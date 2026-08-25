@@ -143,12 +143,69 @@ const TEST_CAPABILITIES: readonly CommunicationProviderCapabilitiesV1[] = [
   },
 ];
 
+const PRODUCTION_CAPABILITIES: readonly CommunicationProviderCapabilitiesV1[] =
+  [
+    {
+      key: 'communication.production.inbox.new-appointment',
+      version: 1,
+      channel: 'inbox',
+      testOnly: false,
+      externalDispatchEnabled: true,
+      providerIdempotencySupported: true,
+      providerReferenceReturned: true,
+      reconciliationSupported: true,
+      proofOfNonDeliverySupported: true,
+      acceptedIsTerminal: true,
+      retry: {
+        key: 'communication.production.inbox.no-blind-retry',
+        version: 1,
+        maxExecutionAttempts: 1,
+        retryablePreDispatchErrors: new Set(),
+        backoffMs: [],
+      },
+      reconciliation: {
+        key: 'communication.production.inbox.canonical-read',
+        version: 1,
+        maxInconclusiveAttempts: 2,
+      },
+      payloadRetentionMs: 7 * DAY,
+      auditRetentionMs: 365 * DAY,
+    },
+    {
+      key: 'communication.production.telegram.privacy',
+      version: 1,
+      channel: 'telegram',
+      testOnly: false,
+      externalDispatchEnabled: true,
+      providerIdempotencySupported: false,
+      providerReferenceReturned: true,
+      reconciliationSupported: false,
+      proofOfNonDeliverySupported: false,
+      acceptedIsTerminal: true,
+      retry: {
+        key: 'communication.production.telegram.no-blind-retry',
+        version: 1,
+        maxExecutionAttempts: 1,
+        retryablePreDispatchErrors: new Set(),
+        backoffMs: [],
+      },
+      reconciliation: {
+        key: 'communication.production.telegram.manual-only',
+        version: 1,
+        maxInconclusiveAttempts: 1,
+      },
+      payloadRetentionMs: 7 * DAY,
+      auditRetentionMs: 365 * DAY,
+    },
+  ];
+
 export class CommunicationCapabilityRegistry {
   private readonly definitions = new Map(
-    [...SHADOW_CAPABILITIES, ...TEST_CAPABILITIES].map((definition) => [
-      definition.key,
-      definition,
-    ]),
+    [
+      ...SHADOW_CAPABILITIES,
+      ...TEST_CAPABILITIES,
+      ...PRODUCTION_CAPABILITIES,
+    ].map((definition) => [definition.key, definition]),
   );
 
   get(key: string): CommunicationProviderCapabilitiesV1 {
@@ -157,12 +214,6 @@ export class CommunicationCapabilityRegistry {
       throw new CommunicationContractError(
         'CAPABILITY_NOT_REGISTERED',
         `Communication capability is not registered: ${key}`,
-      );
-    }
-    if (definition.externalDispatchEnabled) {
-      throw new CommunicationContractError(
-        'EXTERNAL_DISPATCH_FORBIDDEN',
-        'Communication foundation accepts only capabilities with dispatch disabled',
       );
     }
     return definition;

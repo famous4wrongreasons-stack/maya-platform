@@ -71,6 +71,75 @@ function optionalText(
   return requiredText(source, key, maxLength);
 }
 
+function assertOnlyKeys(
+  source: Record<string, unknown>,
+  allowed: readonly string[],
+): void {
+  const allowedSet = new Set(allowed);
+  const unexpected = Object.keys(source).filter((key) => !allowedSet.has(key));
+  if (unexpected.length > 0) {
+    throw new ActionContractError(
+      `Unexpected action input: ${unexpected.join(', ')}`,
+    );
+  }
+}
+
+function boundedJsonObject(
+  source: Record<string, unknown>,
+  key: string,
+): Record<string, unknown> | undefined {
+  const value = source[key];
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw new ActionContractError(`${key} must be a JSON object`);
+  }
+  let encoded: string;
+  try {
+    encoded = JSON.stringify(value);
+  } catch {
+    throw new ActionContractError(`${key} must be JSON serializable`);
+  }
+  if (encoded.length > 8_000) {
+    throw new ActionContractError(`${key} exceeds the safe size limit`);
+  }
+  return value as Record<string, unknown>;
+}
+
+function newAppointmentDeliveryNormalizer(
+  value: unknown,
+): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, [
+    'userId',
+    'sourceEventId',
+    'title',
+    'bodyText',
+    'deepLink',
+    'payload',
+  ]);
+  const deepLink = optionalText(source, 'deepLink', 400);
+  const payload = boundedJsonObject(source, 'payload');
+  return {
+    userId: normalizeOpaqueRef(source.userId, 'userId'),
+    sourceEventId: normalizeOpaqueRef(source.sourceEventId, 'sourceEventId'),
+    title: requiredText(source, 'title', 160),
+    bodyText: requiredText(source, 'bodyText', 12_000),
+    ...(deepLink ? { deepLink } : {}),
+    ...(payload ? { payload } : {}),
+  };
+}
+
+function privacyTelegramDeliveryNormalizer(
+  value: unknown,
+): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, ['telegramChatId', 'sourceEventId']);
+  return {
+    telegramChatId: normalizeOpaqueRef(source.telegramChatId, 'telegramChatId'),
+    sourceEventId: normalizeOpaqueRef(source.sourceEventId, 'sourceEventId'),
+  };
+}
+
 function isoTimestamp(source: Record<string, unknown>, key: string): string {
   const value = requiredText(source, key, 80);
   const parsed = new Date(value);
@@ -461,6 +530,50 @@ function appointmentCapability(input: {
   };
 }
 
+function provenCommunicationCapability(input: {
+  capability: string;
+  actionClass: string;
+  targetKind: string;
+  executorKey: string;
+  normalizeInput(value: unknown): Record<string, unknown>;
+}): RegisteredActionCapabilityV1 {
+  return {
+    capability: input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: `maya.${input.actionClass}-input/1`,
+    targetKind: input.targetKind,
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: ['external', 'customer_visible'],
+    policyKey: `production.${input.actionClass}.proven-cutover`,
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L2_CONFIRMED_REQUEST',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: `production.${input.actionClass}.no-blind-retry`,
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: `production.${input.actionClass}.canonical-reconciliation`,
+      version: 1,
+      maxInconclusiveAttempts: 2,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: input.executorKey,
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: (raw) => input.normalizeInput(raw),
+  };
+}
+
 const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   shadowCapability({
     capability: 'client-lifecycle.reactivation-review.prepare',
@@ -484,6 +597,20 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     capability: 'communication.transactional-single.shadow.v1',
     actionClass: 'send_transactional_single',
     scope: 'SINGLE',
+  }),
+  provenCommunicationCapability({
+    capability: 'communication.transactional-single.new-appointment.execute.v1',
+    actionClass: 'deliver_new_appointment_inbox',
+    targetKind: 'internal_user',
+    executorKey: 'communication.inbox.new-appointment',
+    normalizeInput: newAppointmentDeliveryNormalizer,
+  }),
+  provenCommunicationCapability({
+    capability: 'communication.operational-single.privacy.execute.v1',
+    actionClass: 'deliver_privacy_telegram',
+    targetKind: 'telegram_chat',
+    executorKey: 'communication.telegram.privacy',
+    normalizeInput: privacyTelegramDeliveryNormalizer,
   }),
   communicationShadowCapability({
     capability: 'communication.operational-single.shadow.v1',

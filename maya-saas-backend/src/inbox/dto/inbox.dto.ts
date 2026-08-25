@@ -143,6 +143,37 @@ export class ObserveLegacyTelegramDto {
   template_ref?: string;
 }
 
+/**
+ * Fixed-template production delivery for the proven Telegram /privacy path.
+ * Content is intentionally absent: the server owns the policy text.
+ */
+export class DeliverPrivacyTelegramDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(80)
+  tenant_slug!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  provider?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  external_company_id?: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(160)
+  source_event_id!: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(80)
+  telegram_chat_id!: string;
+}
+
 export class RegisterPushTokenDto {
   @IsString()
   @IsIn(['ios', 'android', 'web'])

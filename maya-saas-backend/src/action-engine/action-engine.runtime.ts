@@ -42,17 +42,25 @@ export interface ActionFailureClassification {
   errorClass: string;
 }
 
+export interface ActionRuntimeContextV1 {
+  tenantId: string;
+  executionId: string;
+}
+
 export interface ActionRuntimeHandlers<T> {
   prepare?(
     normalizedInput: Record<string, unknown>,
+    context: ActionRuntimeContextV1,
   ): Promise<Record<string, unknown> | undefined>;
   dispatch(
     normalizedInput: Record<string, unknown>,
     transportIdempotencyKey: string,
+    context: ActionRuntimeContextV1,
   ): Promise<ActionDispatchSuccess<T>>;
   reconcile(
     normalizedInput: Record<string, unknown>,
     preDispatchContext?: Record<string, unknown>,
+    context?: ActionRuntimeContextV1,
   ): Promise<ActionReconciliationDecision>;
   restore(safeResult: Record<string, unknown>): T;
   classifyError(
@@ -287,7 +295,10 @@ export class ActionEngineRuntimeService {
 
     let preDispatchContext: Record<string, unknown> | undefined;
     try {
-      preDispatchContext = await handlers.prepare?.(normalizedInput);
+      preDispatchContext = await handlers.prepare?.(normalizedInput, {
+        tenantId: execution.tenantId,
+        executionId: execution.id,
+      });
       if (preDispatchContext) {
         await this.kernel.recordAttemptContext({
           ...claimInput,
@@ -314,6 +325,7 @@ export class ActionEngineRuntimeService {
       dispatched = await handlers.dispatch(
         normalizedInput,
         claim.execution.transportIdempotencyKey,
+        { tenantId: execution.tenantId, executionId: execution.id },
       );
     } catch (error) {
       const failure = handlers.classifyError(error, 'dispatch');
@@ -384,7 +396,10 @@ export class ActionEngineRuntimeService {
 
     let decision: ActionReconciliationDecision;
     try {
-      decision = await handlers.reconcile(normalizedInput, preDispatchContext);
+      decision = await handlers.reconcile(normalizedInput, preDispatchContext, {
+        tenantId: execution.tenantId,
+        executionId: execution.id,
+      });
     } catch {
       decision = { outcome: 'STILL_UNKNOWN' };
     }

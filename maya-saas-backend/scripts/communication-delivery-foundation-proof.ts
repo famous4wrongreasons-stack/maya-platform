@@ -418,7 +418,6 @@ async function main(): Promise<void> {
     const definitions = new CommunicationCapabilityRegistry().list();
     assert(definitions.length >= 3);
     for (const definition of definitions) {
-      assert.equal(definition.externalDispatchEnabled, false);
       assert.equal(typeof definition.providerIdempotencySupported, 'boolean');
       assert.equal(typeof definition.providerReferenceReturned, 'boolean');
       assert.equal(typeof definition.reconciliationSupported, 'boolean');
@@ -428,8 +427,11 @@ async function main(): Promise<void> {
     const testDefinitions = definitions.filter(
       (definition) => definition.testOnly,
     );
-    const shadowDefinitions = definitions.filter(
-      (definition) => !definition.testOnly,
+    const shadowDefinitions = definitions.filter((definition) =>
+      definition.key.startsWith('communication.shadow.'),
+    );
+    const productionDefinitions = definitions.filter((definition) =>
+      definition.key.startsWith('communication.production.'),
     );
     assert(testDefinitions.length >= 3);
     assert.equal(shadowDefinitions.length, 5);
@@ -440,8 +442,35 @@ async function main(): Promise<void> {
           !definition.externalDispatchEnabled,
       ),
     );
+    assert.deepEqual(
+      productionDefinitions.map((definition) => definition.key).sort(),
+      [
+        'communication.production.inbox.new-appointment',
+        'communication.production.telegram.privacy',
+      ],
+    );
+    assert(
+      productionDefinitions.every(
+        (definition) =>
+          !definition.testOnly &&
+          definition.externalDispatchEnabled &&
+          definition.retry.maxExecutionAttempts === 1 &&
+          definition.retry.retryablePreDispatchErrors.size === 0,
+      ),
+    );
+    assert.equal(
+      definitions.some(
+        (definition) =>
+          definition.externalDispatchEnabled &&
+          (definition.key.includes('bulk') ||
+            definition.key.includes('campaign')),
+      ),
+      false,
+    );
     matrix.provider_capabilities_explicit_and_test_only = true;
     matrix.production_shadow_capabilities_dispatch_disabled = true;
+    matrix.production_capabilities_limited_to_proven_single_classes = true;
+    matrix.production_bulk_capability_absent = true;
 
     stage('logical_delivery_dedup');
     const dedupInput = await envelopeInput({
@@ -1261,8 +1290,16 @@ async function main(): Promise<void> {
       (file) => file.endsWith('.ts') || file.endsWith('.js'),
     );
     assert(artifacts.length > 0, 'communication-delivery artifacts are empty');
-    const source = artifacts
-      .map((file) => readFileSync(join(artifactDirectory, file), 'utf8'))
+    const artifactSources = new Map(
+      artifacts.map((file) => [
+        file,
+        readFileSync(join(artifactDirectory, file), 'utf8'),
+      ]),
+    );
+    const source = [...artifactSources.values()].join('\n');
+    const foundationSource = [...artifactSources.entries()]
+      .filter(([file]) => !file.startsWith('communication-delivery.service.'))
+      .map(([, content]) => content)
       .join('\n');
     const forbiddenRuntimeTokens = [
       'fetch(',
@@ -1276,11 +1313,23 @@ async function main(): Promise<void> {
     ];
     for (const token of forbiddenRuntimeTokens) {
       assert.equal(
-        source.toLowerCase().includes(token.toLowerCase()),
+        foundationSource.toLowerCase().includes(token.toLowerCase()),
         false,
         token,
       );
     }
+    const productionServiceSource = [...artifactSources.entries()]
+      .filter(([file]) => file.startsWith('communication-delivery.service.'))
+      .map(([, content]) => content)
+      .join('\n');
+    assert.equal((productionServiceSource.match(/fetch\(/g) ?? []).length, 1);
+    assert(
+      productionServiceSource.includes(
+        '/api/internal/action-engine/privacy-telegram',
+      ),
+    );
+    assert.equal(productionServiceSource.includes('send_bulk_campaign'), false);
+    assert.equal(productionServiceSource.includes('send_campaign'), false);
     const importSurface = [
       ...(source.match(/from\s+['"][^'"]+['"]/gi) ?? []),
       ...(source.match(/require\(\s*['"][^'"]+['"]\s*\)/gi) ?? []),
@@ -1314,6 +1363,7 @@ async function main(): Promise<void> {
       'test-only communication adapter is missing from proof artifacts',
     );
     matrix.no_side_effect_owner_or_production_provider_imported = true;
+    matrix.production_network_boundary_limited_to_privacy_bridge = true;
 
     stage('metrics');
     const metrics = await deliveryKernel.metrics(tenantA);

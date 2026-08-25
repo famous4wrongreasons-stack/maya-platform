@@ -87,7 +87,7 @@ export interface CommunicationProviderCapabilitiesV1 {
   version: number;
   channel: string;
   testOnly: boolean;
-  externalDispatchEnabled: false;
+  externalDispatchEnabled: boolean;
   providerIdempotencySupported: boolean;
   providerReferenceReturned: boolean;
   reconciliationSupported: boolean;
@@ -130,5 +130,5 @@ export interface CommunicationDeliveryMetricsV1 {
   skipped: number;
   attempts: number;
   duplicateDeliveriesCollapsed: number;
-  externalMessagesSent: 0;
+  externalMessagesSent: number;
 }

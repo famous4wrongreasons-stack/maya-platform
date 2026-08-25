@@ -22,6 +22,10 @@ _LEGACY_TELEGRAM_OBSERVE_URL = (
     os.environ.get("MAYA_COMMUNICATION_SHADOW_URL")
     or _INGEST_URL.rsplit("/", 1)[0] + "/observe-legacy-telegram"
 ).rstrip("/")
+_PRIVACY_DELIVERY_URL = (
+    os.environ.get("MAYA_PRIVACY_DELIVERY_URL")
+    or _INGEST_URL.rsplit("/", 1)[0] + "/deliver-privacy-telegram"
+).rstrip("/")
 _BRIDGE_TOKEN = (os.environ.get("MAYA_INBOX_BRIDGE_TOKEN") or "").strip()
 _TENANT_SLUG = (
     os.environ.get("MAYA_INBOX_TENANT_SLUG") or "muzhskaya-estetika"
@@ -164,6 +168,55 @@ async def observe_legacy_telegram_send(
                 return True
     except Exception as exc:
         logger.warning("communication shadow observe failed: %s", exc)
+        return False
+
+
+async def deliver_privacy_telegram(
+    *,
+    telegram_chat_id: int,
+    source_event_id: str,
+) -> bool:
+    """Ask Action Engine to deliver the fixed privacy response.
+
+    This is a fail-closed cutover. Callers must never fall back to a direct
+    Telegram send when the bridge is unavailable or the outcome is unknown.
+    """
+    if not _BRIDGE_TOKEN or len(_BRIDGE_TOKEN) < 24:
+        return False
+    try:
+        chat_id = int(telegram_chat_id)
+    except (TypeError, ValueError):
+        return False
+    event_id = str(source_event_id or "").strip()
+    if chat_id <= 0 or not event_id or len(event_id) > 160:
+        return False
+    body = {
+        "tenant_slug": _TENANT_SLUG,
+        "provider": _PROVIDER,
+        "external_company_id": _external_company_id(),
+        "source_event_id": event_id,
+        "telegram_chat_id": str(chat_id),
+    }
+    try:
+        timeout = aiohttp.ClientTimeout(total=6)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(
+                _PRIVACY_DELIVERY_URL,
+                json=body,
+                headers={
+                    "Content-Type": "application/json",
+                    "X-Maya-Inbox-Bridge": _BRIDGE_TOKEN,
+                },
+            ) as resp:
+                if resp.status >= 400:
+                    logger.warning(
+                        "privacy delivery rejected by Action Engine: HTTP %s",
+                        resp.status,
+                    )
+                    return False
+                return True
+    except Exception as exc:
+        logger.warning("privacy delivery via Action Engine failed: %s", exc)
         return False
 
 

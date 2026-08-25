@@ -20,6 +20,7 @@
     "scripts/opportunity-lifecycle-proof.ts",
     "scripts/action-engine-kernel-proof.ts",
     "scripts/communication-delivery-foundation-proof.ts",
+    "scripts/communication-shadow-migration-proof.ts",
     "src/config/**/*.ts"
   ],
   "exclude": ["**/*.spec.ts"]

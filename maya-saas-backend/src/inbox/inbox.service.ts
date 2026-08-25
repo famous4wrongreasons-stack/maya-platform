@@ -1,12 +1,14 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Prisma, UserRole } from '@prisma/client';
 
+import { CommunicationDeliveryService } from '../communication-delivery';
 import { CommunicationShadowService } from '../communication-shadow';
 import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { sendInboxApns } from './apns-push';
 import type {
+  DeliverPrivacyTelegramDto,
   IngestInboxItemDto,
   ObserveLegacyTelegramDto,
   RegisterPushTokenDto,
@@ -46,6 +48,8 @@ export class InboxService {
     private readonly bridgeSource: BridgeSourceService,
     @Optional()
     private readonly communicationShadow?: CommunicationShadowService,
+    @Optional()
+    private readonly communicationDelivery?: CommunicationDeliveryService,
   ) {}
 
   assertBridgeToken(header: string | undefined): void {
@@ -154,6 +158,33 @@ export class InboxService {
     });
   }
 
+  async deliverPrivacyTelegram(dto: DeliverPrivacyTelegramDto) {
+    const tenant = await this.bridgeSource.resolveTenant(
+      {
+        provider: dto.provider,
+        externalCompanyId: dto.external_company_id,
+        tenantSlug: dto.tenant_slug,
+      },
+      'inbox_tenant_not_found',
+    );
+    if (!this.communicationDelivery) {
+      throw new Error('communication_delivery_unavailable');
+    }
+    return this.tenantContext.runAsSystemTenant(tenant.tenantId, async () => {
+      const result = await this.communicationDelivery!.deliverPrivacyTelegram({
+        tenantId: tenant.tenantId,
+        telegramChatId: dto.telegram_chat_id,
+        sourceEventId: dto.source_event_id,
+      });
+      return {
+        delivered: true,
+        action_execution_id: result.actionExecutionId,
+        delivery_id: result.deliveryId,
+        status: result.status,
+      };
+    });
+  }
+
   /**
    * In-process publish for Nest schedulers (no bridge token / slug required).
    * Message of record for Maya OS chat; APNs announces when tokens exist.
@@ -195,7 +226,15 @@ export class InboxService {
       return { stored: 0, user_ids: [] as string[] };
     }
 
-    if (input.type !== 'marketing_campaign') {
+    const actionEngineOwnsInbox =
+      input.type === 'new_appointment' &&
+      input.shadowSourceType === 'legacy_bridge';
+
+    if (actionEngineOwnsInbox && !this.communicationDelivery) {
+      throw new Error('communication_delivery_unavailable');
+    }
+
+    if (input.type !== 'marketing_campaign' && !actionEngineOwnsInbox) {
       await Promise.all(
         userIds.map((userId) =>
           this.planSingleSafely({
@@ -226,6 +265,19 @@ export class InboxService {
 
     let stored = 0;
     for (const userId of userIds) {
+      if (actionEngineOwnsInbox) {
+        await this.communicationDelivery!.deliverNewAppointmentInbox({
+          tenantId,
+          userId,
+          sourceEventId: input.sourceEventId,
+          title: input.title,
+          bodyText: input.bodyText,
+          deepLink: input.deepLink,
+          payload: input.payload,
+        });
+        stored += 1;
+        continue;
+      }
       const row = await this.prisma.inboxItem.upsert({
         where: {
           tenantId_userId_type_sourceEventId: {

@@ -76,4 +76,70 @@ describe('ActionCapabilityRegistry', () => {
   it('does not register attendance as a Phase B2 action', () => {
     expect(() => registry.get('crm.appointment.attendance.v1')).toThrow();
   });
+
+  it('registers only the proven B3.3 communication classes for execution', () => {
+    const transactional = registry.get(
+      'communication.transactional-single.new-appointment.execute.v1',
+    );
+    const operational = registry.get(
+      'communication.operational-single.privacy.execute.v1',
+    );
+
+    expect(transactional).toMatchObject({
+      actionClass: 'deliver_new_appointment_inbox',
+      allowedSourceTypes: ['legacy_bridge'],
+      policyDecision: ActionPolicyDecision.ALLOW,
+      executorKey: 'communication.inbox.new-appointment',
+      approvalRequirement: 'NONE',
+    });
+    expect(transactional.retry.maxExecutionAttempts).toBe(1);
+    expect(transactional.reconciliation.retryAfterProvenNonExecution).toBe(
+      false,
+    );
+
+    expect(operational).toMatchObject({
+      actionClass: 'deliver_privacy_telegram',
+      allowedSourceTypes: ['legacy_bridge'],
+      policyDecision: ActionPolicyDecision.ALLOW,
+      executorKey: 'communication.telegram.privacy',
+      approvalRequirement: 'NONE',
+    });
+    expect(operational.retry.maxExecutionAttempts).toBe(1);
+    expect(operational.reconciliation.retryAfterProvenNonExecution).toBe(false);
+
+    const executableBulk = registry
+      .list()
+      .filter(
+        (capability) =>
+          capability.actionClass === 'send_bulk_campaign' &&
+          capability.policyDecision === ActionPolicyDecision.ALLOW,
+      );
+    expect(executableBulk).toEqual([]);
+  });
+
+  it('rejects routing and permission injection in proven communication payloads', () => {
+    const transactional = registry.get(
+      'communication.transactional-single.new-appointment.execute.v1',
+    );
+    const operational = registry.get(
+      'communication.operational-single.privacy.execute.v1',
+    );
+
+    expect(() =>
+      transactional.normalizeInput({
+        userId: 'user-1',
+        sourceEventId: 'new_appointment:event-1',
+        title: 'New appointment',
+        bodyText: 'Safe body',
+        executor: 'legacy.direct-send',
+      }),
+    ).toThrow(/Unexpected action input/);
+    expect(() =>
+      operational.normalizeInput({
+        telegramChatId: '10001',
+        sourceEventId: 'privacy:update-1',
+        approval: 'bypass',
+      }),
+    ).toThrow(/Unexpected action input/);
+  });
 });

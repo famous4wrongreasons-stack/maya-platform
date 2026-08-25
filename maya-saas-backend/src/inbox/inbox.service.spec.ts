@@ -6,6 +6,9 @@ describe('InboxService recipients', () => {
     identities?: Array<{ userId: string }>;
     owners?: Array<{ userId: string }>;
     staffAccess?: Array<{ userId: string; externalStaffId: string }>;
+    communicationDelivery?: {
+      deliverNewAppointmentInbox: jest.Mock;
+    };
   }) => {
     const upsertMock = jest.fn().mockResolvedValue({ id: 'row-1' });
     const allStaff = opts.staffAccess ?? [];
@@ -50,6 +53,9 @@ describe('InboxService recipients', () => {
     const service = new InboxService(
       prisma as never,
       new TenantContextService(),
+      undefined as never,
+      undefined,
+      opts.communicationDelivery as never,
     );
     return { service, prisma, upsertMock, staffAccessFindMany };
   };
@@ -202,5 +208,76 @@ describe('InboxService recipients', () => {
     const update = updateManyMock.mock.calls[0]?.[0];
     expect(update?.where).toEqual({ id: { in: ['old-new-1'] } });
     expect(update?.data.deletedAt).toBeInstanceOf(Date);
+  });
+
+  it('routes proven legacy new appointments only through Communication Delivery', async () => {
+    const deliverNewAppointmentInbox = jest.fn().mockResolvedValue({
+      actionExecutionId: 'execution-1',
+      deliveryId: 'delivery-1',
+      status: 'delivered',
+    });
+    const { service, upsertMock } = makeService({
+      owners: [{ userId: 'owner-1' }],
+      communicationDelivery: { deliverNewAppointmentInbox },
+    });
+
+    const result = await service.publishForTenant('tenant-1', {
+      type: 'new_appointment',
+      sourceEventId: 'new_appointment:cutover-1',
+      title: 'New appointment',
+      bodyText: 'Appointment body',
+      fanoutOwners: true,
+      shadowSourceType: 'legacy_bridge',
+      payload: { record_id: 101 },
+    });
+
+    expect(result).toEqual({ stored: 1, user_ids: ['owner-1'] });
+    expect(deliverNewAppointmentInbox).toHaveBeenCalledTimes(1);
+    expect(deliverNewAppointmentInbox).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        userId: 'owner-1',
+        sourceEventId: 'new_appointment:cutover-1',
+      }),
+    );
+    expect(upsertMock).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when the migrated delivery owner is unavailable', async () => {
+    const { service, upsertMock } = makeService({
+      owners: [{ userId: 'owner-1' }],
+    });
+
+    await expect(
+      service.publishForTenant('tenant-1', {
+        type: 'new_appointment',
+        sourceEventId: 'new_appointment:fail-closed',
+        title: 'New appointment',
+        bodyText: 'Appointment body',
+        fanoutOwners: true,
+        shadowSourceType: 'legacy_bridge',
+      }),
+    ).rejects.toThrow('communication_delivery_unavailable');
+    expect(upsertMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps unproven new appointment producers on the existing path', async () => {
+    const deliverNewAppointmentInbox = jest.fn();
+    const { service, upsertMock } = makeService({
+      owners: [{ userId: 'owner-1' }],
+      communicationDelivery: { deliverNewAppointmentInbox },
+    });
+
+    await service.publishForTenant('tenant-1', {
+      type: 'new_appointment',
+      sourceEventId: 'new_appointment:not-proven',
+      title: 'New appointment',
+      bodyText: 'Appointment body',
+      fanoutOwners: true,
+      shadowSourceType: 'scheduler',
+    });
+
+    expect(deliverNewAppointmentInbox).not.toHaveBeenCalled();
+    expect(upsertMock).toHaveBeenCalledTimes(1);
   });
 });

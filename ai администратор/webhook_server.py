@@ -55,6 +55,7 @@ import masters_ai
 import maya_capabilities
 import memory
 import owner_ai
+from privacy_policy import PRIVACY_TEXT
 import reputation
 import subscriptions
 import web_auth
@@ -84,6 +85,7 @@ from yclients import YClientsAPI
 logger = logging.getLogger(__name__)
 
 _MAYA_LEGACY_BRIDGE_TOKEN = os.getenv("MAYA_LEGACY_BRIDGE_TOKEN", "").strip()
+_MAYA_INBOX_BRIDGE_TOKEN = os.getenv("MAYA_INBOX_BRIDGE_TOKEN", "").strip()
 
 try:
     from config import WEBPUSH_VAPID_PRIVATE_KEY, WEBPUSH_VAPID_CLAIMS
@@ -2038,6 +2040,48 @@ async def internal_loyalty_snapshot_handler(request: web.Request) -> web.Respons
         "balance": max(0, int(database.loyalty_balance(int(client["id"])) or 0)),
         "source": "maya_ledger",
     })
+
+
+async def internal_privacy_telegram_handler(request: web.Request) -> web.Response:
+    """Execute the fixed /privacy Telegram response for Action Engine only."""
+    supplied_token = request.headers.get("X-Maya-Inbox-Bridge", "").strip()
+    if (
+        not _MAYA_INBOX_BRIDGE_TOKEN
+        or not supplied_token
+        or not hmac.compare_digest(supplied_token, _MAYA_INBOX_BRIDGE_TOKEN)
+    ):
+        raise web.HTTPNotFound()
+
+    try:
+        body = await request.json()
+        telegram_chat_id = int(body.get("telegram_chat_id", 0))
+        source_event_id = str(body.get("source_event_id", "")).strip()
+    except (AttributeError, TypeError, ValueError, _json.JSONDecodeError):
+        return web.json_response({"error": "invalid_request"}, status=400)
+
+    if telegram_chat_id <= 0 or not source_event_id or len(source_event_id) > 160:
+        return web.json_response({"error": "invalid_request"}, status=400)
+
+    bot_app = request.app.get("bot_app")
+    bot = getattr(bot_app, "bot", None)
+    original = getattr(
+        getattr(bot, "__class__", object),
+        "_maya_original_send_message_for_chat_mirror",
+        None,
+    )
+    if bot is None or not callable(original):
+        return web.json_response({"error": "executor_unavailable"}, status=503)
+
+    sent_message = await original(
+        bot,
+        chat_id=telegram_chat_id,
+        text=PRIVACY_TEXT,
+        parse_mode="Markdown",
+    )
+    message_id = getattr(sent_message, "message_id", None)
+    if message_id is None:
+        return web.json_response({"error": "provider_reference_missing"}, status=502)
+    return web.json_response({"message_id": str(message_id)})
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -13660,6 +13704,10 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/cabinet/me", cabinet_options_handler)
     web_app.router.add_post(
         "/api/internal/loyalty-snapshot", internal_loyalty_snapshot_handler
+    )
+    web_app.router.add_post(
+        "/api/internal/action-engine/privacy-telegram",
+        internal_privacy_telegram_handler,
     )
 
     # API для PWA через Telegram Login Widget (когда PWA открыта в браузере)

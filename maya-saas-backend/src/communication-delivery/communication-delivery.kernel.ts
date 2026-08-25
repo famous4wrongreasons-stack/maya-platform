@@ -1504,22 +1504,39 @@ export class CommunicationDeliveryKernel {
   }
 
   async metrics(tenantId: string): Promise<CommunicationDeliveryMetricsV1> {
-    const [campaigns, recipients, attempts, grouped] = await Promise.all([
-      this.prisma.marketingCampaign.count({
-        where: { tenantId, lifecycleVersion: 1 },
-      }),
-      this.prisma.marketingCampaignRecipient.count({
-        where: { tenantId, lifecycleVersion: 1 },
-      }),
-      this.prisma.marketingDeliveryAttempt.count({
-        where: { tenantId, lifecycleVersion: 1 },
-      }),
-      this.prisma.marketingCampaignRecipient.groupBy({
-        by: ['deliveryState'],
-        where: { tenantId, lifecycleVersion: 1 },
-        _count: true,
-      }),
-    ]);
+    const [campaigns, recipients, attempts, grouped, externalMessagesSent] =
+      await Promise.all([
+        this.prisma.marketingCampaign.count({
+          where: { tenantId, lifecycleVersion: 1 },
+        }),
+        this.prisma.marketingCampaignRecipient.count({
+          where: { tenantId, lifecycleVersion: 1 },
+        }),
+        this.prisma.marketingDeliveryAttempt.count({
+          where: { tenantId, lifecycleVersion: 1 },
+        }),
+        this.prisma.marketingCampaignRecipient.groupBy({
+          by: ['deliveryState'],
+          where: { tenantId, lifecycleVersion: 1 },
+          _count: true,
+        }),
+        this.prisma.marketingCampaignRecipient.count({
+          where: {
+            tenantId,
+            lifecycleVersion: 1,
+            deliveryState: {
+              in: [
+                CommunicationDeliveryState.ACCEPTED,
+                CommunicationDeliveryState.DELIVERED,
+              ],
+            },
+            campaign: {
+              deliveryCapabilityKey:
+                'communication.production.telegram.privacy',
+            },
+          },
+        }),
+      ]);
     const count = (state: CommunicationDeliveryState) =>
       grouped.find((item) => item.deliveryState === state)?._count ?? 0;
     return {
@@ -1533,7 +1550,7 @@ export class CommunicationDeliveryKernel {
       skipped: count(CommunicationDeliveryState.SKIPPED),
       attempts,
       duplicateDeliveriesCollapsed: this.duplicateDeliveriesCollapsed,
-      externalMessagesSent: 0,
+      externalMessagesSent,
     };
   }
 
@@ -1556,7 +1573,13 @@ export class CommunicationDeliveryKernel {
       input.contentIdentityHash,
       'contentIdentityHash',
     );
-    this.registry.get(input.capabilityKey);
+    const capability = this.registry.get(input.capabilityKey);
+    if (capability.channel !== channel) {
+      throw new CommunicationContractError(
+        'CAPABILITY_CHANNEL_MISMATCH',
+        'Communication capability does not allow the requested channel',
+      );
+    }
     if (
       !Number.isFinite(input.expiresAt.getTime()) ||
       input.expiresAt <= this.now()

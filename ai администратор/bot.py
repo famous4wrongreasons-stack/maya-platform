@@ -43,6 +43,7 @@ import lead_alerts
 import loyalty
 import masters_ai
 import migration
+import maya_inbox_bridge
 import reactivation
 import referral
 import reviews
@@ -50,6 +51,7 @@ import sources
 import subscriptions
 import yukassa_api
 import webhook_server
+from privacy_policy import PRIVACY_TEXT
 from identity_utils import normalize_tg_user
 from config import (
     TELEGRAM_TOKEN, PROXY_URL, REMINDER_MINUTES_BEFORE, BARBERSHOP_NAME,
@@ -308,25 +310,6 @@ def _parse_gift_amount(text: str) -> int | None:
     if n in (2, 3, 5):
         return n * 1000
     return None
-
-PRIVACY_TEXT = """
-📋 *Политика конфиденциальности*
-Барбершоп «Мужская Эстетика», Ставрополь
-
-*Оператор персональных данных:* ИП Мосин Станислав Евгеньевич, ИНН 263409096156.
-
-*Какие данные собираем:* имя и номер телефона — только для оформления записи.
-
-*Зачем:* записать вас к мастеру, связаться по записи, напомнить о визите.
-
-*Хранение:* данные хранятся в нашей базе и используются согласно настоящей Политике. Имя и телефон передаются в систему записи YClients для оформления записи.
-
-*AI-помощник:* для формирования ответов используется автоматизированный сервис — ему передаётся только обезличенная информация (услуга, мастер, дата, время), без имени и телефона.
-
-*Маркетинговые сообщения:* напоминания о новой стрижке, поздравления с ДР и спецпредложения шлём *только если вы дали отдельное согласие на рассылки*. Согласие на рассылки — добровольное; без него вы продолжите получать только служебные сообщения по своим записям. Отписаться можно в любой момент командой /unsubscribe.
-
-*Ваши права:* вы можете запросить уточнение или удаление данных, отозвать любое согласие — напишите или позвоните: 8-962-447-67-47, malehaircut@gmail.com.
-""".strip()
 
 # «Что нового» — версия и текст. При обновлении содержимого меняй версию
 # (например, '2026-06-10') — после этого всем клиентам покажется один раз
@@ -788,7 +771,15 @@ async def cmd_whats_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_privacy(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(PRIVACY_TEXT, parse_mode="Markdown")
+    message = update.effective_message
+    if message is None:
+        return
+    delivered = await maya_inbox_bridge.deliver_privacy_telegram(
+        telegram_chat_id=message.chat_id,
+        source_event_id=f"privacy:{update.update_id}",
+    )
+    if not delivered:
+        logger.error("/privacy delivery did not reach Action Engine")
 
 
 async def cmd_unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):

@@ -16,6 +16,7 @@ import { Public } from '../decorators/public.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import {
+  DeliverPrivacyTelegramDto,
   IngestInboxItemDto,
   ObserveLegacyTelegramDto,
   RegisterPushTokenDto,
@@ -65,6 +66,20 @@ export class InboxController {
   ) {
     this.inboxService.assertBridgeToken(bridgeToken);
     return this.inboxService.observeLegacyTelegram(dto);
+  }
+
+  @Public()
+  @Post('internal/deliver-privacy-telegram')
+  @ApiOperation({
+    summary:
+      'Action Engine cutover entry for the fixed Telegram privacy response',
+  })
+  deliverPrivacyTelegram(
+    @Headers('x-maya-inbox-bridge') bridgeToken: string | undefined,
+    @Body() dto: DeliverPrivacyTelegramDto,
+  ) {
+    this.inboxService.assertBridgeToken(bridgeToken);
+    return this.inboxService.deliverPrivacyTelegram(dto);
   }
 
   @ApiBearerAuth()
