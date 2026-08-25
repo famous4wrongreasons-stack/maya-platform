@@ -1,6 +1,6 @@
 # CYCLE 06 — BLOCKING PACKAGE 1 — RESIDUAL APPOINTMENT MUTATION CONVERGENCE REPORT
 
-Status: shadow deployed; A04, A05, and A07 production equivalence observed; cutover not performed
+Status: shadow deployed; A04-A07 production equivalence observed; cutover not performed
 Repository implementation HEAD: `c8c67c72`
 Package order: 1 of 5
 Next package started: no
@@ -254,11 +254,21 @@ logical action, zero duplicates, zero divergences, zero incomplete
 observations, and zero new-path external actions. Backend and observer journals
 contained no errors.
 
+The owner next edited the service composition of the same appointment through
+the native MAYA journal at approximately 02:41 MSK. The production edge received
+three successful A06 requests with three different normalized service sets.
+Each request produced exactly one legacy write and one passive Shadow
+observation. All three were classified `EQUIVALENT`; there were three unique
+logical actions, zero collapsed duplicates, zero divergences, zero incomplete
+observations, and zero new-path external actions. Because the normalized inputs
+differ, these are reported as three real composition transitions rather than a
+single request duplicated by the backend.
+
 | Action class | Verdict |
 |---|---|
 | A04 attendance/status | EQUIVALENT (1 organic transition; 0 divergences) |
 | A05 duration | EQUIVALENT (2 distinct organic transitions; 0 divergences) |
-| A06 services/composition | NOT OBSERVED IN PRODUCTION |
+| A06 services/composition | EQUIVALENT (3 distinct organic transitions; 0 divergences) |
 | A07 fields/comment/client/SMS | EQUIVALENT |
 | A08 payment/close | NOT OBSERVED IN PRODUCTION |
 
@@ -287,8 +297,10 @@ owner-performed A05 proof, the observer reported two A05 deliveries, two unique
 logical actions, zero divergences, zero incomplete observations, and zero new-
 path external actions. The subsequent A04 proof added one delivery and one
 unique logical action with the same zero-divergence and zero-side-effect
-result. Backend and observer journals contained no errors. The new path has
-performed zero CRM mutations and zero external messages.
+result. The A06 proof then added three deliveries and three unique logical
+actions, again with zero divergences, incomplete observations, or new-path
+external actions. Backend and observer journals contained no errors. The new
+path has performed zero CRM mutations and zero external messages.
 
 No automatic cutover was performed. The five classes still have legacy
 execution owners, so their direct bypass count remains five at this gate.
