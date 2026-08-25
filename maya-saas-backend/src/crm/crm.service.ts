@@ -80,7 +80,7 @@ import {
 } from './crm-provider-settings';
 import type { StaffId, VisitAttendance } from '../domain';
 import { asStaffId, asStaffIdOrNull } from '../domain';
-import { assertWritableAttendance } from './crm-attendance';
+import { assertWritableAttendance, attendanceToCode } from './crm-attendance';
 import {
   CrmOutcomeUnknownError,
   CrmRecordGoneError,
@@ -109,6 +109,18 @@ export type ResidualAppointmentShadowCapability =
   | 'crm.appointment.services.shadow.v1'
   | 'crm.appointment.fields.shadow.v1'
   | 'crm.appointment.payment-close.shadow.v1';
+
+type ResidualAppointmentShadowAction =
+  | 'set_appointment_attendance'
+  | 'set_appointment_duration'
+  | 'set_appointment_services'
+  | 'set_appointment_fields'
+  | 'close_appointment_payment';
+
+const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_PREFIX =
+  'MAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION ';
+const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_CONTRACT =
+  'maya.legacy-appointment-shadow-observation/1';
 
 type CreateAppointmentInput = {
   clientId: string;
@@ -1561,6 +1573,93 @@ export class CrmService {
     return preview;
   }
 
+  private appointmentObservationRef(value: string): string {
+    return createHash('sha256').update(value).digest('hex');
+  }
+
+  private async observeNestResidualAppointmentMutation(input: {
+    tenantId: string;
+    actionClass: ResidualAppointmentShadowAction;
+    capability: ResidualAppointmentShadowCapability;
+    externalId: string;
+    input: unknown;
+  }): Promise<void> {
+    try {
+      const context = this.tenantContext.get();
+      const requestId = context?.requestId;
+      const preview = await this.planResidualAppointmentShadow(
+        input.tenantId,
+        input.capability,
+        `appointment/${input.externalId}`,
+        input.input,
+        {
+          sourceType: 'authenticated_request',
+          ...(requestId ? { sourceRef: requestId } : {}),
+          ...(requestId
+            ? {
+                callerIdempotency: {
+                  scope: `nest.crm.journal:${input.actionClass}`,
+                  key: `${requestId}:${input.externalId}`,
+                },
+              }
+            : {}),
+        },
+      );
+      const observation = {
+        event: 'legacy_appointment_shadow_observation',
+        contract: LEGACY_APPOINTMENT_SHADOW_OBSERVATION_CONTRACT,
+        mode: 'shadow',
+        tenant_ref: this.appointmentObservationRef(input.tenantId),
+        tenant_resolution: 'request_context',
+        origin: 'nest.crm.journal',
+        authorization_context: {
+          transport_authentication: 'authenticated_request',
+          integration_binding: 'verified',
+          origin_action_policy: 'allowed',
+          tenant_scope: 'request_tenant',
+        },
+        legacy_action_class: input.actionClass,
+        preview_action_class: preview.actionClass,
+        capability: preview.capability,
+        capability_version: preview.capabilityVersion,
+        target_kind: preview.targetKind,
+        target_ref_hash: this.appointmentObservationRef(preview.targetRef),
+        normalized_input_hash: preview.normalizedInputHash,
+        identity_fingerprint: preview.identityFingerprint,
+        request_idempotency_key_hash: preview.requestIdempotencyKeyHash,
+        policy_key: preview.policyKey,
+        policy_version: preview.policyVersion,
+        policy_decision: preview.policyDecision,
+        autonomy_level: preview.autonomyLevel,
+        approval_requirement: preview.approvalRequirement,
+        executor_key: preview.executorKey,
+        executor_version: preview.executorVersion,
+        legacy_outcome: {
+          success: true,
+          code: 'legacy_write_succeeded',
+        },
+        preview_external_side_effects: preview.externalSideEffects,
+        bridge_external_side_effects: 0,
+        shadow_side_effects: {
+          crm_writes: 0,
+          messages: 0,
+          campaigns: 0,
+        },
+      };
+      this.logger.log(
+        `${LEGACY_APPOINTMENT_SHADOW_OBSERVATION_PREFIX}${JSON.stringify(
+          observation,
+        )}`,
+      );
+    } catch (error) {
+      const errorClass =
+        error instanceof Error ? error.constructor.name : 'UnknownError';
+      this.logger.warn(
+        `Residual appointment shadow observation failed action=${input.actionClass} error=${errorClass}`,
+      );
+    }
+  }
+
   async getAppointmentActionExecutionResult(
     tenantId: string,
     executionId: string,
@@ -2212,11 +2311,20 @@ export class CrmService {
       'crm_attendance_not_supported',
     );
 
-    return adapter.markAppointmentAttendance({
+    const result = await adapter.markAppointmentAttendance({
       tenantId: scopedTenantId,
       externalId,
       attendance,
     });
+
+    await this.observeNestResidualAppointmentMutation({
+      tenantId: scopedTenantId,
+      actionClass: 'set_appointment_attendance',
+      capability: 'crm.appointment.attendance.shadow.v1',
+      externalId,
+      input: { attendanceCode: attendanceToCode(attendance) },
+    });
+    return result;
   }
 
   async setAppointmentDuration(
@@ -2245,11 +2353,21 @@ export class CrmService {
       'crm_duration_not_supported',
     );
 
-    return adapter.setAppointmentDuration({
+    const roundedDurationMinutes = Math.round(durationMinutes);
+    const result = await adapter.setAppointmentDuration({
       tenantId: scopedTenantId,
       externalId,
-      durationMinutes: Math.round(durationMinutes),
+      durationMinutes: roundedDurationMinutes,
     });
+
+    await this.observeNestResidualAppointmentMutation({
+      tenantId: scopedTenantId,
+      actionClass: 'set_appointment_duration',
+      capability: 'crm.appointment.duration.shadow.v1',
+      externalId,
+      input: { durationSeconds: roundedDurationMinutes * 60 },
+    });
+    return result;
   }
 
   async setAppointmentServices(
@@ -2275,11 +2393,20 @@ export class CrmService {
       'crm_services_not_supported',
     );
 
-    return adapter.setAppointmentServices({
+    const result = await adapter.setAppointmentServices({
       tenantId: scopedTenantId,
       externalId,
       serviceIds,
     });
+
+    await this.observeNestResidualAppointmentMutation({
+      tenantId: scopedTenantId,
+      actionClass: 'set_appointment_services',
+      capability: 'crm.appointment.services.shadow.v1',
+      externalId,
+      input: { serviceIds },
+    });
+    return result;
   }
 
   /** Перенос визита из журнала — под тем же стражем, что и правки. */

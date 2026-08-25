@@ -17,6 +17,7 @@ SPEC.loader.exec_module(observer)
 def observation(
     action_class: str = "create_appointment",
     identity: str = "d" * 64,
+    tenant_resolution: str = "integration",
     **overrides,
 ):
     expected = observer.ACTION_CLASSES[action_class]
@@ -25,9 +26,11 @@ def observation(
         "contract": observer.OBSERVATION_CONTRACT,
         "mode": "shadow",
         "tenant_ref": "a" * 64,
-        "tenant_resolution": "integration",
+        "tenant_resolution": tenant_resolution,
         "origin": "webhook.chat",
-        "authorization_context": dict(observer.AUTHORIZATION_CONTEXT),
+        "authorization_context": dict(
+            observer.AUTHORIZATION_CONTEXTS[tenant_resolution]
+        ),
         "legacy_action_class": action_class,
         "preview_action_class": expected["preview_action"],
         "capability": expected["capability"],
@@ -200,15 +203,31 @@ class ObserverTest(unittest.TestCase):
         self.assertFalse(self.store.process_journal_record(record))
         self.assertEqual(self.store.summary()["totals"]["deliveries"], 0)
 
-    def test_attendance_is_out_of_scope(self):
-        value = observation()
-        value["legacy_action_class"] = "update_attendance"
-        self.assertFalse(
+    def test_direct_nest_attendance_observation_is_equivalent(self):
+        value = observation(
+            "set_appointment_attendance",
+            tenant_resolution="request_context",
+            origin="nest.crm.journal",
+        )
+        self.assertTrue(
             self.store.process_journal_record(journal_record("cursor-1", value))
         )
-        self.assertEqual(self.store.summary()["totals"]["deliveries"], 0)
+        result = self.store.summary()["action_classes"]["set_appointment_attendance"]
+        self.assertEqual(result["verdict"], "EQUIVALENT")
 
-    def test_all_three_classes_can_reach_equivalence_without_side_effects(self):
+    def test_mixed_tenant_resolution_and_auth_profile_is_divergent(self):
+        value = observation(
+            "set_appointment_duration",
+            tenant_resolution="request_context",
+            authorization_context=dict(
+                observer.AUTHORIZATION_CONTEXTS["integration"]
+            ),
+        )
+        self.store.process_journal_record(journal_record("cursor-1", value))
+        result = self.store.summary()["action_classes"]["set_appointment_duration"]
+        self.assertEqual(result["verdict"], "DIVERGENT")
+
+    def test_all_supported_classes_can_reach_equivalence_without_side_effects(self):
         for index, action_class in enumerate(observer.ACTION_CLASSES, start=1):
             self.store.process_journal_record(
                 journal_record(

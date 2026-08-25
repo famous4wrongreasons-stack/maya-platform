@@ -90,6 +90,11 @@ describe('CrmService: операции над визитом', () => {
       create: jest.fn().mockReturnValue(adapter),
     } as unknown as CrmAdapterFactory;
     const tenantContext = new TenantContextService();
+    const actionClassByCapability: Record<string, string> = {
+      'crm.appointment.attendance.shadow.v1': 'set_appointment_attendance',
+      'crm.appointment.duration.shadow.v1': 'set_appointment_duration',
+      'crm.appointment.services.shadow.v1': 'set_appointment_services',
+    };
     const actionEngineRuntime = {
       execute: jest.fn(
         async (
@@ -125,6 +130,36 @@ describe('CrmService: операции над визитом', () => {
           return { value: dispatched.value, execution: {} };
         },
       ),
+      preview: jest.fn(
+        (request: {
+          tenantId: string;
+          capability: string;
+          source: { type: string };
+          targetRef: string;
+        }) => ({
+          contract: 'maya.action-execution-preview/1',
+          tenantId: request.tenantId,
+          sourceType: request.source.type,
+          capability: request.capability,
+          capabilityVersion: 1,
+          actionClass: actionClassByCapability[request.capability],
+          targetKind: 'appointment',
+          targetRef: request.targetRef,
+          normalizedInputHash: 'a'.repeat(64),
+          identityFingerprint: 'b'.repeat(64),
+          idempotencyScope: 'nest.crm.journal:test',
+          requestIdempotencyKeyHash: 'c'.repeat(64),
+          policyKey: 'chapter6.residual-appointment-shadow',
+          policyVersion: 1,
+          policyDecision: 'SHADOW_ONLY',
+          autonomyLevel: 'L2_5_SHADOW',
+          approvalRequirement: 'NONE',
+          executorKey: 'shadow.none',
+          executorVersion: 1,
+          externalSideEffects: 0,
+        }),
+      ),
+      planShadow: jest.fn().mockResolvedValue({}),
     };
     const service = new CrmService(
       prisma,
@@ -138,6 +173,7 @@ describe('CrmService: операции над визитом', () => {
 
     return {
       service,
+      actionEngineRuntime,
       run: <T>(fn: () => Promise<T>) =>
         tenantContext.runAsSystemTenant('tenant-1', fn),
     };
@@ -262,6 +298,86 @@ describe('CrmService: операции над визитом', () => {
     expect(markAppointmentAttendance).toHaveBeenCalledTimes(1);
     // Владельца визита проверяем ОДНИМ запросом, без полной карточки.
     expect(getAppointmentStaffId).toHaveBeenCalledTimes(1);
+  });
+
+  it('после успешных прямых правок создаёт только shadow-планы A04-A06', async () => {
+    const adapter = {
+      markAppointmentAttendance: jest
+        .fn()
+        .mockResolvedValue({ external_id: '77', attendance: 'arrived' }),
+      setAppointmentDuration: jest
+        .fn()
+        .mockResolvedValue({ external_id: '77', duration_minutes: 45 }),
+      setAppointmentServices: jest
+        .fn()
+        .mockResolvedValue({ external_id: '77', service_ids: ['10', '20'] }),
+    };
+    const { service, actionEngineRuntime, run } = build(adapter);
+
+    await run(() =>
+      service.markAppointmentAttendance('tenant-1', OWNER, '77', 'arrived'),
+    );
+    await run(() =>
+      service.setAppointmentDuration('tenant-1', OWNER, '77', 45),
+    );
+    await run(() =>
+      service.setAppointmentServices('tenant-1', OWNER, '77', ['20', '10']),
+    );
+
+    expect(actionEngineRuntime.planShadow).toHaveBeenCalledTimes(3);
+    expect(actionEngineRuntime.planShadow).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        capability: 'crm.appointment.attendance.shadow.v1',
+        input: { attendanceCode: 1 },
+      }),
+    );
+    expect(actionEngineRuntime.planShadow).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        capability: 'crm.appointment.duration.shadow.v1',
+        input: { durationSeconds: 2700 },
+      }),
+    );
+    expect(actionEngineRuntime.planShadow).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        capability: 'crm.appointment.services.shadow.v1',
+        input: { serviceIds: ['20', '10'] },
+      }),
+    );
+  });
+
+  it('не создаёт shadow-план, если legacy provider mutation не удалась', async () => {
+    const adapter = {
+      setAppointmentDuration: jest
+        .fn()
+        .mockRejectedValue(new Error('provider rejected')),
+    };
+    const { service, actionEngineRuntime, run } = build(adapter);
+
+    await expect(
+      run(() => service.setAppointmentDuration('tenant-1', OWNER, '77', 45)),
+    ).rejects.toThrow('provider rejected');
+    expect(actionEngineRuntime.planShadow).not.toHaveBeenCalled();
+  });
+
+  it('ошибка shadow не меняет уже доказанный legacy-результат', async () => {
+    const expected = { external_id: '77', duration_minutes: 45 };
+    const adapter = {
+      setAppointmentDuration: jest.fn().mockResolvedValue(expected),
+    };
+    const built = build(adapter);
+    built.actionEngineRuntime.planShadow.mockRejectedValueOnce(
+      new Error('shadow unavailable'),
+    );
+
+    await expect(
+      built.run(() =>
+        built.service.setAppointmentDuration('tenant-1', OWNER, '77', 45),
+      ),
+    ).resolves.toEqual(expected);
+    expect(adapter.setAppointmentDuration).toHaveBeenCalledTimes(1);
   });
 
   it('мастер не может изменить чужой визит', async () => {

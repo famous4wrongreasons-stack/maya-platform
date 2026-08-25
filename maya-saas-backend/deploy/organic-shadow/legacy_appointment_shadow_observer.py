@@ -41,14 +41,49 @@ ACTION_CLASSES = {
         "capability": "crm.appointment.cancel.v1",
         "executor": "crm.appointment.cancel",
     },
+    "set_appointment_attendance": {
+        "preview_action": "set_appointment_attendance",
+        "capability": "crm.appointment.attendance.shadow.v1",
+        "executor": "shadow.none",
+    },
+    "set_appointment_duration": {
+        "preview_action": "set_appointment_duration",
+        "capability": "crm.appointment.duration.shadow.v1",
+        "executor": "shadow.none",
+    },
+    "set_appointment_services": {
+        "preview_action": "set_appointment_services",
+        "capability": "crm.appointment.services.shadow.v1",
+        "executor": "shadow.none",
+    },
+    "set_appointment_fields": {
+        "preview_action": "set_appointment_fields",
+        "capability": "crm.appointment.fields.shadow.v1",
+        "executor": "shadow.none",
+    },
+    "close_appointment_payment": {
+        "preview_action": "close_appointment_payment",
+        "capability": "crm.appointment.payment-close.shadow.v1",
+        "executor": "shadow.none",
+    },
 }
 
-AUTHORIZATION_CONTEXT = {
-    "transport_authentication": "bridge_secret",
-    "integration_binding": "verified",
-    "origin_action_policy": "allowed",
-    "tenant_scope": "system_tenant",
+AUTHORIZATION_CONTEXTS = {
+    "integration": {
+        "transport_authentication": "bridge_secret",
+        "integration_binding": "verified",
+        "origin_action_policy": "allowed",
+        "tenant_scope": "system_tenant",
+    },
+    "request_context": {
+        "transport_authentication": "authenticated_request",
+        "integration_binding": "verified",
+        "origin_action_policy": "allowed",
+        "tenant_scope": "request_tenant",
+    },
 }
+AUTHORIZATION_FIELDS = tuple(AUTHORIZATION_CONTEXTS["integration"])
+AUTHORIZATION_CONTEXT = AUTHORIZATION_CONTEXTS["integration"]
 
 HEX_64 = re.compile(r"^[a-f0-9]{64}$")
 STOP_REQUESTED = False
@@ -142,7 +177,7 @@ def sanitize_observation(raw: dict[str, Any]) -> dict[str, Any]:
         "origin": safe_string(raw.get("origin")),
         "authorization_context": {
             key: safe_string(authorization.get(key))
-            for key in AUTHORIZATION_CONTEXT
+            for key in AUTHORIZATION_FIELDS
         },
         "legacy_action_class": safe_string(raw.get("legacy_action_class")),
         "preview_action_class": safe_string(raw.get("preview_action_class")),
@@ -201,7 +236,6 @@ def evaluate_observation(observation: dict[str, Any]) -> tuple[str, list[str]]:
         "event": "legacy_appointment_shadow_observation",
         "contract": OBSERVATION_CONTRACT,
         "mode": "shadow",
-        "tenant_resolution": "integration",
         "preview_action_class": expected["preview_action"],
         "capability": expected["capability"],
         "capability_version": 1,
@@ -212,6 +246,11 @@ def evaluate_observation(observation: dict[str, Any]) -> tuple[str, list[str]]:
     for field, expected_value in required_equalities.items():
         if observation.get(field) != expected_value:
             reasons.append(f"{field}_mismatch")
+
+    tenant_resolution = observation.get("tenant_resolution")
+    expected_authorization = AUTHORIZATION_CONTEXTS.get(str(tenant_resolution))
+    if expected_authorization is None:
+        reasons.append("tenant_resolution_mismatch")
 
     for field in (
         "origin",
@@ -241,9 +280,10 @@ def evaluate_observation(observation: dict[str, Any]) -> tuple[str, list[str]]:
     if not isinstance(authorization, dict):
         reasons.append("authorization_context_missing")
     else:
-        for field, expected_value in AUTHORIZATION_CONTEXT.items():
-            if authorization.get(field) != expected_value:
-                reasons.append(f"authorization_{field}_mismatch")
+        if expected_authorization is not None:
+            for field, expected_value in expected_authorization.items():
+                if authorization.get(field) != expected_value:
+                    reasons.append(f"authorization_{field}_mismatch")
 
     legacy_outcome = observation.get("legacy_outcome")
     if not isinstance(legacy_outcome, dict) or not isinstance(
@@ -571,7 +611,8 @@ class ObserverStore:
             "source_unit": self.source_unit,
             "mode": "passive_read_only",
             "cutover_performed": False,
-            "attendance_in_scope": False,
+            "attendance_in_scope": True,
+            "residual_appointment_actions_in_scope": True,
             "action_classes": action_summary,
             "totals": {
                 "deliveries": total_deliveries,
