@@ -36,6 +36,22 @@ def canonical_body(state="SUCCEEDED", execution_id="execution-1"):
     }
 
 
+def shadow_body(execution_id="execution-shadow-1"):
+    return {
+        "contract": bridge.BRIDGE_RESULT_CONTRACT,
+        "accepted": True,
+        "mode": "shadow",
+        "tenant_resolution": "integration",
+        "execution": {
+            "contract": "maya.action-execution-preview/1",
+            "executionId": execution_id,
+            "state": "PLANNED",
+        },
+        "safe_explanation": "Shadow observation accepted.",
+        "bridge_external_side_effects": 0,
+    }
+
+
 class FakeResponse:
     def __init__(self, status_code=200, body=None, json_error=False):
         self.status_code = status_code
@@ -225,6 +241,87 @@ class LegacyAppointmentBridgeTests(unittest.TestCase):
         self.assertTrue(result["unknown"])
         self.assertFalse(result["retry_allowed"])
         self.assertEqual(get.call_args.kwargs["params"]["external_company_id"], "42")
+
+    def test_residual_observer_posts_only_to_shadow_with_zero_effects(self):
+        captured = []
+
+        def accepted(path, envelope):
+            captured.append((path, envelope))
+            return shadow_body()
+
+        with patch.object(bridge, "_post_bridge", side_effect=accepted):
+            observed = bridge.observe_residual_appointment_action(
+                provider="yclients",
+                external_company_id="42",
+                origin="legacy.residual_appointment",
+                action_class="set_appointment_attendance",
+                payload={"external_id": "77", "attendance_code": 1},
+                legacy_outcome={
+                    "success": True,
+                    "code": "legacy_write_succeeded",
+                    "unsafe": {"phone": "+79990001122"},
+                },
+            )
+
+        self.assertTrue(observed)
+        self.assertEqual(captured[0][0], "shadow")
+        self.assertEqual(
+            captured[0][1]["legacy_outcome"],
+            {"success": True, "code": "legacy_write_succeeded"},
+        )
+
+    def test_residual_observer_rejects_non_shadow_or_effectful_result(self):
+        for body in (
+            canonical_body(),
+            {**shadow_body(), "bridge_external_side_effects": 1},
+            {**shadow_body(), "accepted": False},
+        ):
+            with self.subTest(body=body), patch.object(
+                bridge, "_post_bridge", return_value=body
+            ):
+                observed = bridge.observe_residual_appointment_action(
+                    provider="yclients",
+                    external_company_id="42",
+                    origin="legacy.residual_appointment",
+                    action_class="set_appointment_duration",
+                    payload={"external_id": "77", "duration_seconds": 3600},
+                    legacy_outcome={"success": True},
+                )
+                self.assertFalse(observed)
+
+    def test_residual_observer_identity_is_stable_across_restart(self):
+        envelopes = []
+
+        def accepted(_path, envelope):
+            envelopes.append(envelope)
+            return shadow_body()
+
+        kwargs = {
+            "provider": "yclients",
+            "external_company_id": "42",
+            "origin": "legacy.residual_appointment",
+            "action_class": "set_appointment_services",
+            "payload": {"external_id": "77", "service_ids": ["1", "2"]},
+            "legacy_outcome": {"success": True},
+        }
+        with patch.object(bridge, "_post_bridge", side_effect=accepted):
+            self.assertTrue(bridge.observe_residual_appointment_action(**kwargs))
+            self.assertTrue(bridge.observe_residual_appointment_action(**kwargs))
+
+        self.assertEqual(
+            envelopes[0]["idempotency_key"], envelopes[1]["idempotency_key"]
+        )
+        self.assertEqual(envelopes[0]["requester_ref"], envelopes[1]["requester_ref"])
+
+    def test_sensitive_mutation_reference_is_stable_and_contains_no_plaintext(self):
+        value = {"name": "Sensitive Name", "phone": "+79990001122"}
+        first = bridge.opaque_mutation_reference(value, "client_identity")
+        second = bridge.opaque_mutation_reference(value, "client_identity")
+
+        self.assertEqual(first, second)
+        self.assertTrue(first.startswith("legacy-field:client_identity:"))
+        self.assertNotIn("Sensitive Name", first)
+        self.assertNotIn("79990001122", first)
 
 
 if __name__ == "__main__":

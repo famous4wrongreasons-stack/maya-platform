@@ -7,6 +7,7 @@ through Action Engine; this module has no direct CRM execution or fallback.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import logging
 import os
@@ -57,6 +58,20 @@ def opaque_client_reference(phone: str, fallback: str = "anonymous") -> str:
     digits = "".join(char for char in str(phone or "") if char.isdigit())
     material = digits or str(fallback or "anonymous")
     return f"legacy-client:{hashlib.sha256(material.encode('utf-8')).hexdigest()}"
+
+
+def opaque_mutation_reference(value: Any, field: str) -> str:
+    """Return a tenant-local HMAC reference without exposing mutation data."""
+    secret = os.getenv(
+        "MAYA_LEGACY_APPOINTMENT_BRIDGE_OBSERVATION_SECRET", ""
+    ).strip()
+    if not secret:
+        secret = os.getenv("MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN", "").strip()
+    if not secret:
+        raise RuntimeError("legacy_appointment_bridge_observation_secret_missing")
+    material = f"{field}:{_canonical_json(value)}".encode("utf-8")
+    digest = hmac.new(secret.encode("utf-8"), material, hashlib.sha256).hexdigest()
+    return f"legacy-field:{field}:{digest}"
 
 
 def appointment_idempotency_key(
@@ -277,6 +292,46 @@ def dispatch_appointment_action(
     if "execution" not in result:
         return result
     return _canonical_result(result)
+
+
+def observe_residual_appointment_action(
+    *,
+    provider: str,
+    external_company_id: str,
+    origin: str | None,
+    action_class: str,
+    payload: dict[str, Any],
+    legacy_outcome: dict[str, Any],
+) -> bool:
+    """Persist a passive shadow observation after a proven legacy mutation.
+
+    This observer never authorizes, executes, retries, or falls back to a CRM
+    mutation. Its result cannot change the already completed legacy outcome.
+    """
+    if not origin:
+        return False
+
+    safe_outcome = {
+        key: legacy_outcome[key]
+        for key in ("success", "code", "http_status", "unknown")
+        if key in legacy_outcome
+        and isinstance(legacy_outcome[key], (bool, int, str, type(None)))
+    }
+    envelope = _envelope(
+        provider=provider,
+        external_company_id=external_company_id,
+        origin=origin,
+        action_class=action_class,
+        payload=payload,
+    )
+    envelope["legacy_outcome"] = safe_outcome
+    result = _post_bridge("shadow", envelope)
+    return bool(
+        result.get("contract") == BRIDGE_RESULT_CONTRACT
+        and result.get("accepted") is True
+        and result.get("mode") == "shadow"
+        and result.get("bridge_external_side_effects") == 0
+    )
 
 
 def get_appointment_execution_status(

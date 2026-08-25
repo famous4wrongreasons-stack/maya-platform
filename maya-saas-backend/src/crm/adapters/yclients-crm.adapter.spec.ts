@@ -755,6 +755,85 @@ describe('YclientsCRMAdapter', () => {
     expect(result.start).toBe('2026-08-23T09:00:00.000Z');
   });
 
+  it('writes only the explicit supported attendance code without a fallback', async () => {
+    let updateBody: Record<string, unknown> | null = null;
+    global.fetch = jest.fn(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        const method = String(init?.method ?? 'GET').toUpperCase();
+
+        if (url.includes('/record/123/456') && method === 'GET') {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  id: 456,
+                  datetime: '2026-08-23T10:00:00',
+                  seance_length: 3600,
+                  attendance: 0,
+                  comment: '',
+                  staff: { id: 15 },
+                  client: { id: 88, name: 'Client', phone: '+79990001122' },
+                  services: [{ id: 7, cost: 2000, discount: 0 }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+
+        if (url.includes('/record/123/456') && method === 'PUT') {
+          updateBody = requestJsonBody(init);
+          return Promise.resolve(
+            new Response(JSON.stringify({ success: true, data: { id: 456 } }), {
+              status: 200,
+            }),
+          );
+        }
+
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: [] }), { status: 200 }),
+        );
+      },
+    ) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await adapter.markAppointmentAttendance({
+      tenantId: 'tenant-1',
+      externalId: '456',
+      attendance: 'no_show',
+    });
+
+    expect(updateBody).toMatchObject({ attendance: -1 });
+  });
+
+  it('rejects an unsupported attendance value before any CRM request', async () => {
+    global.fetch = jest.fn() as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.markAppointmentAttendance({
+        tenantId: 'tenant-1',
+        externalId: '456',
+        attendance: 'unsupported' as never,
+      }),
+    ).rejects.toThrow('Unsupported writable attendance value.');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
   it('treats YClients 422 date-unavailable as empty slots', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,

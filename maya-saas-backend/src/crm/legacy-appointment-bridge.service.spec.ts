@@ -116,6 +116,16 @@ describe('LegacyAppointmentBridgeService', () => {
       previewCreateAppointment: jest.fn().mockResolvedValue(previewFixture()),
       previewRescheduleAppointment: jest.fn(),
       previewCancelAppointment: jest.fn(),
+      planResidualAppointmentShadow: jest.fn().mockResolvedValue({
+        ...previewFixture(),
+        capability: 'crm.appointment.attendance.shadow.v1',
+        actionClass: 'set_appointment_attendance',
+        targetRef: 'appointment/77',
+        policyKey: 'chapter6.residual-appointment-shadow',
+        policyDecision: 'SHADOW_ONLY',
+        autonomyLevel: 'L2_5_SHADOW',
+        executorKey: 'shadow.none',
+      }),
       executeCreateAppointmentWithReceipt: jest.fn(),
       executeRescheduleAppointmentWithReceipt: jest.fn(),
       executeCancelAppointmentWithReceipt: jest.fn(),
@@ -164,6 +174,82 @@ describe('LegacyAppointmentBridgeService', () => {
         metatype: LegacyAppointmentBridgeDto,
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('plans a residual appointment mutation as zero-effect shadow work', async () => {
+    const { crmService, service } = unitHarness();
+    jest.spyOn(Logger.prototype, 'log').mockImplementation();
+
+    const result = await service.shadow(
+      createDto({
+        origin: 'legacy.residual_appointment',
+        action_class: 'set_appointment_attendance',
+        payload: { external_id: '77', attendance_code: 1 },
+      }),
+    );
+
+    expect(crmService.planResidualAppointmentShadow).toHaveBeenCalledWith(
+      'tenant-1',
+      'crm.appointment.attendance.shadow.v1',
+      'appointment/77',
+      { attendanceCode: 1 },
+      expect.objectContaining({ sourceType: 'legacy_bridge' }),
+    );
+    expect(result).toMatchObject({
+      accepted: true,
+      mode: 'shadow',
+      bridge_external_side_effects: 0,
+      preview: {
+        policyDecision: 'SHADOW_ONLY',
+        executorKey: 'shadow.none',
+        externalSideEffects: 0,
+      },
+    });
+    expect(
+      crmService.executeCreateAppointmentWithReceipt,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('rejects residual appointment execution before resolving a tenant', async () => {
+    const { bridgeSource, crmService, service } = unitHarness();
+    process.env.MAYA_LEGACY_APPOINTMENT_BRIDGE_EXECUTION_ENABLED = 'true';
+
+    await expect(
+      service.execute(
+        createDto({
+          origin: 'legacy.residual_appointment',
+          action_class: 'set_appointment_duration',
+          payload: { external_id: '77', duration_seconds: 3600 },
+        }),
+      ),
+    ).rejects.toMatchObject({
+      response: {
+        error: { code: 'legacy_appointment_shadow_only' },
+      },
+    });
+    expect(bridgeSource.resolveTenantByIntegration).not.toHaveBeenCalled();
+    expect(crmService.planResidualAppointmentShadow).not.toHaveBeenCalled();
+  });
+
+  it('rejects invalid residual payload before resolving a tenant', async () => {
+    const { bridgeSource, crmService, service } = unitHarness();
+
+    await expect(
+      service.shadow(
+        createDto({
+          origin: 'legacy.residual_appointment',
+          action_class: 'set_appointment_fields',
+          payload: {
+            external_id: '77',
+            field_kind: 'comment',
+            value_ref: 'hmac:comment-ref',
+            raw_comment: 'must-not-cross-the-boundary',
+          },
+        }),
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(bridgeSource.resolveTenantByIntegration).not.toHaveBeenCalled();
+    expect(crmService.planResidualAppointmentShadow).not.toHaveBeenCalled();
   });
 
   it('shadows through canonical preview without executing an action', async () => {

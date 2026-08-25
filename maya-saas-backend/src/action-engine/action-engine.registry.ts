@@ -336,6 +336,78 @@ function rescheduleAppointmentNormalizer(
   };
 }
 
+const RESIDUAL_APPOINTMENT_FIELD_KINDS = new Set([
+  'comment',
+  'client_name',
+  'sms_flag',
+]);
+const RESIDUAL_APPOINTMENT_VALUE_KINDS = new Set(['payment', 'close']);
+
+function requiredInteger(
+  source: Record<string, unknown>,
+  key: string,
+  min: number,
+  max: number,
+): number {
+  const value = source[key];
+  if (!Number.isInteger(value) || Number(value) < min || Number(value) > max) {
+    throw new ActionContractError(
+      `${key} must be an integer between ${min} and ${max}`,
+    );
+  }
+  return Number(value);
+}
+
+function attendanceShadowNormalizer(value: unknown): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, ['attendanceCode']);
+  const attendanceCode = requiredInteger(source, 'attendanceCode', -1, 2);
+  if (![-1, 0, 1, 2].includes(attendanceCode)) {
+    throw new ActionContractError('attendanceCode is not writable');
+  }
+  return { attendanceCode };
+}
+
+function durationShadowNormalizer(value: unknown): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, ['durationSeconds']);
+  return {
+    durationSeconds: requiredInteger(source, 'durationSeconds', 60, 86_400),
+  };
+}
+
+function servicesShadowNormalizer(value: unknown): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, ['serviceIds']);
+  return { serviceIds: serviceIds(source) };
+}
+
+function fieldsShadowNormalizer(value: unknown): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, ['fieldKind', 'valueRef']);
+  const fieldKind = requiredText(source, 'fieldKind', 32);
+  if (!RESIDUAL_APPOINTMENT_FIELD_KINDS.has(fieldKind)) {
+    throw new ActionContractError('fieldKind is not registered');
+  }
+  return {
+    fieldKind,
+    valueRef: normalizeOpaqueRef(source.valueRef, 'valueRef'),
+  };
+}
+
+function paymentCloseShadowNormalizer(value: unknown): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, ['mutationKind', 'valueRef']);
+  const mutationKind = requiredText(source, 'mutationKind', 32);
+  if (!RESIDUAL_APPOINTMENT_VALUE_KINDS.has(mutationKind)) {
+    throw new ActionContractError('mutationKind is not registered');
+  }
+  return {
+    mutationKind,
+    valueRef: normalizeOpaqueRef(source.valueRef, 'valueRef'),
+  };
+}
+
 const DAY = 24 * 60 * 60 * 1_000;
 
 function shadowCapability(input: {
@@ -427,6 +499,48 @@ function communicationShadowCapability(input: {
     auditRetentionMs: 365 * DAY,
     normalizeInput: (value) =>
       communicationShadowNormalizer(input.scope, value),
+  };
+}
+
+function residualAppointmentShadowCapability(input: {
+  capability: string;
+  actionClass: string;
+  normalizeInput: (value: unknown) => Record<string, unknown>;
+}): RegisteredActionCapabilityV1 {
+  return {
+    capability: input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: `maya.${input.actionClass}-input/1`,
+    targetKind: 'appointment',
+    allowedSourceTypes: ['authenticated_request', 'legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: ['external', 'customer_visible', 'shadow_only'],
+    policyKey: 'chapter6.residual-appointment-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'residual-appointment-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'residual-appointment-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: input.normalizeInput,
   };
 }
 
@@ -639,6 +753,31 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     actionClass: 'cancel_appointment',
     executorKey: 'crm.appointment.cancel',
     normalizeInput: cancelAppointmentNormalizer,
+  }),
+  residualAppointmentShadowCapability({
+    capability: 'crm.appointment.attendance.shadow.v1',
+    actionClass: 'set_appointment_attendance',
+    normalizeInput: attendanceShadowNormalizer,
+  }),
+  residualAppointmentShadowCapability({
+    capability: 'crm.appointment.duration.shadow.v1',
+    actionClass: 'set_appointment_duration',
+    normalizeInput: durationShadowNormalizer,
+  }),
+  residualAppointmentShadowCapability({
+    capability: 'crm.appointment.services.shadow.v1',
+    actionClass: 'set_appointment_services',
+    normalizeInput: servicesShadowNormalizer,
+  }),
+  residualAppointmentShadowCapability({
+    capability: 'crm.appointment.fields.shadow.v1',
+    actionClass: 'set_appointment_fields',
+    normalizeInput: fieldsShadowNormalizer,
+  }),
+  residualAppointmentShadowCapability({
+    capability: 'crm.appointment.payment-close.shadow.v1',
+    actionClass: 'close_appointment_payment',
+    normalizeInput: paymentCloseShadowNormalizer,
   }),
   syntheticCapability({
     capability: 'kernel.test.safe-retry',

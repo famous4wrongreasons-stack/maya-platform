@@ -103,6 +103,13 @@ export type AppointmentActionInvocation = {
   sourceRef?: string;
 };
 
+export type ResidualAppointmentShadowCapability =
+  | 'crm.appointment.attendance.shadow.v1'
+  | 'crm.appointment.duration.shadow.v1'
+  | 'crm.appointment.services.shadow.v1'
+  | 'crm.appointment.fields.shadow.v1'
+  | 'crm.appointment.payment-close.shadow.v1';
+
 type CreateAppointmentInput = {
   clientId: string;
   clientName: string;
@@ -1498,7 +1505,8 @@ export class CrmService {
     capability:
       | 'crm.appointment.create.v1'
       | 'crm.appointment.reschedule.v1'
-      | 'crm.appointment.cancel.v1';
+      | 'crm.appointment.cancel.v1'
+      | ResidualAppointmentShadowCapability;
     targetRef: string;
     input: unknown;
     invocation: AppointmentActionInvocation;
@@ -1531,6 +1539,26 @@ export class CrmService {
       evidenceRefs: [],
       callerIdempotency: input.invocation.callerIdempotency,
     };
+  }
+
+  async planResidualAppointmentShadow(
+    tenantId: string,
+    capability: ResidualAppointmentShadowCapability,
+    targetRef: string,
+    input: unknown,
+    invocation: AppointmentActionInvocation,
+  ): Promise<ActionExecutionPreviewV1> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const request = this.appointmentActionRequest({
+      tenantId: scopedTenantId,
+      capability,
+      targetRef,
+      input,
+      invocation,
+    });
+    const preview = this.actionEngineRuntime.preview(request);
+    await this.actionEngineRuntime.planShadow(request);
+    return preview;
   }
 
   async getAppointmentActionExecutionResult(

@@ -9,6 +9,8 @@ from config import YCLIENTS_BASE_URL, YCLIENTS_PARTNER_TOKEN, YCLIENTS_USER_TOKE
 from legacy_appointment_bridge import (
     dispatch_appointment_action,
     opaque_client_reference,
+    opaque_mutation_reference,
+    observe_residual_appointment_action,
 )
 
 logger = logging.getLogger("yclients")
@@ -241,6 +243,59 @@ class YClientsAPI:
         if resp.status_code == 204 or not resp.text.strip():
             return {"success": True}
         return resp.json()
+
+    @staticmethod
+    def _preserve_attendance(payload: dict, record: dict) -> None:
+        """Copy attendance only when CRM returned an explicit writable value."""
+        raw = record.get("attendance")
+        if type(raw) is bool:
+            return
+        if isinstance(raw, int) and raw in {-1, 0, 1, 2}:
+            payload["attendance"] = raw
+            return
+        if isinstance(raw, str) and raw.strip() in {"-1", "0", "1", "2"}:
+            payload["attendance"] = int(raw.strip())
+
+    def _observe_residual_appointment_action(
+        self, action_class: str, record_id: int, payload: dict
+    ) -> bool:
+        """Observe a proven legacy write; never affect or repeat that write."""
+        try:
+            return observe_residual_appointment_action(
+                provider="yclients",
+                external_company_id=str(self.company_id),
+                origin="legacy.residual_appointment",
+                action_class=action_class,
+                payload={"external_id": str(record_id), **payload},
+                legacy_outcome={"success": True, "code": "legacy_write_succeeded"},
+            )
+        except Exception:
+            logger.exception(
+                "Residual appointment shadow observation failed: %s",
+                action_class,
+            )
+            return False
+
+    def _observe_sensitive_appointment_action(
+        self,
+        action_class: str,
+        record_id: int,
+        kind_key: str,
+        kind: str,
+        value: object,
+    ) -> bool:
+        try:
+            value_ref = opaque_mutation_reference(value, kind)
+        except Exception:
+            logger.exception(
+                "Residual appointment value reference failed: %s", action_class
+            )
+            return False
+        return self._observe_residual_appointment_action(
+            action_class,
+            record_id,
+            {kind_key: kind, "value_ref": value_ref},
+        )
 
     # ─── Мастера ────────────────────────────────────────────────────────────
 
@@ -1259,11 +1314,16 @@ class YClientsAPI:
                     "name": client.get("name", ""),
                 },
                 "services": [{"id": sid, "amount": 1} for sid in service_ids],
-                "attendance": rec.get("attendance", 0),
                 "comment": rec.get("comment", ""),
             }
+            self._preserve_attendance(payload, rec)
             upd = self._put(f"record/{self.company_id}/{record_id}", payload)
             if upd.get("success") or upd.get("data"):
+                self._observe_residual_appointment_action(
+                    "set_appointment_services",
+                    record_id,
+                    {"service_ids": [str(service_id) for service_id in service_ids]},
+                )
                 services = [s["title"] for s in upd.get("data", {}).get("services", [])]
                 return {"success": True, "record_id": record_id, "services": services}
             return {"success": False, "error": upd.get("meta", {}).get("message", "Ошибка")}
@@ -1275,6 +1335,14 @@ class YClientsAPI:
         2 подтвердил. Неразрушающий PUT record/{company}/{id} (остальные поля
         сохраняются)."""
         try:
+            if type(attendance) is bool:
+                return {"success": False, "error": "Некорректный статус визита"}
+            try:
+                attendance_code = int(attendance)
+            except (TypeError, ValueError):
+                return {"success": False, "error": "Некорректный статус визита"}
+            if attendance_code not in {-1, 0, 1, 2}:
+                return {"success": False, "error": "Некорректный статус визита"}
             data = self._get(f"record/{self.company_id}/{record_id}")
             rec = data.get("data", {})
             if not rec:
@@ -1295,12 +1363,17 @@ class YClientsAPI:
                     "name": client.get("name", ""),
                 },
                 "services": [{"id": sid, "amount": 1} for sid in svc_ids],
-                "attendance": int(attendance),
+                "attendance": attendance_code,
                 "comment": rec.get("comment", ""),
             }
             upd = self._put(f"record/{self.company_id}/{record_id}", payload)
             if upd.get("success") or upd.get("data"):
-                return {"success": True, "record_id": record_id, "attendance": int(attendance)}
+                self._observe_residual_appointment_action(
+                    "set_appointment_attendance",
+                    record_id,
+                    {"attendance_code": attendance_code},
+                )
+                return {"success": True, "record_id": record_id, "attendance": attendance_code}
             return {"success": False, "error": upd.get("meta", {}).get("message") or "Не удалось обновить статус"}
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -1389,11 +1462,18 @@ class YClientsAPI:
                     "name":  client.get("name", ""),
                 },
                 "services":   [{"id": sid, "amount": 1} for sid in svc_ids],
-                "attendance": rec.get("attendance", 0),
                 "comment":    rec.get("comment", ""),
             }
+            self._preserve_attendance(payload, rec)
             upd = self._put(f"record/{self.company_id}/{record_id}", payload)
             if upd.get("success") or upd.get("data"):
+                self._observe_sensitive_appointment_action(
+                    "set_appointment_fields",
+                    record_id,
+                    "field_kind",
+                    "sms_flag",
+                    {"notify_by_sms": hours},
+                )
                 return {"success": True, "record_id": record_id, "notify_by_sms": hours}
             return {"success": False,
                     "error": upd.get("meta", {}).get("message") or "PUT отклонён"}
@@ -1879,11 +1959,26 @@ class YClientsAPI:
                 "client": {"id": client.get("id"), "phone": client.get("phone", ""),
                            "name": client.get("name", "")},
                 "services": services_payload,
-                "attendance": rec.get("attendance", 0),
                 "comment": rec.get("comment", ""),
             }
+            self._preserve_attendance(payload, rec)
             upd = self._put(f"record/{self.company_id}/{record_id}", payload)
             if upd.get("success") or upd.get("data"):
+                resulting_ids = [
+                    str(service.get("id"))
+                    for service in services_payload
+                    if service.get("id") is not None
+                ]
+                self._observe_residual_appointment_action(
+                    "set_appointment_services",
+                    record_id,
+                    {"service_ids": resulting_ids},
+                )
+                self._observe_residual_appointment_action(
+                    "set_appointment_duration",
+                    record_id,
+                    {"duration_seconds": new_len},
+                )
                 return {"success": True, "record_id": record_id}
             return {"success": False, "error": upd.get("meta", {}).get("message") or "Не удалось добавить услугу"}
         except Exception as e:
@@ -1969,11 +2064,21 @@ class YClientsAPI:
                 "client": {"id": client.get("id"), "phone": client.get("phone", ""),
                            "name": client.get("name", "")},
                 "services": services_payload,
-                "attendance": rec.get("attendance", 0),
                 "comment": rec.get("comment", ""),
             }
+            self._preserve_attendance(payload, rec)
             upd = self._put(f"record/{self.company_id}/{record_id}", payload)
             if upd.get("success") or upd.get("data"):
+                self._observe_residual_appointment_action(
+                    "set_appointment_services",
+                    record_id,
+                    {"service_ids": [str(service_id) for service_id in ids]},
+                )
+                self._observe_residual_appointment_action(
+                    "set_appointment_duration",
+                    record_id,
+                    {"duration_seconds": total_dur},
+                )
                 return {"success": True, "record_id": record_id}
             return {"success": False, "error": upd.get("meta", {}).get("message") or "Не удалось изменить услуги"}
         except Exception as e:
@@ -2017,11 +2122,16 @@ class YClientsAPI:
                 "client": {"id": client.get("id"), "phone": client.get("phone", ""),
                            "name": client.get("name", "")},
                 "services": services_payload,
-                "attendance": rec.get("attendance", 0),
                 "comment": rec.get("comment", ""),
             }
+            self._preserve_attendance(payload, rec)
             upd = self._put(f"record/{self.company_id}/{record_id}", payload)
             if upd.get("success") or upd.get("data"):
+                self._observe_residual_appointment_action(
+                    "set_appointment_duration",
+                    record_id,
+                    {"duration_seconds": length},
+                )
                 return {"success": True, "record_id": record_id, "seance_length": length}
             return {"success": False,
                     "error": upd.get("meta", {}).get("message") or "Не удалось изменить длительность"}
@@ -2082,11 +2192,18 @@ class YClientsAPI:
                     "email": client.get("email"),
                 },
                 "services": services_payload,
-                "attendance": rec.get("attendance", 0),
                 "comment": rec.get("comment", ""),
             }
+            self._preserve_attendance(payload, rec)
             upd = self._put(f"record/{self.company_id}/{record_id}", payload)
             if upd.get("success") or upd.get("data"):
+                self._observe_sensitive_appointment_action(
+                    "set_appointment_fields",
+                    record_id,
+                    "field_kind",
+                    "client_name",
+                    {"name": name, "phone": phone},
+                )
                 return {"success": True, "record_id": record_id, "client": name, "phone": phone}
             return {"success": False, "error": upd.get("meta", {}).get("message") or "Не удалось сохранить данные клиента"}
         except Exception as e:
@@ -2269,7 +2386,6 @@ class YClientsAPI:
                 "save_if_busy":  True,
                 "send_sms":      False,
                 "comment":       new_comment,
-                "attendance":    current.get("attendance", 0),
                 "paid_full":     current.get("paid_full", 0),
                 "confirmed":     current.get("confirmed", 1),
                 "sms_before":    current.get("sms_before", 0),
@@ -2278,6 +2394,7 @@ class YClientsAPI:
                 "notified":      current.get("notified", 0),
                 "master_request": current.get("master_request", 0),
             }
+            self._preserve_attendance(payload, current)
             data = self._put(f"record/{self.company_id}/{record_id}", payload)
             if not data.get("success"):
                 return {
@@ -2285,6 +2402,23 @@ class YClientsAPI:
                     "error": data.get("meta", {}).get("message", "Ошибка YClients"),
                     "matched_service": matched,
                 }
+            resulting_ids = [
+                str(service.get("id"))
+                for service in services_payload
+                if service.get("id") is not None
+            ]
+            self._observe_residual_appointment_action(
+                "set_appointment_services",
+                record_id,
+                {"service_ids": resulting_ids},
+            )
+            self._observe_sensitive_appointment_action(
+                "set_appointment_fields",
+                record_id,
+                "field_kind",
+                "comment",
+                new_comment,
+            )
             return {"success": True, "matched_service": matched}
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -2345,7 +2479,6 @@ class YClientsAPI:
                 "save_if_busy":  True,
                 "send_sms":      False,
                 "comment":       new_comment,
-                "attendance":    current.get("attendance", 0),
                 "paid_full":     current.get("paid_full", 0),
                 "confirmed":     current.get("confirmed", 1),
                 "sms_before":    current.get("sms_before", 0),
@@ -2354,9 +2487,17 @@ class YClientsAPI:
                 "notified":      current.get("notified", 0),
                 "master_request": current.get("master_request", 0),
             }
+            self._preserve_attendance(payload, current)
             data = self._put(f"record/{self.company_id}/{record_id}", payload)
             if not data.get("success"):
                 return {"success": False, "error": data.get("meta", {}).get("message", "Ошибка YClients")}
+            self._observe_sensitive_appointment_action(
+                "set_appointment_fields",
+                record_id,
+                "field_kind",
+                "comment",
+                new_comment,
+            )
             return {"success": True}
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -2456,7 +2597,6 @@ class YClientsAPI:
                 "comment":       new_comment,
                 # attendance: 1 — клиент пришёл, визит состоялся. Это и есть
                 # «закрыть запись» с точки зрения мастера.
-                "attendance":    1 if paid_full else current.get("attendance", 0),
                 "paid_full":     1 if paid_full else 0,  # может остаться 0,
                 "payment_status": 1 if paid_full else current.get("payment_status", 0),
                 "visit_id":      current.get("visit_id"),
@@ -2467,6 +2607,10 @@ class YClientsAPI:
                 "notified":      current.get("notified", 0),
                 "master_request": current.get("master_request", 0),
             }
+            if paid_full:
+                payload["attendance"] = 1
+            else:
+                self._preserve_attendance(payload, current)
 
             try:
                 data = self._put(f"record/{self.company_id}/{record_id}", payload)
@@ -2536,6 +2680,18 @@ class YClientsAPI:
                     "transaction": tx_result,
                 }
 
+            self._observe_sensitive_appointment_action(
+                "close_appointment_payment",
+                record_id,
+                "mutation_kind",
+                "close" if paid_full else "payment",
+                {
+                    "paid_full": bool(paid_full),
+                    "payment_method": payment_method,
+                    "amount": total,
+                    "transaction_created": not bool(tx_result.get("skipped")),
+                },
+            )
             return {
                 "success": True,
                 "record_id": record_id,

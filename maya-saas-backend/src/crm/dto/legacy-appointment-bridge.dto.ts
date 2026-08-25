@@ -20,6 +20,11 @@ export const LEGACY_APPOINTMENT_ACTIONS = [
   'create_appointment',
   'reschedule_appointment',
   'cancel_appointment',
+  'set_appointment_attendance',
+  'set_appointment_duration',
+  'set_appointment_services',
+  'set_appointment_fields',
+  'close_appointment_payment',
 ] as const;
 
 export type LegacyAppointmentAction =
@@ -27,6 +32,7 @@ export type LegacyAppointmentAction =
 
 export const LEGACY_APPOINTMENT_ORIGINS = [
   'client_record_actions',
+  'legacy.residual_appointment',
   'webhook.loyalty',
   'webhook.chat',
   'webhook.panel',

@@ -256,8 +256,8 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
         )
         dispatch_source = ast.unparse(dispatch)
 
-        self.assertNotIn("direct_call", source)
-        self.assertNotIn("legacy_outcome", source)
+        self.assertNotIn("direct_call", dispatch_source)
+        self.assertNotIn("legacy_outcome", dispatch_source)
         self.assertNotIn('"shadow"', dispatch_source)
         self.assertNotIn('"off"', dispatch_source)
         self.assertIn('VALID_MODES = frozenset({"cutover"})', source)
@@ -288,11 +288,23 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
 
         self.assertEqual(imported_blueprint_from, [])
 
-    def test_bridge_action_surface_excludes_attendance(self):
-        bridge_source = (ROOT / "legacy_appointment_bridge.py").read_text(
-            encoding="utf-8"
-        ).lower()
-        self.assertNotIn("attendance", bridge_source)
+    def test_bridge_execute_surface_excludes_residual_appointment_actions(self):
+        bridge_tree = parsed(ROOT / "legacy_appointment_bridge.py")
+        dispatch = next(
+            node
+            for node in bridge_tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "dispatch_appointment_action"
+        )
+        dispatch_source = ast.unparse(dispatch).lower()
+        for action in (
+            "set_appointment_attendance",
+            "set_appointment_duration",
+            "set_appointment_services",
+            "set_appointment_fields",
+            "close_appointment_payment",
+        ):
+            self.assertNotIn(action, dispatch_source)
 
         for filename in (
             "client_record_actions.py",
@@ -311,7 +323,7 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
                     and isinstance(keyword.value, ast.Constant)
                     and isinstance(keyword.value.value, str)
                 ]
-                self.assertNotIn("attendance", action_classes)
+                self.assertNotIn("set_appointment_attendance", action_classes)
 
     def test_attendance_remains_a_separate_deferred_direct_owner(self):
         methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")
@@ -321,6 +333,51 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
         self.assertIn("self._put", attendance_source)
         self.assertIn("attendance", attendance_source)
         self.assertNotIn("dispatch_appointment_action", attendance_source)
+        self.assertIn("_observe_residual_appointment_action", attendance_source)
+
+    def test_residual_direct_owners_are_passive_shadow_producers(self):
+        methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")
+        residual_actions = {
+            "set_appointment_attendance",
+            "set_appointment_duration",
+            "set_appointment_services",
+            "set_appointment_fields",
+            "close_appointment_payment",
+        }
+        observed = set()
+        for _filename, method_name in EXPECTED_RECORD_PUT_OWNERS:
+            method_source = ast.unparse(methods[method_name])
+            self.assertNotIn("dispatch_appointment_action", method_source, method_name)
+            self.assertTrue(
+                "_observe_residual_appointment_action" in method_source
+                or "_observe_sensitive_appointment_action" in method_source,
+                method_name,
+            )
+            observed.update(
+                action for action in residual_actions if action in method_source
+            )
+
+        self.assertEqual(observed, residual_actions)
+
+    def test_sensitive_field_observers_use_registered_contract_kinds(self):
+        source = (ROOT / "yclients.py").read_text(encoding="utf-8")
+
+        self.assertNotIn('"client_identity"', source)
+        for field_kind in ("client_name", "comment", "sms_flag"):
+            self.assertIn(f'"{field_kind}"', source)
+
+    def test_unrelated_record_updates_never_default_attendance_to_zero(self):
+        source = (ROOT / "yclients.py").read_text(encoding="utf-8")
+        self.assertNotIn(
+            '.get("attendance", 0)',
+            source[source.find("def update_booking") :],
+        )
+
+        methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")
+        preserve = methods["_preserve_attendance"]
+        preserve_source = ast.unparse(preserve)
+        self.assertIn("{-1, 0, 1, 2}", preserve_source)
+        self.assertIn("type(raw) is bool", preserve_source)
 
 
 if __name__ == "__main__":

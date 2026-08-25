@@ -1102,7 +1102,10 @@ export class YclientsCRMAdapter implements CRMAdapter {
     void params.tenantId;
     // Кодировка провайдера появляется ровно здесь и дальше этого метода не идёт.
     const code = attendanceToCode(params.attendance);
-    const attendance = WRITABLE_ATTENDANCE_CODES.includes(code) ? code : 0;
+    if (!WRITABLE_ATTENDANCE_CODES.includes(code)) {
+      throw new Error('Unsupported writable attendance value.');
+    }
+    const attendance = code;
     // 🔴 save_if_busy обязателен: время визита мы не двигаем, но слот занят
     // самой же этой записью, а у журнальной записи поверх чужого окна — ещё и
     // соседней. С save_if_busy=false YClients отклонил бы PUT, и кнопки

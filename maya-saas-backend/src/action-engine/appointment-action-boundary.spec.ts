@@ -112,16 +112,29 @@ describe('appointment action execution boundary', () => {
     expect(violations).toEqual([]);
   });
 
-  it('defers attendance until finding 4.43 has a safe write contract', () => {
-    const capabilities = new ActionCapabilityRegistry().list();
+  it('keeps every residual appointment mutation shadow-only', () => {
+    const registry = new ActionCapabilityRegistry();
+    const capabilities = [
+      'crm.appointment.attendance.shadow.v1',
+      'crm.appointment.duration.shadow.v1',
+      'crm.appointment.services.shadow.v1',
+      'crm.appointment.fields.shadow.v1',
+      'crm.appointment.payment-close.shadow.v1',
+    ].map((capability) => registry.get(capability));
 
-    expect(
-      capabilities.some(
-        (capability) =>
-          capability.actionClass.includes('attendance') ||
-          capability.capability.includes('attendance'),
-      ),
-    ).toBe(false);
+    for (const capability of capabilities) {
+      expect(capability).toMatchObject({
+        policyKey: 'chapter6.residual-appointment-shadow',
+        policyDecision: 'SHADOW_ONLY',
+        autonomyLevel: 'L2_5_SHADOW',
+        executorKey: 'shadow.none',
+      });
+      expect(capability.retry.maxExecutionAttempts).toBe(1);
+      expect(capability.retry.retryablePreDispatchErrors.size).toBe(0);
+      expect(capability.reconciliation.retryAfterProvenNonExecution).toBe(
+        false,
+      );
+    }
   });
 
   it('keeps the legacy bridge as an initiator of CrmService only', () => {
@@ -154,11 +167,17 @@ describe('appointment action execution boundary', () => {
     ).toEqual([]);
   });
 
-  it('does not expand the bridge into the deferred attendance mutation', () => {
-    for (const path of LEGACY_BRIDGE_FILES) {
-      expect(readFileSync(path, 'utf8').toLowerCase()).not.toContain(
-        'attendance',
-      );
-    }
+  it('exposes residual appointment mutations only through shadow planning', () => {
+    const combinedSource = LEGACY_BRIDGE_FILES.map((path) =>
+      readFileSync(path, 'utf8'),
+    ).join('\n');
+
+    expect(combinedSource).toContain('set_appointment_attendance');
+    expect(combinedSource).toContain('set_appointment_duration');
+    expect(combinedSource).toContain('set_appointment_services');
+    expect(combinedSource).toContain('set_appointment_fields');
+    expect(combinedSource).toContain('close_appointment_payment');
+    expect(combinedSource).toContain('legacy_appointment_shadow_only');
+    expect(combinedSource).not.toMatch(/executeAttendance|executeDuration/);
   });
 });

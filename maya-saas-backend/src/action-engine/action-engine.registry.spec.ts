@@ -73,8 +73,52 @@ describe('ActionCapabilityRegistry', () => {
     ).toThrow();
   });
 
-  it('does not register attendance as a Phase B2 action', () => {
+  it('does not register attendance as an executable Phase B2 action', () => {
     expect(() => registry.get('crm.appointment.attendance.v1')).toThrow();
+  });
+
+  it('registers the five residual appointment classes as strict shadow capabilities', () => {
+    const cases = [
+      [
+        'crm.appointment.attendance.shadow.v1',
+        { attendanceCode: 1 },
+        { attendanceCode: 1 },
+      ],
+      [
+        'crm.appointment.duration.shadow.v1',
+        { durationSeconds: 3600 },
+        { durationSeconds: 3600 },
+      ],
+      [
+        'crm.appointment.services.shadow.v1',
+        { serviceIds: ['service-2', 'service-1', 'service-1'] },
+        { serviceIds: ['service-1', 'service-2'] },
+      ],
+      [
+        'crm.appointment.fields.shadow.v1',
+        { fieldKind: 'comment', valueRef: 'hmac:comment-ref' },
+        { fieldKind: 'comment', valueRef: 'hmac:comment-ref' },
+      ],
+      [
+        'crm.appointment.payment-close.shadow.v1',
+        { mutationKind: 'payment', valueRef: 'hmac:payment-ref' },
+        { mutationKind: 'payment', valueRef: 'hmac:payment-ref' },
+      ],
+    ] as const;
+
+    for (const [capabilityName, input, normalized] of cases) {
+      const capability = registry.get(capabilityName);
+      expect(capability).toMatchObject({
+        policyKey: 'chapter6.residual-appointment-shadow',
+        policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+        executorKey: 'shadow.none',
+        approvalRequirement: 'NONE',
+      });
+      expect(capability.normalizeInput(input)).toEqual(normalized);
+      expect(() =>
+        capability.normalizeInput({ ...input, executor: 'legacy.direct' }),
+      ).toThrow(/Unexpected action input/);
+    }
   });
 
   it('registers only the proven B3.3 communication classes for execution', () => {
