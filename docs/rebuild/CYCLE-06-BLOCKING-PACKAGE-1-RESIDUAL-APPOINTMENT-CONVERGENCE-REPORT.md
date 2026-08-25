@@ -1,7 +1,7 @@
 # CYCLE 06 — BLOCKING PACKAGE 1 — RESIDUAL APPOINTMENT MUTATION CONVERGENCE REPORT
 
-Status: shadow deployed; production equivalence and cutover not performed
-Repository baseline HEAD: `017d0d3c`
+Status: shadow deployed; A07 production equivalence observed; cutover not performed
+Repository implementation HEAD: `c8c67c72`
 Package order: 1 of 5
 Next package started: no
 
@@ -138,6 +138,24 @@ through the existing database uniqueness on
 `tenantId + identityFingerprint`; caller idempotency remains a request alias,
 not a second logical action.
 
+### Native/Nest observation coverage
+
+The first owner-performed A05 proof exposed a reachability gap rather than an
+equivalence divergence: the native iOS journal uses an authenticated Nest
+endpoint for duration changes, while the original hook covered only Python
+legacy initiators. The successful provider mutation therefore produced no
+observation.
+
+The authenticated Nest owners for A04 attendance, A05 duration, and A06 service
+composition now submit the same passive `SHADOW_ONLY` observation after a
+confirmed legacy success. Their authorization evidence is derived from the
+verified request tenant and is evaluated separately from integration-secret
+Python observations. A provider failure produces no observation; an observer
+failure cannot change an already successful legacy result.
+
+This adds observation only. Nest remains the execution owner during the proof
+window, and the new path still has no CRM or messaging executor.
+
 ### Attendance finding 4.43
 
 Unrelated record updates no longer inject `attendance = 0` when YClients omits
@@ -193,25 +211,56 @@ cutover.
 - Python bridge and architectural ratchet suite: **28 passed**.
 - Targeted Nest registry, boundary, bridge, and YClients adapter suite:
   **65 passed**.
-- Full Nest test matrix: **170 suites / 1,710 tests passed**.
+- Organic observer suite: **14 passed**.
+- Targeted Nest CRM visit-operation suite: **15 passed**.
+- Full Nest test matrix: **170 suites / 1,713 tests passed**.
 - TypeScript typecheck: **passed**.
+- TypeScript scripts typecheck: **passed**.
 - ESLint: **passed**.
 - Production build and preflight: **passed**.
 - `git diff --check`: **passed**.
 
+## Production Shadow Evidence
+
+One organic A07 `set_appointment_fields` action was observed on 26 August 2026
+at approximately 01:45 MSK. The legacy mutation succeeded, while the canonical
+shadow result was a durable `NOT_EXECUTED / shadow_only` ActionExecution using
+`crm.appointment.fields.shadow.v1` and `shadow.none`. Tenant, target,
+authorization, policy, and deterministic identity were equivalent. CRM writes,
+messages, campaigns, and all other shadow side effects were zero.
+
+| Action class | Verdict |
+|---|---|
+| A04 attendance/status | NOT OBSERVED IN PRODUCTION |
+| A05 duration | NOT OBSERVED IN PRODUCTION after native coverage deploy |
+| A06 services/composition | NOT OBSERVED IN PRODUCTION |
+| A07 fields/comment/client/SMS | EQUIVALENT |
+| A08 payment/close | NOT OBSERVED IN PRODUCTION |
+
+The earlier A05 owner action is not counted as evidence because it occurred
+before the native/Nest observation hook existed. Production equivalence is not
+inferred from structural tests.
+
 ## Production And Cutover Decision
 
-The Shadow implementation was deployed as the immutable Nest release
-`20260826-c06-p1-residual-appointment-shadow`. Health, readiness, build smoke,
-Action Engine startup, and migration status passed; the release had no pending
-database migrations. The passive Python observer was then deployed atomically
-to the existing `barbershop-bot` service. Both `maya-saas` and
-`barbershop-bot` are active with no restart loop or launch errors.
+The initial Shadow capability implementation was deployed as immutable release
+`20260826-c06-p1-residual-appointment-shadow`. Native/Nest observation coverage
+was then deployed as immutable release
+`20260826-c06-p1-native-residual-shadow`. Health, readiness, isolated build
+smoke, Action Engine startup, and migration status passed; there were no
+pending database migrations.
 
-Immediately after rollout, the read-only aggregate check reported zero residual
-Shadow executions and no bridge planning failures. This proves the deployment
-itself did not synthesize an appointment action. The new path has performed
-zero CRM mutations and zero external messages.
+The updated passive observer was deployed atomically to the dedicated
+`maya-organic-appointment-shadow-observer.service`. It retained the existing
+journal cursor and SQLite observation state across restart. Both `maya-saas`
+and the observer are active with no restart loop or launch errors. The observer
+runs without network access and cannot execute a CRM write or message send.
+
+Immediately after the native coverage rollout, the read-only aggregate check
+reported no new residual observation and no planning failure. Backend and
+observer journals contained no errors. This proves the deployment itself did
+not synthesize an appointment action. The new path has performed zero CRM
+mutations and zero external messages.
 
 No automatic cutover was performed. The five classes still have legacy
 execution owners, so their direct bypass count remains five at this gate.
