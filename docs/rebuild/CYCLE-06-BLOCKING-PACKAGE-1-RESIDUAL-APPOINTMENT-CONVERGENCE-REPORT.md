@@ -361,6 +361,14 @@ and a new safe proof returns an unambiguous equivalent outcome. The new legacy
 guard prevents duplicate finance dispatch and preserves `UNKNOWN`; it does not
 claim the partially affected appointment is paid.
 
+The fail-closed A08 guard was deployed as
+`20260826-c06-p1-a08-unknown-guard`. The service restarted cleanly, remained
+active with zero restart-loop count, and the changed files matched the reviewed
+release hashes. The authenticated health route remained reachable (rejecting
+the unauthenticated local probe as designed), and the new process journal
+contained no startup or runtime errors. Deployment performed no payment,
+appointment, CRM, or messaging action.
+
 Before any cutover, production Shadow must observe representative organic
 actions and compare tenant, action class, appointment target, normalized
 semantics, deterministic identity, authorization/policy context, and expected
