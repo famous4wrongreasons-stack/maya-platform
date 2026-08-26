@@ -17,7 +17,7 @@ EXPECTED_ORIGINS = Counter(
         "client_record_actions": 2,
         "webhook.loyalty": 1,
         "webhook.chat": 1,
-        "webhook.panel": 4,
+        "webhook.panel": 3,
         "telegram.bot": 3,
         "claude_ai": 2,
     }
@@ -31,7 +31,6 @@ EXPECTED_ENTRY_POINTS = Counter(
         ("create_record_admin", "webhook.panel"): 1,
         ("reschedule_booking", "webhook.panel"): 1,
         ("cancel_booking", "webhook.panel"): 1,
-        ("pay_visit", "webhook.panel"): 1,
         ("create_booking", "telegram.bot"): 1,
         ("cancel_booking", "telegram.bot"): 1,
         ("pay_visit", "telegram.bot"): 1,
@@ -39,13 +38,16 @@ EXPECTED_ENTRY_POINTS = Counter(
         ("cancel_booking", "claude_ai"): 1,
     }
 )
-WRAPPERS = (
+MIGRATED_WRAPPERS = (
     "create_booking",
     "create_record_admin",
     "reschedule_booking",
     "cancel_booking",
+)
+WRITE_FREE_TOMBSTONES = (
     "pay_visit",
 )
+WRAPPERS = MIGRATED_WRAPPERS + WRITE_FREE_TOMBSTONES
 
 EXPECTED_RECORD_PUT_OWNERS = Counter(
     {
@@ -114,7 +116,7 @@ def function_nodes(tree):
 
 
 class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
-    def test_all_thirteen_production_entry_points_declare_a_known_origin(self):
+    def test_all_twelve_production_entry_points_declare_a_known_origin(self):
         origins = Counter()
         entry_points = Counter()
         for filename in PRODUCTION_CALLERS:
@@ -132,13 +134,13 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
 
         self.assertEqual(origins, EXPECTED_ORIGINS)
         self.assertEqual(entry_points, EXPECTED_ENTRY_POINTS)
-        self.assertEqual(sum(origins.values()), 13)
+        self.assertEqual(sum(origins.values()), 12)
 
     def test_migrated_wrappers_have_exactly_one_bridge_dispatch(self):
         tree = parsed(ROOT / "yclients.py")
         methods = class_methods(tree, "YClientsAPI")
 
-        for wrapper in WRAPPERS:
+        for wrapper in MIGRATED_WRAPPERS:
             node = methods[wrapper]
             dispatches = [
                 call
@@ -150,6 +152,20 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
             self.assertEqual(len(dispatches), 1, wrapper)
             keyword_names = {keyword.arg for keyword in dispatches[0].keywords}
             self.assertNotIn("direct_call", keyword_names, wrapper)
+
+    def test_pay_visit_is_a_write_free_provider_deferred_tombstone(self):
+        source = (ROOT / "yclients.py").read_text(encoding="utf-8")
+        methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")
+        payment = ast.unparse(methods["pay_visit"])
+
+        self.assertNotIn("dispatch_appointment_action", payment)
+        self.assertNotIn("self._put", payment)
+        self.assertNotIn("self._post", payment)
+        self.assertNotIn("create_finance_transaction", payment)
+        self.assertIn("visit_payment_write_provider_contract_deferred", payment)
+        self.assertNotIn("_a08_pay_visit_allowed", source)
+        self.assertNotIn("MAYA_A08_PAY_VISIT_SCOPE", source)
+        self.assertNotIn("MAYA_A08_PAY_VISIT_PROOF_RECORD_IDS", source)
 
     def test_removed_direct_write_owners_cannot_return(self):
         methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")

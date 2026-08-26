@@ -344,6 +344,14 @@ export class LegacyAppointmentBridgeService {
       });
     }
 
+    if (dto.action_class === 'pay_visit') {
+      throw new ServiceUnavailableException({
+        message:
+          'Visit payment write is deferred. Complete the payment manually in YClients.',
+        error: { code: 'visit_payment_write_provider_contract_deferred' },
+      });
+    }
+
     if (!this.isExecutableAction(dto.action_class)) {
       throw new ServiceUnavailableException({
         message: 'This appointment action remains shadow-only.',

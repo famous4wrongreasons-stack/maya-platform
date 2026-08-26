@@ -7,6 +7,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 
@@ -1524,15 +1525,20 @@ export class CrmService {
     return this.actionEngineRuntime.preview(plan.request);
   }
 
-  async executePayVisitWithReceipt(
+  executePayVisitWithReceipt(
     tenantId: string,
     params: PayVisitRequest,
     invocation: AppointmentActionInvocation = {},
   ): Promise<ActionRuntimeReceipt<PaidVisit>> {
-    const plan = await this.payVisitActionPlan(tenantId, params, invocation);
-    return this.actionEngineRuntime.executeWithReceipt(
-      plan.request,
-      plan.handlers,
+    this.tenantContext.assertTenantId(tenantId);
+    void params;
+    void invocation;
+    return Promise.reject(
+      new ServiceUnavailableException({
+        message:
+          'Visit payment write is deferred. Complete the payment manually in YClients.',
+        error: { code: 'visit_payment_write_provider_contract_deferred' },
+      }),
     );
   }
 

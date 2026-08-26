@@ -634,3 +634,58 @@ required after deployment of this initiator correction.
 `REAL PAYMENT PROOF: NOT RUN`
 
 `PACKAGE 2 STARTED: NO`
+
+## Explicit Provider-Contract Deferral (2026-08-27)
+
+The project owner has stopped the A08 production-payment proof after the
+provider visit-update contract produced an unsafe partial mutation. This
+decision supersedes the previously approved implementation/cutover follow-ups
+for runtime availability. Their evidence remains in this report as an audit
+record; it is not permission to execute `pay_visit`.
+
+A08 is now an explicitly deferred provider capability:
+
+- MAYA may read and report the current visit payment state;
+- MAYA may identify an unpaid visit and hand it to an administrator;
+- payment is completed manually in YClients;
+- `pay_visit` is registered for audit and future contract work, but its policy
+  is `DENY` and it has no reachable production executor;
+- the protected legacy bridge rejects `pay_visit` before tenant resolution or
+  executor dispatch;
+- the Nest CRM service rejects direct `payVisit()` execution;
+- Python panel and bot paths are write-free tombstones and cannot fall back to
+  a generic financial operation;
+- no environment switch or proof allowlist can re-enable the mutation.
+
+The damaged test visit and the historical unlinked 2,000-ruble operation are
+manual YClients/accounting review items. MAYA must not restore, link, delete,
+compensate, or use either item as payment proof.
+
+A08 may be reopened only by a separate provider capability gate based on an
+unambiguous official YClients/Altegio contract or a provider-confirmed safe
+flow. Reopening also requires a new isolated contract review, adversarial
+verification, explicit production approval, and a proof plan that does not
+reuse the damaged visit.
+
+This defer satisfies Package 1's permitted outcome of making the unsafe action
+class physically production-unreachable with a maintained architectural
+ratchet. It therefore no longer blocks Package 1. It does not make the other
+Package 1 action classes complete and does not start Package 2.
+
+`A08 STATUS: DEFERRED_UNSAFE_PROVIDER_CAPABILITY`
+
+`PAYMENT STATUS READ: ENABLED`
+
+`PAYMENT WRITE: DISABLED`
+
+`AUTONOMOUS PAYMENT: FORBIDDEN`
+
+`NEW PRODUCTION PAYMENT TESTS: FORBIDDEN`
+
+`A08 BLOCKS PACKAGE 1: NO`
+
+`EXISTING 2000 RUB OPERATION MODIFIED: NO`
+
+`PACKAGE 2 STARTED: NO`
+
+STOP. No production financial write was performed by this decision.

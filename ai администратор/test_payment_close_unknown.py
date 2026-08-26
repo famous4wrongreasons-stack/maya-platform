@@ -1,4 +1,3 @@
-import os
 import unittest
 from unittest.mock import Mock, patch
 
@@ -26,79 +25,46 @@ class PaymentCutoverTests(unittest.TestCase):
         api.create_finance_transaction.assert_not_called()
 
     @patch("yclients.dispatch_appointment_action")
-    def test_pay_visit_dispatches_one_canonical_action(self, dispatch):
-        dispatch.return_value = {
-            "success": True,
-            "execution_id": "execution-1",
-        }
+    def test_pay_visit_is_provider_deferred_and_never_dispatches(self, dispatch):
         api = self.api()
 
-        with patch.dict(os.environ, {"MAYA_A08_PAY_VISIT_SCOPE": "cutover"}):
-            result = api.pay_visit(
-                1930492386,
-                200000,
-                "card",
-                bridge_origin="telegram.bot",
-            )
-
-        self.assertTrue(result["success"])
-        dispatch.assert_called_once_with(
-            provider="yclients",
-            external_company_id="42",
-            origin="telegram.bot",
-            action_class="pay_visit",
-            payload={
-                "external_id": "1930492386",
-                "amount_kopecks": 200000,
-                "payment_method": "card",
-            },
+        result = api.pay_visit(
+            1930492386,
+            200000,
+            "card",
+            bridge_origin="telegram.bot",
         )
-
-    @patch("yclients.dispatch_appointment_action")
-    def test_pay_visit_is_fail_closed_by_default(self, dispatch):
-        api = self.api()
-
-        with patch.dict(os.environ, {"MAYA_A08_PAY_VISIT_SCOPE": "disabled"}):
-            result = api.pay_visit(
-                1930492386,
-                200000,
-                "card",
-                bridge_origin="webhook.panel",
-            )
 
         self.assertFalse(result["success"])
         self.assertFalse(result["unknown"])
         self.assertFalse(result["retry_allowed"])
-        self.assertEqual(result["code"], "pay_visit_cutover_not_enabled")
+        self.assertEqual(
+            result["code"], "visit_payment_write_provider_contract_deferred"
+        )
         dispatch.assert_not_called()
 
     @patch("yclients.dispatch_appointment_action")
-    def test_proof_scope_dispatches_only_the_allowlisted_record(self, dispatch):
-        dispatch.return_value = {"success": True, "execution_id": "execution-1"}
+    def test_legacy_cutover_flags_cannot_reenable_payment_write(self, dispatch):
         api = self.api()
-        env = {
-            "MAYA_A08_PAY_VISIT_SCOPE": "proof",
-            "MAYA_A08_PAY_VISIT_PROOF_RECORD_IDS": "1930492386",
-        }
 
-        with patch.dict(os.environ, env):
-            rejected = api.pay_visit(
-                1930492387,
-                200000,
-                "card",
-                bridge_origin="webhook.panel",
-            )
-            accepted = api.pay_visit(
-                1930492386,
-                200000,
-                "card",
-                bridge_origin="webhook.panel",
-            )
+        first = api.pay_visit(
+            1930492386,
+            200000,
+            "card",
+            bridge_origin="webhook.panel",
+        )
+        second = api.pay_visit(
+            1930492386,
+            200000,
+            "card",
+            bridge_origin="webhook.panel",
+        )
 
-        self.assertFalse(rejected["success"])
-        self.assertEqual(rejected["code"], "pay_visit_cutover_not_enabled")
-        self.assertTrue(accepted["success"])
-        dispatch.assert_called_once()
+        self.assertEqual(
+            first["code"], "visit_payment_write_provider_contract_deferred"
+        )
+        self.assertEqual(second["code"], first["code"])
+        dispatch.assert_not_called()
 
 
 if __name__ == "__main__":

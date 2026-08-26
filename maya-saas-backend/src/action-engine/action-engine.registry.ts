@@ -654,10 +654,10 @@ function visitPaymentCapability(): RegisteredActionCapabilityV1 {
     identityVersion: 1,
     riskProfileVersion: 1,
     riskFacets: ['external', 'customer_visible', 'financial'],
-    policyKey: 'production.pay_visit.confirmed-request',
+    policyKey: 'provider.yclients.pay_visit.deferred-unsafe',
     policyVersion: 1,
-    policyDecision: ActionPolicyDecision.ALLOW,
-    autonomyLevel: 'L2_CONFIRMED_REQUEST',
+    policyDecision: ActionPolicyDecision.DENY,
+    autonomyLevel: 'L0_PROVIDER_DEFERRED',
     approvalRequirement: 'NONE',
     retry: {
       key: 'production.pay_visit.no-blind-retry',

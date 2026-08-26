@@ -116,12 +116,14 @@ describe('ActionCapabilityRegistry', () => {
     }
   });
 
-  it('registers visit payment as a strict no-blind-retry business action', () => {
+  it('registers visit payment as provider-deferred and non-executable', () => {
     const capability = registry.get('crm.visit.payment.v1');
 
     expect(capability).toMatchObject({
       actionClass: 'pay_visit',
-      policyDecision: ActionPolicyDecision.ALLOW,
+      policyKey: 'provider.yclients.pay_visit.deferred-unsafe',
+      policyDecision: ActionPolicyDecision.DENY,
+      autonomyLevel: 'L0_PROVIDER_DEFERRED',
       executorKey: 'crm.visit.payment',
       targetKind: 'appointment',
     });

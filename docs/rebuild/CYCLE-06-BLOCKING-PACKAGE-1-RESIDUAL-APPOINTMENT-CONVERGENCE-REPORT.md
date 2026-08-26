@@ -575,7 +575,7 @@ payment. The full NestJS suite passed 1,734 tests in 170 suites, the focused
 legacy Python boundary suite passed 15 tests, and typecheck, script typecheck,
 lint, build, and whitespace validation passed.
 
-## Final Status
+## Release Candidate Status Before Manual Production Proof
 
 A08 CANONICAL PAYMENT IMPLEMENTED: YES
 LEGACY FAKE-PAYMENT PATH REACHABLE: NO
@@ -625,3 +625,397 @@ VISIT PAID VERIFIED BY READ-BACK: NO
 A08 CUTOVER COMPLETE: NO
 PACKAGE 1 COMPLETE: NO
 PACKAGE 2 STARTED: NO
+
+## A08 Second Manual Proof Attempt: Proof-Canary Target Mismatch
+
+The owner performed the requested single card-payment action on the current
+unpaid appointment shown by the application. The panel handler was reached and
+loaded provider truth successfully: the visit existed, remained unpaid, and
+had an outstanding amount of 2,000 rubles. This proves the first-attempt
+`invalid_amount` initiator defect was corrected.
+
+The request was nevertheless rejected before the protected bridge and Action
+Engine. The production proof canary still allowlisted the earlier proof record,
+while the application presented a different current owner-controlled visit.
+`_a08_pay_visit_allowed(record_id)` therefore returned false and the initiator
+returned `pay_visit_cutover_not_enabled`. This is a proof-configuration and
+record-selection mismatch, not an Action Engine, authorization, UI routing, or
+YClients payment-executor failure.
+
+Read-only production inspection proved:
+
+- the card-button request reached `POST /api/panel/journal_pay` once;
+- no durable `pay_visit` ActionExecution was created;
+- no canonical YClients payment write was dispatched;
+- the current visit remained unpaid and had no linked canonical payment;
+- no transaction was created at the time of the click;
+- no generic financial operation was created by the new path;
+- the historical unlinked 2,000-ruble operation remained unchanged;
+- the local payment mirror remained unset.
+
+The attempt is therefore a failed reachability proof, not a failed or unknown
+financial execution. A second click is not authorized. The next proof requires
+a separate approval to align the proof-canary allowlist with the exact current
+owner-controlled visit, restart the Python initiator deliberately, verify the
+allowlist read-only, and then request one new manual action. No production
+configuration or financial state was changed by this investigation.
+
+`A08 ROOT CAUSE: proof canary allowlisted an earlier record while the application submitted the owner's different current visit`
+
+`A08 SHADOW EQUIVALENT: YES`
+
+`REAL PAYMENT PROOF REQUIRED: YES`
+
+`REAL PAYMENT PROOF: FAILED`
+
+`GENERIC FINANCIAL OPERATION CREATED BY NEW PATH: NO`
+
+`VISIT PAID VERIFIED BY READ-BACK: NO`
+
+`A08 CUTOVER COMPLETE: NO`
+
+`PACKAGE 1 COMPLETE: NO`
+
+`PACKAGE 2 STARTED: NO`
+
+STOP. No production financial write was performed.
+
+## A08 Proof-Canary Realignment: Read-Only Preflight
+
+The next proof was prepared without invoking the payment endpoint. Read-only
+provider inspection identified the owner's current 17:00 test target as YClients
+appointment record `1930552221`, paired with visit `1683934992`, in tenant
+`503759`. The record exists, its canonical outstanding amount is 2,000 rubles,
+and provider truth reports it as unpaid. The target identity was also matched to
+the owner's staff profile without persisting or reporting personal data.
+
+The distinct 10:00 real-client record `1930492386`, paired with visit
+`1683879333`, was explicitly excluded. The proof configuration now contains
+only the immutable appointment record ID `1930552221`; it does not match by
+time, service, price, or previously selected UI state. The former canary target
+was removed before the initiator was restarted.
+
+Post-restart read-only verification proved that the new target is allowlisted,
+the excluded record is not allowlisted, no provider transaction is linked to
+the test visit, no local payment mirror exists, and Action Engine contains zero
+`pay_visit` executions. No payment endpoint or provider mutation was invoked
+during preparation.
+
+`17:00 TEST VISIT ID: appointment record 1930552221 / visit 1683934992`
+
+`CANARY TARGET ID: appointment record 1930552221`
+
+`TARGET IDS MATCH: YES`
+
+`10:00 REAL RECORD EXCLUDED: YES`
+
+`17:00 AMOUNT: 2000 RUB`
+
+`17:00 PAYMENT STATE: UNPAID`
+
+`OLD CANARY TARGET REMOVED: YES`
+
+`FINANCIAL WRITES DURING PREPARATION: 0`
+
+`REAL PAYMENT PROOF: NOT RUN`
+
+`SAFE FOR ONE MANUAL PAYMENT ATTEMPT: YES`
+
+`PACKAGE 2 STARTED: NO`
+
+## A08 Third Manual Proof Attempt: Partial Provider Outcome
+
+The owner performed exactly one approved card-payment action against the
+immutable proof target: appointment record `1930552221`, visit `1683934992`,
+tenant `503759`. The panel initiator accepted the request once and returned
+HTTP 202. Action Engine created exactly one durable `pay_visit` execution
+(`e8f5a6b4-e9a2-4530-9b36-62a4c8347c3a`) with one execution attempt. The
+external dispatch may have crossed; all subsequent attempts were read-only
+reconciliation. There was no blind execution retry.
+
+Authoritative provider reads after the action are inconsistent:
+
+- the appointment record reports `paid_full = 1` and `payment_status = 1`;
+- visit details contain zero payment transactions;
+- the timetable transaction projection contains zero transactions linked to
+  the target appointment and visit;
+- the appointment service list is now empty, so the original 2,000-ruble
+  allocation can no longer be reconstructed from current provider truth;
+- the local payment mirror remains unset;
+- Action Engine remains `UNKNOWN` after reconciliation.
+
+This is not canonical proof that the 2,000-ruble visit was paid as intended.
+The external provider accepted a partial visit update, but no linked service
+payment or allocation exists. The result is therefore
+`partial_or_inconsistent`, not `SUCCEEDED` and not a definitive failure.
+
+The root cause is the canonical YClients executor request body. It called the
+documented visit update endpoint with only `attendance`, `comment`, and
+`fast_payment`. That endpoint owns the complete visit/payment document and the
+provider contract includes services and transaction allocation. Omitting that
+state allowed a replacement-style update that changed payment flags without
+preserving the visit's services or creating the required linked payment
+evidence. Existing unit tests mocked the desired linked transactions after the
+write and therefore did not exercise this real provider replacement behavior.
+
+No generic financial-operation endpoint is reachable from the new path, and
+the historical unlinked 2,000-ruble operation was not accepted as payment
+proof. No second payment attempt is safe. The proof canary and UNKNOWN guard
+must remain enabled until a corrected full provider contract is implemented
+and verified separately. Package 2 remains unstarted.
+
+`A08 ROOT CAUSE: incomplete YClients visit-update payload omitted services and payment allocation, producing a partial provider state`
+
+`A08 SHADOW EQUIVALENT: NO`
+
+`REAL PAYMENT PROOF REQUIRED: YES`
+
+`REAL PAYMENT PROOF: FAILED`
+
+`GENERIC FINANCIAL OPERATION CREATED BY NEW PATH: NO`
+
+`VISIT PAID VERIFIED BY READ-BACK: NO`
+
+`BLIND RETRY AFTER UNKNOWN: NO`
+
+`LOCAL PAYMENT MIRROR UPDATED: NO`
+
+`A08 CUTOVER COMPLETE: NO`
+
+`PACKAGE 1 COMPLETE: NO`
+
+`PACKAGE 2 STARTED: NO`
+
+STOP. No additional production financial write was performed.
+
+## A08 Visit Update / Payment Payload Semantics Gate (2026-08-27)
+
+### Scope and evidence
+
+This gate was performed read-only against provider state and the current
+adapter implementation. It introduced no application, schema, database, or
+production-data changes. Production financial writes during this gate: `0`.
+
+Evidence used:
+
+- the documented YClients/Altegio `Edit Visit` contract;
+- the current `YclientsCrmAdapter.payVisit()` payload and read-back;
+- the damaged test visit after the failed A08 proof;
+- a privacy-safe comparison with an existing known-good paid visit;
+- the existing Action Engine execution/reconciliation state machine;
+- carry-forward finding `4.43` about destructive attendance defaults.
+
+### Provider write semantics
+
+`PUT /visits/{visit_id}/{record_id}` must not be treated as a payment-only
+PATCH. Its documented request owns visit state and payment composition:
+
+- `attendance` and `comment` are required request fields;
+- `services` and `goods_transactions` describe the visit composition;
+- `new_transactions` and `deleted_transaction_ids` describe payment
+  allocation mutations;
+- `fast_payment` selects the provider payment mode but does not, by itself,
+  prove a linked visit payment;
+- linked payment truth is read through visit/record transaction entities,
+  including visit, record, document, account and sold-item references.
+
+The production proof establishes stricter safe semantics than can be inferred
+from optionality in the OpenAPI schema: omitting `services` from the current
+adapter payload cleared the services on the test visit. Therefore MAYA must
+treat this endpoint as a full-state/replace-style provider write for all
+mutable visit fields that it owns. A partial payload is unsafe.
+
+Staff, datetime and duration are appointment-record state rather than fields
+accepted by this visit-update request. The executor must preserve them by not
+using this endpoint to rewrite them and must verify after the write that those
+record values remain unchanged.
+
+### Damaged test visit: read-only state
+
+Before the attempt, the approved preflight proved the immutable test target,
+the matching tenant, an existing unpaid visit, and an outstanding amount of
+`2,000 RUB`. The retained proof does not preserve a reportable service title,
+so no service identity is reconstructed or guessed.
+
+After the attempted payment:
+
+- the payment flags changed to paid-like values;
+- the visit and record still exist;
+- `services` is now empty;
+- the provider-derived visit amount is now zero;
+- linked payment transactions are empty in both visit details and timetable
+  transaction reads;
+- no canonical record/visit/document/payment linkage exists;
+- attendance remains `0`;
+- the local payment mirror was not updated;
+- the unrelated historical generic `2,000 RUB` operation was not changed and
+  is not payment proof.
+
+The payment flags are therefore insufficient evidence of a paid visit.
+
+### Known-good paid visit comparison
+
+A privacy-safe read-only comparison with an existing paid visit found:
+
+- services remained present (`2` service lines in the inspected example);
+- paid flags were set;
+- linked service payment transactions were present (`500 RUB` and
+  `1,800 RUB` in the inspected example);
+- each transaction carried visit, record, document, account and sold-service
+  linkage;
+- the visit document remained present;
+- attendance was preserved as `1`.
+
+The material difference is not the paid flag. It is the combination of an
+intact visit composition and canonical linked payment allocations.
+
+### Required canonical provider-write contract
+
+The current A08 action contract is insufficient and must be replaced by a
+preserving, multi-step execution contract:
+
+1. Resolve and tenant-qualify the immutable appointment and visit identities.
+2. Read the current appointment record, visit details and linked transactions.
+3. Prove that the visit exists, is unpaid, has the expected amount, and has no
+   conflicting payment allocation.
+4. Build a complete visit-update snapshot that preserves current attendance,
+   comment, services, goods and all untouched transaction state, while adding
+   only the intended documented payment allocation and payment mode.
+5. Dispatch the documented provider write exactly once under the durable
+   `pay_visit` execution identity.
+6. Read back the appointment, visit details and linked transactions.
+7. Prove all of the following before `SUCCEEDED`:
+   - the original services remain intact;
+   - attendance, staff, datetime and duration are unchanged;
+   - the expected payment allocation is linked to the target visit, record,
+     document and sold service(s);
+   - the total allocation equals the intended amount;
+   - provider payment state is paid in accordance with that linkage.
+8. Update the local mirror only after provider truth has been proven.
+
+This is a multi-step provider contract (`read -> preserved write -> read-back`),
+even if the provider-side mutation itself can be represented by one documented
+visit-update request.
+
+### Finding 4.43 linkage
+
+This failure and finding `4.43` have the same root risk: an omitted or defaulted
+field in a YClients visit update can mutate unrelated provider truth.
+
+The canonical YClients visit-write contract must therefore enforce one shared
+ratchet:
+
+- no destructive partial `PUT`;
+- no default `attendance = 0` when the source value is absent;
+- no omitted visit composition on a payment mutation;
+- read the current provider snapshot before writing;
+- preserve every untouched writable field;
+- verify attendance and visit composition after writing.
+
+Attendance execution remains deferred; this gate does not migrate it.
+
+### Partial external outcome and state-model gate
+
+The observed result is not an ordinary failure and is no longer merely
+ambiguous:
+
+- the provider definitely mutated external state;
+- the intended business result was not proven;
+- unrelated provider fields were changed unintentionally;
+- automatic retry or compensation is unsafe.
+
+The existing `UNKNOWN` state is appropriate as an immediate quarantine guard:
+it prevents blind retry and requires reconciliation. It is not sufficient as
+the canonical terminal meaning for a known partial destructive mutation.
+
+Before implementation resumes, a schema/contract gate must decide how Action
+Engine durably represents a known `partial external mutation + unintended side
+effect` (for example, a dedicated execution state or a mandatory structured
+outcome code with `MANUAL_REQUIRED`). That decision must preserve restart
+safety, block retries, and retain an audit-safe summary without storing raw CRM
+payloads.
+
+### Recovery and compensation
+
+The current test visit requires manual repair/review in YClients because its
+service composition was cleared and its payment flags no longer agree with
+linked payment truth. Automatic restoration is unsafe because the exact former
+provider snapshot is not available as canonical recovery evidence.
+
+No provider-supported compensation has been proven safe for this partial
+mutation. No service restoration, payment change, transaction linking, deletion
+or compensation may be performed automatically. The separate historical
+generic `2,000 RUB` operation remains an independent manual accounting review
+item.
+
+### Gate verdict
+
+`YCLIENTS PAYMENT WRITE SEMANTICS KNOWN: YES`
+
+`PARTIAL VISIT UPDATE SAFE: NO`
+
+`FULL VISIT SNAPSHOT REQUIRED: YES`
+
+`PAYMENT REQUIRES MULTI-STEP PROVIDER CONTRACT: YES`
+
+`CURRENT TEST VISIT REQUIRES MANUAL REPAIR: YES`
+
+`A08 ACTION CONTRACT MUST CHANGE: YES`
+
+`SCHEMA/CONTRACT GATE REQUIRED: YES`
+
+`SAFE TO RETEST PAYMENT: NO`
+
+`PACKAGE 1 COMPLETE: NO`
+
+STOP. No production writes were performed. Package 2 is not started.
+
+## A08 Explicit Defer And Package-1 Reclassification (2026-08-27)
+
+The owner has explicitly deferred A08 after the canonical payment proof caused
+an unsafe partial YClients visit mutation. No additional production payment
+proof is permitted. The detailed evidence and the superseding runtime decision
+are recorded in `CYCLE-06-A08-FINANCIAL-SEMANTICS-CONTRACT-GATE.md`.
+
+A08 now meets the Package 1 completion alternative **physically
+production-unreachable** rather than Action Engine owned:
+
+- payment-status reads remain enabled;
+- `pay_visit` policy is `DENY`;
+- bridge and direct Nest service execution fail closed;
+- Python panel and bot payment methods cannot dispatch a provider write;
+- generic financial-operation fallback is absent;
+- the existing 2,000-ruble operation and damaged test visit remain manual
+  review items and are excluded from all payment proof.
+
+The action-class inventory for the current Package 1 state is therefore:
+
+| Class | Current disposition | Package-1 state |
+|---|---|---|
+| A04 attendance/status | Shadow observed; execution convergence still required | OPEN |
+| A05 duration | Shadow observed; execution convergence still required | OPEN |
+| A06 services/composition | Shadow observed; execution convergence still required | OPEN |
+| A07 comment/client name/SMS flag | Shadow observed; execution convergence still required | OPEN |
+| A08 payment/close | Provider capability deferred; mutation physically unreachable | CLOSED BY SAFE DEFER |
+
+Package 1 remains open only for A04-A07. Package 2 has not started.
+
+`A08 STATUS: DEFERRED_UNSAFE_PROVIDER_CAPABILITY`
+
+`PAYMENT STATUS READ: ENABLED`
+
+`PAYMENT WRITE: DISABLED`
+
+`AUTONOMOUS PAYMENT: FORBIDDEN`
+
+`NEW PRODUCTION PAYMENT TESTS: FORBIDDEN`
+
+`A08 DIRECT WRITE BYPASSES: 0`
+
+`A08 BLOCKS PACKAGE 1: NO`
+
+`PACKAGE 1 COMPLETE: NO`
+
+`PACKAGE 2 STARTED: NO`
+
+STOP. Return to the accepted Chapter 6 Package 1 plan at A04-A07 only.

@@ -13441,13 +13441,8 @@ async def panel_journal_record_handler(request: web.Request) -> web.Response:
     })
 
 
-# Сериализация UX-вызовов по record_id. Durable idempotency и provider
-# reconciliation принадлежат Action Engine; локальный lock лишь сглаживает double tap.
-_pay_locks: dict = {}
-
-
 async def panel_journal_pay_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_pay — canonical visit payment via Action Engine."""
+    """POST /api/panel/journal_pay — disabled until the provider gate is reopened."""
     try:
         body = await request.json()
     except Exception:
@@ -13462,81 +13457,21 @@ async def panel_journal_pay_handler(request: web.Request) -> web.Response:
         record_id = int(body.get("record_id") or 0)
     except Exception:
         record_id = 0
-    method = (body.get("method") or "").strip().lower()
-    if method not in ("cash", "card"):
-        method = "cash"
     if not record_id:
         return _cabinet_response({"error": "missing", "message": "Нужен ID записи."}, status=400)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    # Owner/manager/cashier access is authorized without an extra CRM read in
-    # _panel_record_guard. Payment still needs provider truth to derive the
-    # amount; never interpret the absent guard payload as a zero-value visit.
-    if _grec is None:
-        try:
-            _grec = await asyncio.to_thread(_yc.get_record, record_id)
-        except Exception as e:
-            logger.error("journal_pay record read %s: %s", record_id, e)
-            return _cabinet_response(
-                {"error": "yclients", "message": "Не удалось проверить сумму визита."},
-                status=502,
-            )
-        if not _grec:
-            return _cabinet_response(
-                {"error": "not_found", "message": "Запись не найдена."}, status=404
-            )
-    services = (_grec or {}).get("services") or []
-    total = sum(
-        int(service.get("cost") or service.get("price") or 0)
-        for service in services
-        if isinstance(service, dict)
-    )
-    if total <= 0:
-        return _cabinet_response(
-            {
-                "error": "invalid_amount",
-                "message": "У визита нет подтверждённой суммы оплаты.",
-            },
-            status=400,
-        )
-
-    if len(_pay_locks) > 512:        # не течём памятью на долгоживущем процессе
-        _pay_locks.clear()
-    lock = _pay_locks.setdefault(record_id, asyncio.Lock())
-    try:
-        async with lock:
-            result = await asyncio.to_thread(
-                _yc.pay_visit,
-                record_id,
-                total * 100,
-                method,
-                bridge_origin="webhook.panel",
-            )
-    except Exception as e:
-        logger.error("journal_pay %s: %s", record_id, e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось провести оплату."}, status=502)
-    if result.get("success"):
-        # Локальный mirror обновляется только после доказанного provider paid state.
-        database.mark_payment_done(record_id, method, total)
-        return _cabinet_response({
-            "ok": True,
-            "record_id": record_id,
-            "method": method,
-            "paid": True,
-            "attendance": 1,
-            "amount": total,
-            "already_paid": bool(result.get("already_paid")),
-        })
-    if _action_outcome_unknown(result):
-        return _cabinet_response(
-            _action_unknown_payload(
-                result,
-                "Результат оплаты уточняется. Не нажимайте оплату повторно.",
+    return _cabinet_response(
+        {
+            "error": "visit_payment_write_provider_contract_deferred",
+            "message": (
+                "Проведение оплаты временно доступно только вручную в YClients. "
+                "MAYA продолжает показывать текущий статус оплаты визита."
             ),
-            status=202,
-        )
-    return _cabinet_response({"error": "pay_failed", "message": result.get("error") or "YClients отклонил оплату."}, status=400)
+            "record_id": record_id,
+            "manual_handoff": "yclients",
+            "retry_allowed": False,
+        },
+        status=503,
+    )
 
 
 async def panel_journal_add_service_handler(request: web.Request) -> web.Response:

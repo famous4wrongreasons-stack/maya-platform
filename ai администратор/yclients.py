@@ -18,22 +18,6 @@ logger = logging.getLogger("yclients")
 SCHEDULE_FILE = os.path.join(os.path.dirname(__file__), "schedule.json")
 
 
-def _a08_pay_visit_allowed(record_id: int) -> bool:
-    """Fail closed until the canonical payment path completes production proof."""
-    scope = os.getenv("MAYA_A08_PAY_VISIT_SCOPE", "disabled").strip().lower()
-    if scope == "cutover":
-        return True
-    if scope != "proof":
-        return False
-
-    allowed = {
-        value.strip()
-        for value in os.getenv("MAYA_A08_PAY_VISIT_PROOF_RECORD_IDS", "").split(",")
-        if value.strip()
-    }
-    return str(record_id) in allowed
-
-
 def get_schedule_from_file(master_name: str, days_ahead: int = 14) -> list[dict]:
     """
     Читает график мастера из schedule.json (формат weekly + overrides).
@@ -2543,7 +2527,7 @@ class YClientsAPI:
             "unknown": False,
             "retry_allowed": False,
             "code": "legacy_fake_payment_removed",
-            "error": "Legacy payment path is disabled; use Action Engine pay_visit.",
+            "error": "Оплата визита через MAYA отключена. Проведите её вручную в YClients.",
         }
 
     def pay_visit(
@@ -2554,26 +2538,14 @@ class YClientsAPI:
         *,
         bridge_origin: str,
     ) -> dict:
-        """Execute the canonical visit payment through the Action Engine."""
-        if not _a08_pay_visit_allowed(record_id):
-            return {
-                "success": False,
-                "unknown": False,
-                "retry_allowed": False,
-                "code": "pay_visit_cutover_not_enabled",
-                "error": (
-                    "Оплата визита через MAYA пока закрыта. "
-                    "Проведите её вручную в YClients."
-                ),
-            }
-        return dispatch_appointment_action(
-            provider="yclients",
-            external_company_id=str(self.company_id),
-            origin=bridge_origin,
-            action_class="pay_visit",
-            payload={
-                "external_id": str(record_id),
-                "amount_kopecks": int(amount_kopecks),
-                "payment_method": str(payment_method).strip().lower(),
-            },
-        )
+        """Provider-deferred write tombstone; payment status reads remain available."""
+        return {
+            "success": False,
+            "unknown": False,
+            "retry_allowed": False,
+            "code": "visit_payment_write_provider_contract_deferred",
+            "error": (
+                "Оплата визита через MAYA отключена. "
+                "Проведите её вручную в YClients."
+            ),
+        }

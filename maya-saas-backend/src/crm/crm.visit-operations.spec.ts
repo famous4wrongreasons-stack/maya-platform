@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -472,7 +473,7 @@ describe('CrmService: операции над визитом', () => {
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
-  it('отказывает fail-closed, если provider не умеет каноническую оплату визита', async () => {
+  it('отказывает fail-closed независимо от provider capability', async () => {
     const { service, run } = build({});
 
     await expect(
@@ -483,7 +484,7 @@ describe('CrmService: операции над визитом', () => {
           paymentMethod: 'card',
         }),
       ),
-    ).rejects.toBeInstanceOf(ConflictException);
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 
   it('строит pay_visit как бизнес-действие, а не как generic finance transport', async () => {
@@ -524,33 +525,10 @@ describe('CrmService: операции над визитом', () => {
     expect(adapter.payVisit).not.toHaveBeenCalled();
   });
 
-  it('до dispatch читает provider truth и вызывает ровно одну каноническую оплату', async () => {
-    const unpaidState = {
-      external_id: '77',
-      visit_id: 'visit-77',
-      classification: 'unpaid',
-      expected_amount_kopecks: 200_000,
-      paid: false,
-      paid_full: false,
-      payment_status: 0,
-      linked_service_payment_count: 0,
-      linked_amount_kopecks: 0,
-      allocation_consistent: false,
-    };
-    const paidState = {
-      ...unpaidState,
-      classification: 'paid_as_intended',
-      paid: true,
-      paid_full: true,
-      payment_status: 1,
-      linked_service_payment_count: 1,
-      linked_amount_kopecks: 200_000,
-      allocation_consistent: true,
-      already_paid: false,
-    };
+  it('не читает payment state и не вызывает provider write', async () => {
     const adapter = {
-      getVisitPaymentState: jest.fn().mockResolvedValue(unpaidState),
-      payVisit: jest.fn().mockResolvedValue(paidState),
+      getVisitPaymentState: jest.fn(),
+      payVisit: jest.fn(),
     };
     const { service, actionEngineRuntime, run } = build(adapter);
 
@@ -562,53 +540,35 @@ describe('CrmService: операции над визитом', () => {
           paymentMethod: 'cash',
         }),
       ),
-    ).resolves.toMatchObject({
-      classification: 'paid_as_intended',
-      paid: true,
+    ).rejects.toMatchObject({
+      response: {
+        error: { code: 'visit_payment_write_provider_contract_deferred' },
+      },
     });
 
-    expect(adapter.getVisitPaymentState).toHaveBeenCalledTimes(1);
-    expect(adapter.getVisitPaymentState).toHaveBeenCalledWith({
-      tenantId: 'tenant-1',
-      externalId: '77',
-    });
-    expect(adapter.payVisit).toHaveBeenCalledTimes(1);
-    expect(adapter.payVisit).toHaveBeenCalledWith({
-      tenantId: 'tenant-1',
-      externalId: '77',
-      amountKopecks: 200_000,
-      paymentMethod: 'cash',
-    });
-    expect(actionEngineRuntime.executeWithReceipt).toHaveBeenCalledTimes(1);
+    expect(adapter.getVisitPaymentState).not.toHaveBeenCalled();
+    expect(adapter.payVisit).not.toHaveBeenCalled();
+    expect(actionEngineRuntime.executeWithReceipt).not.toHaveBeenCalled();
   });
 
-  it('не dispatch-ит при partial/unknown payment state', async () => {
+  it('повтор не может обойти provider-deferred запрет', async () => {
+    const getVisitPaymentState = jest.fn();
     const payVisit = jest.fn();
-    const { service, run } = build({
-      getVisitPaymentState: jest.fn().mockResolvedValue({
-        external_id: '77',
-        visit_id: 'visit-77',
-        classification: 'partial_or_inconsistent',
-        expected_amount_kopecks: 200_000,
-        paid: false,
-        paid_full: false,
-        payment_status: 2,
-        linked_service_payment_count: 1,
-        linked_amount_kopecks: 50_000,
-        allocation_consistent: false,
-      }),
-      payVisit,
-    });
+    const { service, run } = build({ getVisitPaymentState, payVisit });
+    const payment = () =>
+      service.payVisit('tenant-1', {
+        externalId: '77',
+        amountKopecks: 200_000,
+        paymentMethod: 'cash',
+      });
 
-    await expect(
-      run(() =>
-        service.payVisit('tenant-1', {
-          externalId: '77',
-          amountKopecks: 200_000,
-          paymentMethod: 'cash',
-        }),
-      ),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(run(payment)).rejects.toBeInstanceOf(
+      ServiceUnavailableException,
+    );
+    await expect(run(payment)).rejects.toBeInstanceOf(
+      ServiceUnavailableException,
+    );
+    expect(getVisitPaymentState).not.toHaveBeenCalled();
     expect(payVisit).not.toHaveBeenCalled();
   });
 
