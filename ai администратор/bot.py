@@ -1824,29 +1824,48 @@ async def _close_master_booking(
     master: dict,
 ) -> tuple[bool, str, int | None]:
     """
-    Помечает запись оплаченной в YClients + обновляет лог.
-    Идемпотентно: повторное закрытие той же записи возвращает (False, "уже закрыто").
+    Проводит оплату визита через canonical Action Engine и обновляет лог
+    только после доказанного provider read-back.
 
     Возвращает (success, human_message, final_amount).
     """
-    log_row = database.get_ai_advice_for_record(record_id)
-    if log_row and log_row.get("button_pressed"):
-        return False, "Запись уже была закрыта", log_row.get("final_check_amount")
-
     # Достаём запись из YClients, чтобы взять реальную сумму
     record = yc.get_record(record_id)
     if not record:
         return False, "Запись не найдена в YClients", None
+    staff = record.get("staff") or {}
+    try:
+        record_staff_id = int(record.get("staff_id") or staff.get("id") or 0)
+        master_staff_id = int(master.get("yclients_staff_id") or 0)
+    except (TypeError, ValueError):
+        record_staff_id = 0
+        master_staff_id = 0
+    if not record_staff_id or record_staff_id != master_staff_id:
+        logger.warning(
+            "Payment BOLA blocked: master staff_id=%s requested record_id=%s owned by staff_id=%s",
+            master_staff_id,
+            record_id,
+            record_staff_id,
+        )
+        return False, "Эта запись не из вашего расписания", None
     services = record.get("services") or []
     total = sum(int(s.get("cost") or s.get("price") or 0) for s in services) or None
+    if not total:
+        return False, "У визита нет подтверждённой суммы оплаты", None
 
-    # Закрываем в YClients
-    result = yc.set_record_paid(
+    result = yc.pay_visit(
         record_id=record_id,
-        paid_full=True,
+        amount_kopecks=total * 100,
         payment_method=payment_method,
+        bridge_origin="telegram.bot",
     )
     if not result.get("success"):
+        if result.get("unknown"):
+            return (
+                False,
+                "Результат оплаты уточняется. Не повторяйте действие.",
+                None,
+            )
         return False, f"YClients: {result.get('error')}", None
 
     # Дописываем в лог результат

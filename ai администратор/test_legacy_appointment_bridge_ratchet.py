@@ -17,8 +17,8 @@ EXPECTED_ORIGINS = Counter(
         "client_record_actions": 2,
         "webhook.loyalty": 1,
         "webhook.chat": 1,
-        "webhook.panel": 3,
-        "telegram.bot": 2,
+        "webhook.panel": 4,
+        "telegram.bot": 3,
         "claude_ai": 2,
     }
 )
@@ -31,8 +31,10 @@ EXPECTED_ENTRY_POINTS = Counter(
         ("create_record_admin", "webhook.panel"): 1,
         ("reschedule_booking", "webhook.panel"): 1,
         ("cancel_booking", "webhook.panel"): 1,
+        ("pay_visit", "webhook.panel"): 1,
         ("create_booking", "telegram.bot"): 1,
         ("cancel_booking", "telegram.bot"): 1,
+        ("pay_visit", "telegram.bot"): 1,
         ("reschedule_booking", "claude_ai"): 1,
         ("cancel_booking", "claude_ai"): 1,
     }
@@ -42,6 +44,7 @@ WRAPPERS = (
     "create_record_admin",
     "reschedule_booking",
     "cancel_booking",
+    "pay_visit",
 )
 
 EXPECTED_RECORD_PUT_OWNERS = Counter(
@@ -55,7 +58,6 @@ EXPECTED_RECORD_PUT_OWNERS = Counter(
         ("yclients.py", "set_record_client_name"): 1,
         ("yclients.py", "mark_record_loyalty_redemption"): 1,
         ("yclients.py", "append_record_comment"): 1,
-        ("yclients.py", "set_record_paid"): 3,
     }
 )
 
@@ -112,7 +114,7 @@ def function_nodes(tree):
 
 
 class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
-    def test_all_eleven_production_entry_points_declare_a_known_origin(self):
+    def test_all_thirteen_production_entry_points_declare_a_known_origin(self):
         origins = Counter()
         entry_points = Counter()
         for filename in PRODUCTION_CALLERS:
@@ -130,7 +132,7 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
 
         self.assertEqual(origins, EXPECTED_ORIGINS)
         self.assertEqual(entry_points, EXPECTED_ENTRY_POINTS)
-        self.assertEqual(sum(origins.values()), 11)
+        self.assertEqual(sum(origins.values()), 13)
 
     def test_migrated_wrappers_have_exactly_one_bridge_dispatch(self):
         tree = parsed(ROOT / "yclients.py")
@@ -162,6 +164,41 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
         source = (ROOT / "yclients.py").read_text(encoding="utf-8")
         for name in removed:
             self.assertNotIn(name, source)
+
+        tombstone = ast.unparse(methods["set_record_paid"])
+        self.assertNotIn("self._put", tombstone)
+        self.assertNotIn("create_finance_transaction", tombstone)
+        self.assertNotIn("_find_payment_transaction", methods)
+        self.assertNotIn("_payment_outcome_unknown", methods)
+        self.assertNotIn("close_appointment_payment", source)
+
+        for filename in PRODUCTION_CALLERS:
+            tree = parsed(ROOT / filename)
+            calls = {
+                call_name(call)
+                for call in ast.walk(tree)
+                if isinstance(call, ast.Call)
+            }
+            self.assertNotIn("set_record_paid", calls, filename)
+
+    def test_telegram_payment_checks_record_ownership_before_dispatch(self):
+        tree = parsed(ROOT / "bot.py")
+        close_booking = next(
+            node
+            for node in tree.body
+            if isinstance(node, ast.AsyncFunctionDef)
+            and node.name == "_close_master_booking"
+        )
+        source = ast.unparse(close_booking)
+
+        self.assertIn("record.get('staff_id')", source)
+        self.assertIn("master.get('yclients_staff_id')", source)
+        self.assertIn("record_staff_id != master_staff_id", source)
+        self.assertIn("yc.pay_visit", source)
+        self.assertLess(
+            source.index("record_staff_id != master_staff_id"),
+            source.index("yc.pay_visit"),
+        )
 
     def test_actual_migrated_appointment_write_endpoints_have_no_python_owner(self):
         methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")
@@ -342,7 +379,6 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
             "set_appointment_duration",
             "set_appointment_services",
             "set_appointment_fields",
-            "close_appointment_payment",
         }
         observed = set()
         for _filename, method_name in EXPECTED_RECORD_PUT_OWNERS:

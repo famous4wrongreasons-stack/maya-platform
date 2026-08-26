@@ -13441,18 +13441,13 @@ async def panel_journal_record_handler(request: web.Request) -> web.Response:
     })
 
 
-# Сериализация оплаты по record_id: два параллельных «закрыть оплатой» (двойной тап)
-# не должны создать две кассовые операции. Три рубежа: (1) durable-флаг в БД
-# (payment_idempotency) — переживает рестарт; (2) in-process lock на record_id; (3)
-# сам set_record_paid сверяется с истиной YClients (paid_full + поиск существующей
-# транзакции) и вернёт already_paid. У YClients своего ключа идемпотентности нет.
+# Сериализация UX-вызовов по record_id. Durable idempotency и provider
+# reconciliation принадлежат Action Engine; локальный lock лишь сглаживает double tap.
 _pay_locks: dict = {}
 
 
 async def panel_journal_pay_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_pay {record_id, method} — закрыть визит оплатой
-    из карточки журнала. method: cash|card. Реюзает set_record_paid:
-    кассовая транзакция + PUT attendance=1/paid_full=1."""
+    """POST /api/panel/journal_pay — canonical visit payment via Action Engine."""
     try:
         body = await request.json()
     except Exception:
@@ -13475,47 +13470,47 @@ async def panel_journal_pay_handler(request: web.Request) -> web.Response:
     _grec, _gerr = await _panel_record_guard(info, record_id)
     if _gerr:
         return _gerr
-
-    def _already_resp(prev):
-        return _cabinet_response({
-            "ok": True, "record_id": record_id,
-            "method": (prev.get("method") if prev else None) or method,
-            "paid": True, "attendance": 1,
-            "amount": prev.get("amount") if prev else None,
-            "already_paid": True,
-        })
-
-    # Durable-идемпотентность: этот визит уже оплачивали → не дёргаем YClients повторно
-    # (защита от двойного тапа/ретрая даже после рестарта процесса).
-    prev = database.payment_already_done(record_id)
-    if prev:
-        return _already_resp(prev)
+    services = (_grec or {}).get("services") or []
+    total = sum(
+        int(service.get("cost") or service.get("price") or 0)
+        for service in services
+        if isinstance(service, dict)
+    )
+    if total <= 0:
+        return _cabinet_response(
+            {
+                "error": "invalid_amount",
+                "message": "У визита нет подтверждённой суммы оплаты.",
+            },
+            status=400,
+        )
 
     if len(_pay_locks) > 512:        # не течём памятью на долгоживущем процессе
         _pay_locks.clear()
     lock = _pay_locks.setdefault(record_id, asyncio.Lock())
     try:
         async with lock:
-            # повторная проверка под локом — параллельный запрос мог успеть зафиксировать
-            prev = database.payment_already_done(record_id)
-            if prev:
-                return _already_resp(prev)
-            result = await asyncio.to_thread(_yc.set_record_paid, record_id, True, method)
+            result = await asyncio.to_thread(
+                _yc.pay_visit,
+                record_id,
+                total * 100,
+                method,
+                bridge_origin="webhook.panel",
+            )
     except Exception as e:
         logger.error("journal_pay %s: %s", record_id, e)
         return _cabinet_response({"error": "yclients", "message": "Не удалось провести оплату."}, status=502)
     if result.get("success"):
-        # фиксируем durable-флаг (INSERT OR IGNORE — повтор не перезатирает первую оплату)
-        database.mark_payment_done(record_id, method, result.get("amount"))
+        # Локальный mirror обновляется только после доказанного provider paid state.
+        database.mark_payment_done(record_id, method, total)
         return _cabinet_response({
             "ok": True,
             "record_id": record_id,
             "method": method,
             "paid": True,
             "attendance": 1,
-            "amount": result.get("amount"),
+            "amount": total,
             "already_paid": bool(result.get("already_paid")),
-            "transaction": result.get("transaction"),
         })
     if _action_outcome_unknown(result):
         return _cabinet_response(

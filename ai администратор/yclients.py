@@ -18,6 +18,22 @@ logger = logging.getLogger("yclients")
 SCHEDULE_FILE = os.path.join(os.path.dirname(__file__), "schedule.json")
 
 
+def _a08_pay_visit_allowed(record_id: int) -> bool:
+    """Fail closed until the canonical payment path completes production proof."""
+    scope = os.getenv("MAYA_A08_PAY_VISIT_SCOPE", "disabled").strip().lower()
+    if scope == "cutover":
+        return True
+    if scope != "proof":
+        return False
+
+    allowed = {
+        value.strip()
+        for value in os.getenv("MAYA_A08_PAY_VISIT_PROOF_RECORD_IDS", "").split(",")
+        if value.strip()
+    }
+    return str(record_id) in allowed
+
+
 def get_schedule_from_file(master_name: str, days_ahead: int = 14) -> list[dict]:
     """
     Читает график мастера из schedule.json (формат weekly + overrides).
@@ -290,101 +306,6 @@ class YClientsAPI:
                 action_class,
             )
             return False
-
-    def _find_payment_transaction(
-        self,
-        *,
-        comment: str,
-        amount: int,
-        start_date: str,
-        end_date: str,
-        max_pages: int = 5,
-    ) -> dict:
-        """Find our exact payment marker, including provider-unlinked rows.
-
-        YClients can accept a finance transaction while returning it with
-        ``record_id=0`` and ``visit_id=0``. The exact comment and amount are the
-        provider-side evidence in that case. Lookup failures remain distinct
-        from an empty result so callers fail closed instead of paying twice.
-        """
-        page = 1
-        count = 200
-        try:
-            while page <= max_pages:
-                data = self._get(
-                    f"transactions/{self.company_id}",
-                    {
-                        "start_date": start_date,
-                        "end_date": end_date,
-                        "count": count,
-                        "page": page,
-                    },
-                )
-                batch = (data or {}).get("data") or []
-                for tx in batch:
-                    if not isinstance(tx, dict):
-                        continue
-                    try:
-                        tx_amount = int(Decimal(str(tx.get("amount") or "0")))
-                    except (InvalidOperation, ValueError, TypeError):
-                        continue
-                    if (
-                        str(tx.get("comment") or "").strip() == comment
-                        and tx_amount == amount
-                    ):
-                        return {"success": True, "transaction": tx}
-                if len(batch) < count:
-                    break
-                page += 1
-            return {"success": True, "transaction": None}
-        except Exception as exc:
-            logger.warning("YClients payment reconciliation lookup failed: %s", exc)
-            return {"success": False, "error": "payment_reconciliation_unavailable"}
-
-    def _payment_outcome_unknown(
-        self,
-        *,
-        record_id: int,
-        payment_method: str,
-        amount: int,
-        code: str,
-        transaction: dict | None = None,
-    ) -> dict:
-        """Return a fail-closed payment result and record the Shadow outcome."""
-        transaction_id = (transaction or {}).get("id")
-        try:
-            value_ref = opaque_mutation_reference(
-                {
-                    "paid_full": True,
-                    "payment_method": payment_method,
-                    "amount": amount,
-                    "provider_transaction_present": bool(transaction_id),
-                },
-                "close",
-            )
-            self._observe_residual_appointment_outcome(
-                "close_appointment_payment",
-                record_id,
-                {"mutation_kind": "close", "value_ref": value_ref},
-                {"success": False, "code": code, "unknown": True},
-            )
-        except Exception:
-            # Shadow telemetry must never hide the fail-closed payment result.
-            logger.exception("Payment UNKNOWN shadow observation failed")
-        return {
-            "success": False,
-            "unknown": True,
-            "retry_allowed": False,
-            "code": code,
-            "error": (
-                "YClients принял данные оплаты, но ещё не подтвердил оплату визита. "
-                "Не проводите оплату повторно."
-            ),
-            "record_id": record_id,
-            "amount": amount,
-            "payment_method": payment_method,
-            **({"transaction_id": transaction_id} if transaction_id else {}),
-        }
 
     def _observe_sensitive_appointment_action(
         self,
@@ -2616,213 +2537,43 @@ class YClientsAPI:
     def set_record_paid(
         self, record_id: int, paid_full: bool = True, payment_method: str = "cash"
     ) -> dict:
-        """
-        Помечает запись оплаченной с указанным способом (cash / card).
+        """Retired fake-payment path. It must never write to YClients."""
+        return {
+            "success": False,
+            "unknown": False,
+            "retry_allowed": False,
+            "code": "legacy_fake_payment_removed",
+            "error": "Legacy payment path is disabled; use Action Engine pay_visit.",
+        }
 
-        Делает проверяемое закрытие:
-          1. PUT /record — выставляет attendance=1, paid_full/payment_status и
-             обнуляет cost_to_pay у услуг.
-          2. Если запись после PUT всё ещё не оплачена, пробует создать
-             привязанную к record_id/visit_id кассовую операцию.
-          3. Успех возвращает только когда повторное чтение записи показывает
-             paid_full/payment_status или нулевой остаток к оплате.
-        """
-        try:
-            current = self.get_record(record_id)
-            if not current:
-                return {"success": False, "error": f"Запись {record_id} не найдена"}
-
-            def is_paid_record(rec: dict | None) -> bool:
-                if not rec:
-                    return False
-                if rec.get("paid_full"):
-                    return True
-                try:
-                    if int(rec.get("payment_status") or 0) > 0:
-                        return True
-                except Exception:
-                    pass
-                svcs = [s for s in (rec.get("services") or []) if isinstance(s, dict)]
-                if not svcs:
-                    return False
-                total = sum(int(s.get("cost") or 0) for s in svcs)
-                left = sum(int(s.get("cost_to_pay") or 0) for s in svcs)
-                return total > 0 and left <= 0
-
-            if paid_full and is_paid_record(current):
-                return {"success": True, "record_id": record_id, "already_paid": True}
-
-            # Сводим клиента к виду, который ждёт API на запись (id или phone+name)
-            client = current.get("client") or {}
-            client_payload = {
-                "id": client.get("id"),
-                "name": client.get("name"),
-                "surname": client.get("surname"),
-                "phone": client.get("phone"),
-                "email": client.get("email"),
-            }
-            # Сервисы — id + cost + discount достаточно
-            services_payload = []
-            for s in (current.get("services") or []):
-                item = {
-                    "id": s.get("id"),
-                    "amount": s.get("amount") or 1,
-                    "cost": s.get("cost"),
-                    "discount": s.get("discount", 0),
-                    "first_cost": s.get("first_cost") or s.get("cost"),
-                }
-                if s.get("manual_cost") is not None:
-                    item["manual_cost"] = s.get("manual_cost")
-                if paid_full:
-                    item["cost_to_pay"] = 0
-                elif s.get("cost_to_pay") is not None:
-                    item["cost_to_pay"] = s.get("cost_to_pay")
-                services_payload.append(item)
-
-            existing_comment = (current.get("comment") or "").strip()
-            paid_note = f"Закрыто из бота: {payment_method}"
-            # Идемпотентно: если такая пометка уже есть, не дублируем
-            if paid_note in existing_comment:
-                new_comment = existing_comment
-            elif existing_comment:
-                new_comment = f"{existing_comment} | {paid_note}"
-            else:
-                new_comment = paid_note
-
-            total = sum(int(s.get("cost") or 0) for s in services_payload)
-            account_id = (
-                self.cash_account_id
-                if payment_method == "cash"
-                else self.cashless_account_id
-            )
-            tx_comment = f"Оплата записи #{record_id}: {payment_method}"
-            payload = {
-                "staff_id":      current.get("staff_id") or (current.get("staff") or {}).get("id"),
-                "services":      services_payload,
-                "client":        client_payload,
-                "datetime":      current.get("datetime"),
-                "seance_length": current.get("seance_length"),
-                "save_if_busy":  True,
-                "send_sms":      False,
-                "comment":       new_comment,
-                # attendance: 1 — клиент пришёл, визит состоялся. Это и есть
-                # «закрыть запись» с точки зрения мастера.
-                "paid_full":     1 if paid_full else 0,  # может остаться 0,
-                "payment_status": 1 if paid_full else current.get("payment_status", 0),
-                "visit_id":      current.get("visit_id"),
-                "confirmed":     current.get("confirmed", 1),
-                "sms_before":    current.get("sms_before", 0),
-                "sms_now":       current.get("sms_now", 0),
-                "email_now":     current.get("email_now", 0),
-                "notified":      current.get("notified", 0),
-                "master_request": current.get("master_request", 0),
-            }
-            if paid_full:
-                payload["attendance"] = 1
-            else:
-                self._preserve_attendance(payload, current)
-
-            try:
-                data = self._put(f"record/{self.company_id}/{record_id}", payload)
-            except Exception:
-                fallback_payload = dict(payload)
-                fallback_payload.pop("payment_status", None)
-                fallback_payload.pop("visit_id", None)
-                try:
-                    data = self._put(f"record/{self.company_id}/{record_id}", fallback_payload)
-                except Exception:
-                    fallback_payload = dict(fallback_payload)
-                    fallback_payload["services"] = [
-                        {k: v for k, v in s.items() if k != "cost_to_pay"}
-                        for s in fallback_payload.get("services", [])
-                        if isinstance(s, dict)
-                    ]
-                    data = self._put(f"record/{self.company_id}/{record_id}", fallback_payload)
-            if not data.get("success"):
-                return {
-                    "success": False,
-                    "error": data.get("meta", {}).get("message", "Ошибка YClients"),
-                }
-
-            after = self.get_record(record_id)
-            tx_result = {"success": True, "skipped": True, "reason": "record_put"}
-            if paid_full and not is_paid_record(after) and total > 0:
-                start = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
-                end = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
-                lookup = self._find_payment_transaction(
-                    comment=tx_comment,
-                    amount=total,
-                    start_date=start,
-                    end_date=end,
-                    max_pages=5,
-                )
-                if not lookup.get("success"):
-                    return self._payment_outcome_unknown(
-                        record_id=record_id,
-                        payment_method=payment_method,
-                        amount=total,
-                        code="payment_reconciliation_unavailable",
-                    )
-                existing_tx = lookup.get("transaction")
-                if existing_tx:
-                    tx_result = {
-                        "success": True,
-                        "already_exists": True,
-                        "transaction": existing_tx,
-                    }
-                else:
-                    first_service_id = None
-                    for s in services_payload:
-                        if s.get("id"):
-                            first_service_id = s.get("id")
-                            break
-                    tx_result = self.create_finance_transaction(
-                        record_id=record_id,
-                        amount=total,
-                        master_id=current.get("staff_id") or (current.get("staff") or {}).get("id"),
-                        client_id=(current.get("client") or {}).get("id"),
-                        account_id=account_id,
-                        comment=tx_comment,
-                        visit_id=current.get("visit_id"),
-                        sold_item_id=first_service_id,
-                    )
-                if not tx_result.get("success"):
-                    return self._payment_outcome_unknown(
-                        record_id=record_id,
-                        payment_method=payment_method,
-                        amount=total,
-                        code="payment_dispatch_outcome_unknown",
-                    )
-                after = self.get_record(record_id)
-
-            if paid_full and not is_paid_record(after):
-                return self._payment_outcome_unknown(
-                    record_id=record_id,
-                    payment_method=payment_method,
-                    amount=total,
-                    code="provider_payment_unlinked",
-                    transaction=tx_result.get("transaction"),
-                )
-
-            self._observe_sensitive_appointment_action(
-                "close_appointment_payment",
-                record_id,
-                "mutation_kind",
-                "close" if paid_full else "payment",
-                {
-                    "paid_full": bool(paid_full),
-                    "payment_method": payment_method,
-                    "amount": total,
-                    "transaction_created": not bool(tx_result.get("skipped")),
-                },
-            )
+    def pay_visit(
+        self,
+        record_id: int,
+        amount_kopecks: int,
+        payment_method: str,
+        *,
+        bridge_origin: str,
+    ) -> dict:
+        """Execute the canonical visit payment through the Action Engine."""
+        if not _a08_pay_visit_allowed(record_id):
             return {
-                "success": True,
-                "record_id": record_id,
-                "amount": total,
-                "payment_method": payment_method,
-                "record": after or data.get("data"),
-                "transaction": tx_result,
+                "success": False,
+                "unknown": False,
+                "retry_allowed": False,
+                "code": "pay_visit_cutover_not_enabled",
+                "error": (
+                    "Оплата визита через MAYA пока закрыта. "
+                    "Проведите её вручную в YClients."
+                ),
             }
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+        return dispatch_appointment_action(
+            provider="yclients",
+            external_company_id=str(self.company_id),
+            origin=bridge_origin,
+            action_class="pay_visit",
+            payload={
+                "external_id": str(record_id),
+                "amount_kopecks": int(amount_kopecks),
+                "payment_method": str(payment_method).strip().lower(),
+            },
+        )
