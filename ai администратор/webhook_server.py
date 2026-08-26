@@ -13470,6 +13470,22 @@ async def panel_journal_pay_handler(request: web.Request) -> web.Response:
     _grec, _gerr = await _panel_record_guard(info, record_id)
     if _gerr:
         return _gerr
+    # Owner/manager/cashier access is authorized without an extra CRM read in
+    # _panel_record_guard. Payment still needs provider truth to derive the
+    # amount; never interpret the absent guard payload as a zero-value visit.
+    if _grec is None:
+        try:
+            _grec = await asyncio.to_thread(_yc.get_record, record_id)
+        except Exception as e:
+            logger.error("journal_pay record read %s: %s", record_id, e)
+            return _cabinet_response(
+                {"error": "yclients", "message": "Не удалось проверить сумму визита."},
+                status=502,
+            )
+        if not _grec:
+            return _cabinet_response(
+                {"error": "not_found", "message": "Запись не найдена."}, status=404
+            )
     services = (_grec or {}).get("services") or []
     total = sum(
         int(service.get("cost") or service.get("price") or 0)

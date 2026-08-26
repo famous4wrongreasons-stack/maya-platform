@@ -590,3 +590,47 @@ no claim that production paid-state read-back has succeeded.
 `PACKAGE 2 STARTED: NO`
 
 STOP. No production financial write was performed by this gate.
+
+## First Manual Attempt: Initiator Defect, No Financial Dispatch (2026-08-26)
+
+The owner followed the approved manual proof instruction and selected card
+payment for the allowlisted visit. Read-only inspection proved that the request
+did not create an ActionExecution and did not reach the canonical YClients
+payment executor. The visit remained unpaid, its linked canonical payment count
+remained zero, and the historical unlinked 2,000-ruble operation was unchanged.
+No new generic financial operation was created.
+
+The root cause was isolated to the Python panel initiator. The authorization
+guard intentionally returns no provider record for owner, manager, and cashier
+roles because those roles do not need a staff-ownership lookup. The payment
+handler incorrectly interpreted that absent guard payload as a zero-value visit,
+returned `invalid_amount`, and stopped before Action Engine dispatch.
+
+The initiator now reads the provider record after successful authorization when
+the guard has not already supplied it. Payment amount continues to come only
+from provider truth. Master behavior is unchanged and reuses the guarded record.
+Provider-read failure and missing records fail closed before any payment action.
+
+Focused production-environment tests prove both owner and master paths, the
+canonical `pay_visit` proof allowlist, and the fake-payment tombstone. The full
+repository appointment mutation ratchet also passes. This correction does not
+change financial semantics, schema, idempotency, reconciliation, UNKNOWN, or
+the existing 2,000-ruble accounting-review item.
+
+The first click is therefore not a failed real-payment proof: no canonical or
+legacy financial write was attempted. One owner-performed proof is still
+required after deployment of this initiator correction.
+
+`FIRST MANUAL ATTEMPT REACHED ACTION ENGINE: NO`
+
+`FIRST MANUAL ATTEMPT FINANCIAL WRITES: 0`
+
+`FIRST MANUAL ATTEMPT CREATED GENERIC OPERATION: NO`
+
+`FIRST MANUAL ATTEMPT CHANGED VISIT PAID STATE: NO`
+
+`INITIATOR ROOT CAUSE FIXED: YES`
+
+`REAL PAYMENT PROOF: NOT RUN`
+
+`PACKAGE 2 STARTED: NO`

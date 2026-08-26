@@ -596,3 +596,32 @@ ACTION CLASSES MIGRATED: 0 (proof canary is not global cutover)
 DIRECT BYPASSES REMAINING FOR PACKAGE: 4
 NEXT BLOCKING PACKAGE STARTED: NO
 CHAPTER 6 BLOCKING PACKAGES REMAINING: 5
+
+## A08 First Manual Proof Attempt: Pre-dispatch Blocker
+
+The approved owner-performed card-payment attempt stopped in the Python panel
+initiator before Action Engine. Read-only production evidence showed no
+`pay_visit` ActionExecution, no canonical provider payment mutation, no new
+generic financial operation, no linked payment, and no paid-state change. The
+historical unlinked 2,000-ruble operation remained unchanged.
+
+The owner/manager/cashier authorization branch did not return a provider record,
+while the handler derived the amount directly from that optional guard payload.
+It consequently rejected the valid visit as zero-value. The corrected handler
+loads provider truth after authorization whenever the guard does not already
+carry the record. Focused owner/master payment tests, the proof-scope/fake-path
+tests, Python compilation, and the repository appointment mutation ratchet pass.
+
+This is an initiator reachability correction only. The canonical payment
+contract and its UNKNOWN, idempotency, read-back, and no-fallback guarantees are
+unchanged. The real payment proof remains not run until this correction is
+deployed and the owner performs one new explicit action.
+
+A08 SHADOW EQUIVALENT: YES
+REAL PAYMENT PROOF REQUIRED: YES
+REAL PAYMENT PROOF: NOT RUN
+GENERIC FINANCIAL OPERATION CREATED BY NEW PATH: NO
+VISIT PAID VERIFIED BY READ-BACK: NO
+A08 CUTOVER COMPLETE: NO
+PACKAGE 1 COMPLETE: NO
+PACKAGE 2 STARTED: NO
