@@ -25,10 +25,15 @@ The minimum canonical business action proposed by this gate is
 the transport step `create_financial_operation`. Attendance remains a separate
 action and must not be hidden inside payment settlement.
 
-Implementation is not approved yet. The current adapter has no proven
-provider-supported write sequence or atomic endpoint that guarantees both the
-operation-to-visit linkage and the paid visit state. This is a provider write
-contract gate, not a Prisma schema gate.
+Final public-contract verification found a provider-supported visit payment
+write surface. YClients documents both a visit-level update with
+`fast_payment` and a sale-document payment operation. The current Maya adapter
+implements neither workflow: it mutates an appointment and then falls back to
+creating a generic financial transaction. Therefore the provider capability is
+SUPPORTED, while the current A08 implementation and cutover remain unsafe.
+
+This is an implementation/cutover gate, not a provider limitation and not a
+Prisma schema gate.
 
 ## Evidence And Safety Boundary
 
@@ -45,10 +50,13 @@ Evidence sources:
 - read-only inspection of the A08 2,000-ruble operation and its target visit;
 - read-only comparison with five known-good paid visits from the same provider;
 - official YClients product documentation describing visit payment and
-  financial-operation linkage.
+  financial-operation linkage;
+- the official public YClients developer API contract for visit and sale
+  payment operations.
 
 Official provider references:
 
+- [Public YClients API: Visits and Sale Operation](https://developers.yclients.com/ru/)
 - [Payment by link: a paid visit and financial/stock operations are separate
   resulting records](https://support.yclients.com/5-23-581--oplata-vizitov-i-tovarov-po-ssylke/)
 - [Financial operation details can navigate to the related visit](https://support.yclients.com/996)
@@ -56,9 +64,11 @@ Official provider references:
 - [Service payment operations are generated from the visit workflow](https://support.yclients.com/591)
 - [Visit payment selects a payment method and cash account](https://support.yclients.com/698)
 
-These references establish the provider's business semantics. They do not
-document a safe public API write primitive that our adapter can use to atomically
-settle an existing visit. That missing write contract remains the blocker.
+The public developer contract documents supported write primitives for visit
+payment. The remaining blocker is that Maya does not implement or verify that
+documented workflow; the blocker is not absence of a YClients capability.
+
+No undocumented browser/UI endpoint was considered or accepted as evidence.
 
 ## Three Independent Provider Facts
 
@@ -90,6 +100,36 @@ visit/payment document. Its payment projection is primarily based on
 `paid_full`; the existing A08 capability is Shadow-only and carries only opaque
 `mutationKind` and `valueRef` fields.
 
+### Public provider writes verified in the official contract
+
+The official public YClients developer contract exposes:
+
+1. `PUT /api/v1/visits/{visit_id}/{record_id}` (`Изменить визит`). Its request
+   supports visit services, new/deleted transactions, goods transactions and
+   `fast_payment`, where the documented values include cash and cashless/card
+   settlement, with optional receipt printing variants.
+2. `POST /api/v1/company/{company_id}/sale/{document_id}/payment`
+   (`Оплата в кассу и лояльностью (различными методами)`). It adds a payment to
+   a provider sale document by an explicit payment method/account and returns
+   the resulting sale operation.
+
+The same public contract provides authoritative read surfaces:
+
+- `GET /api/v1/visits/{visit_id}`;
+- `GET /api/v1/visit/details/{salon_id}/{record_id}/{visit_id}`, including
+  payment transactions;
+- appointment/visit payment state such as `paid_full` and `payment_status`.
+
+These endpoints establish that YClients supports the business capability
+`unpaid visit -> paid visit`. They do not make generic
+`POST finance_transactions/{company_id}` an equivalent substitute.
+
+The current adapter already uses the documented public API host and the same
+`Bearer <partner>, User <user>` authorization form required by these endpoints.
+Thus the integration can address this public contract with tenant credentials,
+subject to provider role/financial permissions. No write was attempted to test
+those permissions in production.
+
 ### Writes currently present in legacy code
 
 The legacy Python flow attempts:
@@ -108,6 +148,10 @@ paid.
 The adapter does not currently read or own a separate canonical
 visit/payment/document entity that could prove provider settlement semantics
 independently of the appointment and transaction projections.
+
+It also does not call either documented provider payment workflow above. Its
+generic transaction fallback is therefore a fake-payment path and must be
+removed from production reachability before A08 cutover.
 
 ### Unsafe legacy paid predicate
 
@@ -230,18 +274,16 @@ comment belongs in the durable normalized input.
 
 ### Provider writes
 
-The exact write sequence is **not yet approved**. The current combination of
-appointment PUT plus generic transaction POST is not a proven provider
-settlement workflow.
+The provider capability is documented, but the exact canonical Maya sequence
+is **not yet implemented or cut over**. Implementation must use the public
+visit/sale payment contract, never the generic transaction fallback, and must
+prove the resulting visit state through authoritative reads before returning
+success.
 
-Before implementation, one of the following must be established from a
-provider-supported contract or isolated non-production proof:
-
-- an atomic visit-payment endpoint; or
-- a documented sequence that creates the payment allocation, links it to the
-  visit, and updates the visit paid state with a stable idempotency strategy.
-
-No production write experimentation is permitted to discover this contract.
+Isolated tests must determine which documented route matches the current
+YClients configuration, actor permissions, split-payment needs and sale
+document lifecycle. No production write experimentation is permitted to make
+that choice.
 
 ### Local mirror updates
 
@@ -388,10 +430,12 @@ one, delete it, or compensate it from the current evidence.
 
 ## Required Follow-Up Before Implementation
 
-A08 implementation may start only after the provider write contract is proven
-without production financial experimentation. The follow-up must establish:
+A08 implementation may start against the documented public provider contract,
+but production cutover remains prohibited until isolated proof and adversarial
+verification establish:
 
-- the supported payment/visit write primitive or sequence;
+- which documented payment/visit write primitive or sequence is canonical for
+  Maya;
 - its idempotency behavior;
 - split-payment and zero-price/discount semantics;
 - the exact authoritative paid-state read contract;
@@ -402,7 +446,30 @@ without production financial experimentation. The follow-up must establish:
   input, conflicting operations, tenant isolation, and manual reconciliation.
 
 No database migration is required for these semantics. Application code will
-be required later, but none was changed by this gate.
+be required later to remove the fake-payment path, implement the documented
+provider workflow, preserve UNKNOWN, and reconcile the authoritative read
+state. None was changed by this final capability verification.
+
+## Final Provider Capability Verification
+
+The hypothesis that YClients does not expose visit payment writes is rejected.
+The official public API contract contains supported visit and sale-payment
+writes. Accordingly:
+
+- `appointment payment mutation` is **SUPPORTED BY PROVIDER**;
+- the legacy Maya flow remains forbidden because it implements different
+  semantics;
+- Action Engine must not expose A08 as available until the documented provider
+  workflow and success proof are implemented and verified;
+- read-only payment-status capability remains valid;
+- `visit_requires_manual_payment` may be emitted as an interim Opportunity or
+  Admin Task while A08 is unavailable, but it is an operational handoff rather
+  than a permanent provider limitation;
+- the existing unlinked 2,000-ruble operation remains unchanged and requires
+  manual owner/accounting review in YClients.
+
+Package 1 cannot close *with a provider limitation* because the limitation does
+not exist. A08 requires a later explicit implementation and cutover approval.
 
 ## Gate Verdict
 
@@ -423,5 +490,19 @@ be required later, but none was changed by this gate.
 `SCHEMA CHANGE REQUIRED: NO`
 
 `A08 IMPLEMENTATION SAFE TO START: NO`
+
+`YCLIENTS VISIT PAYMENT WRITE CAPABILITY: SUPPORTED`
+
+`FINANCIAL TRANSACTION CREATION CAN SUBSTITUTE PAYMENT: NO`
+
+`A08 LEGACY PAYMENT PATH MUST BE REMOVED: YES`
+
+`PAYMENT STATUS READ CAN REMAIN: YES`
+
+`MANUAL YCLIENTS HANDOFF REQUIRED: NO`
+
+`A08 CUTOVER REQUIRED: YES`
+
+`PACKAGE 1 CAN CLOSE WITH PROVIDER LIMITATION: NO`
 
 STOP. No production writes were performed. Package 2 was not started.
