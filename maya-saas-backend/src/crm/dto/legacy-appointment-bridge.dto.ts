@@ -20,11 +20,11 @@ export const LEGACY_APPOINTMENT_ACTIONS = [
   'create_appointment',
   'reschedule_appointment',
   'cancel_appointment',
+  'pay_visit',
   'set_appointment_attendance',
   'set_appointment_duration',
   'set_appointment_services',
   'set_appointment_fields',
-  'close_appointment_payment',
 ] as const;
 
 export type LegacyAppointmentAction =

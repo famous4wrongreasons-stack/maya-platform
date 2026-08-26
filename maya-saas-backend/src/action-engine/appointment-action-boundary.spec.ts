@@ -10,6 +10,7 @@ const PROVIDER_WRITE_METHODS = new Set([
   'createAppointment',
   'rescheduleAppointment',
   'cancelAppointment',
+  'payVisit',
 ]);
 const CANONICAL_PROVIDER_OWNER = 'crm/crm.service.ts';
 const FORBIDDEN_ACTION_ENGINE_IMPORTS = [
@@ -55,11 +56,17 @@ describe('appointment action execution boundary', () => {
         ts.ScriptKind.TS,
       );
       const visit = (node: ts.Node): void => {
+        const expression = ts.isCallExpression(node)
+          ? ts.isNonNullExpression(node.expression)
+            ? node.expression.expression
+            : node.expression
+          : null;
         if (
           ts.isCallExpression(node) &&
-          ts.isPropertyAccessExpression(node.expression) &&
-          PROVIDER_WRITE_METHODS.has(node.expression.name.text) &&
-          node.expression.expression.getText(source) === 'adapter'
+          expression !== null &&
+          ts.isPropertyAccessExpression(expression) &&
+          PROVIDER_WRITE_METHODS.has(expression.name.text) &&
+          expression.expression.getText(source) === 'adapter'
         ) {
           const line =
             source.getLineAndCharacterOfPosition(node.getStart(source)).line +
@@ -71,7 +78,7 @@ describe('appointment action execution boundary', () => {
       visit(source);
     }
 
-    expect(directProviderCalls.length).toBe(3);
+    expect(directProviderCalls.length).toBe(4);
     expect(
       directProviderCalls.every((call) =>
         call.startsWith(`${CANONICAL_PROVIDER_OWNER}:`),
@@ -119,7 +126,6 @@ describe('appointment action execution boundary', () => {
       'crm.appointment.duration.shadow.v1',
       'crm.appointment.services.shadow.v1',
       'crm.appointment.fields.shadow.v1',
-      'crm.appointment.payment-close.shadow.v1',
     ].map((capability) => registry.get(capability));
 
     for (const capability of capabilities) {
@@ -176,7 +182,8 @@ describe('appointment action execution boundary', () => {
     expect(combinedSource).toContain('set_appointment_duration');
     expect(combinedSource).toContain('set_appointment_services');
     expect(combinedSource).toContain('set_appointment_fields');
-    expect(combinedSource).toContain('close_appointment_payment');
+    expect(combinedSource).toContain('pay_visit');
+    expect(combinedSource).not.toContain('close_appointment_payment');
     expect(combinedSource).toContain('legacy_appointment_shadow_only');
     expect(combinedSource).not.toMatch(/executeAttendance|executeDuration/);
   });

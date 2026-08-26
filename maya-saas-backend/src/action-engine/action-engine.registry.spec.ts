@@ -77,7 +77,7 @@ describe('ActionCapabilityRegistry', () => {
     expect(() => registry.get('crm.appointment.attendance.v1')).toThrow();
   });
 
-  it('registers the five residual appointment classes as strict shadow capabilities', () => {
+  it('registers the four residual appointment classes as strict shadow capabilities', () => {
     const cases = [
       [
         'crm.appointment.attendance.shadow.v1',
@@ -99,11 +99,6 @@ describe('ActionCapabilityRegistry', () => {
         { fieldKind: 'comment', valueRef: 'hmac:comment-ref' },
         { fieldKind: 'comment', valueRef: 'hmac:comment-ref' },
       ],
-      [
-        'crm.appointment.payment-close.shadow.v1',
-        { mutationKind: 'payment', valueRef: 'hmac:payment-ref' },
-        { mutationKind: 'payment', valueRef: 'hmac:payment-ref' },
-      ],
     ] as const;
 
     for (const [capabilityName, input, normalized] of cases) {
@@ -119,6 +114,42 @@ describe('ActionCapabilityRegistry', () => {
         capability.normalizeInput({ ...input, executor: 'legacy.direct' }),
       ).toThrow(/Unexpected action input/);
     }
+  });
+
+  it('registers visit payment as a strict no-blind-retry business action', () => {
+    const capability = registry.get('crm.visit.payment.v1');
+
+    expect(capability).toMatchObject({
+      actionClass: 'pay_visit',
+      policyDecision: ActionPolicyDecision.ALLOW,
+      executorKey: 'crm.visit.payment',
+      targetKind: 'appointment',
+    });
+    expect(capability.retry.maxExecutionAttempts).toBe(1);
+    expect(capability.retry.retryablePreDispatchErrors.size).toBe(0);
+    expect(capability.reconciliation.retryAfterProvenNonExecution).toBe(false);
+    expect(
+      capability.normalizeInput({
+        externalId: 'visit-record-1',
+        amountKopecks: 200000,
+        paymentMethod: 'card',
+      }),
+    ).toEqual({
+      externalId: 'visit-record-1',
+      amountKopecks: 200000,
+      paymentMethod: 'card',
+    });
+    expect(() =>
+      capability.normalizeInput({
+        externalId: 'visit-record-1',
+        amountKopecks: 200000,
+        paymentMethod: 'card',
+        executor: 'legacy.direct',
+      }),
+    ).toThrow(/Unexpected action input/);
+    expect(() =>
+      registry.get('crm.appointment.payment-close.shadow.v1'),
+    ).toThrow();
   });
 
   it('registers only the proven B3.3 communication classes for execution', () => {

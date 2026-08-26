@@ -32,9 +32,13 @@ import {
   CrmJournalMaster,
   CrmTeamMember,
   CrmStaffPayroll,
+  CrmVisitPaymentClassification,
+  CrmVisitPaymentState,
   CreatedAppointment,
   CrmAdapterConfig,
   CreateAppointmentParams,
+  PaidVisit,
+  PayVisitParams,
   RescheduledAppointment,
   ServiceItem,
   StaffMember,
@@ -142,6 +146,7 @@ interface YclientsRecordServiceApiItem {
   id?: number | string;
   title?: string;
   cost?: number | string;
+  cost_to_pay?: number | string;
   /** Скидка по услуге в визите — при PUT обязана переноситься, иначе теряется. */
   discount?: number | string;
   /** Цена до скидки. YClients ждёт её вместе с cost при перезаписи состава. */
@@ -153,6 +158,7 @@ interface YclientsRecordServiceApiItem {
 
 interface YclientsRecordApiItem {
   id?: number | string;
+  record_id?: number | string;
   date?: string;
   datetime?: string;
   length?: number;
@@ -160,12 +166,59 @@ interface YclientsRecordApiItem {
   attendance?: number;
   visit_attendance?: number;
   paid_full?: boolean | number;
-  deleted?: boolean;
+  prepaid?: number | string;
+  prepaid_confirmed?: number | string;
+  payment_status?: number | string;
+  visit_id?: number | string;
+  deleted?: boolean | number;
   comment?: string;
   staff_id?: number | string;
   client?: YclientsRecordClientApiItem | null;
   staff?: YclientsRecordStaffApiItem | null;
   services?: YclientsRecordServiceApiItem[] | null;
+}
+
+interface YclientsVisitApiItem {
+  id?: number | string;
+  visit_id?: number | string;
+  record_id?: number | string;
+  paid_full?: boolean | number;
+  prepaid?: number | string;
+  prepaid_confirmed?: number | string;
+  payment_status?: number | string;
+  services?: YclientsRecordServiceApiItem[] | null;
+  records?: YclientsRecordApiItem[] | null;
+}
+
+interface YclientsVisitPaymentTransactionApiItem {
+  id?: number | string;
+  amount?: number | string;
+  item_id?: number | string | null;
+  record_id?: number | string | null;
+  deleted?: boolean | number;
+}
+
+interface YclientsVisitItemApiItem {
+  item_id?: number | string | null;
+  record_id?: number | string | null;
+  service_id?: number | string | null;
+  is_service?: boolean | number;
+  deleted?: boolean | number;
+}
+
+interface YclientsVisitDetailsApiItem {
+  payment_transactions?: YclientsVisitPaymentTransactionApiItem[] | null;
+  items?: YclientsVisitItemApiItem[] | null;
+}
+
+interface YclientsVisitLinkedTransactionApiItem {
+  id?: number | string;
+  amount?: number | string;
+  record_id?: number | string | null;
+  visit_id?: number | string | null;
+  sold_item_id?: number | string | null;
+  sold_item_type?: string | null;
+  deleted?: boolean | number;
 }
 
 interface YclientsResponse<TData> {
@@ -1307,6 +1360,244 @@ export class YclientsCRMAdapter implements CRMAdapter {
       // Удалённую запись править нечего — кабинет спрячет кнопки.
       can_edit: record.deleted !== true,
     };
+  }
+
+  async getVisitPaymentState(params: {
+    tenantId: string;
+    externalId: string;
+  }): Promise<CrmVisitPaymentState> {
+    void params.tenantId;
+    const recordId = this.toNumericId(params.externalId, 'externalId');
+    const recordResponse = await this.request<YclientsRecordApiItem>(
+      `record/${this.getCompanyId()}/${recordId}`,
+    );
+    const record = recordResponse.data;
+    if (!record) throw new CrmRecordGoneError('YClients record was not found');
+
+    const visitId = this.toNumericId(record.visit_id, 'visitId');
+    const [visitResponse, detailsResponse, transactionsResponse] =
+      await Promise.all([
+        this.request<YclientsVisitApiItem | YclientsVisitApiItem[]>(
+          `visits/${visitId}`,
+        ),
+        this.request<YclientsVisitDetailsApiItem>(
+          `visit/details/${this.getCompanyId()}/${recordId}/${visitId}`,
+        ),
+        this.request<YclientsVisitLinkedTransactionApiItem[]>(
+          `timetable/transactions/${this.getCompanyId()}`,
+          {
+            query: new URLSearchParams({
+              record_id: String(recordId),
+              visit_id: String(visitId),
+            }),
+          },
+        ),
+      ]);
+    const visit = this.visitRecord(visitResponse.data, recordId) ?? record;
+    const expectedAmountKopecks = this.visitAmountKopecks(record);
+    const paidFull = this.optionalBoolean(visit.paid_full);
+    const paymentStatus = this.optionalInteger(visit.payment_status);
+    const details = detailsResponse.data;
+    const detailTransactions = (details?.payment_transactions ?? []).filter(
+      (transaction) => !this.isProviderDeleted(transaction.deleted),
+    );
+    const timetableTransactions = (transactionsResponse.data ?? []).filter(
+      (transaction) => !this.isProviderDeleted(transaction.deleted),
+    );
+    const serviceItemIds = new Set(
+      (details?.items ?? [])
+        .filter(
+          (item) =>
+            !this.isProviderDeleted(item.deleted) &&
+            this.optionalBoolean(item.is_service) === true &&
+            Number(item.record_id) === recordId,
+        )
+        .map((item) => Number(item.item_id ?? item.service_id))
+        .filter((itemId) => Number.isSafeInteger(itemId) && itemId > 0),
+    );
+    const detailsById = new Map(
+      detailTransactions
+        .map((transaction) => [Number(transaction.id), transaction] as const)
+        .filter(([id]) => Number.isSafeInteger(id) && id > 0),
+    );
+    const exactTimetableTransactions = timetableTransactions.filter(
+      (transaction) =>
+        Number(transaction.record_id) === recordId &&
+        Number(transaction.visit_id) === visitId,
+    );
+    const linkedServiceTransactions = exactTimetableTransactions.filter(
+      (transaction) => {
+        const transactionId = Number(transaction.id);
+        const soldItemId = Number(transaction.sold_item_id);
+        const detailTransaction = detailsById.get(transactionId);
+        return (
+          String(transaction.sold_item_type ?? '').toLowerCase() ===
+            'service' &&
+          detailTransaction !== undefined &&
+          Number(detailTransaction.record_id) === recordId &&
+          Number(detailTransaction.item_id) === soldItemId &&
+          serviceItemIds.has(soldItemId)
+        );
+      },
+    );
+    const linkedAmountKopecks = linkedServiceTransactions.reduce(
+      (sum, transaction) =>
+        sum + this.rublesToKopecks(transaction.amount, 'payment amount'),
+      0,
+    );
+    const transactionIds = linkedServiceTransactions.map((transaction) =>
+      Number(transaction.id),
+    );
+    const uniqueTransactionIds = new Set(transactionIds);
+    const targetDetailTransactionCount = detailTransactions.filter(
+      (transaction) => Number(transaction.record_id) === recordId,
+    ).length;
+    const allocationConsistent =
+      linkedServiceTransactions.length > 0 &&
+      linkedServiceTransactions.length === uniqueTransactionIds.size &&
+      linkedServiceTransactions.length === exactTimetableTransactions.length &&
+      linkedServiceTransactions.length === targetDetailTransactionCount &&
+      linkedAmountKopecks === expectedAmountKopecks;
+    const paidAsIntended =
+      !this.isProviderDeleted(record.deleted) &&
+      paidFull === true &&
+      paymentStatus === 1 &&
+      allocationConsistent;
+    const hasPaymentSignal =
+      paidFull === true ||
+      (paymentStatus !== null && paymentStatus !== 0) ||
+      targetDetailTransactionCount > 0 ||
+      exactTimetableTransactions.length > 0;
+    const authoritativeReadsComplete =
+      visitResponse.data !== undefined &&
+      detailsResponse.data !== undefined &&
+      transactionsResponse.data !== undefined &&
+      paidFull !== null &&
+      paymentStatus !== null;
+    const classification: CrmVisitPaymentClassification = paidAsIntended
+      ? 'paid_as_intended'
+      : authoritativeReadsComplete && !hasPaymentSignal
+        ? 'unpaid'
+        : authoritativeReadsComplete
+          ? 'partial_or_inconsistent'
+          : 'unknown';
+
+    return {
+      external_id: String(recordId),
+      visit_id: String(visitId),
+      expected_amount_kopecks: expectedAmountKopecks,
+      paid: paidAsIntended,
+      classification,
+      paid_full: paidFull,
+      payment_status: paymentStatus,
+      linked_service_payment_count: linkedServiceTransactions.length,
+      linked_amount_kopecks: linkedAmountKopecks,
+      allocation_consistent: allocationConsistent,
+    };
+  }
+
+  async payVisit(params: PayVisitParams): Promise<PaidVisit> {
+    const before = await this.getVisitPaymentState(params);
+    if (before.expected_amount_kopecks !== params.amountKopecks) {
+      throw new ConflictException(
+        'Visit payment amount does not match YClients truth.',
+      );
+    }
+    if (before.classification === 'paid_as_intended') {
+      return { ...before, already_paid: true };
+    }
+    if (before.classification !== 'unpaid') {
+      throw new ConflictException(
+        'Visit has a partial or inconsistent payment state.',
+      );
+    }
+
+    const recordId = this.toNumericId(params.externalId, 'externalId');
+    const recordResponse = await this.request<YclientsRecordApiItem>(
+      `record/${this.getCompanyId()}/${recordId}`,
+    );
+    const record = recordResponse.data;
+    if (!record) throw new CrmRecordGoneError('YClients record was not found');
+
+    await this.request<YclientsVisitApiItem>(
+      `visits/${this.toNumericId(before.visit_id, 'visitId')}/${recordId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          attendance: Number(record.attendance ?? record.visit_attendance ?? 0),
+          comment: String(record.comment ?? ''),
+          fast_payment: params.paymentMethod === 'cash' ? 1 : 2,
+        }),
+      },
+    );
+
+    let after: CrmVisitPaymentState;
+    try {
+      after = await this.getVisitPaymentState(params);
+    } catch (error) {
+      throw new CrmOutcomeUnknownError(
+        'YClients accepted visit payment write but read-back failed',
+        error,
+      );
+    }
+    if (
+      after.classification !== 'paid_as_intended' ||
+      after.expected_amount_kopecks !== params.amountKopecks
+    ) {
+      throw new CrmOutcomeUnknownError(
+        'YClients accepted visit payment write but paid state was not proven',
+      );
+    }
+    return after;
+  }
+
+  private visitAmountKopecks(record: YclientsRecordApiItem): number {
+    const amountRubles = (record.services ?? []).reduce((sum, service) => {
+      const value = Number(service.cost ?? service.price_min ?? 0);
+      return Number.isFinite(value) && value >= 0 ? sum + value : sum;
+    }, 0);
+    const amountKopecks = Math.round(amountRubles * 100);
+    if (!Number.isSafeInteger(amountKopecks) || amountKopecks <= 0) {
+      throw new BadRequestException('YClients visit has no payable amount');
+    }
+    return amountKopecks;
+  }
+
+  private optionalBoolean(value: unknown): boolean | null {
+    if (value === true || value === 1 || value === '1') return true;
+    if (value === false || value === 0 || value === '0') return false;
+    return null;
+  }
+
+  private optionalInteger(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') return null;
+    const numeric = Number(value);
+    return Number.isSafeInteger(numeric) ? numeric : null;
+  }
+
+  private isProviderDeleted(value: unknown): boolean {
+    return value === true || value === 1 || value === '1';
+  }
+
+  private rublesToKopecks(value: unknown, field: string): number {
+    const rubles = Number(value);
+    const kopecks = Math.round(rubles * 100);
+    if (!Number.isFinite(rubles) || !Number.isSafeInteger(kopecks)) {
+      throw new CrmOutcomeUnknownError(`Invalid YClients ${field}`);
+    }
+    return kopecks;
+  }
+
+  private visitRecord(
+    value: YclientsVisitApiItem | YclientsVisitApiItem[] | undefined,
+    recordId: number,
+  ): YclientsVisitApiItem | undefined {
+    if (!value) return undefined;
+    const roots = Array.isArray(value) ? value : [value];
+    const nested = roots.flatMap((item) => item.records ?? []);
+    return [...nested, ...roots].find(
+      (item) => Number(item.record_id ?? item.id) === recordId,
+    );
   }
 
   /**

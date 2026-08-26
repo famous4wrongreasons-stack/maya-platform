@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { CrmProvider } from '../../common/domain.enums';
+import { CrmOutcomeUnknownError } from '../crm-request.errors';
 import { YclientsCRMAdapter } from './yclients-crm.adapter';
 
 describe('YclientsCRMAdapter', () => {
@@ -2210,5 +2211,730 @@ describe('YclientsCRMAdapter', () => {
         },
       ],
     });
+  });
+
+  it('settles an unpaid visit once and proves the canonical payment by strict read-back', async () => {
+    let paid = false;
+    let paymentWrites = 0;
+    global.fetch = jest.fn<typeof fetch>(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        if (url.includes('/record/123/901')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  id: 901,
+                  visit_id: 701,
+                  attendance: 1,
+                  deleted: false,
+                  services: [{ id: 11, cost: 2000 }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visits/701/901') && init?.method === 'PUT') {
+          paymentWrites += 1;
+          expect(requestJsonBody(init)).toEqual({
+            attendance: 1,
+            comment: '',
+            fast_payment: 2,
+          });
+          paid = true;
+          return Promise.resolve(
+            new Response(JSON.stringify({ success: true }), { status: 200 }),
+          );
+        }
+        if (url.includes('/visits/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  id: 701,
+                  records: [
+                    {
+                      id: 901,
+                      record_id: 901,
+                      paid_full: paid ? 1 : 0,
+                      payment_status: paid ? 1 : 0,
+                    },
+                  ],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visit/details/123/901/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  payment_transactions: paid
+                    ? [{ id: 501, amount: 2000, item_id: 11, record_id: 901 }]
+                    : [],
+                  items: [
+                    {
+                      item_id: 11,
+                      record_id: 901,
+                      service_id: 11,
+                      is_service: true,
+                    },
+                  ],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/timetable/transactions/123')) {
+          expect(url).toContain('record_id=901');
+          expect(url).toContain('visit_id=701');
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: paid
+                  ? [
+                      {
+                        id: 501,
+                        amount: 2000,
+                        record_id: 901,
+                        visit_id: 701,
+                        sold_item_id: 11,
+                        sold_item_type: 'service',
+                      },
+                    ]
+                  : [],
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        return Promise.reject(new Error(`Unexpected request: ${url}`));
+      },
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.payVisit({
+        tenantId: 'tenant-1',
+        externalId: '901',
+        amountKopecks: 200_000,
+        paymentMethod: 'card',
+      }),
+    ).resolves.toMatchObject({
+      external_id: '901',
+      visit_id: '701',
+      paid: true,
+      classification: 'paid_as_intended',
+      paid_full: true,
+      payment_status: 1,
+      linked_service_payment_count: 1,
+      linked_amount_kopecks: 200_000,
+      allocation_consistent: true,
+    });
+    expect(paymentWrites).toBe(1);
+  });
+
+  it('accepts exact split allocations and ignores an unrelated orphan operation', async () => {
+    global.fetch = jest.fn<typeof fetch>(
+      (input: Parameters<typeof fetch>[0]) => {
+        const url = requestUrl(input);
+        if (url.includes('/record/123/901')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  id: 901,
+                  visit_id: 701,
+                  deleted: false,
+                  services: [{ id: 11, cost: 2000 }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visits/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  records: [
+                    {
+                      id: 901,
+                      record_id: 901,
+                      paid_full: 1,
+                      payment_status: 1,
+                    },
+                  ],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visit/details/123/901/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  payment_transactions: [
+                    { id: 501, amount: 1200, item_id: 11, record_id: 901 },
+                    { id: 502, amount: 800, item_id: 11, record_id: 901 },
+                  ],
+                  items: [{ item_id: 11, record_id: 901, is_service: true }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/timetable/transactions/123')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: [
+                  {
+                    id: 999,
+                    amount: 2000,
+                    record_id: 0,
+                    visit_id: 0,
+                    sold_item_type: 'service',
+                  },
+                  {
+                    id: 501,
+                    amount: 1200,
+                    record_id: 901,
+                    visit_id: 701,
+                    sold_item_id: 11,
+                    sold_item_type: 'service',
+                  },
+                  {
+                    id: 502,
+                    amount: 800,
+                    record_id: 901,
+                    visit_id: 701,
+                    sold_item_id: 11,
+                    sold_item_type: 'service',
+                  },
+                ],
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        return Promise.reject(new Error(`Unexpected request: ${url}`));
+      },
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getVisitPaymentState({
+        tenantId: 'tenant-1',
+        externalId: '901',
+      }),
+    ).resolves.toMatchObject({
+      paid: true,
+      classification: 'paid_as_intended',
+      linked_service_payment_count: 2,
+      linked_amount_kopecks: 200_000,
+      allocation_consistent: true,
+    });
+  });
+
+  it('does not dispatch again when the visit is already canonically paid', async () => {
+    let paymentWrites = 0;
+    global.fetch = jest.fn<typeof fetch>(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        if (url.includes('/visits/701/901') && init?.method === 'PUT') {
+          paymentWrites += 1;
+        }
+        if (url.includes('/record/123/901')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  id: 901,
+                  visit_id: 701,
+                  deleted: false,
+                  services: [{ id: 11, cost: 2000 }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visits/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  records: [
+                    {
+                      id: 901,
+                      record_id: 901,
+                      paid_full: 1,
+                      payment_status: 1,
+                    },
+                  ],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visit/details/123/901/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  payment_transactions: [
+                    { id: 501, amount: 2000, item_id: 11, record_id: 901 },
+                  ],
+                  items: [{ item_id: 11, record_id: 901, is_service: true }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/timetable/transactions/123')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: [
+                  {
+                    id: 501,
+                    amount: 2000,
+                    record_id: 901,
+                    visit_id: 701,
+                    sold_item_id: 11,
+                    sold_item_type: 'service',
+                  },
+                ],
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        return Promise.reject(new Error(`Unexpected request: ${url}`));
+      },
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.payVisit({
+        tenantId: 'tenant-1',
+        externalId: '901',
+        amountKopecks: 200_000,
+        paymentMethod: 'cash',
+      }),
+    ).resolves.toMatchObject({ already_paid: true, paid: true });
+    expect(paymentWrites).toBe(0);
+  });
+
+  it('preserves UNKNOWN when write acknowledgement is not followed by canonical payment proof', async () => {
+    let paymentWrites = 0;
+    global.fetch = jest.fn<typeof fetch>(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        if (url.includes('/record/123/901')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  id: 901,
+                  visit_id: 701,
+                  attendance: 1,
+                  deleted: false,
+                  services: [{ id: 11, cost: 2000 }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visits/701/901') && init?.method === 'PUT') {
+          paymentWrites += 1;
+          return Promise.resolve(
+            new Response(JSON.stringify({ success: true }), { status: 200 }),
+          );
+        }
+        if (url.includes('/visits/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  records: [
+                    {
+                      id: 901,
+                      record_id: 901,
+                      paid_full: paymentWrites > 0 ? 1 : 0,
+                      payment_status: paymentWrites > 0 ? 1 : 0,
+                    },
+                  ],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visit/details/123/901/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  payment_transactions: [],
+                  items: [{ item_id: 11, record_id: 901, is_service: true }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/timetable/transactions/123')) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ data: [] }), { status: 200 }),
+          );
+        }
+        return Promise.reject(new Error(`Unexpected request: ${url}`));
+      },
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.payVisit({
+        tenantId: 'tenant-1',
+        externalId: '901',
+        amountKopecks: 200_000,
+        paymentMethod: 'card',
+      }),
+    ).rejects.toBeInstanceOf(CrmOutcomeUnknownError);
+    expect(paymentWrites).toBe(1);
+  });
+
+  it('rejects amount mismatch and partial provider state before any payment write', async () => {
+    let paymentWrites = 0;
+    global.fetch = jest.fn<typeof fetch>(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        if (url.includes('/visits/701/901') && init?.method === 'PUT') {
+          paymentWrites += 1;
+        }
+        if (url.includes('/record/123/901')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  id: 901,
+                  visit_id: 701,
+                  deleted: false,
+                  services: [{ id: 11, cost: 2000 }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visits/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  records: [
+                    {
+                      id: 901,
+                      record_id: 901,
+                      paid_full: 0,
+                      payment_status: 2,
+                    },
+                  ],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visit/details/123/901/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  payment_transactions: [
+                    { id: 501, amount: 500, item_id: 11, record_id: 901 },
+                  ],
+                  items: [{ item_id: 11, record_id: 901, is_service: true }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/timetable/transactions/123')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: [
+                  {
+                    id: 501,
+                    amount: 500,
+                    record_id: 901,
+                    visit_id: 701,
+                    sold_item_id: 11,
+                    sold_item_type: 'service',
+                  },
+                ],
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        return Promise.reject(new Error(`Unexpected request: ${url}`));
+      },
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.payVisit({
+        tenantId: 'tenant-1',
+        externalId: '901',
+        amountKopecks: 199_900,
+        paymentMethod: 'cash',
+      }),
+    ).rejects.toThrow('does not match');
+    await expect(
+      adapter.payVisit({
+        tenantId: 'tenant-1',
+        externalId: '901',
+        amountKopecks: 200_000,
+        paymentMethod: 'cash',
+      }),
+    ).rejects.toThrow('partial or inconsistent');
+    expect(paymentWrites).toBe(0);
+  });
+
+  it('never treats a deleted record as a paid visit even with exact payment links', async () => {
+    let paymentWrites = 0;
+    global.fetch = jest.fn<typeof fetch>(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        if (url.includes('/visits/701/901') && init?.method === 'PUT') {
+          paymentWrites += 1;
+        }
+        if (url.includes('/record/123/901')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  id: 901,
+                  visit_id: 701,
+                  deleted: 1,
+                  services: [{ id: 11, cost: 2000 }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visits/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  records: [
+                    {
+                      id: 901,
+                      record_id: 901,
+                      paid_full: 1,
+                      payment_status: 1,
+                    },
+                  ],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visit/details/123/901/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  payment_transactions: [
+                    { id: 501, amount: 2000, item_id: 11, record_id: 901 },
+                  ],
+                  items: [{ item_id: 11, record_id: 901, is_service: true }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/timetable/transactions/123')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: [
+                  {
+                    id: 501,
+                    amount: 2000,
+                    record_id: 901,
+                    visit_id: 701,
+                    sold_item_id: 11,
+                    sold_item_type: 'service',
+                  },
+                ],
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        return Promise.reject(new Error(`Unexpected request: ${url}`));
+      },
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getVisitPaymentState({
+        tenantId: 'tenant-1',
+        externalId: '901',
+      }),
+    ).resolves.toMatchObject({
+      paid: false,
+      classification: 'partial_or_inconsistent',
+    });
+    await expect(
+      adapter.payVisit({
+        tenantId: 'tenant-1',
+        externalId: '901',
+        amountKopecks: 200_000,
+        paymentMethod: 'card',
+      }),
+    ).rejects.toThrow('partial or inconsistent');
+    expect(paymentWrites).toBe(0);
+  });
+
+  it('fails closed when authoritative payment read-back is incomplete', async () => {
+    let paymentWrites = 0;
+    global.fetch = jest.fn<typeof fetch>(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        if (url.includes('/visits/701/901') && init?.method === 'PUT') {
+          paymentWrites += 1;
+        }
+        if (url.includes('/record/123/901')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  id: 901,
+                  visit_id: 701,
+                  deleted: false,
+                  services: [{ id: 11, cost: 2000 }],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visits/701')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  records: [
+                    {
+                      id: 901,
+                      record_id: 901,
+                      paid_full: 0,
+                      payment_status: 0,
+                    },
+                  ],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/visit/details/123/901/701')) {
+          return Promise.resolve(
+            new Response(JSON.stringify({}), { status: 200 }),
+          );
+        }
+        if (url.includes('/timetable/transactions/123')) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ data: [] }), { status: 200 }),
+          );
+        }
+        return Promise.reject(new Error(`Unexpected request: ${url}`));
+      },
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await expect(
+      adapter.getVisitPaymentState({
+        tenantId: 'tenant-1',
+        externalId: '901',
+      }),
+    ).resolves.toMatchObject({ paid: false, classification: 'unknown' });
+    await expect(
+      adapter.payVisit({
+        tenantId: 'tenant-1',
+        externalId: '901',
+        amountKopecks: 200_000,
+        paymentMethod: 'cash',
+      }),
+    ).rejects.toThrow('partial or inconsistent');
+    expect(paymentWrites).toBe(0);
   });
 });

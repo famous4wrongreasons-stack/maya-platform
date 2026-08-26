@@ -16,6 +16,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import type {
   AppointmentActionInvocation,
   CreateAppointmentRequest,
+  PayVisitRequest,
   ResidualAppointmentShadowCapability,
   RescheduleAppointmentRequest,
 } from './crm.service';
@@ -53,7 +54,6 @@ const ORIGIN_ACTIONS: Record<
     'set_appointment_duration',
     'set_appointment_services',
     'set_appointment_fields',
-    'close_appointment_payment',
   ]),
   'webhook.loyalty': new Set(['create_appointment']),
   'webhook.chat': new Set(['create_appointment']),
@@ -61,8 +61,13 @@ const ORIGIN_ACTIONS: Record<
     'create_appointment',
     'reschedule_appointment',
     'cancel_appointment',
+    'pay_visit',
   ]),
-  'telegram.bot': new Set(['create_appointment', 'cancel_appointment']),
+  'telegram.bot': new Set([
+    'create_appointment',
+    'cancel_appointment',
+    'pay_visit',
+  ]),
   claude_ai: new Set(['reschedule_appointment', 'cancel_appointment']),
 };
 
@@ -70,6 +75,7 @@ type ParsedAction =
   | { action: 'create_appointment'; params: CreateAppointmentRequest }
   | { action: 'reschedule_appointment'; params: RescheduleAppointmentRequest }
   | { action: 'cancel_appointment'; externalId: string }
+  | { action: 'pay_visit'; params: PayVisitRequest }
   | {
       action: 'set_appointment_attendance';
       externalId: string;
@@ -89,18 +95,16 @@ type ParsedAction =
       action: 'set_appointment_fields';
       externalId: string;
       input: { fieldKind: string; valueRef: string };
-    }
-  | {
-      action: 'close_appointment_payment';
-      externalId: string;
-      input: { mutationKind: string; valueRef: string };
     };
 
 type ExecutableParsedAction = Extract<
   ParsedAction,
   {
     action:
-      'create_appointment' | 'reschedule_appointment' | 'cancel_appointment';
+      | 'create_appointment'
+      | 'reschedule_appointment'
+      | 'cancel_appointment'
+      | 'pay_visit';
   }
 >;
 
@@ -577,6 +581,34 @@ export class LegacyAppointmentBridgeService {
       };
     }
 
+    if (action === 'pay_visit') {
+      assertExactKeys(payload, [
+        'external_id',
+        'amount_kopecks',
+        'payment_method',
+      ]);
+      const paymentMethod = requiredString(payload, 'payment_method', 16);
+      if (paymentMethod !== 'cash' && paymentMethod !== 'card') {
+        payloadError(
+          'Appointment payment method must be cash or card.',
+          'legacy_appointment_payload_invalid',
+        );
+      }
+      return {
+        action,
+        params: {
+          externalId: requiredString(payload, 'external_id', 128),
+          amountKopecks: requiredInteger(
+            payload,
+            'amount_kopecks',
+            1,
+            1_000_000_000,
+          ),
+          paymentMethod,
+        },
+      };
+    }
+
     if (action === 'set_appointment_attendance') {
       assertExactKeys(payload, ['external_id', 'attendance_code']);
       const attendanceCode = requiredInteger(payload, 'attendance_code', -1, 2);
@@ -630,18 +662,6 @@ export class LegacyAppointmentBridgeService {
       };
     }
 
-    if (action === 'close_appointment_payment') {
-      assertExactKeys(payload, ['external_id', 'mutation_kind', 'value_ref']);
-      return {
-        action,
-        externalId: requiredString(payload, 'external_id', 128),
-        input: {
-          mutationKind: requiredString(payload, 'mutation_kind', 64),
-          valueRef: requiredString(payload, 'value_ref', 128),
-        },
-      };
-    }
-
     assertExactKeys(payload, ['external_id']);
     return {
       action: 'cancel_appointment',
@@ -675,6 +695,13 @@ export class LegacyAppointmentBridgeService {
         invocation,
       );
     }
+    if (parsed.action === 'pay_visit') {
+      return this.crmService.previewPayVisit(
+        tenantId,
+        parsed.params,
+        invocation,
+      );
+    }
     return this.crmService.planResidualAppointmentShadow(
       tenantId,
       this.shadowCapability(parsed.action),
@@ -703,6 +730,13 @@ export class LegacyAppointmentBridgeService {
         invocation,
       );
     }
+    if (parsed.action === 'pay_visit') {
+      return this.crmService.executePayVisitWithReceipt(
+        tenantId,
+        parsed.params,
+        invocation,
+      );
+    }
     return this.crmService.executeCancelAppointmentWithReceipt(
       tenantId,
       parsed.externalId,
@@ -714,7 +748,8 @@ export class LegacyAppointmentBridgeService {
     return (
       action === 'create_appointment' ||
       action === 'reschedule_appointment' ||
-      action === 'cancel_appointment'
+      action === 'cancel_appointment' ||
+      action === 'pay_visit'
     );
   }
 
@@ -729,7 +764,6 @@ export class LegacyAppointmentBridgeService {
       set_appointment_duration: 'crm.appointment.duration.shadow.v1',
       set_appointment_services: 'crm.appointment.services.shadow.v1',
       set_appointment_fields: 'crm.appointment.fields.shadow.v1',
-      close_appointment_payment: 'crm.appointment.payment-close.shadow.v1',
     };
     return capabilities[action];
   }

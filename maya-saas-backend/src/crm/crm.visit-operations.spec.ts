@@ -91,6 +91,7 @@ describe('CrmService: операции над визитом', () => {
     } as unknown as CrmAdapterFactory;
     const tenantContext = new TenantContextService();
     const actionClassByCapability: Record<string, string> = {
+      'crm.visit.payment.v1': 'pay_visit',
       'crm.appointment.attendance.shadow.v1': 'set_appointment_attendance',
       'crm.appointment.duration.shadow.v1': 'set_appointment_duration',
       'crm.appointment.services.shadow.v1': 'set_appointment_services',
@@ -100,12 +101,14 @@ describe('CrmService: операции над визитом', () => {
         async (
           request: { input: unknown },
           handlers: {
+            prepare?: (input: Record<string, unknown>) => Promise<unknown>;
             dispatch: (
               input: Record<string, unknown>,
               idempotencyKey: string,
             ) => Promise<{ value: unknown }>;
           },
         ) => {
+          await handlers.prepare?.(request.input as Record<string, unknown>);
           const dispatched = await handlers.dispatch(
             request.input as Record<string, unknown>,
             'visit-operation-test',
@@ -117,12 +120,14 @@ describe('CrmService: операции над визитом', () => {
         async (
           request: { input: unknown },
           handlers: {
+            prepare?: (input: Record<string, unknown>) => Promise<unknown>;
             dispatch: (
               input: Record<string, unknown>,
               idempotencyKey: string,
             ) => Promise<{ value: unknown }>;
           },
         ) => {
+          await handlers.prepare?.(request.input as Record<string, unknown>);
           const dispatched = await handlers.dispatch(
             request.input as Record<string, unknown>,
             'visit-operation-test',
@@ -465,5 +470,164 @@ describe('CrmService: операции над визитом', () => {
     await expect(
       run(() => service.searchClients('tenant-1', '9182')),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('отказывает fail-closed, если provider не умеет каноническую оплату визита', async () => {
+    const { service, run } = build({});
+
+    await expect(
+      run(() =>
+        service.payVisit('tenant-1', {
+          externalId: '77',
+          amountKopecks: 200_000,
+          paymentMethod: 'card',
+        }),
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('строит pay_visit как бизнес-действие, а не как generic finance transport', async () => {
+    const adapter = {
+      getVisitPaymentState: jest.fn(),
+      payVisit: jest.fn(),
+    };
+    const { service, actionEngineRuntime, run } = build(adapter);
+
+    const preview = await run(() =>
+      service.previewPayVisit('tenant-1', {
+        externalId: '77',
+        amountKopecks: 200_000,
+        paymentMethod: 'card',
+      }),
+    );
+
+    expect(preview).toMatchObject({
+      capability: 'crm.visit.payment.v1',
+      actionClass: 'pay_visit',
+      targetKind: 'appointment',
+      targetRef: 'appointment/77',
+      externalSideEffects: 0,
+    });
+    expect(actionEngineRuntime.preview).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        capability: 'crm.visit.payment.v1',
+        targetRef: 'appointment/77',
+        input: {
+          externalId: '77',
+          amountKopecks: 200_000,
+          paymentMethod: 'card',
+        },
+      }),
+    );
+    expect(adapter.getVisitPaymentState).not.toHaveBeenCalled();
+    expect(adapter.payVisit).not.toHaveBeenCalled();
+  });
+
+  it('до dispatch читает provider truth и вызывает ровно одну каноническую оплату', async () => {
+    const unpaidState = {
+      external_id: '77',
+      visit_id: 'visit-77',
+      classification: 'unpaid',
+      expected_amount_kopecks: 200_000,
+      paid: false,
+      paid_full: false,
+      payment_status: 0,
+      linked_service_payment_count: 0,
+      linked_amount_kopecks: 0,
+      allocation_consistent: false,
+    };
+    const paidState = {
+      ...unpaidState,
+      classification: 'paid_as_intended',
+      paid: true,
+      paid_full: true,
+      payment_status: 1,
+      linked_service_payment_count: 1,
+      linked_amount_kopecks: 200_000,
+      allocation_consistent: true,
+      already_paid: false,
+    };
+    const adapter = {
+      getVisitPaymentState: jest.fn().mockResolvedValue(unpaidState),
+      payVisit: jest.fn().mockResolvedValue(paidState),
+    };
+    const { service, actionEngineRuntime, run } = build(adapter);
+
+    await expect(
+      run(() =>
+        service.payVisit('tenant-1', {
+          externalId: '77',
+          amountKopecks: 200_000,
+          paymentMethod: 'cash',
+        }),
+      ),
+    ).resolves.toMatchObject({
+      classification: 'paid_as_intended',
+      paid: true,
+    });
+
+    expect(adapter.getVisitPaymentState).toHaveBeenCalledTimes(1);
+    expect(adapter.getVisitPaymentState).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      externalId: '77',
+    });
+    expect(adapter.payVisit).toHaveBeenCalledTimes(1);
+    expect(adapter.payVisit).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      externalId: '77',
+      amountKopecks: 200_000,
+      paymentMethod: 'cash',
+    });
+    expect(actionEngineRuntime.executeWithReceipt).toHaveBeenCalledTimes(1);
+  });
+
+  it('не dispatch-ит при partial/unknown payment state', async () => {
+    const payVisit = jest.fn();
+    const { service, run } = build({
+      getVisitPaymentState: jest.fn().mockResolvedValue({
+        external_id: '77',
+        visit_id: 'visit-77',
+        classification: 'partial_or_inconsistent',
+        expected_amount_kopecks: 200_000,
+        paid: false,
+        paid_full: false,
+        payment_status: 2,
+        linked_service_payment_count: 1,
+        linked_amount_kopecks: 50_000,
+        allocation_consistent: false,
+      }),
+      payVisit,
+    });
+
+    await expect(
+      run(() =>
+        service.payVisit('tenant-1', {
+          externalId: '77',
+          amountKopecks: 200_000,
+          paymentMethod: 'cash',
+        }),
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(payVisit).not.toHaveBeenCalled();
+  });
+
+  it('не даёт выполнить pay_visit вне tenant context', async () => {
+    const payVisit = jest.fn();
+    const { service, run } = build({
+      getVisitPaymentState: jest.fn(),
+      payVisit,
+    });
+
+    await expect(
+      run(() =>
+        service.payVisit('tenant-2', {
+          externalId: '77',
+          amountKopecks: 200_000,
+          paymentMethod: 'cash',
+        }),
+      ),
+    ).rejects.toThrow();
+    expect(payVisit).not.toHaveBeenCalled();
   });
 });

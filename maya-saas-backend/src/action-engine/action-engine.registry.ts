@@ -341,8 +341,6 @@ const RESIDUAL_APPOINTMENT_FIELD_KINDS = new Set([
   'client_name',
   'sms_flag',
 ]);
-const RESIDUAL_APPOINTMENT_VALUE_KINDS = new Set(['payment', 'close']);
-
 function requiredInteger(
   source: Record<string, unknown>,
   key: string,
@@ -356,6 +354,20 @@ function requiredInteger(
     );
   }
   return Number(value);
+}
+
+function visitPaymentNormalizer(value: unknown): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, ['externalId', 'amountKopecks', 'paymentMethod']);
+  const paymentMethod = requiredText(source, 'paymentMethod', 16);
+  if (paymentMethod !== 'cash' && paymentMethod !== 'card') {
+    throw new ActionContractError('paymentMethod must be cash or card');
+  }
+  return {
+    externalId: normalizeOpaqueRef(source.externalId, 'externalId'),
+    amountKopecks: requiredInteger(source, 'amountKopecks', 1, 1_000_000_000),
+    paymentMethod,
+  };
 }
 
 function attendanceShadowNormalizer(value: unknown): Record<string, unknown> {
@@ -391,19 +403,6 @@ function fieldsShadowNormalizer(value: unknown): Record<string, unknown> {
   }
   return {
     fieldKind,
-    valueRef: normalizeOpaqueRef(source.valueRef, 'valueRef'),
-  };
-}
-
-function paymentCloseShadowNormalizer(value: unknown): Record<string, unknown> {
-  const source = recordInput(value);
-  assertOnlyKeys(source, ['mutationKind', 'valueRef']);
-  const mutationKind = requiredText(source, 'mutationKind', 32);
-  if (!RESIDUAL_APPOINTMENT_VALUE_KINDS.has(mutationKind)) {
-    throw new ActionContractError('mutationKind is not registered');
-  }
-  return {
-    mutationKind,
     valueRef: normalizeOpaqueRef(source.valueRef, 'valueRef'),
   };
 }
@@ -644,6 +643,44 @@ function appointmentCapability(input: {
   };
 }
 
+function visitPaymentCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: 'crm.visit.payment.v1',
+    capabilityVersion: 1,
+    actionClass: 'pay_visit',
+    normalizedInputContract: 'maya.pay_visit-input/1',
+    targetKind: 'appointment',
+    allowedSourceTypes: ['authenticated_request', 'legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: ['external', 'customer_visible', 'financial'],
+    policyKey: 'production.pay_visit.confirmed-request',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L2_CONFIRMED_REQUEST',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'production.pay_visit.no-blind-retry',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'production.pay_visit.canonical-read',
+      version: 1,
+      maxInconclusiveAttempts: 3,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'crm.visit.payment',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: visitPaymentNormalizer,
+  };
+}
+
 function provenCommunicationCapability(input: {
   capability: string;
   actionClass: string;
@@ -754,6 +791,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     executorKey: 'crm.appointment.cancel',
     normalizeInput: cancelAppointmentNormalizer,
   }),
+  visitPaymentCapability(),
   residualAppointmentShadowCapability({
     capability: 'crm.appointment.attendance.shadow.v1',
     actionClass: 'set_appointment_attendance',
@@ -773,11 +811,6 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     capability: 'crm.appointment.fields.shadow.v1',
     actionClass: 'set_appointment_fields',
     normalizeInput: fieldsShadowNormalizer,
-  }),
-  residualAppointmentShadowCapability({
-    capability: 'crm.appointment.payment-close.shadow.v1',
-    actionClass: 'close_appointment_payment',
-    normalizeInput: paymentCloseShadowNormalizer,
   }),
   syntheticCapability({
     capability: 'kernel.test.safe-retry',

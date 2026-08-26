@@ -116,6 +116,14 @@ describe('LegacyAppointmentBridgeService', () => {
       previewCreateAppointment: jest.fn().mockResolvedValue(previewFixture()),
       previewRescheduleAppointment: jest.fn(),
       previewCancelAppointment: jest.fn(),
+      previewPayVisit: jest.fn().mockResolvedValue({
+        ...previewFixture(),
+        capability: 'crm.visit.payment.v1',
+        actionClass: 'pay_visit',
+        targetRef: 'appointment/77',
+        policyKey: 'production.pay_visit.confirmed-request',
+        executorKey: 'crm.visit.payment',
+      }),
       planResidualAppointmentShadow: jest.fn().mockResolvedValue({
         ...previewFixture(),
         capability: 'crm.appointment.attendance.shadow.v1',
@@ -129,6 +137,7 @@ describe('LegacyAppointmentBridgeService', () => {
       executeCreateAppointmentWithReceipt: jest.fn(),
       executeRescheduleAppointmentWithReceipt: jest.fn(),
       executeCancelAppointmentWithReceipt: jest.fn(),
+      executePayVisitWithReceipt: jest.fn(),
       getAppointmentActionExecutionResult: jest.fn(),
     };
     const tenantContext = new TenantContextService();
@@ -174,6 +183,182 @@ describe('LegacyAppointmentBridgeService', () => {
         metatype: LegacyAppointmentBridgeDto,
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rejects the removed generic financial-operation payment action', async () => {
+    const body = {
+      ...createDto(),
+      origin: 'webhook.panel',
+      action_class: 'close_appointment_payment',
+      payload: {
+        external_id: '77',
+        amount_kopecks: 200_000,
+        payment_method: 'card',
+      },
+    };
+
+    await expect(
+      productionBodyPipe().transform(body, {
+        type: 'body',
+        metatype: LegacyAppointmentBridgeDto,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('plans pay_visit as a zero-effect shadow using the canonical payment contract', async () => {
+    const { crmService, service } = unitHarness();
+    jest.spyOn(Logger.prototype, 'log').mockImplementation();
+
+    const result = await service.shadow(
+      createDto({
+        origin: 'webhook.panel',
+        action_class: 'pay_visit',
+        payload: {
+          external_id: '77',
+          amount_kopecks: 200_000,
+          payment_method: 'card',
+        },
+      }),
+    );
+
+    expect(crmService.previewPayVisit).toHaveBeenCalledWith(
+      'tenant-1',
+      {
+        externalId: '77',
+        amountKopecks: 200_000,
+        paymentMethod: 'card',
+      },
+      expect.objectContaining({ sourceType: 'legacy_bridge' }),
+    );
+    expect(crmService.executePayVisitWithReceipt).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      mode: 'shadow',
+      bridge_external_side_effects: 0,
+      preview: {
+        capability: 'crm.visit.payment.v1',
+        actionClass: 'pay_visit',
+        executorKey: 'crm.visit.payment',
+      },
+    });
+  });
+
+  it('routes pay_visit execution only through the canonical Action Engine receipt', async () => {
+    const { crmService, service } = unitHarness();
+    process.env.MAYA_LEGACY_APPOINTMENT_BRIDGE_EXECUTION_ENABLED = 'true';
+    const execution = {
+      contract: ACTION_EXECUTION_RESULT_CONTRACT,
+      executionId: 'exec-pay-1',
+      state: 'SUCCEEDED',
+      outcomeCode: 'provider_readback_proven',
+    } as const;
+    crmService.executePayVisitWithReceipt.mockResolvedValue({
+      value: { external_id: '77', paid: true },
+      execution,
+    });
+
+    const result = await service.execute(
+      createDto({
+        origin: 'webhook.panel',
+        action_class: 'pay_visit',
+        payload: {
+          external_id: '77',
+          amount_kopecks: 200_000,
+          payment_method: 'card',
+        },
+      }),
+    );
+
+    expect(crmService.executePayVisitWithReceipt).toHaveBeenCalledTimes(1);
+    expect(crmService.executePayVisitWithReceipt).toHaveBeenCalledWith(
+      'tenant-1',
+      {
+        externalId: '77',
+        amountKopecks: 200_000,
+        paymentMethod: 'card',
+      },
+      expect.objectContaining({ sourceType: 'legacy_bridge' }),
+    );
+    expect(crmService.previewPayVisit).not.toHaveBeenCalled();
+    expect(result.execution).toEqual(execution);
+  });
+
+  it('preserves pay_visit UNKNOWN and never performs a blind second call', async () => {
+    const { crmService, service } = unitHarness();
+    process.env.MAYA_LEGACY_APPOINTMENT_BRIDGE_EXECUTION_ENABLED = 'true';
+    const error = Object.assign(new Error('unknown payment outcome'), {
+      actionExecutionResult: UNKNOWN_EXECUTION,
+    });
+    crmService.executePayVisitWithReceipt.mockRejectedValue(error);
+
+    const result = await service.execute(
+      createDto({
+        origin: 'telegram.bot',
+        action_class: 'pay_visit',
+        payload: {
+          external_id: '77',
+          amount_kopecks: 200_000,
+          payment_method: 'cash',
+        },
+      }),
+    );
+
+    expect(result.execution).toEqual(UNKNOWN_EXECUTION);
+    expect(result.safe_explanation).toContain('Не повторяйте действие');
+    expect(crmService.executePayVisitWithReceipt).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    {
+      title: 'unsupported payment method',
+      origin: 'webhook.panel',
+      payload: {
+        external_id: '77',
+        amount_kopecks: 200_000,
+        payment_method: 'bank_transfer',
+      },
+    },
+    {
+      title: 'zero amount',
+      origin: 'webhook.panel',
+      payload: {
+        external_id: '77',
+        amount_kopecks: 0,
+        payment_method: 'card',
+      },
+    },
+    {
+      title: 'untrusted payload field',
+      origin: 'webhook.panel',
+      payload: {
+        external_id: '77',
+        amount_kopecks: 200_000,
+        payment_method: 'card',
+        provider_transaction_id: 'legacy-operation-2000',
+      },
+    },
+    {
+      title: 'unauthorized origin',
+      origin: 'webhook.chat',
+      payload: {
+        external_id: '77',
+        amount_kopecks: 200_000,
+        payment_method: 'card',
+      },
+    },
+  ])('rejects pay_visit $title before tenant resolution', async (example) => {
+    const { bridgeSource, crmService, service } = unitHarness();
+
+    await expect(
+      service.shadow(
+        createDto({
+          origin: example.origin as LegacyAppointmentBridgeDto['origin'],
+          action_class: 'pay_visit',
+          payload: example.payload,
+        }),
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(bridgeSource.resolveTenantByIntegration).not.toHaveBeenCalled();
+    expect(crmService.previewPayVisit).not.toHaveBeenCalled();
   });
 
   it('plans a residual appointment mutation as zero-effect shadow work', async () => {

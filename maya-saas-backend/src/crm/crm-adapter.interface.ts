@@ -287,6 +287,36 @@ export interface CrmAppointmentDetail extends CrmJournalAppointment {
   can_edit: boolean;
 }
 
+export type VisitPaymentMethod = 'cash' | 'card';
+
+export type CrmVisitPaymentClassification =
+  'paid_as_intended' | 'unpaid' | 'partial_or_inconsistent' | 'unknown';
+
+export interface PayVisitParams {
+  tenantId: string;
+  externalId: string;
+  amountKopecks: number;
+  paymentMethod: VisitPaymentMethod;
+}
+
+/** Minimal provider truth used to prove one visit payment. */
+export interface CrmVisitPaymentState {
+  external_id: string;
+  visit_id: string;
+  expected_amount_kopecks: number;
+  paid: boolean;
+  classification: CrmVisitPaymentClassification;
+  paid_full: boolean | null;
+  payment_status: number | null;
+  linked_service_payment_count: number;
+  linked_amount_kopecks: number;
+  allocation_consistent: boolean;
+}
+
+export interface PaidVisit extends CrmVisitPaymentState {
+  already_paid?: boolean;
+}
+
 export interface CrmJournal {
   calendar_source: 'external';
   /**
@@ -513,6 +543,13 @@ export interface CRMAdapter {
     externalId: string;
     timezone: string;
   }): Promise<CrmAppointmentDetail>;
+  /** Authoritative provider read used by pay_visit reconciliation. */
+  getVisitPaymentState?(params: {
+    tenantId: string;
+    externalId: string;
+  }): Promise<CrmVisitPaymentState>;
+  /** Pay a visit through the provider's documented visit-payment contract. */
+  payVisit?(params: PayVisitParams): Promise<PaidVisit>;
   /** «Пришёл» / «не пришёл». Кодировку провайдера знает только сам адаптер. */
   markAppointmentAttendance?(params: {
     tenantId: string;

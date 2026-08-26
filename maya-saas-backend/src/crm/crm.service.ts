@@ -58,12 +58,15 @@ import {
   CrmFinancialSummary,
   CrmRevenueSummary,
   CrmTeamMember,
+  CrmVisitPaymentState,
+  PaidVisit,
   RescheduledAppointment,
   ServiceItem,
   StaffMember,
   StaffScheduleChangePreview,
   StaffScheduleDay,
   StaffScheduleSlot,
+  VisitPaymentMethod,
 } from './crm-adapter.interface';
 import {
   getCrmProviderCapability,
@@ -107,15 +110,13 @@ export type ResidualAppointmentShadowCapability =
   | 'crm.appointment.attendance.shadow.v1'
   | 'crm.appointment.duration.shadow.v1'
   | 'crm.appointment.services.shadow.v1'
-  | 'crm.appointment.fields.shadow.v1'
-  | 'crm.appointment.payment-close.shadow.v1';
+  | 'crm.appointment.fields.shadow.v1';
 
 type ResidualAppointmentShadowAction =
   | 'set_appointment_attendance'
   | 'set_appointment_duration'
   | 'set_appointment_services'
-  | 'set_appointment_fields'
-  | 'close_appointment_payment';
+  | 'set_appointment_fields';
 
 const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_PREFIX =
   'MAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION ';
@@ -158,6 +159,12 @@ export type RescheduleAppointmentRequest = {
   staffId?: string;
   serviceIds?: string[];
   notes?: string | null;
+};
+
+export type PayVisitRequest = {
+  externalId: string;
+  amountKopecks: number;
+  paymentMethod: VisitPaymentMethod;
 };
 
 type AppointmentActionPlan<T> = {
@@ -203,6 +210,13 @@ function optionalNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value)
     ? value
     : undefined;
+}
+
+function requireNumber(value: unknown, label: string): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(`Invalid durable ${label}`);
+  }
+  return value;
 }
 
 function normalizedServiceIds(serviceIds: readonly string[]): string[] {
@@ -1487,6 +1501,121 @@ export class CrmService {
     };
   }
 
+  async payVisit(
+    tenantId: string,
+    params: PayVisitRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<PaidVisit> {
+    try {
+      return (
+        await this.executePayVisitWithReceipt(tenantId, params, invocation)
+      ).value;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  async previewPayVisit(
+    tenantId: string,
+    params: PayVisitRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionExecutionPreviewV1> {
+    const plan = await this.payVisitActionPlan(tenantId, params, invocation);
+    return this.actionEngineRuntime.preview(plan.request);
+  }
+
+  async executePayVisitWithReceipt(
+    tenantId: string,
+    params: PayVisitRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<PaidVisit>> {
+    const plan = await this.payVisitActionPlan(tenantId, params, invocation);
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private async payVisitActionPlan(
+    tenantId: string,
+    params: PayVisitRequest,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<PaidVisit>> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    if (!adapter.getVisitPaymentState || !adapter.payVisit) {
+      throw new ConflictException(
+        'CRM provider does not support canonical visit payment.',
+      );
+    }
+    const actionInput: PayVisitRequest = {
+      externalId: String(params.externalId),
+      amountKopecks: params.amountKopecks,
+      paymentMethod: params.paymentMethod,
+    };
+
+    return {
+      request: this.appointmentActionRequest({
+        tenantId: scopedTenantId,
+        capability: 'crm.visit.payment.v1',
+        targetRef: `appointment/${actionInput.externalId}`,
+        input: actionInput,
+        invocation,
+      }),
+      handlers: {
+        prepare: async (input) => {
+          const durable = this.payVisitInput(input);
+          const state = await adapter.getVisitPaymentState!({
+            tenantId: scopedTenantId,
+            externalId: durable.externalId,
+          });
+          this.assertVisitPaymentAmount(state, durable.amountKopecks);
+          if (
+            state.classification === 'partial_or_inconsistent' ||
+            state.classification === 'unknown'
+          ) {
+            throw new ConflictException(
+              'Visit payment state is not safe for a new payment.',
+            );
+          }
+          return this.visitPaymentSafe(state);
+        },
+        dispatch: async (input) => {
+          const durable = this.payVisitInput(input);
+          const value = await adapter.payVisit!({
+            tenantId: scopedTenantId,
+            ...durable,
+          });
+          return { value, safeResult: this.visitPaymentSafe(value) };
+        },
+        reconcile: async (input) => {
+          const durable = this.payVisitInput(input);
+          const state = await adapter.getVisitPaymentState!({
+            tenantId: scopedTenantId,
+            externalId: durable.externalId,
+          });
+          if (
+            state.classification === 'paid_as_intended' &&
+            state.expected_amount_kopecks === durable.amountKopecks
+          ) {
+            return {
+              outcome: 'PROVEN_SUCCEEDED',
+              safeResult: this.visitPaymentSafe(state),
+            };
+          }
+          if (state.classification === 'unpaid') {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          return { outcome: 'STILL_UNKNOWN' };
+        },
+        restore: (safe) => this.restorePaidVisit(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
   private appointmentFingerprint(value: unknown): string {
     return createHash('sha256')
       .update(stableActionJson(value))
@@ -1518,6 +1647,7 @@ export class CrmService {
       | 'crm.appointment.create.v1'
       | 'crm.appointment.reschedule.v1'
       | 'crm.appointment.cancel.v1'
+      | 'crm.visit.payment.v1'
       | ResidualAppointmentShadowCapability;
     targetRef: string;
     input: unknown;
@@ -1792,6 +1922,78 @@ export class CrmService {
       start: requireString(safe.start, 'start'),
       staff_id: requireString(safe.staffId, 'staffId'),
       service_ids: requireStringArray(safe.serviceIds, 'serviceIds'),
+    };
+  }
+
+  private payVisitInput(input: Record<string, unknown>): PayVisitRequest {
+    const amountKopecks = requireNumber(input.amountKopecks, 'amountKopecks');
+    const paymentMethod = requireString(input.paymentMethod, 'paymentMethod');
+    if (!Number.isSafeInteger(amountKopecks) || amountKopecks <= 0) {
+      throw new BadRequestException('amountKopecks must be a positive integer');
+    }
+    if (paymentMethod !== 'cash' && paymentMethod !== 'card') {
+      throw new BadRequestException('paymentMethod must be cash or card');
+    }
+    return {
+      externalId: requireString(input.externalId, 'externalId'),
+      amountKopecks,
+      paymentMethod,
+    };
+  }
+
+  private assertVisitPaymentAmount(
+    state: CrmVisitPaymentState,
+    amountKopecks: number,
+  ): void {
+    if (state.expected_amount_kopecks !== amountKopecks) {
+      throw new ConflictException(
+        'Visit payment amount does not match provider truth.',
+      );
+    }
+  }
+
+  private visitPaymentSafe(
+    value: CrmVisitPaymentState,
+  ): Record<string, unknown> {
+    return {
+      externalId: value.external_id,
+      visitId: value.visit_id,
+      expectedAmountKopecks: value.expected_amount_kopecks,
+      paid: value.paid,
+      classification: value.classification,
+      paidFull: value.paid_full,
+      paymentStatus: value.payment_status,
+      linkedServicePaymentCount: value.linked_service_payment_count,
+      linkedAmountKopecks: value.linked_amount_kopecks,
+      allocationConsistent: value.allocation_consistent,
+    };
+  }
+
+  private restorePaidVisit(safe: Record<string, unknown>): PaidVisit {
+    const classification = requireString(safe.classification, 'classification');
+    if (classification !== 'paid_as_intended') {
+      throw new ConflictException('Stored visit payment is not proven paid.');
+    }
+    return {
+      external_id: requireString(safe.externalId, 'externalId'),
+      visit_id: requireString(safe.visitId, 'visitId'),
+      expected_amount_kopecks: requireNumber(
+        safe.expectedAmountKopecks,
+        'expectedAmountKopecks',
+      ),
+      paid: safe.paid === true,
+      classification,
+      paid_full: safe.paidFull === true,
+      payment_status: requireNumber(safe.paymentStatus, 'paymentStatus'),
+      linked_service_payment_count: requireNumber(
+        safe.linkedServicePaymentCount,
+        'linkedServicePaymentCount',
+      ),
+      linked_amount_kopecks: requireNumber(
+        safe.linkedAmountKopecks,
+        'linkedAmountKopecks',
+      ),
+      allocation_consistent: safe.allocationConsistent === true,
     };
   }
 
