@@ -1,6 +1,6 @@
 # CYCLE 06 — BLOCKING PACKAGE 1 — RESIDUAL APPOINTMENT MUTATION CONVERGENCE REPORT
 
-Status: shadow deployed; A04-A07 production equivalence observed; cutover not performed
+Status: shadow deployed; A04-A07 production equivalence observed; A08 divergence isolated; cutover not performed
 Repository implementation HEAD: `c8c67c72`
 Package order: 1 of 5
 Next package started: no
@@ -185,6 +185,34 @@ The field contract mismatch discovered during adversarial review
 (`client_identity` versus canonical `client_name`) was corrected and protected
 by a ratchet test.
 
+### A08 partial-effect safety boundary
+
+The owner-performed card close exposed a provider ambiguity that the original
+legacy code treated as a normal failure. YClients accepted one finance
+transaction, but returned it without `record_id` or `visit_id` linkage and left
+the appointment unpaid. Treating that result as a retryable failure could create
+a second cashbox transaction.
+
+The legacy A08 owner now fails closed around this provider behavior:
+
+- before dispatch it reconciles by the exact MAYA payment marker and amount,
+  including provider rows whose record and visit linkage was stripped;
+- a reconciliation outage never means "no transaction" and therefore never
+  permits a blind dispatch;
+- an already existing matching transaction suppresses a second finance write;
+- a dispatch result whose provider outcome cannot be proved is `UNKNOWN`, not
+  `FAILED`;
+- the HTTP contract returns `202`, `retry_allowed = false`, and an explicit
+  instruction not to repeat payment;
+- the durable legacy `payment_idempotency` success marker is not written until
+  the appointment itself is confirmed paid;
+- Shadow receives the unknown A08 outcome for comparison, but remains unable to
+  execute a CRM or cashbox mutation;
+- failure of Shadow telemetry cannot hide or alter the fail-closed user result.
+
+This is a safety repair to the existing legacy execution owner. It is not an
+A08 cutover and grants the Action Engine no new execution capability.
+
 ## Adversarial Verification
 
 | Attempted invariant break | Result |
@@ -212,6 +240,8 @@ cutover.
 - Targeted Nest registry, boundary, bridge, and YClients adapter suite:
   **65 passed**.
 - Organic observer suite: **14 passed**.
+- A08 payment ambiguity, reconciliation and legacy bridge suite: **34 passed**.
+- Python syntax compilation for the changed A08 files: **passed**.
 - Targeted Nest CRM visit-operation suite: **15 passed**.
 - Full Nest test matrix: **170 suites / 1,713 tests passed**.
 - TypeScript typecheck: **passed**.
@@ -279,11 +309,20 @@ execution identity.
 | A05 duration | EQUIVALENT (2 distinct organic transitions; 0 divergences) |
 | A06 services/composition | EQUIVALENT (4 deliveries; 3 unique transitions; 1 duplicate collapsed; 0 divergences) |
 | A07 fields/comment/client/SMS | EQUIVALENT |
-| A08 payment/close | NOT OBSERVED IN PRODUCTION |
+| A08 payment/close | DIVERGENT: one finance transaction was accepted but remained provider-unlinked and the appointment remained unpaid |
 
 The earlier A05 owner action is not counted as evidence because it occurred
 before the native/Nest observation hook existed. Production equivalence is not
 inferred from structural tests.
+
+For A08, the owner selected card payment on appointment `1930492386`. The
+provider created exactly one matching 2,000-ruble finance transaction, but
+returned `record_id = 0` and `visit_id = 0`; the appointment remained
+`paid_full = 0`, `payment_status = 0`, with 2,000 rubles still due. A subsequent
+read-only check after the owner's latest tap still found exactly one matching
+transaction, proving no duplicate external charge was created. This is a real
+production divergence/partial external effect, not equivalence. No payment or
+provider data was changed during verification.
 
 ## Production And Cutover Decision
 
@@ -315,6 +354,12 @@ messages.
 
 No automatic cutover was performed. The five classes still have legacy
 execution owners, so their direct bypass count remains five at this gate.
+
+A08 remains blocked from cutover until its canonical executor has an approved
+provider-specific reconciliation strategy for unlinked finance transactions
+and a new safe proof returns an unambiguous equivalent outcome. The new legacy
+guard prevents duplicate finance dispatch and preserves `UNKNOWN`; it does not
+claim the partially affected appointment is paid.
 
 Before any cutover, production Shadow must observe representative organic
 actions and compare tenant, action class, appointment target, normalized

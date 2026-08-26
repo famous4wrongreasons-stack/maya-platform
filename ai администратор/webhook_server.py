@@ -13517,6 +13517,14 @@ async def panel_journal_pay_handler(request: web.Request) -> web.Response:
             "already_paid": bool(result.get("already_paid")),
             "transaction": result.get("transaction"),
         })
+    if _action_outcome_unknown(result):
+        return _cabinet_response(
+            _action_unknown_payload(
+                result,
+                "Результат оплаты уточняется. Не нажимайте оплату повторно.",
+            ),
+            status=202,
+        )
     return _cabinet_response({"error": "pay_failed", "message": result.get("error") or "YClients отклонил оплату."}, status=400)
 
 

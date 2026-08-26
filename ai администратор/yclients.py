@@ -260,6 +260,21 @@ class YClientsAPI:
         self, action_class: str, record_id: int, payload: dict
     ) -> bool:
         """Observe a proven legacy write; never affect or repeat that write."""
+        return self._observe_residual_appointment_outcome(
+            action_class,
+            record_id,
+            payload,
+            {"success": True, "code": "legacy_write_succeeded"},
+        )
+
+    def _observe_residual_appointment_outcome(
+        self,
+        action_class: str,
+        record_id: int,
+        payload: dict,
+        legacy_outcome: dict,
+    ) -> bool:
+        """Observe a legacy result without granting Shadow side effects."""
         try:
             return observe_residual_appointment_action(
                 provider="yclients",
@@ -267,7 +282,7 @@ class YClientsAPI:
                 origin="legacy.residual_appointment",
                 action_class=action_class,
                 payload={"external_id": str(record_id), **payload},
-                legacy_outcome={"success": True, "code": "legacy_write_succeeded"},
+                legacy_outcome=legacy_outcome,
             )
         except Exception:
             logger.exception(
@@ -275,6 +290,101 @@ class YClientsAPI:
                 action_class,
             )
             return False
+
+    def _find_payment_transaction(
+        self,
+        *,
+        comment: str,
+        amount: int,
+        start_date: str,
+        end_date: str,
+        max_pages: int = 5,
+    ) -> dict:
+        """Find our exact payment marker, including provider-unlinked rows.
+
+        YClients can accept a finance transaction while returning it with
+        ``record_id=0`` and ``visit_id=0``. The exact comment and amount are the
+        provider-side evidence in that case. Lookup failures remain distinct
+        from an empty result so callers fail closed instead of paying twice.
+        """
+        page = 1
+        count = 200
+        try:
+            while page <= max_pages:
+                data = self._get(
+                    f"transactions/{self.company_id}",
+                    {
+                        "start_date": start_date,
+                        "end_date": end_date,
+                        "count": count,
+                        "page": page,
+                    },
+                )
+                batch = (data or {}).get("data") or []
+                for tx in batch:
+                    if not isinstance(tx, dict):
+                        continue
+                    try:
+                        tx_amount = int(Decimal(str(tx.get("amount") or "0")))
+                    except (InvalidOperation, ValueError, TypeError):
+                        continue
+                    if (
+                        str(tx.get("comment") or "").strip() == comment
+                        and tx_amount == amount
+                    ):
+                        return {"success": True, "transaction": tx}
+                if len(batch) < count:
+                    break
+                page += 1
+            return {"success": True, "transaction": None}
+        except Exception as exc:
+            logger.warning("YClients payment reconciliation lookup failed: %s", exc)
+            return {"success": False, "error": "payment_reconciliation_unavailable"}
+
+    def _payment_outcome_unknown(
+        self,
+        *,
+        record_id: int,
+        payment_method: str,
+        amount: int,
+        code: str,
+        transaction: dict | None = None,
+    ) -> dict:
+        """Return a fail-closed payment result and record the Shadow outcome."""
+        transaction_id = (transaction or {}).get("id")
+        try:
+            value_ref = opaque_mutation_reference(
+                {
+                    "paid_full": True,
+                    "payment_method": payment_method,
+                    "amount": amount,
+                    "provider_transaction_present": bool(transaction_id),
+                },
+                "close",
+            )
+            self._observe_residual_appointment_outcome(
+                "close_appointment_payment",
+                record_id,
+                {"mutation_kind": "close", "value_ref": value_ref},
+                {"success": False, "code": code, "unknown": True},
+            )
+        except Exception:
+            # Shadow telemetry must never hide the fail-closed payment result.
+            logger.exception("Payment UNKNOWN shadow observation failed")
+        return {
+            "success": False,
+            "unknown": True,
+            "retry_allowed": False,
+            "code": code,
+            "error": (
+                "YClients принял данные оплаты, но ещё не подтвердил оплату визита. "
+                "Не проводите оплату повторно."
+            ),
+            "record_id": record_id,
+            "amount": amount,
+            "payment_method": payment_method,
+            **({"transaction_id": transaction_id} if transaction_id else {}),
+        }
 
     def _observe_sensitive_appointment_action(
         self,
@@ -2637,20 +2747,30 @@ class YClientsAPI:
             after = self.get_record(record_id)
             tx_result = {"success": True, "skipped": True, "reason": "record_put"}
             if paid_full and not is_paid_record(after) and total > 0:
-                tx_exists = False
-                try:
-                    start = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
-                    end = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
-                    for tx in self.get_company_transactions(start, end, max_pages=5):
-                        if not isinstance(tx, dict):
-                            continue
-                        if tx_comment in str(tx.get("comment") or "") and int(tx.get("record_id") or 0) == int(record_id):
-                            tx_exists = True
-                            tx_result = {"success": True, "already_exists": True, "transaction": tx}
-                            break
-                except Exception:
-                    tx_exists = False
-                if not tx_exists:
+                start = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
+                end = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
+                lookup = self._find_payment_transaction(
+                    comment=tx_comment,
+                    amount=total,
+                    start_date=start,
+                    end_date=end,
+                    max_pages=5,
+                )
+                if not lookup.get("success"):
+                    return self._payment_outcome_unknown(
+                        record_id=record_id,
+                        payment_method=payment_method,
+                        amount=total,
+                        code="payment_reconciliation_unavailable",
+                    )
+                existing_tx = lookup.get("transaction")
+                if existing_tx:
+                    tx_result = {
+                        "success": True,
+                        "already_exists": True,
+                        "transaction": existing_tx,
+                    }
+                else:
                     first_service_id = None
                     for s in services_payload:
                         if s.get("id"):
@@ -2667,18 +2787,22 @@ class YClientsAPI:
                         sold_item_id=first_service_id,
                     )
                 if not tx_result.get("success"):
-                    return {
-                        "success": False,
-                        "error": tx_result.get("error") or "Кассовая операция не создана.",
-                    }
+                    return self._payment_outcome_unknown(
+                        record_id=record_id,
+                        payment_method=payment_method,
+                        amount=total,
+                        code="payment_dispatch_outcome_unknown",
+                    )
                 after = self.get_record(record_id)
 
             if paid_full and not is_paid_record(after):
-                return {
-                    "success": False,
-                    "error": "YClients принял запрос, но запись осталась неоплаченной.",
-                    "transaction": tx_result,
-                }
+                return self._payment_outcome_unknown(
+                    record_id=record_id,
+                    payment_method=payment_method,
+                    amount=total,
+                    code="provider_payment_unlinked",
+                    transaction=tx_result.get("transaction"),
+                )
 
             self._observe_sensitive_appointment_action(
                 "close_appointment_payment",
