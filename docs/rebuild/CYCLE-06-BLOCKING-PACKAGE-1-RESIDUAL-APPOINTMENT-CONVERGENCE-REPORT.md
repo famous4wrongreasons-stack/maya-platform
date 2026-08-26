@@ -324,6 +324,110 @@ transaction, proving no duplicate external charge was created. This is a real
 production divergence/partial external effect, not equivalence. No payment or
 provider data was changed during verification.
 
+## A08 Root-Cause Analysis
+
+### Exact legacy semantics
+
+The legacy user action is labelled and returned as "pay and close the visit".
+Its intended business postconditions are composite rather than a single
+cashbox write:
+
+1. mark the appointment as attended;
+2. create the selected cash/card financial operation;
+3. link that operation to the appointment and visit;
+4. update the appointment payment state so that no amount remains due.
+
+The legacy handler exposes `paid = true` and `attendance = 1` only when the
+whole operation is reported as successful. A standalone finance transaction is
+therefore not the user-visible success condition.
+
+### Three independently observed states
+
+| State | Read-only production evidence | Verdict |
+|---|---|---|
+| External financial operation created | Exactly one matching 2,000-ruble operation exists | YES |
+| Operation linked to appointment/visit | The operation has `record_id = 0` and `visit_id = 0` | NO |
+| Appointment payment state updated | `paid_full = 0`, `payment_status = 0`, and 2,000 rubles remain due | NO |
+
+The first row is evidence of a partial provider side effect only. It is not
+proof that the appointment was paid or closed.
+
+### Root cause and ownership classification
+
+The primary root cause is a **legacy semantics defect**: after the appointment
+update failed to produce a proven paid state, the legacy implementation used a
+generic finance-transaction creation call as a fallback for completing the
+composite "pay and close" action. It assumed that submitting appointment and
+visit identifiers would make the resulting cashbox operation settle and link
+the visit. The provider accepted the operation but persisted it without those
+links and left the appointment unpaid.
+
+This is also a provider-contract mismatch/limitation for the selected endpoint:
+successful creation of the financial operation does not provide an atomic
+guarantee that the visit is linked and settled. The current evidence does not
+justify classifying the provider acceptance itself as a provider failure.
+
+The new canonical executor did not cause the divergence: A08 remains
+`SHADOW_ONLY`, has no executor, and performed zero financial or CRM writes.
+The durable `ActionExecution` schema is not the blocker because it can already
+preserve `UNKNOWN`, attempt evidence, safe partial-result summaries, and a
+reconciliation state. The current **A08 capability contract is incomplete**,
+however: its opaque `valueRef` does not separately express attendance, external
+operation creation, record/visit linkage, and final appointment payment state.
+
+### Read-only reconciliation boundary
+
+Current-state reconciliation is possible without another mutation:
+
+- find the exact financial operation using the deterministic payment marker
+  and amount;
+- read its appointment/visit linkage fields;
+- read the appointment payment fields and remaining service amount;
+- classify the composite result as succeeded, not executed, failed before
+  dispatch, or partial/UNKNOWN.
+
+For this incident, reconciliation proves a stable partial/UNKNOWN outcome:
+operation created, operation unlinked, appointment unpaid. It cannot safely
+repair the linkage or mark the appointment paid. Such repair would be a new
+production financial mutation and is outside the approved scope.
+
+The existing `UNKNOWN guard` remains mandatory. The matching operation blocks
+a second dispatch, and reconciliation failure must never be interpreted as
+"no operation exists".
+
+### Gate decision
+
+Correcting A08 requires an approved financial capability contract that defines:
+
+- which postconditions constitute success for "pay and close";
+- whether attendance is part of the same action or a separately authorised
+  transition;
+- which provider-supported primitive owns operation-to-visit linkage and
+  payment settlement;
+- how each partial state is represented and reconciled;
+- how an already-created unlinked operation is escalated for manual resolution
+  without a second charge.
+
+This changes the current financial execution semantics, so the required result
+is **A08 FINANCIAL SEMANTICS/CONTRACT GATE -> STOP**. Based on the current
+durable kernel, a Prisma/schema migration is not required for the gate itself.
+No canonical executor or production repair was implemented, and Package 2 was
+not started.
+
+`A08 ROOT CAUSE: legacy generic finance-transaction fallback created a provider-accepted but unlinked operation; the composite visit payment postconditions were never satisfied`
+
+`EXTERNAL OPERATION CREATED: YES`
+
+`APPOINTMENT PAYMENT PROVEN: NO`
+
+`SECOND OPERATION POSSIBLE: NO`
+
+`RECONCILIATION POSSIBLE: YES (read-only state classification only; no automatic repair)`
+
+`A08 CUTOVER SAFE: NO`
+
+`PACKAGE 1 COMPLETE: NO`
+
 ## Production And Cutover Decision
 
 The initial Shadow capability implementation was deployed as immutable release
