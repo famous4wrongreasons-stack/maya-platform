@@ -481,11 +481,118 @@ step is one explicitly requested, owner-performed production action followed by
 read-only inspection. Cutover requires a separate approval and must remove
 direct execution without runtime fallback.
 
+## A08 Canonical Visit Payment Cutover Candidate
+
+The approved A08 implementation replaces the legacy business semantics
+"create a generic financial operation" with the canonical business action
+`pay_visit`. The release candidate routes that action through Action Engine to
+the YClients visit-payment executor and uses only the documented public
+`PUT /visits/{visit_id}/{record_id}` capability with the supported
+`fast_payment` allocation. The action name and contract express the business
+result, not the provider transport endpoint.
+
+The canonical preflight reads provider truth before dispatch and proves the
+tenant, visit/record identity, current unpaid state, exact outstanding amount,
+payment method/allocation, requester authorization, and deterministic
+execution identity. An already paid visit converges without a second provider
+write. Amount mismatch, partial payment, ambiguous state, wrong tenant, wrong
+visit, and unauthorized initiation fail closed before dispatch.
+
+After a provider write the executor reads the record, visit, visit details,
+and linked transactions again. `SUCCEEDED` is permitted only when those reads
+prove the intended record/visit is paid in full and its non-deleted service
+transactions carry the exact payment allocation. HTTP success, remaining
+amount alone, or the existence of a generic financial operation is not proof.
+An acknowledged or timed-out dispatch without this proof remains `UNKNOWN` and
+is eligible only for read-only reconciliation. Blind retry is impossible.
+
+The existing unlinked 2,000-ruble operation has `record_id = 0` and
+`visit_id = 0`; the canonical proof deliberately ignores it. The operation was
+not modified, linked, deleted, or compensated and remains a manual accounting
+review item.
+
+The old `set_record_paid` fake-payment entry point is now a fail-closed
+tombstone. The Telegram and panel initiators call only the protected bridge,
+and the bridge accepts only the canonical `pay_visit` contract. Architectural
+ratchets reject restoration of a generic financial-operation fallback,
+direct provider payment mutation by an initiator, dispatch without the
+Telegram staff ownership check, or retry after an unknown outcome.
+
+Shadow planning was exercised with the canonical tenant, visit, amount,
+payment allocation, authorization context, and execution identity. It
+performed zero provider writes. The NestJS release candidate was deployed as
+immutable release `20260826-c06-p1-a08-canonical-shadow`. The reviewed Python
+initiators and bridge client were deployed with the fail-closed proof canary:
+`MAYA_A08_PAY_VISIT_SCOPE=proof`, with exactly one owner-controlled test record
+allowlisted. All other payment targets remain blocked. Deployed source hashes
+match the reviewed commit and both `maya-saas` and `barbershop-bot` are active.
+
+The production Shadow used the owner's own unpaid test visit, the exact
+2,000-ruble amount, card allocation, deterministic logical execution identity,
+the documented YClients visit-payment endpoint, and the mandatory paid-visit
+read-back contract. Shadow accepted the canonical plan while performing zero
+provider writes. The durable production `pay_visit` execution count remained
+zero. A subsequent read-only provider inspection proved that the visit remained
+unpaid and had zero linked canonical payment transactions. It also proved that
+the historical unlinked 2,000-ruble operation remained present and untouched.
+No generic financial operation was created by the new path.
+
+The canary is therefore structurally and semantically ready for one explicit
+owner-performed payment proof, but that proof has not run. A08 production
+cutover is not complete until one manual action proves one ActionExecution, one
+documented provider payment mutation, authoritative paid read-back, no generic
+operation, no duplicate on repeat, and a consistent local mirror. The four
+other Package 1 classes remain on their previously recorded owners.
+
+### Mandatory adversarial matrix
+
+| # | Scenario | Evidence / verdict |
+|---|---|---|
+| 1 | Unpaid visit -> canonical payment | Adapter and CRM service tests prove one documented visit-payment mutation. |
+| 2 | Read-back proves paid | Success requires the authoritative record, visit, details, and linked allocation reads. |
+| 3 | Repeated same payment | Already-paid convergence plus Action Engine identity prevents a second mutation. |
+| 4 | Already paid visit | Adapter returns the proven paid state without dispatch. |
+| 5 | Timeout before dispatch | Existing Action Engine kernel records non-dispatch and permits no false success. |
+| 6 | Timeout after dispatch | Provider/bridge tests preserve `UNKNOWN`; no fallback or retry occurs. |
+| 7 | UNKNOWN -> reconciled paid | Reconciler maps exact paid read-back to `PROVEN_SUCCEEDED`. |
+| 8 | UNKNOWN -> not applied | Authoritative unpaid read-back maps to `PROVEN_NOT_EXECUTED`. |
+| 9 | Partial provider state | Partial or conflicting allocation remains unresolved and blocks dispatch/retry. |
+| 10 | Local mirror failure after provider success | Provider proof remains authoritative; initiators mirror only after a confirmed canonical receipt. |
+| 11 | Restart after dispatch | Durable Action Engine execution and reconciliation resume the same identity. |
+| 12 | Two workers, same payment | The existing database claim invariant admits one execution owner. |
+| 13 | Wrong tenant | Tenant-scoped CRM service and protected bridge reject the request. |
+| 14 | Wrong visit | Missing or mismatched provider record/visit fails closed before mutation. |
+| 15 | Unauthorized requester | Allowed bridge origins, panel authentication, and Telegram staff ownership are enforced. |
+| 16 | Amount mismatch | Exact outstanding amount is required by service and adapter. |
+| 17 | Legacy generic-operation path | Tombstone and AST/architecture ratchets make the fake-payment path unreachable. |
+| 18 | Existing 2,000-ruble operation | Unlinked zero record/visit identifiers are ignored as payment proof. |
+| 19 | Blind retry | Registry allows one attempt and no retryable post-dispatch error. |
+| 20 | Exactly one provider mutation | Dispatch-count assertions prove one mutation per successful logical action. |
+
+The restart, local-mirror, and two-worker rows inherit the already approved
+durable Action Engine kernel invariants; they do not claim a new production
+payment. The full NestJS suite passed 1,734 tests in 170 suites, the focused
+legacy Python boundary suite passed 15 tests, and typecheck, script typecheck,
+lint, build, and whitespace validation passed.
+
 ## Final Status
 
-PACKAGE COMPLETE: NO
-ACTION CLASSES MIGRATED: 0
-DIRECT BYPASSES REMAINING FOR PACKAGE: 5
+A08 CANONICAL PAYMENT IMPLEMENTED: YES
+LEGACY FAKE-PAYMENT PATH REACHABLE: NO
+VISIT PAID SUCCESS REQUIRES READ-BACK: YES
 BLIND RETRY AFTER UNKNOWN: NO
+EXISTING 2000 RUB OPERATION MODIFIED: NO
+A08 CUTOVER COMPLETE: NO
+PACKAGE 1 COMPLETE: NO
+PACKAGE 2 STARTED: NO
+
+A08 SHADOW EQUIVALENT: YES
+REAL PAYMENT PROOF REQUIRED: YES
+REAL PAYMENT PROOF: NOT RUN
+GENERIC FINANCIAL OPERATION CREATED BY NEW PATH: NO
+VISIT PAID VERIFIED BY READ-BACK: NO
+
+ACTION CLASSES MIGRATED: 0 (proof canary is not global cutover)
+DIRECT BYPASSES REMAINING FOR PACKAGE: 4
 NEXT BLOCKING PACKAGE STARTED: NO
 CHAPTER 6 BLOCKING PACKAGES REMAINING: 5

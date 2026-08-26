@@ -506,3 +506,87 @@ not exist. A08 requires a later explicit implementation and cutover approval.
 `PACKAGE 1 CAN CLOSE WITH PROVIDER LIMITATION: NO`
 
 STOP. No production writes were performed. Package 2 was not started.
+
+## Approved Implementation Follow-Up (2026-08-26)
+
+The project owner accepted this gate and explicitly approved implementation of
+the A08 canonical visit-payment cutover candidate. The historical gate verdict
+above remains the record of the pre-approval decision; this follow-up records
+the implementation that followed that approval.
+
+The release candidate introduces the canonical `pay_visit` action through the
+durable Action Engine. It uses the documented YClients visit-payment write,
+requires exact visit identity and payment allocation, and performs an
+authoritative read-back before success. Generic financial-operation creation
+is neither an executor nor payment proof. If the dispatch may have occurred but
+the visit cannot be proven paid, the durable execution remains `UNKNOWN` and
+can only be reconciled by reads.
+
+The legacy fake-payment route has been removed from the release-candidate
+execution graph and protected by static and runtime ratchets. Shadow planning
+performs no provider mutation. The existing unlinked 2,000-ruble operation is
+explicitly excluded from canonical proof and remains unchanged for manual
+accounting review.
+
+Structural verification passed the full 1,734-test NestJS suite, the focused
+15-test Python boundary suite, typechecks, lint, build, and whitespace checks.
+No deployment, production payment, automatic linkage, compensation, or other
+financial write was performed. A08 production cutover therefore still requires
+a separately approved release and, if requested after deployment, one
+owner-performed functional proof. Package 2 was not started.
+
+`A08 CANONICAL PAYMENT IMPLEMENTED: YES`
+
+`LEGACY FAKE-PAYMENT PATH REACHABLE: NO (release candidate source; production cutover not deployed)`
+
+`VISIT PAID IS VERIFIED BY READ-BACK: YES`
+
+`BLIND RETRY AFTER UNKNOWN: NO`
+
+`EXISTING 2000 RUB OPERATION MODIFIED: NO`
+
+`A08 CUTOVER COMPLETE: NO`
+
+`PACKAGE 1 COMPLETE: NO`
+
+`PACKAGE 2 STARTED: NO`
+
+STOP. No production writes were performed.
+
+## Production Safe Proof Gate (2026-08-26)
+
+The reviewed canonical implementation was deployed to NestJS as immutable
+release `20260826-c06-p1-a08-canonical-shadow`. The Python initiators and bridge
+client were deployed behind a fail-closed proof canary that allows exactly one
+owner-controlled test record. All other A08 payment targets remain disabled.
+The deployed source hashes match the reviewed release, the services are active,
+and the durable production `pay_visit` execution count is zero.
+
+Read-only production inspection proved that the allowlisted visit exists and
+is unpaid, with zero linked canonical payment transactions. The historical
+unlinked 2,000-ruble operation remains present and untouched and is excluded
+from reconciliation. Shadow planning for the exact visit, 2,000-ruble amount,
+card allocation, deterministic execution identity, documented YClients payment
+endpoint, and mandatory paid-state read-back passed with zero financial writes.
+
+The next and only permitted action is one manual owner-performed payment on the
+allowlisted visit. Until that proof is inspected, there is no global cutover and
+no claim that production paid-state read-back has succeeded.
+
+`A08 SHADOW EQUIVALENT: YES`
+
+`REAL PAYMENT PROOF REQUIRED: YES`
+
+`REAL PAYMENT PROOF: NOT RUN`
+
+`GENERIC FINANCIAL OPERATION CREATED BY NEW PATH: NO`
+
+`VISIT PAID VERIFIED BY READ-BACK: NO`
+
+`A08 CUTOVER COMPLETE: NO`
+
+`PACKAGE 1 COMPLETE: NO`
+
+`PACKAGE 2 STARTED: NO`
+
+STOP. No production financial write was performed by this gate.
