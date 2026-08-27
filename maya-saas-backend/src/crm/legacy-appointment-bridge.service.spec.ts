@@ -140,6 +140,10 @@ describe('LegacyAppointmentBridgeService', () => {
       executeRescheduleAppointmentWithReceipt: jest.fn(),
       executeCancelAppointmentWithReceipt: jest.fn(),
       executePayVisitWithReceipt: jest.fn(),
+      executeResidualAppointmentWithReceipt: jest.fn().mockResolvedValue({
+        value: { external_id: '77', duration_minutes: 60 },
+        execution: UNKNOWN_EXECUTION,
+      }),
       getAppointmentActionExecutionResult: jest.fn(),
     };
     const tenantContext = new TenantContextService();
@@ -384,25 +388,38 @@ describe('LegacyAppointmentBridgeService', () => {
     ).not.toHaveBeenCalled();
   });
 
-  it('rejects residual appointment execution before resolving a tenant', async () => {
+  it('executes a residual appointment mutation through the canonical Action Engine path', async () => {
     const { bridgeSource, crmService, service } = unitHarness();
     process.env.MAYA_LEGACY_APPOINTMENT_BRIDGE_EXECUTION_ENABLED = 'true';
 
-    await expect(
-      service.execute(
-        createDto({
-          origin: 'legacy.residual_appointment',
-          action_class: 'set_appointment_duration',
-          payload: { external_id: '77', duration_seconds: 3600 },
-        }),
-      ),
-    ).rejects.toMatchObject({
-      response: {
-        error: { code: 'legacy_appointment_shadow_only' },
-      },
-    });
-    expect(bridgeSource.resolveTenantByIntegration).not.toHaveBeenCalled();
+    const result = await service.execute(
+      createDto({
+        origin: 'legacy.residual_appointment',
+        action_class: 'set_appointment_duration',
+        payload: { external_id: '77', duration_seconds: 3600 },
+      }),
+    );
+
+    expect(bridgeSource.resolveTenantByIntegration).toHaveBeenCalledTimes(1);
+    expect(
+      crmService.executeResidualAppointmentWithReceipt,
+    ).toHaveBeenCalledWith(
+      'tenant-1',
+      'set_appointment_duration',
+      '77',
+      { durationSeconds: 3600 },
+      expect.objectContaining({
+        sourceType: 'legacy_bridge',
+        sourceRef: 'legacy:legacy.residual_appointment:request-1',
+        callerIdempotency: {
+          scope: 'legacy-appointment:yclients:42:set_appointment_duration',
+          key: 'legacy-v1:request-1',
+        },
+      }),
+    );
     expect(crmService.planResidualAppointmentShadow).not.toHaveBeenCalled();
+    expect(result.execution).toEqual(UNKNOWN_EXECUTION);
+    expect(result.safe_explanation).toContain('Не повторяйте действие');
   });
 
   it('rejects invalid residual payload before resolving a tenant', async () => {

@@ -93,6 +93,10 @@ describe('CrmService: операции над визитом', () => {
     const tenantContext = new TenantContextService();
     const actionClassByCapability: Record<string, string> = {
       'crm.visit.payment.v1': 'pay_visit',
+      'crm.appointment.attendance.v1': 'set_appointment_attendance',
+      'crm.appointment.duration.v1': 'set_appointment_duration',
+      'crm.appointment.services.v1': 'set_appointment_services',
+      'crm.appointment.fields.v1': 'set_appointment_fields',
       'crm.appointment.attendance.shadow.v1': 'set_appointment_attendance',
       'crm.appointment.duration.shadow.v1': 'set_appointment_duration',
       'crm.appointment.services.shadow.v1': 'set_appointment_services',
@@ -205,16 +209,38 @@ describe('CrmService: операции над визитом', () => {
     branch: null,
   });
 
+  const mutationState = (
+    overrides: Partial<{
+      attendance: string;
+      duration_minutes: number;
+      service_ids: string[];
+      comment: string;
+      client_name: string;
+      client_phone: string;
+      sms_flag: number;
+    }> = {},
+  ) => ({
+    external_id: '77',
+    attendance: 'awaiting',
+    duration_minutes: 60,
+    service_ids: ['10'],
+    comment: '',
+    client_name: 'Клиент',
+    client_phone: '+79990000000',
+    sms_flag: 0,
+    ...overrides,
+  });
+
   it('отвечает понятным кодом, когда провайдер не умеет операцию', async () => {
-    const { service, run } = build({});
+    const { service, run } = build({
+      getAppointmentMutationState: jest.fn().mockResolvedValue(mutationState()),
+    });
 
     await expect(
       run(() =>
         service.markAppointmentAttendance('tenant-1', OWNER, '77', 'arrived'),
       ),
-    ).rejects.toMatchObject({
-      response: { error: { code: 'crm_attendance_not_supported' } },
-    });
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('не пускает в CRM исход, который нельзя проставить записью', async () => {
@@ -288,12 +314,19 @@ describe('CrmService: операции над визитом', () => {
   });
 
   it('мастер работает со своим визитом', async () => {
+    let state = mutationState();
     const getAppointmentStaffId = jest.fn().mockResolvedValue('1461615');
-    const markAppointmentAttendance = jest
-      .fn()
-      .mockResolvedValue({ external_id: '77', attendance: 'arrived' });
+    const markAppointmentAttendance = jest.fn().mockImplementation(() => {
+      state = mutationState({ attendance: 'arrived' });
+      return Promise.resolve({ external_id: '77', attendance: 'arrived' });
+    });
+    const getAppointmentMutationState = jest.fn(() => Promise.resolve(state));
     const { service, run } = build(
-      { getAppointmentStaffId, markAppointmentAttendance },
+      {
+        getAppointmentStaffId,
+        getAppointmentMutationState,
+        markAppointmentAttendance,
+      },
       { staffId: 'staff-1', status: 'active' },
     );
 
@@ -306,17 +339,29 @@ describe('CrmService: операции над визитом', () => {
     expect(getAppointmentStaffId).toHaveBeenCalledTimes(1);
   });
 
-  it('после успешных прямых правок создаёт только shadow-планы A04-A06', async () => {
+  it('проводит A04-A06 только через Action Engine и доказывает результат read-back', async () => {
+    let state = mutationState();
     const adapter = {
-      markAppointmentAttendance: jest
-        .fn()
-        .mockResolvedValue({ external_id: '77', attendance: 'arrived' }),
-      setAppointmentDuration: jest
-        .fn()
-        .mockResolvedValue({ external_id: '77', duration_minutes: 45 }),
-      setAppointmentServices: jest
-        .fn()
-        .mockResolvedValue({ external_id: '77', service_ids: ['10', '20'] }),
+      getAppointmentMutationState: jest.fn(() => Promise.resolve(state)),
+      markAppointmentAttendance: jest.fn().mockImplementation(() => {
+        state = mutationState({ attendance: 'arrived' });
+        return Promise.resolve({ external_id: '77', attendance: 'arrived' });
+      }),
+      setAppointmentDuration: jest.fn().mockImplementation(() => {
+        state = mutationState({ attendance: 'arrived', duration_minutes: 45 });
+        return Promise.resolve({ external_id: '77', duration_minutes: 45 });
+      }),
+      setAppointmentServices: jest.fn().mockImplementation(() => {
+        state = mutationState({
+          attendance: 'arrived',
+          duration_minutes: 45,
+          service_ids: ['10', '20'],
+        });
+        return Promise.resolve({
+          external_id: '77',
+          service_ids: ['10', '20'],
+        });
+      }),
     };
     const { service, actionEngineRuntime, run } = build(adapter);
 
@@ -330,32 +375,38 @@ describe('CrmService: операции над визитом', () => {
       service.setAppointmentServices('tenant-1', OWNER, '77', ['20', '10']),
     );
 
-    expect(actionEngineRuntime.planShadow).toHaveBeenCalledTimes(3);
-    expect(actionEngineRuntime.planShadow).toHaveBeenNthCalledWith(
+    expect(actionEngineRuntime.executeWithReceipt).toHaveBeenCalledTimes(3);
+    expect(actionEngineRuntime.executeWithReceipt).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        capability: 'crm.appointment.attendance.shadow.v1',
+        capability: 'crm.appointment.attendance.v1',
         input: { attendanceCode: 1 },
       }),
+      expect.any(Object),
     );
-    expect(actionEngineRuntime.planShadow).toHaveBeenNthCalledWith(
+    expect(actionEngineRuntime.executeWithReceipt).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        capability: 'crm.appointment.duration.shadow.v1',
+        capability: 'crm.appointment.duration.v1',
         input: { durationSeconds: 2700 },
       }),
+      expect.any(Object),
     );
-    expect(actionEngineRuntime.planShadow).toHaveBeenNthCalledWith(
+    expect(actionEngineRuntime.executeWithReceipt).toHaveBeenNthCalledWith(
       3,
       expect.objectContaining({
-        capability: 'crm.appointment.services.shadow.v1',
+        capability: 'crm.appointment.services.v1',
         input: { serviceIds: ['20', '10'] },
       }),
+      expect.any(Object),
     );
+    expect(adapter.getAppointmentMutationState).toHaveBeenCalledTimes(6);
+    expect(actionEngineRuntime.planShadow).not.toHaveBeenCalled();
   });
 
-  it('не создаёт shadow-план, если legacy provider mutation не удалась', async () => {
+  it('не создаёт второй dispatch, если provider mutation завершилась ошибкой', async () => {
     const adapter = {
+      getAppointmentMutationState: jest.fn().mockResolvedValue(mutationState()),
       setAppointmentDuration: jest
         .fn()
         .mockRejectedValue(new Error('provider rejected')),
@@ -365,25 +416,26 @@ describe('CrmService: операции над визитом', () => {
     await expect(
       run(() => service.setAppointmentDuration('tenant-1', OWNER, '77', 45)),
     ).rejects.toThrow('provider rejected');
+    expect(adapter.setAppointmentDuration).toHaveBeenCalledTimes(1);
     expect(actionEngineRuntime.planShadow).not.toHaveBeenCalled();
   });
 
-  it('ошибка shadow не меняет уже доказанный legacy-результат', async () => {
-    const expected = { external_id: '77', duration_minutes: 45 };
+  it('не объявляет успех, если read-back не доказал запрошенное состояние', async () => {
     const adapter = {
-      setAppointmentDuration: jest.fn().mockResolvedValue(expected),
+      getAppointmentMutationState: jest.fn().mockResolvedValue(mutationState()),
+      setAppointmentDuration: jest
+        .fn()
+        .mockResolvedValue({ external_id: '77', duration_minutes: 45 }),
     };
     const built = build(adapter);
-    built.actionEngineRuntime.planShadow.mockRejectedValueOnce(
-      new Error('shadow unavailable'),
-    );
 
     await expect(
       built.run(() =>
         built.service.setAppointmentDuration('tenant-1', OWNER, '77', 45),
       ),
-    ).resolves.toEqual(expected);
+    ).rejects.toThrow(/without proving the requested appointment state/);
     expect(adapter.setAppointmentDuration).toHaveBeenCalledTimes(1);
+    expect(built.actionEngineRuntime.planShadow).not.toHaveBeenCalled();
   });
 
   it('мастер не может изменить чужой визит', async () => {

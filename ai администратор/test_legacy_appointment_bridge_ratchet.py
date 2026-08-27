@@ -49,19 +49,7 @@ WRITE_FREE_TOMBSTONES = (
 )
 WRAPPERS = MIGRATED_WRAPPERS + WRITE_FREE_TOMBSTONES
 
-EXPECTED_RECORD_PUT_OWNERS = Counter(
-    {
-        ("yclients.py", "update_booking"): 1,
-        ("yclients.py", "set_record_attendance"): 1,
-        ("yclients.py", "set_record_notify_by_sms"): 1,
-        ("yclients.py", "add_services_to_record"): 1,
-        ("yclients.py", "set_record_services"): 1,
-        ("yclients.py", "set_record_duration"): 1,
-        ("yclients.py", "set_record_client_name"): 1,
-        ("yclients.py", "mark_record_loyalty_redemption"): 1,
-        ("yclients.py", "append_record_comment"): 1,
-    }
-)
+EXPECTED_RECORD_PUT_OWNERS = Counter()
 
 
 def parsed(path):
@@ -378,38 +366,39 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
                 ]
                 self.assertNotIn("set_appointment_attendance", action_classes)
 
-    def test_attendance_remains_a_separate_deferred_direct_owner(self):
+    def test_attendance_is_owned_by_the_canonical_action_engine_bridge(self):
         methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")
         attendance = methods["set_record_attendance"]
         attendance_source = ast.unparse(attendance)
 
-        self.assertIn("self._put", attendance_source)
+        self.assertNotIn("self._put", attendance_source)
         self.assertIn("attendance", attendance_source)
-        self.assertNotIn("dispatch_appointment_action", attendance_source)
-        self.assertIn("_observe_residual_appointment_action", attendance_source)
+        self.assertIn("dispatch_appointment_action", attendance_source)
+        self.assertNotIn("_observe_residual_appointment_action", attendance_source)
 
-    def test_residual_direct_owners_are_passive_shadow_producers(self):
+    def test_residual_appointment_wrappers_have_no_direct_provider_write(self):
         methods = class_methods(parsed(ROOT / "yclients.py"), "YClientsAPI")
-        residual_actions = {
-            "set_appointment_attendance",
-            "set_appointment_duration",
-            "set_appointment_services",
-            "set_appointment_fields",
+        wrappers = {
+            "update_booking": "set_appointment_services",
+            "set_record_attendance": "set_appointment_attendance",
+            "set_record_notify_by_sms": "set_appointment_fields",
+            "add_services_to_record": "set_appointment_services",
+            "set_record_services": "set_appointment_services",
+            "set_record_duration": "set_appointment_duration",
+            "set_record_client_name": "set_appointment_fields",
+            "append_record_comment": "set_appointment_fields",
         }
-        observed = set()
-        for _filename, method_name in EXPECTED_RECORD_PUT_OWNERS:
+        for method_name, action_class in wrappers.items():
             method_source = ast.unparse(methods[method_name])
-            self.assertNotIn("dispatch_appointment_action", method_source, method_name)
-            self.assertTrue(
-                "_observe_residual_appointment_action" in method_source
-                or "_observe_sensitive_appointment_action" in method_source,
-                method_name,
-            )
-            observed.update(
-                action for action in residual_actions if action in method_source
-            )
+            self.assertIn("dispatch_appointment_action", method_source, method_name)
+            self.assertIn(action_class, method_source, method_name)
+            self.assertNotIn("self._put", method_source, method_name)
+            self.assertNotIn("self._post", method_source, method_name)
+            self.assertNotIn("_observe_residual_appointment_action", method_source)
 
-        self.assertEqual(observed, residual_actions)
+        loyalty_source = ast.unparse(methods["mark_record_loyalty_redemption"])
+        self.assertNotIn("self._put", loyalty_source)
+        self.assertNotIn("dispatch_appointment_action", loyalty_source)
 
     def test_sensitive_field_observers_use_registered_contract_kinds(self):
         source = (ROOT / "yclients.py").read_text(encoding="utf-8")

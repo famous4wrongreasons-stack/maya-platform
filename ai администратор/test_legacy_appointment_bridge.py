@@ -242,59 +242,49 @@ class LegacyAppointmentBridgeTests(unittest.TestCase):
         self.assertFalse(result["retry_allowed"])
         self.assertEqual(get.call_args.kwargs["params"]["external_company_id"], "42")
 
-    def test_residual_observer_posts_only_to_shadow_with_zero_effects(self):
+    def test_residual_action_posts_only_to_canonical_execute(self):
+        os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
         captured = []
 
         def accepted(path, envelope):
             captured.append((path, envelope))
-            return shadow_body()
+            return canonical_body()
 
         with patch.object(bridge, "_post_bridge", side_effect=accepted):
-            observed = bridge.observe_residual_appointment_action(
+            result = bridge.dispatch_appointment_action(
                 provider="yclients",
                 external_company_id="42",
                 origin="legacy.residual_appointment",
                 action_class="set_appointment_attendance",
                 payload={"external_id": "77", "attendance_code": 1},
-                legacy_outcome={
-                    "success": True,
-                    "code": "legacy_write_succeeded",
-                    "unsafe": {"phone": "+79990001122"},
-                },
             )
 
-        self.assertTrue(observed)
-        self.assertEqual(captured[0][0], "shadow")
-        self.assertEqual(
-            captured[0][1]["legacy_outcome"],
-            {"success": True, "code": "legacy_write_succeeded"},
-        )
+        self.assertTrue(result["success"])
+        self.assertEqual(captured[0][0], "execute")
+        self.assertNotIn("legacy_outcome", captured[0][1])
 
-    def test_residual_observer_rejects_non_shadow_or_effectful_result(self):
-        for body in (
-            canonical_body(),
-            {**shadow_body(), "bridge_external_side_effects": 1},
-            {**shadow_body(), "accepted": False},
-        ):
-            with self.subTest(body=body), patch.object(
-                bridge, "_post_bridge", return_value=body
-            ):
-                observed = bridge.observe_residual_appointment_action(
-                    provider="yclients",
-                    external_company_id="42",
-                    origin="legacy.residual_appointment",
-                    action_class="set_appointment_duration",
-                    payload={"external_id": "77", "duration_seconds": 3600},
-                    legacy_outcome={"success": True},
-                )
-                self.assertFalse(observed)
+    def test_residual_action_fails_closed_when_cutover_mode_is_not_active(self):
+        os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "shadow"
+        with patch.object(bridge, "_post_bridge") as post:
+            result = bridge.dispatch_appointment_action(
+                provider="yclients",
+                external_company_id="42",
+                origin="legacy.residual_appointment",
+                action_class="set_appointment_duration",
+                payload={"external_id": "77", "duration_seconds": 3600},
+            )
 
-    def test_residual_observer_identity_is_stable_across_restart(self):
+        self.assertFalse(result["success"])
+        self.assertEqual(result["code"], "legacy_appointment_bridge_mode_invalid")
+        post.assert_not_called()
+
+    def test_residual_execution_identity_is_stable_across_restart(self):
+        os.environ["MAYA_LEGACY_APPOINTMENT_BRIDGE_MODE"] = "cutover"
         envelopes = []
 
         def accepted(_path, envelope):
             envelopes.append(envelope)
-            return shadow_body()
+            return canonical_body()
 
         kwargs = {
             "provider": "yclients",
@@ -302,11 +292,10 @@ class LegacyAppointmentBridgeTests(unittest.TestCase):
             "origin": "legacy.residual_appointment",
             "action_class": "set_appointment_services",
             "payload": {"external_id": "77", "service_ids": ["1", "2"]},
-            "legacy_outcome": {"success": True},
         }
         with patch.object(bridge, "_post_bridge", side_effect=accepted):
-            self.assertTrue(bridge.observe_residual_appointment_action(**kwargs))
-            self.assertTrue(bridge.observe_residual_appointment_action(**kwargs))
+            self.assertTrue(bridge.dispatch_appointment_action(**kwargs)["success"])
+            self.assertTrue(bridge.dispatch_appointment_action(**kwargs)["success"])
 
         self.assertEqual(
             envelopes[0]["idempotency_key"], envelopes[1]["idempotency_key"]

@@ -816,6 +816,186 @@ describe('YclientsCRMAdapter', () => {
     expect(updateBody).toMatchObject({ attendance: -1 });
   });
 
+  it('preserves the complete visit while applying every residual mutation family', async () => {
+    const updateBodies: Record<string, unknown>[] = [];
+    const currentRecord = {
+      id: 456,
+      datetime: '2026-08-23T10:00:00',
+      seance_length: 3600,
+      attendance: 2,
+      comment: 'keep-comment',
+      notify_by_sms: 3,
+      staff: { id: 15 },
+      client: {
+        id: 88,
+        name: 'Client',
+        surname: 'Surname',
+        phone: '+79990001122',
+        email: 'client@example.test',
+      },
+      services: [
+        { id: 7, cost: 2000, first_cost: 2500, discount: 20 },
+        { id: 8, cost: 500, first_cost: 500, discount: 0 },
+      ],
+    };
+
+    global.fetch = jest.fn(
+      (
+        input: Parameters<typeof fetch>[0],
+        init?: Parameters<typeof fetch>[1],
+      ) => {
+        const url = requestUrl(input);
+        const method = String(init?.method ?? 'GET').toUpperCase();
+
+        if (url.includes('/record/123/456') && method === 'GET') {
+          return Promise.resolve(
+            new Response(JSON.stringify({ data: currentRecord }), {
+              status: 200,
+            }),
+          );
+        }
+        if (url.includes('/record/123/456') && method === 'PUT') {
+          updateBodies.push(requestJsonBody(init));
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({ success: true, data: currentRecord }),
+              {
+                status: 200,
+              },
+            ),
+          );
+        }
+        if (url.includes('/book_services/123')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                data: {
+                  services: [
+                    { id: 7, price_min: 2500, seance_length: 3600 },
+                    { id: 9, price_min: 900, seance_length: 1800 },
+                  ],
+                },
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: [] }), { status: 200 }),
+        );
+      },
+    ) as typeof fetch;
+
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+
+    await adapter.markAppointmentAttendance({
+      tenantId: 'tenant-1',
+      externalId: '456',
+      attendance: 'no_show',
+    });
+    await adapter.setAppointmentDuration({
+      tenantId: 'tenant-1',
+      externalId: '456',
+      durationMinutes: 90,
+    });
+    await adapter.setAppointmentServices({
+      tenantId: 'tenant-1',
+      externalId: '456',
+      serviceIds: ['7', '9'],
+      durationMinutes: 75,
+    });
+    await adapter.setAppointmentField({
+      tenantId: 'tenant-1',
+      externalId: '456',
+      update: { fieldKind: 'comment', value: 'new-comment' },
+    });
+    await adapter.setAppointmentField({
+      tenantId: 'tenant-1',
+      externalId: '456',
+      update: {
+        fieldKind: 'client_name',
+        value: { name: 'New Name' },
+      },
+    });
+    await adapter.setAppointmentField({
+      tenantId: 'tenant-1',
+      externalId: '456',
+      update: { fieldKind: 'sms_flag', value: 12 },
+    });
+
+    expect(updateBodies).toHaveLength(6);
+    for (const body of updateBodies) {
+      expect(body).toMatchObject({
+        staff_id: 15,
+        datetime: '2026-08-23T10:00:00',
+        save_if_busy: true,
+      });
+    }
+    expect(updateBodies[0]).toMatchObject({
+      attendance: -1,
+      seance_length: 3600,
+      comment: 'keep-comment',
+      notify_by_sms: 3,
+      client: {
+        id: 88,
+        name: 'Client',
+        surname: 'Surname',
+        phone: '+79990001122',
+        email: 'client@example.test',
+      },
+      services: [
+        { id: 7, cost: 2000, first_cost: 2500, discount: 20 },
+        { id: 8, cost: 500, first_cost: 500, discount: 0 },
+      ],
+    });
+    expect(updateBodies[1]).toMatchObject({
+      attendance: 2,
+      seance_length: 5400,
+      comment: 'keep-comment',
+      notify_by_sms: 3,
+    });
+    expect(updateBodies[2]).toMatchObject({
+      attendance: 2,
+      seance_length: 4500,
+      comment: 'keep-comment',
+      notify_by_sms: 3,
+      services: [
+        { id: 7, cost: 2000, first_cost: 2500, discount: 20 },
+        { id: 9, cost: 900, first_cost: 900, discount: 0 },
+      ],
+    });
+    expect(updateBodies[3]).toMatchObject({
+      attendance: 2,
+      seance_length: 3600,
+      comment: 'new-comment',
+      notify_by_sms: 3,
+    });
+    expect(updateBodies[4]).toMatchObject({
+      attendance: 2,
+      seance_length: 3600,
+      comment: 'keep-comment',
+      notify_by_sms: 3,
+      client: {
+        id: 88,
+        name: 'New Name',
+        surname: 'Surname',
+        phone: '+79990001122',
+        email: 'client@example.test',
+      },
+    });
+    expect(updateBodies[5]).toMatchObject({
+      attendance: 2,
+      seance_length: 3600,
+      comment: 'keep-comment',
+      notify_by_sms: 12,
+    });
+  });
+
   it('rejects an unsupported attendance value before any CRM request', async () => {
     global.fetch = jest.fn() as typeof fetch;
 

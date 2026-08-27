@@ -20,6 +20,7 @@ import {
   ClientLoyaltySnapshot,
   CRMAdapter,
   CrmAppointmentDetail,
+  CrmAppointmentMutationState,
   CrmAppointmentRevenueSnapshot,
   CrmClientRegistrySnapshot,
   CrmClientSearchResult,
@@ -39,6 +40,7 @@ import {
   CreateAppointmentParams,
   PaidVisit,
   PayVisitParams,
+  ResidualAppointmentFieldUpdate,
   RescheduledAppointment,
   ServiceItem,
   StaffMember,
@@ -132,6 +134,8 @@ interface YclientsRecordClientApiItem {
   id?: number | string;
   phone?: string;
   name?: string;
+  surname?: string;
+  email?: string;
 }
 
 interface YclientsRecordStaffApiItem {
@@ -172,6 +176,7 @@ interface YclientsRecordApiItem {
   visit_id?: number | string;
   deleted?: boolean | number;
   comment?: string;
+  notify_by_sms?: number;
   staff_id?: number | string;
   client?: YclientsRecordClientApiItem | null;
   staff?: YclientsRecordStaffApiItem | null;
@@ -836,6 +841,8 @@ export class YclientsCRMAdapter implements CRMAdapter {
           : {}),
         phone: client.phone ? this.normalizePhone(client.phone) : '',
         name: client.name || client.phone || '',
+        ...(client.surname ? { surname: client.surname } : {}),
+        ...(client.email ? { email: client.email } : {}),
       },
       // 🔴 Цены переносим ЯВНО. YClients при PUT перезаписывает состав услуг
       // целиком: услуга, пришедшая без cost/first_cost, теряет свою стоимость.
@@ -1115,6 +1122,15 @@ export class YclientsCRMAdapter implements CRMAdapter {
         };
       });
 
+    const overrideClient =
+      overrides.client &&
+      typeof overrides.client === 'object' &&
+      !Array.isArray(overrides.client)
+        ? (overrides.client as Record<string, unknown>)
+        : {};
+    const topLevelOverrides = { ...overrides };
+    delete topLevelOverrides.client;
+
     const payload: Record<string, unknown> = {
       staff_id: this.toNumericId(
         String(record.staff?.id ?? record.staff_id ?? ''),
@@ -1130,13 +1146,19 @@ export class YclientsCRMAdapter implements CRMAdapter {
           : {}),
         phone: client.phone ? this.normalizePhone(client.phone) : '',
         name: client.name || client.phone || '',
+        ...(client.surname ? { surname: client.surname } : {}),
+        ...(client.email ? { email: client.email } : {}),
+        ...overrideClient,
       },
       services,
       ...(typeof record.attendance === 'number'
         ? { attendance: record.attendance }
         : {}),
       comment: record.comment ?? '',
-      ...overrides,
+      ...(typeof record.notify_by_sms === 'number'
+        ? { notify_by_sms: record.notify_by_sms }
+        : {}),
+      ...topLevelOverrides,
     };
 
     const response = await this.request<YclientsRecordApiItem>(
@@ -1175,6 +1197,42 @@ export class YclientsCRMAdapter implements CRMAdapter {
     };
   }
 
+  async getAppointmentMutationState(params: {
+    tenantId: string;
+    externalId: string;
+  }): Promise<CrmAppointmentMutationState> {
+    void params.tenantId;
+    const numericId = this.toNumericId(params.externalId, 'externalId');
+    const response = await this.request<YclientsRecordApiItem>(
+      `record/${this.getCompanyId()}/${numericId}`,
+    );
+    const record = response.data;
+    if (!record) {
+      throw new Error('YClients record was not found');
+    }
+
+    const durationSeconds = Number(record.seance_length ?? record.length ?? 0);
+    return {
+      external_id: params.externalId,
+      attendance: observedAttendanceFromCode(record.attendance),
+      duration_minutes:
+        Number.isFinite(durationSeconds) && durationSeconds > 0
+          ? Math.round(durationSeconds / 60)
+          : 0,
+      service_ids: (record.services || [])
+        .filter((service) => service?.id !== undefined)
+        .map((service) => String(service.id))
+        .sort(),
+      comment: record.comment ?? '',
+      client_name: record.client?.name ?? '',
+      client_phone: record.client?.phone
+        ? this.normalizePhone(record.client.phone)
+        : '',
+      sms_flag:
+        typeof record.notify_by_sms === 'number' ? record.notify_by_sms : null,
+    };
+  }
+
   async setAppointmentDuration(params: {
     tenantId: string;
     externalId: string;
@@ -1202,6 +1260,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     tenantId: string;
     externalId: string;
     serviceIds: string[];
+    durationMinutes?: number;
   }): Promise<{ external_id: string; service_ids: string[] }> {
     void params.tenantId;
 
@@ -1256,11 +1315,13 @@ export class YclientsCRMAdapter implements CRMAdapter {
       };
     });
     // Длительность визита = сумма длительностей услуг, как в журнале салона.
-    const seanceLength =
-      params.serviceIds.reduce((total, serviceId) => {
-        const service = catalogById.get(String(serviceId));
-        return total + (service?.seance_length || service?.duration || 0);
-      }, 0) || undefined;
+    const explicitDuration = Number(params.durationMinutes);
+    const seanceLength = Number.isFinite(explicitDuration)
+      ? Math.round(explicitDuration * 60)
+      : params.serviceIds.reduce((total, serviceId) => {
+          const service = catalogById.get(String(serviceId));
+          return total + (service?.seance_length || service?.duration || 0);
+        }, 0) || undefined;
 
     await this.putRecordPreserving(
       params.externalId,
@@ -1272,6 +1333,39 @@ export class YclientsCRMAdapter implements CRMAdapter {
     );
 
     return { external_id: params.externalId, service_ids: params.serviceIds };
+  }
+
+  async setAppointmentField(params: {
+    tenantId: string;
+    externalId: string;
+    update: ResidualAppointmentFieldUpdate;
+  }): Promise<{ external_id: string; field_kind: string }> {
+    void params.tenantId;
+    const update = params.update;
+    let overrides: Record<string, unknown>;
+
+    if (update.fieldKind === 'comment') {
+      overrides = { comment: update.value };
+    } else if (update.fieldKind === 'sms_flag') {
+      overrides = { notify_by_sms: update.value };
+    } else {
+      overrides = {
+        client: {
+          name: update.value.name,
+          ...(update.value.phone
+            ? { phone: this.normalizePhone(update.value.phone) }
+            : {}),
+        },
+      };
+    }
+
+    await this.putRecordPreserving(params.externalId, overrides, {
+      saveIfBusy: true,
+    });
+    return {
+      external_id: params.externalId,
+      field_kind: update.fieldKind,
+    };
   }
 
   /**

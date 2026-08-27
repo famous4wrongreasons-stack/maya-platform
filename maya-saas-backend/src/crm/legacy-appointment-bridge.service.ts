@@ -17,6 +17,8 @@ import type {
   AppointmentActionInvocation,
   CreateAppointmentRequest,
   PayVisitRequest,
+  ResidualAppointmentAction,
+  ResidualAppointmentMutationInput,
   ResidualAppointmentShadowCapability,
   RescheduleAppointmentRequest,
 } from './crm.service';
@@ -89,12 +91,14 @@ type ParsedAction =
   | {
       action: 'set_appointment_services';
       externalId: string;
-      input: { serviceIds: string[] };
+      input: { serviceIds: string[]; durationSeconds?: number };
     }
   | {
       action: 'set_appointment_fields';
       externalId: string;
-      input: { fieldKind: string; valueRef: string };
+      input:
+        | Extract<ResidualAppointmentMutationInput, { fieldKind: string }>
+        | { fieldKind: string; valueRef: string };
     };
 
 type ExecutableParsedAction = Extract<
@@ -104,9 +108,12 @@ type ExecutableParsedAction = Extract<
       | 'create_appointment'
       | 'reschedule_appointment'
       | 'cancel_appointment'
-      | 'pay_visit';
+      | 'pay_visit'
+      | ResidualAppointmentAction;
   }
 >;
+
+type BridgeMode = 'shadow' | 'execute';
 
 export interface LegacyAppointmentBridgeShadowResult {
   contract: typeof LEGACY_APPOINTMENT_BRIDGE_RESULT_CONTRACT;
@@ -309,7 +316,7 @@ export class LegacyAppointmentBridgeService {
   async shadow(
     dto: LegacyAppointmentBridgeDto,
   ): Promise<LegacyAppointmentBridgeShadowResult> {
-    const context = await this.resolve(dto);
+    const context = await this.resolve(dto, 'shadow');
     const preview = await this.tenantContext.runAsSystemTenant(
       context.tenantId,
       () => this.preview(context.tenantId, context.parsed, context.invocation),
@@ -352,14 +359,7 @@ export class LegacyAppointmentBridgeService {
       });
     }
 
-    if (!this.isExecutableAction(dto.action_class)) {
-      throw new ServiceUnavailableException({
-        message: 'This appointment action remains shadow-only.',
-        error: { code: 'legacy_appointment_shadow_only' },
-      });
-    }
-
-    const context = await this.resolve(dto);
+    const context = await this.resolve(dto, 'execute');
     let execution: ExecutionResultV1;
     try {
       execution = await this.tenantContext.runAsSystemTenant(
@@ -368,7 +368,7 @@ export class LegacyAppointmentBridgeService {
           (
             await this.executeAction(
               context.tenantId,
-              context.parsed as ExecutableParsedAction,
+              context.parsed,
               context.invocation,
             )
           ).execution,
@@ -409,7 +409,7 @@ export class LegacyAppointmentBridgeService {
     return this.executionResponse('status', execution);
   }
 
-  private async resolve(dto: LegacyAppointmentBridgeDto) {
+  private async resolve(dto: LegacyAppointmentBridgeDto, mode: BridgeMode) {
     const assertedProvider = this.normalizedProvider(dto.provider);
     const assertedCompanyId = this.externalCompanyId(dto.external_company_id);
     this.assertOriginAction(dto.origin, dto.action_class);
@@ -422,6 +422,7 @@ export class LegacyAppointmentBridgeService {
       dto.payload,
       dto.origin,
       externalCompanyId,
+      mode,
     );
     const tenant = await this.bridgeSource.resolveTenantByIntegration(
       { provider, externalCompanyId },
@@ -510,6 +511,7 @@ export class LegacyAppointmentBridgeService {
     payload: Record<string, unknown>,
     origin: LegacyAppointmentOrigin,
     trustedCompanyId: string,
+    mode: BridgeMode,
   ): ParsedAction {
     if (!payload || Array.isArray(payload) || typeof payload !== 'object') {
       payloadError(
@@ -650,22 +652,95 @@ export class LegacyAppointmentBridgeService {
     }
 
     if (action === 'set_appointment_services') {
-      assertExactKeys(payload, ['external_id', 'service_ids']);
-      return {
-        action,
-        externalId: requiredString(payload, 'external_id', 128),
-        input: { serviceIds: requiredStringArray(payload, 'service_ids') },
-      };
-    }
-
-    if (action === 'set_appointment_fields') {
-      assertExactKeys(payload, ['external_id', 'field_kind', 'value_ref']);
+      assertExactKeys(payload, [
+        'external_id',
+        'service_ids',
+        'duration_seconds',
+      ]);
       return {
         action,
         externalId: requiredString(payload, 'external_id', 128),
         input: {
-          fieldKind: requiredString(payload, 'field_kind', 64),
-          valueRef: requiredString(payload, 'value_ref', 128),
+          serviceIds: requiredStringArray(payload, 'service_ids'),
+          ...(payload.duration_seconds === undefined
+            ? {}
+            : {
+                durationSeconds: requiredInteger(
+                  payload,
+                  'duration_seconds',
+                  60,
+                  86_400,
+                ),
+              }),
+        },
+      };
+    }
+
+    if (action === 'set_appointment_fields') {
+      if (mode === 'shadow') {
+        assertExactKeys(payload, ['external_id', 'field_kind', 'value_ref']);
+        return {
+          action,
+          externalId: requiredString(payload, 'external_id', 128),
+          input: {
+            fieldKind: requiredString(payload, 'field_kind', 64),
+            valueRef: requiredString(payload, 'value_ref', 128),
+          },
+        };
+      }
+
+      assertExactKeys(payload, ['external_id', 'field_kind', 'value']);
+      const externalId = requiredString(payload, 'external_id', 128);
+      const fieldKind = requiredString(payload, 'field_kind', 64);
+      if (fieldKind === 'comment') {
+        if (typeof payload.value !== 'string' || payload.value.length > 2_000) {
+          payloadError(
+            'Appointment comment is invalid.',
+            'legacy_appointment_payload_invalid',
+          );
+        }
+        return {
+          action,
+          externalId,
+          input: { fieldKind, value: payload.value },
+        };
+      }
+      if (fieldKind === 'sms_flag') {
+        return {
+          action,
+          externalId,
+          input: {
+            fieldKind,
+            value: requiredInteger(payload, 'value', 0, 48),
+          },
+        };
+      }
+      if (fieldKind !== 'client_name') {
+        payloadError(
+          'Appointment field kind is not supported.',
+          'legacy_appointment_payload_invalid',
+        );
+      }
+      const value = payload.value;
+      if (!value || Array.isArray(value) || typeof value !== 'object') {
+        payloadError(
+          'Appointment client value must be an object.',
+          'legacy_appointment_payload_invalid',
+        );
+      }
+      const client = value as Record<string, unknown>;
+      assertExactKeys(client, ['name', 'phone']);
+      return {
+        action,
+        externalId,
+        input: {
+          fieldKind,
+          value: {
+            name: requiredString(client, 'name', 160),
+            ...(client.phone === undefined
+              ? {}
+              : { phone: requiredString(client, 'phone', 40) }),
+          },
         },
       };
     }
@@ -745,6 +820,20 @@ export class LegacyAppointmentBridgeService {
         invocation,
       );
     }
+    if (
+      parsed.action === 'set_appointment_attendance' ||
+      parsed.action === 'set_appointment_duration' ||
+      parsed.action === 'set_appointment_services' ||
+      parsed.action === 'set_appointment_fields'
+    ) {
+      return this.crmService.executeResidualAppointmentWithReceipt(
+        tenantId,
+        parsed.action,
+        parsed.externalId,
+        parsed.input as ResidualAppointmentMutationInput,
+        invocation,
+      );
+    }
     return this.crmService.executeCancelAppointmentWithReceipt(
       tenantId,
       parsed.externalId,
@@ -757,15 +846,19 @@ export class LegacyAppointmentBridgeService {
       action === 'create_appointment' ||
       action === 'reschedule_appointment' ||
       action === 'cancel_appointment' ||
-      action === 'pay_visit'
+      action === 'pay_visit' ||
+      action === 'set_appointment_attendance' ||
+      action === 'set_appointment_duration' ||
+      action === 'set_appointment_services' ||
+      action === 'set_appointment_fields'
     );
   }
 
   private shadowCapability(
-    action: Exclude<ParsedAction, ExecutableParsedAction>['action'],
+    action: ResidualAppointmentAction,
   ): ResidualAppointmentShadowCapability {
     const capabilities: Record<
-      Exclude<ParsedAction, ExecutableParsedAction>['action'],
+      ResidualAppointmentAction,
       ResidualAppointmentShadowCapability
     > = {
       set_appointment_attendance: 'crm.appointment.attendance.shadow.v1',

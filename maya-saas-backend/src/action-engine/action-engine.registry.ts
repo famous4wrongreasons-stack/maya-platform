@@ -394,6 +394,25 @@ function servicesShadowNormalizer(value: unknown): Record<string, unknown> {
   return { serviceIds: serviceIds(source) };
 }
 
+function servicesNormalizer(value: unknown): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, ['serviceIds', 'durationSeconds']);
+  const durationSeconds = source.durationSeconds;
+  return {
+    serviceIds: serviceIds(source),
+    ...(durationSeconds === undefined || durationSeconds === null
+      ? {}
+      : {
+          durationSeconds: requiredInteger(
+            source,
+            'durationSeconds',
+            60,
+            86_400,
+          ),
+        }),
+  };
+}
+
 function fieldsShadowNormalizer(value: unknown): Record<string, unknown> {
   const source = recordInput(value);
   assertOnlyKeys(source, ['fieldKind', 'valueRef']);
@@ -404,6 +423,43 @@ function fieldsShadowNormalizer(value: unknown): Record<string, unknown> {
   return {
     fieldKind,
     valueRef: normalizeOpaqueRef(source.valueRef, 'valueRef'),
+  };
+}
+
+function fieldsNormalizer(value: unknown): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, ['fieldKind', 'value']);
+  const fieldKind = requiredText(source, 'fieldKind', 32);
+  if (!RESIDUAL_APPOINTMENT_FIELD_KINDS.has(fieldKind)) {
+    throw new ActionContractError('fieldKind is not registered');
+  }
+
+  if (fieldKind === 'comment') {
+    if (typeof source.value !== 'string' || source.value.length > 2_000) {
+      throw new ActionContractError('comment value is invalid');
+    }
+    return { fieldKind, value: source.value };
+  }
+
+  if (fieldKind === 'sms_flag') {
+    if (!Number.isInteger(source.value)) {
+      throw new ActionContractError('sms_flag value must be an integer');
+    }
+    return {
+      fieldKind,
+      value: requiredInteger(source, 'value', 0, 48),
+    };
+  }
+
+  const client = recordInput(source.value);
+  assertOnlyKeys(client, ['name', 'phone']);
+  const phone = optionalText(client, 'phone', 40);
+  return {
+    fieldKind,
+    value: {
+      name: requiredText(client, 'name', 200),
+      ...(phone ? { phone } : {}),
+    },
   };
 }
 
@@ -792,6 +848,30 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     normalizeInput: cancelAppointmentNormalizer,
   }),
   visitPaymentCapability(),
+  appointmentCapability({
+    capability: 'crm.appointment.attendance.v1',
+    actionClass: 'set_appointment_attendance',
+    executorKey: 'crm.appointment.attendance',
+    normalizeInput: attendanceShadowNormalizer,
+  }),
+  appointmentCapability({
+    capability: 'crm.appointment.duration.v1',
+    actionClass: 'set_appointment_duration',
+    executorKey: 'crm.appointment.duration',
+    normalizeInput: durationShadowNormalizer,
+  }),
+  appointmentCapability({
+    capability: 'crm.appointment.services.v1',
+    actionClass: 'set_appointment_services',
+    executorKey: 'crm.appointment.services',
+    normalizeInput: servicesNormalizer,
+  }),
+  appointmentCapability({
+    capability: 'crm.appointment.fields.v1',
+    actionClass: 'set_appointment_fields',
+    executorKey: 'crm.appointment.fields',
+    normalizeInput: fieldsNormalizer,
+  }),
   residualAppointmentShadowCapability({
     capability: 'crm.appointment.attendance.shadow.v1',
     actionClass: 'set_appointment_attendance',

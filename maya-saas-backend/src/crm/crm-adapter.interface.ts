@@ -317,6 +317,30 @@ export interface PaidVisit extends CrmVisitPaymentState {
   already_paid?: boolean;
 }
 
+export type ResidualAppointmentFieldUpdate =
+  | { fieldKind: 'comment'; value: string }
+  | {
+      fieldKind: 'client_name';
+      value: { name: string; phone?: string };
+    }
+  | { fieldKind: 'sms_flag'; value: number };
+
+/**
+ * Minimal authoritative snapshot for A04-A07 reconciliation.
+ * The Action Engine persists only a hash of this value; PII remains inside
+ * the provider adapter and encrypted execution payload.
+ */
+export interface CrmAppointmentMutationState {
+  external_id: string;
+  attendance: VisitAttendance | null;
+  duration_minutes: number;
+  service_ids: string[];
+  comment: string;
+  client_name: string;
+  client_phone: string;
+  sms_flag: number | null;
+}
+
 export interface CrmJournal {
   calendar_source: 'external';
   /**
@@ -550,6 +574,11 @@ export interface CRMAdapter {
   }): Promise<CrmVisitPaymentState>;
   /** Pay a visit through the provider's documented visit-payment contract. */
   payVisit?(params: PayVisitParams): Promise<PaidVisit>;
+  /** Authoritative read used to prove A04-A07 after provider mutation. */
+  getAppointmentMutationState?(params: {
+    tenantId: string;
+    externalId: string;
+  }): Promise<CrmAppointmentMutationState>;
   /** «Пришёл» / «не пришёл». Кодировку провайдера знает только сам адаптер. */
   markAppointmentAttendance?(params: {
     tenantId: string;
@@ -567,7 +596,14 @@ export interface CRMAdapter {
     tenantId: string;
     externalId: string;
     serviceIds: string[];
+    durationMinutes?: number;
   }): Promise<{ external_id: string; service_ids: string[] }>;
+  /** One typed mutable field; the adapter must preserve the full record. */
+  setAppointmentField?(params: {
+    tenantId: string;
+    externalId: string;
+    update: ResidualAppointmentFieldUpdate;
+  }): Promise<{ external_id: string; field_kind: string }>;
   /** Подсказка постоянного клиента по хвосту телефона при ручной записи. */
   searchClients?(params: {
     tenantId: string;

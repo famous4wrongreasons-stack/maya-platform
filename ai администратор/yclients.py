@@ -9,8 +9,6 @@ from config import YCLIENTS_BASE_URL, YCLIENTS_PARTNER_TOKEN, YCLIENTS_USER_TOKE
 from legacy_appointment_bridge import (
     dispatch_appointment_action,
     opaque_client_reference,
-    opaque_mutation_reference,
-    observe_residual_appointment_action,
 )
 
 logger = logging.getLogger("yclients")
@@ -255,62 +253,6 @@ class YClientsAPI:
             return
         if isinstance(raw, str) and raw.strip() in {"-1", "0", "1", "2"}:
             payload["attendance"] = int(raw.strip())
-
-    def _observe_residual_appointment_action(
-        self, action_class: str, record_id: int, payload: dict
-    ) -> bool:
-        """Observe a proven legacy write; never affect or repeat that write."""
-        return self._observe_residual_appointment_outcome(
-            action_class,
-            record_id,
-            payload,
-            {"success": True, "code": "legacy_write_succeeded"},
-        )
-
-    def _observe_residual_appointment_outcome(
-        self,
-        action_class: str,
-        record_id: int,
-        payload: dict,
-        legacy_outcome: dict,
-    ) -> bool:
-        """Observe a legacy result without granting Shadow side effects."""
-        try:
-            return observe_residual_appointment_action(
-                provider="yclients",
-                external_company_id=str(self.company_id),
-                origin="legacy.residual_appointment",
-                action_class=action_class,
-                payload={"external_id": str(record_id), **payload},
-                legacy_outcome=legacy_outcome,
-            )
-        except Exception:
-            logger.exception(
-                "Residual appointment shadow observation failed: %s",
-                action_class,
-            )
-            return False
-
-    def _observe_sensitive_appointment_action(
-        self,
-        action_class: str,
-        record_id: int,
-        kind_key: str,
-        kind: str,
-        value: object,
-    ) -> bool:
-        try:
-            value_ref = opaque_mutation_reference(value, kind)
-        except Exception:
-            logger.exception(
-                "Residual appointment value reference failed: %s", action_class
-            )
-            return False
-        return self._observe_residual_appointment_action(
-            action_class,
-            record_id,
-            {kind_key: kind, "value_ref": value_ref},
-        )
 
     # ─── Мастера ────────────────────────────────────────────────────────────
 
@@ -1308,90 +1250,40 @@ class YClientsAPI:
     # ─── Обновление записи (добавление услуг) ───────────────────────────────
 
     def update_booking(self, record_id: int, service_ids: list[int]) -> dict:
-        """Обновляет запись — заменяет список услуг на переданный."""
-        try:
-            # Получаем текущую запись
-            data = self._get(f"record/{self.company_id}/{record_id}")
-            rec = data.get("data", {})
-            if not rec:
-                return {"success": False, "error": "Запись не найдена"}
-
-            client = rec.get("client", {})
-            payload = {
-                "staff_id": rec["staff"]["id"],
-                "datetime": rec["datetime"],
-                "seance_length": rec.get("seance_length", 3600),
-                "save_if_busy": False,
-                "send_sms": False,
-                "client": {
-                    "id": client.get("id"),
-                    "phone": client.get("phone", ""),
-                    "name": client.get("name", ""),
-                },
-                "services": [{"id": sid, "amount": 1} for sid in service_ids],
-                "comment": rec.get("comment", ""),
-            }
-            self._preserve_attendance(payload, rec)
-            upd = self._put(f"record/{self.company_id}/{record_id}", payload)
-            if upd.get("success") or upd.get("data"):
-                self._observe_residual_appointment_action(
-                    "set_appointment_services",
-                    record_id,
-                    {"service_ids": [str(service_id) for service_id in service_ids]},
-                )
-                services = [s["title"] for s in upd.get("data", {}).get("services", [])]
-                return {"success": True, "record_id": record_id, "services": services}
-            return {"success": False, "error": upd.get("meta", {}).get("message", "Ошибка")}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+        """Заменяет услуги только через canonical Action Engine executor."""
+        return dispatch_appointment_action(
+            provider="yclients",
+            external_company_id=str(self.company_id),
+            origin="legacy.residual_appointment",
+            action_class="set_appointment_services",
+            payload={
+                "external_id": str(record_id),
+                "service_ids": [str(service_id) for service_id in service_ids],
+            },
+        )
 
     def set_record_attendance(self, record_id: int, attendance: int) -> dict:
         """Ставит статус визита (attendance): 1 пришёл, -1 не пришёл, 0 ожидание,
         2 подтвердил. Неразрушающий PUT record/{company}/{id} (остальные поля
         сохраняются)."""
+        if type(attendance) is bool:
+            return {"success": False, "error": "Некорректный статус визита"}
         try:
-            if type(attendance) is bool:
-                return {"success": False, "error": "Некорректный статус визита"}
-            try:
-                attendance_code = int(attendance)
-            except (TypeError, ValueError):
-                return {"success": False, "error": "Некорректный статус визита"}
-            if attendance_code not in {-1, 0, 1, 2}:
-                return {"success": False, "error": "Некорректный статус визита"}
-            data = self._get(f"record/{self.company_id}/{record_id}")
-            rec = data.get("data", {})
-            if not rec:
-                return {"success": False, "error": "Запись не найдена"}
-            client = rec.get("client") or {}
-            staff = rec.get("staff") or {}
-            svc_ids = [s.get("id") for s in (rec.get("services") or [])
-                       if isinstance(s, dict) and s.get("id")]
-            payload = {
-                "staff_id": staff.get("id"),
-                "datetime": rec.get("datetime"),
-                "seance_length": rec.get("seance_length", 3600),
-                "save_if_busy": True,
-                "send_sms": False,
-                "client": {
-                    "id": client.get("id"),
-                    "phone": client.get("phone", ""),
-                    "name": client.get("name", ""),
-                },
-                "services": [{"id": sid, "amount": 1} for sid in svc_ids],
-                "attendance": attendance_code,
-                "comment": rec.get("comment", ""),
-            }
-            upd = self._put(f"record/{self.company_id}/{record_id}", payload)
-            if upd.get("success") or upd.get("data"):
-                self._observe_residual_appointment_action(
-                    "set_appointment_attendance",
-                    record_id,
-                    {"attendance_code": attendance_code},
-                )
-                return {"success": True, "record_id": record_id, "attendance": attendance_code}
-            return {"success": False, "error": upd.get("meta", {}).get("message") or "Не удалось обновить статус"}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+            attendance_code = int(attendance)
+        except (TypeError, ValueError):
+            return {"success": False, "error": "Некорректный статус визита"}
+        if attendance_code not in {-1, 0, 1, 2}:
+            return {"success": False, "error": "Некорректный статус визита"}
+        return dispatch_appointment_action(
+            provider="yclients",
+            external_company_id=str(self.company_id),
+            origin="legacy.residual_appointment",
+            action_class="set_appointment_attendance",
+            payload={
+                "external_id": str(record_id),
+                "attendance_code": attendance_code,
+            },
+        )
 
     # ─── Перенос записи ─────────────────────────────────────────────────────
 
@@ -1459,39 +1351,17 @@ class YClientsAPI:
                 except (TypeError, ValueError):
                     pass
 
-            client = rec.get("client") or {}
-            staff  = rec.get("staff") or {}
-            svc_ids = [s.get("id") for s in (rec.get("services") or [])
-                       if isinstance(s, dict) and s.get("id")]
-
-            payload = {
-                "staff_id":      staff.get("id"),
-                "datetime":      rec.get("datetime", ""),   # время НЕ меняем
-                "seance_length": rec.get("seance_length", 3600),
-                "save_if_busy":  True,    # это собственный слот записи — не «занят»
-                "send_sms":      False,
-                "notify_by_sms": hours,
-                "client": {
-                    "id":    client.get("id"),
-                    "phone": client.get("phone", ""),
-                    "name":  client.get("name", ""),
+            return dispatch_appointment_action(
+                provider="yclients",
+                external_company_id=str(self.company_id),
+                origin="legacy.residual_appointment",
+                action_class="set_appointment_fields",
+                payload={
+                    "external_id": str(record_id),
+                    "field_kind": "sms_flag",
+                    "value": hours,
                 },
-                "services":   [{"id": sid, "amount": 1} for sid in svc_ids],
-                "comment":    rec.get("comment", ""),
-            }
-            self._preserve_attendance(payload, rec)
-            upd = self._put(f"record/{self.company_id}/{record_id}", payload)
-            if upd.get("success") or upd.get("data"):
-                self._observe_sensitive_appointment_action(
-                    "set_appointment_fields",
-                    record_id,
-                    "field_kind",
-                    "sms_flag",
-                    {"notify_by_sms": hours},
-                )
-                return {"success": True, "record_id": record_id, "notify_by_sms": hours}
-            return {"success": False,
-                    "error": upd.get("meta", {}).get("message") or "PUT отклонён"}
+            )
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -1914,50 +1784,39 @@ class YClientsAPI:
             return 0
 
     def add_services_to_record(self, record_id: int, add_service_ids: list[int]) -> dict:
-        """Добавляет услуги к записи (к существующим), не трогая остальное.
-        Неразрушающий PUT: текущие услуги сохраняем с их ценой/скидкой, новые
-        добавляем по дефолтной цене."""
+        """Добавляет услуги через canonical Action Engine executor."""
         try:
             rec = self.get_record(record_id)
             if not rec:
                 return {"success": False, "error": "Запись не найдена"}
-            client = rec.get("client") or {}
             staff = rec.get("staff") or {}
-            # Цены и длительности услуг мастера. YClients ДРОПАЕТ услугу без cost
-            # при PUT, а длительность нужна, чтобы продлить визит на новые услуги.
-            price_map = {}
             dur_map = {}
             try:
                 for s in self.get_services(staff.get("id")):
                     if isinstance(s, dict) and s.get("id"):
-                        price_map[s["id"]] = s.get("price_min") or s.get("price_max") or 0
                         try:
                             dur_map[s["id"]] = int(s.get("duration") or 0)
                         except Exception:
                             dur_map[s["id"]] = 0
             except Exception:
-                price_map = {}
-            services_payload = []
+                dur_map = {}
             have = set()
             for s in (rec.get("services") or []):
                 sid = s.get("id")
                 if sid is None:
                     continue
-                have.add(sid)
-                services_payload.append({
-                    "id": sid,
-                    "cost": s.get("cost"),
-                    "discount": s.get("discount", 0),
-                    "first_cost": s.get("first_cost") or s.get("cost"),
-                })
-            added_dur = 0   # суммарная длительность реально добавленных услуг (сек)
+                have.add(int(sid))
+            added_dur = 0
             for sid in add_service_ids:
-                if sid and sid not in have:
-                    cost = price_map.get(sid, 0)
-                    services_payload.append({"id": sid, "cost": cost, "discount": 0, "first_cost": cost})
-                    have.add(sid)
-                    added_dur += int(dur_map.get(sid, 0) or 0)
-            # Продлеваем визит на длительность добавленных услуг (тайминг растёт).
+                try:
+                    service_id = int(sid)
+                except (TypeError, ValueError):
+                    continue
+                if service_id > 0 and service_id not in have:
+                    have.add(service_id)
+                    added_dur += int(dur_map.get(service_id, 0) or 0)
+            if not have:
+                return {"success": False, "error": "В визите должна остаться хотя бы одна услуга"}
             try:
                 orig_len = int(rec.get("seance_length") or 0)
             except Exception:
@@ -1965,37 +1824,17 @@ class YClientsAPI:
             if orig_len <= 0:
                 orig_len = 3600
             new_len = orig_len + added_dur
-            payload = {
-                "staff_id": staff.get("id"),
-                "datetime": rec.get("datetime"),
-                "seance_length": new_len,
-                "save_if_busy": True,
-                "send_sms": False,
-                "client": {"id": client.get("id"), "phone": client.get("phone", ""),
-                           "name": client.get("name", "")},
-                "services": services_payload,
-                "comment": rec.get("comment", ""),
-            }
-            self._preserve_attendance(payload, rec)
-            upd = self._put(f"record/{self.company_id}/{record_id}", payload)
-            if upd.get("success") or upd.get("data"):
-                resulting_ids = [
-                    str(service.get("id"))
-                    for service in services_payload
-                    if service.get("id") is not None
-                ]
-                self._observe_residual_appointment_action(
-                    "set_appointment_services",
-                    record_id,
-                    {"service_ids": resulting_ids},
-                )
-                self._observe_residual_appointment_action(
-                    "set_appointment_duration",
-                    record_id,
-                    {"duration_seconds": new_len},
-                )
-                return {"success": True, "record_id": record_id}
-            return {"success": False, "error": upd.get("meta", {}).get("message") or "Не удалось добавить услугу"}
+            return dispatch_appointment_action(
+                provider="yclients",
+                external_company_id=str(self.company_id),
+                origin="legacy.residual_appointment",
+                action_class="set_appointment_services",
+                payload={
+                    "external_id": str(record_id),
+                    "service_ids": [str(service_id) for service_id in sorted(have)],
+                    "duration_seconds": new_len,
+                },
+            )
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -2022,38 +1861,19 @@ class YClientsAPI:
             rec = self.get_record(record_id)
             if not rec:
                 return {"success": False, "error": "Запись не найдена"}
-            client = rec.get("client") or {}
             staff = rec.get("staff") or {}
-            price_map = {}
             dur_map = {}
             try:
                 for s in self.get_services(staff.get("id")):
                     if isinstance(s, dict) and s.get("id"):
-                        price_map[s["id"]] = s.get("price_min") or s.get("price_max") or 0
                         try:
                             dur_map[s["id"]] = int(s.get("duration") or 0)
                         except Exception:
                             dur_map[s["id"]] = 0
             except Exception:
-                price_map = {}
-            existing = {}
-            for s in (rec.get("services") or []):
-                if isinstance(s, dict) and s.get("id") is not None:
-                    existing[s["id"]] = s
-            services_payload = []
+                dur_map = {}
             total_dur = 0
             for sid in ids:
-                old = existing.get(sid)
-                if old:
-                    services_payload.append({
-                        "id": sid,
-                        "cost": old.get("cost"),
-                        "discount": old.get("discount", 0),
-                        "first_cost": old.get("first_cost") or old.get("cost"),
-                    })
-                else:
-                    cost = price_map.get(sid, 0)
-                    services_payload.append({"id": sid, "cost": cost, "discount": 0, "first_cost": cost})
                 total_dur += int(dur_map.get(sid, 0) or 0)
             if total_dur <= 0:
                 try:
@@ -2070,32 +1890,17 @@ class YClientsAPI:
                         total_dur = explicit
                 except Exception:
                     pass
-            payload = {
-                "staff_id": staff.get("id"),
-                "datetime": rec.get("datetime"),
-                "seance_length": total_dur,
-                "save_if_busy": True,
-                "send_sms": False,
-                "client": {"id": client.get("id"), "phone": client.get("phone", ""),
-                           "name": client.get("name", "")},
-                "services": services_payload,
-                "comment": rec.get("comment", ""),
-            }
-            self._preserve_attendance(payload, rec)
-            upd = self._put(f"record/{self.company_id}/{record_id}", payload)
-            if upd.get("success") or upd.get("data"):
-                self._observe_residual_appointment_action(
-                    "set_appointment_services",
-                    record_id,
-                    {"service_ids": [str(service_id) for service_id in ids]},
-                )
-                self._observe_residual_appointment_action(
-                    "set_appointment_duration",
-                    record_id,
-                    {"duration_seconds": total_dur},
-                )
-                return {"success": True, "record_id": record_id}
-            return {"success": False, "error": upd.get("meta", {}).get("message") or "Не удалось изменить услуги"}
+            return dispatch_appointment_action(
+                provider="yclients",
+                external_company_id=str(self.company_id),
+                origin="legacy.residual_appointment",
+                action_class="set_appointment_services",
+                payload={
+                    "external_id": str(record_id),
+                    "service_ids": [str(service_id) for service_id in ids],
+                    "duration_seconds": total_dur,
+                },
+            )
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -2112,44 +1917,13 @@ class YClientsAPI:
                 length = 0
             if length <= 0:
                 return {"success": False, "error": "Некорректная длительность"}
-            rec = self.get_record(record_id)
-            if not rec:
-                return {"success": False, "error": "Запись не найдена"}
-            client = rec.get("client") or {}
-            staff = rec.get("staff") or {}
-            services_payload = []
-            for s in (rec.get("services") or []):
-                if isinstance(s, dict) and s.get("id") is not None:
-                    services_payload.append({
-                        "id": s["id"],
-                        "cost": s.get("cost"),
-                        "discount": s.get("discount", 0),
-                        "first_cost": s.get("first_cost") or s.get("cost"),
-                    })
-            if not services_payload:
-                return {"success": False, "error": "В записи нет услуг"}
-            payload = {
-                "staff_id": staff.get("id"),
-                "datetime": rec.get("datetime"),
-                "seance_length": length,
-                "save_if_busy": True,
-                "send_sms": False,
-                "client": {"id": client.get("id"), "phone": client.get("phone", ""),
-                           "name": client.get("name", "")},
-                "services": services_payload,
-                "comment": rec.get("comment", ""),
-            }
-            self._preserve_attendance(payload, rec)
-            upd = self._put(f"record/{self.company_id}/{record_id}", payload)
-            if upd.get("success") or upd.get("data"):
-                self._observe_residual_appointment_action(
-                    "set_appointment_duration",
-                    record_id,
-                    {"duration_seconds": length},
-                )
-                return {"success": True, "record_id": record_id, "seance_length": length}
-            return {"success": False,
-                    "error": upd.get("meta", {}).get("message") or "Не удалось изменить длительность"}
+            return dispatch_appointment_action(
+                provider="yclients",
+                external_company_id=str(self.company_id),
+                origin="legacy.residual_appointment",
+                action_class="set_appointment_duration",
+                payload={"external_id": str(record_id), "duration_seconds": length},
+            )
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -2182,45 +1956,17 @@ class YClientsAPI:
                 if len(digits) != 11 or not digits.startswith("7"):
                     return {"success": False, "error": "Введите телефон в формате +7XXXXXXXXXX"}
                 phone = "+" + digits
-            services_payload = []
-            for s in (rec.get("services") or []):
-                if not isinstance(s, dict) or not s.get("id"):
-                    continue
-                item = {"id": s.get("id"), "amount": s.get("amount") or 1}
-                for key in ("cost", "discount", "first_cost", "cost_to_pay", "manual_cost"):
-                    if s.get(key) is not None:
-                        item[key] = s.get(key)
-                services_payload.append(item)
-            if not services_payload:
-                return {"success": False, "error": "В записи нет услуг"}
-            payload = {
-                "staff_id": staff.get("id"),
-                "datetime": rec.get("datetime"),
-                "seance_length": rec.get("seance_length", 3600),
-                "save_if_busy": True,
-                "send_sms": False,
-                "client": {
-                    "id": client.get("id"),
-                    "phone": phone,
-                    "name": name,
-                    "surname": client.get("surname"),
-                    "email": client.get("email"),
+            return dispatch_appointment_action(
+                provider="yclients",
+                external_company_id=str(self.company_id),
+                origin="legacy.residual_appointment",
+                action_class="set_appointment_fields",
+                payload={
+                    "external_id": str(record_id),
+                    "field_kind": "client_name",
+                    "value": {"name": name, "phone": phone},
                 },
-                "services": services_payload,
-                "comment": rec.get("comment", ""),
-            }
-            self._preserve_attendance(payload, rec)
-            upd = self._put(f"record/{self.company_id}/{record_id}", payload)
-            if upd.get("success") or upd.get("data"):
-                self._observe_sensitive_appointment_action(
-                    "set_appointment_fields",
-                    record_id,
-                    "field_kind",
-                    "client_name",
-                    {"name": name, "phone": phone},
-                )
-                return {"success": True, "record_id": record_id, "client": name, "phone": phone}
-            return {"success": False, "error": upd.get("meta", {}).get("message") or "Не удалось сохранить данные клиента"}
+            )
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -2338,105 +2084,15 @@ class YClientsAPI:
         service_title: str,
         points: int,
     ) -> dict:
-        """
-        Помечает в YClients-записи, что одна из услуг оплачена баллами:
-          1) добавляет к comment пометку «🪙 <услуга> оплачено баллами (N б)»
-          2) обнуляет cost этой услуги в записи (YClients покажет 0₽ + первоначальную)
-
-        Идемпотентно: если пометка уже есть в comment — не дублирует.
-        Если услуга в записи не найдена — добавляет только comment.
-        """
-        try:
-            current = self._get(f"record/{self.company_id}/{record_id}").get("data") or {}
-            if not current:
-                return {"success": False, "error": "record not found"}
-
-            # 1) обновляем услуги: ищем нужную по title, обнуляем cost,
-            # discount ставим 100% (визуально «бесплатно по программе лояльности»).
-            services_payload = []
-            target_lower = (service_title or "").strip().lower()
-            matched = False
-            for s in (current.get("services") or []):
-                stitle = (s.get("title") or "").strip().lower()
-                if stitle == target_lower and not matched:
-                    services_payload.append({
-                        "id": s.get("id"),
-                        "cost": 0,
-                        "discount": 100,
-                        "first_cost": s.get("first_cost") or s.get("cost"),
-                    })
-                    matched = True
-                else:
-                    services_payload.append({
-                        "id": s.get("id"),
-                        "cost": s.get("cost"),
-                        "discount": s.get("discount", 0),
-                        "first_cost": s.get("first_cost") or s.get("cost"),
-                    })
-
-            # 2) комментарий — идемпотентно
-            existing_comment = (current.get("comment") or "").strip()
-            note = f"🪙 {service_title} оплачено баллами ({points} б)"
-            if note in existing_comment:
-                new_comment = existing_comment
-            elif existing_comment:
-                new_comment = f"{existing_comment} | {note}"
-            else:
-                new_comment = note
-
-            # 3) клиент в payload — обязательное поле (если есть)
-            client = current.get("client") or {}
-            client_payload = {
-                "phone": client.get("phone", ""),
-                "name":  client.get("name",  ""),
-                "email": client.get("email", ""),
-            } if client.get("phone") else None
-
-            payload = {
-                "staff_id":      current.get("staff_id") or (current.get("staff") or {}).get("id"),
-                "services":      services_payload,
-                "client":        client_payload,
-                "datetime":      current.get("datetime"),
-                "seance_length": current.get("seance_length"),
-                "save_if_busy":  True,
-                "send_sms":      False,
-                "comment":       new_comment,
-                "paid_full":     current.get("paid_full", 0),
-                "confirmed":     current.get("confirmed", 1),
-                "sms_before":    current.get("sms_before", 0),
-                "sms_now":       current.get("sms_now", 0),
-                "email_now":     current.get("email_now", 0),
-                "notified":      current.get("notified", 0),
-                "master_request": current.get("master_request", 0),
-            }
-            self._preserve_attendance(payload, current)
-            data = self._put(f"record/{self.company_id}/{record_id}", payload)
-            if not data.get("success"):
-                return {
-                    "success": False,
-                    "error": data.get("meta", {}).get("message", "Ошибка YClients"),
-                    "matched_service": matched,
-                }
-            resulting_ids = [
-                str(service.get("id"))
-                for service in services_payload
-                if service.get("id") is not None
-            ]
-            self._observe_residual_appointment_action(
-                "set_appointment_services",
-                record_id,
-                {"service_ids": resulting_ids},
-            )
-            self._observe_sensitive_appointment_action(
-                "set_appointment_fields",
-                record_id,
-                "field_kind",
-                "comment",
-                new_comment,
-            )
-            return {"success": True, "matched_service": matched}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+        """Price-changing loyalty writes need their own approved action contract."""
+        del record_id, service_title, points
+        return {
+            "success": False,
+            "unknown": False,
+            "retry_allowed": False,
+            "code": "loyalty_record_adjustment_requires_action_contract",
+            "error": "Списание баллов в записи временно недоступно.",
+        }
 
 
     def append_record_comment(self, record_id: int, note: str, replace_markers=None) -> dict:
@@ -2470,50 +2126,17 @@ class YClientsAPI:
             if new_comment == orig_comment:
                 return {"success": True, "skipped": True}  # ничего не изменилось
 
-            # услуги сохраняем как есть (cost/discount/first_cost), ничего не меняем
-            services_payload = [{
-                "id": s.get("id"),
-                "cost": s.get("cost"),
-                "discount": s.get("discount", 0),
-                "first_cost": s.get("first_cost") or s.get("cost"),
-            } for s in (current.get("services") or [])]
-
-            client = current.get("client") or {}
-            client_payload = {
-                "phone": client.get("phone", ""),
-                "name":  client.get("name",  ""),
-                "email": client.get("email", ""),
-            } if client.get("phone") else None
-
-            payload = {
-                "staff_id":      current.get("staff_id") or (current.get("staff") or {}).get("id"),
-                "services":      services_payload,
-                "client":        client_payload,
-                "datetime":      current.get("datetime"),
-                "seance_length": current.get("seance_length"),
-                "save_if_busy":  True,
-                "send_sms":      False,
-                "comment":       new_comment,
-                "paid_full":     current.get("paid_full", 0),
-                "confirmed":     current.get("confirmed", 1),
-                "sms_before":    current.get("sms_before", 0),
-                "sms_now":       current.get("sms_now", 0),
-                "email_now":     current.get("email_now", 0),
-                "notified":      current.get("notified", 0),
-                "master_request": current.get("master_request", 0),
-            }
-            self._preserve_attendance(payload, current)
-            data = self._put(f"record/{self.company_id}/{record_id}", payload)
-            if not data.get("success"):
-                return {"success": False, "error": data.get("meta", {}).get("message", "Ошибка YClients")}
-            self._observe_sensitive_appointment_action(
-                "set_appointment_fields",
-                record_id,
-                "field_kind",
-                "comment",
-                new_comment,
+            return dispatch_appointment_action(
+                provider="yclients",
+                external_company_id=str(self.company_id),
+                origin="legacy.residual_appointment",
+                action_class="set_appointment_fields",
+                payload={
+                    "external_id": str(record_id),
+                    "field_kind": "comment",
+                    "value": new_comment,
+                },
             )
-            return {"success": True}
         except Exception as e:
             return {"success": False, "error": str(e)}
 

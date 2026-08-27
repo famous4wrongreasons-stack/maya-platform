@@ -11,6 +11,10 @@ const PROVIDER_WRITE_METHODS = new Set([
   'rescheduleAppointment',
   'cancelAppointment',
   'payVisit',
+  'markAppointmentAttendance',
+  'setAppointmentDuration',
+  'setAppointmentServices',
+  'setAppointmentField',
 ]);
 const CANONICAL_PROVIDER_OWNER = 'crm/crm.service.ts';
 const FORBIDDEN_ACTION_ENGINE_IMPORTS = [
@@ -78,7 +82,7 @@ describe('appointment action execution boundary', () => {
       visit(source);
     }
 
-    expect(directProviderCalls.length).toBe(4);
+    expect(directProviderCalls.length).toBe(8);
     expect(
       directProviderCalls.every((call) =>
         call.startsWith(`${CANONICAL_PROVIDER_OWNER}:`),
@@ -119,27 +123,30 @@ describe('appointment action execution boundary', () => {
     expect(violations).toEqual([]);
   });
 
-  it('keeps every residual appointment mutation shadow-only', () => {
+  it('owns every migrated residual appointment mutation in the Action Engine', () => {
     const registry = new ActionCapabilityRegistry();
     const capabilities = [
-      'crm.appointment.attendance.shadow.v1',
-      'crm.appointment.duration.shadow.v1',
-      'crm.appointment.services.shadow.v1',
-      'crm.appointment.fields.shadow.v1',
+      'crm.appointment.attendance.v1',
+      'crm.appointment.duration.v1',
+      'crm.appointment.services.v1',
+      'crm.appointment.fields.v1',
     ].map((capability) => registry.get(capability));
 
     for (const capability of capabilities) {
       expect(capability).toMatchObject({
-        policyKey: 'chapter6.residual-appointment-shadow',
-        policyDecision: 'SHADOW_ONLY',
-        autonomyLevel: 'L2_5_SHADOW',
-        executorKey: 'shadow.none',
+        policyKey: `production.${capability.actionClass}.confirmed-request`,
+        policyDecision: 'ALLOW',
+        autonomyLevel: 'L2_CONFIRMED_REQUEST',
       });
-      expect(capability.retry.maxExecutionAttempts).toBe(1);
-      expect(capability.retry.retryablePreDispatchErrors.size).toBe(0);
-      expect(capability.reconciliation.retryAfterProvenNonExecution).toBe(
-        false,
+      expect(capability.executorKey).not.toBe('shadow.none');
+      expect(capability.retry.maxExecutionAttempts).toBe(2);
+      expect(capability.retry.retryablePreDispatchErrors).toEqual(
+        new Set([
+          'crm_rate_limited_before_dispatch',
+          'crm_transient_before_dispatch',
+        ]),
       );
+      expect(capability.reconciliation.retryAfterProvenNonExecution).toBe(true);
     }
   });
 
@@ -173,7 +180,7 @@ describe('appointment action execution boundary', () => {
     ).toEqual([]);
   });
 
-  it('exposes residual appointment mutations only through shadow planning', () => {
+  it('exposes residual appointment mutations through CrmService execution only', () => {
     const combinedSource = LEGACY_BRIDGE_FILES.map((path) =>
       readFileSync(path, 'utf8'),
     ).join('\n');
@@ -184,7 +191,8 @@ describe('appointment action execution boundary', () => {
     expect(combinedSource).toContain('set_appointment_fields');
     expect(combinedSource).toContain('pay_visit');
     expect(combinedSource).not.toContain('close_appointment_payment');
-    expect(combinedSource).toContain('legacy_appointment_shadow_only');
+    expect(combinedSource).toContain('executeResidualAppointmentWithReceipt');
+    expect(combinedSource).not.toContain('legacy_appointment_shadow_only');
     expect(combinedSource).not.toMatch(/executeAttendance|executeDuration/);
   });
 });

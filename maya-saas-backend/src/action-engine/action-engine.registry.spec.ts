@@ -73,8 +73,65 @@ describe('ActionCapabilityRegistry', () => {
     ).toThrow();
   });
 
-  it('does not register attendance as an executable Phase B2 action', () => {
-    expect(() => registry.get('crm.appointment.attendance.v1')).toThrow();
+  it('registers the four residual appointment classes as strict executable capabilities', () => {
+    const cases = [
+      [
+        'crm.appointment.attendance.v1',
+        'set_appointment_attendance',
+        'crm.appointment.attendance',
+        { attendanceCode: 1 },
+        { attendanceCode: 1 },
+      ],
+      [
+        'crm.appointment.duration.v1',
+        'set_appointment_duration',
+        'crm.appointment.duration',
+        { durationSeconds: 3600 },
+        { durationSeconds: 3600 },
+      ],
+      [
+        'crm.appointment.services.v1',
+        'set_appointment_services',
+        'crm.appointment.services',
+        { serviceIds: ['service-2', 'service-1', 'service-1'] },
+        { serviceIds: ['service-1', 'service-2'] },
+      ],
+      [
+        'crm.appointment.fields.v1',
+        'set_appointment_fields',
+        'crm.appointment.fields',
+        { fieldKind: 'comment', value: 'Комментарий' },
+        { fieldKind: 'comment', value: 'Комментарий' },
+      ],
+    ] as const;
+
+    for (const [
+      capabilityName,
+      actionClass,
+      executorKey,
+      input,
+      normalized,
+    ] of cases) {
+      const capability = registry.get(capabilityName);
+      expect(capability).toMatchObject({
+        actionClass,
+        policyDecision: ActionPolicyDecision.ALLOW,
+        executorKey,
+        approvalRequirement: 'NONE',
+      });
+      expect(capability.retry.maxExecutionAttempts).toBe(2);
+      expect(capability.retry.retryablePreDispatchErrors).toEqual(
+        new Set([
+          'crm_rate_limited_before_dispatch',
+          'crm_transient_before_dispatch',
+        ]),
+      );
+      expect(capability.reconciliation.retryAfterProvenNonExecution).toBe(true);
+      expect(capability.normalizeInput(input)).toEqual(normalized);
+      expect(() =>
+        capability.normalizeInput({ ...input, executor: 'legacy.direct' }),
+      ).toThrow(/Unexpected action input/);
+    }
   });
 
   it('registers the four residual appointment classes as strict shadow capabilities', () => {

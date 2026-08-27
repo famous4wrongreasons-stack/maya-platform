@@ -53,6 +53,7 @@ import {
   CreatedAppointment,
   AppliedStaffScheduleDayChange,
   CrmAdapterConfig,
+  CrmAppointmentMutationState,
   CrmAppointmentDetail,
   CrmAppointmentRevenueSnapshot,
   CrmCompanyProfile,
@@ -84,7 +85,11 @@ import {
 } from './crm-provider-settings';
 import type { StaffId, VisitAttendance } from '../domain';
 import { asStaffId, asStaffIdOrNull } from '../domain';
-import { assertWritableAttendance, attendanceToCode } from './crm-attendance';
+import {
+  assertWritableAttendance,
+  attendanceFromWritableCode,
+  attendanceToCode,
+} from './crm-attendance';
 import {
   CrmOutcomeUnknownError,
   CrmRecordGoneError,
@@ -118,6 +123,31 @@ type ResidualAppointmentShadowAction =
   | 'set_appointment_duration'
   | 'set_appointment_services'
   | 'set_appointment_fields';
+
+export type ResidualAppointmentCapability =
+  | 'crm.appointment.attendance.v1'
+  | 'crm.appointment.duration.v1'
+  | 'crm.appointment.services.v1'
+  | 'crm.appointment.fields.v1';
+
+export type ResidualAppointmentAction = ResidualAppointmentShadowAction;
+
+export type ResidualAppointmentMutationInput =
+  | { attendanceCode: number }
+  | { durationSeconds: number }
+  | { serviceIds: string[]; durationSeconds?: number }
+  | { fieldKind: 'comment'; value: string }
+  | {
+      fieldKind: 'client_name';
+      value: { name: string; phone?: string };
+    }
+  | { fieldKind: 'sms_flag'; value: number };
+
+export type ResidualAppointmentMutationResult =
+  | { external_id: string; attendance: VisitAttendance }
+  | { external_id: string; duration_minutes: number }
+  | { external_id: string; service_ids: string[] }
+  | { external_id: string; field_kind: string };
 
 const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_PREFIX =
   'MAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION ';
@@ -1622,6 +1652,342 @@ export class CrmService {
     };
   }
 
+  async executeResidualAppointmentWithReceipt(
+    tenantId: string,
+    action: ResidualAppointmentAction,
+    externalId: string,
+    input: ResidualAppointmentMutationInput,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<ResidualAppointmentMutationResult>> {
+    const plan = await this.residualAppointmentActionPlan(
+      tenantId,
+      action,
+      externalId,
+      input,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private async residualAppointmentActionPlan(
+    tenantId: string,
+    action: ResidualAppointmentAction,
+    externalId: string,
+    input: ResidualAppointmentMutationInput,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<ResidualAppointmentMutationResult>> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    if (!adapter.getAppointmentMutationState) {
+      throw new ConflictException(
+        'CRM provider does not support appointment mutation verification.',
+      );
+    }
+
+    const capabilityByAction: Record<
+      ResidualAppointmentAction,
+      ResidualAppointmentCapability
+    > = {
+      set_appointment_attendance: 'crm.appointment.attendance.v1',
+      set_appointment_duration: 'crm.appointment.duration.v1',
+      set_appointment_services: 'crm.appointment.services.v1',
+      set_appointment_fields: 'crm.appointment.fields.v1',
+    };
+    const readState = () =>
+      adapter.getAppointmentMutationState!({
+        tenantId: scopedTenantId,
+        externalId,
+      });
+
+    return {
+      request: this.appointmentActionRequest({
+        tenantId: scopedTenantId,
+        capability: capabilityByAction[action],
+        targetRef: `appointment/${externalId}`,
+        input,
+        invocation,
+      }),
+      handlers: {
+        prepare: async () => ({
+          beforeHash: this.appointmentFingerprint(await readState()),
+        }),
+        dispatch: async (normalizedInput) => {
+          const durable = this.residualAppointmentInput(
+            action,
+            normalizedInput,
+          );
+          await this.dispatchResidualAppointmentMutation(
+            adapter,
+            scopedTenantId,
+            action,
+            externalId,
+            durable,
+          );
+          const current = await readState();
+          if (!this.matchesResidualAppointment(current, action, durable)) {
+            throw new CrmOutcomeUnknownError(
+              'CRM mutation returned without proving the requested appointment state.',
+            );
+          }
+          const value = this.residualAppointmentResult(
+            externalId,
+            action,
+            durable,
+          );
+          return { value, safeResult: this.residualAppointmentSafe(value) };
+        },
+        reconcile: async (normalizedInput, previous) => {
+          const durable = this.residualAppointmentInput(
+            action,
+            normalizedInput,
+          );
+          const current = await readState();
+          if (this.matchesResidualAppointment(current, action, durable)) {
+            const value = this.residualAppointmentResult(
+              externalId,
+              action,
+              durable,
+            );
+            return {
+              outcome: 'PROVEN_SUCCEEDED',
+              safeResult: this.residualAppointmentSafe(value),
+            };
+          }
+          if (
+            previous &&
+            previous.beforeHash === this.appointmentFingerprint(current)
+          ) {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          return { outcome: 'STILL_UNKNOWN' };
+        },
+        restore: (safe) => this.restoreResidualAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  private residualAppointmentInput(
+    action: ResidualAppointmentAction,
+    input: Record<string, unknown>,
+  ): ResidualAppointmentMutationInput {
+    if (action === 'set_appointment_attendance') {
+      return {
+        attendanceCode: requireNumber(input.attendanceCode, 'attendanceCode'),
+      };
+    }
+    if (action === 'set_appointment_duration') {
+      return {
+        durationSeconds: requireNumber(
+          input.durationSeconds,
+          'durationSeconds',
+        ),
+      };
+    }
+    if (action === 'set_appointment_services') {
+      return {
+        serviceIds: requireStringArray(input.serviceIds, 'serviceIds'),
+        ...(input.durationSeconds === undefined
+          ? {}
+          : {
+              durationSeconds: requireNumber(
+                input.durationSeconds,
+                'durationSeconds',
+              ),
+            }),
+      };
+    }
+
+    const fieldKind = requireString(input.fieldKind, 'fieldKind');
+    if (fieldKind === 'comment') {
+      if (typeof input.value !== 'string') {
+        throw new BadRequestException('Invalid appointment comment.');
+      }
+      return { fieldKind, value: input.value };
+    }
+    if (fieldKind === 'sms_flag') {
+      return { fieldKind, value: requireNumber(input.value, 'value') };
+    }
+    if (fieldKind !== 'client_name') {
+      throw new BadRequestException('Unsupported appointment field kind.');
+    }
+    const value = input.value;
+    if (!value || Array.isArray(value) || typeof value !== 'object') {
+      throw new BadRequestException('Invalid appointment client value.');
+    }
+    const client = value as Record<string, unknown>;
+    return {
+      fieldKind,
+      value: {
+        name: requireString(client.name, 'client name'),
+        ...(typeof client.phone === 'string' && client.phone
+          ? { phone: client.phone }
+          : {}),
+      },
+    };
+  }
+
+  private async dispatchResidualAppointmentMutation(
+    adapter: CRMAdapter,
+    tenantId: string,
+    action: ResidualAppointmentAction,
+    externalId: string,
+    input: ResidualAppointmentMutationInput,
+  ): Promise<void> {
+    if (action === 'set_appointment_attendance') {
+      if (!adapter.markAppointmentAttendance || !('attendanceCode' in input)) {
+        throw new ConflictException('CRM attendance mutation is unsupported.');
+      }
+      await adapter.markAppointmentAttendance({
+        tenantId,
+        externalId,
+        attendance: attendanceFromWritableCode(input.attendanceCode),
+      });
+      return;
+    }
+    if (action === 'set_appointment_duration') {
+      if (
+        !adapter.setAppointmentDuration ||
+        !('durationSeconds' in input) ||
+        typeof input.durationSeconds !== 'number'
+      ) {
+        throw new ConflictException('CRM duration mutation is unsupported.');
+      }
+      await adapter.setAppointmentDuration({
+        tenantId,
+        externalId,
+        durationMinutes: Math.round(input.durationSeconds / 60),
+      });
+      return;
+    }
+    if (action === 'set_appointment_services') {
+      if (!adapter.setAppointmentServices || !('serviceIds' in input)) {
+        throw new ConflictException('CRM services mutation is unsupported.');
+      }
+      await adapter.setAppointmentServices({
+        tenantId,
+        externalId,
+        serviceIds: input.serviceIds,
+        ...('durationSeconds' in input && input.durationSeconds !== undefined
+          ? { durationMinutes: Math.round(input.durationSeconds / 60) }
+          : {}),
+      });
+      return;
+    }
+    if (!adapter.setAppointmentField || !('fieldKind' in input)) {
+      throw new ConflictException('CRM field mutation is unsupported.');
+    }
+    await adapter.setAppointmentField({
+      tenantId,
+      externalId,
+      update: input,
+    });
+  }
+
+  private matchesResidualAppointment(
+    state: CrmAppointmentMutationState,
+    action: ResidualAppointmentAction,
+    input: ResidualAppointmentMutationInput,
+  ): boolean {
+    if (action === 'set_appointment_attendance' && 'attendanceCode' in input) {
+      return (
+        state.attendance === attendanceFromWritableCode(input.attendanceCode)
+      );
+    }
+    if (
+      action === 'set_appointment_duration' &&
+      'durationSeconds' in input &&
+      typeof input.durationSeconds === 'number'
+    ) {
+      return state.duration_minutes === Math.round(input.durationSeconds / 60);
+    }
+    if (action === 'set_appointment_services' && 'serviceIds' in input) {
+      return (
+        sameServiceIds(state.service_ids, input.serviceIds) &&
+        (!('durationSeconds' in input) ||
+          input.durationSeconds === undefined ||
+          state.duration_minutes === Math.round(input.durationSeconds / 60))
+      );
+    }
+    if (!('fieldKind' in input)) return false;
+    if (input.fieldKind === 'comment') return state.comment === input.value;
+    if (input.fieldKind === 'sms_flag') return state.sms_flag === input.value;
+    return (
+      state.client_name === input.value.name &&
+      (!input.value.phone ||
+        phoneMatchKey(state.client_phone) === phoneMatchKey(input.value.phone))
+    );
+  }
+
+  private residualAppointmentResult(
+    externalId: string,
+    action: ResidualAppointmentAction,
+    input: ResidualAppointmentMutationInput,
+  ): ResidualAppointmentMutationResult {
+    if (action === 'set_appointment_attendance' && 'attendanceCode' in input) {
+      return {
+        external_id: externalId,
+        attendance: attendanceFromWritableCode(input.attendanceCode),
+      };
+    }
+    if (
+      action === 'set_appointment_duration' &&
+      'durationSeconds' in input &&
+      typeof input.durationSeconds === 'number'
+    ) {
+      return {
+        external_id: externalId,
+        duration_minutes: Math.round(input.durationSeconds / 60),
+      };
+    }
+    if (action === 'set_appointment_services' && 'serviceIds' in input) {
+      return { external_id: externalId, service_ids: input.serviceIds };
+    }
+    if ('fieldKind' in input) {
+      return { external_id: externalId, field_kind: input.fieldKind };
+    }
+    throw new Error('Residual appointment result is inconsistent.');
+  }
+
+  private residualAppointmentSafe(
+    value: ResidualAppointmentMutationResult,
+  ): Record<string, unknown> {
+    return { ...value };
+  }
+
+  private restoreResidualAppointment(
+    safe: Record<string, unknown>,
+  ): ResidualAppointmentMutationResult {
+    const externalId = requireString(safe.external_id, 'external_id');
+    if (typeof safe.attendance === 'string') {
+      return {
+        external_id: externalId,
+        attendance: safe.attendance as VisitAttendance,
+      };
+    }
+    if (typeof safe.duration_minutes === 'number') {
+      return {
+        external_id: externalId,
+        duration_minutes: safe.duration_minutes,
+      };
+    }
+    if (Array.isArray(safe.service_ids)) {
+      return {
+        external_id: externalId,
+        service_ids: requireStringArray(safe.service_ids, 'service_ids'),
+      };
+    }
+    return {
+      external_id: externalId,
+      field_kind: requireString(safe.field_kind, 'field_kind'),
+    };
+  }
+
   private appointmentFingerprint(value: unknown): string {
     return createHash('sha256')
       .update(stableActionJson(value))
@@ -1654,6 +2020,7 @@ export class CrmService {
       | 'crm.appointment.reschedule.v1'
       | 'crm.appointment.cancel.v1'
       | 'crm.visit.payment.v1'
+      | ResidualAppointmentCapability
       | ResidualAppointmentShadowCapability;
     targetRef: string;
     input: unknown;
@@ -1707,6 +2074,25 @@ export class CrmService {
     const preview = this.actionEngineRuntime.preview(request);
     await this.actionEngineRuntime.planShadow(request);
     return preview;
+  }
+
+  private nestResidualAppointmentInvocation(
+    action: ResidualAppointmentAction,
+    externalId: string,
+  ): AppointmentActionInvocation {
+    const requestId = this.tenantContext.get()?.requestId;
+    return {
+      sourceType: 'authenticated_request',
+      ...(requestId ? { sourceRef: requestId } : {}),
+      ...(requestId
+        ? {
+            callerIdempotency: {
+              scope: `nest.crm.journal:${action}`,
+              key: `${requestId}:${externalId}`,
+            },
+          }
+        : {}),
+    };
   }
 
   private appointmentObservationRef(value: string): string {
@@ -2507,32 +2893,31 @@ export class CrmService {
     actor: AuthenticatedUser,
     externalId: string,
     attendance: VisitAttendance,
-  ) {
+  ): Promise<{ external_id: string; attendance: VisitAttendance }> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
     // Сервис не доверяет вызывающему: HTTP-край не единственный вход.
     assertWritableAttendance(attendance);
-
-    const adapter = await this.getVisitCapableAdapter(
-      scopedTenantId,
-      'markAppointmentAttendance',
-      'crm_attendance_not_supported',
-    );
-
-    const result = await adapter.markAppointmentAttendance({
-      tenantId: scopedTenantId,
-      externalId,
-      attendance,
-    });
-
-    await this.observeNestResidualAppointmentMutation({
-      tenantId: scopedTenantId,
-      actionClass: 'set_appointment_attendance',
-      capability: 'crm.appointment.attendance.shadow.v1',
-      externalId,
-      input: { attendanceCode: attendanceToCode(attendance) },
-    });
-    return result;
+    try {
+      const result = (
+        await this.executeResidualAppointmentWithReceipt(
+          scopedTenantId,
+          'set_appointment_attendance',
+          externalId,
+          { attendanceCode: attendanceToCode(attendance) },
+          this.nestResidualAppointmentInvocation(
+            'set_appointment_attendance',
+            externalId,
+          ),
+        )
+      ).value;
+      if (!('attendance' in result)) {
+        throw new Error('Attendance action returned an inconsistent result.');
+      }
+      return result;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
   }
 
   async setAppointmentDuration(
@@ -2540,7 +2925,7 @@ export class CrmService {
     actor: AuthenticatedUser,
     externalId: string,
     durationMinutes: number,
-  ) {
+  ): Promise<{ external_id: string; duration_minutes: number }> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
 
@@ -2555,27 +2940,27 @@ export class CrmService {
       });
     }
 
-    const adapter = await this.getVisitCapableAdapter(
-      scopedTenantId,
-      'setAppointmentDuration',
-      'crm_duration_not_supported',
-    );
-
     const roundedDurationMinutes = Math.round(durationMinutes);
-    const result = await adapter.setAppointmentDuration({
-      tenantId: scopedTenantId,
-      externalId,
-      durationMinutes: roundedDurationMinutes,
-    });
-
-    await this.observeNestResidualAppointmentMutation({
-      tenantId: scopedTenantId,
-      actionClass: 'set_appointment_duration',
-      capability: 'crm.appointment.duration.shadow.v1',
-      externalId,
-      input: { durationSeconds: roundedDurationMinutes * 60 },
-    });
-    return result;
+    try {
+      const result = (
+        await this.executeResidualAppointmentWithReceipt(
+          scopedTenantId,
+          'set_appointment_duration',
+          externalId,
+          { durationSeconds: roundedDurationMinutes * 60 },
+          this.nestResidualAppointmentInvocation(
+            'set_appointment_duration',
+            externalId,
+          ),
+        )
+      ).value;
+      if (!('duration_minutes' in result)) {
+        throw new Error('Duration action returned an inconsistent result.');
+      }
+      return result;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
   }
 
   async setAppointmentServices(
@@ -2583,7 +2968,7 @@ export class CrmService {
     actor: AuthenticatedUser,
     externalId: string,
     serviceIds: string[],
-  ) {
+  ): Promise<{ external_id: string; service_ids: string[] }> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
 
@@ -2595,26 +2980,26 @@ export class CrmService {
       });
     }
 
-    const adapter = await this.getVisitCapableAdapter(
-      scopedTenantId,
-      'setAppointmentServices',
-      'crm_services_not_supported',
-    );
-
-    const result = await adapter.setAppointmentServices({
-      tenantId: scopedTenantId,
-      externalId,
-      serviceIds,
-    });
-
-    await this.observeNestResidualAppointmentMutation({
-      tenantId: scopedTenantId,
-      actionClass: 'set_appointment_services',
-      capability: 'crm.appointment.services.shadow.v1',
-      externalId,
-      input: { serviceIds },
-    });
-    return result;
+    try {
+      const result = (
+        await this.executeResidualAppointmentWithReceipt(
+          scopedTenantId,
+          'set_appointment_services',
+          externalId,
+          { serviceIds },
+          this.nestResidualAppointmentInvocation(
+            'set_appointment_services',
+            externalId,
+          ),
+        )
+      ).value;
+      if (!('service_ids' in result)) {
+        throw new Error('Services action returned an inconsistent result.');
+      }
+      return result;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
   }
 
   /** Перенос визита из журнала — под тем же стражем, что и правки. */
