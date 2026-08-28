@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 
 import { ActionPolicyDecision, type PrismaClient } from '@prisma/client';
 
@@ -100,6 +100,13 @@ export interface CanonicalActionPolicyResolutionV1 {
   policyEvidenceJson: Record<string, unknown>;
   policyEvaluatedAt: Date;
   policyValidUntil: Date;
+  approvalBindingHash: string;
+  approvalBindingExpiresAt: Date;
+}
+
+export interface CanonicalActionApprovalAttestationV1 {
+  policyContextHash: string;
+  policyEvidenceJson: Record<string, unknown>;
   approvalBindingHash: string;
   approvalBindingExpiresAt: Date;
 }
@@ -451,6 +458,67 @@ export class CanonicalActionPolicyResolver {
     };
   }
 
+  /**
+   * Verifies a durable binding without trusting a caller-provided approval
+   * flag or hash. The HMAC secret remains owned by this server-side resolver.
+   */
+  verifyApprovalBinding(
+    request: ActionPolicyResolutionRequestV1,
+    attestation: CanonicalActionApprovalAttestationV1,
+  ): boolean {
+    this.assertRequest(request);
+    if (
+      !HASH_PATTERN.test(attestation.policyContextHash) ||
+      !HASH_PATTERN.test(attestation.approvalBindingHash) ||
+      !(attestation.approvalBindingExpiresAt instanceof Date) ||
+      Number.isNaN(attestation.approvalBindingExpiresAt.getTime()) ||
+      !attestation.policyEvidenceJson ||
+      Array.isArray(attestation.policyEvidenceJson) ||
+      typeof attestation.policyEvidenceJson !== 'object'
+    ) {
+      return false;
+    }
+    const actor = recordValue(attestation.policyEvidenceJson.actor);
+    const actorRef = nullableHash(actor?.actorRef);
+    const membershipRef = nullableHash(actor?.membershipRef);
+    if (actorRef === undefined || membershipRef === undefined) {
+      return false;
+    }
+    const expectedContextHash = this.hmac(
+      'maya.action-policy-context/1',
+      attestation.policyEvidenceJson,
+    );
+    if (!hashesEqual(expectedContextHash, attestation.policyContextHash)) {
+      return false;
+    }
+
+    const capability = this.capabilityRegistry.get(request.capability);
+    const policy = this.policyRegistry.get(request.capability);
+    const expectedBindingHash = this.hmac('maya.action-approval-binding/1', {
+      tenantRef: this.refHash('tenant', request.tenantId),
+      actorRef,
+      actorMembershipRef: membershipRef,
+      sourceType: request.sourceType,
+      sourceRef: this.refHash('source', request.sourceRef),
+      capability: capability.capability,
+      capabilityVersion: capability.capabilityVersion,
+      actionClass: capability.actionClass,
+      targetKind: capability.targetKind,
+      targetRef: this.refHash('target', request.targetRef),
+      normalizedInputHash: request.normalizedInputHash,
+      policyKey: capability.policyKey,
+      policyVersion: capability.policyVersion,
+      policyContextHash: attestation.policyContextHash,
+      riskProfileVersion: capability.riskProfileVersion,
+      riskFacets: [...capability.riskFacets].sort(),
+      approvalRequirement: capability.approvalRequirement,
+      approverPolicyKey: policy.approverPolicyKey,
+      approvalBindingExpiresAt:
+        attestation.approvalBindingExpiresAt.toISOString(),
+    });
+    return hashesEqual(expectedBindingHash, attestation.approvalBindingHash);
+  }
+
   private assertRequest(request: ActionPolicyResolutionRequestV1): void {
     if (!request || Array.isArray(request) || typeof request !== 'object') {
       throw new ActionContractError('Policy resolution request is invalid');
@@ -699,4 +767,27 @@ function assertOpaque(value: string, label: string): void {
   ) {
     throw new ActionContractError(`${label} must be an opaque reference`);
   }
+}
+
+function recordValue(value: unknown): Record<string, unknown> | null {
+  return value && !Array.isArray(value) && typeof value === 'object'
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function nullableHash(value: unknown): string | null | undefined {
+  return value === null
+    ? null
+    : typeof value === 'string' && HASH_PATTERN.test(value)
+      ? value
+      : undefined;
+}
+
+function hashesEqual(left: string, right: string): boolean {
+  const leftBuffer = Buffer.from(left, 'hex');
+  const rightBuffer = Buffer.from(right, 'hex');
+  return (
+    leftBuffer.length === rightBuffer.length &&
+    timingSafeEqual(leftBuffer, rightBuffer)
+  );
 }
