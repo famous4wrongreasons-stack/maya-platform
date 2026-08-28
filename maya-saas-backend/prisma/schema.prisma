@@ -363,17 +363,23 @@ model ActionExecution {
   intentExpiresAt          DateTime?
   dryRun                   Boolean   @default(false)
 
-  riskProfileVersion Int
-  riskFacetsJson     Json
-  policyKey          String
-  policyVersion      Int
-  policyDecision     ActionPolicyDecision
-  autonomyLevel      String
-  policyDecidedBy    String
+  riskProfileVersion    Int
+  riskFacetsJson        Json
+  policyKey             String
+  policyVersion         Int
+  policyDecision        ActionPolicyDecision
+  autonomyLevel         String
+  policyDecidedBy       String
+  policyContextContract String?
+  policyContextHash     String?
+  policyEvidenceJson    Json?
+  policyEvaluatedAt     DateTime?
+  policyValidUntil      DateTime?
 
   approvalRequirement     String
   approvalDecision        ActionApprovalDecision
   approvalInputHash       String?
+  approvalBindingHash     String?
   approvalRequestedAt     DateTime?
   approvalExpiresAt       DateTime?
   approvalDecidedAt       DateTime?
