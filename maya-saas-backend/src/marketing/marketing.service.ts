@@ -12,13 +12,19 @@ import { UserRole } from '@prisma/client';
 import { asJson } from '../common/json.util';
 import { phonesMatch } from '../common/phone.util';
 import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
+import { CommunicationDeliveryService } from '../communication-delivery/communication-delivery.service';
 import { CommunicationShadowService } from '../communication-shadow';
 import { CrmService } from '../crm/crm.service';
 import type { CrmClientSearchResult } from '../crm/crm-adapter.interface';
-import { InboxService } from '../inbox/inbox.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecoveryService } from '../recovery/recovery.service';
 import { DEFAULT_SALON_TIMEZONE } from '../tenants/salon-timezone';
+import {
+  type BulkAudiencePlanRow,
+  type BulkConsentState,
+  type BulkOptOutState,
+  compareBulkAudienceDeliveryPlans,
+} from './bulk-audience-equivalence';
 
 const DAY_MS = 24 * 60 * 60 * 1_000;
 const SNAPSHOT_TTL_MS = DAY_MS;
@@ -37,6 +43,20 @@ type Candidate = {
   consentRecordedAt: Date;
 };
 
+type BulkAudienceDecision = {
+  userId: string;
+  eligibilityStatus: 'ALLOW' | 'SKIP';
+  exclusionReason?: string;
+  candidate?: Candidate;
+};
+
+type BulkDeliveryProof = {
+  audienceId: string;
+  audienceSnapshotHash: string;
+  messageSnapshotHash: string;
+  eligibleUserIds: string[];
+};
+
 @Injectable()
 export class MarketingService {
   private readonly logger = new Logger(MarketingService.name);
@@ -44,7 +64,7 @@ export class MarketingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly crmService: CrmService,
-    private readonly inboxService: InboxService,
+    private readonly communicationDelivery: CommunicationDeliveryService,
     private readonly recoveryService: RecoveryService,
     /**
      * 🔴 Cycle 04 P9. Давность посещения — у владельца факта. Здесь стояло
@@ -273,47 +293,89 @@ export class MarketingService {
     const recipients = revalidated.filter(({ match }) =>
       this.matchesRule(match, rule, when),
     );
+    const revalidatedByUserId = new Map(
+      revalidated.map((item) => [item.candidate.userId, item]),
+    );
+    const audienceDecisions: BulkAudienceDecision[] = [...requestedIds]
+      .sort()
+      .map((userId) => {
+        const item = revalidatedByUserId.get(userId);
+        if (!item) {
+          return {
+            userId,
+            eligibilityStatus: 'SKIP',
+            exclusionReason: 'CONSENT_OR_ACCOUNT_INELIGIBLE',
+          };
+        }
+        if (!item.match) {
+          return {
+            userId,
+            eligibilityStatus: 'SKIP',
+            exclusionReason: 'CRM_CLIENT_UNAVAILABLE',
+            candidate: item.candidate,
+          };
+        }
+        if (!this.matchesRule(item.match, rule, when)) {
+          return {
+            userId,
+            eligibilityStatus: 'SKIP',
+            exclusionReason: 'RECENCY_OR_VISIT_RULE_NOT_MET',
+            candidate: item.candidate,
+          };
+        }
+        return {
+          userId,
+          eligibilityStatus: 'ALLOW',
+          candidate: item.candidate,
+        };
+      });
 
-    await this.planBulkCampaignShadow({
+    const proof = await this.planBulkCampaignShadow({
       tenantId: input.tenantId,
       actorUserId: input.actorUserId,
       idempotencyKey: input.idempotencyKey,
       campaign,
       audience,
       rule,
+      requestedIds: [...requestedIds],
+      audienceDecisions,
       recipients: recipients.map(({ candidate }) => candidate),
     });
 
-    let sentCount = 0;
-    let failedCount = 0;
+    const delivery = await this.communicationDelivery.deliverBulkCampaign({
+      tenantId: input.tenantId,
+      actorUserId: input.actorUserId,
+      campaignId: campaign.id,
+      audienceId: proof.audienceId,
+      audienceSnapshotHash: proof.audienceSnapshotHash,
+      messageSnapshotHash: proof.messageSnapshotHash,
+      title: 'MAYA',
+      bodyText: campaign.message,
+      expiresAt: campaign.expiresAt,
+      idempotencyKey: input.idempotencyKey,
+    });
+    const expectedUserIds = [...proof.eligibleUserIds].sort();
+    const deliveredUserIds = [...delivery.deliveredUserIds].sort();
+    if (
+      expectedUserIds.length !== deliveredUserIds.length ||
+      expectedUserIds.some(
+        (userId, index) => userId !== deliveredUserIds[index],
+      )
+    ) {
+      throw new ConflictException({
+        message: 'Bulk delivery result does not match the proven audience.',
+        error: { code: 'bulk_delivery_identity_mismatch' },
+      });
+    }
+
+    const deliveredUserIdSet = new Set(deliveredUserIds);
     let attributionFailedCount = 0;
     await this.mapConcurrent(
-      recipients,
+      recipients.filter(({ candidate }) =>
+        deliveredUserIdSet.has(candidate.userId),
+      ),
       CRM_LOOKUP_CONCURRENCY,
       async (item) => {
-        try {
-          const delivery = await this.inboxService.publishForTenant(
-            input.tenantId,
-            {
-              type: 'marketing_campaign',
-              sourceEventId: `marketing:${campaign.id}`,
-              title: 'MAYA',
-              bodyText: campaign.message,
-              payload: { campaign_id: campaign.id, kind: 'reactivation' },
-              deepLink: 'maya://chat',
-              userIds: [item.candidate.userId],
-              fanoutOwners: false,
-            },
-          );
-          if (delivery.stored !== 1) {
-            failedCount += 1;
-            return;
-          }
-          sentCount += 1;
-        } catch {
-          failedCount += 1;
-          return;
-        }
         try {
           await this.recoveryService.recordConsentSafeTouchpoint({
             tenantId: input.tenantId,
@@ -330,16 +392,16 @@ export class MarketingService {
       },
     );
 
-    const skippedCount = requestedIds.size - recipients.length;
-    const status = failedCount === 0 ? 'sent' : 'partial';
+    const sentCount = deliveredUserIds.length;
+    const skippedCount = requestedIds.size - sentCount;
     const saved = await this.prisma.marketingCampaign.update({
       where: { id: campaign.id },
-      data: { status, sentCount, sentAt: new Date() },
+      data: { status: 'sent', sentCount, sentAt: new Date() },
     });
     return {
       ...this.deliveryResult(saved, false),
       skipped_count: skippedCount,
-      failed_count: failedCount,
+      failed_count: 0,
       attribution_failed_count: attributionFailedCount,
     };
   }
@@ -398,96 +460,173 @@ export class MarketingService {
       snapshotHash?: string;
     };
     rule: MarketingAudienceRule;
+    requestedIds: string[];
+    audienceDecisions: BulkAudienceDecision[];
     recipients: Candidate[];
-  }): Promise<void> {
-    if (!this.communicationShadow || input.recipients.length === 0) return;
-
-    try {
-      const durableAudience = await this.ensureShadowAudience({
-        tenantId: input.tenantId,
-        actorUserId: input.actorUserId,
-        audience: input.audience,
-        rule: input.rule,
-        recipients: input.recipients,
+  }): Promise<BulkDeliveryProof> {
+    if (!this.communicationShadow) {
+      throw new ConflictException({
+        message: 'Bulk audience verification is unavailable.',
+        error: { code: 'bulk_audience_shadow_unavailable' },
       });
-      const messageSnapshotHash =
-        input.campaign.messageSnapshotHash || this.hash(input.campaign.message);
-      const inboxRecipients = await Promise.all(
-        input.recipients.map((candidate) =>
-          this.shadowMarketingRecipient(
-            input.tenantId,
-            durableAudience.snapshotHash,
-            candidate,
-            candidate.userId,
-            'internal_user',
-            'inbox',
-          ),
-        ),
-      );
-      const common = {
-        tenantId: input.tenantId,
-        sourceType: 'authenticated_request' as const,
-        producerRef: 'marketing.sendCampaign',
-        taxonomy: 'bulk_campaign' as const,
-        templateRef: 'marketing.reactivation',
-        contentIdentityParts: [messageSnapshotHash],
-        eligibilityPolicyRef: 'marketing.consent-recency-revalidation.v1',
-        legacyApprovalRequirement: 'OWNER_CONFIRMED' as const,
-        expiresAt: input.campaign.expiresAt,
-        actorUserId: input.actorUserId,
-        audienceId: durableAudience.id,
-        audienceSnapshotHash: durableAudience.snapshotHash,
-        confirmedByUserId: input.actorUserId,
-      };
-      await this.communicationShadow.plan({
-        ...common,
-        logicalRef: `marketing:${input.campaign.id}:inbox:${input.idempotencyKey}`,
-        channel: 'inbox',
-        recipients: inboxRecipients,
-      });
-
-      const consentByUser = new Map(
-        input.recipients.map((candidate) => [candidate.userId, candidate]),
-      );
-      const pushTokens = await this.prisma.devicePushToken.findMany({
-        where: {
-          tenantId: input.tenantId,
-          userId: { in: input.recipients.map(({ userId }) => userId) },
-        },
-        select: { userId: true, token: true },
-        orderBy: [{ userId: 'asc' }, { token: 'asc' }],
-      });
-      const pushRecipients = await Promise.all(
-        pushTokens.flatMap((token) => {
-          const candidate = consentByUser.get(token.userId);
-          return candidate
-            ? [
-                this.shadowMarketingRecipient(
-                  input.tenantId,
-                  durableAudience.snapshotHash,
-                  candidate,
-                  token.token,
-                  'apns_device',
-                  'apns',
-                ),
-              ]
-            : [];
-        }),
-      );
-      if (pushRecipients.length > 0) {
-        await this.communicationShadow.plan({
-          ...common,
-          logicalRef: `marketing:${input.campaign.id}:apns:${input.idempotencyKey}`,
-          channel: 'apns',
-          recipients: pushRecipients,
-        });
-      }
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : 'unknown';
-      this.logger.warn(
-        `Communication shadow plan failed for campaign ${input.campaign.id}: ${reason}`,
-      );
     }
+
+    const eligibilitySnapshotHash = this.audienceDecisionSnapshotHash(
+      input.tenantId,
+      input.rule,
+      input.audienceDecisions,
+    );
+    const inboxRecipients = await Promise.all(
+      input.recipients.map((candidate) =>
+        this.shadowMarketingRecipient(
+          input.tenantId,
+          eligibilitySnapshotHash,
+          candidate,
+          candidate.userId,
+          'internal_user',
+          'inbox',
+        ),
+      ),
+    );
+    const inboxEligibilityByUserId = new Map(
+      inboxRecipients.map((recipient) => [
+        recipient.internalUserId,
+        recipient.eligibility,
+      ]),
+    );
+    const inboxPolicyByUserId = new Map(
+      inboxRecipients.map((recipient) => [
+        recipient.internalUserId,
+        {
+          consentState: recipient.consentState,
+          optOutState: recipient.optOutState,
+        },
+      ]),
+    );
+    const finalDecisions = input.audienceDecisions.map((decision) => {
+      if (decision.eligibilityStatus !== 'ALLOW') return decision;
+      const eligibility = inboxEligibilityByUserId.get(decision.userId);
+      return eligibility?.decision === 'SKIP'
+        ? {
+            ...decision,
+            eligibilityStatus: 'SKIP' as const,
+            exclusionReason:
+              eligibility.reasonCode || 'COMMUNICATION_POLICY_INELIGIBLE',
+          }
+        : decision;
+    });
+    const durableAudience = await this.ensureShadowAudience({
+      tenantId: input.tenantId,
+      actorUserId: input.actorUserId,
+      audience: input.audience,
+      rule: input.rule,
+      decisions: finalDecisions,
+    });
+    const durableRows = await this.prisma.marketingAudienceRecipient.findMany({
+      where: {
+        tenantId: input.tenantId,
+        audienceId: durableAudience.id,
+      },
+      select: {
+        tenantId: true,
+        externalClientId: true,
+        eligibilityStatus: true,
+        exclusionReason: true,
+      },
+      orderBy: { externalClientId: 'asc' },
+    });
+    const messageSnapshotHash =
+      input.campaign.messageSnapshotHash || this.hash(input.campaign.message);
+    const legacyRows = input.audienceDecisions.map((decision) =>
+      this.bulkPlanRow({
+        tenantId: input.tenantId,
+        campaignId: input.campaign.id,
+        idempotencyKey: input.idempotencyKey,
+        messageSnapshotHash,
+        decision,
+        consentState: decision.candidate ? 'GRANTED' : 'NOT_GRANTED',
+        optOutState: decision.candidate ? 'OPTED_IN' : 'UNKNOWN',
+      }),
+    );
+    const finalDecisionByUserId = new Map(
+      finalDecisions.map((decision) => [decision.userId, decision]),
+    );
+    const shadowRows = durableRows.map((row) => {
+      const decision = finalDecisionByUserId.get(row.externalClientId);
+      if (!decision) {
+        throw new Error(
+          `Shadow audience row has no decision: ${row.externalClientId}`,
+        );
+      }
+      const policy = inboxPolicyByUserId.get(row.externalClientId);
+      return this.bulkPlanRow({
+        tenantId: row.tenantId,
+        campaignId: input.campaign.id,
+        idempotencyKey: input.idempotencyKey,
+        messageSnapshotHash,
+        decision: {
+          ...decision,
+          eligibilityStatus: row.eligibilityStatus as 'ALLOW' | 'SKIP',
+          exclusionReason: row.exclusionReason ?? undefined,
+        },
+        consentState:
+          policy?.consentState ??
+          (decision.candidate ? 'GRANTED' : 'NOT_GRANTED'),
+        optOutState:
+          policy?.optOutState ?? (decision.candidate ? 'OPTED_IN' : 'UNKNOWN'),
+      });
+    });
+    const proof = compareBulkAudienceDeliveryPlans({
+      tenantId: input.tenantId,
+      requestedIds: input.requestedIds,
+      legacyRows,
+      shadowRows,
+    });
+    this.logger.log(
+      `Bulk audience shadow proof campaign=${input.campaign.id} equivalent=${proof.equivalent} requested=${proof.requestedCount} included=${proof.includedCount} excluded=${proof.excludedCount} duplicates=${proof.duplicateCount} wrongTenant=${proof.wrongTenantCount} missing=${proof.missingCount} unexpected=${proof.unexpectedCount} semanticMismatch=${proof.semanticMismatchCount} legacyPlanHash=${proof.legacyPlanHash} shadowPlanHash=${proof.shadowPlanHash}`,
+    );
+    if (!proof.equivalent) {
+      throw new ConflictException({
+        message: 'Bulk audience verification diverged.',
+        error: { code: 'bulk_audience_shadow_divergent' },
+      });
+    }
+    const common = {
+      tenantId: input.tenantId,
+      sourceType: 'authenticated_request' as const,
+      producerRef: 'marketing.sendCampaign',
+      taxonomy: 'bulk_campaign' as const,
+      templateRef: 'marketing.reactivation',
+      contentIdentityParts: [messageSnapshotHash],
+      eligibilityPolicyRef: 'marketing.consent-recency-revalidation.v1',
+      legacyApprovalRequirement: 'OWNER_CONFIRMED' as const,
+      expiresAt: input.campaign.expiresAt,
+      actorUserId: input.actorUserId,
+      audienceId: durableAudience.id,
+      audienceSnapshotHash: durableAudience.snapshotHash,
+      confirmedByUserId: input.actorUserId,
+    };
+    const shadowResult = await this.communicationShadow.plan({
+      ...common,
+      logicalRef: `marketing:${input.campaign.id}:inbox:${input.idempotencyKey}`,
+      channel: 'inbox',
+      recipients: inboxRecipients,
+    });
+    if (shadowResult.externalMessagesSent !== 0) {
+      throw new ConflictException({
+        message: 'Bulk audience shadow attempted an external send.',
+        error: { code: 'bulk_audience_shadow_side_effect' },
+      });
+    }
+    return {
+      audienceId: durableAudience.id,
+      audienceSnapshotHash: durableAudience.snapshotHash,
+      messageSnapshotHash,
+      eligibleUserIds: finalDecisions
+        .filter(({ eligibilityStatus }) => eligibilityStatus === 'ALLOW')
+        .map(({ userId }) => userId)
+        .sort(),
+    };
   }
 
   private async ensureShadowAudience(input: {
@@ -502,43 +641,71 @@ export class MarketingService {
       snapshotHash?: string;
     };
     rule: MarketingAudienceRule;
-    recipients: Candidate[];
+    decisions: BulkAudienceDecision[];
   }): Promise<{ id: string; snapshotHash: string }> {
-    const userIds = input.recipients.map(({ userId }) => userId);
-    const snapshotHash = this.audienceSnapshotHash(
+    const includedUserIds = input.decisions
+      .filter(({ eligibilityStatus }) => eligibilityStatus === 'ALLOW')
+      .map(({ userId }) => userId);
+    const snapshotHash = this.audienceDecisionSnapshotHash(
       input.tenantId,
       input.rule,
-      userIds,
+      input.decisions,
     );
-    if (input.audience.snapshotHash === snapshotHash) {
-      return { id: input.audience.id, snapshotHash };
-    }
+    const exclusionReasons = input.decisions.reduce<Record<string, number>>(
+      (counts, decision) => {
+        if (decision.eligibilityStatus === 'SKIP') {
+          const reason = decision.exclusionReason || 'UNSPECIFIED';
+          counts[reason] = (counts[reason] ?? 0) + 1;
+        }
+        return counts;
+      },
+      {},
+    );
 
-    return this.prisma.marketingAudience.create({
-      data: {
+    const shadowAudienceId = `marketing-shadow-audience:${this.hash(
+      JSON.stringify([input.tenantId, input.audience.id, snapshotHash]),
+    )}`;
+
+    return this.prisma.marketingAudience.upsert({
+      where: { id: shadowAudienceId },
+      create: {
+        id: shadowAudienceId,
         tenantId: input.tenantId,
         createdByUserId: input.audience.createdByUserId || input.actorUserId,
         ruleJson: asJson(input.rule),
-        recipientUserIdsJson: asJson([...userIds].sort()),
-        candidateCount: input.audience.candidateCount ?? userIds.length,
-        eligibleCount: userIds.length,
-        unavailableCount: input.audience.unavailableCount ?? 0,
+        recipientUserIdsJson: asJson([...includedUserIds].sort()),
+        candidateCount: input.decisions.length,
+        eligibleCount: includedUserIds.length,
+        unavailableCount: input.decisions.filter(
+          ({ exclusionReason }) => exclusionReason === 'CRM_CLIENT_UNAVAILABLE',
+        ).length,
         expiresAt: input.audience.expiresAt,
         provider: 'maya_inbox',
         status: 'AUDIENCE_REVALIDATED_SHADOW',
         snapshotHash,
+        exclusionReasonsJson: asJson(exclusionReasons),
         recipients: {
-          create: input.recipients.map((candidate) => ({
-            id: randomUUID(),
+          create: input.decisions.map((decision) => ({
+            id: `marketing-shadow-recipient:${this.hash(
+              JSON.stringify([
+                input.tenantId,
+                shadowAudienceId,
+                decision.userId,
+              ]),
+            )}`,
             tenantId: input.tenantId,
-            externalClientId: candidate.userId,
-            internalUserId: candidate.userId,
-            eligibilityStatus: 'ALLOW',
-            consentSource: 'customer_profile.marketingConsentAt',
-            consentRecordedAt: candidate.consentRecordedAt,
+            externalClientId: decision.userId,
+            internalUserId: decision.userId,
+            eligibilityStatus: decision.eligibilityStatus,
+            exclusionReason: decision.exclusionReason,
+            consentSource: decision.candidate
+              ? 'customer_profile.marketingConsentAt'
+              : undefined,
+            consentRecordedAt: decision.candidate?.consentRecordedAt,
           })),
         },
       },
+      update: {},
       select: { id: true, snapshotHash: true },
     });
   }
@@ -588,11 +755,26 @@ export class MarketingService {
           : !consentEvidence.grantedAt
             ? 'CONSENT_EVIDENCE_INCOMPLETE'
             : undefined;
+    const consentState: BulkConsentState = consentEvidence.revokedAt
+      ? 'REVOKED'
+      : consentEvidence.expiresAt &&
+          consentEvidence.expiresAt.getTime() <= Date.now()
+        ? 'EXPIRED'
+        : status !== 'granted' || !consentEvidence.grantedAt
+          ? 'NOT_GRANTED'
+          : 'GRANTED';
+    const optOutState: BulkOptOutState = consentEvidence.revokedAt
+      ? 'OPTED_OUT'
+      : consentState === 'GRANTED'
+        ? 'OPTED_IN'
+        : 'UNKNOWN';
     return {
       recipientRef,
       recipientKind,
       internalUserId: candidate.userId,
       consentEvidenceId: consentEvidence.id,
+      consentState,
+      optOutState,
       eligibility: {
         basis: 'consent_and_current_crm_recency',
         decision: reasonCode ? ('SKIP' as const) : ('ALLOW' as const),
@@ -614,6 +796,41 @@ export class MarketingService {
     };
   }
 
+  private bulkPlanRow(input: {
+    tenantId: string;
+    campaignId: string;
+    idempotencyKey: string;
+    messageSnapshotHash: string;
+    decision: BulkAudienceDecision;
+    consentState: BulkConsentState;
+    optOutState: BulkOptOutState;
+  }): BulkAudiencePlanRow {
+    const allowed = input.decision.eligibilityStatus === 'ALLOW';
+    return {
+      tenantId: input.tenantId,
+      externalClientId: input.decision.userId,
+      eligibilityStatus: input.decision.eligibilityStatus,
+      exclusionReason: input.decision.exclusionReason ?? null,
+      consentState: input.consentState,
+      optOutState: input.optOutState,
+      channel: allowed ? 'inbox' : null,
+      deliveryIdentity: allowed
+        ? `bulk-delivery:${this.hash(
+            JSON.stringify([
+              input.tenantId,
+              input.campaignId,
+              input.decision.userId,
+              'inbox',
+              input.idempotencyKey,
+              input.messageSnapshotHash,
+            ]),
+          )}`
+        : null,
+      approvalRequirement: 'OWNER_CONFIRMED',
+      riskClass: 'bulk',
+    };
+  }
+
   private audienceSnapshotHash(
     tenantId: string,
     rule: MarketingAudienceRule,
@@ -628,6 +845,30 @@ export class MarketingService {
           max_recipients: rule.max_recipients,
         },
         userIds: [...userIds].sort(),
+      }),
+    );
+  }
+
+  private audienceDecisionSnapshotHash(
+    tenantId: string,
+    rule: MarketingAudienceRule,
+    decisions: BulkAudienceDecision[],
+  ): string {
+    return this.hash(
+      JSON.stringify({
+        tenantId,
+        rule: {
+          inactive_days: rule.inactive_days,
+          minimum_visits: rule.minimum_visits,
+          max_recipients: rule.max_recipients,
+        },
+        decisions: decisions
+          .map(({ userId, eligibilityStatus, exclusionReason }) => ({
+            userId,
+            eligibilityStatus,
+            exclusionReason: exclusionReason ?? null,
+          }))
+          .sort((left, right) => left.userId.localeCompare(right.userId)),
       }),
     );
   }

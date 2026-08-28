@@ -24,8 +24,7 @@ from __future__ import annotations
 import logging
 import re
 
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Application, ContextTypes
+from telegram.ext import Application
 
 import database
 
@@ -169,51 +168,34 @@ async def scan_and_alert(app: Application) -> dict:
             continue
 
         text = _build_alert_text(state, client)
-        # Кнопка «досье»: владелец одним тапом видит визиты + переписку клиента,
-        # чтобы понять — наш клиент завис или новенький.
-        kb = InlineKeyboardMarkup([[InlineKeyboardButton(
-            "📋 Кто это? (визиты + переписка)", callback_data="dossierc_" + str(client_id))]])
-        sent_any = False
-        for admin_id in admins:
-            try:
-                await app.bot.send_message(
-                    chat_id=admin_id,
-                    text=text,
-                    parse_mode="Markdown",
-                    disable_web_page_preview=True,
-                    reply_markup=kb,
-                )
-                sent_any = True
-            except Exception as e:
-                logger.error(
-                    f"lead_alerts: не отправил admin_id={admin_id} "
-                    f"client_id={client_id}: {e}"
-                )
-        if sent_any:
+        try:
+            import maya_inbox_bridge
+
+            accepted = await maya_inbox_bridge.publish_inbox_item(
+                type="hanging_lead",
+                title="Зависшая заявка",
+                body_text=text,
+                source_seed=f"hanging_lead|{client_id}|{state.get('updated_at')}",
+                telegram_chat_ids=list(admins),
+                deep_link="/app/?panel=customers",
+                payload={"client_id": client_id},
+                fanout_owners=True,
+                telegram_parse_mode="Markdown",
+                telegram_buttons=[{
+                    "text": "📋 Кто это? (визиты + переписка)",
+                    "callback_data": "dossierc_" + str(client_id),
+                }],
+            )
+        except Exception as exc:
+            logger.warning("lead_alerts Action Engine client_id=%s: %s", client_id, exc)
+            accepted = False
+        if accepted:
             database.mark_lead_alerted(client_id)
             alerted += 1
             logger.info(
                 f"lead_alerts: ⚠️ пинг по client_id={client_id} "
                 f"({client.get('name', '?')})"
             )
-            try:
-                import maya_inbox_bridge
-                await maya_inbox_bridge.publish_inbox_item(
-                    type="hanging_lead",
-                    title="Зависшая заявка",
-                    body_text=(
-                        text.replace("*", "")
-                        .replace("`", "")
-                        .replace("_", "")
-                    ),
-                    source_seed=f"hanging_lead|{client_id}|{state.get('updated_at')}",
-                    telegram_chat_ids=list(admins),
-                    deep_link="/app/?panel=customers",
-                    payload={"client_id": client_id},
-                    fanout_owners=True,
-                )
-            except Exception as inbox_exc:
-                logger.warning(f"lead_alerts nest inbox: {inbox_exc}")
 
     summary = {"checked": len(candidates), "alerted": alerted}
     logger.info(f"lead_alerts: scheduler tick {summary}")

@@ -16,7 +16,6 @@ from __future__ import annotations
 import logging
 from datetime import date, datetime, timedelta
 
-from telegram.error import Forbidden, BadRequest
 from telegram.ext import Application
 
 import database
@@ -87,11 +86,6 @@ async def run_birthday_job(app: Application) -> dict:
             skipped += 1
             continue
 
-        # Защита от двойной отправки в один год
-        if database.already_sent_birthday_this_year(client["id"], year):
-            skipped += 1
-            continue
-
         # Персональные настройки: ДР-промо выключаем только при явном False (дефолт ON).
         # Проверяем ДО YClients-вызовов и генерации промокода, чтобы не «сжечь» код года.
         if database.get_notify_prefs(client["id"]).get("birthday") is False:
@@ -114,30 +108,40 @@ async def run_birthday_job(app: Application) -> dict:
         if not _is_today_birthday(yc_client.get("birth_date")):
             continue
 
-        # Генерим уникальный код (защита от коллизии)
-        for _ in range(5):
-            code = database.new_birthday_promo_code()
-            try:
-                expires_at = (today + timedelta(days=PROMO_VALID_DAYS)).isoformat()
-                database.save_birthday_promo(
-                    client_id=client["id"],
-                    code=code,
-                    percent=PROMO_PERCENT,
-                    year=year,
-                    expires_at=expires_at,
-                )
-                break
-            except Exception as e:
-                # UNIQUE collision — генерим заново
-                if "UNIQUE" in str(e):
-                    continue
-                logger.error(f"birthday: save_promo: {e}")
-                errors += 1
-                code = None
-                break
+        # Промокод и delivery имеют разные identity. Уже созданный код переиспользуем,
+        # а durable Action Engine сам схлопнет повтор того же поздравления.
+        promo = database.get_birthday_promo_for_year(client["id"], year)
+        code = str((promo or {}).get("code") or "").strip() or None
+        expires_at = str((promo or {}).get("expires_at") or "").strip()
+        if not code:
+            code = None
+            expires_at = (today + timedelta(days=PROMO_VALID_DAYS)).isoformat()
+            for _ in range(5):
+                candidate = database.new_birthday_promo_code()
+                try:
+                    database.save_birthday_promo(
+                        client_id=client["id"],
+                        code=candidate,
+                        percent=PROMO_PERCENT,
+                        year=year,
+                        expires_at=expires_at,
+                    )
+                    code = candidate
+                    break
+                except Exception as e:
+                    if "UNIQUE" in str(e):
+                        continue
+                    logger.error(f"birthday: save_promo: {e}")
+                    errors += 1
+                    break
         if not code:
             errors += 1
             continue
+
+        try:
+            expires_label = date.fromisoformat(expires_at[:10]).strftime("%d.%m.%Y")
+        except (TypeError, ValueError):
+            expires_label = (today + timedelta(days=PROMO_VALID_DAYS)).strftime("%d.%m.%Y")
 
         # Сообщение
         name = _first_name(client.get("name"))
@@ -146,7 +150,7 @@ async def run_birthday_job(app: Application) -> dict:
             f"От «Мужской Эстетики» — *скидка 20% на любую услугу* "
             f"в течение {PROMO_VALID_DAYS} дней.\n\n"
             f"Промокод: `{code}`\n"
-            f"Действует до: {(today + timedelta(days=PROMO_VALID_DAYS)).strftime('%d.%m.%Y')}\n\n"
+            f"Действует до: {expires_label}\n\n"
             f"Назови код мастеру при оплате, чтобы получить скидку. "
             f"Или запишись прямо сейчас — я напомню тебе про код, когда будем "
             f"оформлять.\n\n"
@@ -154,18 +158,26 @@ async def run_birthday_job(app: Application) -> dict:
         )
 
         try:
-            await app.bot.send_message(
-                chat_id=chat_id,
-                text=text,
-                parse_mode="Markdown",
+            import maya_inbox_bridge
+
+            accepted = await maya_inbox_bridge.publish_inbox_item(
+                type="birthday_alert",
+                title="MAYA · день рождения",
+                body_text=text,
+                source_seed=f"birthday|{client['id']}|{year}",
+                telegram_chat_ids=[int(chat_id)],
+                deep_link="/app/?panel=booking",
+                payload={"client_id": client["id"], "promo_year": year},
+                fanout_owners=False,
+                telegram_parse_mode="Markdown",
             )
-            sent += 1
-            logger.info(f"🎂 Поздравил {name} (chat_id={chat_id}, код={code})")
-        except (Forbidden, BadRequest) as e:
-            logger.info(f"🎂 Не доставлено {name} (chat_id={chat_id}): {e}")
-            errors += 1
+            if accepted:
+                sent += 1
+                logger.info("birthday: delivery accepted client_id=%s", client["id"])
+            else:
+                errors += 1
         except Exception as e:
-            logger.error(f"🎂 Ошибка отправки {name}: {e}")
+            logger.error("birthday: Action Engine client_id=%s: %s", client["id"], e)
             errors += 1
 
     summary = {

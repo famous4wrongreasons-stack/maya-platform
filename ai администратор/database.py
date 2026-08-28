@@ -4216,6 +4216,17 @@ def already_sent_birthday_this_year(client_id: int, year: int) -> bool:
         return bool(row)
 
 
+def get_birthday_promo_for_year(client_id: int, year: int) -> dict | None:
+    """Возвращает уже созданный промокод, чтобы повторный job не создавал новый."""
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT * FROM birthday_promo WHERE client_id = ? AND year = ? "
+            "ORDER BY id DESC LIMIT 1",
+            (client_id, year),
+        ).fetchone()
+        return dict(row) if row else None
+
+
 def new_birthday_promo_code() -> str:
     """Уникальный код вида BDAY-XXXXXX (без 0/O/1/I/L)."""
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"

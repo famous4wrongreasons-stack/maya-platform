@@ -8,6 +8,7 @@ import {
   IsString,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
 
 const INBOX_TYPES = [
@@ -23,10 +24,29 @@ const INBOX_TYPES = [
   'appointment_reassigned',
   'hanging_lead',
   'owner_alert',
+  'birthday_alert',
+  'review_alert',
   'client_support_request',
   'maya_task',
   'marketing_campaign',
 ] as const;
+
+export class TelegramButtonDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(80)
+  text!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  callback_data?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(400)
+  url?: string;
+}
 
 export class IngestInboxItemDto {
   /**
@@ -85,6 +105,18 @@ export class IngestInboxItemDto {
   @ArrayMaxSize(40)
   @Type(() => String)
   telegram_chat_ids?: string[];
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['Markdown', 'MarkdownV2', 'HTML'])
+  telegram_parse_mode?: 'Markdown' | 'MarkdownV2' | 'HTML';
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(4)
+  @ValidateNested({ each: true })
+  @Type(() => TelegramButtonDto)
+  telegram_buttons?: TelegramButtonDto[];
 
   /** Explicit Nest user ids when known. */
   @IsOptional()

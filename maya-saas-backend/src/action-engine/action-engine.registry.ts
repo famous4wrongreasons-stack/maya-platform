@@ -1,7 +1,10 @@
 import { ActionPolicyDecision } from '@prisma/client';
 
 import { ActionContractError } from './action-engine.errors';
-import type { RegisteredActionCapabilityV1 } from './action-engine.contract';
+import type {
+  ActionSourceType,
+  RegisteredActionCapabilityV1,
+} from './action-engine.contract';
 
 const OPAQUE_REF_PATTERN = /^[A-Za-z0-9._:/-]{1,240}$/;
 
@@ -137,6 +140,138 @@ function privacyTelegramDeliveryNormalizer(
   return {
     telegramChatId: normalizeOpaqueRef(source.telegramChatId, 'telegramChatId'),
     sourceEventId: normalizeOpaqueRef(source.sourceEventId, 'sourceEventId'),
+  };
+}
+
+function package2SingleDeliveryNormalizer(
+  value: unknown,
+): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, [
+    'channel',
+    'messageType',
+    'userId',
+    'telegramChatId',
+    'deviceToken',
+    'sourceEventId',
+    'title',
+    'bodyText',
+    'deepLink',
+    'payload',
+    'parseMode',
+    'buttons',
+  ]);
+  const channel = requiredText(source, 'channel', 40);
+  if (channel !== 'inbox' && channel !== 'apns' && channel !== 'telegram') {
+    throw new ActionContractError('channel must be inbox, apns or telegram');
+  }
+  const userId = optionalText(source, 'userId', 160);
+  const telegramChatId = optionalText(source, 'telegramChatId', 160);
+  const deviceToken = optionalText(source, 'deviceToken', 512);
+  if ((channel === 'inbox' || channel === 'apns') && !userId) {
+    throw new ActionContractError('userId is required for inbox and apns');
+  }
+  if (channel === 'apns' && !deviceToken) {
+    throw new ActionContractError('deviceToken is required for apns');
+  }
+  if (channel !== 'apns' && deviceToken) {
+    throw new ActionContractError('deviceToken is forbidden outside apns');
+  }
+  if (channel === 'telegram' && !telegramChatId) {
+    throw new ActionContractError('telegramChatId is required for telegram');
+  }
+  if (channel !== 'telegram' && telegramChatId) {
+    throw new ActionContractError(
+      'telegramChatId is forbidden outside telegram',
+    );
+  }
+  const parseMode = optionalText(source, 'parseMode', 20);
+  if (
+    parseMode &&
+    parseMode !== 'Markdown' &&
+    parseMode !== 'MarkdownV2' &&
+    parseMode !== 'HTML'
+  ) {
+    throw new ActionContractError('parseMode is unsupported');
+  }
+  if (channel !== 'telegram' && parseMode) {
+    throw new ActionContractError('parseMode is forbidden outside telegram');
+  }
+  const rawButtons = source.buttons;
+  if (channel !== 'telegram' && rawButtons !== undefined) {
+    throw new ActionContractError('buttons are forbidden outside telegram');
+  }
+  if (rawButtons !== undefined && !Array.isArray(rawButtons)) {
+    throw new ActionContractError('buttons must be an array');
+  }
+  if (Array.isArray(rawButtons) && rawButtons.length > 4) {
+    throw new ActionContractError('buttons may contain at most 4 items');
+  }
+  const buttons = Array.isArray(rawButtons)
+    ? rawButtons.map((item, index) => {
+        const button = recordInput(item);
+        assertOnlyKeys(button, ['text', 'callbackData', 'url']);
+        const callbackData = optionalText(button, 'callbackData', 64);
+        const url = optionalText(button, 'url', 400);
+        if (Boolean(callbackData) === Boolean(url)) {
+          throw new ActionContractError(
+            `buttons[${index}] must contain exactly one action`,
+          );
+        }
+        return {
+          text: requiredText(button, 'text', 80),
+          ...(callbackData ? { callbackData } : {}),
+          ...(url ? { url } : {}),
+        };
+      })
+    : [];
+  const deepLink = optionalText(source, 'deepLink', 400);
+  const payload = boundedJsonObject(source, 'payload');
+  return {
+    channel,
+    messageType: normalizeOpaqueRef(source.messageType, 'messageType'),
+    ...(userId ? { userId: normalizeOpaqueRef(userId, 'userId') } : {}),
+    ...(telegramChatId
+      ? {
+          telegramChatId: normalizeOpaqueRef(telegramChatId, 'telegramChatId'),
+        }
+      : {}),
+    sourceEventId: normalizeOpaqueRef(source.sourceEventId, 'sourceEventId'),
+    title: requiredText(source, 'title', 160),
+    bodyText: requiredText(source, 'bodyText', 12_000),
+    ...(deviceToken ? { deviceToken } : {}),
+    ...(deepLink ? { deepLink } : {}),
+    ...(payload ? { payload } : {}),
+    ...(parseMode ? { parseMode } : {}),
+    ...(buttons.length ? { buttons } : {}),
+  };
+}
+
+function bulkCampaignDeliveryNormalizer(
+  value: unknown,
+): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, [
+    'campaignId',
+    'audienceId',
+    'audienceSnapshotHash',
+    'messageSnapshotHash',
+    'title',
+    'bodyText',
+  ]);
+  return {
+    campaignId: normalizeOpaqueRef(source.campaignId, 'campaignId'),
+    audienceId: normalizeOpaqueRef(source.audienceId, 'audienceId'),
+    audienceSnapshotHash: normalizeOpaqueRef(
+      source.audienceSnapshotHash,
+      'audienceSnapshotHash',
+    ),
+    messageSnapshotHash: normalizeOpaqueRef(
+      source.messageSnapshotHash,
+      'messageSnapshotHash',
+    ),
+    title: requiredText(source, 'title', 160),
+    bodyText: requiredText(source, 'bodyText', 12_000),
   };
 }
 
@@ -742,6 +877,7 @@ function provenCommunicationCapability(input: {
   actionClass: string;
   targetKind: string;
   executorKey: string;
+  allowedSourceTypes?: readonly ActionSourceType[];
   normalizeInput(value: unknown): Record<string, unknown>;
 }): RegisteredActionCapabilityV1 {
   return {
@@ -750,7 +886,7 @@ function provenCommunicationCapability(input: {
     actionClass: input.actionClass,
     normalizedInputContract: `maya.${input.actionClass}-input/1`,
     targetKind: input.targetKind,
-    allowedSourceTypes: ['legacy_bridge'],
+    allowedSourceTypes: input.allowedSourceTypes ?? ['legacy_bridge'],
     identityVersion: 1,
     riskProfileVersion: 1,
     riskFacets: ['external', 'customer_visible'],
@@ -811,6 +947,43 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     targetKind: 'internal_user',
     executorKey: 'communication.inbox.new-appointment',
     normalizeInput: newAppointmentDeliveryNormalizer,
+  }),
+  provenCommunicationCapability({
+    capability: 'communication.appointment-reminders.execute.v1',
+    actionClass: 'deliver_appointment_reminder',
+    targetKind: 'communication_recipient',
+    executorKey: 'communication.package2.single',
+    allowedSourceTypes: ['scheduler', 'legacy_bridge'],
+    normalizeInput: package2SingleDeliveryNormalizer,
+  }),
+  provenCommunicationCapability({
+    capability: 'communication.reports-briefings.execute.v1',
+    actionClass: 'deliver_report_briefing',
+    targetKind: 'communication_recipient',
+    executorKey: 'communication.package2.single',
+    allowedSourceTypes: ['scheduler', 'legacy_bridge'],
+    normalizeInput: package2SingleDeliveryNormalizer,
+  }),
+  provenCommunicationCapability({
+    capability: 'communication.business-alerts.execute.v1',
+    actionClass: 'deliver_business_alert',
+    targetKind: 'communication_recipient',
+    executorKey: 'communication.package2.single',
+    allowedSourceTypes: [
+      'scheduler',
+      'webhook',
+      'authenticated_request',
+      'legacy_bridge',
+    ],
+    normalizeInput: package2SingleDeliveryNormalizer,
+  }),
+  provenCommunicationCapability({
+    capability: 'communication.bulk-campaign.execute.v1',
+    actionClass: 'deliver_bulk_campaign',
+    targetKind: 'marketing_campaign',
+    executorKey: 'communication.package2.bulk',
+    allowedSourceTypes: ['authenticated_request', 'legacy_bridge'],
+    normalizeInput: bulkCampaignDeliveryNormalizer,
   }),
   provenCommunicationCapability({
     capability: 'communication.operational-single.privacy.execute.v1',

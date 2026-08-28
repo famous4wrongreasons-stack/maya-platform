@@ -2084,6 +2084,104 @@ async def internal_privacy_telegram_handler(request: web.Request) -> web.Respons
     return web.json_response({"message_id": str(message_id)})
 
 
+_PACKAGE2_TELEGRAM_MESSAGE_TYPES = frozenset({
+    "appointment_reminder",
+    "shift_reminder",
+    "daily_report",
+    "morning_brief",
+    "growth_plan",
+    "hanging_lead",
+    "owner_alert",
+    "birthday_alert",
+    "review_alert",
+})
+_PACKAGE2_TELEGRAM_PARSE_MODES = frozenset({"Markdown", "MarkdownV2", "HTML"})
+
+
+async def internal_package2_telegram_handler(request: web.Request) -> web.Response:
+    """Execute one Package 2 Telegram delivery owned by Action Engine."""
+    supplied_token = request.headers.get("X-Maya-Inbox-Bridge", "").strip()
+    if (
+        not _MAYA_INBOX_BRIDGE_TOKEN
+        or not supplied_token
+        or not hmac.compare_digest(supplied_token, _MAYA_INBOX_BRIDGE_TOKEN)
+    ):
+        raise web.HTTPNotFound()
+
+    try:
+        body = await request.json()
+        telegram_chat_id = int(body.get("telegram_chat_id", 0))
+        message_type = str(body.get("message_type", "")).strip()
+        source_event_id = str(body.get("source_event_id", "")).strip()
+        title = str(body.get("title", "")).strip()
+        body_text = str(body.get("body_text", "")).strip()
+        parse_mode = body.get("parse_mode")
+        raw_buttons = body.get("buttons", [])
+    except (AttributeError, TypeError, ValueError, _json.JSONDecodeError):
+        return web.json_response({"error": "invalid_request"}, status=400)
+
+    if (
+        telegram_chat_id <= 0
+        or message_type not in _PACKAGE2_TELEGRAM_MESSAGE_TYPES
+        or not source_event_id
+        or len(source_event_id) > 160
+        or not title
+        or len(title) > 160
+        or not body_text
+        or len(body_text) > 4096
+    ):
+        return web.json_response({"error": "invalid_request"}, status=400)
+    if parse_mode is not None and parse_mode not in _PACKAGE2_TELEGRAM_PARSE_MODES:
+        return web.json_response({"error": "invalid_parse_mode"}, status=400)
+    if not isinstance(raw_buttons, list) or len(raw_buttons) > 4:
+        return web.json_response({"error": "invalid_buttons"}, status=400)
+
+    buttons = []
+    for raw_button in raw_buttons:
+        if not isinstance(raw_button, dict):
+            return web.json_response({"error": "invalid_buttons"}, status=400)
+        text = str(raw_button.get("text", "")).strip()
+        callback_data = str(raw_button.get("callback_data", "")).strip()
+        url = str(raw_button.get("url", "")).strip()
+        if (
+            not text
+            or len(text) > 64
+            or bool(callback_data) == bool(url)
+            or len(callback_data) > 64
+            or (url and not re.match(r"^https?://", url, flags=re.IGNORECASE))
+        ):
+            return web.json_response({"error": "invalid_buttons"}, status=400)
+        buttons.append(
+            InlineKeyboardButton(
+                text,
+                callback_data=callback_data or None,
+                url=url or None,
+            )
+        )
+
+    bot_app = request.app.get("bot_app")
+    bot = getattr(bot_app, "bot", None)
+    original = getattr(
+        getattr(bot, "__class__", object),
+        "_maya_original_send_message_for_chat_mirror",
+        None,
+    )
+    if bot is None or not callable(original):
+        return web.json_response({"error": "executor_unavailable"}, status=503)
+
+    sent_message = await original(
+        bot,
+        chat_id=telegram_chat_id,
+        text=body_text,
+        parse_mode=parse_mode,
+        reply_markup=InlineKeyboardMarkup([[button] for button in buttons]) if buttons else None,
+    )
+    message_id = getattr(sent_message, "message_id", None)
+    if message_id is None:
+        return web.json_response({"error": "provider_reference_missing"}, status=502)
+    return web.json_response({"message_id": str(message_id)})
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # Telegram Login Widget (для PWA в браузере, не Mini App)
 # Подпись формируется иначе чем у InitData:
@@ -11416,30 +11514,24 @@ async def _send_growth_role_briefs_once(
                 deliveries.append({"role": role, "state": "skipped", "reason": "already_sent"})
                 continue
             try:
-                markup = InlineKeyboardMarkup([[
-                    InlineKeyboardButton(payload["button"], url=payload["url"]),
-                ]])
-                await app.bot.send_message(
-                    chat_id=int(chat_id),
-                    text=payload["message"],
-                    reply_markup=markup,
+                import maya_inbox_bridge
+
+                accepted = await maya_inbox_bridge.publish_inbox_item(
+                    type="growth_plan" if role == "owner" else "morning_brief",
+                    title="MAYA · утренний план" + (" владельца" if role == "owner" else " менеджера"),
+                    body_text=payload["message"],
+                    source_seed=delivery_key,
+                    telegram_chat_ids=[int(chat_id)],
+                    deep_link=payload["url"].replace("https://malesthetic.pro", "") or "/app/?panel=os",
+                    fanout_owners=(role == "owner"),
+                    telegram_buttons=[{"text": payload["button"], "url": payload["url"]}],
                 )
+                if not accepted:
+                    deliveries.append({"role": role, "state": "failed", "reason": "action_engine_rejected"})
+                    continue
                 database.set_setting(delivery_key, now.isoformat(timespec="seconds"))
                 sent += 1
-                deliveries.append({"role": role, "state": "sent"})
-                try:
-                    import maya_inbox_bridge
-                    await maya_inbox_bridge.publish_inbox_item(
-                        type="growth_plan" if role == "owner" else "morning_brief",
-                        title="MAYA · утренний план" + (" владельца" if role == "owner" else " менеджера"),
-                        body_text=payload["message"],
-                        source_seed=delivery_key,
-                        telegram_chat_ids=[int(chat_id)],
-                        deep_link=payload["url"].replace("https://malesthetic.pro", "") or "/app/?panel=os",
-                        fanout_owners=(role == "owner"),
-                    )
-                except Exception as inbox_exc:
-                    logger.warning(f"growth role brief inbox: {inbox_exc}")
+                deliveries.append({"role": role, "state": "accepted"})
             except Exception as e:
                 logger.error(f"growth role brief {role}: {e}")
                 deliveries.append({"role": role, "state": "failed"})
@@ -11645,156 +11737,54 @@ async def _send_master_day_briefs_once(
         except Exception as e:
             logger.error(f"master day brief snapshot staff={staff_id}: {e}")
         delivery_key = f"master_day_brief_delivery:{date_s}:{staff_id}"
-        try:
-            delivery_state = _json.loads(database.get_setting(delivery_key) or "{}")
-            if not isinstance(delivery_state, dict):
-                delivery_state = {}
-        except Exception:
-            delivery_state = {}
+        if not force and database.get_setting(delivery_key):
+            skipped += 1
+            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "already_accepted"})
+            continue
         chat_id = master.get("telegram_chat_id")
         message = master_briefing.render_master_day_message(forecast)
-        push_body = master_briefing.render_master_day_push(forecast)
-        has_chat = bool(chat_id)
-        has_telegram = bool(
-            chat_id and not database.is_master_muted(int(chat_id))
-        )
         try:
-            has_push = bool(
-                WEBPUSH_VAPID_PRIVATE_KEY
-                and _push_subscriptions_for_master(master)
+            import maya_inbox_bridge
+
+            telegram_ids = None
+            if chat_id and not database.is_master_muted(int(chat_id)):
+                telegram_ids = [int(chat_id)]
+            target_label = "сегодня" if date_s == now.date().isoformat() else "завтра"
+            accepted = await maya_inbox_bridge.publish_inbox_item(
+                type="morning_brief",
+                title=f"MAYA · план на {target_label}",
+                body_text=message,
+                source_seed=f"master-day-brief|{date_s}|{staff_id}",
+                telegram_chat_ids=telegram_ids,
+                deep_link="/app/?panel=schedule",
+                payload={"staff_id": staff_id, "date": date_s},
+                fanout_owners=False,
             )
         except Exception as e:
-            logger.error(f"master day brief push lookup staff={staff_id}: {e}")
-            has_push = False
-        telegram_done = bool(delivery_state.get("telegram"))
-        push_done = bool(delivery_state.get("push"))
-        chat_done = bool(delivery_state.get("chat"))
-        chat_stored = False
-        chat_dedupe_key = ""
-        if has_chat and (force or not chat_done):
-            chat_dedupe_key = _telegram_chat_mirror_dedupe_key(int(chat_id), message)
-            chat_stored = _store_assistant_message_in_chat(
-                int(chat_id),
-                message,
-                mode="staff",
-                dedupe_key=chat_dedupe_key,
-                protect_content=True,
-            )
-            chat_done = bool(
-                chat_done
-                or chat_stored
-                or _chat_has_assistant_dedupe_key(int(chat_id), "staff", chat_dedupe_key)
-            )
-        delivery_complete = master_briefing.delivery_is_complete(
-            delivery_state,
-            has_telegram=has_telegram,
-            has_push=has_push,
-            has_chat=has_chat,
-        )
-        if chat_done and not delivery_state.get("chat"):
-            delivery_state["chat"] = True
-            delivery_complete = master_briefing.delivery_is_complete(
-                delivery_state,
-                has_telegram=has_telegram,
-                has_push=has_push,
-                has_chat=has_chat,
-            )
-        if not force and delivery_complete:
-            database.set_setting(
-                delivery_key,
-                _json.dumps({
-                    **delivery_state,
-                    "updated_at": now.isoformat(timespec="seconds"),
-                }, ensure_ascii=False),
-            )
-            if chat_stored:
-                sent += 1
-                deliveries.append({"staff_id": staff_id, "state": "sent", "channels": ["chat"]})
-            else:
-                skipped += 1
-                deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "already_sent"})
+            logger.error(f"master day brief Action Engine staff={staff_id}: {e}")
+            accepted = False
+        if not accepted:
+            deliveries.append({"staff_id": staff_id, "state": "failed", "reason": "action_engine_rejected"})
             continue
-        telegram_sent = False
-        if has_telegram and (force or not telegram_done):
-            try:
-                await app.bot.send_message(chat_id=int(chat_id), text=message)
-                telegram_sent = True
-            except Exception as e:
-                logger.error(f"master day brief Telegram staff={staff_id}: {e}")
-        push_sent = 0
-        if has_push and (force or not push_done):
-            try:
-                target_label = "сегодня" if date_s == now.date().isoformat() else "завтра"
-                push_sent = await _send_master_push(
-                    master,
-                    title=f"MAYA · план на {target_label}",
-                    body=push_body,
-                    url="/app/?panel=schedule",
-                    tag=f"master-day-plan-{staff_id}-{date_s}",
-                    data={
-                        "event": "master.day_plan",
-                        "date": date_s,
-                        "staff_id": staff_id,
-                    },
-                )
-            except Exception as e:
-                logger.error(f"master day brief push staff={staff_id}: {e}")
-        telegram_done = telegram_done or telegram_sent
-        push_done = push_done or bool(push_sent)
-        delivery_complete = master_briefing.delivery_is_complete(
-            {"telegram": telegram_done, "push": push_done, "chat": chat_done},
-            has_telegram=has_telegram,
-            has_push=has_push,
-            has_chat=has_chat,
+        accepted_at = now.isoformat(timespec="seconds")
+        database.set_setting(delivery_key, accepted_at)
+        database.set_setting(f"master_day_brief_sent:{date_s}:{staff_id}", accepted_at)
+        database.set_setting(
+            f"master_day_brief_last:{staff_id}",
+            _json.dumps({
+                "date": date_s,
+                "accepted_at": accepted_at,
+                "records_count": forecast.get("records_count"),
+                "booked_revenue_rub": forecast.get("booked_revenue_rub"),
+                "potential_total_revenue_rub": forecast.get("potential_total_revenue_rub"),
+                "primary_daily_target_rub": forecast.get("primary_daily_target_rub"),
+                "primary_target_progress_pct": forecast.get("primary_target_progress_pct"),
+                "potential_target_progress_pct": forecast.get("potential_target_progress_pct"),
+                "opportunities_count": forecast.get("opportunities_count"),
+            }, ensure_ascii=False),
         )
-        if telegram_done or push_done or chat_done:
-            database.set_setting(
-                delivery_key,
-                _json.dumps({
-                    "telegram": telegram_done,
-                    "push": push_done,
-                    "chat": chat_done,
-                    "updated_at": now.isoformat(timespec="seconds"),
-                }, ensure_ascii=False),
-            )
-        if telegram_sent or push_sent or chat_stored:
-            sent += 1
-            if delivery_complete:
-                database.set_setting(
-                    f"master_day_brief_sent:{date_s}:{staff_id}",
-                    now.isoformat(timespec="seconds"),
-                )
-            database.set_setting(
-                f"master_day_brief_last:{staff_id}",
-                _json.dumps({
-                    "date": date_s,
-                    "sent_at": now.isoformat(timespec="seconds"),
-                    "records_count": forecast.get("records_count"),
-                    "booked_revenue_rub": forecast.get("booked_revenue_rub"),
-                    "potential_total_revenue_rub": forecast.get("potential_total_revenue_rub"),
-                    "primary_daily_target_rub": forecast.get("primary_daily_target_rub"),
-                    "primary_target_progress_pct": forecast.get("primary_target_progress_pct"),
-                    "potential_target_progress_pct": forecast.get("potential_target_progress_pct"),
-                    "opportunities_count": forecast.get("opportunities_count"),
-                }, ensure_ascii=False),
-            )
-            deliveries.append({
-                "staff_id": staff_id,
-                "state": "sent" if delivery_complete else "partial",
-                "telegram": telegram_done,
-                "push": push_done,
-                "new_telegram": telegram_sent,
-                "new_push": int(push_sent or 0),
-            })
-        elif telegram_done or push_done:
-            deliveries.append({
-                "staff_id": staff_id,
-                "state": "partial",
-                "telegram": telegram_done,
-                "push": push_done,
-            })
-        else:
-            deliveries.append({"staff_id": staff_id, "state": "failed", "reason": "no_delivery_channel"})
+        sent += 1
+        deliveries.append({"staff_id": staff_id, "state": "accepted"})
     return {
         "ok": True,
         "date": date_s,
@@ -11929,45 +11919,35 @@ async def _send_shift_reminders_once(app: Application) -> int:
             key = (staff_id, now.date().isoformat(), offset)
             if key in _SHIFT_REMINDERS_SENT:
                 continue
-            _SHIFT_REMINDERS_SENT.add(key)
             label = "1 час" if offset == 60 else "30 минут"
             text = (
                 f"⏰ *До начала рабочего дня осталось {label}*\n\n"
                 f"Старт смены: {start.strftime('%H:%M')}\n"
                 "Открой приложение, чтобы проверить расписание."
             )
-            if master.get("telegram_chat_id") and not database.is_master_muted(master["telegram_chat_id"]):
-                try:
-                    await app.bot.send_message(
-                        chat_id=master["telegram_chat_id"],
-                        text=text,
-                        parse_mode="Markdown",
-                    )
-                    sent += 1
-                except Exception as e:
-                    logger.error(f"shift reminder Telegram failed: {e}")
-            sent += await _send_master_push(
-                master,
-                title=f"До рабочего дня {label}",
-                body=f"Старт смены в {start.strftime('%H:%M')}",
-                url="/app/?panel=schedule",
-                tag=f"shift-{staff_id}-{now.date().isoformat()}-{offset}",
-                data={"event": "shift.reminder", "minutes": offset},
-            )
             try:
                 import maya_inbox_bridge
                 tg = master.get("telegram_chat_id")
-                await maya_inbox_bridge.publish_inbox_item(
+                telegram_ids = None
+                if tg and not database.is_master_muted(int(tg)):
+                    telegram_ids = [int(tg)]
+                accepted = await maya_inbox_bridge.publish_inbox_item(
                     type="shift_reminder",
                     title=f"До рабочего дня {label}",
                     body_text=text.replace("*", ""),
                     source_seed=f"shift|{staff_id}|{now.date().isoformat()}|{offset}",
-                    telegram_chat_ids=[int(tg)] if tg else None,
+                    telegram_chat_ids=telegram_ids,
                     deep_link="/app/?panel=schedule",
+                    payload={"staff_id": staff_id, "date": now.date().isoformat(), "minutes": offset},
                     fanout_owners=False,
+                    telegram_parse_mode="Markdown",
                 )
             except Exception as inbox_exc:
-                logger.warning(f"shift reminder nest inbox: {inbox_exc}")
+                logger.warning(f"shift reminder Action Engine: {inbox_exc}")
+                accepted = False
+            if accepted:
+                _SHIFT_REMINDERS_SENT.add(key)
+                sent += 1
     return sent
 
 
@@ -12049,28 +12029,31 @@ def _owner_reputation_ids() -> list[int]:
 
 
 async def notify_owner_cycle_candidates(snapshot: dict) -> dict:
-    """Sends one PII-free Web Push for a newly changed return queue."""
+    """Submit one PII-free return-queue alert to its canonical executor."""
     payload = cycle_reminder.owner_alert_push_payload(snapshot)
     if not payload:
         return {"attempted": False, "owners": 0, "push": 0}
     owner_ids = _owner_reputation_ids()
-    push_sent = 0
-    for owner_id in owner_ids:
-        try:
-            push_sent += await _send_client_push(
-                owner_id,
-                payload["title"],
-                payload["body"],
-                url=payload["url"],
-                tag=payload["tag"],
-                data=payload["data"],
-            )
-        except Exception as exc:
-            logger.error("cycle owner push delivery: %s", exc)
+    try:
+        import maya_inbox_bridge
+
+        accepted = await maya_inbox_bridge.publish_inbox_item(
+            type="owner_alert",
+            title=payload["title"],
+            body_text=payload["body"],
+            source_seed=str(payload["data"]["event_id"]),
+            telegram_chat_ids=owner_ids,
+            deep_link=payload["url"],
+            payload={"event": "cycle.candidates", "event_id": payload["data"]["event_id"]},
+            fanout_owners=True,
+        )
+    except Exception as exc:
+        logger.error("cycle owner Action Engine delivery: %s", exc)
+        accepted = False
     return {
-        "attempted": True,
+        "attempted": bool(accepted),
         "owners": len(owner_ids),
-        "push": push_sent,
+        "accepted": bool(accepted),
         "event_id": payload["data"]["event_id"],
     }
 
@@ -12083,49 +12066,30 @@ async def _notify_owner_reputation(app: Application, rows: list[dict]) -> dict:
     if not owner_ids:
         return {"delivered": False, "count": alert.get("count", 0), "owners": 0}
 
-    delivered = False
+    review_ids = sorted(str(row.get("id")) for row in rows if row.get("id"))
     try:
-        for owner_id in owner_ids:
-            delivered = _store_assistant_message_in_chat(
-                owner_id,
-                alert["text"],
-                mode="staff",
-                dedupe_key=_telegram_chat_mirror_dedupe_key(owner_id, alert["text"]),
-                protect_content=True,
-            ) or delivered
-    except Exception as e:
-        logger.error(f"reputation owner in-app delivery: {e}")
+        import maya_inbox_bridge
 
-    telegram_sent = 0
-    push_sent = 0
-    for owner_id in owner_ids:
-        try:
-            await app.bot.send_message(chat_id=owner_id, text=alert["text"])
-            telegram_sent += 1
-            delivered = True
-        except Exception as e:
-            logger.error(f"reputation owner Telegram delivery: {e}")
-        try:
-            push_sent += await _send_client_push(
-                owner_id,
-                alert["push_title"],
-                alert["push_body"],
-                url="/app/?god=1",
-                tag="maya-reputation-new",
-                data={"event": "reputation.new_review"},
-            )
-            if push_sent:
-                delivered = True
-        except Exception as e:
-            logger.error(f"reputation owner push delivery: {e}")
+        delivered = await maya_inbox_bridge.publish_inbox_item(
+            type="review_alert",
+            title=alert.get("push_title") or "Новый отзыв",
+            body_text=alert["text"],
+            source_seed="reviews|" + "|".join(review_ids),
+            telegram_chat_ids=owner_ids,
+            deep_link="/app/?god=1",
+            payload={"event": "reputation.new_review", "review_ids": review_ids},
+            fanout_owners=True,
+        )
+    except Exception as e:
+        logger.error(f"reputation owner Action Engine delivery: {e}")
+        delivered = False
     return {
         "delivered": delivered,
         "count": alert.get("count", 0),
         "positive": alert.get("positive", 0),
         "negative": alert.get("negative", 0),
         "owners": len(owner_ids),
-        "telegram": telegram_sent,
-        "push": push_sent,
+        "accepted": bool(delivered),
     }
 
 
@@ -13662,6 +13626,10 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_post(
         "/api/internal/action-engine/privacy-telegram",
         internal_privacy_telegram_handler,
+    )
+    web_app.router.add_post(
+        "/api/internal/action-engine/package2-telegram",
+        internal_package2_telegram_handler,
     )
 
     # API для PWA через Telegram Login Widget (когда PWA открыта в браузере)

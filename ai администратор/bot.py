@@ -6704,71 +6704,35 @@ async def notify_owner(app: Application, text: str, push_title: str = "MAYA",
                        button_label: str = "📊 Открыть кабинет",
                        button_url: str = "https://malesthetic.pro/app/?panel=report",
                        chat_action: dict | None = None) -> int:
-    """Единая точка проактивных сообщений AI-директора владельцу: Telegram + Web Push
-    в PWA. Майя может писать владельцу сама (брифинг, риск, возможность). Возвращает
-    число адресатов, которым доставлено в Telegram."""
+    """Передаёт одно сообщение владельца единственному execution owner."""
     owner_ids = _owner_recipient_ids()
     if not owner_ids:
         logger.warning("notify_owner: нет настроенных owner/founder получателей")
         return 0
-    import webhook_server
-    # Сохраняем карточку и при недоступном Telegram. Глобальное зеркало после
-    # успешной Telegram-доставки увидит тот же dedupe_key и не создаст дубль.
-    try:
-        for owner_id in owner_ids:
-            webhook_server._store_assistant_message_in_chat(
-                owner_id,
-                text,
-                mode="staff",
-                action=chat_action if isinstance(chat_action, dict) else None,
-                dedupe_key=webhook_server._telegram_chat_mirror_dedupe_key(owner_id, text),
-                protect_content=True,
-            )
-    except Exception as e:
-        logger.error(f"notify_owner in-app chat: {e}")
-
-    # Persistent Nest inbox for Maya OS native (survives app close).
+    buttons = []
+    callback = _owner_job_callback(chat_action.get("job")) if isinstance(chat_action, dict) else None
+    if callback:
+        buttons.append({
+            "text": str(chat_action.get("label") or "Запустить"),
+            "callback_data": callback,
+        })
+    if button_label and button_url:
+        buttons.append({"text": button_label, "url": button_url})
     try:
         import maya_inbox_bridge
-        await maya_inbox_bridge.publish_owner_message(
+
+        accepted = await maya_inbox_bridge.publish_owner_message(
             text,
             title=push_title or "MAYA",
             tag=tag or "maya_owner",
             url=url or "/app/?panel=report",
             owner_ids=list(owner_ids),
+            telegram_buttons=buttons or None,
         )
     except Exception as e:
-        logger.warning(f"notify_owner nest inbox: {e}")
-
-    kb = None
-    try:
-        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-        rows = []
-        _cb = _owner_job_callback(chat_action.get("job")) if isinstance(chat_action, dict) else None
-        _cb_label = (chat_action.get("label") or "Запустить") if isinstance(chat_action, dict) else None
-        if _cb:
-            rows.append([InlineKeyboardButton(_cb_label, callback_data=_cb)])
-        if button_label and button_url:
-            rows.append([InlineKeyboardButton(button_label, url=button_url)])
-        if rows:
-            kb = InlineKeyboardMarkup(rows)
-    except Exception:
-            kb = None
-    sent = 0
-    for owner_id in owner_ids:
-        try:
-            await app.bot.send_message(chat_id=owner_id, text=text, reply_markup=kb)
-            sent += 1
-        except Exception as e:
-            logger.error(f"notify_owner tg → {owner_id}: {e}")
-        try:
-            await webhook_server._send_client_push(
-                owner_id, push_title, push_body or text[:120],
-                url=url, tag=tag,
-            )
-        except Exception as e:
-            logger.error(f"notify_owner push → {owner_id}: {e}")
-    return sent
+        logger.warning(f"notify_owner Action Engine: {e}")
+        accepted = False
+    return len(owner_ids) if accepted else 0
 
 
 def _format_director_briefing(brief: dict) -> tuple[str, str, str]:
@@ -6886,9 +6850,8 @@ async def _director_briefing_job(app: Application):
         if database.get_setting("director_briefing_last") == sig:
             logger.info("director_briefing: уже отправлен сегодня")
             return
-        database.set_setting("director_briefing_last", sig)
     except Exception:
-        pass
+        sig = ""
     if isinstance(top_action, dict):
         try:
             pretty = _owner_action_text(top_action)
@@ -6899,6 +6862,8 @@ async def _director_briefing_job(app: Application):
     n = await notify_owner(app, text, push_title=push_title, push_body=push_body,
                            tag="director_briefing", url="/app/?panel=report",
                            chat_action=top_action if isinstance(top_action, dict) else None)
+    if n and sig:
+        database.set_setting("director_briefing_last", sig)
     logger.info(f"📊 Брифинг AI-директора отправлен: {n} адресат(ов)")
 
 
@@ -7010,30 +6975,8 @@ async def _daily_report_job(app: Application):
     push_body = "\n".join(_push_lines)
 
     try:
-        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-        kb = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("📊 Открыть отчёт", url="https://malesthetic.pro/app/?panel=report")]]
-        )
-    except Exception:
-        kb = None
-
-    import webhook_server
-    for admin_id in database.list_admins():
-        try:
-            await app.bot.send_message(chat_id=admin_id, text=text, reply_markup=kb)
-        except Exception as e:
-            logger.error(f"daily_report tg → {admin_id}: {e}")
-        try:
-            await webhook_server._send_client_push(
-                admin_id, f"Отчёт за {dd} 📊", push_body,
-                url="/app/?panel=report", tag="daily_report",
-            )
-        except Exception as e:
-            logger.error(f"daily_report push → {admin_id}: {e}")
-
-    try:
         import maya_inbox_bridge
-        await maya_inbox_bridge.publish_inbox_item(
+        accepted = await maya_inbox_bridge.publish_inbox_item(
             type="daily_report",
             title=f"Отчёт за {dd}",
             body_text=text,
@@ -7042,9 +6985,15 @@ async def _daily_report_job(app: Application):
             deep_link="/app/?panel=report",
             payload={"date": d},
             fanout_owners=True,
+            telegram_buttons=[{
+                "text": "📊 Открыть отчёт",
+                "url": "https://malesthetic.pro/app/?panel=report",
+            }],
         )
+        if not accepted:
+            logger.warning("daily_report rejected by Action Engine")
     except Exception as e:
-        logger.warning(f"daily_report nest inbox: {e}")
+        logger.warning(f"daily_report Action Engine: {e}")
 
 
 async def _god_watch_job(app: Application):
@@ -7090,30 +7039,39 @@ async def _god_watch_job(app: Application):
             lines.append(f"• {c['label']}: {c.get('detail') or ''}".rstrip(": "))
     text = "\n".join(lines).strip()
 
-    # Анти-спам: один и тот же дайджест шлём не чаще раза в день.
+    # Анти-спам: один и тот же дайджест принимаем в durable delivery не чаще раза в день.
+    sig = None
     try:
         import hashlib
         from datetime import date as _d
         sig = _d.today().isoformat() + ":" + hashlib.md5(text.encode("utf-8")).hexdigest()[:12]
         if (database.get_setting("god_last_alert") or "") == sig:
             return
-        database.set_setting("god_last_alert", sig)
     except Exception:
         pass
 
-    for fid in FOUNDER_IDS:
-        try:
-            await app.bot.send_message(chat_id=fid, text=text)
-        except Exception as e:
-            logger.error(f"god_watch tg → {fid}: {e}")
-        try:
-            await webhook_server._send_client_push(
-                fid, "MAYA: нужно внимание 🛡️",
-                "Есть проблемы или оплаты на подходе — откройте Центр управления.",
-                url="/app/?god=1", tag="god_watch",
-            )
-        except Exception as e:
-            logger.error(f"god_watch push → {fid}: {e}")
+    try:
+        import maya_inbox_bridge
+
+        accepted = await maya_inbox_bridge.publish_inbox_item(
+            type="owner_alert",
+            title="MAYA: нужно внимание",
+            body_text=text,
+            source_seed=f"god-watch|{sig or text}",
+            telegram_chat_ids=[int(fid) for fid in FOUNDER_IDS],
+            deep_link="/app/?god=1",
+            payload={"event": "god.watch"},
+            fanout_owners=True,
+            telegram_buttons=[{
+                "text": "Открыть Центр управления",
+                "url": "https://malesthetic.pro/app/?god=1",
+            }],
+        )
+    except Exception as e:
+        logger.error(f"god_watch Action Engine: {e}")
+        accepted = False
+    if accepted and sig:
+        database.set_setting("god_last_alert", sig)
 
 
 async def _dual_role_guard_job(app: Application):
@@ -7168,30 +7126,37 @@ async def _dual_role_guard_job(app: Application):
             lines.append(f"• {it['name']}: {it.get('detail') or it.get('reason') or 'проверьте'}")
     text = "\n".join(lines).strip()
 
+    sig = None
     try:
         sig_base = "|".join(f"{it.get('chat_id')}:{it.get('reason')}" for it in issues)
         sig = date.today().isoformat() + ":" + hashlib.md5(sig_base.encode("utf-8")).hexdigest()[:12]
         if (database.get_setting("dual_role_guard_last_alert") or "") == sig:
             return
-        database.set_setting("dual_role_guard_last_alert", sig)
     except Exception:
         pass
 
-    for fid in FOUNDER_IDS:
-        try:
-            await app.bot.send_message(chat_id=fid, text=text)
-        except Exception as e:
-            logger.error(f"dual_role_guard tg → {fid}: {e}")
-        try:
-            await webhook_server._send_client_push(
-                fid,
-                "MAYA: dual-role guard 🛡️",
-                "Есть рассинхрон между ролями мастер/клиент — откройте Центр управления.",
-                url="/app/?god=1",
-                tag="dual_role_guard",
-            )
-        except Exception as e:
-            logger.error(f"dual_role_guard push → {fid}: {e}")
+    try:
+        import maya_inbox_bridge
+
+        accepted = await maya_inbox_bridge.publish_inbox_item(
+            type="owner_alert",
+            title="MAYA: dual-role guard",
+            body_text=text,
+            source_seed=f"dual-role-guard|{sig or text}",
+            telegram_chat_ids=[int(fid) for fid in FOUNDER_IDS],
+            deep_link="/app/?god=1",
+            payload={"event": "god.dual_role_guard"},
+            fanout_owners=True,
+            telegram_buttons=[{
+                "text": "Открыть Центр управления",
+                "url": "https://malesthetic.pro/app/?god=1",
+            }],
+        )
+    except Exception as e:
+        logger.error(f"dual_role_guard Action Engine: {e}")
+        accepted = False
+    if accepted and sig:
+        database.set_setting("dual_role_guard_last_alert", sig)
 
 
 async def _loyalty_job(app: Application):

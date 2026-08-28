@@ -276,4 +276,103 @@ describe('ActionCapabilityRegistry', () => {
       }),
     ).toThrow(/Unexpected action input/);
   });
+
+  it('registers Package 2 communication classes with one executable owner', () => {
+    const cases = [
+      [
+        'communication.appointment-reminders.execute.v1',
+        'deliver_appointment_reminder',
+        'communication.package2.single',
+      ],
+      [
+        'communication.reports-briefings.execute.v1',
+        'deliver_report_briefing',
+        'communication.package2.single',
+      ],
+      [
+        'communication.business-alerts.execute.v1',
+        'deliver_business_alert',
+        'communication.package2.single',
+      ],
+      [
+        'communication.bulk-campaign.execute.v1',
+        'deliver_bulk_campaign',
+        'communication.package2.bulk',
+      ],
+    ] as const;
+
+    for (const [capabilityName, actionClass, executorKey] of cases) {
+      const capability = registry.get(capabilityName);
+      expect(capability).toMatchObject({
+        actionClass,
+        policyDecision: ActionPolicyDecision.ALLOW,
+        executorKey,
+      });
+      expect(capability.retry.maxExecutionAttempts).toBe(1);
+      expect(capability.retry.retryablePreDispatchErrors.size).toBe(0);
+      expect(capability.reconciliation.retryAfterProvenNonExecution).toBe(
+        false,
+      );
+    }
+  });
+
+  it('rejects direct routing and invalid channel data in Package 2 inputs', () => {
+    const reminder = registry.get(
+      'communication.appointment-reminders.execute.v1',
+    );
+    const bulk = registry.get('communication.bulk-campaign.execute.v1');
+
+    expect(
+      reminder.normalizeInput({
+        channel: 'telegram',
+        messageType: 'appointment_reminder',
+        telegramChatId: '10001',
+        sourceEventId: 'reminder:event-1',
+        title: 'Напоминание',
+        bodyText: 'Запись сегодня в 10:00',
+        parseMode: 'Markdown',
+        buttons: [{ text: 'Открыть', url: 'https://example.test/app' }],
+      }),
+    ).toEqual({
+      channel: 'telegram',
+      messageType: 'appointment_reminder',
+      telegramChatId: '10001',
+      sourceEventId: 'reminder:event-1',
+      title: 'Напоминание',
+      bodyText: 'Запись сегодня в 10:00',
+      parseMode: 'Markdown',
+      buttons: [{ text: 'Открыть', url: 'https://example.test/app' }],
+    });
+    expect(() =>
+      reminder.normalizeInput({
+        channel: 'telegram',
+        messageType: 'appointment_reminder',
+        telegramChatId: '10001',
+        sourceEventId: 'reminder:event-1',
+        title: 'Напоминание',
+        bodyText: 'Запись сегодня в 10:00',
+        executor: 'legacy.direct-send',
+      }),
+    ).toThrow(/Unexpected action input/);
+    expect(() =>
+      reminder.normalizeInput({
+        channel: 'inbox',
+        messageType: 'appointment_reminder',
+        sourceEventId: 'reminder:event-1',
+        title: 'Напоминание',
+        bodyText: 'Запись сегодня в 10:00',
+      }),
+    ).toThrow(/userId is required/);
+    expect(() =>
+      bulk.normalizeInput({
+        campaignId: 'campaign-1',
+        audienceId: 'audience-1',
+        audienceSnapshotHash: 'audience-hash',
+        messageSnapshotHash: 'message-hash',
+        title: 'MAYA',
+        bodyText: 'Вернитесь к нам',
+        approval: 'bypass',
+      }),
+    ).toThrow(/Unexpected action input/);
+  });
 });

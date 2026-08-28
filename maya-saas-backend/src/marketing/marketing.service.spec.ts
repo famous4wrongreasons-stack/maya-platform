@@ -1,7 +1,7 @@
 import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
+import { CommunicationDeliveryService } from '../communication-delivery/communication-delivery.service';
 import { CommunicationShadowService } from '../communication-shadow';
 import { CrmService } from '../crm/crm.service';
-import { InboxService } from '../inbox/inbox.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecoveryService } from '../recovery/recovery.service';
 import { MarketingService } from './marketing.service';
@@ -42,10 +42,13 @@ describe('MarketingService', () => {
     }>;
     searchClients?: jest.Mock;
     audienceCreate?: jest.Mock;
+    audienceUpsert?: jest.Mock;
     campaignCreate?: jest.Mock;
     campaignFindFirst?: jest.Mock;
     audienceFindFirst?: jest.Mock;
+    audienceRecipientFindMany?: jest.Mock;
     campaignUpdate?: jest.Mock;
+    communicationDelivery?: { deliverBulkCampaign: jest.Mock };
     communicationShadow?: { plan: jest.Mock };
     consentEvidenceUpsert?: jest.Mock;
     pushTokens?: Array<{ userId: string; token: string }>;
@@ -70,6 +73,16 @@ describe('MarketingService', () => {
             expiresAt: future,
           }),
         findFirst: input?.audienceFindFirst ?? jest.fn(),
+        upsert:
+          input?.audienceUpsert ??
+          jest.fn().mockResolvedValue({
+            id: 'shadow-audience-default',
+            snapshotHash: 'shadow-snapshot-default',
+          }),
+      },
+      marketingAudienceRecipient: {
+        findMany:
+          input?.audienceRecipientFindMany ?? jest.fn().mockResolvedValue([]),
       },
       marketingCampaign: {
         create: input?.campaignCreate ?? jest.fn(),
@@ -113,8 +126,26 @@ describe('MarketingService', () => {
     const crm = {
       searchClients: input?.searchClients ?? jest.fn().mockResolvedValue([]),
     };
-    const inbox = {
-      publishForTenant: jest.fn().mockResolvedValue({ stored: 1 }),
+    const communicationDelivery = input?.communicationDelivery ?? {
+      deliverBulkCampaign: jest.fn().mockImplementation(async () => {
+        const rows =
+          (await prisma.marketingAudienceRecipient.findMany()) as Array<{
+            externalClientId: string;
+            eligibilityStatus: string;
+          }>;
+        return {
+          actionExecutionId: 'bulk-action-1',
+          deliveryId: 'bulk-delivery-1',
+          status: 'delivered',
+          deliveredUserIds: rows
+            .filter((row) => row.eligibilityStatus === 'ALLOW')
+            .map((row) => row.externalClientId)
+            .sort(),
+        };
+      }),
+    };
+    const communicationShadow = input?.communicationShadow ?? {
+      plan: jest.fn().mockResolvedValue({ externalMessagesSent: 0 }),
     };
     const recovery = {
       recordConsentSafeTouchpoint: jest.fn().mockResolvedValue({ id: 'tp-1' }),
@@ -122,12 +153,19 @@ describe('MarketingService', () => {
     const service = new MarketingService(
       prisma as unknown as PrismaService,
       crm as unknown as CrmService,
-      inbox as unknown as InboxService,
+      communicationDelivery as unknown as CommunicationDeliveryService,
       recovery as unknown as RecoveryService,
       new ClientRecencyFactsService(crm as unknown as CrmService),
-      input?.communicationShadow as unknown as CommunicationShadowService,
+      communicationShadow as unknown as CommunicationShadowService,
     );
-    return { service, prisma, crm, inbox, recovery };
+    return {
+      service,
+      prisma,
+      crm,
+      communicationDelivery,
+      communicationShadow,
+      recovery,
+    };
   }
 
   it('returns only aggregate audience data and never leaks client PII', async () => {
@@ -216,7 +254,7 @@ describe('MarketingService', () => {
       channel: 'app',
       expiresAt: future,
     };
-    const { service, inbox, recovery } = makeService({
+    const { service, communicationDelivery, recovery } = makeService({
       memberships: [
         {
           userId: 'user-1',
@@ -245,6 +283,20 @@ describe('MarketingService', () => {
           last_visit_date: '2025-01-01T10:00:00.000Z',
         },
       ]),
+      audienceRecipientFindMany: jest.fn().mockResolvedValue([
+        {
+          tenantId: 'tenant-1',
+          externalClientId: 'user-1',
+          eligibilityStatus: 'ALLOW',
+          exclusionReason: null,
+        },
+        {
+          tenantId: 'tenant-1',
+          externalClientId: 'user-withdrawn',
+          eligibilityStatus: 'SKIP',
+          exclusionReason: 'CONSENT_OR_ACCOUNT_INELIGIBLE',
+        },
+      ]),
     });
 
     const result = await service.sendCampaign({
@@ -262,10 +314,12 @@ describe('MarketingService', () => {
       failed_count: 0,
       attribution_failed_count: 0,
     });
-    expect(inbox.publishForTenant).toHaveBeenCalledTimes(1);
-    expect(inbox.publishForTenant).toHaveBeenCalledWith(
-      'tenant-1',
-      expect.objectContaining({ userIds: ['user-1'] }),
+    expect(communicationDelivery.deliverBulkCampaign).toHaveBeenCalledTimes(1);
+    expect(communicationDelivery.deliverBulkCampaign).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        campaignId: 'campaign-123',
+      }),
     );
     expect(recovery.recordConsentSafeTouchpoint).toHaveBeenCalledTimes(1);
   });
@@ -341,7 +395,7 @@ describe('MarketingService', () => {
       channel: 'app',
       expiresAt: future,
     };
-    const { service, inbox, recovery } = makeService({
+    const { service, communicationDelivery, recovery } = makeService({
       campaignFindFirst: jest.fn().mockResolvedValue(campaign),
     });
 
@@ -358,7 +412,7 @@ describe('MarketingService', () => {
       sent_count: 1,
       replayed: true,
     });
-    expect(inbox.publishForTenant).not.toHaveBeenCalled();
+    expect(communicationDelivery.deliverBulkCampaign).not.toHaveBeenCalled();
     expect(recovery.recordConsentSafeTouchpoint).not.toHaveBeenCalled();
   });
 
@@ -401,6 +455,14 @@ describe('MarketingService', () => {
           visits_count: 5,
           sold_amount: 10_000,
           last_visit_date: '2025-01-01T10:00:00.000Z',
+        },
+      ]),
+      audienceRecipientFindMany: jest.fn().mockResolvedValue([
+        {
+          tenantId: 'tenant-1',
+          externalClientId: 'user-1',
+          eligibilityStatus: 'ALLOW',
+          exclusionReason: null,
         },
       ]),
     });
@@ -449,7 +511,9 @@ describe('MarketingService', () => {
   ])(
     'uses durable consent evidence and plans $decision without dispatch',
     async ({ evidence, decision, reasonCode }) => {
-      const communicationShadow = { plan: jest.fn().mockResolvedValue({}) };
+      const communicationShadow = {
+        plan: jest.fn().mockResolvedValue({ externalMessagesSent: 0 }),
+      };
       const consentEvidenceUpsert = jest.fn().mockResolvedValue(evidence);
       const campaign = {
         id: 'campaign-123',
@@ -464,7 +528,7 @@ describe('MarketingService', () => {
         channel: 'app',
         expiresAt: future,
       };
-      const { service } = makeService({
+      const { service, prisma, communicationDelivery } = makeService({
         memberships: [
           {
             userId: 'user-1',
@@ -495,38 +559,73 @@ describe('MarketingService', () => {
             last_visit_date: '2025-01-01T10:00:00.000Z',
           },
         ]),
-        audienceCreate: jest.fn().mockResolvedValue({
+        audienceUpsert: jest.fn().mockResolvedValue({
           id: 'shadow-audience-1',
           snapshotHash: 'shadow-snapshot-1',
         }),
+        audienceRecipientFindMany: jest.fn().mockResolvedValue([
+          {
+            tenantId: 'tenant-1',
+            externalClientId: 'user-1',
+            eligibilityStatus: decision,
+            exclusionReason: reasonCode,
+          },
+        ]),
         communicationShadow,
         consentEvidenceUpsert,
       });
 
-      await service.sendCampaign({
+      const send = service.sendCampaign({
         tenantId: 'tenant-1',
         actorUserId: 'owner-1',
         campaignId: 'campaign-123',
         idempotencyKey: 'approval-idempotency-key',
       });
 
+      if (decision === 'SKIP') {
+        await expect(send).rejects.toMatchObject({
+          response: {
+            error: { code: 'bulk_audience_shadow_divergent' },
+          },
+        });
+      } else {
+        await expect(send).resolves.toMatchObject({ status: 'sent' });
+      }
+
       expect(consentEvidenceUpsert).toHaveBeenCalledWith(
         expect.objectContaining({ update: {} }),
       );
-      expect(communicationShadow.plan).toHaveBeenCalledTimes(1);
-      const [[shadowPlan]] = communicationShadow.plan.mock.calls as unknown as [
-        [Parameters<CommunicationShadowService['plan']>[0]],
+      const [[audienceUpsertCall]] = prisma.marketingAudience.upsert.mock
+        .calls as unknown as [
+        [{ where: { id: string }; update: Record<string, never> }],
       ];
-      expect(shadowPlan).toMatchObject({
-        taxonomy: 'bulk_campaign',
-        channel: 'inbox',
-        recipients: [
-          {
-            consentEvidenceId: evidence.id,
-            eligibility: { decision, reasonCode },
-          },
-        ],
-      });
+      expect(audienceUpsertCall.where.id).toMatch(
+        /^marketing-shadow-audience:/,
+      );
+      expect(audienceUpsertCall.update).toEqual({});
+      expect(prisma.devicePushToken.findMany).not.toHaveBeenCalled();
+      if (decision === 'SKIP') {
+        expect(communicationShadow.plan).not.toHaveBeenCalled();
+        expect(
+          communicationDelivery.deliverBulkCampaign,
+        ).not.toHaveBeenCalled();
+      } else {
+        expect(communicationShadow.plan).toHaveBeenCalledTimes(1);
+        const [[shadowPlan]] = communicationShadow.plan.mock
+          .calls as unknown as [
+          [Parameters<CommunicationShadowService['plan']>[0]],
+        ];
+        expect(shadowPlan).toMatchObject({
+          taxonomy: 'bulk_campaign',
+          channel: 'inbox',
+          recipients: [
+            {
+              consentEvidenceId: evidence.id,
+              eligibility: { decision, reasonCode },
+            },
+          ],
+        });
+      }
     },
   );
 });

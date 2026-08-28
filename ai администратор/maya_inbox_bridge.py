@@ -1,7 +1,8 @@
-"""Dual-write proactive MAYA messages into Nest persistent inbox.
+"""Fail-closed bridge for proactive MAYA communication.
 
-Telegram остаётся каналом доставки. Message of record для приложения —
-строка InboxItem на Nest (maya-saas). Без токена/URL модуль молча no-op.
+Python producers describe one logical message. Nest/Action Engine owns the
+durable Inbox/APNS/Telegram deliveries; callers must not fall back to a direct
+channel send when this bridge rejects the request or returns an unknown result.
 """
 from __future__ import annotations
 
@@ -66,19 +67,10 @@ async def publish_inbox_item(
     deep_link: str | None = None,
     payload: dict[str, Any] | None = None,
     fanout_owners: bool = True,
+    telegram_parse_mode: str | None = None,
+    telegram_buttons: list[dict[str, str]] | None = None,
 ) -> bool:
-    """Fire-and-forget publish. Never raises into the bot hot path."""
-    # Nest owns multi-tenant morning/evening reports. Skip dual-write for those
-    # types so subscribers do not depend on a Telegram bot and ME does not get
-    # duplicate inbox cards.
-    nest_owns = (os.environ.get("MAYA_OWNER_REPORTS_VIA_NEST") or "1").strip().lower()
-    if nest_owns not in ("0", "false", "off", "no") and type in {
-        "daily_report",
-        "morning_brief",
-        "growth_plan",
-    }:
-        return False
-
+    """Submit one logical message to its only production execution owner."""
     if not _BRIDGE_TOKEN or len(_BRIDGE_TOKEN) < 24:
         return False
     clean = (body_text or "").strip()
@@ -100,6 +92,10 @@ async def publish_inbox_item(
         body["payload"] = payload
     if telegram_chat_ids:
         body["telegram_chat_ids"] = [str(int(x)) for x in telegram_chat_ids if x]
+    if telegram_parse_mode:
+        body["telegram_parse_mode"] = str(telegram_parse_mode)
+    if telegram_buttons:
+        body["telegram_buttons"] = telegram_buttons
 
     try:
         timeout = aiohttp.ClientTimeout(total=4)
@@ -227,6 +223,7 @@ async def publish_owner_message(
     tag: str = "owner_alert",
     url: str = "/app/?panel=report",
     owner_ids: list[int] | None = None,
+    telegram_buttons: list[dict[str, str]] | None = None,
 ) -> bool:
     kind = "owner_alert"
     if "утренний план" in (title or "").lower() or "growth" in (tag or ""):
@@ -244,4 +241,5 @@ async def publish_owner_message(
         deep_link=url,
         payload={"tag": tag},
         fanout_owners=True,
+        telegram_buttons=telegram_buttons,
     )

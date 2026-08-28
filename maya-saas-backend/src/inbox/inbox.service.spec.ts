@@ -8,7 +8,12 @@ describe('InboxService recipients', () => {
     staffAccess?: Array<{ userId: string; externalStaffId: string }>;
     communicationDelivery?: {
       deliverNewAppointmentInbox: jest.Mock;
+      deliverPackage2Inbox?: jest.Mock;
+      deliverPackage2Apns?: jest.Mock;
+      deliverPackage2Telegram?: jest.Mock;
     };
+    communicationShadow?: { plan: jest.Mock };
+    deviceTokens?: Array<{ userId: string; platform?: string; token: string }>;
   }) => {
     const upsertMock = jest.fn().mockResolvedValue({ id: 'row-1' });
     const allStaff = opts.staffAccess ?? [];
@@ -47,14 +52,14 @@ describe('InboxService recipients', () => {
         upsert: upsertMock,
       },
       devicePushToken: {
-        findMany: jest.fn().mockResolvedValue([]),
+        findMany: jest.fn().mockResolvedValue(opts.deviceTokens ?? []),
       },
     };
     const service = new InboxService(
       prisma as never,
       new TenantContextService(),
       undefined as never,
-      undefined,
+      opts.communicationShadow as never,
       opts.communicationDelivery as never,
     );
     return { service, prisma, upsertMock, staffAccessFindMany };
@@ -119,10 +124,32 @@ describe('InboxService recipients', () => {
     expect(upsertMock).toHaveBeenCalled();
   });
 
-  it('skips owners when fanoutOwners is false', async () => {
+  it('routes Package 2 reminders through canonical inbox and APNs delivery', async () => {
+    const deliverPackage2Inbox = jest.fn().mockResolvedValue({
+      actionExecutionId: 'execution-inbox-shift',
+      deliveryId: 'delivery-inbox-shift',
+      status: 'delivered',
+    });
+    const deliverPackage2Apns = jest.fn().mockResolvedValue({
+      actionExecutionId: 'execution-apns-shift',
+      deliveryId: 'delivery-apns-shift',
+      status: 'accepted',
+    });
+    const deliverPackage2Telegram = jest.fn().mockResolvedValue({
+      actionExecutionId: 'execution-telegram-shift',
+      deliveryId: 'delivery-telegram-shift',
+      status: 'sent',
+    });
     const { service, prisma, upsertMock } = makeService({
       identities: [{ userId: 'staff-1' }],
       owners: [{ userId: 'owner-1' }],
+      communicationDelivery: {
+        deliverNewAppointmentInbox: jest.fn(),
+        deliverPackage2Inbox,
+        deliverPackage2Apns,
+        deliverPackage2Telegram,
+      },
+      deviceTokens: [{ userId: 'staff-1', platform: 'ios', token: 'device-1' }],
     });
 
     const result = await service.publishForTenant('tenant-1', {
@@ -137,13 +164,54 @@ describe('InboxService recipients', () => {
 
     expect(prisma.membership.findMany).not.toHaveBeenCalled();
     expect(result.user_ids).toEqual(['staff-1']);
-    expect(upsertMock).toHaveBeenCalledTimes(1);
+    expect(deliverPackage2Inbox).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        userId: 'staff-1',
+        messageType: 'shift_reminder',
+        sourceType: 'scheduler',
+        sourceEventId: 'shift:test-1',
+      }),
+    );
+    expect(deliverPackage2Apns).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        userId: 'staff-1',
+        messageType: 'shift_reminder',
+        deviceToken: 'device-1',
+      }),
+    );
+    expect(deliverPackage2Telegram).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        telegramChatId: '111',
+        messageType: 'shift_reminder',
+        sourceEventId: 'shift:test-1',
+      }),
+    );
+    expect(upsertMock).not.toHaveBeenCalled();
   });
 
-  it('fans out to owners when no explicit recipients matched', async () => {
+  it('routes Package 2 alerts to resolved owners through Action Engine', async () => {
+    const deliverPackage2Inbox = jest.fn().mockResolvedValue({
+      actionExecutionId: 'execution-inbox-lead',
+      deliveryId: 'delivery-inbox-lead',
+      status: 'delivered',
+    });
+    const deliverPackage2Telegram = jest.fn().mockResolvedValue({
+      actionExecutionId: 'execution-telegram-lead',
+      deliveryId: 'delivery-telegram-lead',
+      status: 'sent',
+    });
     const { service, upsertMock } = makeService({
       identities: [],
       owners: [{ userId: 'owner-1' }],
+      communicationDelivery: {
+        deliverNewAppointmentInbox: jest.fn(),
+        deliverPackage2Inbox,
+        deliverPackage2Apns: jest.fn(),
+        deliverPackage2Telegram,
+      },
     });
 
     const result = await service.publishForTenant('tenant-1', {
@@ -156,7 +224,23 @@ describe('InboxService recipients', () => {
     });
 
     expect(result.user_ids).toEqual(['owner-1']);
-    expect(upsertMock).toHaveBeenCalledTimes(1);
+    expect(deliverPackage2Inbox).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        userId: 'owner-1',
+        messageType: 'hanging_lead',
+        sourceEventId: 'hanging:test-1',
+      }),
+    );
+    expect(deliverPackage2Telegram).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        telegramChatId: '999',
+        messageType: 'hanging_lead',
+        sourceEventId: 'hanging:test-1',
+      }),
+    );
+    expect(upsertMock).not.toHaveBeenCalled();
   });
 
   it('soft-deletes related new_appointment cards when cancel is published', async () => {
@@ -231,7 +315,11 @@ describe('InboxService recipients', () => {
       payload: { record_id: 101 },
     });
 
-    expect(result).toEqual({ stored: 1, user_ids: ['owner-1'] });
+    expect(result).toEqual({
+      stored: 1,
+      user_ids: ['owner-1'],
+      telegram_delivered: 0,
+    });
     expect(deliverNewAppointmentInbox).toHaveBeenCalledTimes(1);
     expect(deliverNewAppointmentInbox).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -279,5 +367,51 @@ describe('InboxService recipients', () => {
 
     expect(deliverNewAppointmentInbox).not.toHaveBeenCalled();
     expect(upsertMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('fails closed when the Package 2 delivery owner is unavailable', async () => {
+    const { service, upsertMock } = makeService({
+      owners: [{ userId: 'owner-1' }],
+    });
+
+    await expect(
+      service.publishForTenant('tenant-1', {
+        type: 'daily_report',
+        sourceEventId: 'daily:delivery-unavailable',
+        title: 'Daily report',
+        bodyText: 'Report body',
+        fanoutOwners: true,
+        shadowSourceType: 'scheduler',
+      }),
+    ).rejects.toThrow('communication_delivery_unavailable');
+
+    expect(upsertMock).not.toHaveBeenCalled();
+  });
+
+  it('does not fall back when canonical Package 2 delivery fails', async () => {
+    const deliverPackage2Inbox = jest
+      .fn()
+      .mockRejectedValue(new Error('canonical_delivery_unknown'));
+    const { service, upsertMock } = makeService({
+      owners: [{ userId: 'owner-1' }],
+      communicationDelivery: {
+        deliverNewAppointmentInbox: jest.fn(),
+        deliverPackage2Inbox,
+        deliverPackage2Apns: jest.fn(),
+      },
+    });
+
+    await expect(
+      service.publishForTenant('tenant-1', {
+        type: 'daily_report',
+        sourceEventId: 'daily:canonical-unknown',
+        title: 'Daily report',
+        bodyText: 'Report body',
+        fanoutOwners: true,
+        shadowSourceType: 'scheduler',
+      }),
+    ).rejects.toThrow('canonical_delivery_unknown');
+
+    expect(upsertMock).not.toHaveBeenCalled();
   });
 });

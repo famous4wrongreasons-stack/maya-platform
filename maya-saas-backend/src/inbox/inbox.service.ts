@@ -1,7 +1,10 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Prisma, UserRole } from '@prisma/client';
 
-import { CommunicationDeliveryService } from '../communication-delivery';
+import {
+  CommunicationDeliveryService,
+  type Package2InboxType,
+} from '../communication-delivery';
 import { CommunicationShadowService } from '../communication-shadow';
 import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
@@ -37,6 +40,24 @@ const STAFF_SCOPED_INBOX_TYPES = new Set<string>([
   'appointment_reassigned',
   'shift_reminder',
 ]);
+
+const PACKAGE2_SINGLE_TYPES = new Set<IngestInboxItemDto['type']>([
+  'appointment_reminder',
+  'shift_reminder',
+  'daily_report',
+  'morning_brief',
+  'growth_plan',
+  'hanging_lead',
+  'owner_alert',
+  'birthday_alert',
+  'review_alert',
+]);
+
+function isPackage2SingleType(
+  type: IngestInboxItemDto['type'],
+): type is Package2InboxType {
+  return PACKAGE2_SINGLE_TYPES.has(type);
+}
 
 @Injectable()
 export class InboxService {
@@ -90,6 +111,8 @@ export class InboxService {
         deepLink: dto.deep_link,
         userIds: dto.user_ids,
         telegramChatIds: dto.telegram_chat_ids,
+        telegramParseMode: dto.telegram_parse_mode,
+        telegramButtons: dto.telegram_buttons,
         fanoutOwners: dto.fanout_owners,
         shadowSourceType: 'legacy_bridge',
       }),
@@ -200,6 +223,12 @@ export class InboxService {
       deepLink?: string | null;
       userIds?: string[];
       telegramChatIds?: string[];
+      telegramParseMode?: 'Markdown' | 'MarkdownV2' | 'HTML';
+      telegramButtons?: Array<{
+        text: string;
+        callback_data?: string;
+        url?: string;
+      }>;
       fanoutOwners?: boolean;
       shadowSourceType?:
         'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge';
@@ -215,20 +244,34 @@ export class InboxService {
       deep_link: input.deepLink ?? undefined,
       user_ids: input.userIds,
       telegram_chat_ids: input.telegramChatIds,
+      telegram_parse_mode: input.telegramParseMode,
+      telegram_buttons: input.telegramButtons,
       fanout_owners: input.fanoutOwners,
     };
 
     const userIds = await this.resolveRecipients(tenantId, dto);
-    if (userIds.length === 0) {
+    const telegramChatIds = [
+      ...new Set(
+        (input.telegramChatIds ?? [])
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ),
+    ];
+    if (userIds.length === 0 && telegramChatIds.length === 0) {
       this.logger.warn(
         `inbox publish skipped: no recipients for ${input.type}/${input.sourceEventId} tenant=${tenantId}`,
       );
       return { stored: 0, user_ids: [] as string[] };
     }
 
-    const actionEngineOwnsInbox =
+    const provenNewAppointment =
       input.type === 'new_appointment' &&
       input.shadowSourceType === 'legacy_bridge';
+    const package2MessageType = isPackage2SingleType(input.type)
+      ? input.type
+      : null;
+    const package2OwnsDelivery = package2MessageType !== null;
+    const actionEngineOwnsInbox = provenNewAppointment || package2OwnsDelivery;
 
     if (actionEngineOwnsInbox && !this.communicationDelivery) {
       throw new Error('communication_delivery_unavailable');
@@ -263,9 +306,55 @@ export class InboxService {
       );
     }
 
+    const package2Tokens = package2OwnsDelivery
+      ? await this.prisma.devicePushToken.findMany({
+          where: { tenantId, userId: { in: userIds } },
+          select: { userId: true, token: true },
+        })
+      : [];
+    const tokensByUser = new Map<string, string[]>();
+    for (const token of package2Tokens) {
+      const current = tokensByUser.get(token.userId) ?? [];
+      current.push(token.token);
+      tokensByUser.set(token.userId, current);
+    }
+
+    let telegramDelivered = 0;
+    if (package2OwnsDelivery) {
+      const telegramButtons = (input.telegramButtons ?? []).map((button) => {
+        const callbackData = button.callback_data?.trim();
+        const url = button.url?.trim();
+        if (Boolean(callbackData) === Boolean(url)) {
+          throw new Error('invalid_telegram_button_action');
+        }
+        return {
+          text: button.text.trim(),
+          ...(callbackData ? { callbackData } : {}),
+          ...(url ? { url } : {}),
+        };
+      });
+      for (const telegramChatId of telegramChatIds) {
+        await this.communicationDelivery!.deliverPackage2Telegram({
+          tenantId,
+          telegramChatId,
+          messageType: package2MessageType,
+          sourceType:
+            input.shadowSourceType ?? this.shadowSourceForType(input.type),
+          sourceEventId: input.sourceEventId,
+          title: input.title,
+          bodyText: input.bodyText,
+          ...(input.telegramParseMode
+            ? { parseMode: input.telegramParseMode }
+            : {}),
+          ...(telegramButtons.length ? { buttons: telegramButtons } : {}),
+        });
+        telegramDelivered += 1;
+      }
+    }
+
     let stored = 0;
     for (const userId of userIds) {
-      if (actionEngineOwnsInbox) {
+      if (provenNewAppointment) {
         await this.communicationDelivery!.deliverNewAppointmentInbox({
           tenantId,
           userId,
@@ -275,6 +364,29 @@ export class InboxService {
           deepLink: input.deepLink,
           payload: input.payload,
         });
+        stored += 1;
+        continue;
+      }
+      if (package2OwnsDelivery) {
+        const deliveryInput = {
+          tenantId,
+          userId,
+          messageType: package2MessageType,
+          sourceType:
+            input.shadowSourceType ?? this.shadowSourceForType(input.type),
+          sourceEventId: input.sourceEventId,
+          title: input.title,
+          bodyText: input.bodyText,
+          deepLink: input.deepLink,
+          payload: input.payload,
+        };
+        await this.communicationDelivery!.deliverPackage2Inbox(deliveryInput);
+        for (const deviceToken of tokensByUser.get(userId) ?? []) {
+          await this.communicationDelivery!.deliverPackage2Apns({
+            ...deliveryInput,
+            deviceToken,
+          });
+        }
         stored += 1;
         continue;
       }
@@ -322,13 +434,19 @@ export class InboxService {
       await this.softDeleteRelatedAppointmentCards(tenantId, input.payload);
     }
 
-    void this.announcePush(tenantId, userIds, dto).catch((error) => {
-      this.logger.warn(
-        `inbox push announce failed: ${error instanceof Error ? error.message : 'unknown'}`,
-      );
-    });
+    if (!package2OwnsDelivery) {
+      void this.announcePush(tenantId, userIds, dto).catch((error) => {
+        this.logger.warn(
+          `inbox push announce failed: ${error instanceof Error ? error.message : 'unknown'}`,
+        );
+      });
+    }
 
-    return { stored, user_ids: userIds };
+    return {
+      stored,
+      user_ids: userIds,
+      telegram_delivered: telegramDelivered,
+    };
   }
 
   /**
