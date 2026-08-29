@@ -420,6 +420,7 @@ model ActionExecution {
   approverMembership    Membership?        @relation("ActionApprover", fields: [approvalDecidedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
   attempts              ActionAttempt[]
   communicationCampaign MarketingCampaign?
+  billingPayment        BillingPayment?    @relation("BillingPaymentActionExecution")
 
   @@unique([id, tenantId])
   @@unique([tenantId, identityFingerprint])
@@ -1401,6 +1402,7 @@ model TenantEntitlement {
 model BillingPayment {
   id                String            @id @default(cuid())
   tenantId          String
+  actionExecutionId String?
   planId            String?
   provider          String            @default("yookassa")
   providerPaymentId String?           @unique
@@ -1418,8 +1420,10 @@ model BillingPayment {
   updatedAt         DateTime          @updatedAt
   tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   plan              SubscriptionPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  actionExecution   ActionExecution?  @relation("BillingPaymentActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([id, tenantId])
+  @@unique([actionExecutionId, tenantId])
   @@index([tenantId, createdAt])
   @@index([tenantId, status])
   @@index([provider, providerPaymentId])
