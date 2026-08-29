@@ -10,3 +10,4 @@ export * from './action-engine.policy-registry';
 export * from './action-engine.policy-resolver';
 export * from './action-engine.registry';
 export * from './action-engine.runtime';
+export * from './legacy-loyalty-earn-shadow.contract';

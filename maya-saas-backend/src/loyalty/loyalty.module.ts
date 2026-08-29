@@ -9,6 +9,8 @@ import {
   AdminLoyaltyController,
   LoyaltyController,
 } from './loyalty.controller';
+import { LegacyLoyaltyShadowController } from './legacy-loyalty-shadow.controller';
+import { LegacyLoyaltyShadowService } from './legacy-loyalty-shadow.service';
 import { LoyaltyService } from './loyalty.service';
 
 @Module({
@@ -19,8 +21,12 @@ import { LoyaltyService } from './loyalty.service';
     EncryptionModule,
     AuditLogModule,
   ],
-  controllers: [LoyaltyController, AdminLoyaltyController],
-  providers: [LoyaltyService],
+  controllers: [
+    LoyaltyController,
+    AdminLoyaltyController,
+    LegacyLoyaltyShadowController,
+  ],
+  providers: [LoyaltyService, LegacyLoyaltyShadowService],
   exports: [LoyaltyService],
 })
 export class LoyaltyModule {}

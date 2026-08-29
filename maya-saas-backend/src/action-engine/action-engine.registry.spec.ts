@@ -131,6 +131,102 @@ describe('ActionCapabilityRegistry', () => {
     });
   });
 
+  it('registers only a non-executable canonical Shadow for legacy loyalty earn', () => {
+    const capability = registry.get('loyalty.legacy-earn.shadow.v1');
+    expect(capability).toMatchObject({
+      actionClass: 'earn_legacy_loyalty',
+      targetKind: 'loyalty_client',
+      allowedSourceTypes: ['legacy_bridge'],
+      policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+      autonomyLevel: 'L2_5_SHADOW',
+      approvalRequirement: 'NONE',
+      executorKey: 'shadow.none',
+    });
+    expect(capability.retry.maxExecutionAttempts).toBe(1);
+    expect(capability.retry.retryablePreDispatchErrors).toEqual(new Set());
+    expect(capability.reconciliation.retryAfterProvenNonExecution).toBe(false);
+    expect(
+      capability.normalizeInput({
+        provider: 'yclients',
+        canonicalClientId: 'client-7',
+        providerVisitIdentityHash: 'visit-hash-7',
+        visitOccurredOn: '2026-08-29',
+        visitAmountRubles: 2_000,
+        intendedDeltaPoints: 100,
+        legacyClaimedPoints: 100,
+        calculationPolicy: 'legacy-cashback-5pct-half-even.v1',
+        divergenceCode: 'none',
+      }),
+    ).toEqual({
+      provider: 'yclients',
+      canonicalClientId: 'client-7',
+      providerVisitIdentityHash: 'visit-hash-7',
+      visitOccurredOn: '2026-08-29',
+      visitAmountRubles: 2_000,
+      intendedDeltaPoints: 100,
+      legacyClaimedPoints: 100,
+      calculationPolicy: 'legacy-cashback-5pct-half-even.v1',
+      divergenceCode: 'none',
+    });
+    expect(
+      capability.normalizeInput({
+        provider: 'yclients',
+        canonicalClientId: 'client-7',
+        providerVisitIdentityHash: 'visit-hash-7',
+        visitOccurredOn: '2026-08-29',
+        visitAmountRubles: 70,
+        intendedDeltaPoints: 4,
+        legacyClaimedPoints: 3,
+        calculationPolicy: 'legacy-cashback-5pct-half-even.v1',
+        divergenceCode: 'legacy_points_mismatch',
+      }),
+    ).toMatchObject({
+      intendedDeltaPoints: 4,
+      divergenceCode: 'legacy_points_mismatch',
+    });
+
+    const baseInput = {
+      provider: 'yclients',
+      canonicalClientId: 'client-7',
+      providerVisitIdentityHash: 'visit-hash-7',
+      visitOccurredOn: '2026-08-29',
+      visitAmountRubles: 2_000,
+      intendedDeltaPoints: 100,
+      legacyClaimedPoints: 100,
+      calculationPolicy: 'legacy-cashback-5pct-half-even.v1',
+      divergenceCode: 'none',
+    };
+    for (const forged of [
+      { tenantId: 'tenant-b' },
+      { entitled: true },
+      { approved: true },
+      { autonomy: 'L5' },
+      { policyDecision: 'ALLOW' },
+      { approvalBindingHash: 'forged' },
+      { executor: 'legacy.direct' },
+    ]) {
+      expect(() =>
+        capability.normalizeInput({ ...baseInput, ...forged }),
+      ).toThrow('Unexpected action input');
+    }
+    expect(() =>
+      capability.normalizeInput({
+        ...baseInput,
+        intendedDeltaPoints: 101,
+      }),
+    ).toThrow('intendedDeltaPoints is not server-derived');
+
+    const policy = canonicalProductionPolicyDefinitions(registry).find(
+      (definition) => definition.capability === capability.capability,
+    );
+    expect(policy).toMatchObject({
+      actorPolicy: 'OPTIONAL_TRUSTED_SERVICE',
+      trustedServiceSourceTypes: ['legacy_bridge'],
+      requiredFeatures: ['loyalty'],
+      approverPolicyKey: 'none',
+    });
+  });
+
   it('registers appointment mutations with strict trusted routing', () => {
     const create = registry.get('crm.appointment.create.v1');
     expect(create).toMatchObject({

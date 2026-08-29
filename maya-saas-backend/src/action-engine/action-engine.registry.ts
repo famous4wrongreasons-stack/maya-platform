@@ -5,6 +5,11 @@ import type {
   ActionSourceType,
   RegisteredActionCapabilityV1,
 } from './action-engine.contract';
+import {
+  LEGACY_LOYALTY_EARN_INPUT_CONTRACT,
+  LEGACY_LOYALTY_EARN_SHADOW_CAPABILITY,
+  legacyLoyaltyEarnShadowNormalizer,
+} from './legacy-loyalty-earn-shadow.contract';
 
 const OPAQUE_REF_PATTERN = /^[A-Za-z0-9._:/-]{1,240}$/;
 
@@ -783,6 +788,51 @@ function loyaltyInternalAdjustmentShadowCapability(): RegisteredActionCapability
   };
 }
 
+function legacyLoyaltyEarnShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: LEGACY_LOYALTY_EARN_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'earn_legacy_loyalty',
+    normalizedInputContract: LEGACY_LOYALTY_EARN_INPUT_CONTRACT,
+    targetKind: 'loyalty_client',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'financial_equivalent',
+      'customer_value',
+      'bulk',
+      'provider_evidence',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.legacy-loyalty-earn-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.legacy-loyalty-earn-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.legacy-loyalty-earn-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: legacyLoyaltyEarnShadowNormalizer,
+  };
+}
+
 function loyaltyInternalAdjustmentCapability(): RegisteredActionCapabilityV1 {
   return {
     capability: 'loyalty.internal-adjust.execute.v1',
@@ -1112,6 +1162,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   visitPaymentCapability(),
   loyaltyInternalAdjustmentCapability(),
   loyaltyInternalAdjustmentShadowCapability(),
+  legacyLoyaltyEarnShadowCapability(),
   appointmentCapability({
     capability: 'crm.appointment.attendance.v1',
     actionClass: 'set_appointment_attendance',
