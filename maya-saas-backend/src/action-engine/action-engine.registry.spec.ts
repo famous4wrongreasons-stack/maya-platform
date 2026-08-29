@@ -227,6 +227,86 @@ describe('ActionCapabilityRegistry', () => {
     });
   });
 
+  it('registers only a destructive non-executable Shadow for legacy loyalty expiry', () => {
+    const capability = registry.get('loyalty.legacy-expire.shadow.v1');
+    expect(capability).toMatchObject({
+      actionClass: 'expire_legacy_loyalty',
+      targetKind: 'loyalty_client',
+      allowedSourceTypes: ['legacy_bridge'],
+      policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+      autonomyLevel: 'L2_5_SHADOW',
+      approvalRequirement: 'NONE',
+      executorKey: 'shadow.none',
+    });
+    expect(capability.riskFacets).toContain('destructive');
+    expect(capability.retry.maxExecutionAttempts).toBe(1);
+    expect(capability.retry.retryablePreDispatchErrors).toEqual(new Set());
+    expect(capability.reconciliation.retryAfterProvenNonExecution).toBe(false);
+
+    const input = {
+      provider: 'yclients',
+      canonicalClientId: 'client-7',
+      evaluationWindowStart: '2025-09-04',
+      evaluationWindowEnd: '2026-08-30',
+      policyEffectiveOn: '2025-01-01',
+      canonicalBalancePoints: 100,
+      legacyClaimedBalancePoints: 100,
+      canonicalRecentAttendedOn: null,
+      intendedDeltaPoints: -100,
+      eligibilityDecision: 'expire',
+      expiryPolicy: 'legacy-inactivity-360d-full-balance.v1',
+      perClientCapPoints: 1000,
+      perRunCapPoints: 10000,
+      capDecision: 'within_cap',
+      evidenceCoverage: 'complete',
+      divergenceCodes: [],
+    };
+    expect(capability.normalizeInput(input)).toEqual(input);
+    expect(
+      capability.normalizeInput({
+        ...input,
+        canonicalRecentAttendedOn: '2026-08-01',
+        intendedDeltaPoints: 0,
+        eligibilityDecision: 'do_not_expire',
+        divergenceCodes: ['canonical_recent_attendance'],
+      }),
+    ).toMatchObject({
+      intendedDeltaPoints: 0,
+      eligibilityDecision: 'do_not_expire',
+      divergenceCodes: ['canonical_recent_attendance'],
+    });
+
+    for (const forged of [
+      { tenantId: 'tenant-b' },
+      { entitled: true },
+      { approved: true },
+      { autonomy: 'L5' },
+      { policyDecision: 'ALLOW' },
+      { approvalBindingHash: 'forged' },
+      { executor: 'legacy.direct' },
+    ]) {
+      expect(() => capability.normalizeInput({ ...input, ...forged })).toThrow(
+        'Unexpected action input',
+      );
+    }
+    expect(() =>
+      capability.normalizeInput({ ...input, intendedDeltaPoints: 0 }),
+    ).toThrow('intendedDeltaPoints is not server-derived');
+    expect(() =>
+      capability.normalizeInput({ ...input, evidenceCoverage: 'partial' }),
+    ).toThrow('expiry evidence coverage must be complete');
+
+    const policy = canonicalProductionPolicyDefinitions(registry).find(
+      (definition) => definition.capability === capability.capability,
+    );
+    expect(policy).toMatchObject({
+      actorPolicy: 'OPTIONAL_TRUSTED_SERVICE',
+      trustedServiceSourceTypes: ['legacy_bridge'],
+      requiredFeatures: ['loyalty'],
+      approverPolicyKey: 'none',
+    });
+  });
+
   it('registers appointment mutations with strict trusted routing', () => {
     const create = registry.get('crm.appointment.create.v1');
     expect(create).toMatchObject({
