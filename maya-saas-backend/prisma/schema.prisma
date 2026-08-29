@@ -241,6 +241,10 @@ model Tenant {
   appointmentNotificationSetting AppointmentNotificationSetting?
   catalogItems                   TenantCatalogItem[]
   referralProgram                ReferralProgram?
+  customerReferrals              CustomerReferral[]
+  referralRewardIssuances        ReferralRewardIssuance[]
+  referralRewards                ReferralReward[]
+  referralRewardFulfillments     ReferralRewardFulfillment[]
   businessReviews                BusinessReview[]
   clients                        Client[]
   crmClientLinks                 CrmClientLink[]
@@ -426,6 +430,10 @@ model ActionExecution {
   loyaltyTransactions   LoyaltyTransaction[] @relation("LoyaltyTransactionActionExecution")
   issuedLoyaltyRedemptionGrant LoyaltyRedemptionGrant? @relation("LoyaltyRedemptionGrantIssueExecution")
   loyaltyRedemption     LoyaltyRedemption? @relation("LoyaltyRedemptionActionExecution")
+  createdCustomerReferral CustomerReferral? @relation("CustomerReferralCreateExecution")
+  resolvedCustomerReferral CustomerReferral? @relation("CustomerReferralResolutionExecution")
+  referralRewardIssuance ReferralRewardIssuance? @relation("ReferralRewardIssuanceActionExecution")
+  referralRewardFulfillment ReferralRewardFulfillment? @relation("ReferralRewardFulfillmentActionExecution")
   expense               Expense?           @relation("ExpenseActionExecution")
   expensePeriodDeclaration ExpensePeriodDeclaration? @relation("ExpensePeriodDeclarationActionExecution")
 
@@ -919,6 +927,111 @@ model ReferralProgram {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
   tenant               Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+/// Tenant-scoped referral fact. Creation and terminal resolution remain
+/// separate logical actions; reward issuance is deliberately modeled outside
+/// this row so a relationship fact cannot itself grant value.
+model CustomerReferral {
+  id                    String           @id @default(cuid())
+  tenantId              String
+  createExecutionId     String?
+  resolutionExecutionId String?
+  referrerClientId      String
+  referredClientId      String?
+  identityHash          String
+  referredSubjectHash   String
+  referralCodeHash      String
+  status                String           @default("pending")
+  joinedAt              DateTime
+  resolvedAt            DateTime?
+  legacySourceRef       String?
+  createdAt             DateTime         @default(now())
+  tenant                Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  referrer              Client           @relation("ReferralReferrer", fields: [referrerClientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  referredClient        Client?          @relation("ReferralReferredClient", fields: [referredClientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  createExecution       ActionExecution? @relation("CustomerReferralCreateExecution", fields: [createExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  resolutionExecution   ActionExecution? @relation("CustomerReferralResolutionExecution", fields: [resolutionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  rewardIssuance        ReferralRewardIssuance?
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, identityHash])
+  @@unique([createExecutionId, tenantId])
+  @@unique([resolutionExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, referredSubjectHash, status])
+  @@index([tenantId, referrerClientId, joinedAt])
+}
+
+/// One reward-issuance batch for one qualified referral. The action binding is
+/// one-to-one; its immutable child rows carry the individual recipient values.
+model ReferralRewardIssuance {
+  id                 String           @id @default(cuid())
+  tenantId           String
+  referralId         String
+  actionExecutionId  String?
+  policySnapshotHash String
+  issuedAt           DateTime
+  legacySourceRef    String?
+  createdAt          DateTime         @default(now())
+  tenant             Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  referral           CustomerReferral @relation(fields: [referralId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution    ActionExecution? @relation("ReferralRewardIssuanceActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  rewards            ReferralReward[]
+
+  @@unique([id, tenantId])
+  @@unique([referralId, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, issuedAt])
+}
+
+/// One immutable value slot in a referral issuance batch. Money and percentage
+/// rewards keep their native domain facts rather than collapsing into a
+/// generic value amount.
+model ReferralReward {
+  id                 String                     @id @default(cuid())
+  tenantId           String
+  issuanceId         String
+  recipientClientId  String
+  rewardSlot         String
+  codeHash           String
+  amountKopecks      Int?
+  currency           String?
+  percentBasisPoints Int?
+  issuedAt           DateTime
+  expiresAt          DateTime
+  createdAt          DateTime                   @default(now())
+  tenant             Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  issuance           ReferralRewardIssuance     @relation(fields: [issuanceId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  recipient          Client                     @relation("ReferralRewardRecipient", fields: [recipientClientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  fulfillment        ReferralRewardFulfillment?
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, codeHash])
+  @@unique([issuanceId, tenantId, rewardSlot])
+  @@index([tenantId, recipientClientId, expiresAt])
+}
+
+/// Append-only claim for applying one referral reward. The unique reward
+/// identity blocks a second fulfillment through another execution path.
+model ReferralRewardFulfillment {
+  id                String           @id @default(cuid())
+  tenantId          String
+  rewardId          String
+  actionExecutionId String?
+  fulfilledAt       DateTime
+  legacySourceRef   String?
+  createdAt         DateTime         @default(now())
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reward            ReferralReward   @relation(fields: [rewardId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution   ActionExecution? @relation("ReferralRewardFulfillmentActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([rewardId, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, fulfilledAt])
 }
 
 /// Review text can contain names and other personal data, so it is encrypted
@@ -1542,6 +1655,9 @@ model Client {
   crmLinks     CrmClientLink[]
   appointments Appointment[]
   loyaltyRedemptionGrants LoyaltyRedemptionGrant[]
+  referralsAsReferrer CustomerReferral[] @relation("ReferralReferrer")
+  referralsAsReferred CustomerReferral[] @relation("ReferralReferredClient")
+  referralRewards ReferralReward[] @relation("ReferralRewardRecipient")
 
   @@unique([id, tenantId])
   @@index([tenantId, phoneHash])
