@@ -247,6 +247,8 @@ model Tenant {
   referralRewardFulfillments     ReferralRewardFulfillment[]
   customerSubscriptions          CustomerSubscription[]
   customerSubscriptionUsages     CustomerSubscriptionUsage[]
+  giftCertificates               GiftCertificate[]
+  giftCertificateRedemptions     GiftCertificateRedemption[]
   businessReviews                BusinessReview[]
   clients                        Client[]
   crmClientLinks                 CrmClientLink[]
@@ -439,6 +441,8 @@ model ActionExecution {
   activatedCustomerSubscription CustomerSubscription? @relation("CustomerSubscriptionActivationExecution")
   endedCustomerSubscription CustomerSubscription? @relation("CustomerSubscriptionEndExecution")
   customerSubscriptionUsages CustomerSubscriptionUsage[] @relation("CustomerSubscriptionUsageActionExecution")
+  issuedGiftCertificate GiftCertificate? @relation("GiftCertificateIssueExecution")
+  giftCertificateRedemption GiftCertificateRedemption? @relation("GiftCertificateRedemptionActionExecution")
   expense               Expense?           @relation("ExpenseActionExecution")
   expensePeriodDeclaration ExpensePeriodDeclaration? @relation("ExpensePeriodDeclarationActionExecution")
 
@@ -1110,6 +1114,67 @@ model CustomerSubscriptionUsage {
   @@unique([tenantId, legacySourceRef])
   @@index([actionExecutionId, tenantId])
   @@index([subscriptionId, tenantId, usedAt])
+}
+
+/// One tenant-owned certificate issuance and its provider payment lifecycle.
+/// The bearer secret is represented only by a server-derived hash; recipient
+/// and offer facts are immutable snapshots rather than mutable catalog data.
+model GiftCertificate {
+  id                       String                     @id @default(cuid())
+  tenantId                 String
+  issueExecutionId         String?
+  issuanceIdentityHash     String
+  codeHash                 String
+  recipientSubjectHash     String
+  offerSnapshotHash        String
+  nominalAmountKopecks     Int
+  currency                 String
+  paymentStatus            String                     @default("pending_payment")
+  provider                 String?
+  providerPaymentRefHash   String?
+  issuedAt                 DateTime
+  expiresAt                DateTime
+  paidAt                   DateTime?
+  canceledAt               DateTime?
+  legacySourceRef          String?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  tenant                   Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  issueExecution           ActionExecution?           @relation("GiftCertificateIssueExecution", fields: [issueExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  redemption               GiftCertificateRedemption?
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, issuanceIdentityHash])
+  @@unique([tenantId, codeHash])
+  @@unique([issueExecutionId, tenantId])
+  @@unique([tenantId, provider, providerPaymentRefHash])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, paymentStatus, expiresAt])
+  @@index([tenantId, recipientSubjectHash, expiresAt])
+}
+
+/// Append-only claim that consumes one paid certificate in full. Partial
+/// balance semantics are intentionally absent because the approved and legacy
+/// contract is one certificate -> at most one full redemption.
+model GiftCertificateRedemption {
+  id                       String           @id @default(cuid())
+  tenantId                 String
+  certificateId            String
+  actionExecutionId        String?
+  targetKind               String
+  targetRefHash            String
+  redeemedAt               DateTime
+  legacySourceRef          String?
+  createdAt                DateTime         @default(now())
+  tenant                   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  certificate              GiftCertificate  @relation(fields: [certificateId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution          ActionExecution? @relation("GiftCertificateRedemptionActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([certificateId, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, redeemedAt])
 }
 
 /// Review text can contain names and other personal data, so it is encrypted
