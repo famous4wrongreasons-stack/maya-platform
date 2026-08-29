@@ -12,3 +12,4 @@ export * from './action-engine.registry';
 export * from './action-engine.runtime';
 export * from './legacy-loyalty-earn-shadow.contract';
 export * from './legacy-loyalty-expire-shadow.contract';
+export * from './legacy-loyalty-redeem-shadow.contract';

@@ -11,6 +11,8 @@ import {
 } from './loyalty.controller';
 import { LegacyLoyaltyExpiryShadowController } from './legacy-loyalty-expiry-shadow.controller';
 import { LegacyLoyaltyExpiryShadowService } from './legacy-loyalty-expiry-shadow.service';
+import { LegacyLoyaltyRedemptionShadowController } from './legacy-loyalty-redemption-shadow.controller';
+import { LegacyLoyaltyRedemptionShadowService } from './legacy-loyalty-redemption-shadow.service';
 import { LegacyLoyaltyShadowController } from './legacy-loyalty-shadow.controller';
 import { LegacyLoyaltyShadowService } from './legacy-loyalty-shadow.service';
 import { LoyaltyService } from './loyalty.service';
@@ -28,11 +30,13 @@ import { LoyaltyService } from './loyalty.service';
     AdminLoyaltyController,
     LegacyLoyaltyShadowController,
     LegacyLoyaltyExpiryShadowController,
+    LegacyLoyaltyRedemptionShadowController,
   ],
   providers: [
     LoyaltyService,
     LegacyLoyaltyShadowService,
     LegacyLoyaltyExpiryShadowService,
+    LegacyLoyaltyRedemptionShadowService,
   ],
   exports: [LoyaltyService],
 })
