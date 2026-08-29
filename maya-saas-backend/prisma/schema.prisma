@@ -422,6 +422,7 @@ model ActionExecution {
   communicationCampaign MarketingCampaign?
   billingPayment        BillingPayment?    @relation("BillingPaymentActionExecution")
   loyaltyTransactions   LoyaltyTransaction[] @relation("LoyaltyTransactionActionExecution")
+  expense               Expense?           @relation("ExpenseActionExecution")
 
   @@unique([id, tenantId])
   @@unique([tenantId, identityFingerprint])
@@ -1093,27 +1094,30 @@ model LoyaltyTransaction {
 }
 
 model Expense {
-  id                String   @id @default(cuid())
+  id                String           @id @default(cuid())
   tenantId          String
+  actionExecutionId String?
   branchId          String?
   branchTenantId    String?
   createdById       String?
   createdByTenantId String?
   category          String
   amountKopecks     Int
-  currency          String   @default("RUB")
+  currency          String           @default("RUB")
   occurredAt        DateTime
   encryptedNote     String?
-  source            String   @default("manual")
+  source            String           @default("manual")
   externalId        String?
   idempotencyKey    String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch            Branch?  @relation(fields: [branchId, branchTenantId], references: [id, tenantId], onDelete: SetNull)
-  createdBy         User?    @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch            Branch?          @relation(fields: [branchId, branchTenantId], references: [id, tenantId], onDelete: SetNull)
+  createdBy         User?            @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  actionExecution   ActionExecution? @relation("ExpenseActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([id, tenantId])
+  @@unique([actionExecutionId, tenantId])
   @@unique([tenantId, externalId])
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, occurredAt])
