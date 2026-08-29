@@ -216,6 +216,8 @@ model Tenant {
   customerProfiles               CustomerProfile[]
   loyaltyAccounts                LoyaltyAccount[]
   loyaltyTransactions            LoyaltyTransaction[]
+  loyaltyRedemptionGrants        LoyaltyRedemptionGrant[]
+  loyaltyRedemptions             LoyaltyRedemption[]
   expenses                       Expense[]
   expensePeriodDeclarations      ExpensePeriodDeclaration[]
   aiApprovalRequests             AiApprovalRequest[]
@@ -422,6 +424,8 @@ model ActionExecution {
   communicationCampaign MarketingCampaign?
   billingPayment        BillingPayment?    @relation("BillingPaymentActionExecution")
   loyaltyTransactions   LoyaltyTransaction[] @relation("LoyaltyTransactionActionExecution")
+  issuedLoyaltyRedemptionGrant LoyaltyRedemptionGrant? @relation("LoyaltyRedemptionGrantIssueExecution")
+  loyaltyRedemption     LoyaltyRedemption? @relation("LoyaltyRedemptionActionExecution")
   expense               Expense?           @relation("ExpenseActionExecution")
   expensePeriodDeclaration ExpensePeriodDeclaration? @relation("ExpensePeriodDeclarationActionExecution")
 
@@ -1094,6 +1098,55 @@ model LoyaltyTransaction {
   @@index([tenantId, actorUserId, createdAt])
 }
 
+/// One tenant-scoped, one-time loyalty right. The bearer code is stored only
+/// as a server-derived hash; the immutable target and point value remain
+/// domain facts rather than a generic value-ledger payload.
+model LoyaltyRedemptionGrant {
+  id               String           @id @default(cuid())
+  tenantId         String
+  issueExecutionId String?
+  clientId         String
+  codeHash         String
+  serviceRef       String
+  points           Int
+  issuedAt         DateTime
+  expiresAt        DateTime
+  legacySourceRef  String?
+  createdAt        DateTime         @default(now())
+  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client           Client           @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  issueExecution   ActionExecution? @relation("LoyaltyRedemptionGrantIssueExecution", fields: [issueExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  redemption       LoyaltyRedemption?
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, codeHash])
+  @@unique([issueExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, clientId, expiresAt])
+}
+
+/// Append-only one-time claim for a loyalty grant. A separate row makes issue
+/// and consume distinct logical actions and lets the database reject a second
+/// redemption even when it arrives through another execution path.
+model LoyaltyRedemption {
+  id                String           @id @default(cuid())
+  tenantId          String
+  grantId           String
+  actionExecutionId String?
+  redeemedAt        DateTime
+  legacySourceRef   String?
+  createdAt         DateTime         @default(now())
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  grant             LoyaltyRedemptionGrant @relation(fields: [grantId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution   ActionExecution? @relation("LoyaltyRedemptionActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([grantId, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, redeemedAt])
+}
+
 model Expense {
   id                String           @id @default(cuid())
   tenantId          String
@@ -1488,6 +1541,7 @@ model Client {
   mergedFrom   Client[]        @relation("ClientMerge")
   crmLinks     CrmClientLink[]
   appointments Appointment[]
+  loyaltyRedemptionGrants LoyaltyRedemptionGrant[]
 
   @@unique([id, tenantId])
   @@index([tenantId, phoneHash])
