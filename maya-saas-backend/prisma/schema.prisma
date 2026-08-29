@@ -423,6 +423,7 @@ model ActionExecution {
   billingPayment        BillingPayment?    @relation("BillingPaymentActionExecution")
   loyaltyTransactions   LoyaltyTransaction[] @relation("LoyaltyTransactionActionExecution")
   expense               Expense?           @relation("ExpenseActionExecution")
+  expensePeriodDeclaration ExpensePeriodDeclaration? @relation("ExpensePeriodDeclarationActionExecution")
 
   @@unique([id, tenantId])
   @@unique([tenantId, identityFingerprint])
@@ -1129,17 +1130,20 @@ model Expense {
 /// кроме системной зарплаты из CRM, уже внесены. Нулевая аренда не создаётся:
 /// собственное помещение — нормальный сценарий, а не фиктивный расход.
 model ExpensePeriodDeclaration {
-  id             String   @id @default(cuid())
-  tenantId       String
-  declaredById   String?
-  periodFromDay  String
-  periodToDay    String
-  idempotencyKey String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  declaredBy     User?    @relation("ExpensePeriodDeclarer", fields: [declaredById], references: [id], onDelete: SetNull)
+  id                String           @id @default(cuid())
+  tenantId          String
+  actionExecutionId String?
+  declaredById      String?
+  periodFromDay     String
+  periodToDay       String
+  idempotencyKey    String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  declaredBy        User?            @relation("ExpensePeriodDeclarer", fields: [declaredById], references: [id], onDelete: SetNull)
+  actionExecution   ActionExecution? @relation("ExpensePeriodDeclarationActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
+  @@unique([actionExecutionId, tenantId])
   @@unique([tenantId, periodFromDay, periodToDay])
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, periodFromDay, periodToDay])
