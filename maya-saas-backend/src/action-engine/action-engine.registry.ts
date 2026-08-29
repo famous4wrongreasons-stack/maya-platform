@@ -491,6 +491,17 @@ function requiredInteger(
   return Number(value);
 }
 
+function loyaltyInternalAdjustmentNormalizer(
+  value: unknown,
+): Record<string, unknown> {
+  const source = recordInput(value);
+  assertOnlyKeys(source, ['delta', 'reason']);
+  return {
+    delta: requiredInteger(source, 'delta', -1_000_000, 1_000_000),
+    reason: requiredText(source, 'reason', 160),
+  };
+}
+
 function visitPaymentNormalizer(value: unknown): Record<string, unknown> {
   const source = recordInput(value);
   assertOnlyKeys(source, ['externalId', 'amountKopecks', 'paymentMethod']);
@@ -731,6 +742,44 @@ function residualAppointmentShadowCapability(input: {
     payloadRetentionMs: 7 * DAY,
     auditRetentionMs: 365 * DAY,
     normalizeInput: input.normalizeInput,
+  };
+}
+
+function loyaltyInternalAdjustmentShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: 'loyalty.internal-adjust.shadow.v1',
+    capabilityVersion: 1,
+    actionClass: 'adjust_internal_loyalty',
+    normalizedInputContract: 'maya.adjust_internal_loyalty-input/1',
+    targetKind: 'loyalty_account',
+    allowedSourceTypes: ['authenticated_request'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: ['local', 'financial', 'customer_value', 'shadow_only'],
+    policyKey: 'chapter6.package4.loyalty-adjustment-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.loyalty-adjustment-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.loyalty-adjustment-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: loyaltyInternalAdjustmentNormalizer,
   };
 }
 
@@ -1021,6 +1070,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     normalizeInput: cancelAppointmentNormalizer,
   }),
   visitPaymentCapability(),
+  loyaltyInternalAdjustmentShadowCapability(),
   appointmentCapability({
     capability: 'crm.appointment.attendance.v1',
     actionClass: 'set_appointment_attendance',

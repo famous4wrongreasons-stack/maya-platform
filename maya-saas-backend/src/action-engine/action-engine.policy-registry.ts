@@ -21,13 +21,28 @@ const TENANT_ACTION_ROLES: readonly UserRole[] = [
   UserRole.INTEGRATION_SERVICE,
 ];
 
+const LOYALTY_ADJUSTMENT_ROLES: readonly UserRole[] = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+];
+
 function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
   if (capability.startsWith('crm.')) return ['crm.integration'];
   if (capability.startsWith('communication.')) return ['notifications.core'];
+  if (capability.startsWith('loyalty.')) return ['loyalty'];
   if (capability.startsWith('client-lifecycle.')) return ['customers.core'];
   if (capability.startsWith('occupancy.')) return ['calendar.internal'];
   if (capability.startsWith('admin.')) return ['ai.admin'];
   return [];
+}
+
+function allowedActorRoles(capability: string): readonly UserRole[] {
+  if (capability === 'loyalty.internal-adjust.shadow.v1') {
+    return LOYALTY_ADJUSTMENT_ROLES;
+  }
+  return TENANT_ACTION_ROLES;
 }
 
 export function canonicalProductionPolicyDefinitions(
@@ -50,7 +65,7 @@ export function canonicalProductionPolicyDefinitions(
           trustedServiceSourceTypes.length > 0
             ? 'OPTIONAL_TRUSTED_SERVICE'
             : 'REQUIRED',
-        allowedActorRoles: TENANT_ACTION_ROLES,
+        allowedActorRoles: allowedActorRoles(capability.capability),
         trustedServiceSourceTypes,
         requiredFeatures: requiredFeatures(capability.capability),
         permissionCodes: [

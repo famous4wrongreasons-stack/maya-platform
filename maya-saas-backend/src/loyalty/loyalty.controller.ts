@@ -76,6 +76,7 @@ export class AdminLoyaltyController {
       tenantId: user.tenantId!,
       targetUserId: userId,
       actorUserId: user.userId,
+      sourceRef: 'http.admin-loyalty.adjust',
       dto,
     });
   }

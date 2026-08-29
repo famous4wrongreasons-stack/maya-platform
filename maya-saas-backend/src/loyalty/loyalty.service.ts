@@ -8,6 +8,10 @@ import {
 import { Prisma } from '@prisma/client';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
+import {
+  ACTION_EXECUTION_REQUEST_CONTRACT,
+  ActionEngineRuntimeService,
+} from '../action-engine';
 import { CalendarSource } from '../common/domain.enums';
 import {
   LOYALTY_WARNING,
@@ -35,6 +39,7 @@ export class LoyaltyService {
     private readonly crmService: CrmService,
     private readonly encryptionService: EncryptionService,
     private readonly auditLogService: AuditLogService,
+    private readonly actionEngine: ActionEngineRuntimeService,
   ) {}
 
   /**
@@ -225,6 +230,7 @@ export class LoyaltyService {
     tenantId: string;
     targetUserId: string;
     actorUserId: string;
+    sourceRef: 'http.admin-loyalty.adjust' | 'ai-tool.loyalty.internal.adjust';
     dto: AdjustLoyaltyDto;
   }) {
     const tenantId = this.tenantContext.assertTenantId(params.tenantId);
@@ -245,6 +251,28 @@ export class LoyaltyService {
       this.usersService.getTenantUserOrThrow(params.targetUserId, tenantId),
       this.usersService.getTenantUserOrThrow(params.actorUserId, tenantId),
     ]);
+
+    const shadowExecution = await this.actionEngine.planShadow({
+      contract: ACTION_EXECUTION_REQUEST_CONTRACT,
+      tenantId,
+      capability: 'loyalty.internal-adjust.shadow.v1',
+      source: {
+        type: 'authenticated_request',
+        occurrenceScope: `loyalty.internal-adjust:${params.dto.idempotencyKey}`,
+        sourceRef: params.sourceRef,
+        actorUserId: params.actorUserId,
+      },
+      targetRef: params.targetUserId,
+      input: {
+        delta: params.dto.delta,
+        reason: params.dto.reason,
+      },
+      evidenceRefs: [],
+      callerIdempotency: {
+        scope: 'loyalty.internal-adjust',
+        key: params.dto.idempotencyKey,
+      },
+    });
 
     const result = await this.prisma
       .$transaction(
@@ -353,6 +381,7 @@ export class LoyaltyService {
         transaction_id: result.transaction.id,
         delta: result.transaction.delta,
         balance_after: result.transaction.balanceAfter,
+        shadow_action_execution_id: shadowExecution.id,
       },
     });
 

@@ -1,6 +1,7 @@
 import { ConflictException, ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { ActionEngineRuntimeService } from '../action-engine';
 import { CalendarSource, CrmProvider } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -84,6 +85,7 @@ describe('LoyaltyService', () => {
         currency: 'RUB',
       },
     ]);
+    const transactionMock = jest.fn();
     const prisma = {
       tenant: {
         findUnique: jest.fn().mockResolvedValue(null),
@@ -98,7 +100,7 @@ describe('LoyaltyService', () => {
       loyaltyTransaction: {
         findMany: jest.fn().mockResolvedValue([]),
       },
-      $transaction: jest.fn(),
+      $transaction: transactionMock,
     } as unknown as PrismaService;
     const usersService = {
       getTenantUserOrThrow: getTenantUserOrThrowMock,
@@ -112,9 +114,22 @@ describe('LoyaltyService', () => {
       encrypt: jest.fn((value: string) => `encrypted:${value}`),
       decrypt: jest.fn((value: string) => value.replace('encrypted:', '')),
     } as unknown as EncryptionService;
+    const auditLogMock = jest.fn(
+      (input: Parameters<AuditLogService['log']>[0]) => {
+        void input;
+        return Promise.resolve(undefined);
+      },
+    );
     const auditLogService = {
-      log: jest.fn().mockResolvedValue(undefined),
+      log: auditLogMock,
     } as unknown as AuditLogService;
+    const planShadowMock = jest.fn().mockResolvedValue({
+      id: 'shadow-execution-a',
+      state: 'NOT_EXECUTED',
+    });
+    const actionEngine = {
+      planShadow: planShadowMock,
+    } as unknown as ActionEngineRuntimeService;
 
     return {
       tenantContext,
@@ -129,6 +144,9 @@ describe('LoyaltyService', () => {
       getCalendarSourceMock,
       getClientLoyaltyMock,
       getServicesMock,
+      planShadowMock,
+      transactionMock,
+      auditLogMock,
       tenantFindUniqueMock: (
         prisma as unknown as {
           tenant: { findUnique: jest.Mock };
@@ -149,6 +167,7 @@ describe('LoyaltyService', () => {
         crmService,
         encryptionService,
         auditLogService,
+        actionEngine,
       ),
     };
   };
@@ -292,6 +311,7 @@ describe('LoyaltyService', () => {
           tenantId: 'tenant-a',
           targetUserId: 'client-a',
           actorUserId: 'owner-a',
+          sourceRef: 'http.admin-loyalty.adjust',
           dto: {
             delta: 100,
             reason: 'Manual correction',
@@ -301,6 +321,137 @@ describe('LoyaltyService', () => {
       ),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(setup.getTenantUserOrThrowMock).not.toHaveBeenCalled();
+    expect(setup.planShadowMock).not.toHaveBeenCalled();
+  });
+
+  it('records the canonical non-executable shadow before the internal ledger owner', async () => {
+    const setup = createService();
+    setup.getCalendarSourceMock.mockResolvedValueOnce(CalendarSource.INTERNAL);
+    const createdAt = new Date('2026-08-29T18:30:00.000Z');
+    const account = {
+      id: 'account-a',
+      tenantId: 'tenant-a',
+      userId: 'client-a',
+      source: CalendarSource.INTERNAL,
+      balance: 100,
+      externalReference: null,
+      syncedAt: createdAt,
+      createdAt,
+      updatedAt: createdAt,
+    };
+    const updatedAccount = { ...account, balance: 125 };
+    let createdTransactionData: Record<string, unknown> | undefined;
+    const transactionCreateMock = jest.fn(
+      (args: { data: Record<string, unknown> }) => {
+        createdTransactionData = args.data;
+        return Promise.resolve({
+          id: 'transaction-a',
+          tenantId: 'tenant-a',
+          accountId: 'account-a',
+          actorUserId: 'owner-a',
+          actorTenantId: 'tenant-a',
+          kind: 'credit',
+          delta: 25,
+          balanceAfter: 125,
+          encryptedReason: 'encrypted:Service recovery',
+          idempotencyKey: '2cedf552-132a-4ca9-a2bb-a0a4d59b3928',
+          actionExecutionId: null,
+          createdAt,
+          account,
+        });
+      },
+    );
+    setup.transactionMock.mockImplementationOnce(
+      async (
+        callback: (transaction: {
+          loyaltyTransaction: {
+            findUnique: jest.Mock;
+            create: jest.Mock;
+          };
+          loyaltyAccount: { upsert: jest.Mock; update: jest.Mock };
+        }) => Promise<unknown>,
+      ) =>
+        callback({
+          loyaltyTransaction: {
+            findUnique: jest.fn().mockResolvedValue(null),
+            create: transactionCreateMock,
+          },
+          loyaltyAccount: {
+            upsert: jest.fn().mockResolvedValue(account),
+            update: jest.fn().mockResolvedValue(updatedAccount),
+          },
+        }),
+    );
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.adjustInternalBalance({
+        tenantId: 'tenant-a',
+        targetUserId: 'client-a',
+        actorUserId: 'owner-a',
+        sourceRef: 'http.admin-loyalty.adjust',
+        dto: {
+          delta: 25,
+          reason: '  Service recovery  ',
+          idempotencyKey: '2cedf552-132a-4ca9-a2bb-a0a4d59b3928',
+        },
+      }),
+    );
+
+    expect(setup.planShadowMock).toHaveBeenCalledWith({
+      contract: 'maya.action-execution-request/1',
+      tenantId: 'tenant-a',
+      capability: 'loyalty.internal-adjust.shadow.v1',
+      source: {
+        type: 'authenticated_request',
+        occurrenceScope:
+          'loyalty.internal-adjust:2cedf552-132a-4ca9-a2bb-a0a4d59b3928',
+        sourceRef: 'http.admin-loyalty.adjust',
+        actorUserId: 'owner-a',
+      },
+      targetRef: 'client-a',
+      input: { delta: 25, reason: '  Service recovery  ' },
+      evidenceRefs: [],
+      callerIdempotency: {
+        scope: 'loyalty.internal-adjust',
+        key: '2cedf552-132a-4ca9-a2bb-a0a4d59b3928',
+      },
+    });
+    expect(setup.planShadowMock.mock.invocationCallOrder[0]).toBeLessThan(
+      setup.transactionMock.mock.invocationCallOrder[0],
+    );
+    expect(createdTransactionData).not.toHaveProperty('actionExecutionId');
+    expect(setup.auditLogMock.mock.calls[0]?.[0].metadata).toMatchObject({
+      shadow_action_execution_id: 'shadow-execution-a',
+    });
+    expect(result).toMatchObject({
+      balance: 125,
+      transaction_id: 'transaction-a',
+    });
+  });
+
+  it('fails closed before the ledger transaction when canonical shadow policy fails', async () => {
+    const setup = createService();
+    setup.getCalendarSourceMock.mockResolvedValueOnce(CalendarSource.INTERNAL);
+    setup.planShadowMock.mockRejectedValueOnce(
+      new Error('canonical shadow denied'),
+    );
+
+    await expect(
+      setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+        setup.service.adjustInternalBalance({
+          tenantId: 'tenant-a',
+          targetUserId: 'client-a',
+          actorUserId: 'owner-a',
+          sourceRef: 'ai-tool.loyalty.internal.adjust',
+          dto: {
+            delta: 25,
+            reason: 'Service recovery',
+            idempotencyKey: '2cedf552-132a-4ca9-a2bb-a0a4d59b3928',
+          },
+        }),
+      ),
+    ).rejects.toThrow('canonical shadow denied');
+    expect(setup.transactionMock).not.toHaveBeenCalled();
   });
 
   it('rejects a tenant mismatch before loading CRM or user data', async () => {

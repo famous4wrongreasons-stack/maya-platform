@@ -113,4 +113,33 @@ describe('canonical ActionExecution ingress ratchet', () => {
       "code: 'visit_payment_write_provider_contract_deferred'",
     );
   });
+
+  it('keeps P4-02 loyalty adjustment behind canonical shadow without executable cutover', () => {
+    const loyalty = source(join(SRC_ROOT, 'loyalty', 'loyalty.service.ts'));
+    const controller = source(
+      join(SRC_ROOT, 'loyalty', 'loyalty.controller.ts'),
+    );
+    const aiHandler = source(
+      join(SRC_ROOT, 'ai-tools', 'ai-tool-handler.service.ts'),
+    );
+
+    expect(loyalty).toContain('ActionEngineRuntimeService');
+    expect(loyalty).toContain('this.actionEngine.planShadow({');
+    expect(loyalty).toContain(
+      "capability: 'loyalty.internal-adjust.shadow.v1'",
+    );
+    expect(loyalty).not.toMatch(
+      /this\.actionEngine\.(?:execute|executeWithReceipt)\(/,
+    );
+    expect(loyalty).not.toContain('actionExecution.create');
+    expect(controller).toContain("sourceRef: 'http.admin-loyalty.adjust'");
+    expect(aiHandler).toContain("sourceRef: 'ai-tool.loyalty.internal.adjust'");
+
+    const directLedgerOwners = productionTypescriptFiles(SRC_ROOT).filter(
+      (path) => source(path).includes('loyaltyTransaction.create'),
+    );
+    expect(directLedgerOwners.map((path) => basename(path))).toEqual([
+      'loyalty.service.ts',
+    ]);
+  });
 });

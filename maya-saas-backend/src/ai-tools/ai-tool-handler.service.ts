@@ -3271,6 +3271,7 @@ export class AiToolHandlerService {
       tenantId: principal.tenantId,
       targetUserId: this.requiredString(args.target_user_id),
       actorUserId: principal.userId,
+      sourceRef: 'ai-tool.loyalty.internal.adjust',
       dto: {
         delta: this.requiredNumber(args.delta),
         reason: this.requiredString(args.reason),

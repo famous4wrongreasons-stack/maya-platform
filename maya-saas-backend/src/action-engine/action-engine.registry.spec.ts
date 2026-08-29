@@ -1,5 +1,7 @@
 import { ActionPolicyDecision } from '@prisma/client';
 
+import { UserRole } from '../common/domain.enums';
+import { canonicalProductionPolicyDefinitions } from './action-engine.policy-registry';
 import { ActionCapabilityRegistry } from './action-engine.registry';
 
 describe('ActionCapabilityRegistry', () => {
@@ -33,6 +35,49 @@ describe('ActionCapabilityRegistry', () => {
       expect(capability.policyDecision).toBe(ActionPolicyDecision.SHADOW_ONLY);
       expect(capability.executorKey).toBe('shadow.none');
     }
+  });
+
+  it('registers the first Package 4 family as a non-executable server-policy shadow', () => {
+    const capability = registry.get('loyalty.internal-adjust.shadow.v1');
+    expect(capability).toMatchObject({
+      actionClass: 'adjust_internal_loyalty',
+      targetKind: 'loyalty_account',
+      allowedSourceTypes: ['authenticated_request'],
+      policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+      autonomyLevel: 'L2_5_SHADOW',
+      approvalRequirement: 'NONE',
+      executorKey: 'shadow.none',
+    });
+    expect(capability.retry.maxExecutionAttempts).toBe(1);
+    expect(capability.reconciliation.retryAfterProvenNonExecution).toBe(false);
+    expect(
+      capability.normalizeInput({
+        delta: 125,
+        reason: '  Service recovery  ',
+      }),
+    ).toEqual({ delta: 125, reason: 'Service recovery' });
+    expect(() =>
+      capability.normalizeInput({
+        delta: 125,
+        reason: 'Service recovery',
+        approved: true,
+      }),
+    ).toThrow('Unexpected action input');
+
+    const policy = canonicalProductionPolicyDefinitions(registry).find(
+      (definition) => definition.capability === capability.capability,
+    );
+    expect(policy).toMatchObject({
+      actorPolicy: 'REQUIRED',
+      allowedActorRoles: [
+        UserRole.TENANT_OWNER,
+        UserRole.BUSINESS_OWNER,
+        UserRole.TENANT_ADMIN,
+        UserRole.ADMINISTRATOR,
+      ],
+      requiredFeatures: ['loyalty'],
+      approverPolicyKey: 'none',
+    });
   });
 
   it('registers appointment mutations with strict trusted routing', () => {
