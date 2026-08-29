@@ -39,7 +39,7 @@ function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
 }
 
 function allowedActorRoles(capability: string): readonly UserRole[] {
-  if (capability === 'loyalty.internal-adjust.shadow.v1') {
+  if (capability.startsWith('loyalty.internal-adjust.')) {
     return LOYALTY_ADJUSTMENT_ROLES;
   }
   return TENANT_ACTION_ROLES;

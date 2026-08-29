@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
   Injectable,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -11,6 +12,8 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import {
   ACTION_EXECUTION_REQUEST_CONTRACT,
   ActionEngineRuntimeService,
+  type ActionFailureClassification,
+  type ActionRuntimePhase,
 } from '../action-engine';
 import { CalendarSource } from '../common/domain.enums';
 import {
@@ -234,88 +237,200 @@ export class LoyaltyService {
     dto: AdjustLoyaltyDto;
   }) {
     const tenantId = this.tenantContext.assertTenantId(params.tenantId);
-    if (
-      (await this.crmService.getCalendarSource(tenantId)) !==
-      CalendarSource.INTERNAL
-    ) {
-      throw new ConflictException({
-        message: 'External CRM is the source of truth for this balance.',
-        error: {
-          code: 'external_loyalty_read_only',
-          message: 'Change loyalty balance in the connected CRM.',
+    const receipt = await this.actionEngine.executeWithReceipt(
+      {
+        contract: ACTION_EXECUTION_REQUEST_CONTRACT,
+        tenantId,
+        capability: 'loyalty.internal-adjust.execute.v1',
+        source: {
+          type: 'authenticated_request',
+          occurrenceScope: `loyalty.internal-adjust:${params.dto.idempotencyKey}`,
+          sourceRef: params.sourceRef,
+          actorUserId: params.actorUserId,
         },
-      });
-    }
+        targetRef: params.targetUserId,
+        input: {
+          delta: params.dto.delta,
+          reason: params.dto.reason,
+        },
+        evidenceRefs: [],
+        callerIdempotency: {
+          scope: 'loyalty.internal-adjust',
+          key: params.dto.idempotencyKey,
+        },
+      },
+      {
+        prepare: async () => {
+          if (
+            (await this.crmService.getCalendarSource(tenantId)) !==
+            CalendarSource.INTERNAL
+          ) {
+            throw new ConflictException({
+              message: 'External CRM is the source of truth for this balance.',
+              error: {
+                code: 'external_loyalty_read_only',
+                message: 'Change loyalty balance in the connected CRM.',
+              },
+            });
+          }
+          await Promise.all([
+            this.usersService.getTenantUserOrThrow(
+              params.targetUserId,
+              tenantId,
+            ),
+            this.usersService.getTenantUserOrThrow(
+              params.actorUserId,
+              tenantId,
+            ),
+          ]);
+          return {
+            targetUserId: params.targetUserId,
+            actorUserId: params.actorUserId,
+          };
+        },
+        dispatch: async (normalizedInput, _transportKey, context) => {
+          const input = this.loyaltyAdjustmentInput(normalizedInput);
+          const result = await this.applyInternalAdjustment({
+            tenantId: context.tenantId,
+            executionId: context.executionId,
+            targetUserId: params.targetUserId,
+            actorUserId: params.actorUserId,
+            idempotencyKey: params.dto.idempotencyKey,
+            ...input,
+          });
+          const value = this.loyaltyAdjustmentValue(result);
+          return {
+            value,
+            safeResult: this.loyaltyAdjustmentSafeResult(value),
+          };
+        },
+        reconcile: async (normalizedInput, _previous, context) => {
+          if (!context) return { outcome: 'STILL_UNKNOWN' };
+          const input = this.loyaltyAdjustmentInput(normalizedInput);
+          const existing = await this.findAdjustment(
+            context.tenantId,
+            params.dto.idempotencyKey,
+          );
+          if (!existing || existing.actionExecutionId === null) {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          if (
+            existing.actionExecutionId !== context.executionId ||
+            !this.isSameAdjustment(existing, {
+              targetUserId: params.targetUserId,
+              actorUserId: params.actorUserId,
+              ...input,
+            })
+          ) {
+            return { outcome: 'PROVEN_FAILED' };
+          }
+          const value = this.loyaltyAdjustmentValue({
+            account: {
+              ...existing.account,
+              balance: existing.balanceAfter,
+            },
+            transaction: existing,
+          });
+          return {
+            outcome: 'PROVEN_SUCCEEDED',
+            safeResult: this.loyaltyAdjustmentSafeResult(value),
+          };
+        },
+        restore: (safeResult) => this.restoreLoyaltyAdjustmentValue(safeResult),
+        classifyError: (error, phase) =>
+          this.classifyLoyaltyAdjustmentError(error, phase),
+      },
+    );
 
-    await Promise.all([
-      this.usersService.getTenantUserOrThrow(params.targetUserId, tenantId),
-      this.usersService.getTenantUserOrThrow(params.actorUserId, tenantId),
-    ]);
-
-    const shadowExecution = await this.actionEngine.planShadow({
-      contract: ACTION_EXECUTION_REQUEST_CONTRACT,
+    await this.auditLogService.log({
       tenantId,
-      capability: 'loyalty.internal-adjust.shadow.v1',
-      source: {
-        type: 'authenticated_request',
-        occurrenceScope: `loyalty.internal-adjust:${params.dto.idempotencyKey}`,
-        sourceRef: params.sourceRef,
-        actorUserId: params.actorUserId,
-      },
-      targetRef: params.targetUserId,
-      input: {
+      userId: params.actorUserId,
+      action: 'loyalty.balance_adjusted',
+      entityType: 'loyalty_account',
+      entityId: receipt.value.account_id,
+      metadata: {
+        target_user_id: params.targetUserId,
+        transaction_id: receipt.value.transaction_id,
         delta: params.dto.delta,
-        reason: params.dto.reason,
-      },
-      evidenceRefs: [],
-      callerIdempotency: {
-        scope: 'loyalty.internal-adjust',
-        key: params.dto.idempotencyKey,
+        balance_after: receipt.value.balance,
+        action_execution_id: receipt.execution.executionId,
       },
     });
 
-    const result = await this.prisma
+    return receipt.value;
+  }
+
+  private async applyInternalAdjustment(input: {
+    tenantId: string;
+    executionId: string;
+    targetUserId: string;
+    actorUserId: string;
+    idempotencyKey: string;
+    delta: number;
+    reason: string;
+  }) {
+    return this.prisma
       .$transaction(
         async (tx) => {
           const existing = await tx.loyaltyTransaction.findUnique({
             where: {
               tenantId_idempotencyKey: {
-                tenantId,
-                idempotencyKey: params.dto.idempotencyKey,
+                tenantId: input.tenantId,
+                idempotencyKey: input.idempotencyKey,
               },
             },
             include: { account: true },
           });
           if (existing) {
-            const sameOperation =
-              existing.account.userId === params.targetUserId &&
-              existing.actorUserId === params.actorUserId &&
-              existing.delta === params.dto.delta &&
-              this.encryptionService.decrypt(existing.encryptedReason) ===
-                params.dto.reason.trim();
-            if (!sameOperation) {
+            if (!this.isSameAdjustment(existing, input)) {
               throw new ConflictException(
                 'Idempotency key is already used for another loyalty operation',
               );
             }
-            return { account: existing.account, transaction: existing };
+            if (
+              existing.actionExecutionId !== null &&
+              existing.actionExecutionId !== input.executionId
+            ) {
+              throw new ConflictException(
+                'Loyalty operation is bound to another ActionExecution',
+              );
+            }
+            const transaction =
+              existing.actionExecutionId === input.executionId
+                ? existing
+                : await tx.loyaltyTransaction.update({
+                    where: {
+                      tenantId_idempotencyKey: {
+                        tenantId: input.tenantId,
+                        idempotencyKey: input.idempotencyKey,
+                      },
+                    },
+                    data: { actionExecutionId: input.executionId },
+                  });
+            return {
+              account: {
+                ...existing.account,
+                balance: existing.balanceAfter,
+              },
+              transaction,
+            };
           }
 
           const account = await tx.loyaltyAccount.upsert({
             where: {
               userId_tenantId: {
-                userId: params.targetUserId,
-                tenantId,
+                userId: input.targetUserId,
+                tenantId: input.tenantId,
               },
             },
             update: {},
             create: {
-              tenantId,
-              userId: params.targetUserId,
+              tenantId: input.tenantId,
+              userId: input.targetUserId,
               source: CalendarSource.INTERNAL,
             },
           });
-          const balanceAfter = account.balance + params.dto.delta;
+          const balanceAfter = account.balance + input.delta;
           if (balanceAfter < 0) {
             throw new BadRequestException({
               message: 'Loyalty balance cannot become negative.',
@@ -328,22 +443,23 @@ export class LoyaltyService {
           }
 
           const updatedAccount = await tx.loyaltyAccount.update({
-            where: { id_tenantId: { id: account.id, tenantId } },
+            where: {
+              id_tenantId: { id: account.id, tenantId: input.tenantId },
+            },
             data: { balance: balanceAfter, source: CalendarSource.INTERNAL },
           });
           const transaction = await tx.loyaltyTransaction.create({
             data: {
-              tenantId,
+              tenantId: input.tenantId,
+              actionExecutionId: input.executionId,
               accountId: account.id,
-              actorUserId: params.actorUserId,
-              actorTenantId: tenantId,
-              kind: params.dto.delta >= 0 ? 'credit' : 'debit',
-              delta: params.dto.delta,
+              actorUserId: input.actorUserId,
+              actorTenantId: input.tenantId,
+              kind: input.delta >= 0 ? 'credit' : 'debit',
+              delta: input.delta,
               balanceAfter,
-              encryptedReason: this.encryptionService.encrypt(
-                params.dto.reason.trim(),
-              ),
-              idempotencyKey: params.dto.idempotencyKey,
+              encryptedReason: this.encryptionService.encrypt(input.reason),
+              idempotencyKey: input.idempotencyKey,
             },
           });
           return { account: updatedAccount, transaction };
@@ -351,40 +467,132 @@ export class LoyaltyService {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       )
       .catch((error: unknown) => {
-        // 🔴 Гонка по ключу: обе транзакции прошли findUnique до того, как любая
-        // записала строку. Уникальный индекс [tenantId, idempotencyKey] не даёт
-        // задвоить начисление — портился только контракт ошибки: наружу летел
-        // необработанный P2002 обычной пятисоткой без кода, тогда как соседний
-        // ExpensesService на том же месте отдаёт уже существующую запись.
-        //
-        // Повтор по тому же ключу — это воспроизведение, а не сбой: отдаём то,
-        // что записала выигравшая транзакция, через тот же путь, что и обычный
-        // повторный вызов.
         if (
           error instanceof Prisma.PrismaClientKnownRequestError &&
           error.code === 'P2002'
         ) {
-          return this.replayAdjustment(tenantId, params);
+          return this.bindConcurrentAdjustment(input, error);
         }
-
         throw error;
       });
+  }
 
-    await this.auditLogService.log({
-      tenantId,
-      userId: params.actorUserId,
-      action: 'loyalty.balance_adjusted',
-      entityType: 'loyalty_account',
-      entityId: result.account.id,
-      metadata: {
-        target_user_id: params.targetUserId,
-        transaction_id: result.transaction.id,
-        delta: result.transaction.delta,
-        balance_after: result.transaction.balanceAfter,
-        shadow_action_execution_id: shadowExecution.id,
+  private async bindConcurrentAdjustment(
+    input: {
+      tenantId: string;
+      executionId: string;
+      targetUserId: string;
+      actorUserId: string;
+      idempotencyKey: string;
+      delta: number;
+      reason: string;
+    },
+    originalError: Prisma.PrismaClientKnownRequestError,
+  ) {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const existing = await tx.loyaltyTransaction.findUnique({
+          where: {
+            tenantId_idempotencyKey: {
+              tenantId: input.tenantId,
+              idempotencyKey: input.idempotencyKey,
+            },
+          },
+          include: { account: true },
+        });
+        if (!existing) {
+          // A P2002 can also come from concurrent account creation under a
+          // different logical adjustment. Preserve the database uncertainty
+          // so canonical reconciliation can prove absence before retrying.
+          throw originalError;
+        }
+        if (!this.isSameAdjustment(existing, input)) {
+          throw new ConflictException(
+            'Loyalty operation could not be replayed after a concurrent write',
+          );
+        }
+        if (
+          existing.actionExecutionId !== null &&
+          existing.actionExecutionId !== input.executionId
+        ) {
+          throw new ConflictException(
+            'Loyalty operation is bound to another ActionExecution',
+          );
+        }
+        const transaction =
+          existing.actionExecutionId === input.executionId
+            ? existing
+            : await tx.loyaltyTransaction.update({
+                where: {
+                  tenantId_idempotencyKey: {
+                    tenantId: input.tenantId,
+                    idempotencyKey: input.idempotencyKey,
+                  },
+                },
+                data: { actionExecutionId: input.executionId },
+              });
+        return {
+          account: { ...existing.account, balance: existing.balanceAfter },
+          transaction,
+        };
       },
-    });
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+  }
 
+  private findAdjustment(tenantId: string, idempotencyKey: string) {
+    return this.prisma.loyaltyTransaction.findUnique({
+      where: {
+        tenantId_idempotencyKey: {
+          tenantId,
+          idempotencyKey,
+        },
+      },
+      include: { account: true },
+    });
+  }
+
+  private isSameAdjustment(
+    existing: {
+      account: { userId: string };
+      actorUserId: string | null;
+      delta: number;
+      encryptedReason: string;
+    },
+    input: {
+      targetUserId: string;
+      actorUserId: string;
+      delta: number;
+      reason: string;
+    },
+  ): boolean {
+    return (
+      existing.account.userId === input.targetUserId &&
+      existing.actorUserId === input.actorUserId &&
+      existing.delta === input.delta &&
+      this.encryptionService.decrypt(existing.encryptedReason) === input.reason
+    );
+  }
+
+  private loyaltyAdjustmentInput(input: Record<string, unknown>): {
+    delta: number;
+    reason: string;
+  } {
+    if (!Number.isInteger(input.delta) || typeof input.reason !== 'string') {
+      throw new BadRequestException('Invalid canonical loyalty adjustment');
+    }
+    return { delta: Number(input.delta), reason: input.reason };
+  }
+
+  private loyaltyAdjustmentValue(result: {
+    account: {
+      id: string;
+      balance: number;
+      source: string;
+      syncedAt: Date | null;
+    };
+    transaction: { id: string };
+  }) {
     return {
       ...this.serializeAccount(result.account, {
         authoritative: 'maya',
@@ -395,50 +603,71 @@ export class LoyaltyService {
     };
   }
 
-  /**
-   * Воспроизведение операции, которую записала выигравшая гонку транзакция.
-   *
-   * Проверки те же, что и на обычном повторном вызове: если под этим ключом
-   * лежит ДРУГАЯ операция, это конфликт, а не воспроизведение.
-   */
-  private async replayAdjustment(
-    tenantId: string,
-    params: {
-      targetUserId: string;
-      actorUserId: string;
-      dto: { delta: number; reason: string; idempotencyKey: string };
-    },
-  ) {
-    const existing = await this.prisma.loyaltyTransaction.findUnique({
-      where: {
-        tenantId_idempotencyKey: {
-          tenantId,
-          idempotencyKey: params.dto.idempotencyKey,
+  private loyaltyAdjustmentSafeResult(
+    value: ReturnType<LoyaltyService['loyaltyAdjustmentValue']>,
+  ): Record<string, unknown> {
+    return {
+      accountId: value.account_id,
+      balance: value.balance,
+      source: value.source,
+      syncedAt:
+        value.synced_at instanceof Date ? value.synced_at.toISOString() : null,
+      transactionId: value.transaction_id,
+    };
+  }
+
+  private restoreLoyaltyAdjustmentValue(safe: Record<string, unknown>) {
+    if (
+      typeof safe.accountId !== 'string' ||
+      !Number.isInteger(safe.balance) ||
+      typeof safe.source !== 'string' ||
+      typeof safe.transactionId !== 'string' ||
+      (safe.syncedAt !== null && typeof safe.syncedAt !== 'string')
+    ) {
+      throw new ConflictException('Loyalty action result is incomplete');
+    }
+    return {
+      ...this.serializeAccount(
+        {
+          id: safe.accountId,
+          balance: Number(safe.balance),
+          source: safe.source,
+          syncedAt: safe.syncedAt ? new Date(safe.syncedAt) : null,
         },
-      },
-      include: { account: true },
-    });
+        { authoritative: 'maya', syncStatus: 'current', stale: false },
+      ),
+      transaction_id: safe.transactionId,
+    };
+  }
 
-    if (!existing) {
-      throw new ConflictException(
-        'Loyalty operation could not be replayed after a concurrent write',
-      );
+  private classifyLoyaltyAdjustmentError(
+    error: unknown,
+    phase: ActionRuntimePhase,
+  ): ActionFailureClassification {
+    if (phase === 'prepare') {
+      return {
+        kind: 'definitive',
+        outcomeCode:
+          error instanceof HttpException
+            ? 'loyalty_preparation_rejected'
+            : 'loyalty_preparation_transient',
+        errorClass:
+          error instanceof Error ? error.constructor.name : 'UnknownError',
+      };
     }
-
-    const sameOperation =
-      existing.account.userId === params.targetUserId &&
-      existing.actorUserId === params.actorUserId &&
-      existing.delta === params.dto.delta &&
-      this.encryptionService.decrypt(existing.encryptedReason) ===
-        params.dto.reason.trim();
-
-    if (!sameOperation) {
-      throw new ConflictException(
-        'Idempotency key is already used for another loyalty operation',
-      );
+    if (error instanceof HttpException) {
+      return {
+        kind: 'definitive',
+        outcomeCode: 'loyalty_adjustment_rejected',
+        errorClass: error.constructor.name,
+      };
     }
-
-    return { account: existing.account, transaction: existing };
+    return {
+      kind: 'unknown',
+      outcomeCode: 'loyalty_adjustment_outcome_unknown',
+      errorClass:
+        error instanceof Error ? error.constructor.name : 'UnknownError',
+    };
   }
 
   private async getExternalAccount(

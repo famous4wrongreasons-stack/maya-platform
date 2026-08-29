@@ -50,6 +50,7 @@
     "action-engine:proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/action-engine-kernel-proof.ts",
     "action-engine:appointment-proof": "node dist/scripts/appointment-action-engine-proof.js",
     "action-engine:appointment-proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/appointment-action-engine-proof.ts",
+    "action-engine:loyalty-proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/loyalty-action-engine-proof.ts",
     "communication-delivery:proof": "node dist/scripts/communication-delivery-foundation-proof.js",
     "communication-delivery:proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/communication-delivery-foundation-proof.ts",
     "communication-shadow:proof": "node dist/scripts/communication-shadow-migration-proof.js",

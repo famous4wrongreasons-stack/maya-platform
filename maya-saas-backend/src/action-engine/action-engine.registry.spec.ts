@@ -80,6 +80,57 @@ describe('ActionCapabilityRegistry', () => {
     });
   });
 
+  it('registers the Package 4 loyalty executor without accepting caller authority', () => {
+    const capability = registry.get('loyalty.internal-adjust.execute.v1');
+    expect(capability).toMatchObject({
+      actionClass: 'adjust_internal_loyalty',
+      targetKind: 'loyalty_account',
+      allowedSourceTypes: ['authenticated_request'],
+      policyDecision: ActionPolicyDecision.ALLOW,
+      autonomyLevel: 'L2_CONFIRMED_REQUEST',
+      approvalRequirement: 'NONE',
+      executorKey: 'loyalty.internal-adjust',
+    });
+    expect(capability.retry.retryablePreDispatchErrors).toEqual(
+      new Set(['loyalty_preparation_transient']),
+    );
+    expect(capability.reconciliation.retryAfterProvenNonExecution).toBe(true);
+    expect(
+      capability.normalizeInput({ delta: -25, reason: ' Correction ' }),
+    ).toEqual({ delta: -25, reason: 'Correction' });
+    for (const forged of [
+      { approved: true },
+      { entitled: true },
+      { autonomy: 'L5' },
+      { policyDecision: 'ALLOW' },
+      { approvalBindingHash: 'forged' },
+      { executor: 'legacy.direct' },
+    ]) {
+      expect(() =>
+        capability.normalizeInput({
+          delta: 25,
+          reason: 'Correction',
+          ...forged,
+        }),
+      ).toThrow('Unexpected action input');
+    }
+
+    const policy = canonicalProductionPolicyDefinitions(registry).find(
+      (definition) => definition.capability === capability.capability,
+    );
+    expect(policy).toMatchObject({
+      actorPolicy: 'REQUIRED',
+      allowedActorRoles: [
+        UserRole.TENANT_OWNER,
+        UserRole.BUSINESS_OWNER,
+        UserRole.TENANT_ADMIN,
+        UserRole.ADMINISTRATOR,
+      ],
+      requiredFeatures: ['loyalty'],
+      approverPolicyKey: 'none',
+    });
+  });
+
   it('registers appointment mutations with strict trusted routing', () => {
     const create = registry.get('crm.appointment.create.v1');
     expect(create).toMatchObject({

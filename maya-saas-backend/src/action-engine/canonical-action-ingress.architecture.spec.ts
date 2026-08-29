@@ -114,7 +114,7 @@ describe('canonical ActionExecution ingress ratchet', () => {
     );
   });
 
-  it('keeps P4-02 loyalty adjustment behind canonical shadow without executable cutover', () => {
+  it('keeps P4-02 loyalty adjustment behind the canonical executable ingress', () => {
     const loyalty = source(join(SRC_ROOT, 'loyalty', 'loyalty.service.ts'));
     const controller = source(
       join(SRC_ROOT, 'loyalty', 'loyalty.controller.ts'),
@@ -124,16 +124,24 @@ describe('canonical ActionExecution ingress ratchet', () => {
     );
 
     expect(loyalty).toContain('ActionEngineRuntimeService');
-    expect(loyalty).toContain('this.actionEngine.planShadow({');
+    expect(loyalty).toContain('this.actionEngine.executeWithReceipt(');
     expect(loyalty).toContain(
-      "capability: 'loyalty.internal-adjust.shadow.v1'",
+      "capability: 'loyalty.internal-adjust.execute.v1'",
     );
-    expect(loyalty).not.toMatch(
-      /this\.actionEngine\.(?:execute|executeWithReceipt)\(/,
+    expect(loyalty).toMatch(
+      /dispatch:[\s\S]{0,500}this\.applyInternalAdjustment\(/,
     );
+    expect(loyalty.match(/this\.applyInternalAdjustment\(/g)).toHaveLength(1);
+    expect(
+      loyalty.match(/private async applyInternalAdjustment\(/g),
+    ).toHaveLength(1);
+    expect(loyalty).toContain('actionExecutionId: input.executionId');
+    expect(loyalty).not.toContain('this.actionEngine.planShadow({');
     expect(loyalty).not.toContain('actionExecution.create');
     expect(controller).toContain("sourceRef: 'http.admin-loyalty.adjust'");
     expect(aiHandler).toContain("sourceRef: 'ai-tool.loyalty.internal.adjust'");
+    expect(controller).not.toContain('loyaltyTransaction.create');
+    expect(aiHandler).not.toContain('loyaltyTransaction.create');
 
     const directLedgerOwners = productionTypescriptFiles(SRC_ROOT).filter(
       (path) => source(path).includes('loyaltyTransaction.create'),

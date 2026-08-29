@@ -123,12 +123,44 @@ describe('LoyaltyService', () => {
     const auditLogService = {
       log: auditLogMock,
     } as unknown as AuditLogService;
-    const planShadowMock = jest.fn().mockResolvedValue({
-      id: 'shadow-execution-a',
-      state: 'NOT_EXECUTED',
-    });
+    const executeWithReceiptMock = jest.fn(
+      async (
+        request: { input: { delta: number; reason: string } },
+        handlers: {
+          prepare?: () => Promise<Record<string, unknown> | undefined>;
+          dispatch: (
+            input: Record<string, unknown>,
+            transportKey: string,
+            context: { tenantId: string; executionId: string },
+          ) => Promise<{
+            value: Record<string, unknown>;
+            safeResult: Record<string, unknown>;
+          }>;
+        },
+      ) => {
+        await handlers.prepare?.();
+        const dispatched = await handlers.dispatch(
+          {
+            delta: request.input.delta,
+            reason: request.input.reason.trim(),
+          },
+          'transport-key-a',
+          { tenantId: 'tenant-a', executionId: 'execution-a' },
+        );
+        return {
+          value: dispatched.value,
+          execution: {
+            contract: 'maya.action-execution-result/1',
+            executionId: 'execution-a',
+            state: 'SUCCEEDED',
+            outcomeCode: 'provider_applied',
+            safeResult: dispatched.safeResult,
+          },
+        };
+      },
+    );
     const actionEngine = {
-      planShadow: planShadowMock,
+      executeWithReceipt: executeWithReceiptMock,
     } as unknown as ActionEngineRuntimeService;
 
     return {
@@ -144,7 +176,7 @@ describe('LoyaltyService', () => {
       getCalendarSourceMock,
       getClientLoyaltyMock,
       getServicesMock,
-      planShadowMock,
+      executeWithReceiptMock,
       transactionMock,
       auditLogMock,
       tenantFindUniqueMock: (
@@ -321,10 +353,11 @@ describe('LoyaltyService', () => {
       ),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(setup.getTenantUserOrThrowMock).not.toHaveBeenCalled();
-    expect(setup.planShadowMock).not.toHaveBeenCalled();
+    expect(setup.executeWithReceiptMock).toHaveBeenCalledTimes(1);
+    expect(setup.transactionMock).not.toHaveBeenCalled();
   });
 
-  it('records the canonical non-executable shadow before the internal ledger owner', async () => {
+  it('records the ledger mutation through the canonical Action Engine owner', async () => {
     const setup = createService();
     setup.getCalendarSourceMock.mockResolvedValueOnce(CalendarSource.INTERNAL);
     const createdAt = new Date('2026-08-29T18:30:00.000Z');
@@ -355,7 +388,7 @@ describe('LoyaltyService', () => {
           balanceAfter: 125,
           encryptedReason: 'encrypted:Service recovery',
           idempotencyKey: '2cedf552-132a-4ca9-a2bb-a0a4d59b3928',
-          actionExecutionId: null,
+          actionExecutionId: 'execution-a',
           createdAt,
           account,
         });
@@ -397,10 +430,11 @@ describe('LoyaltyService', () => {
       }),
     );
 
-    expect(setup.planShadowMock).toHaveBeenCalledWith({
+    const executableCall = setup.executeWithReceiptMock.mock.calls[0];
+    expect(executableCall?.[0]).toEqual({
       contract: 'maya.action-execution-request/1',
       tenantId: 'tenant-a',
-      capability: 'loyalty.internal-adjust.shadow.v1',
+      capability: 'loyalty.internal-adjust.execute.v1',
       source: {
         type: 'authenticated_request',
         occurrenceScope:
@@ -416,12 +450,17 @@ describe('LoyaltyService', () => {
         key: '2cedf552-132a-4ca9-a2bb-a0a4d59b3928',
       },
     });
-    expect(setup.planShadowMock.mock.invocationCallOrder[0]).toBeLessThan(
-      setup.transactionMock.mock.invocationCallOrder[0],
-    );
-    expect(createdTransactionData).not.toHaveProperty('actionExecutionId');
+    expect(typeof executableCall?.[1].prepare).toBe('function');
+    expect(typeof executableCall?.[1].dispatch).toBe('function');
+    expect(typeof executableCall?.[1].reconcile).toBe('function');
+    expect(typeof executableCall?.[1].restore).toBe('function');
+    expect(typeof executableCall?.[1].classifyError).toBe('function');
+    expect(createdTransactionData).toMatchObject({
+      actionExecutionId: 'execution-a',
+      tenantId: 'tenant-a',
+    });
     expect(setup.auditLogMock.mock.calls[0]?.[0].metadata).toMatchObject({
-      shadow_action_execution_id: 'shadow-execution-a',
+      action_execution_id: 'execution-a',
     });
     expect(result).toMatchObject({
       balance: 125,
@@ -429,11 +468,11 @@ describe('LoyaltyService', () => {
     });
   });
 
-  it('fails closed before the ledger transaction when canonical shadow policy fails', async () => {
+  it('fails closed before the ledger transaction when canonical policy fails', async () => {
     const setup = createService();
     setup.getCalendarSourceMock.mockResolvedValueOnce(CalendarSource.INTERNAL);
-    setup.planShadowMock.mockRejectedValueOnce(
-      new Error('canonical shadow denied'),
+    setup.executeWithReceiptMock.mockRejectedValueOnce(
+      new Error('canonical policy denied'),
     );
 
     await expect(
@@ -450,7 +489,7 @@ describe('LoyaltyService', () => {
           },
         }),
       ),
-    ).rejects.toThrow('canonical shadow denied');
+    ).rejects.toThrow('canonical policy denied');
     expect(setup.transactionMock).not.toHaveBeenCalled();
   });
 

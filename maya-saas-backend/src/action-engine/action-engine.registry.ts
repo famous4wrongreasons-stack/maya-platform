@@ -783,6 +783,46 @@ function loyaltyInternalAdjustmentShadowCapability(): RegisteredActionCapability
   };
 }
 
+function loyaltyInternalAdjustmentCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: 'loyalty.internal-adjust.execute.v1',
+    capabilityVersion: 1,
+    actionClass: 'adjust_internal_loyalty',
+    normalizedInputContract: 'maya.adjust_internal_loyalty-input/1',
+    targetKind: 'loyalty_account',
+    allowedSourceTypes: ['authenticated_request'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: ['local', 'financial', 'customer_value'],
+    policyKey: 'chapter6.package4.loyalty-adjustment-executable',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L2_CONFIRMED_REQUEST',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.loyalty-adjustment.pre-dispatch-only',
+      version: 1,
+      maxExecutionAttempts: 2,
+      retryablePreDispatchErrors: new Set<string>([
+        'loyalty_preparation_transient',
+      ]),
+      backoffMs: [0],
+    },
+    reconciliation: {
+      key: 'package4.loyalty-adjustment.bound-ledger-read',
+      version: 1,
+      maxInconclusiveAttempts: 3,
+      retryAfterProvenNonExecution: true,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'loyalty.internal-adjust',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: loyaltyInternalAdjustmentNormalizer,
+  };
+}
+
 function syntheticCapability(input: {
   capability: string;
   actionClass: string;
@@ -1070,6 +1110,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     normalizeInput: cancelAppointmentNormalizer,
   }),
   visitPaymentCapability(),
+  loyaltyInternalAdjustmentCapability(),
   loyaltyInternalAdjustmentShadowCapability(),
   appointmentCapability({
     capability: 'crm.appointment.attendance.v1',
