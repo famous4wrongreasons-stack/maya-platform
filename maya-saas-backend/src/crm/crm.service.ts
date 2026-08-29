@@ -3255,7 +3255,15 @@ export class CrmService {
     });
   }
 
-  async getClientLoyalty(tenantId: string, phone: string) {
+  /**
+   * Provider evidence read with no identity-registration write.
+   *
+   * Canonical value Shadow paths already require an exact CrmClientLink and
+   * must fail closed if the provider returns another card. Registering that
+   * other card as a side effect would mutate identity state after an
+   * ambiguous phone lookup, so the evidence-only boundary is explicit.
+   */
+  async getClientLoyaltyEvidenceReadOnly(tenantId: string, phone: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
 
     if (
@@ -3265,10 +3273,18 @@ export class CrmService {
     }
 
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    const loyalty = await adapter.getClientLoyalty({
+    return adapter.getClientLoyalty({
       tenantId: scopedTenantId,
       phone,
     });
+  }
+
+  async getClientLoyalty(tenantId: string, phone: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const loyalty = await this.getClientLoyaltyEvidenceReadOnly(
+      scopedTenantId,
+      phone,
+    );
 
     // Теневая регистрация личности: единственное место, где Maya вообще видит
     // внешний идентификатор клиента. Раньше он вычислялся и выбрасывался.
