@@ -419,15 +419,25 @@ describe('CanonicalApprovalBindingService', () => {
 
   it('does not create an approval dependency when approval is not required', async () => {
     const { resolver } = buildHarness();
-    const repository = new FakeApprovalRepository(null);
+    const request = {
+      ...baseRequest(),
+      capability: 'kernel.test.safe-retry',
+    };
+    const policy = await resolver.resolve(request);
+    const repository = new FakeApprovalRepository(
+      approvalRecord(request, policy, {
+        approvalRequirement: 'NONE',
+        approvalDecision: ActionApprovalDecision.NOT_REQUIRED,
+        approvalExpiresAt: null,
+        approvalDecidedAt: null,
+        approvalDecidedByUserId: null,
+      }),
+    );
     const service = new CanonicalApprovalBindingService(resolver, repository, {
       now: () => NOW,
     });
     const result = await service.authorizeForClaim(
-      authorizationRequest({
-        ...baseRequest(),
-        capability: 'kernel.test.safe-retry',
-      }),
+      authorizationRequest(request),
     );
 
     expect(result).toMatchObject({
@@ -436,7 +446,7 @@ describe('CanonicalApprovalBindingService', () => {
       approvalConsumed: false,
       externalExecutionAllowed: true,
     });
-    expect(repository.findCalls).toBe(0);
+    expect(repository.findCalls).toBe(1);
     expect(repository.consumeCalls).toBe(0);
   });
 

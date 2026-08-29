@@ -2045,9 +2045,7 @@ export class CrmService {
         ...(sourceType === 'agent_task' && input.invocation.agentTaskId
           ? { agentTaskId: input.invocation.agentTaskId }
           : {}),
-        ...(context?.userId && context.membershipId
-          ? { actorUserId: context.userId }
-          : {}),
+        ...(context?.userId ? { actorUserId: context.userId } : {}),
       },
       targetRef: input.targetRef,
       input: input.input,

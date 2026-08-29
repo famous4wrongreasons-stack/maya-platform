@@ -51,6 +51,18 @@ import {
   ActionCapabilityRegistry,
   normalizeOpaqueRef,
 } from './action-engine.registry';
+import {
+  ACTION_APPROVAL_AUTHORIZATION_REQUEST_CONTRACT,
+  CanonicalApprovalBindingService,
+  type CanonicalApprovalBindingRepository,
+  type CanonicalApprovalExecutionRecordV1,
+} from './action-engine.approval-binding';
+import {
+  ACTION_POLICY_RESOLUTION_REQUEST_CONTRACT,
+  type ActionPolicyResolutionRequestV1,
+  type CanonicalActionPolicyResolutionV1,
+  type CanonicalActionPolicyResolver,
+} from './action-engine.policy-resolver';
 
 const CODE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/;
 const APPROVER_ROLES = new Set([
@@ -60,6 +72,9 @@ const APPROVER_ROLES = new Set([
   'business_owner',
   'administrator',
   'tenant_admin',
+]);
+const CANONICAL_APPROVER_POLICY_ROLES = new Map([
+  ['tenant-owner', new Set(['tenant_owner', 'business_owner'])],
 ]);
 
 function assertCode(value: string, label: string): string {
@@ -87,6 +102,11 @@ function stringList(value: Prisma.JsonValue): string[] {
 function jsonRecord(value: Prisma.JsonValue | null): Record<string, unknown> {
   if (!value || Array.isArray(value) || typeof value !== 'object') return {};
   return value;
+}
+
+function recordValue(value: unknown): Record<string, unknown> {
+  if (!value || Array.isArray(value) || typeof value !== 'object') return {};
+  return value as Record<string, unknown>;
 }
 
 function isUniqueConflict(error: unknown): boolean {
@@ -117,6 +137,8 @@ export interface ActionEngineKernelOptions {
   now?: () => Date;
   executionLeaseMs?: number;
   reconciliationLeaseMs?: number;
+  /** Explicitly restricted to local proof/test harnesses. */
+  controlledFixtureMode?: boolean;
 }
 
 interface SourceValidation {
@@ -130,11 +152,13 @@ export class ActionEngineKernel {
   private readonly now: () => Date;
   private readonly executionLeaseMs: number;
   private readonly reconciliationLeaseMs: number;
+  private readonly controlledFixtureMode: boolean;
 
   constructor(
     private readonly prisma: PrismaClient,
     options: ActionEngineKernelOptions,
     registry = new ActionCapabilityRegistry(),
+    private readonly policyResolver?: CanonicalActionPolicyResolver,
   ) {
     this.identity = new ActionIdentityService(
       options.identitySecret,
@@ -144,11 +168,13 @@ export class ActionEngineKernel {
     this.now = options.now ?? (() => new Date());
     this.executionLeaseMs = options.executionLeaseMs ?? 30_000;
     this.reconciliationLeaseMs = options.reconciliationLeaseMs ?? 30_000;
+    this.controlledFixtureMode = options.controlledFixtureMode ?? false;
   }
 
-  async createFromChapter5Intent(
+  async createFromChapter5IntentForControlledFixture(
     context: Chapter5IntentContextV1,
   ): Promise<ActionExecution> {
+    this.assertControlledFixtureMode();
     const { intent } = context;
     if (!context.trustedProjection || intent.tenantId !== context.tenantId) {
       throw new ActionContractError(
@@ -182,7 +208,7 @@ export class ActionEngineKernel {
     if (!targetRef) {
       throw new ActionContractError('Chapter 5 intent target is missing');
     }
-    return this.createExecution({
+    return this.createExecutionForControlledFixture({
       contract: ACTION_EXECUTION_REQUEST_CONTRACT,
       tenantId: context.tenantId,
       capability: intent.capability,
@@ -201,10 +227,45 @@ export class ActionEngineKernel {
     });
   }
 
-  async createExecution(
+  async createCanonicalExecution(
+    request: TrustedActionExecutionRequestV1,
+    policy: CanonicalActionPolicyResolutionV1,
+  ): Promise<ActionExecution> {
+    if (!this.policyResolver) {
+      throw new ActionContractError(
+        'Canonical policy resolver is required for execution creation',
+      );
+    }
+    const normalized = this.normalizeRequest(request);
+    const policyRequest = this.policyRequest(request, normalized);
+    if (
+      !this.policyResolver.verifyApprovalBinding(policyRequest, {
+        policyContextHash: policy.policyContextHash,
+        policyEvidenceJson: policy.policyEvidenceJson,
+        approvalBindingHash: policy.approvalBindingHash,
+        approvalBindingExpiresAt: policy.approvalBindingExpiresAt,
+      })
+    ) {
+      throw new ActionContractError(
+        'Canonical policy attestation is missing or invalid',
+      );
+    }
+    this.assertPolicyMatchesCapability(normalized.capability, policy);
+    return this.createExecution(request, normalized, policy);
+  }
+
+  createExecutionForControlledFixture(
     request: TrustedActionExecutionRequestV1,
   ): Promise<ActionExecution> {
-    const normalized = this.normalizeRequest(request);
+    this.assertControlledFixtureMode();
+    return this.createExecution(request, this.normalizeRequest(request));
+  }
+
+  private async createExecution(
+    request: TrustedActionExecutionRequestV1,
+    normalized: NormalizedActionExecutionV1,
+    policy?: CanonicalActionPolicyResolutionV1,
+  ): Promise<ActionExecution> {
     const now = this.now();
 
     for (let databaseAttempt = 0; databaseAttempt < 3; databaseAttempt += 1) {
@@ -226,12 +287,14 @@ export class ActionEngineKernel {
               request.intentExpiresAt,
               source,
               now,
+              policy,
             );
             const approval = this.initialApproval(
               normalized.capability,
               normalized.normalizedInputHash,
               initial,
               now,
+              policy,
             );
             const finalizedAt =
               initial.state === ActionExecutionState.NOT_EXECUTED ? now : null;
@@ -272,16 +335,31 @@ export class ActionEngineKernel {
                 evidenceRefsJson: jsonInput(request.evidenceRefs),
                 intentExpiresAt: request.intentExpiresAt,
                 dryRun:
-                  normalized.capability.policyDecision ===
+                  (policy?.policyDecision ??
+                    normalized.capability.policyDecision) ===
                   ActionPolicyDecision.SHADOW_ONLY,
                 riskProfileVersion: normalized.capability.riskProfileVersion,
                 riskFacetsJson: jsonInput(normalized.capability.riskFacets),
-                policyKey: normalized.capability.policyKey,
-                policyVersion: normalized.capability.policyVersion,
+                policyKey: policy?.policyKey ?? normalized.capability.policyKey,
+                policyVersion:
+                  policy?.policyVersion ?? normalized.capability.policyVersion,
                 policyDecision: initial.policyDecision,
-                autonomyLevel: normalized.capability.autonomyLevel,
-                policyDecidedBy: 'trusted_capability_registry',
-                approvalRequirement: normalized.capability.approvalRequirement,
+                autonomyLevel:
+                  policy?.autonomyLevel ?? normalized.capability.autonomyLevel,
+                policyDecidedBy:
+                  policy?.policyDecidedBy ?? 'controlled_fixture_registry',
+                policyContextContract:
+                  policy?.policyContextContract ?? undefined,
+                policyContextHash: policy?.policyContextHash ?? undefined,
+                policyEvidenceJson: policy
+                  ? jsonInput(policy.policyEvidenceJson)
+                  : undefined,
+                policyEvaluatedAt: policy?.policyEvaluatedAt,
+                policyValidUntil: policy?.policyValidUntil,
+                approvalBindingHash: policy?.approvalBindingHash,
+                approvalRequirement:
+                  policy?.approvalRequirement ??
+                  normalized.capability.approvalRequirement,
                 ...approval,
                 state: initial.state,
                 notExecutedReasonCode: initial.notExecutedReasonCode,
@@ -383,6 +461,19 @@ export class ActionEngineKernel {
           'Execution is not waiting for approval',
         );
       }
+      if (
+        !this.controlledFixtureMode &&
+        (!execution.policyContextHash ||
+          !execution.policyEvidenceJson ||
+          !execution.policyEvaluatedAt ||
+          !execution.policyValidUntil ||
+          !execution.approvalBindingHash)
+      ) {
+        throw new ActionClaimError(
+          'CANONICAL_APPROVAL_BINDING_REQUIRED',
+          'Approval cannot be decided without canonical policy binding',
+        );
+      }
       if (!execution.approvalExpiresAt || execution.approvalExpiresAt <= now) {
         return tx.actionExecution.update({
           where: {
@@ -406,10 +497,13 @@ export class ActionEngineKernel {
           },
         },
       });
+      const approverRoles = this.controlledFixtureMode
+        ? APPROVER_ROLES
+        : this.canonicalApproverRoles(execution);
       if (
         !approver ||
         approver.status !== MembershipStatus.active ||
-        !APPROVER_ROLES.has(approver.role)
+        !approverRoles.has(approver.role)
       ) {
         throw new ActionClaimError(
           'APPROVER_NOT_AUTHORIZED',
@@ -472,6 +566,9 @@ export class ActionEngineKernel {
           'EXECUTION_POLICY_FORBIDS_CLAIM',
           'Trusted policy does not allow execution',
         );
+      }
+      if (!this.controlledFixtureMode) {
+        await this.assertCanonicalClaim(tx, execution, now);
       }
       await this.assertExecutionCurrent(tx, execution, capability, now);
       if (
@@ -1334,17 +1431,134 @@ export class ActionEngineKernel {
     };
   }
 
+  private policyRequest(
+    request: TrustedActionExecutionRequestV1,
+    normalized: NormalizedActionExecutionV1,
+  ): ActionPolicyResolutionRequestV1 {
+    const sourceRef = request.source.sourceRef;
+    if (!sourceRef) {
+      throw new ActionContractError(
+        'Canonical execution requires a durable sourceRef',
+      );
+    }
+    return {
+      contract: ACTION_POLICY_RESOLUTION_REQUEST_CONTRACT,
+      tenantId: request.tenantId,
+      capability: normalized.capability.capability,
+      sourceType: request.source.type,
+      sourceRef,
+      ...(request.source.actorUserId
+        ? { actorUserId: request.source.actorUserId }
+        : {}),
+      targetRef: normalized.targetRef,
+      normalizedInputHash: normalized.normalizedInputHash,
+    };
+  }
+
+  private assertPolicyMatchesCapability(
+    capability: RegisteredActionCapabilityV1,
+    policy: CanonicalActionPolicyResolutionV1,
+  ): void {
+    const evidence = policy.policyEvidenceJson;
+    const evidenceCapability = recordValue(evidence.capability);
+    const evidenceRisk = recordValue(evidence.risk);
+    const evidenceAutonomy = recordValue(evidence.autonomy);
+    const evidenceApproval = recordValue(evidence.approval);
+    const evidencePolicy = recordValue(evidence.policy);
+    const staticDecisionPreserved =
+      capability.policyDecision === ActionPolicyDecision.ALLOW ||
+      policy.policyDecision === capability.policyDecision;
+    if (
+      evidence.contract !== policy.policyContextContract ||
+      evidence.evaluatedAt !== policy.policyEvaluatedAt.toISOString() ||
+      evidence.validUntil !== policy.policyValidUntil.toISOString() ||
+      evidenceCapability.key !== capability.capability ||
+      evidenceCapability.version !== capability.capabilityVersion ||
+      evidenceCapability.actionClass !== capability.actionClass ||
+      evidenceCapability.targetKind !== capability.targetKind ||
+      evidenceRisk.profileVersion !== policy.riskProfileVersion ||
+      stableActionJson(evidenceRisk.facets) !==
+        stableActionJson([...policy.riskFacets].sort()) ||
+      evidenceAutonomy.level !== policy.autonomyLevel ||
+      evidenceApproval.requirement !== policy.approvalRequirement ||
+      evidenceApproval.approverPolicyKey !== policy.approverPolicyKey ||
+      evidenceApproval.bindingExpiresAt !==
+        policy.approvalBindingExpiresAt.toISOString() ||
+      evidencePolicy.key !== policy.policyKey ||
+      evidencePolicy.version !== policy.policyVersion ||
+      evidencePolicy.decision !== policy.policyDecision ||
+      evidencePolicy.decidedBy !== policy.policyDecidedBy ||
+      stableActionJson(evidencePolicy.reasonCodes) !==
+        stableActionJson([...policy.reasonCodes].sort()) ||
+      policy.policyKey !== capability.policyKey ||
+      policy.policyVersion !== capability.policyVersion ||
+      policy.autonomyLevel !== capability.autonomyLevel ||
+      policy.approvalRequirement !== capability.approvalRequirement ||
+      policy.riskProfileVersion !== capability.riskProfileVersion ||
+      stableActionJson([...policy.riskFacets].sort()) !==
+        stableActionJson([...capability.riskFacets].sort()) ||
+      policy.policyValidUntil <= policy.policyEvaluatedAt ||
+      !staticDecisionPreserved
+    ) {
+      throw new ActionContractError(
+        'Canonical policy attestation does not match capability invariants',
+      );
+    }
+  }
+
+  private assertControlledFixtureMode(): void {
+    if (!this.controlledFixtureMode) {
+      throw new ActionContractError(
+        'Controlled fixture execution is disabled outside proof/test harnesses',
+      );
+    }
+  }
+
+  private canonicalApproverRoles(
+    execution: ActionExecution,
+  ): ReadonlySet<string> {
+    const evidence = recordValue(execution.policyEvidenceJson);
+    const approval = recordValue(evidence.approval);
+    const policyKey = approval.approverPolicyKey;
+    const roles =
+      typeof policyKey === 'string'
+        ? CANONICAL_APPROVER_POLICY_ROLES.get(policyKey)
+        : undefined;
+    if (!roles) {
+      throw new ActionClaimError(
+        'CANONICAL_APPROVER_POLICY_INVALID',
+        'Execution has no registered canonical approver policy',
+      );
+    }
+    return roles;
+  }
+
   private initialDecision(
     capability: RegisteredActionCapabilityV1,
     intentExpiresAt: Date | undefined,
     source: SourceValidation,
     now: Date,
+    policy?: CanonicalActionPolicyResolutionV1,
   ): InitialDecisionV1 {
+    const policyDecision = policy?.policyDecision ?? capability.policyDecision;
+    const approvalRequirement =
+      policy?.approvalRequirement ?? capability.approvalRequirement;
+    if (policy && policy.policyValidUntil <= now) {
+      return {
+        policyDecision,
+        approvalDecision:
+          approvalRequirement === 'REQUIRED'
+            ? ActionApprovalDecision.EXPIRED
+            : ActionApprovalDecision.NOT_REQUIRED,
+        state: ActionExecutionState.NOT_EXECUTED,
+        notExecutedReasonCode: 'policy_expired',
+      };
+    }
     if (intentExpiresAt && intentExpiresAt <= now) {
       return {
-        policyDecision: capability.policyDecision,
+        policyDecision,
         approvalDecision:
-          capability.approvalRequirement === 'REQUIRED'
+          approvalRequirement === 'REQUIRED'
             ? ActionApprovalDecision.EXPIRED
             : ActionApprovalDecision.NOT_REQUIRED,
         state: ActionExecutionState.NOT_EXECUTED,
@@ -1353,16 +1567,16 @@ export class ActionEngineKernel {
     }
     if (!source.current) {
       return {
-        policyDecision: capability.policyDecision,
+        policyDecision,
         approvalDecision:
-          capability.approvalRequirement === 'REQUIRED'
+          approvalRequirement === 'REQUIRED'
             ? ActionApprovalDecision.EXPIRED
             : ActionApprovalDecision.NOT_REQUIRED,
         state: ActionExecutionState.NOT_EXECUTED,
         notExecutedReasonCode: source.reasonCode ?? 'source_not_current',
       };
     }
-    if (capability.policyDecision === ActionPolicyDecision.DENY) {
+    if (policyDecision === ActionPolicyDecision.DENY) {
       return {
         policyDecision: ActionPolicyDecision.DENY,
         approvalDecision: ActionApprovalDecision.NOT_REQUIRED,
@@ -1370,7 +1584,7 @@ export class ActionEngineKernel {
         notExecutedReasonCode: 'policy_denied',
       };
     }
-    if (capability.policyDecision === ActionPolicyDecision.SHADOW_ONLY) {
+    if (policyDecision === ActionPolicyDecision.SHADOW_ONLY) {
       return {
         policyDecision: ActionPolicyDecision.SHADOW_ONLY,
         approvalDecision: ActionApprovalDecision.NOT_REQUIRED,
@@ -1378,7 +1592,7 @@ export class ActionEngineKernel {
         notExecutedReasonCode: 'shadow_only',
       };
     }
-    if (capability.approvalRequirement === 'REQUIRED') {
+    if (approvalRequirement === 'REQUIRED') {
       return {
         policyDecision: ActionPolicyDecision.ALLOW,
         approvalDecision: ActionApprovalDecision.PENDING,
@@ -1397,6 +1611,7 @@ export class ActionEngineKernel {
     normalizedInputHash: string,
     decision: InitialDecisionV1,
     now: Date,
+    policy?: CanonicalActionPolicyResolutionV1,
   ): Pick<
     Prisma.ActionExecutionUncheckedCreateInput,
     | 'approvalDecision'
@@ -1405,7 +1620,9 @@ export class ActionEngineKernel {
     | 'approvalExpiresAt'
     | 'approvalDecidedAt'
   > {
-    if (capability.approvalRequirement === 'NONE') {
+    const approvalRequirement =
+      policy?.approvalRequirement ?? capability.approvalRequirement;
+    if (approvalRequirement === 'NONE') {
       return {
         approvalDecision: ActionApprovalDecision.NOT_REQUIRED,
         approvalInputHash: null,
@@ -1427,9 +1644,9 @@ export class ActionEngineKernel {
       approvalDecision: ActionApprovalDecision.PENDING,
       approvalInputHash: normalizedInputHash,
       approvalRequestedAt: now,
-      approvalExpiresAt: new Date(
-        now.getTime() + (capability.approvalTtlMs ?? 15 * 60 * 1_000),
-      ),
+      approvalExpiresAt:
+        policy?.approvalBindingExpiresAt ??
+        new Date(now.getTime() + (capability.approvalTtlMs ?? 15 * 60 * 1_000)),
       approvalDecidedAt: null,
     };
   }
@@ -1624,6 +1841,110 @@ export class ActionEngineKernel {
         'Execution source, intent, policy, or approval is no longer current',
       );
     }
+  }
+
+  private async assertCanonicalClaim(
+    tx: Prisma.TransactionClient,
+    execution: ActionExecution,
+    now: Date,
+  ): Promise<void> {
+    if (!this.policyResolver || !execution.sourceRef) {
+      throw new ActionClaimError(
+        'CANONICAL_INGRESS_ATTESTATION_REQUIRED',
+        'Execution is missing canonical ingress authority',
+      );
+    }
+    const evidence = execution.policyEvidenceJson;
+    if (!evidence || Array.isArray(evidence) || typeof evidence !== 'object') {
+      throw new ActionClaimError(
+        'CANONICAL_INGRESS_ATTESTATION_REQUIRED',
+        'Execution is missing canonical policy evidence',
+      );
+    }
+    const record: CanonicalApprovalExecutionRecordV1 = {
+      id: execution.id,
+      tenantId: execution.tenantId,
+      sourceType:
+        execution.sourceType as ActionPolicyResolutionRequestV1['sourceType'],
+      sourceRef: execution.sourceRef,
+      actorUserId: execution.actorUserId,
+      actionClass: execution.actionClass,
+      capability: execution.capability,
+      capabilityVersion: execution.capabilityVersion,
+      targetKind: execution.targetKind,
+      targetRef: execution.targetRef,
+      normalizedInputHash: execution.normalizedInputHash,
+      policyKey: execution.policyKey,
+      policyVersion: execution.policyVersion,
+      policyDecision: execution.policyDecision,
+      policyContextContract: execution.policyContextContract,
+      policyContextHash: execution.policyContextHash,
+      policyEvidenceJson: evidence,
+      policyEvaluatedAt: execution.policyEvaluatedAt,
+      policyValidUntil: execution.policyValidUntil,
+      approvalRequirement: execution.approvalRequirement,
+      approvalDecision: execution.approvalDecision,
+      approvalBindingHash: execution.approvalBindingHash,
+      approvalExpiresAt: execution.approvalExpiresAt,
+      approvalDecidedAt: execution.approvalDecidedAt,
+      approvalDecidedByUserId: execution.approvalDecidedByUserId,
+      state: execution.state,
+      revision: execution.revision,
+    };
+    let consumed = false;
+    const repository: CanonicalApprovalBindingRepository = {
+      findExecution: (tenantId, executionId) =>
+        Promise.resolve(
+          tenantId === execution.tenantId && executionId === execution.id
+            ? record
+            : null,
+        ),
+      consumeApprovedExecution: (input) => {
+        const matches =
+          !consumed &&
+          input.tenantId === execution.tenantId &&
+          input.executionId === execution.id &&
+          input.expectedRevision === execution.revision &&
+          input.expectedPolicyContextHash === execution.policyContextHash &&
+          input.expectedApprovalBindingHash === execution.approvalBindingHash &&
+          execution.state === ActionExecutionState.READY &&
+          execution.approvalDecision === ActionApprovalDecision.APPROVED;
+        consumed = matches;
+        return Promise.resolve(matches);
+      },
+    };
+    const approval = new CanonicalApprovalBindingService(
+      this.policyResolver,
+      repository,
+      { now: () => now },
+    );
+    const result = await approval.authorizeForClaim({
+      contract: ACTION_APPROVAL_AUTHORIZATION_REQUEST_CONTRACT,
+      executionId: execution.id,
+      action: {
+        contract: ACTION_POLICY_RESOLUTION_REQUEST_CONTRACT,
+        tenantId: execution.tenantId,
+        capability: execution.capability,
+        sourceType:
+          execution.sourceType as ActionPolicyResolutionRequestV1['sourceType'],
+        sourceRef: execution.sourceRef,
+        ...(execution.actorUserId
+          ? { actorUserId: execution.actorUserId }
+          : {}),
+        targetRef: execution.targetRef,
+        normalizedInputHash: execution.normalizedInputHash,
+      },
+    });
+    if (
+      !result.externalExecutionAllowed ||
+      (execution.approvalRequirement === 'REQUIRED' && !result.approvalConsumed)
+    ) {
+      throw new ActionClaimError(
+        'CANONICAL_POLICY_OR_APPROVAL_INVALID',
+        `Canonical claim failed closed: ${result.reason}`,
+      );
+    }
+    void tx;
   }
 
   private async lockExecution(

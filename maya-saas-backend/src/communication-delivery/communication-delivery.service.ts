@@ -1113,6 +1113,7 @@ export class CommunicationDeliveryService {
           type: 'authenticated_request',
           occurrenceScope: `bulk-campaign:${logicalIdentity}`,
           sourceRef: 'marketing.sendCampaign',
+          actorUserId: input.actorUserId,
         },
         targetRef: `marketing-campaign:${input.campaignId}`,
         input: requestInput,

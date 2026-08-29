@@ -140,14 +140,6 @@ export class CanonicalApprovalBindingService {
       });
     }
 
-    if (policy.approvalRequirement === 'NONE') {
-      return this.result(request, policy, {
-        status: 'NOT_REQUIRED',
-        reason: 'APPROVAL_NOT_REQUIRED',
-        externalExecutionAllowed: true,
-      });
-    }
-
     const execution = await this.repository.findExecution(
       request.action.tenantId,
       request.executionId,
@@ -159,22 +151,14 @@ export class CanonicalApprovalBindingService {
       });
     }
 
-    if (
-      execution.approvalDecision !== ActionApprovalDecision.APPROVED ||
-      execution.approvalRequirement !== 'REQUIRED' ||
-      !execution.approvalDecidedAt ||
-      !execution.approvalDecidedByUserId
-    ) {
-      return this.result(request, policy, {
-        status: 'REJECTED',
-        reason: 'APPROVAL_NOT_APPROVED',
-      });
-    }
-
     const now = this.now();
+    const bindingExpiresAt =
+      policy.approvalRequirement === 'REQUIRED'
+        ? execution.approvalExpiresAt
+        : execution.policyValidUntil;
     if (
-      !execution.approvalExpiresAt ||
-      execution.approvalExpiresAt <= now ||
+      !bindingExpiresAt ||
+      bindingExpiresAt <= now ||
       !execution.policyValidUntil ||
       execution.policyValidUntil <= now ||
       policy.policyValidUntil <= now
@@ -188,23 +172,51 @@ export class CanonicalApprovalBindingService {
     const policyContextHash = execution.policyContextHash;
     const policyEvidenceJson = execution.policyEvidenceJson;
     const approvalBindingHash = execution.approvalBindingHash;
-    const approvalExpiresAt = execution.approvalExpiresAt;
     if (
       !policyContextHash ||
       !policyEvidenceJson ||
       !approvalBindingHash ||
-      !approvalExpiresAt ||
       !this.policyResolver.verifyApprovalBinding(request.action, {
         policyContextHash,
         policyEvidenceJson,
         approvalBindingHash,
-        approvalBindingExpiresAt: approvalExpiresAt,
+        approvalBindingExpiresAt: bindingExpiresAt,
       }) ||
       !this.subjectMatches(request, policy, execution)
     ) {
       return this.result(request, policy, {
         status: 'REJECTED',
         reason: 'APPROVAL_SUBJECT_MISMATCH',
+      });
+    }
+
+    if (policy.approvalRequirement === 'NONE') {
+      if (
+        execution.approvalRequirement !== 'NONE' ||
+        execution.approvalDecision !== ActionApprovalDecision.NOT_REQUIRED
+      ) {
+        return this.result(request, policy, {
+          status: 'REJECTED',
+          reason: 'APPROVAL_SUBJECT_MISMATCH',
+        });
+      }
+      return this.result(request, policy, {
+        status: 'NOT_REQUIRED',
+        reason: 'APPROVAL_NOT_REQUIRED',
+        bindingMatches: true,
+        externalExecutionAllowed: true,
+      });
+    }
+
+    if (
+      execution.approvalDecision !== ActionApprovalDecision.APPROVED ||
+      execution.approvalRequirement !== 'REQUIRED' ||
+      !execution.approvalDecidedAt ||
+      !execution.approvalDecidedByUserId
+    ) {
+      return this.result(request, policy, {
+        status: 'REJECTED',
+        reason: 'APPROVAL_NOT_APPROVED',
       });
     }
 

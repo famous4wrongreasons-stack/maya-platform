@@ -12,7 +12,7 @@ import {
   PrismaClient,
 } from '@prisma/client';
 
-import { ActionEngineRuntimeService } from '../src/action-engine';
+import { createStandaloneCanonicalActionEngineRuntime } from '../src/action-engine';
 import {
   CommunicationCapabilityRegistry,
   CommunicationDeliveryKernel,
@@ -24,6 +24,8 @@ import {
   type CommunicationShadowRecipientInput,
 } from '../src/communication-shadow';
 import type { PrismaService } from '../src/prisma/prisma.service';
+import { EntitlementsService } from '../src/entitlements/entitlements.service';
+import { FeatureRegistryService } from '../src/entitlements/feature-registry.service';
 
 const IDENTITY_SECRET =
   'cycle-06-b32-proof-identity-secret-never-used-outside-proof-databases';
@@ -94,7 +96,14 @@ function shadowService(prisma: PrismaClient): CommunicationShadowService {
   });
   const service = prisma as unknown as PrismaService;
   return new CommunicationShadowService(
-    new ActionEngineRuntimeService(service, config),
+    createStandaloneCanonicalActionEngineRuntime(
+      service,
+      new EntitlementsService(service, new FeatureRegistryService()),
+      {
+        identitySecret: IDENTITY_SECRET,
+        payloadEncryptionSecret: PAYLOAD_SECRET,
+      },
+    ),
     service,
     config,
   );

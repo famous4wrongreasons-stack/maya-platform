@@ -178,7 +178,7 @@ async function createAction(
   tenantId: string,
   scope: string,
 ) {
-  const execution = await actionKernel.createExecution(
+  const execution = await actionKernel.createExecutionForControlledFixture(
     actionRequest(tenantId, scope),
   );
   assert.equal(execution.state, ActionExecutionState.READY);
@@ -400,6 +400,7 @@ async function main(): Promise<void> {
     now: () => new Date(now),
     executionLeaseMs: LEASE_MS,
     reconciliationLeaseMs: LEASE_MS,
+    controlledFixtureMode: true,
   });
   const deliveryKernel = new CommunicationDeliveryKernel(prisma, {
     identitySecret: IDENTITY_SECRET,

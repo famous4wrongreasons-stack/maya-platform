@@ -3,7 +3,6 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 
-import { ConfigService } from '@nestjs/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import {
   ActionApprovalDecision,
@@ -22,7 +21,10 @@ import {
   ActionExecutionUncertainError,
   type ActionRuntimeHandlers,
   type TrustedActionExecutionRequestV1,
+  createStandaloneCanonicalActionEngineRuntime,
 } from '../src/action-engine';
+import { EntitlementsService } from '../src/entitlements/entitlements.service';
+import { FeatureRegistryService } from '../src/entitlements/feature-registry.service';
 import type { PrismaService } from '../src/prisma/prisma.service';
 
 const IDENTITY_SECRET =
@@ -131,13 +133,14 @@ function syntheticApprovalRequest(
 }
 
 function runtime(prisma: PrismaClient): ActionEngineRuntimeService {
-  const config = new ConfigService({
-    ACTION_ENGINE_IDENTITY_SECRET: IDENTITY_SECRET,
-    ACTION_ENGINE_PAYLOAD_ENCRYPTION_SECRET: PAYLOAD_SECRET,
-  });
-  return new ActionEngineRuntimeService(
-    prisma as unknown as PrismaService,
-    config,
+  const service = prisma as unknown as PrismaService;
+  return createStandaloneCanonicalActionEngineRuntime(
+    service,
+    new EntitlementsService(service, new FeatureRegistryService()),
+    {
+      identitySecret: IDENTITY_SECRET,
+      payloadEncryptionSecret: PAYLOAD_SECRET,
+    },
   );
 }
 
@@ -147,6 +150,7 @@ function kernel(prisma: PrismaClient): ActionEngineKernel {
     payloadEncryptionSecret: PAYLOAD_SECRET,
     executionLeaseMs: 250,
     reconciliationLeaseMs: 250,
+    controlledFixtureMode: true,
   });
 }
 
@@ -752,7 +756,8 @@ async function main(): Promise<void> {
       sourceRef: 'http/restart-after-dispatch',
       actorUserId: primary.ownerId,
     });
-    const restartExecution = await proofKernel.createExecution(restartRequest);
+    const restartExecution =
+      await proofKernel.createExecutionForControlledFixture(restartRequest);
     const restartClaim = await proofKernel.claimExecution({
       tenantId: primary.tenantId,
       executionId: restartExecution.id,
@@ -911,7 +916,7 @@ async function main(): Promise<void> {
 
     const approvalRequest = syntheticApprovalRequest(primary.tenantId);
     const approvalExecution =
-      await proofKernel.createExecution(approvalRequest);
+      await proofKernel.createExecutionForControlledFixture(approvalRequest);
     await proofKernel.decideApproval({
       tenantId: primary.tenantId,
       executionId: approvalExecution.id,

@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
   ActionExecutionState,
   ActionPolicyDecision,
@@ -9,7 +8,6 @@ import {
   type ActionExecution,
 } from '@prisma/client';
 
-import { PrismaService } from '../prisma/prisma.service';
 import type {
   ActionExecutionPreviewV1,
   ExecutionResultV1,
@@ -22,6 +20,7 @@ import {
   ActionExecutionTerminalError,
   ActionExecutionUncertainError,
 } from './action-engine.errors';
+import { CanonicalActionIngressService } from './action-engine.ingress';
 import { ActionEngineKernel } from './action-engine.kernel';
 
 export type ActionRuntimePhase = 'prepare' | 'dispatch';
@@ -102,25 +101,12 @@ function sleep(ms: number): Promise<void> {
 
 @Injectable()
 export class ActionEngineRuntimeService {
-  private readonly kernel: ActionEngineKernel;
   private readonly workerId = `action-runtime:${randomUUID()}`;
 
-  constructor(prisma: PrismaService, config: ConfigService) {
-    const compatibilitySecret = config.get<string>('CRM_ENCRYPTION_KEY');
-    const identitySecret =
-      config.get<string>('ACTION_ENGINE_IDENTITY_SECRET') ??
-      compatibilitySecret;
-    const payloadEncryptionSecret =
-      config.get<string>('ACTION_ENGINE_PAYLOAD_ENCRYPTION_SECRET') ??
-      compatibilitySecret;
-    if (!identitySecret || !payloadEncryptionSecret) {
-      throw new ActionContractError('Action Engine secrets are not configured');
-    }
-    this.kernel = new ActionEngineKernel(prisma, {
-      identitySecret,
-      payloadEncryptionSecret,
-    });
-  }
+  constructor(
+    private readonly kernel: ActionEngineKernel,
+    private readonly canonicalIngress: CanonicalActionIngressService,
+  ) {}
 
   async execute<T>(
     request: TrustedActionExecutionRequestV1,
@@ -129,8 +115,10 @@ export class ActionEngineRuntimeService {
     return (await this.executeWithReceipt(request, handlers)).value;
   }
 
-  preview(request: TrustedActionExecutionRequestV1): ActionExecutionPreviewV1 {
-    return this.kernel.previewExecution(request);
+  preview(
+    request: TrustedActionExecutionRequestV1,
+  ): Promise<ActionExecutionPreviewV1> {
+    return this.canonicalIngress.preview(request);
   }
 
   /**
@@ -140,7 +128,7 @@ export class ActionEngineRuntimeService {
   async planShadow(
     request: TrustedActionExecutionRequestV1,
   ): Promise<ActionExecution> {
-    const preview = this.kernel.previewExecution(request);
+    const preview = await this.canonicalIngress.preview(request);
     if (
       preview.policyDecision !== ActionPolicyDecision.SHADOW_ONLY ||
       preview.executorKey !== 'shadow.none' ||
@@ -150,7 +138,7 @@ export class ActionEngineRuntimeService {
         'planShadow accepts only non-executable SHADOW_ONLY capabilities',
       );
     }
-    const execution = await this.kernel.createExecution(request);
+    const execution = await this.canonicalIngress.createExecution(request);
     if (
       !execution.dryRun ||
       execution.policyDecision !== ActionPolicyDecision.SHADOW_ONLY ||
@@ -175,7 +163,7 @@ export class ActionEngineRuntimeService {
     request: TrustedActionExecutionRequestV1,
     handlers: ActionRuntimeHandlers<T>,
   ): Promise<ActionRuntimeReceipt<T>> {
-    let execution = await this.kernel.createExecution(request);
+    let execution = await this.canonicalIngress.createExecution(request);
     try {
       for (
         let transition = 0;

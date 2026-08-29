@@ -225,7 +225,7 @@ async function makeUnknown(input: {
   scope: string;
   capability?: string;
 }): Promise<string> {
-  const execution = await input.kernel.createExecution(
+  const execution = await input.kernel.createExecutionForControlledFixture(
     request({
       tenantId: input.tenantId,
       scope: input.scope,
@@ -284,6 +284,7 @@ async function main(): Promise<void> {
     now: () => new Date(now),
     executionLeaseMs: LEASE_MS,
     reconciliationLeaseMs: LEASE_MS,
+    controlledFixtureMode: true,
   });
 
   try {
@@ -301,7 +302,8 @@ async function main(): Promise<void> {
         new ActionEngineKernel(prisma, {
           identitySecret: IDENTITY_SECRET,
           payloadEncryptionSecret: PAYLOAD_SECRET,
-        }).createExecution(duplicateRequest),
+          controlledFixtureMode: true,
+        }).createExecutionForControlledFixture(duplicateRequest),
       ),
     );
     assert.equal(new Set(duplicateRows.map((row) => row.id)).size, 1);
@@ -320,10 +322,10 @@ async function main(): Promise<void> {
 
     stage('cross_tenant_identity');
     const sameScope = opaque('cross_tenant_identity');
-    const crossA = await kernel.createExecution(
+    const crossA = await kernel.createExecutionForControlledFixture(
       request({ tenantId: tenantA, scope: sameScope }),
     );
-    const crossB = await kernel.createExecution(
+    const crossB = await kernel.createExecutionForControlledFixture(
       request({ tenantId: tenantB, scope: sameScope }),
     );
     assert.notEqual(crossA.id, crossB.id);
@@ -331,7 +333,7 @@ async function main(): Promise<void> {
     matrix.same_identity_another_tenant_allowed = true;
 
     stage('single_execution_claim');
-    const raceExecution = await kernel.createExecution(
+    const raceExecution = await kernel.createExecutionForControlledFixture(
       request({ tenantId: tenantA, scope: opaque('worker_race') }),
     );
     const race = await Promise.allSettled([
@@ -382,7 +384,7 @@ async function main(): Promise<void> {
 
     stage('approval_lifecycle');
     const approverId = await createApprover(prisma, tenantA);
-    const rejected = await kernel.createExecution(
+    const rejected = await kernel.createExecutionForControlledFixture(
       request({
         tenantId: tenantA,
         scope: opaque('rejected'),
@@ -409,7 +411,7 @@ async function main(): Promise<void> {
       'EXECUTION_TERMINAL',
     );
 
-    const approved = await kernel.createExecution(
+    const approved = await kernel.createExecutionForControlledFixture(
       request({
         tenantId: tenantA,
         scope: opaque('approved'),
@@ -435,7 +437,7 @@ async function main(): Promise<void> {
     matrix.approved_path_executes = true;
 
     stage('policy_denied');
-    const denied = await kernel.createExecution(
+    const denied = await kernel.createExecutionForControlledFixture(
       request({
         tenantId: tenantA,
         scope: opaque('denied'),
@@ -448,7 +450,7 @@ async function main(): Promise<void> {
 
     stage('trusted_normalization');
     const injectionScope = opaque('prompt_injection');
-    const injection = await kernel.createExecution(
+    const injection = await kernel.createExecutionForControlledFixture(
       request({
         tenantId: tenantA,
         scope: injectionScope,
@@ -473,7 +475,7 @@ async function main(): Promise<void> {
     matrix.untrusted_text_cannot_alter_action_class = true;
 
     stage('retry_policy');
-    const safeRetry = await kernel.createExecution(
+    const safeRetry = await kernel.createExecutionForControlledFixture(
       request({ tenantId: tenantA, scope: opaque('safe_retry') }),
     );
     const safeClaim = await kernel.claimExecution({
@@ -498,7 +500,7 @@ async function main(): Promise<void> {
     });
     matrix.safe_retry_class = true;
 
-    const noRetry = await kernel.createExecution(
+    const noRetry = await kernel.createExecutionForControlledFixture(
       request({
         tenantId: tenantA,
         scope: opaque('no_retry'),
@@ -659,7 +661,7 @@ async function main(): Promise<void> {
     matrix.reconciliation_still_unknown_requires_manual_review = true;
 
     stage('crash_recovery');
-    const crashExecution = await kernel.createExecution(
+    const crashExecution = await kernel.createExecutionForControlledFixture(
       request({
         tenantId: tenantA,
         scope: opaque('crash_after_dispatch'),
@@ -697,7 +699,7 @@ async function main(): Promise<void> {
       tenantId: tenantA,
       now,
     });
-    const shadow = await kernel.createExecution({
+    const shadow = await kernel.createExecutionForControlledFixture({
       contract: ACTION_EXECUTION_REQUEST_CONTRACT,
       tenantId: tenantA,
       capability: 'client-lifecycle.reactivation-review.prepare',
@@ -780,12 +782,13 @@ async function main(): Promise<void> {
       }),
     );
 
-    const openAttemptExecution = await kernel.createExecution(
-      request({
-        tenantId: tenantA,
-        scope: opaque('single_open_attempt'),
-      }),
-    );
+    const openAttemptExecution =
+      await kernel.createExecutionForControlledFixture(
+        request({
+          tenantId: tenantA,
+          scope: opaque('single_open_attempt'),
+        }),
+      );
     const openAttemptClaim = await kernel.claimExecution({
       tenantId: tenantA,
       executionId: openAttemptExecution.id,
@@ -811,7 +814,7 @@ async function main(): Promise<void> {
     });
 
     stage('expiry');
-    const expiredExecution = await kernel.createExecution(
+    const expiredExecution = await kernel.createExecutionForControlledFixture(
       request({
         tenantId: tenantA,
         scope: opaque('expired_intent'),

@@ -10,7 +10,7 @@ import type { ConfigService } from '@nestjs/config';
 import {
   ACTION_EXECUTION_PREVIEW_CONTRACT,
   ACTION_EXECUTION_RESULT_CONTRACT,
-  ActionEngineRuntimeService,
+  createStandaloneCanonicalActionEngineRuntime,
 } from '../action-engine';
 import { CrmProvider } from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -679,7 +679,23 @@ describe('legacy/native appointment identity convergence', () => {
         tenant: {
           findUnique: jest
             .fn()
-            .mockResolvedValue({ calendarSource: 'external' }),
+            .mockImplementation(({ where }: { where: { id: string } }) =>
+              Promise.resolve({
+                id: where.id,
+                calendarSource: 'external',
+                status: 'active',
+                planId: null,
+                trialEndsAt: null,
+                trialFullAccess: false,
+                currentPeriodEnd: new Date('2026-09-22T08:00:00.000Z'),
+                pastDueAt: null,
+                graceEndsAt: null,
+                updatedAt: now,
+              }),
+            ),
+        },
+        membership: {
+          findUnique: jest.fn().mockResolvedValue(null),
         },
         crmIntegration: {
           findUnique: jest.fn(({ where }: { where: { tenantId: string } }) =>
@@ -698,7 +714,33 @@ describe('legacy/native appointment identity convergence', () => {
         },
       } as unknown as PrismaService;
       const tenantContext = new TenantContextService();
-      const runtime = new ActionEngineRuntimeService(prisma, config);
+      const runtime = createStandaloneCanonicalActionEngineRuntime(
+        prisma,
+        {
+          resolveFeatureRequirements: (
+            tenantId: string,
+            requiredFeatures: readonly never[],
+            evaluatedAt: Date,
+          ) =>
+            Promise.resolve({
+              contract: 'maya.feature-requirement-decision/1',
+              tenantId,
+              planId: null,
+              requiredFeatures: requiredFeatures.map((featureKey) => ({
+                featureKey,
+                enabled: true,
+              })),
+              allowed: true,
+              evaluatedAt,
+              validUntil: new Date('2026-09-22T08:00:00.000Z'),
+            }),
+        } as never,
+        {
+          identitySecret: secret,
+          payloadEncryptionSecret: secret,
+          now: () => now,
+        },
+      );
       const adapterFactory = { create: jest.fn().mockReturnValue({}) };
       const crmService = new CrmService(
         prisma,
