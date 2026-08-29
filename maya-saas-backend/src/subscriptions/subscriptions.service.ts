@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { normalizeFeatureFlags } from '../common/feature-catalog';
 import { PrismaService } from '../prisma/prisma.service';
-import { canonicalPlanName } from './plan-catalog';
+import { CANONICAL_PLAN_NAMES, canonicalPlanName } from './plan-catalog';
 
 @Injectable()
 export class SubscriptionsService {
@@ -33,7 +33,21 @@ export class SubscriptionsService {
   }
 
   async listPlans() {
+    return this.listPlansByNames();
+  }
+
+  /**
+   * Customer-facing billing must never advertise internal/test plans.
+   * Historical tenants may remain bound to one, so the rows are preserved and
+   * the administrative inventory still returns them through `listPlans()`.
+   */
+  async listPublicPlans() {
+    return this.listPlansByNames([...CANONICAL_PLAN_NAMES]);
+  }
+
+  private async listPlansByNames(names?: string[]) {
     const plans = await this.prisma.subscriptionPlan.findMany({
+      ...(names ? { where: { name: { in: names } } } : {}),
       orderBy: [{ priceMonthly: 'asc' }, { createdAt: 'asc' }],
       include: {
         entitlements: {

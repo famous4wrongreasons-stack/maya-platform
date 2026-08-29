@@ -16,4 +16,40 @@ describe('SubscriptionsService plan aliases', () => {
     });
     expect(findUnique).toHaveBeenCalledWith({ where: { name: 'solo' } });
   });
+
+  it('limits the customer-facing catalog to canonical plans', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const service = new SubscriptionsService({
+      subscriptionPlan: { findMany },
+    } as unknown as PrismaService);
+
+    await service.listPublicPlans();
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          name: { in: ['solo', 'business', 'business_plus'] },
+        },
+      }),
+    );
+  });
+
+  it('keeps internal and historical plans in the administrative catalog', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const service = new SubscriptionsService({
+      subscriptionPlan: { findMany },
+    } as unknown as PrismaService);
+
+    await service.listPlans();
+
+    expect(findMany).toHaveBeenCalledWith({
+      orderBy: [{ priceMonthly: 'asc' }, { createdAt: 'asc' }],
+      include: {
+        entitlements: {
+          where: { enabled: true },
+          orderBy: { featureKey: 'asc' },
+        },
+      },
+    });
+  });
 });

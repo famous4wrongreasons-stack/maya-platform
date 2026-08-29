@@ -33,7 +33,7 @@ export class BillingController {
   @Get('billing/plans')
   @ApiOperation({ summary: 'List plans available after a trial ends' })
   listPlans() {
-    return this.subscriptionsService.listPlans();
+    return this.subscriptionsService.listPublicPlans();
   }
 
   /**
