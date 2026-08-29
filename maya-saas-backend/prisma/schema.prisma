@@ -421,6 +421,7 @@ model ActionExecution {
   attempts              ActionAttempt[]
   communicationCampaign MarketingCampaign?
   billingPayment        BillingPayment?    @relation("BillingPaymentActionExecution")
+  loyaltyTransactions   LoyaltyTransaction[] @relation("LoyaltyTransactionActionExecution")
 
   @@unique([id, tenantId])
   @@unique([tenantId, identityFingerprint])
@@ -1067,23 +1068,26 @@ model LoyaltyAccount {
 }
 
 model LoyaltyTransaction {
-  id              String         @id @default(cuid())
-  tenantId        String
-  accountId       String
-  actorUserId     String?
-  actorTenantId   String?
-  kind            String
-  delta           Int
-  balanceAfter    Int
-  encryptedReason String
-  idempotencyKey  String
-  externalRef     String?
-  createdAt       DateTime       @default(now())
-  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  account         LoyaltyAccount @relation(fields: [accountId, tenantId], references: [id, tenantId], onDelete: Cascade)
-  actor           User?          @relation("LoyaltyTransactionActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  id                String           @id @default(cuid())
+  tenantId          String
+  actionExecutionId String?
+  accountId         String
+  actorUserId       String?
+  actorTenantId     String?
+  kind              String
+  delta             Int
+  balanceAfter      Int
+  encryptedReason   String
+  idempotencyKey    String
+  externalRef       String?
+  createdAt         DateTime         @default(now())
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account           LoyaltyAccount   @relation(fields: [accountId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  actor             User?            @relation("LoyaltyTransactionActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actionExecution   ActionExecution? @relation("LoyaltyTransactionActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, actionExecutionId])
   @@index([tenantId, accountId, createdAt])
   @@index([tenantId, actorUserId, createdAt])
 }
