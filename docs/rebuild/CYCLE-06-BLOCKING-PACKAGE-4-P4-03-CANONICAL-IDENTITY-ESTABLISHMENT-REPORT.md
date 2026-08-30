@@ -1,6 +1,6 @@
 # CYCLE 06 BLOCKING PACKAGE 4 — P4-03 CANONICAL IDENTITY ESTABLISHMENT REPORT
 
-Status: **BLOCKED AT PRE-APPLY — 25 legacy principals resolve to only 24 unique provider identities**
+Status: **PASS — 23 SAFE PRINCIPALS ESTABLISHED; P02/P03 REMAIN UNDER LIVE HOLD**
 
 Source checkpoint: `65678ff6`
 
@@ -328,3 +328,172 @@ state:
 STOP. The 25-principal apply remains prohibited until the two-principal
 provider-identity collision has authoritative resolution. No partial identity
 establishment is permitted under this checkpoint.
+
+## 12. Authorized safe-partition establishment at `0941a32a`
+
+The owner accepted the durable P02/P03 continuity hold and explicitly
+authorized Chapter 2 identity establishment for only the 23 exact singleton
+provider mappings. The earlier all-25 apply remains correctly prohibited; this
+step did not resolve, merge, register, link, or mutate either held principal.
+
+Immediately before the first write, production source evidence was rebuilt
+from the complete legacy principal set and a fresh complete provider registry
+snapshot. Raw names, phones, Telegram identifiers, provider identifiers, and
+other personal data were kept out of command output and this report.
+
+| Pre-apply invariant | Required | Actual |
+| --- | ---: | ---: |
+| Legacy principals | `25` | `25` |
+| Exact provider mappings | `25/25` | `25/25` |
+| Unique provider identities | `24` | `24` |
+| Live collision holds | `1` | `1` |
+| Principals represented by live hold | `2` | `2` |
+| Safe singleton principals | `23` | `23` |
+| Collision groups inside safe set | `0` | `0` |
+| Cross-tenant collisions | `0` | `0` |
+| Safe provider identities under any unresolved hold | `0` | `0` |
+| Exact active account-bound control in safe set | `1` | `1` |
+| Safe guest principals without canonical account | `22` | `22` |
+| Existing Client / CrmClientLink rows | `0 / 0` | `0 / 0` |
+
+The live hold partition remained exactly `3 rows / 580 points`; the safe
+partition remained exactly `118 rows / 64,221 points`. Together they still
+reconciled to `121 rows / 64,801 points` before apply.
+
+The non-PII plan manifest for this bounded run was:
+
+`067bc1c65598dac2a73effb4950a2ba88021b836860a048576bae10661a771a3`
+
+## 13. Canonical Chapter 2 apply
+
+All 23 safe registrations ran sequentially through the deployed
+`ClientIdentityService.registerCrmClient` under a tenant-qualified system
+context. No loyalty-specific registration implementation or direct database
+identity writer was introduced.
+
+- the one exact control principal was bound to its independently proven active
+  `AuthIdentity`/`Membership` user;
+- the other 22 Clients were created as guests with `userId = NULL`;
+- phone/profile data was not copied because the exact provider identity was
+  sufficient;
+- no merge, `AuthIdentity` update, guest User creation, ActionExecution, or
+  provider mutation occurred;
+- each registration rechecked the live hold inside the existing serializable
+  Chapter 2 transaction before creating its Client and CrmClientLink.
+
+| Apply result | Value |
+| --- | ---: |
+| New Client rows | `23` |
+| New CrmClientLink rows | `23` |
+| Control Clients with proven `userId` | `1` |
+| Guest Clients with `userId = NULL` | `22/22` |
+| P02/P03 links created | `0` |
+| Ambiguous safe mappings | `0` |
+| Duplicate provider links | `0` |
+| Cross-tenant link violations | `0` |
+| Active live holds after apply | `1` |
+
+## 14. Post-apply and restart/idempotency proof
+
+An independent production read verified `23 Client` rows and `23
+CrmClientLink` rows, with exactly one account-bound Client and 22 guest
+Clients. The live hold still had no matching CrmClientLink and still blocked
+the collision identity.
+
+A second read-only establishment plan used the same deployed hold guard and
+the canonical `(tenantId, provider, externalId)` lookup for every safe
+principal. It converged to:
+
+`WOULD CREATE CLIENTS: 0`
+
+`WOULD CREATE CRMCLIENTLINKS: 0`
+
+No registration method was called during this rerun, so the idempotency proof
+did not update `syncedAt` or perform any other production write.
+
+The registration guard and owner ratchet were also rerun locally:
+
+`TARGETED SUITES: 2/2`
+
+`TARGETED ASSERTIONS: 21/21`
+
+Production health/readiness remained `200/200`, and the bounded post-apply
+service-log check found zero priority error entries.
+
+## 15. Loyalty freeze and continuity
+
+| Continuity fact | Post-apply result |
+| --- | ---: |
+| Legacy ledger | unchanged — `121 rows / 64,801 points` |
+| Safe ledger partition | unchanged — `118 rows / 64,221 points` |
+| Held P02/P03 partition | unchanged — `3 rows / 580 points` |
+| Canonical LoyaltyTransaction rows | `0` |
+| LoyaltyRedemptionGrant rows | `0` |
+| LoyaltyRedemption rows | `0` |
+| ActionExecution rows | unchanged — `509` |
+| Loyalty value mutations | `0` |
+| Grants created | `0` |
+| Provider writes | `0` |
+| Historical refund 800 correction | `NO` |
+
+FULL_LEDGER migration and P4-03 production cutover were not started. The two
+unresolved principals remain read-only under the live continuity hold.
+
+## 16. Process hygiene
+
+All helper commands ran sequentially and completed in the foreground. The
+provider snapshot/apply orchestrator, its single database child, independent
+database verification, health/legacy verification, and targeted test process
+all exited and were waited. No watch mode, browser, Playwright, background
+server, or temporary database was used.
+
+`TEMP PROCESSES STARTED: 6`
+
+`TEMP PROCESSES TERMINATED: 6`
+
+`OWNED TEMP PROCESSES STILL RUNNING: 0`
+
+`BACKGROUND WATCHERS LEFT: 0`
+
+`PLAYWRIGHT/CHROME STARTED: 0`
+
+`TEMP DATABASES CREATED: 0`
+
+`TEMP DATABASES REMAINING: 0`
+
+## 17. Final verdict at `0941a32a`
+
+`SAFE CANONICAL IDENTITIES ESTABLISHED: YES`
+
+`SAFE PRINCIPALS EXACTLY MAPPABLE AFTER ESTABLISHMENT: 23/23`
+
+`NEW CLIENTS CREATED: 23`
+
+`NEW CRMCLIENTLINKS CREATED: 23`
+
+`P02/P03 CLIENTS CREATED: 0`
+
+`P02/P03 CRMCLIENTLINKS CREATED: 0`
+
+`UNRESOLVED PRINCIPALS REMAIN: 2`
+
+`UNRESOLVED VALUE PRESERVED: 580`
+
+`AMBIGUOUS SAFE MAPPINGS: 0`
+
+`CROSS-TENANT VIOLATIONS: 0`
+
+`DUPLICATE PROVIDER LINKS: 0`
+
+`LIVE HOLD STILL ACTIVE: YES`
+
+`RE-RUN CREATES DUPLICATES: NO`
+
+`LOYALTY VALUE MUTATIONS: 0`
+
+`READY FOR SAFE FULL_LEDGER MIGRATION: YES`
+
+`READY FOR P4-03 CUTOVER: NO`
+
+STOP. Safe FULL_LEDGER migration is the next separately authorized step; it
+was not started. Package 5 and Chapter 7 were not started.
