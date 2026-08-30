@@ -18,3 +18,4 @@ export * from './legacy-loyalty-import-shadow.contract';
 export * from './legacy-loyalty-backfill-shadow.contract';
 export * from './legacy-loyalty-grant-issue-shadow.contract';
 export * from './legacy-loyalty-grant-consume-shadow.contract';
+export * from './p4-03-legacy-loyalty-executable.contract';

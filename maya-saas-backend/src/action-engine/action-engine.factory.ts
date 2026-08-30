@@ -14,12 +14,29 @@ export interface StandaloneCanonicalActionEngineOptions {
   now?: () => Date;
 }
 
+export interface StandaloneCanonicalActionEngine {
+  runtime: ActionEngineRuntimeService;
+  kernel: ActionEngineKernel;
+  ingress: CanonicalActionIngressService;
+  policyResolver: CanonicalActionPolicyResolver;
+}
+
 /** Local proof/test composition helper. Production composition is Nest-owned. */
 export function createStandaloneCanonicalActionEngineRuntime(
   prisma: PrismaService,
   entitlements: Pick<EntitlementsService, 'resolveFeatureRequirements'>,
   options: StandaloneCanonicalActionEngineOptions,
 ): ActionEngineRuntimeService {
+  return createStandaloneCanonicalActionEngine(prisma, entitlements, options)
+    .runtime;
+}
+
+/** Full local composition for executable PostgreSQL proofs only. */
+export function createStandaloneCanonicalActionEngine(
+  prisma: PrismaService,
+  entitlements: Pick<EntitlementsService, 'resolveFeatureRequirements'>,
+  options: StandaloneCanonicalActionEngineOptions,
+): StandaloneCanonicalActionEngine {
   const capabilities = new ActionCapabilityRegistry();
   const policyResolver = new CanonicalActionPolicyResolver(
     prisma,
@@ -43,5 +60,6 @@ export function createStandaloneCanonicalActionEngineRuntime(
     policyResolver,
   );
   const ingress = new CanonicalActionIngressService(kernel, policyResolver);
-  return new ActionEngineRuntimeService(kernel, ingress);
+  const runtime = new ActionEngineRuntimeService(kernel, ingress);
+  return { runtime, kernel, ingress, policyResolver };
 }

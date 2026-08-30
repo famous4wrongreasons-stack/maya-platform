@@ -28,6 +28,18 @@ const LOYALTY_ADJUSTMENT_ROLES: readonly UserRole[] = [
   UserRole.ADMINISTRATOR,
 ];
 
+const LOYALTY_GRANT_CONSUME_ROLES: readonly UserRole[] = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
+  UserRole.PROVIDER,
+  UserRole.EMPLOYEE,
+  UserRole.STAFF,
+];
+
 function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
   if (capability.startsWith('crm.')) return ['crm.integration'];
   if (capability.startsWith('communication.')) return ['notifications.core'];
@@ -41,6 +53,9 @@ function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
 function allowedActorRoles(capability: string): readonly UserRole[] {
   if (capability.startsWith('loyalty.internal-adjust.')) {
     return LOYALTY_ADJUSTMENT_ROLES;
+  }
+  if (capability === 'loyalty.redemption-grant.consume.execute.v1') {
+    return LOYALTY_GRANT_CONSUME_ROLES;
   }
   return TENANT_ACTION_ROLES;
 }

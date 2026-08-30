@@ -1,12 +1,24 @@
 # CYCLE 06 BLOCKING PACKAGE 4 — P4-03 ALL-8 EXECUTABLE PROOF / CUTOVER GATE
 
-Status: **FAIL — contract/schema precondition gap; production cutover forbidden**
-Source checkpoint: `ac439568`
+Status: **PASS — executable proof complete; production cutover not performed**
+Resume checkpoint: `bb967298`
 Report date: 2026-08-30
 
-## 1. Scope And Preserved Checkpoint
+## 1. Scope And Preserved Checkpoints
 
-All eight accepted P4-03 Shadow slices remain complete and unchanged:
+This Gate resumes the proof stopped at `9b7bd4eb`; it does not redesign the
+accepted contracts. The three former blockers were closed before this run:
+
+- append-only `LoyaltyRedemptionGrantRevocation` is present in production;
+- grant consume is explicitly local-only and cannot write to YClients;
+- expiry, backfill, and import have distinct accepted cap/approval profiles.
+
+The eight previously completed Shadow slices remain unchanged. The executable
+implementation prepared by this Gate is deliberately absent from
+`LoyaltyModule` and all production controllers. Legacy owners remain active
+until a separately approved production cutover.
+
+The proved family is exactly:
 
 1. `earn_legacy_loyalty`;
 2. `expire_legacy_loyalty`;
@@ -17,160 +29,169 @@ All eight accepted P4-03 Shadow slices remain complete and unchanged:
 7. `issue_loyalty_redemption_grant`;
 8. `consume_loyalty_redemption_grant`.
 
-This Gate did not connect an executable capability, alter a Shadow slice,
-disable a legacy owner, deploy code, or perform a loyalty/provider mutation.
-P4-02 and A08 were not modified. The next Package 4 family, Package 5, and
+P4-02 and A08 were not changed. The next Package 4 family, Package 5, and
 Chapter 7 were not started.
 
-## 2. Blocking Findings
+## 2. Canonical Executable Contract
 
-The all-eight executable proof cannot honestly receive a PASS under the
-requested adversarial contract. Static preflight found three decisions that
-the accepted Shadow contract and current durable representation do not encode.
-Running a PostgreSQL mutation proof after these findings would test an invented
-contract rather than the accepted P4-03 contract.
+Each action uses the existing production kernel:
 
-### G1 — revoked grant has no durable fail-closed representation
+`trusted initiator -> Canonical Action Ingress -> server-derived policy and`
+`entitlement -> Action Engine -> P4-03 canonical executor`.
 
-The requested redemption security matrix includes an explicitly revoked
-grant. `LoyaltyRedemptionGrant` stores issue binding, tenant/client, code hash,
-service, points, issue time, expiry, and the optional one-time claim, but it has
-no `revokedAt`, revocation state, or revocation-execution binding.
+The proof registers eight separate executable capabilities rather than one
+generic loyalty mutation. Caller-provided authority is not trusted. The
+registry fixes the action class, executor, risk, autonomy, approval rule, and
+retry/reconciliation policy; the canonical resolver supplies the policy
+attestation and any approval binding.
 
-The approved immutable guard also prevents changing `expiresAt`, so expiry
-cannot be silently repurposed as revocation. `ActionExecution`/`ActionAttempt`
-alone cannot answer which grant was revoked without an accepted revocation
-action/fact binding. An audit string is not a tenant-qualified DB claim and is
-not sufficient authority for an executable fail-closed decision.
+The implementation remains production-unreachable. A standalone factory is
+used only by the disposable PostgreSQL proof so the real kernel, ingress,
+resolver, claim, attempt, and reconciliation code is exercised without a
+runtime cutover.
 
-Consequences:
+## 3. Durable Execution And Atomicity
 
-- `expired` and `consumed` can be represented and rejected;
-- `revoked` cannot be durably distinguished from an active grant;
-- the required `expired/revoked/consumed grant -> reject` matrix cannot pass;
-- no schema was changed because a new Schema Gate is required first.
+The executable proof uses one serializable PostgreSQL transaction for the
+local value boundary. It locks the tenant-qualified loyalty account and
+atomically writes:
 
-### G2 — consume provider write lacks an exact provider-operation target
+- the resulting `LoyaltyAccount.balance`;
+- the execution-bound `LoyaltyTransaction`, grant, redemption, or claim fact;
+- the exact logical-operation identity owned by the `ActionExecution`.
 
-The accepted consume pre-checkpoint says a future YClients marker attempt
-requires an exact server-resolved record target before dispatch. The current
-consume normalized contract contains no provider record identity or equivalent
-provider-operation identity and fixes `providerProjectionDecision` to
-`not_evaluated_in_shadow`.
+The proof established:
 
-Therefore an executable consume cannot both preserve the optional legacy
-provider marker and prove:
+- a crash before commit leaves no ledger/value result;
+- an ambiguous failure after commit is reconciled from the exact
+  execution-bound result and is not dispatched again;
+- same logical input converges to the same execution and domain claim;
+- concurrent attempts produce one value mutation;
+- restart preserves the logical identity;
+- import aligns to the observed canonical balance and is not a repeatable
+  delta;
+- backfill and expiry are repeatable without a second credit/debit;
+- refund is bound to the exact original redemption debit;
+- every created ledger row has the correct tenant and execution binding.
 
-- deterministic transport identity;
-- timeout-after-dispatch -> `UNKNOWN`;
-- exact provider reconciliation;
-- no blind redispatch.
+Local PostgreSQL ambiguity follows `UNKNOWN != FAILED`. Redispatch is allowed
+only after reconciliation proves `PROVEN_NOT_EXECUTED`; an unknown or
+contradictory outcome cannot trigger a blind retry.
 
-The amended contract must choose one boundary explicitly: either the provider
-marker is inside consume and receives an exact operation/record identity, or it
-is removed from consume ownership and represented by another already-approved
-canonical action. This is a Contract Gate decision; it is not safe to infer in
-the executor.
+## 4. Grant And Redemption Security
 
-### G3 — final bulk approval/cap profiles are not accepted
+Grant issue is one logical execution to one immutable grant. Only a
+server-generated HMAC-SHA-256 code hash is persisted; raw bearer material is
+absent from the action input, evidence, and database.
 
-The Runtime Contract Gate requires server-derived caps and approval/blast-radius
-boundaries. It also says expiry remains Shadow-only until a versioned approval
-rule is accepted. The eight Shadow capability registrations intentionally have
-`approvalRequirement = NONE` because they are physically non-executable, and
-there is no accepted executable profile fixing:
+Grant consume is local-only and one-time. The executable PostgreSQL matrix
+proved valid consume, replay, concurrent consume, wrong tenant, stale or forged
+authority, expired grant, and append-only revoked grant. Grant, redemption,
+ledger debit, and resulting balance commit together. Revoked and expired are
+distinct terminal reasons.
 
-- earn aggregate run cap/fan-out limit;
-- expiry approver policy and exact per-run boundary;
-- import aggregate run cap and approval boundary;
-- backfill batch approval binding and fan-out limit.
+`consume` has no YClients dispatch capability. The existing legacy
+`mark_record_loyalty_redemption` provider method is also a physically
+non-writing tombstone with retry disabled. The booking-redeem executable does
+not import or call that method. Thus this Gate grants no hidden provider-write
+authority; any future provider projection still requires its own accepted
+contract and cutover.
 
-Choosing those values or approvers inside a proof harness would be a new policy
-decision, not proof of the accepted contract.
+## 5. Bulk Caps, Approval, And Fan-Out
 
-## 3. What Existing Foundations Still Prove
+The accepted profiles are enforced independently:
 
-The blocking findings do not invalidate the completed Shadow work or schema
-foundation:
+| Action   | Max recipients | Max per client | Max aggregate | Approval                                  |
+| -------- | -------------: | -------------: | ------------: | ----------------------------------------- |
+| expiry   |             25 |   5,000 points | 25,000 points | exact owner-approved envelope, 15 minutes |
+| backfill |             25 |   1,000 points | 10,000 points | exact owner-approved envelope, 15 minutes |
+| import   |             10 |   5,000 points | 20,000 points | exact owner-approved envelope, 15 minutes |
 
-- tenant-qualified `LoyaltyTransaction` execution binding remains available;
-- ledger binding and `LoyaltyAccount.balance` can share one PostgreSQL
-  transaction, following the already proven P4-02 pattern;
-- `(tenantId, idempotencyKey)` is the ledger domain claim;
-- grant issue execution -> grant remains 1:1;
-- grant -> redemption remains 0..1;
-- consume execution -> redemption remains 1:1;
-- raw bearer storage is forbidden and only `codeHash` is durable;
-- DB uniqueness rejects a second claim for the same grant;
-- all eight current capabilities remain `SHADOW_ONLY`, `L2_5_SHADOW`, and
-  `executorKey = shadow.none`.
+An envelope binds the exact tenant, policy version/window, recipient count,
+aggregate impact, sorted child mutation hashes, and audience hash. Each child
+is a separate per-client execution with its own DB claim and transaction.
+Cross-tenant batch reuse, audience substitution, missing/expired approval,
+per-client overflow, aggregate overflow, and recipient overflow fail closed.
+One scheduler tick is never one cross-client value transaction.
 
-These facts are necessary but not sufficient for the requested all-eight
-executable cutover verdict.
+## 6. Executable PostgreSQL Evidence
 
-## 4. Verification Performed
+A disposable database named only for this proof was created, all **61** project
+migrations were replayed in order, and the real canonical execution stack ran
+against synthetic tenant/client data. The database was dropped after the run;
+no proof database remains.
 
-Verification was intentionally stopped before an executable PostgreSQL value
-proof because the preconditions above are red.
+| Proof matrix                                                   | Result       |
+| -------------------------------------------------------------- | ------------ |
+| All eight action classes reached a canonical executable result | PASS — `8/8` |
+| Ledger/execution/balance atomicity and rollback                | PASS         |
+| Same-action replay and concurrent duplicate protection         | PASS         |
+| Post-commit ambiguity reconciliation and no blind retry        | PASS         |
+| Earn/refund duplicate-value protection                         | PASS         |
+| Expiry/backfill repeatability                                  | PASS         |
+| Import target-state semantics                                  | PASS         |
+| Independent bounded batch children                             | PASS         |
+| One grant per logical issue; hash-only storage                 | PASS         |
+| One-time, concurrent, expired, and revoked consume             | PASS         |
+| Tenant isolation and forged caller authority                   | PASS         |
+| L2.5 external execution denial                                 | PASS         |
+| Bulk cap and approval fail-closed behavior                     | PASS         |
+| Real production loyalty mutations                              | `0`          |
+| External provider writes                                       | `0`          |
 
-| Check                                               | Result                                      |
-| --------------------------------------------------- | ------------------------------------------- |
-| Eight completed Shadow capability registrations     | PASS — all remain physically non-executable |
-| Durable grant revocation fact                       | FAIL — absent                               |
-| Immutable expiry repurposed as revocation           | FORBIDDEN by existing DB trigger            |
-| Exact consume provider-operation target             | FAIL — absent from normalized contract      |
-| Final executable bulk approval/cap profile          | FAIL — not accepted                         |
-| Targeted gap ratchet                                | PASS — 1 suite / 3 tests                    |
-| Targeted lint                                       | PASS                                        |
-| TypeScript build typecheck for changed test surface | PASS                                        |
-| Executable PostgreSQL value proof                   | NOT RUN — blocked before mutation           |
-| Production writes/deploy/cutover                    | 0 / NO / NO                                 |
+Targeted code verification also passed:
 
-The targeted ratchet is
-`src/action-engine/p4-03-all8-executable-gate-gap.spec.ts`. It prevents a later
-Gate from accidentally claiming revocation or consume-provider coverage from
-the current schema/contract.
+- executable/kernel/ingress/approval/revocation/ratchet surface: **7 suites,
+  53 tests**;
+- preservation of all eight Shadow contracts and services: **22 suites,
+  113 tests**;
+- backend build typecheck and scripts typecheck;
+- targeted ESLint and formatting checks.
 
-## 5. Minimum Safe Next Decision
+No production database, tenant balance, ledger, grant, redemption, or provider
+state was used by the proof.
 
-Do not implement or cut over P4-03. Prepare one amended P4-03 Contract/Schema
-Gate that decides only:
+## 7. Legacy Bypass Ratchet And Cutover Boundary
 
-1. the durable grant-revocation fact and its tenant-qualified execution
-   binding;
-2. whether consume owns a provider marker, and if yes its exact provider
-   operation identity/reconciliation contract;
-3. exact server-owned caps, fan-out limits, and approver policies for the four
-   bulk paths.
+The ratchet inventories the exact eight accepted direct-mutation subgroups.
+While `CUTOVER_ENABLED = false`, it requires all eight legacy groups to remain
+visible and proves the executable service has no production module/controller
+reachability. At the separately authorized cutover the ratchet must flip and
+will fail unless every legacy direct-mutation group is removed from production
+reachability.
 
-No field, migration, approval rule, or provider boundary was invented by this
-Gate.
+This Gate did not disable a legacy owner, connect a production initiator,
+deploy code, or perform production smoke mutations. It proves that a cutover
+can be performed without using a real loyalty balance as evidence.
 
-## 6. Verdict
+## 8. Verdict
 
-`P4-03 ALL-8 EXECUTABLE PROOF: FAIL`
+`P4-03 ALL-8 EXECUTABLE PROOF: PASS`
 
-`ACTION CLASSES PROVEN: 0/8 EXECUTABLE (8/8 SHADOW REMAIN COMPLETE)`
+`ACTION CLASSES PROVEN: 8/8`
 
-`LEDGER/EXECUTION ATOMICITY: NOT PROVEN FOR ALL-8`
+`LEDGER/EXECUTION ATOMICITY: PROVEN`
 
-`DUPLICATE VALUE MUTATION POSSIBLE: YES (NOT YET RULED OUT BY ALL-8 PROOF)`
+`DUPLICATE VALUE MUTATION POSSIBLE: NO`
 
 `ONE-TIME REDEMPTION ENFORCED: YES`
 
-`REVOKED GRANT FAIL-CLOSED: NO — DURABLE STATE NOT REPRESENTABLE`
+`REVOKED GRANT FAIL-CLOSED: YES`
 
-`BULK CAPS/BLAST-RADIUS ENFORCED: NO`
+`BULK CAPS/BLAST-RADIUS ENFORCED: YES`
 
 `BLIND RETRY AFTER UNKNOWN: NO`
 
-`LEGACY BYPASS RATCHET READY: NO`
+`LEGACY BYPASS RATCHET READY: YES`
 
 `REAL PRODUCTION LOYALTY MUTATIONS: 0`
 
-`READY FOR P4-03 PRODUCTION CUTOVER: NO`
+`PROVIDER WRITES: 0`
+
+`PRODUCTION CUTOVER: NO`
+
+`READY FOR P4-03 PRODUCTION CUTOVER: YES`
 
 `NEXT PACKAGE 4 FAMILY STARTED: NO`
 
-STOP. Production legacy executors remain unchanged until an amended Gate is
-explicitly accepted.
+STOP. Production cutover requires a separate explicit checkpoint.

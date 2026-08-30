@@ -45,6 +45,22 @@ import {
   LEGACY_LOYALTY_GRANT_CONSUME_SHADOW_CAPABILITY,
   legacyLoyaltyGrantConsumeShadowNormalizer,
 } from './legacy-loyalty-grant-consume-shadow.contract';
+import {
+  P4_03_BULK_ENVELOPE_CAPABILITIES,
+  P4_03_BULK_POLICY_PROFILES,
+  P4_03_EXECUTABLE_CAPABILITIES,
+  p403BackfillExecutableNormalizer,
+  p403BulkEnvelopeNormalizer,
+  p403EarnExecutableNormalizer,
+  p403ExpireExecutableNormalizer,
+  p403GrantConsumeExecutableNormalizer,
+  p403GrantIssueExecutableNormalizer,
+  p403ImportExecutableNormalizer,
+  p403RedeemExecutableNormalizer,
+  p403RefundExecutableNormalizer,
+  type P403BulkActionClass,
+  type P403ExecutableActionClass,
+} from './p4-03-legacy-loyalty-executable.contract';
 
 const OPAQUE_REF_PATTERN = /^[A-Za-z0-9._:/-]{1,240}$/;
 
@@ -1229,6 +1245,112 @@ function loyaltyInternalAdjustmentCapability(): RegisteredActionCapabilityV1 {
   };
 }
 
+function p403ExecutableCapability(input: {
+  capability: string;
+  actionClass: P403ExecutableActionClass;
+  targetKind: string;
+  executorKey: string;
+  normalizeInput: (value: unknown) => Record<string, unknown>;
+  allowedSourceTypes?: readonly ActionSourceType[];
+  riskFacets: readonly string[];
+}): RegisteredActionCapabilityV1 {
+  return {
+    capability: input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: `maya.${input.actionClass}-executable-input/1`,
+    targetKind: input.targetKind,
+    allowedSourceTypes: input.allowedSourceTypes ?? [
+      'scheduler',
+      'legacy_bridge',
+      'authenticated_request',
+    ],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'financial_equivalent',
+      'customer_value',
+      ...input.riskFacets,
+    ],
+    policyKey: `chapter6.package4.${input.actionClass}-executable`,
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L3_CANONICAL',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: `package4.${input.actionClass}.reconcile-before-retry`,
+      version: 1,
+      maxExecutionAttempts: 2,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [0],
+    },
+    reconciliation: {
+      key: `package4.${input.actionClass}.bound-local-facts`,
+      version: 1,
+      maxInconclusiveAttempts: 2,
+      retryAfterProvenNonExecution: true,
+    },
+    transportIdentityVersion: 1,
+    executorKey: input.executorKey,
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: input.normalizeInput,
+  };
+}
+
+function p403BulkEnvelopeCapability(input: {
+  capability: string;
+  actionClass: P403BulkActionClass;
+}): RegisteredActionCapabilityV1 {
+  const profile = P4_03_BULK_POLICY_PROFILES[input.actionClass];
+  return {
+    capability: input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: `maya.${input.actionClass}-batch-envelope/1`,
+    targetKind: 'loyalty_bulk_batch',
+    allowedSourceTypes: ['scheduler', 'legacy_bridge', 'authenticated_request'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'financial_equivalent',
+      'customer_value',
+      'bulk',
+      'approval_bound',
+      'non_value_envelope',
+    ],
+    policyKey: `chapter6.package4.${input.actionClass}-batch`,
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L3_OWNER_APPROVED',
+    approvalRequirement: 'REQUIRED',
+    approvalTtlMs: profile.approvalTtlMs,
+    retry: {
+      key: `package4.${input.actionClass}-batch.pre-dispatch-only`,
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: `package4.${input.actionClass}-batch.no-value`,
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'loyalty.legacy-bulk-envelope',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: (value) =>
+      p403BulkEnvelopeNormalizer(input.actionClass, value),
+  };
+}
+
 function syntheticCapability(input: {
   capability: string;
   actionClass: string;
@@ -1526,6 +1648,90 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   legacyLoyaltyBackfillShadowCapability(),
   legacyLoyaltyGrantIssueShadowCapability(),
   legacyLoyaltyGrantConsumeShadowCapability(),
+  p403BulkEnvelopeCapability({
+    capability: P4_03_BULK_ENVELOPE_CAPABILITIES.expire,
+    actionClass: 'expire_legacy_loyalty',
+  }),
+  p403BulkEnvelopeCapability({
+    capability: P4_03_BULK_ENVELOPE_CAPABILITIES.backfill,
+    actionClass: 'backfill_legacy_loyalty',
+  }),
+  p403BulkEnvelopeCapability({
+    capability: P4_03_BULK_ENVELOPE_CAPABILITIES.import,
+    actionClass: 'import_legacy_loyalty_balance',
+  }),
+  p403ExecutableCapability({
+    capability: P4_03_EXECUTABLE_CAPABILITIES.earn,
+    actionClass: 'earn_legacy_loyalty',
+    targetKind: 'loyalty_client',
+    executorKey: 'loyalty.legacy-ledger',
+    allowedSourceTypes: ['scheduler', 'legacy_bridge'],
+    riskFacets: ['provider_evidence'],
+    normalizeInput: p403EarnExecutableNormalizer,
+  }),
+  p403ExecutableCapability({
+    capability: P4_03_EXECUTABLE_CAPABILITIES.expire,
+    actionClass: 'expire_legacy_loyalty',
+    targetKind: 'loyalty_client',
+    executorKey: 'loyalty.legacy-ledger',
+    allowedSourceTypes: ['scheduler', 'legacy_bridge'],
+    riskFacets: ['destructive', 'bulk_child', 'approval_bound'],
+    normalizeInput: p403ExpireExecutableNormalizer,
+  }),
+  p403ExecutableCapability({
+    capability: P4_03_EXECUTABLE_CAPABILITIES.redeem,
+    actionClass: 'redeem_legacy_loyalty',
+    targetKind: 'loyalty_redemption',
+    executorKey: 'loyalty.legacy-ledger',
+    allowedSourceTypes: ['legacy_bridge', 'authenticated_request'],
+    riskFacets: ['destructive', 'appointment_evidence'],
+    normalizeInput: p403RedeemExecutableNormalizer,
+  }),
+  p403ExecutableCapability({
+    capability: P4_03_EXECUTABLE_CAPABILITIES.refund,
+    actionClass: 'refund_legacy_loyalty',
+    targetKind: 'loyalty_redemption',
+    executorKey: 'loyalty.legacy-ledger',
+    allowedSourceTypes: ['webhook', 'legacy_bridge', 'authenticated_request'],
+    riskFacets: ['compensating', 'provider_evidence'],
+    normalizeInput: p403RefundExecutableNormalizer,
+  }),
+  p403ExecutableCapability({
+    capability: P4_03_EXECUTABLE_CAPABILITIES.import,
+    actionClass: 'import_legacy_loyalty_balance',
+    targetKind: 'loyalty_account',
+    executorKey: 'loyalty.legacy-ledger',
+    allowedSourceTypes: ['legacy_bridge', 'authenticated_request'],
+    riskFacets: ['provider_evidence', 'one_time', 'bulk_child'],
+    normalizeInput: p403ImportExecutableNormalizer,
+  }),
+  p403ExecutableCapability({
+    capability: P4_03_EXECUTABLE_CAPABILITIES.backfill,
+    actionClass: 'backfill_legacy_loyalty',
+    targetKind: 'loyalty_client',
+    executorKey: 'loyalty.legacy-ledger',
+    allowedSourceTypes: ['scheduler', 'legacy_bridge', 'authenticated_request'],
+    riskFacets: ['provider_evidence', 'one_time', 'bulk_child'],
+    normalizeInput: p403BackfillExecutableNormalizer,
+  }),
+  p403ExecutableCapability({
+    capability: P4_03_EXECUTABLE_CAPABILITIES.issueGrant,
+    actionClass: 'issue_loyalty_redemption_grant',
+    targetKind: 'loyalty_redemption_grant',
+    executorKey: 'loyalty.redemption-grant.issue',
+    allowedSourceTypes: ['legacy_bridge', 'authenticated_request'],
+    riskFacets: ['one_time', 'bearer_secret'],
+    normalizeInput: p403GrantIssueExecutableNormalizer,
+  }),
+  p403ExecutableCapability({
+    capability: P4_03_EXECUTABLE_CAPABILITIES.consumeGrant,
+    actionClass: 'consume_loyalty_redemption_grant',
+    targetKind: 'loyalty_redemption',
+    executorKey: 'loyalty.redemption-grant.consume',
+    allowedSourceTypes: ['legacy_bridge', 'authenticated_request'],
+    riskFacets: ['one_time', 'bearer_secret', 'destructive', 'local_only'],
+    normalizeInput: p403GrantConsumeExecutableNormalizer,
+  }),
   appointmentCapability({
     capability: 'crm.appointment.attendance.v1',
     actionClass: 'set_appointment_attendance',
