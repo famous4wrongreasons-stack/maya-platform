@@ -219,6 +219,7 @@ model Tenant {
   loyaltyRedemptionGrants        LoyaltyRedemptionGrant[]
   loyaltyRedemptions             LoyaltyRedemption[]
   loyaltyGrantRevocations        LoyaltyRedemptionGrantRevocation[]
+  unresolvedClientIdentityHolds  UnresolvedClientIdentityHold[]
   expenses                       Expense[]
   expensePeriodDeclarations      ExpensePeriodDeclaration[]
   aiApprovalRequests             AiApprovalRequest[]
@@ -436,6 +437,7 @@ model ActionExecution {
   issuedLoyaltyRedemptionGrant LoyaltyRedemptionGrant? @relation("LoyaltyRedemptionGrantIssueExecution")
   loyaltyRedemption     LoyaltyRedemption? @relation("LoyaltyRedemptionActionExecution")
   loyaltyGrantRevocation LoyaltyRedemptionGrantRevocation? @relation("LoyaltyRedemptionGrantRevocationActionExecution")
+  resolvedClientIdentityHolds UnresolvedClientIdentityHold[] @relation("UnresolvedClientIdentityHoldResolutionExecution")
   createdCustomerReferral CustomerReferral? @relation("CustomerReferralCreateExecution")
   resolvedCustomerReferral CustomerReferral? @relation("CustomerReferralResolutionExecution")
   referralRewardIssuance ReferralRewardIssuance? @relation("ReferralRewardIssuanceActionExecution")
@@ -1425,6 +1427,28 @@ model LoyaltyRedemptionGrantRevocation {
   @@unique([grantId, tenantId])
   @@unique([actionExecutionId, tenantId])
   @@index([tenantId, revokedAt])
+}
+
+/// Tenant-qualified, fail-closed record of one known provider-identity
+/// collision. The legacy principal manifest stays outside this table; only its
+/// immutable evidence digest and cardinality are persisted, never raw PII.
+model UnresolvedClientIdentityHold {
+  id                          String           @id @default(cuid())
+  tenantId                    String
+  provider                    String
+  externalId                  String
+  reasonCode                  String
+  sourceNamespace             String
+  sourceEvidenceHash          String
+  unresolvedPrincipalCount    Int
+  createdAt                   DateTime         @default(now())
+  resolvedAt                  DateTime?
+  resolutionActionExecutionId String?
+  tenant                      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  resolutionActionExecution   ActionExecution? @relation("UnresolvedClientIdentityHoldResolutionExecution", fields: [resolutionActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "UnresolvedIdentityHold_resolution_execution_tenant_fkey")
+
+  @@unique([tenantId, provider, externalId], map: "UnresolvedClientIdentityHold_tenant_provider_external_key")
+  @@index([tenantId, reasonCode, resolvedAt], map: "UnresolvedClientIdentityHold_tenant_reason_resolved_idx")
 }
 
 model Expense {
