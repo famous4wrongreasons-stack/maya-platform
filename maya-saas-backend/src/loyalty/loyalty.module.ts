@@ -17,6 +17,8 @@ import { LegacyLoyaltyRefundShadowController } from './legacy-loyalty-refund-sha
 import { LegacyLoyaltyRefundShadowService } from './legacy-loyalty-refund-shadow.service';
 import { LegacyLoyaltyImportShadowController } from './legacy-loyalty-import-shadow.controller';
 import { LegacyLoyaltyImportShadowService } from './legacy-loyalty-import-shadow.service';
+import { LegacyLoyaltyBackfillShadowController } from './legacy-loyalty-backfill-shadow.controller';
+import { LegacyLoyaltyBackfillShadowService } from './legacy-loyalty-backfill-shadow.service';
 import { LegacyLoyaltyShadowController } from './legacy-loyalty-shadow.controller';
 import { LegacyLoyaltyShadowService } from './legacy-loyalty-shadow.service';
 import { LoyaltyService } from './loyalty.service';
@@ -37,6 +39,7 @@ import { LoyaltyService } from './loyalty.service';
     LegacyLoyaltyRedemptionShadowController,
     LegacyLoyaltyRefundShadowController,
     LegacyLoyaltyImportShadowController,
+    LegacyLoyaltyBackfillShadowController,
   ],
   providers: [
     LoyaltyService,
@@ -45,6 +48,7 @@ import { LoyaltyService } from './loyalty.service';
     LegacyLoyaltyRedemptionShadowService,
     LegacyLoyaltyRefundShadowService,
     LegacyLoyaltyImportShadowService,
+    LegacyLoyaltyBackfillShadowService,
   ],
   exports: [LoyaltyService],
 })

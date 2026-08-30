@@ -15,3 +15,4 @@ export * from './legacy-loyalty-expire-shadow.contract';
 export * from './legacy-loyalty-redeem-shadow.contract';
 export * from './legacy-loyalty-refund-shadow.contract';
 export * from './legacy-loyalty-import-shadow.contract';
+export * from './legacy-loyalty-backfill-shadow.contract';
