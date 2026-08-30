@@ -207,6 +207,19 @@ describe('LegacyLoyaltyRefundShadowService', () => {
     );
   });
 
+  it('preserves the same redeem evidence and refund identity after restart', async () => {
+    const firstProcess = buildHarness();
+    const restartedProcess = buildHarness();
+
+    const first = await firstProcess.service.planRefund(validDto());
+    const afterRestart = await restartedProcess.service.planRefund(validDto());
+
+    expect(afterRestart).toEqual(first);
+    expect(restartedProcess.planShadow.mock.calls[0]?.[0]).toEqual(
+      firstProcess.planShadow.mock.calls[0]?.[0],
+    );
+  });
+
   it('normalizes cancel execution and removed event into the same action request', async () => {
     const executionEvidence = buildHarness();
     const domainEvidence = buildHarness();

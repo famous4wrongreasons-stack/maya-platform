@@ -1,4 +1,4 @@
-import { createHash, createHmac } from 'node:crypto';
+import { createHash } from 'node:crypto';
 
 import {
   ActionApprovalDecision,
@@ -16,15 +16,25 @@ import type {
 import { ActionEngineRuntimeService } from '../action-engine/action-engine.runtime';
 import type { TrustedActionExecutionRequestV1 } from '../action-engine/action-engine.contract';
 import {
+  LEGACY_LOYALTY_REDEEM_LEDGER_KIND,
+  LEGACY_LOYALTY_REFUND_LEDGER_KIND,
+  legacyLoyaltyRefundCorrelationHash,
+} from '../action-engine/legacy-loyalty-refund-shadow.contract';
+import {
   P4_03_BULK_ENVELOPE_CAPABILITIES,
   P4_03_EXECUTABLE_CAPABILITIES,
   type P403BulkActionClass,
   type P403ExecutableActionClass,
 } from '../action-engine/p4-03-legacy-loyalty-executable.contract';
 import { EncryptionService } from '../encryption/encryption.service';
+import {
+  issueLoyaltyRedemptionClaim,
+  loyaltyRedemptionClaimLookup,
+  type LoyaltyRedemptionClaimArtifactV1,
+} from './loyalty-redemption-claim.contract';
 
 interface P403ExecutableServiceOptions {
-  redemptionCodeSecret: string;
+  redemptionCodePepper: string;
   now?: () => Date;
 }
 
@@ -35,6 +45,7 @@ export interface P403ExecutionValue {
   balanceAfter?: number;
   transactionIds?: string[];
   grantId?: string;
+  claimArtifact?: LoyaltyRedemptionClaimArtifactV1;
   redemptionId?: string;
   batchAudienceHash?: string;
   childMutationHashes?: string[];
@@ -80,7 +91,7 @@ const BULK_CAPABILITY_BY_ACTION: Readonly<Record<P403BulkActionClass, string>> =
  */
 export class P403LegacyLoyaltyExecutableService {
   private readonly now: () => Date;
-  private readonly redemptionCodeSecret: Buffer;
+  private readonly redemptionCodePepper: Buffer;
 
   constructor(
     private readonly prisma: PrismaClient,
@@ -88,13 +99,13 @@ export class P403LegacyLoyaltyExecutableService {
     private readonly encryption: EncryptionService,
     options: P403ExecutableServiceOptions,
   ) {
-    const secret = options.redemptionCodeSecret.trim();
-    if (secret.length < 32) {
+    const pepper = options.redemptionCodePepper.trim();
+    if (pepper.length < 32) {
       throw new P403ExecutionContractError(
-        'Redemption code secret must contain at least 32 characters',
+        'Redemption code pepper must contain at least 32 characters',
       );
     }
-    this.redemptionCodeSecret = Buffer.from(secret, 'utf8');
+    this.redemptionCodePepper = Buffer.from(pepper, 'utf8');
     this.now = options.now ?? (() => new Date());
   }
 
@@ -457,7 +468,7 @@ export class P403LegacyLoyaltyExecutableService {
           plan.intendedDeltaPoints,
           'intendedDeltaPoints',
         );
-        const externalRef = this.ledgerExternalRef(actionClass, plan);
+        const externalRef = this.ledgerExternalRef(tenantId, actionClass, plan);
         const claimed = await tx.loyaltyTransaction.findFirst({
           where: { tenantId, externalRef },
         });
@@ -497,7 +508,14 @@ export class P403LegacyLoyaltyExecutableService {
             tenantId,
             actionExecutionId: executionId,
             accountId: locked.id,
-            kind: delta > 0 ? 'credit' : 'debit',
+            kind:
+              actionClass === 'redeem_legacy_loyalty'
+                ? LEGACY_LOYALTY_REDEEM_LEDGER_KIND
+                : actionClass === 'refund_legacy_loyalty'
+                  ? LEGACY_LOYALTY_REFUND_LEDGER_KIND
+                  : delta > 0
+                    ? 'credit'
+                    : 'debit',
             delta,
             balanceAfter,
             encryptedReason: this.encryption.encrypt(`p4-03:${actionClass}`),
@@ -536,13 +554,19 @@ export class P403LegacyLoyaltyExecutableService {
       where: {
         tenantId,
         actionExecutionId: originalExecutionId,
+        kind: LEGACY_LOYALTY_REDEEM_LEDGER_KIND,
         delta: { lt: 0 },
       },
     });
+    const providerRecordIdentityHash = this.text(
+      plan.providerRecordIdentityHash,
+      'providerRecordIdentityHash',
+    );
     const points = rows.reduce((sum, row) => sum - row.delta, 0);
     if (
       rows.length !== Number(plan.originalDebitRowCount) ||
-      points !== Number(plan.originalDebitPoints)
+      points !== Number(plan.originalDebitPoints) ||
+      rows.some((row) => row.externalRef !== providerRecordIdentityHash)
     ) {
       throw new P403ExecutionContractError('Original redemption changed');
     }
@@ -569,12 +593,32 @@ export class P403LegacyLoyaltyExecutableService {
   }
 
   private ledgerExternalRef(
+    tenantId: string,
     actionClass: Exclude<
       P403ExecutableActionClass,
       'issue_loyalty_redemption_grant' | 'consume_loyalty_redemption_grant'
     >,
     plan: Record<string, unknown>,
   ): string {
+    if (actionClass === 'redeem_legacy_loyalty') {
+      return this.text(
+        plan.providerRecordIdentityHash,
+        'providerRecordIdentityHash',
+      );
+    }
+    if (actionClass === 'refund_legacy_loyalty') {
+      return legacyLoyaltyRefundCorrelationHash({
+        tenantId,
+        originalRedemptionActionExecutionId: this.text(
+          plan.originalRedemptionActionExecutionId,
+          'originalRedemptionActionExecutionId',
+        ),
+        cancellationFactHash: this.text(
+          plan.cancellationFactHash,
+          'cancellationFactHash',
+        ),
+      });
+    }
     const identity =
       actionClass === 'earn_legacy_loyalty'
         ? [plan.provider, plan.providerVisitIdentityHash]
@@ -584,20 +628,9 @@ export class P403LegacyLoyaltyExecutableService {
               plan.expiryPolicy,
               plan.evaluationWindowEnd,
             ]
-          : actionClass === 'redeem_legacy_loyalty'
-            ? [plan.redemptionRequestIdentityHash]
-            : actionClass === 'refund_legacy_loyalty'
-              ? [
-                  plan.originalRedemptionActionExecutionId,
-                  plan.cancellationFactHash,
-                ]
-              : actionClass === 'import_legacy_loyalty_balance'
-                ? [
-                    plan.provider,
-                    plan.providerCardIdentityHash,
-                    plan.importPolicy,
-                  ]
-                : [plan.canonicalClientId, plan.programVersion];
+          : actionClass === 'import_legacy_loyalty_balance'
+            ? [plan.provider, plan.providerCardIdentityHash, plan.importPolicy]
+            : [plan.canonicalClientId, plan.programVersion];
     return `p4-03:${actionClass}:${this.sha256(identity)}`;
   }
 
@@ -673,17 +706,16 @@ export class P403LegacyLoyaltyExecutableService {
           issuedAt.getTime() +
             this.integer(input.ttlDays, 'ttlDays') * 24 * 60 * 60 * 1_000,
         );
+        const claimArtifact = issueLoyaltyRedemptionClaim();
         const grant = await tx.loyaltyRedemptionGrant.create({
           data: {
             tenantId,
             issueExecutionId: executionId,
             clientId,
-            codeHash: createHmac('sha256', this.redemptionCodeSecret)
-              .update('p4-03-loyalty-grant-code\0')
-              .update(tenantId)
-              .update('\0')
-              .update(executionId)
-              .digest('hex'),
+            codeHash: loyaltyRedemptionClaimLookup(
+              this.redemptionCodePepper,
+              claimArtifact.bearer,
+            ),
             serviceRef: this.text(input.serviceRef, 'serviceRef'),
             points: this.integer(input.servicePoints, 'servicePoints'),
             issuedAt,
@@ -691,7 +723,7 @@ export class P403LegacyLoyaltyExecutableService {
             legacySourceRef,
           },
         });
-        return this.grantValue(executionId, grant.id);
+        return this.grantValue(executionId, grant.id, claimArtifact);
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
@@ -953,11 +985,16 @@ export class P403LegacyLoyaltyExecutableService {
     return grant ? this.grantValue(executionId, grant.id) : null;
   }
 
-  private grantValue(executionId: string, grantId: string): P403ExecutionValue {
+  private grantValue(
+    executionId: string,
+    grantId: string,
+    claimArtifact?: LoyaltyRedemptionClaimArtifactV1,
+  ): P403ExecutionValue {
     return {
       actionClass: 'issue_loyalty_redemption_grant',
       actionExecutionId: executionId,
       grantId,
+      ...(claimArtifact ? { claimArtifact } : {}),
       providerWrites: 0,
     };
   }

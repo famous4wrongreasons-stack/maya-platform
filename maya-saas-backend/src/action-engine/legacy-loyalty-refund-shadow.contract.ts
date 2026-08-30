@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import { ActionContractError } from './action-engine.errors';
 
 export const LEGACY_LOYALTY_REFUND_SHADOW_CAPABILITY =
@@ -6,6 +8,37 @@ export const LEGACY_LOYALTY_REFUND_INPUT_CONTRACT =
   'maya.refund_legacy_loyalty-input/1' as const;
 export const LEGACY_LOYALTY_REFUND_POLICY =
   'legacy-cancel-exact-ledger-compensation.v1' as const;
+export const LEGACY_LOYALTY_REDEEM_LEDGER_KIND = 'redeem' as const;
+export const LEGACY_LOYALTY_REFUND_LEDGER_KIND = 'refund' as const;
+
+function canonicalLedgerHash(parts: readonly string[]): string {
+  return createHash('sha256').update(parts.join('\u001f')).digest('hex');
+}
+
+export function legacyLoyaltyProviderRecordIdentityHash(input: {
+  tenantId: string;
+  provider: string;
+  providerRecordId: string;
+}): string {
+  return canonicalLedgerHash([
+    input.tenantId,
+    input.provider,
+    input.providerRecordId,
+  ]);
+}
+
+export function legacyLoyaltyRefundCorrelationHash(input: {
+  tenantId: string;
+  originalRedemptionActionExecutionId: string;
+  cancellationFactHash: string;
+}): string {
+  return canonicalLedgerHash([
+    input.tenantId,
+    input.originalRedemptionActionExecutionId,
+    input.cancellationFactHash,
+    LEGACY_LOYALTY_REFUND_POLICY,
+  ]);
+}
 
 const OPAQUE_REF_PATTERN = /^[A-Za-z0-9._:/-]{1,240}$/;
 

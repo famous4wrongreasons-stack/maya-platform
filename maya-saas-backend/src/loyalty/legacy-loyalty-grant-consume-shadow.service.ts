@@ -1,4 +1,4 @@
-import { createHash, createHmac } from 'node:crypto';
+import { createHash } from 'node:crypto';
 
 import { Injectable } from '@nestjs/common';
 
@@ -13,6 +13,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import type { LegacyLoyaltyGrantConsumeShadowDto } from './dto/legacy-loyalty-grant-consume-shadow.dto';
+import { loyaltyRedemptionClaimLookup } from './loyalty-redemption-claim.contract';
 
 type NoPlanOutcome =
   | 'shadow_disabled'
@@ -159,12 +160,7 @@ export class LegacyLoyaltyGrantConsumeShadowService {
       return this.noPlan('policy_unresolved', 1);
     }
 
-    const codeHash = createHmac('sha256', codePepper)
-      .update(
-        `${LOYALTY_REDEMPTION_CODE_HASH_CONTRACT}\u001f${normalizedCode}`,
-        'utf8',
-      )
-      .digest('hex');
+    const codeHash = loyaltyRedemptionClaimLookup(codePepper, normalizedCode);
     const grant = await this.prisma.loyaltyRedemptionGrant.findUnique({
       where: {
         tenantId_codeHash: {
@@ -215,6 +211,7 @@ export class LegacyLoyaltyGrantConsumeShadowService {
             },
           },
         },
+        revocation: { select: { id: true } },
       },
     });
     if (
@@ -230,6 +227,7 @@ export class LegacyLoyaltyGrantConsumeShadowService {
       grant.issueExecution.tenantId !== tenant.tenantId ||
       grant.issueExecution.actionClass !== 'issue_loyalty_redemption_grant' ||
       grant.issueExecution.state !== 'SUCCEEDED' ||
+      grant.revocation !== null ||
       !grant.serviceRef.trim() ||
       !Number.isInteger(grant.points) ||
       grant.points < 1 ||

@@ -7,6 +7,8 @@ import {
   ActionEngineRuntimeService,
   LEGACY_LOYALTY_REFUND_POLICY,
   LEGACY_LOYALTY_REFUND_SHADOW_CAPABILITY,
+  legacyLoyaltyProviderRecordIdentityHash,
+  legacyLoyaltyRefundCorrelationHash,
 } from '../action-engine';
 import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
@@ -156,11 +158,11 @@ export class LegacyLoyaltyRefundShadowService {
     });
     if (!originalExecution) return this.noPlan('evidence_unresolved', 1);
 
-    const providerRecordIdentityHash = this.hash([
-      tenant.tenantId,
-      boundSource.provider,
+    const providerRecordIdentityHash = legacyLoyaltyProviderRecordIdentityHash({
+      tenantId: tenant.tenantId,
+      provider: boundSource.provider,
       providerRecordId,
-    ]);
+    });
     const originalDebitRows = await this.prisma.loyaltyTransaction.findMany({
       where: {
         tenantId: tenant.tenantId,
@@ -212,12 +214,11 @@ export class LegacyLoyaltyRefundShadowService {
       providerRecordId,
       'appointment.removed',
     ]);
-    const refundCorrelationHash = this.hash([
-      tenant.tenantId,
-      originalExecution.id,
+    const refundCorrelationHash = legacyLoyaltyRefundCorrelationHash({
+      tenantId: tenant.tenantId,
+      originalRedemptionActionExecutionId: originalExecution.id,
       cancellationFactHash,
-      LEGACY_LOYALTY_REFUND_POLICY,
-    ]);
+    });
     const existingRefund = await this.prisma.loyaltyTransaction.findFirst({
       where: {
         tenantId: tenant.tenantId,

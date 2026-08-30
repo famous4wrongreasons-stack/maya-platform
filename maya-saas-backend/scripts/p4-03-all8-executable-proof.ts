@@ -433,7 +433,7 @@ async function main(): Promise<void> {
     prisma,
     engine.runtime,
     proofEncryption(),
-    { redemptionCodeSecret: CODE_SECRET },
+    { redemptionCodePepper: CODE_SECRET },
   );
   const matrix: Record<string, boolean> = {};
 
@@ -605,7 +605,7 @@ async function main(): Promise<void> {
       crashing.prisma,
       engine.runtime,
       proofEncryption(),
-      { redemptionCodeSecret: CODE_SECRET },
+      { redemptionCodePepper: CODE_SECRET },
     );
     const crashAfterRequest = request({
       tenantId: tenant.tenantId,
@@ -1402,7 +1402,7 @@ async function main(): Promise<void> {
         },
       ).runtime,
       proofEncryption(),
-      { redemptionCodeSecret: CODE_SECRET },
+      { redemptionCodePepper: CODE_SECRET },
     );
     assert.deepEqual(
       (await restartExecutor.execute(earnRequest)).value.transactionIds,

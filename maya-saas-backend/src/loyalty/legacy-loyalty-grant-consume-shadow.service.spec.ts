@@ -1,10 +1,9 @@
-import { createHash, createHmac } from 'node:crypto';
+import { createHash } from 'node:crypto';
 
 import type { ActionExecution } from '@prisma/client';
 
 import {
   ActionEngineRuntimeService,
-  LOYALTY_REDEMPTION_CODE_HASH_CONTRACT,
   type TrustedActionExecutionRequestV1,
 } from '../action-engine';
 import { PrismaService } from '../prisma/prisma.service';
@@ -15,6 +14,10 @@ import {
   LegacyLoyaltyGrantConsumeShadowDto,
 } from './dto/legacy-loyalty-grant-consume-shadow.dto';
 import { LegacyLoyaltyGrantConsumeShadowService } from './legacy-loyalty-grant-consume-shadow.service';
+import {
+  issueLoyaltyRedemptionClaim,
+  loyaltyRedemptionClaimLookup,
+} from './loyalty-redemption-claim.contract';
 
 const CODE_PEPPER = 'test-only-code-pepper-'.padEnd(64, 'x');
 const RAW_CODE = 'LOY-ONE-TIME-8008';
@@ -25,12 +28,7 @@ function hash(parts: readonly string[]): string {
 }
 
 function codeHash(code: string): string {
-  return createHmac('sha256', CODE_PEPPER)
-    .update(
-      `${LOYALTY_REDEMPTION_CODE_HASH_CONTRACT}\u001f${code.toUpperCase()}`,
-      'utf8',
-    )
-    .digest('hex');
+  return loyaltyRedemptionClaimLookup(CODE_PEPPER, code);
 }
 
 const LOGICAL_IDENTITY = hash([
@@ -78,6 +76,7 @@ function canonicalGrant() {
       user: { status: 'active' },
     },
     redemption: null,
+    revocation: null,
   };
 }
 
@@ -249,6 +248,95 @@ describe('LegacyLoyaltyGrantConsumeShadowService', () => {
     );
   });
 
+  it('accepts the exact issue artifact after a service restart without storing raw bearer material', async () => {
+    const claim = issueLoyaltyRedemptionClaim();
+    const issuedGrant = {
+      ...canonicalGrant(),
+      codeHash: codeHash(claim.bearer),
+    };
+    const firstProcess = buildHarness();
+    const restartedProcess = buildHarness();
+    firstProcess.grantFindUnique.mockResolvedValue(issuedGrant);
+    restartedProcess.grantFindUnique.mockResolvedValue(issuedGrant);
+    const dto = validDto();
+    dto.redemption_code = claim.bearer;
+
+    const beforeRestart = await firstProcess.service.planConsume(dto);
+    const afterRestart = await restartedProcess.service.planConsume(dto);
+
+    expect(afterRestart).toEqual(beforeRestart);
+    expect(afterRestart).toMatchObject({
+      outcome: 'planned',
+      intendedMutation: { grantId: 'grant-8' },
+      newPathValueMutations: 0,
+      newPathProviderWrites: 0,
+    });
+    expect(restartedProcess.grantFindUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          tenantId_codeHash: {
+            tenantId: 'tenant-a',
+            codeHash: issuedGrant.codeHash,
+          },
+        },
+      }),
+    );
+    expect(JSON.stringify(issuedGrant)).not.toContain(claim.bearer);
+    expect(
+      JSON.stringify(restartedProcess.planShadow.mock.calls[0]?.[0]),
+    ).not.toContain(claim.bearer);
+  });
+
+  it('fails closed for a wrong bearer or the same bearer under another tenant', async () => {
+    const wrongBearer = buildHarness();
+    wrongBearer.grantFindUnique.mockImplementation(
+      (query: {
+        where: { tenantId_codeHash: { tenantId: string; codeHash: string } };
+      }) =>
+        Promise.resolve(
+          query.where.tenantId_codeHash.codeHash === codeHash(RAW_CODE)
+            ? canonicalGrant()
+            : null,
+        ),
+    );
+    const wrongCodeDto = validDto();
+    wrongCodeDto.redemption_code = 'LOY-WRONG-BEARER-9009';
+
+    await expect(
+      wrongBearer.service.planConsume(wrongCodeDto),
+    ).resolves.toMatchObject({
+      outcome: 'evidence_unresolved',
+      actionExecutionId: null,
+      newPathProviderWrites: 0,
+    });
+    expect(wrongBearer.planShadow).not.toHaveBeenCalled();
+
+    const wrongTenant = buildHarness();
+    wrongTenant.bridgeSource.resolveTenantByIntegration.mockResolvedValue({
+      tenantId: 'tenant-b',
+      slug: 'tenant-b',
+      resolvedBy: 'integration',
+    });
+    wrongTenant.grantFindUnique.mockResolvedValue(null);
+
+    await expect(
+      wrongTenant.service.planConsume(validDto()),
+    ).resolves.toMatchObject({
+      outcome: 'evidence_unresolved',
+      actionExecutionId: null,
+    });
+    expect(wrongTenant.grantFindUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          tenantId_codeHash: {
+            tenantId: 'tenant-b',
+            codeHash: codeHash(RAW_CODE),
+          },
+        },
+      }),
+    );
+  });
+
   it('fails closed for an unmapped, inactive, or cross-tenant requester', async () => {
     const setup = buildHarness();
     setup.requesterFindUnique.mockResolvedValue(null);
@@ -358,6 +446,22 @@ describe('LegacyLoyaltyGrantConsumeShadowService', () => {
         'per_redemption_cap_exceeded',
       ],
     });
+  });
+
+  it('fails closed before planning when the grant has an append-only revocation', async () => {
+    const setup = buildHarness();
+    setup.grantFindUnique.mockResolvedValue({
+      ...canonicalGrant(),
+      revocation: { id: 'revocation-8' },
+    });
+
+    await expect(setup.service.planConsume(validDto())).resolves.toMatchObject({
+      outcome: 'evidence_unresolved',
+      actionExecutionId: null,
+      newPathValueMutations: 0,
+      newPathProviderWrites: 0,
+    });
+    expect(setup.planShadow).not.toHaveBeenCalled();
   });
 
   it('recognizes one exact existing claim and rejects contradictory reuse', async () => {
