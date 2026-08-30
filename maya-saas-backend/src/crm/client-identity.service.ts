@@ -7,6 +7,30 @@ import { phoneMatchKey } from '../common/phone.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 
+export const CLIENT_IDENTITY_UNRESOLVED = 'client_identity_unresolved' as const;
+export const CLIENT_IDENTITY_GUARD_UNAVAILABLE =
+  'client_identity_guard_unavailable' as const;
+
+type ClientIdentityRegistrationGuardReason =
+  typeof CLIENT_IDENTITY_UNRESOLVED | typeof CLIENT_IDENTITY_GUARD_UNAVAILABLE;
+
+export type ClientIdentityRegistrationGuardDecision =
+  | { allowed: true; reasonCode: null }
+  | { allowed: false; reasonCode: ClientIdentityRegistrationGuardReason };
+
+export type ShadowClientIdentityRegistrationOutcome =
+  | { status: 'registered'; clientId: string }
+  | { status: 'ignored'; reasonCode: null }
+  | { status: 'blocked'; reasonCode: ClientIdentityRegistrationGuardReason }
+  | { status: 'failed'; reasonCode: 'client_identity_registration_failed' };
+
+export class ClientIdentityRegistrationGuardError extends Error {
+  constructor(readonly code: ClientIdentityRegistrationGuardReason) {
+    super(code);
+    this.name = 'ClientIdentityRegistrationGuardError';
+  }
+}
+
 /**
  * Теневая регистрация личности клиента на границе нормализации CRM.
  *
@@ -57,42 +81,96 @@ export class ClientIdentityService {
 
     const phoneHash = this.hashPhone(params.phone);
 
-    const existing = await this.prisma.crmClientLink.findUnique({
-      where: {
-        tenantId_provider_externalId: { tenantId, provider, externalId },
-      },
-      select: { clientId: true, unlinkedAt: true },
-    });
+    return this.prisma
+      .$transaction(
+        async (tx) => {
+          // The hold lookup and any identity write share one SERIALIZABLE
+          // boundary. A concurrent hold materialization cannot leave a
+          // check-then-create window that silently registers the collision.
+          await this.assertRegistrationAllowed(tx, {
+            tenantId,
+            provider,
+            externalId,
+          });
 
-    if (existing) {
-      // Карточку увидели живой: обновляем свежесть и снимаем отметку об
-      // исчезновении, если она была. Переподключение той же CRM обязано
-      // возвращать ТУ ЖЕ личность, а не заводить новую.
-      await this.prisma.crmClientLink.update({
-        where: {
-          tenantId_provider_externalId: { tenantId, provider, externalId },
+          const existing = await tx.crmClientLink.findUnique({
+            where: {
+              tenantId_provider_externalId: {
+                tenantId,
+                provider,
+                externalId,
+              },
+            },
+            select: { clientId: true, unlinkedAt: true },
+          });
+
+          if (existing) {
+            // Карточку увидели живой: обновляем свежесть и снимаем отметку об
+            // исчезновении, если она была. Переподключение той же CRM обязано
+            // возвращать ТУ ЖЕ личность, а не заводить новую.
+            await tx.crmClientLink.update({
+              where: {
+                tenantId_provider_externalId: {
+                  tenantId,
+                  provider,
+                  externalId,
+                },
+              },
+              data: { syncedAt: new Date(), unlinkedAt: null },
+            });
+
+            if (phoneHash) {
+              // Смена номера не создаёт новую личность — в этом весь смысл
+              // якоря.
+              await tx.client.updateMany({
+                where: { id: existing.clientId, tenantId },
+                data: { phoneHash },
+              });
+            }
+
+            return { clientId: existing.clientId };
+          }
+
+          return this.createIdentityForCard(tx, {
+            tenantId,
+            provider,
+            externalId,
+            phoneHash,
+            userId: params.userId ?? null,
+          });
         },
-        data: { syncedAt: new Date(), unlinkedAt: null },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      )
+      .catch(async (error: unknown) => {
+        // Гонка: две параллельные регистрации одной карточки. Уникальный ключ
+        // не даёт задвоить связь, а повтор — это воспроизведение, а не сбой.
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2002'
+        ) {
+          // The winner may have raced with hold materialization. Re-check the
+          // same authoritative guard before returning its identity.
+          await this.assertRegistrationAllowed(this.prisma, {
+            tenantId,
+            provider,
+            externalId,
+          });
+          const raced = await this.prisma.crmClientLink.findUnique({
+            where: {
+              tenantId_provider_externalId: {
+                tenantId,
+                provider,
+                externalId,
+              },
+            },
+            select: { clientId: true },
+          });
+
+          return raced ? { clientId: raced.clientId } : null;
+        }
+
+        throw error;
       });
-
-      if (phoneHash) {
-        // Смена номера не создаёт новую личность — в этом весь смысл якоря.
-        await this.prisma.client.updateMany({
-          where: { id: existing.clientId, tenantId },
-          data: { phoneHash },
-        });
-      }
-
-      return { clientId: existing.clientId };
-    }
-
-    return this.createIdentityForCard({
-      tenantId,
-      provider,
-      externalId,
-      phoneHash,
-      userId: params.userId ?? null,
-    });
   }
 
   /**
@@ -103,56 +181,103 @@ export class ClientIdentityService {
    * автоматическое объединение по нему склеило бы разных людей необратимо.
    * Слияние дублей остаётся отдельной осознанной операцией.
    */
-  private async createIdentityForCard(input: {
+  private async createIdentityForCard(
+    tx: Prisma.TransactionClient,
+    input: {
+      tenantId: string;
+      provider: string;
+      externalId: string;
+      phoneHash: string | null;
+      userId: string | null;
+    },
+  ): Promise<{ clientId: string }> {
+    const client = await tx.client.create({
+      data: {
+        tenantId: input.tenantId,
+        userId: input.userId,
+        phoneHash: input.phoneHash,
+        crmLinks: {
+          // tenantId у связи задаёт САМА связь с клиентом: внешний ключ
+          // составной, (clientId, tenantId) → Client(id, tenantId), поэтому
+          // задать арендатора отдельно нельзя — и не нужно.
+          create: {
+            provider: input.provider,
+            externalId: input.externalId,
+          },
+        },
+      },
+      select: { id: true },
+    });
+
+    return { clientId: client.id };
+  }
+
+  /**
+   * Read-only guard decision used by controlled dry-runs. It does not create
+   * or update identity rows and it never treats a lookup failure as ALLOW.
+   */
+  async checkCrmClientRegistrationGuard(params: {
     tenantId: string;
     provider: string;
     externalId: string;
-    phoneHash: string | null;
-    userId: string | null;
-  }): Promise<{ clientId: string } | null> {
-    try {
-      const client = await this.prisma.client.create({
-        data: {
-          tenantId: input.tenantId,
-          userId: input.userId,
-          phoneHash: input.phoneHash,
-          crmLinks: {
-            // tenantId у связи задаёт САМА связь с клиентом: внешний ключ
-            // составной, (clientId, tenantId) → Client(id, tenantId), поэтому
-            // задать арендатора отдельно нельзя — и не нужно.
-            create: {
-              provider: input.provider,
-              externalId: input.externalId,
-            },
-          },
-        },
-        select: { id: true },
-      });
+  }): Promise<ClientIdentityRegistrationGuardDecision> {
+    const tenantId = this.tenantContext.assertTenantId(params.tenantId);
+    const provider = params.provider.trim().toLowerCase();
+    const externalId = params.externalId.trim();
 
-      return { clientId: client.id };
-    } catch (error) {
-      // Гонка: две параллельные регистрации одной карточки. Уникальный ключ
-      // не даёт задвоить связь, а повтор — это воспроизведение, а не сбой.
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
-        const raced = await this.prisma.crmClientLink.findUnique({
-          where: {
-            tenantId_provider_externalId: {
-              tenantId: input.tenantId,
-              provider: input.provider,
-              externalId: input.externalId,
-            },
-          },
-          select: { clientId: true },
-        });
-
-        return raced ? { clientId: raced.clientId } : null;
-      }
-
-      throw error;
+    if (!provider || !externalId) {
+      return { allowed: false, reasonCode: CLIENT_IDENTITY_GUARD_UNAVAILABLE };
     }
+
+    try {
+      const blocked = await this.hasActiveHold(this.prisma, {
+        tenantId,
+        provider,
+        externalId,
+      });
+      return blocked
+        ? { allowed: false, reasonCode: CLIENT_IDENTITY_UNRESOLVED }
+        : { allowed: true, reasonCode: null };
+    } catch {
+      return { allowed: false, reasonCode: CLIENT_IDENTITY_GUARD_UNAVAILABLE };
+    }
+  }
+
+  private async assertRegistrationAllowed(
+    db: Pick<Prisma.TransactionClient, 'unresolvedClientIdentityHold'>,
+    input: { tenantId: string; provider: string; externalId: string },
+  ): Promise<void> {
+    try {
+      if (await this.hasActiveHold(db, input)) {
+        throw new ClientIdentityRegistrationGuardError(
+          CLIENT_IDENTITY_UNRESOLVED,
+        );
+      }
+    } catch (error) {
+      if (error instanceof ClientIdentityRegistrationGuardError) {
+        throw error;
+      }
+      throw new ClientIdentityRegistrationGuardError(
+        CLIENT_IDENTITY_GUARD_UNAVAILABLE,
+      );
+    }
+  }
+
+  private async hasActiveHold(
+    db: Pick<Prisma.TransactionClient, 'unresolvedClientIdentityHold'>,
+    input: { tenantId: string; provider: string; externalId: string },
+  ): Promise<boolean> {
+    const hold = await db.unresolvedClientIdentityHold.findUnique({
+      where: {
+        tenantId_provider_externalId: {
+          tenantId: input.tenantId,
+          provider: input.provider,
+          externalId: input.externalId,
+        },
+      },
+      select: { resolvedAt: true },
+    });
+    return hold?.resolvedAt === null;
   }
 
   /**
@@ -168,15 +293,28 @@ export class ClientIdentityService {
     externalId: string;
     phone?: string | null;
     userId?: string | null;
-  }): Promise<void> {
+  }): Promise<ShadowClientIdentityRegistrationOutcome> {
     try {
-      await this.registerCrmClient(params);
+      const result = await this.registerCrmClient(params);
+      return result
+        ? { status: 'registered', clientId: result.clientId }
+        : { status: 'ignored', reasonCode: null };
     } catch (error) {
+      if (error instanceof ClientIdentityRegistrationGuardError) {
+        this.logger.warn(
+          `shadow client identity registration blocked provider=${params.provider} reason=${error.code}`,
+        );
+        return { status: 'blocked', reasonCode: error.code };
+      }
       this.logger.warn(
         `shadow client identity registration failed provider=${params.provider}: ${
           error instanceof Error ? error.name : 'unknown'
         }`,
       );
+      return {
+        status: 'failed',
+        reasonCode: 'client_identity_registration_failed',
+      };
     }
   }
 

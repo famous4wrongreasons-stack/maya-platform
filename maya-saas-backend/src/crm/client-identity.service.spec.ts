@@ -3,7 +3,12 @@ import { ForbiddenException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import { ClientIdentityService } from './client-identity.service';
+import {
+  CLIENT_IDENTITY_GUARD_UNAVAILABLE,
+  CLIENT_IDENTITY_UNRESOLVED,
+  ClientIdentityRegistrationGuardError,
+  ClientIdentityService,
+} from './client-identity.service';
 
 type ClientCreateArgs = {
   data: {
@@ -16,11 +21,14 @@ type ClientCreateArgs = {
 type ClientUpdateManyArgs = { where: { id: string; tenantId: string } };
 type LinkUpdateArgs = { data: { unlinkedAt: Date | null } };
 type LinkRow = { clientId: string; unlinkedAt: Date | null } | null;
+type HoldRow = { resolvedAt: Date | null } | null;
+type TransactionOptions = { isolationLevel?: string };
 
 describe('ClientIdentityService', () => {
   const createService = (
     overrides: {
       linkFindUnique?: jest.MockedFunction<() => Promise<LinkRow>>;
+      holdFindUnique?: jest.MockedFunction<() => Promise<HoldRow>>;
       secret?: string;
     } = {},
   ) => {
@@ -35,9 +43,19 @@ describe('ClientIdentityService', () => {
     const clientUpdateMany: jest.MockedFunction<
       (args: ClientUpdateManyArgs) => Promise<{ count: number }>
     > = jest.fn().mockResolvedValue({ count: 1 });
+    const holdFindUnique: jest.MockedFunction<() => Promise<HoldRow>> =
+      overrides.holdFindUnique ?? jest.fn().mockResolvedValue(null);
+    const transaction: jest.MockedFunction<
+      (
+        callback: (tx: unknown) => Promise<unknown>,
+        options?: TransactionOptions,
+      ) => Promise<unknown>
+    > = jest.fn(async (callback) => callback(prisma));
     const prisma = {
       crmClientLink: { findUnique: linkFindUnique, update: linkUpdate },
       client: { create: clientCreate, updateMany: clientUpdateMany },
+      unresolvedClientIdentityHold: { findUnique: holdFindUnique },
+      $transaction: transaction,
     } as unknown as PrismaService;
     const tenantContext = new TenantContextService();
     const service = new ClientIdentityService(prisma, tenantContext, {
@@ -55,6 +73,8 @@ describe('ClientIdentityService', () => {
       linkUpdate,
       clientCreate,
       clientUpdateMany,
+      holdFindUnique,
+      transaction,
     };
   };
 
@@ -68,7 +88,13 @@ describe('ClientIdentityService', () => {
     );
 
   it('creates an identity for a card that was never seen before', async () => {
-    const { service, tenantContext, clientCreate } = createService({
+    const {
+      service,
+      tenantContext,
+      clientCreate,
+      holdFindUnique,
+      transaction,
+    } = createService({
       linkFindUnique: jest.fn().mockResolvedValue(null),
     });
 
@@ -85,6 +111,151 @@ describe('ClientIdentityService', () => {
     // Хеш, а не номер: сам телефон в таблицу не попадает никогда.
     expect(createArgs?.data.phoneHash).toMatch(/^[a-f0-9]{64}$/);
     expect(JSON.stringify(createArgs)).not.toContain('9990000000');
+    expect(holdFindUnique).toHaveBeenCalledWith({
+      where: {
+        tenantId_provider_externalId: {
+          tenantId: 'tenant-1',
+          provider: 'yclients',
+          externalId: '777',
+        },
+      },
+      select: { resolvedAt: true },
+    });
+    expect(transaction.mock.calls[0]?.[1]).toEqual({
+      isolationLevel: 'Serializable',
+    });
+  });
+
+  it('blocks an active unresolved provider identity before any identity write', async () => {
+    const {
+      service,
+      tenantContext,
+      linkFindUnique,
+      linkUpdate,
+      clientCreate,
+      clientUpdateMany,
+    } = createService({
+      holdFindUnique: jest.fn().mockResolvedValue({ resolvedAt: null }),
+    });
+
+    await expect(
+      register(service, tenantContext, {
+        tenantId: 'tenant-1',
+        provider: 'YCLIENTS',
+        externalId: 'shared-provider-card',
+      }),
+    ).rejects.toMatchObject<ClientIdentityRegistrationGuardError>({
+      code: CLIENT_IDENTITY_UNRESOLVED,
+    });
+    expect(linkFindUnique).not.toHaveBeenCalled();
+    expect(linkUpdate).not.toHaveBeenCalled();
+    expect(clientCreate).not.toHaveBeenCalled();
+    expect(clientUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it('allows ordinary canonical registration when no active hold exists', async () => {
+    const { service, tenantContext, clientCreate } = createService({
+      holdFindUnique: jest.fn().mockResolvedValue(null),
+      linkFindUnique: jest.fn().mockResolvedValue(null),
+    });
+
+    await expect(
+      register(service, tenantContext, {
+        tenantId: 'tenant-1',
+        provider: 'yclients',
+        externalId: 'safe-provider-card',
+      }),
+    ).resolves.toEqual({ clientId: 'client-1' });
+    expect(clientCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows registration after a hold has been durably resolved', async () => {
+    const { service, tenantContext, clientCreate } = createService({
+      holdFindUnique: jest
+        .fn()
+        .mockResolvedValue({ resolvedAt: new Date('2026-08-31T00:00:00Z') }),
+      linkFindUnique: jest.fn().mockResolvedValue(null),
+    });
+
+    await expect(
+      register(service, tenantContext, {
+        tenantId: 'tenant-1',
+        provider: 'yclients',
+        externalId: 'resolved-provider-card',
+      }),
+    ).resolves.toEqual({ clientId: 'client-1' });
+    expect(clientCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('fails closed when the hold lookup is unavailable', async () => {
+    const { service, tenantContext, linkFindUnique, clientCreate } =
+      createService({
+        holdFindUnique: jest.fn().mockRejectedValue(new Error('lookup failed')),
+      });
+
+    await expect(
+      register(service, tenantContext, {
+        tenantId: 'tenant-1',
+        provider: 'yclients',
+        externalId: '777',
+      }),
+    ).rejects.toMatchObject<ClientIdentityRegistrationGuardError>({
+      code: CLIENT_IDENTITY_GUARD_UNAVAILABLE,
+    });
+    expect(linkFindUnique).not.toHaveBeenCalled();
+    expect(clientCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns machine-readable guard decisions without identity writes', async () => {
+    const { service, tenantContext, clientCreate } = createService({
+      holdFindUnique: jest
+        .fn()
+        .mockResolvedValueOnce({ resolvedAt: null })
+        .mockResolvedValueOnce(null),
+    });
+
+    const blocked = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.checkCrmClientRegistrationGuard({
+        tenantId: 'tenant-1',
+        provider: 'yclients',
+        externalId: 'shared-provider-card',
+      }),
+    );
+    const allowed = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.checkCrmClientRegistrationGuard({
+        tenantId: 'tenant-1',
+        provider: 'yclients',
+        externalId: 'safe-provider-card',
+      }),
+    );
+
+    expect(blocked).toEqual({
+      allowed: false,
+      reasonCode: CLIENT_IDENTITY_UNRESOLVED,
+    });
+    expect(allowed).toEqual({ allowed: true, reasonCode: null });
+    expect(clientCreate).not.toHaveBeenCalled();
+  });
+
+  it('leaves all 23 collision-free provider identities registrable', async () => {
+    const { service, tenantContext, holdFindUnique, clientCreate } =
+      createService({
+        holdFindUnique: jest.fn().mockResolvedValue(null),
+        linkFindUnique: jest.fn().mockResolvedValue(null),
+      });
+
+    for (let index = 1; index <= 23; index += 1) {
+      await expect(
+        register(service, tenantContext, {
+          tenantId: 'tenant-1',
+          provider: 'yclients',
+          externalId: `safe-provider-card-${index}`,
+        }),
+      ).resolves.toEqual({ clientId: 'client-1' });
+    }
+
+    expect(holdFindUnique).toHaveBeenCalledTimes(23);
+    expect(clientCreate).toHaveBeenCalledTimes(23);
   });
 
   it('is idempotent: the same card returns the same identity', async () => {
@@ -236,7 +407,7 @@ describe('ClientIdentityService', () => {
 
   it('never lets a shadow write break the caller', async () => {
     const { service, tenantContext } = createService({
-      linkFindUnique: jest
+      holdFindUnique: jest
         .fn()
         .mockRejectedValue(new Error('database is gone')),
     });
@@ -249,7 +420,10 @@ describe('ClientIdentityService', () => {
           externalId: '777',
         }),
       ),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({
+      status: 'blocked',
+      reasonCode: CLIENT_IDENTITY_GUARD_UNAVAILABLE,
+    });
   });
 
   it('produces no hash when the secret is absent', async () => {
