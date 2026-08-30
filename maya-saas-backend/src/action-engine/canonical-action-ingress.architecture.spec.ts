@@ -20,6 +20,41 @@ function productionTypescriptFiles(root: string): string[] {
   });
 }
 
+function isCanonicalActionEngineLedgerOwner(
+  path: string,
+  contents: string,
+): boolean {
+  const file = basename(path);
+  const commonBoundary =
+    contents.includes('ActionEngineRuntimeService') &&
+    contents.includes('this.actionEngine.executeWithReceipt(') &&
+    !contents.includes('ActionEngineKernel') &&
+    !contents.includes('actionExecution.create') &&
+    !contents.includes('.createCanonicalExecution(');
+
+  if (file === 'loyalty.service.ts') {
+    return (
+      commonBoundary &&
+      contents.includes("capability: 'loyalty.internal-adjust.execute.v1'") &&
+      /dispatch:[\s\S]{0,500}this\.applyInternalAdjustment\(/.test(contents) &&
+      (contents.match(/this\.applyInternalAdjustment\(/g) ?? []).length === 1 &&
+      (contents.match(/loyaltyTransaction\.create/g) ?? []).length === 1
+    );
+  }
+
+  if (file === 'p4-03-legacy-loyalty-executable.service.ts') {
+    return (
+      commonBoundary &&
+      contents.includes('P4_03_EXECUTABLE_CAPABILITIES') &&
+      /dispatch:[\s\S]{0,500}this\.applyLedgerMutation\(/.test(contents) &&
+      /dispatch:[\s\S]{0,500}this\.consumeGrant\(/.test(contents) &&
+      (contents.match(/loyaltyTransaction\.create/g) ?? []).length === 2
+    );
+  }
+
+  return false;
+}
+
 describe('canonical ActionExecution ingress ratchet', () => {
   it('routes every production runtime creation through canonical ingress', () => {
     const runtime = source(join(__dirname, 'action-engine.runtime.ts'));
@@ -143,11 +178,31 @@ describe('canonical ActionExecution ingress ratchet', () => {
     expect(controller).not.toContain('loyaltyTransaction.create');
     expect(aiHandler).not.toContain('loyaltyTransaction.create');
 
-    const directLedgerOwners = productionTypescriptFiles(SRC_ROOT).filter(
-      (path) => source(path).includes('loyaltyTransaction.create'),
+    const ledgerOwners = productionTypescriptFiles(SRC_ROOT).filter((path) =>
+      source(path).includes('loyaltyTransaction.create'),
     );
-    expect(directLedgerOwners.map((path) => basename(path))).toEqual([
+    expect(ledgerOwners.map((path) => basename(path))).toEqual([
       'loyalty.service.ts',
+      'p4-03-legacy-loyalty-executable.service.ts',
     ]);
+    expect(
+      ledgerOwners.filter(
+        (path) => !isCanonicalActionEngineLedgerOwner(path, source(path)),
+      ),
+    ).toEqual([]);
+
+    const directOwnerFixture = `
+      export class DirectLoyaltyMutationOwner {
+        write(prisma: { loyaltyTransaction: { create(input: unknown): unknown } }) {
+          return prisma.loyaltyTransaction.create({ data: input });
+        }
+      }
+    `;
+    expect(
+      isCanonicalActionEngineLedgerOwner(
+        join(SRC_ROOT, 'loyalty', 'direct-loyalty-owner.ts'),
+        directOwnerFixture,
+      ),
+    ).toBe(false);
   });
 });

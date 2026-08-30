@@ -44,10 +44,26 @@ describe('P4-03 loyalty grant consume Shadow architecture', () => {
         'legacy-loyalty-grant-consume-shadow.service.ts',
       ),
     );
+    const issueExecutor = source(
+      join(SRC_ROOT, 'loyalty', 'p4-03-legacy-loyalty-executable.service.ts'),
+    );
+    const claimContract = source(
+      join(SRC_ROOT, 'loyalty', 'loyalty-redemption-claim.contract.ts'),
+    );
 
     expect(shadowService).toContain('this.prisma.authIdentity.findUnique({');
     expect(shadowService).toContain('tenantId_provider_providerUserId');
-    expect(shadowService).toContain("createHmac('sha256', codePepper)");
+    expect(shadowService).toContain(
+      'loyaltyRedemptionClaimLookup(codePepper, normalizedCode)',
+    );
+    expect(issueExecutor).toContain('codeHash: loyaltyRedemptionClaimLookup(');
+    expect(shadowService).not.toContain('createHmac(');
+    expect(issueExecutor).not.toContain('createHmac(');
+    expect(claimContract).toContain(
+      'export function loyaltyRedemptionClaimLookup(',
+    );
+    expect(claimContract).toContain('LOYALTY_REDEMPTION_CODE_HASH_CONTRACT');
+    expect(claimContract.match(/createHmac\(/g)).toHaveLength(1);
     expect(shadowService).toContain('tenantId_codeHash');
     expect(shadowService).toContain(
       'MAYA_LEGACY_LOYALTY_GRANT_CONSUME_CASHIER_USER_IDS',
@@ -79,12 +95,22 @@ describe('P4-03 loyalty grant consume Shadow architecture', () => {
       actionRequestStart,
       shadowService.indexOf('\n    return {', actionRequestStart),
     );
+    const issueExecutor = source(
+      join(SRC_ROOT, 'loyalty', 'p4-03-legacy-loyalty-executable.service.ts'),
+    );
+    const safeResult = issueExecutor.slice(
+      issueExecutor.indexOf('private safe('),
+      issueExecutor.indexOf('private restore('),
+    );
 
     expect(actionRequest).not.toContain('normalizedCode');
     expect(actionRequest).not.toContain('codeHash,');
     expect(actionRequest).not.toContain('dto.redemption_code');
     expect(actionRequest).toContain('grantIdentityHash');
     expect(actionRequest).toContain('requesterIdentityHash');
+    expect(issueExecutor).toContain('codeHash: loyaltyRedemptionClaimLookup(');
+    expect(safeResult).not.toContain('claimArtifact');
+    expect(safeResult).not.toContain('bearer');
   });
 
   it('keeps the isolated Python adapter free of legacy and provider mutations', () => {
