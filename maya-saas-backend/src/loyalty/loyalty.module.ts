@@ -21,6 +21,8 @@ import { LegacyLoyaltyBackfillShadowController } from './legacy-loyalty-backfill
 import { LegacyLoyaltyBackfillShadowService } from './legacy-loyalty-backfill-shadow.service';
 import { LegacyLoyaltyGrantIssueShadowController } from './legacy-loyalty-grant-issue-shadow.controller';
 import { LegacyLoyaltyGrantIssueShadowService } from './legacy-loyalty-grant-issue-shadow.service';
+import { LegacyLoyaltyGrantConsumeShadowController } from './legacy-loyalty-grant-consume-shadow.controller';
+import { LegacyLoyaltyGrantConsumeShadowService } from './legacy-loyalty-grant-consume-shadow.service';
 import { LegacyLoyaltyShadowController } from './legacy-loyalty-shadow.controller';
 import { LegacyLoyaltyShadowService } from './legacy-loyalty-shadow.service';
 import { LoyaltyService } from './loyalty.service';
@@ -43,6 +45,7 @@ import { LoyaltyService } from './loyalty.service';
     LegacyLoyaltyImportShadowController,
     LegacyLoyaltyBackfillShadowController,
     LegacyLoyaltyGrantIssueShadowController,
+    LegacyLoyaltyGrantConsumeShadowController,
   ],
   providers: [
     LoyaltyService,
@@ -53,6 +56,7 @@ import { LoyaltyService } from './loyalty.service';
     LegacyLoyaltyImportShadowService,
     LegacyLoyaltyBackfillShadowService,
     LegacyLoyaltyGrantIssueShadowService,
+    LegacyLoyaltyGrantConsumeShadowService,
   ],
   exports: [LoyaltyService],
 })

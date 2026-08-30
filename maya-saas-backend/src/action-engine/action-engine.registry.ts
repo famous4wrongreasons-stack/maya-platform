@@ -40,6 +40,11 @@ import {
   LEGACY_LOYALTY_GRANT_ISSUE_SHADOW_CAPABILITY,
   legacyLoyaltyGrantIssueShadowNormalizer,
 } from './legacy-loyalty-grant-issue-shadow.contract';
+import {
+  LEGACY_LOYALTY_GRANT_CONSUME_INPUT_CONTRACT,
+  LEGACY_LOYALTY_GRANT_CONSUME_SHADOW_CAPABILITY,
+  legacyLoyaltyGrantConsumeShadowNormalizer,
+} from './legacy-loyalty-grant-consume-shadow.contract';
 
 const OPAQUE_REF_PATTERN = /^[A-Za-z0-9._:/-]{1,240}$/;
 
@@ -1137,6 +1142,53 @@ function legacyLoyaltyGrantIssueShadowCapability(): RegisteredActionCapabilityV1
   };
 }
 
+function legacyLoyaltyGrantConsumeShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: LEGACY_LOYALTY_GRANT_CONSUME_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'consume_loyalty_redemption_grant',
+    normalizedInputContract: LEGACY_LOYALTY_GRANT_CONSUME_INPUT_CONTRACT,
+    targetKind: 'loyalty_redemption',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'financial_equivalent',
+      'customer_value',
+      'one_time',
+      'bearer_secret',
+      'destructive',
+      'external_crm',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.legacy-loyalty-grant-consume-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.legacy-loyalty-grant-consume-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.legacy-loyalty-grant-consume-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: legacyLoyaltyGrantConsumeShadowNormalizer,
+  };
+}
+
 function loyaltyInternalAdjustmentCapability(): RegisteredActionCapabilityV1 {
   return {
     capability: 'loyalty.internal-adjust.execute.v1',
@@ -1473,6 +1525,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   legacyLoyaltyImportShadowCapability(),
   legacyLoyaltyBackfillShadowCapability(),
   legacyLoyaltyGrantIssueShadowCapability(),
+  legacyLoyaltyGrantConsumeShadowCapability(),
   appointmentCapability({
     capability: 'crm.appointment.attendance.v1',
     actionClass: 'set_appointment_attendance',
