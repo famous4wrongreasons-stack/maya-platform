@@ -19,7 +19,7 @@ describe('P4-03 legacy loyalty import Shadow architecture', () => {
 
     expect(shadowService).toContain('this.actionEngine.planShadow({');
     expect(shadowService).toContain(
-      'this.crm.getClientLoyaltyEvidenceReadOnly(',
+      'this.crm.getClientLoyaltyEvidenceByExternalIdReadOnly(',
     );
     expect(shadowService).not.toContain('executeWithReceipt');
     expect(shadowService).not.toContain('loyaltyTransaction.create');
@@ -55,7 +55,7 @@ describe('P4-03 legacy loyalty import Shadow architecture', () => {
   it('uses a provider evidence read that cannot register an ambiguous identity', () => {
     const crmService = source(join(SRC_ROOT, 'crm', 'crm.service.ts'));
     const readOnlyStart = crmService.indexOf(
-      'async getClientLoyaltyEvidenceReadOnly',
+      'async getClientLoyaltyEvidenceByExternalIdReadOnly',
     );
     const mutatingStart = crmService.indexOf(
       'async getClientLoyalty(',
@@ -65,7 +65,13 @@ describe('P4-03 legacy loyalty import Shadow architecture', () => {
 
     expect(readOnlyStart).toBeGreaterThan(0);
     expect(mutatingStart).toBeGreaterThan(readOnlyStart);
-    expect(readOnlyMethod).toContain('adapter.getClientLoyalty({');
+    expect(readOnlyMethod).toContain('this.getClientRegistry(scopedTenantId)');
+    expect(readOnlyMethod).toContain(
+      '(candidate) => candidate.external_id === exactExternalId',
+    );
+    expect(readOnlyMethod).toContain(
+      'loyalty.external_client_id === exactExternalId',
+    );
     expect(readOnlyMethod).not.toContain('tryRegisterCrmClient');
     expect(readOnlyMethod).not.toContain('.create(');
     expect(readOnlyMethod).not.toContain('.update(');

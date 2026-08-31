@@ -86,6 +86,11 @@ describe('LoyaltyService', () => {
       },
     ]);
     const transactionMock = jest.fn();
+    const clientFindUniqueMock = jest.fn().mockResolvedValue({
+      id: 'client-canonical-a',
+      mergedIntoClientId: null,
+    });
+    const loyaltyTransactionFindManyMock = jest.fn().mockResolvedValue([]);
     const prisma = {
       tenant: {
         findUnique: jest.fn().mockResolvedValue(null),
@@ -93,12 +98,15 @@ describe('LoyaltyService', () => {
       authIdentity: {
         findFirst: jest.fn().mockResolvedValue(null),
       },
+      client: {
+        findUnique: clientFindUniqueMock,
+      },
       loyaltyAccount: {
         findUnique: loyaltyFindUniqueMock,
         upsert: loyaltyUpsertMock,
       },
       loyaltyTransaction: {
-        findMany: jest.fn().mockResolvedValue([]),
+        findMany: loyaltyTransactionFindManyMock,
       },
       $transaction: transactionMock,
     } as unknown as PrismaService;
@@ -176,6 +184,8 @@ describe('LoyaltyService', () => {
       getCalendarSourceMock,
       getClientLoyaltyMock,
       getServicesMock,
+      clientFindUniqueMock,
+      loyaltyTransactionFindManyMock,
       executeWithReceiptMock,
       transactionMock,
       auditLogMock,
@@ -203,6 +213,77 @@ describe('LoyaltyService', () => {
       ),
     };
   };
+
+  it('reads a guest Client-owned account and history without a User or Membership', async () => {
+    const setup = createService();
+    const createdAt = new Date('2026-08-31T09:00:00.000Z');
+    setup.loyaltyFindUniqueMock.mockResolvedValue({
+      id: 'account-guest-a',
+      tenantId: 'tenant-a',
+      clientId: 'client-canonical-a',
+      userId: null,
+      source: CalendarSource.INTERNAL,
+      balance: 640,
+      externalReference: null,
+      syncedAt: null,
+      createdAt,
+      updatedAt: createdAt,
+    });
+    setup.loyaltyTransactionFindManyMock.mockResolvedValue([
+      {
+        id: 'transaction-guest-a',
+        kind: 'credit',
+        delta: 640,
+        balanceAfter: 640,
+        encryptedReason: 'encrypted:historical migration',
+        createdAt,
+      },
+    ]);
+
+    const state = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getStateForClient('tenant-a', 'client-canonical-a'),
+    );
+    const history = await setup.tenantContext.runAsSystemTenant(
+      'tenant-a',
+      () =>
+        setup.service.listTransactionsForClient(
+          'tenant-a',
+          'client-canonical-a',
+        ),
+    );
+
+    expect(state).toMatchObject({
+      account_id: 'account-guest-a',
+      balance: 640,
+      authoritative: 'maya',
+    });
+    expect(history).toEqual([
+      {
+        id: 'transaction-guest-a',
+        kind: 'credit',
+        delta: 640,
+        balance_after: 640,
+        reason: 'historical migration',
+        created_at: createdAt,
+      },
+    ]);
+    expect(setup.clientFindUniqueMock).toHaveBeenCalledWith({
+      where: {
+        id_tenantId: { id: 'client-canonical-a', tenantId: 'tenant-a' },
+      },
+      select: { id: true, mergedIntoClientId: true },
+    });
+    expect(setup.loyaltyFindUniqueMock).toHaveBeenCalledWith({
+      where: {
+        tenantId_clientId: {
+          tenantId: 'tenant-a',
+          clientId: 'client-canonical-a',
+        },
+      },
+    });
+    expect(setup.getTenantUserOrThrowMock).not.toHaveBeenCalled();
+    expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
+  });
 
   it('stores and returns the exact external CRM balance', async () => {
     const setup = createService();

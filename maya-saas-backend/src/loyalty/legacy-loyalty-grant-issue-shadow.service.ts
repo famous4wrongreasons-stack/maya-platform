@@ -117,38 +117,33 @@ export class LegacyLoyaltyGrantIssueShadowService {
         client: {
           select: {
             id: true,
-            userId: true,
             mergedIntoClientId: true,
-            user: { select: { status: true } },
           },
         },
       },
     });
     if (
-      !clientLink?.client.userId ||
+      !clientLink ||
       clientLink.client.mergedIntoClientId !== null ||
-      clientLink.unlinkedAt !== null ||
-      clientLink.client.user?.status !== 'active'
+      clientLink.unlinkedAt !== null
     ) {
       return this.noPlan('identity_unresolved', 1);
     }
 
     const account = await this.prisma.loyaltyAccount.findUnique({
       where: {
-        userId_tenantId: {
-          userId: clientLink.client.userId,
+        tenantId_clientId: {
           tenantId: tenant.tenantId,
+          clientId: clientLink.client.id,
         },
       },
       select: {
         id: true,
         balance: true,
-        membership: { select: { status: true } },
       },
     });
     if (
       !account ||
-      account.membership.status !== 'active' ||
       !Number.isInteger(account.balance) ||
       account.balance < 0 ||
       account.balance > 5_000_000

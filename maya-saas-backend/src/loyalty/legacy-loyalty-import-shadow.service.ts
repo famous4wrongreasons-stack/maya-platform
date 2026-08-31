@@ -99,28 +99,24 @@ export class LegacyLoyaltyImportShadowService {
         client: {
           select: {
             id: true,
-            userId: true,
             mergedIntoClientId: true,
-            user: { select: { phone: true } },
           },
         },
       },
     });
-    const phone = clientLink?.client.user?.phone?.trim() ?? '';
     if (
-      !clientLink?.client.userId ||
+      !clientLink ||
       clientLink.client.mergedIntoClientId !== null ||
-      clientLink.unlinkedAt !== null ||
-      !phone
+      clientLink.unlinkedAt !== null
     ) {
       return this.noPlan('identity_unresolved', 1);
     }
 
     const account = await this.prisma.loyaltyAccount.findUnique({
       where: {
-        userId_tenantId: {
-          userId: clientLink.client.userId,
+        tenantId_clientId: {
           tenantId: tenant.tenantId,
+          clientId: clientLink.client.id,
         },
       },
       select: { id: true, balance: true },
@@ -135,12 +131,16 @@ export class LegacyLoyaltyImportShadowService {
     }
 
     let providerSnapshot: Awaited<
-      ReturnType<CrmService['getClientLoyaltyEvidenceReadOnly']>
+      ReturnType<CrmService['getClientLoyaltyEvidenceByExternalIdReadOnly']>
     >;
     try {
       providerSnapshot = await this.tenantContext.runAsSystemTenant(
         tenant.tenantId,
-        () => this.crm.getClientLoyaltyEvidenceReadOnly(tenant.tenantId, phone),
+        () =>
+          this.crm.getClientLoyaltyEvidenceByExternalIdReadOnly(
+            tenant.tenantId,
+            externalClientId,
+          ),
       );
     } catch {
       return this.noPlan('evidence_unresolved', 1);

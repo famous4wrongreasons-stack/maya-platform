@@ -36,7 +36,6 @@ function buildHarness() {
   const clientFindUnique = jest.fn().mockResolvedValue({
     client: {
       id: 'client-canonical-7',
-      userId: 'user-7',
       mergedIntoClientId: null,
     },
   });

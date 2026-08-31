@@ -37,6 +37,9 @@ describe('P4-03 loyalty grant issue Shadow architecture', () => {
     const shadowService = source(
       join(SRC_ROOT, 'loyalty', 'legacy-loyalty-grant-issue-shadow.service.ts'),
     );
+    const executable = source(
+      join(SRC_ROOT, 'loyalty', 'p4-03-legacy-loyalty-executable.service.ts'),
+    );
 
     expect(shadowService).toContain('this.crm.getExternalProviderKey(');
     expect(shadowService).toContain(
@@ -49,7 +52,11 @@ describe('P4-03 loyalty grant issue Shadow architecture', () => {
       'MAYA_LEGACY_LOYALTY_GRANT_PER_GRANT_CAP_POINTS',
     );
     expect(shadowService).toContain('MAYA_LEGACY_LOYALTY_GRANT_TTL_DAYS');
-    expect(shadowService).toContain("membership.status !== 'active'");
+    expect(shadowService).toContain('tenantId_clientId');
+    expect(shadowService).not.toContain('account.membership');
+    expect(executable).toContain(
+      "input.authorizationEvidence !== 'server_resolved_eligible_requester'",
+    );
     expect(shadowService).toContain('legacySourceRef: requestIdentityHash');
     expect(shadowService).toContain('grant.issueExecutionId === null');
   });

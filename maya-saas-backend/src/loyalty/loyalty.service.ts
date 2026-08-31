@@ -99,6 +99,26 @@ export class LoyaltyService {
   }
 
   /**
+   * Canonical Client-owned read boundary for callers whose requester policy
+   * has already been established by the ingress layer. A business Client may
+   * own loyalty value without having a Maya User or Membership; this method
+   * therefore never manufactures either and never creates an account.
+   */
+  async getStateForClient(tenantId: string, clientId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const account = await this.getEstablishedClientAccount(
+      scopedTenantId,
+      clientId,
+    );
+    const loyalty = this.serializeAccount(account, {
+      authoritative: 'maya',
+      syncStatus: 'current',
+      stale: false,
+    });
+    return this.withSpendOptions(scopedTenantId, loyalty);
+  }
+
+  /**
    * Сравнить авторитетный баланс с уже прочитанной картой провайдера.
    *
    * 🔴 Победитель не выбирается молча: авторитет задан политикой домена
@@ -227,6 +247,59 @@ export class LoyaltyService {
       reason: this.encryptionService.decrypt(transaction.encryptedReason),
       created_at: transaction.createdAt,
     }));
+  }
+
+  /** Client-owned history read; requester authorization remains external. */
+  async listTransactionsForClient(
+    tenantId: string,
+    clientId: string,
+    limit = 50,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const account = await this.getEstablishedClientAccount(
+      scopedTenantId,
+      clientId,
+    );
+    const transactions = await this.prisma.loyaltyTransaction.findMany({
+      where: { tenantId: scopedTenantId, accountId: account.id },
+      orderBy: { createdAt: 'desc' },
+      take: Math.min(Math.max(limit, 1), 100),
+    });
+
+    return transactions.map((transaction) => ({
+      id: transaction.id,
+      kind: transaction.kind,
+      delta: transaction.delta,
+      balance_after: transaction.balanceAfter,
+      reason: this.encryptionService.decrypt(transaction.encryptedReason),
+      created_at: transaction.createdAt,
+    }));
+  }
+
+  private async getEstablishedClientAccount(
+    tenantId: string,
+    clientId: string,
+  ) {
+    const client = await this.prisma.client.findUnique({
+      where: { id_tenantId: { id: clientId, tenantId } },
+      select: { id: true, mergedIntoClientId: true },
+    });
+    if (!client || client.mergedIntoClientId !== null) {
+      throw new ConflictException({
+        message: 'Canonical loyalty owner is unresolved.',
+        error: { code: 'loyalty_client_owner_unresolved' },
+      });
+    }
+    const account = await this.prisma.loyaltyAccount.findUnique({
+      where: { tenantId_clientId: { tenantId, clientId: client.id } },
+    });
+    if (!account) {
+      throw new ConflictException({
+        message: 'Client-owned loyalty account is not established.',
+        error: { code: 'loyalty_account_not_established' },
+      });
+    }
+    return account;
   }
 
   async adjustInternalBalance(params: {
@@ -554,7 +627,7 @@ export class LoyaltyService {
 
   private isSameAdjustment(
     existing: {
-      account: { userId: string };
+      account: { userId: string | null };
       actorUserId: string | null;
       delta: number;
       encryptedReason: string;

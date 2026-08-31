@@ -48,23 +48,26 @@ function buildHarness() {
     unlinkedAt: null,
     client: {
       id: 'client-canonical-7',
-      userId: 'user-7',
       mergedIntoClientId: null,
-      user: { phone: '+79990000007' },
     },
   });
   const accountFindUnique = jest.fn().mockResolvedValue({ id: 'account-7' });
   const sourceRowsFindMany = jest.fn().mockResolvedValue([]);
-  const searchClients = jest.fn().mockResolvedValue([
-    {
-      id: '7007',
-      name: 'Exact client',
-      phone: '+79990000007',
-      visits_count: 12,
-      sold_amount: 6000,
-      last_visit_date: '2026-08-01',
-    },
-  ]);
+  const getClientRegistry = jest.fn().mockResolvedValue({
+    provider: 'yclients',
+    generated_at: '2026-08-30T12:00:00.000Z',
+    complete: true,
+    clients: [
+      {
+        external_id: '7007',
+        name: 'Exact client',
+        phone: '+79990000007',
+        visits_count: 12,
+        sold_amount: 6000,
+        last_visit_date: '2026-08-01',
+      },
+    ],
+  });
   const bridgeSource = {
     assertBridgeSecret: jest.fn(),
     assertBridgeIntegrationBinding: jest.fn().mockReturnValue({
@@ -87,7 +90,7 @@ function buildHarness() {
       loyaltyAccount: { findUnique: accountFindUnique },
       loyaltyTransaction: { findMany: sourceRowsFindMany },
     } as unknown as PrismaService,
-    { searchClients } as unknown as CrmService,
+    { getClientRegistry } as unknown as CrmService,
     bridgeSource as unknown as BridgeSourceService,
     { runAsSystemTenant } as unknown as TenantContextService,
   );
@@ -98,7 +101,7 @@ function buildHarness() {
     clientFindUnique,
     accountFindUnique,
     sourceRowsFindMany,
-    searchClients,
+    getClientRegistry,
     bridgeSource,
     runAsSystemTenant,
   };
@@ -181,7 +184,7 @@ describe('LegacyLoyaltyBackfillShadowService', () => {
     expect(lazyRequest.source.occurrenceScope).toContain(
       lazyRequest.callerIdempotency.key,
     );
-    expect(lazy.searchClients).toHaveBeenCalledWith('tenant-a', '+79990000007');
+    expect(lazy.getClientRegistry).toHaveBeenCalledWith('tenant-a');
   });
 
   it('fails closed for an unmapped, merged, or cross-tenant client', async () => {
@@ -196,22 +199,27 @@ describe('LegacyLoyaltyBackfillShadowService', () => {
         newPathProviderWrites: 0,
       },
     );
-    expect(setup.searchClients).not.toHaveBeenCalled();
+    expect(setup.getClientRegistry).not.toHaveBeenCalled();
     expect(setup.planShadow).not.toHaveBeenCalled();
   });
 
   it('requires exact provider client LTV evidence', async () => {
     const setup = buildHarness();
-    setup.searchClients.mockResolvedValue([
-      {
-        id: 'other-client',
-        name: 'Other',
-        phone: '+79990000007',
-        visits_count: 12,
-        sold_amount: 6000,
-        last_visit_date: null,
-      },
-    ]);
+    setup.getClientRegistry.mockResolvedValue({
+      provider: 'yclients',
+      generated_at: '2026-08-30T12:00:00.000Z',
+      complete: true,
+      clients: [
+        {
+          external_id: 'other-client',
+          name: 'Other',
+          phone: '+79990000007',
+          visits_count: 12,
+          sold_amount: 6000,
+          last_visit_date: null,
+        },
+      ],
+    });
 
     await expect(setup.service.planBackfill(validDto())).resolves.toMatchObject(
       {
@@ -224,7 +232,7 @@ describe('LegacyLoyaltyBackfillShadowService', () => {
 
   it('treats provider failure as unresolved evidence without UNKNOWN or retry', async () => {
     const setup = buildHarness();
-    setup.searchClients.mockRejectedValue(new Error('provider timeout'));
+    setup.getClientRegistry.mockRejectedValue(new Error('provider timeout'));
 
     await expect(setup.service.planBackfill(validDto())).resolves.toMatchObject(
       {
@@ -234,7 +242,7 @@ describe('LegacyLoyaltyBackfillShadowService', () => {
         newPathProviderWrites: 0,
       },
     );
-    expect(setup.searchClients).toHaveBeenCalledTimes(1);
+    expect(setup.getClientRegistry).toHaveBeenCalledTimes(1);
     expect(setup.planShadow).not.toHaveBeenCalled();
   });
 
@@ -264,16 +272,21 @@ describe('LegacyLoyaltyBackfillShadowService', () => {
 
   it('applies the server client cap and refuses a candidate over the run cap', async () => {
     const setup = buildHarness();
-    setup.searchClients.mockResolvedValue([
-      {
-        id: '7007',
-        name: 'Exact client',
-        phone: '+79990000007',
-        visits_count: 12,
-        sold_amount: 100_000,
-        last_visit_date: null,
-      },
-    ]);
+    setup.getClientRegistry.mockResolvedValue({
+      provider: 'yclients',
+      generated_at: '2026-08-30T12:00:00.000Z',
+      complete: true,
+      clients: [
+        {
+          external_id: '7007',
+          name: 'Exact client',
+          phone: '+79990000007',
+          visits_count: 12,
+          sold_amount: 100_000,
+          last_visit_date: null,
+        },
+      ],
+    });
     process.env.MAYA_LEGACY_LOYALTY_BACKFILL_PER_RUN_CAP_POINTS = '900';
     const dto = validDto();
     dto.legacy_claimed_sold_amount_rubles = 100_000;

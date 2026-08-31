@@ -43,9 +43,7 @@ function buildHarness() {
     unlinkedAt: null,
     client: {
       id: 'client-canonical-7',
-      userId: 'user-7',
       mergedIntoClientId: null,
-      user: { phone: '+79990000007' },
     },
   });
   const accountFindUnique = jest.fn().mockResolvedValue({
@@ -53,14 +51,16 @@ function buildHarness() {
     balance: 600,
   });
   const importFindMany = jest.fn().mockResolvedValue([]);
-  const getClientLoyaltyEvidenceReadOnly = jest.fn().mockResolvedValue({
-    provider: 'yclients',
-    external_client_id: '7007',
-    external_card_id: 'card-77',
-    balance: 900,
-    sold_amount: 3000,
-    currency: 'RUB',
-  });
+  const getClientLoyaltyEvidenceByExternalIdReadOnly = jest
+    .fn()
+    .mockResolvedValue({
+      provider: 'yclients',
+      external_client_id: '7007',
+      external_card_id: 'card-77',
+      balance: 900,
+      sold_amount: 3000,
+      currency: 'RUB',
+    });
   const bridgeSource = {
     assertBridgeSecret: jest.fn(),
     assertBridgeIntegrationBinding: jest.fn().mockReturnValue({
@@ -83,7 +83,7 @@ function buildHarness() {
       loyaltyAccount: { findUnique: accountFindUnique },
       loyaltyTransaction: { findMany: importFindMany },
     } as unknown as PrismaService,
-    { getClientLoyaltyEvidenceReadOnly } as unknown as CrmService,
+    { getClientLoyaltyEvidenceByExternalIdReadOnly } as unknown as CrmService,
     bridgeSource as unknown as BridgeSourceService,
     { runAsSystemTenant } as unknown as TenantContextService,
   );
@@ -94,7 +94,7 @@ function buildHarness() {
     clientFindUnique,
     accountFindUnique,
     importFindMany,
-    getClientLoyaltyEvidenceReadOnly,
+    getClientLoyaltyEvidenceByExternalIdReadOnly,
     bridgeSource,
     runAsSystemTenant,
   };
@@ -168,10 +168,9 @@ describe('LegacyLoyaltyImportShadowService', () => {
     expect(firstRequest.source.occurrenceScope).toContain(
       firstRequest.callerIdempotency.key,
     );
-    expect(setup.getClientLoyaltyEvidenceReadOnly).toHaveBeenCalledWith(
-      'tenant-a',
-      '+79990000007',
-    );
+    expect(
+      setup.getClientLoyaltyEvidenceByExternalIdReadOnly,
+    ).toHaveBeenCalledWith('tenant-a', '7007');
   });
 
   it('fails closed for an unmapped, merged, or cross-tenant client', async () => {
@@ -184,13 +183,15 @@ describe('LegacyLoyaltyImportShadowService', () => {
       newPathValueMutations: 0,
       newPathProviderWrites: 0,
     });
-    expect(setup.getClientLoyaltyEvidenceReadOnly).not.toHaveBeenCalled();
+    expect(
+      setup.getClientLoyaltyEvidenceByExternalIdReadOnly,
+    ).not.toHaveBeenCalled();
     expect(setup.planShadow).not.toHaveBeenCalled();
   });
 
   it('requires the server provider snapshot to match the exact client/card', async () => {
     const setup = buildHarness();
-    setup.getClientLoyaltyEvidenceReadOnly.mockResolvedValue({
+    setup.getClientLoyaltyEvidenceByExternalIdReadOnly.mockResolvedValue({
       provider: 'yclients',
       external_client_id: 'other-client',
       external_card_id: 'card-77',
@@ -208,7 +209,7 @@ describe('LegacyLoyaltyImportShadowService', () => {
 
   it('treats provider timeout as unresolved evidence without UNKNOWN or retry', async () => {
     const setup = buildHarness();
-    setup.getClientLoyaltyEvidenceReadOnly.mockRejectedValue(
+    setup.getClientLoyaltyEvidenceByExternalIdReadOnly.mockRejectedValue(
       new Error('provider timeout'),
     );
 
@@ -218,7 +219,9 @@ describe('LegacyLoyaltyImportShadowService', () => {
       newPathValueMutations: 0,
       newPathProviderWrites: 0,
     });
-    expect(setup.getClientLoyaltyEvidenceReadOnly).toHaveBeenCalledTimes(1);
+    expect(
+      setup.getClientLoyaltyEvidenceByExternalIdReadOnly,
+    ).toHaveBeenCalledTimes(1);
     expect(setup.planShadow).not.toHaveBeenCalled();
   });
 

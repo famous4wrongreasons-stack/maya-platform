@@ -18,12 +18,12 @@ describe('P4-03 legacy loyalty backfill Shadow architecture', () => {
     );
 
     expect(shadowService).toContain('this.actionEngine.planShadow({');
-    expect(shadowService).toContain('this.crm.searchClients(');
+    expect(shadowService).toContain('this.crm.getClientRegistry(');
     expect(shadowService).not.toContain('executeWithReceipt');
     expect(shadowService).not.toContain('loyaltyTransaction.create');
     expect(shadowService).not.toContain('loyaltyTransaction.update');
     expect(shadowService).not.toContain('loyaltyAccount.update');
-    expect(shadowService).not.toContain('getClientRegistry');
+    expect(shadowService).not.toContain('searchClients');
     expect(shadowService).not.toContain('updateClientLoyalty');
     expect(shadowService).not.toContain('YClients');
     expect(registry).toMatch(
@@ -37,7 +37,10 @@ describe('P4-03 legacy loyalty backfill Shadow architecture', () => {
     );
 
     expect(shadowService).toContain(
-      '(candidate) => candidate.id === externalClientId',
+      '(candidate) => candidate.external_id === externalClientId',
+    );
+    expect(shadowService).toContain(
+      'providerRegistry.provider !== boundSource.provider',
     );
     expect(shadowService).toContain('calculateLegacyLoyaltyBackfillPoints(');
     expect(shadowService).toContain(

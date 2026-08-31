@@ -109,24 +109,20 @@ export class LegacyLoyaltyRedemptionShadowService {
         client: {
           select: {
             id: true,
-            userId: true,
             mergedIntoClientId: true,
           },
         },
       },
     });
-    if (
-      !clientLink?.client.userId ||
-      clientLink.client.mergedIntoClientId !== null
-    ) {
+    if (!clientLink || clientLink.client.mergedIntoClientId !== null) {
       return this.noPlan('identity_unresolved', 1);
     }
 
     const account = await this.prisma.loyaltyAccount.findUnique({
       where: {
-        userId_tenantId: {
-          userId: clientLink.client.userId,
+        tenantId_clientId: {
           tenantId: tenant.tenantId,
+          clientId: clientLink.client.id,
         },
       },
       select: { id: true, balance: true },

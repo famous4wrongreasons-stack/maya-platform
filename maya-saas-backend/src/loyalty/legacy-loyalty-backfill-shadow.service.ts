@@ -108,50 +108,46 @@ export class LegacyLoyaltyBackfillShadowService {
         client: {
           select: {
             id: true,
-            userId: true,
             mergedIntoClientId: true,
-            user: { select: { phone: true } },
           },
         },
       },
     });
-    const phone = clientLink?.client.user?.phone?.trim() ?? '';
     if (
-      !clientLink?.client.userId ||
+      !clientLink ||
       clientLink.client.mergedIntoClientId !== null ||
-      clientLink.unlinkedAt !== null ||
-      !phone
+      clientLink.unlinkedAt !== null
     ) {
       return this.noPlan('identity_unresolved', 1);
     }
 
     const account = await this.prisma.loyaltyAccount.findUnique({
       where: {
-        userId_tenantId: {
-          userId: clientLink.client.userId,
+        tenantId_clientId: {
           tenantId: tenant.tenantId,
+          clientId: clientLink.client.id,
         },
       },
       select: { id: true },
     });
     if (!account) return this.noPlan('identity_unresolved', 1);
 
-    let providerClients: Awaited<ReturnType<CrmService['searchClients']>>;
+    let providerRegistry: Awaited<ReturnType<CrmService['getClientRegistry']>>;
     try {
-      providerClients = await this.tenantContext.runAsSystemTenant(
+      providerRegistry = await this.tenantContext.runAsSystemTenant(
         tenant.tenantId,
-        () => this.crm.searchClients(tenant.tenantId, phone),
+        () => this.crm.getClientRegistry(tenant.tenantId),
       );
     } catch {
       return this.noPlan('evidence_unresolved', 1);
     }
-    const exactProviderClients = providerClients.filter(
-      (candidate) => candidate.id === externalClientId,
+    const exactProviderClients = providerRegistry.clients.filter(
+      (candidate) => candidate.external_id === externalClientId,
     );
     const providerClient = exactProviderClients[0];
     if (
+      providerRegistry.provider !== boundSource.provider ||
       exactProviderClients.length !== 1 ||
-      providerClient.sold_amount === null ||
       !Number.isFinite(providerClient.sold_amount) ||
       providerClient.sold_amount < 0 ||
       providerClient.sold_amount > 100_000_000

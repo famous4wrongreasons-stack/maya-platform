@@ -52,15 +52,12 @@ function buildHarness() {
     unlinkedAt: null,
     client: {
       id: 'client-canonical-7',
-      userId: 'user-7',
       mergedIntoClientId: null,
-      user: { status: 'active' },
     },
   });
   const accountFindUnique = jest.fn().mockResolvedValue({
     id: 'account-7',
     balance: 1500,
-    membership: { status: 'active' },
   });
   const grantFindMany = jest.fn().mockResolvedValue([]);
   const getExternalProviderKey = jest.fn().mockResolvedValue('yclients');
@@ -218,20 +215,19 @@ describe('LegacyLoyaltyGrantIssueShadowService', () => {
     expect(setup.planShadow).not.toHaveBeenCalled();
   });
 
-  it('requires an active membership and canonical account balance', async () => {
+  it('allows a guest Client owner without manufacturing membership', async () => {
     const setup = buildHarness();
     setup.accountFindUnique.mockResolvedValue({
       id: 'account-7',
       balance: 1500,
-      membership: { status: 'revoked' },
     });
 
     await expect(setup.service.planIssue(validDto())).resolves.toMatchObject({
-      outcome: 'identity_unresolved',
-      actionExecutionId: null,
+      outcome: 'planned',
+      actionExecutionId: 'execution-grant-issue-1',
     });
-    expect(setup.getServices).not.toHaveBeenCalled();
-    expect(setup.planShadow).not.toHaveBeenCalled();
+    expect(setup.getServices).toHaveBeenCalledTimes(1);
+    expect(setup.planShadow).toHaveBeenCalledTimes(1);
   });
 
   it('requires an exact external provider and catalog service', async () => {
@@ -275,7 +271,6 @@ describe('LegacyLoyaltyGrantIssueShadowService', () => {
     setup.accountFindUnique.mockResolvedValue({
       id: 'account-7',
       balance: 1000,
-      membership: { status: 'active' },
     });
     process.env.MAYA_LEGACY_LOYALTY_GRANT_PER_GRANT_CAP_POINTS = '1100';
     process.env.MAYA_LEGACY_LOYALTY_GRANT_ALLOWED_SERVICE_IDS = 'service-mask';

@@ -189,9 +189,7 @@ export class LegacyLoyaltyGrantConsumeShadowService {
         client: {
           select: {
             id: true,
-            userId: true,
             mergedIntoClientId: true,
-            user: { select: { status: true } },
           },
         },
         redemption: {
@@ -218,9 +216,7 @@ export class LegacyLoyaltyGrantConsumeShadowService {
       !grant ||
       grant.tenantId !== tenant.tenantId ||
       grant.client.id !== grant.clientId ||
-      !grant.client.userId ||
       grant.client.mergedIntoClientId !== null ||
-      grant.client.user?.status !== 'active' ||
       !grant.issueExecutionId ||
       !grant.issueExecution ||
       grant.issueExecution.id !== grant.issueExecutionId ||
@@ -241,20 +237,18 @@ export class LegacyLoyaltyGrantConsumeShadowService {
 
     const account = await this.prisma.loyaltyAccount.findUnique({
       where: {
-        userId_tenantId: {
-          userId: grant.client.userId,
+        tenantId_clientId: {
           tenantId: tenant.tenantId,
+          clientId: grant.client.id,
         },
       },
       select: {
         id: true,
         balance: true,
-        membership: { select: { status: true } },
       },
     });
     if (
       !account ||
-      account.membership.status !== 'active' ||
       !Number.isInteger(account.balance) ||
       account.balance < 0 ||
       account.balance > 5_000_000

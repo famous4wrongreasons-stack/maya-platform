@@ -784,13 +784,15 @@ export class P403LegacyLoyaltyExecutableService {
           include: { client: true, redemption: true, revocation: true },
         });
         this.assertGrantConsumable(tenantId, input, grant);
-        if (!grant?.client.userId) {
+        if (!grant || grant.client.mergedIntoClientId !== null) {
           throw new P403ExecutionContractError(
-            'Grant client has no canonical loyalty account owner',
+            'Grant client is not an active canonical loyalty owner',
           );
         }
         const account = await tx.loyaltyAccount.findUnique({
-          where: { userId_tenantId: { userId: grant.client.userId, tenantId } },
+          where: {
+            tenantId_clientId: { tenantId, clientId: grant.clientId },
+          },
         });
         if (!account) {
           throw new P403ExecutionContractError('Loyalty account is missing');
@@ -927,17 +929,22 @@ export class P403LegacyLoyaltyExecutableService {
   ) {
     const client = await tx.client.findUnique({
       where: { id_tenantId: { id: clientId, tenantId } },
+      select: { id: true, mergedIntoClientId: true },
     });
-    if (!client?.userId) {
+    if (!client || client.mergedIntoClientId !== null) {
       throw new P403ExecutionContractError(
-        'Canonical client has no tenant-qualified user binding',
+        'Canonical client is missing or merged',
       );
     }
-    return tx.loyaltyAccount.upsert({
-      where: { userId_tenantId: { userId: client.userId, tenantId } },
-      update: {},
-      create: { tenantId, userId: client.userId, source: 'internal' },
+    const account = await tx.loyaltyAccount.findUnique({
+      where: { tenantId_clientId: { tenantId, clientId: client.id } },
     });
+    if (!account) {
+      throw new P403ExecutionContractError(
+        'Client-owned loyalty account is missing',
+      );
+    }
+    return account;
   }
 
   private async ledgerValueForExecution(

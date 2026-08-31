@@ -3279,6 +3279,40 @@ export class CrmService {
     });
   }
 
+  /**
+   * Exact provider-card loyalty evidence for a canonical CRM identity.
+   *
+   * Guest Clients do not have a User phone by definition. The provider
+   * registry is therefore used only as a read-only bridge from the already
+   * proven external id to the provider's legacy phone-based loyalty read.
+   * The returned snapshot must resolve back to the same external id; an
+   * absent/duplicate card fails closed and no identity registration occurs.
+   */
+  async getClientLoyaltyEvidenceByExternalIdReadOnly(
+    tenantId: string,
+    externalClientId: string,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const exactExternalId = externalClientId.trim();
+    if (!exactExternalId) return null;
+
+    const registry = await this.getClientRegistry(scopedTenantId);
+    const matches = registry.clients.filter(
+      (candidate) => candidate.external_id === exactExternalId,
+    );
+    const phone = matches.length === 1 ? matches[0]?.phone?.trim() : '';
+    if (!phone) return null;
+
+    const loyalty = await this.getClientLoyaltyEvidenceReadOnly(
+      scopedTenantId,
+      phone,
+    );
+    return loyalty?.provider === registry.provider &&
+      loyalty.external_client_id === exactExternalId
+      ? loyalty
+      : null;
+  }
+
   async getClientLoyalty(tenantId: string, phone: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const loyalty = await this.getClientLoyaltyEvidenceReadOnly(

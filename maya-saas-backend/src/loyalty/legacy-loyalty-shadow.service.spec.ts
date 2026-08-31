@@ -1,6 +1,10 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import type { ActionExecution } from '@prisma/client';
 
-import { ActionEngineRuntimeService } from '../action-engine';
+import {
+  ActionEngineRuntimeService,
+  type TrustedActionExecutionRequestV1,
+} from '../action-engine';
 import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -22,11 +26,15 @@ const validDto = (): LegacyLoyaltyEarnShadowDto => ({
 });
 
 function buildHarness() {
-  const planShadow = jest.fn().mockResolvedValue({ id: 'execution-earn-1' });
+  const planShadow: jest.MockedFunction<
+    ActionEngineRuntimeService['planShadow']
+  > = jest.fn((request: TrustedActionExecutionRequestV1) => {
+    void request;
+    return Promise.resolve({ id: 'execution-earn-1' } as ActionExecution);
+  });
   const findUnique = jest.fn().mockResolvedValue({
     client: {
       id: 'client-canonical-7',
-      userId: 'user-7',
       mergedIntoClientId: null,
     },
   });
@@ -195,15 +203,11 @@ describe('LegacyLoyaltyShadowService', () => {
       newPathValueMutations: 0,
       newPathProviderWrites: 0,
     });
-    expect(setup.planShadow).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: expect.objectContaining({
-          intendedDeltaPoints: 4,
-          legacyClaimedPoints: 3,
-          divergenceCode: 'legacy_points_mismatch',
-        }),
-      }),
-    );
+    expect(setup.planShadow.mock.calls[0]?.[0].input).toMatchObject({
+      intendedDeltaPoints: 4,
+      legacyClaimedPoints: 3,
+      divergenceCode: 'legacy_points_mismatch',
+    });
   });
 
   it('does not create an execution while the backend-owned Shadow switch is disabled', async () => {

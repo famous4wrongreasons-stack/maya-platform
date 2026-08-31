@@ -71,9 +71,7 @@ function canonicalGrant() {
     },
     client: {
       id: 'client-8',
-      userId: 'client-user-8',
       mergedIntoClientId: null,
-      user: { status: 'active' },
     },
     redemption: null,
     revocation: null,
@@ -102,7 +100,6 @@ function buildHarness() {
   const accountFindUnique = jest.fn().mockResolvedValue({
     id: 'account-8',
     balance: 1500,
-    membership: { status: 'active' },
   });
   const bridgeSource = {
     assertBridgeSecret: jest.fn(),
@@ -421,7 +418,6 @@ describe('LegacyLoyaltyGrantConsumeShadowService', () => {
     setup.accountFindUnique.mockResolvedValue({
       id: 'account-8',
       balance: 900,
-      membership: { status: 'active' },
     });
     process.env.MAYA_LEGACY_LOYALTY_GRANT_CONSUME_MAX_POINTS = '1000';
     const dto = validDto();
