@@ -6811,6 +6811,12 @@ async def client_book_with_loyalty_handler(request: web.Request) -> web.Response
     Nothing monetary is trusted from the browser. The service, current price,
     balance and exact slot for the combined duration are rechecked server-side.
     """
+    return _client_record_response({
+        "success": False,
+        "error": "p4_03_legacy_mutation_disabled",
+        "code": "p4_03_legacy_mutation_disabled",
+    }, status=409)
+
     try:
         body = await request.json()
     except Exception:

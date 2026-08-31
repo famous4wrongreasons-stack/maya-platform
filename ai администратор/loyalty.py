@@ -61,6 +61,16 @@ CARE_SERVICES: list[dict] = [
 CARE_TITLES_LOWER = {s["title"].lower().strip() for s in CARE_SERVICES}
 
 
+class LegacyLoyaltyCutoverError(RuntimeError):
+    """Raised when retired SQLite loyalty mutation code is invoked."""
+
+
+def _legacy_loyalty_mutation_disabled(action_class: str):
+    raise LegacyLoyaltyCutoverError(
+        f"p4_03_legacy_mutation_disabled:{action_class}"
+    )
+
+
 # ─── Утилиты ────────────────────────────────────────────────────────────
 
 def _gen_token(length: int = 6) -> str:
@@ -131,6 +141,8 @@ def import_yclients_loyalty_balance(client_id: int, phone: str) -> dict | None:
     Это не периодический sync: после импорта локальные начисления/списания не
     перетираются при каждом открытии кабинета.
     """
+    return _legacy_loyalty_mutation_disabled("import_legacy_loyalty_balance")
+
     if not phone or database.client_has_loyalty_yclients_import(client_id):
         return None
     card = _yc_loyalty_card(phone)
@@ -387,6 +399,8 @@ async def run_earning_job(app: Application | None = None) -> dict:
     подтверждению), начисляет 5% за каждый attended визит, ещё не
     зачисленный, кроме покрытых абонементом.
     """
+    return _legacy_loyalty_mutation_disabled("earn_legacy_loyalty")
+
     today = date.today()
     cutoff = today - timedelta(days=90)
     summary = {
@@ -481,6 +495,8 @@ async def run_expiry_job(app: Application | None = None) -> dict:
     EXPIRY_MONTHS_NO_VISITS, ничего не сгораем. Это даёт grace period
     клиентам, которым мы зачислили welcome-баллы за прошлую историю.
     """
+    return _legacy_loyalty_mutation_disabled("expire_legacy_loyalty")
+
     today = date.today()
     launch = get_launch_date()
     grace_until = launch + timedelta(days=EXPIRY_MONTHS_NO_VISITS * 30)
@@ -536,6 +552,8 @@ async def run_expiry_job(app: Application | None = None) -> dict:
 
 async def run_loyalty_job(app: Application | None = None) -> dict:
     """Совмещённый daily job — начисление + сгорание."""
+    return _legacy_loyalty_mutation_disabled("legacy_loyalty_daily_batch")
+
     earn = await run_earning_job(app)
     exp = await run_expiry_job(app)
     return {"earn": earn, "expire": exp}
@@ -604,6 +622,8 @@ def apply_redemption_for_booking(
     Идемпотентно: если для (client_id, record_id, service) уже есть redeem —
     повторно не списываем.
     """
+    return _legacy_loyalty_mutation_disabled("redeem_legacy_loyalty")
+
     quoted = service_quotes if service_quotes is not None else current_care_services()
     care_lookup = {
         _normalize_service_title(c.get("title")): c
@@ -682,6 +702,8 @@ def refund_for_cancelled_record(record_id: int) -> dict:
     этим visit_record_id и компенсирует положительными refund-транзакциями.
     Идемпотентно (если уже рефанд был — больше не делаем).
     """
+    return _legacy_loyalty_mutation_disabled("refund_legacy_loyalty")
+
     rows = database.loyalty_redemptions_for_record(record_id)
     refunded = 0
     for r in rows:
@@ -711,6 +733,8 @@ def lazy_backfill_for_client(client_id: int, phone: str) -> dict | None:
 
     Идемпотентно: повторные вызовы не дают второй порции.
     """
+    return _legacy_loyalty_mutation_disabled("backfill_legacy_loyalty")
+
     if not phone:
         return None
     # У действующего клиента источником стартового остатка является его карта
@@ -767,6 +791,8 @@ async def run_backfill_job() -> dict:
 
     Также фиксирует дату запуска программы (если ещё не зафиксирована).
     """
+    return _legacy_loyalty_mutation_disabled("backfill_legacy_loyalty")
+
     if not BACKFILL_ENABLED:
         logger.info("run_backfill_job пропущен: BACKFILL_ENABLED=False")
         return {"skipped": True, "reason": "backfill_disabled"}
@@ -889,6 +915,10 @@ def generate_redeem_code(client_id: int, service_title: str) -> dict:
     Создаёт одноразовый код погашения. Проверяет баланс и срок:
     баллы холдируются (НЕ списываются) до момента подтверждения админом.
     """
+    return _legacy_loyalty_mutation_disabled(
+        "issue_loyalty_redemption_grant"
+    )
+
     care = current_care_service(service_title)
     if not care:
         return {"ok": False, "reason": "не уход"}
@@ -923,6 +953,10 @@ def consume_redeem_code(code: str, admin_user_id: int) -> dict:
     — дополнительно отметит её в YClients (cost=0 + comment).
     Идемпотентно.
     """
+    return _legacy_loyalty_mutation_disabled(
+        "consume_loyalty_redemption_grant"
+    )
+
     row = database.get_loyalty_code(code)
     if not row:
         return {"ok": False, "reason": "код не найден"}

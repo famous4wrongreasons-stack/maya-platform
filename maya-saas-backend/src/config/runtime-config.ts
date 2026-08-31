@@ -13,6 +13,9 @@ const PRODUCTION_SECRET_NAMES = [
   'AUTH_RATE_LIMIT_SECRET',
   'PHONE_AUTH_SECRET',
   'CRM_ENCRYPTION_KEY',
+  // One-time loyalty bearer lookup is a separate security domain. The raw
+  // bearer is never persisted, so this key must remain stable and independent.
+  'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER',
   // Отдельный от прочих намеренно: хеш личности клиента — свой домен
   // безопасности, и ротироваться он должен независимо от сессий и токенов.
   'CLIENT_IDENTITY_HASH_SECRET',

@@ -12,6 +12,7 @@ describe('runtime config validation', () => {
     AUTH_RATE_LIMIT_SECRET: secret('rate-limit'),
     PHONE_AUTH_SECRET: secret('phone'),
     CRM_ENCRYPTION_KEY: secret('crm'),
+    MAYA_LOYALTY_REDEMPTION_CODE_PEPPER: secret('loyalty-redemption'),
     CLIENT_IDENTITY_HASH_SECRET: secret('client-identity'),
     CORS_ALLOWED_ORIGINS: 'https://app.example.test,capacitor://localhost',
     AUTH_TRUST_PROXY: '127.0.0.1',
@@ -52,6 +53,19 @@ describe('runtime config validation', () => {
     const config = productionConfig();
     delete config.CLIENT_IDENTITY_HASH_SECRET;
     expect(validationMessage(config)).toContain('CLIENT_IDENTITY_HASH_SECRET');
+  });
+
+  it('requires an independent loyalty redemption claim pepper', () => {
+    const config = productionConfig();
+    delete config.MAYA_LOYALTY_REDEMPTION_CODE_PEPPER;
+    expect(validationMessage(config)).toContain(
+      'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER is required in production',
+    );
+
+    config.MAYA_LOYALTY_REDEMPTION_CODE_PEPPER = config.CRM_ENCRYPTION_KEY;
+    expect(validationMessage(config)).toContain(
+      'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER must be independent from CRM_ENCRYPTION_KEY',
+    );
   });
 
   it('refuses a client identity secret copied from another domain', () => {

@@ -85,9 +85,10 @@ const BULK_CAPABILITY_BY_ACTION: Readonly<Record<P403BulkActionClass, string>> =
   };
 
 /**
- * Canonical P4-03 executor prepared for the cutover gate. It is deliberately
- * not registered in LoyaltyModule and therefore has no production-reachable
- * initiator until a separately approved cutover wires the legacy adapters.
+ * Canonical P4-03 execution owner. LoyaltyModule registers this service after
+ * the final cutover; callers remain trusted server-side initiators and all
+ * policy, entitlement, approval and execution claims still pass through the
+ * canonical Action Engine runtime.
  */
 export class P403LegacyLoyaltyExecutableService {
   private readonly now: () => Date;
