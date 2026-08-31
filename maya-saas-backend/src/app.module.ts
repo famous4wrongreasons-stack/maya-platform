@@ -40,6 +40,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { QuotaGuard } from './quotas/quota.guard';
 import { QuotasModule } from './quotas/quotas.module';
 import { RecoveryModule } from './recovery/recovery.module';
+import { ReferralsModule } from './referrals/referrals.module';
 import { ServicesModule } from './services/services.module';
 import { StaffModule } from './staff/staff.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
@@ -92,6 +93,7 @@ import { SystemMetricsService } from './system-metrics.service';
     OperationsAnalyticsModule,
     AnalyticsHttpModule,
     RecoveryModule,
+    ReferralsModule,
     AiToolsModule,
   ],
   controllers: [AppController],

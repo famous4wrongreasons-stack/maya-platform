@@ -61,6 +61,11 @@ import {
   type P403BulkActionClass,
   type P403ExecutableActionClass,
 } from './p4-03-legacy-loyalty-executable.contract';
+import {
+  REFERRAL_CREATE_SHADOW_CAPABILITY,
+  REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
+  referralCreateShadowNormalizer,
+} from './referral-create-shadow.contract';
 
 const OPAQUE_REF_PATTERN = /^[A-Za-z0-9._:/-]{1,240}$/;
 
@@ -884,6 +889,49 @@ function legacyLoyaltyEarnShadowCapability(): RegisteredActionCapabilityV1 {
   };
 }
 
+function referralCreateShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: REFERRAL_CREATE_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'create_customer_referral',
+    normalizedInputContract: REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
+    targetKind: 'customer_referral',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'customer_identity',
+      'referral_relationship',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.referral-create-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.referral-create-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.referral-create-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: referralCreateShadowNormalizer,
+  };
+}
+
 function legacyLoyaltyExpireShadowCapability(): RegisteredActionCapabilityV1 {
   return {
     capability: LEGACY_LOYALTY_EXPIRE_SHADOW_CAPABILITY,
@@ -1648,6 +1696,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   legacyLoyaltyBackfillShadowCapability(),
   legacyLoyaltyGrantIssueShadowCapability(),
   legacyLoyaltyGrantConsumeShadowCapability(),
+  referralCreateShadowCapability(),
   p403BulkEnvelopeCapability({
     capability: P4_03_BULK_ENVELOPE_CAPABILITIES.expire,
     actionClass: 'expire_legacy_loyalty',

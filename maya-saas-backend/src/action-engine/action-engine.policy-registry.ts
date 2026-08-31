@@ -44,6 +44,7 @@ function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
   if (capability.startsWith('crm.')) return ['crm.integration'];
   if (capability.startsWith('communication.')) return ['notifications.core'];
   if (capability.startsWith('loyalty.')) return ['loyalty'];
+  if (capability.startsWith('referrals.')) return ['referrals'];
   if (capability.startsWith('client-lifecycle.')) return ['customers.core'];
   if (capability.startsWith('occupancy.')) return ['calendar.internal'];
   if (capability.startsWith('admin.')) return ['ai.admin'];
