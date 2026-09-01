@@ -169,7 +169,23 @@ step "9/10 смоук на запасном порту 3199"
 run "set -e
   cd '$REL'
   set -a; . <(sudo -n cat /etc/maya-saas/live-widgets.env); set +a
-  PORT=3199 nohup /opt/node-v24/bin/node dist/src/main.js > /tmp/smoke-$STAMP.log 2>&1 &
+  SMOKE_LOG=/tmp/smoke-$STAMP.log
+  SPID=''
+  cleanup_smoke() {
+    if [ -n \"\${SPID:-}\" ] && kill -0 \"\$SPID\" 2>/dev/null; then
+      kill \"\$SPID\" 2>/dev/null || true
+    fi
+    if [ -n \"\${SPID:-}\" ]; then
+      wait \"\$SPID\" 2>/dev/null || true
+    fi
+    if [ -n \"\${SPID:-}\" ] && kill -0 \"\$SPID\" 2>/dev/null; then
+      kill -KILL \"\$SPID\" 2>/dev/null || true
+      wait \"\$SPID\" 2>/dev/null || true
+    fi
+    rm -f \"\$SMOKE_LOG\"
+  }
+  trap cleanup_smoke EXIT
+  PORT=3199 nohup /opt/node-v24/bin/node dist/src/main.js > \"\$SMOKE_LOG\" 2>&1 &
   SPID=\$!
   CODE=''
   for i in \$(seq 1 25); do
@@ -178,8 +194,14 @@ run "set -e
     [ \"\$CODE\" = '200' ] && break
   done
   kill \$SPID 2>/dev/null || true
-  [ \"\$CODE\" = '200' ] || { echo 'СМОУК ПРОВАЛЕН'; tail -25 /tmp/smoke-$STAMP.log; exit 1; }
-  echo 'смоук пройден'" || fail "смоук"
+  wait \$SPID 2>/dev/null || true
+  if kill -0 \$SPID 2>/dev/null; then
+    kill -KILL \$SPID 2>/dev/null || true
+    wait \$SPID 2>/dev/null || true
+  fi
+  kill -0 \$SPID 2>/dev/null && { echo 'СМОУК-ПРОЦЕСС НЕ ЗАВЕРШЁН'; exit 1; }
+  [ \"\$CODE\" = '200' ] || { echo 'СМОУК ПРОВАЛЕН'; tail -25 \"\$SMOKE_LOG\"; exit 1; }
+  echo 'смоук пройден; процесс завершён и reap выполнен'" || fail "смоук"
 
 step "10/10 переключение, проверка, уборка"
 run "set -e
