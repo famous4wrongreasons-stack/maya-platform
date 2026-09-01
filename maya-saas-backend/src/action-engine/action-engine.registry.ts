@@ -103,6 +103,11 @@ import {
   customerSubscriptionCancellationShadowNormalizer,
 } from './customer-subscription-cancellation-shadow.contract';
 import {
+  CUSTOMER_SUBSCRIPTION_REVOCATION_SHADOW_CAPABILITY,
+  CUSTOMER_SUBSCRIPTION_REVOCATION_SHADOW_INPUT_CONTRACT,
+  customerSubscriptionRevocationShadowNormalizer,
+} from './customer-subscription-revocation-shadow.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1312,6 +1317,54 @@ function customerSubscriptionCancellationShadowCapability(): RegisteredActionCap
   };
 }
 
+function customerSubscriptionRevocationShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: CUSTOMER_SUBSCRIPTION_REVOCATION_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'revoke_customer_subscription',
+    normalizedInputContract:
+      CUSTOMER_SUBSCRIPTION_REVOCATION_SHADOW_INPUT_CONTRACT,
+    targetKind: 'customer_subscription_term',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'customer_value',
+      'terminal_transition',
+      'owner_or_admin_authority',
+      'approval_bound',
+      'one_time_claim',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.customer-subscription-revocation-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'REQUIRED',
+    approvalTtlMs: 30 * 60 * 1_000,
+    retry: {
+      key: 'package4.customer-subscription-revocation-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.customer-subscription-revocation-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: customerSubscriptionRevocationShadowNormalizer,
+  };
+}
+
 function referralResolveShadowCapability(): RegisteredActionCapabilityV1 {
   return {
     capability: REFERRAL_RESOLVE_SHADOW_CAPABILITY,
@@ -2360,6 +2413,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   customerSubscriptionUsageShadowCapability(),
   customerSubscriptionExpiryShadowCapability(),
   customerSubscriptionCancellationShadowCapability(),
+  customerSubscriptionRevocationShadowCapability(),
   p404SchedulerEnvelopeCapability(),
   ...P4_04_EXECUTABLE_REGISTRATIONS.map(p404ExecutableCapability),
   p403BulkEnvelopeCapability({

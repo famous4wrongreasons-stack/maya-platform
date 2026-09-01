@@ -17,6 +17,7 @@ export * from './customer-subscription-renewal-activation-shadow.contract';
 export * from './customer-subscription-usage-shadow.contract';
 export * from './customer-subscription-expiry-shadow.contract';
 export * from './customer-subscription-cancellation-shadow.contract';
+export * from './customer-subscription-revocation-shadow.contract';
 export * from './legacy-loyalty-earn-shadow.contract';
 export * from './legacy-loyalty-expire-shadow.contract';
 export * from './legacy-loyalty-redeem-shadow.contract';

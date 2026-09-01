@@ -17,6 +17,8 @@ import { CustomerSubscriptionExpiryShadowController } from './customer-subscript
 import { CustomerSubscriptionExpiryShadowService } from './customer-subscription-expiry-shadow.service';
 import { CustomerSubscriptionCancellationShadowController } from './customer-subscription-cancellation-shadow.controller';
 import { CustomerSubscriptionCancellationShadowService } from './customer-subscription-cancellation-shadow.service';
+import { CustomerSubscriptionRevocationShadowController } from './customer-subscription-revocation-shadow.controller';
+import { CustomerSubscriptionRevocationShadowService } from './customer-subscription-revocation-shadow.service';
 
 @Module({
   imports: [ActionEngineModule, BillingModule, CrmModule],
@@ -28,6 +30,7 @@ import { CustomerSubscriptionCancellationShadowService } from './customer-subscr
     CustomerSubscriptionUsageShadowController,
     CustomerSubscriptionExpiryShadowController,
     CustomerSubscriptionCancellationShadowController,
+    CustomerSubscriptionRevocationShadowController,
   ],
   providers: [
     CustomerSubscriptionPurchaseShadowService,
@@ -37,6 +40,7 @@ import { CustomerSubscriptionCancellationShadowService } from './customer-subscr
     CustomerSubscriptionUsageShadowService,
     CustomerSubscriptionExpiryShadowService,
     CustomerSubscriptionCancellationShadowService,
+    CustomerSubscriptionRevocationShadowService,
   ],
 })
 export class CustomerSubscriptionsModule {}
