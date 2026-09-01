@@ -31,6 +31,7 @@ const validDto = (): ReferralRewardFulfillShadowDto => ({
   requester_identity_provider: 'telegram',
   external_requester_id: 'provider-requester-1',
   recipient_external_client_id: 'provider-recipient-8',
+  target_external_record_id: 'record-42',
   reward_claim: RAW_CLAIM,
   legacy_claimed_value_kopecks: 1_500,
   legacy_claimed_fulfilled: false,
@@ -48,6 +49,9 @@ function issuedReward() {
     amountKopecks: 1_500,
     currency: 'RUB',
     percentBasisPoints: null,
+    liabilityCapKopecks: 1_500,
+    liabilityCurrency: 'RUB',
+    presentationKeyVersion: 'test-v1',
     issuedAt,
     expiresAt: new Date('2099-10-01T00:00:00.000Z'),
     fulfillment: null,
@@ -103,11 +107,16 @@ function buildHarness() {
       branchId: null,
     },
   });
-  const findAccount = jest.fn().mockResolvedValue({
-    id: 'account-8',
+  const findAppointment = jest.fn().mockResolvedValue({
+    id: 'appointment-42',
     tenantId: 'tenant-a',
-    clientId: 'client-referred-8',
-    balance: 0,
+    mayaClientId: 'client-referred-8',
+    crmProvider: 'yclients',
+    crmExternalId: 'record-42',
+    serviceIds: ['service-2', 'service-1'],
+    totalPriceKopecks: 5_000,
+    currency: 'RUB',
+    providerPayload: { visit_id: 'visit-42' },
   });
   const checkCrmClientRegistrationGuard = jest
     .fn()
@@ -132,7 +141,7 @@ function buildHarness() {
     {
       authIdentity: { findUnique: findRequester },
       referralReward: { findUnique: findReward },
-      loyaltyAccount: { findUnique: findAccount },
+      appointment: { findUnique: findAppointment },
     } as unknown as PrismaService,
     bridgeSource as unknown as BridgeSourceService,
     { runAsSystemTenant } as unknown as TenantContextService,
@@ -145,7 +154,7 @@ function buildHarness() {
     planShadow,
     findReward,
     findRequester,
-    findAccount,
+    findAppointment,
     checkCrmClientRegistrationGuard,
     bridgeSource,
   };
@@ -190,15 +199,20 @@ describe('ReferralRewardFulfillShadowService', () => {
         rewardId: 'reward-1',
         originatingReferralId: 'referral-1',
         recipientClientId: 'client-referred-8',
-        loyaltyAccountId: 'account-8',
-        rewardAmountKopecks: 1_500,
+        denomination: 'FIXED_MONEY_DISCOUNT',
+        amountKopecks: 1_500,
+        percentBasisPoints: null,
+        liabilityCapKopecks: 1_500,
+        targetAppointmentId: 'appointment-42',
+        eligibleAmountKopecks: 5_000,
+        appliedAmountKopecks: 1_500,
         currency: 'RUB',
         oneTimeClaimRequired: true,
         requesterAuthority: 'administrative_role',
         approvalRequirement: 'NONE_ACTOR_AUTHORIZED',
         providerBoundary: 'LOCAL_ONLY',
         unknownApplicable: false,
-        valueApplication: 'REFERRAL_REWARD_CLAIM_ONLY',
+        valueApplication: 'EXACT_TARGET_DISCOUNT_ENTITLEMENT',
         writesPerformed: false,
       },
       newPathFulfillments: 0,
@@ -297,13 +311,13 @@ describe('ReferralRewardFulfillShadowService', () => {
     }
   });
 
-  it('requires an exact canonical LoyaltyAccount and unexpired issued reward', async () => {
-    const missingAccount = buildHarness();
-    missingAccount.findAccount.mockResolvedValueOnce(null);
+  it('requires one exact durable fulfillment target and an unexpired issued reward', async () => {
+    const missingTarget = buildHarness();
+    missingTarget.findAppointment.mockResolvedValueOnce(null);
     await expect(
-      missingAccount.service.planFulfillment(validDto()),
-    ).resolves.toMatchObject({ outcome: 'loyalty_account_unresolved' });
-    expect(missingAccount.planShadow).not.toHaveBeenCalled();
+      missingTarget.service.planFulfillment(validDto()),
+    ).resolves.toMatchObject({ outcome: 'fulfillment_target_unresolved' });
+    expect(missingTarget.planShadow).not.toHaveBeenCalled();
 
     const expired = buildHarness();
     expired.reward.issuedAt = new Date('2026-01-01T00:00:00.000Z');
@@ -313,6 +327,42 @@ describe('ReferralRewardFulfillShadowService', () => {
       expired.service.planFulfillment(validDto()),
     ).resolves.toMatchObject({ outcome: 'reward_expired' });
     expect(expired.planShadow).not.toHaveBeenCalled();
+
+    const changedTarget = buildHarness();
+    await expect(
+      changedTarget.service.planFulfillment({
+        ...validDto(),
+        target_external_record_id: 'record-other',
+      }),
+    ).resolves.toMatchObject({ outcome: 'fulfillment_target_unresolved' });
+    expect(changedTarget.planShadow).not.toHaveBeenCalled();
+  });
+
+  it('applies percentage entitlement to exact eligible value and frozen cap', async () => {
+    const setup = buildHarness();
+    Object.assign(setup.reward, {
+      amountKopecks: null,
+      percentBasisPoints: 2_500,
+      liabilityCapKopecks: 1_000,
+    });
+
+    const result = await setup.service.planFulfillment({
+      ...validDto(),
+      legacy_claimed_value_kopecks: 1_000,
+    });
+
+    expect(result).toMatchObject({
+      outcome: 'planned',
+      intendedFulfillment: {
+        denomination: 'PERCENT_DISCOUNT',
+        eligibleAmountKopecks: 5_000,
+        appliedAmountKopecks: 1_000,
+        liabilityCapKopecks: 1_000,
+      },
+    });
+    expect(setup.planShadow.mock.calls[0]?.[0].input).not.toHaveProperty(
+      'loyaltyPoints',
+    );
   });
 
   it('separates authenticated actor authority from the recipient value owner', async () => {
@@ -372,10 +422,10 @@ describe('ReferralRewardFulfillShadowService', () => {
     expect(result).toMatchObject({
       outcome: 'planned',
       shadowDivergences: 2,
-      intendedFulfillment: { rewardAmountKopecks: 1_500 },
+      intendedFulfillment: { appliedAmountKopecks: 1_500 },
     });
     expect(setup.planShadow.mock.calls[0]?.[0].input).toMatchObject({
-      rewardAmountKopecks: 1_500,
+      appliedAmountKopecks: 1_500,
       legacyClaimedValueKopecks: 49_999,
       legacyClaimedFulfilledDecision: 'already_fulfilled',
       divergenceCodes: ['legacy_value_mismatch', 'legacy_fulfillment_mismatch'],

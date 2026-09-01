@@ -2,19 +2,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = join(__dirname, '..', '..');
+const source = (...parts: string[]): string =>
+  readFileSync(join(ROOT, ...parts), 'utf8');
 
-function source(...parts: string[]): string {
-  return readFileSync(join(ROOT, ...parts), 'utf8');
-}
-
-function modelBlock(schema: string, model: string): string {
-  const match = schema.match(new RegExp(`model ${model} \\{[\\s\\S]*?\\n\\}`));
-  if (!match) throw new Error(`Missing Prisma model ${model}`);
-  return match[0];
-}
-
-describe('P4-04 all-4 executable proof contract gaps', () => {
-  const schema = source('prisma', 'schema.prisma');
+describe('P4-04 contract-to-value runtime alignment ratchet', () => {
   const issueContract = source(
     'src',
     'action-engine',
@@ -41,88 +32,94 @@ describe('P4-04 all-4 executable proof contract gaps', () => {
     'referrals',
     'referral-reward-fulfill-shadow.service.ts',
   );
-  const claimLookup = source(
+  const presentation = source(
     'src',
     'referrals',
     'referral-reward-claim.contract.ts',
   );
+  const presentationService = source(
+    'src',
+    'referrals',
+    'referral-reward-presentation.service.ts',
+  );
+  const envelope = source(
+    'src',
+    'action-engine',
+    'referral-reward-scheduler-envelope.contract.ts',
+  );
+  const envelopeService = source(
+    'src',
+    'referrals',
+    'referral-reward-scheduler-envelope.service.ts',
+  );
 
-  it('does not invent a kopeck/percentage to loyalty-point conversion', () => {
-    const reward = modelBlock(schema, 'ReferralReward');
-    const ledger = modelBlock(schema, 'LoyaltyTransaction');
-
+  it('freezes native discount denominations and never converts them to points', () => {
     expect(issueContract).toContain(
-      "source.rewardRepresentation !== 'fixed_money_kopecks'",
+      "'FIXED_MONEY_DISCOUNT' | 'PERCENT_DISCOUNT'",
     );
-    expect(reward).toContain('amountKopecks');
-    expect(reward).toContain('percentBasisPoints');
-    expect(reward).not.toContain('loyaltyPoints');
-    expect(ledger).toMatch(/delta\s+Int/);
-    expect(ledger).not.toMatch(/currency|amountKopecks|percentBasisPoints/);
+    expect(issueService).toContain('liabilityCapKopecks');
+    expect(issueService).toContain('REFERRAL_REWARD_VALUE_CONTRACT');
     expect(fulfillService).toContain(
-      "valueApplication: 'REFERRAL_REWARD_CLAIM_ONLY'",
+      "valueApplication: 'EXACT_TARGET_DISCOUNT_ENTITLEMENT'",
     );
-    expect(fulfillService).not.toMatch(/pointsPerKopeck|kopecksPerPoint/);
+    for (const text of [
+      issueContract,
+      issueService,
+      fulfillContract,
+      fulfillService,
+    ]) {
+      expect(text).not.toMatch(
+        /pointsPerKopeck|kopecksPerPoint|LoyaltyTransaction/,
+      );
+    }
   });
 
-  it('has no accepted exact purchase, visit, or service application target', () => {
-    const fulfillment = modelBlock(schema, 'ReferralRewardFulfillment');
-
-    expect(fulfillDto).not.toMatch(
-      /(?:purchase|visit|service)(?:_|)(?:id|ref|identity)/i,
-    );
-    expect(fulfillContract).not.toMatch(
-      /fulfillmentTarget|purchaseIdentity|visitIdentity|serviceIdentity/,
-    );
-    expect(fulfillService).not.toMatch(
-      /fulfillmentTarget|purchaseIdentity|visitIdentity|serviceIdentity/,
-    );
-    expect(fulfillment).not.toMatch(
-      /targetRef|purchaseId|visitId|serviceRef|applicationIdentityHash/,
-    );
+  it('requires an exact server-derived appointment/visit/service target', () => {
+    expect(fulfillDto).toContain('target_external_record_id');
+    expect(fulfillContract).toContain('appointment_visit_payment.v1');
+    expect(fulfillContract).toContain('targetIdentityHash');
+    expect(fulfillService).toContain('tenantId_crmProvider_crmExternalId');
+    expect(fulfillService).toContain('serviceIds');
+    expect(fulfillService).not.toContain('loyaltyAccount.findUnique');
   });
 
-  it('has claim lookup but no crash-safe issue output/re-presentation contract', () => {
-    expect(claimLookup).toContain('referralRewardClaimLookup');
-    expect(claimLookup).not.toMatch(/issueReferralRewardClaim|randomBytes/);
-    expect(issueService).not.toMatch(
-      /issueReferralRewardClaim|referralRewardClaimLookup|randomBytes/,
+  it('centralizes crash-safe deterministic presentation without raw persistence', () => {
+    expect(presentation).toContain('referralRewardPresentation');
+    expect(presentation).toContain('referralRewardClaimLookup');
+    expect(presentation).toContain('presentationKeyVersion');
+    expect(issueService).toContain('presentationReference');
+    expect(issueService).toContain('codeHash');
+    expect(issueService).not.toMatch(/randomBytes|bearer\s*:/);
+    expect(presentation).not.toMatch(/prisma|\.create\(\s*\{|\.update\(\s*\{/);
+    expect(presentationService).toContain('config.presentationKeys.get');
+    expect(presentationService).toContain(
+      'material.codeHash !== reward.codeHash',
     );
-    expect(issueService).not.toContain('codeHash:');
-    expect(issueService).not.toContain('claimArtifact');
+    expect(presentationService).not.toMatch(/\.create\(|\.update\(|\.upsert\(/);
   });
 
-  it('has per-issuance caps but no accepted scheduler fan-out envelope', () => {
+  it('enforces deterministic scheduler envelope, bounded fan-out, caps, and resume', () => {
+    expect(envelope).toContain('maxReferralsPerEnvelope');
+    expect(envelope).toContain('maxRecipientsPerEnvelope');
+    expect(envelope).toContain('maxAggregateEnvelopeLiabilityKopecks');
+    expect(envelope).toContain('OWNER_APPROVAL_REQUIRED');
+    expect(envelope).toContain('BOUNDED_PER_REFERRAL_EXECUTIONS');
+    expect(envelope).toContain('remainingReferralRewardSchedulerChildren');
+    expect(envelopeService).toContain('this.actionEngine.planShadow({');
+    expect(envelopeService).toContain("type: 'scheduler'");
+    expect(envelopeService).toContain('valueMutations: 0');
+  });
+
+  it('keeps all aligned capabilities physically Shadow-only', () => {
     const registry = source(
       'src',
       'action-engine',
       'action-engine.registry.ts',
     );
-
-    expect(issueContract).toContain('maxRecipients: 2');
-    expect(issueContract).toContain('maxIssuanceKopecks: 100_000');
-    expect(issueContract).toContain('approvalThresholdKopecks: 1');
-    expect(issueContract).not.toMatch(
-      /maxReferralsPerRun|maxAggregateRunKopecks|approvalTtlMs|audienceHash/,
+    expect(registry).toContain(
+      'policyDecision: ActionPolicyDecision.SHADOW_ONLY',
     );
-    expect(registry).not.toMatch(
-      /p4-04\.referral-bulk-envelope|P4_04_BULK_ENVELOPE/,
-    );
-  });
-
-  it('preserves the prepared one-time claim and immutable binding foundation', () => {
-    const fulfillment = modelBlock(schema, 'ReferralRewardFulfillment');
-    const migration = source(
-      'prisma',
-      'migrations',
-      '20260829234500_referral_reward_fulfillment',
-      'migration.sql',
-    );
-
-    expect(fulfillment).toContain('@@unique([rewardId, tenantId])');
-    expect(fulfillment).toContain('@@unique([actionExecutionId, tenantId])');
-    expect(migration).toContain(
-      'CREATE TRIGGER "ReferralRewardFulfillment_immutable_guard"',
-    );
+    expect(registry).toContain("autonomyLevel: 'L2_5_SHADOW'");
+    expect(registry).toContain("executorKey: 'shadow.none'");
   });
 });

@@ -2,9 +2,13 @@ import { ActionContractError } from './action-engine.errors';
 import {
   REFERRAL_REWARD_FULFILL_RECONCILIATION_CONTRACT,
   REFERRAL_REWARD_FULFILL_SHADOW_POLICY_PROFILE,
+  REFERRAL_REWARD_FULFILL_TARGET_CONTRACT,
   referralRewardFulfillShadowNormalizer,
 } from './referral-reward-fulfill-shadow.contract';
-import { REFERRAL_REWARD_CLAIM_CONTRACT } from './referral-reward-issue-shadow.contract';
+import {
+  REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT,
+  REFERRAL_REWARD_VALUE_CONTRACT,
+} from './referral-reward-issue-shadow.contract';
 
 const canonicalInput = () => ({
   provider: 'yclients',
@@ -14,19 +18,29 @@ const canonicalInput = () => ({
   originatingReferralId: 'referral-1',
   recipientClientId: 'client-referred-8',
   recipientIdentityHash: 'recipient-hash',
-  loyaltyAccountIdentityHash: 'account-hash',
   requesterIdentityHash: 'requester-hash',
   requesterRole: 'tenant_owner',
   requesterAuthority: 'administrative_role',
   fulfillmentIdentityHash: 'fulfillment-hash',
   claimBindingHash: 'claim-binding-hash',
-  claimContract: REFERRAL_REWARD_CLAIM_CONTRACT,
+  claimLookupContract: REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT,
   rewardSlot: 'invitee',
-  rewardRepresentation: 'fixed_money_kopecks',
-  rewardAmountKopecks: 1_500,
+  valueContract: REFERRAL_REWARD_VALUE_CONTRACT,
+  denomination: 'FIXED_MONEY_DISCOUNT',
+  amountKopecks: 1_500,
+  percentBasisPoints: null,
+  liabilityCapKopecks: 1_500,
   currency: 'RUB',
   issuedAt: '2026-09-01T00:00:00.000Z',
   expiresAt: '2026-10-01T00:00:00.000Z',
+  targetContract: REFERRAL_REWARD_FULFILL_TARGET_CONTRACT,
+  targetAppointmentId: 'appointment-42',
+  targetIdentityHash: 'target-identity-hash',
+  providerRecordIdentity: 'record-42',
+  providerVisitIdentity: 'visit-42',
+  serviceIds: ['service-1', 'service-2'],
+  eligibleAmountKopecks: 5_000,
+  appliedAmountKopecks: 1_500,
   fulfillmentDecision: 'fulfill',
   fulfillmentPolicy: REFERRAL_REWARD_FULFILL_SHADOW_POLICY_PROFILE,
   approvalRequirement: 'NONE_ACTOR_AUTHORIZED',
@@ -85,10 +99,11 @@ describe('referralRewardFulfillShadowNormalizer', () => {
 
   it('rejects malformed or over-cap value and inconsistent reward time', () => {
     for (const changed of [
-      { rewardAmountKopecks: 0 },
-      { rewardAmountKopecks: 50_001 },
+      { amountKopecks: 0 },
+      { amountKopecks: 50_001, liabilityCapKopecks: 50_001 },
       { currency: 'rubles' },
       { expiresAt: '2026-08-31T00:00:00.000Z' },
+      { appliedAmountKopecks: 1_499 },
     ]) {
       expect(() =>
         referralRewardFulfillShadowNormalizer({

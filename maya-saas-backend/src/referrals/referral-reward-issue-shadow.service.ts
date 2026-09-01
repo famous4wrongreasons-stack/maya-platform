@@ -5,10 +5,12 @@ import { Injectable } from '@nestjs/common';
 import {
   ACTION_EXECUTION_REQUEST_CONTRACT,
   ActionEngineRuntimeService,
-  REFERRAL_REWARD_CLAIM_CONTRACT,
+  REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT,
   REFERRAL_REWARD_ISSUE_SHADOW_CAPABILITY,
   REFERRAL_REWARD_ISSUE_SHADOW_POLICY_PROFILE,
   REFERRAL_REWARD_POLICY_LIMITS,
+  REFERRAL_REWARD_PRESENTATION_CONTRACT,
+  REFERRAL_REWARD_VALUE_CONTRACT,
 } from '../action-engine';
 import {
   CLIENT_IDENTITY_GUARD_UNAVAILABLE,
@@ -19,14 +21,26 @@ import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import type { ReferralRewardIssueShadowDto } from './dto/referral-reward-issue-shadow.dto';
+import {
+  referralRewardPresentation,
+  referralRewardPresentationConfig,
+} from './referral-reward-claim.contract';
 
 type RewardSlot = 'inviter' | 'invitee';
 
 type IntendedReward = {
   slot: RewardSlot;
   recipientClientId: string;
+  rewardId: string;
   rewardIdentityHash: string;
-  amountKopecks: number;
+  denomination: 'FIXED_MONEY_DISCOUNT' | 'PERCENT_DISCOUNT';
+  amountKopecks: number | null;
+  percentBasisPoints: number | null;
+  liabilityCapKopecks: number;
+  liabilityCurrency: string;
+  presentationKeyVersion: string;
+  presentationReference: string;
+  codeHash: string;
 };
 
 export type ReferralRewardIssueShadowOutcome =
@@ -37,7 +51,8 @@ export type ReferralRewardIssueShadowOutcome =
   | 'referral_not_qualified'
   | 'reward_already_issued'
   | 'reward_policy_invalid'
-  | 'reward_cap_exceeded';
+  | 'reward_cap_exceeded'
+  | 'presentation_contract_unavailable';
 
 export interface ReferralRewardIssueShadowResult {
   outcome: ReferralRewardIssueShadowOutcome;
@@ -47,22 +62,24 @@ export interface ReferralRewardIssueShadowResult {
     model: 'ReferralRewardIssuance';
     referralId: string;
     issuanceIdentityHash: string;
+    issuanceId: string;
     resolutionExecutionId: string;
     resolutionEvidenceHash: string;
     policyProfile: typeof REFERRAL_REWARD_ISSUE_SHADOW_POLICY_PROFILE;
     policySnapshotHash: string;
-    rewardRepresentation: 'fixed_money_kopecks';
+    valueContract: typeof REFERRAL_REWARD_VALUE_CONTRACT;
     currency: string;
     issuedAt: string;
     expiresAt: string;
     rewards: IntendedReward[];
-    aggregateAmountKopecks: number;
+    aggregateLiabilityKopecks: number;
     maxRecipients: 2;
-    perRewardCapKopecks: number;
-    perIssuanceCapKopecks: number;
+    perRewardLiabilityCapKopecks: number;
+    perIssuanceLiabilityCapKopecks: number;
     approvalThresholdKopecks: 1;
     executableApprovalRequirement: 'REQUIRED';
-    claimContract: typeof REFERRAL_REWARD_CLAIM_CONTRACT;
+    presentationContract: typeof REFERRAL_REWARD_PRESENTATION_CONTRACT;
+    claimLookupContract: typeof REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT;
     capDecision: 'within_cap';
   } | null;
   newPathRewardIssuances: 0;
@@ -98,6 +115,10 @@ export class ReferralRewardIssueShadowService {
     dto: ReferralRewardIssueShadowDto,
   ): Promise<ReferralRewardIssueShadowResult> {
     if (!this.enabled()) return this.noPlan('shadow_disabled', 0);
+    const presentationConfig = referralRewardPresentationConfig();
+    if (!presentationConfig) {
+      return this.noPlan('presentation_contract_unavailable', 1);
+    }
 
     const boundSource = this.bridgeSource.assertBridgeIntegrationBinding(
       {
@@ -130,6 +151,7 @@ export class ReferralRewardIssueShadowService {
         provider: boundSource.provider,
         referrerExternalId,
         referredExternalId,
+        presentationConfig,
         dto,
       }),
     );
@@ -140,6 +162,9 @@ export class ReferralRewardIssueShadowService {
     provider: string;
     referrerExternalId: string;
     referredExternalId: string;
+    presentationConfig: NonNullable<
+      ReturnType<typeof referralRewardPresentationConfig>
+    >;
     dto: ReferralRewardIssueShadowDto;
   }): Promise<ReferralRewardIssueShadowResult> {
     for (const externalId of [
@@ -265,6 +290,10 @@ export class ReferralRewardIssueShadowService {
         enabled: true,
         inviterRewardKopecks: true,
         inviteeRewardKopecks: true,
+        inviterRewardPercentBasisPoints: true,
+        inviteeRewardPercentBasisPoints: true,
+        inviterRewardLiabilityCapKopecks: true,
+        inviteeRewardLiabilityCapKopecks: true,
         currency: true,
         updatedAt: true,
       },
@@ -276,39 +305,69 @@ export class ReferralRewardIssueShadowService {
       {
         slot: 'inviter' as const,
         recipientClientId: referrer.client.id,
-        amountKopecks: program.inviterRewardKopecks,
+        amountKopecks: program.inviterRewardKopecks ?? null,
+        percentBasisPoints: program.inviterRewardPercentBasisPoints ?? null,
+        configuredLiabilityCapKopecks:
+          program.inviterRewardLiabilityCapKopecks ?? null,
       },
       {
         slot: 'invitee' as const,
         recipientClientId: referred.client.id,
-        amountKopecks: program.inviteeRewardKopecks,
+        amountKopecks: program.inviteeRewardKopecks ?? null,
+        percentBasisPoints: program.inviteeRewardPercentBasisPoints ?? null,
+        configuredLiabilityCapKopecks:
+          program.inviteeRewardLiabilityCapKopecks ?? null,
       },
     ];
     if (
       configuredRewards.some(
-        (reward) => reward.amountKopecks !== null && reward.amountKopecks < 0,
+        (reward) =>
+          (reward.amountKopecks !== null && reward.amountKopecks < 0) ||
+          (reward.percentBasisPoints !== null &&
+            (reward.percentBasisPoints < 0 ||
+              reward.percentBasisPoints > 10_000)) ||
+          (reward.configuredLiabilityCapKopecks !== null &&
+            reward.configuredLiabilityCapKopecks < 0) ||
+          (reward.amountKopecks !== null &&
+            reward.percentBasisPoints !== null) ||
+          (reward.percentBasisPoints !== null &&
+            reward.percentBasisPoints > 0 &&
+            (!reward.configuredLiabilityCapKopecks ||
+              reward.configuredLiabilityCapKopecks < 1)),
       )
     ) {
       return this.noPlan('reward_policy_invalid', 1);
     }
-    const activeRewards = configuredRewards.filter(
-      (reward): reward is typeof reward & { amountKopecks: number } =>
-        reward.amountKopecks !== null && reward.amountKopecks > 0,
-    );
+    const activeRewards = configuredRewards
+      .filter(
+        (reward) =>
+          (reward.amountKopecks !== null && reward.amountKopecks > 0) ||
+          (reward.percentBasisPoints !== null && reward.percentBasisPoints > 0),
+      )
+      .map((reward) => ({
+        ...reward,
+        denomination: reward.amountKopecks
+          ? ('FIXED_MONEY_DISCOUNT' as const)
+          : ('PERCENT_DISCOUNT' as const),
+        liabilityCapKopecks:
+          reward.amountKopecks ?? reward.configuredLiabilityCapKopecks ?? 0,
+      }));
     if (activeRewards.length < 1) {
       return this.noPlan('reward_policy_invalid', 1);
     }
-    const aggregateAmountKopecks = activeRewards.reduce(
-      (sum, reward) => sum + reward.amountKopecks,
+    const aggregateLiabilityKopecks = activeRewards.reduce(
+      (sum, reward) => sum + reward.liabilityCapKopecks,
       0,
     );
     if (
       activeRewards.length > REFERRAL_REWARD_POLICY_LIMITS.maxRecipients ||
       activeRewards.some(
         (reward) =>
-          reward.amountKopecks > REFERRAL_REWARD_POLICY_LIMITS.maxRewardKopecks,
+          reward.liabilityCapKopecks >
+          REFERRAL_REWARD_POLICY_LIMITS.maxRewardLiabilityKopecks,
       ) ||
-      aggregateAmountKopecks > REFERRAL_REWARD_POLICY_LIMITS.maxIssuanceKopecks
+      aggregateLiabilityKopecks >
+        REFERRAL_REWARD_POLICY_LIMITS.maxIssuanceLiabilityKopecks
     ) {
       return this.noPlan('reward_cap_exceeded', 1);
     }
@@ -326,13 +385,20 @@ export class ReferralRewardIssueShadowService {
       String(program.enabled),
       String(program.inviterRewardKopecks ?? ''),
       String(program.inviteeRewardKopecks ?? ''),
+      String(program.inviterRewardPercentBasisPoints ?? ''),
+      String(program.inviteeRewardPercentBasisPoints ?? ''),
+      String(program.inviterRewardLiabilityCapKopecks ?? ''),
+      String(program.inviteeRewardLiabilityCapKopecks ?? ''),
       program.currency,
       String(REFERRAL_REWARD_POLICY_LIMITS.maxRecipients),
-      String(REFERRAL_REWARD_POLICY_LIMITS.maxRewardKopecks),
-      String(REFERRAL_REWARD_POLICY_LIMITS.maxIssuanceKopecks),
+      String(REFERRAL_REWARD_POLICY_LIMITS.maxRewardLiabilityKopecks),
+      String(REFERRAL_REWARD_POLICY_LIMITS.maxIssuanceLiabilityKopecks),
       String(REFERRAL_REWARD_POLICY_LIMITS.ttlDays),
       String(REFERRAL_REWARD_POLICY_LIMITS.approvalThresholdKopecks),
-      REFERRAL_REWARD_CLAIM_CONTRACT,
+      REFERRAL_REWARD_VALUE_CONTRACT,
+      REFERRAL_REWARD_PRESENTATION_CONTRACT,
+      REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT,
+      input.presentationConfig.presentationKeyVersion,
       program.updatedAt.toISOString(),
     ]);
     const issuanceIdentityHash = this.hash([
@@ -351,27 +417,66 @@ export class ReferralRewardIssueShadowService {
       referral.resolutionExecution.finalizedAt.toISOString(),
       referral.resolvedAt.toISOString(),
     ]);
-    const rewards: IntendedReward[] = activeRewards.map((reward) => ({
-      slot: reward.slot,
-      recipientClientId: reward.recipientClientId,
-      rewardIdentityHash: this.hash([
-        'p4-04.referral-reward-slot.v1',
+    const rewards: IntendedReward[] = activeRewards.map((reward) => {
+      const rewardId = this.hash([
+        'p4-04.referral-reward-id.v1',
         input.tenantId,
         issuanceIdentityHash,
         reward.slot,
-        reward.recipientClientId,
-        String(reward.amountKopecks),
-        program.currency,
-        expiresAt,
-        REFERRAL_REWARD_CLAIM_CONTRACT,
-      ]),
-      amountKopecks: reward.amountKopecks,
-    }));
+      ]);
+      const presentation = referralRewardPresentation(
+        {
+          tenantId: input.tenantId,
+          issuanceId: issuanceIdentityHash,
+          rewardId,
+          recipientClientId: reward.recipientClientId,
+          rewardSlot: reward.slot,
+          expiresAt,
+        },
+        {
+          presentationKey: input.presentationConfig.presentationKey,
+          presentationKeyVersion:
+            input.presentationConfig.presentationKeyVersion,
+          lookupKey: input.presentationConfig.lookupKey,
+        },
+      );
+      return {
+        slot: reward.slot,
+        recipientClientId: reward.recipientClientId,
+        rewardId,
+        rewardIdentityHash: this.hash([
+          'p4-04.referral-reward-slot.v1',
+          input.tenantId,
+          issuanceIdentityHash,
+          reward.slot,
+          reward.recipientClientId,
+          reward.denomination,
+          String(reward.amountKopecks ?? ''),
+          String(reward.percentBasisPoints ?? ''),
+          String(reward.liabilityCapKopecks),
+          program.currency,
+          expiresAt,
+          REFERRAL_REWARD_VALUE_CONTRACT,
+          presentation.presentationKeyVersion,
+          presentation.codeHash,
+        ]),
+        denomination: reward.denomination,
+        amountKopecks: reward.amountKopecks,
+        percentBasisPoints: reward.percentBasisPoints,
+        liabilityCapKopecks: reward.liabilityCapKopecks,
+        liabilityCurrency: program.currency,
+        presentationKeyVersion: presentation.presentationKeyVersion,
+        presentationReference: presentation.presentationReference,
+        codeHash: presentation.codeHash,
+      };
+    });
 
     const inviterAmount =
-      rewards.find((reward) => reward.slot === 'inviter')?.amountKopecks ?? 0;
+      rewards.find((reward) => reward.slot === 'inviter')
+        ?.liabilityCapKopecks ?? 0;
     const inviteeAmount =
-      rewards.find((reward) => reward.slot === 'invitee')?.amountKopecks ?? 0;
+      rewards.find((reward) => reward.slot === 'invitee')
+        ?.liabilityCapKopecks ?? 0;
     const divergences = [
       input.dto.legacy_claimed_inviter_reward_kopecks === undefined ||
         input.dto.legacy_claimed_inviter_reward_kopecks === inviterAmount,
@@ -387,21 +492,25 @@ export class ReferralRewardIssueShadowService {
       canonicalReferrerClientId: referrer.client.id,
       canonicalReferredClientId: referred.client.id,
       issuanceIdentityHash,
+      issuanceId: issuanceIdentityHash,
       rewardPolicyProfile: REFERRAL_REWARD_ISSUE_SHADOW_POLICY_PROFILE,
       policySnapshotHash,
-      rewardRepresentation: 'fixed_money_kopecks',
+      valueContract: REFERRAL_REWARD_VALUE_CONTRACT,
       currency: program.currency,
       issuedAt,
       expiresAt,
       maxRecipients: REFERRAL_REWARD_POLICY_LIMITS.maxRecipients,
-      perRewardCapKopecks: REFERRAL_REWARD_POLICY_LIMITS.maxRewardKopecks,
-      perIssuanceCapKopecks: REFERRAL_REWARD_POLICY_LIMITS.maxIssuanceKopecks,
+      perRewardLiabilityCapKopecks:
+        REFERRAL_REWARD_POLICY_LIMITS.maxRewardLiabilityKopecks,
+      perIssuanceLiabilityCapKopecks:
+        REFERRAL_REWARD_POLICY_LIMITS.maxIssuanceLiabilityKopecks,
       approvalThresholdKopecks:
         REFERRAL_REWARD_POLICY_LIMITS.approvalThresholdKopecks,
       executableApprovalRequirement: 'REQUIRED',
-      claimContract: REFERRAL_REWARD_CLAIM_CONTRACT,
+      presentationContract: REFERRAL_REWARD_PRESENTATION_CONTRACT,
+      claimLookupContract: REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT,
       rewards,
-      aggregateAmountKopecks,
+      aggregateLiabilityKopecks,
       capDecision: 'within_cap',
       legacyClaimedInviterRewardKopecks:
         input.dto.legacy_claimed_inviter_reward_kopecks ?? null,
@@ -439,23 +548,27 @@ export class ReferralRewardIssueShadowService {
         model: 'ReferralRewardIssuance',
         referralId: referral.id,
         issuanceIdentityHash,
+        issuanceId: issuanceIdentityHash,
         resolutionExecutionId: referral.resolutionExecution.id,
         resolutionEvidenceHash,
         policyProfile: REFERRAL_REWARD_ISSUE_SHADOW_POLICY_PROFILE,
         policySnapshotHash,
-        rewardRepresentation: 'fixed_money_kopecks',
+        valueContract: REFERRAL_REWARD_VALUE_CONTRACT,
         currency: program.currency,
         issuedAt,
         expiresAt,
         rewards,
-        aggregateAmountKopecks,
+        aggregateLiabilityKopecks,
         maxRecipients: REFERRAL_REWARD_POLICY_LIMITS.maxRecipients,
-        perRewardCapKopecks: REFERRAL_REWARD_POLICY_LIMITS.maxRewardKopecks,
-        perIssuanceCapKopecks: REFERRAL_REWARD_POLICY_LIMITS.maxIssuanceKopecks,
+        perRewardLiabilityCapKopecks:
+          REFERRAL_REWARD_POLICY_LIMITS.maxRewardLiabilityKopecks,
+        perIssuanceLiabilityCapKopecks:
+          REFERRAL_REWARD_POLICY_LIMITS.maxIssuanceLiabilityKopecks,
         approvalThresholdKopecks:
           REFERRAL_REWARD_POLICY_LIMITS.approvalThresholdKopecks,
         executableApprovalRequirement: 'REQUIRED',
-        claimContract: REFERRAL_REWARD_CLAIM_CONTRACT,
+        presentationContract: REFERRAL_REWARD_PRESENTATION_CONTRACT,
+        claimLookupContract: REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT,
         capDecision: 'within_cap',
       },
       newPathRewardIssuances: 0,

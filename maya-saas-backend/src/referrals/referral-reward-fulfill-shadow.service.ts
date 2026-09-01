@@ -5,11 +5,13 @@ import { Injectable } from '@nestjs/common';
 import {
   ACTION_EXECUTION_REQUEST_CONTRACT,
   ActionEngineRuntimeService,
-  REFERRAL_REWARD_CLAIM_CONTRACT,
+  REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT,
   REFERRAL_REWARD_FULFILL_RECONCILIATION_CONTRACT,
   REFERRAL_REWARD_FULFILL_SHADOW_CAPABILITY,
   REFERRAL_REWARD_FULFILL_SHADOW_POLICY_PROFILE,
+  REFERRAL_REWARD_FULFILL_TARGET_CONTRACT,
   REFERRAL_REWARD_POLICY_LIMITS,
+  REFERRAL_REWARD_VALUE_CONTRACT,
 } from '../action-engine';
 import {
   CLIENT_IDENTITY_GUARD_UNAVAILABLE,
@@ -50,7 +52,7 @@ export type ReferralRewardFulfillShadowOutcome =
   | 'reward_unresolved'
   | 'reward_expired'
   | 'already_fulfilled'
-  | 'loyalty_account_unresolved';
+  | 'fulfillment_target_unresolved';
 
 export interface ReferralRewardFulfillShadowResult {
   outcome: ReferralRewardFulfillShadowOutcome;
@@ -61,18 +63,24 @@ export interface ReferralRewardFulfillShadowResult {
     rewardId: string;
     originatingReferralId: string;
     recipientClientId: string;
-    loyaltyAccountId: string;
     fulfillmentIdentityHash: string;
-    rewardAmountKopecks: number;
+    denomination: 'FIXED_MONEY_DISCOUNT' | 'PERCENT_DISCOUNT';
+    amountKopecks: number | null;
+    percentBasisPoints: number | null;
+    liabilityCapKopecks: number;
+    targetAppointmentId: string;
+    targetIdentityHash: string;
+    eligibleAmountKopecks: number;
+    appliedAmountKopecks: number;
     currency: string;
     oneTimeClaimRequired: true;
-    claimContract: typeof REFERRAL_REWARD_CLAIM_CONTRACT;
+    claimLookupContract: typeof REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT;
     requesterAuthority: RequesterAuthority;
     approvalRequirement: 'NONE_ACTOR_AUTHORIZED';
     providerBoundary: 'LOCAL_ONLY';
     unknownApplicable: false;
     reconciliationContract: typeof REFERRAL_REWARD_FULFILL_RECONCILIATION_CONTRACT;
-    valueApplication: 'REFERRAL_REWARD_CLAIM_ONLY';
+    valueApplication: 'EXACT_TARGET_DISCOUNT_ENTITLEMENT';
     writesPerformed: false;
   } | null;
   newPathFulfillments: 0;
@@ -141,11 +149,13 @@ export class ReferralRewardFulfillShadowService {
       .toLowerCase();
     const externalRequesterId = dto.external_requester_id.trim();
     const recipientExternalId = dto.recipient_external_client_id.trim();
+    const targetExternalRecordId = dto.target_external_record_id.trim();
     const normalizedClaim = dto.reward_claim.trim().toUpperCase();
     if (
       !requesterProvider ||
       !externalRequesterId ||
       !recipientExternalId ||
+      !targetExternalRecordId ||
       !normalizedClaim
     ) {
       return this.noPlan('identity_unresolved', 1);
@@ -158,6 +168,7 @@ export class ReferralRewardFulfillShadowService {
         requesterProvider,
         externalRequesterId,
         recipientExternalId,
+        targetExternalRecordId,
         normalizedClaim,
         claimSecret,
         cashierUserIds,
@@ -172,6 +183,7 @@ export class ReferralRewardFulfillShadowService {
     requesterProvider: string;
     externalRequesterId: string;
     recipientExternalId: string;
+    targetExternalRecordId: string;
     normalizedClaim: string;
     claimSecret: string;
     cashierUserIds: Set<string>;
@@ -221,6 +233,9 @@ export class ReferralRewardFulfillShadowService {
         amountKopecks: true,
         currency: true,
         percentBasisPoints: true,
+        liabilityCapKopecks: true,
+        liabilityCurrency: true,
+        presentationKeyVersion: true,
         issuedAt: true,
         expiresAt: true,
         fulfillment: { select: { id: true, actionExecutionId: true } },
@@ -287,13 +302,25 @@ export class ReferralRewardFulfillShadowService {
       (reward.rewardSlot !== 'inviter' && reward.rewardSlot !== 'invitee') ||
       !reward.codeHash ||
       reward.codeHash !== codeHash ||
-      reward.percentBasisPoints !== null ||
-      !Number.isInteger(reward.amountKopecks) ||
-      reward.amountKopecks === null ||
-      reward.amountKopecks < 1 ||
-      reward.amountKopecks > REFERRAL_REWARD_POLICY_LIMITS.maxRewardKopecks ||
-      !reward.currency ||
-      !/^[A-Z]{3}$/.test(reward.currency) ||
+      !reward.presentationKeyVersion ||
+      !Number.isInteger(reward.liabilityCapKopecks) ||
+      reward.liabilityCapKopecks === null ||
+      reward.liabilityCapKopecks < 1 ||
+      reward.liabilityCapKopecks >
+        REFERRAL_REWARD_POLICY_LIMITS.maxRewardLiabilityKopecks ||
+      (reward.amountKopecks === null) ===
+        (reward.percentBasisPoints === null) ||
+      (reward.amountKopecks !== null &&
+        (!Number.isInteger(reward.amountKopecks) ||
+          reward.amountKopecks < 1 ||
+          reward.amountKopecks !== reward.liabilityCapKopecks)) ||
+      (reward.percentBasisPoints !== null &&
+        (!Number.isInteger(reward.percentBasisPoints) ||
+          reward.percentBasisPoints < 1 ||
+          reward.percentBasisPoints > 10_000)) ||
+      !reward.liabilityCurrency ||
+      !/^[A-Z]{3}$/.test(reward.liabilityCurrency) ||
+      reward.currency !== reward.liabilityCurrency ||
       !Number.isFinite(reward.issuedAt.getTime()) ||
       !Number.isFinite(reward.expiresAt.getTime()) ||
       reward.expiresAt.getTime() <= reward.issuedAt.getTime()
@@ -320,22 +347,41 @@ export class ReferralRewardFulfillShadowService {
       return this.noPlan('reward_expired', 0);
     }
 
-    const account = await this.prisma.loyaltyAccount.findUnique({
+    const appointment = await this.prisma.appointment.findUnique({
       where: {
-        tenantId_clientId: {
+        tenantId_crmProvider_crmExternalId: {
           tenantId: input.tenantId,
-          clientId: reward.recipientClientId,
+          crmProvider: input.provider,
+          crmExternalId: input.targetExternalRecordId,
         },
       },
-      select: { id: true, tenantId: true, clientId: true, balance: true },
+      select: {
+        id: true,
+        tenantId: true,
+        mayaClientId: true,
+        crmProvider: true,
+        crmExternalId: true,
+        serviceIds: true,
+        totalPriceKopecks: true,
+        currency: true,
+        providerPayload: true,
+      },
     });
+    const serviceIds = this.serviceIds(appointment?.serviceIds);
     if (
-      !account ||
-      account.tenantId !== input.tenantId ||
-      account.clientId !== reward.recipientClientId ||
-      !Number.isInteger(account.balance)
+      !appointment ||
+      appointment.tenantId !== input.tenantId ||
+      appointment.mayaClientId !== reward.recipientClientId ||
+      appointment.crmProvider !== input.provider ||
+      appointment.crmExternalId !== input.targetExternalRecordId ||
+      !serviceIds ||
+      serviceIds.length < 1 ||
+      !Number.isInteger(appointment.totalPriceKopecks) ||
+      appointment.totalPriceKopecks === null ||
+      appointment.totalPriceKopecks < 1 ||
+      appointment.currency !== reward.liabilityCurrency
     ) {
-      return this.noPlan('loyalty_account_unresolved', 1);
+      return this.noPlan('fulfillment_target_unresolved', 1);
     }
 
     const requesterRole = String(requester.membership.role);
@@ -350,6 +396,40 @@ export class ReferralRewardFulfillShadowService {
       return this.noPlan('policy_unresolved', 1);
     }
 
+    const denomination =
+      reward.amountKopecks !== null
+        ? ('FIXED_MONEY_DISCOUNT' as const)
+        : ('PERCENT_DISCOUNT' as const);
+    const eligibleAmountKopecks = appointment.totalPriceKopecks;
+    const appliedAmountKopecks =
+      denomination === 'FIXED_MONEY_DISCOUNT'
+        ? Math.min(eligibleAmountKopecks, reward.amountKopecks as number)
+        : Math.min(
+            reward.liabilityCapKopecks,
+            Math.floor(
+              (eligibleAmountKopecks * (reward.percentBasisPoints as number)) /
+                10_000,
+            ),
+          );
+    if (appliedAmountKopecks < 1) {
+      return this.noPlan('fulfillment_target_unresolved', 1);
+    }
+    const providerVisitIdentity = this.providerVisitIdentity(
+      appointment.providerPayload,
+    );
+    const targetIdentityHash = this.hash([
+      REFERRAL_REWARD_FULFILL_TARGET_CONTRACT,
+      input.tenantId,
+      reward.recipientClientId,
+      appointment.id,
+      input.provider,
+      appointment.crmExternalId,
+      providerVisitIdentity ?? '',
+      ...serviceIds,
+      String(eligibleAmountKopecks),
+      appointment.currency,
+    ]);
+
     const rewardIdentityHash = this.hash([
       'p4-04.referral-reward.v1',
       input.tenantId,
@@ -357,8 +437,12 @@ export class ReferralRewardFulfillShadowService {
       reward.issuanceId,
       reward.recipientClientId,
       reward.rewardSlot,
-      String(reward.amountKopecks),
-      reward.currency,
+      denomination,
+      String(reward.amountKopecks ?? ''),
+      String(reward.percentBasisPoints ?? ''),
+      String(reward.liabilityCapKopecks),
+      reward.liabilityCurrency,
+      reward.presentationKeyVersion,
       reward.issuedAt.toISOString(),
       reward.expiresAt.toISOString(),
       reward.codeHash,
@@ -376,18 +460,13 @@ export class ReferralRewardFulfillShadowService {
       input.tenantId,
       reward.id,
       reward.codeHash,
-      REFERRAL_REWARD_CLAIM_CONTRACT,
+      REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT,
     ]);
     const recipientIdentityHash = this.hash([
       input.tenantId,
       reward.recipientClientId,
       input.provider,
       input.recipientExternalId,
-    ]);
-    const loyaltyAccountIdentityHash = this.hash([
-      input.tenantId,
-      account.id,
-      reward.recipientClientId,
     ]);
     const requesterIdentityHash = this.hash([
       input.tenantId,
@@ -402,11 +481,11 @@ export class ReferralRewardFulfillShadowService {
       reward.id,
       rewardIdentityHash,
       claimBindingHash,
-      loyaltyAccountIdentityHash,
+      targetIdentityHash,
       REFERRAL_REWARD_FULFILL_SHADOW_POLICY_PROFILE,
     ]);
     const divergenceCodes = [
-      ...(input.dto.legacy_claimed_value_kopecks !== reward.amountKopecks
+      ...(input.dto.legacy_claimed_value_kopecks !== appliedAmountKopecks
         ? ['legacy_value_mismatch']
         : []),
       ...(input.dto.legacy_claimed_fulfilled
@@ -421,19 +500,29 @@ export class ReferralRewardFulfillShadowService {
       originatingReferralId: reward.issuance.referralId,
       recipientClientId: reward.recipientClientId,
       recipientIdentityHash,
-      loyaltyAccountIdentityHash,
       requesterIdentityHash,
       requesterRole,
       requesterAuthority,
       fulfillmentIdentityHash,
       claimBindingHash,
-      claimContract: REFERRAL_REWARD_CLAIM_CONTRACT,
+      claimLookupContract: REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT,
       rewardSlot: reward.rewardSlot,
-      rewardRepresentation: 'fixed_money_kopecks',
-      rewardAmountKopecks: reward.amountKopecks,
-      currency: reward.currency,
+      valueContract: REFERRAL_REWARD_VALUE_CONTRACT,
+      denomination,
+      amountKopecks: reward.amountKopecks,
+      percentBasisPoints: reward.percentBasisPoints,
+      liabilityCapKopecks: reward.liabilityCapKopecks,
+      currency: reward.liabilityCurrency,
       issuedAt: reward.issuedAt.toISOString(),
       expiresAt: reward.expiresAt.toISOString(),
+      targetContract: REFERRAL_REWARD_FULFILL_TARGET_CONTRACT,
+      targetAppointmentId: appointment.id,
+      targetIdentityHash,
+      providerRecordIdentity: appointment.crmExternalId,
+      providerVisitIdentity,
+      serviceIds,
+      eligibleAmountKopecks,
+      appliedAmountKopecks,
       fulfillmentDecision: 'fulfill',
       fulfillmentPolicy: REFERRAL_REWARD_FULFILL_SHADOW_POLICY_PROFILE,
       approvalRequirement: 'NONE_ACTOR_AUTHORIZED',
@@ -456,7 +545,7 @@ export class ReferralRewardFulfillShadowService {
         sourceRef: 'legacy-referral:fulfill-referral-reward',
         actorUserId: requester.user.id,
       },
-      targetRef: `referral-reward:${rewardIdentityHash}`,
+      targetRef: `appointment:${targetIdentityHash}`,
       input: canonicalInput,
       evidenceRefs: [
         `referral:${reward.issuance.referralId}`,
@@ -464,7 +553,7 @@ export class ReferralRewardFulfillShadowService {
         `reward:${rewardIdentityHash}`,
         `claim-binding:${claimBindingHash}`,
         `recipient:${recipientIdentityHash}`,
-        `loyalty-account:${loyaltyAccountIdentityHash}`,
+        `fulfillment-target:${targetIdentityHash}`,
         `requester:${requesterIdentityHash}`,
       ],
       callerIdempotency: {
@@ -482,18 +571,24 @@ export class ReferralRewardFulfillShadowService {
         rewardId: reward.id,
         originatingReferralId: reward.issuance.referralId,
         recipientClientId: reward.recipientClientId,
-        loyaltyAccountId: account.id,
         fulfillmentIdentityHash,
-        rewardAmountKopecks: reward.amountKopecks,
-        currency: reward.currency,
+        denomination,
+        amountKopecks: reward.amountKopecks,
+        percentBasisPoints: reward.percentBasisPoints,
+        liabilityCapKopecks: reward.liabilityCapKopecks,
+        targetAppointmentId: appointment.id,
+        targetIdentityHash,
+        eligibleAmountKopecks,
+        appliedAmountKopecks,
+        currency: reward.liabilityCurrency,
         oneTimeClaimRequired: true,
-        claimContract: REFERRAL_REWARD_CLAIM_CONTRACT,
+        claimLookupContract: REFERRAL_REWARD_CLAIM_LOOKUP_CONTRACT,
         requesterAuthority,
         approvalRequirement: 'NONE_ACTOR_AUTHORIZED',
         providerBoundary: 'LOCAL_ONLY',
         unknownApplicable: false,
         reconciliationContract: REFERRAL_REWARD_FULFILL_RECONCILIATION_CONTRACT,
-        valueApplication: 'REFERRAL_REWARD_CLAIM_ONLY',
+        valueApplication: 'EXACT_TARGET_DISCOUNT_ENTITLEMENT',
         writesPerformed: false,
       },
       newPathFulfillments: 0,
@@ -545,6 +640,41 @@ export class ReferralRewardFulfillShadowService {
       return null;
     }
     return new Set(values);
+  }
+
+  private serviceIds(value: unknown): string[] | null {
+    if (!Array.isArray(value)) return null;
+    const ids = value.map((item) => String(item).trim()).filter(Boolean);
+    if (
+      ids.length !== value.length ||
+      ids.length > 100 ||
+      new Set(ids).size !== ids.length ||
+      ids.some((item) => !OPAQUE_REF_PATTERN.test(item))
+    ) {
+      return null;
+    }
+    return [...ids].sort();
+  }
+
+  private providerVisitIdentity(value: unknown): string | null {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      return null;
+    const payload = value as Record<string, unknown>;
+    for (const key of [
+      'visit_id',
+      'visitId',
+      'attendance_id',
+      'attendanceId',
+    ]) {
+      const candidate = payload[key];
+      if (
+        (typeof candidate === 'string' || typeof candidate === 'number') &&
+        OPAQUE_REF_PATTERN.test(String(candidate))
+      ) {
+        return String(candidate);
+      }
+    }
+    return null;
   }
 
   private enabled(): boolean {

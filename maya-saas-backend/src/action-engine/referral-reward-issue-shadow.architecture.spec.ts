@@ -54,11 +54,13 @@ describe('P4-04 issue_referral_rewards Shadow architecture', () => {
     expect(service).toContain("state !== 'SUCCEEDED'");
     expect(service).toContain('referral?.rewardIssuance');
     expect(contract).toContain('maxRecipients: 2');
-    expect(contract).toContain('maxRewardKopecks: 50_000');
-    expect(contract).toContain('maxIssuanceKopecks: 100_000');
+    expect(contract).toContain('maxRewardLiabilityKopecks: 50_000');
+    expect(contract).toContain('maxIssuanceLiabilityKopecks: 100_000');
     expect(contract).toContain('approvalThresholdKopecks: 1');
     expect(contract).not.toContain('rawBearer');
     expect(contract).not.toContain('plaintext');
+    expect(service).toContain('presentationReference');
+    expect(service).not.toMatch(/randomBytes|bearer\s*:/);
   });
 
   it('keeps the bridge local and disconnected from the production legacy owner', () => {

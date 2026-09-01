@@ -50,6 +50,11 @@ export class ReferralRewardFulfillShadowDto {
   recipient_external_client_id!: string;
 
   @IsString()
+  @MinLength(1)
+  @MaxLength(160)
+  target_external_record_id!: string;
+
+  @IsString()
   @MinLength(8)
   @MaxLength(128)
   @Matches(/^[A-Za-z0-9-]+$/)

@@ -59,6 +59,7 @@ async def plan_fulfillment(
     requester_identity_provider: str,
     external_requester_id: int | str | None,
     recipient_external_client_id: int | str | None,
+    target_external_record_id: int | str | None,
     reward_claim: str,
     legacy_claimed_value_kopecks: int = 0,
     legacy_claimed_fulfilled: bool = False,
@@ -71,12 +72,14 @@ async def plan_fulfillment(
     requester_provider = str(requester_identity_provider or "").strip().lower()
     requester_ref = str(external_requester_id or "").strip()
     recipient_ref = str(recipient_external_client_id or "").strip()
+    target_record_ref = str(target_external_record_id or "").strip()
     transient_claim = str(reward_claim or "").strip()
     company_id = _company_id()
     if (
         not requester_provider
         or not requester_ref
         or not recipient_ref
+        or not target_record_ref
         or not transient_claim
         or not company_id
     ):
@@ -90,6 +93,7 @@ async def plan_fulfillment(
         "requester_identity_provider": requester_provider,
         "external_requester_id": requester_ref,
         "recipient_external_client_id": recipient_ref,
+        "target_external_record_id": target_record_ref,
         "reward_claim": transient_claim,
         "legacy_claimed_value_kopecks": int(legacy_claimed_value_kopecks),
         "legacy_claimed_fulfilled": bool(legacy_claimed_fulfilled),

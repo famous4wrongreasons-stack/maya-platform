@@ -48,7 +48,8 @@ describe('P4-04 fulfill_referral_reward Shadow architecture', () => {
 
     expect(service).toContain('referralRewardClaimLookup(');
     expect(service).not.toContain('createHmac');
-    expect(lookup.match(/createHmac\('sha256'/g)).toHaveLength(1);
+    expect(lookup).toContain('referralRewardPresentation');
+    expect(lookup).toContain('referralRewardClaimLookup');
     expect(actionRequest).not.toContain('normalizedClaim');
     expect(actionRequest).not.toContain('reward_claim');
     expect(actionRequest).not.toMatch(/\bcodeHash\b/);

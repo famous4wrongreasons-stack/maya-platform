@@ -89,6 +89,10 @@ function buildHarness() {
     enabled: true,
     inviterRewardKopecks: 1_500,
     inviteeRewardKopecks: 1_500,
+    inviterRewardPercentBasisPoints: null,
+    inviteeRewardPercentBasisPoints: null,
+    inviterRewardLiabilityCapKopecks: null,
+    inviteeRewardLiabilityCapKopecks: null,
     currency: 'RUB',
     updatedAt: new Date('2026-08-31T00:00:00.000Z'),
   });
@@ -134,17 +138,34 @@ function buildHarness() {
 }
 
 describe('ReferralRewardIssueShadowService', () => {
-  const originalEnabled = process.env.MAYA_REFERRAL_REWARD_ISSUE_SHADOW_ENABLED;
+  const originalEnvironment = {
+    enabled: process.env.MAYA_REFERRAL_REWARD_ISSUE_SHADOW_ENABLED,
+    presentationKey: process.env.MAYA_REFERRAL_REWARD_PRESENTATION_KEY,
+    presentationVersion:
+      process.env.MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION,
+    lookupKey: process.env.MAYA_REFERRAL_REWARD_CLAIM_SECRET,
+  };
 
   beforeEach(() => {
     process.env.MAYA_REFERRAL_REWARD_ISSUE_SHADOW_ENABLED = 'true';
+    process.env.MAYA_REFERRAL_REWARD_PRESENTATION_KEY =
+      'p4-04-presentation-test-secret-000000000000';
+    process.env.MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION = 'test-v1';
+    process.env.MAYA_REFERRAL_REWARD_CLAIM_SECRET =
+      'p4-04-lookup-test-secret-0000000000000000';
   });
 
   afterAll(() => {
-    if (originalEnabled === undefined) {
-      delete process.env.MAYA_REFERRAL_REWARD_ISSUE_SHADOW_ENABLED;
-    } else {
-      process.env.MAYA_REFERRAL_REWARD_ISSUE_SHADOW_ENABLED = originalEnabled;
+    for (const [key, value] of Object.entries({
+      MAYA_REFERRAL_REWARD_ISSUE_SHADOW_ENABLED: originalEnvironment.enabled,
+      MAYA_REFERRAL_REWARD_PRESENTATION_KEY:
+        originalEnvironment.presentationKey,
+      MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION:
+        originalEnvironment.presentationVersion,
+      MAYA_REFERRAL_REWARD_CLAIM_SECRET: originalEnvironment.lookupKey,
+    })) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
     }
   });
 
@@ -162,15 +183,16 @@ describe('ReferralRewardIssueShadowService', () => {
         referralId: 'referral-1',
         resolutionExecutionId: 'resolution-1',
         policyProfile: 'p4-04.referral-reward-issuance.shadow-policy.v1',
-        rewardRepresentation: 'fixed_money_kopecks',
+        valueContract: 'p4-04.discount-entitlement.v1',
         currency: 'RUB',
-        aggregateAmountKopecks: 3_000,
+        aggregateLiabilityKopecks: 3_000,
         maxRecipients: 2,
-        perRewardCapKopecks: 50_000,
-        perIssuanceCapKopecks: 100_000,
+        perRewardLiabilityCapKopecks: 50_000,
+        perIssuanceLiabilityCapKopecks: 100_000,
         approvalThresholdKopecks: 1,
         executableApprovalRequirement: 'REQUIRED',
-        claimContract: 'p4-04.referral-reward-claim.v1',
+        presentationContract: 'referral-reward-presentation.v1',
+        claimLookupContract: 'referralRewardClaimLookup.v1',
         capDecision: 'within_cap',
       },
       newPathRewardIssuances: 0,
@@ -183,12 +205,17 @@ describe('ReferralRewardIssueShadowService', () => {
       expect.objectContaining({
         slot: 'inviter',
         recipientClientId: 'client-referrer-7',
+        denomination: 'FIXED_MONEY_DISCOUNT',
         amountKopecks: 1_500,
+        percentBasisPoints: null,
+        liabilityCapKopecks: 1_500,
       }),
       expect.objectContaining({
         slot: 'invitee',
         recipientClientId: 'client-referred-8',
+        denomination: 'FIXED_MONEY_DISCOUNT',
         amountKopecks: 1_500,
+        liabilityCapKopecks: 1_500,
       }),
     ]);
     expect(result.intendedIssuance?.rewards[0]?.rewardIdentityHash).not.toBe(
@@ -208,8 +235,9 @@ describe('ReferralRewardIssueShadowService', () => {
       },
     });
     expect(request.evidenceRefs).toHaveLength(3);
-    expect(request.input).not.toHaveProperty('codeHash');
+    expect(request.input).toHaveProperty('rewards.0.codeHash');
     expect(request.input).not.toHaveProperty('bearer');
+    expect(JSON.stringify(request.input)).not.toContain('MAYA-RR-');
   });
 
   it('supports exactly one configured recipient without duplicate value', async () => {
@@ -236,8 +264,41 @@ describe('ReferralRewardIssueShadowService', () => {
         amountKopecks: 2_000,
       }),
     ]);
-    expect(result.intendedIssuance?.aggregateAmountKopecks).toBe(2_000);
+    expect(result.intendedIssuance?.aggregateLiabilityKopecks).toBe(2_000);
     expect(result.shadowDivergences).toBe(0);
+  });
+
+  it('freezes a percentage discount with an explicit maximum liability', async () => {
+    const setup = buildHarness();
+    setup.findProgram.mockResolvedValue({
+      id: 'program-1',
+      enabled: true,
+      inviterRewardKopecks: null,
+      inviteeRewardKopecks: null,
+      inviterRewardPercentBasisPoints: 1_000,
+      inviteeRewardPercentBasisPoints: null,
+      inviterRewardLiabilityCapKopecks: 4_000,
+      inviteeRewardLiabilityCapKopecks: null,
+      currency: 'RUB',
+      updatedAt: new Date('2026-08-31T00:00:00.000Z'),
+    });
+
+    const result = await setup.service.planIssuance({
+      ...validDto(),
+      legacy_claimed_inviter_reward_kopecks: 4_000,
+      legacy_claimed_invitee_reward_kopecks: 0,
+    });
+
+    expect(result.intendedIssuance?.rewards).toEqual([
+      expect.objectContaining({
+        slot: 'inviter',
+        denomination: 'PERCENT_DISCOUNT',
+        amountKopecks: null,
+        percentBasisPoints: 1_000,
+        liabilityCapKopecks: 4_000,
+      }),
+    ]);
+    expect(result.intendedIssuance?.aggregateLiabilityKopecks).toBe(4_000);
   });
 
   it('converges retry, restart, and distinct initiators to one issuance identity', async () => {
@@ -361,6 +422,7 @@ describe('ReferralRewardIssueShadowService', () => {
       },
     );
     expect(setup.planShadow).not.toHaveBeenCalled();
+    expect(setup.findProgram).not.toHaveBeenCalled();
   });
 
   it('enforces server-derived per-reward and aggregate caps', async () => {

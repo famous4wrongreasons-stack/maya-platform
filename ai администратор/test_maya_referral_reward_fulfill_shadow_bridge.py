@@ -85,6 +85,7 @@ class ReferralRewardFulfillShadowBridgeTests(unittest.TestCase):
             requester_identity_provider="telegram",
             external_requester_id=1001,
             recipient_external_client_id=8008,
+            target_external_record_id=9009,
             reward_claim="MAYA-RR-ABC12345",
             legacy_claimed_value_kopecks=1500,
         ))
@@ -102,6 +103,7 @@ class ReferralRewardFulfillShadowBridgeTests(unittest.TestCase):
             "requester_identity_provider": "telegram",
             "external_requester_id": "1001",
             "recipient_external_client_id": "8008",
+            "target_external_record_id": "9009",
             "reward_claim": "MAYA-RR-ABC12345",
             "legacy_claimed_value_kopecks": 1500,
             "legacy_claimed_fulfilled": False,
@@ -130,6 +132,7 @@ class ReferralRewardFulfillShadowBridgeTests(unittest.TestCase):
             requester_identity_provider="telegram",
             external_requester_id=1001,
             recipient_external_client_id=8008,
+            target_external_record_id=9009,
             reward_claim="MAYA-RR-ABC12345",
         ))
 

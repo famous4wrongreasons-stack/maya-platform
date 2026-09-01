@@ -81,6 +81,11 @@ import {
   REFERRAL_REWARD_FULFILL_SHADOW_INPUT_CONTRACT,
   referralRewardFulfillShadowNormalizer,
 } from './referral-reward-fulfill-shadow.contract';
+import {
+  REFERRAL_REWARD_SCHEDULER_ENVELOPE_INPUT_CONTRACT,
+  REFERRAL_REWARD_SCHEDULER_ENVELOPE_SHADOW_CAPABILITY,
+  referralRewardSchedulerEnvelopeNormalizer,
+} from './referral-reward-scheduler-envelope.contract';
 
 const OPAQUE_REF_PATTERN = /^[A-Za-z0-9._:/-]{1,240}$/;
 
@@ -1082,6 +1087,52 @@ function referralRewardFulfillShadowCapability(): RegisteredActionCapabilityV1 {
   };
 }
 
+function referralRewardSchedulerEnvelopeShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: REFERRAL_REWARD_SCHEDULER_ENVELOPE_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'issue_referral_rewards',
+    normalizedInputContract: REFERRAL_REWARD_SCHEDULER_ENVELOPE_INPUT_CONTRACT,
+    targetKind: 'referral_reward_batch',
+    allowedSourceTypes: ['scheduler'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'financial_equivalent',
+      'customer_value',
+      'referral_reward',
+      'bounded_fan_out',
+      'approval_bound',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.referral-reward-scheduler-envelope-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.referral-reward-scheduler-envelope-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.referral-reward-scheduler-envelope-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: referralRewardSchedulerEnvelopeNormalizer,
+  };
+}
+
 function legacyLoyaltyExpireShadowCapability(): RegisteredActionCapabilityV1 {
   return {
     capability: LEGACY_LOYALTY_EXPIRE_SHADOW_CAPABILITY,
@@ -1850,6 +1901,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   referralResolveShadowCapability(),
   referralRewardIssueShadowCapability(),
   referralRewardFulfillShadowCapability(),
+  referralRewardSchedulerEnvelopeShadowCapability(),
   p403BulkEnvelopeCapability({
     capability: P4_03_BULK_ENVELOPE_CAPABILITIES.expire,
     actionClass: 'expire_legacy_loyalty',
