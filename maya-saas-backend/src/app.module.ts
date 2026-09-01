@@ -20,6 +20,7 @@ import { BusinessContentModule } from './business-content/business-content.modul
 import { CommerceModule } from './commerce/commerce.module';
 import { CrmModule } from './crm/crm.module';
 import { CustomersModule } from './customers/customers.module';
+import { CustomerSubscriptionsModule } from './customer-subscriptions/customer-subscriptions.module';
 import { CustomerPortalModule } from './customer-portal/customer-portal.module';
 import { DashboardPreferencesModule } from './dashboard-preferences/dashboard-preferences.module';
 import { EncryptionModule } from './encryption/encryption.module';
@@ -76,6 +77,7 @@ import { SystemMetricsService } from './system-metrics.service';
     BranchesModule,
     CrmModule,
     CustomersModule,
+    CustomerSubscriptionsModule,
     CustomerPortalModule,
     DashboardPreferencesModule,
     InternalCalendarModule,

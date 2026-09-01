@@ -68,6 +68,11 @@ import {
   type P404ExecutableRegistration,
 } from './p4-04-referral-reward-executable.contract';
 import {
+  CUSTOMER_SUBSCRIPTION_PURCHASE_SHADOW_CAPABILITY,
+  CUSTOMER_SUBSCRIPTION_PURCHASE_SHADOW_INPUT_CONTRACT,
+  customerSubscriptionPurchaseShadowNormalizer,
+} from './customer-subscription-purchase-shadow.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -956,6 +961,51 @@ function referralCreateShadowCapability(): RegisteredActionCapabilityV1 {
     payloadRetentionMs: 7 * DAY,
     auditRetentionMs: 365 * DAY,
     normalizeInput: referralCreateShadowNormalizer,
+  };
+}
+
+function customerSubscriptionPurchaseShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: CUSTOMER_SUBSCRIPTION_PURCHASE_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'initiate_customer_subscription_purchase',
+    normalizedInputContract:
+      CUSTOMER_SUBSCRIPTION_PURCHASE_SHADOW_INPUT_CONTRACT,
+    targetKind: 'customer_subscription_checkout',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'financial',
+      'provider_dispatch',
+      'customer_subscription',
+      'checkout_intent',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.customer-subscription-purchase-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.customer-subscription-purchase-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.customer-subscription-purchase-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: customerSubscriptionPurchaseShadowNormalizer,
   };
 }
 
@@ -2000,6 +2050,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   referralRewardIssueShadowCapability(),
   referralRewardFulfillShadowCapability(),
   referralRewardSchedulerEnvelopeShadowCapability(),
+  customerSubscriptionPurchaseShadowCapability(),
   p404SchedulerEnvelopeCapability(),
   ...P4_04_EXECUTABLE_REGISTRATIONS.map(p404ExecutableCapability),
   p403BulkEnvelopeCapability({
