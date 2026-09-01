@@ -22,3 +22,4 @@ export * from './p4-03-legacy-loyalty-executable.contract';
 export * from './referral-create-shadow.contract';
 export * from './referral-resolve-shadow.contract';
 export * from './referral-reward-issue-shadow.contract';
+export * from './referral-reward-fulfill-shadow.contract';

@@ -8,6 +8,8 @@ import { ReferralResolveShadowController } from './referral-resolve-shadow.contr
 import { ReferralResolveShadowService } from './referral-resolve-shadow.service';
 import { ReferralRewardIssueShadowController } from './referral-reward-issue-shadow.controller';
 import { ReferralRewardIssueShadowService } from './referral-reward-issue-shadow.service';
+import { ReferralRewardFulfillShadowController } from './referral-reward-fulfill-shadow.controller';
+import { ReferralRewardFulfillShadowService } from './referral-reward-fulfill-shadow.service';
 
 @Module({
   imports: [ActionEngineModule, CrmModule],
@@ -15,11 +17,13 @@ import { ReferralRewardIssueShadowService } from './referral-reward-issue-shadow
     ReferralCreateShadowController,
     ReferralResolveShadowController,
     ReferralRewardIssueShadowController,
+    ReferralRewardFulfillShadowController,
   ],
   providers: [
     ReferralCreateShadowService,
     ReferralResolveShadowService,
     ReferralRewardIssueShadowService,
+    ReferralRewardFulfillShadowService,
   ],
 })
 export class ReferralsModule {}
