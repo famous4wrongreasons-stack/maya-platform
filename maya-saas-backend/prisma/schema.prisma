@@ -934,6 +934,10 @@ model ReferralProgram {
   enabled              Boolean  @default(false)
   inviterRewardKopecks Int?
   inviteeRewardKopecks Int?
+  inviterRewardPercentBasisPoints  Int?
+  inviteeRewardPercentBasisPoints  Int?
+  inviterRewardLiabilityCapKopecks Int?
+  inviteeRewardLiabilityCapKopecks Int?
   currency             String   @default("RUB")
   terms                String?
   codePrefix           String?
@@ -1012,6 +1016,9 @@ model ReferralReward {
   amountKopecks      Int?
   currency           String?
   percentBasisPoints Int?
+  liabilityCapKopecks Int?
+  liabilityCurrency String?
+  presentationKeyVersion String?
   issuedAt           DateTime
   expiresAt          DateTime
   createdAt          DateTime                   @default(now())
@@ -1033,18 +1040,26 @@ model ReferralRewardFulfillment {
   tenantId          String
   rewardId          String
   actionExecutionId String?
+  targetAppointmentId String?
+  targetIdentityHash String?
+  eligibleAmountKopecks Int?
+  appliedAmountKopecks Int?
+  currency          String?
   fulfilledAt       DateTime
   legacySourceRef   String?
   createdAt         DateTime         @default(now())
   tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reward            ReferralReward   @relation(fields: [rewardId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
   actionExecution   ActionExecution? @relation("ReferralRewardFulfillmentActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  targetAppointment Appointment?     @relation(fields: [targetAppointmentId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ReferralRewardFulfillment_target_appointment_tenant_fkey")
 
   @@unique([id, tenantId])
   @@unique([rewardId, tenantId])
   @@unique([actionExecutionId, tenantId])
   @@unique([tenantId, legacySourceRef])
+  @@unique([tenantId, targetIdentityHash], map: "ReferralRewardFulfillment_tenant_target_hash_key")
   @@index([tenantId, fulfilledAt])
+  @@index([tenantId, targetAppointmentId], map: "ReferralRewardFulfillment_tenant_target_appointment_idx")
 }
 
 /// One actually activated customer subscription term. A renewal is a new row
@@ -2236,7 +2251,9 @@ model Appointment {
    */
   mayaClient        Client?  @relation(fields: [mayaClientId, tenantId], references: [id, tenantId], onDelete: Restrict)
   branch            Branch?  @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  referralRewardFulfillments ReferralRewardFulfillment[]
 
+  @@unique([id, tenantId])
   @@unique([id, tenantId, clientId])
   /// 🔴 Одна запись CRM — одна строка Maya. До Cycle 03 уникальности не было
   /// вовсе, а поиск шёл в пределах КЛИЕНТА: два независимых пути приёма
