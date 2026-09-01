@@ -17,6 +17,6 @@ import { YooKassaClientService } from './yookassa-client.service';
     BillingSystemGateway,
     YooKassaClientService,
   ],
-  exports: [BillingService],
+  exports: [BillingService, YooKassaClientService],
 })
 export class BillingModule {}
