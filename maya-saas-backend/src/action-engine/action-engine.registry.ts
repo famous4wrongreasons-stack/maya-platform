@@ -88,6 +88,11 @@ import {
   customerSubscriptionRenewalActivationShadowNormalizer,
 } from './customer-subscription-renewal-activation-shadow.contract';
 import {
+  CUSTOMER_SUBSCRIPTION_USAGE_SHADOW_CAPABILITY,
+  CUSTOMER_SUBSCRIPTION_USAGE_SHADOW_INPUT_CONTRACT,
+  customerSubscriptionUsageShadowNormalizer,
+} from './customer-subscription-usage-shadow.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1161,6 +1166,51 @@ function customerSubscriptionRenewalActivationShadowCapability(): RegisteredActi
   };
 }
 
+function customerSubscriptionUsageShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: CUSTOMER_SUBSCRIPTION_USAGE_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'sync_customer_subscription_usage',
+    normalizedInputContract: CUSTOMER_SUBSCRIPTION_USAGE_SHADOW_INPUT_CONTRACT,
+    targetKind: 'customer_subscription_usage',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'customer_value',
+      'provider_evidence',
+      'one_time_claim',
+      'bounded_usage',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.customer-subscription-usage-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.customer-subscription-usage-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.customer-subscription-usage-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: customerSubscriptionUsageShadowNormalizer,
+  };
+}
+
 function referralResolveShadowCapability(): RegisteredActionCapabilityV1 {
   return {
     capability: REFERRAL_RESOLVE_SHADOW_CAPABILITY,
@@ -2206,6 +2256,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   customerSubscriptionActivationShadowCapability(),
   customerSubscriptionRenewalShadowCapability(),
   customerSubscriptionRenewalActivationShadowCapability(),
+  customerSubscriptionUsageShadowCapability(),
   p404SchedulerEnvelopeCapability(),
   ...P4_04_EXECUTABLE_REGISTRATIONS.map(p404ExecutableCapability),
   p403BulkEnvelopeCapability({
