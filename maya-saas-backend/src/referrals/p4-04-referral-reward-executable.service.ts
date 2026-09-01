@@ -59,8 +59,9 @@ const ACTION_BY_CAPABILITY = new Map<string, P404ExecutableActionClass>([
 ]);
 
 /**
- * Isolated canonical execution owner used by the P4-04 executable gate.
- * Production initiators are deliberately not cut over in this checkpoint.
+ * Canonical P4-04 execution owner. ReferralsModule registers this service
+ * after the final cutover; trusted initiators still reach every mutation only
+ * through Canonical Action Ingress and the Action Engine runtime.
  */
 export class P404ReferralRewardExecutableService {
   private readonly now: () => Date;

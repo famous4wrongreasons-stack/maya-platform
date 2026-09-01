@@ -13,6 +13,9 @@ describe('runtime config validation', () => {
     PHONE_AUTH_SECRET: secret('phone'),
     CRM_ENCRYPTION_KEY: secret('crm'),
     MAYA_LOYALTY_REDEMPTION_CODE_PEPPER: secret('loyalty-redemption'),
+    MAYA_REFERRAL_REWARD_PRESENTATION_KEY: secret('referral-presentation'),
+    MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION: 'v1',
+    MAYA_REFERRAL_REWARD_CLAIM_SECRET: secret('referral-claim'),
     CLIENT_IDENTITY_HASH_SECRET: secret('client-identity'),
     CORS_ALLOWED_ORIGINS: 'https://app.example.test,capacitor://localhost',
     AUTH_TRUST_PROXY: '127.0.0.1',
@@ -65,6 +68,28 @@ describe('runtime config validation', () => {
     config.MAYA_LOYALTY_REDEMPTION_CODE_PEPPER = config.CRM_ENCRYPTION_KEY;
     expect(validationMessage(config)).toContain(
       'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER must be independent from CRM_ENCRYPTION_KEY',
+    );
+  });
+
+  it('requires independent referral reward presentation and claim secrets', () => {
+    const config = productionConfig();
+    delete config.MAYA_REFERRAL_REWARD_PRESENTATION_KEY;
+    expect(validationMessage(config)).toContain(
+      'MAYA_REFERRAL_REWARD_PRESENTATION_KEY is required in production',
+    );
+
+    config.MAYA_REFERRAL_REWARD_PRESENTATION_KEY = secret(
+      'referral-presentation',
+    );
+    config.MAYA_REFERRAL_REWARD_CLAIM_SECRET = config.CRM_ENCRYPTION_KEY;
+    expect(validationMessage(config)).toContain(
+      'MAYA_REFERRAL_REWARD_CLAIM_SECRET must be independent from CRM_ENCRYPTION_KEY',
+    );
+
+    config.MAYA_REFERRAL_REWARD_CLAIM_SECRET = secret('referral-claim');
+    config.MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION = 'unsafe version';
+    expect(validationMessage(config)).toContain(
+      'MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION must be a stable version identifier',
     );
   });
 

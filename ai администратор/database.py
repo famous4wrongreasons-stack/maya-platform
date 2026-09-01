@@ -4088,6 +4088,7 @@ def is_ref_code_free(code: str) -> bool:
 
 
 def create_ref_code(client_id: int, code: str):
+    raise RuntimeError("p4_04_legacy_mutation_disabled:issue_referral_link")
     with _db() as conn:
         conn.execute(
             "INSERT INTO referral_codes (client_id, code, created_at) "
@@ -4120,6 +4121,7 @@ def get_referral_for_referee(referee_chat_id: int) -> dict | None:
 
 
 def create_referral(referrer_client_id: int, referee_chat_id: int, code_used: str):
+    raise RuntimeError("p4_04_legacy_mutation_disabled:create_customer_referral")
     with _db() as conn:
         conn.execute(
             "INSERT INTO referrals "
@@ -4140,6 +4142,7 @@ def list_pending_referrals() -> list[dict]:
 
 
 def set_referral_referee_client(referral_id: int, referee_client_id: int):
+    raise RuntimeError("p4_04_legacy_mutation_disabled:resolve_customer_referral")
     with _db() as conn:
         conn.execute(
             "UPDATE referrals SET referee_client_id = ? WHERE id = ?",
@@ -4149,6 +4152,7 @@ def set_referral_referee_client(referral_id: int, referee_client_id: int):
 
 def update_referral_status(referral_id: int, status: str):
     """status: pending / granted / self_block / expired."""
+    raise RuntimeError("p4_04_legacy_mutation_disabled:resolve_customer_referral")
     with _db() as conn:
         conn.execute(
             "UPDATE referrals SET status = ? WHERE id = ?",
@@ -4159,6 +4163,7 @@ def update_referral_status(referral_id: int, status: str):
 def save_referral_promo(*, referral_id: int, client_id: int, code: str,
                          kind: str, percent: int, expires_at: str):
     """kind: referrer (тому, кто пригласил) / referee (приведённому)."""
+    raise RuntimeError("p4_04_legacy_mutation_disabled:issue_referral_rewards")
     with _db() as conn:
         conn.execute(
             "INSERT INTO referral_promos "

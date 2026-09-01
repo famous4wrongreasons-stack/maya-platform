@@ -16,6 +16,10 @@ const PRODUCTION_SECRET_NAMES = [
   // One-time loyalty bearer lookup is a separate security domain. The raw
   // bearer is never persisted, so this key must remain stable and independent.
   'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER',
+  // Referral rewards use a deterministic presentation PRF and a separate
+  // lookup HMAC. Neither secret may share another security domain.
+  'MAYA_REFERRAL_REWARD_PRESENTATION_KEY',
+  'MAYA_REFERRAL_REWARD_CLAIM_SECRET',
   // Отдельный от прочих намеренно: хеш личности клиента — свой домен
   // безопасности, и ротироваться он должен независимо от сессий и токенов.
   'CLIENT_IDENTITY_HASH_SECRET',
@@ -152,6 +156,7 @@ function validateProductionConfig(
     true,
   );
   validateProductionSecrets(config, issues, emailLoginEnabled);
+  validateReferralRewardPresentationVersion(config, issues);
 
   if (!stringValue(config.CORS_ALLOWED_ORIGINS)) {
     issues.push('CORS_ALLOWED_ORIGINS is required in production');
@@ -251,6 +256,20 @@ function validateProductionConfig(
 
   if (yandexEnabled || telegramEnabled) {
     requireSetting(config, 'OAUTH_NATIVE_REDIRECT_URI', issues);
+  }
+}
+
+function validateReferralRewardPresentationVersion(
+  config: Record<string, unknown>,
+  issues: string[],
+): void {
+  const value = stringValue(
+    config.MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION,
+  );
+  if (!/^[A-Za-z0-9._:-]{1,64}$/.test(value)) {
+    issues.push(
+      'MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION must be a stable version identifier',
+    );
   }
 }
 

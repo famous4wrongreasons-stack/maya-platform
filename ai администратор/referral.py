@@ -46,6 +46,15 @@ REFERRAL_CODE_TTL_DAYS = 30
 REFERRAL_PENDING_TTL_DAYS = 60   # pending старше — переводим в expired
 
 
+def _legacy_referral_mutation_disabled(action_class: str) -> dict:
+    """P4-04 cutover: Python remains read-only provenance, never an owner."""
+    logger.warning(f"p4_04_legacy_mutation_disabled:{action_class}")
+    return {
+        "status": "p4_04_legacy_mutation_disabled",
+        "action_class": action_class,
+    }
+
+
 # ─── Генерация реферальных кодов ────────────────────────────────────────
 
 def _gen_short_token(length: int = 6) -> str:
@@ -59,6 +68,7 @@ def get_or_create_ref_code(client_id: int) -> str:
     existing = database.get_referral_code(client_id)
     if existing:
         return existing
+    raise RuntimeError("p4_04_legacy_mutation_disabled:issue_referral_link")
     # Уникальный код. Пытаемся несколько раз на случай коллизии.
     for _ in range(10):
         token = "REF-" + _gen_short_token(6)
@@ -87,6 +97,7 @@ def handle_referral_visit(referee_chat_id: int, code: str) -> dict:
     Вызывается из cmd_start, когда payload начинается с 'ref_'.
     Возвращает {"status": "...", "referrer_name": "Сергей"} или {"status": "..."}.
     """
+    return _legacy_referral_mutation_disabled("create_customer_referral")
     code = code.strip().upper()
     if not code.startswith("REF-"):
         return {"status": "bad_code"}
@@ -203,6 +214,18 @@ async def run_referral_resolver_job(app: Application) -> dict:
     был ли первый визит. Если был — выдаём награды, если pending слишком
     старый — переводим в expired.
     """
+    disabled = _legacy_referral_mutation_disabled(
+        "resolve_and_issue_referral_rewards"
+    )
+    return {
+        "pending": 0,
+        "granted": 0,
+        "self_blocked": 0,
+        "expired": 0,
+        "skipped_no_visit_yet": 0,
+        "errors": 0,
+        **disabled,
+    }
     pending = database.list_pending_referrals()
     logger.info(f"🤝 Реферал-резолвер: {len(pending)} pending в очереди")
 
