@@ -108,6 +108,13 @@ import {
   customerSubscriptionRevocationShadowNormalizer,
 } from './customer-subscription-revocation-shadow.contract';
 import {
+  P4_05_EXECUTABLE_REGISTRATIONS,
+  P4_05_SCHEDULER_ENVELOPE_CAPABILITY,
+  P4_05_SCHEDULER_ENVELOPE_CONTRACT,
+  customerSubscriptionSchedulerEnvelopeNormalizer,
+  type P405ExecutableRegistration,
+} from './p4-05-customer-subscription-executable.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -2104,6 +2111,98 @@ function p404SchedulerEnvelopeCapability(): RegisteredActionCapabilityV1 {
   };
 }
 
+function p405ExecutableCapability(
+  input: P405ExecutableRegistration,
+): RegisteredActionCapabilityV1 {
+  return {
+    capability: input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: `maya.${input.actionClass}-executable-input/1`,
+    targetKind: input.targetKind,
+    allowedSourceTypes: input.allowedSourceTypes,
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      input.providerDispatch ? 'external' : 'local',
+      'customer_subscription',
+      ...input.riskFacets,
+    ],
+    policyKey: `chapter6.package4.${input.actionClass}-executable`,
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: input.approvalRequired
+      ? 'L3_OWNER_APPROVED'
+      : 'L3_CANONICAL',
+    approvalRequirement: input.approvalRequired ? 'REQUIRED' : 'NONE',
+    ...(input.approvalRequired ? { approvalTtlMs: 30 * 60 * 1_000 } : {}),
+    retry: {
+      key: `package4.${input.actionClass}.reconcile-before-retry`,
+      version: 1,
+      maxExecutionAttempts: 2,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [0],
+    },
+    reconciliation: {
+      key: input.providerDispatch
+        ? `package4.${input.actionClass}.provider-status`
+        : `package4.${input.actionClass}.bound-local-facts`,
+      version: 1,
+      maxInconclusiveAttempts: 2,
+      retryAfterProvenNonExecution: true,
+    },
+    transportIdentityVersion: 1,
+    executorKey: input.executorKey,
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: input.normalizeInput,
+  };
+}
+
+function p405SchedulerEnvelopeCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: P4_05_SCHEDULER_ENVELOPE_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'sync_customer_subscription_usage',
+    normalizedInputContract: P4_05_SCHEDULER_ENVELOPE_CONTRACT,
+    targetKind: 'customer_subscription_scheduler_batch',
+    allowedSourceTypes: ['scheduler'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'customer_subscription',
+      'bounded_fan_out',
+      'non_value_envelope',
+    ],
+    policyKey: 'chapter6.package4.customer-subscription-scheduler-envelope',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L3_CANONICAL',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.customer-subscription-envelope.pre-dispatch-only',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.customer-subscription-envelope.no-value',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'customer-subscriptions.scheduler-envelope',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: customerSubscriptionSchedulerEnvelopeNormalizer,
+  };
+}
+
 function syntheticCapability(input: {
   capability: string;
   actionClass: string;
@@ -2414,6 +2513,8 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   customerSubscriptionExpiryShadowCapability(),
   customerSubscriptionCancellationShadowCapability(),
   customerSubscriptionRevocationShadowCapability(),
+  p405SchedulerEnvelopeCapability(),
+  ...P4_05_EXECUTABLE_REGISTRATIONS.map(p405ExecutableCapability),
   p404SchedulerEnvelopeCapability(),
   ...P4_04_EXECUTABLE_REGISTRATIONS.map(p404ExecutableCapability),
   p403BulkEnvelopeCapability({
