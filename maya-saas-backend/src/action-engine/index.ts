@@ -13,6 +13,7 @@ export * from './action-engine.runtime';
 export * from './customer-subscription-activation-shadow.contract';
 export * from './customer-subscription-purchase-shadow.contract';
 export * from './customer-subscription-renewal-shadow.contract';
+export * from './customer-subscription-renewal-activation-shadow.contract';
 export * from './legacy-loyalty-earn-shadow.contract';
 export * from './legacy-loyalty-expire-shadow.contract';
 export * from './legacy-loyalty-redeem-shadow.contract';
