@@ -78,6 +78,11 @@ import {
   customerSubscriptionActivationShadowNormalizer,
 } from './customer-subscription-activation-shadow.contract';
 import {
+  CUSTOMER_SUBSCRIPTION_RENEWAL_SHADOW_CAPABILITY,
+  CUSTOMER_SUBSCRIPTION_RENEWAL_SHADOW_INPUT_CONTRACT,
+  customerSubscriptionRenewalShadowNormalizer,
+} from './customer-subscription-renewal-shadow.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1056,6 +1061,51 @@ function customerSubscriptionActivationShadowCapability(): RegisteredActionCapab
     payloadRetentionMs: 7 * DAY,
     auditRetentionMs: 365 * DAY,
     normalizeInput: customerSubscriptionActivationShadowNormalizer,
+  };
+}
+
+function customerSubscriptionRenewalShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: CUSTOMER_SUBSCRIPTION_RENEWAL_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'initiate_customer_subscription_renewal',
+    normalizedInputContract:
+      CUSTOMER_SUBSCRIPTION_RENEWAL_SHADOW_INPUT_CONTRACT,
+    targetKind: 'customer_subscription_renewal_checkout',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'financial',
+      'provider_dispatch',
+      'customer_subscription',
+      'renewal_intent',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.customer-subscription-renewal-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.customer-subscription-renewal-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.customer-subscription-renewal-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: customerSubscriptionRenewalShadowNormalizer,
   };
 }
 
@@ -2102,6 +2152,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   referralRewardSchedulerEnvelopeShadowCapability(),
   customerSubscriptionPurchaseShadowCapability(),
   customerSubscriptionActivationShadowCapability(),
+  customerSubscriptionRenewalShadowCapability(),
   p404SchedulerEnvelopeCapability(),
   ...P4_04_EXECUTABLE_REGISTRATIONS.map(p404ExecutableCapability),
   p403BulkEnvelopeCapability({
