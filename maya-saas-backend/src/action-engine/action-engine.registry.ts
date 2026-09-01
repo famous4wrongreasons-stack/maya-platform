@@ -71,6 +71,11 @@ import {
   REFERRAL_RESOLVE_SHADOW_INPUT_CONTRACT,
   referralResolveShadowNormalizer,
 } from './referral-resolve-shadow.contract';
+import {
+  REFERRAL_REWARD_ISSUE_SHADOW_CAPABILITY,
+  REFERRAL_REWARD_ISSUE_SHADOW_INPUT_CONTRACT,
+  referralRewardIssueShadowNormalizer,
+} from './referral-reward-issue-shadow.contract';
 
 const OPAQUE_REF_PATTERN = /^[A-Za-z0-9._:/-]{1,240}$/;
 
@@ -981,6 +986,51 @@ function referralResolveShadowCapability(): RegisteredActionCapabilityV1 {
   };
 }
 
+function referralRewardIssueShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: REFERRAL_REWARD_ISSUE_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'issue_referral_rewards',
+    normalizedInputContract: REFERRAL_REWARD_ISSUE_SHADOW_INPUT_CONTRACT,
+    targetKind: 'referral_reward_issuance',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'financial_equivalent',
+      'customer_value',
+      'referral_reward',
+      'approval_bound',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.referral-reward-issue-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.referral-reward-issue-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.referral-reward-issue-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: referralRewardIssueShadowNormalizer,
+  };
+}
+
 function legacyLoyaltyExpireShadowCapability(): RegisteredActionCapabilityV1 {
   return {
     capability: LEGACY_LOYALTY_EXPIRE_SHADOW_CAPABILITY,
@@ -1747,6 +1797,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   legacyLoyaltyGrantConsumeShadowCapability(),
   referralCreateShadowCapability(),
   referralResolveShadowCapability(),
+  referralRewardIssueShadowCapability(),
   p403BulkEnvelopeCapability({
     capability: P4_03_BULK_ENVELOPE_CAPABILITIES.expire,
     actionClass: 'expire_legacy_loyalty',
