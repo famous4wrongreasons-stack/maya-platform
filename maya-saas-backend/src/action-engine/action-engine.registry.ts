@@ -93,6 +93,11 @@ import {
   customerSubscriptionUsageShadowNormalizer,
 } from './customer-subscription-usage-shadow.contract';
 import {
+  CUSTOMER_SUBSCRIPTION_EXPIRY_SHADOW_CAPABILITY,
+  CUSTOMER_SUBSCRIPTION_EXPIRY_SHADOW_INPUT_CONTRACT,
+  customerSubscriptionExpiryShadowNormalizer,
+} from './customer-subscription-expiry-shadow.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1211,6 +1216,51 @@ function customerSubscriptionUsageShadowCapability(): RegisteredActionCapability
   };
 }
 
+function customerSubscriptionExpiryShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: CUSTOMER_SUBSCRIPTION_EXPIRY_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'expire_customer_subscription',
+    normalizedInputContract: CUSTOMER_SUBSCRIPTION_EXPIRY_SHADOW_INPUT_CONTRACT,
+    targetKind: 'customer_subscription_term',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'customer_value',
+      'terminal_transition',
+      'time_evidence',
+      'one_time_claim',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.customer-subscription-expiry-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.customer-subscription-expiry-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.customer-subscription-expiry-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: customerSubscriptionExpiryShadowNormalizer,
+  };
+}
+
 function referralResolveShadowCapability(): RegisteredActionCapabilityV1 {
   return {
     capability: REFERRAL_RESOLVE_SHADOW_CAPABILITY,
@@ -2257,6 +2307,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   customerSubscriptionRenewalShadowCapability(),
   customerSubscriptionRenewalActivationShadowCapability(),
   customerSubscriptionUsageShadowCapability(),
+  customerSubscriptionExpiryShadowCapability(),
   p404SchedulerEnvelopeCapability(),
   ...P4_04_EXECUTABLE_REGISTRATIONS.map(p404ExecutableCapability),
   p403BulkEnvelopeCapability({
