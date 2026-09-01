@@ -1,218 +1,203 @@
 # CYCLE 06 BLOCKING PACKAGE 4 — P4-04 ALL-4 EXECUTABLE PROOF / CUTOVER GATE
 
-Status: **FAIL — contract-to-value preconditions are incomplete; production cutover forbidden**
-Source checkpoint: `03036ecd`
+Status: **PASS — executable proof complete; production cutover remains separate**
+Source checkpoint: `f960f5ec`
 Report date: 2026-09-01
 
-## 1. Scope and preserved Shadow baseline
+## 1. Scope and accepted baseline
 
-All four accepted P4-04 Shadow slices remain complete and unchanged:
+This Gate resumes the proof stopped at `c343e957` after the accepted
+Contract-to-Value Closure Gate, production schema apply, and runtime alignment.
+It does not redesign P4-04 or repeat the four accepted Shadow implementations.
 
-1. `create_customer_referral`;
-2. `resolve_customer_referral`;
-3. `issue_referral_rewards`;
-4. `fulfill_referral_reward`.
-
-This Gate did not register an executable capability, connect a production
-initiator, alter a Shadow contract, disable a legacy owner, deploy code, or
-perform a referral/reward/loyalty/provider mutation. P4-02 and immutable P4-03
-were not modified. Package 5 and Chapter 7 were not started.
-
-Static preflight stopped the executable PostgreSQL mutation matrix before any
-disposable or production value write. The current contracts do not define the
-last part of the requested chain:
-
-`ReferralReward -> ReferralRewardFulfillment -> LoyaltyTransaction -> LoyaltyAccount.balance`.
-
-Running that matrix now would require choosing new value units, application
-semantics, target evidence, bearer recovery, and batch policy inside the proof
-harness. That would be implementation by invention rather than proof of the
-accepted P4-04 contract.
-
-## 2. Blocking findings
-
-### G1 — referral reward and loyalty ledger use different value units
-
-The accepted issue Shadow fixes:
+The executable chain proven on a disposable PostgreSQL database is:
 
 ```text
-rewardRepresentation = fixed_money_kopecks
-ReferralReward.amountKopecks + currency
+create_customer_referral
+  -> resolve_customer_referral
+  -> issue_referral_rewards
+  -> frozen fixed-money / percentage discount entitlement
+  -> fulfill_referral_reward
+  -> exact appointment/provider/service target
 ```
 
-The schema also permits `percentBasisPoints`, matching the legacy 15% discount
-semantics. By contrast, the canonical `LoyaltyAccount.balance` and
-`LoyaltyTransaction.delta` are loyalty **points**. Neither schema nor the
-accepted P4-04 contract defines:
+The accepted value is a discount entitlement. It is not silently converted to
+loyalty points. The proof created no `LoyaltyTransaction` and changed no
+`LoyaltyAccount` balance.
 
-- whether fulfillment grants points, spends points, or applies a monetary
-  discount outside the loyalty ledger;
-- a kopeck/percentage-to-points conversion and its immutable policy snapshot;
-- the sign and exact ledger `kind` of the requested mutation;
-- whether value is created at issuance or only applied at fulfillment;
-- how a partial monetary application would be represented.
+Production P4-04 initiators and legacy executors were not changed or deployed.
+P4-02, immutable P4-03, A08, Package 5, and Chapter 7 were not modified.
 
-The final Shadow explicitly and correctly stops at
-`valueApplication = REFERRAL_REWARD_CLAIM_ONLY`. Treating `1 kopeck = 1 point`,
-or converting a percentage without an exact purchase amount, would silently
-change the business contract. Therefore fulfillment/ledger/balance atomicity
-cannot be honestly proved yet.
+## 2. Canonical executable owner
 
-### G2 — exact reward-application target is absent
+Four executable capability contracts now reuse the already approved strict
+Shadow normalizers. They are registered with the Action Engine for isolated
+proof, while the executor service remains outside the production referrals
+module until the separately authorized cutover:
 
-The accepted Runtime Contract Gate says executable fulfillment requires its
-authenticated actor, exact purchase/visit/service target, and claim evidence.
-The final Shadow proves actor and bearer evidence, but its DTO, normalized
-input, target identity, and durable fulfillment fact contain no purchase,
-visit, service, payment, or application identity.
+| Action class                | Canonical executor key         | Durable fact                                                          |
+| --------------------------- | ------------------------------ | --------------------------------------------------------------------- |
+| `create_customer_referral`  | `referrals.customer-referral`  | `CustomerReferral.createExecutionId`                                  |
+| `resolve_customer_referral` | `referrals.customer-referral`  | `CustomerReferral.resolutionExecutionId`                              |
+| `issue_referral_rewards`    | `referrals.reward-issuance`    | `ReferralRewardIssuance.actionExecutionId` plus immutable reward rows |
+| `fulfill_referral_reward`   | `referrals.reward-fulfillment` | `ReferralRewardFulfillment.actionExecutionId`                         |
 
-Consequences:
+The executable service can only be entered with a trusted canonical request and
+uses `ActionEngineRuntimeService.executeWithReceipt`. Caller-supplied policy,
+entitlement, approval, frozen value, exact target, actor authority, executor,
+or binding facts cannot bypass the existing strict canonical contracts.
 
-- a valid bearer can identify one reward, but not the business event on which
-  the reward is being applied;
-- changed visit/service/payment evidence cannot be detected;
-- duplicate application to two purchases cannot be distinguished from a
-  retry of one purchase solely from the current normalized contract;
-- reconciliation cannot compare one exact application target with one exact
-  fulfillment/ledger fact.
+## 3. Executable PostgreSQL proof
 
-The amended contract must decide whether an immutable target can be bound
-durably through `ActionExecution` plus existing domain rows or whether
-`ReferralRewardFulfillment` needs a minimal target/reference field. No schema
-choice is made by this Gate.
+The proof applied all `64` repository migrations to a new disposable database
+and executed the four actions as one chain.
 
-### G3 — issue has lookup vocabulary but no crash-safe claim output contract
+### Relationship and qualification
 
-The final Shadow centralized `referralRewardClaimLookup`, so fulfillment can
-HMAC a presented bearer and query `(tenantId, codeHash)`. However the issue
-Shadow deliberately creates neither:
+- one relationship identity converged to one `CustomerReferral`;
+- retry and restart returned the same logical execution/fact;
+- resolution was accepted only for the exact referral and canonical clients;
+- cross-tenant, self/ambiguous identity, and unresolved-hold inputs failed
+  closed;
+- P02/P03-style active `UnresolvedClientIdentityHold` prevented execution.
 
-- a random claim artifact returned to the real initiator;
-- the corresponding `codeHash` on a durable `ReferralReward`;
-- a deterministic or durable way to re-present the same artifact after a
-  commit/response-loss boundary.
+### Frozen reward issuance
 
-The approved Runtime Contract Gate explicitly requires crash-safe presentation
-or re-presentation without plaintext bearer persistence. The executable proof
-cannot select between an immediate one-shot response, deterministic
-server-secret derivation, or a protected delivery/outbox contract without a
-separate decision. Reward id, referral id, or execution id remains forbidden
-as a substitute bearer credential.
+- one qualified referral produced one deterministic issuance;
+- the proof issuance produced two distinct reward slots without duplicate
+  recipient value;
+- fixed-money and percentage denominations stayed native and immutable;
+- amount/percent, liability cap/currency, policy snapshot, expiry,
+  presentation version, and lookup hash survived restart unchanged;
+- a later policy change could not rewrite an issued reward;
+- no implicit `kopecks -> points` or `% -> points` conversion exists.
 
-### G4 — per-issuance caps do not bound scheduler fan-out
+### Crash-safe presentation
 
-The accepted issuance profile does prove:
+- raw bearer material was never stored in the database;
+- the stored fact is the canonical lookup hash/reference;
+- a synthetic crash after the issuance transaction committed but before the
+  Action Engine success acknowledgement moved the execution through
+  reconciliation to proven success;
+- reconciliation found the execution-bound issuance and did not dispatch a
+  second issuance;
+- deterministic re-presentation returned the same claim material without
+  creating a second issuance or reward.
 
-- at most two recipients per referral;
-- at most `50,000` kopecks per reward;
-- at most `100,000` kopecks per issuance;
-- owner approval above the `1`-kopeck threshold.
+### Exact one-time fulfillment
 
-It does not define the executable resolver/scheduler envelope:
+- fulfillment used the exact immutable appointment, tenant, recipient,
+  provider visit, service set, eligible amount, and target hash;
+- a changed appointment/target was rejected;
+- two concurrent claims for one reward converged to one fulfillment;
+- reward uniqueness plus the tenant-qualified execution binding prevented a
+  second value application;
+- a synthetic post-commit crash reconciled from the execution-bound
+  fulfillment fact, so there was no second dispatch;
+- local PostgreSQL commit/rollback remained deterministic; no provider write
+  or artificial external `UNKNOWN` was introduced.
 
-- maximum referrals resolved per run;
-- maximum aggregate potential issuance value per run;
-- policy window and audience identity;
-- approval scope/TTL for the exact bounded batch;
-- per-referral child execution fan-out contract.
+The resulting proof database contained exactly `1` referral, `1` issuance,
+`2` frozen rewards, `2` one-time fulfillments, and `0` loyalty transactions.
 
-Thus one issuance is bounded, but one scheduler tick is not yet proven to be a
-bounded tenant-scoped set of independent child executions. The requested
-caps/approval/blast-radius proof cannot pass for the family as a whole.
+## 4. Scheduler envelope, caps, and approval
 
-## 3. What the existing foundation still proves
+The executable scheduler envelope is a non-value ActionExecution separate from
+the per-referral/per-reward child executions. The proof verified:
 
-These blockers do not invalidate the schema foundation or four Shadow slices:
+- deterministic tenant-scoped batch identity and policy window;
+- required owner approval for the exact envelope;
+- recipient and aggregate liability caps;
+- the per-reward and per-issuance caps preserved by issuance;
+- bounded child identities rather than one cross-customer value transaction;
+- partial completion restart/resume returns only remaining child identities;
+- replay cannot create additional value capacity.
 
-- referral creation and resolution have separate immutable 1:1 execution
-  bindings;
-- one qualified referral can have at most one issuance;
-- one issuance has at most one immutable reward per slot;
-- `(tenantId, codeHash)` is the exact claim lookup;
-- one reward can have at most one tenant-qualified fulfillment;
-- one fulfillment can bind to one exact `ActionExecution` and cannot be
-  silently moved or cleared;
-- a future local executor can place fulfillment, an execution-bound ledger
-  row, and balance update in one serializable PostgreSQL transaction once the
-  value/target contract is accepted;
-- P02/P03 unresolved Client identity remains fail-closed through the existing
-  canonical hold guard;
-- provider writes remain unauthorized and `UNKNOWN` is not invented for a
-  local-only transaction.
+## 5. Atomicity, idempotency, and `UNKNOWN`
 
-The DB one-time claim prevents two fulfillment rows for one reward. It does not
-by itself define or prove the missing reward-to-loyalty value mutation.
+Every domain mutation runs in a serializable PostgreSQL transaction. The
+domain fact and its tenant-qualified `ActionExecution` binding commit together.
+Action Engine final-state persistence can be reconciled after response loss
+from that immutable bound fact:
 
-## 4. Schema and contract decision required
+```text
+domain transaction absent  -> PROVEN_NOT_EXECUTED
+execution-bound fact exists -> PROVEN_SUCCEEDED
+```
 
-An amended P4-04 Contract/Schema Gate must decide only:
+This proves crash/restart safety without treating `UNKNOWN` as `FAILED` and
+without blind retry after the dispatch boundary. There is no external provider
+dispatch in the accepted P4-04 fulfillment contract; provider/YClients reads
+fail closed before mutation.
 
-1. the canonical value domain:
-   - monetary/percentage discount applied to an exact payment, or
-   - loyalty points with an immutable point amount/conversion snapshot;
-2. the exact application target and its durable identity;
-3. issue output, stored lookup, response-loss, and re-presentation semantics;
-4. the bounded scheduler envelope, aggregate cap, policy window, and approval
-   binding.
+## 6. Legacy bypass ratchet readiness
 
-If the accepted value remains monetary/percentage, the loyalty points ledger
-must not be used merely to satisfy a test shape. If the accepted value becomes
-points, the Gate must determine whether current fields are sufficient or a
-minimal immutable points fact is required. No field or migration is added in
-this step.
+The current pre-cutover legacy owner remains
+`ai администратор/referral.py`. It contains exactly one P4-04 family bypass
+group with three direct-mutation subgroups:
 
-`ADDITIONAL CONTRACT GATE REQUIRED: YES`
+1. referral relationship write;
+2. referral resolution write;
+3. reward issue/fulfillment write.
 
-`ADDITIONAL SCHEMA DECISION REQUIRED: YES`
+The prepared ratchet distinguishes the isolated canonical executor behind
+Action Engine from a direct owner, locks the three known subgroups, and proves
+with a synthetic direct owner that the same mutation patterns still fail the
+rule. It is ready to become the post-cutover zero-bypass ratchet; the legacy
+owner is intentionally not disabled in this Gate.
 
-`ADDITIONAL MIGRATION AUTHORIZED: NO`
+## 7. Verification
 
-## 5. Verification performed
+| Check                                   | Result                                     |
+| --------------------------------------- | ------------------------------------------ |
+| Disposable PostgreSQL apply             | PASS — clean replay of `64/64` migrations  |
+| ALL-4 executable matrix                 | PASS — `19/19` proof assertions            |
+| Actions proven                          | PASS — `4/4`                               |
+| Targeted P4-04 Jest set                 | PASS — `22/22` suites, `120/120` tests     |
+| Shadow preservation                     | PASS — `4/4` remains non-executable        |
+| Legacy bypass ratchet readiness         | PASS — 1 group / 3 subgroups locked        |
+| Targeted ESLint                         | PASS                                       |
+| Application TypeScript typecheck        | PASS                                       |
+| Scripts TypeScript typecheck            | PASS                                       |
+| Full suite/build                        | NOT RUN — outside this targeted proof Gate |
+| Production referral/reward/value writes | `0`                                        |
+| Provider writes                         | `0`                                        |
 
-Verification intentionally stopped before executable PostgreSQL writes because
-the preconditions above are red.
+No production endpoint, production database mutation, provider client,
+browser, Chrome, or Playwright process was used. Production cutover was not
+performed.
 
-| Check | Result |
-|---|---|
-| Four completed Shadow capability/contracts | PASS — preserved `4/4` |
-| Reward value unit -> loyalty ledger unit | FAIL — no accepted mapping |
-| Exact purchase/visit/service application target | FAIL — absent |
-| Crash-safe issue -> bearer presentation contract | FAIL — absent |
-| Scheduler fan-out cap/approval envelope | FAIL — absent |
-| Tenant-qualified one-time fulfillment schema | PASS |
-| Targeted gap ratchet | PASS — 1 suite / 5 tests |
-| Four Shadow contract/service/architecture preservation set | PASS — 12 suites / 69 tests |
-| Combined targeted P4-04 set | PASS — 13 suites / 74 tests |
-| Targeted ESLint | PASS |
-| Application TypeScript typecheck | PASS |
-| Executable PostgreSQL value proof | NOT RUN — blocked before mutation |
-| Production referral/value mutations | `0` |
-| Provider writes | `0` |
+## 8. Verdict
 
-No production endpoint, production database, provider client, browser, or
-Playwright process was used.
+`P4-04 ALL-4 EXECUTABLE PROOF: PASS`
 
-## 6. Verdict
+`ACTION CLASSES PROVEN: 4/4`
 
-`P4-04 ALL-4 EXECUTABLE PROOF: FAIL`
+`FULL REFERRAL→REWARD→VALUE CHAIN PROVEN: YES`
 
-`ACTION CLASSES PROVEN: 0/4 EXECUTABLE (4/4 SHADOW REMAIN COMPLETE)`
+`FROZEN REWARD VALUE PRESERVED: YES`
 
-`FULL REFERRAL→REWARD→VALUE CHAIN PROVEN: NO`
+`EXACT FULFILLMENT TARGET ENFORCED: YES`
 
-`FULFILLMENT/LEDGER/BALANCE ATOMICITY: NOT PROVEN — VALUE/TARGET CONTRACT MISSING`
+`CRASH-SAFE PRESENTATION PROVEN: YES`
 
-`DUPLICATE REWARD VALUE POSSIBLE: NOT YET RULED OUT BY EXECUTABLE PROOF`
+`FULFILLMENT/ENTITLEMENT ATOMICITY: PROVEN`
 
-`ONE-TIME FULFILLMENT ENFORCED: YES — DOMAIN CLAIM ONLY`
+`DUPLICATE REWARD VALUE POSSIBLE: NO`
 
-`TENANT ISOLATION FOUNDATION: PRESENT`
+`ONE-TIME FULFILLMENT ENFORCED: YES`
 
-`P02/P03 HOLD FOUNDATION: PRESENT`
+`SCHEDULER CAPS/BLAST-RADIUS ENFORCED: YES`
 
-`POLICY/APPROVAL/CAPS COMPLETE FOR ALL-4: NO`
+`TENANT ISOLATION: ENFORCED`
 
-`LEGACY BYPASS RATCHET READY: NO`
+`P02/P03 HOLD FAIL-CLOSED: YES`
+
+`FORGED POLICY/VALUE/AUTHORITY ACCEPTED: NO`
+
+`BLIND RETRY AFTER UNKNOWN: NO`
+
+`LEGACY BYPASS RATCHET READY: YES`
 
 `REAL PRODUCTION VALUE MUTATIONS: 0`
 
@@ -220,20 +205,19 @@ Playwright process was used.
 
 `PRODUCTION CUTOVER: NO`
 
-`READY FOR P4-04 PRODUCTION CUTOVER: NO`
+`READY FOR P4-04 PRODUCTION CUTOVER: YES`
+
+`NEXT PACKAGE 4 FAMILY STARTED: NO`
 
 `PACKAGE 5 STARTED: NO`
 
 `CHAPTER 7 STARTED: NO`
 
-## 7. Permanent process hygiene
+## 9. Permanent process hygiene
 
-All commands were foreground and self-terminating. No background process,
-watcher, browser, Playwright process, or temporary database was started.
-
-`TEMP PROCESSES STARTED: 0`
-
-`TEMP PROCESSES TERMINATED: 0`
+All verification commands were foreground and self-terminating. Each
+disposable PostgreSQL database used while isolating and proving the chain was
+removed before the next step.
 
 `OWNED TEMP PROCESSES STILL RUNNING: 0`
 
@@ -243,5 +227,4 @@ watcher, browser, Playwright process, or temporary database was started.
 
 `TEMP DATABASES REMAINING: 0`
 
-STOP. Executable proof and production cutover remain forbidden until the
-amended Contract/Schema Gate is explicitly accepted.
+STOP. Production cutover and the next Package 4 family were not started.

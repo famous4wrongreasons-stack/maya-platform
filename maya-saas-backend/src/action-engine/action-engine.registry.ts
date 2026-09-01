@@ -62,6 +62,12 @@ import {
   type P403ExecutableActionClass,
 } from './p4-03-legacy-loyalty-executable.contract';
 import {
+  P4_04_EXECUTABLE_REGISTRATIONS,
+  P4_04_SCHEDULER_ENVELOPE_CAPABILITY,
+  p404SchedulerEnvelopeExecutableNormalizer,
+  type P404ExecutableRegistration,
+} from './p4-04-referral-reward-executable.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -74,6 +80,7 @@ import {
 import {
   REFERRAL_REWARD_ISSUE_SHADOW_CAPABILITY,
   REFERRAL_REWARD_ISSUE_SHADOW_INPUT_CONTRACT,
+  REFERRAL_REWARD_POLICY_LIMITS,
   referralRewardIssueShadowNormalizer,
 } from './referral-reward-issue-shadow.contract';
 import {
@@ -1600,6 +1607,97 @@ function p403BulkEnvelopeCapability(input: {
   };
 }
 
+function p404ExecutableCapability(
+  input: P404ExecutableRegistration,
+): RegisteredActionCapabilityV1 {
+  return {
+    capability: input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: `maya.${input.actionClass}-executable-input/1`,
+    targetKind: input.targetKind,
+    allowedSourceTypes: input.allowedSourceTypes,
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: ['local', 'referral_reward', ...input.riskFacets],
+    policyKey: `chapter6.package4.${input.actionClass}-executable`,
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: input.approvalRequired
+      ? 'L3_OWNER_APPROVED'
+      : 'L3_CANONICAL',
+    approvalRequirement: input.approvalRequired ? 'REQUIRED' : 'NONE',
+    ...(input.approvalRequired
+      ? { approvalTtlMs: REFERRAL_REWARD_POLICY_LIMITS.approvalWindowMs }
+      : {}),
+    retry: {
+      key: `package4.${input.actionClass}.reconcile-before-retry`,
+      version: 1,
+      maxExecutionAttempts: 2,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [0],
+    },
+    reconciliation: {
+      key: `package4.${input.actionClass}.bound-local-facts`,
+      version: 1,
+      maxInconclusiveAttempts: 2,
+      retryAfterProvenNonExecution: true,
+    },
+    transportIdentityVersion: 1,
+    executorKey: input.executorKey,
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: (inputValue) => input.normalizeInput(inputValue),
+  };
+}
+
+function p404SchedulerEnvelopeCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: P4_04_SCHEDULER_ENVELOPE_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'issue_referral_rewards',
+    normalizedInputContract: 'maya.referral-reward-scheduler-envelope/1',
+    targetKind: 'referral_reward_batch',
+    allowedSourceTypes: ['scheduler', 'authenticated_request'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'financial_equivalent',
+      'customer_value',
+      'bounded_fan_out',
+      'approval_bound',
+      'non_value_envelope',
+    ],
+    policyKey: 'chapter6.package4.referral-reward-scheduler-envelope',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L3_OWNER_APPROVED',
+    approvalRequirement: 'REQUIRED',
+    approvalTtlMs: REFERRAL_REWARD_POLICY_LIMITS.approvalWindowMs,
+    retry: {
+      key: 'package4.referral-reward-envelope.pre-dispatch-only',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.referral-reward-envelope.no-value',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'referrals.reward-scheduler-envelope',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: p404SchedulerEnvelopeExecutableNormalizer,
+  };
+}
+
 function syntheticCapability(input: {
   capability: string;
   actionClass: string;
@@ -1902,6 +2000,8 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   referralRewardIssueShadowCapability(),
   referralRewardFulfillShadowCapability(),
   referralRewardSchedulerEnvelopeShadowCapability(),
+  p404SchedulerEnvelopeCapability(),
+  ...P4_04_EXECUTABLE_REGISTRATIONS.map(p404ExecutableCapability),
   p403BulkEnvelopeCapability({
     capability: P4_03_BULK_ENVELOPE_CAPABILITIES.expire,
     actionClass: 'expire_legacy_loyalty',
