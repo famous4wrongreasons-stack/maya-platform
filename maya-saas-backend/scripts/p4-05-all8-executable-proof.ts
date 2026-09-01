@@ -241,6 +241,7 @@ class ProofCheckoutProvider implements P405CheckoutProvider {
       amountKopecks: input.amountKopecks,
       currency: input.currency,
       capturedAt: null,
+      confirmationUrl: 'https://proof.invalid/subscription-checkout',
       metadata: { ...input.metadata },
     };
     this.byKey.set(input.idempotencyKey, payment);
@@ -259,9 +260,12 @@ class ProofCheckoutProvider implements P405CheckoutProvider {
     return Promise.resolve(payment ? structuredClone(payment) : null);
   }
 
-  reconcileByIdempotencyKey(
-    idempotencyKey: string,
-  ): Promise<
+  reconcileByIdempotencyKey(input: {
+    idempotencyKey: string;
+    amountKopecks: number;
+    currency: string;
+    metadata: Readonly<Record<string, string>>;
+  }): Promise<
     | { outcome: 'FOUND'; payment: P405ProviderPayment }
     | { outcome: 'NOT_FOUND' }
     | { outcome: 'UNKNOWN' }
@@ -270,7 +274,7 @@ class ProofCheckoutProvider implements P405CheckoutProvider {
     if (this.ambiguity === 'inconclusive') {
       return Promise.resolve({ outcome: 'UNKNOWN' });
     }
-    const payment = this.byKey.get(idempotencyKey);
+    const payment = this.byKey.get(input.idempotencyKey);
     this.ambiguity = 'none';
     return Promise.resolve(
       payment

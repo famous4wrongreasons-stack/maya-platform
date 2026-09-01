@@ -15,6 +15,11 @@ const CONTROLLED_PROOF_FIXTURES = [
     databaseGuard: "database.startsWith('maya_c06_p404_all4_')",
     refusalMarker: 'P4-04 proof refuses non-disposable databases',
   },
+  {
+    path: 'scripts/p4-05-all8-executable-proof.ts',
+    databaseGuard: "database.startsWith('maya_c06_p405_all8_')",
+    refusalMarker: 'P4-05 proof refuses non-disposable databases',
+  },
 ] as const;
 
 type SourceFile = { path: string; code: string };
@@ -82,6 +87,7 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
     expect(owners).toEqual([
       'scripts/p4-03-all8-executable-proof.ts',
       'scripts/p4-04-all4-executable-proof.ts',
+      'scripts/p4-05-all8-executable-proof.ts',
       CANONICAL_OWNER,
     ]);
 
@@ -94,6 +100,11 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
       ({ path }) => path === 'scripts/p4-04-all4-executable-proof.ts',
     );
     expect(isControlledProofFixture(p404Proof!)).toBe(true);
+
+    const p405Proof = files.find(
+      ({ path }) => path === 'scripts/p4-05-all8-executable-proof.ts',
+    );
+    expect(isControlledProofFixture(p405Proof!)).toBe(true);
 
     expect(productionRegistrationOwners(files)).toEqual([CANONICAL_OWNER]);
   });
@@ -132,22 +143,47 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
   });
 
   it('requires both physical disposable-database markers on the exact proof path', () => {
-    const proof = files.find(
+    const p404Proof = files.find(
       ({ path }) => path === 'scripts/p4-04-all4-executable-proof.ts',
     );
-    const withoutDatabaseGuard = proof?.code.replace(
+    const p405Proof = files.find(
+      ({ path }) => path === 'scripts/p4-05-all8-executable-proof.ts',
+    );
+    const withoutP404DatabaseGuard = p404Proof?.code.replace(
       "database.startsWith('maya_c06_p404_all4_')",
       'database.length > 0',
     );
-    const withoutRefusalMarker = proof?.code.replace(
+    const withoutP404RefusalMarker = p404Proof?.code.replace(
       'P4-04 proof refuses non-disposable databases',
+      'proof database rejected',
+    );
+    const withoutP405DatabaseGuard = p405Proof?.code.replace(
+      "database.startsWith('maya_c06_p405_all8_')",
+      'database.length > 0',
+    );
+    const withoutP405RefusalMarker = p405Proof?.code.replace(
+      'P4-05 proof refuses non-disposable databases',
       'proof database rejected',
     );
 
     expect([
-      isControlledProofFixture({ ...proof!, code: withoutDatabaseGuard! }),
-      isControlledProofFixture({ ...proof!, code: withoutRefusalMarker! }),
-    ]).toEqual([false, false]);
+      isControlledProofFixture({
+        ...p404Proof!,
+        code: withoutP404DatabaseGuard!,
+      }),
+      isControlledProofFixture({
+        ...p404Proof!,
+        code: withoutP404RefusalMarker!,
+      }),
+      isControlledProofFixture({
+        ...p405Proof!,
+        code: withoutP405DatabaseGuard!,
+      }),
+      isControlledProofFixture({
+        ...p405Proof!,
+        code: withoutP405RefusalMarker!,
+      }),
+    ]).toEqual([false, false, false, false]);
   });
 
   it('checks the tenant-qualified active hold inside the write transaction', () => {

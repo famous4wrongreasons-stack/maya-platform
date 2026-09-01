@@ -4991,6 +4991,11 @@ async def _start_subscription_purchase(
     Создаёт pending-подписку с выбранным уровнем, открывает инвойс ЮKassa.
     tier: 'senior' / 'top'.
     """
+    logger.warning("p4_05_legacy_mutation_disabled:initiate_customer_subscription_purchase")
+    await query.edit_message_text(
+        "Покупка абонемента временно недоступна. Попробуйте позже."
+    )
+    return
     chat_id = query.from_user.id
     plan = subscriptions.get_plan(plan_code)
     if not plan:
@@ -5097,6 +5102,8 @@ async def _poll_subscription_payment(app: Application, sub_id: int, payment_id: 
     Опрашивает статус платежа ЮKassa ~30 минут. При успехе активирует
     подписку и шлёт клиенту подтверждение.
     """
+    logger.warning("p4_05_legacy_mutation_disabled:activate_customer_subscription")
+    return
     deadline = datetime.now() + timedelta(minutes=30)
     interval = 7
     logger.info(f"Запуск опроса платежа подписки {payment_id} для sub#{sub_id}")
@@ -5123,6 +5130,8 @@ async def _poll_subscription_payment(app: Application, sub_id: int, payment_id: 
 
 async def _activate_paid_subscription(app: Application, sub_id: int):
     """После succeeded — активируем подписку и шлём клиенту приветствие."""
+    logger.warning("p4_05_legacy_mutation_disabled:activate_customer_subscription")
+    return
     sub = database.get_subscription(sub_id)
     if not sub:
         return

@@ -7424,6 +7424,11 @@ async def sub_create_handler(request: web.Request) -> web.Response:
     (внедрён из бота) активирует абонемент и уведомляет покупателя в Telegram.
     Абонемент личный — получателя не спрашиваем; телефон для чека 54-ФЗ берём из БД.
     """
+    logger.warning("p4_05_legacy_mutation_disabled:initiate_customer_subscription_purchase")
+    return _cabinet_response({
+        "error": "canonical_subscription_ingress_required",
+        "message": "Покупка абонемента временно недоступна. Попробуйте позже.",
+    }, status=503)
     try:
         body = await request.json()
     except Exception:

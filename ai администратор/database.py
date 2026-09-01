@@ -3302,6 +3302,7 @@ def create_subscription(*, client_id: int, plan_code: str, tier: str,
                          price_rub: int, visits_included: int,
                          started_at: str, expires_at: str) -> int:
     """Создаёт подписку со статусом pending_payment. Возвращает id."""
+    raise RuntimeError("p4_05_legacy_mutation_disabled:initiate_customer_subscription_purchase")
     with _db() as conn:
         cur = conn.execute(
             "INSERT INTO subscriptions "
@@ -3315,6 +3316,7 @@ def create_subscription(*, client_id: int, plan_code: str, tier: str,
 
 
 def set_subscription_payment_id(subscription_id: int, payment_id: str):
+    raise RuntimeError("p4_05_legacy_mutation_disabled:provider_payment_correlation")
     with _db() as conn:
         conn.execute(
             "UPDATE subscriptions SET yukassa_payment_id = ? WHERE id = ?",
@@ -3341,6 +3343,7 @@ def get_subscription_by_payment_id(payment_id: str) -> dict | None:
 
 def activate_subscription(subscription_id: int):
     """pending_payment → active + проставляет payment_completed_at."""
+    raise RuntimeError("p4_05_legacy_mutation_disabled:activate_customer_subscription")
     with _db() as conn:
         conn.execute(
             "UPDATE subscriptions SET status = 'active', "
@@ -3351,6 +3354,7 @@ def activate_subscription(subscription_id: int):
 
 def update_subscription_status(subscription_id: int, status: str):
     """active / expired / refunded."""
+    raise RuntimeError("p4_05_legacy_mutation_disabled:terminal_subscription_lifecycle")
     with _db() as conn:
         conn.execute(
             "UPDATE subscriptions SET status = ? WHERE id = ?",
@@ -3359,6 +3363,7 @@ def update_subscription_status(subscription_id: int, status: str):
 
 
 def update_subscription_usage(subscription_id: int, visits_used: int):
+    raise RuntimeError("p4_05_legacy_mutation_disabled:sync_customer_subscription_usage")
     with _db() as conn:
         conn.execute(
             "UPDATE subscriptions SET visits_used = ? WHERE id = ?",

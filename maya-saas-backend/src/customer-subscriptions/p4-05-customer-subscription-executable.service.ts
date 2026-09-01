@@ -30,19 +30,24 @@ export interface P405ProviderPayment {
   amountKopecks: number;
   currency: string;
   capturedAt: string | null;
+  confirmationUrl: string | null;
+  metadata: Readonly<Record<string, string>>;
+}
+
+export interface P405ProviderCheckoutRequest {
+  idempotencyKey: string;
+  amountKopecks: number;
+  currency: string;
   metadata: Readonly<Record<string, string>>;
 }
 
 export interface P405CheckoutProvider {
-  createPayment(input: {
-    idempotencyKey: string;
-    amountKopecks: number;
-    currency: string;
-    metadata: Readonly<Record<string, string>>;
-  }): Promise<P405ProviderPayment>;
+  createPayment(
+    input: P405ProviderCheckoutRequest,
+  ): Promise<P405ProviderPayment>;
   getPayment(providerPaymentId: string): Promise<P405ProviderPayment | null>;
   reconcileByIdempotencyKey(
-    idempotencyKey: string,
+    input: P405ProviderCheckoutRequest,
   ): Promise<
     | { outcome: 'FOUND'; payment: P405ProviderPayment }
     | { outcome: 'NOT_FOUND' }
@@ -85,6 +90,7 @@ export interface P405ExecutionValue {
   visitsIncluded?: number;
   termDays?: number;
   paymentProvider?: 'yookassa';
+  checkoutConfirmationUrl?: string;
   subscriptionId?: string;
   previousSubscriptionId?: string;
   termIdentityHash?: string;
@@ -248,15 +254,14 @@ export class P405CustomerSubscriptionExecutableService {
           };
         },
         dispatch: async (input, transportKey, context) => {
+          const providerRequest = this.checkoutProviderRequest(
+            context.tenantId,
+            context.executionId,
+            transportKey,
+            input,
+          );
           const payment = await this.options.provider.createPayment({
-            idempotencyKey: transportKey,
-            amountKopecks: this.integer(input.priceKopecks, 'priceKopecks'),
-            currency: this.text(input.currency, 'currency'),
-            metadata: this.checkoutMetadata(
-              context.tenantId,
-              context.executionId,
-              input,
-            ),
+            ...providerRequest,
           });
           this.assertCheckoutPayment(input, context, payment);
           await this.persistProviderReference(
@@ -285,7 +290,12 @@ export class P405CustomerSubscriptionExecutableService {
           }
           const decision =
             await this.options.provider.reconcileByIdempotencyKey(
-              attempt.providerRequestIdentityHash,
+              this.checkoutProviderRequest(
+                context.tenantId,
+                context.executionId,
+                attempt.providerRequestIdentityHash,
+                input,
+              ),
             );
           if (decision.outcome === 'UNKNOWN') {
             return { outcome: 'STILL_UNKNOWN' };
@@ -1064,6 +1074,20 @@ export class P405CustomerSubscriptionExecutableService {
     };
   }
 
+  private checkoutProviderRequest(
+    tenantId: string,
+    executionId: string,
+    idempotencyKey: string,
+    input: Record<string, unknown>,
+  ): P405ProviderCheckoutRequest {
+    return {
+      idempotencyKey,
+      amountKopecks: this.integer(input.priceKopecks, 'priceKopecks'),
+      currency: this.text(input.currency, 'currency'),
+      metadata: this.checkoutMetadata(tenantId, executionId, input),
+    };
+  }
+
   private assertCheckoutPayment(
     input: Record<string, unknown>,
     context: { tenantId: string; executionId: string },
@@ -1175,6 +1199,9 @@ export class P405CustomerSubscriptionExecutableService {
       visitsIncluded: this.integer(input.visitsIncluded, 'visitsIncluded'),
       termDays: this.integer(input.termDays, 'termDays'),
       paymentProvider: 'yookassa',
+      ...(payment.confirmationUrl
+        ? { checkoutConfirmationUrl: payment.confirmationUrl }
+        : {}),
       ...(input.predecessorSubscriptionId
         ? {
             previousSubscriptionId: this.text(

@@ -241,6 +241,9 @@ async def sync_subscription_usage(sub: dict) -> tuple[int, int]:
     Синхронизирует visits_used для одной подписки. Возвращает
     (previous_used, new_used). Если изменилось — обновляет БД.
     """
+    logger.warning("p4_05_legacy_mutation_disabled:sync_customer_subscription_usage")
+    current = sub.get("visits_used", 0)
+    return current, current
     client = database.get_client_by_id(sub["client_id"])
     if not client or not client.get("phone"):
         return sub.get("visits_used", 0), sub.get("visits_used", 0)
@@ -335,6 +338,14 @@ async def run_subscriptions_job(app: Application) -> dict:
          и push ещё не отправляли.
       3. Mark expired для тех, у кого срок прошёл.
     """
+    logger.warning("p4_05_legacy_mutation_disabled:subscription_scheduler")
+    return {
+        "synced": 0,
+        "expired": 0,
+        "renew_pushed": 0,
+        "errors": 0,
+        "disabled": "canonical_action_engine_required",
+    }
     today = date.today()
     summary = {"synced": 0, "expired": 0, "renew_pushed": 0, "errors": 0}
 
