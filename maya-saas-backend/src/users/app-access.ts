@@ -34,10 +34,10 @@ const PLATFORM_ROLES = new Set<UserRole>([
 const OWNER_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
   UserRole.BUSINESS_OWNER,
-  UserRole.TENANT_ADMIN,
 ]);
 
 const STAFF_ROLES = new Set<UserRole>([
+  UserRole.TENANT_ADMIN,
   UserRole.ADMINISTRATOR,
   UserRole.MANAGER,
   UserRole.BRANCH_MANAGER,

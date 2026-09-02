@@ -41,6 +41,24 @@ describe('buildAppAccessContext', () => {
     );
   });
 
+  it('keeps a tenant administrator out of owner mode', () => {
+    const result = buildAppAccessContext({
+      tenantId: 'tenant-1',
+      role: UserRole.TENANT_ADMIN,
+      staffProfileLinked: true,
+      customerProfileLinked: false,
+    });
+
+    expect(result.default_mode).toBe('staff');
+    expect(result.available_modes.map(({ mode }) => mode)).toEqual([
+      'staff',
+      'client',
+    ]);
+    expect(result.available_modes).not.toContainEqual(
+      expect.objectContaining({ mode: 'owner' }),
+    );
+  });
+
   it('does not expose tenant modes to an integration identity', () => {
     const result = buildAppAccessContext({
       tenantId: 'tenant-1',

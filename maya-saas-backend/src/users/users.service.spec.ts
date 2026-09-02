@@ -410,6 +410,26 @@ describe('UsersService', () => {
       can_switch_mode: false,
       chooser_required: false,
     });
+    expect(result.is_platform_owner).toBe(false);
+  });
+
+  it('grants founder surfaces only through the explicit server allowlist', async () => {
+    const previousIds = process.env.MAYA_FOUNDER_IDS;
+    const previousEmails = process.env.MAYA_FOUNDER_EMAILS;
+    process.env.MAYA_FOUNDER_IDS = 'user-1';
+    process.env.MAYA_FOUNDER_EMAILS = '';
+
+    try {
+      const { service } = createService();
+      const result = await service.serializeCurrentUser(tenantUser());
+
+      expect(result.is_platform_owner).toBe(true);
+    } finally {
+      if (previousIds === undefined) delete process.env.MAYA_FOUNDER_IDS;
+      else process.env.MAYA_FOUNDER_IDS = previousIds;
+      if (previousEmails === undefined) delete process.env.MAYA_FOUNDER_EMAILS;
+      else process.env.MAYA_FOUNDER_EMAILS = previousEmails;
+    }
   });
 
   it('updates the current user profile with an encrypted name', async () => {

@@ -1511,10 +1511,6 @@ export class UsersService {
     email: string | null;
     role: string;
   }): boolean {
-    if (serialized.role === 'platform_owner') {
-      return true;
-    }
-
     const parse = (raw?: string) =>
       String(raw || '')
         .split(',')
