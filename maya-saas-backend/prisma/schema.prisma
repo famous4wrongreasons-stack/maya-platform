@@ -222,6 +222,7 @@ model Tenant {
   unresolvedClientIdentityHolds  UnresolvedClientIdentityHold[]
   expenses                       Expense[]
   expensePeriodDeclarations      ExpensePeriodDeclaration[]
+  expensePeriodDeclarationInvalidations ExpensePeriodDeclarationInvalidation[]
   aiApprovalRequests             AiApprovalRequest[]
   aiToolExecutions               AiToolExecution[]
   aiBrainSessions                AiBrainSession[]
@@ -449,6 +450,8 @@ model ActionExecution {
   giftCertificateRedemption GiftCertificateRedemption? @relation("GiftCertificateRedemptionActionExecution")
   expense               Expense?           @relation("ExpenseActionExecution")
   expensePeriodDeclaration ExpensePeriodDeclaration? @relation("ExpensePeriodDeclarationActionExecution")
+  invalidatedExpensePeriodDeclarations ExpensePeriodDeclarationInvalidation[] @relation("ExpensePeriodInvalidatedDeclarationExecution")
+  expensePeriodDeclarationInvalidations ExpensePeriodDeclarationInvalidation[] @relation("ExpensePeriodInvalidationExecution")
 
   @@unique([id, tenantId])
   @@unique([tenantId, identityFingerprint])
@@ -1513,6 +1516,7 @@ model ExpensePeriodDeclaration {
   declaredById      String?
   periodFromDay     String
   periodToDay       String
+  declarationEpoch  Int?
   idempotencyKey    String?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
@@ -1524,6 +1528,33 @@ model ExpensePeriodDeclaration {
   @@unique([tenantId, periodFromDay, periodToDay])
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, periodFromDay, periodToDay])
+}
+
+/// Append-only boundary between two current expense-period declaration
+/// generations. The invalidated declaration row may be physically deleted,
+/// so its id and canonical ActionExecution remain as immutable evidence here.
+model ExpensePeriodDeclarationInvalidation {
+  id                                      String   @id @default(uuid())
+  tenantId                                String
+  periodFromDay                           String
+  periodToDay                             String
+  invalidatedDeclarationId                String
+  invalidatedDeclarationActionExecutionId String
+  invalidationActionExecutionId           String
+  previousDeclarationEpoch                Int
+  nextDeclarationEpoch                    Int
+  reasonCode                              String
+  createdAt                               DateTime @default(now())
+
+  tenant                                Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "ExpensePeriodInvalidation_tenant_fkey")
+  invalidatedDeclarationActionExecution ActionExecution @relation("ExpensePeriodInvalidatedDeclarationExecution", fields: [invalidatedDeclarationActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ExpensePeriodInvalidation_decl_exec_fkey")
+  invalidationActionExecution           ActionExecution @relation("ExpensePeriodInvalidationExecution", fields: [invalidationActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ExpensePeriodInvalidation_action_exec_fkey")
+
+  @@unique([id, tenantId], map: "ExpensePeriodInvalidation_id_tenant_key")
+  @@unique([tenantId, invalidatedDeclarationActionExecutionId], map: "ExpensePeriodInvalidation_decl_exec_key")
+  @@unique([tenantId, periodFromDay, periodToDay, nextDeclarationEpoch], map: "ExpensePeriodInvalidation_period_epoch_key")
+  @@unique([tenantId, invalidationActionExecutionId, invalidatedDeclarationId], map: "ExpensePeriodInvalidation_action_decl_key")
+  @@index([tenantId, periodFromDay, periodToDay, nextDeclarationEpoch], map: "ExpensePeriodInvalidation_period_epoch_idx")
 }
 
 model AiApprovalRequest {
