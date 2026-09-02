@@ -34,6 +34,7 @@ export * from './p4-04-referral-reward-executable.contract';
 export * from './p4-05-customer-subscription-executable.contract';
 export * from './p4-06-gift-certificate-executable.contract';
 export * from './p4-07-expense-executable.contract';
+export * from './p4-08-tenant-billing-executable.contract';
 export * from './referral-create-shadow.contract';
 export * from './referral-resolve-shadow.contract';
 export * from './referral-reward-issue-shadow.contract';

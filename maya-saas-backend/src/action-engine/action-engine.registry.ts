@@ -146,6 +146,15 @@ import {
   expensePeriodDeclareNormalizer,
 } from './p4-07-expense-executable.contract';
 import {
+  P4_08_EXECUTABLE_CAPABILITIES,
+  P4_08_REGISTRATIONS,
+  P4_08_SCHEDULER_ENVELOPE_CAPABILITY,
+  P4_08_SCHEDULER_ENVELOPE_CONTRACT,
+  P4_08_SHADOW_CAPABILITIES,
+  tenantBillingSchedulerEnvelopeNormalizer,
+  type P408Registration,
+} from './p4-08-tenant-billing-executable.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -2503,6 +2512,112 @@ function p405SchedulerEnvelopeCapability(): RegisteredActionCapabilityV1 {
   };
 }
 
+function p408Capability(
+  input: P408Registration,
+  shadow: boolean,
+): RegisteredActionCapabilityV1 {
+  return {
+    capability: shadow
+      ? P4_08_SHADOW_CAPABILITIES[
+          input.capability === P4_08_EXECUTABLE_CAPABILITIES.checkout
+            ? 'checkout'
+            : input.capability === P4_08_EXECUTABLE_CAPABILITIES.recurring
+              ? 'recurring'
+              : input.capability === P4_08_EXECUTABLE_CAPABILITIES.outcome
+                ? 'outcome'
+                : 'pastDue'
+        ]
+      : input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: `maya.${input.actionClass}-input/1`,
+    targetKind: input.targetKind,
+    allowedSourceTypes: input.allowedSourceTypes,
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      input.providerDispatch ? 'external' : 'local',
+      'tenant_billing',
+      ...(shadow ? ['shadow_only'] : ['payment_value']),
+    ],
+    policyKey: `chapter6.package4.${input.actionClass}.${shadow ? 'shadow' : 'executable'}`,
+    policyVersion: 1,
+    policyDecision: shadow
+      ? ActionPolicyDecision.SHADOW_ONLY
+      : ActionPolicyDecision.ALLOW,
+    autonomyLevel: shadow ? 'L2_5_SHADOW' : 'L3_CANONICAL',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: shadow
+        ? 'package4.tenant-billing-shadow.no-execution'
+        : `package4.${input.actionClass}.reconcile-before-retry`,
+      version: 1,
+      maxExecutionAttempts: shadow ? 1 : 2,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: shadow ? [] : [0],
+    },
+    reconciliation: {
+      key: shadow
+        ? 'package4.tenant-billing-shadow.not-required'
+        : input.providerDispatch
+          ? `package4.${input.actionClass}.provider-status`
+          : `package4.${input.actionClass}.bound-local-facts`,
+      version: 1,
+      maxInconclusiveAttempts: shadow ? 1 : 2,
+      retryAfterProvenNonExecution: !shadow,
+    },
+    transportIdentityVersion: 1,
+    executorKey: shadow ? 'shadow.none' : input.executorKey,
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: (value) => input.normalizeInput(value),
+  };
+}
+
+function p408SchedulerEnvelopeCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: P4_08_SCHEDULER_ENVELOPE_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'charge_tenant_billing_recurring',
+    normalizedInputContract: P4_08_SCHEDULER_ENVELOPE_CONTRACT,
+    targetKind: 'tenant_billing_scheduler_envelope',
+    allowedSourceTypes: ['scheduler'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'tenant_billing',
+      'bounded_fan_out',
+      'non_value_envelope',
+    ],
+    policyKey: 'chapter6.package4.tenant-billing-scheduler-envelope',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L3_CANONICAL',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.tenant-billing-envelope.pre-dispatch-only',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.tenant-billing-envelope.no-value',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'tenant-billing.scheduler-envelope',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: tenantBillingSchedulerEnvelopeNormalizer,
+  };
+}
+
 function syntheticCapability(input: {
   capability: string;
   actionClass: string;
@@ -2838,6 +2953,13 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     normalizeInput: expensePeriodDeclareNormalizer,
   }),
   ...P4_07_EXECUTABLE_REGISTRATIONS.map(p407ExecutableCapability),
+  ...P4_08_REGISTRATIONS.map((registration) =>
+    p408Capability(registration, true),
+  ),
+  p408SchedulerEnvelopeCapability(),
+  ...P4_08_REGISTRATIONS.map((registration) =>
+    p408Capability(registration, false),
+  ),
   ...P4_06_EXECUTABLE_REGISTRATIONS.map(p406ExecutableCapability),
   p405SchedulerEnvelopeCapability(),
   ...P4_05_EXECUTABLE_REGISTRATIONS.map(p405ExecutableCapability),

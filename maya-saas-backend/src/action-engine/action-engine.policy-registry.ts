@@ -53,6 +53,15 @@ const EXPENSE_DECLARER_ROLES: readonly UserRole[] = [
   UserRole.BUSINESS_OWNER,
 ];
 
+const TENANT_BILLING_ACTOR_ROLES: readonly UserRole[] = [
+  UserRole.PLATFORM_OWNER,
+  UserRole.PLATFORM_ADMIN,
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+];
+
 function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
   if (capability.startsWith('crm.')) return ['crm.integration'];
   if (capability.startsWith('communication.')) return ['notifications.core'];
@@ -66,6 +75,9 @@ function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
 }
 
 function allowedActorRoles(capability: string): readonly UserRole[] {
+  if (capability.startsWith('tenant-billing.')) {
+    return TENANT_BILLING_ACTOR_ROLES;
+  }
   if (capability.startsWith('loyalty.internal-adjust.')) {
     return LOYALTY_ADJUSTMENT_ROLES;
   }
