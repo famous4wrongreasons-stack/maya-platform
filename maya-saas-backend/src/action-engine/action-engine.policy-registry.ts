@@ -62,6 +62,13 @@ const TENANT_BILLING_ACTOR_ROLES: readonly UserRole[] = [
   UserRole.ADMINISTRATOR,
 ];
 
+const VALUE_CONFIGURATION_REQUESTER_ROLES: readonly UserRole[] = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+];
+
 function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
   if (capability.startsWith('crm.')) return ['crm.integration'];
   if (capability.startsWith('communication.')) return ['notifications.core'];
@@ -75,6 +82,9 @@ function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
 }
 
 function allowedActorRoles(capability: string): readonly UserRole[] {
+  if (capability.startsWith('value-configuration.')) {
+    return VALUE_CONFIGURATION_REQUESTER_ROLES;
+  }
   if (capability.startsWith('tenant-billing.')) {
     return TENANT_BILLING_ACTOR_ROLES;
   }

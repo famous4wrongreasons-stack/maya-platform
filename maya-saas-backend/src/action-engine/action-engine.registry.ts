@@ -155,6 +155,11 @@ import {
   type P408Registration,
 } from './p4-08-tenant-billing-executable.contract';
 import {
+  P4_09_INPUT_CONTRACT,
+  P4_09_REGISTRATIONS,
+  type P409Registration,
+} from './p4-09-value-configuration-executable.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1311,6 +1316,59 @@ function p407ExecutableCapability(
     payloadRetentionMs: 30 * DAY,
     auditRetentionMs: 7 * 365 * DAY,
     normalizeInput: registration.normalizeInput,
+  };
+}
+
+function p409Capability(
+  registration: P409Registration,
+  shadow: boolean,
+): RegisteredActionCapabilityV1 {
+  return {
+    capability: shadow
+      ? registration.shadowCapability
+      : registration.executableCapability,
+    capabilityVersion: 1,
+    actionClass: registration.actionClass,
+    normalizedInputContract: P4_09_INPUT_CONTRACT,
+    targetKind: registration.targetKind,
+    allowedSourceTypes: registration.allowedSourceTypes,
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'financial_equivalent',
+      'value_configuration',
+      'one_target',
+      'owner_approval',
+      'future_issuance_only',
+      ...(shadow ? ['shadow_only'] : ['local_atomic']),
+    ],
+    policyKey: `chapter6.package4.${registration.actionClass}.${shadow ? 'shadow' : 'execute'}`,
+    policyVersion: 1,
+    policyDecision: shadow
+      ? ActionPolicyDecision.SHADOW_ONLY
+      : ActionPolicyDecision.ALLOW,
+    autonomyLevel: shadow ? 'L2_5_SHADOW' : 'L3_OWNER_APPROVED',
+    approvalRequirement: shadow ? 'NONE' : 'REQUIRED',
+    ...(shadow ? {} : { approvalTtlMs: 15 * 60 * 1_000 }),
+    retry: {
+      key: 'package4.value-configuration.local-transaction',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.value-configuration.local-not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: shadow ? 'shadow.none' : 'business-content.canonical-value',
+    executorVersion: 1,
+    payloadRetentionMs: shadow ? 7 * DAY : 30 * DAY,
+    auditRetentionMs: 7 * 365 * DAY,
+    normalizeInput: (value) => registration.normalizeInput(value),
   };
 }
 
@@ -2959,6 +3017,12 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   p408SchedulerEnvelopeCapability(),
   ...P4_08_REGISTRATIONS.map((registration) =>
     p408Capability(registration, false),
+  ),
+  ...P4_09_REGISTRATIONS.map((registration) =>
+    p409Capability(registration, true),
+  ),
+  ...P4_09_REGISTRATIONS.map((registration) =>
+    p409Capability(registration, false),
   ),
   ...P4_06_EXECUTABLE_REGISTRATIONS.map(p406ExecutableCapability),
   p405SchedulerEnvelopeCapability(),
