@@ -469,6 +469,7 @@ const START_PLAN_FEATURES: MayaFeatureKey[] = [
   'customers.core',
   'expenses.core',
   'analytics.solo',
+  'notifications.core',
 ];
 
 const PRO_PLAN_FEATURES: MayaFeatureKey[] = [

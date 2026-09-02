@@ -102,6 +102,7 @@ describe('OwnerReportsService', () => {
       type: 'morning_brief',
       sourceEventId: `nest:morning_brief:${LOCAL_DATE}`,
       userIds: ['owner-user'],
+      telegramChatIds: ['10001'],
       fanoutOwners: false,
     });
     expect(ownerMessage?.bodyText).toContain('всего 8 записей');
@@ -129,6 +130,46 @@ describe('OwnerReportsService', () => {
     expect(result).toBe('skipped');
     expect(readState).not.toHaveBeenCalled();
     expect(inbox.publishForTenant).not.toHaveBeenCalled();
+  });
+
+  it('delivers the daily owner report to the linked Telegram chat', async () => {
+    const { service, publishForTenant } = createService();
+
+    const result = await service.runDailyReport(
+      tenant,
+      new Date('2026-08-13T18:05:00.000Z'),
+    );
+
+    expect(result).toBe('sent');
+    expect(publishForTenant).toHaveBeenCalledWith(
+      tenant.id,
+      expect.objectContaining({
+        type: 'daily_report',
+        sourceEventId: `nest:daily_report:${LOCAL_DATE}`,
+        userIds: ['owner-user'],
+        telegramChatIds: ['10001'],
+        fanoutOwners: false,
+      }),
+    );
+  });
+
+  it('uses a separate idempotent source event for report recovery', async () => {
+    const { service, publishForTenant } = createService();
+
+    const result = await service.recoverDailyReport(
+      tenant,
+      LOCAL_DATE,
+      'incident-20260903',
+    );
+
+    expect(result).toBe('sent');
+    expect(publishForTenant).toHaveBeenCalledWith(
+      tenant.id,
+      expect.objectContaining({
+        sourceEventId: `nest:daily_report:${LOCAL_DATE}:recovery:incident-20260903`,
+        telegramChatIds: ['10001'],
+      }),
+    );
   });
 
   it('does not deliver briefs to users who disabled daily brief', async () => {
