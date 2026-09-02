@@ -926,17 +926,21 @@ model TenantCatalogItem {
   externalRef           String?
   metadataJson          Json?
   canonicalTemplateKey  String?
+  supersedesOfferId     String?
   currentValueVersionId String?
   createdAt             DateTime                        @default(now())
   updatedAt             DateTime                        @updatedAt
   tenant                Tenant                          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   valueVersions         TenantCatalogItemValueVersion[] @relation("TenantCatalogItemValueVersions")
   currentValueVersion   TenantCatalogItemValueVersion?  @relation("TenantCatalogItemCurrentValueVersion", fields: [currentValueVersionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  supersededOffer       TenantCatalogItem?               @relation("TenantCatalogItemReplacementLineage", fields: [supersedesOfferId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  replacementOffer      TenantCatalogItem?               @relation("TenantCatalogItemReplacementLineage")
 
   @@unique([id, tenantId])
   @@unique([currentValueVersionId, tenantId])
-  @@unique([tenantId, kind, canonicalTemplateKey])
+  @@unique([supersedesOfferId, tenantId])
   @@unique([tenantId, kind, externalRef])
+  @@index([tenantId, kind, canonicalTemplateKey], map: "TenantCatalogItem_tenant_kind_template_idx")
   @@index([tenantId, kind, active])
 }
 
