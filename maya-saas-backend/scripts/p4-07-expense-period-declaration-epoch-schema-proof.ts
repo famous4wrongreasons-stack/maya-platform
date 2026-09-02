@@ -25,7 +25,10 @@ import {
   type EntitlementsService,
   type FeatureRequirementDecision,
 } from '../src/entitlements/entitlements.service';
-import { p407Hash } from '../src/expenses/expense-canonical-shadow.service';
+import {
+  expensePeriodDeclarationIdentityHash,
+  p407Hash,
+} from '../src/expenses/expense-canonical-shadow.service';
 import type { PrismaService } from '../src/prisma/prisma.service';
 
 const NOW = new Date('2026-09-02T18:00:00.000Z');
@@ -144,14 +147,13 @@ function declarationRequest(
     PERIOD_FROM,
     PERIOD_TO,
   ]);
-  const declarationIdentityHash = p407Hash([
-    'p4-07.declare-expense-period-complete.v2',
+  const declarationIdentityHash = expensePeriodDeclarationIdentityHash(
     scope.tenantId,
     PERIOD_FROM,
     PERIOD_TO,
+    epoch,
     ledgerSnapshotHash,
-    String(epoch),
-  ]);
+  );
   return request({
     tenantId: scope.tenantId,
     actorUserId: scope.ownerId,
@@ -161,6 +163,7 @@ function declarationRequest(
     normalized: {
       periodFromDay: PERIOD_FROM,
       periodToDay: PERIOD_TO,
+      declarationEpoch: epoch,
       ledgerSnapshotHash,
       declarationIdentityHash,
       actorMembershipId: scope.membershipId,
@@ -690,7 +693,12 @@ async function main() {
       ).declarationEpoch,
       null,
     );
-    assert.equal(await prisma.expense.count(), 0);
+    assert.equal(
+      await prisma.expense.count({
+        where: { tenantId: { in: [primary.tenantId, other.tenantId] } },
+      }),
+      0,
+    );
 
     console.log(
       JSON.stringify({

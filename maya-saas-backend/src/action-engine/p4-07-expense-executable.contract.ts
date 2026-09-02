@@ -18,7 +18,7 @@ export const EXPENSE_CREATE_INPUT_CONTRACT =
 export const EXPENSE_DELETE_INPUT_CONTRACT =
   'maya.delete_expense-input/1' as const;
 export const EXPENSE_PERIOD_DECLARE_INPUT_CONTRACT =
-  'maya.declare_expense_period_complete-input/1' as const;
+  'maya.declare_expense_period_complete-input/2' as const;
 
 export const EXPENSE_CREATE_POLICY_PROFILE =
   'p4-07.expense-create.policy.v1' as const;
@@ -106,6 +106,20 @@ function positiveAmount(source: Record<string, unknown>) {
   ) {
     throw new ActionContractError(
       'amountKopecks exceeds the canonical per-row cap',
+    );
+  }
+  return value as number;
+}
+
+function declarationEpoch(source: Record<string, unknown>) {
+  const value = source.declarationEpoch;
+  if (
+    !Number.isSafeInteger(value) ||
+    (value as number) < 0 ||
+    (value as number) > 2_147_483_647
+  ) {
+    throw new ActionContractError(
+      'declarationEpoch must be a non-negative PostgreSQL integer',
     );
   }
   return value as number;
@@ -278,6 +292,7 @@ export function expensePeriodDeclareNormalizer(
   only(source, [
     'periodFromDay',
     'periodToDay',
+    'declarationEpoch',
     'ledgerSnapshotHash',
     'declarationIdentityHash',
     'actorMembershipId',
@@ -318,6 +333,7 @@ export function expensePeriodDeclareNormalizer(
   return {
     periodFromDay: from,
     periodToDay: to,
+    declarationEpoch: declarationEpoch(source),
     ledgerSnapshotHash: opaque(source, 'ledgerSnapshotHash'),
     declarationIdentityHash: opaque(source, 'declarationIdentityHash'),
     ...commonAuthority(source, EXPENSE_PERIOD_DECLARE_POLICY_PROFILE),

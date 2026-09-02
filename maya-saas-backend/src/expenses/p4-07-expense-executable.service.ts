@@ -20,6 +20,7 @@ import {
 } from '../action-engine';
 import {
   expenseLedgerSnapshotHash,
+  expensePeriodDeclarationIdentityHash,
   p407Hash,
 } from './expense-canonical-shadow.service';
 
@@ -30,6 +31,7 @@ export interface P407ExecutionValue {
   actionExecutionId: string;
   expenseId?: string;
   declarationId?: string;
+  declarationEpoch?: number;
   deletionIdentityHash?: string;
   declarationIdentityHash?: string;
   invalidatedDeclarationIds: string[];
@@ -234,6 +236,27 @@ export class P407ExpenseExecutableService {
       throw new P407ExpenseExecutionError(
         'Expense ledger changed after declaration planning',
       );
+    const declarationEpoch = await this.currentDeclarationEpoch(
+      tx,
+      execution.tenantId,
+      from,
+      to,
+    );
+    if (declarationEpoch !== this.epoch(input.declarationEpoch))
+      throw new P407ExpenseExecutionError(
+        'Expense declaration epoch changed after planning',
+      );
+    const declarationIdentityHash = expensePeriodDeclarationIdentityHash(
+      execution.tenantId,
+      from,
+      to,
+      declarationEpoch,
+      actual,
+    );
+    if (declarationIdentityHash !== input.declarationIdentityHash)
+      throw new P407ExpenseExecutionError(
+        'Expense declaration identity is stale or forged',
+      );
     const existing = await tx.expensePeriodDeclaration.findUnique({
       where: {
         tenantId_periodFromDay_periodToDay: {
@@ -243,7 +266,11 @@ export class P407ExpenseExecutableService {
         },
       },
     });
-    if (existing && existing.actionExecutionId !== execution.id)
+    if (
+      existing &&
+      (existing.actionExecutionId !== execution.id ||
+        existing.declarationEpoch !== declarationEpoch)
+    )
       throw new P407ExpenseExecutionError(
         'Expense period has a conflicting current declaration',
       );
@@ -256,7 +283,8 @@ export class P407ExpenseExecutableService {
           declaredById: execution.actorUserId,
           periodFromDay: from,
           periodToDay: to,
-          idempotencyKey: this.text(input.declarationIdentityHash),
+          declarationEpoch,
+          idempotencyKey: declarationIdentityHash,
         },
       }));
     await this.audit(
@@ -268,6 +296,7 @@ export class P407ExpenseExecutableService {
         period_from_day: from,
         period_to_day: to,
         ledger_snapshot_hash: actual,
+        declaration_epoch: declarationEpoch,
         action_execution_id: execution.id,
       },
     );
@@ -275,7 +304,8 @@ export class P407ExpenseExecutableService {
       actionClass: 'declare_expense_period_complete',
       actionExecutionId: execution.id,
       declarationId: declaration.id,
-      declarationIdentityHash: this.text(input.declarationIdentityHash),
+      declarationEpoch,
+      declarationIdentityHash,
       invalidatedDeclarationIds: [],
       expenseCreates: 0,
       expenseDeletes: 0,
@@ -297,16 +327,40 @@ export class P407ExpenseExecutableService {
         periodFromDay: { lte: day },
         periodToDay: { gte: day },
       },
-      select: { id: true, periodFromDay: true, periodToDay: true },
+      select: {
+        id: true,
+        periodFromDay: true,
+        periodToDay: true,
+        declarationEpoch: true,
+        actionExecutionId: true,
+      },
     });
-    if (rows.length)
-      await tx.expensePeriodDeclaration.deleteMany({
-        where: {
-          id: { in: rows.map((row) => row.id) },
+    for (const row of rows) {
+      if (row.declarationEpoch === null || !row.actionExecutionId)
+        throw new P407ExpenseExecutionError(
+          'Historical expense declaration requires explicit correlation before mutation',
+        );
+      await tx.expensePeriodDeclarationInvalidation.create({
+        data: {
+          id: randomUUID(),
           tenantId: execution.tenantId,
+          periodFromDay: row.periodFromDay,
+          periodToDay: row.periodToDay,
+          invalidatedDeclarationId: row.id,
+          invalidatedDeclarationActionExecutionId: row.actionExecutionId,
+          invalidationActionExecutionId: execution.id,
+          previousDeclarationEpoch: row.declarationEpoch,
+          nextDeclarationEpoch: row.declarationEpoch + 1,
+          reasonCode: `expense_ledger_changed:${cause}`,
         },
       });
-    for (const row of rows)
+      const deleted = await tx.expensePeriodDeclaration.deleteMany({
+        where: { id: row.id, tenantId: execution.tenantId },
+      });
+      if (deleted.count !== 1)
+        throw new P407ExpenseExecutionError(
+          'Exact expense declaration disappeared during invalidation',
+        );
       await this.audit(
         tx,
         execution,
@@ -317,9 +371,26 @@ export class P407ExpenseExecutableService {
           period_to_day: row.periodToDay,
           reason: `expense_ledger_changed:${cause}`,
           action_execution_id: execution.id,
+          previous_declaration_epoch: row.declarationEpoch,
+          next_declaration_epoch: row.declarationEpoch + 1,
         },
       );
+    }
     return rows.map((row) => row.id).sort();
+  }
+
+  private async currentDeclarationEpoch(
+    tx: Tx,
+    tenantId: string,
+    periodFromDay: string,
+    periodToDay: string,
+  ): Promise<number> {
+    const latest = await tx.expensePeriodDeclarationInvalidation.findFirst({
+      where: { tenantId, periodFromDay, periodToDay },
+      orderBy: { nextDeclarationEpoch: 'desc' },
+      select: { nextDeclarationEpoch: true },
+    });
+    return latest?.nextDeclarationEpoch ?? 0;
   }
 
   private async begin(tx: Tx, execution: ActionExecution): Promise<string> {
@@ -604,6 +675,14 @@ export class P407ExpenseExecutableService {
         'Canonical expense integer is missing',
       );
     return value as number;
+  }
+  private epoch(value: unknown) {
+    const epoch = this.integer(value);
+    if (epoch < 0 || epoch > 2_147_483_647)
+      throw new P407ExpenseExecutionError(
+        'Canonical declaration epoch is invalid',
+      );
+    return epoch;
   }
   private instant(value: unknown) {
     const date = new Date(this.text(value));

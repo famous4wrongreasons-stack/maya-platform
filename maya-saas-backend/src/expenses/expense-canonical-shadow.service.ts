@@ -83,6 +83,23 @@ export function expenseLedgerSnapshotHash(
   ]);
 }
 
+export function expensePeriodDeclarationIdentityHash(
+  tenantId: string,
+  fromDay: string,
+  toDay: string,
+  declarationEpoch: number,
+  ledgerSnapshotHash: string,
+): string {
+  return p407Hash([
+    'p4-07.declare-expense-period-complete.v2',
+    tenantId,
+    fromDay,
+    toDay,
+    String(declarationEpoch),
+    ledgerSnapshotHash,
+  ]);
+}
+
 export interface ExpenseShadowResult {
   actionClass:
     'create_expense' | 'delete_expense' | 'declare_expense_period_complete';
@@ -304,16 +321,28 @@ export class ExpenseCanonicalShadowService {
       dto.period_to_day,
       rows,
     );
-    const declarationIdentityHash = p407Hash([
-      'p4-07.declare-expense-period-complete.v1',
+    const latestInvalidation =
+      await this.prisma.expensePeriodDeclarationInvalidation.findFirst({
+        where: {
+          tenantId: scoped,
+          periodFromDay: dto.period_from_day,
+          periodToDay: dto.period_to_day,
+        },
+        orderBy: { nextDeclarationEpoch: 'desc' },
+        select: { nextDeclarationEpoch: true },
+      });
+    const declarationEpoch = latestInvalidation?.nextDeclarationEpoch ?? 0;
+    const declarationIdentityHash = expensePeriodDeclarationIdentityHash(
       scoped,
       dto.period_from_day,
       dto.period_to_day,
+      declarationEpoch,
       ledgerSnapshotHash,
-    ]);
+    );
     const input = {
       periodFromDay: dto.period_from_day,
       periodToDay: dto.period_to_day,
+      declarationEpoch,
       ledgerSnapshotHash,
       declarationIdentityHash,
       actorMembershipId: actor.id,

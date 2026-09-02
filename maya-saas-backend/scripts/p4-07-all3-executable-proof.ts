@@ -27,6 +27,7 @@ import {
 } from '../src/entitlements/entitlements.service';
 import {
   expenseLedgerSnapshotHash,
+  expensePeriodDeclarationIdentityHash,
   p407Hash,
 } from '../src/expenses/expense-canonical-shadow.service';
 import { P407ExpenseExecutableService } from '../src/expenses/p4-07-expense-executable.service';
@@ -258,16 +259,28 @@ async function declarationInput(
     to,
     rows,
   );
-  const declarationIdentityHash = p407Hash([
-    'p4-07.declare-expense-period-complete.v1',
+  const latestInvalidation =
+    await prisma.expensePeriodDeclarationInvalidation.findFirst({
+      where: {
+        tenantId: scope.tenantId,
+        periodFromDay: from,
+        periodToDay: to,
+      },
+      orderBy: { nextDeclarationEpoch: 'desc' },
+      select: { nextDeclarationEpoch: true },
+    });
+  const declarationEpoch = latestInvalidation?.nextDeclarationEpoch ?? 0;
+  const declarationIdentityHash = expensePeriodDeclarationIdentityHash(
     scope.tenantId,
     from,
     to,
+    declarationEpoch,
     ledgerSnapshotHash,
-  ]);
+  );
   return {
     periodFromDay: from,
     periodToDay: to,
+    declarationEpoch,
     ledgerSnapshotHash,
     declarationIdentityHash,
     actorMembershipId: scope.membershipId,
@@ -323,7 +336,6 @@ async function main() {
   try {
     const primary = await tenant(prisma, 'primary');
     const other = await tenant(prisma, 'other');
-    let declarationReestablishmentGap = false;
 
     const firstInput = createInput(primary, 'first');
     const firstRequest = request({
@@ -378,6 +390,7 @@ async function main() {
       }),
       1,
     );
+    assert.equal(concurrentDeclaration[0].declarationEpoch, 0);
 
     const secondInput = createInput(primary, 'second', {
       amountKopecks: 225_000,
@@ -434,11 +447,16 @@ async function main() {
     );
 
     const reopenedDeclaration = await declarationInput(prisma, primary);
-    assert.equal(
+    assert.notEqual(
       reopenedDeclaration.declarationIdentityHash,
       declaration.declarationIdentityHash,
-      'a create followed by physical delete can restore the exact old ledger snapshot',
+      'durable epoch must distinguish a restored ledger snapshot',
     );
+    assert.equal(
+      reopenedDeclaration.ledgerSnapshotHash,
+      declaration.ledgerSnapshotHash,
+    );
+    assert.equal(reopenedDeclaration.declarationEpoch, 1);
     const reopenedRequest = request({
       tenantId: primary.tenantId,
       actorUserId: primary.ownerId,
@@ -447,11 +465,18 @@ async function main() {
       logicalKey: String(reopenedDeclaration.declarationIdentityHash),
       normalized: reopenedDeclaration,
     });
-    await executable.execute(reopenedRequest);
-    declarationReestablishmentGap =
-      (await prisma.expensePeriodDeclaration.count({
+    const reopened = await executable.execute(reopenedRequest);
+    assert.equal(reopened.declarationEpoch, 1);
+    assert.equal(
+      (await restarted.execute(reopenedRequest)).declarationId,
+      reopened.declarationId,
+    );
+    assert.equal(
+      await prisma.expensePeriodDeclaration.count({
         where: { tenantId: primary.tenantId },
-      })) !== 1;
+      }),
+      1,
+    );
 
     const staleDeclaration = await declarationInput(prisma, primary);
     const staleRequest = request({
@@ -487,6 +512,53 @@ async function main() {
       0,
       'race must not leave a stale declaration',
     );
+
+    const finalDeclaration = await declarationInput(prisma, primary);
+    assert.equal(finalDeclaration.declarationEpoch, 2);
+    const finalDeclarationRequest = request({
+      tenantId: primary.tenantId,
+      actorUserId: primary.ownerId,
+      capability: P4_07_EXECUTABLE_CAPABILITIES.declare,
+      targetRef: 'expense-period:2026-08-01:2026-08-31',
+      logicalKey: String(finalDeclaration.declarationIdentityHash),
+      normalized: finalDeclaration,
+    });
+    const finalDeclarationResult = await executable.execute(
+      finalDeclarationRequest,
+    );
+    assert.equal(finalDeclarationResult.declarationEpoch, 2);
+    assert.equal(
+      (await restarted.execute(finalDeclarationRequest)).declarationId,
+      finalDeclarationResult.declarationId,
+    );
+    assert.equal(
+      await prisma.expensePeriodDeclaration.count({
+        where: { tenantId: primary.tenantId },
+      }),
+      1,
+      'a second re-declare without invalidation must remain in epoch 2',
+    );
+
+    const forgedEpoch = {
+      ...finalDeclaration,
+      declarationEpoch: 99,
+      declarationIdentityHash: expensePeriodDeclarationIdentityHash(
+        primary.tenantId,
+        finalDeclaration.periodFromDay,
+        finalDeclaration.periodToDay,
+        99,
+        finalDeclaration.ledgerSnapshotHash,
+      ),
+    };
+    const forgedEpochRequest = request({
+      tenantId: primary.tenantId,
+      actorUserId: primary.ownerId,
+      capability: P4_07_EXECUTABLE_CAPABILITIES.declare,
+      targetRef: 'expense-period:2026-08-01:2026-08-31',
+      logicalKey: String(forgedEpoch.declarationIdentityHash),
+      normalized: forgedEpoch,
+    });
+    await assert.rejects(() => executable.execute(forgedEpochRequest));
 
     const crossTenantInput = createInput(primary, 'cross-tenant', {
       branchId: other.branchId,
@@ -562,25 +634,41 @@ async function main() {
       },
     });
     assert.ok(succeededExecutions >= 5);
+    const invalidations =
+      await prisma.expensePeriodDeclarationInvalidation.findMany({
+        where: {
+          tenantId: primary.tenantId,
+          periodFromDay: '2026-08-01',
+          periodToDay: '2026-08-31',
+        },
+        orderBy: { nextDeclarationEpoch: 'asc' },
+        select: {
+          previousDeclarationEpoch: true,
+          nextDeclarationEpoch: true,
+        },
+      });
+    assert.deepEqual(invalidations, [
+      { previousDeclarationEpoch: 0, nextDeclarationEpoch: 1 },
+      { previousDeclarationEpoch: 1, nextDeclarationEpoch: 2 },
+    ]);
 
     console.log(
       JSON.stringify({
-        status: declarationReestablishmentGap ? 'BLOCKED' : 'PASS',
+        status: 'PASS',
         actionClassesExercised: '3/3',
-        actionClassesProven: declarationReestablishmentGap ? '2/3' : '3/3',
+        actionClassesProven: '3/3',
         createOneTime: true,
         deleteAuditSafe: true,
-        declarationRaceSafe: !declarationReestablishmentGap,
-        declarationReestablishmentAfterInvalidation:
-          !declarationReestablishmentGap,
-        blocker: declarationReestablishmentGap
-          ? 'period_declaration_identity_repeats_after_snapshot_restoration'
-          : null,
+        declarationRaceSafe: true,
+        declarationReestablishmentAfterInvalidation: true,
+        declarationEpochs: [0, 1, 2],
+        oldSucceededExecutionCanMaskRedeclaration: false,
+        forgedEpochPossible: false,
+        blocker: null,
         unknownRequired: false,
         providerWrites: 0,
       }),
     );
-    if (declarationReestablishmentGap) process.exitCode = 2;
   } finally {
     await prisma.$disconnect();
   }

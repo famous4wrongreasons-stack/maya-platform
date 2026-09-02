@@ -49,6 +49,9 @@ function harness(role = 'tenant_owner') {
       findFirst: jest.fn().mockResolvedValue(expense),
       findMany: jest.fn().mockResolvedValue([expense]),
     },
+    expensePeriodDeclarationInvalidation: {
+      findFirst: jest.fn().mockResolvedValue(null),
+    },
   };
   const tenantContext = new TenantContextService();
   const service = new ExpenseCanonicalShadowService(
@@ -232,9 +235,31 @@ describe('ExpenseCanonicalShadowService', () => {
       input: {
         branchScope: 'whole_tenant',
         actorRole: 'tenant_owner',
+        declarationEpoch: 0,
         declarationWritePerformed: false,
       },
     });
+  });
+
+  it('derives a re-assertion epoch from durable invalidation state', async () => {
+    const h = harness();
+    h.prisma.expensePeriodDeclarationInvalidation.findFirst.mockResolvedValue({
+      nextDeclarationEpoch: 3,
+    });
+    await h.tenantContext.runAsSystemTenant('tenant-a', () =>
+      h.service.planDeclare('tenant-a', 'owner-1', {
+        initiator: 'http',
+        source_intent_ref: 'declare:epoch-3',
+        period_from_day: '2026-08-01',
+        period_to_day: '2026-08-31',
+      }),
+    );
+    expect(h.planShadow.mock.calls[0][0].input).toMatchObject({
+      declarationEpoch: 3,
+    });
+    expect(h.planShadow.mock.calls[0][0].callerIdempotency?.key).toEqual(
+      h.planShadow.mock.calls[0][0].input.declarationIdentityHash,
+    );
   });
 
   it('converges duplicate declaration initiators and restart on snapshot identity', async () => {
