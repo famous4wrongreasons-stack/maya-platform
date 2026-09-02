@@ -243,7 +243,9 @@ model Tenant {
   marketingCampaigns             MarketingCampaign[]
   appointmentNotificationSetting AppointmentNotificationSetting?
   catalogItems                   TenantCatalogItem[]
+  catalogItemValueVersions       TenantCatalogItemValueVersion[]
   referralProgram                ReferralProgram?
+  referralProgramValueVersions   ReferralProgramValueVersion[]
   customerReferrals              CustomerReferral[]
   referralRewardIssuances        ReferralRewardIssuance[]
   referralRewards                ReferralReward[]
@@ -452,6 +454,8 @@ model ActionExecution {
   expensePeriodDeclaration ExpensePeriodDeclaration? @relation("ExpensePeriodDeclarationActionExecution")
   invalidatedExpensePeriodDeclarations ExpensePeriodDeclarationInvalidation[] @relation("ExpensePeriodInvalidatedDeclarationExecution")
   expensePeriodDeclarationInvalidations ExpensePeriodDeclarationInvalidation[] @relation("ExpensePeriodInvalidationExecution")
+  tenantCatalogItemValueVersion TenantCatalogItemValueVersion? @relation("TenantCatalogItemValueVersionActionExecution")
+  referralProgramValueVersion ReferralProgramValueVersion? @relation("ReferralProgramValueVersionActionExecution")
 
   @@unique([id, tenantId])
   @@unique([tenantId, identityFingerprint])
@@ -908,45 +912,123 @@ model CommerceIntegration {
 /// their catalog here, while businesses without an adapter can manage it
 /// manually. `kind` is one of inventory, certificate or membership.
 model TenantCatalogItem {
-  id                String   @id @default(cuid())
-  tenantId          String
-  kind              String
-  name              String
-  description       String?
-  priceKopecks      Int?
-  currency          String   @default("RUB")
-  quantity          Int?
-  lowStockThreshold Int?
-  active            Boolean  @default(true)
-  source            String   @default("manual")
-  externalRef       String?
-  metadataJson      Json?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                    String                          @id @default(cuid())
+  tenantId              String
+  kind                  String
+  name                  String
+  description           String?
+  priceKopecks          Int?
+  currency              String                          @default("RUB")
+  quantity              Int?
+  lowStockThreshold     Int?
+  active                Boolean                         @default(true)
+  source                String                          @default("manual")
+  externalRef           String?
+  metadataJson          Json?
+  canonicalTemplateKey  String?
+  currentValueVersionId String?
+  createdAt             DateTime                        @default(now())
+  updatedAt             DateTime                        @updatedAt
+  tenant                Tenant                          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  valueVersions         TenantCatalogItemValueVersion[] @relation("TenantCatalogItemValueVersions")
+  currentValueVersion   TenantCatalogItemValueVersion?  @relation("TenantCatalogItemCurrentValueVersion", fields: [currentValueVersionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
+  @@unique([id, tenantId])
+  @@unique([currentValueVersionId, tenantId])
+  @@unique([tenantId, kind, canonicalTemplateKey])
   @@unique([tenantId, kind, externalRef])
   @@index([tenantId, kind, active])
+}
+
+/// Append-only value-bearing configuration for one immutable internal offer.
+/// The mutable catalog row is only the current projection; checkout freezes
+/// this exact version identity and snapshot before any provider dispatch.
+model TenantCatalogItemValueVersion {
+  id                String                         @id @default(cuid())
+  tenantId          String
+  offerId           String
+  actionExecutionId String
+  previousVersionId String?
+  version           Int
+  templateKey       String
+  offerKind         String
+  priceKopecks      Int
+  currency          String
+  availabilityState String
+  valueSnapshotHash String
+  createdAt         DateTime                       @default(now())
+  tenant            Tenant                         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  offer             TenantCatalogItem              @relation("TenantCatalogItemValueVersions", fields: [offerId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution   ActionExecution                @relation("TenantCatalogItemValueVersionActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  previousVersion   TenantCatalogItemValueVersion? @relation("TenantCatalogItemValueVersionChain", fields: [previousVersionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  nextVersion       TenantCatalogItemValueVersion? @relation("TenantCatalogItemValueVersionChain")
+  currentForOffer   TenantCatalogItem?             @relation("TenantCatalogItemCurrentValueVersion")
+
+  @@unique([id, tenantId])
+  @@unique([offerId, tenantId, version])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([previousVersionId, tenantId])
+  @@index([tenantId, templateKey, availabilityState], map: "TenantCatalogItemValueVersion_lookup_idx")
 }
 
 /// One referral policy per tenant. Referral fulfillment remains a separately
 /// entitled add-on; this record is the source of truth for its public rules.
 model ReferralProgram {
-  id                   String   @id @default(cuid())
-  tenantId             String   @unique
-  enabled              Boolean  @default(false)
-  inviterRewardKopecks Int?
-  inviteeRewardKopecks Int?
+  id                                 String                        @id @default(cuid())
+  tenantId                           String                        @unique
+  enabled                            Boolean                       @default(false)
+  inviterRewardKopecks               Int?
+  inviteeRewardKopecks               Int?
+  inviterRewardPercentBasisPoints    Int?
+  inviteeRewardPercentBasisPoints    Int?
+  inviterRewardLiabilityCapKopecks   Int?
+  inviteeRewardLiabilityCapKopecks   Int?
+  currency                           String                        @default("RUB")
+  terms                              String?
+  codePrefix                         String?
+  currentValueVersionId              String?
+  createdAt                          DateTime                      @default(now())
+  updatedAt                          DateTime                      @updatedAt
+  tenant                             Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  valueVersions                      ReferralProgramValueVersion[] @relation("ReferralProgramValueVersions")
+  currentValueVersion                ReferralProgramValueVersion?  @relation("ReferralProgramCurrentValueVersion", fields: [currentValueVersionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([currentValueVersionId, tenantId])
+}
+
+/// Append-only future-issuance value policy for one tenant referral program.
+/// Existing referral rewards remain bound to the immutable values copied at
+/// issuance and are never recomputed from a later policy version.
+model ReferralProgramValueVersion {
+  id                               String                       @id @default(cuid())
+  tenantId                         String
+  programId                        String
+  actionExecutionId                String
+  previousVersionId                String?
+  version                          Int
+  enabled                          Boolean
+  inviterRewardKopecks             Int?
+  inviteeRewardKopecks             Int?
   inviterRewardPercentBasisPoints  Int?
   inviteeRewardPercentBasisPoints  Int?
   inviterRewardLiabilityCapKopecks Int?
   inviteeRewardLiabilityCapKopecks Int?
-  currency             String   @default("RUB")
-  terms                String?
-  codePrefix           String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  tenant               Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  currency                         String
+  valueSnapshotHash                String
+  createdAt                        DateTime                     @default(now())
+  tenant                           Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  program                          ReferralProgram              @relation("ReferralProgramValueVersions", fields: [programId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution                  ActionExecution              @relation("ReferralProgramValueVersionActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  previousVersion                  ReferralProgramValueVersion? @relation("ReferralProgramValueVersionChain", fields: [previousVersionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  nextVersion                      ReferralProgramValueVersion? @relation("ReferralProgramValueVersionChain")
+  currentForProgram                ReferralProgram?             @relation("ReferralProgramCurrentValueVersion")
+
+  @@unique([id, tenantId])
+  @@unique([programId, tenantId, version])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([previousVersionId, tenantId])
+  @@index([tenantId, programId, version])
 }
 
 /// Tenant-scoped referral fact. Creation and terminal resolution remain
