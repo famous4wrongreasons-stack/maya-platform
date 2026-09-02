@@ -20,6 +20,7 @@ export * from './customer-subscription-cancellation-shadow.contract';
 export * from './customer-subscription-revocation-shadow.contract';
 export * from './gift-certificate-purchase-shadow.contract';
 export * from './gift-certificate-activation-shadow.contract';
+export * from './gift-certificate-redemption-shadow.contract';
 export * from './legacy-loyalty-earn-shadow.contract';
 export * from './legacy-loyalty-expire-shadow.contract';
 export * from './legacy-loyalty-redeem-shadow.contract';

@@ -125,6 +125,11 @@ import {
   giftCertificateActivationShadowNormalizer,
 } from './gift-certificate-activation-shadow.contract';
 import {
+  GIFT_CERTIFICATE_REDEMPTION_SHADOW_CAPABILITY,
+  GIFT_CERTIFICATE_REDEMPTION_SHADOW_INPUT_CONTRACT,
+  giftCertificateRedemptionShadowNormalizer,
+} from './gift-certificate-redemption-shadow.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1148,6 +1153,52 @@ function giftCertificateActivationShadowCapability(): RegisteredActionCapability
     payloadRetentionMs: 7 * DAY,
     auditRetentionMs: 365 * DAY,
     normalizeInput: giftCertificateActivationShadowNormalizer,
+  };
+}
+
+function giftCertificateRedemptionShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: GIFT_CERTIFICATE_REDEMPTION_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'redeem_gift_certificate',
+    normalizedInputContract: GIFT_CERTIFICATE_REDEMPTION_SHADOW_INPUT_CONTRACT,
+    targetKind: 'gift_certificate',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'financial_equivalent',
+      'customer_value',
+      'gift_certificate',
+      'bearer_claim',
+      'exact_business_target',
+      'one_time',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.gift-certificate-redemption-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.gift-certificate-redemption-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.gift-certificate-redemption-shadow.local-only',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: giftCertificateRedemptionShadowNormalizer,
   };
 }
 
@@ -2615,6 +2666,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   customerSubscriptionRevocationShadowCapability(),
   giftCertificatePurchaseShadowCapability(),
   giftCertificateActivationShadowCapability(),
+  giftCertificateRedemptionShadowCapability(),
   p405SchedulerEnvelopeCapability(),
   ...P4_05_EXECUTABLE_REGISTRATIONS.map(p405ExecutableCapability),
   p404SchedulerEnvelopeCapability(),
