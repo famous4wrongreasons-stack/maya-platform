@@ -126,7 +126,10 @@ export class P407ExpenseExecutableService {
         currency: this.text(input.currency),
         occurredAt,
         encryptedNote: this.nullableText(input.encryptedNote),
-        source: this.text(input.sourceNamespace),
+        // P4-07 currently converges the authenticated manual-entry family.
+        // The exact HTTP/AI namespace remains bound in ActionExecution input;
+        // the domain row keeps the established reporting source vocabulary.
+        source: 'manual',
         externalId: null,
         idempotencyKey: this.text(input.intentIdentityHash),
       },

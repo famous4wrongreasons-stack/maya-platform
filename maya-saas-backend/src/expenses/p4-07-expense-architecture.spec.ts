@@ -59,24 +59,26 @@ describe('P4-07 expense convergence architecture', () => {
     ).toBe(true);
   });
 
-  it('keeps executable proof owner isolated from production mutation routes before cutover', () => {
+  it('wires the canonical owner without exposing a raw execution route', () => {
     const module = source('src/expenses/expenses.module.ts');
     const controller = source('src/expenses/expenses.controller.ts');
-    expect(module).not.toContain('P407ExpenseExecutableService');
-    expect(controller).not.toContain('P407ExpenseExecutableService');
-    expect(source('scripts/p4-07-all3-executable-proof.ts')).toContain(
-      'proof refuses non-disposable databases',
+    const adapter = source(
+      'src/expenses/p4-07-expense-canonical-cutover.service.ts',
     );
+    expect(module).toContain('P407ExpenseExecutableService');
+    expect(module).toContain('P407ExpenseCanonicalCutoverService');
+    expect(adapter).toContain('this.ingress.createExecution(request)');
+    expect(adapter).toContain('this.executor.execute(request)');
+    expect(controller).not.toContain('P407ExpenseExecutableService');
+    expect(module).not.toContain('.execute.v1');
   });
 
-  it('locks the accepted pre-cutover baseline at one bypass group and four subgroups', () => {
+  it('reduces the production bypass group and all four legacy mutation subgroups to zero', () => {
     const legacy = source('src/expenses/expenses.service.ts');
-    expect(directMutationSubgroups(legacy)).toEqual([
-      'expense.create',
-      'expense.delete',
-      'declaration.upsert',
-      'declaration.deleteMany',
-    ]);
+    expect(directMutationSubgroups(legacy)).toEqual([]);
+    expect(legacy).toContain('this.requireCanonicalCutover().create(');
+    expect(legacy).toContain('this.requireCanonicalCutover().remove(');
+    expect(legacy).toContain('this.requireCanonicalCutover().declare(');
   });
 
   it('detects a real direct mutation bypass instead of broadly excluding expense code', () => {
@@ -99,5 +101,13 @@ describe('P4-07 expense convergence architecture', () => {
     );
     expect(executable).not.toContain('ActionExecutionState.UNKNOWN');
     expect(executable).not.toContain('provider.create');
+  });
+
+  it('keeps all three completed Shadow entrypoints physically non-executable', () => {
+    const shadow = source('src/expenses/expense-canonical-shadow.service.ts');
+    expect(shadow).toContain('this.actionEngine.planShadow(');
+    expect(shadow).not.toContain('this.executor.execute(');
+    expect(shadow).not.toContain('this.prisma.expense.create(');
+    expect(shadow).not.toContain('this.prisma.expense.delete(');
   });
 });

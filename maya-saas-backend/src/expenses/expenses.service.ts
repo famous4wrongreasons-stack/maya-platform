@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -20,6 +19,7 @@ import {
   findExpenseCategory,
   resolveExpenseCategory,
 } from './expense-category';
+import { P407ExpenseCanonicalCutoverService } from './p4-07-expense-canonical-cutover.service';
 
 interface ExpenseRow {
   id: string;
@@ -57,6 +57,8 @@ export interface CreateExpenseOptions {
    * возвращает уже созданный расход, а не заводит второй.
    */
   idempotencyKey?: string | null;
+  /** Authenticated production surface which supplied the stable intent. */
+  initiator?: 'http' | 'ai_tool';
 }
 
 /** Страница перечня операций. Деньги периода от неё не зависят. */
@@ -69,7 +71,8 @@ export class ExpensesService {
     private readonly tenantContext: TenantContextService,
     private readonly tenantsService: TenantsService,
     private readonly encryptionService: EncryptionService,
-    private readonly auditLogService: AuditLogService,
+    _auditLogService: AuditLogService,
+    private readonly canonicalCutover: P407ExpenseCanonicalCutoverService,
   ) {}
 
   async create(
@@ -80,101 +83,45 @@ export class ExpensesService {
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const source: ExpenseSource = options.source ?? 'manual';
-    const category = this.assertCategory(dto.category, source);
+    if (source !== 'manual' || options.externalId) {
+      throw new BadRequestException(
+        'CRM expense import has no approved P4-07 canonical action contract',
+      );
+    }
+    this.assertCategory(dto.category, source);
     if (dto.branchId) {
       await this.tenantsService.assertBranchBelongsToTenant(
         dto.branchId,
         scopedTenantId,
       );
     }
-    const occurredAt = new Date(dto.occurredAt);
-    if (Number.isNaN(occurredAt.getTime())) {
+    if (Number.isNaN(new Date(dto.occurredAt).getTime())) {
       throw new BadRequestException('Invalid expense date');
     }
-
-    const idempotencyKey = options.idempotencyKey ?? null;
-    const externalId = options.externalId ?? null;
-    const replayed = await this.findExisting(
+    const result = await this.requireCanonicalCutover().create(
       scopedTenantId,
-      idempotencyKey,
-      externalId,
-    );
-    if (replayed) {
-      return { ...this.serialize(replayed), possible_duplicate: null };
-    }
-
-    // 🔴 Мягкая защита от задвоения, а не запрет. Уникальность по externalId
-    // ловит только повторный ИМПОРТ; один и тот же реальный платёж, введённый
-    // руками и приехавший из CRM, для базы — две разные записи, и в прибыли он
-    // вычитается дважды. Блокировать нельзя: у владельца бывает две одинаковых
-    // оплаты в один день, и он знает это лучше нас. Поэтому — пометка, которую
-    // видно в карточке подтверждения и в ответе.
-    const duplicates = await this.findProbableDuplicates(scopedTenantId, {
-      category,
-      amountKopecks: dto.amountKopecks,
-      currency: dto.currency ?? 'RUB',
-      occurredAt,
-      source,
-    }).catch(() => []);
-
-    let expense: ExpenseRow;
-    try {
-      expense = await this.prisma.expense.create({
-        data: {
-          tenantId: scopedTenantId,
-          branchId: dto.branchId ?? null,
-          branchTenantId: dto.branchId ? scopedTenantId : null,
-          createdById: actorUserId,
-          createdByTenantId: scopedTenantId,
-          category,
-          amountKopecks: dto.amountKopecks,
-          currency: dto.currency ?? 'RUB',
-          occurredAt,
-          encryptedNote: dto.note?.trim()
-            ? this.encryptionService.encrypt(dto.note.trim())
-            : null,
-          source,
-          externalId,
-          idempotencyKey,
-        },
-      });
-    } catch (error) {
-      // Гонка двух подтверждений одной карточки: индекс сработал раньше нас,
-      // расход уже есть — отдаём его, а не заводим второй.
-      if (!this.isUniqueConstraintError(error)) {
-        throw error;
-      }
-      const raced = await this.findExisting(
-        scopedTenantId,
-        idempotencyKey,
-        externalId,
-      );
-      if (!raced) {
-        throw error;
-      }
-      return { ...this.serialize(raced), possible_duplicate: null };
-    }
-
-    await this.auditLogService.log({
-      tenantId: scopedTenantId,
-      userId: actorUserId,
-      action: 'expense.created',
-      entityType: 'expense',
-      entityId: expense.id,
-      metadata: {
-        category: expense.category,
-        amount_kopecks: expense.amountKopecks,
-        currency: expense.currency,
-        occurred_at: expense.occurredAt.toISOString(),
-        source: expense.source,
-        possible_duplicate_of: duplicates.map((row) => row.id),
+      actorUserId,
+      dto,
+      {
+        initiator: options.initiator ?? 'http',
+        sourceIntentRef: options.idempotencyKey ?? '',
       },
-    });
-
-    await this.invalidatePeriodDeclarations(
-      scopedTenantId,
-      occurredAt.toISOString().slice(0, 10),
     );
+    const expense = (await this.prisma.expense.findFirst({
+      where: { id: result.expenseId, tenantId: scopedTenantId },
+    })) as ExpenseRow | null;
+    if (!expense) {
+      throw new NotFoundException(
+        'Canonical expense result is missing its committed row',
+      );
+    }
+    const duplicates = await this.findProbableDuplicates(scopedTenantId, {
+      category: expense.category,
+      amountKopecks: expense.amountKopecks,
+      currency: expense.currency,
+      occurredAt: expense.occurredAt,
+      source: expense.source as ExpenseSource,
+    }).catch(() => []);
 
     return {
       ...this.serialize(expense),
@@ -261,34 +208,13 @@ export class ExpensesService {
 
   async remove(tenantId: string, actorUserId: string, expenseId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const expense = await this.prisma.expense.findFirst({
-      where: { id: expenseId, tenantId: scopedTenantId },
-    });
-    if (!expense) {
-      throw new NotFoundException('Expense not found');
-    }
-
-    await this.prisma.expense.delete({
-      where: { id_tenantId: { id: expenseId, tenantId: scopedTenantId } },
-    });
-    await this.invalidatePeriodDeclarations(
+    const result = await this.requireCanonicalCutover().remove(
       scopedTenantId,
-      expense.occurredAt.toISOString().slice(0, 10),
+      actorUserId,
+      expenseId,
     );
-    await this.auditLogService.log({
-      tenantId: scopedTenantId,
-      userId: actorUserId,
-      action: 'expense.deleted',
-      entityType: 'expense',
-      entityId: expenseId,
-      metadata: {
-        category: expense.category,
-        amount_kopecks: expense.amountKopecks,
-        currency: expense.currency,
-      },
-    });
 
-    return { ok: true, expense_id: expenseId };
+    return { ok: true, expense_id: result.expenseId ?? expenseId };
   }
 
   /**
@@ -307,71 +233,27 @@ export class ExpensesService {
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     this.assertDayRange(periodFromDay, periodToDay);
-
-    const key = idempotencyKey?.trim() || null;
-    if (key) {
-      const replayed = await this.prisma.expensePeriodDeclaration.findFirst({
-        where: { tenantId: scopedTenantId, idempotencyKey: key },
-      });
-      if (replayed) {
-        if (
-          replayed.periodFromDay !== periodFromDay ||
-          replayed.periodToDay !== periodToDay
-        ) {
-          throw new BadRequestException(
-            'Expense declaration idempotency key belongs to another period',
-          );
-        }
-        return this.serializePeriodDeclaration(replayed);
-      }
-    }
-
-    let declaration: ExpensePeriodDeclarationRow;
-    try {
-      declaration = await this.prisma.expensePeriodDeclaration.upsert({
-        where: {
-          tenantId_periodFromDay_periodToDay: {
-            tenantId: scopedTenantId,
-            periodFromDay,
-            periodToDay,
-          },
-        },
-        create: {
+    const result = await this.requireCanonicalCutover().declare(
+      scopedTenantId,
+      actorUserId,
+      periodFromDay,
+      periodToDay,
+      idempotencyKey ?? '',
+    );
+    const declaration = await this.prisma.expensePeriodDeclaration.findUnique({
+      where: {
+        tenantId_periodFromDay_periodToDay: {
           tenantId: scopedTenantId,
-          declaredById: actorUserId,
           periodFromDay,
           periodToDay,
-          idempotencyKey: key,
         },
-        update: {
-          declaredById: actorUserId,
-          idempotencyKey: key,
-        },
-      });
-    } catch (error) {
-      if (!this.isUniqueConstraintError(error) || !key) {
-        throw error;
-      }
-      const raced = await this.prisma.expensePeriodDeclaration.findFirst({
-        where: { tenantId: scopedTenantId, idempotencyKey: key },
-      });
-      if (!raced) {
-        throw error;
-      }
-      declaration = raced;
-    }
-
-    await this.auditLogService.log({
-      tenantId: scopedTenantId,
-      userId: actorUserId,
-      action: 'expense.period_declared_complete',
-      entityType: 'expense_period_declaration',
-      entityId: declaration.id,
-      metadata: {
-        period_from_day: declaration.periodFromDay,
-        period_to_day: declaration.periodToDay,
       },
     });
+    if (!declaration || declaration.id !== result.declarationId) {
+      throw new NotFoundException(
+        'Canonical declaration result is missing its committed row',
+      );
+    }
 
     return this.serializePeriodDeclaration(declaration);
   }
@@ -395,13 +277,6 @@ export class ExpensesService {
     return declaration ? this.serializePeriodDeclaration(declaration) : null;
   }
 
-  /**
-   * Категория при записи — только из справочника, и зарплату руками нельзя.
-   *
-   * Начисления мастерам приезжают расчётом из CRM и уже участвуют в отчётах.
-   * Ручной расход с той же категорией сложил бы зарплату саму с собой и
-   * занизил прибыль ровно на фонд оплаты труда.
-   */
   private assertCategory(value: unknown, source: ExpenseSource): string {
     const known = findExpenseCategory(value);
     if (!known) {
@@ -488,37 +363,6 @@ export class ExpensesService {
       }));
   }
 
-  private async findExisting(
-    tenantId: string,
-    idempotencyKey: string | null,
-    externalId: string | null,
-  ): Promise<ExpenseRow | null> {
-    if (idempotencyKey) {
-      const byKey = (await this.prisma.expense.findFirst({
-        where: { tenantId, idempotencyKey },
-      })) as ExpenseRow | null;
-      if (byKey) {
-        return byKey;
-      }
-    }
-    if (externalId) {
-      const byExternalId = (await this.prisma.expense.findFirst({
-        where: { tenantId, externalId },
-      })) as ExpenseRow | null;
-      if (byExternalId) {
-        return byExternalId;
-      }
-    }
-    return null;
-  }
-
-  private isUniqueConstraintError(error: unknown): boolean {
-    return (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    );
-  }
-
   private assertRange(from: Date, to: Date): void {
     if (
       Number.isNaN(from.getTime()) ||
@@ -552,17 +396,8 @@ export class ExpensesService {
     }
   }
 
-  private async invalidatePeriodDeclarations(
-    tenantId: string,
-    occurredDay: string,
-  ): Promise<void> {
-    await this.prisma.expensePeriodDeclaration.deleteMany({
-      where: {
-        tenantId,
-        periodFromDay: { lte: occurredDay },
-        periodToDay: { gte: occurredDay },
-      },
-    });
+  private requireCanonicalCutover(): P407ExpenseCanonicalCutoverService {
+    return this.canonicalCutover;
   }
 
   private serializePeriodDeclaration(declaration: ExpensePeriodDeclarationRow) {

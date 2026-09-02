@@ -87,7 +87,11 @@ import { ActionEngineRuntimeService } from './action-engine.runtime';
     CanonicalActionIngressService,
     ActionEngineRuntimeService,
   ],
-  exports: [ActionEngineRuntimeService],
+  exports: [
+    ActionEngineRuntimeService,
+    CanonicalActionIngressService,
+    ActionEngineKernel,
+  ],
 })
 export class ActionEngineModule {}
 

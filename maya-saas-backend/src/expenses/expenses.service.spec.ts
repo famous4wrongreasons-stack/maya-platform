@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { ExpensesService } from './expenses.service';
+import { P407ExpenseCanonicalCutoverService } from './p4-07-expense-canonical-cutover.service';
 
 describe('ExpensesService', () => {
   const expense = {
@@ -34,6 +35,10 @@ describe('ExpensesService', () => {
     createdAt: new Date('2026-08-01T10:00:00.000Z'),
     updatedAt: new Date('2026-08-01T10:00:00.000Z'),
   };
+  type ExpenseTestRow = Omit<typeof expense, 'idempotencyKey'> & {
+    idempotencyKey: string | null;
+  };
+  type DeclarationTestRow = typeof declaration;
 
   const createService = (
     overrides: {
@@ -62,11 +67,15 @@ describe('ExpensesService', () => {
         return Promise.resolve([expense]);
       });
     const expenseFindFirst =
-      overrides.findFirst ?? jest.fn().mockResolvedValue(null);
+      overrides.findFirst ??
+      jest.fn((args: { where: Record<string, unknown> }) =>
+        Promise.resolve(args.where.id === expense.id ? expense : null),
+      );
     const declarationFindFirst =
       overrides.declarationFindFirst ?? jest.fn().mockResolvedValue(null);
     const declarationFindUnique =
-      overrides.declarationFindUnique ?? jest.fn().mockResolvedValue(null);
+      overrides.declarationFindUnique ??
+      jest.fn().mockResolvedValue(declaration);
     const declarationUpsert =
       overrides.declarationUpsert ?? jest.fn().mockResolvedValue(declaration);
     const declarationDeleteMany =
@@ -98,6 +107,115 @@ describe('ExpensesService', () => {
     } as unknown as EncryptionService;
     const auditLog = jest.fn().mockResolvedValue(undefined);
     const auditLogService = { log: auditLog } as unknown as AuditLogService;
+    const canonicalCutover = {
+      create: jest.fn(
+        async (
+          tenantId: string,
+          actorUserId: string,
+          dto: {
+            category: string;
+            amountKopecks: number;
+            currency?: string;
+            occurredAt: string;
+            branchId?: string;
+            note?: string;
+          },
+          invocation: { sourceIntentRef: string },
+        ) => {
+          const existing = (await expenseFindFirst({
+            where: {
+              tenantId,
+              idempotencyKey: invocation.sourceIntentRef,
+            },
+          })) as unknown as ExpenseTestRow | null;
+          let row = existing;
+          if (!row) {
+            try {
+              await expenseCreate({
+                data: {
+                  tenantId,
+                  branchId: dto.branchId ?? null,
+                  branchTenantId: dto.branchId ? tenantId : null,
+                  createdById: actorUserId,
+                  createdByTenantId: tenantId,
+                  category: dto.category,
+                  amountKopecks: dto.amountKopecks,
+                  currency: dto.currency ?? 'RUB',
+                  occurredAt: new Date(dto.occurredAt),
+                  encryptedNote: dto.note
+                    ? encryptionService.encrypt(dto.note)
+                    : null,
+                  source: 'manual',
+                  externalId: null,
+                  idempotencyKey: invocation.sourceIntentRef,
+                },
+              });
+              row = expense;
+            } catch (error) {
+              if (
+                !(await expenseFindFirst({
+                  where: {
+                    tenantId,
+                    idempotencyKey: invocation.sourceIntentRef,
+                  },
+                }))
+              )
+                throw error;
+              row = expense;
+            }
+          }
+          return {
+            actionClass: 'create_expense',
+            actionExecutionId: `execution:${invocation.sourceIntentRef}`,
+            expenseId: row.id,
+            invalidatedDeclarationIds: [],
+            expenseCreates: existing ? 0 : 1,
+            expenseDeletes: 0,
+            declarationCreates: 0,
+            unknownApplicable: false,
+            providerWrites: 0,
+          };
+        },
+      ),
+      declare: jest.fn(
+        async (
+          tenantId: string,
+          actorUserId: string,
+          periodFromDay: string,
+          periodToDay: string,
+          sourceIntentRef: string,
+        ) => {
+          const row = (await declarationUpsert({
+            where: {
+              tenantId_periodFromDay_periodToDay: {
+                tenantId,
+                periodFromDay,
+                periodToDay,
+              },
+            },
+            create: {
+              tenantId,
+              declaredById: actorUserId,
+              periodFromDay,
+              periodToDay,
+              idempotencyKey: sourceIntentRef,
+            },
+            update: {},
+          })) as unknown as DeclarationTestRow;
+          return {
+            actionClass: 'declare_expense_period_complete',
+            actionExecutionId: `execution:${sourceIntentRef}`,
+            declarationId: row.id,
+            invalidatedDeclarationIds: [],
+            expenseCreates: 0,
+            expenseDeletes: 0,
+            declarationCreates: 1,
+            unknownApplicable: false,
+            providerWrites: 0,
+          };
+        },
+      ),
+    } as unknown as P407ExpenseCanonicalCutoverService;
 
     return {
       tenantContext,
@@ -122,6 +240,7 @@ describe('ExpensesService', () => {
         tenantsService,
         encryptionService,
         auditLogService,
+        canonicalCutover,
       ),
     };
   };
@@ -130,13 +249,18 @@ describe('ExpensesService', () => {
     const setup = createService();
 
     const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.create('tenant-a', 'owner-a', {
-        category: 'rent',
-        amountKopecks: 150_000,
-        occurredAt: '2026-07-10T10:00:00.000Z',
-        branchId: 'branch-a',
-        note: 'July rent',
-      }),
+      setup.service.create(
+        'tenant-a',
+        'owner-a',
+        {
+          category: 'rent',
+          amountKopecks: 150_000,
+          occurredAt: '2026-07-10T10:00:00.000Z',
+          branchId: 'branch-a',
+          note: 'July rent',
+        },
+        { idempotencyKey: 'request-a' },
+      ),
     );
 
     expect(setup.assertBranchBelongsToTenantMock).toHaveBeenCalledWith(
@@ -152,7 +276,7 @@ describe('ExpensesService', () => {
       encryptedNote: 'encrypted:July rent',
       source: 'manual',
       externalId: null,
-      idempotencyKey: null,
+      idempotencyKey: 'request-a',
     });
     expect(result).toMatchObject({
       id: 'expense-a',
@@ -163,13 +287,7 @@ describe('ExpensesService', () => {
       category_known: true,
       source: 'manual',
     });
-    expect(setup.declarationDeleteMany).toHaveBeenCalledWith({
-      where: {
-        tenantId: 'tenant-a',
-        periodFromDay: { lte: '2026-07-10' },
-        periodToDay: { gte: '2026-07-10' },
-      },
-    });
+    expect(setup.declarationDeleteMany).not.toHaveBeenCalled();
   });
 
   it('stores an audited declaration that the owner entered every additional expense', async () => {
@@ -200,10 +318,7 @@ describe('ExpensesService', () => {
         periodToDay: '2026-07-31',
         idempotencyKey: 'declaration-key',
       },
-      update: {
-        declaredById: 'owner-a',
-        idempotencyKey: 'declaration-key',
-      },
+      update: {},
     });
     expect(result).toMatchObject({
       tenant_id: 'tenant-a',
@@ -211,12 +326,7 @@ describe('ExpensesService', () => {
       period_to_day: '2026-07-31',
       declared_complete: true,
     });
-    expect(setup.auditLog).toHaveBeenCalledWith(
-      expect.objectContaining({
-        action: 'expense.period_declared_complete',
-        entityId: 'declaration-a',
-      }),
-    );
+    expect(setup.auditLog).not.toHaveBeenCalled();
   });
 
   it('refuses a category outside the dictionary before touching the database', async () => {
@@ -258,27 +368,24 @@ describe('ExpensesService', () => {
     expect(setup.expenseCreate).not.toHaveBeenCalled();
   });
 
-  it('still accepts payroll from the CRM import path', async () => {
+  it('fails closed for the not-yet-converged CRM import writer', async () => {
     const setup = createService();
 
-    await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.create(
-        'tenant-a',
-        'owner-a',
-        {
-          category: 'payroll',
-          amountKopecks: 6_000_000,
-          occurredAt: '2026-07-10T10:00:00.000Z',
-        },
-        { source: 'crm', externalId: 'yclients-777' },
+    await expect(
+      setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+        setup.service.create(
+          'tenant-a',
+          'owner-a',
+          {
+            category: 'payroll',
+            amountKopecks: 6_000_000,
+            occurredAt: '2026-07-10T10:00:00.000Z',
+          },
+          { source: 'crm', externalId: 'yclients-777' },
+        ),
       ),
-    );
-
-    expect(setup.getCreatedData()).toMatchObject({
-      category: 'payroll',
-      source: 'crm',
-      externalId: 'yclients-777',
-    });
+    ).rejects.toThrow('no approved P4-07 canonical action contract');
+    expect(setup.getCreatedData()).toBeNull();
   });
 
   it('returns the existing expense instead of a second one for the same key', async () => {
@@ -316,6 +423,7 @@ describe('ExpensesService', () => {
     };
     const findFirst = jest
       .fn()
+      .mockResolvedValue(stored)
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(stored);
     const create = jest.fn().mockRejectedValue(

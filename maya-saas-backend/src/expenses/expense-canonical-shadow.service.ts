@@ -16,6 +16,8 @@ import {
   EXPENSE_DELETE_SHADOW_CAPABILITY,
   EXPENSE_PERIOD_DECLARE_POLICY_PROFILE,
   EXPENSE_PERIOD_DECLARE_SHADOW_CAPABILITY,
+  P4_07_EXECUTABLE_CAPABILITIES,
+  type TrustedActionExecutionRequestV1,
 } from '../action-engine';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -130,6 +132,27 @@ export class ExpenseCanonicalShadowService {
     dto: CreateExpenseShadowDto,
   ): Promise<ExpenseShadowResult> {
     if (!this.enabled()) return this.disabled('create_expense');
+    const request = await this.buildCreateRequest(
+      tenantId,
+      actorUserId,
+      dto,
+      EXPENSE_CREATE_SHADOW_CAPABILITY,
+    );
+    const execution = await this.actionEngine.planShadow(request);
+    return this.planned('create_expense', execution.id, {
+      model: 'Expense',
+      ...(request.input as Record<string, unknown>),
+    });
+  }
+
+  async buildCreateRequest(
+    tenantId: string,
+    actorUserId: string,
+    dto: CreateExpenseShadowDto,
+    capability:
+      | typeof EXPENSE_CREATE_SHADOW_CAPABILITY
+      | typeof P4_07_EXECUTABLE_CAPABILITIES.create,
+  ): Promise<TrustedActionExecutionRequestV1> {
     const scoped = this.tenantContext.assertTenantId(tenantId);
     const actor = await this.actor(scoped, actorUserId, MANAGERS);
     const tenant = await this.prisma.tenant.findUniqueOrThrow({
@@ -193,21 +216,15 @@ export class ExpenseCanonicalShadowService {
       expenseWritePerformed: false,
       declarationInvalidationPerformed: false,
     };
-    const execution = await this.actionEngine.planShadow(
-      this.request(
-        scoped,
-        actorUserId,
-        dto,
-        EXPENSE_CREATE_SHADOW_CAPABILITY,
-        `expense-intent:${intentIdentityHash}`,
-        input,
-        intentIdentityHash,
-      ),
+    return this.request(
+      scoped,
+      actorUserId,
+      dto,
+      capability,
+      `expense-intent:${intentIdentityHash}`,
+      input,
+      intentIdentityHash,
     );
-    return this.planned('create_expense', execution.id, {
-      model: 'Expense',
-      ...input,
-    });
   }
 
   async planDelete(
@@ -216,6 +233,27 @@ export class ExpenseCanonicalShadowService {
     dto: DeleteExpenseShadowDto,
   ): Promise<ExpenseShadowResult> {
     if (!this.enabled()) return this.disabled('delete_expense');
+    const request = await this.buildDeleteRequest(
+      tenantId,
+      actorUserId,
+      dto,
+      EXPENSE_DELETE_SHADOW_CAPABILITY,
+    );
+    const execution = await this.actionEngine.planShadow(request);
+    return this.planned('delete_expense', execution.id, {
+      model: 'Expense',
+      ...(request.input as Record<string, unknown>),
+    });
+  }
+
+  async buildDeleteRequest(
+    tenantId: string,
+    actorUserId: string,
+    dto: DeleteExpenseShadowDto,
+    capability:
+      | typeof EXPENSE_DELETE_SHADOW_CAPABILITY
+      | typeof P4_07_EXECUTABLE_CAPABILITIES.delete,
+  ): Promise<TrustedActionExecutionRequestV1> {
     const scoped = this.tenantContext.assertTenantId(tenantId);
     const actor = await this.actor(scoped, actorUserId, MANAGERS);
     const expense = (await this.prisma.expense.findFirst({
@@ -278,21 +316,15 @@ export class ExpenseCanonicalShadowService {
       expenseDeletePerformed: false,
       declarationInvalidationPerformed: false,
     };
-    const execution = await this.actionEngine.planShadow(
-      this.request(
-        scoped,
-        actorUserId,
-        dto,
-        EXPENSE_DELETE_SHADOW_CAPABILITY,
-        `expense:${expense.id}`,
-        input,
-        deletionIdentityHash,
-      ),
+    return this.request(
+      scoped,
+      actorUserId,
+      dto,
+      capability,
+      `expense:${expense.id}`,
+      input,
+      deletionIdentityHash,
     );
-    return this.planned('delete_expense', execution.id, {
-      model: 'Expense',
-      ...input,
-    });
   }
 
   async planDeclare(
@@ -302,6 +334,27 @@ export class ExpenseCanonicalShadowService {
   ): Promise<ExpenseShadowResult> {
     if (!this.enabled())
       return this.disabled('declare_expense_period_complete');
+    const request = await this.buildDeclareRequest(
+      tenantId,
+      actorUserId,
+      dto,
+      EXPENSE_PERIOD_DECLARE_SHADOW_CAPABILITY,
+    );
+    const execution = await this.actionEngine.planShadow(request);
+    return this.planned('declare_expense_period_complete', execution.id, {
+      model: 'ExpensePeriodDeclaration',
+      ...(request.input as Record<string, unknown>),
+    });
+  }
+
+  async buildDeclareRequest(
+    tenantId: string,
+    actorUserId: string,
+    dto: DeclareExpensePeriodShadowDto,
+    capability:
+      | typeof EXPENSE_PERIOD_DECLARE_SHADOW_CAPABILITY
+      | typeof P4_07_EXECUTABLE_CAPABILITIES.declare,
+  ): Promise<TrustedActionExecutionRequestV1> {
     const scoped = this.tenantContext.assertTenantId(tenantId);
     const actor = await this.actor(scoped, actorUserId, OWNERS);
     this.assertPeriod(dto.period_from_day, dto.period_to_day);
@@ -360,21 +413,15 @@ export class ExpenseCanonicalShadowService {
       intendedMutation: 'insert_current_period_declaration',
       declarationWritePerformed: false,
     };
-    const execution = await this.actionEngine.planShadow(
-      this.request(
-        scoped,
-        actorUserId,
-        dto,
-        EXPENSE_PERIOD_DECLARE_SHADOW_CAPABILITY,
-        `expense-period:${dto.period_from_day}:${dto.period_to_day}`,
-        input,
-        declarationIdentityHash,
-      ),
+    return this.request(
+      scoped,
+      actorUserId,
+      dto,
+      capability,
+      `expense-period:${dto.period_from_day}:${dto.period_to_day}`,
+      input,
+      declarationIdentityHash,
     );
-    return this.planned('declare_expense_period_complete', execution.id, {
-      model: 'ExpensePeriodDeclaration',
-      ...input,
-    });
   }
 
   private request(
@@ -385,7 +432,7 @@ export class ExpenseCanonicalShadowService {
     targetRef: string,
     input: Record<string, unknown>,
     identity: string,
-  ) {
+  ): TrustedActionExecutionRequestV1 {
     return {
       contract: ACTION_EXECUTION_REQUEST_CONTRACT,
       tenantId,

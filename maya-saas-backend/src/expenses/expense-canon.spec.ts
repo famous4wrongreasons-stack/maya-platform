@@ -119,6 +119,7 @@ function createExpenses(rows: Row[], options: { fail?: 'aggregate' } = {}) {
     {
       log: jest.fn().mockResolvedValue(undefined),
     } as unknown as AuditLogService,
+    {} as never,
   );
   return { service, prisma, tenantContext, findMany, calls };
 }

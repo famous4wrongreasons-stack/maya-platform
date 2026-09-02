@@ -2265,7 +2265,7 @@ export class AiToolHandlerService {
         ...(note ? { note } : {}),
       },
       // Повторное подтверждение той же карточки вернёт уже созданный расход.
-      { source: 'manual', idempotencyKey },
+      { source: 'manual', idempotencyKey, initiator: 'ai_tool' },
     );
 
     const resolved = resolveExpenseCategory(expense.category);

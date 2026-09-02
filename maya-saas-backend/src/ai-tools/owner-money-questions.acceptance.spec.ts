@@ -31,6 +31,7 @@ import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-
 import { EncryptionService } from '../encryption/encryption.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { ExpensesService } from '../expenses/expenses.service';
+import { P407ExpenseCanonicalCutoverService } from '../expenses/p4-07-expense-canonical-cutover.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -566,12 +567,104 @@ function createHarness(
     new AppointmentPeriodReader(crmService),
     new AttendanceFactsService(prisma, tenantContext),
   );
+  const canonicalCutover = {
+    create: jest.fn(
+      async (
+        tenantId: string,
+        actorUserId: string,
+        dto: {
+          category: string;
+          amountKopecks: number;
+          currency?: string;
+          occurredAt: string;
+          branchId?: string;
+          note?: string;
+        },
+        invocation: { sourceIntentRef: string },
+      ) => {
+        const existing = store.expenses.find(
+          (row) =>
+            row.tenantId === tenantId &&
+            row.idempotencyKey === invocation.sourceIntentRef,
+        );
+        const row =
+          existing ??
+          (await prisma.expense.create({
+            data: {
+              tenantId,
+              branchId: dto.branchId ?? null,
+              branchTenantId: dto.branchId ? tenantId : null,
+              createdById: actorUserId,
+              createdByTenantId: tenantId,
+              category: dto.category,
+              amountKopecks: dto.amountKopecks,
+              currency: dto.currency ?? 'RUB',
+              occurredAt: new Date(dto.occurredAt),
+              encryptedNote: dto.note ? encryption.encrypt(dto.note) : null,
+              source: 'manual',
+              externalId: null,
+              idempotencyKey: invocation.sourceIntentRef,
+            },
+          }));
+        return {
+          actionClass: 'create_expense',
+          actionExecutionId: `execution:${invocation.sourceIntentRef}`,
+          expenseId: row.id,
+          invalidatedDeclarationIds: [],
+          expenseCreates: existing ? 0 : 1,
+          expenseDeletes: 0,
+          declarationCreates: 0,
+          unknownApplicable: false,
+          providerWrites: 0,
+        };
+      },
+    ),
+    declare: jest.fn(
+      async (
+        tenantId: string,
+        actorUserId: string,
+        periodFromDay: string,
+        periodToDay: string,
+        sourceIntentRef: string,
+      ) => {
+        const declaration = await prisma.expensePeriodDeclaration.upsert({
+          where: {
+            tenantId_periodFromDay_periodToDay: {
+              tenantId,
+              periodFromDay,
+              periodToDay,
+            },
+          },
+          create: {
+            tenantId,
+            declaredById: actorUserId,
+            periodFromDay,
+            periodToDay,
+            idempotencyKey: sourceIntentRef,
+          },
+          update: {},
+        });
+        return {
+          actionClass: 'declare_expense_period_complete',
+          actionExecutionId: `execution:${sourceIntentRef}`,
+          declarationId: declaration.id,
+          invalidatedDeclarationIds: [],
+          expenseCreates: 0,
+          expenseDeletes: 0,
+          declarationCreates: 1,
+          unknownApplicable: false,
+          providerWrites: 0,
+        };
+      },
+    ),
+  } as unknown as P407ExpenseCanonicalCutoverService;
   const expensesService = new ExpensesService(
     prisma,
     tenantContext,
     { assertBranchBelongsToTenant: jest.fn() } as unknown as TenantsService,
     encryption,
     auditLog,
+    canonicalCutover,
   );
   const registry = new AiToolRegistryService();
   const handler = new AiToolHandlerService(

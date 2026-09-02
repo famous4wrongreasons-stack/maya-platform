@@ -20,6 +20,7 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { resolveExpenseCategory } from '../expenses/expense-category';
 import { ExpensesService } from '../expenses/expenses.service';
+import { P407ExpenseCanonicalCutoverService } from '../expenses/p4-07-expense-canonical-cutover.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -225,24 +226,20 @@ describe('РАСХОД ИЗ ЧАТА — состязательный прого
       expect(h.store.expenses).toHaveLength(2);
     });
 
-    it('🔴 СБОЙ ПОСЛЕ ВСТАВКИ: расход записан, инструмент отчитался ошибкой, повтор даёт дубль', async () => {
+    it('сбой canonical audit откатывает expense вместе с локальной транзакцией', async () => {
       const h = createHarness();
-      // Падение сразу после INSERT (аудит-лог/сеть/таймаут рантайма).
-      h.failAuditAction('expense.created');
+      h.failAuditAction('expense.created.canonical');
       const p = await prepare(h, { category: 'rent', amount_rubles: 60_000 });
       await expect(h.approve(p)).rejects.toBeDefined();
 
-      // Строка в БД есть.
-      expect(h.store.expenses).toHaveLength(1);
-      // А карточка и исполнение помечены провалом — человеку сказано «не вышло».
+      // Канонический локальный owner не оставляет value fact без его audit.
+      expect(h.store.expenses).toHaveLength(0);
       expect(h.store.approvals[0].status).toBe('failed');
       expect(h.store.executions[0].status).toBe('failed');
 
-      // Повторная попытка той же карточки заблокирована...
       await expect(h.approve(p)).rejects.toMatchObject({
         response: { error: { code: 'ai_approval_already_decided' } },
       });
-      // ...но повтор фразы в чате пишет второй расход.
       h.failAuditAction(null);
       const retry = await prepare(
         h,
@@ -253,7 +250,7 @@ describe('РАСХОД ИЗ ЧАТА — состязательный прого
         KEY_B,
       );
       await h.approve(retry);
-      expect(h.store.expenses).toHaveLength(2);
+      expect(h.store.expenses).toHaveLength(1);
     });
 
     it('🔴 ТАЙМАУТ рантайма: вставка доезжает, человеку сказано «не вышло»', async () => {
@@ -1067,6 +1064,87 @@ function createHarness() {
   const tenantsService = {
     assertBranchBelongsToTenant: jest.fn().mockResolvedValue(undefined),
   } as unknown as TenantsService;
+  const inFlightCreates = new Map<string, Promise<Record<string, unknown>>>();
+  const canonicalCutover = {
+    create: jest.fn(
+      (
+        tenantId: string,
+        actorUserId: string,
+        dto: {
+          category: string;
+          amountKopecks: number;
+          currency?: string;
+          occurredAt: string;
+          branchId?: string;
+          note?: string;
+        },
+        invocation: { sourceIntentRef: string },
+      ) => {
+        const key = `${tenantId}:${invocation.sourceIntentRef}`;
+        const active = inFlightCreates.get(key);
+        if (active) return active;
+        const operation = (async () => {
+          const existing = store.expenses.find(
+            (row) =>
+              row.tenantId === tenantId &&
+              row.idempotencyKey === invocation.sourceIntentRef,
+          );
+          if (existing) {
+            return {
+              actionClass: 'create_expense',
+              actionExecutionId: `execution:${key}`,
+              expenseId: existing.id,
+              invalidatedDeclarationIds: [],
+              expenseCreates: 0,
+              expenseDeletes: 0,
+              declarationCreates: 0,
+              unknownApplicable: false,
+              providerWrites: 0,
+            };
+          }
+          const row = await prisma.expense.create({
+            data: {
+              tenantId,
+              branchId: dto.branchId ?? null,
+              branchTenantId: dto.branchId ? tenantId : null,
+              createdById: actorUserId,
+              createdByTenantId: tenantId,
+              category: dto.category,
+              amountKopecks: dto.amountKopecks,
+              currency: dto.currency ?? 'RUB',
+              occurredAt: new Date(dto.occurredAt),
+              encryptedNote: dto.note ? encryption.encrypt(dto.note) : null,
+              source: 'manual',
+              externalId: null,
+              idempotencyKey: invocation.sourceIntentRef,
+            },
+          });
+          try {
+            await auditLog.log({ action: 'expense.created.canonical' });
+          } catch (error) {
+            const index = store.expenses.findIndex(
+              (item) => item.id === row.id,
+            );
+            if (index >= 0) store.expenses.splice(index, 1);
+            throw error;
+          }
+          return {
+            actionClass: 'create_expense',
+            actionExecutionId: `execution:${key}`,
+            expenseId: row.id,
+            invalidatedDeclarationIds: [],
+            expenseCreates: 1,
+            expenseDeletes: 0,
+            declarationCreates: 0,
+            unknownApplicable: false,
+            providerWrites: 0,
+          };
+        })().finally(() => inFlightCreates.delete(key));
+        inFlightCreates.set(key, operation);
+        return operation;
+      },
+    ),
+  } as unknown as P407ExpenseCanonicalCutoverService;
 
   const expensesService = new ExpensesService(
     prisma,
@@ -1074,6 +1152,7 @@ function createHarness() {
     tenantsService,
     encryption,
     auditLog,
+    canonicalCutover,
   );
   const registry = new AiToolRegistryService();
   const handler = new AiToolHandlerService(
