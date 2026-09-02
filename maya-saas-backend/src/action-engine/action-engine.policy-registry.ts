@@ -40,11 +40,25 @@ const LOYALTY_GRANT_CONSUME_ROLES: readonly UserRole[] = [
   UserRole.STAFF,
 ];
 
+const EXPENSE_MANAGER_ROLES: readonly UserRole[] = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.ACCOUNTANT,
+];
+
+const EXPENSE_DECLARER_ROLES: readonly UserRole[] = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+];
+
 function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
   if (capability.startsWith('crm.')) return ['crm.integration'];
   if (capability.startsWith('communication.')) return ['notifications.core'];
   if (capability.startsWith('loyalty.')) return ['loyalty'];
   if (capability.startsWith('referrals.')) return ['referrals'];
+  if (capability.startsWith('expenses.')) return ['expenses.core'];
   if (capability.startsWith('client-lifecycle.')) return ['customers.core'];
   if (capability.startsWith('occupancy.')) return ['calendar.internal'];
   if (capability.startsWith('admin.')) return ['ai.admin'];
@@ -58,6 +72,10 @@ function allowedActorRoles(capability: string): readonly UserRole[] {
   if (capability === 'loyalty.redemption-grant.consume.execute.v1') {
     return LOYALTY_GRANT_CONSUME_ROLES;
   }
+  if (capability.startsWith('expenses.period-declare.')) {
+    return EXPENSE_DECLARER_ROLES;
+  }
+  if (capability.startsWith('expenses.')) return EXPENSE_MANAGER_ROLES;
   return TENANT_ACTION_ROLES;
 }
 

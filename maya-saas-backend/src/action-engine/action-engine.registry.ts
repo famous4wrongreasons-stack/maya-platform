@@ -134,6 +134,18 @@ import {
   type P406ExecutableRegistration,
 } from './p4-06-gift-certificate-executable.contract';
 import {
+  EXPENSE_CREATE_INPUT_CONTRACT,
+  EXPENSE_CREATE_SHADOW_CAPABILITY,
+  EXPENSE_DELETE_INPUT_CONTRACT,
+  EXPENSE_DELETE_SHADOW_CAPABILITY,
+  EXPENSE_PERIOD_DECLARE_INPUT_CONTRACT,
+  EXPENSE_PERIOD_DECLARE_SHADOW_CAPABILITY,
+  P4_07_EXECUTABLE_REGISTRATIONS,
+  expenseCreateNormalizer,
+  expenseDeleteNormalizer,
+  expensePeriodDeclareNormalizer,
+} from './p4-07-expense-executable.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1203,6 +1215,93 @@ function giftCertificateRedemptionShadowCapability(): RegisteredActionCapability
     payloadRetentionMs: 7 * DAY,
     auditRetentionMs: 365 * DAY,
     normalizeInput: giftCertificateRedemptionShadowNormalizer,
+  };
+}
+
+function expenseShadowCapability(input: {
+  capability: string;
+  actionClass: string;
+  targetKind: string;
+  inputContract: string;
+  normalizeInput: (value: unknown) => Record<string, unknown>;
+}): RegisteredActionCapabilityV1 {
+  return {
+    capability: input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: input.inputContract,
+    targetKind: input.targetKind,
+    allowedSourceTypes: ['authenticated_request', 'legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: ['local', 'financial', 'expense_ledger', 'shadow_only'],
+    policyKey: `chapter6.package4.${input.actionClass}.shadow`,
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.expense-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.expense-shadow.local-not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: input.normalizeInput,
+  };
+}
+
+function p407ExecutableCapability(
+  registration: (typeof P4_07_EXECUTABLE_REGISTRATIONS)[number],
+): RegisteredActionCapabilityV1 {
+  return {
+    capability: registration.capability,
+    capabilityVersion: 1,
+    actionClass: registration.actionClass,
+    normalizedInputContract: registration.inputContract,
+    targetKind: registration.targetKind,
+    allowedSourceTypes: ['authenticated_request', 'legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: ['local', 'financial', 'expense_ledger', 'atomic'],
+    policyKey: `chapter6.package4.${registration.actionClass}.execute`,
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L2_SERVER_POLICY',
+    approvalRequirement: registration.approvalRequirement,
+    ...(registration.approvalRequirement === 'REQUIRED'
+      ? { approvalTtlMs: 15 * 60 * 1_000 }
+      : {}),
+    retry: {
+      key: 'package4.expense-local-transaction.no-blind-retry',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.expense-local-transaction.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'expenses.canonical-ledger',
+    executorVersion: 1,
+    payloadRetentionMs: 30 * DAY,
+    auditRetentionMs: 7 * 365 * DAY,
+    normalizeInput: registration.normalizeInput,
   };
 }
 
@@ -2717,6 +2816,28 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   giftCertificatePurchaseShadowCapability(),
   giftCertificateActivationShadowCapability(),
   giftCertificateRedemptionShadowCapability(),
+  expenseShadowCapability({
+    capability: EXPENSE_CREATE_SHADOW_CAPABILITY,
+    actionClass: 'create_expense',
+    targetKind: 'expense',
+    inputContract: EXPENSE_CREATE_INPUT_CONTRACT,
+    normalizeInput: expenseCreateNormalizer,
+  }),
+  expenseShadowCapability({
+    capability: EXPENSE_DELETE_SHADOW_CAPABILITY,
+    actionClass: 'delete_expense',
+    targetKind: 'expense',
+    inputContract: EXPENSE_DELETE_INPUT_CONTRACT,
+    normalizeInput: expenseDeleteNormalizer,
+  }),
+  expenseShadowCapability({
+    capability: EXPENSE_PERIOD_DECLARE_SHADOW_CAPABILITY,
+    actionClass: 'declare_expense_period_complete',
+    targetKind: 'expense_period',
+    inputContract: EXPENSE_PERIOD_DECLARE_INPUT_CONTRACT,
+    normalizeInput: expensePeriodDeclareNormalizer,
+  }),
+  ...P4_07_EXECUTABLE_REGISTRATIONS.map(p407ExecutableCapability),
   ...P4_06_EXECUTABLE_REGISTRATIONS.map(p406ExecutableCapability),
   p405SchedulerEnvelopeCapability(),
   ...P4_05_EXECUTABLE_REGISTRATIONS.map(p405ExecutableCapability),
