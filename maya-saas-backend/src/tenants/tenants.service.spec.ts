@@ -494,7 +494,7 @@ describe('TenantsService', () => {
     expect(result.trial_full_access).toBe(true);
   });
 
-  it('keeps public features available during the three-day grace period', async () => {
+  it('projects the three-day grace period without becoming a billing writer', async () => {
     const {
       service,
       mocks: { tenantFindUniqueMock, tenantUpdateManyMock },
@@ -520,19 +520,7 @@ describe('TenantsService', () => {
       booking_mode: 'preview',
       subscription_cta: null,
     });
-    expect(tenantUpdateManyMock).toHaveBeenCalledWith({
-      where: {
-        id: tenant.id,
-        status: 'trial',
-        updatedAt: tenant.updatedAt,
-      },
-      data: {
-        status: 'past_due',
-        trialFullAccess: false,
-        pastDueAt: expect.any(Date) as Date,
-        graceEndsAt: expect.any(Date) as Date,
-      },
-    });
+    expect(tenantUpdateManyMock).not.toHaveBeenCalled();
   });
 
   it('returns a subscription CTA after the persisted grace period', async () => {
