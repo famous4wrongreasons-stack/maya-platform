@@ -56,12 +56,24 @@ describe('P4-06 redeem_gift_certificate Shadow architecture', () => {
       service.indexOf('const canonicalInput = {'),
       service.indexOf('const execution = await this.actionEngine.planShadow'),
     );
+    const lookupContract = claimContract.slice(
+      claimContract.indexOf('export function giftCertificateClaimLookup'),
+      claimContract.indexOf('export function giftCertificatePresentation('),
+    );
+    const presentationContract = claimContract.slice(
+      claimContract.indexOf('export function giftCertificatePresentation('),
+      claimContract.indexOf(
+        'export function giftCertificatePresentationConfig(',
+      ),
+    );
 
     expect(service).toContain('giftCertificateClaimLookup(');
     expect(service).toContain(
       'input.presentationKeys.has(certificate.presentationKeyVersion)',
     );
-    expect(claimContract.match(/createHmac\(/g)).toHaveLength(1);
+    expect(lookupContract.match(/createHmac\(/g)).toHaveLength(1);
+    expect(presentationContract.match(/createHmac\(/g)).toHaveLength(2);
+    expect(presentationContract).toContain('giftCertificateClaimLookup(');
     expect(claimContract).toContain(
       'GIFT_CERTIFICATE_CLAIM_LOOKUP_CONTRACT_VERSION',
     );

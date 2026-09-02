@@ -130,6 +130,10 @@ import {
   giftCertificateRedemptionShadowNormalizer,
 } from './gift-certificate-redemption-shadow.contract';
 import {
+  P4_06_EXECUTABLE_REGISTRATIONS,
+  type P406ExecutableRegistration,
+} from './p4-06-gift-certificate-executable.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -2311,6 +2315,52 @@ function p405ExecutableCapability(
   };
 }
 
+function p406ExecutableCapability(
+  input: P406ExecutableRegistration,
+): RegisteredActionCapabilityV1 {
+  return {
+    capability: input.capability,
+    capabilityVersion: 1,
+    actionClass: input.actionClass,
+    normalizedInputContract: `maya.${input.actionClass}-executable-input/1`,
+    targetKind: input.targetKind,
+    allowedSourceTypes: input.allowedSourceTypes,
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      input.providerDispatch ? 'external' : 'local',
+      'gift_certificate',
+      ...input.riskFacets,
+    ],
+    policyKey: `chapter6.package4.${input.actionClass}-executable`,
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L3_CANONICAL',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: `package4.${input.actionClass}.reconcile-before-retry`,
+      version: 1,
+      maxExecutionAttempts: 2,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [0],
+    },
+    reconciliation: {
+      key: input.providerDispatch
+        ? `package4.${input.actionClass}.provider-status`
+        : `package4.${input.actionClass}.bound-local-facts`,
+      version: 1,
+      maxInconclusiveAttempts: 2,
+      retryAfterProvenNonExecution: true,
+    },
+    transportIdentityVersion: 1,
+    executorKey: input.executorKey,
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: input.normalizeInput,
+  };
+}
+
 function p405SchedulerEnvelopeCapability(): RegisteredActionCapabilityV1 {
   return {
     capability: P4_05_SCHEDULER_ENVELOPE_CAPABILITY,
@@ -2667,6 +2717,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   giftCertificatePurchaseShadowCapability(),
   giftCertificateActivationShadowCapability(),
   giftCertificateRedemptionShadowCapability(),
+  ...P4_06_EXECUTABLE_REGISTRATIONS.map(p406ExecutableCapability),
   p405SchedulerEnvelopeCapability(),
   ...P4_05_EXECUTABLE_REGISTRATIONS.map(p405ExecutableCapability),
   p404SchedulerEnvelopeCapability(),

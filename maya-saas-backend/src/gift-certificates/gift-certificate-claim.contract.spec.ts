@@ -1,9 +1,36 @@
 import {
   giftCertificateClaimLookup,
+  giftCertificatePresentation,
   giftCertificatePresentationConfig,
 } from './gift-certificate-claim.contract';
 
 describe('gift certificate claim contract', () => {
+  it('re-derives one bearer across restart without persisting key material', () => {
+    const facts = {
+      tenantId: 'tenant-proof',
+      certificateId: 'certificate-proof',
+      issuanceIdentityHash: 'issuance-proof',
+      activationExecutionId: 'execution-proof',
+      nominalAmountKopecks: 200_000,
+      currency: 'RUB',
+      expiresAt: '2027-09-02T00:00:00.000Z',
+    };
+    const keys = {
+      presentationKey: 'p'.repeat(48),
+      presentationKeyVersion: 'proof-v1',
+      lookupKey: 'l'.repeat(48),
+    };
+    const issued = giftCertificatePresentation(facts, keys);
+    const restarted = giftCertificatePresentation({ ...facts }, { ...keys });
+    expect(restarted).toEqual(issued);
+    expect(issued.bearer).toMatch(/^MAYA-GC-/);
+    expect(issued.codeHash).toBe(
+      giftCertificateClaimLookup(keys.lookupKey, issued.bearer),
+    );
+    expect(JSON.stringify(issued)).not.toContain(keys.presentationKey);
+    expect(JSON.stringify(issued)).not.toContain(keys.lookupKey);
+  });
+
   it('normalizes the transient bearer into one deterministic keyed lookup', () => {
     const secret = 'lookup-secret-with-at-least-32-bytes';
     expect(giftCertificateClaimLookup(secret, '  maya-gc-abc_123  ')).toBe(
