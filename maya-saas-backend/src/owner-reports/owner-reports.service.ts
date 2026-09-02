@@ -159,6 +159,10 @@ export class OwnerReportsService {
     });
     let stored = 0;
     if (!ownerAlreadySent && ownerRecipients.length > 0) {
+      const telegramChatIds = await this.listTelegramChatIds(
+        tenant.id,
+        ownerRecipients,
+      );
       const composed = composeMorningBrief({
         facts: businessBriefFacts(state, localDate),
       });
@@ -170,6 +174,7 @@ export class OwnerReportsService {
         payload: composed.payload,
         deepLink: '/app/?panel=chat',
         userIds: ownerRecipients,
+        telegramChatIds,
         fanoutOwners: false,
       });
       stored += published.stored;
@@ -282,6 +287,28 @@ export class OwnerReportsService {
     return [...new Set(memberships.map((membership) => membership.userId))];
   }
 
+  private async listTelegramChatIds(
+    tenantId: string,
+    userIds: string[],
+  ): Promise<string[]> {
+    if (userIds.length === 0) return [];
+    const identities = await this.prisma.authIdentity.findMany({
+      where: {
+        tenantId,
+        provider: 'telegram',
+        userId: { in: [...new Set(userIds)] },
+      },
+      select: { providerUserId: true },
+    });
+    return [
+      ...new Set(
+        identities
+          .map((identity) => identity.providerUserId.trim())
+          .filter((providerUserId) => /^[1-9]\d+$/.test(providerUserId)),
+      ),
+    ];
+  }
+
   private masterMorningSourceEventId(
     localDate: string,
     userId: string,
@@ -295,6 +322,37 @@ export class OwnerReportsService {
   ): Promise<'sent' | 'skipped'> {
     const localDate = localCalendarDate(tenant.defaultTimezone, now);
     const sourceEventId = `nest:daily_report:${localDate}`;
+    return this.deliverDailyReport(tenant, localDate, sourceEventId);
+  }
+
+  async recoverDailyReport(
+    tenant: EligibleTenant,
+    localDate: string,
+    recoveryId: string,
+  ): Promise<'sent' | 'skipped'> {
+    const normalizedDate = localDate.trim();
+    const normalizedRecoveryId = recoveryId.trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(normalizedDate)) {
+      throw new Error('Daily report recovery date must use YYYY-MM-DD.');
+    }
+    if (!/^[A-Za-z0-9._-]{1,64}$/.test(normalizedRecoveryId)) {
+      throw new Error('Daily report recovery id is invalid.');
+    }
+
+    // Validate the calendar date before creating a recoverable source event.
+    dayIsoRange(tenant.defaultTimezone, normalizedDate);
+    return this.deliverDailyReport(
+      tenant,
+      normalizedDate,
+      `nest:daily_report:${normalizedDate}:recovery:${normalizedRecoveryId}`,
+    );
+  }
+
+  private async deliverDailyReport(
+    tenant: EligibleTenant,
+    localDate: string,
+    sourceEventId: string,
+  ): Promise<'sent' | 'skipped'> {
     const [alreadySent, rawRecipients] = await Promise.all([
       this.inbox.hasSourceEvent(tenant.id, 'daily_report', sourceEventId),
       this.listOwnerRecipients(tenant.id),
@@ -342,6 +400,10 @@ export class OwnerReportsService {
     }
 
     const composed = composeDailyReport({ facts });
+    const telegramChatIds = await this.listTelegramChatIds(
+      tenant.id,
+      recipients,
+    );
     const published = await this.inbox.publishForTenant(tenant.id, {
       type: 'daily_report',
       sourceEventId,
@@ -350,6 +412,7 @@ export class OwnerReportsService {
       payload: composed.payload,
       deepLink: '/app/?panel=chat',
       userIds: recipients,
+      telegramChatIds,
       fanoutOwners: false,
     });
     if (published.stored === 0) return 'skipped';

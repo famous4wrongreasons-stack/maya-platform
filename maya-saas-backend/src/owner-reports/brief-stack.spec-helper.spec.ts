@@ -235,6 +235,9 @@ export function buildStack(options: StackOptions = {}) {
     membership: {
       findMany: jest.fn().mockResolvedValue([{ userId: 'owner-user' }]),
     },
+    authIdentity: {
+      findMany: jest.fn().mockResolvedValue([{ providerUserId: '10001' }]),
+    },
     reconciliationRun: {
       findFirst: jest
         .fn()

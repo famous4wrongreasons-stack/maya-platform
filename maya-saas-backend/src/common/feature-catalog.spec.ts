@@ -39,6 +39,7 @@ describe('feature catalog helpers', () => {
   });
 
   it('keeps paid plan upgrades monotonic', () => {
+    expect(MAYA_PLAN_FEATURES.solo).toContain('notifications.core');
     expect(new Set(MAYA_PLAN_FEATURES.business)).toEqual(
       new Set([...MAYA_PLAN_FEATURES.solo, ...MAYA_PLAN_FEATURES.business]),
     );
