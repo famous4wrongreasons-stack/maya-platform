@@ -1,6 +1,6 @@
 # CYCLE 06 BLOCKING PACKAGE 4 — P4-09 CANONICAL OFFER AUTHORITY DECISION BRIEF
 
-Status: **DECISION BRIEF — RECOMMENDATION ONLY; NOT IMPLEMENTED**
+Status: **OPTION A APPROVED — IDENTITY CLARIFICATION RECORDED; NOT IMPLEMENTED**
 
 Source checkpoint: `c663ebc5`
 
@@ -36,15 +36,16 @@ existing P4-05/P4-06 code catalog owns the non-mutable product template:
 plan/product type, tier, allowance, term, service scope, denomination type,
 expiry, presentation, and provider contract.
 
-**Immutable offer identity:** required, allowlisted `externalRef` is the
-canonical business offer code. It is immutable while the row exists. The row
-`id` identifies one materialization; delete/re-create is a new row generation
-of the same business offer code.
+**Immutable offer identity:** `TenantCatalogItem.id` is the primary internal
+Maya identity. `externalRef` remains an optional integration/provider alias
+and is excluded from logical identity. A separate immutable server template
+key maps the internal offer to one known P4-05/P4-06 template.
 
-**Versioning:** every mutation has a server-derived version made from the
-current `updatedAt`/snapshot, predecessor ActionExecution, operation, desired
-snapshot, and contract version. Checkout freezes the resulting snapshot hash.
-No generic revision table is required.
+**Versioning:** every value mutation appends an immutable, internally
+identified version bound to its predecessor and ActionExecution. The current
+offer points to that version; checkout freezes the exact version id and
+snapshot hash. The approved clarification therefore requires the minimal
+schema foundation identified after this brief.
 
 **P4-05 subscription:** resolves one active `kind=membership` row by tenant +
 one of the six known offer codes, combines it with the immutable P4-05
@@ -91,9 +92,9 @@ versus checkout-price split.
 cutover; P4-05/P4-06 resolvers must be aligned; static fallback must then be
 removed; new product templates still require a separate contract.
 
-**Complexity:** medium. Runtime/DTO alignment, local executable proof, one
-controlled data-establishment gate, and a narrow bypass ratchet; no schema
-migration.
+**Complexity:** medium. One additive version foundation/migration,
+runtime/DTO alignment, local executable proof, one controlled data-
+establishment gate, and a narrow bypass ratchet.
 
 ## 3. Option B — static server catalog remains authoritative
 
@@ -220,12 +221,12 @@ It also avoids Option B's permanent mismatch between tenant-visible catalog
 and executable checkout, while avoiding Option C's unnecessary schema and
 migration surface.
 
-For terminology, `externalRef` is the immutable canonical **business offer
-code** in Option A. `TenantCatalogItem.id` remains the immutable identity of
-one materialized row. Delete/re-create intentionally creates a new row
-generation under the same business offer code, chained through
-ActionExecution. No additional offer-identity column or revision table is
-required for the approved known-template scope.
+For terminology, `TenantCatalogItem.id` is the immutable canonical offer
+identity in Option A. `externalRef` remains only an integration alias and can
+retain its historical semantics. A server-owned template key classifies the
+offer without becoming its identity. Value versions are append-only and
+internally identified; logical retirement preserves the offer and all earlier
+versions.
 
 Option A must not cut over until controlled materialization proves complete
 coverage and P4-05/P4-06 have no static fallback for switched tenants.
@@ -234,11 +235,11 @@ coverage and P4-05/P4-06 have no static fallback for switched tenants.
 
 `TenantCatalogItem AS CANONICAL AUTHORITY: YES — TENANT PRICE/CURRENCY/AVAILABILITY FOR KNOWN SERVER TEMPLATES`
 
-`externalRef AS CANONICAL OFFER IDENTITY: YES — REQUIRED, ALLOWLISTED, IMMUTABLE BUSINESS OFFER CODE`
+`externalRef AS PRIMARY CANONICAL OFFER IDENTITY: NO — INTEGRATION/PROVIDER ALIAS ONLY`
 
-`IMMUTABLE INTERNAL OFFER IDENTITY REQUIRED: YES — EXISTING TENANTCATALOGITEM.ID IDENTIFIES EACH MATERIALIZED GENERATION; NO NEW COLUMN REQUIRED`
+`IMMUTABLE INTERNAL OFFER IDENTITY REQUIRED: YES — TENANTCATALOGITEM.ID`
 
-`VERSIONED OFFER VALUE REQUIRED: YES — ACTIONEXECUTION PREDECESSOR + SERVER SNAPSHOT/UPDATEDAT + CHECKOUT SNAPSHOT HASH`
+`VERSIONED OFFER VALUE REQUIRED: YES — APPEND-ONLY INTERNAL VERSION + ACTIONEXECUTION BINDING + CHECKOUT SNAPSHOT HASH`
 
 `ISSUED/FROZEN VALUE CHANGES RETROACTIVELY: NO`
 

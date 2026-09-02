@@ -1,6 +1,6 @@
 # CYCLE 06 BLOCKING PACKAGE 4 — P4-09 CANONICAL OFFER AUTHORITY CONTRACT PROPOSAL
 
-Status: **PROPOSED — APPROVAL REQUIRED; NOT IMPLEMENTED**
+Status: **OPTION A APPROVED — IDENTITY CLARIFICATION REQUIRES SCHEMA FOUNDATION**
 
 Source Gate: `CYCLE-06-BLOCKING-PACKAGE-4-P4-09-VALUE-BEARING-CONFIGURATION-RUNTIME-CONTRACT-GATE.md`
 
@@ -32,8 +32,13 @@ authority only for exact server-owned P4-05/P4-06 templates.
 - `kind=membership` may bind only to one of the six current P4-05 offer codes;
 - `kind=certificate` may bind only to one of the three current P4-06 offer
   codes;
-- `externalRef` is the exact canonical offer code, required and immutable once
-  the value-bearing row is created;
+- `TenantCatalogItem.id` is the primary immutable internal Maya offer
+  identity;
+- a server-owned immutable template key classifies that internal offer as one
+  of the known P4-05/P4-06 templates, but is not a provider identity;
+- `externalRef` remains an optional integration/provider alias under its
+  historical semantics; it is not primary identity and may not participate in
+  logical action identity;
 - plan/product type, tier, included visits, term, service scope, certificate
   denomination type, expiry, presentation policy, and provider contract remain
   server-owned template facts, never free-form caller metadata;
@@ -50,7 +55,8 @@ catalog DTO to define new financial semantics.
 ### 2.2 Future checkout boundary
 
 After materialization and cutover, P4-05/P4-06 purchase initiation must read
-the exact active tenant catalog row by tenant + kind + canonical offer code.
+the exact active tenant catalog row by tenant + internal offer id and verify
+its server-owned template key.
 It combines the validated mutable row with the server template and freezes
 the resulting snapshot before provider dispatch.
 
@@ -75,8 +81,10 @@ Before P4-09 production cutover, a separate read-first establishment gate must
 materialize or reconcile the nine known offer rows per tenant that actually
 uses the corresponding commerce feature. It must prove:
 
-- every row has one exact immutable canonical offer code;
-- no duplicate `(tenant, kind, externalRef)` binding;
+- every row has one exact immutable internal Maya identity and one immutable
+  server template key;
+- no duplicate `(tenant, kind, template key)` binding;
+- existing `externalRef` aliases are preserved without becoming identity;
 - configured price/currency/availability matches the approved source;
 - no checkout, payment, subscription, or certificate is created;
 - re-run creates no duplicate configuration;
@@ -93,34 +101,37 @@ local P4-09 cycle may prove the contract without materializing production rows.
 
 For certificate and membership offers:
 
-- create targets tenant + kind + immutable canonical offer code and requires
-  the row to be absent;
-- update targets the exact row and code and requires the server-read
-  `updatedAt`/snapshot revision;
-- delete targets the exact row and code and retains the full pre-delete
-  snapshot in its ActionExecution safe result;
-- the ActionExecution predecessor chain is the durable configuration
-  generation; re-create after delete uses the delete execution as predecessor;
-- the logical identity includes predecessor, operation, target code, desired
-  snapshot, and contract version;
+- create targets tenant + a server-generated immutable offer id + kind +
+  immutable template key and requires that target to be absent;
+- update targets the exact internal offer id and exact current immutable value
+  version;
+- delete is a logical retirement version for the exact internal offer id; it
+  does not erase the canonical identity or its earlier versions;
+- each mutation appends one immutable value version bound to its
+  ActionExecution and predecessor version;
+- the logical identity includes predecessor version, operation, internal
+  offer id, desired snapshot, and contract version; `externalRef` is excluded;
 - retries within one generation converge; an intervening update/delete makes
   a later re-assertion a new execution;
 - compare-and-set on the server-read revision allows one concurrent winner;
   stale writers fail with `configuration_conflict` and do not overwrite it.
 
-The public row id may change after delete/re-create; the immutable canonical
-offer code remains the business target. Random UUID generation is not the
-logical idempotency identity.
+The internal row id never changes. A genuinely new offer receives a new Maya
+id even if an integration later reuses an old `externalRef`. Random UUID
+generation alone is not the logical idempotency identity: create also binds
+the approved creation intent and exact template/value snapshot.
 
 ### 3.2 Delete and deactivate
 
-Approve physical delete only as withdrawal of the current future-offer row.
-The delete execution retains exact pre-delete evidence. Already frozen
-checkout/value rows remain valid. New checkout fails closed because no
-canonical row exists.
+Approve API delete as logical retirement of the current future offer. The
+retirement action appends an immutable terminal value version and leaves the
+internal offer identity and historical versions intact. Already frozen
+checkout/value rows remain valid. New checkout fails closed because the
+current version is retired.
 
-Deactivation remains a reversible update. Delete followed by re-create is a
-new generation. Neither operation cancels an existing checkout, refunds a
+Deactivation remains a reversible non-terminal version. A retired internal
+offer cannot be silently reactivated; a later replacement is a new internal
+offer identity. Neither operation cancels an existing checkout, refunds a
 payment, ends a subscription, revokes a certificate, or changes issued value.
 
 ### 3.3 Narrow Package 4 ownership
@@ -211,22 +222,27 @@ The eventual ratchet must:
 5. forbid static-catalog fallback once the tenant is switched;
 6. preserve immutable P4-04/P4-05/P4-06 result writers.
 
-## 7. Schema impact
+## 7. Schema impact after approved identity clarification
 
-No schema change is proposed.
+The approved clarification makes the existing schema insufficient. The
+current row has an internal id, but its value-bearing fields are overwritten
+in place and there is no immutable version row, predecessor claim, current
+version pointer, or tenant-qualified ActionExecution binding. `updatedAt` and
+an unbound execution snapshot cannot enforce the approved append-only rule.
 
-The current rows, immutable business offer code contract, durable `updatedAt`,
-ActionExecution predecessor/snapshot evidence, and already frozen downstream
-aggregates are sufficient. Implementing this proposal requires runtime and DTO
-alignment plus a later controlled data-establishment gate, not a migration.
+The minimum additive design is specified in:
+
+`CYCLE-06-BLOCKING-PACKAGE-4-P4-09-IMMUTABLE-OFFER-VALUE-VERSION-SCHEMA-PROPOSAL.md`.
+
+No migration is created or applied by this contract correction.
 
 ## 8. Acceptance criteria
 
-After explicit approval, the safe local P4-09 cycle may implement seven
-non-executable Shadows and continue through targeted/adversarial PostgreSQL
-proof. It must prove:
+After explicit schema approval, foundation, and migration gate, the safe local
+P4-09 cycle may implement seven non-executable Shadows and continue through
+targeted/adversarial PostgreSQL proof. It must prove:
 
-- exact known-template mapping and tenant isolation;
+- exact internal identity, known-template mapping, and tenant isolation;
 - server-derived price/currency/template/policy facts;
 - deterministic create/update/delete/re-create generations;
 - same-generation retry and concurrent convergence;
@@ -247,7 +263,11 @@ proof. It must prove:
 
 `SUPPORTED OFFER TEMPLATES: EXISTING P4-05/P4-06 CODES ONLY`
 
-`CANONICAL OFFER KEY: REQUIRED IMMUTABLE EXTERNALREF`
+`PRIMARY CANONICAL OFFER IDENTITY: IMMUTABLE TENANTCATALOGITEM.ID`
+
+`EXTERNALREF PRIMARY IDENTITY: NO — INTEGRATION ALIAS ONLY`
+
+`IMMUTABLE OFFER VALUE VERSION: REQUIRED`
 
 `STATIC FALLBACK AFTER AUTHORITY CUTOVER: FORBIDDEN`
 
@@ -265,12 +285,12 @@ proof. It must prove:
 
 `BULK VALUE CONFIGURATION: FORBIDDEN`
 
-`ADDITIONAL SCHEMA REQUIRED: NO`
+`ADDITIONAL SCHEMA REQUIRED: YES — MINIMAL APPEND-ONLY VALUE VERSION FOUNDATION`
 
 `CONTROLLED PRODUCTION CATALOG MATERIALIZATION REQUIRED BEFORE CUTOVER: YES`
 
 `PRODUCTION CONFIG/VALUE MUTATIONS: 0`
 
-`P4-09 SHADOW AUTHORIZED: NO — EXPLICIT PROPOSAL APPROVAL REQUIRED`
+`P4-09 SHADOW AUTHORIZED: NO — SCHEMA PROPOSAL APPROVAL/FOUNDATION REQUIRED`
 
 STOP.
