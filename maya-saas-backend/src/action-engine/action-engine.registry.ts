@@ -115,6 +115,11 @@ import {
   type P405ExecutableRegistration,
 } from './p4-05-customer-subscription-executable.contract';
 import {
+  GIFT_CERTIFICATE_PURCHASE_SHADOW_CAPABILITY,
+  GIFT_CERTIFICATE_PURCHASE_SHADOW_INPUT_CONTRACT,
+  giftCertificatePurchaseShadowNormalizer,
+} from './gift-certificate-purchase-shadow.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1048,6 +1053,50 @@ function customerSubscriptionPurchaseShadowCapability(): RegisteredActionCapabil
     payloadRetentionMs: 7 * DAY,
     auditRetentionMs: 365 * DAY,
     normalizeInput: customerSubscriptionPurchaseShadowNormalizer,
+  };
+}
+
+function giftCertificatePurchaseShadowCapability(): RegisteredActionCapabilityV1 {
+  return {
+    capability: GIFT_CERTIFICATE_PURCHASE_SHADOW_CAPABILITY,
+    capabilityVersion: 1,
+    actionClass: 'initiate_gift_certificate_purchase',
+    normalizedInputContract: GIFT_CERTIFICATE_PURCHASE_SHADOW_INPUT_CONTRACT,
+    targetKind: 'gift_certificate_checkout',
+    allowedSourceTypes: ['legacy_bridge'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'financial',
+      'provider_dispatch',
+      'gift_certificate',
+      'checkout_intent',
+      'shadow_only',
+    ],
+    policyKey: 'chapter6.package4.gift-certificate-purchase-shadow',
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.SHADOW_ONLY,
+    autonomyLevel: 'L2_5_SHADOW',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.gift-certificate-purchase-shadow.no-execution',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.gift-certificate-purchase-shadow.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'shadow.none',
+    executorVersion: 1,
+    payloadRetentionMs: 7 * DAY,
+    auditRetentionMs: 365 * DAY,
+    normalizeInput: giftCertificatePurchaseShadowNormalizer,
   };
 }
 
@@ -2513,6 +2562,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   customerSubscriptionExpiryShadowCapability(),
   customerSubscriptionCancellationShadowCapability(),
   customerSubscriptionRevocationShadowCapability(),
+  giftCertificatePurchaseShadowCapability(),
   p405SchedulerEnvelopeCapability(),
   ...P4_05_EXECUTABLE_REGISTRATIONS.map(p405ExecutableCapability),
   p404SchedulerEnvelopeCapability(),

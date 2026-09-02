@@ -27,6 +27,7 @@ import { EncryptionModule } from './encryption/encryption.module';
 import { EntitlementsModule } from './entitlements/entitlements.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { FeatureGuard } from './entitlements/feature.guard';
+import { GiftCertificatesModule } from './gift-certificates/gift-certificates.module';
 import { InternalCalendarModule } from './internal-calendar/internal-calendar.module';
 import { EventsModule } from './events/events.module';
 import { InboxModule } from './inbox/inbox.module';
@@ -65,6 +66,7 @@ import { SystemMetricsService } from './system-metrics.service';
     TenancyModule,
     EntitlementsModule,
     ExpensesModule,
+    GiftCertificatesModule,
     EncryptionModule,
     SubscriptionsModule,
     TenantsModule,
