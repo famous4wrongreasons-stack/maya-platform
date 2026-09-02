@@ -1354,6 +1354,101 @@ describe('SocialAuthService', () => {
     });
   });
 
+  it('registers an isolated Telegram client when the provider omits the phone', async () => {
+    const {
+      service,
+      mocks: {
+        authFlowStateFindUniqueMock,
+        authIdentityCreateMock,
+        createUserMock,
+        issueSessionMock,
+      },
+    } = createService();
+    const createdUser = {
+      ...baseUser(),
+      email: 'telegram-no-phone@example.com',
+      phone: null,
+      encryptedName: 'enc:John Doe',
+    };
+    const { privateKey, publicKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+    });
+    const jwk = publicKey.export({ format: 'jwk' }) as JsonWebKey;
+    const now = Math.floor(Date.now() / 1000);
+    const token = signJwt(
+      privateKey,
+      { alg: 'RS256', kid: 'telegram-key-no-phone', typ: 'JWT' },
+      {
+        iss: 'https://oauth.telegram.org',
+        aud: '123456789',
+        sub: 'tg-subject-no-phone',
+        id: 987654322,
+        name: 'John Doe',
+        iat: now,
+        exp: now + 3600,
+      },
+    );
+
+    authFlowStateFindUniqueMock.mockResolvedValue({
+      id: 'flow-telegram-no-phone',
+      state: 'te_state_no_phone',
+      provider: 'telegram',
+      redirectUri: 'https://maya.example/oauth-callback.html',
+      codeVerifier: 'telegram-code-verifier-no-phone',
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      consumedAt: null,
+      tenant,
+    });
+    createUserMock.mockResolvedValue(createdUser);
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        createFetchResponse({
+          access_token: 'telegram-access-token-no-phone',
+          id_token: token,
+        }),
+      )
+      .mockResolvedValueOnce(
+        createFetchResponse({
+          keys: [
+            {
+              ...jwk,
+              kid: 'telegram-key-no-phone',
+              use: 'sig',
+              alg: 'RS256',
+            },
+          ],
+        }),
+      );
+
+    const result = await service.completeTelegramLogin({
+      state: 'te_state_no_phone',
+      code: 'telegram-code-no-phone',
+    });
+
+    expect(createUserMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: tenant.id,
+        phone: null,
+        role: UserRole.CLIENT,
+      }),
+    );
+    expect(authIdentityCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: createdUser.id,
+        provider: 'telegram',
+        providerUserId: '987654322',
+        phone: null,
+      }),
+    );
+    expect(issueSessionMock).toHaveBeenCalledWith(createdUser, {});
+    expect(result).toMatchObject({
+      access_token: 'jwt-token',
+      is_new_user: true,
+      provider: 'telegram',
+    });
+  });
+
   it('returns a controlled unavailable error when Telegram cannot be reached', async () => {
     const {
       service,
