@@ -502,7 +502,11 @@ describe('AiToolHandlerService output minimization', () => {
         occurredAt: '2026-08-07T09:00:00.000Z',
         note: 'Аренда за август',
       }),
-      { source: 'manual', idempotencyKey: 'approval-key-1' },
+      {
+        source: 'manual',
+        idempotencyKey: 'approval-key-1',
+        initiator: 'ai_tool',
+      },
     );
     expect(result).toMatchObject({
       recorded: true,
