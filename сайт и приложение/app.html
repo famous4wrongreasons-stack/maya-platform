@@ -1,5 +1,5 @@
 <!doctype html><html lang="ru"><head>
-<meta name="maya-build" content="2026-09-02-pwa-native-build9"/>
+<meta name="maya-build" content="2026-09-02-pwa-telegram-auth1"/>
 <meta name="maya-source-build" content="2026-08-13-native-typewriter-v2"/>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"/>
 <meta name="theme-color" content="#000000" id="me-theme-color"/><meta name="color-scheme" content="dark" id="me-color-scheme"/><meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -12203,17 +12203,20 @@ function ABookFlow() {
   // и восстановление сессии при открытии экрана записи. Во втором случае
   // владелец с бизнес-ролью улетал в рабочий кабинет прямо из «Записаться»:
   // экран открывался, проверял сессию и сам себя выкидывал. Проверки полноты
-  // профиля (нет телефона / нет имени) остаются в обоих случаях — без них
-  // запись всё равно не создать.
+  // Имя нужно дозаполнить сразу. Telegram-клиент без номера может
+  // войти в изолированный кабинет; номер форма запросит перед записью.
   function authRouteProfile(me, provider, opts) {
     var skipRedirect = !!(opts && opts.skipRedirect);
     if (me && me.profile_completed === false) {
       var miss = (me && me.missing_profile_fields) || [];
-      if (miss.indexOf('phone') >= 0 || !me.phone) {
+      var missingPhone = miss.indexOf('phone') >= 0 || !me.phone;
+      if (missingPhone && provider !== 'telegram') {
         setAuthSocialProvider(provider === 'telegram' ? 'telegram' : 'yandex');
         setAuthErr(''); setAuthStage('social_phone_required'); setSaasAuth('anon'); return;
       }
-      setAuthName((me && me.name) || ''); setAuthErr(''); setAuthStage('name'); setSaasAuth('anon'); return;
+      if (miss.indexOf('name') >= 0 || !me.name) {
+        setAuthName((me && me.name) || ''); setAuthErr(''); setAuthStage('name'); setSaasAuth('anon'); return;
+      }
     }
     if (me) {
       saasUpdateUser(me);

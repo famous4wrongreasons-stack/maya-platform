@@ -570,11 +570,16 @@ export class SocialAuthService {
     this.assertTenantAllowsSelfRegistration(
       params.tenant.allowSelfRegistration,
     );
-    this.assertClientIdentityHasVerifiedPhone(
-      { role: UserRole.CLIENT, phone: null },
-      params.profile,
-      params.tenant.calendarSource,
-    );
+    // Telegram's signed OIDC identity is enough to create an isolated client
+    // account. A phone is still required at booking time and no CRM profile is
+    // linked until a verified phone is available.
+    if (params.profile.provider !== 'telegram') {
+      this.assertClientIdentityHasVerifiedPhone(
+        { role: UserRole.CLIENT, phone: null },
+        params.profile,
+        params.tenant.calendarSource,
+      );
+    }
 
     if (params.branchId) {
       await this.tenantsService.assertBranchBelongsToTenant(
