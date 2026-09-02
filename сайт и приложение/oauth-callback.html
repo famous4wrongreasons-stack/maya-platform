@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Вход · MAYA</title>
-<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/app/fonts.css">
 <style>
 :root{
   --bg:#070810; --ink:#f2f0ec; --dim:rgba(242,240,236,.6); --faint:rgba(242,240,236,.36);
@@ -64,7 +64,7 @@ p{color:var(--dim);font-size:13.5px;line-height:1.6}
     return m[code] || fallback || 'Не удалось войти.';
   }
 
-  var RET_URL = '/app.html'; // выставляется из pending соответствующего state
+  var RET_URL = '/app/'; // без явного салона не уводим в платформенный maya-os // выставляется из pending соответствующего state
   function fail(text) {
     $('spin').style.display = 'none';
     $('card').classList.add('err');
@@ -98,7 +98,7 @@ p{color:var(--dim);font-size:13.5px;line-height:1.6}
       var x = new URL(String(u || ''), location.origin);
       if (x.origin === location.origin) return x.pathname + x.search + x.hash;
     } catch (e) {}
-    return '/app.html';
+    return '/app/';
   }
   var q = new URLSearchParams(location.search);
   var err = q.get('error');
