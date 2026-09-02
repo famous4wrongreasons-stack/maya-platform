@@ -13622,7 +13622,11 @@ async def panel_journal_set_client_name_handler(request: web.Request) -> web.Res
     return _cabinet_response({"error": "set_failed", "message": result.get("error") or "YClients отклонил изменение."}, status=400)
 
 
-async def start_webhook_server(bot_app: Application):
+async def start_webhook_server(
+    bot_app: Application,
+    *,
+    start_background_tasks: bool = True,
+):
     """
     Запускает aiohttp-сервер на WEBHOOK_PORT в том же event loop, что и бот.
     Вызывается из post_init() бота.
@@ -13865,10 +13869,11 @@ async def start_webhook_server(bot_app: Application):
     await site.start()
     globals()["_WEBHOOK_RUNNER"] = runner
     globals()["_WEBHOOK_SITE"] = site
-    asyncio.create_task(master_day_brief_loop(bot_app))
-    asyncio.create_task(client_retention_refresh_loop(bot_app))
-    asyncio.create_task(reputation_monitor_loop(bot_app))
-    asyncio.create_task(master_shift_reminder_loop(bot_app))
-    asyncio.create_task(waitlist_admin_alert_loop(bot_app))
-    asyncio.create_task(maya_operating_rhythm_loop(bot_app))
+    if start_background_tasks:
+        asyncio.create_task(master_day_brief_loop(bot_app))
+        asyncio.create_task(client_retention_refresh_loop(bot_app))
+        asyncio.create_task(reputation_monitor_loop(bot_app))
+        asyncio.create_task(master_shift_reminder_loop(bot_app))
+        asyncio.create_task(waitlist_admin_alert_loop(bot_app))
+        asyncio.create_task(maya_operating_rhythm_loop(bot_app))
     logger.info(f"📡 Webhook-сервер слушает {bind_host}:{WEBHOOK_PORT}")

@@ -88,6 +88,24 @@ class Package2CommunicationRatchetTests(unittest.TestCase):
         self.assertNotIn("_send_master_push", calls)
         self.assertNotIn("while ", source)
 
+    def test_request_only_pwa_process_initializes_the_telegram_executor(self):
+        serve = function_node(parsed("pwa_api.py"), "serve")
+        source = ast.unparse(serve)
+
+        self.assertIn("install_staff_telegram_chat_mirror", called_names(serve))
+        self.assertIn("start_background_tasks=False", source)
+
+        start_server = function_node(parsed("webhook_server.py"), "start_webhook_server")
+        start_source = ast.unparse(start_server)
+        keyword_defaults = {
+            arg.arg: default
+            for arg, default in zip(start_server.args.kwonlyargs, start_server.args.kw_defaults)
+        }
+        self.assertIn("start_background_tasks", keyword_defaults)
+        self.assertIsInstance(keyword_defaults["start_background_tasks"], ast.Constant)
+        self.assertTrue(keyword_defaults["start_background_tasks"].value)
+        self.assertIn("if start_background_tasks:", start_source)
+
 
 if __name__ == "__main__":
     unittest.main()
