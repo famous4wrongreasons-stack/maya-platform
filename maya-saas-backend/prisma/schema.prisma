@@ -1136,14 +1136,16 @@ model CustomerSubscriptionUsage {
 }
 
 /// One tenant-owned certificate issuance and its provider payment lifecycle.
-/// The bearer secret is represented only by a server-derived hash; recipient
-/// and offer facts are immutable snapshots rather than mutable catalog data.
+/// The bearer secret is represented only by a server-derived hash; the
+/// non-secret presentation key version makes re-presentation restart-safe.
+/// Recipient and offer facts are immutable snapshots, not mutable catalog data.
 model GiftCertificate {
   id                       String                     @id @default(cuid())
   tenantId                 String
   issueExecutionId         String?
   issuanceIdentityHash     String
   codeHash                 String
+  presentationKeyVersion   String?
   recipientSubjectHash     String
   offerSnapshotHash        String
   nominalAmountKopecks     Int
