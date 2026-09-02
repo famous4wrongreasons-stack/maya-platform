@@ -16,6 +16,11 @@ describe('runtime config validation', () => {
     MAYA_REFERRAL_REWARD_PRESENTATION_KEY: secret('referral-presentation'),
     MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION: 'v1',
     MAYA_REFERRAL_REWARD_CLAIM_SECRET: secret('referral-claim'),
+    MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY: secret(
+      'gift-certificate-presentation',
+    ),
+    MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION: 'v1',
+    MAYA_GIFT_CERTIFICATE_CLAIM_SECRET: secret('gift-certificate-claim'),
     CLIENT_IDENTITY_HASH_SECRET: secret('client-identity'),
     CORS_ALLOWED_ORIGINS: 'https://app.example.test,capacitor://localhost',
     AUTH_TRUST_PROXY: '127.0.0.1',
@@ -90,6 +95,30 @@ describe('runtime config validation', () => {
     config.MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION = 'unsafe version';
     expect(validationMessage(config)).toContain(
       'MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION must be a stable version identifier',
+    );
+  });
+
+  it('requires independent gift-certificate presentation and claim secrets', () => {
+    const config = productionConfig();
+    delete config.MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY;
+    expect(validationMessage(config)).toContain(
+      'MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY is required in production',
+    );
+
+    config.MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY = secret(
+      'gift-certificate-presentation',
+    );
+    config.MAYA_GIFT_CERTIFICATE_CLAIM_SECRET = config.CRM_ENCRYPTION_KEY;
+    expect(validationMessage(config)).toContain(
+      'MAYA_GIFT_CERTIFICATE_CLAIM_SECRET must be independent from CRM_ENCRYPTION_KEY',
+    );
+
+    config.MAYA_GIFT_CERTIFICATE_CLAIM_SECRET = secret(
+      'gift-certificate-claim',
+    );
+    config.MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION = 'unsafe version';
+    expect(validationMessage(config)).toContain(
+      'MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION must be a stable version identifier',
     );
   });
 

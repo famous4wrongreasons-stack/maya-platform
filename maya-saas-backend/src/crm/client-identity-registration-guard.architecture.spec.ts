@@ -20,6 +20,11 @@ const CONTROLLED_PROOF_FIXTURES = [
     databaseGuard: "database.startsWith('maya_c06_p405_all8_')",
     refusalMarker: 'P4-05 proof refuses non-disposable databases',
   },
+  {
+    path: 'scripts/p4-06-all3-executable-proof.ts',
+    databaseGuard: "database.startsWith('maya_c06_p406_all3_')",
+    refusalMarker: 'P4-06 proof refuses non-disposable databases',
+  },
 ] as const;
 
 type SourceFile = { path: string; code: string };
@@ -88,6 +93,7 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
       'scripts/p4-03-all8-executable-proof.ts',
       'scripts/p4-04-all4-executable-proof.ts',
       'scripts/p4-05-all8-executable-proof.ts',
+      'scripts/p4-06-all3-executable-proof.ts',
       CANONICAL_OWNER,
     ]);
 
@@ -105,6 +111,11 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
       ({ path }) => path === 'scripts/p4-05-all8-executable-proof.ts',
     );
     expect(isControlledProofFixture(p405Proof!)).toBe(true);
+
+    const p406Proof = files.find(
+      ({ path }) => path === 'scripts/p4-06-all3-executable-proof.ts',
+    );
+    expect(isControlledProofFixture(p406Proof!)).toBe(true);
 
     expect(productionRegistrationOwners(files)).toEqual([CANONICAL_OWNER]);
   });
@@ -149,6 +160,9 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
     const p405Proof = files.find(
       ({ path }) => path === 'scripts/p4-05-all8-executable-proof.ts',
     );
+    const p406Proof = files.find(
+      ({ path }) => path === 'scripts/p4-06-all3-executable-proof.ts',
+    );
     const withoutP404DatabaseGuard = p404Proof?.code.replace(
       "database.startsWith('maya_c06_p404_all4_')",
       'database.length > 0',
@@ -163,6 +177,14 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
     );
     const withoutP405RefusalMarker = p405Proof?.code.replace(
       'P4-05 proof refuses non-disposable databases',
+      'proof database rejected',
+    );
+    const withoutP406DatabaseGuard = p406Proof?.code.replace(
+      "database.startsWith('maya_c06_p406_all3_')",
+      'database.length > 0',
+    );
+    const withoutP406RefusalMarker = p406Proof?.code.replace(
+      'P4-06 proof refuses non-disposable databases',
       'proof database rejected',
     );
 
@@ -183,7 +205,15 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
         ...p405Proof!,
         code: withoutP405RefusalMarker!,
       }),
-    ]).toEqual([false, false, false, false]);
+      isControlledProofFixture({
+        ...p406Proof!,
+        code: withoutP406DatabaseGuard!,
+      }),
+      isControlledProofFixture({
+        ...p406Proof!,
+        code: withoutP406RefusalMarker!,
+      }),
+    ]).toEqual([false, false, false, false, false, false]);
   });
 
   it('checks the tenant-qualified active hold inside the write transaction', () => {

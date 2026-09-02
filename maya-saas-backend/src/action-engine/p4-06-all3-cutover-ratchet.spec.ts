@@ -5,7 +5,7 @@ import { ActionCapabilityRegistry } from './action-engine.registry';
 import { P4_06_EXECUTABLE_CAPABILITIES } from './p4-06-gift-certificate-executable.contract';
 
 const ROOT = join(__dirname, '..', '..', '..');
-const CUTOVER_ENABLED = false;
+const CUTOVER_ENABLED = true;
 const LEGACY_BOT = 'ai администратор/bot.py';
 const LEGACY_WEB = 'ai администратор/webhook_server.py';
 const LEGACY_DB = 'ai администратор/database.py';
@@ -14,11 +14,135 @@ const PRODUCTION_MODULE =
   'maya-saas-backend/src/gift-certificates/gift-certificates.module.ts';
 const CANONICAL_OWNER =
   'maya-saas-backend/src/gift-certificates/p4-06-gift-certificate-executable.service.ts';
+const PROVIDER_ADAPTER =
+  'maya-saas-backend/src/gift-certificates/p4-06-yookassa-checkout-provider.ts';
+const CLAIM_CONTRACT =
+  'maya-saas-backend/src/gift-certificates/gift-certificate-claim.contract.ts';
 
 type DirectMutationSubgroup =
   | 'checkout_and_provider_reference'
   | 'payment_success_activation'
   | 'full_redemption';
+
+interface Guard {
+  file: string;
+  entrypoint: string;
+  marker: string;
+  mutation: string;
+}
+
+const SUBGROUP_GUARDS: Readonly<
+  Record<DirectMutationSubgroup, readonly Guard[]>
+> = {
+  checkout_and_provider_reference: [
+    {
+      file: LEGACY_BOT,
+      entrypoint: 'async def _send_cert_invoice',
+      marker:
+        'p4_06_legacy_mutation_disabled:initiate_gift_certificate_purchase',
+      mutation: 'database.save_gift_certificate(',
+    },
+    {
+      file: LEGACY_WEB,
+      entrypoint: 'async def cert_create_handler',
+      marker:
+        'p4_06_legacy_mutation_disabled:initiate_gift_certificate_purchase',
+      mutation: 'database.save_gift_certificate(',
+    },
+    {
+      file: LEGACY_DB,
+      entrypoint: 'def save_gift_certificate',
+      marker:
+        'raise RuntimeError("p4_06_legacy_mutation_disabled:initiate_gift_certificate_purchase")',
+      mutation: 'conn.execute',
+    },
+    {
+      file: LEGACY_DB,
+      entrypoint: 'def set_cert_payment_id',
+      marker:
+        'raise RuntimeError("p4_06_legacy_mutation_disabled:provider_payment_correlation")',
+      mutation: 'conn.execute',
+    },
+    {
+      file: LEGACY_BLUEPRINT,
+      entrypoint: 'def save_gift_certificate',
+      marker:
+        'raise RuntimeError("p4_06_legacy_mutation_disabled:initiate_gift_certificate_purchase")',
+      mutation: 'conn.execute',
+    },
+    {
+      file: LEGACY_BLUEPRINT,
+      entrypoint: 'def set_cert_payment_id',
+      marker:
+        'raise RuntimeError("p4_06_legacy_mutation_disabled:provider_payment_correlation")',
+      mutation: 'conn.execute',
+    },
+  ],
+  payment_success_activation: [
+    {
+      file: LEGACY_BOT,
+      entrypoint: 'async def _poll_payment',
+      marker: 'p4_06_legacy_mutation_disabled:activate_gift_certificate',
+      mutation: 'database.mark_cert_paid(',
+    },
+    {
+      file: LEGACY_DB,
+      entrypoint: 'def mark_cert_paid',
+      marker:
+        'raise RuntimeError("p4_06_legacy_mutation_disabled:activate_gift_certificate")',
+      mutation: 'conn.execute',
+    },
+    {
+      file: LEGACY_DB,
+      entrypoint: 'def mark_cert_canceled',
+      marker:
+        'raise RuntimeError("p4_06_legacy_mutation_disabled:provider_payment_reconciliation")',
+      mutation: 'conn.execute',
+    },
+    {
+      file: LEGACY_BLUEPRINT,
+      entrypoint: 'def mark_cert_paid',
+      marker:
+        'raise RuntimeError("p4_06_legacy_mutation_disabled:activate_gift_certificate")',
+      mutation: 'conn.execute',
+    },
+    {
+      file: LEGACY_BLUEPRINT,
+      entrypoint: 'def mark_cert_canceled',
+      marker:
+        'raise RuntimeError("p4_06_legacy_mutation_disabled:provider_payment_reconciliation")',
+      mutation: 'conn.execute',
+    },
+  ],
+  full_redemption: [
+    {
+      file: LEGACY_BOT,
+      entrypoint: 'async def handle_callback',
+      marker: 'p4_06_legacy_mutation_disabled:redeem_gift_certificate',
+      mutation: 'database.mark_cert_used(',
+    },
+    {
+      file: LEGACY_WEB,
+      entrypoint: 'async def panel_redeem_handler',
+      marker: 'p4_06_legacy_mutation_disabled:redeem_gift_certificate',
+      mutation: 'database.mark_cert_used(',
+    },
+    {
+      file: LEGACY_DB,
+      entrypoint: 'def mark_cert_used',
+      marker:
+        'raise RuntimeError("p4_06_legacy_mutation_disabled:redeem_gift_certificate")',
+      mutation: 'conn.execute',
+    },
+    {
+      file: LEGACY_BLUEPRINT,
+      entrypoint: 'def mark_cert_used',
+      marker:
+        'raise RuntimeError("p4_06_legacy_mutation_disabled:redeem_gift_certificate")',
+      mutation: 'conn.execute',
+    },
+  ],
+};
 
 type SourceOverrides = ReadonlyMap<string, string>;
 
@@ -26,43 +150,38 @@ function source(path: string, overrides?: SourceOverrides): string {
   return overrides?.get(path) ?? readFileSync(join(ROOT, path), 'utf8');
 }
 
-function directMutationSubgroups(
-  overrides?: SourceOverrides,
-): DirectMutationSubgroup[] {
-  const bot = source(LEGACY_BOT, overrides);
-  const web = source(LEGACY_WEB, overrides);
-  const database = source(LEGACY_DB, overrides);
-  const blueprint = source(LEGACY_BLUEPRINT, overrides);
-  const result: DirectMutationSubgroup[] = [];
-  if (
-    bot.includes('database.save_gift_certificate(') ||
-    web.includes('database.save_gift_certificate(') ||
-    database.includes('INSERT INTO gift_certificates') ||
-    blueprint.includes('INSERT INTO gift_certificates')
-  ) {
-    result.push('checkout_and_provider_reference');
-  }
-  if (
-    bot.includes('database.mark_cert_paid(') ||
-    database.includes("payment_status = 'paid'") ||
-    blueprint.includes("payment_status = 'paid'")
-  ) {
-    result.push('payment_success_activation');
-  }
-  if (
-    bot.includes('database.mark_cert_used(') ||
-    web.includes('database.mark_cert_used(') ||
-    database.includes('SET used_at = ?, used_by_admin_id = ?') ||
-    blueprint.includes(
-      'UPDATE gift_certificates SET used_at = ?, used_by_admin_id = ?',
-    )
-  ) {
-    result.push('full_redemption');
-  }
-  return result;
+function functionBody(contents: string, entrypoint: string): string {
+  const start = contents.indexOf(entrypoint);
+  if (start < 0) return '';
+  const rest = contents.slice(start + entrypoint.length);
+  const nextFunction = rest.search(/\n(?:async )?def /u);
+  return nextFunction < 0 ? rest : rest.slice(0, nextFunction);
 }
 
-describe('P4-06 all-3 production cutover ratchet readiness', () => {
+function isFailClosed(guard: Guard, overrides?: SourceOverrides): boolean {
+  const body = functionBody(source(guard.file, overrides), guard.entrypoint);
+  const marker = body.indexOf(guard.marker);
+  const mutation = body.indexOf(guard.mutation);
+  if (marker < 0 || mutation < 0 || marker >= mutation) return false;
+  const barrier = body.slice(marker, mutation);
+  return barrier.includes('raise RuntimeError(') || barrier.includes('return');
+}
+
+function currentLegacyBypasses(
+  overrides?: SourceOverrides,
+): DirectMutationSubgroup[] {
+  return (
+    Object.entries(SUBGROUP_GUARDS) as Array<
+      [DirectMutationSubgroup, readonly Guard[]]
+    >
+  )
+    .filter(([, guards]) =>
+      guards.some((guard) => !isFailClosed(guard, overrides)),
+    )
+    .map(([subgroup]) => subgroup);
+}
+
+describe('P4-06 all-3 production cutover ratchet', () => {
   it('registers all three canonical Action Engine owners', () => {
     const registry = new ActionCapabilityRegistry();
     expect(
@@ -76,45 +195,54 @@ describe('P4-06 all-3 production cutover ratchet readiness', () => {
     ]);
   });
 
-  it('keeps the executable proof owner isolated from production wiring', () => {
-    expect(CUTOVER_ENABLED).toBe(false);
+  it('wires the canonical owner without exposing a raw execution endpoint', () => {
+    const module = source(PRODUCTION_MODULE);
+    expect(CUTOVER_ENABLED).toBe(true);
     expect(source(CANONICAL_OWNER)).toContain(
       'this.actionEngine.executeWithReceipt(',
     );
-    expect(source(PRODUCTION_MODULE)).not.toContain(
-      'P406GiftCertificateExecutableService',
+    expect(module).toContain('P406GiftCertificateExecutableService');
+    expect(module).toContain('P406YooKassaCheckoutProvider');
+    expect(module).toContain('P406GiftCertificateExecutableService,');
+    expect(module).not.toContain('.execute.v1');
+  });
+
+  it('keeps UNKNOWN reconciliation on the exact original provider request', () => {
+    const adapter = source(PROVIDER_ADAPTER);
+    expect(adapter).toContain('input.idempotencyKey');
+    expect(adapter).toContain('this.request(input)');
+    expect(adapter).toContain("return { outcome: 'UNKNOWN' }");
+    expect(adapter).not.toContain('randomUUID');
+    expect(adapter).not.toContain('Math.random');
+  });
+
+  it('persists only claim lookup material and a non-secret key version', () => {
+    const owner = source(CANONICAL_OWNER);
+    const claim = source(CLAIM_CONTRACT);
+    expect(owner).toContain('presentationKeyVersion');
+    expect(owner).toContain('codeHash: material.codeHash');
+    expect(owner).toContain('delete result.bearer');
+    expect(claim).toContain('export function giftCertificateClaimLookup(');
+    expect(claim).toContain('presentationReference');
+    expect(claim).not.toContain('rawBearer');
+  });
+
+  it('reduces the legacy family bypass and all three mutation subgroups to zero', () => {
+    expect(Object.keys(SUBGROUP_GUARDS)).toHaveLength(3);
+    expect(currentLegacyBypasses()).toEqual([]);
+  });
+
+  it('still detects a genuine direct redemption owner if its guard is removed', () => {
+    const unguarded = source(LEGACY_DB).replace(
+      'raise RuntimeError("p4_06_legacy_mutation_disabled:redeem_gift_certificate")',
+      'pass  # simulated direct owner regression',
+    );
+    expect(currentLegacyBypasses(new Map([[LEGACY_DB, unguarded]]))).toContain(
+      'full_redemption',
     );
   });
 
-  it('locks one pre-cutover family group and exactly three direct mutation subgroups', () => {
-    expect(directMutationSubgroups()).toEqual([
-      'checkout_and_provider_reference',
-      'payment_success_activation',
-      'full_redemption',
-    ]);
-  });
-
-  it('has a prepared zero-bypass state only after every real owner is disabled', () => {
-    const disabled = new Map<string, string>([
-      [LEGACY_BOT, ''],
-      [LEGACY_WEB, ''],
-      [LEGACY_DB, ''],
-      [LEGACY_BLUEPRINT, ''],
-    ]);
-    expect(directMutationSubgroups(disabled)).toEqual([]);
-  });
-
-  it('still detects a genuine direct writer in the prepared zero-bypass state', () => {
-    const synthetic = new Map<string, string>([
-      [LEGACY_BOT, 'database.mark_cert_used(code, actor)'],
-      [LEGACY_WEB, ''],
-      [LEGACY_DB, ''],
-      [LEGACY_BLUEPRINT, ''],
-    ]);
-    expect(directMutationSubgroups(synthetic)).toEqual(['full_redemption']);
-  });
-
-  it('preserves all three Shadow paths as non-executable planners', () => {
+  it('keeps all three completed Shadow paths non-executable', () => {
     for (const file of [
       'gift-certificate-purchase-shadow.service.ts',
       'gift-certificate-activation-shadow.service.ts',
@@ -123,8 +251,8 @@ describe('P4-06 all-3 production cutover ratchet readiness', () => {
       const contents = source(
         `maya-saas-backend/src/gift-certificates/${file}`,
       );
-      expect(contents).toContain('planShadow(');
       expect(contents).not.toContain('executeWithReceipt(');
+      expect(contents).not.toContain('p4_06_legacy_mutation_disabled');
     }
   });
 });

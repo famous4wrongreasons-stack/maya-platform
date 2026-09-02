@@ -2900,6 +2900,11 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not database.can_redeem_codes(chat_id):
             await query.edit_message_text("Гасить сертификаты могут только админы или кассиры 🔒")
             return
+        logger.warning("p4_06_legacy_mutation_disabled:redeem_gift_certificate")
+        await query.edit_message_text(
+            "Погашение сертификата через старый контур отключено. Попробуйте позже."
+        )
+        return
         ok = database.mark_cert_used(code, admin_user_id=chat_id)
         cert = database.get_gift_certificate(code)
         if ok and cert:
@@ -4464,6 +4469,14 @@ async def _send_cert_invoice(context: ContextTypes.DEFAULT_TYPE, chat_id: int, f
     редиректит клиента обратно в чат бота, а фоновая задача _poll_payment
     параллельно фиксирует факт оплаты и выдаёт PDF-сертификат.
     """
+    logger.warning("p4_06_legacy_mutation_disabled:initiate_gift_certificate_purchase")
+    await context.bot.send_message(
+        chat_id,
+        "Покупка сертификата временно недоступна. Попробуйте позже.",
+        reply_markup=MAIN_KEYBOARD,
+    )
+    digital_cert_flow.pop(chat_id, None)
+    return
     amount = flow["amount"]
     code = database.new_cert_code(amount)
     expires_at = (datetime.now() + timedelta(days=365)).isoformat(timespec="seconds")
@@ -4536,6 +4549,8 @@ async def _poll_payment(app: Application, code: str, payment_id: str):
     в течение пары минут. Если за 30 мин нет оплаты — прекращаем опрос,
     сертификат остаётся в pending (можно проверить вручную позже).
     """
+    logger.warning("p4_06_legacy_mutation_disabled:activate_gift_certificate")
+    return
     deadline = datetime.now() + timedelta(minutes=30)
     interval = 7
     logger.info(f"Запуск опроса платежа {payment_id} для сертификата {code}")

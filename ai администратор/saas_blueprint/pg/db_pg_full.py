@@ -1565,6 +1565,7 @@ def save_gift_certificate(
     payment_status: str = "paid",
 ):
     """Сохраняет выпущенный сертификат. Имя/телефон получателя шифрует."""
+    raise RuntimeError("p4_06_legacy_mutation_disabled:initiate_gift_certificate_purchase")
     with _db() as conn:
         # Legacy-столбец recipient_phone имеет NOT NULL — пишем пустую строку,
         # реальный (зашифрованный) телефон уходит в recipient_phone_enc.
@@ -1599,6 +1600,7 @@ def mark_cert_paid(code: str, yukassa_payment_id: str = None) -> bool:
     Помечает сертификат оплаченным (после успешного платежа в ЮKassa).
     Возвращает True, если переход был выполнен (был pending → стал paid).
     """
+    raise RuntimeError("p4_06_legacy_mutation_disabled:activate_gift_certificate")
     with _db() as conn:
         cur = conn.execute(
             "UPDATE gift_certificates SET payment_status = 'paid', "
@@ -1613,6 +1615,7 @@ def set_cert_payment_id(code: str, yukassa_payment_id: str) -> bool:
     Привязывает ID платежа ЮKassa к сертификату (сразу после create_payment).
     Нужно, чтобы при рестарте бота можно было возобновить опрос статуса.
     """
+    raise RuntimeError("p4_06_legacy_mutation_disabled:provider_payment_correlation")
     with _db() as conn:
         cur = conn.execute(
             "UPDATE gift_certificates SET yukassa_payment_id = ? WHERE code = ?",
@@ -1637,6 +1640,7 @@ def list_pending_certs() -> list[dict]:
 
 def mark_cert_canceled(code: str) -> bool:
     """Помечает сертификат отменённым (если ЮKassa вернул status=canceled)."""
+    raise RuntimeError("p4_06_legacy_mutation_disabled:provider_payment_reconciliation")
     with _db() as conn:
         cur = conn.execute(
             "UPDATE gift_certificates SET payment_status = 'canceled' "
@@ -1651,6 +1655,7 @@ def mark_cert_used(code: str, admin_user_id: int) -> bool:
     Помечает сертификат использованным. Возвращает True, если успешно
     (т.е. сертификат был активен), False если уже погашен / не найден.
     """
+    raise RuntimeError("p4_06_legacy_mutation_disabled:redeem_gift_certificate")
     with _db() as conn:
         cur = conn.execute(
             "UPDATE gift_certificates SET used_at = ?, used_by_admin_id = ? "

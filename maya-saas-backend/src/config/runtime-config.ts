@@ -20,6 +20,10 @@ const PRODUCTION_SECRET_NAMES = [
   // lookup HMAC. Neither secret may share another security domain.
   'MAYA_REFERRAL_REWARD_PRESENTATION_KEY',
   'MAYA_REFERRAL_REWARD_CLAIM_SECRET',
+  // Gift certificates are transferable bearer value. Their deterministic
+  // presentation PRF and lookup HMAC are independent security domains.
+  'MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY',
+  'MAYA_GIFT_CERTIFICATE_CLAIM_SECRET',
   // Отдельный от прочих намеренно: хеш личности клиента — свой домен
   // безопасности, и ротироваться он должен независимо от сессий и токенов.
   'CLIENT_IDENTITY_HASH_SECRET',
@@ -157,6 +161,7 @@ function validateProductionConfig(
   );
   validateProductionSecrets(config, issues, emailLoginEnabled);
   validateReferralRewardPresentationVersion(config, issues);
+  validateGiftCertificatePresentationVersion(config, issues);
 
   if (!stringValue(config.CORS_ALLOWED_ORIGINS)) {
     issues.push('CORS_ALLOWED_ORIGINS is required in production');
@@ -269,6 +274,20 @@ function validateReferralRewardPresentationVersion(
   if (!/^[A-Za-z0-9._:-]{1,64}$/.test(value)) {
     issues.push(
       'MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION must be a stable version identifier',
+    );
+  }
+}
+
+function validateGiftCertificatePresentationVersion(
+  config: Record<string, unknown>,
+  issues: string[],
+): void {
+  const value = stringValue(
+    config.MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION,
+  );
+  if (!/^[A-Za-z0-9._:-]{1,64}$/.test(value)) {
+    issues.push(
+      'MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION must be a stable version identifier',
     );
   }
 }

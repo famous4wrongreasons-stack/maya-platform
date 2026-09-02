@@ -3787,6 +3787,13 @@ async def panel_redeem_handler(request: web.Request) -> web.Response:
         }
         if mode != "confirm":
             return _cabinet_response({"ok": True, "type": "cert", "valid": True, "details": details})
+        logger.warning("p4_06_legacy_mutation_disabled:redeem_gift_certificate")
+        return _cabinet_response({
+            "ok": False,
+            "type": "cert",
+            "error": "canonical_gift_certificate_ingress_required",
+            "reason": "Погашение сертификата временно недоступно.",
+        }, status=503)
         try:
             database.mark_cert_used(code, int(tg_id))
         except Exception as e:
@@ -7301,6 +7308,11 @@ async def cert_create_handler(request: web.Request) -> web.Response:
     он может переслать тому, кому дарит. Реквизиты карты в приложение НЕ вводятся —
     оплата проходит на стороне ЮKassa.
     """
+    logger.warning("p4_06_legacy_mutation_disabled:initiate_gift_certificate_purchase")
+    return _cabinet_response({
+        "error": "canonical_gift_certificate_ingress_required",
+        "message": "Покупка сертификата временно недоступна. Попробуйте позже.",
+    }, status=503)
     try:
         body = await request.json()
     except Exception:
