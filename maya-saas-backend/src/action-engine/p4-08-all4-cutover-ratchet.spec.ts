@@ -17,6 +17,7 @@ function productionBypasses(input: {
   billingService: string;
   scheduler: string;
   accessState: string;
+  tenantsService: string;
 }): string[] {
   const groups: string[] = [];
   if (
@@ -33,7 +34,21 @@ function productionBypasses(input: {
   }
   if (
     /markTenantPastDue\(/.test(input.billingService) ||
-    /tenant\.update(?:Many)?\(/.test(input.accessState)
+    /tenant\.update(?:Many)?\(/.test(input.accessState) ||
+    /(?:pastDueAt|graceEndsAt)\s*:/.test(
+      method(
+        input.tenantsService,
+        'async updateTenant',
+        'async setTenantStatus',
+      ),
+    ) ||
+    /(?:pastDueAt|graceEndsAt)\s*:/.test(
+      method(
+        input.tenantsService,
+        'async getPublicMobileConfig',
+        'async listPublicTenants',
+      ),
+    )
   ) {
     groups.push('past-due-owner');
   }
@@ -43,6 +58,12 @@ function productionBypasses(input: {
     groups.push('unbounded-scheduler-owner');
   }
   return groups;
+}
+
+function method(source: string, start: string, end: string): string {
+  const from = source.indexOf(start);
+  const to = source.indexOf(end, from + start.length);
+  return from < 0 ? '' : source.slice(from, to < 0 ? source.length : to);
 }
 
 describe('P4-08 all-four cutover ratchet readiness', () => {
@@ -66,43 +87,54 @@ describe('P4-08 all-four cutover ratchet readiness', () => {
     ).toEqual(P4_08_REGISTRATIONS.map((item) => item.actionClass));
   });
 
-  it('keeps the safe local cycle disconnected from production routes', () => {
+  it('wires all production initiators through the canonical P4-08 owner', () => {
     const controller = source('src/billing/billing.controller.ts');
     const scheduler = source('src/billing/billing-scheduler.service.ts');
     const module = source('src/billing/billing.module.ts');
     expect(controller).not.toContain('P408TenantBillingExecutableService');
     expect(scheduler).not.toContain('P408TenantBillingExecutableService');
-    expect(module).not.toContain('P408TenantBillingExecutableService');
+    expect(scheduler).toContain('P408TenantBillingCanonicalCutoverService');
+    expect(module).toContain('P408TenantBillingExecutableService');
+    expect(module).toContain('P408TenantBillingCanonicalCutoverService');
+    expect(module).toContain('P408YooKassaPaymentProvider');
+    expect(source('src/billing/billing.service.ts')).toContain(
+      'P408TenantBillingCanonicalCutoverService',
+    );
   });
 
-  it('enumerates the exact pre-cutover owner surfaces instead of hiding them', () => {
+  it('finds no production-reachable direct payment/value owner after cutover', () => {
     const bypasses = productionBypasses({
       billingService: source('src/billing/billing.service.ts'),
       scheduler: source('src/billing/billing-scheduler.service.ts'),
       accessState: source('src/tenants/tenant-access-state.service.ts'),
+      tenantsService: source('src/tenants/tenants.service.ts'),
     });
-    expect(bypasses).toEqual([
+    expect(bypasses).toEqual([]);
+  });
+
+  it('still detects each of the four concrete direct-mutation subgroups', () => {
+    const clean = productionBypasses({
+      billingService: 'class ReadOnlyBillingProjection {}',
+      scheduler: 'class CanonicalFanOutInitiator {}',
+      accessState: 'class ReadOnlyAccessGuard {}',
+      tenantsService: 'class TenantAdminWithoutBillingWrites {}',
+    });
+    const rogue = productionBypasses({
+      billingService:
+        'class Rogue { run() { this.yooKassaClient.createPayment({}); this.applyProviderPaymentIfFinal(); this.billingPayment.update({}); } }',
+      scheduler:
+        'class RogueScheduler { tick() { return this.billingService.runDueBilling(); } }',
+      accessState:
+        'class RogueAccess { run() { this.tenant.updateMany({}); } }',
+      tenantsService: 'class TenantAdminWithoutBillingWrites {}',
+    });
+    expect(clean).toEqual([]);
+    expect(rogue).toEqual([
       'checkout-and-recurring-owner',
       'payment-outcome-owner',
       'past-due-owner',
       'unbounded-scheduler-owner',
     ]);
-  });
-
-  it('detects a newly introduced direct payment/value bypass', () => {
-    const clean = productionBypasses({
-      billingService: 'class ReadOnlyBillingProjection {}',
-      scheduler: 'class CanonicalFanOutInitiator {}',
-      accessState: 'class ReadOnlyAccessGuard {}',
-    });
-    const rogue = productionBypasses({
-      billingService:
-        'class Rogue { run() { return this.yooKassaClient.createPayment({}); } }',
-      scheduler: 'class CanonicalFanOutInitiator {}',
-      accessState: 'class ReadOnlyAccessGuard {}',
-    });
-    expect(clean).toEqual([]);
-    expect(rogue).toEqual(['checkout-and-recurring-owner']);
   });
 
   it('classifies the PostgreSQL proof as disposable and test-only', () => {
@@ -123,5 +155,21 @@ describe('P4-08 all-four cutover ratchet readiness', () => {
     expect(executor).toContain('reconcileByIdempotencyKey');
     expect(executor).toContain('Prisma.TransactionIsolationLevel.Serializable');
     expect(executor).toContain('billing_plan_change_contract_required');
+    expect(source('src/tenants/tenant-access-state.service.ts')).not.toMatch(
+      /tenant\.update(?:Many)?\(/,
+    );
+    const tenantAdmin = source('src/tenants/tenants.service.ts');
+    expect(
+      method(tenantAdmin, 'async updateTenant', 'async setTenantStatus'),
+    ).not.toMatch(
+      /(?:planId|currentPeriodStart|currentPeriodEnd|pastDueAt|graceEndsAt|billingMethodId)\s*:/,
+    );
+    expect(
+      method(
+        tenantAdmin,
+        'async getPublicMobileConfig',
+        'async listPublicTenants',
+      ),
+    ).not.toMatch(/tenant\.update(?:Many)?\(/);
   });
 });

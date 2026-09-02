@@ -113,6 +113,10 @@ class ProofProvider implements P408PaymentProvider {
       currency: input.currency,
       capturedAt: null,
       paymentMethodId: input.paymentMethodId,
+      confirmationUrl: input.paymentMethodId
+        ? null
+        : 'https://provider.invalid/checkout',
+      returnUrl: input.paymentMethodId ? null : 'https://maya.invalid/return',
       metadata: { ...input.metadata },
     };
     this.byKey.set(input.idempotencyKey, payment);
@@ -262,7 +266,7 @@ function recurringInput(input: {
     amountKopecks: input.amountKopecks,
     currency: 'RUB',
     dueWindowEndsAt: input.dueWindowEndsAt,
-    billingMethodIdentityHash: 'billing_method_identity_hash',
+    billingMethodIdentityHash: new ProofCodec().hash('method_saved_1'),
     recurringIdentityHash: p408Hash([
       'recurring',
       input.tenantId,
@@ -354,6 +358,7 @@ async function main() {
       engine.runtime,
       provider,
       codec,
+      () => new Date('2026-11-02T12:00:00.000Z'),
     );
     const shadow = new TenantBillingCanonicalShadowService(engine.runtime);
 
@@ -579,9 +584,9 @@ async function main() {
     const pastDueInput = {
       tenantId: expired.tenantId,
       accessWindowEndsAt: expiredAt.toISOString(),
-      transitionAt: NOW.toISOString(),
+      transitionAt: expiredAt.toISOString(),
       pastDueAt: expiredAt.toISOString(),
-      graceEndsAt: '2026-09-08T00:00:00.000Z',
+      graceEndsAt: '2026-09-04T00:00:00.000Z',
       canceledRecurringPaymentId: null,
       transitionIdentityHash: p408Hash([
         'past-due',

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { BillingService } from './billing.service';
+import { P408TenantBillingCanonicalCutoverService } from './p4-08-tenant-billing-canonical-cutover.service';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DEFAULT_INTERVAL_MS = HOUR_MS;
@@ -35,7 +35,7 @@ export class BillingSchedulerService implements OnModuleInit, OnModuleDestroy {
   private running = false;
 
   constructor(
-    private readonly billingService: BillingService,
+    private readonly canonicalBilling: P408TenantBillingCanonicalCutoverService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -91,9 +91,9 @@ export class BillingSchedulerService implements OnModuleInit, OnModuleDestroy {
       // Сначала сверка: платёж мог пройти, а уведомление не дойти. Если не
       // досчитать его ДО продления, салон выглядел бы должником с оплаченной
       // подпиской — и мог получить второе списание.
-      await this.billingService.reconcilePendingPayments();
+      await this.canonicalBilling.reconcilePendingPayments();
 
-      const result = await this.billingService.runDueBilling();
+      const result = await this.canonicalBilling.runDueBilling();
 
       if (
         result.charged > 0 ||

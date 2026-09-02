@@ -276,55 +276,10 @@ describe('TenantsService.updateTenant', () => {
     expect(result.booking_live_blockers).toContain('mock_crm_only');
   });
 
-  it('persists manual billing dates and billing method id through tenant update', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-07-17T12:00:00.000Z'));
-    const updatedTenant = {
-      ...baseTenant(),
-      status: 'past_due',
-      trialEndsAt: new Date('2026-07-19T12:00:00.000Z'),
-      currentPeriodStart: new Date('2026-07-20T00:00:00.000Z'),
-      currentPeriodEnd: new Date('2026-08-19T23:59:59.000Z'),
-      pastDueAt: new Date('2026-07-17T12:00:00.000Z'),
-      graceEndsAt: new Date('2026-07-20T12:00:00.000Z'),
-      billingMethodId: 'pm_yookassa_saved_card_123',
-    };
-    const tenantUpdateMock: jest.MockedFunction<
-      (args: {
-        where: { id: string };
-        data: {
-          status?: string;
-          currentPeriodStart?: Date | null;
-          currentPeriodEnd?: Date | null;
-          pastDueAt?: Date | null;
-          graceEndsAt?: Date | null;
-          billingMethodId?: string | null;
-        };
-      }) => Promise<void>
-    > = jest.fn().mockResolvedValue(undefined);
-    const tenantFindFirstMock = jest.fn().mockResolvedValue(null);
-    const tenantFindUniqueMock = jest
-      .fn()
-      .mockResolvedValueOnce(baseTenant())
-      .mockResolvedValueOnce(updatedTenant);
-    const transactionMock = jest
-      .fn()
-      .mockImplementation((callback: (tx: unknown) => unknown) =>
-        Promise.resolve(
-          callback({
-            tenant: {
-              update: tenantUpdateMock,
-            },
-            brandingSettings: {
-              upsert: jest.fn(),
-            },
-          }),
-        ),
-      );
+  it('rejects generic writes to payment-derived tenant fields', async () => {
+    const transactionMock = jest.fn();
     const prisma = {
-      tenant: {
-        findUnique: tenantFindUniqueMock,
-        findFirst: tenantFindFirstMock,
-      },
+      tenant: { findUnique: jest.fn(), findFirst: jest.fn() },
       $transaction: transactionMock,
     } as unknown as PrismaService;
     const subscriptionsService = {
@@ -332,86 +287,21 @@ describe('TenantsService.updateTenant', () => {
     } as unknown as SubscriptionsService;
     const service = new TenantsService(prisma, subscriptionsService);
 
-    const result = await service.updateTenant('tenant-1', {
-      status: 'past_due' as TenantRecord['status'],
-      currentPeriodStart: '2026-07-20T00:00:00.000Z',
-      currentPeriodEnd: '2026-08-19T23:59:59.000Z',
-      billingMethodId: 'pm_yookassa_saved_card_123',
-    });
-
-    const [tenantUpdateArgs] = tenantUpdateMock.mock.calls[0] ?? [];
-
-    expect(tenantUpdateArgs.where).toEqual({ id: 'tenant-1' });
-    expect(tenantUpdateArgs.data.status).toBe('past_due');
-    expect(tenantUpdateArgs.data.currentPeriodStart).toEqual(
-      new Date('2026-07-20T00:00:00.000Z'),
-    );
-    expect(tenantUpdateArgs.data.currentPeriodEnd).toEqual(
-      new Date('2026-08-19T23:59:59.000Z'),
-    );
-    expect(tenantUpdateArgs.data.pastDueAt).toEqual(
-      new Date('2026-07-17T12:00:00.000Z'),
-    );
-    expect(tenantUpdateArgs.data.graceEndsAt).toEqual(
-      new Date('2026-07-20T12:00:00.000Z'),
-    );
-    expect(tenantUpdateArgs.data.billingMethodId).toBe(
-      'pm_yookassa_saved_card_123',
-    );
-    expect(result.billing).toMatchObject({
-      current_period_start: new Date('2026-07-20T00:00:00.000Z'),
-      current_period_end: new Date('2026-08-19T23:59:59.000Z'),
-      billing_method_attached: true,
-      billing_method_id: 'pm_yookassa_saved_card_123',
-    });
-    expect(result.billing.grace_ends_at).toEqual(
-      new Date('2026-07-20T12:00:00.000Z'),
-    );
+    await expect(
+      service.updateTenant('tenant-1', {
+        status: 'past_due' as TenantRecord['status'],
+        currentPeriodStart: '2026-07-20T00:00:00.000Z',
+        currentPeriodEnd: '2026-08-19T23:59:59.000Z',
+        billingMethodId: 'pm_yookassa_saved_card_123',
+      }),
+    ).rejects.toThrow('payment_derived_billing_fields_forbidden');
+    expect(transactionMock).not.toHaveBeenCalled();
   });
 
-  it('clears manual billing dates and billing method id when empty strings are supplied', async () => {
-    const clearedTenant = {
-      ...baseTenant(),
-      trialEndsAt: null,
-      currentPeriodStart: null,
-      currentPeriodEnd: null,
-      billingMethodId: null,
-    };
-    const tenantUpdateMock: jest.MockedFunction<
-      (args: {
-        where: { id: string };
-        data: {
-          trialEndsAt?: Date | null;
-          currentPeriodStart?: Date | null;
-          currentPeriodEnd?: Date | null;
-          billingMethodId?: string | null;
-        };
-      }) => Promise<void>
-    > = jest.fn().mockResolvedValue(undefined);
-    const tenantFindFirstMock = jest.fn().mockResolvedValue(null);
-    const tenantFindUniqueMock = jest
-      .fn()
-      .mockResolvedValueOnce(baseTenant())
-      .mockResolvedValueOnce(clearedTenant);
-    const transactionMock = jest
-      .fn()
-      .mockImplementation((callback: (tx: unknown) => unknown) =>
-        Promise.resolve(
-          callback({
-            tenant: {
-              update: tenantUpdateMock,
-            },
-            brandingSettings: {
-              upsert: jest.fn(),
-            },
-          }),
-        ),
-      );
+  it('also rejects attempts to clear canonical payment-derived bindings', async () => {
+    const transactionMock = jest.fn();
     const prisma = {
-      tenant: {
-        findUnique: tenantFindUniqueMock,
-        findFirst: tenantFindFirstMock,
-      },
+      tenant: { findUnique: jest.fn(), findFirst: jest.fn() },
       $transaction: transactionMock,
     } as unknown as PrismaService;
     const subscriptionsService = {
@@ -419,26 +309,30 @@ describe('TenantsService.updateTenant', () => {
     } as unknown as SubscriptionsService;
     const service = new TenantsService(prisma, subscriptionsService);
 
-    const result = await service.updateTenant('tenant-1', {
-      trialEndsAt: '',
-      currentPeriodStart: '',
-      currentPeriodEnd: '',
-      billingMethodId: '',
-    });
+    await expect(
+      service.updateTenant('tenant-1', {
+        currentPeriodStart: '',
+        currentPeriodEnd: '',
+        billingMethodId: '',
+      }),
+    ).rejects.toThrow('payment_derived_billing_fields_forbidden');
+    expect(transactionMock).not.toHaveBeenCalled();
+  });
 
-    const [tenantUpdateArgs] = tenantUpdateMock.mock.calls[0] ?? [];
-
-    expect(tenantUpdateArgs.where).toEqual({ id: 'tenant-1' });
-    expect(tenantUpdateArgs.data.trialEndsAt).toBeNull();
-    expect(tenantUpdateArgs.data.currentPeriodStart).toBeNull();
-    expect(tenantUpdateArgs.data.currentPeriodEnd).toBeNull();
-    expect(tenantUpdateArgs.data.billingMethodId).toBeNull();
-    expect(result.billing).toMatchObject({
-      trial_ends_at: null,
-      current_period_start: null,
-      current_period_end: null,
-      billing_method_attached: false,
-      billing_method_id: null,
-    });
+  it('rejects generic ACTIVE without server-derived entitlement evidence', async () => {
+    const transactionMock = jest.fn();
+    const prisma = {
+      tenant: { findUnique: jest.fn(), findFirst: jest.fn() },
+      $transaction: transactionMock,
+    } as unknown as PrismaService;
+    const service = new TenantsService(prisma, {
+      getPlanByIdOrThrow: jest.fn(),
+    } as unknown as SubscriptionsService);
+    await expect(
+      service.updateTenant('tenant-1', {
+        status: 'active' as TenantRecord['status'],
+      }),
+    ).rejects.toThrow('payment_derived_billing_fields_forbidden');
+    expect(transactionMock).not.toHaveBeenCalled();
   });
 });

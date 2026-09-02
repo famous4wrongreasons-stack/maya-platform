@@ -27,11 +27,7 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { serializePublicCrmSettings } from '../crm/crm-provider-settings';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
-import {
-  addDays,
-  evaluateTenantAccessState,
-  PAST_DUE_GRACE_DAYS,
-} from './tenant-access-state';
+import { addDays, evaluateTenantAccessState } from './tenant-access-state';
 
 type PublicContentPair = [string, string];
 
@@ -277,16 +273,6 @@ function normalizeOptionalDateString(value?: string): Date | null | undefined {
   return new Date(normalized);
 }
 
-function normalizeBillingMethodId(value?: string): string | null | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  const normalized = value.trim();
-
-  return normalized.length > 0 ? normalized : null;
-}
-
 @Injectable()
 export class TenantsService {
   constructor(
@@ -438,6 +424,15 @@ export class TenantsService {
     // единственный тест звал функцию изолированно и создавал ложное
     // впечатление покрытия.
     this.assertHostNamesAllowed(dto);
+    if (
+      dto.currentPeriodStart !== undefined ||
+      dto.currentPeriodEnd !== undefined ||
+      dto.billingMethodId !== undefined ||
+      dto.status === TenantStatus.ACTIVE ||
+      dto.status === TenantStatus.PAST_DUE
+    ) {
+      throw new BadRequestException('payment_derived_billing_fields_forbidden');
+    }
 
     const existing = await this.prisma.tenant.findUnique({
       where: { slug: dto.slug.toLowerCase() },
@@ -455,13 +450,8 @@ export class TenantsService {
     const billingDates = this.resolveBillingDates({
       status: dto.status ?? TenantStatus.TRIAL,
       trialEndsAt: normalizeOptionalDateString(dto.trialEndsAt),
-      currentPeriodStart: normalizeOptionalDateString(dto.currentPeriodStart),
-      currentPeriodEnd: normalizeOptionalDateString(dto.currentPeriodEnd),
     });
-    const billingMethodId = normalizeBillingMethodId(dto.billingMethodId);
     const status = dto.status ?? TenantStatus.TRIAL;
-    const pastDueAt = status === TenantStatus.PAST_DUE ? new Date() : null;
-    const graceEndsAt = addDays(pastDueAt, PAST_DUE_GRACE_DAYS);
 
     const tenant = await this.prisma.$transaction(async (tx) => {
       const normalizedBranchName = asNonEmptyString(dto.branchName) ?? dto.name;
@@ -488,11 +478,10 @@ export class TenantsService {
           customDomain: dto.customDomain?.toLowerCase(),
           subdomain: (dto.subdomain ?? dto.slug).toLowerCase(),
           trialEndsAt: billingDates.trialEndsAt,
-          currentPeriodStart: billingDates.currentPeriodStart,
-          currentPeriodEnd: billingDates.currentPeriodEnd,
-          pastDueAt,
-          graceEndsAt,
-          billingMethodId,
+          currentPeriodStart: null,
+          currentPeriodEnd: null,
+          pastDueAt: null,
+          graceEndsAt: null,
           trialFullAccess: dto.trialFullAccess ?? false,
           allowSelfRegistration: dto.allowSelfRegistration ?? true,
         },
@@ -622,16 +611,22 @@ export class TenantsService {
 
   async updateTenant(id: string, dto: UpdateTenantDto) {
     this.assertHostNamesAllowed(dto);
+    if (
+      dto.planId !== undefined ||
+      dto.currentPeriodStart !== undefined ||
+      dto.currentPeriodEnd !== undefined ||
+      dto.billingMethodId !== undefined ||
+      dto.status === TenantStatus.ACTIVE ||
+      dto.status === TenantStatus.PAST_DUE
+    ) {
+      throw new BadRequestException('payment_derived_billing_fields_forbidden');
+    }
     const existingTenant = await this.getTenantByIdOrThrow(id);
     const existingThemeJson =
       (existingTenant.brandingSettings?.themeJson as Record<
         string,
         unknown
       > | null) ?? null;
-
-    if (dto.planId) {
-      await this.subscriptionsService.getPlanByIdOrThrow(dto.planId);
-    }
 
     if (dto.slug) {
       const existing = await this.prisma.tenant.findFirst({
@@ -650,30 +645,8 @@ export class TenantsService {
     const billingDates = this.resolveBillingDates({
       status: dto.status ?? existingTenant.status,
       trialEndsAt: normalizeOptionalDateString(dto.trialEndsAt),
-      currentPeriodStart: normalizeOptionalDateString(dto.currentPeriodStart),
-      currentPeriodEnd: normalizeOptionalDateString(dto.currentPeriodEnd),
       existingTrialEndsAt: existingTenant.trialEndsAt,
-      existingCurrentPeriodStart: existingTenant.currentPeriodStart,
-      existingCurrentPeriodEnd: existingTenant.currentPeriodEnd,
     });
-    const billingMethodId = normalizeBillingMethodId(dto.billingMethodId);
-    const nextStatus = dto.status ?? existingTenant.status;
-    const enteringPastDue =
-      nextStatus === TENANT_STATUS_PAST_DUE &&
-      existingTenant.status !== TENANT_STATUS_PAST_DUE;
-    const pastDueAt =
-      nextStatus === TENANT_STATUS_PAST_DUE
-        ? enteringPastDue
-          ? new Date()
-          : (existingTenant.pastDueAt ?? new Date())
-        : null;
-    const graceEndsAt =
-      nextStatus === TENANT_STATUS_PAST_DUE
-        ? enteringPastDue
-          ? addDays(pastDueAt, PAST_DUE_GRACE_DAYS)
-          : (existingTenant.graceEndsAt ??
-            addDays(pastDueAt, PAST_DUE_GRACE_DAYS))
-        : null;
 
     await this.prisma.$transaction(async (tx) => {
       await tx.tenant.update({
@@ -682,7 +655,6 @@ export class TenantsService {
           name: dto.name,
           slug: dto.slug?.toLowerCase(),
           status: dto.status,
-          planId: dto.planId,
           industryPresetId: dto.industryPresetId,
           calendarSource: dto.calendarSource,
           defaultCurrency: dto.defaultCurrency,
@@ -691,11 +663,6 @@ export class TenantsService {
           customDomain: dto.customDomain?.toLowerCase(),
           subdomain: dto.subdomain?.toLowerCase(),
           trialEndsAt: billingDates.trialEndsAt,
-          currentPeriodStart: billingDates.currentPeriodStart,
-          currentPeriodEnd: billingDates.currentPeriodEnd,
-          pastDueAt,
-          graceEndsAt,
-          billingMethodId,
           allowSelfRegistration: dto.allowSelfRegistration,
         },
       });
@@ -733,24 +700,18 @@ export class TenantsService {
 
   async setTenantStatus(id: string, status: TenantStatus) {
     const tenant = await this.getTenantByIdOrThrow(id);
-    const enteringPastDue =
-      status === TenantStatus.PAST_DUE &&
-      tenant.status !== TENANT_STATUS_PAST_DUE;
-    const pastDueAt =
-      status === TenantStatus.PAST_DUE
-        ? enteringPastDue
-          ? new Date()
-          : (tenant.pastDueAt ?? new Date())
-        : null;
-    const graceEndsAt =
-      status === TenantStatus.PAST_DUE
-        ? enteringPastDue
-          ? addDays(pastDueAt, PAST_DUE_GRACE_DAYS)
-          : (tenant.graceEndsAt ?? addDays(pastDueAt, PAST_DUE_GRACE_DAYS))
-        : null;
+    if (status === TenantStatus.PAST_DUE) {
+      throw new BadRequestException('canonical_billing_transition_required');
+    }
+    if (status === TenantStatus.ACTIVE) {
+      const activeUntil = tenant.currentPeriodEnd ?? tenant.trialEndsAt;
+      if (!activeUntil || activeUntil <= new Date()) {
+        throw new BadRequestException('billing_entitlement_evidence_required');
+      }
+    }
     await this.prisma.tenant.update({
       where: { id },
-      data: { status, pastDueAt, graceEndsAt },
+      data: { status },
     });
 
     return this.serializeTenant(await this.getTenantByIdOrThrow(id));
@@ -888,29 +849,6 @@ export class TenantsService {
     }
 
     const access = evaluateTenantAccessState(tenant);
-    const shouldPersistWindow =
-      access.tenantStatus === TENANT_STATUS_PAST_DUE &&
-      Boolean(access.pastDueAt && access.graceEndsAt) &&
-      (!tenant.pastDueAt || !tenant.graceEndsAt);
-    if (
-      access.shouldMarkPastDue ||
-      shouldPersistWindow ||
-      (access.subscriptionRequired && tenant.trialFullAccess)
-    ) {
-      await this.prisma.tenant.updateMany({
-        where: {
-          id: tenant.id,
-          status: tenant.status,
-          updatedAt: tenant.updatedAt,
-        },
-        data: {
-          status: TenantStatus.PAST_DUE,
-          trialFullAccess: false,
-          pastDueAt: access.pastDueAt,
-          graceEndsAt: access.graceEndsAt,
-        },
-      });
-    }
 
     const firstBranch = tenant.branches[0] ?? null;
     const theme =

@@ -10,6 +10,7 @@ import {
 import {
   P4_08_EXECUTABLE_CAPABILITIES,
   P4_08_SCHEDULER_ENVELOPE_CAPABILITY,
+  p408Hash,
   type P408ActionClass,
   type TrustedActionExecutionRequestV1,
 } from '../action-engine';
@@ -20,6 +21,7 @@ import type {
   ActionRuntimeReceipt,
 } from '../action-engine/action-engine.runtime';
 import { ActionEngineRuntimeService } from '../action-engine/action-engine.runtime';
+import { PAST_DUE_GRACE_DAYS } from '../tenants/tenant-access-state';
 
 export interface P408ProviderPayment {
   id: string;
@@ -29,6 +31,8 @@ export interface P408ProviderPayment {
   currency: string;
   capturedAt: string | null;
   paymentMethodId: string | null;
+  confirmationUrl: string | null;
+  returnUrl: string | null;
   metadata: Readonly<Record<string, string>>;
 }
 
@@ -97,6 +101,7 @@ export class P408TenantBillingExecutableService {
     private readonly actionEngine: ActionEngineRuntimeService,
     private readonly provider: P408PaymentProvider,
     private readonly providerReferenceCodec: P408ProviderReferenceCodec,
+    private readonly now: () => Date = () => new Date(),
   ) {}
 
   execute(
@@ -213,8 +218,17 @@ export class P408TenantBillingExecutableService {
             where: {
               id_tenantId: { id: payment.id, tenantId: context.tenantId },
             },
-            data: { providerPaymentId: providerPayment.id },
+            data: {
+              providerPaymentId: providerPayment.id,
+              confirmationUrl: providerPayment.confirmationUrl,
+              returnUrl: providerPayment.returnUrl,
+            },
           });
+          if (providerPayment.status === 'unknown') {
+            throw new P408ProviderDispatchAmbiguousError(
+              'Provider returned an unrecognized payment state',
+            );
+          }
           const value = this.paymentValue(
             actionClass,
             context.executionId,
@@ -270,8 +284,15 @@ export class P408TenantBillingExecutableService {
             where: {
               id_tenantId: { id: payment.id, tenantId: context.tenantId },
             },
-            data: { providerPaymentId: decision.payment.id },
+            data: {
+              providerPaymentId: decision.payment.id,
+              confirmationUrl: decision.payment.confirmationUrl,
+              returnUrl: decision.payment.returnUrl,
+            },
           });
+          if (decision.payment.status === 'unknown') {
+            return { outcome: 'STILL_UNKNOWN' };
+          }
           const value = this.paymentValue(
             actionClass,
             context.executionId,
@@ -403,6 +424,8 @@ export class P408TenantBillingExecutableService {
     if (
       !plan ||
       plan.priceMonthly * 100 !== input.amountKopecks ||
+      p408Hash([plan.id, String(plan.priceMonthly * 100), 'RUB']) !==
+        input.planSnapshotHash ||
       input.currency !== tenant.defaultCurrency ||
       input.currency !== 'RUB'
     ) {
@@ -412,17 +435,24 @@ export class P408TenantBillingExecutableService {
       if (
         tenant.planId !== plan.id ||
         !tenant.billingMethodId ||
-        tenant.currentPeriodEnd?.toISOString() !== input.dueWindowEndsAt
+        this.providerReferenceCodec.hash(tenant.billingMethodId) !==
+          input.billingMethodIdentityHash ||
+        !tenant.currentPeriodEnd ||
+        tenant.currentPeriodEnd.toISOString() !== input.dueWindowEndsAt ||
+        tenant.currentPeriodEnd > this.now()
       ) {
         throw new P408ContractError('Recurring charge facts changed');
       }
       return;
     }
     const active =
-      tenant.currentPeriodEnd && tenant.currentPeriodEnd > new Date();
+      tenant.currentPeriodEnd && tenant.currentPeriodEnd > this.now();
     if (
-      active &&
-      (tenant.planId !== plan.id || input.samePlanPrepayment !== true)
+      input.activePlanId !== (active ? tenant.planId : null) ||
+      input.activeWindowEndsAt !==
+        (active ? tenant.currentPeriodEnd?.toISOString() : null) ||
+      input.samePlanPrepayment !== Boolean(active) ||
+      (active && tenant.planId !== plan.id)
     ) {
       throw new P408ContractError('billing_plan_change_contract_required');
     }
@@ -516,7 +546,6 @@ export class P408TenantBillingExecutableService {
     request: P408ProviderPaymentRequest,
   ): void {
     if (
-      payment.status === 'unknown' ||
       payment.amountKopecks !== request.amountKopecks ||
       payment.currency !== request.currency ||
       Object.entries(request.metadata).some(
@@ -591,6 +620,15 @@ export class P408TenantBillingExecutableService {
         : 'initiate_tenant_billing_checkout',
     );
     this.assertProviderPayment(provider, request);
+    if (
+      (provider.paymentMethodId
+        ? this.providerReferenceCodec.hash(provider.paymentMethodId)
+        : null) !== input.providerMethodIdentityHash
+    ) {
+      throw new P408ContractError(
+        'Provider payment method evidence is not canonical',
+      );
+    }
     if (
       provider.status !== input.providerStatus ||
       provider.capturedAt !== input.providerPaidAt ||
@@ -735,10 +773,19 @@ export class P408TenantBillingExecutableService {
       where: { id: tenantId },
     });
     const boundary = tenant.currentPeriodEnd ?? tenant.trialEndsAt;
+    const expectedPastDueAt = boundary?.toISOString() ?? null;
+    const expectedGraceEndsAt = boundary
+      ? new Date(
+          boundary.getTime() + PAST_DUE_GRACE_DAYS * 24 * 60 * 60 * 1000,
+        ).toISOString()
+      : null;
     if (
       !boundary ||
       boundary.toISOString() !== input.accessWindowEndsAt ||
-      boundary > new Date(this.text(input.transitionAt))
+      boundary > this.now() ||
+      input.transitionAt !== expectedPastDueAt ||
+      input.pastDueAt !== expectedPastDueAt ||
+      input.graceEndsAt !== expectedGraceEndsAt
     ) {
       throw new P408ContractError('Access window is not expired');
     }

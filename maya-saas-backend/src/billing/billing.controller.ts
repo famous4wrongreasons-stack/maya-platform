@@ -63,7 +63,11 @@ export class BillingController {
     @CurrentUser() actor: AuthenticatedUser,
     @Body() dto: CreateBillingCheckoutDto,
   ) {
-    return this.billingService.createCheckout(actor.tenantId!, dto);
+    return this.billingService.createCheckout(
+      actor.tenantId!,
+      actor.userId,
+      dto,
+    );
   }
 
   @Get('billing/payments')
@@ -83,8 +87,9 @@ export class BillingController {
   createCheckout(
     @Param('id') tenantId: string,
     @Body() dto: CreateBillingCheckoutDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ) {
-    return this.billingService.createCheckout(tenantId, dto);
+    return this.billingService.createCheckout(tenantId, actor.userId, dto);
   }
 
   @Get('admin/tenants/:id/billing/payments')
@@ -101,8 +106,11 @@ export class BillingController {
   @Roles(UserRole.PLATFORM_OWNER)
   @TenantScoped({ paramKey: 'id', requireTenant: false })
   @ApiOperation({ summary: 'Charge tenant using a saved YooKassa method' })
-  chargeTenant(@Param('id') tenantId: string) {
-    return this.billingService.chargeTenant(tenantId);
+  chargeTenant(
+    @Param('id') tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.billingService.chargeTenant(tenantId, actor.userId);
   }
 
   @Post('admin/billing/run-due')

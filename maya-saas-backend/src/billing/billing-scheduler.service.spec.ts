@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 
 import { BillingSchedulerService } from './billing-scheduler.service';
-import { BillingService } from './billing.service';
+import { P408TenantBillingCanonicalCutoverService } from './p4-08-tenant-billing-canonical-cutover.service';
 
 /**
  * Планировщик автопродления.
@@ -28,15 +28,15 @@ describe('BillingSchedulerService', () => {
       .fn()
       .mockResolvedValue({ checked: 0, applied: 0, failed: 0 }),
   ) => {
-    const billingService = {
+    const canonicalBilling = {
       runDueBilling,
       reconcilePendingPayments,
-    } as unknown as BillingService;
+    } as unknown as P408TenantBillingCanonicalCutoverService;
     const configService = {
       get: (key: string) => env[key],
     } as unknown as ConfigService;
 
-    return new BillingSchedulerService(billingService, configService);
+    return new BillingSchedulerService(canonicalBilling, configService);
   };
 
   afterEach(() => {

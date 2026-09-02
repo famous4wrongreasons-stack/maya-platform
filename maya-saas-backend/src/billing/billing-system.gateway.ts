@@ -23,22 +23,47 @@ export class BillingSystemGateway {
     return this.prisma.billingPayment.findMany({
       where: {
         status: 'pending',
-        providerPaymentId: { not: null },
         createdAt: { lt: olderThan },
       },
+      include: { actionExecution: true },
       orderBy: { createdAt: 'asc' },
       take: 200,
     });
   }
 
-  listBillingCandidates() {
+  getBillingCandidate(tenantId: string) {
+    return this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      include: { plan: true },
+    });
+  }
+
+  listBillingCandidates(now: Date, take: number) {
     return this.prisma.tenant.findMany({
       where: {
-        status: {
-          in: [TenantStatus.ACTIVE, TenantStatus.TRIAL, TenantStatus.PAST_DUE],
-        },
+        OR: [
+          {
+            status: { in: [TenantStatus.ACTIVE, TenantStatus.TRIAL] },
+            OR: [
+              { currentPeriodEnd: { lte: now } },
+              { currentPeriodEnd: null, trialEndsAt: { lte: now } },
+            ],
+          },
+          {
+            status: TenantStatus.PAST_DUE,
+            billingMethodId: { not: null },
+            planId: { not: null },
+            OR: [
+              { currentPeriodEnd: { lte: now } },
+              { currentPeriodEnd: null, trialEndsAt: { lte: now } },
+            ],
+          },
+        ],
+        billingPayments: { none: { status: 'pending' } },
       },
       include: { plan: true },
+      orderBy: { id: 'asc' },
+      take,
     });
   }
 }

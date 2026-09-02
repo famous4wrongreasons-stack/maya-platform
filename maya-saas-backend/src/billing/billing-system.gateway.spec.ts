@@ -28,15 +28,34 @@ describe('BillingSystemGateway', () => {
     } as unknown as PrismaService;
     const gateway = new BillingSystemGateway(prisma);
 
-    await gateway.listBillingCandidates();
+    const now = new Date('2026-09-02T12:00:00.000Z');
+    await gateway.listBillingCandidates(now, 25);
 
     expect(findManyMock).toHaveBeenCalledWith({
       where: {
-        status: {
-          in: [TenantStatus.ACTIVE, TenantStatus.TRIAL, TenantStatus.PAST_DUE],
-        },
+        OR: [
+          {
+            status: { in: [TenantStatus.ACTIVE, TenantStatus.TRIAL] },
+            OR: [
+              { currentPeriodEnd: { lte: now } },
+              { currentPeriodEnd: null, trialEndsAt: { lte: now } },
+            ],
+          },
+          {
+            status: TenantStatus.PAST_DUE,
+            billingMethodId: { not: null },
+            planId: { not: null },
+            OR: [
+              { currentPeriodEnd: { lte: now } },
+              { currentPeriodEnd: null, trialEndsAt: { lte: now } },
+            ],
+          },
+        ],
+        billingPayments: { none: { status: 'pending' } },
       },
       include: { plan: true },
+      orderBy: { id: 'asc' },
+      take: 25,
     });
   });
 });
