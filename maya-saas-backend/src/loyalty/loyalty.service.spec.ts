@@ -115,7 +115,7 @@ describe('LoyaltyService', () => {
     } as unknown as UsersService;
     const crmService = {
       getCalendarSource: getCalendarSourceMock,
-      getClientLoyalty: getClientLoyaltyMock,
+      getClientLoyaltyEvidenceReadOnly: getClientLoyaltyMock,
       getServices: getServicesMock,
     } as unknown as CrmService;
     const encryptionService = {
@@ -285,7 +285,7 @@ describe('LoyaltyService', () => {
     expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
   });
 
-  it('stores and returns the exact external CRM balance', async () => {
+  it('returns the exact external CRM balance without persisting it', async () => {
     const setup = createService();
 
     const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
@@ -312,9 +312,11 @@ describe('LoyaltyService', () => {
         },
       },
     });
-    expect(setup.getUpsertTenantId()).toBe('tenant-a');
-    expect(setup.getUpsertUserId()).toBe('client-a');
-    expect(setup.getUpsertBalance()).toBe(2133);
+    expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
+    expect(setup.auditLogMock).not.toHaveBeenCalled();
+    expect(setup.getUpsertTenantId()).toBeNull();
+    expect(setup.getUpsertUserId()).toBeNull();
+    expect(setup.getUpsertBalance()).toBeUndefined();
   });
 
   it('берёт баланс из внешнего журнала и называет владельца честно', async () => {
@@ -358,6 +360,8 @@ describe('LoyaltyService', () => {
       stale: false,
     });
     expect(setup.getClientLoyaltyMock).not.toHaveBeenCalled();
+    expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
+    expect(setup.auditLogMock).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [requestUrl, requestInit] = fetchMock.mock.calls[0] ?? [];
     expect(requestUrl).toEqual(
@@ -367,6 +371,74 @@ describe('LoyaltyService', () => {
     expect(new Headers(requestInit?.headers).get('X-Maya-Legacy-Bridge')).toBe(
       'x'.repeat(48),
     );
+  });
+
+  it('does not mutate canonical value when the legacy read fails', async () => {
+    const setup = createService();
+    process.env.MAYA_LEGACY_BRIDGE_TOKEN = 'x'.repeat(48);
+    process.env.MAYA_LEGACY_BRIDGE_URL =
+      'http://127.0.0.1:8080/api/internal/loyalty-snapshot';
+    process.env.MAYA_LEGACY_LOYALTY_TENANT_SLUGS = 'tenant-a-slug';
+    setup.tenantFindUniqueMock.mockResolvedValueOnce({ slug: 'tenant-a-slug' });
+    setup.authIdentityFindFirstMock.mockResolvedValueOnce({
+      providerUserId: '987654321',
+    });
+    setup.loyaltyFindUniqueMock.mockResolvedValueOnce({
+      id: 'account-a',
+      tenantId: 'tenant-a',
+      userId: 'client-a',
+      source: 'legacy_maya',
+      balance: 385,
+      externalReference: null,
+      syncedAt: new Date('2026-07-15T09:00:00.000Z'),
+      createdAt: new Date('2026-07-15T09:00:00.000Z'),
+      updatedAt: new Date('2026-07-15T09:00:00.000Z'),
+    });
+    global.fetch = jest.fn().mockRejectedValue(new Error('bridge timeout'));
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getForUser('tenant-a', 'client-a'),
+    );
+
+    expect(result).toMatchObject({
+      balance: 385,
+      authoritative: 'legacy_bot',
+      sync_status: 'temporarily_unavailable',
+      stale: true,
+    });
+    expect(setup.getClientLoyaltyMock).not.toHaveBeenCalled();
+    expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
+    expect(setup.transactionMock).not.toHaveBeenCalled();
+    expect(setup.auditLogMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps repeated external reads free of canonical value writes', async () => {
+    const setup = createService();
+    setup.loyaltyFindUniqueMock.mockResolvedValue({
+      id: 'account-a',
+      tenantId: 'tenant-a',
+      userId: 'client-a',
+      source: CalendarSource.INTERNAL,
+      balance: 640,
+      externalReference: null,
+      syncedAt: null,
+      createdAt: new Date('2026-07-15T09:00:00.000Z'),
+      updatedAt: new Date('2026-07-15T09:00:00.000Z'),
+    });
+
+    const first = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getForUser('tenant-a', 'client-a'),
+    );
+    const second = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.getForUser('tenant-a', 'client-a'),
+    );
+
+    expect(first.balance).toBe(2133);
+    expect(second.balance).toBe(2133);
+    expect(setup.getClientLoyaltyMock).toHaveBeenCalledTimes(2);
+    expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
+    expect(setup.transactionMock).not.toHaveBeenCalled();
+    expect(setup.auditLogMock).not.toHaveBeenCalled();
   });
 
   it('keeps the confirmed balance available when the service catalog fails', async () => {
@@ -413,6 +485,8 @@ describe('LoyaltyService', () => {
       stale: true,
     });
     expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
+    expect(setup.transactionMock).not.toHaveBeenCalled();
+    expect(setup.auditLogMock).not.toHaveBeenCalled();
   });
 
   it('keeps external CRM balances read-only', async () => {

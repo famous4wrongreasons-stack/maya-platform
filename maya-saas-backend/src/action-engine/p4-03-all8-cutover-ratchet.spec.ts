@@ -1,7 +1,10 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import ts from 'typescript';
+
 const ROOT = join(__dirname, '..', '..', '..');
+const BACKEND_ROOT = join(ROOT, 'maya-saas-backend');
 const CUTOVER_ENABLED = true;
 
 const LEGACY_BYPASS_GROUPS = [
@@ -132,8 +135,90 @@ const LEGACY_BYPASS_GROUPS = [
 
 type SourceOverrides = ReadonlyMap<string, string>;
 
+type LoyaltyAccountWriteSite = {
+  file: string;
+  method: string;
+  operation: string;
+  writesBalance: boolean;
+};
+
 function source(file: string, overrides?: SourceOverrides): string {
   return overrides?.get(file) ?? readFileSync(join(ROOT, file), 'utf8');
+}
+
+function typeScriptFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const absolute = join(directory, entry.name);
+    if (entry.isDirectory()) return typeScriptFiles(absolute);
+    if (!entry.isFile() || !entry.name.endsWith('.ts')) return [];
+    if (entry.name.endsWith('.spec.ts') || entry.name.endsWith('.test.ts')) {
+      return [];
+    }
+    return [absolute];
+  });
+}
+
+function loyaltyAccountWriteSites(
+  overrides: SourceOverrides = new Map(),
+): LoyaltyAccountWriteSite[] {
+  const existing = typeScriptFiles(join(BACKEND_ROOT, 'src')).map((file) =>
+    file.slice(ROOT.length + 1),
+  );
+  const files = new Set([
+    ...existing,
+    ...[...overrides.keys()].filter(
+      (file) =>
+        file.startsWith('maya-saas-backend/src/') &&
+        file.endsWith('.ts') &&
+        !file.endsWith('.spec.ts') &&
+        !file.endsWith('.test.ts'),
+    ),
+  ]);
+  const sites: LoyaltyAccountWriteSite[] = [];
+  const operations = new Set([
+    'create',
+    'createMany',
+    'update',
+    'updateMany',
+    'upsert',
+    'delete',
+    'deleteMany',
+  ]);
+
+  for (const file of [...files].sort()) {
+    const fileSource = source(file, overrides);
+    const sourceFile = ts.createSourceFile(
+      file,
+      fileSource,
+      ts.ScriptTarget.Latest,
+      true,
+    );
+
+    const visit = (node: ts.Node, method = '<module>'): void => {
+      const currentMethod = ts.isMethodDeclaration(node)
+        ? node.name.getText(sourceFile)
+        : method;
+      if (
+        ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        operations.has(node.expression.name.text) &&
+        ts.isPropertyAccessExpression(node.expression.expression) &&
+        node.expression.expression.name.text === 'loyaltyAccount'
+      ) {
+        sites.push({
+          file,
+          method: currentMethod,
+          operation: node.expression.name.text,
+          writesBalance: /\bbalance\s*:/.test(node.getText(sourceFile)),
+        });
+      }
+      ts.forEachChild(node, (child) => visit(child, currentMethod));
+    };
+
+    visit(sourceFile);
+  }
+
+  return sites;
 }
 
 function hasImmediateFailClosedGuard(
@@ -231,6 +316,93 @@ describe('P4-03 all-8 production cutover ratchet', () => {
     expect(currentLegacyBypasses(new Map([[file, unguarded]]))).toContain(
       'earn_legacy_loyalty',
     );
+  });
+
+  it('keeps loyalty read surfaces physically free of account/value writes', () => {
+    const serviceSource = source(
+      'maya-saas-backend/src/loyalty/loyalty.service.ts',
+    );
+    const externalStart = serviceSource.indexOf(
+      '  private async getExternalAccount(',
+    );
+    const legacyStart = serviceSource.indexOf(
+      '  private async getLegacyMayaAccount(',
+    );
+    const emptyStart = serviceSource.indexOf('  private emptyExternalAccount(');
+    const externalRead = serviceSource.slice(externalStart, legacyStart);
+    const legacyRead = serviceSource.slice(legacyStart, emptyStart);
+
+    expect(externalStart).toBeGreaterThan(-1);
+    expect(legacyStart).toBeGreaterThan(externalStart);
+    expect(emptyStart).toBeGreaterThan(legacyStart);
+    expect(externalRead).toContain('getClientLoyaltyEvidenceReadOnly');
+    expect(externalRead).not.toContain('.getClientLoyalty(');
+    for (const readSurface of [externalRead, legacyRead]) {
+      expect(readSurface).not.toMatch(
+        /\.loyaltyAccount\.(?:create|createMany|update|updateMany|upsert|delete|deleteMany)\s*\(/,
+      );
+      expect(readSurface).not.toContain('auditLogService.log');
+    }
+  });
+
+  it('allows only the exact canonical loyalty-account writer sites', () => {
+    expect(loyaltyAccountWriteSites()).toEqual([
+      {
+        file: 'maya-saas-backend/src/loyalty/loyalty.service.ts',
+        method: 'getForUser',
+        operation: 'upsert',
+        writesBalance: false,
+      },
+      {
+        file: 'maya-saas-backend/src/loyalty/loyalty.service.ts',
+        method: 'applyInternalAdjustment',
+        operation: 'upsert',
+        writesBalance: false,
+      },
+      {
+        file: 'maya-saas-backend/src/loyalty/loyalty.service.ts',
+        method: 'applyInternalAdjustment',
+        operation: 'update',
+        writesBalance: true,
+      },
+      {
+        file: 'maya-saas-backend/src/loyalty/p4-03-legacy-loyalty-executable.service.ts',
+        method: 'applyLedgerMutation',
+        operation: 'update',
+        writesBalance: true,
+      },
+      {
+        file: 'maya-saas-backend/src/loyalty/p4-03-legacy-loyalty-executable.service.ts',
+        method: 'consumeGrant',
+        operation: 'update',
+        writesBalance: true,
+      },
+    ]);
+  });
+
+  it('detects a newly introduced production loyalty-account writer', () => {
+    const simulatedFile =
+      'maya-saas-backend/src/loyalty/simulated-read-bypass.ts';
+    const simulatedSource = `
+      class SimulatedReadBypass {
+        constructor(private readonly prisma: any) {}
+        async getBalance() {
+          return this.prisma.loyaltyAccount.update({
+            where: { id: 'account' },
+            data: { balance: 900 },
+          });
+        }
+      }
+    `;
+
+    expect(
+      loyaltyAccountWriteSites(new Map([[simulatedFile, simulatedSource]])),
+    ).toContainEqual({
+      file: simulatedFile,
+      method: 'getBalance',
+      operation: 'update',
+      writesBalance: true,
+    });
   });
 
   it('keeps the deferred redemption provider projection physically non-writing', () => {

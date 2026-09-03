@@ -770,7 +770,10 @@ export class LoyaltyService {
     }
 
     try {
-      const snapshot = await this.crmService.getClientLoyalty(tenantId, phone);
+      const snapshot = await this.crmService.getClientLoyaltyEvidenceReadOnly(
+        tenantId,
+        phone,
+      );
       if (!snapshot) {
         // Карты в CRM нет. Не ошибка, но и не пустяк: именно это владелец
         // видит как «баллы не начисляются».
@@ -786,50 +789,20 @@ export class LoyaltyService {
           : this.emptyExternalAccount('card_not_found');
       }
 
-      const changed =
-        !cached ||
-        cached.balance !== snapshot.balance ||
-        cached.source !== snapshot.provider ||
-        cached.externalReference !== snapshot.external_card_id;
-      const account = await this.prisma.loyaltyAccount.upsert({
-        where: { userId_tenantId: { userId, tenantId } },
-        update: {
-          source: snapshot.provider,
-          balance: snapshot.balance,
-          externalReference: snapshot.external_card_id,
-          syncedAt: new Date(),
-        },
-        create: {
-          tenantId,
-          userId,
-          source: snapshot.provider,
-          balance: snapshot.balance,
-          externalReference: snapshot.external_card_id,
-          syncedAt: new Date(),
-        },
-      });
-
-      if (changed) {
-        await this.auditLogService.log({
-          tenantId,
-          userId,
-          action: 'loyalty.crm_balance_synced',
-          entityType: 'loyalty_account',
-          entityId: account.id,
-          metadata: {
-            provider: snapshot.provider,
-            balance: snapshot.balance,
-            external_card_id: snapshot.external_card_id,
-          },
-        });
-      }
-
       return {
-        ...this.serializeAccount(account, {
-          authoritative: 'crm',
-          syncStatus: 'current',
-          stale: false,
-        }),
+        ...this.serializeObservedBalance(
+          {
+            accountId: cached?.id ?? null,
+            balance: snapshot.balance,
+            source: snapshot.provider,
+            observedAt: new Date(),
+          },
+          {
+            authoritative: 'crm',
+            syncStatus: 'current',
+            stale: false,
+          },
+        ),
         sold_amount: snapshot.sold_amount,
       };
     } catch (error) {
@@ -949,49 +922,22 @@ export class LoyaltyService {
       // второго запроса не требуется. Победитель при этом не выбирается молча —
       // политика объявлена в `resolveAuthoritativeBalance`.
       const legacyWarnings: LoyaltyWarning[] = [];
-      const changed =
-        !cached ||
-        cached.balance !== normalizedBalance ||
-        cached.source !== 'legacy_maya';
-      const account = await this.prisma.loyaltyAccount.upsert({
-        where: { userId_tenantId: { userId, tenantId } },
-        update: {
-          source: 'legacy_maya',
+      return this.serializeObservedBalance(
+        {
+          accountId: cached?.id ?? null,
           balance: normalizedBalance,
-          externalReference: null,
-          syncedAt: new Date(),
-        },
-        create: {
-          tenantId,
-          userId,
           source: 'legacy_maya',
-          balance: normalizedBalance,
-          syncedAt: new Date(),
+          observedAt: new Date(),
         },
-      });
-
-      if (changed) {
-        await this.auditLogService.log({
-          tenantId,
-          userId,
-          action: 'loyalty.legacy_balance_synced',
-          entityType: 'loyalty_account',
-          entityId: account.id,
-          metadata: {
-            provider: 'legacy_maya',
-            balance: normalizedBalance,
-          },
-        });
-      }
-
-      return this.serializeAccount(account, {
-        // 🔴 Это ЧУЖОЙ журнал, а не реестр Maya. Раньше здесь стояло 'maya',
-        // и из-за этого подтверждение перед тратой не запрашивалось.
-        authoritative: 'legacy_bot',
-        syncStatus: 'current',
-        stale: false,
-        warnings: legacyWarnings,
-      });
+        {
+          // 🔴 Это ЧУЖОЙ журнал, а не реестр Maya. Раньше здесь стояло 'maya',
+          // и из-за этого подтверждение перед тратой не запрашивалось.
+          authoritative: 'legacy_bot',
+          syncStatus: 'current',
+          stale: false,
+          warnings: legacyWarnings,
+        },
+      );
     } catch {
       if (cached?.source === 'legacy_maya') {
         return this.serializeAccount(cached, {
@@ -1023,6 +969,49 @@ export class LoyaltyService {
       sync_status: syncStatus,
       stale: false,
       synced_at: null,
+    };
+  }
+
+  /**
+   * Provider and legacy balances are observations, not Maya ledger facts.
+   * A read may present the current external value, but only the canonical
+   * P4-03 import executor may turn exact provider evidence into a bound ledger
+   * claim and an atomic LoyaltyAccount balance change.
+   */
+  private serializeObservedBalance(
+    observation: {
+      accountId: string | null;
+      balance: number;
+      source: string;
+      observedAt: Date;
+    },
+    status: {
+      authoritative: LoyaltyAuthority;
+      syncStatus: string;
+      stale: boolean;
+      warnings?: LoyaltyWarning[];
+    },
+  ) {
+    const warnings = status.warnings ?? [];
+    return {
+      account_id: observation.accountId,
+      balance: observation.balance,
+      currency: 'RUB',
+      source: observation.source,
+      authority: status.authoritative,
+      authoritative: status.authoritative,
+      authority_scope: 'resolved' as const,
+      sync_status: status.syncStatus,
+      stale: status.stale,
+      verification_required: loyaltyVerificationRequired({
+        authority: status.authoritative,
+        stale: status.stale,
+        hasDisagreement: warnings.some(
+          (warning) => warning.code === LOYALTY_WARNING.authorityDisagreement,
+        ),
+      }),
+      warnings,
+      synced_at: observation.observedAt,
     };
   }
 
