@@ -76,6 +76,14 @@ const COMMERCE_CREDENTIAL_MANAGER_ROLES: readonly UserRole[] = [
   UserRole.ADMINISTRATOR,
 ];
 
+const RECOVERY_ATTRIBUTION_REQUESTER_ROLES: readonly UserRole[] = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+];
+
 function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
   if (capability.startsWith('crm.')) return ['crm.integration'];
   if (capability.startsWith('communication.')) return ['notifications.core'];
@@ -89,6 +97,11 @@ function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
 }
 
 function allowedActorRoles(capability: string): readonly UserRole[] {
+  if (
+    capability.startsWith('package5.wave5.recovery-attribution-correction.')
+  ) {
+    return RECOVERY_ATTRIBUTION_REQUESTER_ROLES;
+  }
   if (capability.startsWith('commerce-credentials.')) {
     return COMMERCE_CREDENTIAL_MANAGER_ROLES;
   }

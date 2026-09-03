@@ -189,6 +189,12 @@ import {
   type Package5Wave4Registration,
 } from './package5-wave4-executable.contract';
 import {
+  PACKAGE5_WAVE5_INPUT_CONTRACT,
+  PACKAGE5_WAVE5_REGISTRATIONS,
+  normalizePackage5Wave5Input,
+  type Package5Wave5Registration,
+} from './package5-wave5-executable.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1711,6 +1717,60 @@ function package5Wave4Capability(
     auditRetentionMs: 7 * 365 * DAY,
     normalizeInput: (value) =>
       normalizePackage5Wave4Input(registration.operation, value),
+  };
+}
+
+function package5Wave5Capability(
+  registration: Package5Wave5Registration,
+  shadow: boolean,
+): RegisteredActionCapabilityV1 {
+  return {
+    capability: shadow
+      ? registration.shadowCapability
+      : registration.executableCapability,
+    capabilityVersion: 1,
+    actionClass: registration.actionClass,
+    normalizedInputContract: PACKAGE5_WAVE5_INPUT_CONTRACT,
+    targetKind: registration.targetKind,
+    allowedSourceTypes: ['authenticated_request', 'synthetic_shadow'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'a29',
+      'ac1',
+      'one_target',
+      'owner_approval',
+      'immutable_source_evidence',
+      'local_atomic',
+      ...(shadow ? ['shadow_only'] : []),
+    ],
+    policyKey: `chapter6.package5.wave5.${registration.actionClass}.${shadow ? 'shadow' : 'execute'}`,
+    policyVersion: 1,
+    policyDecision: shadow
+      ? ActionPolicyDecision.SHADOW_ONLY
+      : ActionPolicyDecision.ALLOW,
+    autonomyLevel: shadow ? 'L2_5_SHADOW' : 'L3_OWNER_APPROVED',
+    approvalRequirement: 'REQUIRED',
+    approvalTtlMs: 30 * 60 * 1_000,
+    retry: {
+      key: 'package5.wave5.local-transaction',
+      version: 1,
+      maxExecutionAttempts: 3,
+      retryablePreDispatchErrors: new Set(['local_serialization']),
+      backoffMs: [0, 25, 100],
+    },
+    reconciliation: {
+      key: 'package5.wave5.not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: shadow ? 'shadow.none' : 'package5.wave5.local-correction',
+    executorVersion: 1,
+    payloadRetentionMs: shadow ? 7 * DAY : 30 * DAY,
+    auditRetentionMs: 7 * 365 * DAY,
+    normalizeInput: normalizePackage5Wave5Input,
   };
 }
 
@@ -3395,6 +3455,12 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   ),
   ...PACKAGE5_WAVE4_REGISTRATIONS.map((registration) =>
     package5Wave4Capability(registration, false),
+  ),
+  ...PACKAGE5_WAVE5_REGISTRATIONS.map((registration) =>
+    package5Wave5Capability(registration, true),
+  ),
+  ...PACKAGE5_WAVE5_REGISTRATIONS.map((registration) =>
+    package5Wave5Capability(registration, false),
   ),
   ...P4_06_EXECUTABLE_REGISTRATIONS.map(p406ExecutableCapability),
   p405SchedulerEnvelopeCapability(),

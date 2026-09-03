@@ -34,6 +34,10 @@ export const DOMAIN_EVENT_TYPE = {
    * стало известно) изменением не является и события не даёт.
    */
   appointmentAttendanceChanged: 'appointment.attendance_changed',
+  recoveryTouchpointObserved: 'recovery.touchpoint_observed',
+  recoveryTouchpointStatusChanged: 'recovery.touchpoint_status_changed',
+  recoveryBookingObserved: 'recovery.booking_observed',
+  recoveryBookingStatusChanged: 'recovery.booking_status_changed',
 } as const;
 
 export type DomainEventType =
@@ -53,10 +57,16 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] =
 export const DOMAIN_EVENT_VERSION = 1;
 
 /** Что за сущность изменилась. Идентичность — всегда Maya. */
-export type DomainEntityType = 'appointment' | 'client' | 'staff';
+export type DomainEntityType =
+  | 'appointment'
+  | 'client'
+  | 'staff'
+  | 'recovery_touchpoint'
+  | 'recovery_conversion';
 
 /** Как Maya узнала. Не источник, а СПОСОБ: у сверки тот же отпечаток. */
-export type IngestionMethod = 'webhook' | 'reconciliation' | 'bootstrap';
+export type IngestionMethod =
+  'webhook' | 'reconciliation' | 'bootstrap' | 'internal';
 
 /**
  * Что означает наблюдение.
