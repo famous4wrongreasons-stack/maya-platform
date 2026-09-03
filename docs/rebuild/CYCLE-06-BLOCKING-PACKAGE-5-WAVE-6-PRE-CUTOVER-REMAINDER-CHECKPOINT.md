@@ -1,9 +1,17 @@
 # CYCLE 06 — PACKAGE 5 WAVE 6 PRE-CUTOVER REMAINDER
 
-Status: **CURRENT — Wave 6 safe-local proof PASS; production remains 5/6**
+Status: **CURRENT — Wave 6 safe-local proof PASS; cutover preflight STOP on requested owner/route mismatch; production remains 5/6**
 
 Date: 2026-09-04. This checkpoint supersedes the Wave 6 Contract Stop remainder
 from `178b39f2` after explicit approval of Auth Retention Policy V1.
+
+Latest controlled cycle accepts `bf21d9d6`. Its production cutover preflight
+stopped before deployment: the latest instruction requires Canonical Action
+Ingress / Action Engine ownership, while the accepted implementation and
+Authority Gate use AC6 MaintenanceRun/MaintenanceItemClaim ownership. See
+`CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-CUTOVER-OWNER-MISMATCH-STOP-REPORT.md` for exact
+source evidence and current read-only production checks. The accepted local
+Gate, Shadow and executable proof are unchanged and were not repeated.
 
 Completed:
 
@@ -21,15 +29,19 @@ Completed:
 
 Exact remaining work:
 
-1. **Separately authorized Wave 6 production runtime cutover.** Verify current
+1. **Resolve the requested cutover owner/route mismatch.** Confirm that the
+   intended cutover retains the proven AC6 coordinator and names it truthfully,
+   or define the verification boundary for a new Action Engine integration.
+   No implementation change or new policy is inferred from the mismatch.
+2. **Resume the authorized Wave 6 production runtime cutover after resolution.** Verify current
    HEAD/origin, schema, health and required deployment gates, then all actual
    Nest, CLI and Python launcher surfaces. The local candidate already routes
    auth/quarantine through AC6 and removes disallowed fallback bodies. Only
    read-only/structural verification is allowed for cutover proof; real
    deletion/anonymization requires its separately approved boundary.
-2. Separately initiated Final Package 5 Adversarial Gate.
-3. Separately initiated Final Chapter 6 Gate.
-4. After Chapter 6, separate provenance/ownership audit of the 17 pre-existing
+3. Separately initiated Final Package 5 Adversarial Gate.
+4. Separately initiated Final Chapter 6 Gate.
+5. After Chapter 6, separate provenance/ownership audit of the 17 pre-existing
    local test DBs. No cleanup authority is inferred from this checkpoint.
 
 There is no Wave 7. Waves 1–5 and Packages 1–4 stay complete and preserved.
@@ -43,7 +55,9 @@ PACKAGE 5 WAVE 6 FAMILIES: A30
 PACKAGE 5 WAVE 6 ACTION CLASSES: 6
 PACKAGE 5 FAMILY INVENTORY COVERAGE: 13/13
 PACKAGE 5 FAMILIES REMAINING AFTER PLANNED WAVE 6 CUTOVER: 0
-READY FOR PACKAGE 5 WAVE 6 PRODUCTION RUNTIME CUTOVER: YES
+READY FOR PACKAGE 5 WAVE 6 PRODUCTION RUNTIME CUTOVER: NO — REQUESTED OWNER/ROUTE MISMATCH
+WAVE 6 ACTION CLASSES CUTOVER: 0/6
+PACKAGE 5 FAMILIES REMAINING IN PRODUCTION: 1 — A30
 REAL PRODUCTION BUSINESS/PROVIDER MUTATIONS: 0
 WAVE 6 PRODUCTION RUNTIME CUTOVER: NOT PERFORMED
 WAVE 7 CREATED: NO
