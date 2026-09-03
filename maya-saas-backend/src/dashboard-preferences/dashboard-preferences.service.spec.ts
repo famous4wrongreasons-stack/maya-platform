@@ -28,7 +28,7 @@ describe('DashboardPreferencesService', () => {
       },
     } as unknown as PrismaService;
     const updateFinance = jest.fn(
-      async (
+      (
         _tenantId: string,
         _userId: string,
         command: {
@@ -43,10 +43,11 @@ describe('DashboardPreferencesService', () => {
           monthly_target_rub: command.monthlyTargetRub,
           staff_targets_rub: command.staffTargetsRub,
         };
+        return Promise.resolve();
       },
     );
     const updateAssistant = jest.fn(
-      async (
+      (
         _tenantId: string,
         _userId: string,
         command: { enabledCapabilities: string[] },
@@ -55,6 +56,7 @@ describe('DashboardPreferencesService', () => {
           schema_version: 1,
           enabled_capabilities: command.enabledCapabilities,
         };
+        return Promise.resolve();
       },
     );
     const canonical = {

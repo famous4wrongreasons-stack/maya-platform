@@ -32,27 +32,33 @@ describe('Package5Wave1CanonicalCutoverService', () => {
       inboxItem: { findFirst: jest.fn() },
       membership: { findMany: jest.fn() },
     } as unknown as PrismaService;
+    const publishForTenant = jest.fn().mockResolvedValue({ stored: 1 });
     const inbox = {
-      publishForTenant: jest.fn().mockResolvedValue({ stored: 1 }),
+      publishForTenant,
       projectOperationalWorkItemCompletion: jest.fn(),
     } as unknown as InboxService;
+    const buildAssistant = jest
+      .fn()
+      .mockResolvedValue({ capability: 'assistant' });
     const planner = {
-      buildAssistant: jest.fn().mockResolvedValue({ capability: 'assistant' }),
+      buildAssistant,
       buildFinance: jest.fn(),
       buildAppointmentNotifications: jest.fn(),
       buildTaskCreate: jest.fn().mockResolvedValue({ capability: 'task' }),
       buildTaskComplete: jest.fn(),
       buildAdministratorContact: jest.fn(),
     } as unknown as Package5Wave1ShadowService;
+    const execute = jest.fn().mockResolvedValue({
+      actionClass: 'update_assistant_preferences',
+      targetRef: 'dashboard-preference:user-a:assistant',
+    });
+    const resume = jest.fn().mockResolvedValue({
+      actionClass: 'update_assistant_preferences',
+      targetRef: 'dashboard-preference:user-a:assistant',
+    });
     const executor = {
-      execute: jest.fn().mockResolvedValue({
-        actionClass: 'update_assistant_preferences',
-        targetRef: 'dashboard-preference:user-a:assistant',
-      }),
-      resume: jest.fn().mockResolvedValue({
-        actionClass: 'update_assistant_preferences',
-        targetRef: 'dashboard-preference:user-a:assistant',
-      }),
+      execute,
+      resume,
     } as unknown as Package5Wave1ExecutableService;
     const kernel = {
       readTrustedNormalizedInput: jest
@@ -67,7 +73,18 @@ describe('Package5Wave1CanonicalCutoverService', () => {
       executor,
       kernel,
     );
-    return { service, prisma, inbox, planner, executor, kernel };
+    return {
+      service,
+      prisma,
+      inbox,
+      planner,
+      executor,
+      kernel,
+      buildAssistant,
+      execute,
+      resume,
+      publishForTenant,
+    };
   }
 
   it('routes a new setting mutation through planner and executable owner', async () => {
@@ -80,7 +97,7 @@ describe('Package5Wave1CanonicalCutoverService', () => {
       'request-a',
     );
 
-    expect(context.planner.buildAssistant).toHaveBeenCalledWith(
+    expect(context.buildAssistant).toHaveBeenCalledWith(
       'tenant-a',
       'user-a',
       {
@@ -89,7 +106,7 @@ describe('Package5Wave1CanonicalCutoverService', () => {
       },
       'execute',
     );
-    expect(context.executor.execute).toHaveBeenCalledWith({
+    expect(context.execute).toHaveBeenCalledWith({
       capability: 'assistant',
     });
     expect(result).toMatchObject({
@@ -116,11 +133,8 @@ describe('Package5Wave1CanonicalCutoverService', () => {
       { enabledCapabilities: ['business_analytics'] },
       'request-a',
     );
-    expect(context.executor.resume).toHaveBeenCalledWith(
-      'tenant-a',
-      'execution-a',
-    );
-    expect(context.planner.buildAssistant).not.toHaveBeenCalled();
+    expect(context.resume).toHaveBeenCalledWith('tenant-a', 'execution-a');
+    expect(context.buildAssistant).not.toHaveBeenCalled();
 
     await expect(
       context.service.updateAssistant(
@@ -134,7 +148,7 @@ describe('Package5Wave1CanonicalCutoverService', () => {
 
   it('projects a task only after the canonical work item succeeds', async () => {
     const context = setup();
-    jest.mocked(context.executor.execute).mockResolvedValue({
+    context.execute.mockResolvedValue({
       actionClass: 'create_operational_task',
       actionExecutionId: 'execution-task',
       targetRef: 'work-item-a',
@@ -159,8 +173,8 @@ describe('Package5Wave1CanonicalCutoverService', () => {
       'task-a',
     );
 
-    expect(context.executor.execute).toHaveBeenCalled();
-    expect(context.inbox.publishForTenant).toHaveBeenCalledWith(
+    expect(context.execute).toHaveBeenCalled();
+    expect(context.publishForTenant).toHaveBeenCalledWith(
       'tenant-a',
       expect.objectContaining({
         operationalWorkItemId: 'work-item-a',
@@ -168,10 +182,8 @@ describe('Package5Wave1CanonicalCutoverService', () => {
         userIds: ['staff-a'],
       }),
     );
-    expect(
-      jest.mocked(context.executor.execute).mock.invocationCallOrder[0],
-    ).toBeLessThan(
-      jest.mocked(context.inbox.publishForTenant).mock.invocationCallOrder[0],
+    expect(context.execute.mock.invocationCallOrder[0]).toBeLessThan(
+      context.publishForTenant.mock.invocationCallOrder[0],
     );
   });
 });
