@@ -271,6 +271,26 @@ async function main() {
     });
     assert.equal(encryption.decrypt(connected.encryptedShopId), 'primary-shop');
     const immutableIntegrationId = connected.id;
+    const readsBeforeCanonicalResume = verifier.reads;
+    const resumedConnect = await executor.resume(
+      primary.tenantId,
+      connectA.actionExecutionId,
+      connect.material,
+    );
+    assert.equal(resumedConnect.actionExecutionId, connectA.actionExecutionId);
+    assert.equal(
+      verifier.reads,
+      readsBeforeCanonicalResume,
+      'canonical resume must not repeat the provider read',
+    );
+    await expectRejected(
+      () =>
+        executor.resume(primary.tenantId, connectA.actionExecutionId, {
+          shopId: 'forged-shop',
+          secretKey: 'forged-secret',
+        }),
+      'canonical resume must reject changed credential material',
+    );
 
     const competingA = await planner.buildRequest(
       primary.tenantId,
@@ -419,6 +439,15 @@ async function main() {
       }),
       0,
     );
+    const resumedDisconnect = await executor.resume(
+      primary.tenantId,
+      disconnectA.actionExecutionId,
+      null,
+    );
+    assert.equal(
+      resumedDisconnect.actionExecutionId,
+      disconnectA.actionExecutionId,
+    );
 
     await expectRejected(
       () =>
@@ -474,6 +503,17 @@ async function main() {
       unavailableExecution.attempts[0].reconciliationRequired,
       false,
     );
+    const readsBeforeFailedResume = verifier.reads;
+    await expectRejected(
+      () =>
+        executor.resume(
+          unavailable.tenantId,
+          unavailableExecution.id,
+          unavailableConnect.material,
+        ),
+      'definitively failed read-only verification must not be redispatched',
+    );
+    assert.equal(verifier.reads, readsBeforeFailedResume);
 
     const succeededActions = await prisma.actionExecution.findMany({
       where: {

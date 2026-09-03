@@ -2,14 +2,14 @@ import {
   BadGatewayException,
   BadRequestException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { ConnectCommerceIntegrationDto } from './dto/connect-commerce-integration.dto';
+import { P410CommerceCredentialCanonicalCutoverService } from './p4-10-commerce-credential-canonical-cutover.service';
+import { P410CommerceCredentialExecutionError } from './p4-10-commerce-credential-executable.service';
 
 type StoredCommerceIntegration = {
   id: string;
@@ -32,7 +32,7 @@ export class CommerceIntegrationService {
     private readonly prisma: PrismaService,
     private readonly encryptionService: EncryptionService,
     private readonly tenantContext: TenantContextService,
-    private readonly configService: ConfigService,
+    private readonly canonicalCutover: P410CommerceCredentialCanonicalCutoverService,
   ) {}
 
   async getStatus(tenantId: string) {
@@ -56,154 +56,64 @@ export class CommerceIntegrationService {
     };
   }
 
-  async connect(tenantId: string, dto: ConnectCommerceIntegrationDto) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const shopId = dto.shopId.trim();
-    const secretKey = dto.secretKey.trim();
-
-    if (!shopId || !secretKey) {
-      throw new BadRequestException({
-        message: 'YooKassa shopId and secret key are required',
-        error: { code: 'commerce_credentials_required' },
-      });
-    }
-
-    await this.verifyCredentials(shopId, secretKey);
-    const checkedAt = new Date();
-    const encryptedShopId = this.encryptionService.encrypt(shopId);
-    const encryptedSecretKey = this.encryptionService.encrypt(secretKey);
-    const integration = await this.prisma.commerceIntegration.upsert({
-      where: { tenantId: scopedTenantId },
-      create: {
-        tenantId: scopedTenantId,
-        provider: 'yookassa',
-        encryptedShopId,
-        encryptedSecretKey,
-        status: 'active',
-        verifiedAt: checkedAt,
-        lastCheckedAt: checkedAt,
-      },
-      update: {
-        provider: 'yookassa',
-        encryptedShopId,
-        encryptedSecretKey,
-        status: 'active',
-        verifiedAt: checkedAt,
-        lastCheckedAt: checkedAt,
-        lastErrorCode: null,
-        lastErrorAt: null,
-      },
-    });
-
-    return {
-      configured: true,
-      provider: integration.provider,
-      connection: this.serialize(integration),
-    };
-  }
-
-  async recheck(tenantId: string) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const integration = await this.getStored(scopedTenantId);
-    const checkedAt = new Date();
-
-    try {
-      await this.verifyCredentials(
-        this.encryptionService.decrypt(integration.encryptedShopId),
-        this.encryptionService.decrypt(integration.encryptedSecretKey),
-      );
-      const updated = await this.prisma.commerceIntegration.update({
-        where: { tenantId: scopedTenantId },
-        data: {
-          status: 'active',
-          verifiedAt: checkedAt,
-          lastCheckedAt: checkedAt,
-          lastErrorCode: null,
-          lastErrorAt: null,
-        },
-      });
-      return {
-        configured: true,
-        provider: updated.provider,
-        connection: this.serialize(updated),
-      };
-    } catch (error) {
-      const errorCode = this.errorCode(error);
-      await this.prisma.commerceIntegration.update({
-        where: { tenantId: scopedTenantId },
-        data: {
-          status: 'error',
-          lastCheckedAt: checkedAt,
-          lastErrorCode: errorCode,
-          lastErrorAt: checkedAt,
-        },
-      });
-      throw error;
-    }
-  }
-
-  async disconnect(tenantId: string) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const existing = await this.prisma.commerceIntegration.findUnique({
-      where: { tenantId: scopedTenantId },
-      select: { id: true },
-    });
-    if (existing) {
-      await this.prisma.commerceIntegration.delete({
-        where: { tenantId: scopedTenantId },
-      });
-    }
-    return { ok: true, disconnected: Boolean(existing) };
-  }
-
-  private async getStored(
+  async connect(
     tenantId: string,
-  ): Promise<StoredCommerceIntegration> {
-    const integration = await this.prisma.commerceIntegration.findUnique({
-      where: { tenantId },
-    });
-    if (!integration) {
-      throw new NotFoundException({
-        message: 'Tenant commerce integration is not configured',
-        error: { code: 'commerce_integration_not_configured' },
-      });
+    actorUserId: string,
+    dto: ConnectCommerceIntegrationDto,
+    idempotencyKey?: string,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    try {
+      await this.canonicalCutover.setCredentials(
+        scopedTenantId,
+        actorUserId,
+        dto,
+        idempotencyKey,
+      );
+    } catch (error) {
+      this.mapCanonicalError(error);
     }
-    return integration;
+    return this.getStatus(scopedTenantId);
   }
 
-  private async verifyCredentials(shopId: string, secretKey: string) {
-    let response: Response;
+  async recheck(
+    tenantId: string,
+    actorUserId: string,
+    idempotencyKey?: string,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    let errorCode: string | null = null;
     try {
-      response = await fetch(`${this.baseUrl()}/payments?limit=1`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Basic ${Buffer.from(`${shopId}:${secretKey}`).toString('base64')}`,
-          Accept: 'application/json',
-        },
-        signal: AbortSignal.timeout(this.timeoutMs()),
-      });
-    } catch {
-      throw new BadGatewayException({
-        message: 'Could not reach YooKassa',
-        error: { code: 'commerce_provider_unavailable' },
-      });
+      const result = await this.canonicalCutover.recheck(
+        scopedTenantId,
+        actorUserId,
+        idempotencyKey,
+      );
+      errorCode = result.verificationErrorCode;
+    } catch (error) {
+      this.mapCanonicalError(error);
     }
+    if (errorCode) this.throwProviderError(errorCode);
+    return this.getStatus(scopedTenantId);
+  }
 
-    if (response.status === 401 || response.status === 403) {
-      throw new BadRequestException({
-        message: 'YooKassa rejected the supplied credentials',
-        error: { code: 'commerce_credentials_rejected' },
-      });
+  async disconnect(
+    tenantId: string,
+    actorUserId: string,
+    idempotencyKey?: string,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    try {
+      const result = await this.canonicalCutover.disconnect(
+        scopedTenantId,
+        actorUserId,
+        idempotencyKey,
+      );
+      return { ok: true, disconnected: Boolean(result) };
+    } catch (error) {
+      this.mapCanonicalError(error);
     }
-    if (!response.ok) {
-      throw new BadGatewayException({
-        message: 'YooKassa credential check failed',
-        error: {
-          code: 'commerce_provider_error',
-          provider_status: response.status,
-        },
-      });
-    }
+    return { ok: true, disconnected: false };
   }
 
   private serialize(integration: StoredCommerceIntegration) {
@@ -230,31 +140,24 @@ export class CommerceIntegrationService {
     return `${value.slice(0, 2)}${'*'.repeat(Math.min(8, value.length - 4))}${value.slice(-2)}`;
   }
 
-  private baseUrl(): string {
-    return (
-      this.configService.get<string>('YOOKASSA_API_BASE_URL')?.trim() ||
-      'https://api.yookassa.ru/v3'
-    ).replace(/\/+$/, '');
+  private mapCanonicalError(error: unknown): never {
+    if (!(error instanceof P410CommerceCredentialExecutionError)) throw error;
+    this.throwProviderError(error.message);
   }
 
-  private timeoutMs(): number {
-    const value = Number(
-      this.configService.get<string>('YOOKASSA_REQUEST_TIMEOUT_MS'),
-    );
-    return Number.isFinite(value) && value >= 1000 && value <= 60_000
-      ? value
-      : 15_000;
-  }
-
-  private errorCode(error: unknown): string {
-    if (!error || typeof error !== 'object') return 'commerce_provider_error';
-    const response = (error as { getResponse?: () => unknown }).getResponse?.();
-    if (!response || typeof response !== 'object') {
-      return 'commerce_provider_error';
+  private throwProviderError(code: string): never {
+    if (code === 'commerce_credentials_rejected') {
+      throw new BadRequestException({
+        message: 'YooKassa rejected the supplied credentials',
+        error: { code },
+      });
     }
-    const nested = (response as { error?: { code?: unknown } }).error;
-    return typeof nested?.code === 'string'
-      ? nested.code
-      : 'commerce_provider_error';
+    throw new BadGatewayException({
+      message:
+        code === 'commerce_provider_unavailable'
+          ? 'Could not reach YooKassa'
+          : 'YooKassa credential check failed',
+      error: { code },
+    });
   }
 }

@@ -48,27 +48,32 @@ describe('P4-10 all-four cutover ratchet readiness', () => {
     ).toEqual(P4_10_REGISTRATIONS.map((item) => item.actionClass));
   });
 
-  it('keeps the safe local cycle disconnected from production routes', () => {
+  it('wires all four production mutations through the canonical owner', () => {
     const module = source('src/commerce/commerce.module.ts');
     const controller = source(
       'src/commerce/commerce-integration.controller.ts',
     );
-    expect(module).not.toContain('P410CommerceCredentialExecutableService');
-    expect(module).not.toContain('P410CommerceCredentialShadowService');
-    expect(controller).not.toContain('P410CommerceCredentialExecutableService');
+    const service = source('src/commerce/commerce-integration.service.ts');
+    const canonical = source(
+      'src/commerce/p4-10-commerce-credential-canonical-cutover.service.ts',
+    );
+    expect(module).toContain('ActionEngineModule');
+    expect(module).toContain('P410CommerceCredentialExecutableService');
+    expect(module).toContain('P410CommerceCredentialCanonicalCutoverService');
+    expect(controller).toContain("@Headers('idempotency-key')");
+    expect(service).toContain('this.canonicalCutover.setCredentials(');
+    expect(service).toContain('this.canonicalCutover.recheck(');
+    expect(service).toContain('this.canonicalCutover.disconnect(');
+    expect(canonical).toContain('this.executor.execute(');
+    expect(canonical).toContain('this.executor.resume(');
   });
 
-  it('enumerates the one owner group and four concrete pre-cutover subgroups', () => {
+  it('ratchets the one owner group and four direct subgroups to zero', () => {
     expect(
       productionBypasses(
         source('src/commerce/commerce-integration.service.ts'),
       ),
-    ).toEqual([
-      'initial-connect-owner',
-      'credential-replacement-owner',
-      'credential-recheck-owner',
-      'credential-disconnect-owner',
-    ]);
+    ).toEqual([]);
   });
 
   it('still detects every new direct credential-mutation bypass', () => {
@@ -113,5 +118,20 @@ describe('P4-10 all-four cutover ratchet readiness', () => {
     );
     expect(executor).toContain('Prisma.TransactionIsolationLevel.Serializable');
     expect(executor).toContain('unknownApplicable: false');
+    expect(executor).not.toContain('encryptedShopId: input');
+    expect(executor).not.toContain('encryptedSecretKey: input');
+  });
+
+  it('keeps direct mutation ownership out of the facade and adapter', () => {
+    const surfaces = [
+      source('src/commerce/commerce-integration.service.ts'),
+      source(
+        'src/commerce/p4-10-commerce-credential-canonical-cutover.service.ts',
+      ),
+    ].join('\n');
+    expect(productionBypasses(surfaces)).toEqual([]);
+    expect(surfaces).not.toMatch(
+      /commerceIntegration\.(create|upsert|update|delete)\(/,
+    );
   });
 });

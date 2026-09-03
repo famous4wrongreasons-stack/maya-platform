@@ -56,6 +56,7 @@ export interface P410ExecutionValue {
   connectionState: 'active' | 'error' | 'disconnected';
   verificationOutcome:
     'ACCEPTED' | 'REJECTED' | 'UNAVAILABLE' | 'NOT_APPLICABLE';
+  verificationErrorCode: string | null;
   credentialMutations: 1;
   providerReads: 0 | 1;
   providerWrites: 0;
@@ -85,23 +86,55 @@ export class P410CommerceCredentialExecutableService {
       );
     }
     const execution = await this.canonicalExecution(request);
+    return this.executeCanonical(execution, operation, material);
+  }
+
+  async resume(
+    tenantId: string,
+    executionId: string,
+    material: P410CredentialMaterial | null,
+  ): Promise<P410ExecutionValue> {
+    const execution = await this.prisma.actionExecution.findUniqueOrThrow({
+      where: { id_tenantId: { id: executionId, tenantId } },
+    });
+    const operation = OPERATION_BY_CAPABILITY.get(execution.capability);
+    if (!operation) {
+      throw new P410CommerceCredentialExecutionError(
+        'Existing execution is not a P4-10 credential action',
+      );
+    }
+    return this.executeCanonical(execution, operation, material);
+  }
+
+  private async executeCanonical(
+    execution: ActionExecution,
+    operation: P410Operation,
+    material: P410CredentialMaterial | null,
+  ): Promise<P410ExecutionValue> {
     if (execution.actionClass !== ACTION_BY_OPERATION[operation]) {
       throw new P410CommerceCredentialExecutionError(
         'P4-10 action class mismatch',
-      );
-    }
-    if (execution.state === ActionExecutionState.SUCCEEDED) {
-      return this.restore(execution);
-    }
-    if (execution.state !== ActionExecutionState.READY) {
-      throw new P410CommerceCredentialExecutionError(
-        `Execution cannot run from ${execution.state}`,
       );
     }
     const input = await this.kernel.readTrustedNormalizedInput(
       execution.tenantId,
       execution.id,
     );
+    this.assertPresentedMaterial(operation, input, material);
+    if (execution.state === ActionExecutionState.SUCCEEDED) {
+      return this.restore(execution);
+    }
+    if (execution.state === ActionExecutionState.FAILED) {
+      throw new P410CommerceCredentialExecutionError(
+        execution.finalOutcomeCode ?? 'commerce_credential_action_failed',
+      );
+    }
+    if (execution.state !== ActionExecutionState.READY) {
+      throw new P410CommerceCredentialExecutionError(
+        `Execution cannot run from ${execution.state}`,
+      );
+    }
+    await this.assertActorBeforeProvider(execution, input);
     const verification = await this.verification(
       execution,
       operation,
@@ -155,6 +188,38 @@ export class P410CommerceCredentialExecutableService {
     return result.value;
   }
 
+  private assertPresentedMaterial(
+    operation: P410Operation,
+    input: Record<string, unknown>,
+    material: P410CredentialMaterial | null,
+  ): void {
+    if (operation === 'connect' || operation === 'replace') {
+      if (!material) {
+        throw new P410CommerceCredentialExecutionError(
+          'Transient credential presentation is required',
+        );
+      }
+      const fingerprints = this.fingerprints(
+        material.shopId,
+        material.secretKey,
+      );
+      if (
+        fingerprints.set !== this.text(input.desiredCredentialSetFingerprint) ||
+        fingerprints.shop !== this.text(input.shopIdFingerprint)
+      ) {
+        throw new P410CommerceCredentialExecutionError(
+          'Presented credential material changed after planning',
+        );
+      }
+      return;
+    }
+    if (material) {
+      throw new P410CommerceCredentialExecutionError(
+        `${operation} must not receive raw credentials`,
+      );
+    }
+  }
+
   private async verification(
     execution: ActionExecution,
     operation: P410Operation,
@@ -162,11 +227,6 @@ export class P410CommerceCredentialExecutableService {
     material: P410CredentialMaterial | null,
   ): Promise<P410CredentialVerification> {
     if (operation === 'disconnect') {
-      if (material) {
-        throw new P410CommerceCredentialExecutionError(
-          'Disconnect must not receive raw credentials',
-        );
-      }
       return {
         outcome: 'ACCEPTED',
         errorCode: null,
@@ -176,11 +236,6 @@ export class P410CommerceCredentialExecutableService {
     }
     let credentials = material;
     if (operation === 'recheck') {
-      if (material) {
-        throw new P410CommerceCredentialExecutionError(
-          'Recheck uses only the stored credential authority',
-        );
-      }
       const stored = await this.prisma.commerceIntegration.findUnique({
         where: { tenantId: execution.tenantId },
       });
@@ -199,25 +254,13 @@ export class P410CommerceCredentialExecutableService {
         'Transient credential presentation is required',
       );
     }
-    const fingerprints = this.fingerprints(
-      credentials.shopId,
-      credentials.secretKey,
-    );
-    const expected =
-      operation === 'recheck'
-        ? this.text(input.currentCredentialSetFingerprint)
-        : this.text(input.desiredCredentialSetFingerprint);
-    if (fingerprints.set !== expected) {
-      throw new P410CommerceCredentialExecutionError(
-        'Presented credential material changed after planning',
-      );
-    }
     if (
-      operation !== 'recheck' &&
-      fingerprints.shop !== this.text(input.shopIdFingerprint)
+      operation === 'recheck' &&
+      this.fingerprints(credentials.shopId, credentials.secretKey).set !==
+        this.text(input.currentCredentialSetFingerprint)
     ) {
       throw new P410CommerceCredentialExecutionError(
-        'Presented shop identity changed after planning',
+        'Stored credential authority changed before verification',
       );
     }
     return this.verifier.verify(credentials.shopId, credentials.secretKey);
@@ -288,6 +331,8 @@ export class P410CommerceCredentialExecutableService {
             : 'error',
       verificationOutcome:
         operation === 'disconnect' ? 'NOT_APPLICABLE' : verification.outcome,
+      verificationErrorCode:
+        operation === 'disconnect' ? null : verification.errorCode,
       credentialMutations: 1,
       providerReads: operation === 'disconnect' ? 0 : 1,
       providerWrites: 0,
@@ -375,6 +420,48 @@ export class P410CommerceCredentialExecutableService {
         'Credential manager authority changed after planning',
       );
     }
+  }
+
+  private async assertActorBeforeProvider(
+    execution: ActionExecution,
+    input: Record<string, unknown>,
+  ): Promise<void> {
+    if (!execution.actorUserId) {
+      throw new P410CommerceCredentialExecutionError(
+        'Credential manager is required',
+      );
+    }
+    const actor = await this.prisma.membership.findUnique({
+      where: {
+        userId_tenantId: {
+          userId: execution.actorUserId,
+          tenantId: execution.tenantId,
+        },
+      },
+    });
+    if (!this.actorAuthorized(actor, input)) {
+      throw new P410CommerceCredentialExecutionError(
+        'Credential manager authority changed before provider verification',
+      );
+    }
+  }
+
+  private actorAuthorized(
+    actor: { id: string; role: string; status: string } | null,
+    input: Record<string, unknown>,
+  ): boolean {
+    return Boolean(
+      actor &&
+      actor.status === 'active' &&
+      actor.id === input.actorMembershipId &&
+      actor.role === input.actorRole &&
+      [
+        'tenant_owner',
+        'business_owner',
+        'tenant_admin',
+        'administrator',
+      ].includes(actor.role),
+    );
   }
 
   private assertExecutable(

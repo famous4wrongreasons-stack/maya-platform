@@ -1,7 +1,14 @@
-import { Body, Controller, Delete, Get, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { AuditLogService } from '../audit-log/audit-log.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
 import { AllowSubscriptionRequired } from '../decorators/allow-subscription-required.decorator';
@@ -24,10 +31,7 @@ const COMMERCE_MANAGEMENT_ROLES = [
 @Roles(...COMMERCE_MANAGEMENT_ROLES)
 @Controller('integrations/commerce')
 export class CommerceIntegrationController {
-  constructor(
-    private readonly service: CommerceIntegrationService,
-    private readonly auditLogService: AuditLogService,
-  ) {}
+  constructor(private readonly service: CommerceIntegrationService) {}
 
   @Get()
   @AllowSubscriptionRequired()
@@ -42,48 +46,33 @@ export class CommerceIntegrationController {
   async connect(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: ConnectCommerceIntegrationDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    const result = await this.service.connect(user.tenantId!, dto);
-    await this.auditLogService.log({
-      tenantId: user.tenantId!,
-      userId: user.userId,
-      action: 'commerce.yookassa.connected',
-      entityType: 'commerce_integration',
-      entityId: result.connection.id,
-      metadata: { provider: 'yookassa' },
-    });
-    return result;
+    return this.service.connect(
+      user.tenantId!,
+      user.userId,
+      dto,
+      idempotencyKey,
+    );
   }
 
   @Post('yookassa/recheck')
   @AllowSubscriptionRequired()
   @ApiOperation({ summary: 'Recheck encrypted tenant YooKassa credentials' })
-  async recheck(@CurrentUser() user: AuthenticatedUser) {
-    const result = await this.service.recheck(user.tenantId!);
-    await this.auditLogService.log({
-      tenantId: user.tenantId!,
-      userId: user.userId,
-      action: 'commerce.yookassa.rechecked',
-      entityType: 'commerce_integration',
-      entityId: result.connection.id,
-      metadata: { provider: 'yookassa' },
-    });
-    return result;
+  async recheck(
+    @CurrentUser() user: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ) {
+    return this.service.recheck(user.tenantId!, user.userId, idempotencyKey);
   }
 
   @Delete('yookassa')
   @AllowSubscriptionRequired()
   @ApiOperation({ summary: 'Remove tenant YooKassa credentials' })
-  async disconnect(@CurrentUser() user: AuthenticatedUser) {
-    const result = await this.service.disconnect(user.tenantId!);
-    await this.auditLogService.log({
-      tenantId: user.tenantId!,
-      userId: user.userId,
-      action: 'commerce.yookassa.disconnected',
-      entityType: 'commerce_integration',
-      entityId: user.tenantId!,
-      metadata: { provider: 'yookassa' },
-    });
-    return result;
+  async disconnect(
+    @CurrentUser() user: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ) {
+    return this.service.disconnect(user.tenantId!, user.userId, idempotencyKey);
   }
 }
