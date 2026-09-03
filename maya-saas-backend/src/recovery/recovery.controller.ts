@@ -8,7 +8,9 @@ import { Public } from '../decorators/public.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { RequiresFeature } from '../entitlements/requires-feature.decorator';
+import { Package5Wave5CanonicalCutoverService } from '../package5-wave5/package5-wave5-canonical-cutover.service';
 import {
+  CorrectRecoveryAttributionDto,
   IngestRecoveryTouchpointDto,
   RecoveryReportQueryDto,
 } from './dto/recovery.dto';
@@ -26,7 +28,36 @@ const RECOVERY_REPORT_ROLES = [
 @ApiTags('recovery')
 @Controller('recovery')
 export class RecoveryController {
-  constructor(private readonly recoveryService: RecoveryService) {}
+  constructor(
+    private readonly recoveryService: RecoveryService,
+    private readonly canonical: Package5Wave5CanonicalCutoverService,
+  ) {}
+
+  @ApiBearerAuth()
+  @TenantScoped()
+  @Roles(UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER)
+  @RequiresFeature('analytics.business')
+  @Post('attribution/corrections')
+  @ApiOperation({
+    summary: 'Authorize an evidence-bound recovery attribution correction',
+  })
+  correctRecoveryAttribution(
+    @CurrentUser() user: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey: string | undefined,
+    @Body() dto: CorrectRecoveryAttributionDto,
+  ) {
+    return this.canonical.correctRecoveryAttribution(
+      user.tenantId!,
+      user.userId,
+      {
+        conversionId: dto.conversionId,
+        touchpointId: dto.touchpointId,
+        sourceEvidenceEventId: dto.sourceEvidenceEventId,
+        reasonCode: dto.reasonCode,
+      },
+      idempotencyKey,
+    );
+  }
 
   @Public()
   @Post('internal/touchpoints')

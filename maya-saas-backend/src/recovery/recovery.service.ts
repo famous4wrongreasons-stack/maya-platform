@@ -10,6 +10,8 @@ import { ConfigService } from '@nestjs/config';
 import { normalizePhoneE164 } from '../common/phone.util';
 import { CrmService } from '../crm/crm.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { Package5Wave5RecoveryFactPlaneService } from '../package5-wave5/package5-wave5.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import type { IngestRecoveryTouchpointDto } from './dto/recovery.dto';
 
@@ -46,6 +48,8 @@ export class RecoveryService {
     private readonly crmService: CrmService,
     private readonly config: ConfigService,
     private readonly bridgeSource: BridgeSourceService,
+    private readonly factPlane: Package5Wave5RecoveryFactPlaneService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   assertBridgeToken(header: string | undefined): void {
@@ -69,38 +73,29 @@ export class RecoveryService {
       },
       'recovery_tenant_not_found',
     );
-    const tenant = { id: resolved.tenantId };
     const occurredAt = new Date(dto.occurred_at);
-    const touchpoint = await this.prisma.recoveryTouchpoint.upsert({
-      where: {
-        tenantId_externalEventId: {
-          tenantId: tenant.id,
+    // The bridge resolves the tenant before entering the exact fact-plane scope.
+    const touchpoint = await this.tenantContext.runAsPublicTenant(
+      resolved.tenantId,
+      () =>
+        this.factPlane.acceptTouchpoint({
+          tenantId: resolved.tenantId,
           externalEventId: dto.external_event_id,
-        },
-      },
-      create: {
-        tenantId: tenant.id,
-        externalEventId: dto.external_event_id,
-        subjectRef: dto.subject_ref,
-        kind: dto.kind,
-        channel: dto.channel,
-        status: dto.status,
-        occurredAt,
-        attributionWindowDays: dto.attribution_window_days ?? 30,
-      },
-      update: {
-        status: dto.status,
-        channel: dto.channel,
-        occurredAt,
-        attributionWindowDays: dto.attribution_window_days ?? 30,
-      },
-      select: { id: true, status: true, occurredAt: true },
-    });
+          subjectRef: dto.subject_ref,
+          kind: dto.kind,
+          channel: dto.channel,
+          status: dto.status,
+          occurredAt,
+          attributionWindowDays: dto.attribution_window_days ?? 30,
+          source: 'legacy_bot',
+          ingestionMethod: 'webhook',
+        }),
+    );
     return {
       accepted: true,
-      touchpoint_id: touchpoint.id,
-      status: touchpoint.status,
-      occurred_at: touchpoint.occurredAt.toISOString(),
+      touchpoint_id: touchpoint.touchpointId,
+      status: dto.status,
+      occurred_at: occurredAt.toISOString(),
     };
   }
 
@@ -117,35 +112,22 @@ export class RecoveryService {
       1,
       Math.min(MAX_ATTRIBUTION_DAYS, input.attributionWindowDays),
     );
-    const touchpoint = await this.prisma.recoveryTouchpoint.upsert({
-      where: {
-        tenantId_externalEventId: {
-          tenantId: input.tenantId,
-          externalEventId: input.externalEventId,
-        },
-      },
-      create: {
-        tenantId: input.tenantId,
-        externalEventId: input.externalEventId,
-        subjectRef,
-        kind: input.kind,
-        channel: input.channel,
-        status: 'sent',
-        occurredAt: input.occurredAt,
-        attributionWindowDays,
-      },
-      update: {
-        status: 'sent',
-        channel: input.channel,
-        occurredAt: input.occurredAt,
-        attributionWindowDays,
-      },
-      select: { id: true, status: true },
+    const touchpoint = await this.factPlane.acceptTouchpoint({
+      tenantId: input.tenantId,
+      externalEventId: input.externalEventId,
+      subjectRef,
+      kind: input.kind,
+      channel: input.channel,
+      status: 'sent',
+      occurredAt: input.occurredAt,
+      attributionWindowDays,
+      source: 'maya_recovery',
+      ingestionMethod: 'internal',
     });
     return {
       accepted: true,
-      touchpoint_id: touchpoint.id,
-      status: touchpoint.status,
+      touchpoint_id: touchpoint.touchpointId,
+      status: 'sent',
     };
   }
 
@@ -154,75 +136,27 @@ export class RecoveryService {
     if (!subjectRef) {
       return { attributed: false, reason: 'booking_phone_unavailable' };
     }
-
-    const existing = await this.prisma.recoveryConversion.findUnique({
-      where: {
-        tenantId_externalBookingRef: {
-          tenantId: input.tenantId,
-          externalBookingRef: input.externalBookingRef,
-        },
-      },
-      select: { id: true },
+    const conversion = await this.factPlane.acceptBooking({
+      tenantId: input.tenantId,
+      externalBookingRef: input.externalBookingRef,
+      subjectRef,
+      crmExternalId: input.crmExternalId,
+      bookedAt: input.bookedAt,
+      visitAt: input.visitAt,
+      bookedValueKopecks: input.bookedValueKopecks,
+      currency: input.currency,
+      filledWindow: input.filledWindow,
+      source: 'maya_booking',
+      ingestionMethod: 'internal',
     });
-    if (existing) {
-      await this.prisma.recoveryConversion.update({
-        where: { id: existing.id },
-        data: {
-          crmExternalId: input.crmExternalId ?? undefined,
-          visitAt: input.visitAt ?? undefined,
-          bookedValueKopecks: input.bookedValueKopecks ?? undefined,
-          currency: input.currency || undefined,
-          filledWindow: input.filledWindow ?? undefined,
-        },
-      });
-      return { attributed: true, conversion_id: existing.id, duplicate: true };
-    }
-
-    const oldestEligible = new Date(
-      input.bookedAt.getTime() - MAX_ATTRIBUTION_DAYS * DAY_MS,
-    );
-    const candidates = await this.prisma.recoveryTouchpoint.findMany({
-      where: {
-        tenantId: input.tenantId,
-        subjectRef,
-        status: { in: ['sent', 'delivered'] },
-        occurredAt: { gte: oldestEligible, lte: input.bookedAt },
-      },
-      orderBy: { occurredAt: 'desc' },
-      take: 20,
-      select: {
-        id: true,
-        kind: true,
-        occurredAt: true,
-        attributionWindowDays: true,
-      },
-    });
-    const touchpoint = candidates.find(
-      (candidate) =>
-        input.bookedAt.getTime() - candidate.occurredAt.getTime() <=
-        candidate.attributionWindowDays * DAY_MS,
-    );
-    if (!touchpoint) {
+    if (conversion.outcome === 'not_attributed') {
       return { attributed: false, reason: 'eligible_touchpoint_not_found' };
     }
-
-    const conversion = await this.prisma.recoveryConversion.create({
-      data: {
-        tenantId: input.tenantId,
-        touchpointId: touchpoint.id,
-        externalBookingRef: input.externalBookingRef,
-        crmExternalId: input.crmExternalId ?? null,
-        subjectRef,
-        bookedAt: input.bookedAt,
-        visitAt: input.visitAt ?? null,
-        status: 'booked',
-        filledWindow: input.filledWindow ?? touchpoint.kind === 'freed_slot',
-        bookedValueKopecks: input.bookedValueKopecks ?? null,
-        currency: input.currency || 'RUB',
-      },
-      select: { id: true },
-    });
-    return { attributed: true, conversion_id: conversion.id, duplicate: false };
+    return {
+      attributed: true,
+      conversion_id: conversion.conversionId,
+      duplicate: conversion.outcome !== 'created',
+    };
   }
 
   async markBookingStatus(
@@ -230,9 +164,19 @@ export class RecoveryService {
     externalBookingRef: string,
     status: 'booked' | 'canceled',
   ): Promise<void> {
-    await this.prisma.recoveryConversion.updateMany({
-      where: { tenantId, externalBookingRef },
-      data: { status },
+    // A booking with no recovery attribution needs no recovery status event.
+    const conversion = await this.prisma.recoveryConversion.findUnique({
+      where: { tenantId_externalBookingRef: { tenantId, externalBookingRef } },
+      select: { id: true },
+    });
+    if (!conversion) return;
+    await this.factPlane.acceptBookingStatus({
+      tenantId,
+      externalBookingRef,
+      status,
+      occurredAt: new Date(),
+      source: 'maya_booking',
+      ingestionMethod: 'internal',
     });
   }
 
@@ -276,30 +220,21 @@ export class RecoveryService {
           to: reconciliationTo.toISOString(),
           externalIds: crmIds,
         });
+        if (!snapshot.verified) {
+          throw new Error('Unverified appointment revenue snapshot');
+        }
         const confirmed = new Map(
           snapshot.records.map((record) => [record.external_id, record]),
         );
-        await Promise.all(
-          conversions.map((conversion) => {
-            if (!conversion.crmExternalId) return Promise.resolve();
-            const record = confirmed.get(conversion.crmExternalId);
-            if (!record) return Promise.resolve();
-            conversion.confirmedRevenueKopecks = record.amount_kopecks;
-            conversion.confirmedAt = new Date();
-            conversion.currency = snapshot.currency;
-            return this.prisma.recoveryConversion
-              .update({
-                where: { id: conversion.id },
-                data: {
-                  confirmedRevenueKopecks: record.amount_kopecks,
-                  confirmedAt: conversion.confirmedAt,
-                  currency: snapshot.currency,
-                  status: 'confirmed',
-                },
-              })
-              .then(() => undefined);
-          }),
-        );
+        // The report is a reader: provider confirmation affects this response only.
+        for (const conversion of conversions) {
+          if (!conversion.crmExternalId) continue;
+          const record = confirmed.get(conversion.crmExternalId);
+          if (!record) continue;
+          conversion.confirmedRevenueKopecks = record.amount_kopecks;
+          conversion.confirmedAt = new Date();
+          conversion.currency = snapshot.currency;
+        }
         const unconfirmed = conversions.filter(
           (conversion) => !conversion.confirmedRevenueKopecks,
         ).length;

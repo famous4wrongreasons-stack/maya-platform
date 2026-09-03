@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { PACKAGE5_WAVE5_REGISTRATIONS } from './package5-wave5-executable.contract';
@@ -17,6 +17,10 @@ describe('Package 5 Wave 5 fact-plane and bypass ratchet', () => {
   const mirror = read('crm/appointment-mirror.service.ts');
   const eventStore = read('events/event-store.service.ts');
   const appModule = read('app.module.ts');
+  const recoveryModule = read('recovery/recovery.module.ts');
+  const cutover = read(
+    'package5-wave5/package5-wave5-canonical-cutover.service.ts',
+  );
 
   it('registers exactly one governed command without fabricating actions for facts', () => {
     expect(PACKAGE5_WAVE5_REGISTRATIONS).toHaveLength(1);
@@ -56,19 +60,58 @@ describe('Package 5 Wave 5 fact-plane and bypass ratchet', () => {
     );
   });
 
-  it('pins the four pre-cutover A29 direct-mutation subgroups without widening them', () => {
+  it('removes all four legacy A29 mutation groups and connects production ownership', () => {
     expect(recovery).toContain('async ingestTouchpoint');
     expect(recovery).toContain('async recordConsentSafeTouchpoint');
     expect(recovery).toContain('async recordBooking');
     expect(recovery).toContain('async markBookingStatus');
-    expect(recovery).toContain('this.prisma.recoveryTouchpoint.upsert');
-    expect(recovery).toContain('this.prisma.recoveryConversion.create');
-    expect(recovery).toContain('this.prisma.recoveryConversion.updateMany');
-    expect(recovery).toContain(
-      'confirmedRevenueKopecks: record.amount_kopecks',
+    expect(recovery).toContain('this.factPlane.acceptTouchpoint');
+    expect(recovery).toContain('this.factPlane.acceptBooking');
+    expect(recovery).toContain('this.factPlane.acceptBookingStatus');
+    expect(recovery).not.toMatch(
+      /recovery(?:Touchpoint|Conversion)\s*\.(create|update|upsert|delete)/,
     );
-    expect(recoveryController).not.toContain('correctRecoveryAttribution');
-    expect(appModule).not.toContain('Package5Wave5Module');
+    expect(recoveryController).toContain(
+      'this.canonical.correctRecoveryAttribution',
+    );
+    expect(recoveryController).toContain(
+      '@Roles(UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER)',
+    );
+    expect(recoveryModule).toContain(
+      'imports: [CrmModule, Package5Wave5Module]',
+    );
+    expect(appModule).toContain('RecoveryModule');
+    expect(cutover).toContain('this.planner.build');
+    expect(cutover).toContain('this.ingress.createExecution');
+    expect(cutover).toContain('this.kernel.decideApproval');
+    expect(cutover).toContain('this.executor.resume(prepared)');
+    expect(cutover).toContain('this.executor.execute(prepared)');
+    expect(cutover).not.toMatch(
+      /this\.prisma|recoveryConversion|recoveryTouchpoint/,
+    );
+  });
+
+  it('allows recovery projection writers only in the exact canonical Wave 5 file', () => {
+    const visit = (directory: string): string[] =>
+      readdirSync(directory, { withFileTypes: true }).flatMap((entry) =>
+        entry.isDirectory()
+          ? visit(join(directory, entry.name))
+          : [join(directory, entry.name)],
+      );
+    const writers = visit(join(process.cwd(), 'src'))
+      .filter((path) => path.endsWith('.ts') && !path.endsWith('.spec.ts'))
+      .filter((path) =>
+        /recovery(?:Touchpoint|Conversion)\s*\.(?:create|update|upsert|delete)/.test(
+          readFileSync(path, 'utf8'),
+        ),
+      );
+    expect(writers).toEqual([
+      join(process.cwd(), 'src/package5-wave5/package5-wave5.service.ts'),
+    ]);
+    const report = recovery.slice(recovery.indexOf('async report('));
+    expect(report).not.toMatch(
+      /this\.factPlane\.|\.(create|update|upsert|delete)\s*\(/,
+    );
   });
 
   it('keeps webhook, scheduler and catch-up as A31 triggers of one comparator', () => {
@@ -99,7 +142,7 @@ describe('Package 5 Wave 5 fact-plane and bypass ratchet', () => {
     );
   });
 
-  it('makes the future cutover boundary narrow and provider-read-only', () => {
+  it('keeps the production boundary narrow and provider-read-only', () => {
     expect(canonical).toContain('unknownApplicable: false');
     expect(canonical).toContain("reconciliationState: 'NOT_REQUIRED'");
     expect(canonical).not.toMatch(

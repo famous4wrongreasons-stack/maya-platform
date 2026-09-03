@@ -4,23 +4,15 @@ import { ConfigService } from '@nestjs/config';
 
 import { CrmService } from '../crm/crm.service';
 import { PrismaService } from '../prisma/prisma.service';
+import type { Package5Wave5RecoveryFactPlaneService } from '../package5-wave5/package5-wave5.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import type { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { RecoveryService } from './recovery.service';
-
-type RecoveryConversionCreateInput = {
-  data: {
-    subjectRef: string;
-    filledWindow: boolean;
-    bookedValueKopecks: number;
-    status: string;
-  };
-  select: { id: boolean };
-};
 
 describe('RecoveryService', () => {
   const secret = 'recovery-test-secret-at-least-32-characters';
 
-  function createService(prisma: object, crm: object = {}) {
+  function createService(prisma: object, crm: object = {}, facts: object = {}) {
     const config = {
       get: jest.fn((key: string) => {
         if (key === 'MAYA_INBOX_BRIDGE_TOKEN') return secret;
@@ -49,21 +41,16 @@ describe('RecoveryService', () => {
       crm as CrmService,
       config,
       bridgeSource as BridgeSourceService,
+      facts as Package5Wave5RecoveryFactPlaneService,
+      new TenantContextService(),
     );
   }
 
-  it('ingests the same external event idempotently', async () => {
-    const upsert = jest.fn().mockResolvedValue({
-      id: 'touchpoint-1',
-      status: 'sent',
-      occurredAt: new Date('2026-08-14T08:00:00.000Z'),
-    });
-    const service = createService({
-      tenant: {
-        findFirst: jest.fn().mockResolvedValue({ id: 'tenant-1' }),
-      },
-      recoveryTouchpoint: { upsert },
-    });
+  it('delegates bridge facts under the resolved tenant without a direct writer', async () => {
+    const acceptTouchpoint = jest
+      .fn()
+      .mockResolvedValue({ touchpointId: 'touchpoint-1' });
+    const service = createService({}, {}, { acceptTouchpoint });
     const dto = {
       tenant_slug: 'Muzhskaya-Estetika',
       external_event_id: 'cycle:stable-event',
@@ -74,47 +61,30 @@ describe('RecoveryService', () => {
       occurred_at: '2026-08-14T08:00:00.000Z',
       attribution_window_days: 21,
     };
-
-    await service.ingestTouchpoint(dto);
-    await service.ingestTouchpoint(dto);
-
-    expect(upsert).toHaveBeenCalledTimes(2);
-    expect(upsert).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        where: {
-          tenantId_externalEventId: {
-            tenantId: 'tenant-1',
-            externalEventId: 'cycle:stable-event',
-          },
-        },
-      }),
-    );
-    expect(JSON.stringify(upsert.mock.calls)).not.toContain('+7');
+    const result = await service.ingestTouchpoint(dto);
+    expect(result).toMatchObject({
+      accepted: true,
+      touchpoint_id: 'touchpoint-1',
+    });
+    expect(acceptTouchpoint).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      externalEventId: dto.external_event_id,
+      subjectRef: dto.subject_ref,
+      kind: dto.kind,
+      channel: dto.channel,
+      status: dto.status,
+      occurredAt: new Date(dto.occurred_at),
+      attributionWindowDays: 21,
+      source: 'legacy_bot',
+      ingestionMethod: 'webhook',
+    });
   });
 
-  it('attributes a booking to the latest eligible freed slot without storing a phone', async () => {
-    let conversionCreateInput: RecoveryConversionCreateInput | undefined;
-    const create = jest.fn((input: RecoveryConversionCreateInput) => {
-      conversionCreateInput = input;
-      return Promise.resolve({ id: 'conversion-1' });
-    });
-    const service = createService({
-      recoveryConversion: {
-        findUnique: jest.fn().mockResolvedValue(null),
-        create,
-      },
-      recoveryTouchpoint: {
-        findMany: jest.fn().mockResolvedValue([
-          {
-            id: 'touchpoint-1',
-            kind: 'freed_slot',
-            occurredAt: new Date('2026-08-14T08:00:00.000Z'),
-            attributionWindowDays: 7,
-          },
-        ]),
-      },
-    });
-
+  it('passes only HMAC booking evidence to the canonical fact plane', async () => {
+    const acceptBooking = jest
+      .fn()
+      .mockResolvedValue({ outcome: 'created', conversionId: 'conversion-1' });
+    const service = createService({}, {}, { acceptBooking });
     const result = await service.recordBooking({
       tenantId: 'tenant-1',
       phone: '8 (999) 123-45-67',
@@ -125,7 +95,6 @@ describe('RecoveryService', () => {
       bookedValueKopecks: 250_000,
       currency: 'RUB',
     });
-
     const expectedSubject = createHmac('sha256', secret)
       .update('maya-recovery-subject:v1:79991234567')
       .digest('hex');
@@ -134,14 +103,32 @@ describe('RecoveryService', () => {
       conversion_id: 'conversion-1',
       duplicate: false,
     });
-    expect(conversionCreateInput?.data).toMatchObject({
-      subjectRef: expectedSubject,
-      filledWindow: true,
-      bookedValueKopecks: 250_000,
-      status: 'booked',
-    });
-    expect(conversionCreateInput?.select).toEqual({ id: true });
-    expect(JSON.stringify(create.mock.calls)).not.toContain('79991234567');
+    expect(acceptBooking).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        subjectRef: expectedSubject,
+        bookedValueKopecks: 250_000,
+      }),
+    );
+    expect(JSON.stringify(acceptBooking.mock.calls)).not.toContain(
+      '79991234567',
+    );
+    expect(JSON.stringify(acceptBooking.mock.calls)).not.toContain('phone');
+  });
+
+  it('does not invent a status event for a booking without recovery attribution', async () => {
+    const acceptBookingStatus = jest.fn();
+    const service = createService(
+      { recoveryConversion: { findUnique: jest.fn().mockResolvedValue(null) } },
+      {},
+      { acceptBookingStatus },
+    );
+    await service.markBookingStatus(
+      'tenant-1',
+      'booking-unattributed',
+      'canceled',
+    );
+    expect(acceptBookingStatus).not.toHaveBeenCalled();
   });
 
   it('keeps booked value separate from CRM-confirmed revenue', async () => {
@@ -226,6 +213,6 @@ describe('RecoveryService', () => {
       confirmed_revenue_status: 'partial',
       unconfirmed_booking_count: 1,
     });
-    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).not.toHaveBeenCalled();
   });
 });

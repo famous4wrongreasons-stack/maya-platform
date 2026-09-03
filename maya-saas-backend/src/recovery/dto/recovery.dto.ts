@@ -81,3 +81,21 @@ export class RecoveryReportQueryDto {
   @IsISO8601({ strict: true })
   to!: string;
 }
+
+export class CorrectRecoveryAttributionDto {
+  @IsString()
+  @Matches(/^[A-Za-z0-9._:/-]{1,240}$/)
+  conversionId!: string;
+
+  @IsString()
+  @Matches(/^[A-Za-z0-9._:/-]{1,240}$/)
+  touchpointId!: string;
+
+  @IsString()
+  @Matches(/^[A-Za-z0-9._:/-]{1,240}$/)
+  sourceEvidenceEventId!: string;
+
+  @IsIn(['authoritative_source_correction', 'operator_evidence_correction'])
+  reasonCode!:
+    'authoritative_source_correction' | 'operator_evidence_correction';
+}

@@ -6,6 +6,7 @@ import {
   CanonicalActionIngressService,
 } from '../action-engine';
 import { PrismaService } from '../prisma/prisma.service';
+import { Package5Wave5CanonicalCutoverService } from './package5-wave5-canonical-cutover.service';
 import {
   Package5Wave5ExecutableService,
   Package5Wave5RecoveryFactPlaneService,
@@ -15,6 +16,7 @@ import {
 @Module({
   imports: [ActionEngineModule],
   providers: [
+    Package5Wave5CanonicalCutoverService,
     Package5Wave5RecoveryFactPlaneService,
     Package5Wave5ShadowService,
     {
@@ -34,6 +36,7 @@ import {
     },
   ],
   exports: [
+    Package5Wave5CanonicalCutoverService,
     Package5Wave5RecoveryFactPlaneService,
     Package5Wave5ShadowService,
     Package5Wave5ExecutableService,
