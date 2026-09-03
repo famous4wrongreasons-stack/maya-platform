@@ -40,6 +40,12 @@ const CONTROLLED_PROOF_FIXTURES = [
     databaseGuard: "database.startsWith('maya_c06_p409_lineage_')",
     refusalMarker: 'P4-09 lineage proof refuses non-disposable databases',
   },
+  {
+    path: 'scripts/package5-common-authority-foundation-proof.ts',
+    databaseGuard: "name.startsWith('maya_c06_p5_foundation_')",
+    refusalMarker:
+      'Package 5 foundation proof refuses non-disposable databases',
+  },
 ] as const;
 
 type SourceFile = { path: string; code: string };
@@ -112,6 +118,7 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
       'scripts/p4-09-all7-executable-proof.ts',
       'scripts/p4-09-immutable-offer-value-version-schema-proof.ts',
       'scripts/p4-09-offer-replacement-lineage-schema-proof.ts',
+      'scripts/package5-common-authority-foundation-proof.ts',
       CANONICAL_OWNER,
     ]);
 
