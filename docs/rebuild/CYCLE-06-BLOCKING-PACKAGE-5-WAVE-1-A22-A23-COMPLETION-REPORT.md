@@ -125,6 +125,7 @@ Inspection of the deployed runtime found:
 | Wave 1 ActionExecutions created for cutover proof | `0` | `0` |
 | Loyalty accounts / transactions | `23 / 121` | `23 / 121` |
 | Loyalty transaction aggregate | `64581` | `64581` |
+| Active unresolved-identity holds | `1` | `1` |
 | Referral rewards | `0` | `0` |
 | Customer subscriptions / usage | `0 / 0` | `0 / 0` |
 | Gift certificates / redemptions | `0 / 0` | `0 / 0` |
