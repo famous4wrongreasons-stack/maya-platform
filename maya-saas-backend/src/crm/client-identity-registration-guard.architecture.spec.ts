@@ -46,6 +46,11 @@ const CONTROLLED_PROOF_FIXTURES = [
     refusalMarker:
       'Package 5 foundation proof refuses non-disposable databases',
   },
+  {
+    path: 'scripts/package5-wave3-all8-executable-proof.ts',
+    databaseGuard: "name.startsWith('maya_c06_p5_wave3_')",
+    refusalMarker: 'Wave 3 proof refuses a non-disposable database',
+  },
 ] as const;
 
 type SourceFile = { path: string; code: string };
@@ -119,6 +124,7 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
       'scripts/p4-09-immutable-offer-value-version-schema-proof.ts',
       'scripts/p4-09-offer-replacement-lineage-schema-proof.ts',
       'scripts/package5-common-authority-foundation-proof.ts',
+      'scripts/package5-wave3-all8-executable-proof.ts',
       CANONICAL_OWNER,
     ]);
 
