@@ -1,6 +1,6 @@
 import {
+  ForbiddenException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -12,6 +12,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import { UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import { MembershipsService } from '../tenancy/memberships.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AuthClientMetadata } from './auth-client-metadata';
 import { AuthRateLimitService } from './auth-rate-limit.service';
@@ -48,6 +49,7 @@ export class AuthSessionService {
     private readonly systemGateway: AuthSessionSystemGateway,
     private readonly crmService: CrmService,
     private readonly auditLog: AuditLogService,
+    private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
   ) {}
 
   /**
@@ -288,45 +290,47 @@ export class AuthSessionService {
 
   async revokeSession(user: AuthenticatedUser, sessionId: string) {
     const principal = this.fromAuthenticatedUser(user);
-    const revoked = await this.tenantContext.runAsAuthPrincipal(
-      principal,
-      async () => {
-        const count = await this.repository.revokeSession(
-          principal,
-          sessionId,
-          new Date(),
-          'user_revoked',
-        );
-
-        // Пишем и неудачную попытку: обращение к чужому идентификатору сессии
-        // — как раз то, ради чего журнал заводится.
-        await this.auditSessionEvent(
-          principal,
-          count === 1 ? 'auth.session_revoked' : 'auth.session_revoke_missed',
-          sessionId,
-          { by_session_id: user.sessionId },
-        );
-
-        return count;
-      },
-    );
-
-    if (revoked !== 1) {
-      throw new NotFoundException('Session not found');
+    if (!principal.tenantId) {
+      throw new ForbiddenException('Tenant-scoped account is required');
     }
+    await this.tenantContext.runAsAuthPrincipal(principal, async () => {
+      await this.canonicalWave2.execute(
+        principal.tenantId!,
+        { userId: principal.userId },
+        {
+          operation: 'revoke_other_session',
+          sessionId,
+          currentSessionId: user.sessionId,
+        },
+      );
+      await this.auditSessionEvent(
+        principal,
+        'auth.session_revoked',
+        sessionId,
+        { by_session_id: user.sessionId },
+      );
+    });
 
     return { ok: true, revoked_session_id: sessionId };
   }
 
   async revokeAllSessions(user: AuthenticatedUser) {
     const principal = this.fromAuthenticatedUser(user);
+    if (!principal.tenantId) {
+      throw new ForbiddenException('Tenant-scoped account is required');
+    }
     const revoked = await this.tenantContext.runAsAuthPrincipal(
       principal,
       async () => {
-        const count = await this.repository.revokeAllSessions(
-          principal,
-          new Date(),
-          'user_revoked_all',
+        const sessions = await this.repository.listSessions(principal);
+        const count = sessions.filter((session) => !session.revokedAt).length;
+        await this.canonicalWave2.execute(
+          principal.tenantId!,
+          { userId: principal.userId },
+          {
+            operation: 'revoke_all_sessions',
+            currentSessionId: user.sessionId,
+          },
         );
 
         await this.auditSessionEvent(

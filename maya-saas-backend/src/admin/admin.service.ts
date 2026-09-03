@@ -1,16 +1,17 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthenticatedUser } from '../common/authenticated-user.interface';
-import { TenantStatus, UserRole, UserStatus } from '../common/domain.enums';
+import { TenantStatus, UserRole } from '../common/domain.enums';
 import {
   BrandingService,
   UploadedLogoFile,
 } from '../branding/branding.service';
 import { UpdateBrandingDto } from '../branding/dto/update-branding.dto';
 import { CrmService } from '../crm/crm.service';
+import { EncryptionService } from '../encryption/encryption.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from '../crm/dto/update-crm-integration.dto';
 import { UsersService } from '../users/users.service';
@@ -51,6 +52,8 @@ export class AdminService {
     private readonly auditLogService: AuditLogService,
     private readonly tenantContext: TenantContextService,
     private readonly quotas: QuotaService,
+    private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   createTenant(dto: CreateTenantDto, actor: AuthenticatedUser) {
@@ -94,7 +97,17 @@ export class AdminService {
   ) {
     this.ensureTenantCanBeManaged(actor, id);
     this.assertTenantUpdateFieldsAllowed(dto, actor);
-    const tenant = await this.tenantsService.updateTenant(id, dto);
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation: 'update_tenant_configuration',
+        changes: this.definedChanges(dto),
+      },
+    );
+    const tenant = this.tenantsService.serializeTenant(
+      await this.tenantsService.getTenantByIdOrThrow(id),
+    );
 
     await this.auditLogService.log({
       tenantId: id,
@@ -115,7 +128,15 @@ export class AdminService {
   ) {
     this.ensureTenantCanBeManaged(actor, id);
     await this.quotas.assertCustomBrandingAllowed(id, Object.keys(dto));
-    const branding = await this.brandingService.upsertBranding(id, dto);
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation: 'update_tenant_branding',
+        changes: this.definedChanges(dto),
+      },
+    );
+    const branding = await this.brandingService.getTenantBrandingOrThrow(id);
 
     await this.auditLogService.log({
       tenantId: id,
@@ -136,7 +157,18 @@ export class AdminService {
   ) {
     this.ensureTenantCanBeManaged(actor, id);
     await this.tenantsService.getTenantByIdOrThrow(id);
-    const branding = await this.brandingService.uploadTenantLogo(id, file);
+    this.brandingService.assertValidTenantLogoFile(file);
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation: 'upload_tenant_logo',
+        mimeType: file.mimetype as
+          'image/png' | 'image/jpeg' | 'image/webp' | 'image/gif',
+        bytes: file.buffer,
+      },
+    );
+    const branding = await this.brandingService.getTenantBrandingOrThrow(id);
 
     await this.auditLogService.log({
       tenantId: id,
@@ -215,17 +247,48 @@ export class AdminService {
       await this.usersService.ensurePhoneIsAvailable(id, dto.phone);
     }
 
-    const temporaryPassword = dto.password?.trim() || this.generatePassword();
-    const user = await this.usersService.createUser({
-      tenantId: id,
-      branchId: dto.branchId ?? null,
-      email: dto.email,
-      phone: dto.phone ?? null,
-      name: dto.name ?? null,
-      passwordHash: await bcrypt.hash(temporaryPassword, 10),
-      role,
-      status: UserStatus.ACTIVE,
-    });
+    const sourceIntentRef = this.canonicalWave2.intentRef();
+    const temporaryPassword =
+      dto.password?.trim() ||
+      this.encryptionService
+        .opaqueReference(
+          'package5-wave2.generated-tenant-user-password',
+          `${id}\0${sourceIntentRef}`,
+        )
+        .slice(0, 20);
+    const userId = this.canonicalWave2.deterministicTargetId(
+      'create_tenant_user',
+      id,
+      sourceIntentRef,
+    );
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation: 'create_tenant_user',
+        userId,
+        email: dto.email,
+        phone: dto.phone ?? null,
+        encryptedName: dto.name
+          ? this.encryptionService.encrypt(dto.name.trim())
+          : null,
+        passwordHash: await bcrypt.hash(temporaryPassword, 10),
+        credentialIntentHash: this.encryptionService.opaqueReference(
+          'package5-wave2.tenant-user-password-intent',
+          temporaryPassword,
+        ),
+        nameIntentHash: dto.name
+          ? this.encryptionService.opaqueReference(
+              'package5-wave2.tenant-user-name-intent',
+              dto.name.trim(),
+            )
+          : null,
+        role,
+        branchId: dto.branchId ?? null,
+      },
+      sourceIntentRef,
+    );
+    const user = await this.usersService.getTenantUserOrThrow(userId, id);
 
     await this.auditLogService.log({
       tenantId: id,
@@ -260,15 +323,47 @@ export class AdminService {
       await this.usersService.ensurePhoneIsAvailable(id, dto.phone);
     }
 
-    const temporaryPassword = dto.password?.trim() || this.generatePassword();
-    const user = await this.usersService.createStaffUserForInternalProvider({
-      tenantId: id,
-      providerId,
-      email: dto.email,
-      phone: dto.phone ?? null,
-      name: dto.name ?? null,
-      passwordHash: await bcrypt.hash(temporaryPassword, 10),
-    });
+    const sourceIntentRef = this.canonicalWave2.intentRef();
+    const temporaryPassword =
+      dto.password?.trim() ||
+      this.encryptionService
+        .opaqueReference(
+          'package5-wave2.generated-provider-user-password',
+          `${id}\0${providerId}\0${sourceIntentRef}`,
+        )
+        .slice(0, 20);
+    const userId = this.canonicalWave2.deterministicTargetId(
+      'create_provider_user',
+      id,
+      sourceIntentRef,
+    );
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation: 'create_provider_user',
+        providerId,
+        userId,
+        email: dto.email,
+        phone: dto.phone ?? null,
+        encryptedName: dto.name
+          ? this.encryptionService.encrypt(dto.name.trim())
+          : null,
+        passwordHash: await bcrypt.hash(temporaryPassword, 10),
+        credentialIntentHash: this.encryptionService.opaqueReference(
+          'package5-wave2.provider-user-password-intent',
+          temporaryPassword,
+        ),
+        nameIntentHash: dto.name
+          ? this.encryptionService.opaqueReference(
+              'package5-wave2.provider-user-name-intent',
+              dto.name.trim(),
+            )
+          : null,
+      },
+      sourceIntentRef,
+    );
+    const user = await this.usersService.getTenantUserOrThrow(userId, id);
 
     await this.auditLogService.log({
       tenantId: id,
@@ -296,7 +391,22 @@ export class AdminService {
     status: TenantStatus,
     actor: AuthenticatedUser,
   ) {
-    const tenant = await this.tenantsService.setTenantStatus(id, status);
+    if (status !== TenantStatus.SUSPENDED && status !== TenantStatus.ACTIVE) {
+      throw new ForbiddenException('Unsupported tenant lifecycle transition');
+    }
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation:
+          status === TenantStatus.SUSPENDED
+            ? 'suspend_tenant'
+            : 'reactivate_tenant',
+      },
+    );
+    const tenant = this.tenantsService.serializeTenant(
+      await this.tenantsService.getTenantByIdOrThrow(id),
+    );
 
     await this.tenantContext.runAsSystemTenant(id, () =>
       this.auditLogService.log({
@@ -312,8 +422,10 @@ export class AdminService {
     return tenant;
   }
 
-  private generatePassword() {
-    return randomBytes(12).toString('base64url');
+  private definedChanges(dto: object): Record<string, unknown> {
+    return Object.fromEntries(
+      Object.entries(dto).filter(([, value]) => value !== undefined),
+    );
   }
 
   private assertTenantRoleCanBeAssigned(

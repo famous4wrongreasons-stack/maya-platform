@@ -22,6 +22,7 @@ import {
   phonesMatch,
 } from '../common/phone.util';
 import { EncryptionService } from '../encryption/encryption.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { buildAppAccessContext } from './app-access';
@@ -97,6 +98,7 @@ export class UsersService {
     private readonly prisma: PrismaService,
     private readonly encryptionService: EncryptionService,
     private readonly tenantContext: TenantContextService,
+    private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
   ) {}
 
   async findTenantUserByEmail(tenantId: string, email: string) {
@@ -906,217 +908,128 @@ export class UsersService {
       });
     }
 
-    const fallbackPasswordHash =
-      email || phone
-        ? await bcrypt.hash(randomBytes(24).toString('base64url'), 10)
-        : null;
-
-    await this.prisma.$transaction(async (tx) => {
-      const staffId = await this.staffIdByExternal(
-        tx,
-        tenantId,
-        externalStaffId,
-      );
-      const access = await tx.crmStaffAccess.findFirst({
-        where: staffId ? { tenantId, staffId } : { tenantId, id: '' },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              phone: true,
-              role: true,
-            },
-          },
-        },
-      });
-      if (!access) {
-        throw new NotFoundException({
-          message: 'CRM team member access was not found.',
-          error: { code: 'crm_team_access_not_found' },
-        });
-      }
-      if (
-        access.userId === data.actorUserId ||
-        this.isOwnerAccessRole(access.role)
-      ) {
-        throw new ForbiddenException({
-          message: 'Owner access is managed from the owner profile.',
-          error: { code: 'crm_team_owner_access_read_only' },
-        });
-      }
-      if (access.status === 'disabled') {
-        throw new ConflictException({
-          message: 'This employee is no longer active in CRM.',
-          error: { code: 'crm_staff_access_disabled' },
-        });
-      }
-
-      const role = requestedRole ?? access.role;
-      if (role !== UserRole.ADMINISTRATOR && role !== UserRole.STAFF) {
-        throw new BadRequestException({
-          message: 'Unsupported team access role.',
-          error: { code: 'crm_team_role_invalid' },
-        });
-      }
-
-      const contactClauses = [
-        ...(email ? [{ email }] : []),
-        ...(phone ? [{ phone }] : []),
-      ];
-
-      let userId = access.userId;
-      let priorRole = access.user?.role ?? null;
-      let contactChanged = false;
-
-      if (userId && access.user) {
-        contactChanged = Boolean(
-          (email && email !== access.user.email) ||
-          (phone && phone !== access.user.phone),
-        );
-        if (contactClauses.length) {
-          const conflict = await tx.user.findFirst({
-            where: {
-              id: { not: userId },
-              memberships: { some: { tenantId } },
-              OR: contactClauses,
-            },
-            select: { id: true },
-          });
-          if (conflict) this.throwCrmTeamContactConflict();
-        }
-
-        await tx.user.update({
-          where: { id: userId },
-          data: {
-            ...(email ? { email } : {}),
-            ...(phone ? { phone } : {}),
-            role,
-            status: UserStatus.ACTIVE,
-          },
-        });
-        await tx.membership.updateMany({
-          where: { tenantId, userId },
-          data: { role, status: 'active' },
-        });
-      } else if (contactClauses.length) {
-        const matches = await tx.user.findMany({
-          where: {
-            memberships: { some: { tenantId } },
-            OR: contactClauses,
-          },
+    const staffId = await this.staffIdByExternal(
+      this.prisma,
+      tenantId,
+      externalStaffId,
+    );
+    const access = await this.prisma.crmStaffAccess.findFirst({
+      where: staffId ? { tenantId, staffId } : { tenantId, id: '' },
+      include: {
+        user: {
           select: {
             id: true,
             email: true,
             phone: true,
-            role: true,
+            passwordHash: true,
           },
-          take: 2,
-        });
-        if (matches.length > 1) this.throwCrmTeamContactConflict();
-
-        const existingUser = matches[0] ?? null;
-        if (existingUser) {
-          const existingAccess = await tx.crmStaffAccess.findFirst({
-            where: {
-              tenantId,
-              userId: existingUser.id,
-              id: { not: access.id },
-            },
-            select: { id: true },
-          });
-          if (existingAccess) this.throwCrmTeamContactConflict();
-
-          userId = existingUser.id;
-          priorRole = existingUser.role;
-          contactChanged = Boolean(
-            (email && email !== existingUser.email) ||
-            (phone && phone !== existingUser.phone),
-          );
-          await tx.user.update({
-            where: { id: existingUser.id },
-            data: {
-              ...(email ? { email } : {}),
-              ...(phone ? { phone } : {}),
-              role,
-              status: UserStatus.ACTIVE,
-            },
-          });
-          await tx.membership.updateMany({
-            where: { tenantId, userId: existingUser.id },
-            data: { role, status: 'active' },
-          });
-        } else {
-          const [tenant, branch] = await Promise.all([
-            tx.tenant.findUnique({
-              where: { id: tenantId },
-              select: { slug: true },
-            }),
-            tx.branch.findFirst({
-              where: { tenantId },
-              orderBy: { createdAt: 'asc' },
-              select: { id: true },
-            }),
-          ]);
-          if (!tenant || !fallbackPasswordHash) {
-            throw new NotFoundException({
-              message: 'Tenant was not found.',
-              error: { code: 'tenant_not_found' },
-            });
-          }
-
-          const user = await tx.user.create({
-            data: {
-              tenantId,
-              branchId: branch?.id ?? null,
-              email: email ?? buildPhoneLoginEmail(tenant.slug, phone!),
-              phone,
-              encryptedName: access.encryptedDisplayName,
-              passwordHash: fallbackPasswordHash,
-              role,
-              status: UserStatus.ACTIVE,
-              memberships: {
-                create: {
-                  tenantId,
-                  branchId: branch?.id ?? null,
-                  role,
-                  status: 'active',
-                  joinedAt: new Date(),
-                },
-              },
-            },
-            select: { id: true },
-          });
-          userId = user.id;
-        }
-      }
-
-      await tx.crmStaffAccess.update({
-        where: { id: access.id },
-        data: {
-          role,
-          userId,
-          status: userId ? 'active' : 'pending_contact',
         },
-      });
-
-      if (userId && contactChanged) {
-        await tx.authIdentity.deleteMany({
-          where: { tenantId, userId },
-        });
-      }
-      if (userId && (contactChanged || (priorRole && priorRole !== role))) {
-        await tx.authSession.updateMany({
-          where: { tenantId, userId, revokedAt: null },
-          data: {
-            revokedAt: new Date(),
-            revokeReason: contactChanged
-              ? 'crm_staff_login_changed'
-              : 'crm_staff_role_changed',
-          },
-        });
-      }
+      },
     });
+    if (!access) {
+      throw new NotFoundException({
+        message: 'CRM team member access was not found.',
+        error: { code: 'crm_team_access_not_found' },
+      });
+    }
+    const role = requestedRole ?? access.role;
+    if (role !== UserRole.ADMINISTRATOR && role !== UserRole.STAFF) {
+      throw new BadRequestException({
+        message: 'Unsupported team access role.',
+        error: { code: 'crm_team_role_invalid' },
+      });
+    }
+
+    const contactClauses = [
+      ...(email ? [{ email }] : []),
+      ...(phone ? [{ phone }] : []),
+    ];
+    let loginUser = access.user;
+    if (!loginUser && contactClauses.length) {
+      const matches = await this.prisma.user.findMany({
+        where: {
+          memberships: { some: { tenantId } },
+          OR: contactClauses,
+        },
+        select: {
+          id: true,
+          email: true,
+          phone: true,
+          passwordHash: true,
+        },
+        take: 2,
+      });
+      if (matches.length > 1) this.throwCrmTeamContactConflict();
+      loginUser = matches[0] ?? null;
+      if (loginUser) {
+        const conflict = await this.prisma.crmStaffAccess.findFirst({
+          where: { tenantId, userId: loginUser.id, id: { not: access.id } },
+          select: { id: true },
+        });
+        if (conflict) this.throwCrmTeamContactConflict();
+      }
+    }
+
+    const sourceIntentRef = this.canonicalWave2.intentRef();
+    const needsLogin = Boolean(loginUser || contactClauses.length);
+    let login:
+      | {
+          userId: string;
+          email: string;
+          phone: string | null;
+          branchId: string | null;
+          passwordHash: string;
+          credentialIntentHash: string;
+        }
+      | undefined;
+    if (needsLogin) {
+      const [tenant, branch] = await Promise.all([
+        this.prisma.tenant.findUnique({
+          where: { id: tenantId },
+          select: { slug: true },
+        }),
+        this.prisma.branch.findFirst({
+          where: { tenantId },
+          orderBy: { createdAt: 'asc' },
+          select: { id: true },
+        }),
+      ]);
+      if (!tenant) throw new NotFoundException('Tenant was not found.');
+      const loginEmail =
+        email ?? loginUser?.email ?? buildPhoneLoginEmail(tenant.slug, phone!);
+      const loginPhone = phone ?? loginUser?.phone ?? null;
+      login = {
+        userId:
+          loginUser?.id ??
+          this.canonicalWave2.deterministicTargetId(
+            'configure_staff_access',
+            tenantId,
+            sourceIntentRef,
+          ),
+        email: loginEmail,
+        phone: loginPhone,
+        branchId: branch?.id ?? null,
+        passwordHash:
+          loginUser?.passwordHash ??
+          (await bcrypt.hash(randomBytes(24).toString('base64url'), 10)),
+        credentialIntentHash: this.encryptionService.opaqueReference(
+          'package5-wave2.crm-login-intent',
+          `${tenantId}\0${loginEmail}\0${loginPhone ?? ''}`,
+        ),
+      };
+    }
+
+    await this.canonicalWave2.execute(
+      tenantId,
+      { userId: data.actorUserId },
+      {
+        operation: 'configure_staff_access',
+        accessId: access.id,
+        role,
+        ...(login ? { login } : {}),
+      },
+      sourceIntentRef,
+    );
 
     const snapshot = await this.listCrmTeamAccess(tenantId, data.actorUserId);
     return snapshot.items.find(
@@ -1139,80 +1052,29 @@ export class UsersService {
       });
     }
 
-    await this.prisma.$transaction(async (tx) => {
-      const ownerMembership = await tx.membership.findFirst({
-        where: {
-          tenantId,
-          userId: data.actorUserId,
-          status: 'active',
-          role: { in: CRM_OWNER_ROLES },
-        },
-        select: { role: true },
-      });
-      if (!ownerMembership) {
-        throw new ForbiddenException({
-          message: 'Only the tenant owner can claim the CRM owner identity.',
-          error: { code: 'crm_team_owner_claim_forbidden' },
-        });
-      }
-
-      const staffId = await this.staffIdByExternal(
-        tx,
-        tenantId,
-        externalStaffId,
-      );
-      const access = await tx.crmStaffAccess.findFirst({
-        where: staffId ? { tenantId, staffId } : { tenantId, id: '' },
-        select: {
-          id: true,
-          userId: true,
-          role: true,
-          status: true,
-        },
-      });
-      if (!access) {
-        throw new NotFoundException({
-          message: 'CRM team member access was not found.',
-          error: { code: 'crm_team_access_not_found' },
-        });
-      }
-      if (access.status === 'disabled') {
-        throw new ConflictException({
-          message: 'This employee is no longer active in CRM.',
-          error: { code: 'crm_staff_access_disabled' },
-        });
-      }
-      if (access.userId && access.userId !== data.actorUserId) {
-        throw new ConflictException({
-          message: 'This CRM employee is already linked to another account.',
-          error: { code: 'crm_team_owner_claim_assigned' },
-        });
-      }
-
-      const existingOwnerLink = await tx.crmStaffAccess.findFirst({
-        where: {
-          tenantId,
-          id: { not: access.id },
-          OR: [{ userId: data.actorUserId }, { role: { in: CRM_OWNER_ROLES } }],
-        },
-        select: { id: true },
-      });
-      if (existingOwnerLink) {
-        throw new ConflictException({
-          message: 'The tenant owner is already linked to a CRM employee.',
-          error: { code: 'crm_team_owner_already_linked' },
-        });
-      }
-
-      await tx.crmStaffAccess.update({
-        where: { id: access.id },
-        data: {
-          userId: data.actorUserId,
-          role: ownerMembership.role,
-          status: 'active',
-        },
-      });
+    const staffId = await this.staffIdByExternal(
+      this.prisma,
+      tenantId,
+      externalStaffId,
+    );
+    const access = await this.prisma.crmStaffAccess.findFirst({
+      where: staffId ? { tenantId, staffId } : { tenantId, id: '' },
+      select: { id: true },
     });
+    if (!access) {
+      throw new NotFoundException({
+        message: 'CRM team member access was not found.',
+        error: { code: 'crm_team_access_not_found' },
+      });
+    }
+    await this.canonicalWave2.execute(
+      tenantId,
+      { userId: data.actorUserId },
+      {
+        operation: 'claim_team_owner',
+        accessId: access.id,
+      },
+    );
 
     const snapshot = await this.listCrmTeamAccess(tenantId, data.actorUserId);
     return snapshot.items.find(

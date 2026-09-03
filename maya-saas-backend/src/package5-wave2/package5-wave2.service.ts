@@ -101,6 +101,39 @@ const TENANT_CONFIG_FIELDS = new Set([
   'allowSelfRegistration',
   'bookingMode',
 ]);
+const RESERVED_TENANT_HOST_NAMES = new Set([
+  'www',
+  'api',
+  'app',
+  'admin',
+  'auth',
+  'login',
+  'billing',
+  'pay',
+  'static',
+  'assets',
+  'cdn',
+  'mail',
+  'smtp',
+  'ftp',
+  'ns',
+  'ns1',
+  'ns2',
+  'maya',
+  'maya-os',
+  'mayaos',
+  'platform',
+  'system',
+  'support',
+  'help',
+  'status',
+  'docs',
+  'blog',
+  'test',
+  'staging',
+  'dev',
+  'local',
+]);
 
 export type Package5Wave2Command =
   | {
@@ -112,7 +145,9 @@ export type Package5Wave2Command =
         userId: string;
         email: string;
         phone?: string | null;
+        branchId?: string | null;
         passwordHash: string;
+        credentialIntentHash?: string;
       };
     }
   | {
@@ -167,6 +202,8 @@ export type Package5Wave2Command =
       phone?: string | null;
       encryptedName?: string | null;
       passwordHash: string;
+      credentialIntentHash?: string;
+      nameIntentHash?: string | null;
       role: 'tenant_owner' | 'tenant_admin' | 'branch_manager' | 'staff';
       branchId?: string | null;
     }
@@ -179,6 +216,8 @@ export type Package5Wave2Command =
       phone?: string | null;
       encryptedName?: string | null;
       passwordHash: string;
+      credentialIntentHash?: string;
+      nameIntentHash?: string | null;
     }
   | {
       operation: 'suspend_tenant';
@@ -469,11 +508,22 @@ export class Package5Wave2ShadowService {
   }
 
   private requestMaterialHash(command: Package5Wave2Command) {
-    return wave2Hash(
-      Object.fromEntries(
-        Object.entries(command).filter(([key]) => key !== 'sourceIntentRef'),
-      ),
-    );
+    const material = Object.fromEntries(
+      Object.entries(command).filter(([key]) => key !== 'sourceIntentRef'),
+    ) as Record<string, unknown>;
+    if (command.operation === 'configure_staff_access' && command.login) {
+      material.login = Object.fromEntries(
+        Object.entries(command.login).filter(([key]) => key !== 'passwordHash'),
+      );
+    }
+    if (
+      command.operation === 'create_tenant_user' ||
+      command.operation === 'create_provider_user'
+    ) {
+      delete material.passwordHash;
+      delete material.encryptedName;
+    }
+    return wave2Hash(material);
   }
 
   async safeDesired(
@@ -622,7 +672,9 @@ export class Package5Wave2ShadowService {
             ? wave2Hash({
                 email: command.login.email.trim().toLowerCase(),
                 phone: command.login.phone?.trim() ?? null,
-                passwordHash: command.login.passwordHash,
+                branchId: command.login.branchId ?? null,
+                credentialIntentHash:
+                  command.login.credentialIntentHash ?? 'legacy-material',
               })
             : null,
         };
@@ -771,6 +823,7 @@ export class Package5Wave2ShadowService {
           TENANT_CONFIG_FIELDS,
           'tenant configuration',
         );
+        this.assertTenantHostNamesAllowed(command.changes);
         const tenant = await this.prisma.tenant.findUnique({
           where: { id: tenantId },
           include: { brandingSettings: { select: { themeJson: true } } },
@@ -957,8 +1010,8 @@ export class Package5Wave2ShadowService {
       emailFingerprint: wave2Hash(command.email.trim().toLowerCase()),
       phoneFingerprint: command.phone ? wave2Hash(command.phone.trim()) : null,
       credentialFingerprint: wave2Hash({
-        passwordHash: command.passwordHash,
-        encryptedName: command.encryptedName ?? null,
+        credentialIntentHash: command.credentialIntentHash ?? 'legacy-material',
+        nameIntentHash: command.nameIntentHash ?? null,
       }),
       role:
         command.operation === 'create_provider_user'
@@ -1001,13 +1054,7 @@ export class Package5Wave2ShadowService {
       subdomain: tenant.subdomain,
       trialEndsAt: tenant.trialEndsAt?.toISOString() ?? null,
       allowSelfRegistration: tenant.allowSelfRegistration,
-      bookingMode:
-        tenant.brandingSettings?.themeJson &&
-        typeof tenant.brandingSettings.themeJson === 'object' &&
-        !Array.isArray(tenant.brandingSettings.themeJson)
-          ? ((tenant.brandingSettings.themeJson as Record<string, unknown>)
-              .booking_mode ?? null)
-          : null,
+      bookingMode: this.bookingMode(tenant.brandingSettings?.themeJson),
     };
   }
 
@@ -1053,6 +1100,49 @@ export class Package5Wave2ShadowService {
       select: { targetGeneration: true },
     });
     return (latest?.targetGeneration ?? -1) + 1;
+  }
+
+  private assertTenantHostNamesAllowed(changes: Record<string, unknown>) {
+    for (const field of ['subdomain', 'slug'] as const) {
+      const value = changes[field];
+      if (value === undefined || value === null || value === '') continue;
+      if (typeof value !== 'string')
+        throw new BadRequestException(`${field} is invalid`);
+      const normalized = value.trim().toLowerCase();
+      if (!normalized || RESERVED_TENANT_HOST_NAMES.has(normalized)) {
+        throw new BadRequestException({
+          error: { code: 'tenant_host_name_reserved', value: normalized },
+        });
+      }
+    }
+    const value = changes.customDomain;
+    if (value === undefined || value === null || value === '') return;
+    if (typeof value !== 'string')
+      throw new BadRequestException('customDomain is invalid');
+    const domain = value.trim().toLowerCase();
+    const platformDomain = String(process.env.PLATFORM_BASE_DOMAIN ?? '')
+      .trim()
+      .toLowerCase();
+    if (
+      !domain ||
+      (platformDomain &&
+        (domain === platformDomain || domain.endsWith(`.${platformDomain}`)))
+    ) {
+      throw new BadRequestException({
+        error: { code: 'tenant_domain_reserved', value: domain },
+      });
+    }
+  }
+
+  private bookingMode(theme: unknown): unknown {
+    if (!theme || typeof theme !== 'object' || Array.isArray(theme)) {
+      return null;
+    }
+    const booking = (theme as Record<string, unknown>).booking;
+    if (!booking || typeof booking !== 'object' || Array.isArray(booking)) {
+      return null;
+    }
+    return (booking as Record<string, unknown>).mode ?? null;
   }
 
   private integer(value: unknown) {
@@ -1524,13 +1614,7 @@ export class Package5Wave2ExecutableService {
           subdomain: tenant.subdomain,
           trialEndsAt: tenant.trialEndsAt?.toISOString() ?? null,
           allowSelfRegistration: tenant.allowSelfRegistration,
-          bookingMode:
-            tenant.brandingSettings?.themeJson &&
-            typeof tenant.brandingSettings.themeJson === 'object' &&
-            !Array.isArray(tenant.brandingSettings.themeJson)
-              ? ((tenant.brandingSettings.themeJson as Record<string, unknown>)
-                  .booking_mode ?? null)
-              : null,
+          bookingMode: this.bookingMode(tenant.brandingSettings?.themeJson),
         };
       }
       case 'update_tenant_branding':
@@ -1585,10 +1669,7 @@ export class Package5Wave2ExecutableService {
           subdomain: tenant.subdomain,
           trialEndsAt: tenant.trialEndsAt?.toISOString() ?? null,
           allowSelfRegistration: tenant.allowSelfRegistration,
-          bookingMode:
-            theme && typeof theme === 'object' && !Array.isArray(theme)
-              ? ((theme as Record<string, unknown>).booking_mode ?? null)
-              : null,
+          bookingMode: this.bookingMode(theme),
         };
       }
     }
@@ -1605,6 +1686,8 @@ export class Package5Wave2ExecutableService {
           where: { id: command.accessId },
         });
         let userId = access.userId;
+        let contactChanged = false;
+        let roleChanged = access.role !== command.role;
         if (command.login) {
           const existing = await tx.user.findUnique({
             where: { id: command.login.userId },
@@ -1614,6 +1697,7 @@ export class Package5Wave2ExecutableService {
               data: {
                 id: command.login.userId,
                 tenantId: execution.tenantId,
+                branchId: command.login.branchId ?? null,
                 email: command.login.email.trim().toLowerCase(),
                 phone: command.login.phone?.trim() ?? null,
                 encryptedName: access.encryptedDisplayName,
@@ -1623,6 +1707,7 @@ export class Package5Wave2ExecutableService {
                 memberships: {
                   create: {
                     tenantId: execution.tenantId,
+                    branchId: command.login.branchId ?? null,
                     role: command.role,
                     status: 'active',
                     joinedAt: this.now(),
@@ -1631,6 +1716,10 @@ export class Package5Wave2ExecutableService {
               },
             });
           } else {
+            contactChanged =
+              existing.email !== command.login.email.trim().toLowerCase() ||
+              existing.phone !== (command.login.phone?.trim() ?? null);
+            roleChanged = roleChanged || existing.role !== command.role;
             await tx.user.update({
               where: { id: existing.id },
               data: {
@@ -1640,12 +1729,10 @@ export class Package5Wave2ExecutableService {
                 phone: command.login.phone?.trim() ?? null,
               },
             });
-            await tx.membership.update({
+            await tx.membership.updateMany({
               where: {
-                userId_tenantId: {
-                  userId: existing.id,
-                  tenantId: execution.tenantId,
-                },
+                userId: existing.id,
+                tenantId: execution.tenantId,
               },
               data: { role: command.role, status: 'active' },
             });
@@ -1660,12 +1747,19 @@ export class Package5Wave2ExecutableService {
             status: userId ? 'active' : 'pending_contact',
           },
         });
-        if (userId)
+        if (userId && contactChanged) {
+          await tx.authIdentity.deleteMany({
+            where: { tenantId: execution.tenantId, userId },
+          });
+        }
+        if (userId && (contactChanged || roleChanged))
           await tx.authSession.updateMany({
             where: { tenantId: execution.tenantId, userId, revokedAt: null },
             data: {
               revokedAt: this.now(),
-              revokeReason: 'crm_staff_access_changed',
+              revokeReason: contactChanged
+                ? 'crm_staff_login_changed'
+                : 'crm_staff_role_changed',
             },
           });
         return;
@@ -1793,19 +1887,25 @@ export class Package5Wave2ExecutableService {
             !Array.isArray(current.themeJson)
               ? (current.themeJson as Record<string, unknown>)
               : {};
+          const booking =
+            theme.booking &&
+            typeof theme.booking === 'object' &&
+            !Array.isArray(theme.booking)
+              ? (theme.booking as Record<string, unknown>)
+              : {};
           await tx.brandingSettings.upsert({
             where: { tenantId: execution.tenantId },
             create: {
               tenantId: execution.tenantId,
               themeJson: {
                 ...theme,
-                booking_mode: bookingMode,
+                booking: { ...booking, mode: bookingMode },
               },
             },
             update: {
               themeJson: {
                 ...theme,
-                booking_mode: bookingMode,
+                booking: { ...booking, mode: bookingMode },
               },
             },
           });
@@ -1937,6 +2037,17 @@ export class Package5Wave2ExecutableService {
         afterStateHash: this.text(input.afterStateHash),
       },
     });
+  }
+
+  private bookingMode(theme: unknown): unknown {
+    if (!theme || typeof theme !== 'object' || Array.isArray(theme)) {
+      return null;
+    }
+    const booking = (theme as Record<string, unknown>).booking;
+    if (!booking || typeof booking !== 'object' || Array.isArray(booking)) {
+      return null;
+    }
+    return (booking as Record<string, unknown>).mode ?? null;
   }
 
   private assertExecutable(

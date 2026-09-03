@@ -7,6 +7,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import { UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import { MembershipsService } from '../tenancy/memberships.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionRepository } from './auth-session.repository';
@@ -98,6 +99,7 @@ describe('AuthSessionService', () => {
     const assertCrmStaffAccessMock = jest.fn().mockResolvedValue(undefined);
     const auditTryLogMock = jest.fn().mockResolvedValue(undefined);
     const auditTryLogPlatformMock = jest.fn().mockResolvedValue(undefined);
+    const canonicalExecuteMock = jest.fn().mockResolvedValue({});
     const tenantContext = new TenantContextService();
     const service = new AuthSessionService(
       {
@@ -130,6 +132,9 @@ describe('AuthSessionService', () => {
         tryLog: auditTryLogMock,
         tryLogPlatformAction: auditTryLogPlatformMock,
       } as unknown as AuditLogService,
+      {
+        execute: canonicalExecuteMock,
+      } as unknown as Package5Wave2CanonicalCutoverService,
     );
 
     return {
@@ -150,6 +155,7 @@ describe('AuthSessionService', () => {
         revokeSessionMock,
         rotateRefreshTokenMock,
         signAsyncMock,
+        canonicalExecuteMock,
       },
     };
   };
@@ -444,6 +450,10 @@ describe('AuthSessionService', () => {
 
   it('revokes every session owned by the authenticated principal', async () => {
     const { service, mocks } = createService();
+    mocks.listSessionsMock.mockResolvedValueOnce([
+      { id: 'session-a', revokedAt: null },
+      { id: 'session-b', revokedAt: null },
+    ]);
     const result = await service.revokeAllSessions({
       userId: 'user-a',
       sessionId: 'session-a',
@@ -456,10 +466,11 @@ describe('AuthSessionService', () => {
     });
 
     expect(result).toEqual({ ok: true, revoked_sessions: 2 });
-    expect(mocks.revokeAllSessionsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: 'user-a', tenantId: 'tenant-a' }),
-      expect.any(Date),
-      'user_revoked_all',
+    expect(mocks.canonicalExecuteMock).toHaveBeenCalledWith(
+      'tenant-a',
+      { userId: 'user-a' },
+      { operation: 'revoke_all_sessions', currentSessionId: 'session-a' },
     );
+    expect(mocks.revokeAllSessionsMock).not.toHaveBeenCalled();
   });
 });

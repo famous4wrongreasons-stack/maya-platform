@@ -8,6 +8,7 @@ import {
 } from '../action-engine';
 import { PrismaService } from '../prisma/prisma.service';
 import { Package5Wave2FileObjectStore } from './package5-wave2-object-store.service';
+import { Package5Wave2CanonicalCutoverService } from './package5-wave2-canonical-cutover.service';
 import {
   Package5Wave2ExecutableService,
   Package5Wave2ShadowService,
@@ -19,6 +20,7 @@ import { TrialActivationBootstrapService } from './trial-activation-bootstrap.se
   providers: [
     Package5Wave2ShadowService,
     Package5Wave2FileObjectStore,
+    Package5Wave2CanonicalCutoverService,
     {
       provide: TrialActivationBootstrapService,
       useFactory: (prisma: PrismaService) =>
@@ -56,6 +58,7 @@ import { TrialActivationBootstrapService } from './trial-activation-bootstrap.se
   exports: [
     Package5Wave2ShadowService,
     Package5Wave2ExecutableService,
+    Package5Wave2CanonicalCutoverService,
     TrialActivationBootstrapService,
   ],
 })

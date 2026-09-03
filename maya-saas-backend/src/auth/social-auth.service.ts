@@ -27,6 +27,7 @@ import {
   resolveNodeEnvironment,
 } from '../config/security-config';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { AuthClientMetadata } from './auth-client-metadata';
@@ -131,6 +132,7 @@ export class SocialAuthService {
     private readonly flowSystemGateway: AuthFlowSystemGateway,
     private readonly rateLimitService: AuthRateLimitService,
     private readonly sessionService: AuthSessionService,
+    private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
   ) {}
 
   async startYandexLogin(
@@ -676,37 +678,25 @@ export class SocialAuthService {
         provider,
         profile.providerUserId,
       );
-      let transferredFromClient = false;
-
-      if (existingIdentity && existingIdentity.user.id !== targetUser.id) {
-        if (!this.isClientRole(existingIdentity.user.role)) {
-          throw new ConflictException(
-            this.buildSocialAuthError(
-              'social_identity_conflict',
-              'This social account is already linked to another staff account.',
-            ),
-          );
-        }
-
-        await this.authRepository.reassignIdentity(existingIdentity.id, {
-          userId: targetUser.id,
-          email: profile.email,
-          phone: profile.phone,
-          profileJson: asJson(profile.raw),
-        });
-        transferredFromClient = true;
-      } else if (existingIdentity) {
-        await this.updateIdentityRecord(existingIdentity.id, profile);
-      } else {
-        await this.authRepository.createIdentity({
-          userId: targetUser.id,
-          provider,
-          providerUserId: profile.providerUserId,
-          email: profile.email,
-          phone: profile.phone,
-          profileJson: asJson(profile.raw),
-        });
-      }
+      const transferredFromClient = Boolean(
+        existingIdentity && existingIdentity.user.id !== targetUser.id,
+      );
+      await this.canonicalWave2.execute(
+        flow.tenant.id,
+        { userId: principal.userId },
+        {
+          operation: 'link_social_identity',
+          assertion: {
+            verified: true,
+            provider,
+            providerUserId: profile.providerUserId,
+            email: profile.email,
+            phone: profile.phone,
+            profileJson: profile.raw,
+          },
+        },
+        flow.id,
+      );
 
       return {
         ok: true,

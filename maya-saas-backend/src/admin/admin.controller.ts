@@ -184,6 +184,7 @@ export class AdminController {
 
   @Post(':id/suspend')
   @Roles(UserRole.PLATFORM_OWNER)
+  @TenantScoped({ paramKey: 'id', requireTenant: false })
   @ApiOperation({ summary: 'Suspend a tenant' })
   suspendTenant(
     @Param('id') id: string,
@@ -194,6 +195,7 @@ export class AdminController {
 
   @Post(':id/activate')
   @Roles(UserRole.PLATFORM_OWNER)
+  @TenantScoped({ paramKey: 'id', requireTenant: false })
   @ApiOperation({ summary: 'Activate a tenant' })
   activateTenant(
     @Param('id') id: string,

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { QuotaResource } from '../quotas/quota-resource';
 import { QuotaService } from '../quotas/quota.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -12,6 +13,7 @@ export class BranchesService {
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
     private readonly quotas: QuotaService,
+    private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
   ) {}
 
   async listForTenant(tenantId: string) {
@@ -33,16 +35,35 @@ export class BranchesService {
     }));
   }
 
-  async createForTenant(tenantId: string, dto: CreateBranchDto) {
+  async createForTenant(
+    tenantId: string,
+    actorUserId: string,
+    dto: CreateBranchDto,
+  ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.quotas.assertCanCreate(scopedTenantId, QuotaResource.BRANCHES);
-    const branch = await this.prisma.branch.create({
-      data: {
-        tenantId: scopedTenantId,
-        name: dto.name.trim(),
-        address: dto.address?.trim() || null,
-        phone: dto.phone?.trim() || null,
-        timezone: dto.timezone?.trim() || null,
+    const sourceIntentRef = this.canonicalWave2.intentRef();
+    const branchId = this.canonicalWave2.deterministicTargetId(
+      'create_tenant_branch',
+      scopedTenantId,
+      sourceIntentRef,
+    );
+    await this.canonicalWave2.execute(
+      scopedTenantId,
+      { userId: actorUserId },
+      {
+        operation: 'create_tenant_branch',
+        branchId,
+        name: dto.name,
+        address: dto.address,
+        phone: dto.phone,
+        timezone: dto.timezone,
+      },
+      sourceIntentRef,
+    );
+    const branch = await this.prisma.branch.findUniqueOrThrow({
+      where: {
+        id_tenantId: { id: branchId, tenantId: scopedTenantId },
       },
     });
 

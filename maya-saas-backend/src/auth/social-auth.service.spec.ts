@@ -1,5 +1,6 @@
 import { createSign, generateKeyPairSync } from 'crypto';
 
+import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -7,6 +8,7 @@ import { UserRole } from '../common/domain.enums';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
 import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionService } from './auth-session.service';
@@ -208,6 +210,7 @@ describe('SocialAuthService', () => {
     });
     const rateLimitPreflightMock = jest.fn().mockResolvedValue(undefined);
     const rateLimitTenantMock = jest.fn().mockResolvedValue(undefined);
+    const canonicalExecuteMock = jest.fn().mockResolvedValue({});
 
     const configService: Pick<ConfigService, 'get'> = {
       get: configGetMock,
@@ -271,6 +274,9 @@ describe('SocialAuthService', () => {
           assertTenant: rateLimitTenantMock,
         } as unknown as AuthRateLimitService,
         { issueSession: issueSessionMock } as unknown as AuthSessionService,
+        {
+          execute: canonicalExecuteMock,
+        } as unknown as Package5Wave2CanonicalCutoverService,
       ),
       tenantContext,
       mocks: {
@@ -296,6 +302,7 @@ describe('SocialAuthService', () => {
         serializeUserMock,
         serializeCurrentUserMock,
         issueSessionMock,
+        canonicalExecuteMock,
       },
     };
   };
@@ -959,6 +966,7 @@ describe('SocialAuthService', () => {
       mocks: {
         authFlowStateFindUniqueMock,
         authIdentityCreateMock,
+        canonicalExecuteMock,
         getTenantUserOrThrowMock,
         issueSessionMock,
       },
@@ -1004,13 +1012,22 @@ describe('SocialAuthService', () => {
       principal,
     );
 
-    expect(authIdentityCreateMock).toHaveBeenCalledWith(
+    expect(canonicalExecuteMock).toHaveBeenCalledWith(
+      tenant.id,
+      { userId: owner.id },
       expect.objectContaining({
-        userId: owner.id,
-        provider: 'yandex',
-        providerUserId: 'yandex-owner-1',
+        operation: 'link_social_identity',
+        // Jest asymmetric matchers are intentionally nested here.
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        assertion: expect.objectContaining({
+          verified: true,
+          provider: 'yandex',
+          providerUserId: 'yandex-owner-1',
+        }),
       }),
+      'flow-owner-link',
     );
+    expect(authIdentityCreateMock).not.toHaveBeenCalled();
     expect(issueSessionMock).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       ok: true,
@@ -1029,6 +1046,7 @@ describe('SocialAuthService', () => {
         authIdentityCreateMock,
         authIdentityFindUniqueMock,
         authIdentityReassignMock,
+        canonicalExecuteMock,
         getTenantUserOrThrowMock,
       },
     } = createService();
@@ -1077,10 +1095,13 @@ describe('SocialAuthService', () => {
       principal,
     );
 
-    expect(authIdentityReassignMock).toHaveBeenCalledWith(
-      'identity-client',
-      expect.objectContaining({ userId: owner.id }),
+    expect(canonicalExecuteMock).toHaveBeenCalledWith(
+      tenant.id,
+      { userId: owner.id },
+      expect.objectContaining({ operation: 'link_social_identity' }),
+      'flow-owner-transfer',
     );
+    expect(authIdentityReassignMock).not.toHaveBeenCalled();
     expect(authIdentityCreateMock).not.toHaveBeenCalled();
     expect(result.transferred_from_client).toBe(true);
   });
@@ -1092,6 +1113,7 @@ describe('SocialAuthService', () => {
         authFlowStateFindUniqueMock,
         authIdentityFindUniqueMock,
         authIdentityReassignMock,
+        canonicalExecuteMock,
         getTenantUserOrThrowMock,
       },
     } = createService();
@@ -1129,6 +1151,11 @@ describe('SocialAuthService', () => {
         createFetchResponse({ access_token: 'ya-owner-access' }),
       )
       .mockResolvedValueOnce(createFetchResponse({ id: 'yandex-owner-1' }));
+    canonicalExecuteMock.mockRejectedValueOnce(
+      new ConflictException({
+        error: { code: 'social_identity_conflict' },
+      }),
+    );
 
     await expect(
       service.completeYandexLink(

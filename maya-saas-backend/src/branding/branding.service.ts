@@ -13,7 +13,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UpdateBrandingDto } from './dto/update-branding.dto';
 
-const TENANT_LOGO_ROUTE_PREFIX = '/api/public/uploads/tenant-logos';
 const PROVIDER_AVATAR_ROUTE_PREFIX = '/api/public/uploads/provider-avatars';
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 const LOGO_MIME_EXTENSIONS = new Map([
@@ -143,49 +142,18 @@ export class BrandingService {
     });
   }
 
-  async uploadTenantLogo(tenantId: string, file: UploadedLogoFile | undefined) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+  assertValidTenantLogoFile(
+    file: UploadedLogoFile | undefined,
+  ): asserts file is UploadedLogoFile {
     this.validateLogoFile(file);
+  }
 
-    const existingBranding = await this.prisma.brandingSettings.findUnique({
+  async getTenantBrandingOrThrow(tenantId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const branding = await this.prisma.brandingSettings.findUnique({
       where: { tenantId: scopedTenantId },
-      select: {
-        logoUrl: true,
-      },
     });
-    const extension = LOGO_MIME_EXTENSIONS.get(file.mimetype);
-
-    if (!extension) {
-      throw new BadRequestException(
-        this.buildLogoUploadError(
-          'logo_file_type_unsupported',
-          'Logo must be a PNG, JPEG, WEBP, or GIF image.',
-          'file',
-        ),
-      );
-    }
-
-    const filename = `${scopedTenantId}-${randomUUID()}.${extension}`;
-    const uploadDir = this.getTenantLogoUploadDir();
-    const absolutePath = join(uploadDir, filename);
-    const logoUrl = `${TENANT_LOGO_ROUTE_PREFIX}/${filename}`;
-
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(absolutePath, file.buffer, { flag: 'wx' });
-
-    const branding = await this.prisma.brandingSettings.upsert({
-      where: { tenantId: scopedTenantId },
-      create: {
-        tenantId: scopedTenantId,
-        logoUrl,
-      },
-      update: {
-        logoUrl,
-      },
-    });
-
-    await this.removePreviousLocalLogo(existingBranding?.logoUrl ?? null);
-
+    if (!branding) throw new NotFoundException('Tenant branding not found');
     return branding;
   }
 
@@ -331,20 +299,6 @@ export class BrandingService {
       join(process.cwd(), 'uploads');
 
     return resolve(root, 'provider-avatars');
-  }
-
-  private async removePreviousLocalLogo(logoUrl: string | null) {
-    if (!logoUrl?.startsWith(`${TENANT_LOGO_ROUTE_PREFIX}/`)) {
-      return;
-    }
-
-    const filename = logoUrl.slice(TENANT_LOGO_ROUTE_PREFIX.length + 1);
-
-    if (!/^[a-zA-Z0-9_-]+-[a-f0-9-]+\.(png|jpg|webp|gif)$/.test(filename)) {
-      return;
-    }
-
-    await rm(join(this.getTenantLogoUploadDir(), filename), { force: true });
   }
 
   private async removePreviousLocalProviderAvatar(avatarUrl: string | null) {

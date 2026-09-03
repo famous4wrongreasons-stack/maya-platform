@@ -19,6 +19,9 @@ function method(text: string, start: string, end: string) {
 
 describe('Package 5 Wave 2 ownership/bypass ratchet', () => {
   const canonical = source('package5-wave2/package5-wave2.service.ts');
+  const cutover = source(
+    'package5-wave2/package5-wave2-canonical-cutover.service.ts',
+  );
   const bootstrap = source(
     'package5-wave2/trial-activation-bootstrap.service.ts',
   );
@@ -38,6 +41,10 @@ describe('Package 5 Wave 2 ownership/bypass ratchet', () => {
   const admin = source('admin/admin.service.ts');
   const branches = source('branches/branches.service.ts');
   const branding = source('branding/branding.service.ts');
+  const usersModule = source('users/users.module.ts');
+  const authModule = source('auth/auth.module.ts');
+  const adminModule = source('admin/admin.module.ts');
+  const branchesModule = source('branches/branches.module.ts');
 
   it('locks the exact A16/A25/A26 action inventory and authority classes', () => {
     expect(PACKAGE5_WAVE2_REGISTRATIONS).toHaveLength(13);
@@ -70,8 +77,8 @@ describe('Package 5 Wave 2 ownership/bypass ratchet', () => {
     expect(canonical).toContain('readTrustedNormalizedInput');
     const requestBlock = method(
       canonical,
-      'const requestMaterialHash',
-      'async safeDesired',
+      'input: {\n        operation: command.operation',
+      'evidenceRefs:',
     );
     expect(requestBlock).not.toMatch(
       /passwordHash|providerUserId|email:|phone:|bytes:|profileJson/,
@@ -123,19 +130,108 @@ describe('Package 5 Wave 2 ownership/bypass ratchet', () => {
     expect(canonical).not.toMatch(/auth\/\*|onboarding\/\*|crm\/\*/);
   });
 
-  it('pins the exact pre-cutover legacy owners without treating them as exemptions', () => {
-    expect(users).toContain('async updateCrmTeamAccess');
-    expect(users).toContain('async claimCrmTeamOwner');
-    expect(sessions).toContain('async revokeSession');
-    expect(sessions).toContain('async revokeAllSessions');
-    expect(social).toContain('private async completeIdentityLink');
-    expect(admin).toContain('async updateTenant');
-    expect(admin).toContain('async updateBranding');
-    expect(admin).toContain('async uploadTenantLogo');
-    expect(admin).toContain('async createTenantUser');
-    expect(admin).toContain('async createProviderUser');
-    expect(admin).toContain('async setTenantStatus');
-    expect(branches).toContain('async createForTenant');
-    expect(branding).toContain('async uploadTenantLogo');
+  it('keeps every legacy Wave 2 surface as an initiator, not a mutation owner', () => {
+    const userAccess = method(
+      users,
+      'async updateCrmTeamAccess',
+      'async claimCrmTeamOwner',
+    );
+    const ownerClaim = method(
+      users,
+      'async claimCrmTeamOwner',
+      'async createPhoneFirstClientUser',
+    );
+    const revokeOther = method(
+      sessions,
+      'async revokeSession',
+      'async revokeAllSessions',
+    );
+    const revokeAll = method(
+      sessions,
+      'async revokeAllSessions',
+      'private async buildSessionTokens',
+    );
+    const identityLink = method(
+      social,
+      'private async completeIdentityLink',
+      'private async exchangeYandexCode',
+    );
+    const tenantUpdate = method(
+      admin,
+      'async updateTenant',
+      'async updateBranding',
+    );
+    const brandingUpdate = method(
+      admin,
+      'async updateBranding',
+      'async uploadTenantLogo',
+    );
+    const logoUpload = method(
+      admin,
+      'async uploadTenantLogo',
+      'async upsertCrm',
+    );
+    const tenantUser = method(
+      admin,
+      'async createTenantUser',
+      'async createProviderUser',
+    );
+    const providerUser = method(
+      admin,
+      'async createProviderUser',
+      'async setTenantStatus',
+    );
+    const lifecycle = method(
+      admin,
+      'async setTenantStatus',
+      'private definedChanges',
+    );
+    const branchCreate = method(branches, 'async createForTenant', '\n}');
+
+    for (const block of [
+      userAccess,
+      ownerClaim,
+      revokeOther,
+      revokeAll,
+      identityLink,
+      tenantUpdate,
+      brandingUpdate,
+      logoUpload,
+      tenantUser,
+      providerUser,
+      lifecycle,
+      branchCreate,
+    ]) {
+      expect(block).toContain('canonicalWave2');
+    }
+    expect(`${userAccess}\n${ownerClaim}`).not.toMatch(
+      /(crmStaffAccess|user|membership|authSession|authIdentity)\.(create|update|updateMany|upsert|delete|deleteMany)\(/,
+    );
+    expect(`${revokeOther}\n${revokeAll}`).not.toMatch(
+      /repository\.revoke(All)?Session/,
+    );
+    expect(identityLink).not.toMatch(
+      /authRepository\.(reassignIdentity|createIdentity)|updateIdentityRecord/,
+    );
+    expect(
+      `${tenantUpdate}\n${brandingUpdate}\n${logoUpload}\n${tenantUser}\n${providerUser}\n${lifecycle}`,
+    ).not.toMatch(
+      /(tenantsService\.(updateTenant|setTenantStatus)|brandingService\.(upsertBranding|uploadTenantLogo)|usersService\.(createUser|createStaffUserForInternalProvider))/,
+    );
+    expect(branchCreate).not.toMatch(/branch\.create\(/);
+    expect(branding).not.toContain('async uploadTenantLogo');
+  });
+
+  it('wires all four production initiator modules to the narrow cutover adapter', () => {
+    expect(cutover).toContain('Package5Wave2ExecutableService');
+    expect(cutover).toContain("'execute'");
+    for (const module of [
+      usersModule,
+      authModule,
+      adminModule,
+      branchesModule,
+    ]) {
+      expect(module).toContain('Package5Wave2Module');
+    }
   });
 });

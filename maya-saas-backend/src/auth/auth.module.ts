@@ -10,6 +10,7 @@ import { CrmModule } from '../crm/crm.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
+import { Package5Wave2Module } from '../package5-wave2/package5-wave2.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
 import { AuthController } from './auth.controller';
 import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
@@ -36,6 +37,7 @@ import { TenantAuthRepository } from './tenant-auth.repository';
     PassportModule,
     PrismaModule,
     UsersModule,
+    Package5Wave2Module,
     TenantsModule,
     TenancyModule,
     JwtModule.registerAsync({

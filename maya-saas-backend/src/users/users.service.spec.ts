@@ -7,6 +7,7 @@ import {
 import { UserRole } from '../common/domain.enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { EncryptionService } from '../encryption/encryption.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UsersService } from './users.service';
 
@@ -1198,6 +1199,7 @@ describe('UsersService', () => {
         }),
     );
     const tenantContext = new TenantContextService();
+    const canonicalExecute = jest.fn().mockResolvedValue({});
     const service = new UsersService(
       {
         $transaction: transaction,
@@ -1214,6 +1216,14 @@ describe('UsersService', () => {
           create: jest.fn(() => Promise.resolve({ id: 'staff-new' })),
         },
         crmStaffAccess: {
+          findFirst: jest.fn().mockResolvedValue({
+            id: 'access-1',
+            externalStaffId: 'crm-master',
+            userId: null,
+            role: UserRole.STAFF,
+            status: 'pending_contact',
+            user: null,
+          }),
           findMany: jest.fn().mockResolvedValue([
             {
               externalStaffId: 'crm-master',
@@ -1230,12 +1240,25 @@ describe('UsersService', () => {
             },
           ]),
         },
+        user: { findMany: jest.fn().mockResolvedValue([]) },
+        tenant: {
+          findUnique: jest.fn().mockResolvedValue({ slug: 'tenant-one' }),
+        },
+        branch: {
+          findFirst: jest.fn().mockResolvedValue({ id: 'branch-1' }),
+        },
       } as unknown as PrismaService,
       {
         encrypt: (value: string) => `enc:${value}`,
         decrypt: (value: string) => value.replace(/^enc:/, ''),
+        opaqueReference: (_purpose: string, value: string) => `ref:${value}`,
       } as EncryptionService,
       tenantContext,
+      {
+        intentRef: jest.fn().mockReturnValue('request-crm-access'),
+        deterministicTargetId: jest.fn().mockReturnValue('staff-user-1'),
+        execute: canonicalExecute,
+      } as unknown as Package5Wave2CanonicalCutoverService,
     );
 
     const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
@@ -1247,24 +1270,25 @@ describe('UsersService', () => {
       }),
     );
 
-    const createdUserArgs = userCreate.mock.calls[0]?.[0];
-    expect(createdUserArgs).toMatchObject({
-      data: {
-        tenantId: 'tenant-1',
-        branchId: 'branch-1',
-        email: 'ilya@example.test',
+    expect(canonicalExecute).toHaveBeenCalledWith(
+      'tenant-1',
+      { userId: 'owner-1' },
+      expect.objectContaining({
+        operation: 'configure_staff_access',
+        accessId: 'access-1',
         role: UserRole.STAFF,
-      },
-      select: { id: true },
-    });
-    expect(accessUpdate).toHaveBeenCalledWith({
-      where: { id: 'access-1' },
-      data: {
-        role: UserRole.STAFF,
-        userId: 'staff-user-1',
-        status: 'active',
-      },
-    });
+        // Jest asymmetric matchers are intentionally nested here.
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        login: expect.objectContaining({
+          userId: 'staff-user-1',
+          branchId: 'branch-1',
+          email: 'ilya@example.test',
+        }),
+      }),
+      'request-crm-access',
+    );
+    expect(userCreate).not.toHaveBeenCalled();
+    expect(accessUpdate).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       external_staff_id: 'crm-master',
       email: 'ilya@example.test',
@@ -1313,6 +1337,7 @@ describe('UsersService', () => {
         }),
     );
     const tenantContext = new TenantContextService();
+    const canonicalExecute = jest.fn().mockResolvedValue({});
     const service = new UsersService(
       {
         $transaction: transaction,
@@ -1329,6 +1354,7 @@ describe('UsersService', () => {
           create: jest.fn(() => Promise.resolve({ id: 'staff-new' })),
         },
         crmStaffAccess: {
+          findFirst: jest.fn().mockResolvedValue({ id: 'access-owner' }),
           findMany: jest.fn().mockResolvedValue([
             {
               externalStaffId: 'crm-owner',
@@ -1351,6 +1377,9 @@ describe('UsersService', () => {
         decrypt: (value: string) => value.replace(/^enc:/, ''),
       } as EncryptionService,
       tenantContext,
+      {
+        execute: canonicalExecute,
+      } as unknown as Package5Wave2CanonicalCutoverService,
     );
 
     const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
@@ -1361,14 +1390,12 @@ describe('UsersService', () => {
       }),
     );
 
-    expect(accessUpdate).toHaveBeenCalledWith({
-      where: { id: 'access-owner' },
-      data: {
-        userId: 'owner-1',
-        role: UserRole.TENANT_ADMIN,
-        status: 'active',
-      },
-    });
+    expect(canonicalExecute).toHaveBeenCalledWith(
+      'tenant-1',
+      { userId: 'owner-1' },
+      { operation: 'claim_team_owner', accessId: 'access-owner' },
+    );
+    expect(accessUpdate).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       external_staff_id: 'crm-owner',
       is_owner: true,
@@ -1384,13 +1411,30 @@ describe('UsersService', () => {
         }),
     );
     const tenantContext = new TenantContextService();
+    const canonicalExecute = jest
+      .fn()
+      .mockRejectedValue(new ForbiddenException('Owner role required'));
     const service = new UsersService(
-      { $transaction: transaction } as unknown as PrismaService,
+      {
+        $transaction: transaction,
+        crmIntegration: {
+          findUnique: jest.fn().mockResolvedValue({ provider: 'yclients' }),
+        },
+        staffProviderLink: {
+          findFirst: jest.fn().mockResolvedValue({ staffId: 'staff-existing' }),
+        },
+        crmStaffAccess: {
+          findFirst: jest.fn().mockResolvedValue({ id: 'access-owner' }),
+        },
+      } as unknown as PrismaService,
       {
         encrypt: (value: string) => `enc:${value}`,
         decrypt: (value: string) => value.replace(/^enc:/, ''),
       } as EncryptionService,
       tenantContext,
+      {
+        execute: canonicalExecute,
+      } as unknown as Package5Wave2CanonicalCutoverService,
     );
 
     await expect(

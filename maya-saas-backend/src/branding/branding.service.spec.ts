@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { mkdtemp, readFile, rm } from 'fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
@@ -84,7 +84,7 @@ describe('BrandingService logo upload', () => {
     await rm(uploadRoot, { recursive: true, force: true });
   });
 
-  it('stores a valid logo file and updates branding logoUrl', async () => {
+  it('accepts a bounded canonical tenant logo payload without persisting it', () => {
     const upsertMock = createUpsertMock();
     const prisma = {
       brandingSettings: {
@@ -92,29 +92,18 @@ describe('BrandingService logo upload', () => {
         upsert: upsertMock,
       },
     } as unknown as PrismaService;
-    const { service, tenantContext } = createService(prisma);
+    const { service } = createService(prisma);
     const fileBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
 
-    const branding = await tenantContext.runAsSystemTenant('tenant-1', () =>
-      service.uploadTenantLogo('tenant-1', {
+    expect(() =>
+      service.assertValidTenantLogoFile({
         buffer: fileBuffer,
         mimetype: 'image/png',
         originalname: 'logo.png',
         size: fileBuffer.length,
       }),
-    );
-
-    expect(branding.logoUrl).toMatch(
-      /^\/api\/public\/uploads\/tenant-logos\/tenant-1-[a-f0-9-]+\.png$/,
-    );
-    expect(upsertMock).toHaveBeenCalled();
-
-    const filename = branding.logoUrl?.split('/').at(-1);
-
-    expect(filename).toBeDefined();
-    await expect(
-      readFile(join(uploadRoot, 'tenant-logos', filename ?? '')),
-    ).resolves.toEqual(fileBuffer);
+    ).not.toThrow();
+    expect(upsertMock).not.toHaveBeenCalled();
   });
 
   it('rejects unsupported logo file types', async () => {
@@ -127,11 +116,11 @@ describe('BrandingService logo upload', () => {
         upsert: upsertMock,
       },
     } as unknown as PrismaService;
-    const { service, tenantContext } = createService(prisma);
+    const { service } = createService(prisma);
 
     await expect(
-      tenantContext.runAsSystemTenant('tenant-1', () =>
-        service.uploadTenantLogo('tenant-1', {
+      Promise.resolve().then(() =>
+        service.assertValidTenantLogoFile({
           buffer: Buffer.from('<svg></svg>'),
           mimetype: 'image/svg+xml',
           originalname: 'logo.svg',
@@ -150,19 +139,13 @@ describe('BrandingService logo upload', () => {
         upsert: upsertMock,
       },
     } as unknown as PrismaService;
-    const { service, tenantContext } = createService(prisma);
+    const { service } = createService(prisma);
     const fileBuffer = Buffer.from([0xff, 0xd8, 0xff]);
-    const branding = await tenantContext.runAsSystemTenant('tenant-1', () =>
-      service.uploadTenantLogo('tenant-1', {
-        buffer: fileBuffer,
-        mimetype: 'image/jpeg',
-        originalname: 'logo.jpg',
-        size: fileBuffer.length,
-      }),
-    );
-    const filename = branding.logoUrl?.split('/').at(-1);
+    const filename = 'tenant-1-abcdef123.jpg';
+    await mkdir(join(uploadRoot, 'tenant-logos'), { recursive: true });
+    await writeFile(join(uploadRoot, 'tenant-logos', filename), fileBuffer);
 
-    const result = await service.readTenantLogo(filename ?? '');
+    const result = await service.readTenantLogo(filename);
 
     expect(result.contentType).toBe('image/jpeg');
     expect(result.buffer).toEqual(fileBuffer);
