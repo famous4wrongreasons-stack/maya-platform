@@ -12,6 +12,12 @@ describe('Package 5 Wave 3 ownership/bypass ratchet', () => {
   const crm = read('crm/crm.service.ts');
   const customers = read('customers/customers.service.ts');
   const aiTool = read('ai-tools/ai-tool-handler.service.ts');
+  const controller = read('crm/crm-integration.controller.ts');
+  const admin = read('admin/admin.service.ts');
+  const cutover = read(
+    'package5-wave3/package5-wave3-canonical-cutover.service.ts',
+  );
+  const module = read('crm/crm.module.ts');
 
   it('pins exact action inventory and the only external write', () => {
     expect(PACKAGE5_WAVE3_REGISTRATIONS).toHaveLength(8);
@@ -53,12 +59,37 @@ describe('Package 5 Wave 3 ownership/bypass ratchet', () => {
     ).not.toContain('register_crm_client');
   });
 
-  it('pins current production owners until the separate cutover cycle', () => {
-    expect(aiTool).toContain('applyStaffScheduleDayChange');
-    expect(crm).toContain('async stageIntegration');
-    expect(crm).toContain('async disconnectIntegration');
-    expect(customers).toContain('async updateOwnProfile');
-    expect(customers).toContain('async updateNotes');
+  it('pins Action Engine ownership on every production initiator', () => {
+    expect(cutover).toContain('this.planner.build(');
+    expect(cutover).toContain("'execute'");
+    expect(controller).toContain('this.canonicalWave3.installCrmCredentials');
+    expect(controller).toContain('this.canonicalWave3.activateCrmIntegration');
+    expect(controller).toContain(
+      'this.canonicalWave3.disconnectCrmIntegration',
+    );
+    expect(aiTool).toContain(
+      'this.requireCanonicalWave3().updateExternalStaffScheduleDay',
+    );
+    expect(customers).toContain('this.canonicalWave3.updateClientLocale');
+    expect(customers).toContain('this.canonicalWave3.recordClientConsent');
+    expect(customers).toContain('this.canonicalWave3.updateClientNotes');
+    expect(admin).toContain('this.canonicalWave3.installCrmCredentials');
+    expect(module).toContain('Package5Wave3CanonicalCutoverService');
+  });
+
+  it('forbids legacy business mutation owners and fallback methods', () => {
+    expect(crm).not.toMatch(
+      /async (stageIntegration|connectAndActivateIntegration|activateIntegration|disconnectIntegration)/,
+    );
+    expect(customers).not.toMatch(
+      /customerProfile\.(create|update|upsert|delete|deleteMany|updateMany)/,
+    );
+    expect(aiTool).not.toContain('this.crmService.applyStaffScheduleDayChange');
+    expect(admin).not.toContain(
+      'this.crmService.connectAndActivateIntegration',
+    );
+    expect(crm).toContain('async ensureBootstrapMockIntegration');
+    expect(crm).toContain('provider !== CrmProvider.MOCK');
   });
 
   it('requires exact Client ownership, P02/P03 hold and append-only consent', () => {

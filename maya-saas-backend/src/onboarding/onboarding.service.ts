@@ -137,7 +137,7 @@ export class OnboardingService {
           });
 
           if (calendarSource === CalendarSource.EXTERNAL) {
-            await this.crmService.createOrUpdateIntegration(tenant.id, {
+            await this.crmService.ensureBootstrapMockIntegration(tenant.id, {
               provider: CrmProvider.MOCK,
               settingsJson: {
                 industryPresetId,

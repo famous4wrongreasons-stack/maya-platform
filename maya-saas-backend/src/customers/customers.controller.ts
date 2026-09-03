@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  Patch,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -38,11 +46,13 @@ export class CustomersController {
   updateOwnProfile(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateCustomerProfileDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.customersService.updateOwnProfile(
       user.tenantId!,
       user.userId,
       dto,
+      idempotencyKey,
     );
   }
 
@@ -76,12 +86,14 @@ export class CustomersController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('userId') userId: string,
     @Body() dto: UpdateCustomerNotesDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.customersService.updateNotes(
       user.tenantId!,
       user.userId,
       userId,
       dto,
+      idempotencyKey,
     );
   }
 }

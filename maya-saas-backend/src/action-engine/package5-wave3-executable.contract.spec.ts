@@ -44,9 +44,14 @@ function input(
     credentialFingerprint:
       operation === 'install_crm_credentials' ? hash : null,
     providerSnapshotHash: operation === 'confirm_crm_import' ? hash : null,
+    notesFingerprint: operation === 'update_client_notes' ? hash : null,
     clientId: family18 ? 'client:one' : null,
     consentKind: operation === 'record_client_consent' ? 'privacy' : null,
     consentDecision: operation === 'record_client_consent' ? 'grant' : null,
+    consentOccurredAt:
+      operation === 'record_client_consent' ? '2026-09-03T12:00:00.000Z' : null,
+    consentEffectiveAt:
+      operation === 'record_client_consent' ? '2026-09-03T12:00:00.000Z' : null,
     sourceIdentityHash: operation === 'record_client_consent' ? hash : null,
   };
 }

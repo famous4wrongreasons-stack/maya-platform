@@ -221,7 +221,7 @@ describe('CrmService', () => {
       tenantContext,
     );
     const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
-      service.createOrUpdateIntegration('tenant-1', {
+      service.ensureBootstrapMockIntegration('tenant-1', {
         provider: CrmProvider.MOCK,
       }),
     );
@@ -301,7 +301,7 @@ describe('CrmService', () => {
 
     await expect(
       tenantContext.runAsSystemTenant('tenant-1', () =>
-        service.createOrUpdateIntegration('tenant-1', {
+        service.ensureBootstrapMockIntegration('tenant-1', {
           provider: CrmProvider.YCLIENTS,
           settingsJson: { companyId: 42 },
         }),
@@ -401,7 +401,7 @@ describe('CrmService', () => {
 
     await expect(
       tenantContext.runAsSystemTenant('tenant-1', () =>
-        service.createOrUpdateIntegration('tenant-1', {
+        service.ensureBootstrapMockIntegration('tenant-1', {
           provider: CrmProvider.DIKIDI,
           apiToken: 'must-not-be-stored',
         }),
@@ -489,10 +489,8 @@ describe('CrmService', () => {
 
     await expect(
       tenantContext.runAsSystemTenant('tenant-1', () =>
-        service.stageIntegration('tenant-1', {
-          provider: CrmProvider.YCLIENTS,
-          apiToken: 'rejected-token',
-          settingsJson: { companyId: 42 },
+        service.previewCredentials(CrmProvider.YCLIENTS, 'rejected-token', {
+          companyId: 42,
         }),
       ),
     ).rejects.toMatchObject({
@@ -531,10 +529,8 @@ describe('CrmService', () => {
 
     await expect(
       tenantContext.runAsSystemTenant('tenant-1', () =>
-        service.stageIntegration('tenant-1', {
-          provider: CrmProvider.YCLIENTS,
-          apiToken: 'tenant-token',
-          settingsJson: { companyId: 42 },
+        service.previewCredentials(CrmProvider.YCLIENTS, 'tenant-token', {
+          companyId: 42,
         }),
       ),
     ).rejects.toMatchObject({
@@ -545,48 +541,17 @@ describe('CrmService', () => {
     expect(upsertMock).not.toHaveBeenCalled();
   });
 
-  it('stores a verified connection as pending and never returns its token', async () => {
-    const now = new Date('2026-07-16T12:00:00.000Z');
-    const pendingIntegration = {
-      id: 'crm-verified',
-      tenantId: 'tenant-1',
-      provider: CrmProvider.YCLIENTS,
-      encryptedApiToken: 'enc:tenant-token',
-      baseUrl: null,
-      status: CrmIntegrationStatus.PENDING_ACTIVATION,
-      settingsJson: {
-        companyId: 42,
-        apiToken: 'must-never-be-returned',
-      },
-      verifiedAt: now,
-      lastCheckedAt: now,
-      lastSyncAt: now,
-      lastErrorCode: null,
-      lastErrorAt: null,
-      createdAt: now,
-      updatedAt: now,
-    };
-    type UpsertArgs = {
-      create: {
-        status: string;
-        encryptedApiToken: string;
-      };
-    };
-    let capturedUpsertArgs: UpsertArgs | undefined;
-    const upsertMock = jest.fn((args: UpsertArgs) => {
-      capturedUpsertArgs = args;
-      return Promise.resolve(pendingIntegration);
-    });
+  it('previews verified credentials without becoming a mutation owner', async () => {
+    const upsertMock = jest.fn();
     const tenantContext = new TenantContextService();
     const service = new CrmService(
       {
         crmIntegration: {
-          findUnique: jest.fn().mockResolvedValue(null),
           upsert: upsertMock,
         },
       } as unknown as PrismaService,
       {
-        encrypt: jest.fn().mockReturnValue('enc:tenant-token'),
+        encrypt: jest.fn(),
         decrypt: jest.fn(),
       } as unknown as EncryptionService,
       {
@@ -614,138 +579,18 @@ describe('CrmService', () => {
     );
 
     const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
-      service.stageIntegration('tenant-1', {
-        provider: CrmProvider.YCLIENTS,
-        apiToken: 'tenant-token',
-        settingsJson: { companyId: 42 },
+      service.previewCredentials(CrmProvider.YCLIENTS, 'tenant-token', {
+        companyId: 42,
       }),
     );
 
-    expect(capturedUpsertArgs?.create.status).toBe(
-      CrmIntegrationStatus.PENDING_ACTIVATION,
-    );
-    expect(capturedUpsertArgs?.create.encryptedApiToken).toBe(
-      'enc:tenant-token',
-    );
-    expect(result.preview).toMatchObject({
+    expect(result).toMatchObject({
       company_id: 42,
       services: { count: 1 },
       staff: { count: 1 },
     });
     expect(JSON.stringify(result)).not.toContain('tenant-token');
-    expect(result.connection.settings_json).toEqual({ companyId: 42 });
-  });
-
-  it('activates only a verified staged connection and switches the tenant source', async () => {
-    const now = new Date('2026-07-16T12:00:00.000Z');
-    const pendingIntegration = {
-      id: 'crm-verified',
-      tenantId: 'tenant-1',
-      provider: CrmProvider.YCLIENTS,
-      encryptedApiToken: 'enc:tenant-token',
-      baseUrl: null,
-      status: CrmIntegrationStatus.PENDING_ACTIVATION,
-      settingsJson: { companyId: 42 },
-      verifiedAt: now,
-      lastCheckedAt: now,
-      lastSyncAt: now,
-      lastErrorCode: null,
-      lastErrorAt: null,
-      createdAt: now,
-      updatedAt: now,
-    };
-    const activeIntegration = {
-      ...pendingIntegration,
-      status: CrmIntegrationStatus.ACTIVE,
-    };
-    const crmUpdateMock = jest.fn().mockResolvedValue(activeIntegration);
-    const tenantUpdateMock = jest.fn().mockResolvedValue({ id: 'tenant-1' });
-    const brandingFindMock = jest.fn().mockResolvedValue({
-      themeJson: {
-        booking: { mode: 'preview' },
-        custom: { retained: true },
-      },
-    });
-    const brandingUpsertMock = jest.fn().mockResolvedValue({
-      tenantId: 'tenant-1',
-    });
-    const transactionMock = jest
-      .fn()
-      .mockImplementation((callback: (tx: unknown) => unknown) =>
-        Promise.resolve(
-          callback({
-            crmIntegration: { update: crmUpdateMock },
-            tenant: { update: tenantUpdateMock },
-            brandingSettings: {
-              findUnique: brandingFindMock,
-              upsert: brandingUpsertMock,
-            },
-          }),
-        ),
-      );
-    const tenantContext = new TenantContextService();
-    const service = new CrmService(
-      {
-        crmIntegration: {
-          findUnique: jest
-            .fn()
-            .mockResolvedValueOnce(null)
-            .mockResolvedValueOnce(pendingIntegration),
-          upsert: jest.fn().mockResolvedValue(pendingIntegration),
-        },
-        $transaction: transactionMock,
-      } as unknown as PrismaService,
-      {
-        encrypt: jest.fn().mockReturnValue('enc:tenant-token'),
-        decrypt: jest.fn(),
-      } as unknown as EncryptionService,
-      {
-        create: jest.fn().mockReturnValue({
-          testConnection: jest.fn().mockResolvedValue({ ok: true }),
-          getServices: jest.fn().mockResolvedValue([]),
-          getStaff: jest.fn().mockResolvedValue([]),
-        }),
-      },
-      tenantContext,
-    );
-
-    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
-      service.connectAndActivateIntegration('tenant-1', {
-        provider: CrmProvider.YCLIENTS,
-        apiToken: 'tenant-token',
-        settingsJson: { companyId: 42 },
-      }),
-    );
-
-    expect(crmUpdateMock).toHaveBeenCalledWith({
-      where: { tenantId: 'tenant-1' },
-      data: {
-        status: CrmIntegrationStatus.ACTIVE,
-        lastErrorCode: null,
-        lastErrorAt: null,
-      },
-    });
-    expect(tenantUpdateMock).toHaveBeenCalledWith({
-      where: { id: 'tenant-1' },
-      data: { calendarSource: 'external' },
-    });
-    expect(brandingUpsertMock).toHaveBeenCalledWith({
-      where: { tenantId: 'tenant-1' },
-      create: {
-        tenantId: 'tenant-1',
-        themeJson: {
-          booking: { mode: 'live' },
-          custom: { retained: true },
-        },
-      },
-      update: {
-        themeJson: {
-          booking: { mode: 'live' },
-          custom: { retained: true },
-        },
-      },
-    });
-    expect(result.status).toBe(CrmIntegrationStatus.ACTIVE);
+    expect(upsertMock).not.toHaveBeenCalled();
   });
 
   it('does not use a pending connection for operational CRM reads', async () => {

@@ -157,6 +157,12 @@ class ProofProvider implements Package5Wave3ProviderGateway {
       ),
     });
   }
+  fingerprintEncryptedValue(input: {
+    namespace: string;
+    encryptedValue: string;
+  }) {
+    return wave3Hash(input);
+  }
 }
 
 interface Scope {
@@ -310,6 +316,7 @@ function commands(scope: Scope): Package5Wave3Command[] {
       sourceIntentRef: 'notes-one',
       clientId: scope.clientId,
       encryptedNotes: 'encrypted-notes-marker-wave3',
+      notesFingerprint: wave3Hash('notes-marker-wave3'),
     },
   ];
 }
@@ -586,6 +593,7 @@ async function main() {
             sourceIntentRef: 'forged-tenant',
             clientId: primary.clientId,
             encryptedNotes: 'x',
+            notesFingerprint: wave3Hash('x'),
           },
           'execute',
         ),

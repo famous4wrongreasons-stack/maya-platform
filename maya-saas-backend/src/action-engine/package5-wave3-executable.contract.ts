@@ -159,9 +159,12 @@ const KEYS = new Set([
   'expectedProviderRevision',
   'credentialFingerprint',
   'providerSnapshotHash',
+  'notesFingerprint',
   'clientId',
   'consentKind',
   'consentDecision',
+  'consentOccurredAt',
+  'consentEffectiveAt',
   'sourceIdentityHash',
 ]);
 
@@ -185,9 +188,24 @@ function opaque(input: Record<string, unknown>, key: string, nullable = false) {
 }
 function hash(input: Record<string, unknown>, key: string, nullable = false) {
   const value = input[key];
-  if (nullable && value === null) return null;
+  if (nullable && value == null) return null;
   if (typeof value !== 'string' || !HASH.test(value))
     throw new ActionContractError(`${key} must be a SHA-256 digest`);
+  return value;
+}
+
+function instant(
+  input: Record<string, unknown>,
+  key: string,
+  nullable = false,
+) {
+  const value = input[key];
+  if (nullable && value == null) return null;
+  if (typeof value !== 'string')
+    throw new ActionContractError(`${key} must be an ISO instant`);
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime()) || parsed.toISOString() !== value)
+    throw new ActionContractError(`${key} must be an ISO instant`);
   return value;
 }
 
@@ -264,9 +282,12 @@ export function normalizePackage5Wave3Input(
     expectedProviderRevision: hash(input, 'expectedProviderRevision', true),
     credentialFingerprint: hash(input, 'credentialFingerprint', true),
     providerSnapshotHash: hash(input, 'providerSnapshotHash', true),
+    notesFingerprint: hash(input, 'notesFingerprint', true),
     clientId: opaque(input, 'clientId', true),
     consentKind: opaque(input, 'consentKind', true),
     consentDecision: opaque(input, 'consentDecision', true),
+    consentOccurredAt: instant(input, 'consentOccurredAt', true),
+    consentEffectiveAt: instant(input, 'consentEffectiveAt', true),
     sourceIdentityHash: hash(input, 'sourceIdentityHash', true),
   };
   if (registration.authorityClass === 'AC2') {
@@ -294,10 +315,14 @@ export function normalizePackage5Wave3Input(
     throw new ActionContractError('Import snapshot identity required');
   if (registration.family === 'A18' && !normalized.clientId)
     throw new ActionContractError('Exact Client required');
+  if (operation === 'update_client_notes' && !normalized.notesFingerprint)
+    throw new ActionContractError('Notes fingerprint required');
   if (
     operation === 'record_client_consent' &&
     (!normalized.consentKind ||
       !normalized.consentDecision ||
+      !normalized.consentOccurredAt ||
+      !normalized.consentEffectiveAt ||
       !normalized.sourceIdentityHash)
   )
     throw new ActionContractError('Consent identity incomplete');

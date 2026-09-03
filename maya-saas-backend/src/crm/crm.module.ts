@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
 
-import { ActionEngineModule } from '../action-engine';
+import {
+  ActionEngineKernel,
+  ActionEngineModule,
+  ActionEngineRuntimeService,
+  CanonicalActionIngressService,
+} from '../action-engine';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 import { InternalCalendarModule } from '../internal-calendar/internal-calendar.module';
 import { UsersModule } from '../users/users.module';
@@ -23,6 +28,13 @@ import { ShadowIngestionController } from './shadow-ingestion.controller';
 import { ShadowIngestionService } from './shadow-ingestion.service';
 import { LegacyAppointmentBridgeController } from './legacy-appointment-bridge.controller';
 import { LegacyAppointmentBridgeService } from './legacy-appointment-bridge.service';
+import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
+import { Package5Wave3ProductionGatewayService } from '../package5-wave3/package5-wave3-production-gateway.service';
+import {
+  Package5Wave3ExecutableService,
+  Package5Wave3ShadowService,
+} from '../package5-wave3/package5-wave3.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 
 @Module({
   imports: [
@@ -54,6 +66,59 @@ import { LegacyAppointmentBridgeService } from './legacy-appointment-bridge.serv
     ClientIdentityService,
     CrmAdapterFactory,
     CrmService,
+    Package5Wave3ProductionGatewayService,
+    {
+      provide: Package5Wave3ShadowService,
+      useFactory: (
+        runtime: ActionEngineRuntimeService,
+        prisma: PrismaService,
+        tenantContext: TenantContextService,
+        kernel: ActionEngineKernel,
+        gateway: Package5Wave3ProductionGatewayService,
+      ) =>
+        new Package5Wave3ShadowService(
+          runtime,
+          prisma,
+          tenantContext,
+          kernel,
+          gateway,
+        ),
+      inject: [
+        ActionEngineRuntimeService,
+        PrismaService,
+        TenantContextService,
+        ActionEngineKernel,
+        Package5Wave3ProductionGatewayService,
+      ],
+    },
+    {
+      provide: Package5Wave3ExecutableService,
+      useFactory: (
+        prisma: PrismaService,
+        ingress: CanonicalActionIngressService,
+        kernel: ActionEngineKernel,
+        runtime: ActionEngineRuntimeService,
+        planner: Package5Wave3ShadowService,
+        gateway: Package5Wave3ProductionGatewayService,
+      ) =>
+        new Package5Wave3ExecutableService(
+          prisma,
+          ingress,
+          kernel,
+          runtime,
+          planner,
+          gateway,
+        ),
+      inject: [
+        PrismaService,
+        CanonicalActionIngressService,
+        ActionEngineKernel,
+        ActionEngineRuntimeService,
+        Package5Wave3ShadowService,
+        Package5Wave3ProductionGatewayService,
+      ],
+    },
+    Package5Wave3CanonicalCutoverService,
     LegacyAppointmentBridgeService,
     QuarantineCatchupService,
     ShadowIngestionService,
@@ -63,6 +128,7 @@ import { LegacyAppointmentBridgeService } from './legacy-appointment-bridge.serv
     AppointmentReconciliationService,
     ClientIdentityService,
     CrmService,
+    Package5Wave3CanonicalCutoverService,
     OpportunityLifecycleRepository,
     OpportunityLifecycleRunner,
     QuarantineCatchupService,

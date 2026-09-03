@@ -51,6 +51,7 @@ import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.uti
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { InboxService } from '../inbox/inbox.service';
 import { Package5Wave1CanonicalCutoverService } from '../package5-wave1/package5-wave1-canonical-cutover.service';
+import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecoveryService } from '../recovery/recovery.service';
 import { StaffService } from '../staff/staff.service';
@@ -214,6 +215,7 @@ export class AiToolHandlerService {
     private readonly appointmentNotificationsService?: AppointmentNotificationsService,
     private readonly businessContentService?: BusinessContentService,
     private readonly canonicalWave1?: Package5Wave1CanonicalCutoverService,
+    private readonly canonicalWave3?: Package5Wave3CanonicalCutoverService,
   ) {}
 
   async execute(
@@ -335,7 +337,11 @@ export class AiToolHandlerService {
       case 'operations.journal.read':
         return this.readOperationsJournalDay(principal, args);
       case 'staff.schedule.update':
-        return this.applyStaffScheduleDayChange(principal, args);
+        return this.applyStaffScheduleDayChange(
+          principal,
+          args,
+          idempotencyKey,
+        );
       case 'loyalty.internal.adjust':
         return this.adjustInternalLoyalty(principal, args, idempotencyKey);
       case 'company.business-hours.read':
@@ -1747,6 +1753,7 @@ export class AiToolHandlerService {
   private async applyStaffScheduleDayChange(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
+    idempotencyKey: string,
   ) {
     if (!SCHEDULE_MANAGER_ROLES.has(principal.role)) {
       throw new ForbiddenException({
@@ -1754,21 +1761,24 @@ export class AiToolHandlerService {
         error: { code: 'staff_schedule_forbidden' },
       });
     }
-    const result = await this.crmService.applyStaffScheduleDayChange(
-      principal.tenantId,
-      {
-        staffId: this.requiredString(args.staff_id),
-        date: this.requiredString(args.date),
-        slots: this.scheduleSlots(args.slots),
-        expectedRevision: this.requiredString(args.current_revision),
-      },
-    );
+    const { verified: result } =
+      await this.requireCanonicalWave3().updateExternalStaffScheduleDay(
+        principal.tenantId,
+        principal,
+        {
+          externalStaffId: this.requiredString(args.staff_id),
+          localDate: this.requiredString(args.date),
+          slots: this.scheduleSlots(args.slots),
+          expectedProviderRevision: this.requiredString(args.current_revision),
+        },
+        idempotencyKey,
+      );
     return {
       status: 'applied',
       date: result.date,
       is_working: result.is_working,
       slots: result.slots,
-      verified: result.verified,
+      verified: true,
       existing_appointments_preserved: true,
     };
   }
@@ -2353,6 +2363,13 @@ export class AiToolHandlerService {
       throw new Error('Package 5 Wave 1 canonical service is unavailable');
     }
     return this.canonicalWave1;
+  }
+
+  private requireCanonicalWave3(): Package5Wave3CanonicalCutoverService {
+    if (!this.canonicalWave3) {
+      throw new Error('Package 5 Wave 3 canonical service is unavailable');
+    }
+    return this.canonicalWave3;
   }
 
   private humanDay(localDate: string): string {

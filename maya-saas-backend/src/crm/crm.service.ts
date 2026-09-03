@@ -75,7 +75,6 @@ import {
   listConnectableCrmProviders,
 } from './crm-provider-catalog';
 import { CreateCrmIntegrationDto } from './dto/create-crm-integration.dto';
-import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from './dto/update-crm-integration.dto';
 import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
 import { ListCrmJournalDto } from './dto/list-crm-journal.dto';
@@ -94,13 +93,6 @@ import {
   CrmOutcomeUnknownError,
   CrmRecordGoneError,
 } from './crm-request.errors';
-
-type CrmConnectionInput = {
-  provider?: CrmProvider;
-  apiToken?: string;
-  baseUrl?: string;
-  settingsJson?: Record<string, unknown>;
-};
 
 export type AppointmentActionInvocation = {
   callerIdempotency?: {
@@ -379,6 +371,7 @@ export class CrmService {
     provider: CrmProvider,
     apiToken: string,
     settingsJson: Record<string, unknown>,
+    baseUrl?: string | null,
   ): Promise<CrmImportPreview> {
     this.assertProviderCanBeTenantConnected(provider);
     const normalizedToken = apiToken.trim();
@@ -396,6 +389,7 @@ export class CrmService {
       return await this.loadConnectionPreview('onboarding-preview', provider, {
         provider,
         apiToken: normalizedToken,
+        baseUrl,
         settings,
       });
     } catch (error) {
@@ -403,7 +397,7 @@ export class CrmService {
     }
   }
 
-  async createOrUpdateIntegration(
+  async ensureBootstrapMockIntegration(
     tenantId: string,
     dto: CreateCrmIntegrationDto | UpdateCrmIntegrationDto,
   ) {
@@ -416,9 +410,10 @@ export class CrmService {
       CrmProvider.MOCK) as CrmProvider;
     this.assertProviderConnectable(provider);
 
-    if (provider !== CrmProvider.MOCK) {
-      return this.connectAndActivateIntegration(scopedTenantId, dto);
-    }
+    if (provider !== CrmProvider.MOCK)
+      throw new BadRequestException(
+        'Bootstrap integration path only supports the mock provider',
+      );
 
     const providerChanged = Boolean(
       existing && String(existing.provider) !== String(provider),
@@ -475,125 +470,6 @@ export class CrmService {
         });
 
     return this.serializeIntegration(integration);
-  }
-
-  async stageIntegration(
-    tenantId: string,
-    dto: ConnectCrmIntegrationDto | CrmConnectionInput,
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const existing = (await this.prisma.crmIntegration.findUnique({
-      where: { tenantId: scopedTenantId },
-    })) as StoredCrmIntegration | null;
-    const provider = (dto.provider ?? existing?.provider) as
-      CrmProvider | undefined;
-
-    if (!provider) {
-      throw new BadRequestException('CRM provider is required');
-    }
-
-    this.assertProviderCanBeTenantConnected(provider);
-    const providerChanged = Boolean(
-      existing && existing.provider !== String(provider),
-    );
-    const previousSettings =
-      existing && !providerChanged
-        ? ((existing.settingsJson as Record<string, unknown> | null) ?? {})
-        : {};
-    const settings = normalizeCrmProviderSettings(provider, {
-      ...previousSettings,
-      ...(dto.settingsJson ?? {}),
-    });
-    const suppliedToken = dto.apiToken?.trim();
-    const apiToken = suppliedToken
-      ? suppliedToken
-      : existing && !providerChanged
-        ? this.encryptionService.decrypt(existing.encryptedApiToken)
-        : provider === CrmProvider.MOCK
-          ? 'mock'
-          : null;
-
-    if (!apiToken) {
-      throw new BadRequestException({
-        message: 'CRM API token is required',
-        error: { code: 'crm_token_required', provider },
-      });
-    }
-
-    const requestedBaseUrl = 'baseUrl' in dto ? dto.baseUrl : undefined;
-    const baseUrl =
-      requestedBaseUrl ??
-      (existing && !providerChanged ? existing.baseUrl : null);
-    const adapterConfig = {
-      provider,
-      apiToken,
-      baseUrl,
-      settings,
-    };
-    let preview: CrmImportPreview;
-
-    try {
-      preview = await this.loadConnectionPreview(
-        scopedTenantId,
-        provider,
-        adapterConfig,
-      );
-    } catch (error) {
-      throw this.toSafeConnectionException(provider, error);
-    }
-
-    const checkedAt = new Date();
-    const encryptedApiToken = this.encryptionService.encrypt(apiToken);
-    const integration = await this.prisma.crmIntegration.upsert({
-      where: { tenantId: scopedTenantId },
-      create: {
-        tenantId: scopedTenantId,
-        provider,
-        encryptedApiToken,
-        baseUrl,
-        status: CrmIntegrationStatus.PENDING_ACTIVATION,
-        settingsJson: asJson(settings),
-        verifiedAt: checkedAt,
-        lastCheckedAt: checkedAt,
-        lastSyncAt: checkedAt,
-      },
-      update: {
-        provider,
-        encryptedApiToken,
-        baseUrl,
-        status: CrmIntegrationStatus.PENDING_ACTIVATION,
-        settingsJson: asJson(settings),
-        verifiedAt: checkedAt,
-        lastCheckedAt: checkedAt,
-        lastSyncAt: checkedAt,
-        lastErrorCode: null,
-        lastErrorAt: null,
-      },
-    });
-
-    return {
-      connection: this.serializeIntegration(integration),
-      preview,
-      next_action: 'activate',
-    };
-  }
-
-  async connectAndActivateIntegration(
-    tenantId: string,
-    dto: CrmConnectionInput,
-  ) {
-    const staged = await this.stageIntegration(tenantId, dto);
-    const connection = await this.activateVerifiedIntegration(tenantId);
-    await this.syncTenantPresentationFromCrm(
-      this.tenantContext.assertTenantId(tenantId),
-      staged.preview.company,
-    );
-
-    return {
-      ...connection,
-      preview: staged.preview,
-      next_action: null,
-    };
   }
 
   async getIntegrationStatus(tenantId: string) {
@@ -655,6 +531,11 @@ export class CrmService {
   }
 
   async getImportPreview(tenantId: string) {
+    return this.readImportPreviewReadOnly(tenantId);
+  }
+
+  /** AC4 provider observation. Preview reads never confirm an import. */
+  async readImportPreviewReadOnly(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const integration = await this.getStoredIntegration(scopedTenantId);
     const provider = integration.provider as CrmProvider;
@@ -667,34 +548,37 @@ export class CrmService {
         this.createAdapterConfig(integration),
       );
     } catch (error) {
-      await this.recordStoredConnectionFailure(scopedTenantId, error);
       throw this.toSafeConnectionException(provider, error);
     }
 
-    await this.reconcileCrmTeamAccess(scopedTenantId, preview.team.items);
+    return {
+      connection: this.serializeIntegration(integration),
+      preview,
+      next_action: this.resolveNextAction(integration.status),
+    };
+  }
 
+  /** AC5 projection after one exact provider snapshot was accepted. */
+  async applyCanonicalImportProjection(
+    tenantId: string,
+    preview: CrmImportPreview,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.reconcileCrmTeamAccess(
+      scopedTenantId,
+      preview.team.items.slice(0, 50),
+    );
+    await this.syncTenantPresentationFromCrm(scopedTenantId, preview.company);
     const checkedAt = new Date();
-    const status =
-      integration.status === 'active'
-        ? CrmIntegrationStatus.ACTIVE
-        : CrmIntegrationStatus.PENDING_ACTIVATION;
-    const updated = await this.prisma.crmIntegration.update({
+    await this.prisma.crmIntegration.update({
       where: { tenantId: scopedTenantId },
       data: {
-        status,
-        verifiedAt: integration.verifiedAt ?? checkedAt,
         lastCheckedAt: checkedAt,
         lastSyncAt: checkedAt,
         lastErrorCode: null,
         lastErrorAt: null,
       },
     });
-
-    return {
-      connection: this.serializeIntegration(updated),
-      preview,
-      next_action: this.resolveNextAction(updated.status),
-    };
   }
 
   /**
@@ -852,21 +736,6 @@ export class CrmService {
     }
   }
 
-  async activateIntegration(tenantId: string) {
-    const preview = await this.getImportPreview(tenantId);
-    const connection = await this.activateVerifiedIntegration(tenantId);
-    await this.syncTenantPresentationFromCrm(
-      this.tenantContext.assertTenantId(tenantId),
-      preview.preview.company,
-    );
-
-    return {
-      connection,
-      preview: preview.preview,
-      next_action: null,
-    };
-  }
-
   async recheckIntegration(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const integration = await this.getStoredIntegration(scopedTenantId);
@@ -914,77 +783,6 @@ export class CrmService {
       await this.recordStoredConnectionFailure(scopedTenantId, error);
       throw this.toSafeConnectionException(provider, error);
     }
-  }
-
-  /**
-   * Отключение CRM — это граница безопасности, а не просто удаление строки.
-   *
-   * 🔴 До cutover удалялась ТОЛЬКО `CrmIntegration`: гранты, роли и живые сессии
-   * продолжали существовать со старыми внешними id. Отключённая CRM оставляла
-   * активный доступ, выданный этой же CRM.
-   *
-   * 🔴 Роли владельца и администратора НЕ отзываются: они происходят из
-   * членства и платформенной авторизации, а не из CRM. Иначе отключение
-   * интеграции запирало бы владельца снаружи собственного кабинета.
-   */
-  async disconnectIntegration(tenantId: string) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const existing = await this.getStoredIntegration(scopedTenantId);
-    const now = new Date();
-
-    const revoked = await this.prisma.$transaction(async (tx) => {
-      await tx.staffProviderLink.updateMany({
-        where: {
-          tenantId: scopedTenantId,
-          provider: existing.provider,
-          unlinkedAt: null,
-        },
-        data: { unlinkedAt: now },
-      });
-
-      const derived = await tx.crmStaffAccess.findMany({
-        where: { tenantId: scopedTenantId, status: { not: 'disabled' } },
-        select: { id: true, userId: true, role: true },
-      });
-      const provisioned = derived.filter(
-        (access) => !this.isOwnerAccessRole(access.role),
-      );
-
-      if (provisioned.length > 0) {
-        await tx.crmStaffAccess.updateMany({
-          where: { id: { in: provisioned.map((access) => access.id) } },
-          data: { status: 'disabled' },
-        });
-      }
-
-      const userIds = provisioned
-        .map((access) => access.userId)
-        .filter((userId): userId is string => Boolean(userId));
-
-      if (userIds.length === 0) return 0;
-
-      const result = await tx.authSession.updateMany({
-        where: {
-          tenantId: scopedTenantId,
-          userId: { in: userIds },
-          revokedAt: null,
-        },
-        data: { revokedAt: now, revokeReason: 'crm_disconnected' },
-      });
-      return result.count;
-    });
-
-    await this.prisma.crmIntegration.delete({
-      where: { tenantId: scopedTenantId },
-    });
-
-    return {
-      configured: false,
-      disconnected_provider: existing.provider,
-      connection: null,
-      next_action: 'connect',
-      revoked_sessions: revoked,
-    };
   }
 
   async synchronizeCrmTeamAccess(tenantId: string) {
@@ -3781,82 +3579,6 @@ export class CrmService {
       );
       throw error;
     }
-  }
-
-  private async activateVerifiedIntegration(tenantId: string) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const existing = await this.getStoredIntegration(scopedTenantId);
-
-    if (!existing.verifiedAt) {
-      throw new ConflictException({
-        message: 'CRM credentials must be verified before activation',
-        error: { code: 'crm_verification_required' },
-      });
-    }
-
-    const integration = await this.prisma.$transaction(async (tx) => {
-      const activated = await tx.crmIntegration.update({
-        where: { tenantId: scopedTenantId },
-        data: {
-          status: CrmIntegrationStatus.ACTIVE,
-          lastErrorCode: null,
-          lastErrorAt: null,
-        },
-      });
-      await tx.tenant.update({
-        where: { id: scopedTenantId },
-        data: { calendarSource: CalendarSource.EXTERNAL },
-      });
-      if ((existing.provider as CrmProvider) !== CrmProvider.MOCK) {
-        const branding = await tx.brandingSettings.findUnique({
-          where: { tenantId: scopedTenantId },
-          select: { themeJson: true },
-        });
-        await tx.brandingSettings.upsert({
-          where: { tenantId: scopedTenantId },
-          create: {
-            tenantId: scopedTenantId,
-            themeJson: this.withRequestedBookingMode(
-              branding?.themeJson,
-              'live',
-            ),
-          },
-          update: {
-            themeJson: this.withRequestedBookingMode(
-              branding?.themeJson,
-              'live',
-            ),
-          },
-        });
-      }
-      return activated;
-    });
-
-    return this.serializeIntegration(integration);
-  }
-
-  private withRequestedBookingMode(
-    themeJson: unknown,
-    mode: 'live' | 'preview',
-  ) {
-    const theme =
-      themeJson && typeof themeJson === 'object' && !Array.isArray(themeJson)
-        ? (themeJson as Record<string, unknown>)
-        : {};
-    const booking =
-      theme.booking &&
-      typeof theme.booking === 'object' &&
-      !Array.isArray(theme.booking)
-        ? (theme.booking as Record<string, unknown>)
-        : {};
-
-    return asJson({
-      ...theme,
-      booking: {
-        ...booking,
-        mode,
-      },
-    });
   }
 
   private async recordStoredConnectionFailure(

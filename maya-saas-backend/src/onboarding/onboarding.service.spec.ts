@@ -75,7 +75,7 @@ describe('OnboardingService', () => {
     const upsertBrandingMock: jest.MockedFunction<
       (tenantId: string, args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(undefined);
-    const createOrUpdateIntegrationMock: jest.MockedFunction<
+    const ensureBootstrapMockIntegrationMock: jest.MockedFunction<
       (tenantId: string, args: Record<string, unknown>) => Promise<unknown>
     > = jest.fn().mockResolvedValue(undefined);
     const ensureProviderForUserMock = jest.fn().mockResolvedValue({
@@ -127,7 +127,7 @@ describe('OnboardingService', () => {
       expectCreatedTenantContext();
       return Promise.resolve();
     });
-    createOrUpdateIntegrationMock.mockImplementation(() => {
+    ensureBootstrapMockIntegrationMock.mockImplementation(() => {
       expectCreatedTenantContext();
       return Promise.resolve();
     });
@@ -144,7 +144,7 @@ describe('OnboardingService', () => {
       } as unknown as TenantsService,
       { upsertBranding: upsertBrandingMock } as unknown as BrandingService,
       {
-        createOrUpdateIntegration: createOrUpdateIntegrationMock,
+        ensureBootstrapMockIntegration: ensureBootstrapMockIntegrationMock,
       } as unknown as CrmService,
       {
         ensureProviderForUser: ensureProviderForUserMock,
@@ -179,7 +179,7 @@ describe('OnboardingService', () => {
         createTenantMock,
         deleteFailedTrialTenantMock,
         upsertBrandingMock,
-        createOrUpdateIntegrationMock,
+        ensureBootstrapMockIntegrationMock,
         ensureProviderForUserMock,
         getPlanByIdOrThrowMock,
         getPlanByNameOrThrowMock,
@@ -241,7 +241,7 @@ describe('OnboardingService', () => {
         },
       },
     });
-    expect(mocks.createOrUpdateIntegrationMock).toHaveBeenCalledWith(
+    expect(mocks.ensureBootstrapMockIntegrationMock).toHaveBeenCalledWith(
       'tenant-1',
       {
         provider: CrmProvider.MOCK,
@@ -311,7 +311,7 @@ describe('OnboardingService', () => {
         planId: 'plan-solo',
       }),
     );
-    expect(mocks.createOrUpdateIntegrationMock).not.toHaveBeenCalled();
+    expect(mocks.ensureBootstrapMockIntegrationMock).not.toHaveBeenCalled();
     expect(mocks.ensureProviderForUserMock).toHaveBeenCalledWith(
       'tenant-1',
       'user-1',

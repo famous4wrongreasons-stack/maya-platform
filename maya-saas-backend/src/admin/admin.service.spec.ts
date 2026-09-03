@@ -7,6 +7,7 @@ import { BrandingService } from '../branding/branding.service';
 import { CrmService } from '../crm/crm.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
+import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { QuotaService } from '../quotas/quota.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -153,6 +154,13 @@ describe('AdminService tenant update boundaries', () => {
           (purpose: string, value: string) => `opaque:${purpose}:${value}`,
         ),
       } as unknown as EncryptionService,
+      {
+        intentRef: jest.fn().mockReturnValue('request-admin-cutover'),
+        installCrmCredentials: upsertCrmMock,
+        activateCrmIntegration: jest.fn().mockResolvedValue({
+          connection: { id: 'crm-1', provider: CrmProvider.YCLIENTS },
+        }),
+      } as unknown as Package5Wave3CanonicalCutoverService,
     );
 
     return {
@@ -232,7 +240,12 @@ describe('AdminService tenant update boundaries', () => {
 
     await service.upsertCrm('tenant-1', dto, tenantAdmin);
 
-    expect(upsertCrmMock).toHaveBeenCalledWith('tenant-1', dto);
+    expect(upsertCrmMock).toHaveBeenCalledWith(
+      'tenant-1',
+      tenantAdmin,
+      dto,
+      'request-admin-cutover:install',
+    );
   });
 
   it('checks staff quota before any tenant-user creation work', async () => {

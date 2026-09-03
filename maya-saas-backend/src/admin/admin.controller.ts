@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -130,8 +131,9 @@ export class AdminController {
     @Param('id') id: string,
     @Body() dto: CreateCrmIntegrationDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.adminService.upsertCrm(id, dto, actor);
+    return this.adminService.upsertCrm(id, dto, actor, idempotencyKey);
   }
 
   @Patch(':id/crm')
@@ -142,8 +144,9 @@ export class AdminController {
     @Param('id') id: string,
     @Body() dto: UpdateCrmIntegrationDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.adminService.upsertCrm(id, dto, actor);
+    return this.adminService.upsertCrm(id, dto, actor, idempotencyKey);
   }
 
   @Post(':id/test-crm')

@@ -16,6 +16,7 @@ import { CalendarSource } from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
+import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 describe('AiToolHandlerService output minimization', () => {
@@ -604,20 +605,23 @@ describe('AiToolHandlerService output minimization', () => {
   });
 
   it('applies only the immutable schedule approved by a manager', async () => {
-    const applyStaffScheduleDayChange = jest.fn().mockResolvedValue({
-      staff_id: '1461615',
-      date: '2026-08-06',
-      is_working: true,
-      slots: [
-        { from: '10:00', to: '14:00' },
-        { from: '15:00', to: '18:00' },
-      ],
-      verified: true,
+    const updateExternalStaffScheduleDay = jest.fn().mockResolvedValue({
+      result: { actionExecutionId: 'ae-wave3' },
+      verified: {
+        staff_id: '1461615',
+        date: '2026-08-06',
+        is_working: true,
+        slots: [
+          { from: '10:00', to: '14:00' },
+          { from: '15:00', to: '18:00' },
+        ],
+      },
     });
-    const crmService = {
-      applyStaffScheduleDayChange,
-    } as unknown as CrmService;
-    const service = createService({ crmService });
+    const service = createService({
+      canonicalWave3: {
+        updateExternalStaffScheduleDay,
+      } as unknown as Package5Wave3CanonicalCutoverService,
+    });
 
     await expect(
       service.execute(
@@ -645,15 +649,20 @@ describe('AiToolHandlerService output minimization', () => {
       verified: true,
       existing_appointments_preserved: true,
     });
-    expect(applyStaffScheduleDayChange).toHaveBeenCalledWith('tenant-a', {
-      staffId: '1461615',
-      date: '2026-08-06',
-      slots: [
-        { from: '10:00', to: '14:00' },
-        { from: '15:00', to: '18:00' },
-      ],
-      expectedRevision: 'a'.repeat(64),
-    });
+    expect(updateExternalStaffScheduleDay).toHaveBeenCalledWith(
+      'tenant-a',
+      expect.objectContaining({ userId: 'customer-a' }),
+      {
+        externalStaffId: '1461615',
+        localDate: '2026-08-06',
+        slots: [
+          { from: '10:00', to: '14:00' },
+          { from: '15:00', to: '18:00' },
+        ],
+        expectedProviderRevision: 'a'.repeat(64),
+      },
+      'execution-schedule',
+    );
   });
 
   it('reads the exact active staff schedule directly from CRM', async () => {
@@ -2973,6 +2982,7 @@ describe('AiToolHandlerService output minimization', () => {
     prisma?: PrismaService;
     customersService?: CustomersService;
     staffService?: StaffService;
+    canonicalWave3?: Package5Wave3CanonicalCutoverService;
   }) {
     const prisma =
       overrides.prisma ??
@@ -3012,6 +3022,14 @@ describe('AiToolHandlerService output minimization', () => {
       // 🔴 Cycle 04 P6. Канонический читатель периода.
       new AppointmentPeriodReader(overrides.crmService ?? ({} as CrmService)),
       new ClientRecencyFactsService(overrides.crmService ?? ({} as CrmService)),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      overrides.canonicalWave3,
     );
   }
 });

@@ -24,6 +24,7 @@ import { UpdateCrmTeamAccessDto } from '../users/dto/update-crm-team-access.dto'
 import { UsersService } from '../users/users.service';
 import { attendanceFromWritableCode, attendanceToCode } from './crm-attendance';
 import { CrmService } from './crm.service';
+import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
 import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
 import { ListCrmJournalDto } from './dto/list-crm-journal.dto';
@@ -83,6 +84,7 @@ export class CrmIntegrationController {
     private readonly auditLogService: AuditLogService,
     private readonly tenantContext: TenantContextService,
     private readonly usersService: UsersService,
+    private readonly canonicalWave3: Package5Wave3CanonicalCutoverService,
   ) {}
 
   @Get()
@@ -125,9 +127,15 @@ export class CrmIntegrationController {
   async connect(
     @Body() dto: ConnectCrmIntegrationDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     const tenantId = this.tenantId(actor);
-    const result = await this.crmService.stageIntegration(tenantId, dto);
+    const result = await this.canonicalWave3.installCrmCredentials(
+      tenantId,
+      actor,
+      dto,
+      idempotencyKey,
+    );
 
     await this.auditLogService.log({
       tenantId,
@@ -519,9 +527,16 @@ export class CrmIntegrationController {
 
   @Post('activate')
   @ApiOperation({ summary: 'Recheck and activate the staged CRM connection' })
-  async activate(@CurrentUser() actor: AuthenticatedUser) {
+  async activate(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ) {
     const tenantId = this.tenantId(actor);
-    const result = await this.crmService.activateIntegration(tenantId);
+    const result = await this.canonicalWave3.activateCrmIntegration(
+      tenantId,
+      actor,
+      idempotencyKey,
+    );
 
     await this.auditLogService.log({
       tenantId,
@@ -559,9 +574,16 @@ export class CrmIntegrationController {
   @Delete()
   @AllowSubscriptionRequired()
   @ApiOperation({ summary: 'Delete the tenant CRM credential and disconnect' })
-  async disconnect(@CurrentUser() actor: AuthenticatedUser) {
+  async disconnect(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ) {
     const tenantId = this.tenantId(actor);
-    const result = await this.crmService.disconnectIntegration(tenantId);
+    const result = await this.canonicalWave3.disconnectCrmIntegration(
+      tenantId,
+      actor,
+      idempotencyKey,
+    );
 
     await this.auditLogService.log({
       tenantId,

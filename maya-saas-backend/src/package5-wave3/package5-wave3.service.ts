@@ -14,6 +14,7 @@ import {
   ActionPolicyDecision,
   ExternalDispatchState,
   Prisma,
+  UserRole,
   type ActionExecution,
   type PrismaClient,
 } from '@prisma/client';
@@ -42,7 +43,13 @@ const ADMIN_ROLES = new Set([
   'manager',
   'branch_manager',
 ]);
-const OWNER_ROLES = new Set(['tenant_owner', 'business_owner']);
+const OWNER_ROLE_VALUES: UserRole[] = [
+  UserRole.tenant_owner,
+  UserRole.business_owner,
+  UserRole.tenant_admin,
+  UserRole.administrator,
+];
+const OWNER_ROLES = new Set<string>(OWNER_ROLE_VALUES);
 const NOTE_ROLES = new Set([...ADMIN_ROLES, 'provider', 'employee', 'staff']);
 export const PACKAGE5_WAVE3_MAX_CRM_TEAM_CHILDREN = 50;
 
@@ -90,6 +97,7 @@ export type Package5Wave3Command =
       sourceIntentRef: string;
       clientId: string;
       encryptedNotes: string | null;
+      notesFingerprint: string;
     };
 
 export interface Package5Wave3Actor {
@@ -100,23 +108,31 @@ export interface Package5Wave3ProviderGateway {
   readStaffDay(input: {
     tenantId: string;
     provider: string;
+    staffId: string;
+    branchId: string;
     externalStaffId: string;
     localDate: string;
   }): Promise<{ revision: string; stateHash: string }>;
   replaceStaffDay(input: {
     tenantId: string;
     provider: string;
+    staffId: string;
+    branchId: string;
     externalStaffId: string;
     localDate: string;
     slots: StaffDaySlot[];
+    expectedProviderRevision: string;
     requestIdentityHash: string;
   }): Promise<{ stateHash: string }>;
   reconcileStaffDay(input: {
     tenantId: string;
     provider: string;
+    staffId: string;
+    branchId: string;
     externalStaffId: string;
     localDate: string;
     desiredStateHash: string;
+    expectedProviderRevision: string;
     requestIdentityHash: string;
   }): Promise<'PROVEN_SUCCEEDED' | 'PROVEN_NOT_EXECUTED' | 'STILL_UNKNOWN'>;
   verifyCrm(input: {
@@ -127,6 +143,10 @@ export interface Package5Wave3ProviderGateway {
     tenantId: string;
     provider: string;
   }): Promise<{ snapshotHash: string; teamChildHashes: string[] }>;
+  fingerprintEncryptedValue(input: {
+    namespace: string;
+    encryptedValue: string;
+  }): string;
 }
 
 interface Facts {
@@ -138,9 +158,12 @@ interface Facts {
   expectedProviderRevision: string | null;
   credentialFingerprint: string | null;
   providerSnapshotHash: string | null;
+  notesFingerprint: string | null;
   clientId: string | null;
   consentKind: string | null;
   consentDecision: string | null;
+  consentOccurredAt: string | null;
+  consentEffectiveAt: string | null;
   sourceIdentityHash: string | null;
 }
 
@@ -255,7 +278,6 @@ export class Package5Wave3ShadowService {
           }
         : { sourceIntentRef },
     )}`;
-    const requestMaterialHash = this.requestMaterialHash(command);
     const capability =
       mode === 'shadow'
         ? registration.shadowCapability
@@ -272,9 +294,17 @@ export class Package5Wave3ShadowService {
         scoped,
         prior[0].id,
       );
+      const replayCommand =
+        command.operation === 'record_client_consent'
+          ? {
+              ...command,
+              occurredAt: new Date(this.inputText(input.consentOccurredAt)),
+              effectiveAt: new Date(this.inputText(input.consentEffectiveAt)),
+            }
+          : command;
       if (
         input.operation !== command.operation ||
-        input.requestMaterialHash !== requestMaterialHash ||
+        input.requestMaterialHash !== this.requestMaterialHash(replayCommand) ||
         input.actorIdentityHash !== authority.actorIdentityHash
       )
         throw new Package5Wave3Error(
@@ -290,12 +320,13 @@ export class Package5Wave3ShadowService {
           input,
           mode,
         ),
-        command,
+        command: replayCommand,
         actor,
         existingExecution: prior[0],
       };
     }
     const facts = await this.resolveFacts(scoped, actor.userId, command);
+    const requestMaterialHash = this.requestMaterialHash(command);
     const targetGeneration = await this.nextGeneration(
       scoped,
       registration.targetKind,
@@ -356,9 +387,12 @@ export class Package5Wave3ShadowService {
         expectedProviderRevision: facts.expectedProviderRevision,
         credentialFingerprint: facts.credentialFingerprint,
         providerSnapshotHash: facts.providerSnapshotHash,
+        notesFingerprint: facts.notesFingerprint,
         clientId: facts.clientId,
         consentKind: facts.consentKind,
         consentDecision: facts.consentDecision,
+        consentOccurredAt: facts.consentOccurredAt,
+        consentEffectiveAt: facts.consentEffectiveAt,
         sourceIdentityHash: facts.sourceIdentityHash,
       },
       evidenceRefs: [
@@ -408,10 +442,6 @@ export class Package5Wave3ShadowService {
     if (command.operation === 'install_crm_credentials')
       delete material.encryptedApiToken;
     if (command.operation === 'update_client_notes') {
-      material.notesCipherHash =
-        command.encryptedNotes === null
-          ? null
-          : wave3Hash(command.encryptedNotes);
       delete material.encryptedNotes;
     }
     return wave3Hash(material);
@@ -492,9 +522,12 @@ export class Package5Wave3ShadowService {
       expectedProviderRevision: null,
       credentialFingerprint: null,
       providerSnapshotHash: null,
+      notesFingerprint: null,
       clientId: null,
       consentKind: null,
       consentDecision: null,
+      consentOccurredAt: null,
+      consentEffectiveAt: null,
       sourceIdentityHash: null,
     };
     if (command.operation === 'update_staff_schedule_day') {
@@ -516,6 +549,8 @@ export class Package5Wave3ShadowService {
       const current = await this.provider.readStaffDay({
         tenantId,
         provider: link.provider,
+        staffId: staff.id,
+        branchId: staff.branchId,
         externalStaffId: link.externalId,
         localDate: command.localDate,
       });
@@ -679,9 +714,19 @@ export class Package5Wave3ShadowService {
       client.userId !== actorUserId
     )
       throw new ForbiddenException('Client account does not own this profile');
-    const profile = await this.prisma.customerProfile.findUnique({
-      where: { tenantId_clientId: { tenantId, clientId: client.id } },
+    const profiles = await this.prisma.customerProfile.findMany({
+      where: {
+        tenantId,
+        OR: [
+          { clientId: client.id },
+          ...(client.userId ? [{ userId: client.userId }] : []),
+        ],
+      },
+      take: 2,
     });
+    if (profiles.length > 1)
+      throw new ConflictException('Client profile ownership conflicts');
+    const profile = profiles[0] ?? null;
     if (command.operation === 'update_client_profile') {
       if (
         command.preferredLocale !== null &&
@@ -700,25 +745,23 @@ export class Package5Wave3ShadowService {
       };
     }
     if (command.operation === 'update_client_notes') {
-      const notesHash =
-        command.encryptedNotes === null
-          ? null
-          : wave3Hash(command.encryptedNotes);
-      if (
-        (profile?.encryptedNotes ? wave3Hash(profile.encryptedNotes) : null) ===
-        notesHash
-      )
+      const existingFingerprint = profile?.encryptedNotes
+        ? this.provider.fingerprintEncryptedValue({
+            namespace: 'package5.wave3.client-notes',
+            encryptedValue: profile.encryptedNotes,
+          })
+        : null;
+      if (existingFingerprint === command.notesFingerprint)
         throw new ConflictException('Client notes already have desired state');
       return {
         ...empty,
         targetRef: client.id,
         before: {
-          notesHash: profile?.encryptedNotes
-            ? wave3Hash(profile.encryptedNotes)
-            : null,
+          notesFingerprint: existingFingerprint,
         },
-        desired: { notesHash },
+        desired: { notesFingerprint: command.notesFingerprint },
         changedFields: ['encryptedNotes'],
+        notesFingerprint: command.notesFingerprint,
         clientId: client.id,
       };
     }
@@ -759,6 +802,8 @@ export class Package5Wave3ShadowService {
       clientId: client.id,
       consentKind: command.kind,
       consentDecision: command.decision,
+      consentOccurredAt: command.occurredAt.toISOString(),
+      consentEffectiveAt: command.effectiveAt.toISOString(),
       sourceIdentityHash: command.sourceIdentityHash,
     };
   }
@@ -845,6 +890,12 @@ export class Package5Wave3ShadowService {
     if (!normalized || normalized.length > 240)
       throw new BadRequestException('Required value invalid');
     return normalized;
+  }
+
+  private inputText(value: unknown) {
+    if (typeof value !== 'string' || !value)
+      throw new Package5Wave3Error('Expected trusted input text');
+    return value;
   }
 }
 
@@ -940,8 +991,11 @@ export class Package5Wave3ExecutableService {
         staffId: command.staffId,
         unlinkedAt: null,
       },
+      include: { staff: { select: { branchId: true } } },
     });
-    if (!link) throw new Package5Wave3Error('Provider staff link missing');
+    if (!link?.staff.branchId)
+      throw new Package5Wave3Error('Provider staff/branch link missing');
+    const branchId = link.staff.branchId;
     const runtimeValue = await this.runtime.execute(prepared.request, {
       prepare: async (input, context) => {
         const execution = await this.prisma.actionExecution.findUniqueOrThrow({
@@ -970,9 +1024,12 @@ export class Package5Wave3ExecutableService {
         const result = await this.provider.replaceStaffDay({
           tenantId: context.tenantId,
           provider: link.provider,
+          staffId: command.staffId,
+          branchId,
           externalStaffId: link.externalId,
           localDate: command.localDate,
           slots: command.slots,
+          expectedProviderRevision: this.text(input.expectedProviderRevision),
           requestIdentityHash: this.text(input.providerRequestIdentityHash),
         });
         if (result.stateHash !== input.desiredStateHash)
@@ -994,9 +1051,12 @@ export class Package5Wave3ExecutableService {
         const outcome = await this.provider.reconcileStaffDay({
           tenantId: context.tenantId,
           provider: link.provider,
+          staffId: command.staffId,
+          branchId,
           externalStaffId: link.externalId,
           localDate: command.localDate,
           desiredStateHash: this.text(input.desiredStateHash),
+          expectedProviderRevision: this.text(input.expectedProviderRevision),
           requestIdentityHash: this.text(input.providerRequestIdentityHash),
         });
         if (outcome === 'STILL_UNKNOWN') return { outcome };
@@ -1112,7 +1172,7 @@ export class Package5Wave3ExecutableService {
           },
         });
         return;
-      case 'activate_crm_integration':
+      case 'activate_crm_integration': {
         await tx.crmIntegration.update({
           where: { tenantId },
           data: {
@@ -1123,7 +1183,32 @@ export class Package5Wave3ExecutableService {
             lastErrorAt: null,
           },
         });
+        await tx.tenant.update({
+          where: { id: tenantId },
+          data: { calendarSource: 'external' },
+        });
+        const integration = await tx.crmIntegration.findUniqueOrThrow({
+          where: { tenantId },
+          select: { provider: true },
+        });
+        if (integration.provider !== 'mock') {
+          const branding = await tx.brandingSettings.findUnique({
+            where: { tenantId },
+            select: { themeJson: true },
+          });
+          await tx.brandingSettings.upsert({
+            where: { tenantId },
+            create: {
+              tenantId,
+              themeJson: this.withBookingMode(branding?.themeJson, 'live'),
+            },
+            update: {
+              themeJson: this.withBookingMode(branding?.themeJson, 'live'),
+            },
+          });
+        }
         return;
+      }
       case 'confirm_crm_import': {
         const current = await tx.crmIntegration.findUniqueOrThrow({
           where: { tenantId },
@@ -1158,7 +1243,7 @@ export class Package5Wave3ExecutableService {
           where: {
             tenantId,
             status: { not: 'disabled' },
-            role: { notIn: ['tenant_owner', 'administrator'] },
+            role: { notIn: OWNER_ROLE_VALUES },
           },
           select: { id: true, userId: true },
         });
@@ -1179,30 +1264,17 @@ export class Package5Wave3ExecutableService {
         return;
       }
       case 'update_client_profile':
-        await tx.customerProfile.upsert({
-          where: {
-            tenantId_clientId: { tenantId, clientId: command.clientId },
-          },
-          create: {
-            tenantId,
-            clientId: command.clientId,
-            userId: execution.actorUserId,
-            preferredLocale: command.preferredLocale,
-          },
-          update: { preferredLocale: command.preferredLocale },
-        });
+        await this.updateClientProfile(
+          tx,
+          tenantId,
+          command.clientId,
+          execution.actorUserId,
+          { preferredLocale: command.preferredLocale },
+        );
         return;
       case 'update_client_notes':
-        await tx.customerProfile.upsert({
-          where: {
-            tenantId_clientId: { tenantId, clientId: command.clientId },
-          },
-          create: {
-            tenantId,
-            clientId: command.clientId,
-            encryptedNotes: command.encryptedNotes,
-          },
-          update: { encryptedNotes: command.encryptedNotes },
+        await this.updateClientProfile(tx, tenantId, command.clientId, null, {
+          encryptedNotes: command.encryptedNotes,
         });
         return;
       case 'record_client_consent':
@@ -1220,39 +1292,78 @@ export class Package5Wave3ExecutableService {
             actionExecutionId: execution.id,
           },
         });
-        await tx.customerProfile.upsert({
-          where: {
-            tenantId_clientId: { tenantId, clientId: command.clientId },
-          },
-          create: {
-            tenantId,
-            clientId: command.clientId,
-            userId: execution.actorUserId,
-            ...(command.kind === 'privacy'
-              ? {
-                  privacyConsentAt:
-                    command.decision === 'grant' ? command.effectiveAt : null,
-                }
-              : {
-                  marketingConsentAt:
-                    command.decision === 'grant' ? command.effectiveAt : null,
-                }),
-          },
-          update:
-            command.kind === 'privacy'
-              ? {
-                  privacyConsentAt:
-                    command.decision === 'grant' ? command.effectiveAt : null,
-                }
-              : {
-                  marketingConsentAt:
-                    command.decision === 'grant' ? command.effectiveAt : null,
-                },
-        });
+        await this.updateClientProfile(
+          tx,
+          tenantId,
+          command.clientId,
+          execution.actorUserId,
+          command.kind === 'privacy'
+            ? {
+                privacyConsentAt:
+                  command.decision === 'grant' ? command.effectiveAt : null,
+              }
+            : {
+                marketingConsentAt:
+                  command.decision === 'grant' ? command.effectiveAt : null,
+              },
+        );
         return;
       default:
         throw new Package5Wave3Error('Local mutation operation mismatch');
     }
+  }
+
+  private async updateClientProfile(
+    tx: Tx,
+    tenantId: string,
+    clientId: string,
+    actorUserId: string | null,
+    data: {
+      preferredLocale?: string | null;
+      privacyConsentAt?: Date | null;
+      marketingConsentAt?: Date | null;
+      encryptedNotes?: string | null;
+    },
+  ) {
+    const client = await tx.client.findUniqueOrThrow({
+      where: { id_tenantId: { id: clientId, tenantId } },
+      select: { userId: true },
+    });
+    const userId = client.userId ?? actorUserId;
+    const profiles = await tx.customerProfile.findMany({
+      where: {
+        tenantId,
+        OR: [{ clientId }, ...(userId ? [{ userId }] : [])],
+      },
+      take: 2,
+      select: { id: true },
+    });
+    if (profiles.length > 1)
+      throw new Package5Wave3Error('Client profile ownership conflicts');
+    if (profiles[0]) {
+      await tx.customerProfile.update({
+        where: { id: profiles[0].id },
+        data: { clientId, ...(userId ? { userId } : {}), ...data },
+      });
+      return;
+    }
+    await tx.customerProfile.create({
+      data: { tenantId, clientId, userId, ...data },
+    });
+  }
+
+  private withBookingMode(themeJson: unknown, mode: 'live' | 'preview') {
+    const theme =
+      themeJson && typeof themeJson === 'object' && !Array.isArray(themeJson)
+        ? (themeJson as Record<string, unknown>)
+        : {};
+    const booking =
+      theme.booking &&
+      typeof theme.booking === 'object' &&
+      !Array.isArray(theme.booking)
+        ? (theme.booking as Record<string, unknown>)
+        : {};
+    return { ...theme, booking: { ...booking, mode } } as Prisma.InputJsonValue;
   }
 
   private async assertActor(

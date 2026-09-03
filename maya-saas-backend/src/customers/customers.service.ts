@@ -7,6 +7,7 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UsersService } from '../users/users.service';
+import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { UpdateCustomerNotesDto } from './dto/update-customer-notes.dto';
 import { UpdateCustomerProfileDto } from './dto/update-customer-profile.dto';
 
@@ -21,6 +22,7 @@ export class CustomersService {
     private readonly encryptionService: EncryptionService,
     private readonly auditLogService: AuditLogService,
     private readonly loyaltyService: LoyaltyService,
+    private readonly canonicalWave3: Package5Wave3CanonicalCutoverService,
   ) {}
 
   async getOwnProfile(tenantId: string, userId: string) {
@@ -36,6 +38,7 @@ export class CustomersService {
     tenantId: string,
     userId: string,
     dto: UpdateCustomerProfileDto,
+    idempotencyKey?: string,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.usersService.getTenantUserOrThrow(userId, scopedTenantId);
@@ -48,30 +51,54 @@ export class CustomersService {
         'At least one customer profile field must be provided',
       );
     }
+    const client = await this.exactClientForUser(scopedTenantId, userId);
+    const source = this.canonicalWave3.intentRef(idempotencyKey);
     const now = new Date();
-    const profile = await this.prisma.customerProfile.upsert({
-      where: { userId_tenantId: { userId, tenantId: scopedTenantId } },
-      update: {
-        preferredLocale: dto.preferredLocale,
-        privacyConsentAt:
-          dto.privacyConsent === undefined
-            ? undefined
-            : dto.privacyConsent
-              ? now
-              : null,
-        marketingConsentAt:
-          dto.marketingConsent === undefined
-            ? undefined
-            : dto.marketingConsent
-              ? now
-              : null,
-      },
-      create: {
+    const currentProfile = await this.prisma.customerProfile.findFirst({
+      where: {
         tenantId: scopedTenantId,
+        OR: [{ clientId: client.id }, { userId }],
+      },
+    });
+    if (
+      dto.preferredLocale !== undefined &&
+      (!currentProfile ||
+        currentProfile.preferredLocale !== dto.preferredLocale)
+    ) {
+      await this.canonicalWave3.updateClientLocale(
+        scopedTenantId,
         userId,
-        preferredLocale: dto.preferredLocale,
-        privacyConsentAt: dto.privacyConsent ? now : null,
-        marketingConsentAt: dto.marketingConsent ? now : null,
+        client.id,
+        dto.preferredLocale,
+        source,
+      );
+    }
+    if (dto.privacyConsent !== undefined) {
+      await this.canonicalWave3.recordClientConsent(
+        scopedTenantId,
+        userId,
+        client.id,
+        'privacy',
+        dto.privacyConsent,
+        now,
+        source,
+      );
+    }
+    if (dto.marketingConsent !== undefined) {
+      await this.canonicalWave3.recordClientConsent(
+        scopedTenantId,
+        userId,
+        client.id,
+        'marketing',
+        dto.marketingConsent,
+        now,
+        source,
+      );
+    }
+    const profile = await this.prisma.customerProfile.findFirstOrThrow({
+      where: {
+        tenantId: scopedTenantId,
+        OR: [{ clientId: client.id }, { userId }],
       },
     });
 
@@ -222,19 +249,23 @@ export class CustomersService {
     actorUserId: string,
     userId: string,
     dto: UpdateCustomerNotesDto,
+    idempotencyKey?: string,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.getCustomer(scopedTenantId, userId);
+    const client = await this.exactClientForUser(scopedTenantId, userId);
     const notes = dto.notes?.trim() || null;
-    const profile = await this.prisma.customerProfile.upsert({
-      where: { userId_tenantId: { userId, tenantId: scopedTenantId } },
-      update: {
-        encryptedNotes: notes ? this.encryptionService.encrypt(notes) : null,
-      },
-      create: {
+    await this.canonicalWave3.updateClientNotes(
+      scopedTenantId,
+      actorUserId,
+      client.id,
+      notes,
+      idempotencyKey,
+    );
+    const profile = await this.prisma.customerProfile.findFirstOrThrow({
+      where: {
         tenantId: scopedTenantId,
-        userId,
-        encryptedNotes: notes ? this.encryptionService.encrypt(notes) : null,
+        OR: [{ clientId: client.id }, { userId }],
       },
     });
 
@@ -248,6 +279,17 @@ export class CustomersService {
     });
 
     return this.getCustomer(scopedTenantId, userId);
+  }
+
+  private async exactClientForUser(tenantId: string, userId: string) {
+    const clients = await this.prisma.client.findMany({
+      where: { tenantId, userId, mergedIntoClientId: null },
+      take: 2,
+      select: { id: true },
+    });
+    if (clients.length !== 1)
+      throw new BadRequestException('Exact canonical Client is unresolved');
+    return clients[0];
   }
 
   private serializeOwnProfile(

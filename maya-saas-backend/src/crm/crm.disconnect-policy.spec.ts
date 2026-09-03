@@ -1,174 +1,199 @@
-import { CrmProvider, UserRole } from '../common/domain.enums';
-import type { EncryptionService } from '../encryption/encryption.service';
-import { TenantContextService } from '../tenancy/tenant-context.service';
-import type { CrmAdapterFactory } from './crm-adapter.factory';
-import { CrmService } from './crm.service';
-import type { PrismaService } from '../prisma/prisma.service';
+import { UserRole } from '../common/domain.enums';
+import { Package5Wave3ExecutableService } from '../package5-wave3/package5-wave3.service';
 
 /**
- * Отключение CRM — граница безопасности.
- *
- * 🔴 До cutover `disconnectIntegration` удалял ТОЛЬКО строку интеграции: гранты,
- * роли и живые сессии продолжали существовать со старыми внешними id.
- * Отключённая CRM оставляла активный доступ, который сама же и выдала.
- *
- * Здесь зафиксированы три утверждения, каждое из которых обязано пережить любую
- * последующую правку.
+ * CRM disconnect is a Package 5 Wave 3 canonical mutation. These tests keep
+ * the access-revocation policy pinned to the canonical executor after the
+ * legacy CrmService mutation owner has been removed.
  */
-describe('политика отключения CRM', () => {
-  const integration = {
-    id: 'crm-1',
-    tenantId: 'tenant-1',
-    provider: CrmProvider.YCLIENTS,
-    encryptedApiToken: 'enc',
-    baseUrl: null,
-    status: 'active',
-    settingsJson: {},
-    verifiedAt: new Date(),
-    lastCheckedAt: new Date(),
-    lastSyncAt: null,
-    lastErrorCode: null,
-    lastErrorAt: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+describe('canonical CRM disconnect policy', () => {
+  const now = new Date('2026-09-03T12:00:00.000Z');
 
   function build(
     accesses: Array<{ id: string; userId: string | null; role: UserRole }>,
   ) {
-    type UpdateManyArgs = {
-      where: Record<string, unknown>;
-      data?: Record<string, unknown>;
-    };
-    type RevokeArgs = {
-      where: { userId: { in: string[] } };
-      data: { revokeReason: string };
-    };
-    const count = () => Promise.resolve({ count: 1 });
-
-    const linkUpdateMany: jest.MockedFunction<
-      (args: UpdateManyArgs) => Promise<{ count: number }>
-    > = jest.fn(count);
-    const accessUpdateMany: jest.MockedFunction<
-      (args: UpdateManyArgs) => Promise<{ count: number }>
-    > = jest.fn(count);
-    const sessionUpdateMany: jest.MockedFunction<
-      (args: RevokeArgs) => Promise<{ count: number }>
-    > = jest.fn(count);
-    const integrationDelete: jest.MockedFunction<
-      (args: { where: { tenantId: string } }) => Promise<typeof integration>
-    > = jest.fn(() => Promise.resolve(integration));
-
-    const tx = {
-      staffProviderLink: { updateMany: linkUpdateMany },
-      crmStaffAccess: {
-        findMany: jest.fn().mockResolvedValue(accesses),
-        updateMany: accessUpdateMany,
-      },
-      authSession: { updateMany: sessionUpdateMany },
-    };
-
-    const tenantContext = new TenantContextService();
-    const service = new CrmService(
-      {
-        crmIntegration: {
-          findUnique: jest.fn().mockResolvedValue(integration),
-          delete: integrationDelete,
-        },
-        $transaction: jest.fn((run: (t: unknown) => unknown) =>
-          Promise.resolve(run(tx)),
-        ),
-      } as unknown as PrismaService,
-      {
-        decrypt: jest.fn(),
-        encrypt: jest.fn(),
-      } as unknown as EncryptionService,
-      { create: jest.fn() } as unknown as CrmAdapterFactory,
-      tenantContext,
-      {} as never,
-      {} as never,
+    const crmDerived = accesses.filter(
+      (access) =>
+        ![
+          UserRole.TENANT_OWNER,
+          UserRole.BUSINESS_OWNER,
+          UserRole.TENANT_ADMIN,
+          UserRole.ADMINISTRATOR,
+        ].includes(access.role),
     );
+    const staffProviderLinkUpdateMany = jest
+      .fn()
+      .mockResolvedValue({ count: 1 });
+    const crmStaffAccessFindMany = jest.fn().mockResolvedValue(crmDerived);
+    const crmStaffAccessUpdateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const authSessionUpdateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const crmIntegrationDelete = jest.fn().mockResolvedValue({ id: 'crm-1' });
+    const tx = {
+      crmIntegration: {
+        findUniqueOrThrow: jest
+          .fn()
+          .mockResolvedValue({ provider: 'yclients' }),
+        delete: crmIntegrationDelete,
+      },
+      staffProviderLink: { updateMany: staffProviderLinkUpdateMany },
+      crmStaffAccess: {
+        findMany: crmStaffAccessFindMany,
+        updateMany: crmStaffAccessUpdateMany,
+      },
+      authSession: { updateMany: authSessionUpdateMany },
+    };
+    const service = new Package5Wave3ExecutableService(
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      () => now,
+    );
+    const mutate = (
+      service as unknown as {
+        mutate(
+          tx: unknown,
+          execution: { tenantId: string },
+          command: {
+            operation: 'disconnect_crm_integration';
+            sourceIntentRef: string;
+          },
+          input: Record<string, unknown>,
+        ): Promise<void>;
+      }
+    ).mutate.bind(service);
 
     return {
-      service,
-      tenantContext,
-      linkUpdateMany,
-      accessUpdateMany,
-      sessionUpdateMany,
-      integrationDelete,
+      run: () =>
+        mutate(
+          tx,
+          { tenantId: 'tenant-1' },
+          {
+            operation: 'disconnect_crm_integration',
+            sourceIntentRef: 'stable-disconnect-request',
+          },
+          {},
+        ),
+      staffProviderLinkUpdateMany,
+      crmStaffAccessFindMany,
+      crmStaffAccessUpdateMany,
+      authSessionUpdateMany,
+      crmIntegrationDelete,
     };
   }
 
-  it('отзывает доступ, выданный этой CRM, и связанные с ним сессии', async () => {
-    const t = build([
+  it('revokes CRM-derived staff access and linked live sessions', async () => {
+    const fixture = build([
       { id: 'access-master', userId: 'user-master', role: UserRole.STAFF },
     ]);
 
-    await t.tenantContext.runAsSystemTenant('tenant-1', () =>
-      t.service.disconnectIntegration('tenant-1'),
-    );
+    await fixture.run();
 
-    // связи отвязаны — внешние карточки больше не разрешаются в StaffId
-    const unlink = t.linkUpdateMany.mock.calls[0][0];
-    expect(unlink.where).toMatchObject({
-      tenantId: 'tenant-1',
-      provider: CrmProvider.YCLIENTS,
-      unlinkedAt: null,
+    expect(fixture.staffProviderLinkUpdateMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        provider: 'yclients',
+        unlinkedAt: null,
+      },
+      data: { unlinkedAt: now },
     });
-    expect(unlink.data?.unlinkedAt).toBeInstanceOf(Date);
-
-    // грант погашен
-    const disable = t.accessUpdateMany.mock.calls[0][0];
-    expect(disable.where).toEqual({ id: { in: ['access-master'] } });
-    expect(disable.data).toEqual({ status: 'disabled' });
-
-    // сессии отозваны с явной причиной
-    const revoke = t.sessionUpdateMany.mock.calls[0][0];
-    expect(revoke.where.userId.in).toEqual(['user-master']);
-    expect(revoke.data.revokeReason).toBe('crm_disconnected');
+    expect(fixture.crmStaffAccessUpdateMany).toHaveBeenCalledWith({
+      where: { id: { in: ['access-master'] } },
+      data: { status: 'disabled' },
+    });
+    expect(fixture.authSessionUpdateMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        userId: { in: ['user-master'] },
+        revokedAt: null,
+      },
+      data: { revokedAt: now, revokeReason: 'crm_disconnected' },
+    });
   });
 
-  it('🔴 НЕ трогает владельца и администратора: их права не выдаёт CRM', async () => {
-    const t = build([
-      { id: 'access-owner', userId: 'user-owner', role: UserRole.TENANT_ADMIN },
-      { id: 'access-biz', userId: 'user-biz', role: UserRole.BUSINESS_OWNER },
+  it('does not revoke tenant-owner or administrator access', async () => {
+    const fixture = build([
+      {
+        id: 'access-owner',
+        userId: 'user-owner',
+        role: UserRole.TENANT_ADMIN,
+      },
+      {
+        id: 'access-admin',
+        userId: 'user-admin',
+        role: UserRole.ADMINISTRATOR,
+      },
+      {
+        id: 'access-tenant-owner',
+        userId: 'user-tenant-owner',
+        role: UserRole.TENANT_OWNER,
+      },
+      {
+        id: 'access-business-owner',
+        userId: 'user-business-owner',
+        role: UserRole.BUSINESS_OWNER,
+      },
     ]);
 
-    await t.tenantContext.runAsSystemTenant('tenant-1', () =>
-      t.service.disconnectIntegration('tenant-1'),
-    );
+    await fixture.run();
 
-    // Отключение интеграции не должно запирать владельца снаружи кабинета.
-    expect(t.accessUpdateMany).not.toHaveBeenCalled();
-    expect(t.sessionUpdateMany).not.toHaveBeenCalled();
+    expect(fixture.crmStaffAccessFindMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        status: { not: 'disabled' },
+        role: {
+          notIn: [
+            'tenant_owner',
+            'business_owner',
+            'tenant_admin',
+            'administrator',
+          ],
+        },
+      },
+      select: { id: true, userId: true },
+    });
+    expect(fixture.crmStaffAccessUpdateMany).not.toHaveBeenCalled();
+    expect(fixture.authSessionUpdateMany).not.toHaveBeenCalled();
   });
 
-  it('гасит только мастеров, когда владелец и мастер идут вместе', async () => {
-    const t = build([
-      { id: 'access-owner', userId: 'user-owner', role: UserRole.TENANT_ADMIN },
-      { id: 'access-master', userId: 'user-master', role: UserRole.PROVIDER },
+  it('revokes only CRM-derived staff when owner and staff coexist', async () => {
+    const fixture = build([
+      {
+        id: 'access-owner',
+        userId: 'user-owner',
+        role: UserRole.TENANT_ADMIN,
+      },
+      {
+        id: 'access-master',
+        userId: 'user-master',
+        role: UserRole.PROVIDER,
+      },
     ]);
 
-    await t.tenantContext.runAsSystemTenant('tenant-1', () =>
-      t.service.disconnectIntegration('tenant-1'),
-    );
+    await fixture.run();
 
-    expect(t.accessUpdateMany.mock.calls[0][0].where).toEqual({
-      id: { in: ['access-master'] },
+    expect(fixture.crmStaffAccessUpdateMany).toHaveBeenCalledWith({
+      where: { id: { in: ['access-master'] } },
+      data: { status: 'disabled' },
     });
-    const revoke = t.sessionUpdateMany.mock.calls[0][0];
-    expect(revoke.where.userId.in).toEqual(['user-master']);
-    expect(revoke.where.userId.in).not.toContain('user-owner');
+    expect(fixture.authSessionUpdateMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        userId: { in: ['user-master'] },
+        revokedAt: null,
+      },
+      data: { revokedAt: now, revokeReason: 'crm_disconnected' },
+    });
   });
 
-  it('строка интеграции удаляется в любом случае', async () => {
-    const t = build([]);
+  it('removes the credential-bearing integration record', async () => {
+    const fixture = build([]);
 
-    await t.tenantContext.runAsSystemTenant('tenant-1', () =>
-      t.service.disconnectIntegration('tenant-1'),
-    );
+    await fixture.run();
 
-    expect(t.integrationDelete).toHaveBeenCalledWith({
+    expect(fixture.crmIntegrationDelete).toHaveBeenCalledWith({
       where: { tenantId: 'tenant-1' },
     });
   });

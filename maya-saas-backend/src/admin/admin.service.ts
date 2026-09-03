@@ -12,6 +12,7 @@ import { UpdateBrandingDto } from '../branding/dto/update-branding.dto';
 import { CrmService } from '../crm/crm.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
+import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from '../crm/dto/update-crm-integration.dto';
 import { UsersService } from '../users/users.service';
@@ -54,6 +55,7 @@ export class AdminService {
     private readonly quotas: QuotaService,
     private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
     private readonly encryptionService: EncryptionService,
+    private readonly canonicalWave3: Package5Wave3CanonicalCutoverService,
   ) {}
 
   createTenant(dto: CreateTenantDto, actor: AuthenticatedUser) {
@@ -188,13 +190,22 @@ export class AdminService {
     id: string,
     dto: CreateCrmIntegrationDto | UpdateCrmIntegrationDto,
     actor: AuthenticatedUser,
+    idempotencyKey?: string,
   ) {
     this.ensureTenantCanBeManaged(actor, id);
     this.assertCrmUpdateFieldsAllowed(dto, actor);
-    const integration = await this.crmService.connectAndActivateIntegration(
+    await this.canonicalWave3.installCrmCredentials(
       id,
+      actor,
       dto,
+      `${this.canonicalWave3.intentRef(idempotencyKey)}:install`,
     );
+    const activated = await this.canonicalWave3.activateCrmIntegration(
+      id,
+      actor,
+      `${this.canonicalWave3.intentRef(idempotencyKey)}:activate-flow`,
+    );
+    const integration = activated.connection;
 
     await this.auditLogService.log({
       tenantId: id,
