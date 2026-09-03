@@ -268,6 +268,10 @@ model Tenant {
   agentTasks                     AgentTask[]
   actionExecutions               ActionExecution[]
   actionAttempts                 ActionAttempt[]
+  actionTargetMutations          ActionTargetMutation[]
+  operationalWorkItems           OperationalWorkItem[]
+  clientConsentFacts             ClientConsentFact[]
+  maintenanceRuns                MaintenanceRun[]
 
   @@index([status, graceEndsAt])
 }
@@ -456,6 +460,11 @@ model ActionExecution {
   expensePeriodDeclarationInvalidations ExpensePeriodDeclarationInvalidation[] @relation("ExpensePeriodInvalidationExecution")
   tenantCatalogItemValueVersion TenantCatalogItemValueVersion? @relation("TenantCatalogItemValueVersionActionExecution")
   referralProgramValueVersion ReferralProgramValueVersion? @relation("ReferralProgramValueVersionActionExecution")
+  actionTargetMutations       ActionTargetMutation[]
+  operationalWorkItemsCreated OperationalWorkItem[] @relation("OperationalWorkItemCreateExecution")
+  operationalWorkItemsCompleted OperationalWorkItem[] @relation("OperationalWorkItemCompleteExecution")
+  clientConsentFacts          ClientConsentFact[]
+  maintenanceRuns             MaintenanceRun[]
 
   @@unique([id, tenantId])
   @@unique([tenantId, identityFingerprint])
@@ -499,6 +508,33 @@ model ActionAttempt {
   @@unique([tenantId, actionExecutionId, attemptNumber])
   @@index([tenantId, state, startedAt])
   @@index([tenantId, providerReferenceHash])
+}
+
+/// Immutable proof of the exact domain-target generation committed by one
+/// governed Package 5 action. It stores only internal references and safe
+/// normalized hashes; raw PII, credentials, tokens and provider payloads are
+/// forbidden by contract.
+model ActionTargetMutation {
+  id                String   @id @default(uuid())
+  tenantId          String
+  actionExecutionId String
+  mutationKey       String
+  targetKind        String
+  targetRef         String
+  mutationKind      String
+  targetGeneration  Int
+  beforeStateHash   String?
+  afterStateHash    String?
+  createdAt         DateTime @default(now())
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  execution ActionExecution @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, actionExecutionId, mutationKey])
+  @@unique([tenantId, targetKind, targetRef, targetGeneration])
+  @@index([tenantId, targetKind, targetRef, createdAt])
+  @@index([tenantId, actionExecutionId])
 }
 
 /// Tenant-wide transactional appointment reminder policy. These notices are
@@ -609,6 +645,8 @@ model User {
   staff                     Staff[]
   inboxItems                InboxItem[]
   devicePushTokens          DevicePushToken[]
+  maintenanceRunsRequested  MaintenanceRun[] @relation("MaintenanceRunRequester")
+  maintenanceRunsApproved   MaintenanceRun[] @relation("MaintenanceRunApprover")
 
   @@unique([id, tenantId])
   @@unique([tenantId, email])
@@ -678,6 +716,9 @@ model Membership {
   communicationCampaignsCreated  MarketingCampaign[]          @relation("CommunicationCreator")
   communicationCampaignsApproved MarketingCampaign[]          @relation("CommunicationApprover")
   communicationRecipients        MarketingCampaignRecipient[] @relation("CommunicationRecipientMembership")
+  operationalWorkItemsAssigned   OperationalWorkItem[] @relation("OperationalWorkItemAssignee")
+  operationalWorkItemsCreated    OperationalWorkItem[] @relation("OperationalWorkItemCreator")
+  clientConsentFactsAsActor      ClientConsentFact[] @relation("ClientConsentActor")
 
   @@unique([userId, tenantId])
   @@index([tenantId, status])
@@ -1404,7 +1445,8 @@ model TrialActivation {
 model CustomerProfile {
   id                 String     @id @default(cuid())
   tenantId           String
-  userId             String
+  clientId           String?
+  userId             String?
   preferredLocale    String?
   privacyConsentAt   DateTime?
   marketingConsentAt DateTime?
@@ -1412,11 +1454,41 @@ model CustomerProfile {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   tenant             Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  membership         Membership @relation("CustomerProfileMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+  client             Client?    @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  user               User?      @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  membership         Membership? @relation("CustomerProfileMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([userId, tenantId])
+  @@unique([tenantId, clientId])
   @@index([tenantId, updatedAt])
+}
+
+/// Append-only proof of a canonical Client's consent decision. Current
+/// CustomerProfile timestamps remain compatibility projections and are not
+/// accepted as historical evidence by themselves.
+model ClientConsentFact {
+  id                   String   @id @default(uuid())
+  tenantId             String
+  clientId             String
+  kind                 String
+  decision             String
+  occurredAt           DateTime
+  effectiveAt          DateTime
+  sourceType           String
+  sourceIdentityHash   String
+  actorUserId          String?
+  actionExecutionId    String?
+  createdAt            DateTime @default(now())
+
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client      Client           @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actor       Membership?      @relation("ClientConsentActor", fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  execution   ActionExecution? @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, sourceType, sourceIdentityHash])
+  @@index([tenantId, clientId, kind, effectiveAt])
+  @@index([tenantId, actionExecutionId])
 }
 
 model LoyaltyAccount {
@@ -1988,6 +2060,8 @@ model Client {
   referralsAsReferred CustomerReferral[] @relation("ReferralReferredClient")
   referralRewards ReferralReward[] @relation("ReferralRewardRecipient")
   customerSubscriptions CustomerSubscription[]
+  customerProfiles CustomerProfile[]
+  consentFacts ClientConsentFact[]
 
   @@unique([id, tenantId])
   @@index([tenantId, phoneHash])
@@ -2575,6 +2649,73 @@ model ReconciliationRun {
   @@index([tenantId, completeness, finishedAt])
 }
 
+/// Durable envelope for one bounded, centrally versioned Package 5 retention
+/// or cleanup run. Platform-scope automatic runs do not fabricate a tenant
+/// ActionExecution; an explicit tenant command may bind one.
+model MaintenanceRun {
+  id                     String    @id @default(uuid())
+  scope                  String
+  tenantId               String?
+  runIdentityVersion     Int
+  runIdentityFingerprint String    @unique
+  maintenanceKind        String
+  subjectClass           String
+  policyKey              String
+  policyVersion          Int
+  cutoffAt               DateTime
+  maxItems               Int
+  batchSize              Int
+  cursorHash             String?
+  state                  String    @default("PLANNED")
+  leaseOwner             String?
+  leaseTokenHash         String?
+  leaseExpiresAt         DateTime?
+  authorityType          String
+  requestedByUserId      String?
+  approvedByUserId       String?
+  approvalBindingHash    String?
+  actionExecutionId      String?
+  attemptedCount         Int       @default(0)
+  succeededCount         Int       @default(0)
+  failedCount            Int       @default(0)
+  startedAt              DateTime?
+  finishedAt             DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  tenant       Tenant?          @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  requestedBy  User?            @relation("MaintenanceRunRequester", fields: [requestedByUserId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  approvedBy   User?            @relation("MaintenanceRunApprover", fields: [approvedByUserId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  execution    ActionExecution? @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  itemClaims   MaintenanceItemClaim[]
+
+  @@unique([id, scope])
+  @@index([tenantId, maintenanceKind, state, createdAt])
+  @@index([scope, state, leaseExpiresAt])
+  @@index([tenantId, actionExecutionId])
+}
+
+/// Restart-safe ownership and terminal result for one non-PII maintenance
+/// target within a bounded MaintenanceRun.
+model MaintenanceItemClaim {
+  id                String    @id @default(uuid())
+  maintenanceRunId  String
+  itemKind          String
+  itemRefHash       String
+  claimGeneration   Int       @default(0)
+  state             String    @default("CLAIMED")
+  outcomeCode       String?
+  claimedAt         DateTime  @default(now())
+  finishedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  run MaintenanceRun @relation(fields: [maintenanceRunId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([maintenanceRunId, itemKind, itemRefHash])
+  @@index([maintenanceRunId, state, claimedAt])
+}
+
 /// Consent-safe outreach fact used by MAYA Recovered attribution.
 /// `subjectRef` is a tenant-independent HMAC of the normalized phone; raw
 /// client identity is never persisted in this subsystem.
@@ -2738,6 +2879,7 @@ model InboxItem {
   id            String    @id @default(cuid())
   tenantId      String
   userId        String
+  operationalWorkItemId String?
   /// daily_report | morning_brief | growth_plan | new_appointment |
   /// shift_reminder | appointment_reassigned | hanging_lead | owner_alert
   type          String
@@ -2752,10 +2894,45 @@ model InboxItem {
   deletedAt     DateTime?
   tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  operationalWorkItem OperationalWorkItem? @relation(fields: [operationalWorkItemId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
+  @@unique([id, tenantId])
   @@unique([tenantId, userId, type, sourceEventId])
   @@index([tenantId, userId, createdAt])
   @@index([tenantId, type, createdAt])
+  @@index([tenantId, operationalWorkItemId])
+}
+
+/// Canonical business aggregate for Package 5 operational tasks and support
+/// requests. InboxItem is only a presentation/delivery projection.
+model OperationalWorkItem {
+  id                        String   @id @default(uuid())
+  tenantId                  String
+  kind                      String
+  assigneeUserId            String
+  createdByUserId           String?
+  title                     String
+  bodyText                  String
+  dueAt                     DateTime?
+  status                    String   @default("OPEN")
+  createActionExecutionId   String
+  completeActionExecutionId String?
+  completedAt               DateTime?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignee          Membership       @relation("OperationalWorkItemAssignee", fields: [assigneeUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  creator           Membership?      @relation("OperationalWorkItemCreator", fields: [createdByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  createExecution   ActionExecution  @relation("OperationalWorkItemCreateExecution", fields: [createActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  completeExecution ActionExecution? @relation("OperationalWorkItemCompleteExecution", fields: [completeActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  inboxItems         InboxItem[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, createActionExecutionId])
+  @@unique([tenantId, completeActionExecutionId])
+  @@index([tenantId, assigneeUserId, status, dueAt])
+  @@index([tenantId, kind, status, createdAt])
 }
 
 /// Native / web push device tokens for inbox announcements.
