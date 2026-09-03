@@ -159,7 +159,7 @@ export class OnboardingService {
           });
 
           if (calendarSource === CalendarSource.INTERNAL) {
-            await this.internalCalendarService.ensureProviderForUser(
+            await this.internalCalendarService.bootstrapEnsureProviderForUser(
               tenant.id,
               user.id,
               { displayName: dto.ownerName },

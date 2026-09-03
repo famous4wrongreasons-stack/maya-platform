@@ -1,7 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
-import { EncryptionService } from '../encryption/encryption.service';
+import { Package5Wave4CanonicalCutoverService } from '../package5-wave4/package5-wave4-canonical-cutover.service';
+import { Package5Wave4ReviewFactService } from '../package5-wave4/package5-wave4.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { BusinessContentService } from './business-content.service';
@@ -32,9 +33,6 @@ describe('BusinessContentService', () => {
     const tenantContext = {
       assertTenantId: jest.fn((tenantId: string) => tenantId),
     };
-    const encryption = {
-      encrypt: jest.fn((value: string) => `encrypted:${value.length}`),
-    };
     const auditLog = { log: jest.fn().mockResolvedValue(undefined) };
     const canonicalValueConfiguration = {
       createOffer: jest.fn(),
@@ -42,19 +40,27 @@ describe('BusinessContentService', () => {
       retireOffer: jest.fn(),
       updateReferralPolicy: jest.fn(),
     };
+    const canonicalWave4 = {
+      createInventoryItem: jest.fn(),
+      updateInventoryItem: jest.fn(),
+      archiveInventoryItem: jest.fn(),
+    };
+    const reviewFacts = { accept: jest.fn() };
     const service = new BusinessContentService(
       prisma as unknown as PrismaService,
       tenantContext as unknown as TenantContextService,
-      encryption as unknown as EncryptionService,
       auditLog as unknown as AuditLogService,
       canonicalValueConfiguration as unknown as P409ValueConfigurationCanonicalCutoverService,
+      canonicalWave4 as unknown as Package5Wave4CanonicalCutoverService,
+      reviewFacts as unknown as Package5Wave4ReviewFactService,
     );
     return {
       service,
       prisma,
-      encryption,
       auditLog,
       canonicalValueConfiguration,
+      canonicalWave4,
+      reviewFacts,
     };
   }
 
@@ -113,40 +119,43 @@ describe('BusinessContentService', () => {
     });
   });
 
-  it('encrypts review text and never returns it to the AI-facing result', async () => {
-    const { service, prisma, encryption, auditLog } = setup();
-    prisma.businessReview.create.mockImplementation(
-      ({ data }: { data: Record<string, unknown> }) =>
-        Promise.resolve({
-          id: 'review-a',
-          ...data,
-          createdAt: now,
-          updatedAt: now,
-        }),
-    );
+  it('passes review text only to the encrypted immutable fact boundary', async () => {
+    const { service, reviewFacts, auditLog } = setup();
+    reviewFacts.accept.mockResolvedValue({
+      id: 'review-a',
+      tenantId: 'tenant-a',
+      source: 'yandex',
+      externalRef: 'review-source-a',
+      rating: 2,
+      occurredAt: new Date('2026-08-14T09:00:00.000Z'),
+      encryptedText: 'ciphertext',
+      topicTagsJson: ['staff', 'wait'],
+      branchId: null,
+      staffExternalId: null,
+      createdAt: now,
+      updatedAt: now,
+    });
 
     const result = await service.ingestReview('tenant-a', 'owner-a', {
       source: 'Yandex',
+      externalRef: 'review-source-a',
       rating: 2,
       occurredAt: '2026-08-14T09:00:00.000Z',
       text: 'Долго ждал, но мастер вежливый',
     });
 
-    expect(encryption.encrypt).toHaveBeenCalledWith(
-      'Долго ждал, но мастер вежливый',
+    expect(reviewFacts.accept).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-a',
+        source: 'yandex',
+        externalRef: 'review-source-a',
+        text: 'Долго ждал, но мастер вежливый',
+      }),
     );
-    const createCalls = prisma.businessReview.create.mock
-      .calls as unknown as Array<[{ data: Record<string, unknown> }]>;
-    const createInput = createCalls[0]?.[0];
-    expect(createInput).toBeDefined();
-    if (!createInput) throw new Error('Expected review create input');
-    const createData = createInput.data;
-    expect(createData.tenantId).toBe('tenant-a');
-    expect(createData.source).toBe('yandex');
-    expect(createData.encryptedText).toEqual(
-      expect.stringMatching(/^encrypted:/),
-    );
-    expect(createData.topicTagsJson).toEqual(
+    const reviewCalls = reviewFacts.accept.mock.calls as unknown as Array<
+      [Record<string, unknown>]
+    >;
+    expect(reviewCalls[0]?.[0].topicTags).toEqual(
       expect.arrayContaining(['staff', 'wait']),
     );
     expect(result).toMatchObject({
@@ -240,9 +249,10 @@ describe('BusinessContentService', () => {
     );
   });
 
-  it('keeps inventory direct while delegating value-bearing catalog writes', async () => {
-    const { service, prisma, canonicalValueConfiguration } = setup();
-    prisma.tenantCatalogItem.create.mockResolvedValue({
+  it('delegates inventory and value-bearing catalog writes to their canonical owners', async () => {
+    const { service, prisma, canonicalValueConfiguration, canonicalWave4 } =
+      setup();
+    canonicalWave4.createInventoryItem.mockResolvedValue({
       id: 'inventory-a',
       tenantId: 'tenant-a',
       kind: 'inventory',
@@ -259,12 +269,23 @@ describe('BusinessContentService', () => {
       createdAt: now,
       updatedAt: now,
     });
-    await service.createCatalogItem('tenant-a', 'owner-a', 'inventory', {
-      name: 'Wax',
-      priceKopecks: 1000,
-      quantity: 1,
-    });
-    expect(prisma.tenantCatalogItem.create).toHaveBeenCalled();
+    await service.createCatalogItem(
+      'tenant-a',
+      'owner-a',
+      'inventory',
+      {
+        name: 'Wax',
+        priceKopecks: 1000,
+        quantity: 1,
+      },
+      'stable-inventory-request',
+    );
+    expect(canonicalWave4.createInventoryItem).toHaveBeenCalledWith(
+      'tenant-a',
+      'owner-a',
+      { name: 'Wax', priceKopecks: 1000, quantity: 1 },
+      'stable-inventory-request',
+    );
     expect(canonicalValueConfiguration.createOffer).not.toHaveBeenCalled();
 
     canonicalValueConfiguration.createOffer.mockResolvedValue({

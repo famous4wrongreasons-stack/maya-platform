@@ -8,13 +8,21 @@ const read = (path: string) =>
 
 describe('Package 5 Wave 4 ownership/bypass ratchet', () => {
   const canonical = read('package5-wave4/package5-wave4.service.ts');
+  const cutover = read(
+    'package5-wave4/package5-wave4-canonical-cutover.service.ts',
+  );
+  const module = read('package5-wave4/package5-wave4.module.ts');
   const businessContent = read('business-content/business-content.service.ts');
+  const businessController = read(
+    'business-content/business-content.controller.ts',
+  );
   const internalCalendar = read(
     'internal-calendar/internal-calendar.service.ts',
   );
   const calendarController = read(
     'internal-calendar/internal-calendar.controller.ts',
   );
+  const branding = read('branding/branding.service.ts');
   const onboarding = read('onboarding/ai-onboarding.service.ts');
 
   it('pins 12 governed actions and one external object write', () => {
@@ -48,6 +56,10 @@ describe('Package 5 Wave 4 ownership/bypass ratchet', () => {
     ).not.toContain('ingest_business_review');
     expect(canonical).toContain('class Package5Wave4ReviewFactService');
     expect(canonical).not.toMatch(/businessReview\.(update|updateMany|upsert)/);
+    expect(businessContent).toContain('this.reviewFacts.accept');
+    expect(businessContent).not.toMatch(
+      /businessReview\.(create|update|updateMany|upsert|delete|deleteMany)/,
+    );
   });
 
   it('makes archive and prospective-only behavior explicit', () => {
@@ -71,20 +83,64 @@ describe('Package 5 Wave 4 ownership/bypass ratchet', () => {
     expect(request).toContain('providerRequestIdentityHash');
   });
 
-  it('pins current production owners until the separate cutover cycle', () => {
-    expect(businessContent).toContain('private async createInventoryItem');
-    expect(businessContent).toContain('private async updateInventoryItem');
-    expect(businessContent).toContain('private async deleteInventoryItem');
-    expect(internalCalendar).toContain('async createService');
-    expect(internalCalendar).toContain('async replaceWeeklyAvailability');
-    expect(calendarController).toContain(
-      'this.brandingService.uploadProviderAvatar',
+  it('makes Action Engine the production owner for all 12 actions', () => {
+    expect(module).toContain('Package5Wave4CanonicalCutoverService');
+    expect(cutover).toContain("'execute'");
+    expect(cutover).toContain('this.executor.resume(prepared)');
+    expect(cutover).toContain('this.executor.execute(prepared)');
+    expect(businessContent).toContain(
+      'this.canonicalWave4.createInventoryItem',
     );
+    expect(businessContent).toContain(
+      'this.canonicalWave4.updateInventoryItem',
+    );
+    expect(businessContent).toContain(
+      'this.canonicalWave4.archiveInventoryItem',
+    );
+    expect(businessContent).not.toMatch(
+      /tenantCatalogItem\.(create|update|upsert|delete|deleteMany)/,
+    );
+    for (const ownerCall of [
+      'createService',
+      'updateService',
+      'archiveService',
+      'createProvider',
+      'updateProvider',
+      'replaceWeeklyAvailability',
+      'createTimeOff',
+      'deleteTimeOff',
+      'uploadProviderAvatar',
+    ]) {
+      expect(calendarController).toContain(`this.canonicalWave4.${ownerCall}`);
+    }
+    expect(calendarController).not.toMatch(
+      /this\.(?:internalCalendarService|brandingService)\.(?:createService|updateService|deactivateService|createProvider|updateProvider|replaceWeeklyAvailability|createTimeOff|deleteTimeOff|uploadProviderAvatar)/,
+    );
+    expect(branding).not.toContain('async uploadProviderAvatar');
+    expect(businessController.match(/idempotency-key/g)).toHaveLength(3);
+    expect(calendarController.match(/idempotency-key/g)).toHaveLength(9);
   });
 
   it('keeps pre-tenant calendar provisioning narrowly classified under A26', () => {
     expect(onboarding).toContain('private async provisionInternalCalendar');
     expect(onboarding).toContain('createdTenantId');
+    expect(onboarding).toContain(
+      'this.internalCalendarService.bootstrapCreateProvider',
+    );
+    expect(onboarding).toContain(
+      'this.internalCalendarService.bootstrapCreateService',
+    );
+    expect(internalCalendar).toContain('async bootstrapCreateProvider');
+    expect(internalCalendar).toContain('async bootstrapCreateService');
+    expect(internalCalendar).not.toMatch(/\n\s{2}async createService\(/);
+    expect(internalCalendar).not.toMatch(/\n\s{2}async updateService\(/);
+    expect(internalCalendar).not.toMatch(/\n\s{2}async createProvider\(/);
+    expect(internalCalendar).not.toMatch(/\n\s{2}async updateProvider\(/);
+    expect(internalCalendar).not.toMatch(
+      /\n\s{2}async replaceWeeklyAvailability\(/,
+    );
+    expect(internalCalendar).not.toMatch(/\n\s{2}async createTimeOff\(/);
+    expect(internalCalendar).not.toMatch(/\n\s{2}async deleteTimeOff\(/);
     expect(canonical).not.toContain('AiOnboardingDraft');
   });
 });

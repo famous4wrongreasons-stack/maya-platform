@@ -50,11 +50,11 @@ export class IngestBusinessReviewDto {
   @MaxLength(40)
   source!: string;
 
-  @ApiPropertyOptional({ maxLength: 160 })
-  @IsOptional()
+  @ApiProperty({ maxLength: 160 })
   @IsString()
+  @MinLength(1)
   @MaxLength(160)
-  externalRef?: string;
+  externalRef!: string;
 
   @ApiProperty({ minimum: 1, maximum: 5 })
   @IsInt()

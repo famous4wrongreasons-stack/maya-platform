@@ -4,8 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { randomUUID } from 'crypto';
-import { mkdir, readFile, rm, writeFile } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import { join, resolve } from 'path';
 
 import { asJson } from '../common/json.util';
@@ -13,7 +12,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UpdateBrandingDto } from './dto/update-branding.dto';
 
-const PROVIDER_AVATAR_ROUTE_PREFIX = '/api/public/uploads/provider-avatars';
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 const LOGO_MIME_EXTENSIONS = new Map([
   ['image/png', 'png'],
@@ -179,48 +177,6 @@ export class BrandingService {
     }
   }
 
-  async uploadProviderAvatar(
-    tenantId: string,
-    providerId: string,
-    file: UploadedLogoFile | undefined,
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    this.validateImageFile(file, 'avatar');
-
-    const provider = await this.prisma.internalProvider.findFirst({
-      where: { id: providerId, tenantId: scopedTenantId },
-      select: { id: true, avatarUrl: true },
-    });
-    if (!provider) {
-      throw new NotFoundException('Internal provider not found');
-    }
-
-    const extension = LOGO_MIME_EXTENSIONS.get(file.mimetype)!;
-    const filename = `${scopedTenantId}-${providerId}-${randomUUID()}.${extension}`;
-    const uploadDir = this.getProviderAvatarUploadDir();
-    const absolutePath = join(uploadDir, filename);
-    const avatarUrl = `${PROVIDER_AVATAR_ROUTE_PREFIX}/${filename}`;
-
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(absolutePath, file.buffer, { flag: 'wx' });
-
-    const updated = await this.prisma.internalProvider.updateMany({
-      where: { id: providerId, tenantId: scopedTenantId },
-      data: { avatarUrl },
-    });
-    if (updated.count !== 1) {
-      await rm(absolutePath, { force: true });
-      throw new NotFoundException('Internal provider not found');
-    }
-
-    await this.removePreviousLocalProviderAvatar(provider.avatarUrl);
-
-    return {
-      provider_id: providerId,
-      avatar_url: avatarUrl,
-    };
-  }
-
   async readProviderAvatar(filename: string) {
     if (!this.isValidProviderAvatarFilename(filename)) {
       throw new NotFoundException('Provider avatar not found');
@@ -301,23 +257,8 @@ export class BrandingService {
     return resolve(root, 'provider-avatars');
   }
 
-  private async removePreviousLocalProviderAvatar(avatarUrl: string | null) {
-    if (!avatarUrl?.startsWith(`${PROVIDER_AVATAR_ROUTE_PREFIX}/`)) {
-      return;
-    }
-
-    const filename = avatarUrl.slice(PROVIDER_AVATAR_ROUTE_PREFIX.length + 1);
-    if (!this.isValidProviderAvatarFilename(filename)) {
-      return;
-    }
-
-    await rm(join(this.getProviderAvatarUploadDir(), filename), {
-      force: true,
-    });
-  }
-
   private isValidProviderAvatarFilename(filename: string): boolean {
-    return /^[a-zA-Z0-9_-]+-[a-zA-Z0-9_-]+-[a-f0-9-]+\.(png|jpg|webp|gif)$/.test(
+    return /^(?:p5w4-[a-f0-9]{64}|[a-zA-Z0-9_-]+-[a-zA-Z0-9_-]+-[a-f0-9-]+)\.(png|jpg|webp|gif)$/.test(
       filename,
     );
   }

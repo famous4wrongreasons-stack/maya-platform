@@ -6,6 +6,7 @@ import {
   CanonicalActionIngressService,
 } from '../action-engine';
 import { AuditLogModule } from '../audit-log/audit-log.module';
+import { Package5Wave4Module } from '../package5-wave4/package5-wave4.module';
 import { BusinessContentController } from './business-content.controller';
 import { BusinessContentService } from './business-content.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -15,7 +16,7 @@ import { P409ValueConfigurationShadowService } from './p4-09-value-configuration
 import { P409ValueConfigurationCanonicalCutoverService } from './p4-09-value-configuration-canonical-cutover.service';
 
 @Module({
-  imports: [ActionEngineModule, AuditLogModule],
+  imports: [ActionEngineModule, AuditLogModule, Package5Wave4Module],
   controllers: [BusinessContentController],
   providers: [
     BusinessContentService,

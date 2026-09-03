@@ -147,7 +147,7 @@ describe('OnboardingService', () => {
         ensureBootstrapMockIntegration: ensureBootstrapMockIntegrationMock,
       } as unknown as CrmService,
       {
-        ensureProviderForUser: ensureProviderForUserMock,
+        bootstrapEnsureProviderForUser: ensureProviderForUserMock,
       } as unknown as InternalCalendarService,
       {
         getPlanByIdOrThrow: getPlanByIdOrThrowMock,

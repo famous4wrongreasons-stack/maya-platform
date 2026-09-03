@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Post,
   Put,
@@ -80,12 +81,14 @@ export class BusinessContentController {
   createInventory(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpsertCatalogItemDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.service.createCatalogItem(
       user.tenantId!,
       user.userId,
       'inventory',
       dto,
+      idempotencyKey,
     );
   }
 
@@ -96,6 +99,7 @@ export class BusinessContentController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('itemId') itemId: string,
     @Body() dto: UpsertCatalogItemDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.service.updateCatalogItem(
       user.tenantId!,
@@ -103,6 +107,7 @@ export class BusinessContentController {
       'inventory',
       itemId,
       dto,
+      idempotencyKey,
     );
   }
 
@@ -112,12 +117,14 @@ export class BusinessContentController {
   deleteInventory(
     @CurrentUser() user: AuthenticatedUser,
     @Param('itemId') itemId: string,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.service.deleteCatalogItem(
       user.tenantId!,
       user.userId,
       'inventory',
       itemId,
+      idempotencyKey,
     );
   }
 

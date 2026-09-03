@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -19,10 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
-import {
-  BrandingService,
-  type UploadedLogoFile,
-} from '../branding/branding.service';
+import type { UploadedLogoFile } from '../branding/branding.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
 import { CurrentUser } from '../decorators/current-user.decorator';
@@ -30,6 +28,7 @@ import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { QuotaResource } from '../quotas/quota-resource';
 import { RequiresQuota } from '../quotas/requires-quota.decorator';
+import { Package5Wave4CanonicalCutoverService } from '../package5-wave4/package5-wave4-canonical-cutover.service';
 import { CreateInternalServiceDto } from './dto/create-internal-service.dto';
 import { CreateInternalProviderDto } from './dto/create-internal-provider.dto';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
@@ -59,7 +58,7 @@ type ProviderAvatarUploadFields = {
 export class InternalCalendarController {
   constructor(
     private readonly internalCalendarService: InternalCalendarService,
-    private readonly brandingService: BrandingService,
+    private readonly canonicalWave4: Package5Wave4CanonicalCutoverService,
   ) {}
 
   @Get('setup')
@@ -84,8 +83,14 @@ export class InternalCalendarController {
   createService(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateInternalServiceDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.internalCalendarService.createService(user.tenantId!, dto);
+    return this.canonicalWave4.createService(
+      user.tenantId!,
+      user.userId,
+      dto,
+      idempotencyKey,
+    );
   }
 
   @Patch('services/:serviceId')
@@ -94,11 +99,14 @@ export class InternalCalendarController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('serviceId') serviceId: string,
     @Body() dto: UpdateInternalServiceDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.internalCalendarService.updateService(
+    return this.canonicalWave4.updateService(
       user.tenantId!,
+      user.userId,
       serviceId,
       dto,
+      idempotencyKey,
     );
   }
 
@@ -107,10 +115,13 @@ export class InternalCalendarController {
   deactivateService(
     @CurrentUser() user: AuthenticatedUser,
     @Param('serviceId') serviceId: string,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.internalCalendarService.deactivateService(
+    return this.canonicalWave4.archiveService(
       user.tenantId!,
+      user.userId,
       serviceId,
+      idempotencyKey,
     );
   }
 
@@ -120,11 +131,14 @@ export class InternalCalendarController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('providerId') providerId: string,
     @Body() dto: UpdateInternalProviderDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.internalCalendarService.updateProvider(
+    return this.canonicalWave4.updateProvider(
       user.tenantId!,
+      user.userId,
       providerId,
       dto,
+      idempotencyKey,
     );
   }
 
@@ -144,12 +158,15 @@ export class InternalCalendarController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('providerId') providerId: string,
     @UploadedFiles() files: ProviderAvatarUploadFields,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     const file = files?.avatar?.[0] ?? files?.file?.[0];
-    return this.brandingService.uploadProviderAvatar(
+    return this.canonicalWave4.uploadProviderAvatar(
       user.tenantId!,
+      user.userId,
       providerId,
       file,
+      idempotencyKey,
     );
   }
 
@@ -159,8 +176,14 @@ export class InternalCalendarController {
   createProvider(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateInternalProviderDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.internalCalendarService.createProvider(user.tenantId!, dto);
+    return this.canonicalWave4.createProvider(
+      user.tenantId!,
+      user.userId,
+      dto,
+      idempotencyKey,
+    );
   }
 
   @Get('providers/:providerId/schedule')
@@ -181,11 +204,14 @@ export class InternalCalendarController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('providerId') providerId: string,
     @Body() dto: ReplaceWeeklyAvailabilityDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.internalCalendarService.replaceWeeklyAvailability(
+    return this.canonicalWave4.replaceWeeklyAvailability(
       user.tenantId!,
+      user.userId,
       providerId,
       dto.rules,
+      idempotencyKey,
     );
   }
 
@@ -195,11 +221,14 @@ export class InternalCalendarController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('providerId') providerId: string,
     @Body() dto: CreateTimeOffDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.internalCalendarService.createTimeOff(
+    return this.canonicalWave4.createTimeOff(
       user.tenantId!,
+      user.userId,
       providerId,
       dto,
+      idempotencyKey,
     );
   }
 
@@ -209,11 +238,14 @@ export class InternalCalendarController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('providerId') providerId: string,
     @Param('exceptionId') exceptionId: string,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.internalCalendarService.deleteTimeOff(
+    return this.canonicalWave4.deleteTimeOff(
       user.tenantId!,
+      user.userId,
       providerId,
       exceptionId,
+      idempotencyKey,
     );
   }
 }

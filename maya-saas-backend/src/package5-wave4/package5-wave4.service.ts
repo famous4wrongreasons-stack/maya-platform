@@ -4,6 +4,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -27,6 +28,7 @@ import {
   type Package5Wave4ActionClass,
   type TrustedActionExecutionRequestV1,
 } from '../action-engine';
+import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 
@@ -234,6 +236,7 @@ export function wave4Hash(value: unknown): string {
   return createHash('sha256').update(material).digest('hex');
 }
 
+@Injectable()
 export class Package5Wave4ShadowService {
   constructor(
     private readonly actionEngine: ActionEngineRuntimeService,
@@ -1726,7 +1729,10 @@ export class Package5Wave4ExecutableService {
  * when the immutable fact is identical.
  */
 export class Package5Wave4ReviewFactService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly encryption?: EncryptionService,
+  ) {}
 
   async accept(input: {
     tenantId: string;
@@ -1734,20 +1740,46 @@ export class Package5Wave4ReviewFactService {
     externalRef: string;
     rating: number;
     occurredAt: Date;
-    encryptedText: string | null;
+    text?: string | null;
+    encryptedText?: string | null;
     topicTags: string[];
     branchId?: string | null;
     staffExternalId?: string | null;
   }) {
-    if (!input.externalRef.trim())
+    const source = input.source.trim().toLowerCase();
+    const externalRef = input.externalRef.trim();
+    if (!source || !externalRef)
       throw new BadRequestException('Exact review source identity required');
+    if (input.text !== undefined && input.encryptedText !== undefined) {
+      throw new BadRequestException('Review text boundary is ambiguous');
+    }
+    if (input.text !== undefined && !this.encryption) {
+      throw new Package5Wave4Error('Review encryption is not configured');
+    }
+    if (input.branchId) {
+      const branch = await this.prisma.branch.findUnique({
+        where: {
+          id_tenantId: { id: input.branchId, tenantId: input.tenantId },
+        },
+        select: { id: true },
+      });
+      if (!branch) throw new NotFoundException('Review branch not found');
+    }
+    const textIdentity = input.text ?? input.encryptedText ?? null;
+    const encryptedText =
+      input.text !== undefined
+        ? input.text
+          ? this.encryption!.encrypt(input.text)
+          : null
+        : (input.encryptedText ?? null);
+    const topicTags = [...new Set(input.topicTags)].sort();
     const desiredHash = wave4Hash({
-      source: input.source,
-      externalRef: input.externalRef,
+      source,
+      externalRef,
       rating: input.rating,
       occurredAt: input.occurredAt,
-      encryptedText: input.encryptedText,
-      topicTags: [...input.topicTags].sort(),
+      textIdentity,
+      topicTags,
       branchId: input.branchId ?? null,
       staffExternalId: input.staffExternalId ?? null,
     });
@@ -1756,20 +1788,24 @@ export class Package5Wave4ReviewFactService {
         where: {
           tenantId_source_externalRef: {
             tenantId: input.tenantId,
-            source: input.source,
-            externalRef: input.externalRef,
+            source,
+            externalRef,
           },
         },
       });
     const assertSame = (
       existing: NonNullable<Awaited<ReturnType<typeof find>>>,
     ) => {
+      const existingTextIdentity =
+        input.text !== undefined && existing.encryptedText
+          ? this.encryption!.decrypt(existing.encryptedText)
+          : existing.encryptedText;
       const existingHash = wave4Hash({
         source: existing.source,
         externalRef: existing.externalRef,
         rating: existing.rating,
         occurredAt: existing.occurredAt,
-        encryptedText: existing.encryptedText,
+        textIdentity: existingTextIdentity,
         topicTags: Array.isArray(existing.topicTagsJson)
           ? [...existing.topicTagsJson].sort()
           : [],
@@ -1786,8 +1822,8 @@ export class Package5Wave4ReviewFactService {
           where: {
             tenantId_source_externalRef: {
               tenantId: input.tenantId,
-              source: input.source,
-              externalRef: input.externalRef,
+              source,
+              externalRef,
             },
           },
         });
@@ -1797,12 +1833,12 @@ export class Package5Wave4ReviewFactService {
         return tx.businessReview.create({
           data: {
             tenantId: input.tenantId,
-            source: input.source,
-            externalRef: input.externalRef,
+            source,
+            externalRef,
             rating: input.rating,
             occurredAt: input.occurredAt,
-            encryptedText: input.encryptedText,
-            topicTagsJson: input.topicTags,
+            encryptedText,
+            topicTagsJson: topicTags,
             branchId: input.branchId ?? null,
             staffExternalId: input.staffExternalId ?? null,
           },

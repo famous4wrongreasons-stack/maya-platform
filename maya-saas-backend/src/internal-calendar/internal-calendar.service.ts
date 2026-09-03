@@ -21,11 +21,9 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UsersService } from '../users/users.service';
 import { CreateInternalServiceDto } from './dto/create-internal-service.dto';
 import { CreateInternalProviderDto } from './dto/create-internal-provider.dto';
-import { CreateTimeOffDto } from './dto/create-time-off.dto';
 import type { ListCalendarJournalDto } from './dto/list-calendar-journal.dto';
 import type { WeeklyAvailabilityRuleDto } from './dto/replace-weekly-availability.dto';
 import { UpdateInternalProviderDto } from './dto/update-internal-provider.dto';
-import { UpdateInternalServiceDto } from './dto/update-internal-service.dto';
 import {
   localDateMinuteToUtc,
   localWeekday,
@@ -56,7 +54,7 @@ export class InternalCalendarService {
     private readonly quotas: QuotaService,
   ) {}
 
-  async ensureProviderForUser(
+  async bootstrapEnsureProviderForUser(
     tenantId: string,
     userId: string,
     options: { displayName?: string | null; branchId?: string | null } = {},
@@ -316,7 +314,10 @@ export class InternalCalendarService {
     return services.map((service) => this.serializeService(service));
   }
 
-  async createService(tenantId: string, dto: CreateInternalServiceDto) {
+  async bootstrapCreateService(
+    tenantId: string,
+    dto: CreateInternalServiceDto,
+  ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertInternalSource(scopedTenantId);
     const providerIds = await this.prisma.internalProvider.findMany({
@@ -354,45 +355,6 @@ export class InternalCalendarService {
     return this.serializeService(created);
   }
 
-  async updateService(
-    tenantId: string,
-    serviceId: string,
-    dto: UpdateInternalServiceDto,
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.assertInternalSource(scopedTenantId);
-    const result = await this.prisma.internalService.updateMany({
-      where: { id: serviceId, tenantId: scopedTenantId },
-      data: {
-        name: dto.name?.trim(),
-        description:
-          dto.description === undefined
-            ? undefined
-            : dto.description.trim() || null,
-        price: dto.price,
-        currency: dto.currency,
-        durationMinutes: dto.durationMinutes,
-        bufferBeforeMinutes: dto.bufferBeforeMinutes,
-        bufferAfterMinutes: dto.bufferAfterMinutes,
-        sortOrder: dto.sortOrder,
-        active: dto.active,
-      },
-    });
-
-    if (result.count !== 1) {
-      throw new NotFoundException('Internal service not found');
-    }
-
-    const service = await this.prisma.internalService.findFirstOrThrow({
-      where: { id: serviceId, tenantId: scopedTenantId },
-    });
-    return this.serializeService(service);
-  }
-
-  async deactivateService(tenantId: string, serviceId: string) {
-    return this.updateService(tenantId, serviceId, { active: false });
-  }
-
   async listStaff(tenantId: string): Promise<Practitioner[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const providers = await this.prisma.internalProvider.findMany({
@@ -404,7 +366,10 @@ export class InternalCalendarService {
     return providers.map((provider) => this.serializeProvider(provider));
   }
 
-  async createProvider(tenantId: string, dto: CreateInternalProviderDto) {
+  async bootstrapCreateProvider(
+    tenantId: string,
+    dto: CreateInternalProviderDto,
+  ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertInternalSource(scopedTenantId);
     await this.quotas.assertCanCreate(scopedTenantId, QuotaResource.STAFF);
@@ -466,7 +431,7 @@ export class InternalCalendarService {
     return this.getProvider(scopedTenantId, provider.id);
   }
 
-  async updateProvider(
+  async bootstrapUpdateProvider(
     tenantId: string,
     providerId: string,
     dto: UpdateInternalProviderDto,
@@ -557,7 +522,7 @@ export class InternalCalendarService {
     };
   }
 
-  async replaceWeeklyAvailability(
+  async bootstrapReplaceWeeklyAvailability(
     tenantId: string,
     providerId: string,
     rules: WeeklyAvailabilityRuleDto[],
@@ -585,58 +550,6 @@ export class InternalCalendarService {
     });
 
     return this.getProviderSchedule(scopedTenantId, providerId);
-  }
-
-  async createTimeOff(
-    tenantId: string,
-    providerId: string,
-    dto: CreateTimeOffDto,
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.assertInternalSource(scopedTenantId);
-    await this.getProvider(scopedTenantId, providerId);
-    const startAt = new Date(dto.startAt);
-    const endAt = new Date(dto.endAt);
-
-    if (startAt.getTime() >= endAt.getTime()) {
-      throw new BadRequestException('Time off end must be after start');
-    }
-
-    const created = await this.prisma.internalAvailabilityException.create({
-      data: {
-        tenantId: scopedTenantId,
-        providerId,
-        startAt,
-        endAt,
-        note: dto.note?.trim() || null,
-      },
-    });
-
-    return {
-      id: created.id,
-      provider_id: created.providerId,
-      start_at: created.startAt,
-      end_at: created.endAt,
-      note: created.note,
-    };
-  }
-
-  async deleteTimeOff(
-    tenantId: string,
-    providerId: string,
-    exceptionId: string,
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.assertInternalSource(scopedTenantId);
-    const result = await this.prisma.internalAvailabilityException.deleteMany({
-      where: { id: exceptionId, tenantId: scopedTenantId, providerId },
-    });
-
-    if (result.count !== 1) {
-      throw new NotFoundException('Time off entry not found');
-    }
-
-    return { ok: true };
   }
 
   async getServiceTiming(

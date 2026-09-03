@@ -504,7 +504,7 @@ export class AiOnboardingService {
       throw new ConflictException('Owner provider was not created');
     }
 
-    await this.internalCalendarService.updateProvider(
+    await this.internalCalendarService.bootstrapUpdateProvider(
       tenantId,
       ownerProvider.id,
       {
@@ -514,7 +514,7 @@ export class AiOnboardingService {
     const providers = [ownerProvider];
     for (let index = 1; index < blueprint.providerCount!; index += 1) {
       providers.push(
-        await this.internalCalendarService.createProvider(tenantId, {
+        await this.internalCalendarService.bootstrapCreateProvider(tenantId, {
           displayName: `${blueprint.providerTitle} ${index + 1}`,
           title: blueprint.providerTitle,
         }),
@@ -522,7 +522,7 @@ export class AiOnboardingService {
     }
 
     for (const service of blueprint.services) {
-      await this.internalCalendarService.createService(tenantId, {
+      await this.internalCalendarService.bootstrapCreateService(tenantId, {
         name: service.name,
         price: service.price,
         durationMinutes: service.durationMinutes,
@@ -530,7 +530,7 @@ export class AiOnboardingService {
     }
 
     for (const provider of providers) {
-      await this.internalCalendarService.replaceWeeklyAvailability(
+      await this.internalCalendarService.bootstrapReplaceWeeklyAvailability(
         tenantId,
         provider.id,
         blueprint.weeklyRules,

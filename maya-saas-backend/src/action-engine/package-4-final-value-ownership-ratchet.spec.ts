@@ -47,6 +47,7 @@ const CANONICAL_OWNER_FILES = new Set([
   'src/expenses/p4-07-expense-executable.service.ts',
   'src/gift-certificates/p4-06-gift-certificate-executable.service.ts',
   'src/loyalty/p4-03-legacy-loyalty-executable.service.ts',
+  'src/package5-wave4/package5-wave4.service.ts',
   'src/referrals/p4-04-referral-reward-executable.service.ts',
 ]);
 
@@ -90,6 +91,11 @@ const CONTROLLED_VALUE_PROOFS = [
     path: 'scripts/p4-10-all4-executable-proof.ts',
     databaseGuard: "database.startsWith('maya_c06_p410_all4_')",
     refusalMarker: 'P4-10 proof refuses non-disposable databases',
+  },
+  {
+    path: 'scripts/package5-wave4-all12-executable-proof.ts',
+    databaseGuard: "name.startsWith('maya_c06_p5_wave4_')",
+    refusalMarker: 'Wave 4 proof refuses a non-disposable database',
   },
 ] as const;
 
@@ -168,13 +174,6 @@ function isControlledProof(file: SourceFile): boolean {
 
 function isApprovedProductionOwner(site: ValueWriteSite): boolean {
   if (CANONICAL_OWNER_FILES.has(site.path)) return true;
-  if (site.path === 'src/business-content/business-content.service.ts') {
-    return [
-      'createInventoryItem',
-      'updateInventoryItem',
-      'deleteInventoryItem',
-    ].includes(site.method);
-  }
   if (site.path === 'src/loyalty/loyalty.service.ts') {
     if (site.method === 'getForUser') {
       return (
@@ -223,18 +222,6 @@ describe('Package 4 final value execution ownership ratchet', () => {
           .filter(
             (site) =>
               !(
-                site.path ===
-                  'src/business-content/business-content.service.ts' &&
-                [
-                  'createInventoryItem',
-                  'updateInventoryItem',
-                  'deleteInventoryItem',
-                ].includes(site.method)
-              ),
-          )
-          .filter(
-            (site) =>
-              !(
                 site.path === 'src/loyalty/loyalty.service.ts' &&
                 site.method === 'getForUser' &&
                 !/\bbalance\s*:/.test(site.code)
@@ -252,6 +239,7 @@ describe('Package 4 final value execution ownership ratchet', () => {
       'src/gift-certificates/p4-06-gift-certificate-executable.service.ts',
       'src/loyalty/loyalty.service.ts',
       'src/loyalty/p4-03-legacy-loyalty-executable.service.ts',
+      'src/package5-wave4/package5-wave4.service.ts',
       'src/referrals/p4-04-referral-reward-executable.service.ts',
     ]);
 
@@ -262,11 +250,7 @@ describe('Package 4 final value execution ownership ratchet', () => {
             site.path === 'src/business-content/business-content.service.ts',
         )
         .map((site) => site.method),
-    ).toEqual([
-      'createInventoryItem',
-      'updateInventoryItem',
-      'deleteInventoryItem',
-    ]);
+    ).toEqual([]);
   });
 
   it('classifies proof writers only through exact disposable database contracts', () => {

@@ -1,13 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import type { BusinessReview, TenantCatalogItem } from '@prisma/client';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
-import { asJson } from '../common/json.util';
-import { EncryptionService } from '../encryption/encryption.service';
+import { Package5Wave4CanonicalCutoverService } from '../package5-wave4/package5-wave4-canonical-cutover.service';
+import { Package5Wave4ReviewFactService } from '../package5-wave4/package5-wave4.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import type { IngestBusinessReviewDto } from './dto/business-review.dto';
@@ -22,18 +18,6 @@ export const BUSINESS_CONTENT_KINDS = [
 ] as const;
 
 export type BusinessContentKind = (typeof BUSINESS_CONTENT_KINDS)[number];
-
-type CatalogMutableData = {
-  name: string;
-  description: string | null;
-  priceKopecks: number | null;
-  currency: string;
-  quantity: number | null;
-  lowStockThreshold: number | null;
-  active: boolean;
-  source: string;
-  externalRef: string | null;
-};
 
 const REVIEW_TOPICS = {
   service_quality: [
@@ -60,9 +44,10 @@ export class BusinessContentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
-    private readonly encryption: EncryptionService,
     private readonly auditLog: AuditLogService,
     private readonly canonicalValueConfiguration: P409ValueConfigurationCanonicalCutoverService,
+    private readonly canonicalWave4: Package5Wave4CanonicalCutoverService,
+    private readonly reviewFacts: Package5Wave4ReviewFactService,
   ) {}
 
   async listCatalog(
@@ -102,6 +87,7 @@ export class BusinessContentService {
     actorUserId: string,
     kind: BusinessContentKind,
     dto: UpsertCatalogItemDto,
+    idempotencyKey?: string,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     if (kind !== 'inventory') {
@@ -113,30 +99,12 @@ export class BusinessContentService {
       );
       return this.catalogItemResult(scopedTenantId, kind, result.targetId);
     }
-    return this.createInventoryItem(scopedTenantId, actorUserId, dto);
-  }
-
-  private async createInventoryItem(
-    tenantId: string,
-    actorUserId: string,
-    dto: UpsertCatalogItemDto,
-  ) {
-    const row = await this.prisma.tenantCatalogItem.create({
-      data: {
-        tenantId,
-        kind: 'inventory',
-        ...this.catalogData('inventory', dto),
-      },
-    });
-    await this.auditLog.log({
-      tenantId,
-      userId: actorUserId,
-      action: 'business_content.catalog.created',
-      entityType: 'tenant_catalog_item',
-      entityId: row.id,
-      metadata: { kind: 'inventory', source: row.source },
-    });
-    return this.serializeCatalogItem(row);
+    return this.canonicalWave4.createInventoryItem(
+      scopedTenantId,
+      actorUserId,
+      dto,
+      idempotencyKey,
+    );
   }
 
   async updateCatalogItem(
@@ -145,6 +113,7 @@ export class BusinessContentService {
     kind: BusinessContentKind,
     itemId: string,
     dto: UpsertCatalogItemDto,
+    idempotencyKey?: string,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     if (kind !== 'inventory') {
@@ -157,29 +126,13 @@ export class BusinessContentService {
       );
       return this.catalogItemResult(scopedTenantId, kind, result.targetId);
     }
-    return this.updateInventoryItem(scopedTenantId, actorUserId, itemId, dto);
-  }
-
-  private async updateInventoryItem(
-    tenantId: string,
-    actorUserId: string,
-    itemId: string,
-    dto: UpsertCatalogItemDto,
-  ) {
-    await this.requireCatalogItem(tenantId, 'inventory', itemId);
-    const row = await this.prisma.tenantCatalogItem.update({
-      where: { id: itemId },
-      data: this.catalogData('inventory', dto),
-    });
-    await this.auditLog.log({
-      tenantId,
-      userId: actorUserId,
-      action: 'business_content.catalog.updated',
-      entityType: 'tenant_catalog_item',
-      entityId: row.id,
-      metadata: { kind: 'inventory', source: row.source },
-    });
-    return this.serializeCatalogItem(row);
+    return this.canonicalWave4.updateInventoryItem(
+      scopedTenantId,
+      actorUserId,
+      itemId,
+      dto,
+      idempotencyKey,
+    );
   }
 
   async deleteCatalogItem(
@@ -187,6 +140,7 @@ export class BusinessContentService {
     actorUserId: string,
     kind: BusinessContentKind,
     itemId: string,
+    idempotencyKey?: string,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     if (kind !== 'inventory') {
@@ -198,25 +152,12 @@ export class BusinessContentService {
       );
       return { ok: true, deleted: true, id: itemId, retired: true };
     }
-    return this.deleteInventoryItem(scopedTenantId, actorUserId, itemId);
-  }
-
-  private async deleteInventoryItem(
-    tenantId: string,
-    actorUserId: string,
-    itemId: string,
-  ) {
-    await this.requireCatalogItem(tenantId, 'inventory', itemId);
-    await this.prisma.tenantCatalogItem.delete({ where: { id: itemId } });
-    await this.auditLog.log({
-      tenantId,
-      userId: actorUserId,
-      action: 'business_content.catalog.deleted',
-      entityType: 'tenant_catalog_item',
-      entityId: itemId,
-      metadata: { kind: 'inventory' },
-    });
-    return { ok: true, deleted: true, id: itemId };
+    return this.canonicalWave4.archiveInventoryItem(
+      scopedTenantId,
+      actorUserId,
+      itemId,
+      idempotencyKey,
+    );
   }
 
   async getReferralProgram(tenantId: string) {
@@ -266,32 +207,21 @@ export class BusinessContentService {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const normalizedText = dto.text?.trim() || null;
     const topicTags = this.reviewTopics(normalizedText);
-    const data = {
+    const externalRef = dto.externalRef?.trim();
+    if (!externalRef) {
+      throw new BadRequestException('Exact review source identity required');
+    }
+    const row = await this.reviewFacts.accept({
       tenantId: scopedTenantId,
       source: dto.source.trim().toLowerCase(),
-      externalRef: dto.externalRef?.trim() || null,
+      externalRef,
       rating: dto.rating,
       occurredAt: new Date(dto.occurredAt),
-      encryptedText: normalizedText
-        ? this.encryption.encrypt(normalizedText)
-        : null,
-      topicTagsJson: asJson(topicTags),
+      text: normalizedText,
+      topicTags,
       branchId: dto.branchId?.trim() || null,
       staffExternalId: dto.staffExternalId?.trim() || null,
-    };
-    const row = data.externalRef
-      ? await this.prisma.businessReview.upsert({
-          where: {
-            tenantId_source_externalRef: {
-              tenantId: scopedTenantId,
-              source: data.source,
-              externalRef: data.externalRef,
-            },
-          },
-          update: data,
-          create: data,
-        })
-      : await this.prisma.businessReview.create({ data });
+    });
     await this.auditLog.log({
       tenantId: scopedTenantId,
       userId: actorUserId,
@@ -465,23 +395,6 @@ export class BusinessContentService {
     };
   }
 
-  private async requireCatalogItem(
-    tenantId: string,
-    kind: BusinessContentKind,
-    itemId: string,
-  ) {
-    const row = await this.prisma.tenantCatalogItem.findFirst({
-      where: { id: itemId, tenantId, kind },
-      select: { id: true },
-    });
-    if (!row) {
-      throw new NotFoundException({
-        message: 'Catalog item was not found.',
-        error: { code: 'catalog_item_not_found' },
-      });
-    }
-  }
-
   private async catalogItemResult(
     tenantId: string,
     kind: Exclude<BusinessContentKind, 'inventory'>,
@@ -496,24 +409,6 @@ export class BusinessContentService {
       );
     }
     return this.serializeCatalogItem(row);
-  }
-
-  private catalogData(
-    kind: BusinessContentKind,
-    dto: UpsertCatalogItemDto,
-  ): CatalogMutableData {
-    return {
-      name: dto.name.trim(),
-      description: dto.description?.trim() || null,
-      priceKopecks: dto.priceKopecks ?? null,
-      currency: (dto.currency ?? 'RUB').toUpperCase(),
-      quantity: kind === 'inventory' ? (dto.quantity ?? null) : null,
-      lowStockThreshold:
-        kind === 'inventory' ? (dto.lowStockThreshold ?? null) : null,
-      active: dto.active ?? true,
-      source: dto.source?.trim().toLowerCase() || 'manual',
-      externalRef: dto.externalRef?.trim() || null,
-    };
   }
 
   private catalogSource(rows: TenantCatalogItem[]): string {
