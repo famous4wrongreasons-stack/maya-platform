@@ -16,12 +16,10 @@ describe('Wave 5 production correction adapter', () => {
     };
     const planner = { build: jest.fn().mockResolvedValue(prepared) };
     const ingress = {
-      createExecution: jest
-        .fn()
-        .mockResolvedValue({
-          id: 'execution-1',
-          state: ActionExecutionState.PENDING_APPROVAL,
-        }),
+      createExecution: jest.fn().mockResolvedValue({
+        id: 'execution-1',
+        state: ActionExecutionState.PENDING_APPROVAL,
+      }),
     };
     const kernel = { decideApproval: jest.fn().mockResolvedValue({}) };
     const executor = {
