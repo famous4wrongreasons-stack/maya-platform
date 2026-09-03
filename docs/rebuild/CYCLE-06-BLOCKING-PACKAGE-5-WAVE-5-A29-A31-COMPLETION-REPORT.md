@@ -1,54 +1,98 @@
 # CYCLE 06 — PACKAGE 5 WAVE 5 A29/A31 CUTOVER COMPLETION REPORT
 
-Status: **INCOMPLETE — STOP before deployment after a failed cutover ratchet**
+Status: **INCOMPLETE — synchronization and preflight PASS; deployment stopped at lint**
 
-Accepted checkpoint: `a5bc22054af5295b1d909aebbb38d71909163b42`
+Accepted checkpoint: `7a75fb4f`
+
+Ratchet synchronization commit: `6a9d2e16a5f350e1bb5c4141c29aad6e92d5f92d`
 
 Report date: 2026-09-03
 
 Production release remains: `20260903-c06-p5-wave4-cutover-a46b5ee2`
 
-## Result and stop condition
+## Outcome
 
-Wave 5 was **not deployed**. The user-required rule “any red gate → STOP before
-runtime cutover” was applied when the new cutover-specific Jest check returned
-exit code 1. No candidate release was uploaded, no migration was applied, no
-service was restarted and no runtime symlink was switched.
+Wave 5 remains **not deployed**, and Package 5 remains **4/6**. This resumed cycle
+removed the HMAC false positive, proved the required adversarial regressions,
+passed the original 25 cutover checks and repeated the necessary production
+preflight. The standard deployment script then stopped at its mandatory lint gate
+with four formatting errors in the previously prepared adapter test. The user's
+“any red gate → STOP” rule was applied before any server upload or runtime switch.
 
-The accepted Runtime Contract Gate, Shadow 1/1 and PostgreSQL executable proof
-were not repeated. Wave 6, the final Package 5 gate, the final Chapter 6 gate and
-Chapter 7 were not started.
+Runtime Contract Gate, Shadow 1/1 and the PostgreSQL executable proof were not
+repeated. No real recovery correction or provider/business mutation was performed
+for verification. Wave 6 and Chapter 7 were not started.
 
-## Final preflight — PASS
+## Stage 1 — Ratchet synchronization: PASS
 
-- Fetched origin and verified `HEAD = origin = a5bc2205`.
-- Backend and rebuild documentation were initially clean. Unrelated site/bot
-  changes were preserved and are excluded from this checkpoint.
-- Active production release: `20260903-c06-p5-wave4-cutover-a46b5ee2`.
-- Health: `ok`; readiness: `ready`; service: `active`; restart count: `0`.
-- Strict production release preflight: PASS; runtime configuration: safe.
-- Repository migrations: `70`; applied migration records: `73` including the
-  accepted historical migration manifest; pending migrations: `0`.
-- Prisma migration status: up to date.
-- Independent read-only schema comparison: `No difference detected` / drift `NONE`.
-- Existing Wave 1–5 architectural ratchets: `5/5` suites, `34/34` tests — PASS.
-- Canonical Action Ingress and Package 4 production ownership ratchets:
-  `10/10` suites, `65/65` tests — PASS.
-- Existing Wave 5 source-fact and correction code retains append-only source
-  evidence, tenant-qualified identities, frozen attribution windows, owner
-  approval and serializable correction with one ActionTargetMutation.
-- No production recovery facts exist yet. A29 immutable-source enforcement is
-  prepared locally and must not be described as deployed.
+The exact old match was the only `.update(` in the inspected RecoveryService
+surface, at `subjectRefForPhone`:
 
-The production snapshot was taken in a repeatable-read, read-only transaction.
-Only aggregate counts and digests were collected; no personal data was emitted.
+`createHmac('sha256', secret).update(...).digest('hex')`.
 
-| Baseline | Count at preflight |
+The previous slice started at `async report(` and continued through the following
+helper. The receiver is a cryptographic HMAC created from the named `createHmac`
+import in `node:crypto`, not Prisma, a business model, provider or legacy recovery
+writer.
+
+The fix uses TypeScript syntax and symbol binding to mask only the `update`
+identifier of that exact chain: named value import from `node:crypto`, SHA-256,
+two constructor arguments, immediate `.update(...)`, immediate `.digest('hex')`.
+The scanner still visits the entire original surface and every nested argument.
+It does not ignore `.update(` globally, exclude the helper/file/directory, or add
+a broad owner allowlist. Model mutation detection remains and also recognizes
+`createMany`, `updateMany` and `deleteMany` in the report surface.
+
+Five new regressions passed, covering:
+
+1. The actual HMAC chain is permitted. A non-crypto import or locally shadowed
+   `createHmac` identifier is rejected.
+2. Prisma, business and provider `.update()` calls in the same report surface
+   are rejected, including multiline Prisma `updateMany`.
+3. Direct attribution update inside a HMAC argument is still rejected.
+4. Legacy writer, fact-plane mutation initiated by a report and direct upsert
+   remain rejected.
+5. Only exact `.spec.ts` files are excluded; production code in test-named
+   directories and helper filenames remains scanned.
+
+`RATCHET FALSE POSITIVE REMOVED: YES`
+
+`ARCHITECTURAL BYPASS PROTECTION WEAKENED: NO`
+
+`REAL BUSINESS UPDATE STILL DETECTED: YES`
+
+## Stage 2 — Resumed cutover preflight: PASS
+
+| Check | Result |
+| --- | --- |
+| Synchronization regressions | 5/5 PASS |
+| Original cutover checks | 25/25 PASS, 4/4 suites |
+| Waves 1–4, Canonical Action Ingress and Package 4 ownership ratchets | 40/40 PASS, 6/6 suites |
+| Pushed source | HEAD = origin = 6a9d2e16 |
+| Strict production release preflight | PASS; safe runtime configuration |
+| Migration status | 70 repository migrations; up to date |
+| Pending migrations | 0 |
+| Applied migration records | 73, including accepted historical manifest |
+| Independent schema drift comparison | NONE / No difference detected |
+| Production health / readiness | ok / ready |
+| Service / restarts | active / 0 |
+| Candidate port 3199 listeners | 0 |
+| Immutable evidence and tenant/authority ratchets | PASS |
+
+The only production source changes from the active Wave 4 release remain the
+Wave 5 registry/policy entries, recovery event types, Wave 5 module/adapter and
+recovery initiators/read surface. Packages 1–4 and Waves 1–4 runtime source was
+not changed by this cycle.
+
+Production snapshots were collected in a repeatable-read, read-only transaction.
+Counts and row digests matched the preceding preflight snapshot exactly:
+
+| Baseline | Count |
 | --- | ---: |
 | RecoveryTouchpoint / RecoveryConversion | 0 / 0 |
 | DomainEvent | 962 |
 | ActionExecution / ActionTargetMutation | 580 / 0 |
-| Wave 1–5 ActionExecution rows | 0 |
+| Package 5 wave executions | 0 |
 | Appointment | 2303 |
 | Opportunity / AgentTask / InboxItem | 17 / 17 / 153 |
 | OperationalWorkItem | 0 |
@@ -57,64 +101,41 @@ Only aggregate counts and digests were collected; no personal data was emitted.
 | BillingPayment / immutable offer versions | 1 / 9 |
 | Internal services / providers / availability / time off / reviews | 0 / 0 / 0 / 0 / 0 |
 | Active unresolved-client-identity holds | 1 |
-| Cross-tenant recovery projection links | 0 |
+| Cross-tenant recovery links | 0 |
 
-These are preflight values, not a claim that unrelated live production activity
-was frozen. Packages 1–4 and Waves 1–4 remain on the existing production release.
+## Stage 3 — Mandatory deployment gate: STOP
 
-## Prepared local changes — NOT RELEASED
+The standard `deploy/vps/deploy.sh` pipeline was invoked for candidate
+`20260903-c06-p5-wave5-cutover-6a9d2e16`.
 
-- RecoveryModule imports Package5Wave5Module.
-- The owner-only correction endpoint supplies the authenticated tenant/user,
-  explicit bounded Idempotency-Key and exact source-evidence reference.
-- The production adapter builds an executable request, crosses Canonical Action
-  Ingress, records an owner approval through the kernel, then invokes the
-  canonical executor or resumes the same prior execution.
-- Touchpoint, booking and booking-status initiators delegate to the canonical
-  A29 fact plane. Contact data is reduced to its HMAC before this boundary.
-- The recovery report no longer persists revenue/status updates. Verified CRM
-  revenue affects only the response.
-- New tests cover owner authority, required idempotency identity, approval
-  failure/races, retry restoration, evidence rejection and absence of fallback.
-- Post-cutover ratchets restrict recovery projection writes to the exact
-  canonical Wave 5 service and retain A31 comparator/event-store boundaries.
+- Backend clean-tree check: PASS.
+- Prisma schema validation: PASS.
+- Full ESLint: **FAIL**, four `prettier/prettier` errors.
+- Application/scripts typechecks, full Jest, Nest build, server upload/install,
+  candidate preflight/readiness and runtime switch: **NOT RUN**.
 
-These changes are a stopped preparation checkpoint. They are **not eligible for
-production deployment** until the failed check is corrected and the required
-release gates pass in a separately resumed cycle.
+All four errors are in
+`src/package5-wave5/package5-wave5-canonical-cutover.service.spec.ts`, lines 19–24:
+the wrapped `jest.fn().mockResolvedValue(...)` chain and its indentation do not
+match the installed formatter's expected output. The read-only formatter check
+confirmed that these lines should have `jest.fn().mockResolvedValue({` on one
+line with the object fields indented beneath it. No production behavior or test
+assertion needs to change for that repair.
 
-## Failed gate
+This formatting defect is in test preparation from the accepted stopped
+checkpoint. It is not a failure of the synchronized ratchet. The gate failure
+was not hidden, skipped or retried in this cycle. No server release directory
+was uploaded by the pipeline; the active Wave 4 runtime remains unchanged.
 
-Command scope: Wave 5 production adapter, recovery service, Wave 5 architectural
-ratchet, tenant-context service.
+Next required cycle: correct only that formatting, repeat the required release
+gates under the user's stop rule, then deploy only if green. Do not repeat the
+accepted Runtime Gate, Shadow or executable proof.
 
-Result: `3/4` suites passed, `24/25` tests passed; exit code `1`.
-
-Failed test:
-`Package 5 Wave 5 fact-plane and bypass ratchet → allows recovery projection writers only in the exact canonical Wave 5 file`.
-
-The added test extracts from `async report(` through the end of RecoveryService.
-That slice includes the neighboring `subjectRefForPhone` method. Its legitimate
-`createHmac(...).update(...).digest(...)` call matches the test's broad `.update()`
-pattern. This is a test-scope defect introduced in this preparation, not evidence
-of a database mutation by the report. The global recovery-writer allowlist check
-and the report service test denying Prisma update calls passed.
-
-The failed check is preserved for review. It was not weakened or silently rerun.
-Next required repair: bound inspection to the actual report method or inspect
-Prisma mutation calls semantically, preserving detection of multiline database
-writes and fact-plane calls from the report. Then resume the sequential mandatory
-release gates. No permission to proceed past the red gate is inferred.
-
-Remaining release gates were not run: full Prisma/lint/application and scripts
-typechecks, full backend Jest, Nest build, upload/install, candidate release
-preflight, candidate health/readiness, atomic switch and post-deploy verification.
-
-## Exact status
+## Production status
 
 `PACKAGE 5 WAVE 5 COMPLETE: NO`
 
-`WAVE 5 FAMILIES CUTOVER: NONE — A29, A31 NOT DEPLOYED`
+`WAVE 5 FAMILIES CUTOVER: NONE — A29, A31 PENDING`
 
 `WAVE 5 ACTION CLASSES CUTOVER: 0/1`
 
@@ -124,15 +145,15 @@ preflight, candidate health/readiness, atomic switch and post-deploy verificatio
 
 `LEGACY MUTATING OWNER ACTIVE: YES`
 
-`LEGACY FALLBACK: NOT APPLICABLE — WAVE 5 CUTOVER NOT PERFORMED`
+`LEGACY FALLBACK: NOT APPLICABLE — CUTOVER NOT PERFORMED`
 
-`RECOVERY ATTRIBUTION CORRECTABLE: NOT AVAILABLE THROUGH THE CANONICAL PRODUCTION ACTION`
+`RECOVERY ATTRIBUTION CORRECTABLE: CANONICAL PRODUCTION ACTION NOT DEPLOYED`
 
-`SOURCE EVIDENCE IMMUTABLE: LOCAL CONTRACT PRESERVED; A29 PRODUCTION CUTOVER PENDING`
+`SOURCE EVIDENCE IMMUTABLE: A29 PRODUCTION ENFORCEMENT PENDING`
 
-`TENANT/AUTHORITY ISOLATION: PREFLIGHT PASS; WAVE 5 PRODUCTION ENFORCEMENT PENDING`
+`TENANT/AUTHORITY ISOLATION: PREFLIGHT PASS; WAVE 5 CUTOVER PENDING`
 
-`DUPLICATE BUSINESS MUTATION POSSIBLE: NOT RE-ASSESSED — ACCEPTED LOCAL PROOF PASS; NOT DEPLOYED`
+`DUPLICATE BUSINESS MUTATION POSSIBLE: ACCEPTED LOCAL PROOF PASS; NOT DEPLOYED`
 
 `UNKNOWN REQUIRED: NO`
 
@@ -144,20 +165,19 @@ preflight, candidate health/readiness, atomic switch and post-deploy verificatio
 
 `CHAPTER 7 STARTED: NO`
 
-## Process hygiene
+## Existing local databases and process hygiene
 
-All owned commands were foreground processes and exited. No browser, Playwright,
-Chrome, watcher, development server or disposable database was started. Production
-candidate port 3199 had no listener. No production process was stopped or changed.
-Final read-only verification again returned the same active Wave 4 release, health
-and readiness success, and restart count 0.
+The pre-existing local PostgreSQL service and its 17 historical test/proof/clone
+databases were not modified. A separate provenance/cleanup audit remains deferred
+until after Chapter 6; no cleanup action is authorized by this record.
 
-The wider hygiene audit found a pre-existing local PostgreSQL service on port
-5432, started on September 2, and 17 historical `maya_c06_*` test/proof/clone
-databases (12–13 MB each, no active sessions). None belongs to this cycle; none
-was deleted. The VPS has 0 matching temporary databases. Thus the requested
-machine-wide temporary-database count is not zero, although this cycle left none.
-Deleting historical databases was not part of this read-only hygiene check.
+`PRE-EXISTING LOCAL TEMP/TEST DATABASES: 17`
+
+`OWNED BY THIS CYCLE: 0`
+
+All owned commands exited. The deployment wrapper's temporary SSH directory was
+removed by its EXIT trap. No candidate server, watcher, browser, Playwright,
+Chrome or temporary PostgreSQL instance/database was started.
 
 `OWNED TEMP PROCESSES STILL RUNNING: 0`
 
@@ -165,6 +185,6 @@ Deleting historical databases was not part of this read-only hygiene check.
 
 `OWNED PLAYWRIGHT/CHROME PROCESSES REMAINING: 0`
 
-`TEMP DATABASES REMAINING: 17 PRE-EXISTING LOCAL / 0 OWNED BY THIS CYCLE / 0 ON VPS`
+`OWNED TEMP DATABASES REMAINING: 0`
 
-STOP before runtime cutover. See the stopped Wave 5 remainder checkpoint.
+STOP before production cutover. See the updated stopped-cutover remainder.
