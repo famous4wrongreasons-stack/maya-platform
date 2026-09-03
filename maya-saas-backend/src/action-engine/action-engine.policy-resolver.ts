@@ -41,6 +41,10 @@ const ALLOWED_REQUEST_KEYS = new Set([
 const PERMITTED_TENANT_ACCESS_STATES = new Set<
   TenantAccessState['accessState']
 >(['active', 'trial_active', 'past_due_grace']);
+const SUSPENDED_TENANT_RECOVERY_CAPABILITIES = new Set([
+  'package5.wave2.reactivate-tenant.shadow.v1',
+  'package5.wave2.reactivate-tenant.execute.v1',
+]);
 const TRUSTED_SERVICE_SOURCE_TYPES = new Set<TrustedServiceSourceType>([
   'agent_task',
   'scheduler',
@@ -358,9 +362,12 @@ export class CanonicalActionPolicyResolver {
     }
 
     const tenantAccess = evaluateTenantAccessState(tenant, evaluatedAt);
-    const tenantAllowed = PERMITTED_TENANT_ACCESS_STATES.has(
-      tenantAccess.accessState,
-    );
+    const tenantAllowed =
+      PERMITTED_TENANT_ACCESS_STATES.has(tenantAccess.accessState) ||
+      (tenant.status === 'suspended' &&
+        request.sourceType === 'legacy_bridge' &&
+        request.actorUserId === undefined &&
+        SUSPENDED_TENANT_RECOVERY_CAPABILITIES.has(request.capability));
     const actorDecision = this.resolveActorPermission(
       request,
       policy,

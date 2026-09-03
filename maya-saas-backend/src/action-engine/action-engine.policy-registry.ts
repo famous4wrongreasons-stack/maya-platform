@@ -135,7 +135,9 @@ export function canonicalProductionPolicyDefinitions(
         trustedServiceSourceTypes,
         requiredFeatures: requiredFeatures(capability.capability),
         permissionCodes: [
-          'tenant.active',
+          capability.actionClass === 'reactivate_tenant'
+            ? 'tenant.recoverable'
+            : 'tenant.active',
           'principal.server-derived',
           `${capability.actionClass}.request`,
         ],
