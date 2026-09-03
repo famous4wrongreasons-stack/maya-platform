@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 WAVE 6 CONTRACT STOP / REMAINDER
 
-Status: **CURRENT — Wave 6 contract gate stopped; production remains 5/6**
+Status: **HISTORICAL — superseded by WAVE-6-PRE-CUTOVER-REMAINDER-CHECKPOINT after Policy V1 approval and local proof**
 
 Accepted prior completion checkpoint: `ef454c1c`.
 

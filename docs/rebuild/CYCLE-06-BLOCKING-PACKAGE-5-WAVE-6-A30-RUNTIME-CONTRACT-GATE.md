@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 WAVE 6 A30 RUNTIME CONTRACT GATE
 
-Status: **FAIL — exact auth retention eligibility requires a policy decision**
+Status: **HISTORICAL FAIL — superseded by the approved Wave 6 Runtime Contract Gate after explicit Policy V1 approval**
 
 Accepted source checkpoint: `ef454c1c071fb32dfa9745e4bf7adddf828301ca`.
 

@@ -3851,61 +3851,8 @@ def mark_birthday_promo_used(code: str) -> bool:
 # ─── Ротация ПД (152-ФЗ: не хранить дольше нужного) ──────────────────
 
 def rotate_old_pii(retention_months: int) -> dict:
-    """
-    Обезличивает клиентов без активности N месяцев и сертификаты, истёкшие
-    больше N месяцев назад. Фактически зануляет name_enc/phone_enc/phone_hash,
-    но саму строку оставляет — чтобы не сломались связи с bookings.
-
-    Возвращает счётчики {"clients": N, "gift_certs": M} для лога.
-    """
-    cutoff = (datetime.now() - timedelta(days=retention_months * 30)).isoformat(
-        timespec="seconds"
-    )
-    counts = {"clients": 0, "gift_certs": 0}
-
-    with _db() as conn:
-        # Клиенты: нет ни одной записи позже cutoff. Через GROUP BY + HAVING.
-        # Дополнительно условие на updated_at — чтобы только что зарегистрированных
-        # без записей не обезличивать (вдруг человек ввёл данные но не успел дойти
-        # до выбора времени).
-        rows = conn.execute(
-            """
-            SELECT c.id FROM clients c
-            LEFT JOIN bookings b ON b.client_id = c.id
-            WHERE (c.name_enc IS NOT NULL OR c.phone_enc IS NOT NULL)
-              AND (c.updated_at IS NULL OR c.updated_at < ?)
-            GROUP BY c.id
-            HAVING (MAX(b.datetime) IS NULL OR MAX(b.datetime) < ?)
-            """,
-            (cutoff, cutoff),
-        ).fetchall()
-        for r in rows:
-            conn.execute(
-                "UPDATE clients SET name_enc = NULL, phone_enc = NULL, "
-                "phone_hash = NULL, updated_at = ? WHERE id = ?",
-                (_now(), r["id"]),
-            )
-            counts["clients"] += 1
-
-        # Сертификаты: истекли давно. Хранить ПД получателя дальше нет смысла.
-        rows = conn.execute(
-            """
-            SELECT id FROM gift_certificates
-            WHERE expires_at < ?
-              AND (recipient_name_enc IS NOT NULL OR recipient_phone_enc IS NOT NULL)
-            """,
-            (cutoff,),
-        ).fetchall()
-        for r in rows:
-            conn.execute(
-                "UPDATE gift_certificates SET recipient_name_enc = NULL, "
-                "recipient_phone_enc = NULL, recipient_phone_hash = NULL "
-                "WHERE id = ?",
-                (r["id"],),
-            )
-            counts["gift_certs"] += 1
-
-    return counts
+    """D7-A: legacy Client/certificate anonymization is not allowlisted."""
+    raise RuntimeError("package5_a30_legacy_pii_cleanup_not_allowlisted")
 
 
 # Создаём таблицы при импорте модуля — БД всегда готова к работе.

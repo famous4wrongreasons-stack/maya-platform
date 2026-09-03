@@ -101,6 +101,8 @@ async function main(): Promise<void> {
     printHelp();
     return;
   }
+  if (!options.dryRun)
+    throw new Error('package5_a30_ai_cleanup_not_allowlisted');
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error('DATABASE_URL is required');
@@ -212,83 +214,8 @@ async function main(): Promise<void> {
       expired_or_forgotten_memory_selected: memoryFactIds.length,
     };
 
-    if (options.dryRun) {
-      process.stdout.write(
-        JSON.stringify({ ok: true, dry_run: true, candidates }, null, 2) + '\n',
-      );
-      return;
-    }
-
-    const [expiredResult, staleApprovalResult, staleExecutionResult] =
-      await prisma.$transaction([
-        prisma.aiApprovalRequest.updateMany({
-          where: { status: 'pending', expiresAt: { lte: now } },
-          data: { status: 'expired', errorCode: 'ai_approval_expired' },
-        }),
-        prisma.aiApprovalRequest.updateMany({
-          where: {
-            status: { in: ['approved', 'executing'] },
-            updatedAt: { lte: staleBefore },
-          },
-          data: {
-            status: 'failed',
-            errorCode: 'ai_tool_execution_stale_unknown',
-          },
-        }),
-        prisma.aiToolExecution.updateMany({
-          where: {
-            status: 'executing',
-            startedAt: { lte: staleBefore },
-          },
-          data: {
-            status: 'failed',
-            errorCode: 'ai_tool_execution_stale_unknown',
-            completedAt: now,
-          },
-        }),
-      ]);
-    const deletedExecutions = executionIds.length
-      ? await prisma.aiToolExecution.deleteMany({
-          where: { id: { in: executionIds } },
-        })
-      : { count: 0 };
-    const deletedApprovals = approvalIds.length
-      ? await prisma.aiApprovalRequest.deleteMany({
-          where: { id: { in: approvalIds }, execution: null },
-        })
-      : { count: 0 };
-    const deletedBrainSessions = brainSessionIds.length
-      ? await prisma.aiBrainSession.deleteMany({
-          where: { id: { in: brainSessionIds }, expiresAt: { lte: now } },
-        })
-      : { count: 0 };
-    const deletedMemoryFacts = memoryFactIds.length
-      ? await prisma.aiMemoryFact.deleteMany({
-          where: {
-            id: { in: memoryFactIds },
-            OR: [{ expiresAt: { lte: now } }, { deletedAt: { not: null } }],
-          },
-        })
-      : { count: 0 };
-
     process.stdout.write(
-      JSON.stringify(
-        {
-          ok: true,
-          dry_run: false,
-          changed: {
-            expired_pending_approvals: expiredResult.count,
-            stale_approvals: staleApprovalResult.count,
-            stale_executions: staleExecutionResult.count,
-            deleted_executions: deletedExecutions.count,
-            deleted_approvals: deletedApprovals.count,
-            deleted_brain_sessions: deletedBrainSessions.count,
-            deleted_memory_facts: deletedMemoryFacts.count,
-          },
-        },
-        null,
-        2,
-      ) + '\n',
+      JSON.stringify({ ok: true, dry_run: true, candidates }, null, 2) + '\n',
     );
   } finally {
     if (locked) {

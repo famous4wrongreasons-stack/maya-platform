@@ -1,3 +1,4 @@
+import { Package5Wave6MaintenanceService } from '../package5-wave6/package5-wave6.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
@@ -282,19 +283,18 @@ export class EventStoreService {
    *
    * Повторный запуск безопасен и не удаляет ничего сверх: строки уже нет.
    */
-  async purgeExpiredQuarantine(now = new Date()): Promise<{ deleted: number }> {
-    const result = await this.prisma.ingestionQuarantine.deleteMany({
-      where: { expiresAt: { lt: now } },
+  async purgeExpiredQuarantine(): Promise<{ deleted: number }> {
+    const coordinator = new Package5Wave6MaintenanceService(
+      this.prisma,
+      this.tenantContext,
+    );
+    const runId = await coordinator.prepare({
+      actionClass: 'purge_ingestion_quarantine',
     });
-
-    if (result.count > 0) {
-      // Только счётчик: ни одного поля диагностики в журнал не попадает.
-      this.logger.log(
-        `quarantine retention: removed ${result.count} expired row(s)`,
-      );
-    }
-
-    return { deleted: result.count };
+    const result = await coordinator.execute(runId);
+    return {
+      deleted: result.replayed ? 0 : (result.byKind.IngestionQuarantine ?? 0),
+    };
   }
 
   /** Сколько строк истекло, ничего не удаляя. Для сухого прогона. */
