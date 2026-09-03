@@ -40,6 +40,7 @@ export * from './p4-10-commerce-credential-executable.contract';
 export * from './package5-wave1-executable.contract';
 export * from './package5-wave2-executable.contract';
 export * from './package5-wave3-executable.contract';
+export * from './package5-wave4-executable.contract';
 export * from './referral-create-shadow.contract';
 export * from './referral-resolve-shadow.contract';
 export * from './referral-reward-issue-shadow.contract';

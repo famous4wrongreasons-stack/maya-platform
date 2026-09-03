@@ -183,6 +183,12 @@ import {
   type Package5Wave3Registration,
 } from './package5-wave3-executable.contract';
 import {
+  PACKAGE5_WAVE4_INPUT_CONTRACT,
+  PACKAGE5_WAVE4_REGISTRATIONS,
+  normalizePackage5Wave4Input,
+  type Package5Wave4Registration,
+} from './package5-wave4-executable.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1636,6 +1642,75 @@ function package5Wave3Capability(
     auditRetentionMs: 7 * 365 * DAY,
     normalizeInput: (value) =>
       normalizePackage5Wave3Input(registration.operation, value),
+  };
+}
+
+function package5Wave4Capability(
+  registration: Package5Wave4Registration,
+  shadow: boolean,
+): RegisteredActionCapabilityV1 {
+  const external = registration.authorityClass === 'AC2';
+  return {
+    capability: shadow
+      ? registration.shadowCapability
+      : registration.executableCapability,
+    capabilityVersion: 1,
+    actionClass: registration.actionClass,
+    normalizedInputContract: PACKAGE5_WAVE4_INPUT_CONTRACT,
+    targetKind: registration.targetKind,
+    allowedSourceTypes: [
+      'authenticated_request',
+      'legacy_bridge',
+      'synthetic_shadow',
+    ],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      registration.family.toLowerCase(),
+      registration.authorityClass.toLowerCase(),
+      'one_target',
+      'server_derived_authority',
+      'prospective_only',
+      ...(external ? ['content_bound_object_write'] : ['local_atomic']),
+      ...(shadow ? ['shadow_only'] : []),
+    ],
+    policyKey: `chapter6.package5.wave4.${registration.actionClass}.${shadow ? 'shadow' : 'execute'}`,
+    policyVersion: 1,
+    policyDecision: shadow
+      ? ActionPolicyDecision.SHADOW_ONLY
+      : ActionPolicyDecision.ALLOW,
+    autonomyLevel: shadow ? 'L2_5_SHADOW' : 'L2_SERVER_POLICY',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: external
+        ? 'package5.wave4.object-write'
+        : 'package5.wave4.local-transaction',
+      version: 1,
+      maxExecutionAttempts: external ? 1 : 3,
+      retryablePreDispatchErrors: new Set(
+        external ? ['object_store_not_crossed'] : ['local_serialization'],
+      ),
+      backoffMs: external ? [0] : [0, 25, 100],
+    },
+    reconciliation: {
+      key: external
+        ? 'package5.wave4.object-head-by-request-identity'
+        : 'package5.wave4.not-required',
+      version: 1,
+      maxInconclusiveAttempts: external ? 8 : 1,
+      retryAfterProvenNonExecution: external,
+    },
+    transportIdentityVersion: 1,
+    executorKey: shadow
+      ? 'shadow.none'
+      : external
+        ? 'package5.wave4.object-command'
+        : 'package5.wave4.local-command',
+    executorVersion: 1,
+    payloadRetentionMs: shadow ? 7 * DAY : 30 * DAY,
+    auditRetentionMs: 7 * 365 * DAY,
+    normalizeInput: (value) =>
+      normalizePackage5Wave4Input(registration.operation, value),
   };
 }
 
@@ -3314,6 +3389,12 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   ),
   ...PACKAGE5_WAVE3_REGISTRATIONS.map((registration) =>
     package5Wave3Capability(registration, false),
+  ),
+  ...PACKAGE5_WAVE4_REGISTRATIONS.map((registration) =>
+    package5Wave4Capability(registration, true),
+  ),
+  ...PACKAGE5_WAVE4_REGISTRATIONS.map((registration) =>
+    package5Wave4Capability(registration, false),
   ),
   ...P4_06_EXECUTABLE_REGISTRATIONS.map(p406ExecutableCapability),
   p405SchedulerEnvelopeCapability(),
