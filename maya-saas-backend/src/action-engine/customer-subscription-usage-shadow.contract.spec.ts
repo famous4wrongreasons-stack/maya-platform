@@ -15,7 +15,7 @@ const canonicalInput = () => ({
   offerCode: 'haircut.senior',
   planCode: 'haircut',
   tier: 'senior',
-  catalogVersion: 'p4-05.legacy-fixed-catalog.v1',
+  catalogVersion: 'p4-09.canonical-offer-authority.v1',
   planSnapshotHash: 'plan-snapshot-hash',
   serviceScopeHash: 'service-scope-hash',
   visitsIncluded: 2,
