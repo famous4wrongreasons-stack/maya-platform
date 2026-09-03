@@ -1,14 +1,13 @@
 import { BusinessStateService } from '../business-state/business-state.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
-import { AuditLogService } from '../audit-log/audit-log.service';
 import { UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
 import { CustomersService } from '../customers/customers.service';
 import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { ExpensesService } from '../expenses/expenses.service';
-import { InboxService } from '../inbox/inbox.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { Package5Wave1CanonicalCutoverService } from '../package5-wave1/package5-wave1-canonical-cutover.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StaffService } from '../staff/staff.service';
 import { ClientRecencyFactsService } from '../business-facts/client-recency-facts.service';
@@ -326,23 +325,14 @@ describe('AiTool extended capabilities', () => {
   });
 
   it('creates one persistent inbox request per active administrator', async () => {
-    const publishForTenant = jest.fn().mockResolvedValue({
-      stored: 2,
-      user_ids: ['owner-a', 'admin-a'],
+    const requestAdministratorContact = jest.fn().mockResolvedValue({
+      result: { targetRef: 'support-work-item-a' },
+      projected: 2,
     });
     const service = createService({
-      prisma: {
-        membership: {
-          findMany: jest
-            .fn()
-            .mockResolvedValue([
-              { userId: 'owner-a' },
-              { userId: 'admin-a' },
-              { userId: 'admin-a' },
-            ]),
-        },
-      } as unknown as PrismaService,
-      inboxService: { publishForTenant } as unknown as InboxService,
+      canonicalWave1: {
+        requestAdministratorContact,
+      } as unknown as Package5Wave1CanonicalCutoverService,
     });
 
     const result = await service.execute(
@@ -359,14 +349,11 @@ describe('AiTool extended capabilities', () => {
       persistent: true,
       push_announcement_requested: true,
     });
-    expect(publishForTenant).toHaveBeenCalledWith(
+    expect(requestAdministratorContact).toHaveBeenCalledWith(
       'tenant-a',
-      expect.objectContaining({
-        type: 'client_support_request',
-        sourceEventId: 'maya-contact:contact-admin-a',
-        userIds: ['owner-a', 'admin-a'],
-        fanoutOwners: false,
-      }),
+      'customer-a',
+      'Нужна помощь с записью',
+      'contact-admin-a',
     );
     expect(JSON.stringify(result)).not.toContain('owner-a');
     expect(JSON.stringify(result)).not.toContain('admin-a');
@@ -396,9 +383,14 @@ describe('AiTool extended capabilities', () => {
     );
 
     expect(getAssistant).toHaveBeenCalledWith('tenant-a', 'owner-a');
-    expect(updateAssistant).toHaveBeenCalledWith('tenant-a', 'owner-a', {
-      enabledCapabilities: ['business_analytics', 'staff_performance'],
-    });
+    expect(updateAssistant).toHaveBeenCalledWith(
+      'tenant-a',
+      'owner-a',
+      {
+        enabledCapabilities: ['business_analytics', 'staff_performance'],
+      },
+      'settings-a',
+    );
     expect(result).toEqual({
       updated: true,
       scope: 'authenticated_user',
@@ -409,11 +401,10 @@ describe('AiTool extended capabilities', () => {
   });
 
   it('assigns a persistent task to an active CRM team account without exposing identity', async () => {
-    const publishForTenant = jest.fn().mockResolvedValue({
-      stored: 1,
-      user_ids: ['employee-secret'],
+    const createTask = jest.fn().mockResolvedValue({
+      result: { targetRef: 'task-work-item-a' },
+      projected: 1,
     });
-    const audit = jest.fn().mockResolvedValue({ id: 'audit-a' });
     const service = createService({
       crmService: {
         getTeamMembers: jest.fn().mockResolvedValue([
@@ -432,8 +423,9 @@ describe('AiTool extended capabilities', () => {
           }),
         },
       } as unknown as PrismaService,
-      inboxService: { publishForTenant } as unknown as InboxService,
-      auditLogService: { log: audit } as unknown as AuditLogService,
+      canonicalWave1: {
+        createTask,
+      } as unknown as Package5Wave1CanonicalCutoverService,
     });
 
     const result = await service.execute(
@@ -447,20 +439,17 @@ describe('AiTool extended capabilities', () => {
       'task-a',
     );
 
-    expect(publishForTenant).toHaveBeenCalledWith('tenant-a', {
-      type: 'maya_task',
-      sourceEventId: 'maya-task:task-a',
-      title: 'Поручение MAYA',
-      bodyText: 'Проверить отмены на завтра',
-      payload: {
-        status: 'active',
-        due_date: '2026-08-15',
-        source: 'maya_chat',
+    expect(createTask).toHaveBeenCalledWith(
+      'tenant-a',
+      'owner-a',
+      {
+        assigneeUserId: 'employee-secret',
+        title: 'Поручение MAYA',
+        bodyText: 'Проверить отмены на завтра',
+        dueAt: new Date('2026-08-15T12:00:00.000Z'),
       },
-      deepLink: '/app/?panel=chat',
-      userIds: ['employee-secret'],
-      fanoutOwners: false,
-    });
+      'task-a',
+    );
     expect(result).toEqual({
       accepted: true,
       delivered: true,
@@ -470,9 +459,6 @@ describe('AiTool extended capabilities', () => {
     });
     expect(JSON.stringify(result)).not.toContain('employee-secret');
     expect(JSON.stringify(result)).not.toContain('crm-staff-secret');
-    expect(audit).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'maya.task.created' }),
-    );
   });
 
   it('lists only the authenticated user persistent tasks', async () => {
@@ -521,25 +507,14 @@ describe('AiTool extended capabilities', () => {
   });
 
   it('completes only a task assigned to the authenticated user', async () => {
-    const findFirst = jest.fn().mockResolvedValue({
-      id: 'task-row-a',
-      payloadJson: { status: 'active', due_date: '2026-08-15' },
-      readAt: null,
-      archivedAt: null,
-    });
-    type TaskUpdateInput = {
-      where: { id: string };
-      data: { payloadJson: { status: string } };
-    };
-    let taskUpdateInput: TaskUpdateInput | undefined;
-    const update = jest.fn((input: TaskUpdateInput) => {
-      taskUpdateInput = input;
-      return Promise.resolve({ id: 'task-row-a' });
+    const completeTask = jest.fn().mockResolvedValue({
+      actionClass: 'complete_operational_task',
+      targetRef: 'work-item-a',
     });
     const service = createService({
-      prisma: {
-        inboxItem: { findFirst, update },
-      } as unknown as PrismaService,
+      canonicalWave1: {
+        completeTask,
+      } as unknown as Package5Wave1CanonicalCutoverService,
     });
 
     const result = await service.execute(
@@ -554,19 +529,12 @@ describe('AiTool extended capabilities', () => {
       already_completed: false,
       task_id: 'task-row-a',
     });
-    expect(findFirst).toHaveBeenCalledWith({
-      where: {
-        id: 'task-row-a',
-        tenantId: 'tenant-a',
-        userId: 'owner-a',
-        type: 'maya_task',
-        deletedAt: null,
-      },
-    });
-    expect(taskUpdateInput?.where).toEqual({ id: 'task-row-a' });
-    expect(taskUpdateInput?.data.payloadJson).toMatchObject({
-      status: 'completed',
-    });
+    expect(completeTask).toHaveBeenCalledWith(
+      'tenant-a',
+      'owner-a',
+      'task-row-a',
+      'task-complete-a',
+    );
   });
 });
 
@@ -580,8 +548,7 @@ function createService(overrides: {
   customersService?: CustomersService;
   staffService?: StaffService;
   dashboardPreferencesService?: DashboardPreferencesService;
-  inboxService?: InboxService;
-  auditLogService?: AuditLogService;
+  canonicalWave1?: Package5Wave1CanonicalCutoverService;
 }) {
   const prisma =
     overrides.prisma ??
@@ -611,7 +578,11 @@ function createService(overrides: {
     new AppointmentPeriodReader(overrides.crmService ?? ({} as CrmService)),
     new ClientRecencyFactsService(overrides.crmService ?? ({} as CrmService)),
     overrides.dashboardPreferencesService,
-    overrides.inboxService,
-    overrides.auditLogService,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    overrides.canonicalWave1,
   );
 }

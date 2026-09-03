@@ -1,17 +1,12 @@
 import { BadRequestException } from '@nestjs/common';
 
-import { AuditLogService } from '../audit-log/audit-log.service';
 import { CrmService } from '../crm/crm.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { InboxService } from '../inbox/inbox.service';
+import { Package5Wave1CanonicalCutoverService } from '../package5-wave1/package5-wave1-canonical-cutover.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AppointmentNotificationsService } from './appointment-notifications.service';
-
-type NotificationSettingsWrite = {
-  create: { enabled: boolean; leadTimesMinutes: number[] };
-  update: { enabled: boolean; leadTimesMinutes: number[] };
-};
 
 type ReminderPublishInput = {
   type: string;
@@ -60,21 +55,6 @@ describe('AppointmentNotificationsService', () => {
     const prisma = {
       appointmentNotificationSetting: {
         findUnique: jest.fn().mockResolvedValue(null),
-        upsert: jest
-          .fn<
-            (input: NotificationSettingsWrite) => Promise<{
-              id: string;
-              enabled: boolean;
-              leadTimesMinutes: number[];
-            }>
-          >()
-          .mockImplementation((input: NotificationSettingsWrite) =>
-            Promise.resolve({
-              id: 'setting-1',
-              enabled: input.update.enabled,
-              leadTimesMinutes: input.update.leadTimesMinutes,
-            }),
-          ),
       },
       tenant: {
         findMany: jest.fn().mockResolvedValue([
@@ -121,14 +101,28 @@ describe('AppointmentNotificationsService', () => {
     const entitlements = {
       hasFeature: jest.fn().mockResolvedValue(true),
     };
-    const auditLog = { log: jest.fn().mockResolvedValue(undefined) };
+    const canonical = {
+      updateAppointmentNotifications: jest.fn(
+        (
+          _tenantId: string,
+          _actorUserId: string,
+          command: { enabled: boolean; leadTimesMinutes: number[] },
+        ) =>
+          Promise.resolve({
+            enabled: command.enabled,
+            lead_times_minutes: command.leadTimesMinutes,
+            channel: 'maya_inbox_push' as const,
+            transactional: true as const,
+          }),
+      ),
+    };
     const service = new AppointmentNotificationsService(
       prisma as unknown as PrismaService,
       crm as unknown as CrmService,
       inbox as unknown as InboxService,
       tenantContext as unknown as TenantContextService,
       entitlements as unknown as EntitlementsService,
-      auditLog as unknown as AuditLogService,
+      canonical as unknown as Package5Wave1CanonicalCutoverService,
     );
     return {
       service,
@@ -137,12 +131,12 @@ describe('AppointmentNotificationsService', () => {
       inbox,
       tenantContext,
       entitlements,
-      auditLog,
+      canonical,
     };
   }
 
-  it('stores normalized tenant-scoped settings and writes an audit event', async () => {
-    const { service, prisma, auditLog, tenantContext } = makeService();
+  it('routes normalized tenant-scoped settings through the canonical executor', async () => {
+    const { service, canonical, tenantContext } = makeService();
 
     const result = await service.updateSettings('tenant-1', 'owner-1', {
       enabled: true,
@@ -156,15 +150,11 @@ describe('AppointmentNotificationsService', () => {
       transactional: true,
     });
     expect(tenantContext.assertTenantId).toHaveBeenCalledWith('tenant-1');
-    expect(prisma.appointmentNotificationSetting.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { tenantId: 'tenant-1' } }),
-    );
-    expect(auditLog.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        tenantId: 'tenant-1',
-        userId: 'owner-1',
-        action: 'notifications.appointments.updated',
-      }),
+    expect(canonical.updateAppointmentNotifications).toHaveBeenCalledWith(
+      'tenant-1',
+      'owner-1',
+      { enabled: true, leadTimesMinutes: [1440, 120] },
+      undefined,
     );
   });
 

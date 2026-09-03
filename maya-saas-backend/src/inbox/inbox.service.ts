@@ -230,6 +230,7 @@ export class InboxService {
         url?: string;
       }>;
       fanoutOwners?: boolean;
+      operationalWorkItemId?: string;
       shadowSourceType?:
         'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge';
     },
@@ -411,6 +412,7 @@ export class InboxService {
               ? undefined
               : (input.payload as Prisma.InputJsonValue),
           deepLink: input.deepLink?.slice(0, 400) || null,
+          operationalWorkItemId: input.operationalWorkItemId ?? null,
         },
         update: {
           title: input.title.slice(0, 160),
@@ -420,6 +422,7 @@ export class InboxService {
               ? undefined
               : (input.payload as Prisma.InputJsonValue),
           deepLink: input.deepLink?.slice(0, 400) || null,
+          operationalWorkItemId: input.operationalWorkItemId ?? undefined,
           deletedAt: null,
         },
         select: { id: true },
@@ -447,6 +450,52 @@ export class InboxService {
       user_ids: userIds,
       telegram_delivered: telegramDelivered,
     };
+  }
+
+  /**
+   * Mirrors a committed OperationalWorkItem terminal state into its inbox
+   * projection. The work item remains the business authority; this method may
+   * be retried after a delivery failure without repeating the business action.
+   */
+  async projectOperationalWorkItemCompletion(
+    tenantId: string,
+    userId: string,
+    operationalWorkItemId: string,
+  ): Promise<void> {
+    const rows = await this.prisma.inboxItem.findMany({
+      where: {
+        tenantId,
+        userId,
+        operationalWorkItemId,
+        type: 'maya_task',
+        deletedAt: null,
+      },
+      select: { id: true, payloadJson: true, readAt: true, archivedAt: true },
+    });
+    const projectedAt = new Date();
+    await this.prisma.$transaction(
+      rows.map((row) => {
+        const payload =
+          row.payloadJson &&
+          typeof row.payloadJson === 'object' &&
+          !Array.isArray(row.payloadJson)
+            ? (row.payloadJson as Record<string, unknown>)
+            : {};
+        return this.prisma.inboxItem.update({
+          where: { id: row.id },
+          data: {
+            payloadJson: {
+              ...payload,
+              status: 'completed',
+              completed_at: projectedAt.toISOString(),
+              operational_work_item_id: operationalWorkItemId,
+            },
+            readAt: row.readAt ?? projectedAt,
+            archivedAt: row.archivedAt ?? projectedAt,
+          },
+        });
+      }),
+    );
   }
 
   /**

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -41,8 +41,14 @@ export class DashboardPreferencesController {
   updateFinance(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateFinanceDashboardDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.service.updateFinance(user.tenantId!, user.userId, dto);
+    return this.service.updateFinance(
+      user.tenantId!,
+      user.userId,
+      dto,
+      idempotencyKey,
+    );
   }
 
   @Get('assistant')
@@ -56,7 +62,13 @@ export class DashboardPreferencesController {
   updateAssistant(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateAssistantPreferencesDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.service.updateAssistant(user.tenantId!, user.userId, dto);
+    return this.service.updateAssistant(
+      user.tenantId!,
+      user.userId,
+      dto,
+      idempotencyKey,
+    );
   }
 }

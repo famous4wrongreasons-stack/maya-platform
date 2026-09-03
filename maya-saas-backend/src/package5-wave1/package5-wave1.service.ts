@@ -879,6 +879,29 @@ export class Package5Wave1ExecutableService {
     if (!registration)
       throw new Package5Wave1Error('Wave 1 capability is not executable');
     const execution = await this.ingress.createExecution(request);
+    return this.executeCanonical(execution, registration);
+  }
+
+  async resume(
+    tenantId: string,
+    executionId: string,
+  ): Promise<Package5Wave1ExecutionValue> {
+    const execution = await this.prisma.actionExecution.findUniqueOrThrow({
+      where: { id_tenantId: { id: executionId, tenantId } },
+    });
+    const registration = PACKAGE5_WAVE1_REGISTRATIONS.find(
+      (candidate) => candidate.executableCapability === execution.capability,
+    );
+    if (!registration) {
+      throw new Package5Wave1Error('Existing execution is not a Wave 1 action');
+    }
+    return this.executeCanonical(execution, registration);
+  }
+
+  private async executeCanonical(
+    execution: ActionExecution,
+    registration: (typeof PACKAGE5_WAVE1_REGISTRATIONS)[number],
+  ): Promise<Package5Wave1ExecutionValue> {
     if (execution.state === ActionExecutionState.SUCCEEDED)
       return this.restore(execution);
     if (execution.state !== ActionExecutionState.READY) {

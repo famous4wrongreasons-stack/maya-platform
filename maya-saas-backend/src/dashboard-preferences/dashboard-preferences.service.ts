@@ -1,8 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 
-import { AuditLogService } from '../audit-log/audit-log.service';
-import { asJson } from '../common/json.util';
+import { Package5Wave1CanonicalCutoverService } from '../package5-wave1/package5-wave1-canonical-cutover.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import {
@@ -40,7 +39,7 @@ export class DashboardPreferencesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
-    private readonly auditLogService: AuditLogService,
+    private readonly canonicalWave1: Package5Wave1CanonicalCutoverService,
   ) {}
 
   async getFinance(tenantId: string, userId: string) {
@@ -67,6 +66,7 @@ export class DashboardPreferencesService {
     tenantId: string,
     userId: string,
     dto: UpdateFinanceDashboardDto,
+    idempotencyKey?: string,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const current = await this.prisma.dashboardPreference.findUnique({
@@ -95,37 +95,17 @@ export class DashboardPreferencesService {
           : this.normalizeStaffTargets(dto.staffTargetsRub, true),
     };
 
-    const preference = await this.prisma.dashboardPreference.upsert({
-      where: {
-        userId_tenantId_section: {
-          userId,
-          tenantId: scopedTenantId,
-          section: FINANCE_SECTION,
-        },
-      },
-      create: {
-        tenantId: scopedTenantId,
-        userId,
-        section: FINANCE_SECTION,
-        configJson: asJson(next),
-      },
-      update: { configJson: asJson(next) },
-    });
-
-    await this.auditLogService.log({
-      tenantId: scopedTenantId,
+    await this.canonicalWave1.updateFinance(
+      scopedTenantId,
       userId,
-      action: 'dashboard.finance.updated',
-      entityType: 'dashboard_preference',
-      entityId: preference.id,
-      metadata: {
-        enabled_widgets: next.enabled_widgets,
-        has_monthly_target: next.monthly_target_rub !== null,
-        staff_target_count: Object.keys(next.staff_targets_rub).length,
+      {
+        enabledWidgets: next.enabled_widgets,
+        monthlyTargetRub: next.monthly_target_rub,
+        staffTargetsRub: next.staff_targets_rub,
       },
-    });
-
-    return this.serialize(scopedTenantId, userId, next, preference.updatedAt);
+      idempotencyKey,
+    );
+    return this.getFinance(scopedTenantId, userId);
   }
 
   private normalizeConfig(
@@ -257,6 +237,7 @@ export class DashboardPreferencesService {
     tenantId: string,
     userId: string,
     dto: UpdateAssistantPreferencesDto,
+    idempotencyKey?: string,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const current = await this.prisma.dashboardPreference.findUnique({
@@ -276,36 +257,13 @@ export class DashboardPreferencesService {
           ? previous.enabled_capabilities
           : this.normalizeAssistantCapabilities(dto.enabledCapabilities),
     };
-    const preference = await this.prisma.dashboardPreference.upsert({
-      where: {
-        userId_tenantId_section: {
-          userId,
-          tenantId: scopedTenantId,
-          section: ASSISTANT_SECTION,
-        },
-      },
-      create: {
-        tenantId: scopedTenantId,
-        userId,
-        section: ASSISTANT_SECTION,
-        configJson: asJson(next),
-      },
-      update: { configJson: asJson(next) },
-    });
-    await this.auditLogService.log({
-      tenantId: scopedTenantId,
-      userId,
-      action: 'assistant.preferences.updated',
-      entityType: 'dashboard_preference',
-      entityId: preference.id,
-      metadata: { enabled_capabilities: next.enabled_capabilities },
-    });
-    return this.serializeAssistant(
+    await this.canonicalWave1.updateAssistant(
       scopedTenantId,
       userId,
-      next,
-      preference.updatedAt,
+      { enabledCapabilities: next.enabled_capabilities },
+      idempotencyKey,
     );
+    return this.getAssistant(scopedTenantId, userId);
   }
 
   private normalizeAssistantConfig(

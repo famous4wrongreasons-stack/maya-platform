@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
-import { AuditLogService } from '../audit-log/audit-log.service';
+import { Package5Wave1CanonicalCutoverService } from '../package5-wave1/package5-wave1-canonical-cutover.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { DashboardPreferencesService } from './dashboard-preferences.service';
@@ -11,36 +11,67 @@ describe('DashboardPreferencesService', () => {
   ) => {
     const tenantContext = new TenantContextService();
     const updatedAt = new Date('2026-08-02T12:00:00.000Z');
+    let storedConfig = savedConfig;
     const findUnique = jest
       .fn()
-      .mockResolvedValue(
-        savedConfig
-          ? { id: 'pref-a', configJson: savedConfig, updatedAt }
-          : null,
+      .mockImplementation(() =>
+        Promise.resolve(
+          storedConfig
+            ? { id: 'pref-a', configJson: storedConfig, updatedAt }
+            : null,
+        ),
       );
-    const upsert = jest.fn((args: { create: { configJson: unknown } }) =>
-      Promise.resolve({
-        id: 'pref-a',
-        configJson: args.create.configJson,
-        updatedAt,
-      }),
-    );
     const prisma = {
       dashboardPreference: {
         findUnique,
         findMany: jest.fn().mockResolvedValue([]),
-        upsert,
       },
     } as unknown as PrismaService;
-    const auditLogWrite = jest.fn().mockResolvedValue(undefined);
-    const auditLog = { log: auditLogWrite } as unknown as AuditLogService;
+    const updateFinance = jest.fn(
+      async (
+        _tenantId: string,
+        _userId: string,
+        command: {
+          enabledWidgets: string[];
+          monthlyTargetRub: number | null;
+          staffTargetsRub: Record<string, number>;
+        },
+      ) => {
+        storedConfig = {
+          schema_version: 1,
+          enabled_widgets: command.enabledWidgets,
+          monthly_target_rub: command.monthlyTargetRub,
+          staff_targets_rub: command.staffTargetsRub,
+        };
+      },
+    );
+    const updateAssistant = jest.fn(
+      async (
+        _tenantId: string,
+        _userId: string,
+        command: { enabledCapabilities: string[] },
+      ) => {
+        storedConfig = {
+          schema_version: 1,
+          enabled_capabilities: command.enabledCapabilities,
+        };
+      },
+    );
+    const canonical = {
+      updateFinance,
+      updateAssistant,
+    } as unknown as Package5Wave1CanonicalCutoverService;
 
     return {
       tenantContext,
       findUnique,
-      upsert,
-      auditLogWrite,
-      service: new DashboardPreferencesService(prisma, tenantContext, auditLog),
+      updateFinance,
+      updateAssistant,
+      service: new DashboardPreferencesService(
+        prisma,
+        tenantContext,
+        canonical,
+      ),
     };
   };
 
@@ -62,7 +93,7 @@ describe('DashboardPreferencesService', () => {
     ]);
     expect(result.config.monthly_target_rub).toBeNull();
     expect(result.config.staff_targets_rub).toEqual({});
-    expect(setup.upsert).not.toHaveBeenCalled();
+    expect(setup.updateFinance).not.toHaveBeenCalled();
   });
 
   it('persists only supported widgets and finite tenant staff targets', async () => {
@@ -81,18 +112,15 @@ describe('DashboardPreferencesService', () => {
       monthly_target_rub: 1_500_000,
       staff_targets_rub: { 'staff-42': 300_000 },
     });
-    expect(setup.upsert).toHaveBeenCalled();
-    expect(setup.upsert.mock.calls[0]?.[0].create).toMatchObject({
-      tenantId: 'tenant-a',
-      userId: 'owner-a',
-      section: 'finance',
-    });
-    expect(setup.auditLogWrite).toHaveBeenCalledWith(
-      expect.objectContaining({
-        tenantId: 'tenant-a',
-        userId: 'owner-a',
-        action: 'dashboard.finance.updated',
-      }),
+    expect(setup.updateFinance).toHaveBeenCalledWith(
+      'tenant-a',
+      'owner-a',
+      {
+        enabledWidgets: ['summary', 'staff_results', 'plans'],
+        monthlyTargetRub: 1_500_000,
+        staffTargetsRub: { 'staff-42': 300_000 },
+      },
+      undefined,
     );
   });
 
@@ -153,13 +181,13 @@ describe('DashboardPreferencesService', () => {
         expect.objectContaining({ key: 'staff_performance' }),
       ]),
     );
-    expect(setup.upsert.mock.calls[0]?.[0].create).toMatchObject({
-      tenantId: 'tenant-a',
-      userId: 'owner-a',
-      section: 'assistant',
-    });
-    expect(setup.auditLogWrite).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'assistant.preferences.updated' }),
+    expect(setup.updateAssistant).toHaveBeenCalledWith(
+      'tenant-a',
+      'owner-a',
+      {
+        enabledCapabilities: ['business_analytics', 'staff_performance'],
+      },
+      undefined,
     );
   });
 

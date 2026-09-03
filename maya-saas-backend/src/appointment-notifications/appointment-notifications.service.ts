@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CalendarSource, TenantStatus, UserRole } from '@prisma/client';
 
-import { AuditLogService } from '../audit-log/audit-log.service';
 import { phoneMatchKey } from '../common/phone.util';
 import { CrmService } from '../crm/crm.service';
 import type { CrmJournalAppointment } from '../crm/crm-adapter.interface';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { InboxService } from '../inbox/inbox.service';
+import { Package5Wave1CanonicalCutoverService } from '../package5-wave1/package5-wave1-canonical-cutover.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { decodeCrmAppointmentKey } from '../domain';
@@ -42,7 +42,7 @@ export class AppointmentNotificationsService {
     private readonly inbox: InboxService,
     private readonly tenantContext: TenantContextService,
     private readonly entitlements: EntitlementsService,
-    private readonly auditLog: AuditLogService,
+    private readonly canonicalWave1: Package5Wave1CanonicalCutoverService,
   ) {}
 
   async getSettings(
@@ -64,6 +64,7 @@ export class AppointmentNotificationsService {
     tenantId: string,
     actorUserId: string,
     input: { enabled: boolean; leadTimesMinutes?: number[] },
+    idempotencyKey?: string,
   ): Promise<AppointmentNotificationSettings> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const current = await this.prisma.appointmentNotificationSetting.findUnique(
@@ -77,34 +78,12 @@ export class AppointmentNotificationsService {
         current?.leadTimesMinutes ??
         DEFAULT_LEAD_TIMES_MINUTES,
     );
-    const row = await this.prisma.appointmentNotificationSetting.upsert({
-      where: { tenantId: scopedTenantId },
-      create: {
-        tenantId: scopedTenantId,
-        enabled: input.enabled,
-        leadTimesMinutes: leadTimes,
-      },
-      update: {
-        enabled: input.enabled,
-        leadTimesMinutes: leadTimes,
-      },
-      select: { id: true, enabled: true, leadTimesMinutes: true },
-    });
-
-    await this.auditLog.log({
-      tenantId: scopedTenantId,
-      userId: actorUserId,
-      action: 'notifications.appointments.updated',
-      entityType: 'appointment_notification_setting',
-      entityId: row.id,
-      metadata: {
-        enabled: row.enabled,
-        lead_times_minutes: leadTimes,
-        channel: 'maya_inbox_push',
-      },
-    });
-
-    return this.toPublicSettings(row.enabled, row.leadTimesMinutes);
+    return this.canonicalWave1.updateAppointmentNotifications(
+      scopedTenantId,
+      actorUserId,
+      { enabled: input.enabled, leadTimesMinutes: leadTimes },
+      idempotencyKey,
+    );
   }
 
   async tick(now: Date = new Date()): Promise<{

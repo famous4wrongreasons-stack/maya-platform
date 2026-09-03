@@ -50,6 +50,7 @@ import {
 import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { InboxService } from '../inbox/inbox.service';
+import { Package5Wave1CanonicalCutoverService } from '../package5-wave1/package5-wave1-canonical-cutover.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecoveryService } from '../recovery/recovery.service';
 import { StaffService } from '../staff/staff.service';
@@ -212,6 +213,7 @@ export class AiToolHandlerService {
     private readonly recoveryService?: RecoveryService,
     private readonly appointmentNotificationsService?: AppointmentNotificationsService,
     private readonly businessContentService?: BusinessContentService,
+    private readonly canonicalWave1?: Package5Wave1CanonicalCutoverService,
   ) {}
 
   async execute(
@@ -341,13 +343,13 @@ export class AiToolHandlerService {
       case 'settings.read':
         return this.readSettings(principal);
       case 'settings.update':
-        return this.updateSettings(principal, args);
+        return this.updateSettings(principal, args, idempotencyKey);
       case 'tasks.list':
         return this.listTasks(principal, args);
       case 'tasks.create':
         return this.createTask(principal, args, idempotencyKey);
       case 'tasks.complete':
-        return this.completeTask(principal, args);
+        return this.completeTask(principal, args, idempotencyKey);
       case 'notifications.appointments.read':
         return this.requireAppointmentNotificationsService().getSettings(
           principal.tenantId,
@@ -362,6 +364,7 @@ export class AiToolHandlerService {
               ? args.lead_times_minutes.map(Number)
               : undefined,
           },
+          idempotencyKey,
         );
       case 'support.integration-status.read':
         return this.readIntegrationStatus(principal.tenantId);
@@ -381,55 +384,21 @@ export class AiToolHandlerService {
     args: ValidatedAiToolArguments,
     idempotencyKey: string,
   ) {
-    const recipients = await this.prisma.membership.findMany({
-      where: {
-        tenantId: principal.tenantId,
-        status: 'active',
-        role: {
-          in: [
-            UserRole.TENANT_OWNER,
-            UserRole.BUSINESS_OWNER,
-            UserRole.TENANT_ADMIN,
-            UserRole.ADMINISTRATOR,
-          ],
-        },
-      },
-      select: { userId: true },
-    });
-    const userIds = [...new Set(recipients.map((row) => row.userId))];
-    if (userIds.length === 0) {
-      return {
-        accepted: false,
-        reason: 'active_administrator_not_configured',
-        next_action: 'business_owner_must_assign_an_active_administrator',
-      };
-    }
-
     const reason =
       typeof args.reason === 'string' && args.reason.trim()
         ? args.reason.trim()
         : 'Клиент просит администратора связаться с ним.';
-    const sourceEventId = `maya-contact:${idempotencyKey}`.slice(0, 160);
-    const published = await this.requireInboxService().publishForTenant(
-      principal.tenantId,
-      {
-        type: 'client_support_request',
-        sourceEventId,
-        title: 'Клиент просит связаться',
-        bodyText: reason,
-        payload: {
-          channel: 'maya_chat',
-          requester_role: principal.role,
-        },
-        deepLink: '/clients',
-        userIds,
-        fanoutOwners: false,
-      },
-    );
+    const outcome =
+      await this.requireCanonicalWave1().requestAdministratorContact(
+        principal.tenantId,
+        principal.userId,
+        reason,
+        idempotencyKey,
+      );
 
     return {
-      accepted: published.stored > 0,
-      delivered_to_active_administrators: published.stored,
+      accepted: outcome.projected > 0,
+      delivered_to_active_administrators: outcome.projected,
       channel: 'maya_inbox',
       persistent: true,
       push_announcement_requested: true,
@@ -1259,6 +1228,7 @@ export class AiToolHandlerService {
   private async updateSettings(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
+    idempotencyKey: string,
   ) {
     if (!this.dashboardPreferencesService) {
       throw new Error('Dashboard preferences service is unavailable');
@@ -1282,6 +1252,7 @@ export class AiToolHandlerService {
       principal.tenantId,
       principal.userId,
       { enabledCapabilities: nextCapabilities },
+      idempotencyKey,
     );
     const updatedConfig = this.record(updated.config);
 
@@ -1357,7 +1328,6 @@ export class AiToolHandlerService {
     args: ValidatedAiToolArguments,
     idempotencyKey: string,
   ) {
-    const inboxService = this.requireInboxService();
     const recipient = await this.resolveTaskRecipient(
       principal,
       this.requiredString(args.assignee),
@@ -1373,36 +1343,21 @@ export class AiToolHandlerService {
     const task = this.requiredString(args.task);
     const dueDate =
       typeof args.due_date === 'string' ? args.due_date : undefined;
-    const sourceEventId = `maya-task:${idempotencyKey}`.slice(0, 160);
-    const published = await inboxService.publishForTenant(principal.tenantId, {
-      type: 'maya_task',
-      sourceEventId,
-      title: 'Поручение MAYA',
-      bodyText: task,
-      payload: {
-        status: 'active',
-        due_date: dueDate ?? null,
-        source: 'maya_chat',
+    const outcome = await this.requireCanonicalWave1().createTask(
+      principal.tenantId,
+      principal.userId,
+      {
+        assigneeUserId: recipient.userId,
+        title: 'Поручение MAYA',
+        bodyText: task,
+        dueAt: dueDate ? new Date(`${dueDate}T12:00:00.000Z`) : null,
       },
-      deepLink: '/app/?panel=chat',
-      userIds: [recipient.userId],
-      fanoutOwners: false,
-    });
-    await this.auditLogService?.log({
-      tenantId: principal.tenantId,
-      userId: principal.userId,
-      action: 'maya.task.created',
-      entityType: 'inbox_item',
-      entityId: sourceEventId,
-      metadata: {
-        has_due_date: dueDate !== undefined,
-        recipient_is_actor: recipient.userId === principal.userId,
-      },
-    });
+      idempotencyKey,
+    );
 
     return {
-      accepted: published.stored > 0,
-      delivered: published.stored > 0,
+      accepted: outcome.projected > 0,
+      delivered: outcome.projected > 0,
       persistent: true,
       push_announcement_requested: true,
       due_date: dueDate ?? null,
@@ -1412,58 +1367,20 @@ export class AiToolHandlerService {
   private async completeTask(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
+    idempotencyKey: string,
   ) {
     const taskId = this.requiredString(args.task_id);
-    const task = await this.prisma.inboxItem.findFirst({
-      where: {
-        id: taskId,
-        tenantId: principal.tenantId,
-        userId: principal.userId,
-        type: 'maya_task',
-        deletedAt: null,
-      },
-    });
-    if (!task) {
-      return {
-        completed: false,
-        reason: 'task_not_found_or_not_assigned_to_authenticated_user',
-      };
-    }
-
-    const payload = this.record(task.payloadJson);
-    if (payload.status === 'completed') {
-      return {
-        completed: true,
-        already_completed: true,
-        task_id: task.id,
-      };
-    }
-
-    const completedAt = new Date();
-    await this.prisma.inboxItem.update({
-      where: { id: task.id },
-      data: {
-        payloadJson: {
-          ...payload,
-          status: 'completed',
-          completed_at: completedAt.toISOString(),
-        },
-        readAt: task.readAt ?? completedAt,
-        archivedAt: task.archivedAt ?? completedAt,
-      },
-    });
-    await this.auditLogService?.log({
-      tenantId: principal.tenantId,
-      userId: principal.userId,
-      action: 'maya.task.completed',
-      entityType: 'inbox_item',
-      entityId: task.id,
-    });
+    await this.requireCanonicalWave1().completeTask(
+      principal.tenantId,
+      principal.userId,
+      taskId,
+      idempotencyKey,
+    );
 
     return {
       completed: true,
       already_completed: false,
-      task_id: task.id,
+      task_id: taskId,
     };
   }
 
@@ -2429,6 +2346,13 @@ export class AiToolHandlerService {
       throw new Error('InboxService is unavailable');
     }
     return this.inboxService;
+  }
+
+  private requireCanonicalWave1(): Package5Wave1CanonicalCutoverService {
+    if (!this.canonicalWave1) {
+      throw new Error('Package 5 Wave 1 canonical service is unavailable');
+    }
+    return this.canonicalWave1;
   }
 
   private humanDay(localDate: string): string {

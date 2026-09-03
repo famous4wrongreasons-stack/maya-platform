@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { PACKAGE5_WAVE1_REGISTRATIONS } from './package5-wave1-executable.contract';
@@ -13,6 +13,17 @@ function count(text: string, pattern: RegExp) {
   return [...text.matchAll(pattern)].length;
 }
 
+function productionSources(directory = SRC): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) return productionSources(path);
+    if (!entry.name.endsWith('.ts') || entry.name.endsWith('.spec.ts')) {
+      return [];
+    }
+    return [path];
+  });
+}
+
 describe('Package 5 Wave 1 production-bypass ratchet', () => {
   const dashboard = source(
     'dashboard-preferences/dashboard-preferences.service.ts',
@@ -21,28 +32,51 @@ describe('Package 5 Wave 1 production-bypass ratchet', () => {
     'appointment-notifications/appointment-notifications.service.ts',
   );
   const aiTools = source('ai-tools/ai-tool-handler.service.ts');
+  const cutover = source(
+    'package5-wave1/package5-wave1-canonical-cutover.service.ts',
+  );
   const canonical = source('package5-wave1/package5-wave1.service.ts');
   const registry = source('action-engine/action-engine.registry.ts');
 
-  it('classifies the exact pre-cutover setting-owner baseline without a broad exclusion', () => {
-    expect(count(dashboard, /dashboardPreference\.upsert\(/g)).toBe(2);
+  it('keeps production setting initiators free of direct mutations after cutover', () => {
+    expect(count(dashboard, /dashboardPreference\.upsert\(/g)).toBe(0);
     expect(
       count(notifications, /appointmentNotificationSetting\.upsert\(/g),
-    ).toBe(1);
+    ).toBe(0);
     expect(
       count(
         `${dashboard}\n${notifications}`,
         /(dashboardPreference|appointmentNotificationSetting)\.(create|update|upsert|delete)\(/g,
       ),
-    ).toBe(3);
+    ).toBe(0);
+    expect(dashboard).toContain('canonicalWave1.updateFinance');
+    expect(dashboard).toContain('canonicalWave1.updateAssistant');
+    expect(notifications).toContain(
+      'canonicalWave1.updateAppointmentNotifications',
+    );
   });
 
-  it('classifies only the current A23 business mutations, not inbox transport state', () => {
-    expect(count(aiTools, /publishForTenant\(/g)).toBe(2);
-    expect(count(aiTools, /inboxItem\.update\(/g)).toBe(1);
+  it('keeps AI and inbox surfaces as initiators/projections, not business owners', () => {
+    expect(count(aiTools, /publishForTenant\(/g)).toBe(0);
+    expect(count(aiTools, /inboxItem\.update\(/g)).toBe(0);
     expect(
       count(aiTools, /operationalWorkItem\.(create|update|upsert|delete)\(/g),
     ).toBe(0);
+    expect(aiTools).toContain('requireCanonicalWave1().createTask');
+    expect(aiTools).toContain('requireCanonicalWave1().completeTask');
+    expect(aiTools).toContain(
+      'requireCanonicalWave1().requestAdministratorContact',
+    );
+  });
+
+  it('allows only explicit inbox projection after the canonical outcome', () => {
+    expect(cutover).toContain('Package5Wave1ExecutableService');
+    expect(count(cutover, /executor\.(execute|resume)\(/g)).toBe(2);
+    expect(count(cutover, /publishForTenant\(/g)).toBe(2);
+    expect(count(cutover, /projectOperationalWorkItemCompletion\(/g)).toBe(1);
+    expect(cutover).not.toMatch(
+      /(dashboardPreference|appointmentNotificationSetting|operationalWorkItem)\.(create|update|upsert|delete)\(/,
+    );
   });
 
   it('keeps all six canonical mutations behind ActionExecution', () => {
@@ -52,6 +86,18 @@ describe('Package 5 Wave 1 production-bypass ratchet', () => {
     expect(canonical).toContain('CanonicalActionIngressService');
     expect(canonical).toContain('ActionEngineKernel');
     expect(canonical).not.toMatch(/inboxItem\.(create|update|upsert|delete)/);
+  });
+
+  it('rejects a new production-reachable Wave 1 writer outside the canonical executor', () => {
+    const canonicalPath = join(SRC, 'package5-wave1/package5-wave1.service.ts');
+    const bypasses = productionSources()
+      .filter((path) => path !== canonicalPath)
+      .filter((path) =>
+        /(dashboardPreference|appointmentNotificationSetting|operationalWorkItem)\.(create|update|upsert|delete)\(/.test(
+          readFileSync(path, 'utf8'),
+        ),
+      );
+    expect(bypasses).toEqual([]);
   });
 
   it('registers every Shadow/executable pair through the narrow Wave 1 registry', () => {

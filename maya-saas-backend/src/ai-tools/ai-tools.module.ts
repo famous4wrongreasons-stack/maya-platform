@@ -14,6 +14,7 @@ import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { ExpensesModule } from '../expenses/expenses.module';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
 import { InboxModule } from '../inbox/inbox.module';
+import { Package5Wave1Module } from '../package5-wave1/package5-wave1.module';
 import { RecoveryModule } from '../recovery/recovery.module';
 import { MayaBrainRouterService } from '../ai-brain/maya-brain-router.service';
 import { AiCoreController } from './ai-core.controller';
@@ -52,6 +53,7 @@ import { ConversationIntelligenceService } from '../conversation-intelligence/co
     ExpensesModule,
     LoyaltyModule,
     InboxModule,
+    Package5Wave1Module,
     RecoveryModule,
   ],
   controllers: [AiCoreController, AiToolsController],

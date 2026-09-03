@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 
-import { AuditLogModule } from '../audit-log/audit-log.module';
 import { CrmModule } from '../crm/crm.module';
 import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { InboxModule } from '../inbox/inbox.module';
+import { Package5Wave1Module } from '../package5-wave1/package5-wave1.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AppointmentNotificationsScheduler } from './appointment-notifications.scheduler';
 import { AppointmentNotificationsService } from './appointment-notifications.service';
@@ -14,7 +14,7 @@ import { AppointmentNotificationsService } from './appointment-notifications.ser
     CrmModule,
     InboxModule,
     EntitlementsModule,
-    AuditLogModule,
+    Package5Wave1Module,
   ],
   providers: [
     AppointmentNotificationsService,
