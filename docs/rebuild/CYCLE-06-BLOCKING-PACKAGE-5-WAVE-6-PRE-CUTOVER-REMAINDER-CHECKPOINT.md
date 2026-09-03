@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 WAVE 6 PRE-CUTOVER REMAINDER
 
-Status: **CURRENT — AC6 owner decision approved; cutover gates resumed; production remains 5/6 until verified deployment**
+Status: **HISTORICAL — superseded by POST-WAVE-6 REMAINDER CHECKPOINT after successful AC6 production cutover**
 
 Date: 2026-09-04. This checkpoint supersedes the Wave 6 Contract Stop remainder
 from `178b39f2` after explicit approval of Auth Retention Policy V1.

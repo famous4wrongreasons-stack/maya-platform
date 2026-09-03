@@ -46,6 +46,15 @@ is no legacy delete fallback and no provider mutation or UNKNOWN outcome.
 
 ## Commands and output
 
+The deployed release includes a compiled entrypoint and does not require
+ts-node or development dependencies. Production read-only invocation:
+
+```bash
+node dist/scripts/auth-retention-cleanup.js --dry-run --batch-size 100
+```
+
+For a source checkout with development dependencies:
+
 ```bash
 npm run auth:cleanup
 npm run auth:cleanup -- --dry-run --batch-size 100
@@ -62,6 +71,10 @@ A separately authorized destructive operation may use:
 npm run auth:cleanup -- --execute --batch-size 100
 ```
 
+The equivalent compiled production command is
+`node dist/scripts/auth-retention-cleanup.js --execute --batch-size 100`.
+Never use either execute command for deployment smoke.
+
 Output contains `policyVersion`, `dryRun` and five `runs`. Execution results
 contain durable run id/state, deleted/skipped counts, per-kind counts and
 `replayed`. Replayed counts describe the original outcome, not another deletion.
@@ -70,11 +83,14 @@ retry loop is enabled. Errors fail closed and exit nonzero.
 
 ## Production boundary
 
-The Wave 6 implementation checkpoint is **safe-local proof only**. Production
-runtime cutover and real destructive apply are separate authorized boundaries.
+Wave 6 production runtime cutover completed on 2026-09-04 in release
+`20260904-c06-p5-wave6-cutover-3b545671`, using the proven AC6 maintenance
+coordinator and the approved central Policy V1. The user explicitly retained
+AC6 ownership; no Action Engine ingress is required for automatic maintenance.
 Do not run execute to prove deployment. Use read-only structural checks and
 health/readiness for cutover verification. The 17 historical Chapter 6 test
 DBs are unrelated to runtime retention and must not be removed by this command.
 
-See the Wave 6 approved Runtime Contract Gate and Safe Local Convergence Report
-for exact policy approval, proof and remainder status.
+See the Wave 6 approved Runtime Contract Gate, Safe Local Convergence Report,
+A30 Completion Report and POST-WAVE-6 REMAINDER CHECKPOINT. All six waves are
+complete; Package 5 still requires its separate final adversarial gate.
