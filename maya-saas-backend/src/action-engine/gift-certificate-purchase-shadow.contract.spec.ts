@@ -16,6 +16,9 @@ const exactInput = () => ({
   purchaseIntentIdentityHash: 'purchase-intent-hash',
   recipientSubjectHash: 'recipient-subject-hash',
   checkoutIdentityHash: 'checkout-identity-hash',
+  canonicalOfferId: 'certificate-offer-id',
+  offerValueVersionId: 'certificate-version-id',
+  offerValueSnapshotHash: 'certificate-value-snapshot-hash',
   offerCode: 'gift-certificate.3000',
   productCode: 'digital-gift-certificate',
   catalogVersion: GIFT_CERTIFICATE_PURCHASE_CATALOG_VERSION,
@@ -72,7 +75,7 @@ describe('P4-06 gift certificate purchase Shadow contract', () => {
   });
 
   it.each([
-    ['nominalAmountKopecks', 1],
+    ['nominalAmountKopecks', 500_001],
     ['currency', 'USD'],
     ['expiryDays', 366],
     ['offerCode', 'gift-certificate.9999'],

@@ -31,6 +31,34 @@ export class UpdateReferralProgramDto {
   @Max(2_000_000_000)
   inviteeRewardKopecks?: number;
 
+  @ApiPropertyOptional({ description: 'Inviter percentage in basis points.' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10_000)
+  inviterRewardPercentBasisPoints?: number;
+
+  @ApiPropertyOptional({ description: 'Invitee percentage in basis points.' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10_000)
+  inviteeRewardPercentBasisPoints?: number;
+
+  @ApiPropertyOptional({ description: 'Inviter maximum liability in kopecks.' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(50_000)
+  inviterRewardLiabilityCapKopecks?: number;
+
+  @ApiPropertyOptional({ description: 'Invitee maximum liability in kopecks.' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(50_000)
+  inviteeRewardLiabilityCapKopecks?: number;
+
   @ApiPropertyOptional({ default: 'RUB' })
   @IsOptional()
   @IsString()

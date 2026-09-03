@@ -32,16 +32,18 @@ function canonicalOffer(
 
 function service(row: ReturnType<typeof canonicalOffer> | null) {
   const findUnique = jest.fn().mockResolvedValue(row);
+  const findMany = jest.fn().mockResolvedValue(row ? [{ id: row.id }] : []);
   return {
     authority: new P409CanonicalOfferAuthorityService(
       {
-        tenantCatalogItem: { findUnique },
+        tenantCatalogItem: { findUnique, findMany },
       } as unknown as PrismaService,
       {
         assertTenantId: (tenantId: string) => tenantId,
       } as TenantContextService,
     ),
     findUnique,
+    findMany,
   };
 }
 
@@ -81,6 +83,26 @@ describe('P4-09 canonical offer authority', () => {
       nominalAmountKopecks: 220_000,
       currency: 'RUB',
       expiryDays: 365,
+    });
+  });
+
+  it('resolves one active renewal authority by tenant and immutable template', async () => {
+    const { authority, findMany } = service(canonicalOffer('membership'));
+    await expect(
+      authority.resolveMembershipOfferByTemplate('tenant_1', 'haircut.senior'),
+    ).resolves.toMatchObject({
+      offerId: 'membership_offer',
+      offerValueVersionId: 'membership_v2',
+    });
+    expect(findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant_1',
+        kind: 'membership',
+        canonicalTemplateKey: 'haircut.senior',
+        active: true,
+      },
+      select: { id: true },
+      take: 2,
     });
   });
 

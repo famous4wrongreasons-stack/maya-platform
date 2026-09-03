@@ -13,9 +13,12 @@ const input = () => ({
   checkoutExecutionId: 'checkout-execution-1',
   checkoutIdentityHash: 'checkout-identity-hash',
   purchaseIntentIdentityHash: 'purchase-intent-hash',
+  canonicalOfferId: 'certificate-offer-id',
+  offerValueVersionId: 'certificate-version-id',
+  offerValueSnapshotHash: 'certificate-value-snapshot-hash',
   offerCode: 'gift-certificate.3000',
   productCode: 'digital-gift-certificate',
-  catalogVersion: 'p4-06.legacy-fixed-catalog.v1',
+  catalogVersion: 'p4-09.canonical-offer-authority.v1',
   offerSnapshotHash: 'offer-snapshot-hash',
   denominationType: 'fixed_money',
   nominalAmountKopecks: 300_000,
@@ -60,7 +63,7 @@ describe('gift certificate activation Shadow contract', () => {
   });
 
   it.each([
-    ['nominalAmountKopecks', 1],
+    ['nominalAmountKopecks', 500_001],
     ['currency', 'USD'],
     ['expiryDays', 1],
     ['providerPaymentState', 'pending'],

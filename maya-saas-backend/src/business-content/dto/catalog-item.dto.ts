@@ -26,6 +26,17 @@ export class ListCatalogQueryDto {
 }
 
 export class UpsertCatalogItemDto {
+  @ApiPropertyOptional({
+    description:
+      'Server-supported canonical template. Required only when creating a membership or certificate offer.',
+    maxLength: 80,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(80)
+  canonicalTemplateKey?: string;
+
   @ApiProperty({ maxLength: 160 })
   @IsString()
   @MinLength(1)

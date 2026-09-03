@@ -7,14 +7,16 @@ import {
   ACTION_EXECUTION_REQUEST_CONTRACT,
   ActionEngineRuntimeService,
   CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
-  CUSTOMER_SUBSCRIPTION_PURCHASE_OFFERS,
   CUSTOMER_SUBSCRIPTION_RENEWAL_CHECKOUT_CONTRACT_VERSION,
   CUSTOMER_SUBSCRIPTION_RENEWAL_SHADOW_CAPABILITY,
   CUSTOMER_SUBSCRIPTION_RENEWAL_SHADOW_POLICY_PROFILE,
   CUSTOMER_SUBSCRIPTION_RENEWAL_WINDOW_DAYS,
   CUSTOMER_SUBSCRIPTION_RENEWAL_WINDOW_POLICY,
-  type CustomerSubscriptionPurchaseOffer,
 } from '../action-engine';
+import {
+  P409CanonicalOfferAuthorityService,
+  type P409CanonicalMembershipOffer,
+} from '../business-content/p4-09-canonical-offer-authority.service';
 import {
   CLIENT_IDENTITY_GUARD_UNAVAILABLE,
   CLIENT_IDENTITY_UNRESOLVED,
@@ -40,6 +42,7 @@ type RenewalPredecessor = {
   status: string;
   termStartsAt: Date;
   termEndsAt: Date;
+  activationExecution: { safeResultSummaryJson: unknown } | null;
 };
 
 export type CustomerSubscriptionRenewalShadowOutcome =
@@ -68,6 +71,8 @@ export interface CustomerSubscriptionRenewalShadowResult {
     predecessorTermStartsAt: string;
     predecessorTermEndsAt: string;
     renewalWindowOpensAt: string;
+    canonicalOfferId: string;
+    offerValueVersionId: string;
     offerCode: string;
     planCode: string;
     tier: string;
@@ -104,6 +109,7 @@ export class CustomerSubscriptionRenewalShadowService {
     private readonly bridgeSource: BridgeSourceService,
     private readonly tenantContext: TenantContextService,
     private readonly clientIdentity: ClientIdentityService,
+    private readonly canonicalOffers: P409CanonicalOfferAuthorityService,
   ) {}
 
   assertSecret(header: string | undefined): void {
@@ -212,6 +218,7 @@ export class CustomerSubscriptionRenewalShadowService {
         status: true,
         termStartsAt: true,
         termEndsAt: true,
+        activationExecution: { select: { safeResultSummaryJson: true } },
       },
     });
     if (!predecessor) return this.noPlan('subscription_not_found', 1);
@@ -234,8 +241,17 @@ export class CustomerSubscriptionRenewalShadowService {
       return this.noPlan('renewal_window_closed', 1);
     }
 
-    const offer = this.resolveCurrentOffer(input.tenantId, predecessor);
-    if (!offer) return this.noPlan('invalid_plan', 1);
+    const predecessorTemplateKey = this.predecessorTemplateKey(predecessor);
+    if (!predecessorTemplateKey) return this.noPlan('invalid_plan', 1);
+    let offer: P409CanonicalMembershipOffer;
+    try {
+      offer = await this.canonicalOffers.resolveMembershipOfferByTemplate(
+        input.tenantId,
+        predecessorTemplateKey,
+      );
+    } catch {
+      return this.noPlan('invalid_plan', 1);
+    }
 
     const successor = await this.prisma.customerSubscription.findFirst({
       where: {
@@ -261,6 +277,26 @@ export class CustomerSubscriptionRenewalShadowService {
       predecessor.termIdentityHash,
       input.renewalIntentRef,
     ]);
+    const serviceScopeHash = this.hash([
+      'p4-05.subscription-service-scope.v1',
+      input.tenantId,
+      ...offer.serviceScopeRefs,
+    ]);
+    const planSnapshotHash = this.hash([
+      CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
+      input.tenantId,
+      offer.offerId,
+      offer.offerValueVersionId,
+      offer.valueSnapshotHash,
+      offer.templateKey,
+      offer.planCode,
+      offer.tier,
+      String(offer.priceKopecks),
+      offer.currency,
+      String(offer.visitsIncluded),
+      String(offer.termDays),
+      serviceScopeHash,
+    ]);
     const checkoutIdentityHash = this.hash([
       CUSTOMER_SUBSCRIPTION_RENEWAL_CHECKOUT_CONTRACT_VERSION,
       input.tenantId,
@@ -268,7 +304,7 @@ export class CustomerSubscriptionRenewalShadowService {
       predecessor.id,
       predecessor.termIdentityHash,
       renewalIntentIdentityHash,
-      predecessor.planSnapshotHash,
+      planSnapshotHash,
       String(offer.priceKopecks),
       offer.currency,
       String(offer.visitsIncluded),
@@ -286,7 +322,7 @@ export class CustomerSubscriptionRenewalShadowService {
       link.client.id,
       predecessor.id,
       predecessor.termIdentityHash,
-      predecessor.planSnapshotHash,
+      planSnapshotHash,
       'eligible',
       'NONE',
     ]);
@@ -306,12 +342,15 @@ export class CustomerSubscriptionRenewalShadowService {
       renewalWindowOpensAt: renewalWindowOpensAt.toISOString(),
       renewalIntentIdentityHash,
       checkoutIdentityHash,
-      offerCode: offer.offerCode,
+      canonicalOfferId: offer.offerId,
+      offerValueVersionId: offer.offerValueVersionId,
+      offerValueSnapshotHash: offer.valueSnapshotHash,
+      offerCode: offer.templateKey,
       planCode: offer.planCode,
       tier: offer.tier,
       catalogVersion: CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
-      planSnapshotHash: predecessor.planSnapshotHash,
-      serviceScopeHash: predecessor.serviceScopeHash,
+      planSnapshotHash,
+      serviceScopeHash,
       priceKopecks: offer.priceKopecks,
       currency: offer.currency,
       visitsIncluded: offer.visitsIncluded,
@@ -388,7 +427,9 @@ export class CustomerSubscriptionRenewalShadowService {
         predecessorTermStartsAt,
         predecessorTermEndsAt,
         renewalWindowOpensAt: renewalWindowOpensAt.toISOString(),
-        offerCode: offer.offerCode,
+        canonicalOfferId: offer.offerId,
+        offerValueVersionId: offer.offerValueVersionId,
+        offerCode: offer.templateKey,
         planCode: offer.planCode,
         tier: offer.tier,
         priceKopecks: offer.priceKopecks,
@@ -417,39 +458,17 @@ export class CustomerSubscriptionRenewalShadowService {
     };
   }
 
-  private resolveCurrentOffer(
-    tenantId: string,
+  private predecessorTemplateKey(
     predecessor: RenewalPredecessor,
-  ): CustomerSubscriptionPurchaseOffer | undefined {
-    return Object.values(CUSTOMER_SUBSCRIPTION_PURCHASE_OFFERS).find(
-      (offer) => {
-        const serviceScopeHash = this.hash([
-          'p4-05.subscription-service-scope.v1',
-          tenantId,
-          ...offer.serviceScopeRefs,
-        ]);
-        const planSnapshotHash = this.hash([
-          CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
-          tenantId,
-          offer.offerCode,
-          offer.planCode,
-          offer.tier,
-          String(offer.priceKopecks),
-          offer.currency,
-          String(offer.visitsIncluded),
-          String(offer.termDays),
-          serviceScopeHash,
-        ]);
-        return (
-          predecessor.planCode === offer.planCode &&
-          predecessor.planSnapshotHash === planSnapshotHash &&
-          predecessor.serviceScopeHash === serviceScopeHash &&
-          predecessor.priceKopecks === offer.priceKopecks &&
-          predecessor.currency === offer.currency &&
-          predecessor.visitsIncluded === offer.visitsIncluded
-        );
-      },
-    );
+  ): string | null {
+    const value = predecessor.activationExecution?.safeResultSummaryJson;
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return null;
+    }
+    const facts = value as Record<string, unknown>;
+    return typeof facts.offerCode === 'string' && facts.offerCode.trim()
+      ? facts.offerCode
+      : null;
   }
 
   private currentTime(): Date {

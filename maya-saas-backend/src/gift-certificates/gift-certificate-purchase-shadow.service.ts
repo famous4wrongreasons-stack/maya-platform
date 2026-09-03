@@ -14,8 +14,11 @@ import {
   GIFT_CERTIFICATE_PURCHASE_CATALOG_VERSION,
   GIFT_CERTIFICATE_PURCHASE_SHADOW_CAPABILITY,
   GIFT_CERTIFICATE_PURCHASE_SHADOW_POLICY_PROFILE,
-  resolveGiftCertificatePurchaseOffer,
 } from '../action-engine';
+import {
+  P409CanonicalOfferAuthorityService,
+  type P409CanonicalCertificateOffer,
+} from '../business-content/p4-09-canonical-offer-authority.service';
 import {
   CLIENT_IDENTITY_GUARD_UNAVAILABLE,
   CLIENT_IDENTITY_UNRESOLVED,
@@ -44,6 +47,8 @@ export interface GiftCertificatePurchaseShadowResult {
     actionClass: 'initiate_gift_certificate_purchase';
     canonicalPurchaserClientId: string;
     recipientSubjectHash: string;
+    canonicalOfferId: string;
+    offerValueVersionId: string;
     offerCode: string;
     productCode: 'digital-gift-certificate';
     denominationType: 'fixed_money';
@@ -83,6 +88,7 @@ export class GiftCertificatePurchaseShadowService {
     private readonly bridgeSource: BridgeSourceService,
     private readonly tenantContext: TenantContextService,
     private readonly clientIdentity: ClientIdentityService,
+    private readonly canonicalOffers: P409CanonicalOfferAuthorityService,
   ) {}
 
   assertSecret(header: string | undefined): void {
@@ -119,7 +125,7 @@ export class GiftCertificatePurchaseShadowService {
     const externalClientId = dto.external_client_id.trim();
     const purchaseIntentRef = dto.purchase_intent_ref.trim();
     const recipientSubjectRef = dto.recipient_subject_ref.trim();
-    const offer = resolveGiftCertificatePurchaseOffer(dto.offer_code);
+    const offerId = dto.offer_code.trim();
     if (
       !externalClientId ||
       !purchaseIntentRef ||
@@ -127,7 +133,7 @@ export class GiftCertificatePurchaseShadowService {
     ) {
       return this.noPlan('identity_unresolved', 1);
     }
-    if (!offer) return this.noPlan('invalid_certificate_config', 1);
+    if (!offerId) return this.noPlan('invalid_certificate_config', 1);
 
     return this.tenantContext.runAsSystemTenant(tenant.tenantId, () =>
       this.planInsideTenant({
@@ -136,7 +142,7 @@ export class GiftCertificatePurchaseShadowService {
         externalClientId,
         purchaseIntentRef,
         recipientSubjectRef,
-        offer,
+        offerId,
       }),
     );
   }
@@ -147,8 +153,17 @@ export class GiftCertificatePurchaseShadowService {
     externalClientId: string;
     purchaseIntentRef: string;
     recipientSubjectRef: string;
-    offer: NonNullable<ReturnType<typeof resolveGiftCertificatePurchaseOffer>>;
+    offerId: string;
   }): Promise<GiftCertificatePurchaseShadowResult> {
+    let offer: P409CanonicalCertificateOffer;
+    try {
+      offer = await this.canonicalOffers.resolveCertificateOffer(
+        input.tenantId,
+        input.offerId,
+      );
+    } catch {
+      return this.noPlan('invalid_certificate_config', 1);
+    }
     const guard = await this.clientIdentity.checkCrmClientRegistrationGuard({
       tenantId: input.tenantId,
       provider: input.provider,
@@ -208,12 +223,15 @@ export class GiftCertificatePurchaseShadowService {
     const offerSnapshotHash = this.hash([
       GIFT_CERTIFICATE_PURCHASE_CATALOG_VERSION,
       input.tenantId,
-      input.offer.offerCode,
-      input.offer.productCode,
-      input.offer.denominationType,
-      String(input.offer.nominalAmountKopecks),
-      input.offer.currency,
-      String(input.offer.expiryDays),
+      offer.offerId,
+      offer.offerValueVersionId,
+      offer.valueSnapshotHash,
+      offer.templateKey,
+      offer.productCode,
+      offer.denominationType,
+      String(offer.nominalAmountKopecks),
+      offer.currency,
+      String(offer.expiryDays),
       GIFT_CERTIFICATE_EXPIRY_POLICY_VERSION,
     ]);
     const checkoutIdentityHash = this.hash([
@@ -222,8 +240,8 @@ export class GiftCertificatePurchaseShadowService {
       link.client.id,
       purchaseIntentIdentityHash,
       offerSnapshotHash,
-      String(input.offer.nominalAmountKopecks),
-      input.offer.currency,
+      String(offer.nominalAmountKopecks),
+      offer.currency,
       recipientSubjectHash,
       GIFT_CERTIFICATE_EXPIRY_POLICY_VERSION,
     ]);
@@ -249,14 +267,17 @@ export class GiftCertificatePurchaseShadowService {
       purchaseIntentIdentityHash,
       recipientSubjectHash,
       checkoutIdentityHash,
-      offerCode: input.offer.offerCode,
-      productCode: input.offer.productCode,
+      canonicalOfferId: offer.offerId,
+      offerValueVersionId: offer.offerValueVersionId,
+      offerValueSnapshotHash: offer.valueSnapshotHash,
+      offerCode: offer.templateKey,
+      productCode: offer.productCode,
       catalogVersion: GIFT_CERTIFICATE_PURCHASE_CATALOG_VERSION,
       offerSnapshotHash,
-      denominationType: input.offer.denominationType,
-      nominalAmountKopecks: input.offer.nominalAmountKopecks,
-      currency: input.offer.currency,
-      expiryDays: input.offer.expiryDays,
+      denominationType: offer.denominationType,
+      nominalAmountKopecks: offer.nominalAmountKopecks,
+      currency: offer.currency,
+      expiryDays: offer.expiryDays,
       expiryPolicyVersion: GIFT_CERTIFICATE_EXPIRY_POLICY_VERSION,
       paymentProvider: 'yookassa',
       providerRequestIdentitySeedHash,
@@ -330,12 +351,14 @@ export class GiftCertificatePurchaseShadowService {
         actionClass: 'initiate_gift_certificate_purchase',
         canonicalPurchaserClientId: link.client.id,
         recipientSubjectHash,
-        offerCode: input.offer.offerCode,
-        productCode: input.offer.productCode,
-        denominationType: input.offer.denominationType,
-        nominalAmountKopecks: input.offer.nominalAmountKopecks,
-        currency: input.offer.currency,
-        expiryDays: input.offer.expiryDays,
+        canonicalOfferId: offer.offerId,
+        offerValueVersionId: offer.offerValueVersionId,
+        offerCode: offer.templateKey,
+        productCode: offer.productCode,
+        denominationType: offer.denominationType,
+        nominalAmountKopecks: offer.nominalAmountKopecks,
+        currency: offer.currency,
+        expiryDays: offer.expiryDays,
         expiryPolicyVersion: GIFT_CERTIFICATE_EXPIRY_POLICY_VERSION,
         offerSnapshotHash,
         checkoutIdentityHash,

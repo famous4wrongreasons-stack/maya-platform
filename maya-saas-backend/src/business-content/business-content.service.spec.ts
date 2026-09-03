@@ -5,6 +5,7 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { BusinessContentService } from './business-content.service';
+import { P409ValueConfigurationCanonicalCutoverService } from './p4-09-value-configuration-canonical-cutover.service';
 
 describe('BusinessContentService', () => {
   const now = new Date('2026-08-14T10:00:00.000Z');
@@ -35,13 +36,26 @@ describe('BusinessContentService', () => {
       encrypt: jest.fn((value: string) => `encrypted:${value.length}`),
     };
     const auditLog = { log: jest.fn().mockResolvedValue(undefined) };
+    const canonicalValueConfiguration = {
+      createOffer: jest.fn(),
+      updateOffer: jest.fn(),
+      retireOffer: jest.fn(),
+      updateReferralPolicy: jest.fn(),
+    };
     const service = new BusinessContentService(
       prisma as unknown as PrismaService,
       tenantContext as unknown as TenantContextService,
       encryption as unknown as EncryptionService,
       auditLog as unknown as AuditLogService,
+      canonicalValueConfiguration as unknown as P409ValueConfigurationCanonicalCutoverService,
     );
-    return { service, prisma, encryption, auditLog };
+    return {
+      service,
+      prisma,
+      encryption,
+      auditLog,
+      canonicalValueConfiguration,
+    };
   }
 
   it('keeps inventory reads tenant-scoped and identifies low stock', async () => {
@@ -203,8 +217,10 @@ describe('BusinessContentService', () => {
   });
 
   it('refuses to mutate a catalog item outside the current tenant', async () => {
-    const { service, prisma } = setup();
-    prisma.tenantCatalogItem.findFirst.mockResolvedValue(null);
+    const { service, canonicalValueConfiguration } = setup();
+    canonicalValueConfiguration.updateOffer.mockRejectedValue(
+      new NotFoundException('Canonical offer does not exist'),
+    );
 
     await expect(
       service.updateCatalogItem(
@@ -215,6 +231,67 @@ describe('BusinessContentService', () => {
         { name: 'Сертификат' },
       ),
     ).rejects.toBeInstanceOf(NotFoundException);
-    expect(prisma.tenantCatalogItem.update).not.toHaveBeenCalled();
+    expect(canonicalValueConfiguration.updateOffer).toHaveBeenCalledWith(
+      'tenant-a',
+      'owner-a',
+      'certificate',
+      'item-from-tenant-b',
+      { name: 'Сертификат' },
+    );
+  });
+
+  it('keeps inventory direct while delegating value-bearing catalog writes', async () => {
+    const { service, prisma, canonicalValueConfiguration } = setup();
+    prisma.tenantCatalogItem.create.mockResolvedValue({
+      id: 'inventory-a',
+      tenantId: 'tenant-a',
+      kind: 'inventory',
+      name: 'Wax',
+      description: null,
+      priceKopecks: 1000,
+      currency: 'RUB',
+      quantity: 1,
+      lowStockThreshold: null,
+      active: true,
+      source: 'manual',
+      externalRef: null,
+      metadataJson: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await service.createCatalogItem('tenant-a', 'owner-a', 'inventory', {
+      name: 'Wax',
+      priceKopecks: 1000,
+      quantity: 1,
+    });
+    expect(prisma.tenantCatalogItem.create).toHaveBeenCalled();
+    expect(canonicalValueConfiguration.createOffer).not.toHaveBeenCalled();
+
+    canonicalValueConfiguration.createOffer.mockResolvedValue({
+      targetId: 'offer-a',
+    });
+    prisma.tenantCatalogItem.findFirst.mockResolvedValue({
+      id: 'offer-a',
+      tenantId: 'tenant-a',
+      kind: 'membership',
+      name: 'Membership',
+      description: null,
+      priceKopecks: 300_000,
+      currency: 'RUB',
+      quantity: null,
+      lowStockThreshold: null,
+      active: true,
+      source: 'canonical_action_engine',
+      externalRef: null,
+      metadataJson: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await service.createCatalogItem('tenant-a', 'owner-a', 'membership', {
+      canonicalTemplateKey: 'haircut.senior',
+      name: 'Membership',
+      priceKopecks: 300_000,
+    });
+    expect(canonicalValueConfiguration.createOffer).toHaveBeenCalled();
   });
 });

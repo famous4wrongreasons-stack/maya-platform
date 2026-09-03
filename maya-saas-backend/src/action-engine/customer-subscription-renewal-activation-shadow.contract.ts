@@ -61,6 +61,20 @@ function exactNumber(
   return expected;
 }
 
+function boundedPrice(source: Record<string, unknown>): number {
+  const value = source.priceKopecks;
+  if (
+    !Number.isSafeInteger(value) ||
+    Number(value) < 1 ||
+    Number(value) > 600_000
+  ) {
+    throw new ActionContractError(
+      'priceKopecks is outside the canonical membership cap',
+    );
+  }
+  return Number(value);
+}
+
 function isoInstant(source: Record<string, unknown>, key: string): string {
   const value = source[key];
   if (
@@ -88,6 +102,9 @@ export function customerSubscriptionRenewalActivationShadowNormalizer(
     'checkoutExecutionId',
     'checkoutIdentityHash',
     'renewalIntentIdentityHash',
+    'canonicalOfferId',
+    'offerValueVersionId',
+    'offerValueSnapshotHash',
     'offerCode',
     'planCode',
     'tier',
@@ -180,13 +197,16 @@ export function customerSubscriptionRenewalActivationShadowNormalizer(
     checkoutExecutionId: opaque(source, 'checkoutExecutionId'),
     checkoutIdentityHash: opaque(source, 'checkoutIdentityHash'),
     renewalIntentIdentityHash: opaque(source, 'renewalIntentIdentityHash'),
+    canonicalOfferId: opaque(source, 'canonicalOfferId'),
+    offerValueVersionId: opaque(source, 'offerValueVersionId'),
+    offerValueSnapshotHash: opaque(source, 'offerValueSnapshotHash'),
     offerCode: offer.offerCode,
     planCode: offer.planCode,
     tier: offer.tier,
     catalogVersion: CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
     planSnapshotHash: opaque(source, 'planSnapshotHash'),
     serviceScopeHash: opaque(source, 'serviceScopeHash'),
-    priceKopecks: exactNumber(source, 'priceKopecks', offer.priceKopecks),
+    priceKopecks: boundedPrice(source),
     currency: offer.currency,
     visitsIncluded: exactNumber(source, 'visitsIncluded', offer.visitsIncluded),
     termDays: exactNumber(source, 'termDays', offer.termDays),

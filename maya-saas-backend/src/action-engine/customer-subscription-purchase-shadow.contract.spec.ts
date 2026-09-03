@@ -16,6 +16,9 @@ const canonicalInput = () => ({
   checkoutMode: 'initial_purchase',
   purchaseIntentIdentityHash: 'purchase-intent-hash',
   checkoutIdentityHash: 'checkout-identity-hash',
+  canonicalOfferId: 'membership-offer-id',
+  offerValueVersionId: 'membership-version-id',
+  offerValueSnapshotHash: 'membership-value-snapshot-hash',
   offerCode: 'haircut.senior',
   planCode: 'haircut',
   tier: 'senior',
@@ -62,7 +65,7 @@ describe('P4-05 customer subscription purchase Shadow contract', () => {
 
   it('rejects caller authority and forged price, currency, plan, or outcome facts', () => {
     for (const forged of [
-      { priceKopecks: 1 },
+      { priceKopecks: 600_001 },
       { currency: 'USD' },
       { planCode: 'complex' },
       { tier: 'top' },

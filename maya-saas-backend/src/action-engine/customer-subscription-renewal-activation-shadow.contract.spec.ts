@@ -19,6 +19,9 @@ const canonicalInput = () => ({
   checkoutExecutionId: 'renewal-checkout-execution-1',
   checkoutIdentityHash: 'renewal-checkout-hash',
   renewalIntentIdentityHash: 'renewal-intent-hash',
+  canonicalOfferId: 'membership-offer-id',
+  offerValueVersionId: 'membership-version-id',
+  offerValueSnapshotHash: 'membership-value-snapshot-hash',
   offerCode: 'haircut.senior',
   planCode: 'haircut',
   tier: 'senior',
@@ -61,7 +64,7 @@ describe('P4-05 customer subscription renewal activation Shadow contract', () =>
   it('rejects forged payment, plan, term, authority, and predecessor mutation facts', () => {
     for (const forged of [
       { providerPaymentState: 'pending' },
-      { priceKopecks: 1 },
+      { priceKopecks: 600_001 },
       { currency: 'USD' },
       { planCode: 'complex' },
       { tier: 'top' },

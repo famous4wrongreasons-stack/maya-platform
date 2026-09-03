@@ -76,6 +76,20 @@ function exactNumber(
   return expected;
 }
 
+function boundedNominalAmount(source: Record<string, unknown>): number {
+  const value = source.nominalAmountKopecks;
+  if (
+    !Number.isSafeInteger(value) ||
+    Number(value) < 1 ||
+    Number(value) > 500_000
+  ) {
+    throw new ActionContractError(
+      'nominalAmountKopecks is outside the canonical certificate cap',
+    );
+  }
+  return Number(value);
+}
+
 function isoInstant(source: Record<string, unknown>, key: string): string {
   const value = source[key];
   if (
@@ -98,6 +112,9 @@ export function giftCertificateActivationShadowNormalizer(
     'checkoutExecutionId',
     'checkoutIdentityHash',
     'purchaseIntentIdentityHash',
+    'canonicalOfferId',
+    'offerValueVersionId',
+    'offerValueSnapshotHash',
     'offerCode',
     'productCode',
     'catalogVersion',
@@ -195,16 +212,15 @@ export function giftCertificateActivationShadowNormalizer(
     checkoutExecutionId: opaque(source, 'checkoutExecutionId'),
     checkoutIdentityHash: opaque(source, 'checkoutIdentityHash'),
     purchaseIntentIdentityHash: opaque(source, 'purchaseIntentIdentityHash'),
+    canonicalOfferId: opaque(source, 'canonicalOfferId'),
+    offerValueVersionId: opaque(source, 'offerValueVersionId'),
+    offerValueSnapshotHash: opaque(source, 'offerValueSnapshotHash'),
     offerCode: offer.offerCode,
     productCode: offer.productCode,
     catalogVersion: GIFT_CERTIFICATE_PURCHASE_CATALOG_VERSION,
     offerSnapshotHash: opaque(source, 'offerSnapshotHash'),
     denominationType: offer.denominationType,
-    nominalAmountKopecks: exactNumber(
-      source,
-      'nominalAmountKopecks',
-      offer.nominalAmountKopecks,
-    ),
+    nominalAmountKopecks: boundedNominalAmount(source),
     currency: offer.currency,
     recipientSubjectHash: opaque(source, 'recipientSubjectHash'),
     expiryDays: exactNumber(source, 'expiryDays', offer.expiryDays),

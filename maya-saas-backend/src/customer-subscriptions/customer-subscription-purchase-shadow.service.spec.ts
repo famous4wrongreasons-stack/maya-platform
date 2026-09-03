@@ -27,7 +27,7 @@ const validDto = (): CustomerSubscriptionPurchaseShadowDto => ({
   external_company_id: 'company-42',
   external_client_id: 'provider-client-7',
   purchase_intent_ref: 'telegram-update-101',
-  offer_code: 'haircut.senior',
+  offer_code: 'membership-offer-id',
 });
 
 function preview(identityFingerprint = 'checkout-fingerprint') {
@@ -72,6 +72,25 @@ function buildHarness() {
   const runAsSystemTenant = jest.fn(
     (_tenantId: string, callback: () => unknown) => callback(),
   );
+  const resolveMembershipOffer = jest.fn((tenantId: string, offerId: string) =>
+    tenantId === 'tenant-a' && offerId === 'membership-offer-id'
+      ? Promise.resolve({
+          offerId,
+          offerValueVersionId: 'membership-version-id',
+          offerValueVersion: 1,
+          templateKey: 'haircut.senior',
+          valueSnapshotHash: 'membership-value-snapshot-hash',
+          priceKopecks: 330_000,
+          currency: 'RUB' as const,
+          kind: 'membership' as const,
+          planCode: 'haircut' as const,
+          tier: 'senior' as const,
+          visitsIncluded: 2 as const,
+          termDays: 30 as const,
+          serviceScopeRefs: ['yclients.service.mens-haircut'] as const,
+        })
+      : Promise.reject(new Error('not found')),
+  );
   const service = new CustomerSubscriptionPurchaseShadowService(
     {
       preview: previewAction,
@@ -85,6 +104,7 @@ function buildHarness() {
     bridgeSource as unknown as BridgeSourceService,
     { runAsSystemTenant } as unknown as TenantContextService,
     { checkCrmClientRegistrationGuard } as unknown as ClientIdentityService,
+    { resolveMembershipOffer } as never,
   );
 
   return {
@@ -97,6 +117,7 @@ function buildHarness() {
     checkCrmClientRegistrationGuard,
     bridgeSource,
     runAsSystemTenant,
+    resolveMembershipOffer,
   };
 }
 

@@ -7,7 +7,7 @@ export const CUSTOMER_SUBSCRIPTION_PURCHASE_SHADOW_INPUT_CONTRACT =
 export const CUSTOMER_SUBSCRIPTION_PURCHASE_SHADOW_POLICY_PROFILE =
   'p4-05.customer-subscription-purchase.shadow-policy.v1' as const;
 export const CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION =
-  'p4-05.legacy-fixed-catalog.v1' as const;
+  'p4-09.canonical-offer-authority.v1' as const;
 export const CUSTOMER_SUBSCRIPTION_CHECKOUT_CONTRACT_VERSION =
   'p4-05.initial-checkout.v1' as const;
 
@@ -145,6 +145,20 @@ function exactNumber(
   return expected;
 }
 
+function boundedPrice(source: Record<string, unknown>): number {
+  const value = source.priceKopecks;
+  if (
+    !Number.isSafeInteger(value) ||
+    Number(value) < 1 ||
+    Number(value) > 600_000
+  ) {
+    throw new ActionContractError(
+      'priceKopecks is outside the canonical membership cap',
+    );
+  }
+  return Number(value);
+}
+
 export function customerSubscriptionPurchaseShadowNormalizer(
   value: unknown,
 ): Record<string, unknown> {
@@ -156,6 +170,9 @@ export function customerSubscriptionPurchaseShadowNormalizer(
     'checkoutMode',
     'purchaseIntentIdentityHash',
     'checkoutIdentityHash',
+    'canonicalOfferId',
+    'offerValueVersionId',
+    'offerValueSnapshotHash',
     'offerCode',
     'planCode',
     'tier',
@@ -212,13 +229,16 @@ export function customerSubscriptionPurchaseShadowNormalizer(
     checkoutMode: 'initial_purchase',
     purchaseIntentIdentityHash: opaque(source, 'purchaseIntentIdentityHash'),
     checkoutIdentityHash: opaque(source, 'checkoutIdentityHash'),
+    canonicalOfferId: opaque(source, 'canonicalOfferId'),
+    offerValueVersionId: opaque(source, 'offerValueVersionId'),
+    offerValueSnapshotHash: opaque(source, 'offerValueSnapshotHash'),
     offerCode: offer.offerCode,
     planCode: offer.planCode,
     tier: offer.tier,
     catalogVersion: CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
     planSnapshotHash: opaque(source, 'planSnapshotHash'),
     serviceScopeHash: opaque(source, 'serviceScopeHash'),
-    priceKopecks: exactNumber(source, 'priceKopecks', offer.priceKopecks),
+    priceKopecks: boundedPrice(source),
     currency: offer.currency,
     visitsIncluded: exactNumber(source, 'visitsIncluded', offer.visitsIncluded),
     termDays: exactNumber(source, 'termDays', offer.termDays),

@@ -67,6 +67,29 @@ export class P409CanonicalOfferAuthorityService {
     };
   }
 
+  async resolveMembershipOfferByTemplate(
+    tenantId: string,
+    templateKey: string,
+  ): Promise<P409CanonicalMembershipOffer> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const offers = await this.prisma.tenantCatalogItem.findMany({
+      where: {
+        tenantId: scopedTenantId,
+        kind: 'membership',
+        canonicalTemplateKey: templateKey,
+        active: true,
+      },
+      select: { id: true },
+      take: 2,
+    });
+    if (offers.length !== 1) {
+      throw new P409CanonicalOfferAuthorityError(
+        'Canonical membership template does not resolve uniquely',
+      );
+    }
+    return this.resolveMembershipOffer(scopedTenantId, offers[0].id);
+  }
+
   async resolveCertificateOffer(
     tenantId: string,
     offerId: string,

@@ -27,7 +27,7 @@ const validDto = (): GiftCertificatePurchaseShadowDto => ({
   external_company_id: 'company-42',
   external_client_id: 'provider-client-7',
   purchase_intent_ref: 'telegram-update-101',
-  offer_code: 'gift-certificate.3000',
+  offer_code: 'certificate-offer-id',
   recipient_subject_ref: 'a'.repeat(64),
 });
 
@@ -71,6 +71,25 @@ function buildHarness() {
   const runAsSystemTenant = jest.fn(
     (_tenantId: string, callback: () => unknown) => callback(),
   );
+  const resolveCertificateOffer = jest.fn(
+    (tenantId: string, offerId: string) =>
+      tenantId === 'tenant-a' && offerId === 'certificate-offer-id'
+        ? Promise.resolve({
+            offerId,
+            offerValueVersionId: 'certificate-version-id',
+            offerValueVersion: 1,
+            templateKey: 'gift-certificate.3000',
+            valueSnapshotHash: 'certificate-value-snapshot-hash',
+            priceKopecks: 300_000,
+            currency: 'RUB' as const,
+            kind: 'certificate' as const,
+            productCode: 'digital-gift-certificate' as const,
+            denominationType: 'fixed_money' as const,
+            nominalAmountKopecks: 300_000,
+            expiryDays: 365 as const,
+          })
+        : Promise.reject(new Error('not found')),
+  );
   const service = new GiftCertificatePurchaseShadowService(
     {
       preview: previewAction,
@@ -83,6 +102,7 @@ function buildHarness() {
     bridgeSource as unknown as BridgeSourceService,
     { runAsSystemTenant } as unknown as TenantContextService,
     { checkCrmClientRegistrationGuard } as unknown as ClientIdentityService,
+    { resolveCertificateOffer } as never,
   );
 
   return {
@@ -94,6 +114,7 @@ function buildHarness() {
     checkCrmClientRegistrationGuard,
     bridgeSource,
     runAsSystemTenant,
+    resolveCertificateOffer,
   };
 }
 

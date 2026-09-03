@@ -12,6 +12,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { P409CanonicalOfferAuthorityService } from './p4-09-canonical-offer-authority.service';
 import { P409ValueConfigurationExecutableService } from './p4-09-value-configuration-executable.service';
 import { P409ValueConfigurationShadowService } from './p4-09-value-configuration-shadow.service';
+import { P409ValueConfigurationCanonicalCutoverService } from './p4-09-value-configuration-canonical-cutover.service';
 
 @Module({
   imports: [ActionEngineModule, AuditLogModule],
@@ -20,6 +21,7 @@ import { P409ValueConfigurationShadowService } from './p4-09-value-configuration
     BusinessContentService,
     P409CanonicalOfferAuthorityService,
     P409ValueConfigurationShadowService,
+    P409ValueConfigurationCanonicalCutoverService,
     {
       provide: P409ValueConfigurationExecutableService,
       useFactory: (

@@ -7,7 +7,7 @@ export const GIFT_CERTIFICATE_PURCHASE_SHADOW_INPUT_CONTRACT =
 export const GIFT_CERTIFICATE_PURCHASE_SHADOW_POLICY_PROFILE =
   'p4-06.gift-certificate-purchase.shadow-policy.v1' as const;
 export const GIFT_CERTIFICATE_PURCHASE_CATALOG_VERSION =
-  'p4-06.legacy-fixed-catalog.v1' as const;
+  'p4-09.canonical-offer-authority.v1' as const;
 export const GIFT_CERTIFICATE_CHECKOUT_CONTRACT_VERSION =
   'p4-06.gift-certificate-checkout.v1' as const;
 export const GIFT_CERTIFICATE_EXPIRY_POLICY_VERSION =
@@ -110,6 +110,20 @@ function exactNumber(
   return expected;
 }
 
+function boundedNominalAmount(source: Record<string, unknown>): number {
+  const value = source.nominalAmountKopecks;
+  if (
+    !Number.isSafeInteger(value) ||
+    Number(value) < 1 ||
+    Number(value) > 500_000
+  ) {
+    throw new ActionContractError(
+      'nominalAmountKopecks is outside the canonical certificate cap',
+    );
+  }
+  return Number(value);
+}
+
 export function giftCertificatePurchaseShadowNormalizer(
   value: unknown,
 ): Record<string, unknown> {
@@ -121,6 +135,9 @@ export function giftCertificatePurchaseShadowNormalizer(
     'purchaseIntentIdentityHash',
     'recipientSubjectHash',
     'checkoutIdentityHash',
+    'canonicalOfferId',
+    'offerValueVersionId',
+    'offerValueSnapshotHash',
     'offerCode',
     'productCode',
     'catalogVersion',
@@ -191,16 +208,15 @@ export function giftCertificatePurchaseShadowNormalizer(
     purchaseIntentIdentityHash: opaque(source, 'purchaseIntentIdentityHash'),
     recipientSubjectHash: opaque(source, 'recipientSubjectHash'),
     checkoutIdentityHash: opaque(source, 'checkoutIdentityHash'),
+    canonicalOfferId: opaque(source, 'canonicalOfferId'),
+    offerValueVersionId: opaque(source, 'offerValueVersionId'),
+    offerValueSnapshotHash: opaque(source, 'offerValueSnapshotHash'),
     offerCode: offer.offerCode,
     productCode: offer.productCode,
     catalogVersion: GIFT_CERTIFICATE_PURCHASE_CATALOG_VERSION,
     offerSnapshotHash: opaque(source, 'offerSnapshotHash'),
     denominationType: offer.denominationType,
-    nominalAmountKopecks: exactNumber(
-      source,
-      'nominalAmountKopecks',
-      offer.nominalAmountKopecks,
-    ),
+    nominalAmountKopecks: boundedNominalAmount(source),
     currency: offer.currency,
     expiryDays: exactNumber(source, 'expiryDays', offer.expiryDays),
     expiryPolicyVersion: GIFT_CERTIFICATE_EXPIRY_POLICY_VERSION,

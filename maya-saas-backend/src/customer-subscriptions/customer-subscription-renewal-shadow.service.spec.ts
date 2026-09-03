@@ -72,6 +72,9 @@ function canonicalPredecessor(overrides: Record<string, unknown> = {}) {
     status: 'active',
     termStartsAt: TERM_START,
     termEndsAt: TERM_END,
+    activationExecution: {
+      safeResultSummaryJson: { offerCode: 'haircut.senior' },
+    },
     ...overrides,
   };
 }
@@ -116,6 +119,21 @@ function buildHarness() {
   const runAsSystemTenant = jest.fn(
     (_tenantId: string, callback: () => unknown) => callback(),
   );
+  const resolveMembershipOfferByTemplate = jest.fn().mockResolvedValue({
+    offerId: 'membership-offer-id',
+    offerValueVersionId: 'membership-version-id',
+    offerValueVersion: 1,
+    templateKey: 'haircut.senior',
+    valueSnapshotHash: 'membership-value-snapshot-hash',
+    priceKopecks: 330_000,
+    currency: 'RUB',
+    kind: 'membership',
+    planCode: 'haircut',
+    tier: 'senior',
+    visitsIncluded: 2,
+    termDays: 30,
+    serviceScopeRefs: ['yclients.service.mens-haircut'],
+  });
   const service = new CustomerSubscriptionRenewalShadowService(
     {
       preview: previewAction,
@@ -132,6 +150,7 @@ function buildHarness() {
     bridgeSource as unknown as BridgeSourceService,
     { runAsSystemTenant } as unknown as TenantContextService,
     { checkCrmClientRegistrationGuard } as unknown as ClientIdentityService,
+    { resolveMembershipOfferByTemplate } as never,
   );
   jest
     .spyOn(service as unknown as { currentTime: () => Date }, 'currentTime')
@@ -148,6 +167,7 @@ function buildHarness() {
     checkCrmClientRegistrationGuard,
     bridgeSource,
     runAsSystemTenant,
+    resolveMembershipOfferByTemplate,
   };
 }
 
@@ -360,10 +380,10 @@ describe('CustomerSubscriptionRenewalShadowService', () => {
     }
   });
 
-  it('rejects a predecessor that no longer matches the active server catalog', async () => {
+  it('rejects a predecessor without durable canonical offer evidence', async () => {
     const setup = buildHarness();
     setup.findPredecessor.mockResolvedValue(
-      canonicalPredecessor({ priceKopecks: 1 }),
+      canonicalPredecessor({ activationExecution: null }),
     );
 
     await expect(setup.service.planRenewal(validDto())).resolves.toMatchObject({

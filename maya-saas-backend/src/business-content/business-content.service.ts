@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { BusinessReview, TenantCatalogItem } from '@prisma/client';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -9,6 +13,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import type { IngestBusinessReviewDto } from './dto/business-review.dto';
 import type { UpsertCatalogItemDto } from './dto/catalog-item.dto';
 import type { UpdateReferralProgramDto } from './dto/referral-program.dto';
+import { P409ValueConfigurationCanonicalCutoverService } from './p4-09-value-configuration-canonical-cutover.service';
 
 export const BUSINESS_CONTENT_KINDS = [
   'inventory',
@@ -57,6 +62,7 @@ export class BusinessContentService {
     private readonly tenantContext: TenantContextService,
     private readonly encryption: EncryptionService,
     private readonly auditLog: AuditLogService,
+    private readonly canonicalValueConfiguration: P409ValueConfigurationCanonicalCutoverService,
   ) {}
 
   async listCatalog(
@@ -98,20 +104,37 @@ export class BusinessContentService {
     dto: UpsertCatalogItemDto,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    if (kind !== 'inventory') {
+      const result = await this.canonicalValueConfiguration.createOffer(
+        scopedTenantId,
+        actorUserId,
+        kind,
+        dto,
+      );
+      return this.catalogItemResult(scopedTenantId, kind, result.targetId);
+    }
+    return this.createInventoryItem(scopedTenantId, actorUserId, dto);
+  }
+
+  private async createInventoryItem(
+    tenantId: string,
+    actorUserId: string,
+    dto: UpsertCatalogItemDto,
+  ) {
     const row = await this.prisma.tenantCatalogItem.create({
       data: {
-        tenantId: scopedTenantId,
-        kind,
-        ...this.catalogData(kind, dto),
+        tenantId,
+        kind: 'inventory',
+        ...this.catalogData('inventory', dto),
       },
     });
     await this.auditLog.log({
-      tenantId: scopedTenantId,
+      tenantId,
       userId: actorUserId,
       action: 'business_content.catalog.created',
       entityType: 'tenant_catalog_item',
       entityId: row.id,
-      metadata: { kind, source: row.source },
+      metadata: { kind: 'inventory', source: row.source },
     });
     return this.serializeCatalogItem(row);
   }
@@ -124,18 +147,37 @@ export class BusinessContentService {
     dto: UpsertCatalogItemDto,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.requireCatalogItem(scopedTenantId, kind, itemId);
+    if (kind !== 'inventory') {
+      const result = await this.canonicalValueConfiguration.updateOffer(
+        scopedTenantId,
+        actorUserId,
+        kind,
+        itemId,
+        dto,
+      );
+      return this.catalogItemResult(scopedTenantId, kind, result.targetId);
+    }
+    return this.updateInventoryItem(scopedTenantId, actorUserId, itemId, dto);
+  }
+
+  private async updateInventoryItem(
+    tenantId: string,
+    actorUserId: string,
+    itemId: string,
+    dto: UpsertCatalogItemDto,
+  ) {
+    await this.requireCatalogItem(tenantId, 'inventory', itemId);
     const row = await this.prisma.tenantCatalogItem.update({
       where: { id: itemId },
-      data: this.catalogData(kind, dto),
+      data: this.catalogData('inventory', dto),
     });
     await this.auditLog.log({
-      tenantId: scopedTenantId,
+      tenantId,
       userId: actorUserId,
       action: 'business_content.catalog.updated',
       entityType: 'tenant_catalog_item',
       entityId: row.id,
-      metadata: { kind, source: row.source },
+      metadata: { kind: 'inventory', source: row.source },
     });
     return this.serializeCatalogItem(row);
   }
@@ -147,15 +189,32 @@ export class BusinessContentService {
     itemId: string,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.requireCatalogItem(scopedTenantId, kind, itemId);
+    if (kind !== 'inventory') {
+      await this.canonicalValueConfiguration.retireOffer(
+        scopedTenantId,
+        actorUserId,
+        kind,
+        itemId,
+      );
+      return { ok: true, deleted: true, id: itemId, retired: true };
+    }
+    return this.deleteInventoryItem(scopedTenantId, actorUserId, itemId);
+  }
+
+  private async deleteInventoryItem(
+    tenantId: string,
+    actorUserId: string,
+    itemId: string,
+  ) {
+    await this.requireCatalogItem(tenantId, 'inventory', itemId);
     await this.prisma.tenantCatalogItem.delete({ where: { id: itemId } });
     await this.auditLog.log({
-      tenantId: scopedTenantId,
+      tenantId,
       userId: actorUserId,
       action: 'business_content.catalog.deleted',
       entityType: 'tenant_catalog_item',
       entityId: itemId,
-      metadata: { kind },
+      metadata: { kind: 'inventory' },
     });
     return { ok: true, deleted: true, id: itemId };
   }
@@ -191,35 +250,11 @@ export class BusinessContentService {
     dto: UpdateReferralProgramDto,
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const data = {
-      ...(dto.enabled === undefined ? {} : { enabled: dto.enabled }),
-      ...(dto.inviterRewardKopecks === undefined
-        ? {}
-        : { inviterRewardKopecks: dto.inviterRewardKopecks }),
-      ...(dto.inviteeRewardKopecks === undefined
-        ? {}
-        : { inviteeRewardKopecks: dto.inviteeRewardKopecks }),
-      ...(dto.currency === undefined
-        ? {}
-        : { currency: dto.currency.toUpperCase() }),
-      ...(dto.terms === undefined ? {} : { terms: dto.terms.trim() || null }),
-      ...(dto.codePrefix === undefined
-        ? {}
-        : { codePrefix: dto.codePrefix.toUpperCase() }),
-    };
-    const row = await this.prisma.referralProgram.upsert({
-      where: { tenantId: scopedTenantId },
-      update: data,
-      create: { tenantId: scopedTenantId, ...data },
-    });
-    await this.auditLog.log({
-      tenantId: scopedTenantId,
-      userId: actorUserId,
-      action: 'business_content.referrals.updated',
-      entityType: 'referral_program',
-      entityId: row.id,
-      metadata: { enabled: row.enabled },
-    });
+    await this.canonicalValueConfiguration.updateReferralPolicy(
+      scopedTenantId,
+      actorUserId,
+      dto,
+    );
     return this.getReferralProgram(scopedTenantId);
   }
 
@@ -445,6 +480,22 @@ export class BusinessContentService {
         error: { code: 'catalog_item_not_found' },
       });
     }
+  }
+
+  private async catalogItemResult(
+    tenantId: string,
+    kind: Exclude<BusinessContentKind, 'inventory'>,
+    itemId: string,
+  ) {
+    const row = await this.prisma.tenantCatalogItem.findFirst({
+      where: { id: itemId, tenantId, kind },
+    });
+    if (!row) {
+      throw new BadRequestException(
+        'Canonical offer result is missing its committed row',
+      );
+    }
+    return this.serializeCatalogItem(row);
   }
 
   private catalogData(

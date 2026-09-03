@@ -6,6 +6,7 @@ import {
   ActionEngineRuntimeService,
 } from '../action-engine';
 import { BillingModule } from '../billing/billing.module';
+import { BusinessContentModule } from '../business-content/business-content.module';
 import { CrmModule } from '../crm/crm.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { CustomerSubscriptionActivationShadowController } from './customer-subscription-activation-shadow.controller';
@@ -31,7 +32,12 @@ import {
 } from './p4-05-yookassa-checkout-provider';
 
 @Module({
-  imports: [ActionEngineModule, BillingModule, CrmModule],
+  imports: [
+    ActionEngineModule,
+    BillingModule,
+    CrmModule,
+    BusinessContentModule,
+  ],
   controllers: [
     CustomerSubscriptionPurchaseShadowController,
     CustomerSubscriptionActivationShadowController,

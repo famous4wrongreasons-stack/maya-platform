@@ -96,6 +96,9 @@ type RenewalCheckoutSafeResult = {
   predecessorTermEndsAt: string;
   renewalIntentIdentityHash: string;
   checkoutIdentityHash: string;
+  canonicalOfferId: string;
+  offerValueVersionId: string;
+  offerValueSnapshotHash: string;
   offerCode: string;
   planCode: string;
   tier: string;
@@ -447,13 +450,16 @@ export class CustomerSubscriptionRenewalActivationShadowService {
       checkoutExecutionId: checkout.id,
       checkoutIdentityHash: checkoutFacts.checkoutIdentityHash,
       renewalIntentIdentityHash: checkoutFacts.renewalIntentIdentityHash,
+      canonicalOfferId: checkoutFacts.canonicalOfferId,
+      offerValueVersionId: checkoutFacts.offerValueVersionId,
+      offerValueSnapshotHash: checkoutFacts.offerValueSnapshotHash,
       offerCode: offer.offerCode,
       planCode: offer.planCode,
       tier: offer.tier,
       catalogVersion: CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
       planSnapshotHash: checkoutFacts.planSnapshotHash,
       serviceScopeHash: checkoutFacts.serviceScopeHash,
-      priceKopecks: offer.priceKopecks,
+      priceKopecks: checkoutFacts.priceKopecks,
       currency: offer.currency,
       visitsIncluded: offer.visitsIncluded,
       termDays: offer.termDays,
@@ -522,7 +528,7 @@ export class CustomerSubscriptionRenewalActivationShadowService {
         termIdentityHash,
         planCode: offer.planCode,
         tier: offer.tier,
-        priceKopecks: offer.priceKopecks,
+        priceKopecks: checkoutFacts.priceKopecks,
         currency: offer.currency,
         visitsIncluded: offer.visitsIncluded,
         termStartsAt,
@@ -560,6 +566,9 @@ export class CustomerSubscriptionRenewalActivationShadowService {
       'predecessorTermEndsAt',
       'renewalIntentIdentityHash',
       'checkoutIdentityHash',
+      'canonicalOfferId',
+      'offerValueVersionId',
+      'offerValueSnapshotHash',
       'offerCode',
       'planCode',
       'tier',
@@ -604,7 +613,8 @@ export class CustomerSubscriptionRenewalActivationShadowService {
       facts.planCode === offer.planCode &&
       facts.tier === offer.tier &&
       facts.catalogVersion === CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION &&
-      facts.priceKopecks === offer.priceKopecks &&
+      facts.priceKopecks > 0 &&
+      facts.priceKopecks <= 600_000 &&
       facts.currency === offer.currency &&
       facts.visitsIncluded === offer.visitsIncluded &&
       facts.termDays === offer.termDays
@@ -620,11 +630,7 @@ export class CustomerSubscriptionRenewalActivationShadowService {
       predecessor.clientId === canonicalClientId &&
       predecessor.termIdentityHash === facts.predecessorTermIdentityHash &&
       predecessor.planCode === facts.planCode &&
-      predecessor.planSnapshotHash === facts.planSnapshotHash &&
-      predecessor.serviceScopeHash === facts.serviceScopeHash &&
-      predecessor.priceKopecks === facts.priceKopecks &&
       predecessor.currency === facts.currency &&
-      predecessor.visitsIncluded === facts.visitsIncluded &&
       predecessor.termStartsAt.toISOString() ===
         new Date(facts.predecessorTermStartsAt).toISOString() &&
       predecessor.termEndsAt.toISOString() ===

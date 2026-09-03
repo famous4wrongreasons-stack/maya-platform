@@ -84,6 +84,9 @@ export interface P406ExecutionValue {
   canonicalPurchaserClientId?: string;
   checkoutIdentityHash?: string;
   purchaseIntentIdentityHash?: string;
+  canonicalOfferId?: string;
+  offerValueVersionId?: string;
+  offerValueSnapshotHash?: string;
   certificateId?: string;
   issuanceIdentityHash?: string;
   presentationKeyVersion?: string;
@@ -485,6 +488,9 @@ export class P406GiftCertificateExecutableService {
       'providerClientIdentityHash',
       'checkoutIdentityHash',
       'purchaseIntentIdentityHash',
+      'canonicalOfferId',
+      'offerValueVersionId',
+      'offerValueSnapshotHash',
       'offerCode',
       'productCode',
       'catalogVersion',
@@ -972,6 +978,15 @@ export class P406GiftCertificateExecutableService {
       purchaseIntentIdentityHash: this.text(
         input.purchaseIntentIdentityHash,
         'purchaseIntentIdentityHash',
+      ),
+      canonicalOfferId: this.text(input.canonicalOfferId, 'canonicalOfferId'),
+      offerValueVersionId: this.text(
+        input.offerValueVersionId,
+        'offerValueVersionId',
+      ),
+      offerValueSnapshotHash: this.text(
+        input.offerValueSnapshotHash,
+        'offerValueSnapshotHash',
       ),
       offerCode: input.offerCode,
       productCode: input.productCode,

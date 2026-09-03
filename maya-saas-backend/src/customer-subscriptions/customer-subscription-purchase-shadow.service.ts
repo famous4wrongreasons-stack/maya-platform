@@ -10,8 +10,11 @@ import {
   CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
   CUSTOMER_SUBSCRIPTION_PURCHASE_SHADOW_CAPABILITY,
   CUSTOMER_SUBSCRIPTION_PURCHASE_SHADOW_POLICY_PROFILE,
-  resolveCustomerSubscriptionPurchaseOffer,
 } from '../action-engine';
+import {
+  P409CanonicalOfferAuthorityService,
+  type P409CanonicalMembershipOffer,
+} from '../business-content/p4-09-canonical-offer-authority.service';
 import {
   CLIENT_IDENTITY_GUARD_UNAVAILABLE,
   CLIENT_IDENTITY_UNRESOLVED,
@@ -39,6 +42,8 @@ export interface CustomerSubscriptionPurchaseShadowResult {
     actionClass: 'initiate_customer_subscription_purchase';
     checkoutMode: 'initial_purchase';
     canonicalClientId: string;
+    canonicalOfferId: string;
+    offerValueVersionId: string;
     offerCode: string;
     planCode: string;
     tier: string;
@@ -74,6 +79,7 @@ export class CustomerSubscriptionPurchaseShadowService {
     private readonly bridgeSource: BridgeSourceService,
     private readonly tenantContext: TenantContextService,
     private readonly clientIdentity: ClientIdentityService,
+    private readonly canonicalOffers: P409CanonicalOfferAuthorityService,
   ) {}
 
   assertSecret(header: string | undefined): void {
@@ -109,11 +115,11 @@ export class CustomerSubscriptionPurchaseShadowService {
     );
     const externalClientId = dto.external_client_id.trim();
     const purchaseIntentRef = dto.purchase_intent_ref.trim();
-    const offer = resolveCustomerSubscriptionPurchaseOffer(dto.offer_code);
+    const offerId = dto.offer_code.trim();
     if (!externalClientId || !purchaseIntentRef) {
       return this.noPlan('identity_unresolved', 1);
     }
-    if (!offer) return this.noPlan('invalid_plan', 1);
+    if (!offerId) return this.noPlan('invalid_plan', 1);
 
     return this.tenantContext.runAsSystemTenant(tenant.tenantId, () =>
       this.planInsideTenant({
@@ -121,7 +127,7 @@ export class CustomerSubscriptionPurchaseShadowService {
         provider: boundSource.provider,
         externalClientId,
         purchaseIntentRef,
-        offer,
+        offerId,
       }),
     );
   }
@@ -131,10 +137,17 @@ export class CustomerSubscriptionPurchaseShadowService {
     provider: string;
     externalClientId: string;
     purchaseIntentRef: string;
-    offer: NonNullable<
-      ReturnType<typeof resolveCustomerSubscriptionPurchaseOffer>
-    >;
+    offerId: string;
   }): Promise<CustomerSubscriptionPurchaseShadowResult> {
+    let offer: P409CanonicalMembershipOffer;
+    try {
+      offer = await this.canonicalOffers.resolveMembershipOffer(
+        input.tenantId,
+        input.offerId,
+      );
+    } catch {
+      return this.noPlan('invalid_plan', 1);
+    }
     const guard = await this.clientIdentity.checkCrmClientRegistrationGuard({
       tenantId: input.tenantId,
       provider: input.provider,
@@ -198,18 +211,21 @@ export class CustomerSubscriptionPurchaseShadowService {
     const serviceScopeHash = this.hash([
       'p4-05.subscription-service-scope.v1',
       input.tenantId,
-      ...input.offer.serviceScopeRefs,
+      ...offer.serviceScopeRefs,
     ]);
     const planSnapshotHash = this.hash([
       CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
       input.tenantId,
-      input.offer.offerCode,
-      input.offer.planCode,
-      input.offer.tier,
-      String(input.offer.priceKopecks),
-      input.offer.currency,
-      String(input.offer.visitsIncluded),
-      String(input.offer.termDays),
+      offer.offerId,
+      offer.offerValueVersionId,
+      offer.valueSnapshotHash,
+      offer.templateKey,
+      offer.planCode,
+      offer.tier,
+      String(offer.priceKopecks),
+      offer.currency,
+      String(offer.visitsIncluded),
+      String(offer.termDays),
       serviceScopeHash,
     ]);
     const checkoutIdentityHash = this.hash([
@@ -218,9 +234,9 @@ export class CustomerSubscriptionPurchaseShadowService {
       link.client.id,
       purchaseIntentIdentityHash,
       planSnapshotHash,
-      String(input.offer.priceKopecks),
-      input.offer.currency,
-      String(input.offer.visitsIncluded),
+      String(offer.priceKopecks),
+      offer.currency,
+      String(offer.visitsIncluded),
     ]);
     const providerRequestIdentitySeedHash = this.hash([
       'p4-05.yookassa-request-seed.v1',
@@ -243,16 +259,19 @@ export class CustomerSubscriptionPurchaseShadowService {
       checkoutMode: 'initial_purchase',
       purchaseIntentIdentityHash,
       checkoutIdentityHash,
-      offerCode: input.offer.offerCode,
-      planCode: input.offer.planCode,
-      tier: input.offer.tier,
+      canonicalOfferId: offer.offerId,
+      offerValueVersionId: offer.offerValueVersionId,
+      offerValueSnapshotHash: offer.valueSnapshotHash,
+      offerCode: offer.templateKey,
+      planCode: offer.planCode,
+      tier: offer.tier,
       catalogVersion: CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
       planSnapshotHash,
       serviceScopeHash,
-      priceKopecks: input.offer.priceKopecks,
-      currency: input.offer.currency,
-      visitsIncluded: input.offer.visitsIncluded,
-      termDays: input.offer.termDays,
+      priceKopecks: offer.priceKopecks,
+      currency: offer.currency,
+      visitsIncluded: offer.visitsIncluded,
+      termDays: offer.termDays,
       paymentProvider: 'yookassa',
       providerRequestIdentitySeedHash,
       checkoutContractVersion: CUSTOMER_SUBSCRIPTION_CHECKOUT_CONTRACT_VERSION,
@@ -315,13 +334,15 @@ export class CustomerSubscriptionPurchaseShadowService {
         actionClass: 'initiate_customer_subscription_purchase',
         checkoutMode: 'initial_purchase',
         canonicalClientId: link.client.id,
-        offerCode: input.offer.offerCode,
-        planCode: input.offer.planCode,
-        tier: input.offer.tier,
-        priceKopecks: input.offer.priceKopecks,
-        currency: input.offer.currency,
-        visitsIncluded: input.offer.visitsIncluded,
-        termDays: input.offer.termDays,
+        canonicalOfferId: offer.offerId,
+        offerValueVersionId: offer.offerValueVersionId,
+        offerCode: offer.templateKey,
+        planCode: offer.planCode,
+        tier: offer.tier,
+        priceKopecks: offer.priceKopecks,
+        currency: offer.currency,
+        visitsIncluded: offer.visitsIncluded,
+        termDays: offer.termDays,
         planSnapshotHash,
         serviceScopeHash,
         checkoutIdentityHash,

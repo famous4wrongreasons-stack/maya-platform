@@ -80,6 +80,7 @@ type SubscriptionTerm = {
   status: string;
   termStartsAt: Date;
   termEndsAt: Date;
+  activationExecution: { safeResultSummaryJson: unknown } | null;
 };
 
 @Injectable()
@@ -199,6 +200,7 @@ export class CustomerSubscriptionUsageShadowService {
         status: true,
         termStartsAt: true,
         termEndsAt: true,
+        activationExecution: { select: { safeResultSummaryJson: true } },
       },
     });
     if (
@@ -432,6 +434,29 @@ export class CustomerSubscriptionUsageShadowService {
     tenantId: string,
     subscription: SubscriptionTerm,
   ): CustomerSubscriptionPurchaseOffer | null {
+    const activation = subscription.activationExecution?.safeResultSummaryJson;
+    if (
+      activation &&
+      typeof activation === 'object' &&
+      !Array.isArray(activation)
+    ) {
+      const offerCode = (activation as Record<string, unknown>).offerCode;
+      if (typeof offerCode !== 'string') return null;
+      const offer = CUSTOMER_SUBSCRIPTION_PURCHASE_OFFERS[offerCode];
+      if (!offer) return null;
+      const serviceScopeHash = this.hash([
+        'p4-05.subscription-service-scope.v1',
+        tenantId,
+        ...offer.serviceScopeRefs,
+      ]);
+      return subscription.planCode === offer.planCode &&
+        subscription.currency === offer.currency &&
+        subscription.visitsIncluded === offer.visitsIncluded &&
+        subscription.serviceScopeHash === serviceScopeHash &&
+        subscription.planSnapshotHash.length > 0
+        ? offer
+        : null;
+    }
     const matches = Object.values(CUSTOMER_SUBSCRIPTION_PURCHASE_OFFERS).filter(
       (offer) => {
         const serviceScopeHash = this.hash([
@@ -440,7 +465,7 @@ export class CustomerSubscriptionUsageShadowService {
           ...offer.serviceScopeRefs,
         ]);
         const planSnapshotHash = this.hash([
-          CUSTOMER_SUBSCRIPTION_PURCHASE_CATALOG_VERSION,
+          'p4-05.legacy-fixed-catalog.v1',
           tenantId,
           offer.offerCode,
           offer.planCode,

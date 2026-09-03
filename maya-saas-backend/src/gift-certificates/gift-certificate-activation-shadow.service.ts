@@ -101,6 +101,9 @@ type CheckoutSafeResult = {
   providerClientIdentityHash: string;
   checkoutIdentityHash: string;
   purchaseIntentIdentityHash: string;
+  canonicalOfferId: string;
+  offerValueVersionId: string;
+  offerValueSnapshotHash: string;
   offerCode: string;
   productCode: 'digital-gift-certificate';
   catalogVersion: string;
@@ -417,12 +420,15 @@ export class GiftCertificateActivationShadowService {
       checkoutExecutionId: checkout.id,
       checkoutIdentityHash: checkoutFacts.checkoutIdentityHash,
       purchaseIntentIdentityHash: checkoutFacts.purchaseIntentIdentityHash,
+      canonicalOfferId: checkoutFacts.canonicalOfferId,
+      offerValueVersionId: checkoutFacts.offerValueVersionId,
+      offerValueSnapshotHash: checkoutFacts.offerValueSnapshotHash,
       offerCode: offer.offerCode,
       productCode: offer.productCode,
       catalogVersion: GIFT_CERTIFICATE_PURCHASE_CATALOG_VERSION,
       offerSnapshotHash: checkoutFacts.offerSnapshotHash,
       denominationType: offer.denominationType,
-      nominalAmountKopecks: offer.nominalAmountKopecks,
+      nominalAmountKopecks: checkoutFacts.nominalAmountKopecks,
       currency: offer.currency,
       recipientSubjectHash: checkoutFacts.recipientSubjectHash,
       expiryDays: offer.expiryDays,
@@ -498,7 +504,7 @@ export class GiftCertificateActivationShadowService {
         issuanceIdentityHash,
         certificateIdentityHash,
         offerCode: offer.offerCode,
-        nominalAmountKopecks: offer.nominalAmountKopecks,
+        nominalAmountKopecks: checkoutFacts.nominalAmountKopecks,
         currency: offer.currency,
         recipientSubjectHash: checkoutFacts.recipientSubjectHash,
         issuedAt,
@@ -539,6 +545,9 @@ export class GiftCertificateActivationShadowService {
       'providerClientIdentityHash',
       'checkoutIdentityHash',
       'purchaseIntentIdentityHash',
+      'canonicalOfferId',
+      'offerValueVersionId',
+      'offerValueSnapshotHash',
       'offerCode',
       'productCode',
       'catalogVersion',
@@ -582,7 +591,8 @@ export class GiftCertificateActivationShadowService {
       facts.productCode === offer.productCode &&
       facts.catalogVersion === GIFT_CERTIFICATE_PURCHASE_CATALOG_VERSION &&
       facts.denominationType === offer.denominationType &&
-      facts.nominalAmountKopecks === offer.nominalAmountKopecks &&
+      facts.nominalAmountKopecks > 0 &&
+      facts.nominalAmountKopecks <= 500_000 &&
       facts.currency === offer.currency &&
       facts.expiryDays === offer.expiryDays &&
       facts.expiryPolicyVersion === GIFT_CERTIFICATE_EXPIRY_POLICY_VERSION &&

@@ -79,6 +79,9 @@ export interface P405ExecutionValue {
   checkoutIdentityHash?: string;
   purchaseIntentIdentityHash?: string;
   renewalIntentIdentityHash?: string;
+  canonicalOfferId?: string;
+  offerValueVersionId?: string;
+  offerValueSnapshotHash?: string;
   offerCode?: string;
   planCode?: string;
   tier?: string;
@@ -354,8 +357,8 @@ export class P405CustomerSubscriptionExecutableService {
           );
           return { value, safeResult: this.safe(value) };
         },
-        reconcile: async (_input, _previous, context) =>
-          this.reconcileLocalFact(context, actionClass),
+        reconcile: async (input, _previous, context) =>
+          this.reconcileLocalFact(context, actionClass, input),
       }),
     );
   }
@@ -486,6 +489,7 @@ export class P405CustomerSubscriptionExecutableService {
               : 'activate_customer_subscription',
             executionId,
             existing,
+            input,
           );
         }
         const clientId = this.text(
@@ -589,6 +593,7 @@ export class P405CustomerSubscriptionExecutableService {
             : 'activate_customer_subscription',
           executionId,
           term,
+          input,
         );
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
@@ -752,6 +757,9 @@ export class P405CustomerSubscriptionExecutableService {
     const expected: ReadonlyArray<[string, string]> = [
       ['canonicalClientId', 'canonicalClientId'],
       ['checkoutIdentityHash', 'checkoutIdentityHash'],
+      ['canonicalOfferId', 'canonicalOfferId'],
+      ['offerValueVersionId', 'offerValueVersionId'],
+      ['offerValueSnapshotHash', 'offerValueSnapshotHash'],
       ['offerCode', 'offerCode'],
       ['planCode', 'planCode'],
       ['tier', 'tier'],
@@ -1188,6 +1196,15 @@ export class P405CustomerSubscriptionExecutableService {
             ),
           }
         : {}),
+      canonicalOfferId: this.text(input.canonicalOfferId, 'canonicalOfferId'),
+      offerValueVersionId: this.text(
+        input.offerValueVersionId,
+        'offerValueVersionId',
+      ),
+      offerValueSnapshotHash: this.text(
+        input.offerValueSnapshotHash,
+        'offerValueSnapshotHash',
+      ),
       offerCode: this.text(input.offerCode, 'offerCode'),
       planCode: this.text(input.planCode, 'planCode'),
       tier: this.text(input.tier, 'tier'),
@@ -1280,12 +1297,14 @@ export class P405CustomerSubscriptionExecutableService {
       | 'initiate_customer_subscription_purchase'
       | 'initiate_customer_subscription_renewal'
     >,
+    input?: Record<string, unknown>,
   ) {
     if (!context) return { outcome: 'STILL_UNKNOWN' as const };
     const value = await this.valueForExecution(
       context.tenantId,
       context.executionId,
       actionClass,
+      input,
     );
     return value
       ? {
@@ -1303,6 +1322,7 @@ export class P405CustomerSubscriptionExecutableService {
       | 'initiate_customer_subscription_purchase'
       | 'initiate_customer_subscription_renewal'
     >,
+    input?: Record<string, unknown>,
   ): Promise<P405ExecutionValue | null> {
     if (
       actionClass === 'activate_customer_subscription' ||
@@ -1316,7 +1336,9 @@ export class P405CustomerSubscriptionExecutableService {
           },
         },
       });
-      return term ? this.termValue(actionClass, executionId, term) : null;
+      return term && input
+        ? this.termValue(actionClass, executionId, term, input)
+        : null;
     }
     if (actionClass === 'sync_customer_subscription_usage') {
       const usage = await this.prisma.customerSubscriptionUsage.findFirst({
@@ -1352,6 +1374,7 @@ export class P405CustomerSubscriptionExecutableService {
       termStartsAt: Date;
       termEndsAt: Date;
     },
+    input: Record<string, unknown>,
   ): P405ExecutionValue {
     return {
       actionClass,
@@ -1360,6 +1383,16 @@ export class P405CustomerSubscriptionExecutableService {
       canonicalClientId: term.clientId,
       previousSubscriptionId: term.previousSubscriptionId ?? undefined,
       termIdentityHash: term.termIdentityHash,
+      canonicalOfferId: this.text(input.canonicalOfferId, 'canonicalOfferId'),
+      offerValueVersionId: this.text(
+        input.offerValueVersionId,
+        'offerValueVersionId',
+      ),
+      offerValueSnapshotHash: this.text(
+        input.offerValueSnapshotHash,
+        'offerValueSnapshotHash',
+      ),
+      offerCode: this.text(input.offerCode, 'offerCode'),
       termStartsAt: term.termStartsAt.toISOString(),
       termEndsAt: term.termEndsAt.toISOString(),
       providerDispatches: 0,

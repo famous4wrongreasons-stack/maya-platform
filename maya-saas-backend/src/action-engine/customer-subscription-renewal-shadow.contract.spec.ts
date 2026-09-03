@@ -23,6 +23,9 @@ const canonicalInput = () => ({
   renewalWindowOpensAt: '2026-08-31T12:00:00.000Z',
   renewalIntentIdentityHash: 'renewal-intent-hash',
   checkoutIdentityHash: 'renewal-checkout-hash',
+  canonicalOfferId: 'membership-offer-id',
+  offerValueVersionId: 'membership-version-id',
+  offerValueSnapshotHash: 'membership-value-snapshot-hash',
   offerCode: 'haircut.senior',
   planCode: 'haircut',
   tier: 'senior',
@@ -59,7 +62,7 @@ describe('P4-05 customer subscription renewal Shadow contract', () => {
 
   it('rejects forged plan, value, dates, authority, and executable outcome facts', () => {
     for (const forged of [
-      { priceKopecks: 1 },
+      { priceKopecks: 600_001 },
       { currency: 'USD' },
       { planCode: 'complex' },
       { tier: 'top' },
