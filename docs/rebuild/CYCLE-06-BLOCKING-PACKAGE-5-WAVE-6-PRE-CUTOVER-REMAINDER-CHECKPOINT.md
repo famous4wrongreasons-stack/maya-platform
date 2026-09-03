@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 WAVE 6 PRE-CUTOVER REMAINDER
 
-Status: **CURRENT — Wave 6 safe-local proof PASS; cutover preflight STOP on requested owner/route mismatch; production remains 5/6**
+Status: **CURRENT — AC6 owner decision approved; cutover gates resumed; production remains 5/6 until verified deployment**
 
 Date: 2026-09-04. This checkpoint supersedes the Wave 6 Contract Stop remainder
 from `178b39f2` after explicit approval of Auth Retention Policy V1.
@@ -29,10 +29,9 @@ Completed:
 
 Exact remaining work:
 
-1. **Resolve the requested cutover owner/route mismatch.** Confirm that the
-   intended cutover retains the proven AC6 coordinator and names it truthfully,
-   or define the verification boundary for a new Action Engine integration.
-   No implementation change or new policy is inferred from the mismatch.
+1. **Owner mismatch resolved by explicit user decision.**
+   `CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-AC6-OWNER-DECISION.md` supersedes the
+   Action Engine requirement. Preserve the proven AC6 runtime at bf21d9d6.
 2. **Resume the authorized Wave 6 production runtime cutover after resolution.** Verify current
    HEAD/origin, schema, health and required deployment gates, then all actual
    Nest, CLI and Python launcher surfaces. The local candidate already routes
@@ -55,7 +54,7 @@ PACKAGE 5 WAVE 6 FAMILIES: A30
 PACKAGE 5 WAVE 6 ACTION CLASSES: 6
 PACKAGE 5 FAMILY INVENTORY COVERAGE: 13/13
 PACKAGE 5 FAMILIES REMAINING AFTER PLANNED WAVE 6 CUTOVER: 0
-READY FOR PACKAGE 5 WAVE 6 PRODUCTION RUNTIME CUTOVER: NO — REQUESTED OWNER/ROUTE MISMATCH
+READY FOR PACKAGE 5 WAVE 6 PRODUCTION RUNTIME CUTOVER: PENDING CURRENT DEPLOYMENT GATES; OWNER MISMATCH RESOLVED
 WAVE 6 ACTION CLASSES CUTOVER: 0/6
 PACKAGE 5 FAMILIES REMAINING IN PRODUCTION: 1 — A30
 REAL PRODUCTION BUSINESS/PROVIDER MUTATIONS: 0

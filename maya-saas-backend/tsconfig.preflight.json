@@ -9,6 +9,8 @@
     "noEmit": false
   },
   "include": [
+    "scripts/auth-retention-cleanup.ts",
+    "scripts/ai-runtime-maintenance.ts",
     "scripts/release-preflight.ts",
     "scripts/staff-identity-backfill.ts",
     "scripts/appointment-mirror-bootstrap.ts",

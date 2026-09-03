@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 WAVE 6 CUTOVER PREFLIGHT STOP
 
-Status: **STOP BEFORE DEPLOYMENT — requested Action Engine route differs from accepted AC6 candidate**
+Status: **HISTORICAL STOP — resolved by explicit user AC6 owner decision; see WAVE-6-AC6-OWNER-DECISION**
 
 Date: 2026-09-04 (Europe/Moscow). Accepted source checkpoint:
 `bf21d9d6fde99bd91a68e54bf655cbec911ac799`.
