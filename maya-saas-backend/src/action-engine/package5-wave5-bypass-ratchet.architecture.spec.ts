@@ -1,10 +1,100 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import ts from 'typescript';
+
 import { PACKAGE5_WAVE5_REGISTRATIONS } from './package5-wave5-executable.contract';
 
 const read = (path: string) =>
   readFileSync(join(process.cwd(), 'src', path), 'utf8');
+
+const isProductionSource = (path: string) =>
+  path.endsWith('.ts') && !path.endsWith('.spec.ts');
+
+/** Mask only the method token in the proven node:crypto HMAC chain. */
+function maskProvenHmacUpdate(code: string): string {
+  const fileName = '/wave5-recovery-surface.ts';
+  const source = ts.createSourceFile(
+    fileName,
+    code,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  const options: ts.CompilerOptions = { noLib: true, noResolve: true };
+  const host = ts.createCompilerHost(options);
+  host.getSourceFile = (path) => (path === fileName ? source : undefined);
+  const checker = ts.createProgram([fileName], options, host).getTypeChecker();
+  const tokens: Array<{ start: number; end: number }> = [];
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      node.expression.name.text === 'update'
+    ) {
+      const receiver = node.expression.expression;
+      const digest = node.parent;
+      if (
+        ts.isCallExpression(receiver) &&
+        ts.isIdentifier(receiver.expression) &&
+        receiver.arguments.length === 2 &&
+        ts.isStringLiteral(receiver.arguments[0]) &&
+        receiver.arguments[0].text === 'sha256' &&
+        ts.isPropertyAccessExpression(digest) &&
+        digest.name.text === 'digest' &&
+        ts.isCallExpression(digest.parent) &&
+        digest.parent.arguments.length === 1 &&
+        ts.isStringLiteral(digest.parent.arguments[0]) &&
+        digest.parent.arguments[0].text === 'hex'
+      ) {
+        const declarations = checker.getSymbolAtLocation(
+          receiver.expression,
+        )?.declarations;
+        const binding =
+          declarations?.length === 1 ? declarations[0] : undefined;
+        if (
+          binding &&
+          ts.isImportSpecifier(binding) &&
+          !binding.isTypeOnly &&
+          (binding.propertyName ?? binding.name).text === 'createHmac'
+        ) {
+          const clause = binding.parent.parent;
+          const imported = clause.parent;
+          if (
+            !clause.isTypeOnly &&
+            ts.isImportDeclaration(imported) &&
+            ts.isStringLiteral(imported.moduleSpecifier) &&
+            imported.moduleSpecifier.text === 'node:crypto'
+          ) {
+            tokens.push({
+              start: node.expression.name.getStart(source),
+              end: node.expression.name.getEnd(),
+            });
+          }
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  for (const token of tokens.sort((a, b) => b.start - a.start)) {
+    code =
+      code.slice(0, token.start) +
+      ' '.repeat(token.end - token.start) +
+      code.slice(token.end);
+  }
+  return code;
+}
+
+function readSurfaceViolations(code: string): string[] {
+  const masked = maskProvenHmacUpdate(code);
+  return [
+    ...masked
+      .slice(masked.indexOf('async report('))
+      .matchAll(
+        /this\.factPlane\.|\.(create(?:Many)?|update(?:Many)?|upsert|delete(?:Many)?)\s*\(/g,
+      ),
+  ].map((match) => match[0]);
+}
 
 describe('Package 5 Wave 5 fact-plane and bypass ratchet', () => {
   const canonical = read('package5-wave5/package5-wave5.service.ts');
@@ -99,7 +189,7 @@ describe('Package 5 Wave 5 fact-plane and bypass ratchet', () => {
           : [join(directory, entry.name)],
       );
     const writers = visit(join(process.cwd(), 'src'))
-      .filter((path) => path.endsWith('.ts') && !path.endsWith('.spec.ts'))
+      .filter(isProductionSource)
       .filter((path) =>
         /recovery(?:Touchpoint|Conversion)\s*\.(?:create|update|upsert|delete)/.test(
           readFileSync(path, 'utf8'),
@@ -108,10 +198,7 @@ describe('Package 5 Wave 5 fact-plane and bypass ratchet', () => {
     expect(writers).toEqual([
       join(process.cwd(), 'src/package5-wave5/package5-wave5.service.ts'),
     ]);
-    const report = recovery.slice(recovery.indexOf('async report('));
-    expect(report).not.toMatch(
-      /this\.factPlane\.|\.(create|update|upsert|delete)\s*\(/,
-    );
+    expect(readSurfaceViolations(recovery)).toEqual([]);
   });
 
   it('keeps webhook, scheduler and catch-up as A31 triggers of one comparator', () => {
@@ -151,5 +238,87 @@ describe('Package 5 Wave 5 fact-plane and bypass ratchet', () => {
     expect(canonical).toContain('OWNER_APPROVAL_REQUIRED');
     expect(canonical).toContain('sourceEvidenceHash');
     expect(canonical).toContain('immutableSourceFacts: true');
+  });
+});
+
+describe('Wave 5 cryptographic update synchronization regressions', () => {
+  const recovery = read('recovery/recovery.service.ts');
+  const insertInReport = (statement: string) =>
+    recovery.replace(
+      'this.assertReportRange(from, to);',
+      `this.assertReportRange(from, to);\n${statement}`,
+    );
+
+  it('identifies the exact old failing HMAC match and permits only its crypto import binding', () => {
+    const oldSurface = recovery.slice(recovery.indexOf('async report('));
+    const matches = [
+      ...oldSurface.matchAll(/\.(create|update|upsert|delete)\s*\(/g),
+    ];
+    expect(matches.map((match) => match[0])).toEqual(['.update(']);
+    expect(oldSurface).toContain("createHmac('sha256', secret)");
+    expect(readSurfaceViolations(recovery)).toEqual([]);
+    expect(
+      readSurfaceViolations(
+        recovery.replace("from 'node:crypto'", "from './business-writer'"),
+      ),
+    ).toEqual(['.update(']);
+    expect(
+      readSurfaceViolations(
+        recovery.replace(
+          'private subjectRefForPhone(phone: string)',
+          'private subjectRefForPhone(phone: string, createHmac: Function)',
+        ),
+      ),
+    ).toEqual(['.update(']);
+  });
+
+  it('rejects Prisma, business and provider updates next to the permitted HMAC call', () => {
+    for (const statement of [
+      'await this.prisma.recoveryConversion.update({ data: { touchpointId: next } });',
+      'await businessState.update({ attribution: next });',
+      'await provider.update({ attribution: next });',
+      'await this.prisma.recoveryConversion\n.updateMany({ data: { status: next } });',
+    ]) {
+      expect(readSurfaceViolations(insertInReport(statement))).toHaveLength(1);
+    }
+  });
+
+  it('rejects direct attribution mutation even inside the HMAC argument', () => {
+    const malicious = recovery.replace(
+      "createHmac('sha256', secret)",
+      "createHmac('sha256', this.prisma.recoveryConversion.update({ data: { touchpointId: next } }))",
+    );
+    expect(readSurfaceViolations(malicious)).toEqual(['.update(']);
+  });
+
+  it('rejects legacy writes and fact-plane mutation initiated by the report', () => {
+    expect(
+      readSurfaceViolations(
+        insertInReport('await legacyRecovery.update({ touchpointId: next });'),
+      ),
+    ).toEqual(['.update(']);
+    expect(
+      readSurfaceViolations(
+        insertInReport('await this.factPlane.acceptBooking(observation);'),
+      ),
+    ).toEqual(['this.factPlane.']);
+    expect(
+      readSurfaceViolations(
+        insertInReport('await this.prisma.recoveryConversion.upsert({});'),
+      ),
+    ).toEqual(['.upsert(']);
+  });
+
+  it('excludes only exact spec files and never a test-named production directory or helper', () => {
+    expect(isProductionSource('src/recovery/recovery.service.spec.ts')).toBe(
+      false,
+    );
+    for (const path of [
+      'src/test/recovery.service.ts',
+      'src/recovery/test-helper.ts',
+      'src/recovery/recovery.spec-helper.ts',
+    ]) {
+      expect(isProductionSource(path)).toBe(true);
+    }
   });
 });
