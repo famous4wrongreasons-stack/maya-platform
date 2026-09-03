@@ -160,6 +160,11 @@ import {
   type P409Registration,
 } from './p4-09-value-configuration-executable.contract';
 import {
+  P4_10_INPUT_CONTRACT,
+  P4_10_REGISTRATIONS,
+  type P410Registration,
+} from './p4-10-commerce-credential-executable.contract';
+import {
   REFERRAL_CREATE_SHADOW_CAPABILITY,
   REFERRAL_CREATE_SHADOW_INPUT_CONTRACT,
   referralCreateShadowNormalizer,
@@ -1365,6 +1370,58 @@ function p409Capability(
     },
     transportIdentityVersion: 1,
     executorKey: shadow ? 'shadow.none' : 'business-content.canonical-value',
+    executorVersion: 1,
+    payloadRetentionMs: shadow ? 7 * DAY : 30 * DAY,
+    auditRetentionMs: 7 * 365 * DAY,
+    normalizeInput: (value) => registration.normalizeInput(value),
+  };
+}
+
+function p410Capability(
+  registration: P410Registration,
+  shadow: boolean,
+): RegisteredActionCapabilityV1 {
+  return {
+    capability: shadow
+      ? registration.shadowCapability
+      : registration.executableCapability,
+    capabilityVersion: 1,
+    actionClass: registration.actionClass,
+    normalizedInputContract: P4_10_INPUT_CONTRACT,
+    targetKind: 'commerce_integration',
+    allowedSourceTypes: registration.allowedSourceTypes,
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'credential_authority',
+      'tenant_wide',
+      'one_provider',
+      'encrypted_at_rest',
+      ...(registration.operation === 'disconnect' ? ['destructive'] : []),
+      ...(shadow ? ['shadow_only'] : ['local_atomic']),
+    ],
+    policyKey: `chapter6.package4.${registration.actionClass}.${shadow ? 'shadow' : 'execute'}`,
+    policyVersion: 1,
+    policyDecision: shadow
+      ? ActionPolicyDecision.SHADOW_ONLY
+      : ActionPolicyDecision.ALLOW,
+    autonomyLevel: shadow ? 'L2_5_SHADOW' : 'L2_SERVER_POLICY',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'package4.commerce-credentials.read-verify-then-local-transaction',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'package4.commerce-credentials.provider-read-not-required',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: shadow ? 'shadow.none' : 'commerce.canonical-credentials',
     executorVersion: 1,
     payloadRetentionMs: shadow ? 7 * DAY : 30 * DAY,
     auditRetentionMs: 7 * 365 * DAY,
@@ -3023,6 +3080,12 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   ),
   ...P4_09_REGISTRATIONS.map((registration) =>
     p409Capability(registration, false),
+  ),
+  ...P4_10_REGISTRATIONS.map((registration) =>
+    p410Capability(registration, true),
+  ),
+  ...P4_10_REGISTRATIONS.map((registration) =>
+    p410Capability(registration, false),
   ),
   ...P4_06_EXECUTABLE_REGISTRATIONS.map(p406ExecutableCapability),
   p405SchedulerEnvelopeCapability(),

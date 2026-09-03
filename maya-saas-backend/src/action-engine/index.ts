@@ -36,6 +36,7 @@ export * from './p4-06-gift-certificate-executable.contract';
 export * from './p4-07-expense-executable.contract';
 export * from './p4-08-tenant-billing-executable.contract';
 export * from './p4-09-value-configuration-executable.contract';
+export * from './p4-10-commerce-credential-executable.contract';
 export * from './referral-create-shadow.contract';
 export * from './referral-resolve-shadow.contract';
 export * from './referral-reward-issue-shadow.contract';
