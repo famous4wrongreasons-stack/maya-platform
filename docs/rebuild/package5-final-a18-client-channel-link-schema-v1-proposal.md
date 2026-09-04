@@ -1,6 +1,12 @@
 # Package 5 Final — A18 Client-Channel Binding Schema Proposal V1
 
-Status: **PROPOSED SCHEMA — NOT IMPLEMENTED / NOT APPLIED**
+Status: **APPROVED after `55380a90` — implementation tracked in the foundation report**
+
+The user approved this exact one-model design and authorized foundation proof,
+conditional production migration, then A18/A26 remediation and the full final
+gate. The original proposal text below is preserved; its proposal-only STOP is
+superseded by that approval. Current implementation status is in
+`CYCLE-06-BLOCKING-PACKAGE-5-A18-CLIENT-CHANNEL-LINK-FOUNDATION-REPORT.md`.
 
 Starting checkpoint: `9ae29bed`. Date: 2026-09-04.
 

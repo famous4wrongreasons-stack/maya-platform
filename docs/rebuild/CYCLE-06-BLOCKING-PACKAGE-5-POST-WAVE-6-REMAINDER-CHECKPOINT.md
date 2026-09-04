@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — A18 binding V1 contract COMPLETE; schema insufficient; STOP after minimal schema proposal**
+Status: **CURRENT — A18 schema APPROVED; local foundation PASS; production migration gate then A18/A26 remediation**
 
 Date: 2026-09-04. This supersedes the Wave 6 pre-cutover remainder after the
 explicit AC6 owner decision and successful production cutover from gated source
@@ -32,6 +32,13 @@ schema/runtime are not implemented. Current documents:
 `CYCLE-06-BLOCKING-PACKAGE-5-FINAL-A18-BINDING-V1-SCHEMA-ASSESSMENT.md` and
 `package5-final-a18-client-channel-link-schema-v1-proposal.md`.
 
+The user accepted `55380a90` and explicitly approved the exact one-model
+ClientChannelLink schema, its foundation/migration cycle and conditional automatic
+continuation through A18/A26 remediation and the full final gate. Local foundation
+proof is now 32/32, targeted checks 24/24, separate clean replay/validate,
+typechecks/lint and preflight build PASS. Production migration is next; no runtime
+cutover has happened. See the Client Channel Link Foundation Report.
+
 Production release: `20260904-c06-p5-wave6-cutover-3b545671`.
 Wave 6 behavioral proof remains the accepted `bf21d9d6` proof; it was not rerun.
 The A30 owner is AC6 maintenance coordinator with MaintenanceRun/ItemClaim,
@@ -53,11 +60,10 @@ checkpoints; resolve the aggregate blockers without inventing another wave.
 
 Remaining work, in order:
 
-1. Review/approve the **minimal A18 ClientChannelLink schema proposal**. The
-   binding V1 business contract is COMPLETE. Existing schema is insufficient;
-   no new schema is approved/applied yet. After approval, complete the additive
-   binding foundation with required isolation/concurrency/evidence proof and
-   migration gates. No heuristic backfill or runtime workaround.
+1. Complete the authorized **A18 production migration gate/apply** for the
+   approved ClientChannelLink foundation. Exact expected-only pending migration,
+   drift NONE and health/readiness are required. After apply verify pending 0,
+   approved-schema drift NONE and zero backfilled links. No heuristic linking.
 2. Complete the **already authorized A18/A26 remediation** for all three paths,
    final bypass ratchets and targeted adversarial proofs. Retain D2-A/D3-A;
    mandatory local/deployment gates precede release; production verification is
@@ -90,11 +96,13 @@ MAINTENANCE RUN/ITEM CLAIM OWNERSHIP: ENFORCED
 AUTH RETENTION POLICY V1: ENFORCED
 PACKAGE 5 COMPLETE: NO
 PACKAGE 5 FINAL ADVERSARIAL VERIFICATION: FAIL
-PACKAGE 5 FINAL A18/A26 REMEDIATION: BLOCKED — SCHEMA PROPOSAL STOP
+PACKAGE 5 FINAL A18/A26 REMEDIATION: IN PROGRESS — LOCAL FOUNDATION PASS
 A18 CLIENT-CHANNEL BINDING CONTRACT: COMPLETE
 EXISTING SCHEMA SUFFICIENT: NO
 ADDITIONAL SCHEMA REQUIRED: YES
-A18 CONSENT REMEDIATION CAN RESUME: NO
+A18 SCHEMA V1: APPROVED
+A18 LOCAL FOUNDATION PROOF: PASS
+A18 CONSENT REMEDIATION CAN RESUME: AFTER PRODUCTION MIGRATION GATE/APPLY
 UNRESOLVED ACCEPTED PRODUCTION BLOCKER PATHS: 3
 SCHEMA CHANGES APPLIED IN REMEDIATION: 0
 PRODUCTION DEPLOYMENT IN REMEDIATION: NO
@@ -110,7 +118,8 @@ OWNED PLAYWRIGHT/CHROME PROCESSES REMAINING: 0
 OWNED TEMP DATABASES REMAINING: 0
 ```
 
-Current schema proposal STOP: reports → commit/push → HEAD=origin → STOP. After
-schema approval and binding foundation completion, remediation and automatic full
-Final Package 5 Gate resumption remain as listed above. Chapter 6 completion
+The former schema proposal STOP is superseded by explicit approval. Continue the
+authorized foundation/apply, remediation and automatic full Final Package 5 Gate
+as listed above; stop on a new business/schema blocker or new final-gate bypass.
+Chapter 6 completion
 acceptance stays separate; Chapter 7 is not started automatically.
