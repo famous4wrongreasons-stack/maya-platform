@@ -22,6 +22,7 @@ export interface VerifiedClientChannelProof {
   verifier: string;
   channelControlProofHash: string;
   clientAuthorityProofHash: string;
+  deliveryAddressEncrypted?: string;
   validUntil: Date;
   supersedesLinkId?: string;
 }
@@ -51,6 +52,8 @@ export interface ClientChannelLinkVerifier {
 const digest = (value: unknown) =>
   createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const HEX = /^[0-9a-f]{64}$/;
+const ENCRYPTED_ADDRESS =
+  /^[A-Za-z0-9_-]{16}\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]+$/;
 
 export async function lockClientChannelIdentity(
   tx: Tx,
@@ -135,6 +138,7 @@ export class ClientChannelLinkService {
       throw new ForbiddenException(
         'Verified Client linking evidence is incomplete',
       );
+    this.assertEncryptedAddress(proof.deliveryAddressEncrypted);
     const evidence = {
       contract: 'a18.client-channel-verification.v1',
       verifier: proof.verifier,
@@ -193,12 +197,15 @@ export class ClientChannelLinkService {
       const [clock] = await tx.$queryRaw<Array<{ now: Date }>>(
         Prisma.sql`SELECT (clock_timestamp() AT TIME ZONE 'UTC')::timestamp(3) AS now`,
       );
+      if (proof.deliveryAddressEncrypted)
+        await this.authorizeDeliveryWrite(tx, proof.providerSubjectHash);
       const link = await tx.clientChannelLink.create({
         data: {
           tenantId,
           clientId: proof.clientId,
           provider: proof.provider,
           providerSubjectHash: proof.providerSubjectHash,
+          deliveryAddressEncrypted: proof.deliveryAddressEncrypted,
           verificationMethod: proof.method,
           verificationIdentityHash: proof.verificationIdentityHash,
           verificationEvidenceJson: evidence,
@@ -211,6 +218,44 @@ export class ClientChannelLinkService {
       return { link, resumed: false };
     };
     return transaction ? work(transaction) : this.serializable(work);
+  }
+
+  /** Internal verified-channel boundary. Ciphertext never becomes identity;
+   * the transaction-local guard is bound to the canonical subject HMAC. */
+  async persistDeliveryAddressInTransaction(
+    tx: Tx,
+    input: {
+      tenantId: string;
+      linkId: string;
+      provider: ClientChannelProvider;
+      providerSubjectHash: string;
+      deliveryAddressEncrypted: string;
+    },
+  ) {
+    const tenantId = this.context.assertTenantId(input.tenantId);
+    this.assertSubject(input.provider, input.providerSubjectHash);
+    this.assertEncryptedAddress(input.deliveryAddressEncrypted);
+    await lockClientChannelIdentity(
+      tx,
+      tenantId,
+      input.provider,
+      input.providerSubjectHash,
+    );
+    const link = await tx.clientChannelLink.findUnique({
+      where: { id_tenantId: { id: input.linkId, tenantId } },
+    });
+    if (
+      !link ||
+      link.revokedAt ||
+      link.provider !== input.provider ||
+      link.providerSubjectHash !== input.providerSubjectHash
+    )
+      throw new ForbiddenException('Verified active Client channel required');
+    await this.authorizeDeliveryWrite(tx, input.providerSubjectHash);
+    return tx.clientChannelLink.update({
+      where: { id: link.id },
+      data: { deliveryAddressEncrypted: input.deliveryAddressEncrypted },
+    });
   }
 
   /** Internal challenge coordinator boundary: caller owns the same transaction. */
@@ -361,6 +406,28 @@ export class ClientChannelLinkService {
   private assertSubject(provider: string, subjectHash: string) {
     if (!['maya_user', 'telegram'].includes(provider) || !HEX.test(subjectHash))
       throw new ForbiddenException('Authenticated channel identity is invalid');
+  }
+
+  private assertEncryptedAddress(value: string | undefined) {
+    if (
+      value !== undefined &&
+      (value.length < 42 ||
+        value.length > 512 ||
+        !ENCRYPTED_ADDRESS.test(value))
+    )
+      throw new ForbiddenException(
+        'Verified encrypted delivery address required',
+      );
+  }
+
+  private async authorizeDeliveryWrite(tx: Tx, subjectHash: string) {
+    await tx.$executeRaw(Prisma.sql`
+      SELECT set_config(
+        'maya.client_channel_delivery_subject_hash',
+        ${subjectHash},
+        true
+      )
+    `);
   }
 
   private assertValid(validUntil: Date) {

@@ -18,6 +18,7 @@ export * from './customer-subscription-usage-shadow.contract';
 export * from './customer-subscription-expiry-shadow.contract';
 export * from './customer-subscription-cancellation-shadow.contract';
 export * from './customer-subscription-revocation-shadow.contract';
+export * from './client-wanted-slot.contract';
 export * from './gift-certificate-purchase-shadow.contract';
 export * from './gift-certificate-activation-shadow.contract';
 export * from './gift-certificate-redemption-shadow.contract';

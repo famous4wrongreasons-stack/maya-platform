@@ -40,6 +40,8 @@ export interface AuthenticatedClientChannel {
   tenantId: string;
   provider: ClientChannelProvider;
   providerSubjectHash: string;
+  /** Ephemeral authenticated delivery address. Never write to evidence/logs. */
+  deliveryAddress: string;
   channelControlProofHash: string;
   validUntil: Date;
 }
@@ -178,6 +180,9 @@ export class ClientLinkChallengeService {
         verifier: 'a18.client-link-challenge.v1',
         channelControlProofHash: currentChannel.channelControlProofHash,
         clientAuthorityProofHash: challenge.issuanceEvidenceHash,
+        deliveryAddressEncrypted: this.encryption.encrypt(
+          currentChannel.deliveryAddress,
+        ),
         validUntil: new Date(
           Math.min(
             challenge.expiresAt.getTime(),

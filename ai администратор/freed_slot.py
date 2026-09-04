@@ -26,6 +26,7 @@ from telegram.error import Forbidden, BadRequest
 from telegram.ext import Application
 
 import database
+import legacy_wanted_slot_bridge
 from maya_recovery_bridge import publish_recovery_touchpoint
 from yclients import YClientsAPI
 
@@ -352,7 +353,12 @@ async def alert_admins_new_waitlist(app: Application) -> dict:
     return {"pending": len(pending), "alerted": alerted}
 
 
-async def offer_freed_slot(app: Application, staff_id: int, slot_dt: datetime) -> dict:
+async def offer_freed_slot(
+    app: Application,
+    staff_id: int,
+    slot_dt: datetime,
+    source_event_id: str | None = None,
+) -> dict:
     """
     Главная функция. Вызывается webhook'ом отмены.
     Находит кандидатов и шлёт им предложение.
@@ -362,76 +368,32 @@ async def offer_freed_slot(app: Application, staff_id: int, slot_dt: datetime) -
         logger.info(f"freed_slot: слот {slot_dt} в прошлом — пропускаем")
         return {"status": "slot_in_past"}
 
-    if _in_quiet_hours():
-        logger.info(f"freed_slot: тихий час, не шлём (now={datetime.now().hour})")
-        return {"status": "quiet_hours"}
-
     staff_name = _master_name(staff_id)
     slot_iso = slot_dt.isoformat(timespec="minutes")
     sent, blocked, errors, wl_sent = 0, 0, 0, 0
     notified_chats = set()
 
-    # 1) ЛИСТ ОЖИДАНИЯ — клиенты, которые явно спрашивали ЭТО время. Им — первым.
+    # 1) Canonical B9 exact-time interests. Backend owns Client identity,
+    # ordering, fan-out, consent/preferences and verified delivery endpoints.
     try:
-        waitlist = database.get_slot_waitlist(staff_id, slot_iso, tolerance_min=20)
+        canonical = await __import__("asyncio").to_thread(
+            legacy_wanted_slot_bridge.match_available_slot,
+            staff_id,
+            slot_dt,
+            source_event_id or f"legacy-freed-slot:{staff_id}:{slot_iso}",
+        )
     except Exception as e:
-        logger.error(f"freed_slot: waitlist lookup: {e}")
-        waitlist = []
-    wl_ids = []
-    wl_notified_info: list[tuple[str, str]] = []   # (имя, телефон) — для прозвона Антоном
-    for w in waitlist[:3]:                       # это люди, которые ПРОСИЛИ — но без фанатизма
-        chat = w.get("chat_id")
-        if not chat or chat in notified_chats:
-            continue
-        # Персональные настройки: даже из листа ожидания уважаем явный opt-out
-        # «освободилось окно» (дефолт ON — кто просил, тому шлём как раньше).
-        try:
-            if database.get_notify_prefs(w["client_id"]).get("freed_slot") is False:
-                continue
-        except Exception:
-            pass
-        cl = database.get_client(chat) or {}
-        name = _first_name(cl.get("name")) or "клиент"
-        phone = cl.get("phone") or "—"
-        text, kb = _build_message(name, staff_name, slot_dt, staff_id, waited=True)
-        try:
-            await app.bot.send_message(chat, text, parse_mode="Markdown", reply_markup=kb)
-            database.log_freed_slot_offer(client_id=w["client_id"], staff_id=staff_id,
-                                          slot_datetime=slot_iso, action="sent")
-            await publish_recovery_touchpoint(
-                phone=phone,
-                kind="freed_slot",
-                source_seed=f"waitlist:{w['client_id']}:{staff_id}:{slot_iso}",
-                attribution_window_days=7,
-            )
-            notified_chats.add(chat); wl_ids.append(w["id"]); wl_sent += 1; sent += 1
-            wl_notified_info.append((name, phone))
-            logger.info(f"freed_slot: ⏳✅ лист ожидания {name} (chat={chat}, slot={slot_dt})")
-        except (Forbidden, BadRequest) as e:
-            wl_ids.append(w["id"]); blocked += 1
-            # клиент не получит пуш (заблокировал бота) — тем важнее прозвон Антоном
-            wl_notified_info.append((name + " (не получил пуш)", phone))
-            logger.info(f"freed_slot: ⏳🚫 {name}: {e}")
-        except Exception as e:
-            errors += 1
-            logger.error(f"freed_slot: ⏳❌ {name}: {e}")
-    if wl_ids:
-        try:
-            database.mark_slot_waitlist_notified(wl_ids)
-        except Exception as e:
-            logger.error(f"freed_slot: mark_notified: {e}")
-    # Точка B: слот из листа ожидания освободился — сообщаем Антону (прозвонить).
-    if wl_notified_info:
-        master_first = staff_name.split()[0] if staff_name else "мастеру"
-        lines = "\n".join(f"• {n} — `{p}`" for n, p in wl_notified_info)
-        try:
-            await _notify_admins(app, (
-                f"⏳✅ *Освободился слот из листа ожидания*\n\n"
-                f"🗓 *{_format_slot(slot_dt)}* · {master_first}\n"
-                f"Майя оповестила ждавших — можешь прозвонить, вдруг не увидят:\n{lines}"
-            ))
-        except Exception as e:
-            logger.error(f"freed_slot: admin freed-slot notify: {e}")
+        logger.error(f"freed_slot: canonical wanted-slot match failed: {type(e).__name__}")
+        canonical = {"matched": 0, "outcomes": []}
+    wl_sent = sum(
+        1 for item in canonical.get("outcomes", [])
+        if isinstance(item, dict) and item.get("status") == "notified"
+    )
+    sent += wl_sent
+
+    if _in_quiet_hours():
+        logger.info(f"freed_slot: тихий час для cycle scoring (now={datetime.now().hour})")
+        return {"status": "quiet_hours", "waitlist_sent": wl_sent}
 
     # 2) Скоринг по циклу — добиваем оставшихся (тот же мастер + «пора стричься»)
     candidates = find_candidates(staff_id, slot_dt)
@@ -463,7 +425,7 @@ async def offer_freed_slot(app: Application, staff_id: int, slot_dt: datetime) -
             errors += 1
             logger.error(f"freed_slot: ❌ {c['name']}: {e}")
 
-    if sent == 0 and not waitlist and not candidates:
+    if sent == 0 and not canonical.get("outcomes") and not candidates:
         logger.info(f"freed_slot: кандидатов нет для staff_id={staff_id} @ {slot_dt}")
         return {"status": "no_candidates"}
 

@@ -2074,15 +2074,16 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
             staff_id = _resolve_staff_id(staff_name)
             if not staff_id:
                 return json.dumps({"status": "error", "message": f"Мастер '{staff_name}' не найден"}, ensure_ascii=False)
-            if not user_id:
-                return json.dumps({"status": "skip", "message": "Нет клиента для запоминания"}, ensure_ascii=False)
-            slot_iso = str(tool_input.get("datetime_str") or "").replace(" ", "T")[:16]
             saved = False
             try:
-                client_id = database.get_or_create_client(user_id)
-                saved = database.add_slot_interest(client_id, user_id, staff_id, slot_iso)
+                from legacy_wanted_slot_bridge import remember_wanted_slot
+                receipt = remember_wanted_slot(
+                    staff_id,
+                    str(tool_input.get("datetime_str") or ""),
+                )
+                saved = receipt.get("outcome") in ("created", "already_active")
             except Exception as e:
-                logger.error(f"remember_wanted_slot: {e}")
+                logger.error(f"remember_wanted_slot canonical command failed: {type(e).__name__}")
             result = {
                 "status": "saved" if saved else "error",
                 "instruction": (
@@ -2169,35 +2170,16 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 ),
             }
         elif tool_name == "get_referral_link":
-            if not user_id:
-                result = {"status": "need_login",
-                          "message": "Персональная ссылка доступна после входа в приложение."}
-            else:
-                try:
-                    import referral
-                    client_id = database.get_or_create_client(user_id)
-                    code = referral.get_or_create_ref_code(client_id)
-                    bot_username = getattr(_cfg, "BOT_USERNAME", "malesthetic_bot")
-                    link = referral.build_ref_link(code, bot_username)
-                    pct = referral.REFERRAL_DISCOUNT_PERCENT
-                    result = {
-                        "status": "ok",
-                        "referral_link": link,
-                        "discount_percent": pct,
-                        "how_it_works": (
-                            f"Друг переходит по ссылке и записывается. После его первого "
-                            f"визита оба получаете скидку {pct}% на 30 дней."
-                        ),
-                        "instruction": (
-                            "Дай ссылку клиенту как есть и коротко объясни условие "
-                            f"(−{pct}% обоим после первого визита друга). В голосе предложи "
-                            "открыть чат/приложение, чтобы скопировать ссылку."
-                        ),
-                    }
-                except Exception as e:
-                    logger.error(f"get_referral_link: {e}")
-                    result = {"status": "error",
-                              "message": "Не удалось сформировать ссылку, попробуйте позже."}
+            from legacy_wanted_slot_bridge import read_referral_presentation
+            presentation = read_referral_presentation()
+            result = {
+                "status": "unavailable",
+                "referral_link": None,
+                "message": "Персональная реферальная ссылка сейчас недоступна.",
+                "business_mutations": 0,
+            }
+            if presentation.get("status") != "unavailable":
+                result["status"] = "unavailable"
         elif tool_name == "request_client_contact":
             # Сигнал бэкенду показать защищённую кнопку «Поделиться контактом».
             # Сами ПД здесь не трогаем — их безопасно соберёт Telegram-кнопка,

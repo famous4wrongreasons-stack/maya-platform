@@ -70,6 +70,14 @@ export class ClientChannelController {
   ) {
     return this.runtime.submitConsent(mayaProof(authorization), body);
   }
+  @Post('delivery-endpoint/refresh')
+  refreshDeliveryEndpoint(
+    @Headers('authorization') authorization: string | undefined,
+    @Body() body: unknown,
+  ) {
+    empty(body);
+    return this.runtime.refreshDeliveryAddress(mayaProof(authorization));
+  }
   @Get('status')
   status(@Headers('authorization') authorization: string | undefined) {
     return this.runtime.status(mayaProof(authorization));
@@ -160,6 +168,10 @@ export class LegacyClientChannelController {
         );
       if (operation === 'consent')
         return this.runtime.submitConsent(input.channelProof, input.payload);
+      if (operation === 'refresh-delivery') {
+        empty(input.payload);
+        return this.runtime.refreshDeliveryAddress(input.channelProof);
+      }
       if (operation === 'status') {
         empty(input.payload);
         return this.runtime.status(input.channelProof);

@@ -10,6 +10,13 @@ const migration = readFileSync(
   ),
   'utf8',
 );
+const orderingMigration = readFileSync(
+  join(
+    root,
+    'prisma/migrations/20260905020000_client_wanted_slot_eligible_order_v1/migration.sql',
+  ),
+  'utf8',
+);
 
 describe('B9 approved wanted-slot schema V1', () => {
   it('adds exactly one Client-owned model with no backfill', () => {
@@ -34,11 +41,14 @@ describe('B9 approved wanted-slot schema V1', () => {
     expect(migration).toContain('NEW."matchToleranceMinutes" := 0');
     expect(migration).toContain('active_count >= 10');
     expect(migration).toContain('CLIENT_WANTED_SLOT_LIMIT_EXCEEDED');
-    expect(migration).toContain(
+    expect(orderingMigration).toContain(
       'Wanted slot matching must use earliest eligible ordering',
     );
-    expect(migration).toContain('WANTED_SLOT_MATCH_FAN_OUT_EXCEEDED');
-    expect(migration).toContain('>= 3');
+    expect(orderingMigration).toContain('WANTED_SLOT_MATCH_FAN_OUT_EXCEEDED');
+    expect(orderingMigration).toContain('>= 3');
+    expect(orderingMigration).toContain(
+      "current_setting('maya.client_wanted_slot_eligible_ids', true)",
+    );
   });
 
   it('protects tenant relations, history, lifecycle and physical deletion', () => {

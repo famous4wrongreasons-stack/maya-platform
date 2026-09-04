@@ -6,6 +6,7 @@ import {
   ActionPolicyDecision,
   ActionReconciliationState,
   PrismaClient,
+  Prisma,
 } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
@@ -276,23 +277,37 @@ async function run() {
     orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
   });
   const event = 'synthetic-availability-event';
+  const eligibleIds = ordered
+    .slice(0, 3)
+    .map((row) => row.id)
+    .join(',');
   for (const row of ordered.slice(0, 3))
-    await db.clientWantedSlotInterest.update({
-      where: { id: row.id },
-      data: {
-        status: 'MATCHED',
-        matchedSourceEventId: event,
-        matchedAt: new Date(),
-      },
+    await db.$transaction(async (tx) => {
+      await tx.$executeRaw(Prisma.sql`
+        SELECT set_config('maya.client_wanted_slot_eligible_ids', ${eligibleIds}, true)
+      `);
+      await tx.clientWantedSlotInterest.update({
+        where: { id: row.id },
+        data: {
+          status: 'MATCHED',
+          matchedSourceEventId: event,
+          matchedAt: new Date(),
+        },
+      });
     });
   await assert.rejects(
-    db.clientWantedSlotInterest.update({
-      where: { id: ordered[3].id },
-      data: {
-        status: 'MATCHED',
-        matchedSourceEventId: event,
-        matchedAt: new Date(),
-      },
+    db.$transaction(async (tx) => {
+      await tx.$executeRaw(Prisma.sql`
+        SELECT set_config('maya.client_wanted_slot_eligible_ids', ${ordered[3].id}, true)
+      `);
+      await tx.clientWantedSlotInterest.update({
+        where: { id: ordered[3].id },
+        data: {
+          status: 'MATCHED',
+          matchedSourceEventId: event,
+          matchedAt: new Date(),
+        },
+      });
     }),
     /WANTED_SLOT_MATCH_FAN_OUT_EXCEEDED/,
   );

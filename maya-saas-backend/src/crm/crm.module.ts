@@ -1,4 +1,6 @@
 import { ClientHabitsService } from './client-habits.service';
+import { ClientWantedSlotService } from './client-wanted-slot.service';
+import { LegacyClientWantedSlotController } from './client-wanted-slot.controller';
 import {
   ClientHabitsController,
   LegacyClientHabitsController,
@@ -23,6 +25,7 @@ import {
   CanonicalActionIngressService,
 } from '../action-engine';
 import { AuditLogModule } from '../audit-log/audit-log.module';
+import { CommunicationDeliveryModule } from '../communication-delivery';
 import { InternalCalendarModule } from '../internal-calendar/internal-calendar.module';
 import { UsersModule } from '../users/users.module';
 import { ClientIdentityService } from './client-identity.service';
@@ -56,6 +59,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
   imports: [
     ActionEngineModule,
     AuditLogModule,
+    CommunicationDeliveryModule,
     EventsModule,
     InternalCalendarModule,
     UsersModule,
@@ -63,6 +67,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
   controllers: [
     ClientHabitsController,
     LegacyClientHabitsController,
+    LegacyClientWantedSlotController,
     ClientPreferencesController,
     LegacyClientPreferencesController,
     ClientChannelController,
@@ -74,6 +79,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
   ],
   providers: [
     ClientHabitsService,
+    ClientWantedSlotService,
     ClientPreferencesService,
     ClientChannelAuthenticatorService,
     ClientChannelRuntimeService,

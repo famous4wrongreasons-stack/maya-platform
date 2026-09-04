@@ -97,6 +97,7 @@ function channel(
     tenantId,
     provider,
     providerSubjectHash: hash([provider, name]),
+    deliveryAddress: provider === 'telegram' ? '100000001' : name,
     channelControlProofHash: hash(proof),
     validUntil: new Date(Date.now() + 3600_000),
   });

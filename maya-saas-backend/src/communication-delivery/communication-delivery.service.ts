@@ -41,7 +41,8 @@ export type Package2InboxType =
   | 'hanging_lead'
   | 'owner_alert'
   | 'birthday_alert'
-  | 'review_alert';
+  | 'review_alert'
+  | 'wanted_slot_available';
 
 type Package2SourceType =
   'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge';
@@ -56,6 +57,7 @@ const PACKAGE2_CAPABILITY_BY_TYPE: Record<Package2InboxType, string> = {
   owner_alert: 'communication.business-alerts.execute.v1',
   birthday_alert: 'communication.business-alerts.execute.v1',
   review_alert: 'communication.business-alerts.execute.v1',
+  wanted_slot_available: 'communication.appointment-reminders.execute.v1',
 };
 
 interface InboxDeliveryInput {
@@ -78,6 +80,8 @@ interface Package2SingleInput extends InboxDeliveryInput {
   messageType: Package2InboxType;
   sourceType: Package2SourceType;
   deviceToken?: string;
+  /** HMAC comparison identity for a verified ClientChannelLink recipient. */
+  recipientIdentityRef?: string;
 }
 
 export interface Package2TelegramButton {
@@ -96,6 +100,8 @@ interface Package2TelegramInput {
   bodyText: string;
   parseMode?: 'Markdown' | 'MarkdownV2' | 'HTML';
   buttons?: Package2TelegramButton[];
+  /** HMAC comparison identity for a verified ClientChannelLink recipient. */
+  recipientIdentityRef?: string;
 }
 
 interface BulkCampaignDeliveryInput {
@@ -459,6 +465,10 @@ export class CommunicationDeliveryService {
   async deliverPackage2Telegram(
     input: Package2TelegramInput,
   ): Promise<DeliveryResult> {
+    const recipientRef = this.recipientIdentity(
+      input.recipientIdentityRef,
+      input.telegramChatId,
+    );
     const requestInput = {
       channel: 'telegram',
       messageType: input.messageType,
@@ -468,6 +478,9 @@ export class CommunicationDeliveryService {
       bodyText: input.bodyText,
       ...(input.parseMode ? { parseMode: input.parseMode } : {}),
       ...(input.buttons?.length ? { buttons: input.buttons } : {}),
+      ...(input.recipientIdentityRef
+        ? { recipientIdentityRef: recipientRef }
+        : {}),
     };
     const receipt = await this.actionEngine.executeWithReceipt(
       {
@@ -476,16 +489,16 @@ export class CommunicationDeliveryService {
         capability: PACKAGE2_CAPABILITY_BY_TYPE[input.messageType],
         source: {
           type: input.sourceType,
-          occurrenceScope: `package2:${input.messageType}:telegram:${input.sourceEventId}:${input.telegramChatId}`,
+          occurrenceScope: `package2:${input.messageType}:telegram:${input.sourceEventId}:${recipientRef}`,
           sourceRef: `legacy.package2.${input.messageType}`,
         },
-        targetRef: `telegram:${input.telegramChatId}`,
+        targetRef: `telegram:${recipientRef}`,
         input: requestInput,
         evidenceRefs: [`source-event:${input.sourceEventId}`],
         intentExpiresAt: new Date(Date.now() + 7 * DAY),
         callerIdempotency: {
           scope: `communication:package2:${input.messageType}:telegram`,
-          key: `${input.sourceEventId}:${input.telegramChatId}`,
+          key: `${input.sourceEventId}:${recipientRef}`,
         },
       },
       {
@@ -510,6 +523,10 @@ export class CommunicationDeliveryService {
             );
           }
           const telegramChatId = requiredString(normalized, 'telegramChatId');
+          const durableRecipientRef =
+            typeof normalized.recipientIdentityRef === 'string'
+              ? requiredString(normalized, 'recipientIdentityRef')
+              : telegramChatId;
           const sourceEventId = requiredString(normalized, 'sourceEventId');
           const buttons = telegramButtons(normalized.buttons);
           const parseMode =
@@ -523,7 +540,7 @@ export class CommunicationDeliveryService {
             scope: 'SINGLE',
             channel: 'telegram',
             capabilityKey: PACKAGE2_TELEGRAM_DELIVERY_CAPABILITY,
-            campaignIdempotencyKey: `package2:${input.messageType}:telegram:${sourceEventId}:${telegramChatId}`,
+            campaignIdempotencyKey: `package2:${input.messageType}:telegram:${sourceEventId}:${durableRecipientRef}`,
             contentRef: `template:telegram.${input.messageType}.v1`,
             contentIdentityHash: sha256(
               `telegram.${input.messageType}.v1`,
@@ -535,7 +552,7 @@ export class CommunicationDeliveryService {
             expiresAt: new Date(Date.now() + 7 * DAY),
             recipients: [
               {
-                recipientRef: telegramChatId,
+                recipientRef: durableRecipientRef,
                 recipientKind: 'telegram_chat',
                 eligibility: {
                   basis: 'server_recipient_resolution',
@@ -546,7 +563,7 @@ export class CommunicationDeliveryService {
                     context.tenantId,
                     input.messageType,
                     sourceEventId,
-                    telegramChatId,
+                    durableRecipientRef,
                   ),
                   checkedAt: new Date(),
                 },
@@ -743,6 +760,10 @@ export class CommunicationDeliveryService {
     const deviceIdentity = deviceToken
       ? sha256('apns-device', deviceToken)
       : '';
+    const recipientRef = this.recipientIdentity(
+      input.recipientIdentityRef,
+      input.userId,
+    );
     const requestInput = {
       channel,
       messageType: input.messageType,
@@ -753,6 +774,9 @@ export class CommunicationDeliveryService {
       bodyText: input.bodyText,
       ...(input.deepLink ? { deepLink: input.deepLink } : {}),
       ...(input.payload ? { payload: input.payload } : {}),
+      ...(input.recipientIdentityRef
+        ? { recipientIdentityRef: recipientRef }
+        : {}),
     };
     let preparedApnsSender: ReturnType<
       typeof prepareInboxApnsCanonical
@@ -764,19 +788,19 @@ export class CommunicationDeliveryService {
         capability: PACKAGE2_CAPABILITY_BY_TYPE[input.messageType],
         source: {
           type: input.sourceType,
-          occurrenceScope: `package2:${input.messageType}:${channel}:${input.sourceEventId}:${input.userId}${deviceIdentity ? `:${deviceIdentity}` : ''}`,
+          occurrenceScope: `package2:${input.messageType}:${channel}:${input.sourceEventId}:${recipientRef}${deviceIdentity ? `:${deviceIdentity}` : ''}`,
           sourceRef: `legacy.package2.${input.messageType}`,
         },
         targetRef:
           channel === 'inbox'
-            ? `user:${input.userId}`
+            ? `user:${recipientRef}`
             : `device:${deviceIdentity}`,
         input: requestInput,
         evidenceRefs: [`source-event:${input.sourceEventId}`],
         intentExpiresAt: new Date(Date.now() + 7 * DAY),
         callerIdempotency: {
           scope: `communication:package2:${input.messageType}:${channel}`,
-          key: `${input.sourceEventId}:${input.userId}${deviceIdentity ? `:${deviceIdentity}` : ''}`,
+          key: `${input.sourceEventId}:${recipientRef}${deviceIdentity ? `:${deviceIdentity}` : ''}`,
         },
       },
       {
@@ -784,6 +808,10 @@ export class CommunicationDeliveryService {
           const normalizedChannel = requiredString(normalized, 'channel');
           const messageType = requiredString(normalized, 'messageType');
           const userId = requiredString(normalized, 'userId');
+          const durableRecipientRef =
+            typeof normalized.recipientIdentityRef === 'string'
+              ? requiredString(normalized, 'recipientIdentityRef')
+              : userId;
           const sourceEventId = requiredString(normalized, 'sourceEventId');
           if (
             normalizedChannel !== channel ||
@@ -810,7 +838,7 @@ export class CommunicationDeliveryService {
               channel === 'inbox'
                 ? PACKAGE2_INBOX_DELIVERY_CAPABILITY
                 : PACKAGE2_APNS_DELIVERY_CAPABILITY,
-            campaignIdempotencyKey: `package2:${messageType}:${channel}:${sourceEventId}:${userId}${deviceIdentity ? `:${deviceIdentity}` : ''}`,
+            campaignIdempotencyKey: `package2:${messageType}:${channel}:${sourceEventId}:${durableRecipientRef}${deviceIdentity ? `:${deviceIdentity}` : ''}`,
             contentRef: `template:inbox.${messageType}.v1`,
             contentIdentityHash: sha256(
               `inbox.${messageType}.v1`,
@@ -825,7 +853,7 @@ export class CommunicationDeliveryService {
               {
                 recipientRef:
                   channel === 'inbox'
-                    ? userId
+                    ? durableRecipientRef
                     : requiredString(normalized, 'deviceToken'),
                 recipientKind:
                   channel === 'inbox' ? 'internal_user' : 'device_token',
@@ -839,7 +867,7 @@ export class CommunicationDeliveryService {
                     context.tenantId,
                     messageType,
                     sourceEventId,
-                    userId,
+                    durableRecipientRef,
                     deviceIdentity,
                   ),
                   checkedAt: new Date(),
@@ -1083,6 +1111,19 @@ export class CommunicationDeliveryService {
       ...receipt.value,
       actionExecutionId: receipt.execution.executionId,
     };
+  }
+
+  private recipientIdentity(candidate: string | undefined, fallback: string) {
+    if (candidate === undefined) return fallback;
+    if (!/^[a-f0-9]{64}$/.test(candidate)) {
+      throw new CommunicationDispatchError(
+        'definitive',
+        'invalid_verified_recipient_identity',
+        'communication_contract',
+        'Verified recipient identity must be an HMAC digest',
+      );
+    }
+    return candidate;
   }
 
   async deliverBulkCampaign(

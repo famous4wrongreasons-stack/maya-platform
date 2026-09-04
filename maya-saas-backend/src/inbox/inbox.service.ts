@@ -55,7 +55,7 @@ const PACKAGE2_SINGLE_TYPES = new Set<IngestInboxItemDto['type']>([
 
 function isPackage2SingleType(
   type: IngestInboxItemDto['type'],
-): type is Package2InboxType {
+): type is Extract<Package2InboxType, IngestInboxItemDto['type']> {
   return PACKAGE2_SINGLE_TYPES.has(type);
 }
 

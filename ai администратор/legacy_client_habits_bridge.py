@@ -19,6 +19,12 @@ _current = contextvars.ContextVar("maya_client_command_context", default=None)
 _ordinal = contextvars.ContextVar("maya_client_habit_ordinal", default=0)
 
 
+def current_context():
+    """Ephemeral verified request context; never derived from model arguments."""
+    value = _current.get()
+    return value if isinstance(value, ClientCommandContext) else None
+
+
 def request_context(headers, body: dict, message: str, mode: str):
     if mode != "client" or not isinstance(message, str) or not message.strip():
         return None

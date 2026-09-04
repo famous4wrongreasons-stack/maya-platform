@@ -27,6 +27,7 @@ import { clientChannelSubjectHash } from './client-channel-subject';
 export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthority {
   readonly resolverId = 'a18.active-verified-client-channel.v1';
   private readonly challenges: ClientLinkChallengeService;
+  private readonly links: ClientChannelLinkService;
   constructor(
     private readonly prisma: PrismaService,
     private readonly context: TenantContextService,
@@ -44,11 +45,12 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
           new ForbiddenException('Explicit verified rebind operation required'),
         ),
     };
+    this.links = new ClientChannelLinkService(prisma, context, closedVerifier);
     this.challenges = new ClientLinkChallengeService(
       prisma,
       context,
       encryption,
-      new ClientChannelLinkService(prisma, context, closedVerifier),
+      this.links,
       this,
       channels,
     );
@@ -98,6 +100,111 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
   }
   consume(channelProof: string, token: string) {
     return this.challenges.consume({ channelProof, token });
+  }
+
+  async refreshDeliveryAddress(channelProof: string) {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const first = await this.channels.authenticate(channelProof, tx);
+        await lockClientChannelIdentity(
+          tx,
+          first.tenantId,
+          first.provider,
+          first.providerSubjectHash,
+        );
+        const current = await this.channels.authenticate(channelProof, tx);
+        if (
+          current.tenantId !== first.tenantId ||
+          current.provider !== first.provider ||
+          current.providerSubjectHash !== first.providerSubjectHash ||
+          current.deliveryAddress !== first.deliveryAddress
+        )
+          throw new ForbiddenException('Authenticated channel changed');
+        const links = await tx.clientChannelLink.findMany({
+          where: {
+            tenantId: current.tenantId,
+            provider: current.provider,
+            providerSubjectHash: current.providerSubjectHash,
+            revokedAt: null,
+          },
+          take: 2,
+        });
+        if (links.length !== 1)
+          throw new ForbiddenException('client_link_required');
+        await this.links.persistDeliveryAddressInTransaction(tx, {
+          tenantId: current.tenantId,
+          linkId: links[0].id,
+          provider: current.provider,
+          providerSubjectHash: current.providerSubjectHash,
+          deliveryAddressEncrypted: this.encryption.encrypt(
+            current.deliveryAddress,
+          ),
+        });
+        return { stored: true, linkId: links[0].id };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+  }
+
+  /** Server-internal delivery resolution. A caller supplies a canonical Client
+   * and exact link reference, never a raw provider recipient. */
+  async resolveVerifiedDeliveryEndpoint(clientId: string, linkId: string) {
+    const tenantId = this.context.requireTenantId();
+    const link = await this.prisma.clientChannelLink.findUnique({
+      where: { id_tenantId: { id: linkId, tenantId } },
+    });
+    if (
+      !link ||
+      link.clientId !== clientId ||
+      link.revokedAt ||
+      link.verificationVersion !== 1 ||
+      link.subjectHashVersion !== 1 ||
+      !link.deliveryAddressEncrypted
+    )
+      return null;
+    let address: string;
+    try {
+      address = this.encryption.decrypt(link.deliveryAddressEncrypted);
+    } catch {
+      return null;
+    }
+    if (
+      (link.provider === 'telegram' && !/^[1-9][0-9]{0,19}$/.test(address)) ||
+      (link.provider === 'maya_user' &&
+        !/^[A-Za-z0-9._:-]{1,240}$/.test(address)) ||
+      !['telegram', 'maya_user'].includes(link.provider) ||
+      clientChannelSubjectHash(
+        this.encryption,
+        link.provider as 'telegram' | 'maya_user',
+        address,
+      ) !== link.providerSubjectHash
+    )
+      return null;
+    try {
+      await this.links.assertClientEligible(this.prisma, tenantId, clientId);
+    } catch {
+      return null;
+    }
+    if (link.provider === 'maya_user') {
+      const user = await this.prisma.user.findUnique({
+        where: { id: address },
+        select: {
+          status: true,
+          memberships: {
+            where: { tenantId, status: 'active' },
+            select: { id: true },
+            take: 2,
+          },
+        },
+      });
+      if (!user || user.status !== 'active' || user.memberships.length !== 1)
+        return null;
+    }
+    return {
+      provider: link.provider as 'telegram' | 'maya_user',
+      address,
+      identityRef: link.providerSubjectHash,
+    };
   }
 
   async submitConsent(channelProof: string, value: unknown) {

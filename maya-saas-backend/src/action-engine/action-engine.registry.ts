@@ -1,5 +1,6 @@
 import { clientHabitsCapability } from './client-habits.contract';
 import { clientPreferenceCapabilities } from './client-preferences.contract';
+import { clientWantedSlotCapabilities } from './client-wanted-slot.contract';
 import { ActionPolicyDecision } from '@prisma/client';
 
 import { ActionContractError } from './action-engine.errors';
@@ -377,6 +378,7 @@ function package2SingleDeliveryNormalizer(
     'payload',
     'parseMode',
     'buttons',
+    'recipientIdentityRef',
   ]);
   const channel = requiredText(source, 'channel', 40);
   if (channel !== 'inbox' && channel !== 'apns' && channel !== 'telegram') {
@@ -385,6 +387,10 @@ function package2SingleDeliveryNormalizer(
   const userId = optionalText(source, 'userId', 160);
   const telegramChatId = optionalText(source, 'telegramChatId', 160);
   const deviceToken = optionalText(source, 'deviceToken', 512);
+  const recipientIdentityRef = optionalText(source, 'recipientIdentityRef', 64);
+  if (recipientIdentityRef && !/^[a-f0-9]{64}$/.test(recipientIdentityRef)) {
+    throw new ActionContractError('recipientIdentityRef must be a HMAC digest');
+  }
   if ((channel === 'inbox' || channel === 'apns') && !userId) {
     throw new ActionContractError('userId is required for inbox and apns');
   }
@@ -461,6 +467,7 @@ function package2SingleDeliveryNormalizer(
     ...(payload ? { payload } : {}),
     ...(parseMode ? { parseMode } : {}),
     ...(buttons.length ? { buttons } : {}),
+    ...(recipientIdentityRef ? { recipientIdentityRef } : {}),
   };
 }
 
@@ -3460,6 +3467,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   ),
   ...clientPreferenceCapabilities(),
   clientHabitsCapability(),
+  ...clientWantedSlotCapabilities(),
   ...PACKAGE5_WAVE5_REGISTRATIONS.map((registration) =>
     package5Wave5Capability(registration, true),
   ),
