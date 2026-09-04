@@ -43,10 +43,20 @@ Negative tests retain mutation/provider/import and lookalike-proof detection.
 - Prisma validate, project lint, application/scripts typechecks, build and
   build preflight PASS. Site/app inline syntax 27/28 scripts PASS.
 
-This source checkpoint precedes the production gates/cutover. No runtime deploy
-or final Package 5 verdict is claimed here. The production remediation must
-pass server artifact/config/schema/readiness gates, then deploy the bounded
-backend/Python/PHP/caller candidate, verify read-only and restart the complete
-13-family final gate. No real consent/trial/onboarding/provider smoke mutations.
-No Wave 7, Chapter 7, or automatic Chapter 6 completion. Historical 17 local
-DBs are outside ownership and untouched.
+## Production deployment and independent final-gate result
+
+Source `94543056` passed server artifact/config/schema/readiness gates and is
+deployed as `20260904-p5-final-remediation-94543056`. The bounded
+backend/Python/PHP/caller candidate passed structural/read-only verification:
+pending migrations 0, drift NONE, services ready and no new error-priority
+journal entries. No real consent/trial/onboarding/provider smoke mutations.
+
+The complete 13-family Final Package 5 Gate was then restarted from inventory.
+It found new live Python visit-preference and notification-preference writers,
+including a divergent direct provider-comment helper. The mandatory STOP was
+applied; **Package 5 COMPLETE: NO**. The 327-suite regression above belongs to
+the deployed remediation candidate, not a fresh complete final-gate verdict.
+See `CYCLE-06-BLOCKING-PACKAGE-5-DEPLOYED-REMEDIATION-FINAL-RECHECK-STOP-REPORT.md`
+and `evidence/package5-deployed-remediation-final-recheck.json` for exact B5/B6
+paths and current remaining work. No Wave 7, Chapter 7, or automatic Chapter 6
+completion. Historical 17 local DBs remain untouched; owned hygiene is zero.

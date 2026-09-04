@@ -110,7 +110,23 @@
     "app": 28,
     "verdict": "PASS"
   },
-  "runtimeDeployed": false,
-  "finalPackage5Gate": "PENDING PRODUCTION REMEDIATION",
-  "productionBusinessProviderMutationsForProof": 0
+  "runtimeDeployed": true,
+  "finalPackage5Gate": "FAIL \u2014 new inventory bypass B5/B6; mandatory STOP",
+  "productionBusinessProviderMutationsForProof": 0,
+  "deployedSourceCommit": "945430566423fbd6db86b4ebd14f2588f598b9bb",
+  "deployedRelease": "20260904-p5-final-remediation-94543056",
+  "productionStructuralReadOnlyVerification": "PASS",
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "hygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "proofPort55487Listening": false,
+    "unrelatedPlatformDirtyFilesPreserved": 30,
+    "nativeMirrorGeneratedCopyMatches": true
+  }
 }
