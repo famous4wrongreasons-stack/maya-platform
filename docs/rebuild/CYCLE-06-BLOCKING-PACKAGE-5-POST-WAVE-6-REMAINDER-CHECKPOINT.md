@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — accepted wave checkpoints retained; FINAL PACKAGE 5 GATE FAIL on A18/A26 production bypasses**
+Status: **CURRENT — accepted waves retained; A18/A26 remediation authorized but STOPPED on A18 channel-to-Client identity contract**
 
 Date: 2026-09-04. This supersedes the Wave 6 pre-cutover remainder after the
 explicit AC6 owner decision and successful production cutover from gated source
@@ -12,6 +12,16 @@ hard-delete cleanup (A26), and direct administrative tenant creation (A26).
 See `CYCLE-06-BLOCKING-PACKAGE-5-FINAL-ADVERSARIAL-BLOCKER-REPORT.md` and its
 machine-readable production inventory. No runtime was changed. The following
 wave table records accepted checkpoints; it is not an aggregate no-bypass PASS.
+
+The user accepted `ba9e9234` and authorized remediation of all three paths,
+deployment after green mandatory gates, and automatic restart of the complete
+Final Package 5 Gate after green production verification. The remediation
+contract check found an additional blocker: authenticated legacy channel
+identity has no approved durable binding / establishment authority to canonical
+Client, while the current A18 executor requires a Maya User membership. Runtime
+and production remain unchanged under the user's new-business/schema STOP rule.
+See `CYCLE-06-BLOCKING-PACKAGE-5-FINAL-A18-A26-REMEDIATION-STOP-REPORT.md` and
+`package5-final-a18-client-channel-binding-v1-proposal.md`.
 
 Production release: `20260904-c06-p5-wave6-cutover-3b545671`.
 Wave 6 behavioral proof remains the accepted `bf21d9d6` proof; it was not rerun.
@@ -34,17 +44,23 @@ checkpoints; resolve the aggregate blockers without inventing another wave.
 
 Remaining work, in order:
 
-1. **Separately authorized aggregate blocker remediation** for the exact A18
-   and A26 paths in the final blocker report. Retain D2-A/D3-A; do not invent
-   new business/schema contracts or use A30 for tenant hard deletion.
-2. **Resume PACKAGE 5 FINAL ADVERSARIAL VERIFICATION / COMPLETION GATE** after
-   remediation. Reconcile the complete Entry Gate inventory and all
+1. Resolve the new **A18 authenticated channel → canonical Client binding
+   establishment/provenance decision**. D2-A optional User and Client ownership
+   are already approved. The proposal recommends exact durable binding and
+   fail-closed unresolved identity; no new schema is approved/applied yet.
+2. Complete the **already authorized A18/A26 remediation** for all three paths,
+   final bypass ratchets and targeted adversarial proofs. Retain D2-A/D3-A;
+   mandatory local/deployment gates precede release; production verification is
+   structural/read-only. No A30 tenant purge or real consent/trial smoke.
+3. **Automatically restart PACKAGE 5 FINAL ADVERSARIAL VERIFICATION / COMPLETION
+   GATE from the beginning** once remediation production verification passes.
+   Reconcile the complete Entry Gate inventory and all
    canonical owners, including approved AC3/AC4/AC5/AC6 exceptions, against
    actual Nest, CLI, Python, maintenance and scheduler surfaces. Preserve the
    accepted authority/schema decisions, D1-A…D7-A and Common Foundation. Do not
    invent Wave 7 or require fabricated ActionExecution history for AC6.
-3. Separately initiated **Final Chapter 6 Gate** after Package 5 passes.
-4. After Chapter 6, a separate provenance/ownership audit of the **17 historical
+4. Separately initiated **Final Chapter 6 Gate** after Package 5 passes.
+5. After Chapter 6, a separate provenance/ownership audit of the **17 historical
    local temp/test databases**. Their deletion is not authorized by this report.
 
 Preserve Packages 1–4, Waves 1–6 production baselines, P02/P03 holds, Client
@@ -64,6 +80,10 @@ MAINTENANCE RUN/ITEM CLAIM OWNERSHIP: ENFORCED
 AUTH RETENTION POLICY V1: ENFORCED
 PACKAGE 5 COMPLETE: NO
 PACKAGE 5 FINAL ADVERSARIAL VERIFICATION: FAIL
+PACKAGE 5 FINAL A18/A26 REMEDIATION: BLOCKED — NEW IDENTITY CONTRACT
+UNRESOLVED ACCEPTED PRODUCTION BLOCKER PATHS: 3
+SCHEMA CHANGES APPLIED IN REMEDIATION: 0
+PRODUCTION DEPLOYMENT IN REMEDIATION: NO
 FINAL PACKAGE 5 GATE STARTED: YES — STOPPED ON CONFIRMED BYPASSES
 WAVE 7 CREATED: NO
 CHAPTER 7 STARTED: NO
@@ -76,5 +96,7 @@ OWNED PLAYWRIGHT/CHROME PROCESSES REMAINING: 0
 OWNED TEMP DATABASES REMAINING: 0
 ```
 
-Reports → commit/push → HEAD=origin → STOP. Do not start the remaining gates or
-Chapter 7 automatically.
+Current contract STOP: reports → commit/push → HEAD=origin → STOP. After the
+identity decision, the authorized remediation and conditional automatic full
+Final Package 5 Gate resumption remain as listed above. Chapter 6 completion
+acceptance stays separate; Chapter 7 is not started automatically.
