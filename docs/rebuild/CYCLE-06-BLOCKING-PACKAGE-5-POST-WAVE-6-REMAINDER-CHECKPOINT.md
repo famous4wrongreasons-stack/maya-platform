@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — A18 foundation/APPLY PASS; STOP on first-link Client-authority verifier decision**
+Status: **CURRENT — first-link challenge APPROVED; STOP on ClientLinkChallenge schema + TTL proposals**
 
 Date: 2026-09-04. This supersedes the Wave 6 pre-cutover remainder after the
 explicit AC6 owner decision and successful production cutover from gated source
@@ -41,14 +41,25 @@ typechecks/lint and preflight build PASS. Production migration from pushed sourc
 applied. Pending 0, approved-schema drift NONE, link rows/backfill 0;
 health/readiness PASS. Live runtime was not replaced or restarted.
 
-The subsequent A18 runtime review found the next exact blocker: no production
+The subsequent A18 runtime review found the next exact blocker at `813107da`: no production
 verifier or approved evidence source proves first-link **exact Client authority**
 independently of channel authentication. A bare User reference, phone-derived
 legacy chat id, selected Client or signed receipt alone cannot satisfy approved
-Schema V1. The user's new-business/schema STOP rule applies. The required trust
+Schema V1. The user's new-business/schema STOP rule applied. The required trust
 source decision is recorded in `package5-final-a18-first-link-verifier-decision.md`.
 See the Client Channel Link Foundation Report for the completed migration and
 the precise limits of the synthetic local foundation proof.
+
+The user then accepted `813107da` and approved a server-issued, short-lived,
+single-use Client Linking Challenge, issued only after trusted exact Client
+resolution and consumed atomically with the verified link. This resolves the
+previous mechanism decision. Schema/TTL assessment now finds no existing suitable
+challenge model or approved linking lifetime. Fresh production catalogs reconcile
+89 models to 90 tables including `_prisma_migrations`, with no hidden foundation.
+One 14-field `ClientLinkChallenge` model and a separate 600-second TTL decision
+are proposed; neither is approved or implemented. The user's explicit proposal
+STOP applies. Current report:
+`CYCLE-06-BLOCKING-PACKAGE-5-A18-CLIENT-LINK-CHALLENGE-ASSESSMENT.md`.
 
 Production release: `20260904-c06-p5-wave6-cutover-3b545671`.
 Wave 6 behavioral proof remains the accepted `bf21d9d6` proof; it was not rerun.
@@ -71,11 +82,12 @@ checkpoints; resolve the aggregate blockers without inventing another wave.
 
 Remaining work, in order:
 
-1. Resolve the **first-link exact Client-authority evidence source / verifier
-   decision**. The approved one-model foundation and production migration are
-   complete; do not repeat them or manufacture binding history. Implement the
-   verifier only from the concrete approved source. No additional schema is
-   asserted at this checkpoint.
+1. Review **ClientLinkChallenge Schema V1** and the **separate TTL V1 proposal**.
+   After both approvals, implement/prove the challenge foundation and its atomic
+   consumption with the existing link writer, following the then-authorized
+   migration boundary. Preserve the already applied ClientChannelLink foundation.
+   No phone-derived issue, Client payload override or challenge encoded in a
+   pending ClientChannelLink is allowed.
 2. Complete the **already authorized A18/A26 remediation** for all three paths,
    final bypass ratchets and targeted adversarial proofs. Retain D2-A/D3-A;
    mandatory local/deployment gates precede release; production verification is
@@ -108,10 +120,16 @@ MAINTENANCE RUN/ITEM CLAIM OWNERSHIP: ENFORCED
 AUTH RETENTION POLICY V1: ENFORCED
 PACKAGE 5 COMPLETE: NO
 PACKAGE 5 FINAL ADVERSARIAL VERIFICATION: FAIL
-PACKAGE 5 FINAL A18/A26 REMEDIATION: STOP — FIRST-LINK AUTHORITY VERIFIER DECISION
+PACKAGE 5 FINAL A18/A26 REMEDIATION: STOP — CHALLENGE SCHEMA + TTL PROPOSALS
 A18 CLIENT-CHANNEL BINDING CONTRACT: COMPLETE
+A18 FIRST-LINK CHALLENGE AUTHORITY: APPROVED
 APPROVED COMPLETED-LINK SCHEMA SUFFICIENT: YES
-ADDITIONAL SCHEMA REQUIRED BY THIS STOP: NOT ESTABLISHED
+EXISTING CHALLENGE SCHEMA SUFFICIENT: NO
+ADDITIONAL SCHEMA REQUIRED: YES — ClientLinkChallenge
+CHALLENGE SCHEMA PROPOSAL: READY FOR REVIEW
+TTL DECISION REQUIRED: YES
+PROPOSED TTL: 600 SECONDS / 10 MINUTES — NOT APPROVED
+CHALLENGE SCHEMA IMPLEMENTED/APPLIED: NO
 A18 SCHEMA V1: APPROVED
 A18 LOCAL FOUNDATION PROOF: PASS
 SCHEMA FOUNDATION/APPLY: PASS
@@ -119,7 +137,7 @@ PENDING MIGRATIONS: 0
 POST-APPLY DRIFT: NONE
 FAKE CLIENT CHANNEL LINKS BACKFILLED: 0
 CLIENT CHANNEL LINK DURABLE IN PRODUCTION: YES
-A18 CONSENT REMEDIATION CAN RESUME: AFTER CLIENT-AUTHORITY VERIFIER DECISION
+A18 CONSENT REMEDIATION CAN RESUME: AFTER APPROVED CHALLENGE FOUNDATION/PROOF
 UNRESOLVED ACCEPTED PRODUCTION BLOCKER PATHS: 3
 SCHEMA MIGRATIONS APPLIED IN REMEDIATION: 1
 PRODUCTION RUNTIME DEPLOYMENT IN REMEDIATION: NO
@@ -135,8 +153,8 @@ OWNED PLAYWRIGHT/CHROME PROCESSES REMAINING: 0
 OWNED TEMP DATABASES REMAINING: 0
 ```
 
-The former schema proposal STOP was superseded by explicit approval and its
-foundation/apply is complete. The current STOP concerns the first-link verifier's
-Client-authority trust source. After its resolution, the authorized remediation
+The completed-link foundation/apply and first-link mechanism decisions are
+accepted. The current STOP concerns the minimal pending challenge schema and its
+separate TTL decision. After approval/foundation proof, the authorized remediation
 and automatic full Final Package 5 Gate remain the same next steps. Chapter 6
 completion acceptance stays separate; Chapter 7 is not started automatically.

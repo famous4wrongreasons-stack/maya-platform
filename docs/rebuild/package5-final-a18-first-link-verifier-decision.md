@@ -1,6 +1,13 @@
 # Package 5 Final — A18 first-link Client authority verifier
 
-Status: **BUSINESS TRUST-SOURCE DECISION REQUIRED — REMEDIATION STOP**
+Status: **HISTORICAL STOP — CHALLENGE MECHANISM NOW APPROVED AFTER `813107da`**
+
+The user accepted `813107da` and approved a server-issued, short-lived, single-use
+Client Linking Challenge after trusted server-side Client resolution. This
+resolves the mechanism decision described below. The current boundary is the
+minimal challenge schema and separate TTL proposals, documented in
+`CYCLE-06-BLOCKING-PACKAGE-5-A18-CLIENT-LINK-CHALLENGE-ASSESSMENT.md`.
+The original evidence and question below are retained as checkpoint history.
 
 Date: 2026-09-04. Foundation source: `ae3f7438`; accepted schema decision:
 `55380a90` plus explicit ClientChannelLink Schema V1 approval.

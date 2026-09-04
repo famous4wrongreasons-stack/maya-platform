@@ -1,0 +1,3267 @@
+{
+  "acceptedCheckpoint": "813107da9e0aa9bffa99ac9c68fa836e0e5278fb",
+  "assessmentDate": "2026-09-04",
+  "decisionAccepted": "Server-issued short-lived single-use Client Linking Challenge after trusted server-side exact Client resolution",
+  "repository": {
+    "schemaSha256": "3dedb13ec0ea25c69eac7c24b0b27fea98fe83fb60953c60f6576e94c47952c7",
+    "models": [
+      "Tenant",
+      "Opportunity",
+      "AgentTask",
+      "ActionExecution",
+      "ActionAttempt",
+      "ActionTargetMutation",
+      "AppointmentNotificationSetting",
+      "BrandingSettings",
+      "Branch",
+      "User",
+      "UserMerge",
+      "Membership",
+      "DashboardPreference",
+      "CrmStaffAccess",
+      "AuthIdentity",
+      "AuthFlowState",
+      "PhoneAuthCode",
+      "EmailAuthCode",
+      "AuthSession",
+      "AuthRefreshToken",
+      "AuthRateLimitBucket",
+      "CrmIntegration",
+      "CommerceIntegration",
+      "TenantCatalogItem",
+      "TenantCatalogItemValueVersion",
+      "ReferralProgram",
+      "ReferralProgramValueVersion",
+      "CustomerReferral",
+      "ReferralRewardIssuance",
+      "ReferralReward",
+      "ReferralRewardFulfillment",
+      "CustomerSubscription",
+      "CustomerSubscriptionUsage",
+      "GiftCertificate",
+      "GiftCertificateRedemption",
+      "BusinessReview",
+      "InternalService",
+      "InternalProvider",
+      "AiOnboardingDraft",
+      "TrialActivation",
+      "CustomerProfile",
+      "ClientConsentFact",
+      "LoyaltyAccount",
+      "LoyaltyTransaction",
+      "LoyaltyRedemptionGrant",
+      "LoyaltyRedemption",
+      "LoyaltyRedemptionGrantRevocation",
+      "UnresolvedClientIdentityHold",
+      "Expense",
+      "ExpensePeriodDeclaration",
+      "ExpensePeriodDeclarationInvalidation",
+      "AiApprovalRequest",
+      "AiToolExecution",
+      "AiBrainSession",
+      "AiMemoryFact",
+      "AiKnowledgeSource",
+      "AiKnowledgeChunk",
+      "InternalProviderService",
+      "InternalAvailabilityRule",
+      "InternalAvailabilityException",
+      "SubscriptionPlan",
+      "Feature",
+      "PlanEntitlement",
+      "TenantEntitlement",
+      "BillingPayment",
+      "Client",
+      "CrmClientLink",
+      "ClientChannelLink",
+      "Staff",
+      "StaffProviderLink",
+      "MarketingPolicy",
+      "MarketingAudienceRecipient",
+      "MarketingCampaignRecipient",
+      "MarketingConsentEvidence",
+      "MarketingDeliveryAttempt",
+      "AuditLog",
+      "Appointment",
+      "DomainEvent",
+      "IngestionQuarantine",
+      "ReconciliationRun",
+      "MaintenanceRun",
+      "MaintenanceItemClaim",
+      "RecoveryTouchpoint",
+      "RecoveryConversion",
+      "MarketingAudience",
+      "MarketingCampaign",
+      "InboxItem",
+      "OperationalWorkItem",
+      "DevicePushToken"
+    ],
+    "migrationCount": 71
+  },
+  "catalogReconciliation": {
+    "publicTables": 90,
+    "missingApplicationTables": [],
+    "unmodeledApplicationTables": [],
+    "clientChannelLinkPresent": true,
+    "clientLinkChallengePresent": false
+  },
+  "catalog": {
+    "capturedAt": "2026-09-04T07:37:55.838Z",
+    "release": "/opt/maya-saas/releases/20260904-c06-p5-wave6-cutover-3b545671",
+    "mode": "READ ONLY; catalogs only; no application rows",
+    "tables": [
+      "ActionAttempt",
+      "ActionExecution",
+      "ActionTargetMutation",
+      "AgentTask",
+      "AiApprovalRequest",
+      "AiBrainSession",
+      "AiKnowledgeChunk",
+      "AiKnowledgeSource",
+      "AiMemoryFact",
+      "AiOnboardingDraft",
+      "AiToolExecution",
+      "Appointment",
+      "AppointmentNotificationSetting",
+      "AuditLog",
+      "AuthFlowState",
+      "AuthIdentity",
+      "AuthRateLimitBucket",
+      "AuthRefreshToken",
+      "AuthSession",
+      "BillingPayment",
+      "Branch",
+      "BrandingSettings",
+      "BusinessReview",
+      "Client",
+      "ClientChannelLink",
+      "ClientConsentFact",
+      "CommerceIntegration",
+      "CrmClientLink",
+      "CrmIntegration",
+      "CrmStaffAccess",
+      "CustomerProfile",
+      "CustomerReferral",
+      "CustomerSubscription",
+      "CustomerSubscriptionUsage",
+      "DashboardPreference",
+      "DevicePushToken",
+      "DomainEvent",
+      "EmailAuthCode",
+      "Expense",
+      "ExpensePeriodDeclaration",
+      "ExpensePeriodDeclarationInvalidation",
+      "Feature",
+      "GiftCertificate",
+      "GiftCertificateRedemption",
+      "InboxItem",
+      "IngestionQuarantine",
+      "InternalAvailabilityException",
+      "InternalAvailabilityRule",
+      "InternalProvider",
+      "InternalProviderService",
+      "InternalService",
+      "LoyaltyAccount",
+      "LoyaltyRedemption",
+      "LoyaltyRedemptionGrant",
+      "LoyaltyRedemptionGrantRevocation",
+      "LoyaltyTransaction",
+      "MaintenanceItemClaim",
+      "MaintenanceRun",
+      "MarketingAudience",
+      "MarketingAudienceRecipient",
+      "MarketingCampaign",
+      "MarketingCampaignRecipient",
+      "MarketingConsentEvidence",
+      "MarketingDeliveryAttempt",
+      "MarketingPolicy",
+      "Membership",
+      "OperationalWorkItem",
+      "Opportunity",
+      "PhoneAuthCode",
+      "PlanEntitlement",
+      "ReconciliationRun",
+      "RecoveryConversion",
+      "RecoveryTouchpoint",
+      "ReferralProgram",
+      "ReferralProgramValueVersion",
+      "ReferralReward",
+      "ReferralRewardFulfillment",
+      "ReferralRewardIssuance",
+      "Staff",
+      "StaffProviderLink",
+      "SubscriptionPlan",
+      "Tenant",
+      "TenantCatalogItem",
+      "TenantCatalogItemValueVersion",
+      "TenantEntitlement",
+      "TrialActivation",
+      "UnresolvedClientIdentityHold",
+      "User",
+      "UserMerge",
+      "_prisma_migrations"
+    ],
+    "clientReferences": [
+      {
+        "table_name": "\"Appointment\"",
+        "conname": "Appointment_mayaClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"mayaClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"Client\"",
+        "conname": "Client_mergedIntoClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"mergedIntoClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\")"
+      },
+      {
+        "table_name": "\"ClientChannelLink\"",
+        "conname": "ClientChannelLink_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"ClientConsentFact\"",
+        "conname": "ClientConsentFact_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"CrmClientLink\"",
+        "conname": "CrmClientLink_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "\"CustomerProfile\"",
+        "conname": "CustomerProfile_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"CustomerReferral\"",
+        "conname": "CustomerReferral_referredClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"referredClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"CustomerReferral\"",
+        "conname": "CustomerReferral_referrerClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"referrerClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"CustomerSubscription\"",
+        "conname": "CustomerSubscription_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"LoyaltyAccount\"",
+        "conname": "LoyaltyAccount_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"LoyaltyRedemptionGrant\"",
+        "conname": "LoyaltyRedemptionGrant_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"ReferralReward\"",
+        "conname": "ReferralReward_recipientClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"recipientClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      }
+    ],
+    "columns": [
+      {
+        "table_name": "Appointment",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "branchId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "crmExternalId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "staffExternalId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "serviceIds",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "startAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "status",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "notes",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "providerPayload",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "source",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "endAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "blockedStartAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "blockedEndAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "totalPriceKopecks",
+        "data_type": "integer",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "currency",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "staffId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "crmProvider",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "mayaClientId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Appointment",
+        "column_name": "attendance",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "column_name": "provider",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "column_name": "state",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "column_name": "redirectUri",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "column_name": "codeVerifier",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "column_name": "consumedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "column_name": "userId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "column_name": "provider",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "column_name": "providerUserId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "column_name": "email",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "column_name": "phone",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "column_name": "profileJson",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "policyKey",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "action",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "scope",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "subjectHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "attempts",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "windowStartedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "windowEndsAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRefreshToken",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRefreshToken",
+        "column_name": "sessionId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRefreshToken",
+        "column_name": "tokenHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRefreshToken",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthRefreshToken",
+        "column_name": "consumedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthRefreshToken",
+        "column_name": "revokedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthRefreshToken",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "userId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "deviceLabel",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "ipHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "lastUsedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "revokedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "revokeReason",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AuthSession",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "userId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "phoneHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "mergedIntoClientId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "provider",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "providerSubjectHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "subjectHashVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationMethod",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationIdentityHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationEvidenceJson",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationEvidenceHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verifiedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "supersedesLinkId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revokedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revocationIdentityHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revocationEvidenceJson",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revocationEvidenceHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "kind",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "decision",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "occurredAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "effectiveAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "sourceType",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "sourceIdentityHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "actorUserId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "actionExecutionId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "column_name": "provider",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "column_name": "externalId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "column_name": "syncedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "column_name": "unlinkedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "userId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "preferredLocale",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "privacyConsentAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "marketingConsentAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "encryptedNotes",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "createExecutionId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "resolutionExecutionId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "referrerClientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "referredClientId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "identityHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "referredSubjectHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "referralCodeHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "status",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "joinedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "resolvedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "legacySourceRef",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "activationExecutionId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "endExecutionId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "previousSubscriptionId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "termIdentityHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "planCode",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "planSnapshotHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "serviceScopeHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "priceKopecks",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "currency",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "visitsIncluded",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "status",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "provider",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "providerPaymentRefHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "activatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "termStartsAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "termEndsAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "endedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "legacySourceRef",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "DevicePushToken",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "DevicePushToken",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "DevicePushToken",
+        "column_name": "userId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "DevicePushToken",
+        "column_name": "platform",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "DevicePushToken",
+        "column_name": "token",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "DevicePushToken",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "DevicePushToken",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "column_name": "email",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "column_name": "codeHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "column_name": "attempts",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "column_name": "consumedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "column_name": "userId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "column_name": "source",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "column_name": "balance",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "column_name": "externalReference",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "column_name": "syncedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "issueExecutionId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "codeHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "serviceRef",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "points",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "issuedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "legacySourceRef",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "column_name": "grantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "column_name": "actionExecutionId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "column_name": "reasonCode",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "column_name": "revokedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "column_name": "phone",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "column_name": "codeHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "column_name": "attempts",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "column_name": "consumedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "issuanceId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "recipientClientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "rewardSlot",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "codeHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "amountKopecks",
+        "data_type": "integer",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "currency",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "percentBasisPoints",
+        "data_type": "integer",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "issuedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "liabilityCapKopecks",
+        "data_type": "integer",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "liabilityCurrency",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ReferralReward",
+        "column_name": "presentationKeyVersion",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "column_name": "staffId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "column_name": "provider",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "column_name": "externalId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "column_name": "syncedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "column_name": "unlinkedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "activationTokenHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "status",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "source",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "completedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "provider",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "externalId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "reasonCode",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "sourceNamespace",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "sourceEvidenceHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "unresolvedPrincipalCount",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "resolvedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "column_name": "resolutionActionExecutionId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      }
+    ],
+    "constraints": [
+      {
+        "table_name": "Appointment",
+        "conname": "Appointment_attendance_check",
+        "definition": "CHECK (((attendance IS NULL) OR (attendance = ANY (ARRAY['awaiting'::text, 'arrived'::text, 'no_show'::text, 'confirmed_by_client'::text]))))"
+      },
+      {
+        "table_name": "Appointment",
+        "conname": "Appointment_branchId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"branchId\", \"tenantId\") REFERENCES \"Branch\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "Appointment",
+        "conname": "Appointment_clientId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\") REFERENCES \"User\"(id) ON UPDATE CASCADE ON DELETE SET NULL"
+      },
+      {
+        "table_name": "Appointment",
+        "conname": "Appointment_crm_identity_pair_check",
+        "definition": "CHECK (((\"crmExternalId\" IS NULL) = (\"crmProvider\" IS NULL)))"
+      },
+      {
+        "table_name": "Appointment",
+        "conname": "Appointment_internal_no_overlap",
+        "definition": "EXCLUDE USING gist (\"tenantId\" WITH =, \"staffExternalId\" WITH =, tsrange(\"blockedStartAt\", \"blockedEndAt\", '[)'::text) WITH &&) WHERE (((source = 'internal'::text) AND (status <> ALL (ARRAY['canceled'::text, 'cancelled'::text]))))"
+      },
+      {
+        "table_name": "Appointment",
+        "conname": "Appointment_mayaClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"mayaClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "Appointment",
+        "conname": "Appointment_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "Appointment",
+        "conname": "Appointment_staffId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"staffId\", \"tenantId\") REFERENCES \"Staff\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "Appointment",
+        "conname": "Appointment_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "conname": "AuthFlowState_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "AuthFlowState",
+        "conname": "AuthFlowState_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "conname": "AuthIdentity_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "conname": "AuthIdentity_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "conname": "AuthIdentity_userId_fkey",
+        "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "AuthIdentity",
+        "conname": "AuthIdentity_userId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"userId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "conname": "AuthRateLimitBucket_attempts_check",
+        "definition": "CHECK ((attempts >= 0))"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "conname": "AuthRateLimitBucket_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "conname": "AuthRateLimitBucket_scope_check",
+        "definition": "CHECK ((scope = ANY (ARRAY['ip'::text, 'identity'::text, 'tenant'::text])))"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "conname": "AuthRateLimitBucket_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "AuthRateLimitBucket",
+        "conname": "AuthRateLimitBucket_window_check",
+        "definition": "CHECK ((\"windowEndsAt\" > \"windowStartedAt\"))"
+      },
+      {
+        "table_name": "AuthRefreshToken",
+        "conname": "AuthRefreshToken_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "AuthRefreshToken",
+        "conname": "AuthRefreshToken_sessionId_fkey",
+        "definition": "FOREIGN KEY (\"sessionId\") REFERENCES \"AuthSession\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "AuthSession",
+        "conname": "AuthSession_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "AuthSession",
+        "conname": "AuthSession_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "AuthSession",
+        "conname": "AuthSession_userId_fkey",
+        "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "AuthSession",
+        "conname": "AuthSession_userId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"userId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "Client",
+        "conname": "Client_merge_not_self_check",
+        "definition": "CHECK (((\"mergedIntoClientId\" IS NULL) OR (\"mergedIntoClientId\" <> id)))"
+      },
+      {
+        "table_name": "Client",
+        "conname": "Client_mergedIntoClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"mergedIntoClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\")"
+      },
+      {
+        "table_name": "Client",
+        "conname": "Client_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "Client",
+        "conname": "Client_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "Client",
+        "conname": "Client_userId_fkey",
+        "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE CASCADE ON DELETE SET NULL"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "conname": "ClientChannelLink_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "conname": "ClientChannelLink_identity_check",
+        "definition": "CHECK (((length(btrim(id)) > 0) AND (length(btrim(\"tenantId\")) > 0) AND (length(btrim(\"clientId\")) > 0) AND (provider = ANY (ARRAY['maya_user'::text, 'telegram'::text])) AND (\"subjectHashVersion\" = 1) AND (\"verificationVersion\" = 1) AND (\"verificationMethod\" = ANY (ARRAY['proven_user_client_link'::text, 'explicit_verified_challenge'::text])) AND ((\"verificationMethod\" <> 'proven_user_client_link'::text) OR (provider = 'maya_user'::text)) AND (\"providerSubjectHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"verificationIdentityHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"verificationEvidenceHash\" ~ '^[0-9a-f]{64}$'::text) AND ((\"supersedesLinkId\" IS NULL) OR (\"supersedesLinkId\" <> id))))"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "conname": "ClientChannelLink_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "conname": "ClientChannelLink_predecessor_fkey",
+        "definition": "FOREIGN KEY (\"supersedesLinkId\", \"tenantId\", provider, \"providerSubjectHash\") REFERENCES \"ClientChannelLink\"(id, \"tenantId\", provider, \"providerSubjectHash\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "conname": "ClientChannelLink_revocation_check",
+        "definition": "CHECK (((((\"revokedAt\" IS NULL) AND (\"revocationIdentityHash\" IS NULL) AND (\"revocationEvidenceJson\" IS NULL) AND (\"revocationEvidenceHash\" IS NULL)) OR ((\"revokedAt\" IS NOT NULL) AND (\"revocationIdentityHash\" IS NOT NULL) AND (\"revocationEvidenceJson\" IS NOT NULL) AND (\"revocationEvidenceHash\" IS NOT NULL) AND (\"revocationIdentityHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"revocationEvidenceHash\" ~ '^[0-9a-f]{64}$'::text) AND (jsonb_typeof(\"revocationEvidenceJson\") = 'object'::text) AND (octet_length((\"revocationEvidenceJson\")::text) <= 8192) AND (\"revocationEvidenceJson\" ?& ARRAY['contract'::text, 'revocationIdentityHash'::text, 'tenantId'::text, 'linkId'::text, 'actorProofHash'::text, 'reason'::text]) AND ((\"revocationEvidenceJson\" - ARRAY['contract'::text, 'revocationIdentityHash'::text, 'tenantId'::text, 'linkId'::text, 'actorProofHash'::text, 'reason'::text]) = '{}'::jsonb) AND ((\"revocationEvidenceJson\" ->> 'contract'::text) = 'a18.client-channel-revocation.v1'::text) AND ((\"revocationEvidenceJson\" ->> 'revocationIdentityHash'::text) = \"revocationIdentityHash\") AND ((\"revocationEvidenceJson\" ->> 'tenantId'::text) = \"tenantId\") AND ((\"revocationEvidenceJson\" ->> 'linkId'::text) = id) AND ((\"revocationEvidenceJson\" ->> 'actorProofHash'::text) ~ '^[0-9a-f]{64}$'::text) AND ((length(btrim((\"revocationEvidenceJson\" ->> 'reason'::text))) >= 1) AND (length(btrim((\"revocationEvidenceJson\" ->> 'reason'::text))) <= 160)))) IS TRUE))"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "conname": "ClientChannelLink_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "conname": "ClientChannelLink_time_check",
+        "definition": "CHECK (((\"verifiedAt\" <= \"createdAt\") AND ((\"revokedAt\" IS NULL) OR (\"revokedAt\" >= \"createdAt\"))))"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "conname": "ClientChannelLink_verification_evidence_check",
+        "definition": "CHECK ((((jsonb_typeof(\"verificationEvidenceJson\") = 'object'::text) AND (octet_length((\"verificationEvidenceJson\")::text) <= 8192) AND (\"verificationEvidenceJson\" ?& ARRAY['contract'::text, 'verifier'::text, 'channelControlProofHash'::text, 'clientAuthorityProofHash'::text, 'verificationIdentityHash'::text, 'tenantId'::text, 'provider'::text, 'providerSubjectHash'::text, 'clientId'::text]) AND ((\"verificationEvidenceJson\" - ARRAY['contract'::text, 'verifier'::text, 'channelControlProofHash'::text, 'clientAuthorityProofHash'::text, 'verificationIdentityHash'::text, 'tenantId'::text, 'provider'::text, 'providerSubjectHash'::text, 'clientId'::text, 'verifiedAt'::text, 'validUntil'::text]) = '{}'::jsonb) AND ((\"verificationEvidenceJson\" ->> 'contract'::text) = 'a18.client-channel-verification.v1'::text) AND (length(btrim((\"verificationEvidenceJson\" ->> 'verifier'::text))) > 0) AND ((\"verificationEvidenceJson\" ->> 'channelControlProofHash'::text) ~ '^[0-9a-f]{64}$'::text) AND ((\"verificationEvidenceJson\" ->> 'clientAuthorityProofHash'::text) ~ '^[0-9a-f]{64}$'::text) AND ((\"verificationEvidenceJson\" ->> 'verificationIdentityHash'::text) = \"verificationIdentityHash\") AND ((\"verificationEvidenceJson\" ->> 'tenantId'::text) = \"tenantId\") AND ((\"verificationEvidenceJson\" ->> 'provider'::text) = provider) AND ((\"verificationEvidenceJson\" ->> 'providerSubjectHash'::text) = \"providerSubjectHash\") AND ((\"verificationEvidenceJson\" ->> 'clientId'::text) = \"clientId\")) IS TRUE))"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "conname": "ClientConsentFact_actionExecutionId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"actionExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "conname": "ClientConsentFact_actorUserId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"actorUserId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "conname": "ClientConsentFact_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "conname": "ClientConsentFact_decision_check",
+        "definition": "CHECK ((decision = ANY (ARRAY['grant'::text, 'revoke'::text])))"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "conname": "ClientConsentFact_kind_source_nonempty_check",
+        "definition": "CHECK (((length(btrim(kind)) > 0) AND (length(btrim(\"sourceType\")) > 0)))"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "conname": "ClientConsentFact_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "conname": "ClientConsentFact_source_hash_check",
+        "definition": "CHECK ((\"sourceIdentityHash\" ~ '^[0-9a-f]{64}$'::text))"
+      },
+      {
+        "table_name": "ClientConsentFact",
+        "conname": "ClientConsentFact_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "conname": "CrmClientLink_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "conname": "CrmClientLink_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "CrmClientLink",
+        "conname": "CrmClientLink_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "conname": "CustomerProfile_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "conname": "CustomerProfile_owner_present_check",
+        "definition": "CHECK (((\"clientId\" IS NOT NULL) OR (\"userId\" IS NOT NULL)))"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "conname": "CustomerProfile_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "conname": "CustomerProfile_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "conname": "CustomerProfile_userId_fkey",
+        "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "conname": "CustomerProfile_userId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"userId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "conname": "CustomerReferral_createExecutionId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"createExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "conname": "CustomerReferral_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "conname": "CustomerReferral_referredClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"referredClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "conname": "CustomerReferral_referrerClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"referrerClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "conname": "CustomerReferral_resolutionExecutionId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"resolutionExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "conname": "CustomerReferral_shape_check",
+        "definition": "CHECK (((btrim(\"identityHash\") <> ''::text) AND (btrim(\"referredSubjectHash\") <> ''::text) AND (btrim(\"referralCodeHash\") <> ''::text) AND ((\"legacySourceRef\" IS NULL) OR (btrim(\"legacySourceRef\") <> ''::text)) AND (status = ANY (ARRAY['pending'::text, 'qualified'::text, 'expired'::text, 'self_blocked'::text])) AND (((status = 'pending'::text) AND (\"resolvedAt\" IS NULL) AND (\"resolutionExecutionId\" IS NULL)) OR ((status = ANY (ARRAY['qualified'::text, 'expired'::text, 'self_blocked'::text])) AND (\"resolvedAt\" IS NOT NULL))) AND ((status <> 'qualified'::text) OR (\"referredClientId\" IS NOT NULL))))"
+      },
+      {
+        "table_name": "CustomerReferral",
+        "conname": "CustomerReferral_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "conname": "CustomerSubscription_activationExecutionId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"activationExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "conname": "CustomerSubscription_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "conname": "CustomerSubscription_endExecutionId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"endExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "conname": "CustomerSubscription_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "conname": "CustomerSubscription_previousSubscriptionId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"previousSubscriptionId\", \"tenantId\") REFERENCES \"CustomerSubscription\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "conname": "CustomerSubscription_shape_check",
+        "definition": "CHECK (((btrim(\"termIdentityHash\") <> ''::text) AND (btrim(\"planCode\") <> ''::text) AND (btrim(\"planSnapshotHash\") <> ''::text) AND (btrim(\"serviceScopeHash\") <> ''::text) AND (btrim(currency) <> ''::text) AND (\"priceKopecks\" > 0) AND (\"visitsIncluded\" > 0) AND (\"termEndsAt\" > \"termStartsAt\") AND (\"previousSubscriptionId\" IS DISTINCT FROM id) AND (status = ANY (ARRAY['active'::text, 'expired'::text, 'canceled'::text, 'revoked'::text])) AND (((status = 'active'::text) AND (\"endedAt\" IS NULL) AND (\"endExecutionId\" IS NULL)) OR ((status = ANY (ARRAY['expired'::text, 'canceled'::text, 'revoked'::text])) AND (\"endedAt\" IS NOT NULL))) AND (((provider IS NULL) AND (\"providerPaymentRefHash\" IS NULL)) OR ((provider IS NOT NULL) AND (btrim(provider) <> ''::text) AND (\"providerPaymentRefHash\" IS NOT NULL) AND (btrim(\"providerPaymentRefHash\") <> ''::text))) AND ((\"legacySourceRef\" IS NULL) OR (btrim(\"legacySourceRef\") <> ''::text)) AND ((\"activationExecutionId\" IS NOT NULL) OR (\"legacySourceRef\" IS NOT NULL))))"
+      },
+      {
+        "table_name": "CustomerSubscription",
+        "conname": "CustomerSubscription_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "DevicePushToken",
+        "conname": "DevicePushToken_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "DevicePushToken",
+        "conname": "DevicePushToken_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "DevicePushToken",
+        "conname": "DevicePushToken_userId_fkey",
+        "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "conname": "EmailAuthCode_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "EmailAuthCode",
+        "conname": "EmailAuthCode_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "conname": "LoyaltyAccount_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "conname": "LoyaltyAccount_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "conname": "LoyaltyAccount_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "conname": "LoyaltyAccount_userId_fkey",
+        "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE CASCADE ON DELETE SET NULL"
+      },
+      {
+        "table_name": "LoyaltyAccount",
+        "conname": "LoyaltyAccount_userId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"userId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "conname": "LoyaltyRedemptionGrant_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "conname": "LoyaltyRedemptionGrant_issueExecutionId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"issueExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "conname": "LoyaltyRedemptionGrant_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "conname": "LoyaltyRedemptionGrant_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrant",
+        "conname": "LoyaltyRedemptionGrant_value_shape_check",
+        "definition": "CHECK (((btrim(\"codeHash\") <> ''::text) AND (btrim(\"serviceRef\") <> ''::text) AND (points > 0) AND (\"expiresAt\" > \"issuedAt\") AND ((\"legacySourceRef\" IS NULL) OR (btrim(\"legacySourceRef\") <> ''::text))))"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "conname": "LoyaltyGrantRevocation_execution_tenant_fkey",
+        "definition": "FOREIGN KEY (\"actionExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "conname": "LoyaltyRedemptionGrantRevocation_grantId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"grantId\", \"tenantId\") REFERENCES \"LoyaltyRedemptionGrant\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "conname": "LoyaltyRedemptionGrantRevocation_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "conname": "LoyaltyRedemptionGrantRevocation_reason_check",
+        "definition": "CHECK ((\"reasonCode\" = ANY (ARRAY['client_request'::text, 'owner_or_admin_request'::text, 'service_withdrawn'::text, 'suspected_compromise'::text, 'policy_invalidated'::text])))"
+      },
+      {
+        "table_name": "LoyaltyRedemptionGrantRevocation",
+        "conname": "LoyaltyRedemptionGrantRevocation_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "conname": "PhoneAuthCode_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "PhoneAuthCode",
+        "conname": "PhoneAuthCode_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "ReferralReward",
+        "conname": "ReferralReward_contract_to_value_check",
+        "definition": "CHECK ((((\"liabilityCapKopecks\" IS NULL) AND (\"liabilityCurrency\" IS NULL) AND (\"presentationKeyVersion\" IS NULL)) OR (((\"liabilityCapKopecks\" >= 1) AND (\"liabilityCapKopecks\" <= 50000)) AND (\"liabilityCurrency\" ~ '^[A-Z]{3}$'::text) AND (btrim(\"presentationKeyVersion\") <> ''::text) AND (((\"amountKopecks\" IS NOT NULL) AND (\"liabilityCapKopecks\" = \"amountKopecks\") AND (\"liabilityCurrency\" = currency)) OR ((\"amountKopecks\" IS NULL) AND (\"percentBasisPoints\" IS NOT NULL))))))"
+      },
+      {
+        "table_name": "ReferralReward",
+        "conname": "ReferralReward_issuanceId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"issuanceId\", \"tenantId\") REFERENCES \"ReferralRewardIssuance\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "ReferralReward",
+        "conname": "ReferralReward_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "ReferralReward",
+        "conname": "ReferralReward_recipientClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"recipientClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "ReferralReward",
+        "conname": "ReferralReward_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "ReferralReward",
+        "conname": "ReferralReward_value_shape_check",
+        "definition": "CHECK (((\"rewardSlot\" = ANY (ARRAY['inviter'::text, 'invitee'::text])) AND (btrim(\"codeHash\") <> ''::text) AND (\"expiresAt\" > \"issuedAt\") AND (((\"amountKopecks\" > 0) AND (currency IS NOT NULL) AND (btrim(currency) <> ''::text) AND (\"percentBasisPoints\" IS NULL)) OR ((\"amountKopecks\" IS NULL) AND (currency IS NULL) AND ((\"percentBasisPoints\" >= 1) AND (\"percentBasisPoints\" <= 10000))))))"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "conname": "StaffProviderLink_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "conname": "StaffProviderLink_staffId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"staffId\", \"tenantId\") REFERENCES \"Staff\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "StaffProviderLink",
+        "conname": "StaffProviderLink_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "TrialActivation",
+        "conname": "TrialActivation_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "TrialActivation",
+        "conname": "TrialActivation_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE SET NULL"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "conname": "UnresolvedClientIdentityHold_evidence_hash_check",
+        "definition": "CHECK ((\"sourceEvidenceHash\" ~ '^[0-9a-f]{64}$'::text))"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "conname": "UnresolvedClientIdentityHold_external_id_check",
+        "definition": "CHECK ((length(btrim(\"externalId\")) > 0))"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "conname": "UnresolvedClientIdentityHold_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "conname": "UnresolvedClientIdentityHold_principal_count_check",
+        "definition": "CHECK ((\"unresolvedPrincipalCount\" >= 2))"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "conname": "UnresolvedClientIdentityHold_provider_check",
+        "definition": "CHECK ((length(btrim(provider)) > 0))"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "conname": "UnresolvedClientIdentityHold_reason_check",
+        "definition": "CHECK ((\"reasonCode\" = 'loyalty_identity_unresolved'::text))"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "conname": "UnresolvedClientIdentityHold_resolution_pair_check",
+        "definition": "CHECK (((\"resolvedAt\" IS NULL) = (\"resolutionActionExecutionId\" IS NULL)))"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "conname": "UnresolvedClientIdentityHold_source_namespace_check",
+        "definition": "CHECK ((length(btrim(\"sourceNamespace\")) > 0))"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "conname": "UnresolvedClientIdentityHold_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "UnresolvedClientIdentityHold",
+        "conname": "UnresolvedIdentityHold_resolution_execution_tenant_fkey",
+        "definition": "FOREIGN KEY (\"resolutionActionExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      }
+    ],
+    "indexes": [
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_branchId_idx",
+        "indexdef": "CREATE INDEX \"Appointment_branchId_idx\" ON public.\"Appointment\" USING btree (\"branchId\")"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_clientId_idx",
+        "indexdef": "CREATE INDEX \"Appointment_clientId_idx\" ON public.\"Appointment\" USING btree (\"clientId\")"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_id_tenantId_clientId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"Appointment_id_tenantId_clientId_key\" ON public.\"Appointment\" USING btree (id, \"tenantId\", \"clientId\")"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"Appointment_id_tenantId_key\" ON public.\"Appointment\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_internal_no_overlap",
+        "indexdef": "CREATE INDEX \"Appointment_internal_no_overlap\" ON public.\"Appointment\" USING gist (\"tenantId\", \"staffExternalId\", tsrange(\"blockedStartAt\", \"blockedEndAt\", '[)'::text)) WHERE ((source = 'internal'::text) AND (status <> ALL (ARRAY['canceled'::text, 'cancelled'::text])))"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"Appointment_pkey\" ON public.\"Appointment\" USING btree (id)"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_tenantId_crmProvider_crmExternalId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"Appointment_tenantId_crmProvider_crmExternalId_key\" ON public.\"Appointment\" USING btree (\"tenantId\", \"crmProvider\", \"crmExternalId\")"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_tenantId_idx",
+        "indexdef": "CREATE INDEX \"Appointment_tenantId_idx\" ON public.\"Appointment\" USING btree (\"tenantId\")"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_tenantId_mayaClientId_idx",
+        "indexdef": "CREATE INDEX \"Appointment_tenantId_mayaClientId_idx\" ON public.\"Appointment\" USING btree (\"tenantId\", \"mayaClientId\")"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_tenantId_staffExternalId_startAt_idx",
+        "indexdef": "CREATE INDEX \"Appointment_tenantId_staffExternalId_startAt_idx\" ON public.\"Appointment\" USING btree (\"tenantId\", \"staffExternalId\", \"startAt\")"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_tenantId_staffId_startAt_idx",
+        "indexdef": "CREATE INDEX \"Appointment_tenantId_staffId_startAt_idx\" ON public.\"Appointment\" USING btree (\"tenantId\", \"staffId\", \"startAt\")"
+      },
+      {
+        "tablename": "Appointment",
+        "indexname": "Appointment_tenantId_startAt_idx",
+        "indexdef": "CREATE INDEX \"Appointment_tenantId_startAt_idx\" ON public.\"Appointment\" USING btree (\"tenantId\", \"startAt\")"
+      },
+      {
+        "tablename": "AuthFlowState",
+        "indexname": "AuthFlowState_consumedAt_idx",
+        "indexdef": "CREATE INDEX \"AuthFlowState_consumedAt_idx\" ON public.\"AuthFlowState\" USING btree (\"consumedAt\")"
+      },
+      {
+        "tablename": "AuthFlowState",
+        "indexname": "AuthFlowState_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"AuthFlowState_expiresAt_idx\" ON public.\"AuthFlowState\" USING btree (\"expiresAt\")"
+      },
+      {
+        "tablename": "AuthFlowState",
+        "indexname": "AuthFlowState_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthFlowState_id_tenantId_key\" ON public.\"AuthFlowState\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "AuthFlowState",
+        "indexname": "AuthFlowState_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthFlowState_pkey\" ON public.\"AuthFlowState\" USING btree (id)"
+      },
+      {
+        "tablename": "AuthFlowState",
+        "indexname": "AuthFlowState_state_key",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthFlowState_state_key\" ON public.\"AuthFlowState\" USING btree (state)"
+      },
+      {
+        "tablename": "AuthFlowState",
+        "indexname": "AuthFlowState_tenantId_provider_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"AuthFlowState_tenantId_provider_expiresAt_idx\" ON public.\"AuthFlowState\" USING btree (\"tenantId\", provider, \"expiresAt\")"
+      },
+      {
+        "tablename": "AuthIdentity",
+        "indexname": "AuthIdentity_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthIdentity_id_tenantId_key\" ON public.\"AuthIdentity\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "AuthIdentity",
+        "indexname": "AuthIdentity_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthIdentity_pkey\" ON public.\"AuthIdentity\" USING btree (id)"
+      },
+      {
+        "tablename": "AuthIdentity",
+        "indexname": "AuthIdentity_tenantId_provider_idx",
+        "indexdef": "CREATE INDEX \"AuthIdentity_tenantId_provider_idx\" ON public.\"AuthIdentity\" USING btree (\"tenantId\", provider)"
+      },
+      {
+        "tablename": "AuthIdentity",
+        "indexname": "AuthIdentity_tenantId_provider_providerUserId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthIdentity_tenantId_provider_providerUserId_key\" ON public.\"AuthIdentity\" USING btree (\"tenantId\", provider, \"providerUserId\")"
+      },
+      {
+        "tablename": "AuthIdentity",
+        "indexname": "AuthIdentity_userId_idx",
+        "indexdef": "CREATE INDEX \"AuthIdentity_userId_idx\" ON public.\"AuthIdentity\" USING btree (\"userId\")"
+      },
+      {
+        "tablename": "AuthRateLimitBucket",
+        "indexname": "AuthRateLimitBucket_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthRateLimitBucket_pkey\" ON public.\"AuthRateLimitBucket\" USING btree (id)"
+      },
+      {
+        "tablename": "AuthRateLimitBucket",
+        "indexname": "AuthRateLimitBucket_policyKey_subjectHash_key",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthRateLimitBucket_policyKey_subjectHash_key\" ON public.\"AuthRateLimitBucket\" USING btree (\"policyKey\", \"subjectHash\")"
+      },
+      {
+        "tablename": "AuthRateLimitBucket",
+        "indexname": "AuthRateLimitBucket_tenantId_action_idx",
+        "indexdef": "CREATE INDEX \"AuthRateLimitBucket_tenantId_action_idx\" ON public.\"AuthRateLimitBucket\" USING btree (\"tenantId\", action)"
+      },
+      {
+        "tablename": "AuthRateLimitBucket",
+        "indexname": "AuthRateLimitBucket_windowEndsAt_idx",
+        "indexdef": "CREATE INDEX \"AuthRateLimitBucket_windowEndsAt_idx\" ON public.\"AuthRateLimitBucket\" USING btree (\"windowEndsAt\")"
+      },
+      {
+        "tablename": "AuthRefreshToken",
+        "indexname": "AuthRefreshToken_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"AuthRefreshToken_expiresAt_idx\" ON public.\"AuthRefreshToken\" USING btree (\"expiresAt\")"
+      },
+      {
+        "tablename": "AuthRefreshToken",
+        "indexname": "AuthRefreshToken_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthRefreshToken_pkey\" ON public.\"AuthRefreshToken\" USING btree (id)"
+      },
+      {
+        "tablename": "AuthRefreshToken",
+        "indexname": "AuthRefreshToken_sessionId_createdAt_idx",
+        "indexdef": "CREATE INDEX \"AuthRefreshToken_sessionId_createdAt_idx\" ON public.\"AuthRefreshToken\" USING btree (\"sessionId\", \"createdAt\")"
+      },
+      {
+        "tablename": "AuthRefreshToken",
+        "indexname": "AuthRefreshToken_tokenHash_key",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthRefreshToken_tokenHash_key\" ON public.\"AuthRefreshToken\" USING btree (\"tokenHash\")"
+      },
+      {
+        "tablename": "AuthSession",
+        "indexname": "AuthSession_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"AuthSession_expiresAt_idx\" ON public.\"AuthSession\" USING btree (\"expiresAt\")"
+      },
+      {
+        "tablename": "AuthSession",
+        "indexname": "AuthSession_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"AuthSession_pkey\" ON public.\"AuthSession\" USING btree (id)"
+      },
+      {
+        "tablename": "AuthSession",
+        "indexname": "AuthSession_revokedAt_idx",
+        "indexdef": "CREATE INDEX \"AuthSession_revokedAt_idx\" ON public.\"AuthSession\" USING btree (\"revokedAt\")"
+      },
+      {
+        "tablename": "AuthSession",
+        "indexname": "AuthSession_tenantId_userId_revokedAt_idx",
+        "indexdef": "CREATE INDEX \"AuthSession_tenantId_userId_revokedAt_idx\" ON public.\"AuthSession\" USING btree (\"tenantId\", \"userId\", \"revokedAt\")"
+      },
+      {
+        "tablename": "AuthSession",
+        "indexname": "AuthSession_userId_revokedAt_idx",
+        "indexdef": "CREATE INDEX \"AuthSession_userId_revokedAt_idx\" ON public.\"AuthSession\" USING btree (\"userId\", \"revokedAt\")"
+      },
+      {
+        "tablename": "Client",
+        "indexname": "Client_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"Client_id_tenantId_key\" ON public.\"Client\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "Client",
+        "indexname": "Client_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"Client_pkey\" ON public.\"Client\" USING btree (id)"
+      },
+      {
+        "tablename": "Client",
+        "indexname": "Client_tenantId_phoneHash_idx",
+        "indexdef": "CREATE INDEX \"Client_tenantId_phoneHash_idx\" ON public.\"Client\" USING btree (\"tenantId\", \"phoneHash\")"
+      },
+      {
+        "tablename": "Client",
+        "indexname": "Client_tenantId_userId_idx",
+        "indexdef": "CREATE INDEX \"Client_tenantId_userId_idx\" ON public.\"Client\" USING btree (\"tenantId\", \"userId\")"
+      },
+      {
+        "tablename": "ClientChannelLink",
+        "indexname": "ClientChannelLink_active_subject_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ClientChannelLink_active_subject_key\" ON public.\"ClientChannelLink\" USING btree (\"tenantId\", provider, \"providerSubjectHash\") WHERE (\"revokedAt\" IS NULL)"
+      },
+      {
+        "tablename": "ClientChannelLink",
+        "indexname": "ClientChannelLink_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ClientChannelLink_id_tenantId_key\" ON public.\"ClientChannelLink\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "ClientChannelLink",
+        "indexname": "ClientChannelLink_identity_reference_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ClientChannelLink_identity_reference_key\" ON public.\"ClientChannelLink\" USING btree (id, \"tenantId\", provider, \"providerSubjectHash\")"
+      },
+      {
+        "tablename": "ClientChannelLink",
+        "indexname": "ClientChannelLink_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"ClientChannelLink_pkey\" ON public.\"ClientChannelLink\" USING btree (id)"
+      },
+      {
+        "tablename": "ClientChannelLink",
+        "indexname": "ClientChannelLink_revocation_identity_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ClientChannelLink_revocation_identity_key\" ON public.\"ClientChannelLink\" USING btree (\"tenantId\", \"revocationIdentityHash\")"
+      },
+      {
+        "tablename": "ClientChannelLink",
+        "indexname": "ClientChannelLink_supersedesLinkId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ClientChannelLink_supersedesLinkId_key\" ON public.\"ClientChannelLink\" USING btree (\"supersedesLinkId\")"
+      },
+      {
+        "tablename": "ClientChannelLink",
+        "indexname": "ClientChannelLink_tenantId_clientId_idx",
+        "indexdef": "CREATE INDEX \"ClientChannelLink_tenantId_clientId_idx\" ON public.\"ClientChannelLink\" USING btree (\"tenantId\", \"clientId\")"
+      },
+      {
+        "tablename": "ClientChannelLink",
+        "indexname": "ClientChannelLink_verification_identity_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ClientChannelLink_verification_identity_key\" ON public.\"ClientChannelLink\" USING btree (\"tenantId\", \"verificationIdentityHash\")"
+      },
+      {
+        "tablename": "ClientConsentFact",
+        "indexname": "ClientConsentFact_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ClientConsentFact_id_tenantId_key\" ON public.\"ClientConsentFact\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "ClientConsentFact",
+        "indexname": "ClientConsentFact_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"ClientConsentFact_pkey\" ON public.\"ClientConsentFact\" USING btree (id)"
+      },
+      {
+        "tablename": "ClientConsentFact",
+        "indexname": "ClientConsentFact_tenantId_actionExecutionId_idx",
+        "indexdef": "CREATE INDEX \"ClientConsentFact_tenantId_actionExecutionId_idx\" ON public.\"ClientConsentFact\" USING btree (\"tenantId\", \"actionExecutionId\")"
+      },
+      {
+        "tablename": "ClientConsentFact",
+        "indexname": "ClientConsentFact_tenantId_clientId_kind_effectiveAt_idx",
+        "indexdef": "CREATE INDEX \"ClientConsentFact_tenantId_clientId_kind_effectiveAt_idx\" ON public.\"ClientConsentFact\" USING btree (\"tenantId\", \"clientId\", kind, \"effectiveAt\")"
+      },
+      {
+        "tablename": "ClientConsentFact",
+        "indexname": "ClientConsentFact_tenantId_sourceType_sourceIdentityHash_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ClientConsentFact_tenantId_sourceType_sourceIdentityHash_key\" ON public.\"ClientConsentFact\" USING btree (\"tenantId\", \"sourceType\", \"sourceIdentityHash\")"
+      },
+      {
+        "tablename": "CrmClientLink",
+        "indexname": "CrmClientLink_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"CrmClientLink_pkey\" ON public.\"CrmClientLink\" USING btree (id)"
+      },
+      {
+        "tablename": "CrmClientLink",
+        "indexname": "CrmClientLink_tenantId_clientId_idx",
+        "indexdef": "CREATE INDEX \"CrmClientLink_tenantId_clientId_idx\" ON public.\"CrmClientLink\" USING btree (\"tenantId\", \"clientId\")"
+      },
+      {
+        "tablename": "CrmClientLink",
+        "indexname": "CrmClientLink_tenantId_provider_externalId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CrmClientLink_tenantId_provider_externalId_key\" ON public.\"CrmClientLink\" USING btree (\"tenantId\", provider, \"externalId\")"
+      },
+      {
+        "tablename": "CrmClientLink",
+        "indexname": "CrmClientLink_tenantId_provider_syncedAt_idx",
+        "indexdef": "CREATE INDEX \"CrmClientLink_tenantId_provider_syncedAt_idx\" ON public.\"CrmClientLink\" USING btree (\"tenantId\", provider, \"syncedAt\")"
+      },
+      {
+        "tablename": "CustomerProfile",
+        "indexname": "CustomerProfile_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerProfile_pkey\" ON public.\"CustomerProfile\" USING btree (id)"
+      },
+      {
+        "tablename": "CustomerProfile",
+        "indexname": "CustomerProfile_tenantId_clientId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerProfile_tenantId_clientId_key\" ON public.\"CustomerProfile\" USING btree (\"tenantId\", \"clientId\")"
+      },
+      {
+        "tablename": "CustomerProfile",
+        "indexname": "CustomerProfile_tenantId_updatedAt_idx",
+        "indexdef": "CREATE INDEX \"CustomerProfile_tenantId_updatedAt_idx\" ON public.\"CustomerProfile\" USING btree (\"tenantId\", \"updatedAt\")"
+      },
+      {
+        "tablename": "CustomerProfile",
+        "indexname": "CustomerProfile_userId_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerProfile_userId_tenantId_key\" ON public.\"CustomerProfile\" USING btree (\"userId\", \"tenantId\")"
+      },
+      {
+        "tablename": "CustomerReferral",
+        "indexname": "CustomerReferral_createExecutionId_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerReferral_createExecutionId_tenantId_key\" ON public.\"CustomerReferral\" USING btree (\"createExecutionId\", \"tenantId\")"
+      },
+      {
+        "tablename": "CustomerReferral",
+        "indexname": "CustomerReferral_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerReferral_id_tenantId_key\" ON public.\"CustomerReferral\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "CustomerReferral",
+        "indexname": "CustomerReferral_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerReferral_pkey\" ON public.\"CustomerReferral\" USING btree (id)"
+      },
+      {
+        "tablename": "CustomerReferral",
+        "indexname": "CustomerReferral_resolutionExecutionId_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerReferral_resolutionExecutionId_tenantId_key\" ON public.\"CustomerReferral\" USING btree (\"resolutionExecutionId\", \"tenantId\")"
+      },
+      {
+        "tablename": "CustomerReferral",
+        "indexname": "CustomerReferral_tenantId_identityHash_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerReferral_tenantId_identityHash_key\" ON public.\"CustomerReferral\" USING btree (\"tenantId\", \"identityHash\")"
+      },
+      {
+        "tablename": "CustomerReferral",
+        "indexname": "CustomerReferral_tenantId_legacySourceRef_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerReferral_tenantId_legacySourceRef_key\" ON public.\"CustomerReferral\" USING btree (\"tenantId\", \"legacySourceRef\")"
+      },
+      {
+        "tablename": "CustomerReferral",
+        "indexname": "CustomerReferral_tenantId_referredSubjectHash_status_idx",
+        "indexdef": "CREATE INDEX \"CustomerReferral_tenantId_referredSubjectHash_status_idx\" ON public.\"CustomerReferral\" USING btree (\"tenantId\", \"referredSubjectHash\", status)"
+      },
+      {
+        "tablename": "CustomerReferral",
+        "indexname": "CustomerReferral_tenantId_referrerClientId_joinedAt_idx",
+        "indexdef": "CREATE INDEX \"CustomerReferral_tenantId_referrerClientId_joinedAt_idx\" ON public.\"CustomerReferral\" USING btree (\"tenantId\", \"referrerClientId\", \"joinedAt\")"
+      },
+      {
+        "tablename": "CustomerSubscription",
+        "indexname": "CustomerSubscription_activationExecutionId_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerSubscription_activationExecutionId_tenantId_key\" ON public.\"CustomerSubscription\" USING btree (\"activationExecutionId\", \"tenantId\")"
+      },
+      {
+        "tablename": "CustomerSubscription",
+        "indexname": "CustomerSubscription_endExecutionId_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerSubscription_endExecutionId_tenantId_key\" ON public.\"CustomerSubscription\" USING btree (\"endExecutionId\", \"tenantId\")"
+      },
+      {
+        "tablename": "CustomerSubscription",
+        "indexname": "CustomerSubscription_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerSubscription_id_tenantId_key\" ON public.\"CustomerSubscription\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "CustomerSubscription",
+        "indexname": "CustomerSubscription_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerSubscription_pkey\" ON public.\"CustomerSubscription\" USING btree (id)"
+      },
+      {
+        "tablename": "CustomerSubscription",
+        "indexname": "CustomerSubscription_previousSubscriptionId_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerSubscription_previousSubscriptionId_tenantId_key\" ON public.\"CustomerSubscription\" USING btree (\"previousSubscriptionId\", \"tenantId\")"
+      },
+      {
+        "tablename": "CustomerSubscription",
+        "indexname": "CustomerSubscription_tenantId_clientId_status_termEndsAt_idx",
+        "indexdef": "CREATE INDEX \"CustomerSubscription_tenantId_clientId_status_termEndsAt_idx\" ON public.\"CustomerSubscription\" USING btree (\"tenantId\", \"clientId\", status, \"termEndsAt\")"
+      },
+      {
+        "tablename": "CustomerSubscription",
+        "indexname": "CustomerSubscription_tenantId_legacySourceRef_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerSubscription_tenantId_legacySourceRef_key\" ON public.\"CustomerSubscription\" USING btree (\"tenantId\", \"legacySourceRef\")"
+      },
+      {
+        "tablename": "CustomerSubscription",
+        "indexname": "CustomerSubscription_tenantId_provider_providerPaymentRefHa_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerSubscription_tenantId_provider_providerPaymentRefHa_key\" ON public.\"CustomerSubscription\" USING btree (\"tenantId\", provider, \"providerPaymentRefHash\")"
+      },
+      {
+        "tablename": "CustomerSubscription",
+        "indexname": "CustomerSubscription_tenantId_status_termEndsAt_idx",
+        "indexdef": "CREATE INDEX \"CustomerSubscription_tenantId_status_termEndsAt_idx\" ON public.\"CustomerSubscription\" USING btree (\"tenantId\", status, \"termEndsAt\")"
+      },
+      {
+        "tablename": "CustomerSubscription",
+        "indexname": "CustomerSubscription_tenantId_termIdentityHash_key",
+        "indexdef": "CREATE UNIQUE INDEX \"CustomerSubscription_tenantId_termIdentityHash_key\" ON public.\"CustomerSubscription\" USING btree (\"tenantId\", \"termIdentityHash\")"
+      },
+      {
+        "tablename": "DevicePushToken",
+        "indexname": "DevicePushToken_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"DevicePushToken_pkey\" ON public.\"DevicePushToken\" USING btree (id)"
+      },
+      {
+        "tablename": "DevicePushToken",
+        "indexname": "DevicePushToken_tenantId_token_key",
+        "indexdef": "CREATE UNIQUE INDEX \"DevicePushToken_tenantId_token_key\" ON public.\"DevicePushToken\" USING btree (\"tenantId\", token)"
+      },
+      {
+        "tablename": "DevicePushToken",
+        "indexname": "DevicePushToken_tenantId_userId_idx",
+        "indexdef": "CREATE INDEX \"DevicePushToken_tenantId_userId_idx\" ON public.\"DevicePushToken\" USING btree (\"tenantId\", \"userId\")"
+      },
+      {
+        "tablename": "EmailAuthCode",
+        "indexname": "EmailAuthCode_consumedAt_idx",
+        "indexdef": "CREATE INDEX \"EmailAuthCode_consumedAt_idx\" ON public.\"EmailAuthCode\" USING btree (\"consumedAt\")"
+      },
+      {
+        "tablename": "EmailAuthCode",
+        "indexname": "EmailAuthCode_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"EmailAuthCode_expiresAt_idx\" ON public.\"EmailAuthCode\" USING btree (\"expiresAt\")"
+      },
+      {
+        "tablename": "EmailAuthCode",
+        "indexname": "EmailAuthCode_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"EmailAuthCode_id_tenantId_key\" ON public.\"EmailAuthCode\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "EmailAuthCode",
+        "indexname": "EmailAuthCode_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"EmailAuthCode_pkey\" ON public.\"EmailAuthCode\" USING btree (id)"
+      },
+      {
+        "tablename": "EmailAuthCode",
+        "indexname": "EmailAuthCode_tenantId_email_key",
+        "indexdef": "CREATE UNIQUE INDEX \"EmailAuthCode_tenantId_email_key\" ON public.\"EmailAuthCode\" USING btree (\"tenantId\", email)"
+      },
+      {
+        "tablename": "EmailAuthCode",
+        "indexname": "EmailAuthCode_tenantId_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"EmailAuthCode_tenantId_expiresAt_idx\" ON public.\"EmailAuthCode\" USING btree (\"tenantId\", \"expiresAt\")"
+      },
+      {
+        "tablename": "LoyaltyAccount",
+        "indexname": "LoyaltyAccount_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyAccount_id_tenantId_key\" ON public.\"LoyaltyAccount\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "LoyaltyAccount",
+        "indexname": "LoyaltyAccount_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyAccount_pkey\" ON public.\"LoyaltyAccount\" USING btree (id)"
+      },
+      {
+        "tablename": "LoyaltyAccount",
+        "indexname": "LoyaltyAccount_tenantId_clientId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyAccount_tenantId_clientId_key\" ON public.\"LoyaltyAccount\" USING btree (\"tenantId\", \"clientId\")"
+      },
+      {
+        "tablename": "LoyaltyAccount",
+        "indexname": "LoyaltyAccount_tenantId_source_updatedAt_idx",
+        "indexdef": "CREATE INDEX \"LoyaltyAccount_tenantId_source_updatedAt_idx\" ON public.\"LoyaltyAccount\" USING btree (\"tenantId\", source, \"updatedAt\")"
+      },
+      {
+        "tablename": "LoyaltyAccount",
+        "indexname": "LoyaltyAccount_userId_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyAccount_userId_tenantId_key\" ON public.\"LoyaltyAccount\" USING btree (\"userId\", \"tenantId\")"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrant",
+        "indexname": "LoyaltyRedemptionGrant_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyRedemptionGrant_id_tenantId_key\" ON public.\"LoyaltyRedemptionGrant\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrant",
+        "indexname": "LoyaltyRedemptionGrant_issueExecutionId_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyRedemptionGrant_issueExecutionId_tenantId_key\" ON public.\"LoyaltyRedemptionGrant\" USING btree (\"issueExecutionId\", \"tenantId\")"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrant",
+        "indexname": "LoyaltyRedemptionGrant_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyRedemptionGrant_pkey\" ON public.\"LoyaltyRedemptionGrant\" USING btree (id)"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrant",
+        "indexname": "LoyaltyRedemptionGrant_tenantId_clientId_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"LoyaltyRedemptionGrant_tenantId_clientId_expiresAt_idx\" ON public.\"LoyaltyRedemptionGrant\" USING btree (\"tenantId\", \"clientId\", \"expiresAt\")"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrant",
+        "indexname": "LoyaltyRedemptionGrant_tenantId_codeHash_key",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyRedemptionGrant_tenantId_codeHash_key\" ON public.\"LoyaltyRedemptionGrant\" USING btree (\"tenantId\", \"codeHash\")"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrant",
+        "indexname": "LoyaltyRedemptionGrant_tenantId_legacySourceRef_key",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyRedemptionGrant_tenantId_legacySourceRef_key\" ON public.\"LoyaltyRedemptionGrant\" USING btree (\"tenantId\", \"legacySourceRef\")"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrantRevocation",
+        "indexname": "LoyaltyRedemptionGrantRevocation_actionExecutionId_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyRedemptionGrantRevocation_actionExecutionId_tenantId_key\" ON public.\"LoyaltyRedemptionGrantRevocation\" USING btree (\"actionExecutionId\", \"tenantId\")"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrantRevocation",
+        "indexname": "LoyaltyRedemptionGrantRevocation_grantId_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyRedemptionGrantRevocation_grantId_tenantId_key\" ON public.\"LoyaltyRedemptionGrantRevocation\" USING btree (\"grantId\", \"tenantId\")"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrantRevocation",
+        "indexname": "LoyaltyRedemptionGrantRevocation_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyRedemptionGrantRevocation_id_tenantId_key\" ON public.\"LoyaltyRedemptionGrantRevocation\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrantRevocation",
+        "indexname": "LoyaltyRedemptionGrantRevocation_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"LoyaltyRedemptionGrantRevocation_pkey\" ON public.\"LoyaltyRedemptionGrantRevocation\" USING btree (id)"
+      },
+      {
+        "tablename": "LoyaltyRedemptionGrantRevocation",
+        "indexname": "LoyaltyRedemptionGrantRevocation_tenantId_revokedAt_idx",
+        "indexdef": "CREATE INDEX \"LoyaltyRedemptionGrantRevocation_tenantId_revokedAt_idx\" ON public.\"LoyaltyRedemptionGrantRevocation\" USING btree (\"tenantId\", \"revokedAt\")"
+      },
+      {
+        "tablename": "PhoneAuthCode",
+        "indexname": "PhoneAuthCode_consumedAt_idx",
+        "indexdef": "CREATE INDEX \"PhoneAuthCode_consumedAt_idx\" ON public.\"PhoneAuthCode\" USING btree (\"consumedAt\")"
+      },
+      {
+        "tablename": "PhoneAuthCode",
+        "indexname": "PhoneAuthCode_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"PhoneAuthCode_expiresAt_idx\" ON public.\"PhoneAuthCode\" USING btree (\"expiresAt\")"
+      },
+      {
+        "tablename": "PhoneAuthCode",
+        "indexname": "PhoneAuthCode_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"PhoneAuthCode_id_tenantId_key\" ON public.\"PhoneAuthCode\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "PhoneAuthCode",
+        "indexname": "PhoneAuthCode_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"PhoneAuthCode_pkey\" ON public.\"PhoneAuthCode\" USING btree (id)"
+      },
+      {
+        "tablename": "PhoneAuthCode",
+        "indexname": "PhoneAuthCode_tenantId_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"PhoneAuthCode_tenantId_expiresAt_idx\" ON public.\"PhoneAuthCode\" USING btree (\"tenantId\", \"expiresAt\")"
+      },
+      {
+        "tablename": "PhoneAuthCode",
+        "indexname": "PhoneAuthCode_tenantId_phone_key",
+        "indexdef": "CREATE UNIQUE INDEX \"PhoneAuthCode_tenantId_phone_key\" ON public.\"PhoneAuthCode\" USING btree (\"tenantId\", phone)"
+      },
+      {
+        "tablename": "ReferralReward",
+        "indexname": "ReferralReward_id_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ReferralReward_id_tenantId_key\" ON public.\"ReferralReward\" USING btree (id, \"tenantId\")"
+      },
+      {
+        "tablename": "ReferralReward",
+        "indexname": "ReferralReward_issuanceId_tenantId_rewardSlot_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ReferralReward_issuanceId_tenantId_rewardSlot_key\" ON public.\"ReferralReward\" USING btree (\"issuanceId\", \"tenantId\", \"rewardSlot\")"
+      },
+      {
+        "tablename": "ReferralReward",
+        "indexname": "ReferralReward_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"ReferralReward_pkey\" ON public.\"ReferralReward\" USING btree (id)"
+      },
+      {
+        "tablename": "ReferralReward",
+        "indexname": "ReferralReward_tenantId_codeHash_key",
+        "indexdef": "CREATE UNIQUE INDEX \"ReferralReward_tenantId_codeHash_key\" ON public.\"ReferralReward\" USING btree (\"tenantId\", \"codeHash\")"
+      },
+      {
+        "tablename": "ReferralReward",
+        "indexname": "ReferralReward_tenantId_recipientClientId_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"ReferralReward_tenantId_recipientClientId_expiresAt_idx\" ON public.\"ReferralReward\" USING btree (\"tenantId\", \"recipientClientId\", \"expiresAt\")"
+      },
+      {
+        "tablename": "StaffProviderLink",
+        "indexname": "StaffProviderLink_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"StaffProviderLink_pkey\" ON public.\"StaffProviderLink\" USING btree (id)"
+      },
+      {
+        "tablename": "StaffProviderLink",
+        "indexname": "StaffProviderLink_tenantId_provider_externalId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"StaffProviderLink_tenantId_provider_externalId_key\" ON public.\"StaffProviderLink\" USING btree (\"tenantId\", provider, \"externalId\")"
+      },
+      {
+        "tablename": "StaffProviderLink",
+        "indexname": "StaffProviderLink_tenantId_provider_externalId_unlinkedAt_idx",
+        "indexdef": "CREATE INDEX \"StaffProviderLink_tenantId_provider_externalId_unlinkedAt_idx\" ON public.\"StaffProviderLink\" USING btree (\"tenantId\", provider, \"externalId\", \"unlinkedAt\")"
+      },
+      {
+        "tablename": "StaffProviderLink",
+        "indexname": "StaffProviderLink_tenantId_provider_syncedAt_idx",
+        "indexdef": "CREATE INDEX \"StaffProviderLink_tenantId_provider_syncedAt_idx\" ON public.\"StaffProviderLink\" USING btree (\"tenantId\", provider, \"syncedAt\")"
+      },
+      {
+        "tablename": "StaffProviderLink",
+        "indexname": "StaffProviderLink_tenantId_staffId_idx",
+        "indexdef": "CREATE INDEX \"StaffProviderLink_tenantId_staffId_idx\" ON public.\"StaffProviderLink\" USING btree (\"tenantId\", \"staffId\")"
+      },
+      {
+        "tablename": "TrialActivation",
+        "indexname": "TrialActivation_activationTokenHash_key",
+        "indexdef": "CREATE UNIQUE INDEX \"TrialActivation_activationTokenHash_key\" ON public.\"TrialActivation\" USING btree (\"activationTokenHash\")"
+      },
+      {
+        "tablename": "TrialActivation",
+        "indexname": "TrialActivation_completedAt_idx",
+        "indexdef": "CREATE INDEX \"TrialActivation_completedAt_idx\" ON public.\"TrialActivation\" USING btree (\"completedAt\")"
+      },
+      {
+        "tablename": "TrialActivation",
+        "indexname": "TrialActivation_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"TrialActivation_pkey\" ON public.\"TrialActivation\" USING btree (id)"
+      },
+      {
+        "tablename": "TrialActivation",
+        "indexname": "TrialActivation_status_expiresAt_idx",
+        "indexdef": "CREATE INDEX \"TrialActivation_status_expiresAt_idx\" ON public.\"TrialActivation\" USING btree (status, \"expiresAt\")"
+      },
+      {
+        "tablename": "TrialActivation",
+        "indexname": "TrialActivation_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"TrialActivation_tenantId_key\" ON public.\"TrialActivation\" USING btree (\"tenantId\")"
+      },
+      {
+        "tablename": "UnresolvedClientIdentityHold",
+        "indexname": "UnresolvedClientIdentityHold_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"UnresolvedClientIdentityHold_pkey\" ON public.\"UnresolvedClientIdentityHold\" USING btree (id)"
+      },
+      {
+        "tablename": "UnresolvedClientIdentityHold",
+        "indexname": "UnresolvedClientIdentityHold_tenant_provider_external_key",
+        "indexdef": "CREATE UNIQUE INDEX \"UnresolvedClientIdentityHold_tenant_provider_external_key\" ON public.\"UnresolvedClientIdentityHold\" USING btree (\"tenantId\", provider, \"externalId\")"
+      },
+      {
+        "tablename": "UnresolvedClientIdentityHold",
+        "indexname": "UnresolvedClientIdentityHold_tenant_reason_resolved_idx",
+        "indexdef": "CREATE INDEX \"UnresolvedClientIdentityHold_tenant_reason_resolved_idx\" ON public.\"UnresolvedClientIdentityHold\" USING btree (\"tenantId\", \"reasonCode\", \"resolvedAt\")"
+      }
+    ]
+  },
+  "sourceReferences": [
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "3dedb13ec0ea25c69eac7c24b0b27fea98fe83fb60953c60f6576e94c47952c7",
+      "anchors": [
+        {
+          "text": "model AuthFlowState {",
+          "line": 799
+        },
+        {
+          "text": "model PhoneAuthCode {",
+          "line": 818
+        },
+        {
+          "text": "model EmailAuthCode {",
+          "line": 837
+        },
+        {
+          "text": "model AuthSession {",
+          "line": 856
+        },
+        {
+          "text": "model AuthRefreshToken {",
+          "line": 879
+        },
+        {
+          "text": "model AuthIdentity {",
+          "line": 778
+        },
+        {
+          "text": "model TrialActivation {",
+          "line": 1429
+        },
+        {
+          "text": "model ClientChannelLink {",
+          "line": 2104
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/auth/auth.service.ts",
+      "sha256": "87e861386f27b4d5f677dab05ddece7dbab4d55f2204c151bce9454ac398e85c",
+      "anchors": [
+        {
+          "text": "private getPhoneAuthCodeTtlSeconds",
+          "line": 554
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/auth/email-auth.service.ts",
+      "sha256": "abc7171e87b4d5460d9c3b2a260241c84a47f6e58a60a7e567fdefaec6cb0322",
+      "anchors": [
+        {
+          "text": "private getCodeTtlSeconds",
+          "line": 595
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/auth/social-auth.service.ts",
+      "sha256": "7b16427028b2f95b9eb5a6c99ce219cb2b24597645ad6f7831c35cdc07efe274",
+      "anchors": [
+        {
+          "text": "private async createAuthFlowState",
+          "line": 1159
+        },
+        {
+          "text": "private getAuthFlowStateTtlSeconds",
+          "line": 1533
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "sha256": "36725cc1a66c5bd88916267d6d6b88ec13b0c03918b9724dd9bed310022a0972",
+      "anchors": [
+        {
+          "text": "upsertPhoneChallenge",
+          "line": 14
+        },
+        {
+          "text": "async claimPhoneChallenge",
+          "line": 97
+        },
+        {
+          "text": "async claimFlowState",
+          "line": 229
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/config/runtime-config.ts",
+      "sha256": "a3cd63c232435b748c3a69677ed019c5806d89c4affb52a011023bab2b7ce1da",
+      "anchors": [
+        {
+          "text": "['PHONE_AUTH_CODE_TTL'",
+          "line": 50
+        },
+        {
+          "text": "['EMAIL_AUTH_CODE_TTL'",
+          "line": 53
+        },
+        {
+          "text": "['AUTH_FLOW_STATE_TTL_SECONDS'",
+          "line": 58
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave6/package5-wave6.policy.ts",
+      "sha256": "84104711a8aca595c5174a7960a0d9071c5aca5a4b50efab6a3b5da494ae3530",
+      "anchors": [
+        {
+          "text": "export const WAVE6_CLASSES",
+          "line": 11
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/encryption/encryption.service.ts",
+      "sha256": "9f0fc845eb1c60cc50c301d8c385802179d95f9cb8d480a790fa30694a9fc01d",
+      "anchors": [
+        {
+          "text": "opaqueReference(namespace:",
+          "line": 75
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "sha256": "607c91ee405a11dd1bfe5cf0e8b72387f6b20cfafebb74e991ba1a10a3d7d34a",
+      "anchors": [
+        {
+          "text": "export interface ClientChannelLinkVerifier",
+          "line": 46
+        },
+        {
+          "text": "export async function lockClientChannelIdentity",
+          "line": 55
+        }
+      ]
+    },
+    {
+      "path": "docs/rebuild/package5-final-a18-client-channel-link-schema-v1-proposal.md",
+      "sha256": "e8f68cfb569bd2fbf0b2b98223f6462ea01ef1eb49efdff20d2e86abf49be3a6",
+      "anchors": [
+        {
+          "text": "Pending challenge transport",
+          "line": 171
+        },
+        {
+          "text": "If a concrete linking implementation needs additional durable challenge schema,",
+          "line": 174
+        }
+      ]
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-A30-AUTH-POLICY-V1-PROPOSAL.md",
+      "sha256": "4ed4c4f27640a942e32e1d662bd4a399b40ea1286ae3da688c46ed63d121e9ca",
+      "anchors": [
+        {
+          "text": "Approved immutable policy key:",
+          "line": 15
+        }
+      ]
+    }
+  ],
+  "existingChallengeSchemaSufficient": false,
+  "observedAuthenticationTtlDefaultsSeconds": {
+    "phoneCode": 300,
+    "emailCode": 300,
+    "oauthState": 600
+  },
+  "existingApprovedClientLinkingTtlFound": false,
+  "observedDefaultsReclassifiedAsApproval": false,
+  "proposed": {
+    "newModel": "ClientLinkChallenge",
+    "newModelCount": 1,
+    "fieldCount": 14,
+    "ttlPolicyKey": "package5.a18.client-link-challenge",
+    "ttlPolicyVersion": 1,
+    "ttlSeconds": 600,
+    "ttlApproved": false,
+    "schemaApproved": false
+  },
+  "newSchemaImplemented": false,
+  "newMigrationGenerated": false,
+  "newMigrationApplied": false,
+  "runtimeChanged": false,
+  "requiredProofExecuted": false,
+  "productionBusinessProviderMutations": 0,
+  "productionSchemaMutations": 0,
+  "stopReason": "Explicit user schema proposal boundary and separate TTL decision requirement",
+  "remainder": [
+    "Approve minimal challenge schema and separate TTL",
+    "Implement/prove challenge foundation within approved migration boundary",
+    "A18 canonical consent",
+    "A26 trial and admin same TrialActivation authority",
+    "Mandatory gates and runtime deployment",
+    "Read-only production verification",
+    "Restart full 13-family Final Package5 Gate"
+  ],
+  "hygiene": {
+    "temporaryDatabasesCreated": 0,
+    "watchersStarted": 0,
+    "browsersStarted": 0,
+    "preExistingDatabasesTouched": 0,
+    "proposalSourceConsistency": "PASS",
+    "proposedFields": 14,
+    "runtimeSchemaMigrationsUnchanged": true,
+    "unrelatedDirtyFilesUnchanged": 18,
+    "preExistingLocalDatabases": 17,
+    "ownedTempProcesses": 0,
+    "ownedWatchers": 0,
+    "ownedBrowsers": 0,
+    "ownedTempDatabases": 0
+  }
+}
