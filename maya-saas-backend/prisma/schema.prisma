@@ -2123,6 +2123,7 @@ model ClientChannelLink {
   clientId                 String
   provider                 String
   providerSubjectHash      String
+  deliveryAddressEncrypted String?
   subjectHashVersion       Int      @default(1)
   verificationMethod       String
   verificationVersion      Int      @default(1)
