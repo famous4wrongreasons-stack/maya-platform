@@ -1085,14 +1085,12 @@ class YClientsAPI:
         client_name: str,
         client_phone: str,
         client_comment: str = "",
-        notify_by_sms: int = 3,
+        notify_by_sms: int | None = None,
         bridge_origin: str | None = None,
     ) -> dict:
         normalized_phone = self._normalize_phone(client_phone)
-        try:
-            normalized_notify = max(0, min(48, int(notify_by_sms)))
-        except (TypeError, ValueError):
-            normalized_notify = 3
+        if notify_by_sms is not None and (type(notify_by_sms) is not int or not 0 <= notify_by_sms <= 48):
+            return {"success": False, "error": "invalid_reminder_hours"}
         payload = {
             "client_id": opaque_client_reference(normalized_phone, client_name),
             "client_name": str(client_name),
@@ -1102,7 +1100,7 @@ class YClientsAPI:
             "service_ids": [str(service_id) for service_id in service_ids],
             "start": datetime_str,
             "notes": client_comment or None,
-            "notify_by_sms_hours": normalized_notify,
+            **({"notify_by_sms_hours": notify_by_sms} if notify_by_sms is not None else {}),
         }
         return dispatch_appointment_action(
             provider="yclients",

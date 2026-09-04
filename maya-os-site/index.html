@@ -9771,13 +9771,12 @@ function ABookFlow() {
   }, []);
   // Настроение визита (🔴 'red' тишина / 🔵 'blue' общение) — пилюли «как в Матрице».
   // Пред-выбор по последнему выбору клиента (localStorage).
-  const [mood, setMood] = React.useState(function () {
-    try {
-      return localStorage.getItem('me_visit_mood') || null;
-    } catch (e) {
-      return null;
-    }
-  });
+  const [mood, setMood] = React.useState(null);
+  React.useEffect(function () {
+    var active = true;
+    mayaClientPreferenceCall('notify_prefs', {}).then(function (state) { if (active) setMood(state.defaultVisitMood || null); }).catch(function () {});
+    return function () { active = false; };
+  }, []);
 
   // prefill contact data from the hydrated cabinet when reaching the confirm step
   React.useEffect(() => {
@@ -11701,18 +11700,9 @@ function ABookFlow() {
   // Best-effort: не блокирует успех записи; журнал/пуш барбера подхватят выбор.
   function saveMood(recordId) {
     if (!mood || !recordId) return;
-    try {
-      const rq = window.__meAuthReq ? window.__meAuthReq({
-        record_id: recordId,
-        mood: mood
-      }) : null;
-      if (!rq) return;
-      fetch(BF_PROXY + '?action=set_visit_mood', {
-        method: 'POST',
-        headers: rq.headers,
-        body: rq.body
-      }).catch(() => {});
-    } catch (e) {}
+    mayaClientPreferenceCall('set_visit_mood', { record_id: recordId, mood: mood }).catch(function () {
+      if (window.__toast) window.__toast('Не удалось сохранить настроение визита. Проверьте связь с клиентом.');
+    });
   }
 
   // ---- Настроение визита: пилюли «как в Матрице» (🔴 тишина / 🔵 общение) ----
@@ -11722,9 +11712,7 @@ function ABookFlow() {
     const pick = m => {
       const nv = mood === m ? null : m; // повторный тап — снять выбор
       setMood(nv);
-      try {
-        if (nv) localStorage.setItem('me_visit_mood', nv);else localStorage.removeItem('me_visit_mood');
-      } catch (e) {}
+
       try {
         if (window.tactile) window.tactile();else if (navigator.vibrate) navigator.vibrate(12);
       } catch (e) {}
@@ -14252,20 +14240,45 @@ function AHistoryCard(props) {
 window.AHistoryCard = AHistoryCard;
 
 // ── Настройки уведомлений: notify_prefs (POST через __meAuthReq), тумблеры по категориям.
+// B5/B6: current channel credentials and one stable command; no identity heuristics.
+function mayaClientPreferenceCall(action, payload) {
+  var proxy = 'https://malesthetic.pro/app/api-proxy.php';
+  function request(name, data) {
+    var body = Object.assign({}, data), headers = { 'Content-Type': 'application/json' };
+    var tg = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
+    var bundle = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
+    var auth = window.__tgAuthData || JSON.parse(localStorage.getItem('tg_auth_data') || 'null');
+    if (tg) headers['X-Telegram-InitData'] = tg;
+    else if (bundle && bundle.token) headers.Authorization = 'Bearer ' + bundle.token;
+    else if (auth && auth.hash && auth.auth_date) body.auth_data = auth;
+    else return Promise.reject(new Error('client_link_required'));
+    return fetch(proxy + '?action=' + name, { method: 'POST', headers: headers, body: JSON.stringify(body) }).then(function (r) {
+      return r.json().then(function (value) { if (!r.ok || value.error) throw new Error('preference_request_rejected'); return value; });
+    });
+  }
+  if (!payload || !Object.keys(payload).length) return request('notify_prefs', {});
+  var bytes = new Uint8Array(24); window.crypto.getRandomValues(bytes);
+  var key = Array.prototype.map.call(bytes, function (v) { return ('0' + v.toString(16)).slice(-2); }).join('');
+  return request('notify_prefs', {}).then(function (state) {
+    var command = Object.assign({}, payload, { idempotencyKey: key, expectedGeneration: action === 'set_visit_mood' ? state.visitMoodGeneration : state.expectedGeneration });
+    return request(action, command);
+  });
+}
+
 function ANotifyCard(props) {
   var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
   var PROXY = 'https://malesthetic.pro/app/api-proxy.php';
   var st = React.useState({ prefs: null, loading: true }); var s = st[0], setS = st[1];
   var unavailable = !meIsLegacy();
-  function req(body, cb) { if (unavailable) { cb && cb(null); return; } var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null; if (!rq) { cb && cb(null); return; } fetch(PROXY + '?action=notify_prefs', { method: 'POST', headers: rq.headers, body: rq.body }).then(function (r) { return r.json(); }).then(function (res) { cb && cb((res && res.prefs) || {}); }).catch(function () { cb && cb(null); }); }
-  React.useEffect(function () { if (unavailable) { setS({ prefs: null, loading: false }); return; } req({}, function (p) { setS({ prefs: p || {}, loading: false }); }); }, []);
+  function req(body, cb) { if (unavailable) { cb && cb(null); return; } mayaClientPreferenceCall('notify_prefs', body || {}).then(function (res) { cb && cb(res.prefs || {}); }).catch(function () { cb && cb(null); }); }
+  React.useEffect(function () { if (unavailable) { setS({ prefs: null, loading: false }); return; } req({}, function (p) { setS({ prefs: p, loading: false }); }); }, []);
   function on(k) { return !!(s.prefs && s.prefs[k] !== false); }
-  function toggle(k) { var n = Object.assign({}, s.prefs || {}); n[k] = !on(k); setS({ prefs: n, loading: false }); try { window.tactile && window.tactile(); } catch (er) {} req({ prefs: n }, function (p) { if (p) setS({ prefs: p, loading: false }); }); }
+  function toggle(k) { var patch = {}; patch[k] = !on(k); req({ prefs: patch }, function (p) { if (p) setS({ prefs: p, loading: false }); }); }
   var ROWS = [['reminder', 'Напоминания о записи'], ['record_changes', 'Изменения записи'], ['freed_slot', 'Освободилось время'], ['marketing', 'Акции и новости']];
   var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 16, marginTop: 10, maxWidth: 420, background: c.surf };
   var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 4 };
   function Sw(isOn, click) { return e('div', { onClick: click, style: { width: 44, height: 26, borderRadius: 999, flex: '0 0 auto', cursor: 'pointer', background: isOn ? c.invBg : c.line2, position: 'relative', transition: 'background .2s' } }, e('div', { style: { position: 'absolute', top: 3, left: isOn ? 21 : 3, width: 20, height: 20, borderRadius: 999, background: c.invText, transition: 'left .2s' } })); }
-  if (unavailable) return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'), e('div', { style: { fontSize: 13, color: c.muted, lineHeight: 1.5 } }, 'Настройки уведомлений этого бизнеса пока недоступны в чате.'));
+  if (unavailable || (!s.loading && s.prefs === null)) return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'), e('div', { style: { fontSize: 13, color: c.muted, lineHeight: 1.5 } }, 'Настройки уведомлений этого бизнеса пока недоступны в чате.'));
   if (s.loading) return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'), e('div', { style: { fontSize: 12.5, color: c.muted, padding: '6px 2px' } }, 'Секунду…'));
   return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'),
     ROWS.map(function (r, i) { return e('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: 12, padding: '13px 2px', borderTop: i ? '1px solid ' + c.line : 'none' } }, e('span', { style: { flex: 1, fontSize: 13.5, color: c.ink } }, r[1]), Sw(on(r[0]), function () { toggle(r[0]); })); }));
@@ -22582,27 +22595,17 @@ function ASettings() {
   var st = React.useState(null);
   var prefs = st[0], setPrefs = st[1];
   React.useEffect(function () {
-    var rq = window.__meAuthReq ? window.__meAuthReq({}) : null;
-    if (!rq) { setPrefs({}); return; }
-    fetch(SET_PROXY + '?action=notify_prefs', { method: 'POST', headers: rq.headers, body: rq.body })
-      .then(function (r) { return r.json(); })
-      .then(function (res) { setPrefs((res && res.prefs) || {}); })
-      .catch(function () { setPrefs({}); });
+    mayaClientPreferenceCall('notify_prefs', {}).then(function (res) { setPrefs(res.prefs || {}); }).catch(function () { setPrefs({ _unavailable: true }); });
   }, []);
-  function persist(next) {
-    setPrefs(next);
-    try { window.tactile && window.tactile(); } catch (x) {}
-    var rq = window.__meAuthReq ? window.__meAuthReq({ prefs: next }) : null;
-    if (!rq) return;
-    fetch(SET_PROXY + '?action=notify_prefs', { method: 'POST', headers: rq.headers, body: rq.body })
-      .then(function (r) { return r.json(); })
-      .then(function (res) { if (res && res.prefs) setPrefs(res.prefs); })
-      .catch(function () {});
+  function persist(patch) {
+    mayaClientPreferenceCall('notify_prefs', { prefs: patch }).then(function (res) { setPrefs(res.prefs || {}); }).catch(function () {
+      if (window.__toast) window.__toast('Настройки не сохранены. Проверьте связь с клиентом и повторите.');
+    });
   }
-  function setK(k, v) { var n = Object.assign({}, prefs); n[k] = v; persist(n); }
+  function setK(k, v) { var patch = {}; patch[k] = v; persist(patch); }
   function on(k) { return prefs[k] !== false; }   // по умолчанию ВКЛ
   var CATS = ['record_changes', 'reminder', 'marketing', 'cycle', 'birthday', 'freed_slot'];
-  function setAll(v) { var n = Object.assign({}, prefs); CATS.forEach(function (k) { n[k] = v; }); persist(n); }
+  function setAll(v) { var n = {}; CATS.forEach(function (k) { n[k] = v; }); persist(n); }
   function Toggle(isOn, onClick) {
     return e('div', { onClick: onClick, style: { width: 46, height: 28, borderRadius: 999, flex: '0 0 auto', cursor: 'pointer', background: isOn ? '#15140f' : (dark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.16)'), position: 'relative', transition: 'background .2s' } },
       e('div', { style: { position: 'absolute', top: 3, left: isOn ? 21 : 3, width: 22, height: 22, borderRadius: 999, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,.3)', transition: 'left .2s' } }));
@@ -22624,6 +22627,7 @@ function ASettings() {
   function Eb(txt) { return e('div', { style: { fontFamily: DISPLAY, fontWeight: 500, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '22px 0 4px' } }, txt); }
   return e(OverlayShell, { title: "Настройки" }, function () {
     if (!prefs) return e('div', { style: { textAlign: 'center', color: t.dim, fontFamily: BODY, fontSize: 13, padding: '40px 0' } }, 'Загрузка…');
+    if (prefs._unavailable) return e('div', { style: { color: t.dim, padding: 24 } }, 'Войдите и подтвердите связь с клиентом, чтобы изменить настройки.');
     var p = prefs, qOn = (p.quiet_from != null);
     var anyOn = CATS.some(function (k) { return p[k] !== false; });
     return e('div', null,
@@ -22636,17 +22640,18 @@ function ASettings() {
         Toggle(anyOn, function () { setAll(!anyOn); })),
       Eb('Напоминания'),
       Row('Напоминание перед визитом', 'SMS/WhatsApp от бизнеса и сообщение в Telegram', Toggle(on('reminder'), function () { setK('reminder', !on('reminder')); })),
-      on('reminder') ? Seg([{ v: 2, l: 'за 2 ч' }, { v: 3, l: 'за 3 ч' }, { v: 24, l: 'за день' }], p.reminder_hours || 3, function (v) { setK('reminder_hours', v); }) : null,
+      on('reminder') && p.reminder_hours == null ? e('div', { style: { color: t.dim } }, 'Время напоминаний — по правилам бизнеса') : null,
+      on('reminder') ? Seg([{ v: 2, l: 'за 2 ч' }, { v: 3, l: 'за 3 ч' }, { v: 24, l: 'за день' }], p.reminder_hours, function (v) { setK('reminder_hours', v); }) : null,
       Row('Изменения по моей записи', 'Когда запись создана, перенесена или отменена', Toggle(on('record_changes'), function () { setK('record_changes', !on('record_changes')); })),
       Eb('Рассылки'),
       Row('Акции и промокоды', 'Скидки и спецпредложения', Toggle(on('marketing'), function () { setK('marketing', !on('marketing')); })),
-      on('marketing') ? Seg([{ v: 'week', l: 'не чаще раза в неделю' }, { v: '2weeks', l: 'в 2 недели' }, { v: 'month', l: 'в месяц' }], p.marketing_freq || 'week', function (v) { setK('marketing_freq', v); }) : null,
+      on('marketing') ? Seg([{ v: 'week', l: 'не чаще раза в неделю' }, { v: '2weeks', l: 'в 2 недели' }, { v: 'month', l: 'в месяц' }], p.marketing_freq, function (v) { setK('marketing_freq', v); }) : null,
       Row('«Давно не были»', 'Напоминание вернуться к нам', Toggle(on('cycle'), function () { setK('cycle', !on('cycle')); })),
       Row('День рождения', 'Промокод в подарок', Toggle(on('birthday'), function () { setK('birthday', !on('birthday')); })),
       Row('Освободилось окно у мастера', 'Если хотели раньше, а места не было', Toggle(on('freed_slot'), function () { setK('freed_slot', !on('freed_slot')); })),
       Eb('Тихие часы'),
       Row('Не беспокоить ночью', 'С 22:00 до 9:00 не присылать несрочное', Toggle(qOn, function () {
-        var n = Object.assign({}, p);
+        var n = {};
         if (qOn) { n.quiet_from = null; n.quiet_to = null; } else { n.quiet_from = 22; n.quiet_to = 9; }
         persist(n);
       })),

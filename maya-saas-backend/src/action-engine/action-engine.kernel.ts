@@ -1,3 +1,4 @@
+import { verifiedClientChannelCapability } from './client-preferences.contract';
 import type { ConsentChannelBinding } from '../crm/client-consent-authority';
 import { randomBytes, randomUUID } from 'node:crypto';
 
@@ -1453,9 +1454,7 @@ export class ActionEngineKernel {
         : {}),
       targetRef: normalized.targetRef,
       normalizedInputHash: normalized.normalizedInputHash,
-      ...(/^package5\.wave3\.record-client-consent\.(?:execute|shadow)\.v1$/.test(
-        normalized.capability.capability,
-      )
+      ...(verifiedClientChannelCapability(normalized.capability.capability)
         ? {
             clientChannel: normalized.normalizedInput
               .consentChannel as ConsentChannelBinding,
@@ -1927,15 +1926,11 @@ export class ActionEngineKernel {
       repository,
       { now: () => now },
     );
-    const clientChannelInput =
-      /^package5\.wave3\.record-client-consent\.(?:execute|shadow)\.v1$/.test(
-        execution.capability,
-      )
-        ? await this.readTrustedNormalizedInput(
-            execution.tenantId,
-            execution.id,
-          )
-        : null;
+    const clientChannelInput = verifiedClientChannelCapability(
+      execution.capability,
+    )
+      ? await this.readTrustedNormalizedInput(execution.tenantId, execution.id)
+      : null;
     const result = await approval.authorizeForClaim({
       contract: ACTION_APPROVAL_AUTHORIZATION_REQUEST_CONTRACT,
       executionId: execution.id,

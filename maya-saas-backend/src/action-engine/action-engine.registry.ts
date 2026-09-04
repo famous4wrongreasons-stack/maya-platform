@@ -1,3 +1,4 @@
+import { clientPreferenceCapabilities } from './client-preferences.contract';
 import { ActionPolicyDecision } from '@prisma/client';
 
 import { ActionContractError } from './action-engine.errors';
@@ -3456,6 +3457,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   ...PACKAGE5_WAVE4_REGISTRATIONS.map((registration) =>
     package5Wave4Capability(registration, false),
   ),
+  ...clientPreferenceCapabilities(),
   ...PACKAGE5_WAVE5_REGISTRATIONS.map((registration) =>
     package5Wave5Capability(registration, true),
   ),

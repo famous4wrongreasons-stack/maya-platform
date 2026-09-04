@@ -1,3 +1,8 @@
+import { ClientPreferencesService } from './client-preferences.service';
+import {
+  ClientPreferencesController,
+  LegacyClientPreferencesController,
+} from './client-preferences.controller';
 import { Module } from '@nestjs/common';
 import { ClientChannelAuthenticatorService } from './client-channel-authenticator.service';
 import { ClientChannelRuntimeService } from './client-channel-runtime.service';
@@ -51,6 +56,8 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     UsersModule,
   ],
   controllers: [
+    ClientPreferencesController,
+    LegacyClientPreferencesController,
     ClientChannelController,
     LegacyClientChannelController,
     CrmController,
@@ -59,6 +66,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionController,
   ],
   providers: [
+    ClientPreferencesService,
     ClientChannelAuthenticatorService,
     ClientChannelRuntimeService,
     AppointmentChangeService,

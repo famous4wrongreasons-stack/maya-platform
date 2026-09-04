@@ -5,6 +5,8 @@ function maya_client_consent_request(string $action, array $input, array $server
         'consent_status' => ['/api/consent/status', ['auth_data', 'session_token']],
         'consent_submit' => ['/api/consent/submit', ['auth_data', 'session_token', 'accept_pdn', 'accept_marketing', 'idempotency_key']],
         'client_link_consume' => ['/api/client-link/consume', ['auth_data', 'session_token', 'token']],
+        'notify_prefs' => ['/api/cabinet/notify-prefs', ['auth_data', 'session_token', 'prefs', 'expectedGeneration', 'idempotencyKey']],
+        'set_visit_mood' => ['/api/set-visit-mood', ['auth_data', 'session_token', 'record_id', 'mood', 'expectedGeneration', 'idempotencyKey']],
     ];
     if (!isset($routes[$action])) throw new InvalidArgumentException('invalid_client_command');
     [$path, $allowed] = $routes[$action];

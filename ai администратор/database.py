@@ -1166,94 +1166,35 @@ def has_marketing_consent_by_chat_id(telegram_chat_id: int) -> bool:
 # (юридическое согласие), эти настройки — тонкая регулировка ВНУТРИ согласия.
 import json as _json_np
 
-NOTIFY_PREFS_DEFAULTS = {
-    "record_changes": True,    # изменения по моей записи (создана/перенесена/отменена)
-    "reminder": True,          # напоминание перед визитом (наш Telegram + YClients SMS)
-    "reminder_hours": 3,       # за сколько часов до визита (0..48); рулит notify_by_sms YClients
-    "marketing": True,         # акции / промокоды
-    "marketing_freq": "week",  # week | 2weeks | month — минимальный интервал между акциями
-    "cycle": True,             # «давно не были» (возвращающие)
-    "birthday": True,          # промокод на день рождения
-    "freed_slot": True,        # «освободилось окно у мастера»
-    "quiet_from": None,        # тихие часы: час начала 0..23 или None
-    "quiet_to": None,          # тихие часы: час конца 0..23 или None
-}
+# No legacy default policy. Reads use canonical sparse Client overrides.
+NOTIFY_PREFS_DEFAULTS = {}
 # Минимальный интервал маркетинга в днях
 MARKETING_FREQ_DAYS = {"week": 7, "2weeks": 14, "month": 30}
 
 
-def _notify_prefs_ensure(conn):
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS notify_prefs ("
-        " client_id INTEGER PRIMARY KEY, prefs TEXT, updated_at TEXT)")
+def _preference_delivery_subject(client_id: int):
+    # Existing transport recipient selector, never Client authority or creation.
+    with _db() as conn:
+        row = conn.execute("SELECT telegram_chat_id FROM clients WHERE id = ?", (int(client_id),)).fetchone()
+    return row["telegram_chat_id"] if row else None
+
 
 
 def get_notify_prefs(client_id: int) -> dict:
-    """Настройки уведомлений клиента, слитые с дефолтами (всегда полный набор ключей)."""
-    prefs = dict(NOTIFY_PREFS_DEFAULTS)
-    try:
-        with _db() as conn:
-            _notify_prefs_ensure(conn)
-            row = conn.execute(
-                "SELECT prefs FROM notify_prefs WHERE client_id = ?",
-                (int(client_id),)).fetchone()
-        if row and row["prefs"]:
-            saved = _json_np.loads(row["prefs"])
-            if isinstance(saved, dict):
-                for k in NOTIFY_PREFS_DEFAULTS:
-                    if k in saved:
-                        prefs[k] = saved[k]
-    except Exception:
-        pass
-    return prefs
+    from legacy_client_preferences_bridge import delivery_preferences
+    return delivery_preferences(_preference_delivery_subject(client_id))
+
 
 
 def get_notify_prefs_by_chat_id(telegram_chat_id: int) -> dict:
-    """Настройки по Telegram chat_id (для отправщиков уведомлений)."""
-    try:
-        with _db() as conn:
-            row = conn.execute(
-                "SELECT id FROM clients WHERE telegram_chat_id = ?",
-                (int(telegram_chat_id),)).fetchone()
-        if row:
-            return get_notify_prefs(row["id"])
-    except Exception:
-        pass
-    return dict(NOTIFY_PREFS_DEFAULTS)
+    from legacy_client_preferences_bridge import delivery_preferences
+    return delivery_preferences(telegram_chat_id)
+
 
 
 def set_notify_prefs(client_id: int, partial: dict) -> dict:
-    """Частичное обновление настроек (мержим с текущими). Возвращает итог."""
-    cur = get_notify_prefs(client_id)
-    for k, v in (partial or {}).items():
-        if k not in NOTIFY_PREFS_DEFAULTS:
-            continue
-        if k in ("reminder_hours",):
-            try:
-                v = max(0, min(48, int(v)))
-            except (TypeError, ValueError):
-                continue
-        elif k in ("quiet_from", "quiet_to"):
-            if v is None or v == "":
-                v = None
-            else:
-                try:
-                    v = max(0, min(23, int(v)))
-                except (TypeError, ValueError):
-                    continue
-        elif k == "marketing_freq":
-            if v not in MARKETING_FREQ_DAYS:
-                continue
-        else:
-            v = bool(v)
-        cur[k] = v
-    with _db() as conn:
-        _notify_prefs_ensure(conn)
-        conn.execute(
-            "INSERT OR REPLACE INTO notify_prefs (client_id, prefs, updated_at) "
-            "VALUES (?, ?, ?)",
-            (int(client_id), _json_np.dumps(cur, ensure_ascii=False), _now()))
-    return cur
+    raise RuntimeError("canonical_verified_client_preference_command_required")
+
 
 
 def get_maya_audience_stats() -> dict:
@@ -1265,19 +1206,7 @@ def get_maya_audience_stats() -> dict:
     an actual send, so this function never labels the whole base as "active".
     """
     with _db() as conn:
-        _notify_prefs_ensure(conn)
-        rows = conn.execute(
-            "SELECT c.id, c.phone_enc, c.marketing_consent_at, np.prefs, "
-            "COALESCE(("
-            "  SELECT consent_given FROM consents "
-            "  WHERE client_id = c.id AND consent_version = ? "
-            "  ORDER BY id DESC LIMIT 1"
-            "), 0) AS pd_consent "
-            "FROM clients c "
-            "LEFT JOIN notify_prefs np ON np.client_id = c.id "
-            "WHERE c.telegram_chat_id IS NOT NULL",
-            (CONSENT_VERSION,),
-        ).fetchall()
+        rows = conn.execute("SELECT id, telegram_chat_id, phone_enc FROM clients WHERE telegram_chat_id IS NOT NULL").fetchall()
 
     stats = {
         "telegram_connected": 0,
@@ -1289,19 +1218,11 @@ def get_maya_audience_stats() -> dict:
         "reactivation_reachable": 0,
     }
     for row in rows:
-        prefs = dict(NOTIFY_PREFS_DEFAULTS)
-        try:
-            saved = _json_np.loads(row["prefs"] or "{}")
-            if isinstance(saved, dict):
-                for key in NOTIFY_PREFS_DEFAULTS:
-                    if key in saved:
-                        prefs[key] = saved[key]
-        except (TypeError, ValueError, _json_np.JSONDecodeError):
-            pass
-
+        prefs = get_notify_prefs(row["id"])
+        consent = _canonical_delivery_consent_for_client(row["id"])
         identified = bool(row["phone_enc"])
-        pd_consented = bool(row["pd_consent"])
-        marketing_consented = bool(row["marketing_consent_at"])
+        pd_consented = bool(consent.get("privacy"))
+        marketing_consented = bool(consent.get("marketing"))
         marketing_enabled = marketing_consented and bool(prefs.get("marketing", True))
         cycle_enabled = marketing_consented and bool(prefs.get("cycle", True))
         reachable = (
@@ -1339,8 +1260,11 @@ def get_maya_audience_stats() -> dict:
     }
 
 
+
 def in_quiet_hours(prefs: dict, now_hour: int) -> bool:
     """True, если текущий час попадает в тихие часы клиента (не маркетинг/не срочное)."""
+    if "_canonical_quiet_now" in prefs:
+        return bool(prefs["_canonical_quiet_now"])
     try:
         qf, qt = prefs.get("quiet_from"), prefs.get("quiet_to")
         if qf is None or qt is None:
@@ -1356,18 +1280,9 @@ def in_quiet_hours(prefs: dict, now_hour: int) -> bool:
 
 
 def has_saved_notify_prefs(client_id: int) -> bool:
-    """True, если клиент РЕАЛЬНО открывал «Настройки» и что-то сохранил (есть строка).
-    Нужно, чтобы частотный троттл маркетинга применялся ТОЛЬКО к тем, кто сам выбрал
-    частоту — иначе дефолтный 7-дневный кап молча резал бы рассылки всей базе."""
-    try:
-        with _db() as conn:
-            _notify_prefs_ensure(conn)
-            row = conn.execute(
-                "SELECT 1 FROM notify_prefs WHERE client_id = ? LIMIT 1",
-                (int(client_id),)).fetchone()
-        return bool(row)
-    except Exception:
-        return False
+    """Compatibility reader: explicit frequency restriction, never row/consent authority."""
+    return "marketing_freq" in get_notify_prefs(client_id)
+
 
 
 # Троттлинг частоты маркетинга: запоминаем момент последней отправки клиенту,
@@ -2178,81 +2093,27 @@ def delete_record_state(record_id: int):
 _VALID_MOODS = ("red", "blue")
 
 
-def set_visit_mood(record_id: int, mood: str, source: str = "bot",
-                   client_id: int | None = None) -> bool:
-    """Сохраняет выбор настроения для конкретной записи (idempotent upsert).
-    Также запоминает выбор как default клиента для будущих записей.
-    Возвращает True, если mood валиден и сохранён."""
-    mood = (mood or "").strip().lower()
-    if mood not in _VALID_MOODS:
-        return False
-    _ts = _now()
-    with _db() as conn:
-        conn.execute(
-            "INSERT INTO visit_mood "
-            "(record_id, mood, source, client_id, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?) "
-            "ON CONFLICT(record_id) DO UPDATE SET "
-            "  mood = excluded.mood, "
-            "  source = excluded.source, "
-            "  client_id = COALESCE(excluded.client_id, visit_mood.client_id), "
-            "  updated_at = excluded.updated_at",
-            (record_id, mood, source, client_id, _ts, _ts),
-        )
-        if client_id:
-            try:
-                conn.execute(
-                    "UPDATE clients SET default_visit_mood = ? WHERE id = ?",
-                    (mood, client_id),
-                )
-            except sqlite3.OperationalError:
-                pass  # колонка ещё не мигрирована — не критично
-    return True
+def set_visit_mood(record_id: int, mood: str, source: str = "bot", client_id: int | None = None) -> bool:
+    raise RuntimeError("canonical_verified_client_preference_command_required")
+
 
 
 def get_visit_mood(record_id: int) -> str | None:
-    """'red' | 'blue' | None для конкретной записи."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT mood FROM visit_mood WHERE record_id = ?", (record_id,)
-        ).fetchone()
-        return row["mood"] if row else None
+    from legacy_client_preferences_bridge import visit_projection
+    return visit_projection([record_id]).get(int(record_id))
+
 
 
 def get_visit_moods(record_ids) -> dict:
-    """Батч-чтение настроений для списка record_id → {record_id: mood}.
-    Используется журналом, чтобы не делать N запросов на день расписания."""
-    ids = []
-    for r in record_ids:
-        if r is None:
-            continue
-        try:
-            ids.append(int(r))
-        except (TypeError, ValueError):
-            continue  # пропускаем один кривой id, не теряя настроения остальных
-    if not ids:
-        return {}
-    placeholders = ",".join("?" * len(ids))
-    with _db() as conn:
-        rows = conn.execute(
-            f"SELECT record_id, mood FROM visit_mood WHERE record_id IN ({placeholders})",
-            ids,
-        ).fetchall()
-        return {row["record_id"]: row["mood"] for row in rows}
+    from legacy_client_preferences_bridge import visit_projection
+    return visit_projection(record_ids)
+
 
 
 def get_default_visit_mood(client_id: int) -> str | None:
-    """Последний выбор клиента ('red'|'blue'|None) — для пред-выбора при записи."""
-    if not client_id:
-        return None
-    with _db() as conn:
-        try:
-            row = conn.execute(
-                "SELECT default_visit_mood FROM clients WHERE id = ?", (client_id,)
-            ).fetchone()
-        except sqlite3.OperationalError:
-            return None
-        return row["default_visit_mood"] if row and row["default_visit_mood"] else None
+    from legacy_client_preferences_bridge import delivery_read
+    return delivery_read(_preference_delivery_subject(client_id)).get("defaultVisitMood")
+
 
 
 def delete_visit_mood(record_id: int):

@@ -1,3 +1,4 @@
+import { verifiedClientChannelCapability } from './client-preferences.contract';
 import { UserRole } from '../common/domain.enums';
 import type { MayaFeatureKey } from '../common/feature-catalog';
 import {
@@ -140,14 +141,11 @@ export function canonicalProductionPolicyDefinitions(
         capability: capability.capability,
         policyProfileKey: `canonical.${capability.actionClass}`,
         policyProfileVersion: 1,
-        actorPolicy:
-          /^package5\.wave3\.record-client-consent\.(?:execute|shadow)\.v1$/.test(
-            capability.capability,
-          )
-            ? 'VERIFIED_CLIENT_CHANNEL'
-            : trustedServiceSourceTypes.length > 0
-              ? 'OPTIONAL_TRUSTED_SERVICE'
-              : 'REQUIRED',
+        actorPolicy: verifiedClientChannelCapability(capability.capability)
+          ? 'VERIFIED_CLIENT_CHANNEL'
+          : trustedServiceSourceTypes.length > 0
+            ? 'OPTIONAL_TRUSTED_SERVICE'
+            : 'REQUIRED',
         allowedActorRoles: allowedActorRoles(capability.capability),
         trustedServiceSourceTypes,
         requiredFeatures: requiredFeatures(capability.capability),

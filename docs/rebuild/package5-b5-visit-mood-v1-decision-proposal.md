@@ -1,6 +1,7 @@
 # B5 — Client visit preference and CRM synchronization: decision proposal V1
 
-Status: **PROPOSED / NOT APPROVED / NOT IMPLEMENTED**.
+Status: **OWNER DECISION APPROVED; implemented by B5/B6 final remediation**.
+The latest owner decision supersedes proposed inherited constants below: no hidden three-hour Client default; inherit the existing approved effective policy. The historical options/table below retain their proposal provenance, not independent approval authority.
 Accepted baseline: `225ba5e1`; production runtime `94543056`.
 This is Package 5 final remediation, not another wave.
 

@@ -50,6 +50,8 @@
   "scriptTypecheck": "PASS",
   "projectLint": "PASS",
   "buildPreflight": "PASS",
-  "productionMigrationApplied": false,
-  "runtimeRemediationStarted": false
+  "productionMigrationApplied": true,
+  "runtimeRemediationStarted": true,
+  "pendingMigrations": 0,
+  "postApplyDrift": "NONE"
 }

@@ -1,3 +1,4 @@
+import { verifiedClientChannelCapability } from './client-preferences.contract';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 import { ActionPolicyDecision, type PrismaClient } from '@prisma/client';
@@ -584,9 +585,7 @@ export class CanonicalActionPolicyResolver {
   }> {
     if (policy.actorPolicy === 'VERIFIED_CLIENT_CHANNEL') {
       if (
-        !/^package5\.wave3\.record-client-consent\.(?:execute|shadow)\.v1$/.test(
-          request.capability,
-        ) ||
+        !verifiedClientChannelCapability(request.capability) ||
         !this.prisma.clientChannelLink ||
         !request.clientChannel
       )

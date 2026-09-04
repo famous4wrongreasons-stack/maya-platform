@@ -809,56 +809,9 @@ async def _notify_client_record(record: dict, record_id: int, kind: str) -> None
 
 
 async def _apply_client_reminder_pref(record: dict, record_id: int) -> None:
-    """
-    Уважает выбор клиента «Напоминание перед визитом» (раздел «Настройки» в
-    приложении) для ЛЮБОЙ его записи — не только созданной через наше приложение.
+    """B6 V1 is local policy. Webhook observations never synchronize Client preferences to CRM."""
+    return None
 
-    Наш бот шлёт ТОЛЬКО Telegram; SMS/WhatsApp-напоминание шлёт YClients по полю
-    записи `notify_by_sms` (часы до визита, 0 = не напоминать). При записи ЧЕРЕЗ
-    приложение мы уже проставляем его в create_booking. Здесь — дотягиваем выбор
-    клиента до записей, созданных админом / по телефону / онлайн-виджетом.
-
-    Действуем ТОЛЬКО если клиент сам открывал настройки (has_saved_notify_prefs),
-    иначе не трогаем дефолт салона. Меняем неразрушающе и идемпотентно:
-      • reminder == False           → 0 (не напоминать);
-      • reminder == True            → reminder_hours (за сколько часов).
-    """
-    try:
-        client = record.get("client") or {}
-        phone = client.get("phone")
-        if not phone:
-            return
-        our = database.find_client_by_phone(phone)
-        if not our or not our.get("id"):
-            return
-        cid = int(our["id"])
-        # Клиент не открывал настройки → оставляем поведение салона как есть.
-        if not database.has_saved_notify_prefs(cid):
-            return
-        prefs = database.get_notify_prefs(cid)
-        if prefs.get("reminder") is False:
-            target = 0
-        else:
-            try:
-                target = int(prefs.get("reminder_hours", 3) or 0)
-            except (TypeError, ValueError):
-                target = 3
-            if target <= 0:       # напоминание включено, но час не задан — не выключаем
-                target = 3
-        res = await asyncio.to_thread(_yc.set_record_notify_by_sms, record_id, target)
-        if res.get("success"):
-            if not res.get("noop"):
-                logger.info(
-                    f"Webhook: notify_by_sms={target} применён к записи {record_id} "
-                    f"по настройке клиента"
-                )
-        else:
-            logger.warning(
-                f"Webhook: не удалось применить notify_by_sms к {record_id}: "
-                f"{res.get('error')}"
-            )
-    except Exception as e:
-        logger.error(f"_apply_client_reminder_pref {record_id}: {e}")
 
 
 async def enrich_record_with_client(record: dict) -> dict:
@@ -7000,9 +6953,9 @@ async def client_book_with_loyalty_handler(request: web.Request) -> web.Response
 
     try:
         prefs = database.get_notify_prefs_by_chat_id(int(chat_id))
-        notify_hours = int(prefs.get("reminder_hours") or 0) if prefs.get("reminder") else 0
+        notify_hours = prefs.get("reminder_hours") if prefs.get("reminder") is not False else 0
     except Exception:
-        notify_hours = 3
+        notify_hours = 0
     booking_result = await asyncio.to_thread(
         _yc.create_booking,
         staff_id=staff_id,
@@ -7259,31 +7212,24 @@ async def applogin_poll_handler(request: web.Request) -> web.Response:
 
 
 async def notify_prefs_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/cabinet/notify-prefs — персональные настройки уведомлений клиента.
-    Body: { prefs?: {...} }  (+ auth: auth_data / session_token / X-Telegram-InitData)
-    Если prefs передан — частично обновляем; всегда возвращаем актуальный полный набор.
-    """
+    """Verified Client preferences; an empty request is strictly read-only."""
+    from legacy_client_command_bridge import channel_proof
+    from legacy_client_preferences_bridge import command
     try:
         body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"prefs", "expectedGeneration", "idempotencyKey", "auth_data", "session_token"}:
+            raise ValueError("invalid_preference_request")
+        proof = channel_proof(request.headers, body)
+        if "prefs" in body and body["prefs"] != {}:
+            payload = {key: body.get(key) for key in ("prefs", "expectedGeneration", "idempotencyKey")}
+            await asyncio.to_thread(command, "notifications", proof, payload)
+        elif "prefs" in body and not isinstance(body["prefs"], dict):
+            raise ValueError("invalid_preference_patch")
+        result = await asyncio.to_thread(command, "read", proof, {})
+        return _cabinet_response(result)
     except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    try:
-        client_id = database.get_or_create_client(chat_id)
-        patch = body.get("prefs")
-        if isinstance(patch, dict) and patch:
-            prefs = database.set_notify_prefs(client_id, patch)
-        else:
-            prefs = database.get_notify_prefs(client_id)
-    except Exception as e:
-        logger.error(f"notify_prefs chat_id={chat_id}: {e}")
-        return _cabinet_response({"error": "prefs_failed"}, status=500)
-    return _cabinet_response({"prefs": prefs})
+        return _cabinet_response({"error": "preference_request_rejected", "client_link_required": True}, status=409)
+
 
 
 async def cert_create_handler(request: web.Request) -> web.Response:
@@ -7598,9 +7544,9 @@ def _finalize_booking_for_chat(chat_id: int, cr: dict) -> str | None:
         # выключил напоминание → notify_by_sms=0 (YClients молчит); иначе за reminder_hours.
         try:
             _np = database.get_notify_prefs_by_chat_id(chat_id)
-            _nbs = int(_np.get("reminder_hours") or 0) if _np.get("reminder") else 0
+            _nbs = _np.get("reminder_hours") if _np.get("reminder") is not False else 0
         except Exception:
-            _nbs = 3
+            _nbs = 0
         result = _yc.create_booking(
             staff_id=cr["staff_id"],
             service_ids=cr["service_ids"],
@@ -12344,62 +12290,23 @@ async def me_photo_handler(request: web.Request) -> web.Response:
 
 
 async def set_visit_mood_handler(request: web.Request) -> web.Response:
-    """POST /api/set-visit-mood {record_id, mood} — клиент из приложения выбрал
-    «настроение визита» (🔴 red — тишина / 🔵 blue — общение). Сохраняем на
-    конкретную запись + дописываем пометку в комментарий записи YClients,
-    чтобы барбер видел выбор. Авторизация — личность клиента (initData/сессия)."""
+    """Maya-local Client/Appointment command. No phone authority or CRM sync."""
+    from legacy_client_command_bridge import channel_proof
+    from legacy_client_preferences_bridge import command
     try:
         body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"record_id", "mood", "expectedGeneration", "idempotencyKey", "auth_data", "session_token"}:
+            raise ValueError("invalid_mood_request")
+        proof = channel_proof(request.headers, body)
+        result = await asyncio.to_thread(command, "visit-mood", proof, {
+            "provider": "yclients", "recordId": str(body.get("record_id", "")),
+            "mood": body.get("mood"), "expectedGeneration": body.get("expectedGeneration"),
+            "idempotencyKey": body.get("idempotencyKey"),
+        })
+        return _cabinet_response({"ok": True, "mood": body["mood"], **result})
     except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    mood = (body.get("mood") or "").strip().lower()
-    if mood not in ("red", "blue"):
-        return _cabinet_response({"error": "bad_mood"}, status=400)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    if not record_id:
-        return _cabinet_response({"error": "no_record"}, status=400)
-    client_id = None
-    caller_phone = ""
-    try:
-        dbc = await asyncio.to_thread(database.get_client, int(tg_user["id"]))
-        if dbc:
-            client_id = dbc.get("id")
-            caller_phone = dbc.get("phone") or ""
-    except Exception:
-        client_id = None
+        return _cabinet_response({"error": "preference_request_rejected", "client_link_required": True}, status=409)
 
-    # Защита от IDOR: настроение можно ставить ТОЛЬКО на СВОЮ запись. record_id у
-    # YClients последовательны и легко перебираются — без проверки любой
-    # авторизованный клиент мог бы менять настроение/комментарий чужих записей.
-    # Сверяем телефон записи с телефоном профиля звонящего.
-    def _digits10(p):
-        return "".join(ch for ch in str(p or "") if ch.isdigit())[-10:]
-    try:
-        rec = await asyncio.to_thread(_yc.get_record, record_id)
-    except Exception:
-        rec = None
-    rec_phone = ((rec or {}).get("client") or {}).get("phone") if rec else None
-    if not rec or not _digits10(caller_phone) or _digits10(rec_phone) != _digits10(caller_phone):
-        return _cabinet_response({"error": "forbidden", "message": "Это не ваша запись."}, status=403)
-
-    ok = await asyncio.to_thread(database.set_visit_mood, record_id, mood, "app", client_id)
-    if not ok:
-        return _cabinet_response({"error": "bad_mood"}, status=400)
-    note = "🔴 Просит тишину" if mood == "red" else "🔵 Настроен общаться"
-    try:
-        await asyncio.to_thread(
-            _yc.append_record_comment, record_id, note,
-            ["🔴 Просит тишину", "🔵 Настроен общаться"],
-        )
-    except Exception as e:
-        logger.error("set_visit_mood comment record_id=%s: %s", record_id, e)
-    return _cabinet_response({"ok": True, "mood": mood})
 
 
 _NEAREST_SLOT_CACHE = {"ts": 0.0, "data": None}

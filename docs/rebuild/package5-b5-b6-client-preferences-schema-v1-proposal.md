@@ -1,6 +1,7 @@
 # B5/B6 — minimal Client preference schema and local policy proposal V1
 
-Status: **PROPOSED / NOT APPROVED / NOT IMPLEMENTED**.
+Status: **OWNER DECISION APPROVED; implemented by B5/B6 final remediation**.
+The latest owner decision supersedes proposed inherited constants below: no hidden three-hour Client default; inherit the existing approved effective policy. The historical options/table below retain their proposal provenance, not independent approval authority.
 Baseline: `225ba5e1`. No new wave, tenant creation flow or consent model.
 This proposal assumes B5 option A (Maya-local) from the accompanying decision.
 

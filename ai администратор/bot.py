@@ -4013,36 +4013,12 @@ async def _send_visit_mood_prompt(context: ContextTypes.DEFAULT_TYPE, chat_id: i
 
 
 async def _handle_visit_mood_callback(query, chat_id: int, data: str):
-    """Обрабатывает выбор пилюли: сохраняет в БД + дописывает в комментарий
-    записи YClients (барбер видит в своём приложении). Идемпотентно."""
-    try:
-        _, mood, rid = data.split("_", 2)
-        record_id = int(rid)
-    except Exception:
-        return
-    if mood not in ("red", "blue"):
-        return
-    client_id = None
-    try:
-        dbc = await asyncio.to_thread(database.get_client, chat_id)
-        client_id = dbc.get("id") if dbc else None
-    except Exception:
-        client_id = None
-    await asyncio.to_thread(database.set_visit_mood, record_id, mood, "bot", client_id)
-    try:
-        await asyncio.to_thread(
-            yc.append_record_comment, record_id, _VISIT_MOOD_COMMENT[mood],
-            list(_VISIT_MOOD_COMMENT.values()),
-        )
-    except Exception as e:
-        logger.error(f"append visit-mood comment record_id={record_id}: {e}")
-    try:
-        await query.edit_message_text(
-            f"Принял ✅ Настроение визита: {_VISIT_MOOD_LABELS[mood]}.\n"
-            f"Передал мастеру — он учтёт. До встречи! 💈"
-        )
-    except Exception:
-        pass
+    """Old bot buttons cannot substitute for authenticated Client command proof."""
+    await query.edit_message_text(
+        "Выберите настроение визита в приложении Maya после входа и подтверждения связи с клиентом. "
+        "Выбор будет сохранён в Maya для вашего мастера."
+    )
+
 
 
 async def _finalize_booking(context: ContextTypes.DEFAULT_TYPE, chat_id: int, query):
@@ -4059,9 +4035,9 @@ async def _finalize_booking(context: ContextTypes.DEFAULT_TYPE, chat_id: int, qu
     # YClients SMS/WhatsApp-напоминание — по персональной настройке клиента
     try:
         _np = database.get_notify_prefs_by_chat_id(chat_id)
-        _nbs = int(_np.get("reminder_hours") or 0) if _np.get("reminder") else 0
+        _nbs = _np.get("reminder_hours") if _np.get("reminder") is not False else 0
     except Exception:
-        _nbs = 3
+        _nbs = 0
     result = yc.create_booking(
         staff_id=cr["staff_id"],
         service_ids=cr["service_ids"],
