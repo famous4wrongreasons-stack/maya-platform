@@ -1,0 +1,464 @@
+{
+  "acceptedCheckpoint": "2a6d645d5c582e148d5d3f8795e398fabaf84b9d",
+  "cycle": "B7/B8 contract reconstruction; mandatory schema/business decision STOP",
+  "productionBaseline": "/opt/maya-saas/releases/20260904-p5-b5-b6-fb820b3b",
+  "productionSchemaCatalog": {
+    "kind": "schemaCatalog",
+    "release": "/opt/maya-saas/releases/20260904-p5-b5-b6-fb820b3b",
+    "columns": [
+      {
+        "table_name": "Client",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "userId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "phoneHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "mergedIntoClientId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "Client",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "provider",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "providerSubjectHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "subjectHashVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationMethod",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationIdentityHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationEvidenceJson",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationEvidenceHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verifiedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "supersedesLinkId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revokedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revocationIdentityHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revocationEvidenceJson",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revocationEvidenceHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "tokenHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "tokenHashVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "policyVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "issuedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "issuanceEvidenceJson",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "issuanceEvidenceHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "consumedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "consumedLinkId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "consumedProvider",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "consumedSubjectHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "userId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "preferredLocale",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "privacyConsentAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "marketingConsentAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "encryptedNotes",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "defaultVisitMood",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "CustomerProfile",
+        "column_name": "notificationPreferencesJson",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+      }
+    ]
+  },
+  "productionSource": {
+    "kind": "liveSource",
+    "files": [
+      {
+        "file": "webhook_server.py",
+        "sha256": "25a285d9f693b0b0fc15f7c6d7bf379176436c477741446c4dc057fcc7ca6a78",
+        "functions": [
+          {
+            "name": "notify_prefs_handler",
+            "line": 7200,
+            "end": 7217,
+            "sha256": "404a7e9692467c6013f55aea97e7b36b38ad2248632a1a8ddc0ede4c98c84ed1"
+          },
+          {
+            "name": "cabinet_link_phone_handler",
+            "line": 11116,
+            "end": 11150,
+            "sha256": "49b999c6d73afbaa36fc49202751d140c8a82bbdd15cb3b2396f16c4ca90b10a"
+          },
+          {
+            "name": "set_visit_mood_handler",
+            "line": 12401,
+            "end": 12417,
+            "sha256": "5f7a48257e9f51e49d92e68ba425d70271bc2f2ffa3043c3b024f173f13231aa"
+          }
+        ]
+      },
+      {
+        "file": "database.py",
+        "sha256": "ba1cb1e6926f2f885678b655913c1a02a2c5da5dc934b6d807de96dfa723bdd2",
+        "functions": [
+          {
+            "name": "update_client",
+            "line": 762,
+            "end": 783,
+            "sha256": "c19a6dd21a53674ac3c471675ce261d31e7d11b211e84d5f82420f5ed53660d4"
+          },
+          {
+            "name": "add_client_preference",
+            "line": 925,
+            "end": 949,
+            "sha256": "b5b9d63b755e9449bc24530ee2c149fc36ce8609c49f40b5f7c9debbfc88b12c"
+          },
+          {
+            "name": "get_client_preferences",
+            "line": 952,
+            "end": 960,
+            "sha256": "79b9a80d2f09b1c5675a688515e2878773c2234d1f018ea4398e2baa34a06c3c"
+          },
+          {
+            "name": "get_client_preferences_by_phone",
+            "line": 963,
+            "end": 973,
+            "sha256": "2dc5b01e6f9874fb5fdde67670b2eb36c5fc62f496e9483c018c541eecb4a66c"
+          }
+        ]
+      },
+      {
+        "file": "claude_ai.py",
+        "sha256": "365055929f50a95a00f2fa7a5a9de6e28ccdcaddd15953061eddfed862076703",
+        "functions": [
+          {
+            "name": "_execute_tool",
+            "line": 1846,
+            "end": 2829,
+            "sha256": "843e72a7a37615c62da6d31125404a4e3a3c81440371e918e2fcf796bf647184"
+          }
+        ]
+      },
+      {
+        "file": "web_auth.py",
+        "sha256": "94b891dc9ce1447491f49ca0f8edd625177dc803aeefeccd1744ae9f115e940e",
+        "functions": [
+          {
+            "name": "verify_phone_login",
+            "line": 119,
+            "end": 137,
+            "sha256": "3b00e82ade09cd8d4ab54cdcaa41328e2fd24d0b9ebb862d2dfa61a4bc7640bf"
+          },
+          {
+            "name": "_issue_session",
+            "line": 364,
+            "end": 432,
+            "sha256": "2e23f6c8a2f89600f11325d7c65e5bcc8bcd4b15a702ecbfb64478f99368bcd0"
+          }
+        ]
+      }
+    ]
+  },
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "healthReadiness": "PASS",
+  "b5B6BaselineUnchanged": true,
+  "sourceHashes": {
+    "maya-saas-backend/prisma/schema.prisma": "7c0606bf312b03b5acbed90d9597e5bb0d22f109f0ec134e0e6eff8c430d4b83",
+    "maya-saas-backend/src/customers/dto/update-customer-profile.dto.ts": "f1c0fc70b3d5fdcb90e77c4acd4fcaaa1dd51158687a411b0973444c073430c0",
+    "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts": "a686a79143dce98c124c7acf8101c8793340b51f586a3ab63435daaf6be0299d",
+    "maya-saas-backend/src/crm/client-channel-runtime.service.ts": "d279f7e14c8c4969b533ab9374348c6b77b3839b0948dc6163a42af6375a32cf",
+    "maya-saas-backend/src/crm/client-channel-authenticator.service.ts": "6d1b03c3c28907a831938c34260836d9ff504ea7c04dd6a606574dd5e24b87a6",
+    "maya-saas-backend/src/crm/client-link-challenge.service.ts": "1ff0019efcf6de36e57c1756bf3b4cdc6835ac2caabde508d122a48cce122e7e",
+    "maya-saas-backend/src/action-engine/client-preferences.contract.ts": "8f074c470d08009f894c9a9620c7b4bbe3019bc9477fc3e54a3119be08b029c9",
+    "ai администратор/database.py": "3b6e8e7b8d022bd3e744d0410592da462b38ac0c09ac47f413cf88cf0b843d7a",
+    "ai администратор/claude_ai.py": "365055929f50a95a00f2fa7a5a9de6e28ccdcaddd15953061eddfed862076703",
+    "ai администратор/web_auth.py": "94b891dc9ce1447491f49ca0f8edd625177dc803aeefeccd1744ae9f115e940e"
+  },
+  "productionReadOnlyLogSha256": "b21fd4319febc31bd88851ea5f02667f298bba1de3f6cc395f5073aacd7a52e6",
+  "b7": {
+    "meaning": "Explicit Client-stated free-text habits/preferences",
+    "canonicalOwner": "Client / CustomerProfile",
+    "existingSchemaSufficient": false,
+    "additionalSchemaRequired": true,
+    "proposedField": "CustomerProfile.encryptedClientPreferences String?",
+    "newModelsProposed": 0,
+    "staffNotesNotRepurposed": true,
+    "proposal": "package5-b7-client-habits-schema-v1-proposal.md"
+  },
+  "b8": {
+    "phoneProofIsClientAuthority": false,
+    "legacySmsHelperAlsoCreatesPhoneDerivedSession": true,
+    "verifiedClientLinkSchemaSufficient": true,
+    "approvedClientPhoneUpdateCommandFound": false,
+    "firstClientCreationRequiredByProductEstablished": false,
+    "firstClientCreationFromPhoneApproved": false,
+    "recommendedOption": "A — verified Client linking only; no contact-phone persistence",
+    "proposal": "package5-b8-phone-client-linking-v1-decision-proposal.md"
+  },
+  "runtimeSchemaImplementationStarted": false,
+  "runtimeMutations": 0,
+  "productionMutations": 0,
+  "deployPerformed": false,
+  "executableProofRun": false,
+  "finalGateRerunThisCycle": false,
+  "package5Complete": false,
+  "acceptedWaves": 6,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedDatabasesCreated": 0,
+    "unrelatedDirtyFilesPreserved": 30
+  }
+}

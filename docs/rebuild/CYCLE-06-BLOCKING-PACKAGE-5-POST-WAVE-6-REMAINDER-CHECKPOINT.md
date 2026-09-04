@@ -1,10 +1,11 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — approved B5/B6 remediation deployed; fresh Final Gate FAIL;
-STOP on new A18 bypasses B7/B8**.
+Status: **CURRENT — B5/B6 production accepted; B7/B8 reconstruction completed;
+STOP on B7 schema proposal and B8 phone/linking decision**.
 
-Date: 2026-09-04. Owner accepted `cdd97012` and approved B5 Maya-local V1,
-notification policy V1 and exactly three nullable schema fields. Schema source
+Date: 2026-09-04. Latest accepted checkpoint `2a6d645d` authorizes conditional
+B7/B8 Final Remediation. Previously approved B5 Maya-local V1, notification policy
+V1 and the exact three nullable fields remain the accepted production baseline. Schema source
 `b152bf09`; current production runtime `fb820b3b` at
 `/opt/maya-saas/releases/20260904-p5-b5-b6-fb820b3b`.
 
@@ -13,6 +14,11 @@ runtime are now implemented and verified. Do not request their approval again.
 Package 5 is not complete; Chapter 6 completion is not declared.
 
 Current reports:
+
+- `CYCLE-06-BLOCKING-PACKAGE-5-B7-B8-CONTRACT-RECONSTRUCTION-STOP-REPORT.md`;
+- `package5-b7-client-habits-schema-v1-proposal.md`;
+- `package5-b8-phone-client-linking-v1-decision-proposal.md`;
+- `evidence/package5-b7-b8-contract-reconstruction.json`;
 
 - `CYCLE-06-BLOCKING-PACKAGE-5-B5-B6-DEPLOYED-FINAL-GATE-STOP-REPORT.md`;
 - `CYCLE-06-BLOCKING-PACKAGE-5-B5-B6-REMEDIATION-REPORT.md`;
@@ -86,27 +92,44 @@ aggregate replay/regression sequence. Lexical inventories and accepted deploymen
 PASS results are not relabeled as aggregate completeness. Remaining administrative
 script/helper candidates are unclassified until that full gate can continue.
 
-## Remaining work, in order
+## Current B7/B8 reconstruction and remaining work
 
-1. Obtain authorization for bounded **B7/B8 A18 remediation**. Reconstruct exact
-   Client habit/profile and verified-phone/linking semantics against D2-A, the
-   accepted ClientChannelLink/ClientLinkChallenge contract and existing Wave 3
-   commands. Do not infer a new schema field or phone-based Client authority.
-   Preserve the approved B5/B6 runtime and all accepted waves.
-2. After authorization, implement only the established contract, with targeted
-   authority/idempotency/concurrency proof and architectural protection. Any new
-   business/schema decision requires its own proposal/STOP. Pass mandatory
-   deployment gates, then verify production structurally/read-only without
-   real customer/provider mutations for smoke.
-3. Restart **PACKAGE 5 FINAL ADVERSARIAL VERIFICATION / COMPLETION GATE** from
-   the beginning for all 13 families and production-reachable controllers,
-   scripts, legacy writers, callbacks, schedulers, read paths and exact protocol
-   exceptions. A filename alone never proves test/migration isolation. Perform
-   the complete required final sequence and Packages 1–4 baseline certification
-   only if inventory is green. Another confirmed bypass means STOP.
-4. Only after `PACKAGE 5 COMPLETE: YES`, a separately authorized
-   **CHAPTER 6 FINAL COMPLETION / ACCEPTANCE GATE** may begin. Do not declare
-   Chapter 6 complete automatically or start Chapter 7.
+The user has authorized B7/B8 remediation conditionally. Do not request that
+same general authorization again. Implementation is stopped at the user's
+explicit new schema/business decision boundary:
+
+- **B7:** Client-stated free-text habits cannot use locale, staff notes, mood,
+  notification JSON or consent/identity evidence. Production CustomerProfile has
+  no equivalent field. The minimum proposal is one nullable encrypted
+  `CustomerProfile.encryptedClientPreferences` field with existing Client ownership,
+  encryption and execution/audit foundation. No new model or backfill. V1 bounded
+  append/no-op and rejection rather than silent truncation/eviction are proposed
+  explicitly; they are not already approved policy.
+- **B8:** SMS proves phone possession only. The existing legacy helper also issues
+  a phone-derived session; it cannot establish canonical channel/Client authority.
+  Current ClientChannelLink/challenge schema can link an already proven Client,
+  but there is no approved canonical Client contact-phone update command.
+  Recommend linking-only V1 using existing verified authority, without saving a
+  phone or creating a Client. If contact-phone persistence is required, its
+  command/storage/proof contract needs a decision. The product need for first
+  Client creation from SMS was not established, and no such authority is proposed.
+
+1. Obtain owner decisions on the two concrete proposals above. B5/B6, D2-A,
+   optional Maya User and the accepted 600-second Client linking foundation
+   remain approved; do not repeat those decisions or reopen Waves 1–6.
+2. Once contracts are sufficient, continue the same remediation: bounded schema
+   foundation if approved, local adversarial/concurrency/restart/no-op proofs,
+   clean replay and expected-only production migration gate/apply; canonical
+   runtime/readers/ratchets and mandatory deployment gates. No real customer,
+   phone or provider business mutations for smoke. New ambiguity still means STOP.
+3. After production remediation verification PASS, restart the **entire 13-family
+   Package 5 Final Adversarial Verification** from the beginning, including
+   scripts, legacy callers, callbacks, schedulers, reads and narrow protocol
+   exceptions. A filename alone does not prove isolation. Any new bypass means
+   STOP with exact evidence. This proposal-only cycle did not rerun that Gate.
+4. Only after Package 5 COMPLETE: YES may a separately authorized **CHAPTER 6
+   FINAL COMPLETION / ACCEPTANCE GATE** begin. No automatic Chapter 6 completion
+   and no Chapter 7.
 
 Permanent boundaries: D1-A…D7-A, P02/P03 hold, no tenant hard delete,
 Client-owned profile/consent, prospective configuration, immutable recovery
@@ -121,7 +144,10 @@ PACKAGE 5 FINAL ADVERSARIAL VERIFICATION: FAIL
 PACKAGE 5 COMPLETE: NO
 PACKAGE 5 WAVES COMPLETE: 6/6
 PACKAGE 5 FAMILY INVENTORY COVERAGE: 13/13
-CURRENT BLOCKERS: B7 AI remember_client_preference; B8 /api/cabinet/link-phone
+CURRENT BLOCKERS: B7 SCHEMA PROPOSAL; B8 PHONE/LINKING DECISION
+B7/B8 CONTRACT RECONSTRUCTION: COMPLETE
+B7/B8 RUNTIME/SCHEMA IMPLEMENTATION: NOT STARTED
+B7/B8 PRODUCTION REMEDIATION: NOT PERFORMED
 B5 DIRECT CLIENT PROFILE BYPASSES: 0
 B5 AUTOMATIC CRM PROVIDER WRITES: 0
 B6 DIRECT NOTIFICATION PREFERENCE BYPASSES: 0
@@ -131,7 +157,7 @@ PACKAGE 5 GLOBAL CANONICAL COVERAGE: NOT PROVEN
 REMEDIATION FULL REGRESSION: PASS — 329 SUITES / 2742 TESTS
 FINAL FULL REGRESSION: NOT RUN — STOP AT NEW INVENTORY BLOCKERS
 PENDING MIGRATIONS: 0
-SCHEMA DRIFT: NONE
+SCHEMA DRIFT: NONE — RECONFIRMED READ-ONLY
 REAL PRODUCTION MUTATIONS FOR FINAL PROOF: 0
 WAVE 7 CREATED: NO
 CHAPTER 6 COMPLETE: NOT DECLARED
