@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — challenge schema APPLIED; A18 runtime candidate local PASS; STOP on new AI onboarding A26/A28 production bypass**
+Status: **CURRENT — STOP on AI confirmation receipt schema and CRM handoff decision; challenge schema remains APPLIED; A18 runtime candidate remains undeployed**
 
 Date: 2026-09-04. This supersedes the Wave 6 pre-cutover remainder after the
 explicit AC6 owner decision and successful production cutover from gated source
@@ -56,9 +56,9 @@ resolution and consumed atomically with the verified link. This resolves the
 previous mechanism decision. Schema/TTL assessment now finds no existing suitable
 challenge model or approved linking lifetime. Fresh production catalogs reconcile
 89 models to 90 tables including `_prisma_migrations`, with no hidden foundation.
-One 14-field `ClientLinkChallenge` model and a separate 600-second TTL decision
-are proposed; neither is approved or implemented. The user's explicit proposal
-STOP applies. Current report:
+At that assessment, one 14-field `ClientLinkChallenge` model and a separate
+600-second TTL decision were proposed; neither was yet approved or implemented.
+The user's explicit proposal STOP applied at that checkpoint. Historical report:
 `CYCLE-06-BLOCKING-PACKAGE-5-A18-CLIENT-LINK-CHALLENGE-ASSESSMENT.md`.
 
 The user subsequently accepted `84696bc9` and approved both exact proposals,
@@ -79,6 +79,29 @@ delete + activation-reset compensation. The user's new-bypass STOP applies
 before runtime deployment. No full final-gate rerun or aggregate PASS is claimed.
 See `CYCLE-06-BLOCKING-PACKAGE-5-A18-CHALLENGE-APPLY-AND-AI-BYPASS-STOP-REPORT.md`.
 
+The user accepted `d9799b2a` and authorized B4 AI confirmation remediation,
+followed by the existing A18/A26 work and conditional unified deployment/full
+final gate. Exact contract reconstruction found two further gaps within B4:
+**B4-C1**, no immutable version/authority/complete child-plan receipt in the
+18-field AiOnboardingDraft; **B4-C2**, a pre-tenant CRM preview has no canonical
+handoff to the tenant CRM integration required by the A16 access commands.
+The current route creates staff/access/login records through a mock-provider
+bootstrap helper. A minimal three-field extension of AiOnboardingDraft and a
+handoff decision using the existing A17 connection/import are proposed. Neither
+is implemented or approved. The user's new-schema/business STOP rule applies.
+
+Fresh production source/guard inspection also narrows the earlier A28 claim:
+internal-calendar provisioning is gated behind test mode plus its test-only
+flag; ordinary production AI confirmation requires imported external CRM.
+The live CRM team/branding/delete branch remains a confirmed blocker. Preserve
+the latent A28 code in the remediation inventory without claiming it was
+executed, or is enabled, in the current production configuration. A16 team
+ownership and the A17 handoff are now explicit dependencies of B4, not new
+families or waves. See
+`CYCLE-06-BLOCKING-PACKAGE-5-AI-CONFIRM-CONTRACT-STOP-REPORT.md`,
+`package5-ai-confirmation-receipt-schema-v1-proposal.md` and
+`package5-ai-confirm-crm-handoff-v1-decision.md`.
+
 Production release: `20260904-c06-p5-wave6-cutover-3b545671`.
 Wave 6 behavioral proof remains the accepted `bf21d9d6` proof; it was not rerun.
 The A30 owner is AC6 maintenance coordinator with MaintenanceRun/ItemClaim,
@@ -94,33 +117,40 @@ as classified in the Authority Gate. No new Action Engine route was introduced.
 | 6 | A30 | COMPLETE; six AC6 classes |
 
 The inventory is exactly the 13 narrowed Entry Gate families, missing 0 and
-extra 0. Final production-wide canonical coverage is not proven: A18, A26
-and A28 have confirmed alternate mutation paths. Preserve the six accepted wave
+extra 0. Final production-wide canonical coverage is not proven: A18, A26 and
+the A16 team dependency of B4 have confirmed alternate mutation paths; the A28
+AI branch is additionally retained in the dormant-code remediation inventory.
+Preserve the six accepted wave
 checkpoints; resolve the aggregate blockers without inventing another wave.
 
 Remaining work, in order:
 
-1. Preserve the **applied ClientChannelLink + ClientLinkChallenge foundations**;
+1. Resolve **B4-C1 receipt schema and B4-C2 CRM handoff** using the two exact
+   proposals above. Do not silently store a new execution journal in blueprint
+   JSON, infer approval from retry payload, bind staff to mock, enable internal
+   AI onboarding, or extend accepted action contracts. Any approved foundation
+   must pass its local/migration gates before runtime continuation.
+2. Preserve the **applied ClientChannelLink + ClientLinkChallenge foundations**;
    no schema approval or 600-second TTL decision remains pending. Review the
    undeployed A18 candidate's trusted issuance context, verify production auth
    wiring, finish the Python consent initiator/read boundaries and durable
    frontend command identity. No phone-derived linking, arbitrary Client payload,
    raw bearer persistence or synthetic cold-start provenance is permitted.
-2. Resume the **final remediation with B4 explicitly included**: the original
+3. Resume the **final remediation with B4 explicitly included**: the original
    three A18/A26 endpoints plus AI onboarding's post-tenant A26/A28 ownership and
    compensation. Keep canonical TrialActivation atomicity, no hard delete, and
    the accepted post-tenant Action Engine owners. Complete targeted adversarial
    proof and mandatory deployment gates before any runtime release. The prior
    21/21 A18 backend proof is not the complete A18/A26 production-remediation gate.
-3. **Automatically restart PACKAGE 5 FINAL ADVERSARIAL VERIFICATION / COMPLETION
+4. **Automatically restart PACKAGE 5 FINAL ADVERSARIAL VERIFICATION / COMPLETION
    GATE from the beginning** once remediation production verification passes.
    Reconcile the complete Entry Gate inventory and all
    canonical owners, including approved AC3/AC4/AC5/AC6 exceptions, against
    actual Nest, CLI, Python, maintenance and scheduler surfaces. Preserve the
    accepted authority/schema decisions, D1-A…D7-A and Common Foundation. Do not
    invent Wave 7 or require fabricated ActionExecution history for AC6.
-4. Separately initiated **Final Chapter 6 Gate** after Package 5 passes.
-5. After Chapter 6, a separate provenance/ownership audit of the **17 historical
+5. Separately initiated **Final Chapter 6 Gate** after Package 5 passes.
+6. After Chapter 6, a separate provenance/ownership audit of the **17 historical
    local temp/test databases**. Their deletion is not authorized by this report.
 
 Preserve Packages 1–4, Waves 1–6 production baselines, P02/P03 holds, Client
@@ -134,22 +164,28 @@ PACKAGE 5 WAVES COMPLETE: 6/6
 PACKAGE 5 WAVE 6 COMPLETE: YES
 PACKAGE 5 FAMILY INVENTORY COVERAGE: 13/13
 PACKAGE 5 FINAL CANONICAL COVERAGE: NOT PROVEN
-FAMILIES WITH CONFIRMED AGGREGATE BLOCKERS: A18, A26
+FAMILIES WITH CONFIRMED ACTIVE AGGREGATE BLOCKERS: A16, A18, A26
+ADDITIONAL B4 CANONICAL HANDOFF DEPENDENCY: A17
+A28 AI CONFIRM BRANCH: DORMANT/TEST-ONLY UNDER CURRENT PRODUCTION POLICY
 A30 CANONICAL EXECUTION OWNER: AC6 MAINTENANCE COORDINATOR
 MAINTENANCE RUN/ITEM CLAIM OWNERSHIP: ENFORCED
 AUTH RETENTION POLICY V1: ENFORCED
 PACKAGE 5 COMPLETE: NO
 PACKAGE 5 FINAL ADVERSARIAL VERIFICATION: FAIL
-PACKAGE 5 FINAL A18/A26 REMEDIATION: IN PROGRESS — CHALLENGE LOCAL FOUNDATION PASS
+PACKAGE 5 FINAL REMEDIATION: STOP — AI CONFIRMATION SCHEMA/HANDOFF
+AI DRAFT CONFIRM CONTRACT RECONSTRUCTION: COMPLETE
+AI DRAFT CONFIRM RUNTIME CONTRACT SUFFICIENT: NO
 A18 CLIENT-CHANNEL BINDING CONTRACT: COMPLETE
 A18 FIRST-LINK CHALLENGE AUTHORITY: APPROVED
 APPROVED COMPLETED-LINK SCHEMA SUFFICIENT: YES
-EXISTING CHALLENGE SCHEMA SUFFICIENT: NO
-ADDITIONAL SCHEMA REQUIRED: YES — ClientLinkChallenge
+EXISTING CHALLENGE SCHEMA SUFFICIENT: YES
+ADDITIONAL SCHEMA REQUIRED: YES — AiOnboardingDraft confirmation receipt
+AI CONFIRMATION RECEIPT SCHEMA V1: PROPOSED, NOT APPROVED
+CRM HANDOFF V1: PROPOSED, NOT APPROVED
 CHALLENGE SCHEMA V1: APPROVED
 TTL V1: APPROVED — 600 SECONDS
 CHALLENGE SCHEMA IMPLEMENTED: YES
-CHALLENGE SCHEMA APPLIED: NO
+CHALLENGE SCHEMA APPLIED: YES
 CHALLENGE LOCAL FOUNDATION PROOF: PASS — 49/49
 A18 SCHEMA V1: APPROVED
 A18 LOCAL FOUNDATION PROOF: PASS
@@ -158,11 +194,16 @@ PENDING MIGRATIONS: 0
 POST-APPLY DRIFT: NONE
 FAKE CLIENT CHANNEL LINKS BACKFILLED: 0
 CLIENT CHANNEL LINK DURABLE IN PRODUCTION: YES
-A18 CONSENT REMEDIATION CAN RESUME: AFTER APPROVED CHALLENGE FOUNDATION/PROOF
-UNRESOLVED ACCEPTED PRODUCTION BLOCKER PATHS: 3
-SCHEMA MIGRATIONS APPLIED IN REMEDIATION: 1
+CLIENT LINK CHALLENGE DURABLE IN PRODUCTION: YES
+CLIENT LINK CHALLENGE TTL: 600 SECONDS
+A18 LOCAL RUNTIME CANDIDATE PROOF: PASS — accepted d9799b2a, undeployed
+A18 CONSENT REMEDIATION CAN RESUME: AFTER CURRENT AI CONTRACT STOP IS RESOLVED
+UNRESOLVED ACCEPTED PRODUCTION BLOCKER ENDPOINTS: 4
+SCHEMA MIGRATIONS APPLIED IN REMEDIATION: 2
+SCHEMA MIGRATIONS APPLIED IN THIS ASSESSMENT CYCLE: 0
 PRODUCTION RUNTIME DEPLOYMENT IN REMEDIATION: NO
-FINAL PACKAGE 5 GATE STARTED: YES — STOPPED ON CONFIRMED BYPASSES
+FINAL PACKAGE 5 GATE STARTED: YES — STOPPED ON CONFIRMED BYPASSES; NOT RERUN
+FULL REGRESSION GATE: NOT RUN — current contract STOP
 WAVE 7 CREATED: NO
 CHAPTER 7 STARTED: NO
 REAL PRODUCTION BUSINESS/PROVIDER MUTATIONS FOR CUTOVER PROOF: 0
@@ -174,7 +215,8 @@ OWNED PLAYWRIGHT/CHROME PROCESSES REMAINING: 0
 OWNED TEMP DATABASES REMAINING: 0
 ```
 
-The completed-link foundation/apply and both challenge schema/TTL decisions are
-accepted. Continue authorized challenge migration gate/apply, then remediation
-and automatic full Final Package 5 Gate as specified. Chapter 6
+The completed-link and challenge foundations/applies and challenge TTL decision
+are accepted; do not reapply them. Resolve the new AI receipt/handoff proposals,
+then continue the authorized remediation and automatic full Final Package 5
+Gate as specified after all gates pass. Chapter 6
 completion acceptance stays separate; Chapter 7 is not started automatically.

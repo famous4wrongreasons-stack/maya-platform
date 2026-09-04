@@ -1,0 +1,1083 @@
+{
+  "acceptedCheckpoint": "d9799b2a8b1505870b6ba63c54c6050b25ea82f1",
+  "assessment": "STOP — confirmation receipt schema and CRM handoff decision required",
+  "method": "source, approved contracts, production metadata and read-only catalogs; no runtime proof",
+  "catalogModelCount": 90,
+  "catalogReconcilesExactly": true,
+  "production": {
+    "readOnly": true,
+    "release": "/opt/maya-saas/releases/20260904-c06-p5-wave6-cutover-3b545671",
+    "tables": [
+      "ActionAttempt",
+      "ActionExecution",
+      "ActionTargetMutation",
+      "AgentTask",
+      "AiApprovalRequest",
+      "AiBrainSession",
+      "AiKnowledgeChunk",
+      "AiKnowledgeSource",
+      "AiMemoryFact",
+      "AiOnboardingDraft",
+      "AiToolExecution",
+      "Appointment",
+      "AppointmentNotificationSetting",
+      "AuditLog",
+      "AuthFlowState",
+      "AuthIdentity",
+      "AuthRateLimitBucket",
+      "AuthRefreshToken",
+      "AuthSession",
+      "BillingPayment",
+      "Branch",
+      "BrandingSettings",
+      "BusinessReview",
+      "Client",
+      "ClientChannelLink",
+      "ClientConsentFact",
+      "ClientLinkChallenge",
+      "CommerceIntegration",
+      "CrmClientLink",
+      "CrmIntegration",
+      "CrmStaffAccess",
+      "CustomerProfile",
+      "CustomerReferral",
+      "CustomerSubscription",
+      "CustomerSubscriptionUsage",
+      "DashboardPreference",
+      "DevicePushToken",
+      "DomainEvent",
+      "EmailAuthCode",
+      "Expense",
+      "ExpensePeriodDeclaration",
+      "ExpensePeriodDeclarationInvalidation",
+      "Feature",
+      "GiftCertificate",
+      "GiftCertificateRedemption",
+      "InboxItem",
+      "IngestionQuarantine",
+      "InternalAvailabilityException",
+      "InternalAvailabilityRule",
+      "InternalProvider",
+      "InternalProviderService",
+      "InternalService",
+      "LoyaltyAccount",
+      "LoyaltyRedemption",
+      "LoyaltyRedemptionGrant",
+      "LoyaltyRedemptionGrantRevocation",
+      "LoyaltyTransaction",
+      "MaintenanceItemClaim",
+      "MaintenanceRun",
+      "MarketingAudience",
+      "MarketingAudienceRecipient",
+      "MarketingCampaign",
+      "MarketingCampaignRecipient",
+      "MarketingConsentEvidence",
+      "MarketingDeliveryAttempt",
+      "MarketingPolicy",
+      "Membership",
+      "OperationalWorkItem",
+      "Opportunity",
+      "PhoneAuthCode",
+      "PlanEntitlement",
+      "ReconciliationRun",
+      "RecoveryConversion",
+      "RecoveryTouchpoint",
+      "ReferralProgram",
+      "ReferralProgramValueVersion",
+      "ReferralReward",
+      "ReferralRewardFulfillment",
+      "ReferralRewardIssuance",
+      "Staff",
+      "StaffProviderLink",
+      "SubscriptionPlan",
+      "Tenant",
+      "TenantCatalogItem",
+      "TenantCatalogItemValueVersion",
+      "TenantEntitlement",
+      "TrialActivation",
+      "UnresolvedClientIdentityHold",
+      "User",
+      "UserMerge",
+      "_prisma_migrations"
+    ],
+    "fields": [
+      {
+        "table_name": "ActionExecution",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "identityVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "identityFingerprint",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "idempotencyScope",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "requestIdempotencyKeyHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "sourceType",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "sourceRef",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "agentTaskId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "actorUserId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "actionClass",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "capability",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "capabilityVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "targetKind",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "targetRef",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "normalizedInputContract",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "normalizedInputHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "normalizedInputEncrypted",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "evidenceRefsJson",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "intentExpiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "dryRun",
+        "data_type": "boolean",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "riskProfileVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "riskFacetsJson",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "policyKey",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "policyVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "policyDecision",
+        "data_type": "USER-DEFINED",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "autonomyLevel",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "policyDecidedBy",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "approvalRequirement",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "approvalDecision",
+        "data_type": "USER-DEFINED",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "approvalInputHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "approvalRequestedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "approvalExpiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "approvalDecidedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "approvalDecidedByUserId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "state",
+        "data_type": "USER-DEFINED",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "notExecutedReasonCode",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "retryPolicyKey",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "retryPolicyVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "maxExecutionAttempts",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "executionAttemptCount",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "nextExecutionAttemptAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "reconciliationPolicyKey",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "reconciliationPolicyVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "reconciliationState",
+        "data_type": "USER-DEFINED",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "leaseOwner",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "leaseTokenHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "leaseExpiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "revision",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "transportIdentityVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "transportIdempotencyKey",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "finalOutcomeCode",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "safeResultSummaryJson",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "userExplanationCode",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "userExplanationParamsJson",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "firstAttemptedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "finalizedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "payloadRetentionUntil",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "auditRetentionUntil",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "policyContextContract",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "policyContextHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "policyEvidenceJson",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "policyEvaluatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "policyValidUntil",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ActionExecution",
+        "column_name": "approvalBindingHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "draftTokenHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "status",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "templateId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "blueprintJson",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "missingFieldsJson",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "inputDigest",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "confirmedTenantId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "lastAssistantMessage",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "quickRepliesJson",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "lastConfidence",
+        "data_type": "double precision",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "needsClarification",
+        "data_type": "boolean",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "interpreterSource",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "turnCount",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiOnboardingDraft",
+        "column_name": "trialActivationId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "actorUserId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "actorTenantId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "approvalRequestId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "approvalTenantId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "toolName",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "surface",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "riskTier",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "status",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "inputHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "idempotencyKey",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "encryptedResult",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "errorCode",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "startedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "completedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "AiToolExecution",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "provider",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "providerSubjectHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "subjectHashVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationMethod",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationIdentityHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationEvidenceJson",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verificationEvidenceHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "verifiedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "supersedesLinkId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revokedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revocationIdentityHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revocationEvidenceJson",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientChannelLink",
+        "column_name": "revocationEvidenceHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "clientId",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "tokenHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "tokenHashVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "policyVersion",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "issuedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "issuanceEvidenceJson",
+        "data_type": "jsonb",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "issuanceEvidenceHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "consumedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "consumedLinkId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "consumedProvider",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "ClientLinkChallenge",
+        "column_name": "consumedSubjectHash",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "activationTokenHash",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "status",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "source",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "expiresAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "completedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "tenantId",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "createdAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "table_name": "TrialActivation",
+        "column_name": "updatedAt",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO"
+      }
+    ],
+    "guards": [],
+    "repositoryMigrationCount": 72,
+    "appliedMigrationCount": 75,
+    "pendingMigrations": [],
+    "unresolvedMigrations": 0,
+    "flags": {
+      "publicConfirm": true,
+      "route": "ai/drafts/:draftId/confirm",
+      "teamCall": true,
+      "crmImportSavesIdentityHashes": true,
+      "bootstrapMockIntegration": true,
+      "teamProviderFromIntegration": true,
+      "directTeamUserCreate": true,
+      "directTeamAccessCreate": true,
+      "directStaffCreate": true,
+      "directProviderLinkCreate": true,
+      "physicalTenantDelete": true,
+      "activationReset": true,
+      "brandingUpdate": true
+    },
+    "releasePolicy": {
+      "nodeEnvironmentIsTest": false,
+      "legacySmokeFlagEnabled": false,
+      "legacySmokeGuardSource": "legacyHttpSmokeEnabled() {\n        return (process.env.NODE_ENV === 'test' &&\n            process.env.HTTP_SMOKE_ENABLE_LEGACY_AI_ONBOARDING === 'true');\n    }",
+      "missingFieldsSource": "getMissingFields(blueprint) {\n        if (this.legacyHttpSmokeEnabled()) {\n            const missing = [];\n            if (!blueprint.workMode)\n                missing.push('work_mode');\n            if (!blueprint.categoryId)\n                missing.push('category');\n            if (!blueprint.businessName?.trim() && !blueprint.businessNameDeferred) {\n                missing.push('business_name');\n            }\n            if (!blueprint.providerCount)\n                missing.push('provider_count');\n            if (blueprint.services.length === 0 && !blueprint.servicesDeferred) {\n                missing.push('services');\n            }\n            if (!blueprint.calendarSourceConfirmed)\n                missing.push('calendar_source');\n            return missing;\n        }\n        const missing = [];\n        if (!blueprint.workMode)\n            missing.push('work_mode');\n        if (!blueprint.categoryId ||\n            !RELEASE_CATEGORY_IDS.has(blueprint.categoryId)) {\n            missing.push('category');\n        }\n        if (!blueprint.calendarSourceConfirmed) {\n            missing.push('calendar_source');\n            return missing;\n        }\n        if (blueprint.calendarSource !== domain_enums_1.CalendarSource.EXTERNAL ||\n            !blueprint.crmImported) {\n            missing.push('crm_import');\n            return missing;\n        }\n        if (!blueprint.businessName?.trim() && !blueprint.businessNameDeferred) {\n            missing.push('business_name');\n        }\n        return missing;\n    }",
+      "overrideSource": "applyConfirmationOverrides(current, dto) {\n        if (current.crmImported) {\n            return current;\n        }\n        const template = (0, business_templates_1.getBusinessTemplate)(dto.templateId ?? current.templateId);\n        const category = (0, onboarding_categories_1.getOnboardingCategory)(current.categoryId);\n        const businessName = dto.businessName?.trim() || current.businessName;\n        const services = dto.services?.map((service) => ({ ...service })) ?? current.services;\n        return {\n            ...current,\n            templateId: template.id,\n            industryPresetId: category?.industryPresetId ?? template.industryPresetId,\n            providerTitle: category?.providerTitle ?? template.providerTitle,\n            businessName,\n            businessNameDeferred: businessName\n                ? false\n                : (current.businessNameDeferred ?? false),\n            businessNameGenerated: businessName\n                ? false\n                : (current.businessNameGenerated ?? false),\n            calendarSource: dto.calendarSource ?? current.calendarSource,\n            calendarSourceConfirmed: dto.calendarSource\n                ? true\n                : (current.calendarSourceConfirmed ?? false),\n            providerCount: dto.providerCount ?? current.providerCount,\n            services,\n            servicesDeferred: services.length > 0\n                ? false\n                : dto.services\n                    ? true\n                    : (current.servicesDeferred ?? false),\n            weeklyRules: dto.weeklyRules?.map((rule) => ({ ...rule })) ?? current.weeklyRules,\n            scheduleAssumed: dto.weeklyRules ? false : current.scheduleAssumed,\n        };\n    }"
+    },
+    "methodSha256": {
+      "confirm": "9cf5b5c03e1d66d1ae955cacb6bc60891dc965369478eeb8cb4b97a4f4fabab5",
+      "crmImport": "6121bcbee8fdda8b6300491b0dd757f2255228aa971cdc65a39afd577ba17b40",
+      "createTrial": "522a1517b4f64bd7340aee2e02f60f60fcc66c775edde7cb0bc7ddf327479bf9",
+      "provisionTeam": "d21bd04af1d54870f0a6f58e73808365a7c3b099bd52963f572560bb5f2da14c",
+      "ensureStaff": "f6ac0eb54ba6c5775460d3f62aeb3c92e350cc91c1b35aa08f0674f03b6b871d",
+      "resetActivation": "c03c72447d15d10b3c751ae6a6a27c052c4845d8d763efc5ca89fc8fbcec93d0",
+      "createProvider": "31f8a66204da9b579e382ec7b919ae87db0615da106eb66de3ff29eb831d1272"
+    },
+    "productionBusinessMutations": 0
+  },
+  "schemaDrift": "NONE",
+  "sourceSha256": {
+    "src/onboarding/ai-onboarding.service.ts": "bd2393b60edc63be886f54e2d536ae43a6fa6fa4b2d28fd650e919a474eae0ac",
+    "src/onboarding/ai-onboarding.types.ts": "1e3b5687fad3fc42add40dc86f145b64a5952b571b4adddc568d2a7c13bf4b55",
+    "src/onboarding/dto/ai-onboarding.dto.ts": "cb919465569acf58c55d7bb4d8e55e61e7bd1c71f37d9be46e5d4e97f90287c1",
+    "src/onboarding/onboarding.controller.ts": "d97ca07c431cd3e7210ec64dd0cb51abc33e6f67c4129071a4f3b5f927c887b6",
+    "src/onboarding/onboarding.service.ts": "18434bcb95d89b02b9488fdc4cd877ffea898d49e75f03b788e3f79da08b5d39",
+    "src/onboarding/trial-activation.service.ts": "b06c19e54ff08892c65742375452d300d48d7eb7aeeca18d1a56d1ac1fe17386",
+    "src/users/users.service.ts": "fa07778b59b6fabba6fb542e5adb58ab5ef35a164b7717966343b9ebed713237",
+    "src/crm/crm.service.ts": "09384e243ff6f0ad9bc9ca2fd1a8d21d696a084f80a62ec0261449e6564d9710",
+    "src/package5-wave2/trial-activation-bootstrap.service.ts": "f6280bd7803fad9cd3901da2336f04ab83d73863473b41af0c7eb3e675eaceca",
+    "src/package5-wave2/package5-wave2.service.ts": "7cadb06f74361d9a09053be7d9f2de3e3869da00f94bd21ddcbbbb8fc1b634fa",
+    "src/package5-wave3/package5-wave3.service.ts": "a686a79143dce98c124c7acf8101c8793340b51f586a3ab63435daaf6be0299d",
+    "src/package5-wave3/package5-wave3-production-gateway.service.ts": "9f2ad62248d3562ae73e652e2dd63c5416910ba3351bb3923d6d172cdd8d9ad1",
+    "src/package5-wave4/package5-wave4.service.ts": "16630d572e0379bb2eaf9fe3e65aa9542a6c62b20341efc103be83a1842fe94f",
+    "src/package5-wave4/package5-wave4-canonical-cutover.service.ts": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+    "src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts": "87a3e44396ddec16d1a1497f86c939fc2197fac540063f64981fc62f86938382",
+    "src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts": "283928d54df4f1902db11b69ed0fd12b91f18d3ecf8a9437f31f03e31157efa3",
+    "prisma/schema.prisma": "33e98dc19384f1ca58a2d982461f40c230e2a93a0785817cbb2c0b768676da8a"
+  },
+  "sourceAnchors": {
+    "src/onboarding/ai-onboarding.service.ts": {
+      "async confirmDraft(": 329,
+      "const claimed =": 379,
+      "provisionCrmTeamAccess({": 424,
+      "this.prisma.brandingSettings.update({": 442,
+      "releaseCompletedTenant(": 482,
+      "this.prisma.tenant.delete({": 485,
+      "private async provisionInternalCalendar(": 497,
+      "const ownerProvider = setup.providers[0]": 502,
+      "private getMissingFields(": 668,
+      "private legacyHttpSmokeEnabled()": 846,
+      "crmStaffIdentityHashes: preview.team.items.map": 270
+    },
+    "src/onboarding/onboarding.service.ts": {
+      "ensureBootstrapMockIntegration(": 140,
+      "deleteFailedTrialTenant(": 241
+    },
+    "src/users/users.service.ts": {
+      "private async ensureStaffForExternal(": 285,
+      "async provisionCrmTeamAccess(": 586
+    },
+    "src/package5-wave2/package5-wave2.service.ts": {
+      "case 'configure_staff_access'": 627,
+      "case 'claim_team_owner'": 688,
+      "case 'create_provider_user'": 897
+    },
+    "src/package5-wave3/package5-wave3.service.ts": {
+      "if (command.operation === 'confirm_crm_import')": 685
+    },
+    "src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts": {
+      "it('keeps pre-tenant calendar provisioning": 124
+    }
+  },
+  "ratchetsChanged": false,
+  "runtimeChanged": false,
+  "schemaChanged": false,
+  "runtimeRemediationDeployed": false,
+  "targetedRemediationProof": "NOT RUN — contract STOP",
+  "fullRegressionGate": "NOT RUN — contract STOP",
+  "finalGateRerun": false,
+  "package5Complete": false,
+  "wavesComplete": "6/6",
+  "wave7Created": false,
+  "chapter7Started": false,
+  "productionBusinessProviderMutationsForProof": 0,
+  "hygiene": {
+    "preExistingLocalTestDatabases": 17,
+    "preExistingDatabasesTouched": 0,
+    "unrelatedDirtyFileHashesUnchanged": 18,
+    "ownedTempProcesses": 0,
+    "ownedWatchers": 0,
+    "ownedPlaywrightChromeProcesses": 0,
+    "ownedTempDatabases": 0
+  },
+  "rawProbeSha256": "35730a80eef60d7e36fe9bf5f61bbc5dc8b997a14529dadf990325b16b5fa92a"
+}
