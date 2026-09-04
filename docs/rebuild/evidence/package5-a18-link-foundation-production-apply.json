@@ -1,0 +1,148 @@
+{
+  "date": "2026-09-04",
+  "schemaManifest": {
+    "source": "ae3f743844430b1a5fa869da4ce075e16fa648ce",
+    "schemaSha256": "3dedb13ec0ea25c69eac7c24b0b27fea98fe83fb60953c60f6576e94c47952c7",
+    "migration": "20260904090000_a18_client_channel_link_v1",
+    "migrationSha256": "445ef8a23ade1668a8a1cecb481d5db240298e9f90031fdbac48897f9eb8e0a0",
+    "baselineRelease": "/opt/maya-saas/releases/20260904-c06-p5-wave6-cutover-3b545671"
+  },
+  "newModels": 1,
+  "localFoundationProof": {
+    "verdict": "PASS",
+    "checks": 32,
+    "cases": [
+      "verified guest Client without User",
+      "retry and new-service restart return original receipt",
+      "initiator clientId rejected",
+      "initiator providerSubject rejected",
+      "phone-only payload rejected",
+      "unverified proof rejected",
+      "cross-tenant verified context rejected",
+      "foreign Client rejected",
+      "unlinked/ambiguous identity fails closed",
+      "second Client for active subject rejected",
+      "receipt material substitution rejected",
+      "concurrent duplicate creates exactly one receipt",
+      "competing Clients have one allowed creation outcome",
+      "tenant and provider namespaces are isolated",
+      "raw negative fixture is otherwise valid and rolled back",
+      "hash version cannot introduce another identity",
+      "installation cannot create a provider namespace",
+      "JSON null cannot bypass proof checks",
+      "raw attributes not allowed in verification evidence",
+      "silent reassignment rejected",
+      "historical evidence immutable",
+      "historical receipt deletion rejected",
+      "Client cascade cannot delete binding history",
+      "revoked identity fails closed",
+      "revocation cannot be erased",
+      "revoked history cannot be silently bypassed",
+      "explicit verified relink preserves predecessor evidence",
+      "failed rebind rolls back revocation",
+      "stale predecessor cannot fork history",
+      "atomic explicit rebind and restart convergence",
+      "post-revocation revalidation rejects stale consent authority",
+      "consent/revocation identity lock serializes authority boundary"
+    ],
+    "foundationVerifier": "SYNTHETIC ISOLATED FIXTURE; NO PRODUCTION CHALLENGE CLAIM",
+    "newModels": 1,
+    "temporaryLinkReceipts": 8,
+    "realProductionMutations": 0,
+    "providerWrites": 0,
+    "historicalBackfill": 0
+  },
+  "localGates": {
+    "targetedTests": {
+      "passed": 24,
+      "total": 24
+    },
+    "cleanReplayMigrations": 71,
+    "cleanReplayDrift": "NONE",
+    "prismaValidate": "PASS",
+    "applicationTypecheck": "PASS",
+    "scriptsTypecheck": "PASS",
+    "projectLint": "PASS after two synthetic verifier require-await fixes",
+    "preflightBuild": "PASS"
+  },
+  "productionMigrationGate": {
+    "stage": "before",
+    "source": "ae3f743844430b1a5fa869da4ce075e16fa648ce",
+    "expectedOnlyPending": [
+      "20260904090000_a18_client_channel_link_v1"
+    ],
+    "clientChannelLinks": null,
+    "structuralChecks": "PASS",
+    "productionBusinessMutations": 0
+  },
+  "productionMigrationPostApply": {
+    "stage": "after",
+    "source": "ae3f743844430b1a5fa869da4ce075e16fa648ce",
+    "expectedOnlyPending": [],
+    "clientChannelLinks": 0,
+    "structuralChecks": "PASS",
+    "productionBusinessMutations": 0
+  },
+  "pendingMigrations": 0,
+  "postApplyDrift": "NONE against approved candidate schema",
+  "repositoryMigrations": 71,
+  "appliedMigrationRecords": 74,
+  "previouslyAcknowledgedExtraMigrations": 3,
+  "healthEvidence": [
+    {
+      "status": "ok",
+      "service": "maya-saas-backend",
+      "release": "20260904-c06-p5-wave6-cutover-3b545671",
+      "started_at": "2026-09-03T22:41:18.715Z",
+      "timestamp": "2026-09-04T07:04:08.833Z"
+    },
+    {
+      "status": "ready",
+      "service": "maya-saas-backend",
+      "checks": {
+        "database": "ready"
+      },
+      "timestamp": "2026-09-04T07:04:08.852Z"
+    },
+    {
+      "status": "ok",
+      "service": "maya-saas-backend",
+      "release": "20260904-c06-p5-wave6-cutover-3b545671",
+      "started_at": "2026-09-03T22:41:18.715Z",
+      "timestamp": "2026-09-04T07:04:12.878Z"
+    },
+    {
+      "status": "ready",
+      "service": "maya-saas-backend",
+      "checks": {
+        "database": "ready"
+      },
+      "timestamp": "2026-09-04T07:04:12.889Z"
+    }
+  ],
+  "runtimeReleaseChanged": false,
+  "runtimeServiceRestarted": false,
+  "mainPid": 1470307,
+  "nRestarts": 0,
+  "schemaCandidate": "/opt/maya-saas/schema-releases/20260904-a18-client-channel-link-ae3f7438",
+  "rawLogSha256": {
+    "proof.log": "3c247c5756fd25edd74d829185262bf88767927954146abd5c02519a19c1bfad",
+    "clean-replay.log": "44302185b5c3c09b2ca07de1b0ecfde080b16ca7ffc84712cf4a0ed654175d01",
+    "local-gates.log": "aeccdf8585e2e7869b4dcd6843a2800be189863996eb1aa1562a7eaf1f3d780f",
+    "lint-resume.log": "80f5295fdc4b3e55d92f2aa33e3773ba6f2b9305c454e513f870e95ae3fa198d",
+    "build-preflight.log": "71056c72cea061cfa43146c4f2a72f713755cf05e8094b4722ccec5b28fe6da5",
+    "production-migration-gate.log": "73e47559cd5d44e50448110783a3243a40612c54ec91478db63e779f865d985e",
+    "production-migration-apply.log": "457341a76ae59c0503c675d9065140c87050ad95f2d7b5c0808da9beb4b35b59"
+  },
+  "hygiene": {
+    "preExistingLocalDatabases": 17,
+    "preExistingDatabasesTouched": 0,
+    "ownedProcessesRemaining": 0,
+    "ownedWatchersRemaining": 0,
+    "ownedBrowsersRemaining": 0,
+    "ownedTemporaryDatabasesRemaining": 0
+  },
+  "realProductionBusinessProviderMutationsForProof": 0,
+  "productionSchemaMigrationsApplied": 1,
+  "scopeLimit": "Storage/command foundation proof uses a synthetic verifier. A18 end-to-end consent, A26 remediation, runtime deployment and full final gate remain incomplete."
+}

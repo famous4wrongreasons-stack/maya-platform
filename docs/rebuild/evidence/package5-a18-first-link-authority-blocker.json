@@ -1,0 +1,262 @@
+{
+  "date": "2026-09-04",
+  "source": "ae3f743844430b1a5fa869da4ce075e16fa648ce",
+  "blocker": "No concrete approved trust source/verifier proves first-link exact Client authority independently of channel authentication.",
+  "completedBindingContractReopened": false,
+  "newModelRequested": false,
+  "schemaFoundationApplied": true,
+  "decisionRequired": "Identify the trusted issuer/source and exact Client-authority proof accepted for first linkage; retain all approved V1 invariants.",
+  "sourceReferences": [
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "sha256": "607c91ee405a11dd1bfe5cf0e8b72387f6b20cfafebb74e991ba1a10a3d7d34a",
+      "anchors": [
+        {
+          "text": "export interface ClientChannelLinkVerifier",
+          "line": 46
+        },
+        {
+          "text": "export class ClientChannelLinkService",
+          "line": 69
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-identity.service.ts",
+      "sha256": "7add6ec855a71148000a048a44f21d5b2543dd6568ba61409f667aa599a8f522",
+      "anchors": [
+        {
+          "text": "async registerCrmClient",
+          "line": 67
+        },
+        {
+          "text": "const client = await tx.client.create",
+          "line": 194
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.service.ts",
+      "sha256": "09384e243ff6f0ad9bc9ca2fd1a8d21d696a084f80a62ec0261449e6564d9710",
+      "anchors": [
+        {
+          "text": "await this.clientIdentityService.tryRegisterCrmClient",
+          "line": 3125
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.module.ts",
+      "sha256": "b3ca65668ca426e9ac2cc8abdb89bf49bfe5cd900921a2023fd887146c899dae",
+      "anchors": [
+        {
+          "text": "providers: [",
+          "line": 53
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/customers/customers.service.ts",
+      "sha256": "115897259594ac64abbd7e1cbb852e9896bdf80cbfdc484021c7e4c6c54d072b",
+      "anchors": [
+        {
+          "text": "private async exactClientForUser",
+          "line": 284
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/scripts/package5-a18-client-channel-link-proof.ts",
+      "sha256": "349448bb1b411956d2c7817d669b82618568aac23082b2c1d4d924ce687f3a97",
+      "anchors": [
+        {
+          "text": "const verifier: ClientChannelLinkVerifier",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "path": "docs/rebuild/package5-final-a18-client-channel-link-schema-v1-proposal.md",
+      "sha256": "e8f68cfb569bd2fbf0b2b98223f6462ea01ef1eb49efdff20d2e86abf49be3a6",
+      "anchors": [
+        {
+          "text": "The explicit linking verifier must verify both channel control and exact Client",
+          "line": 157
+        }
+      ]
+    }
+  ],
+  "productionSourceVerifierReferences": [
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 46,
+      "source": "export interface ClientChannelLinkVerifier {"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 47,
+      "source": "verifyLink(proof: string): Promise<VerifiedClientChannelProof>;"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 48,
+      "source": "verifyRevocation(proof: string): Promise<VerifiedClientChannelRevocation>;"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 73,
+      "source": "private readonly verifier: ClientChannelLinkVerifier,"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 78,
+      "source": "const proof = await this.verifier.verifyLink(this.proofToken(request));"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 94,
+      "source": "const proof = await this.verifier.verifyLink("
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 97,
+      "source": "const revocation = await this.verifier.verifyRevocation("
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 200,
+      "source": "const proof = await this.verifier.verifyRevocation("
+    }
+  ],
+  "productionReadOnlyEvidence": [
+    {
+      "stage": "after",
+      "source": "ae3f743844430b1a5fa869da4ce075e16fa648ce",
+      "expectedOnlyPending": [],
+      "clientChannelLinks": 0,
+      "structuralChecks": "PASS",
+      "productionBusinessMutations": 0
+    },
+    {
+      "readOnly": true,
+      "liveRelease": "/opt/maya-saas/releases/20260904-c06-p5-wave6-cutover-3b545671",
+      "clientCounts": {
+        "clients": 23,
+        "clientsWithUserReference": 1
+      },
+      "clientChannelLinkCounts": {
+        "total": 0,
+        "active": 0
+      },
+      "liveRuntimeClientChannelLinkReferences": [],
+      "productionBusinessMutations": 0
+    },
+    {
+      "deployedPythonSourceEvidence": {
+        "web_auth.py": {
+          "functions": {
+            "_issue_session": {
+              "calls": [
+                "(email or '').strip",
+                "(email or '').strip().lower",
+                "_enabled_bool",
+                "_new_token",
+                "bool",
+                "client.get",
+                "database.create_web_session",
+                "database.find_client_by_phone",
+                "database.get_master_by_chat_id",
+                "database.is_admin",
+                "getattr",
+                "int",
+                "pii_crypto.hash_phone",
+                "staff_map.get",
+                "str"
+              ],
+              "endLine": 432,
+              "line": 364,
+              "sha256": "2e23f6c8a2f89600f11325d7c65e5bcc8bcd4b15a702ecbfb64478f99368bcd0"
+            }
+          },
+          "sha256": "94b891dc9ce1447491f49ca0f8edd625177dc803aeefeccd1744ae9f115e940e"
+        },
+        "webhook_server.py": {
+          "functions": {
+            "_authed_chat_id": {
+              "calls": [
+                "(body or {}).get",
+                "_verify_telegram_init_data",
+                "_verify_telegram_login_widget",
+                "body.get",
+                "int",
+                "isinstance",
+                "request.headers.get",
+                "sess.get",
+                "tg_user.get",
+                "web_auth.resolve_session"
+              ],
+              "endLine": 6650,
+              "line": 6631,
+              "sha256": "fc54d0a7e3abad4564cd842e3ce3a59bf3bbcb0a604a690547e96aa2218892e8"
+            },
+            "consent_submit_handler": {
+              "calls": [
+                "_authed_chat_id",
+                "_cabinet_response",
+                "body.get",
+                "bool",
+                "database.consent_gate_status",
+                "database.get_or_create_client",
+                "database.has_valid_consent_by_chat_id",
+                "database.save_consent",
+                "database.set_marketing_consent",
+                "isinstance",
+                "logger.error",
+                "request.json"
+              ],
+              "endLine": 7197,
+              "line": 7155,
+              "sha256": "60fcdb0bf1cfb0a39548eaec7aba54abf423337a7134fd6df2aa8e27d28f6149"
+            }
+          },
+          "sha256": "b5dd66307b0dce5f6fdba7be24f1833224f48a521f9c23e0606fd8ca16771cea"
+        }
+      }
+    },
+    {
+      "status": "ok",
+      "service": "maya-saas-backend",
+      "release": "20260904-c06-p5-wave6-cutover-3b545671",
+      "started_at": "2026-09-03T22:41:18.715Z",
+      "timestamp": "2026-09-04T07:06:09.385Z"
+    },
+    {
+      "status": "ready",
+      "service": "maya-saas-backend",
+      "checks": {
+        "database": "ready"
+      },
+      "timestamp": "2026-09-04T07:06:09.401Z"
+    }
+  ],
+  "productionEvidenceLogSha256": "78663ae63e8a8a37b52f8d59c8b5c3160c0e28454ba034ccd38f207fc582962c",
+  "rejectedShortcuts": [
+    "phone/contact match",
+    "bare Client.userId retroactive provenance",
+    "Telegram signature as Client authority",
+    "operator-selected Client alone",
+    "bridge secret alone",
+    "signed attacker-selected Client id",
+    "synthetic verifier as production evidence"
+  ],
+  "acceptedBypassPathsStillOpen": [
+    "A18 /api/consent/submit",
+    "A26 /api/onboarding/trial including physical tenant-delete compensation",
+    "A26 /api/admin/tenants"
+  ],
+  "a18RuntimeRemediationComplete": false,
+  "a26RuntimeChanged": false,
+  "fullFinalGateRerun": false,
+  "package5Complete": false,
+  "realProductionBusinessProviderMutationsForProof": 0
+}
