@@ -1,6 +1,11 @@
 # A18 — Client Linking Challenge TTL Decision V1
 
-Status: **PROPOSED — EXPLICIT TTL APPROVAL REQUIRED**
+Status: **APPROVED after `84696bc9` — TTL V1 = 600 seconds**
+
+The user explicitly approved 600 seconds and policy V1. The original assessment
+and proposed decision below are retained as history; their pending-approval
+statements are superseded. The implementation pins the duration in central
+versioned code and the additive SQL guard; no tenant/initiator override is added.
 
 Date: 2026-09-04. Accepted checkpoint: `813107da`; first-link challenge mechanism
 approved in the user's following instruction. No lifetime has been approved yet.

@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — first-link challenge APPROVED; STOP on ClientLinkChallenge schema + TTL proposals**
+Status: **CURRENT — challenge schema + TTL APPROVED; local foundation PASS; migration gate then A18/A26 remediation**
 
 Date: 2026-09-04. This supersedes the Wave 6 pre-cutover remainder after the
 explicit AC6 owner decision and successful production cutover from gated source
@@ -61,6 +61,14 @@ are proposed; neither is approved or implemented. The user's explicit proposal
 STOP applies. Current report:
 `CYCLE-06-BLOCKING-PACKAGE-5-A18-CLIENT-LINK-CHALLENGE-ASSESSMENT.md`.
 
+The user subsequently accepted `84696bc9` and approved both exact proposals,
+including central TTL V1 = 600 seconds. That proposal STOP is superseded.
+The 14-field challenge foundation is implemented locally: PostgreSQL proof 49/49,
+targeted checks 33/33, clean replay of 72 migrations, validate/typechecks/lint and
+preflight build PASS. Production migration gate/apply is next, followed by the
+already authorized A18/A26 remediation and complete Final Package 5 Gate.
+See `CYCLE-06-BLOCKING-PACKAGE-5-A18-CLIENT-LINK-CHALLENGE-FOUNDATION-REPORT.md`.
+
 Production release: `20260904-c06-p5-wave6-cutover-3b545671`.
 Wave 6 behavioral proof remains the accepted `bf21d9d6` proof; it was not rerun.
 The A30 owner is AC6 maintenance coordinator with MaintenanceRun/ItemClaim,
@@ -82,10 +90,10 @@ checkpoints; resolve the aggregate blockers without inventing another wave.
 
 Remaining work, in order:
 
-1. Review **ClientLinkChallenge Schema V1** and the **separate TTL V1 proposal**.
-   After both approvals, implement/prove the challenge foundation and its atomic
-   consumption with the existing link writer, following the then-authorized
-   migration boundary. Preserve the already applied ClientChannelLink foundation.
+1. Run the **authorized ClientLinkChallenge production migration gate/apply**:
+   expected-only pending set, additive DDL, health/readiness and drift NONE.
+   Afterwards verify pending 0, approved-schema drift NONE and backfill 0.
+   Preserve the already applied ClientChannelLink foundation.
    No phone-derived issue, Client payload override or challenge encoded in a
    pending ClientChannelLink is allowed.
 2. Complete the **already authorized A18/A26 remediation** for all three paths,
@@ -120,16 +128,17 @@ MAINTENANCE RUN/ITEM CLAIM OWNERSHIP: ENFORCED
 AUTH RETENTION POLICY V1: ENFORCED
 PACKAGE 5 COMPLETE: NO
 PACKAGE 5 FINAL ADVERSARIAL VERIFICATION: FAIL
-PACKAGE 5 FINAL A18/A26 REMEDIATION: STOP — CHALLENGE SCHEMA + TTL PROPOSALS
+PACKAGE 5 FINAL A18/A26 REMEDIATION: IN PROGRESS — CHALLENGE LOCAL FOUNDATION PASS
 A18 CLIENT-CHANNEL BINDING CONTRACT: COMPLETE
 A18 FIRST-LINK CHALLENGE AUTHORITY: APPROVED
 APPROVED COMPLETED-LINK SCHEMA SUFFICIENT: YES
 EXISTING CHALLENGE SCHEMA SUFFICIENT: NO
 ADDITIONAL SCHEMA REQUIRED: YES — ClientLinkChallenge
-CHALLENGE SCHEMA PROPOSAL: READY FOR REVIEW
-TTL DECISION REQUIRED: YES
-PROPOSED TTL: 600 SECONDS / 10 MINUTES — NOT APPROVED
-CHALLENGE SCHEMA IMPLEMENTED/APPLIED: NO
+CHALLENGE SCHEMA V1: APPROVED
+TTL V1: APPROVED — 600 SECONDS
+CHALLENGE SCHEMA IMPLEMENTED: YES
+CHALLENGE SCHEMA APPLIED: NO
+CHALLENGE LOCAL FOUNDATION PROOF: PASS — 49/49
 A18 SCHEMA V1: APPROVED
 A18 LOCAL FOUNDATION PROOF: PASS
 SCHEMA FOUNDATION/APPLY: PASS
@@ -153,8 +162,7 @@ OWNED PLAYWRIGHT/CHROME PROCESSES REMAINING: 0
 OWNED TEMP DATABASES REMAINING: 0
 ```
 
-The completed-link foundation/apply and first-link mechanism decisions are
-accepted. The current STOP concerns the minimal pending challenge schema and its
-separate TTL decision. After approval/foundation proof, the authorized remediation
-and automatic full Final Package 5 Gate remain the same next steps. Chapter 6
+The completed-link foundation/apply and both challenge schema/TTL decisions are
+accepted. Continue authorized challenge migration gate/apply, then remediation
+and automatic full Final Package 5 Gate as specified. Chapter 6
 completion acceptance stays separate; Chapter 7 is not started automatically.

@@ -1,6 +1,12 @@
 # A18 — ClientLinkChallenge Schema Proposal V1
 
-Status: **PROPOSED — REQUIRES SCHEMA APPROVAL; NO IMPLEMENTATION/APPLY**
+Status: **APPROVED after `84696bc9` — foundation implementation in progress**
+
+The user explicitly approved this exact model and TTL V1 = 600 seconds, with
+conditional migration apply and continuation through A18/A26 remediation and the
+full final gate. The original proposal below is retained as the design record;
+its proposal-only STOP and pending-approval statements are superseded. Current
+implementation evidence is in the Client Link Challenge Foundation Report.
 
 Date: 2026-09-04. Accepted checkpoint: `813107da`.
 The user's **A18 FIRST CLIENT-CHANNEL LINK AUTHORITY — APPROVED** decision is

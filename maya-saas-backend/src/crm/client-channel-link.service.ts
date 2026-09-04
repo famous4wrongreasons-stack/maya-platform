@@ -113,6 +113,8 @@ export class ClientChannelLinkService {
   private async bindVerified(
     proof: VerifiedClientChannelProof,
     revocation?: VerifiedClientChannelRevocation,
+    transaction?: Tx,
+    initialOnly = false,
   ) {
     const tenantId = this.context.assertTenantId(proof.tenantId);
     this.assertSubject(proof.provider, proof.providerSubjectHash);
@@ -146,7 +148,7 @@ export class ClientChannelLinkService {
       validUntil: proof.validUntil.toISOString(),
     };
     const evidenceHash = digest(evidence);
-    return this.serializable(async (tx) => {
+    const work = async (tx: Tx) => {
       await lockClientChannelIdentity(
         tx,
         tenantId,
@@ -154,6 +156,20 @@ export class ClientChannelLinkService {
         proof.providerSubjectHash,
       );
       this.assertValid(proof.validUntil);
+      if (
+        initialOnly &&
+        (await tx.clientChannelLink.findFirst({
+          where: {
+            tenantId,
+            provider: proof.provider,
+            providerSubjectHash: proof.providerSubjectHash,
+          },
+          select: { id: true },
+        }))
+      )
+        throw new ConflictException(
+          'Initial challenge cannot rebind existing channel history',
+        );
       if (revocation) await this.revokeVerified(tx, revocation);
       const existing = await tx.clientChannelLink.findUnique({
         where: {
@@ -193,7 +209,23 @@ export class ClientChannelLinkService {
         },
       });
       return { link, resumed: false };
-    });
+    };
+    return transaction ? work(transaction) : this.serializable(work);
+  }
+
+  /** Internal challenge coordinator boundary: caller owns the same transaction. */
+  async bindChallengeInTransaction(tx: Tx, proof: VerifiedClientChannelProof) {
+    if (
+      proof.method !== 'explicit_verified_challenge' ||
+      proof.supersedesLinkId
+    )
+      throw new ForbiddenException('Initial challenge proof required');
+    return this.bindVerified(proof, undefined, tx, true);
+  }
+
+  async assertClientEligible(tx: Tx, tenantId: string, clientId: string) {
+    this.context.assertTenantId(tenantId);
+    return this.assertClient(tx, tenantId, clientId);
   }
 
   async revoke(request: unknown) {
