@@ -2,6 +2,7 @@
 // A18 transport only. Authentication and Client authority are checked by Maya.
 function maya_client_consent_request(string $action, array $input, array $server): array {
     $routes = [
+        'cabinet_link_phone' => ['/api/cabinet/link-phone', ['auth_data', 'session_token', 'phone', 'code', 'linking_token']],
         'consent_status' => ['/api/consent/status', ['auth_data', 'session_token']],
         'consent_submit' => ['/api/consent/submit', ['auth_data', 'session_token', 'accept_pdn', 'accept_marketing', 'idempotency_key']],
         'client_link_consume' => ['/api/client-link/consume', ['auth_data', 'session_token', 'token']],

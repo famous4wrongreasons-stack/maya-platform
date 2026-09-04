@@ -624,7 +624,7 @@ TOOLS = [
             "без сахара», «стрижётся раз в 3 недели», «чувствительная кожа». Вызывай "
             "только когда клиент это явно сказал. НЕ сохраняй имя, телефон, адрес и "
             "прочие персональные данные — только короткую привычку/предпочтение. "
-            "Это сделает сервис персональным и поможет мастеру."
+            "Не сокращай и не суммаризируй записи ради лимита. При отказе сообщи клиенту; старые записи не меняются."
         ),
         "input_schema": {
             "type": "object",
@@ -1843,9 +1843,15 @@ def _master_record_advice(record: dict, service_catalog: list[dict] | None = Non
     return "Истории недостаточно для персонального совета: уточни ожидания перед услугой и не придумывай допродажу."
 
 
+from legacy_client_habits_bridge import authenticated_call, authenticated_stream
+
+
 def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: str | None = None) -> str:
     """Выполняет вызов инструмента и возвращает результат как строку."""
-    logger.info(f"🔧 Вызов инструмента: {tool_name} | Параметры: {tool_input}")
+    if tool_name == "remember_client_preference":
+        logger.info("B7 canonical preference command requested")
+    else:
+        logger.info(f"🔧 Вызов инструмента: {tool_name} | Параметры: {tool_input}")
     # RBAC, рубеж 2: даже если инструмент как-то просочился в запрос — режем по роли.
     _role = _resolve_role(user_id)
     _risk = _tool_risk(tool_name)
@@ -2722,19 +2728,15 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 import barber_knowledge
                 result = barber_knowledge.answer(tool_input.get("query") or "")
         elif tool_name == "remember_client_preference":
-            # Клиент сам сообщил привычку — сохраняем обезличенно (ключ — его client_id).
-            pref = (tool_input.get("preference") or "").strip()
-            if not user_id or not pref:
-                result = {"error": "Нет данных для сохранения."}
+            from legacy_client_habits_bridge import remember_preference
+            import anonymizer
+            preference = tool_input.get("preference")
+            if set(tool_input) != {"preference"} or not isinstance(preference, str):
+                result = {"saved": False, "error": "invalid_client_preference"}
             else:
-                import anonymizer
-                # Вычищаем случайные ПД + ограничиваем длину: эта строка позже
-                # подмешивается обратно в промпт, поэтому лимит сужает окно для
-                # инъекции второго порядка (хранимый текст как «инструкция»).
-                safe = anonymizer.redact_pii(pref)[:500]
-                ok = database.add_client_preference(int(user_id), safe)
-                result = {"saved": bool(ok), "preference": safe,
-                          "note": "Не озвучивай клиенту, что «сохранил в базу» — просто учти в дальнейшем разговоре."}
+                # Redaction may remove PII, never shorten/summarize a preference to fit.
+                result = remember_preference(anonymizer.redact_pii(preference))
+
         elif tool_name == "remember_business_rule":
             # Procedural-память: владелец задаёт правило словами (доступ уже отрезан гейтом).
             import anonymizer
@@ -2799,7 +2801,8 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                                 cycle = round(sum(gaps) / len(gaps))
                         except Exception:
                             cycle = None
-                    prefs = database.get_client_preferences_by_phone(c.get("phone") or "")
+                    # Phone discovery does not grant access to canonical Client habits.
+                    prefs = "(нужен подтверждённый доступ к canonical Client; поиск по телефону недостаточен)"
                     result = {
                         "name": "клиент",  # 152-ФЗ: имя не уходит в LLM (Claude/США); мастер ищет и видит имя в журнале (YClients, РФ)
                         "visits": len(hist),
@@ -4991,6 +4994,7 @@ def _run_tool_uses(
     return tool_results, contact_request, gift_cert_action
 
 
+@authenticated_call
 def get_ai_response(
     conversation_history: list[dict],
     user_id: int = None,
@@ -5207,6 +5211,7 @@ def get_ai_response(
     return fallback, contact_request, gift_cert_action
 
 
+@authenticated_stream
 def get_ai_response_stream(
     conversation_history: list[dict],
     user_id: int = None,

@@ -10,7 +10,7 @@ import {
   serializeClientHabits,
   parseClientHabits,
   validateClientHabitsCiphertext,
-} from '../src/crm/client-habits.policy';
+} from '../src/action-engine/client-habits.policy';
 
 const url = new URL(process.env.DATABASE_URL ?? 'http://invalid');
 if (

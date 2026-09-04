@@ -1,3 +1,4 @@
+import { clientHabitsCapability } from './client-habits.contract';
 import { clientPreferenceCapabilities } from './client-preferences.contract';
 import { ActionPolicyDecision } from '@prisma/client';
 
@@ -3458,6 +3459,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     package5Wave4Capability(registration, false),
   ),
   ...clientPreferenceCapabilities(),
+  clientHabitsCapability(),
   ...PACKAGE5_WAVE5_REGISTRATIONS.map((registration) =>
     package5Wave5Capability(registration, true),
   ),

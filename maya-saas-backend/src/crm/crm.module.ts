@@ -1,3 +1,8 @@
+import { ClientHabitsService } from './client-habits.service';
+import {
+  ClientHabitsController,
+  LegacyClientHabitsController,
+} from './client-habits.controller';
 import { ClientPreferencesService } from './client-preferences.service';
 import {
   ClientPreferencesController,
@@ -56,6 +61,8 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     UsersModule,
   ],
   controllers: [
+    ClientHabitsController,
+    LegacyClientHabitsController,
     ClientPreferencesController,
     LegacyClientPreferencesController,
     ClientChannelController,
@@ -66,6 +73,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionController,
   ],
   providers: [
+    ClientHabitsService,
     ClientPreferencesService,
     ClientChannelAuthenticatorService,
     ClientChannelRuntimeService,

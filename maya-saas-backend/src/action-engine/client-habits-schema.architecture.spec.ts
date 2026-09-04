@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { CLIENT_HABITS_POLICY } from '../crm/client-habits.policy';
+import { CLIENT_HABITS_POLICY } from './client-habits.policy';
 const root = join(__dirname, '../..');
 const migration = readFileSync(
   join(root, 'prisma/migrations/20260904193000_client_habits_v1/migration.sql'),

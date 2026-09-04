@@ -76,6 +76,7 @@ export function notificationOverrides(
 
 export function verifiedClientChannelCapability(capability: string) {
   return (
+    capability === 'package5.client-habits.add.execute.v1' ||
     /^package5\.wave3\.record-client-consent\.(?:execute|shadow)\.v1$/.test(
       capability,
     ) ||

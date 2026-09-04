@@ -7951,6 +7951,7 @@ function PhoneLinkForm({ t }) {
   const [step, setStep] = React.useState('phone'); // 'phone' | 'code' | 'done'
   const [phone, setPhone] = React.useState('');
   const [code, setCode] = React.useState('');
+  const [linkingToken, setLinkingToken] = React.useState('');
   const [busy, setBusy] = React.useState(false);
   const [err, setErr] = React.useState('');
   const [mask, setMask] = React.useState('');
@@ -7977,26 +7978,31 @@ function PhoneLinkForm({ t }) {
     var c = digits(code);
     if (c.length < 4) { setErr('Введите код из SMS'); return; }
     setBusy(true); setErr('');
-    px('cabinet_link_phone', { phone: digits(phone), code: c }).then(function (r) {
+    var payload = { phone: digits(phone), code: c };
+    if (linkingToken.trim()) payload.linking_token = linkingToken.trim();
+    px('cabinet_link_phone', payload).then(function (r) {
       setBusy(false);
       var b = r.body || {};
-      if (b.ok) {
+      if (b.ok && b.client_link_verified === true && b.phone_saved === false) {
+        setLinkingToken(''); setCode('');
         setStep('done');
         try { window.__meHydrate && window.__meHydrate('cabinet'); } catch (e) {}
         setTimeout(function () { try { window.__meHydrate && window.__meHydrate('cabinet'); } catch (e) {} }, 700);
       } else if (r.status === 401) setErr('Сессия устарела — войдите заново.');
+      else if (b.error === 'verified_client_linking_required') setErr('Нужна подтверждённая привязка профиля. Введите одноразовый код привязки, выданный Maya. SMS-кода недостаточно.');
       else setErr(b.error === 'wrong_code' ? 'Неверный код. Попробуйте ещё раз.' : 'Не удалось подтвердить. Попробуйте ещё раз.');
     });
   }
   var inputStyle = { width: '100%', maxWidth: 280, padding: '14px 16px', borderRadius: 14, border: '1px solid ' + t.line, background: t.card, color: t.ink, fontFamily: BODY, fontSize: 16, textAlign: 'center', outline: 'none', boxSizing: 'border-box' };
   if (step === 'done') {
-    return React.createElement('div', { style: { fontFamily: BODY, fontSize: 13.5, color: t.dim, textAlign: 'center' } }, 'Готово — загружаем ваш кабинет…');
+    return React.createElement('div', { style: { fontFamily: BODY, fontSize: 13.5, color: t.dim, textAlign: 'center' } }, 'Связь с профилем подтверждена. Контактный телефон не изменён.');
   }
   return React.createElement('div', { style: { width: '100%', maxWidth: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 } },
     step === 'code'
       ? React.createElement('input', { key: 'code', type: 'tel', inputMode: 'numeric', value: code, onChange: function (e) { setCode(e.target.value); }, placeholder: 'Код из SMS', style: inputStyle })
       : React.createElement('input', { key: 'phone', type: 'tel', inputMode: 'tel', value: phone, onChange: function (e) { setPhone(e.target.value); }, placeholder: '+7 (___) ___-__-__', style: inputStyle }),
     step === 'code' && mask ? React.createElement('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, textAlign: 'center' } }, 'Код отправлен на ' + mask) : null,
+    step === 'code' ? React.createElement('input', { key: 'linking-token', type: 'password', autoComplete: 'off', value: linkingToken, onChange: function (e) { setLinkingToken(e.target.value); }, placeholder: 'Одноразовый код привязки Maya', 'aria-label': 'Одноразовый код привязки Maya, если профиль ещё не связан', style: inputStyle }) : null,
     err ? React.createElement('div', { style: { fontFamily: BODY, fontSize: 12, color: '#72706e', textAlign: 'center' } }, err) : null,
     React.createElement('div', { onClick: busy ? null : (step === 'code' ? confirmCode : sendCode), style: { minWidth: 220, cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1 } },
       React.createElement(PrimaryPill, { t: t, label: busy ? 'Секунду…' : (step === 'code' ? 'Подтвердить' : 'Получить код') })),

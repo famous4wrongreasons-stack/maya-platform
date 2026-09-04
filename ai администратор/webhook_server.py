@@ -10165,8 +10165,10 @@ async def chat_handler(request: web.Request) -> web.Response:
         from claude_ai import _resolve_role
         _vmodel = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
     try:
+        from legacy_client_habits_bridge import request_context
         response_text, contact_request, gift_cert_action = get_ai_response(
             llm_history,
+            _client_command_context=request_context(request.headers, body, safe_message, chat_mode),
             user_id=chat_id,
             model=_vmodel,
             disabled_tools=_chat_disabled_tools(chat_mode),
@@ -10752,8 +10754,10 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 
     def _producer() -> None:
         try:
+            from legacy_client_habits_bridge import request_context
             for ev in get_ai_response_stream(
                 llm_history,
+                _client_command_context=request_context(request.headers, body, safe_message, chat_mode),
                 user_id=chat_id,
                 model=model_override,
                 disabled_tools=_chat_disabled_tools(chat_mode),
@@ -11040,7 +11044,12 @@ async def realtime_handler(request: web.Request) -> web.Response:
 
     await ws.send_json({"type": "ready"})
     try:
-        await realtime_bridge.run_session(ws, chat_id, mode=mode)
+        from legacy_client_command_bridge import channel_proof
+        try:
+            verified_channel_proof = channel_proof({"X-Telegram-InitData": init_data}, auth)
+        except ValueError:
+            verified_channel_proof = None
+        await realtime_bridge.run_session(ws, chat_id, mode=mode, client_channel_proof=verified_channel_proof)
     except Exception as e:
         logger.error(f"realtime_handler: {e}")
     if not ws.closed:
@@ -11139,40 +11148,35 @@ async def auth_phone_verify_handler(request: web.Request) -> web.Response:
 
 
 async def cabinet_link_phone_handler(request: web.Request) -> web.Response:
-    """POST /api/cabinet/link-phone  Body: {phone, code} (+ авторизация:
-    X-Telegram-InitData / auth_data / session_token).
-
-    Привязывает ПОДТВЕРЖДЁННЫЙ по SMS-коду YClients телефон к уже залогиненному
-    через Telegram клиенту. Это закрывает кейс «скачал приложение, вошёл через
-    Telegram, но кабинет пустой»: после привязки cabinet_me/_build_full_cabinet
-    видят телефон и подтягивают карточку, визиты и баллы из YClients —
-    без захода в чат-бота. Владение номером доказывается кодом из SMS YClients."""
+    """B8 linking only: SMS evidence never chooses, creates or updates Client."""
+    from legacy_client_command_bridge import channel_proof, command as client_command
+    from legacy_client_habits_bridge import command as habits_command
     try:
         body = await request.json()
-    except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"ok": False, "error": "unauthorized"}, status=401)
-    phone = body.get("phone", "")
-    code = body.get("code", "")
-    if not phone or not code:
+        if not isinstance(body, dict):
+            raise ValueError("bad_input")
+        if any(key in body for key in ("clientId", "client_id", "tenantId", "userId")):
+            raise ValueError("consumer_identity_forbidden")
+        proof = channel_proof(request.headers, body)
+    except (ValueError, TypeError):
+        return _cabinet_response({"ok": False, "error": "verified_client_linking_required"}, status=403)
+    phone, code = body.get("phone"), body.get("code")
+    if not isinstance(phone, str) or not isinstance(code, str) or not phone or not code:
         return _cabinet_response({"ok": False, "error": "bad_input"}, status=400)
-    # Подтверждаем владение номером кодом из SMS (через YClients /user/auth).
-    res = await web_auth.verify_phone_login(phone, code)
-    if not res.get("ok"):
-        return _cabinet_response({"ok": False, "error": res.get("error") or "wrong_code"}, status=400)
-    # Пишем номер в строку этого Telegram-клиента (шифрование + HMAC внутри).
+    result = await web_auth.verify_phone_evidence(phone, code)
+    if not result.get("ok"):
+        return _cabinet_response({"ok": False, "error": result.get("error") or "wrong_code"}, status=400)
     try:
-        client_id = database.get_or_create_client(int(chat_id))
-        database.update_client(client_id, phone=web_auth.normalize_phone(phone) or phone)
-    except Exception as e:
-        logger.error(f"cabinet/link-phone: привязка для chat_id={chat_id} не удалась: {e}")
-        return _cabinet_response({"ok": False, "error": "bind_failed"}, status=500)
-    logger.info(f"cabinet/link-phone: телефон привязан к chat_id={chat_id}")
-    return _cabinet_response({"ok": True})
+        token = body.get("linking_token")
+        if token is not None:
+            if not isinstance(token, str) or not token:
+                raise ValueError("invalid_linking_token")
+            await asyncio.to_thread(client_command, "consume", proof, {"token": token})
+        await asyncio.to_thread(habits_command, "binding", proof, {})
+    except Exception:
+        return _cabinet_response({"ok": False, "error": "verified_client_linking_required",
+                                 "message": "Нужна подтверждённая привязка клиента. SMS-кода недостаточно."}, status=403)
+    return _cabinet_response({"ok": True, "client_link_verified": True, "phone_saved": False})
 
 
 async def auth_vk_handler(request: web.Request) -> web.Response:

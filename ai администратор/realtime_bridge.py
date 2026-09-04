@@ -373,7 +373,7 @@ def _session_config() -> dict:
 
 
 async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
-                      mode: str = "client") -> None:
+                      mode: str = "client", client_channel_proof: str | None = None) -> None:
     """Главный цикл моста для одного авторизованного пользователя.
 
     mode — «режим страницы», с которой запущен голос: 'client' (клиентский
@@ -520,11 +520,15 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
                             }]
                             # Tool-loop синхронный, гоним в executor, чтобы не вешать сокет.
                             from claude_ai import VOICE_CLAUDE_MODEL, get_ai_response
+                            from legacy_client_habits_bridge import ClientCommandContext
+                            from hashlib import sha256
+                            client_context = ClientCommandContext(client_channel_proof, sha256(history[-1]["content"].encode("utf-8")).hexdigest()) if client_channel_proof and not staff_mode else None
                             voice_model = None if _role == "founder" else VOICE_CLAUDE_MODEL
                             reply, *_ = await loop.run_in_executor(
                                 None,
                                 lambda: get_ai_response(
                                     llm_history,
+                                    _client_command_context=client_context,
                                     user_id=chat_id,
                                     model=voice_model,
                                     disabled_tools=disabled,

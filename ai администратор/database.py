@@ -922,58 +922,21 @@ _PREF_MAX_LINES = 12
 _PREF_MAX_LEN = 800
 
 
-def add_client_preference(telegram_chat_id: int, pref: str) -> bool:
-    """Добавляет одно предпочтение клиента (по chat_id). Дедуп без учёта
-    регистра, копит до _PREF_MAX_LINES строк. Возвращает True, если записано."""
-    pref = (pref or "").strip().strip("•- ").strip()
-    if not pref or len(pref) > 200:
-        return False
-    client_id = get_or_create_client(int(telegram_chat_id))
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT prefs FROM client_preferences WHERE client_id = ?",
-            (client_id,),
-        ).fetchone()
-        lines = [l for l in (row["prefs"].split("\n") if row else []) if l.strip()]
-        if any(pref.lower() == l.lower() for l in lines):
-            return False                       # уже есть
-        lines.append(pref)
-        lines = lines[-_PREF_MAX_LINES:]       # держим последние N
-        text = "\n".join(lines)[:_PREF_MAX_LEN]
-        conn.execute(
-            "INSERT INTO client_preferences (client_id, prefs, updated_at) "
-            "VALUES (?, ?, ?) ON CONFLICT(client_id) DO UPDATE SET "
-            "prefs = excluded.prefs, updated_at = excluded.updated_at",
-            (client_id, text, _now()),
-        )
-    return True
+def add_client_preference(*_args, **_kwargs):
+    """Removed B7 writer: numeric/phone legacy identity is never Client authority."""
+    raise RuntimeError("canonical_client_habit_command_required")
 
 
-def get_client_preferences(telegram_chat_id: int) -> str:
-    """Предпочтения клиента по telegram chat_id (или '' если нет)."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT p.prefs FROM client_preferences p "
-            "JOIN clients c ON c.id = p.client_id WHERE c.telegram_chat_id = ?",
-            (int(telegram_chat_id),),
-        ).fetchone()
-        return (row["prefs"] if row else "") or ""
+def get_client_preferences(_telegram_chat_id: int) -> str:
+    """Only current verified request context may read canonical Client habits."""
+    from legacy_client_habits_bridge import read_preferences
+    return read_preferences()
 
 
-def get_client_preferences_by_phone(phone: str) -> str:
-    """Предпочтения клиента по телефону (для досье мастеру). '' если нет."""
-    cl = find_client_by_phone(phone)
-    if not cl or not cl.get("id"):
-        return ""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT prefs FROM client_preferences WHERE client_id = ?",
-            (cl["id"],),
-        ).fetchone()
-        return (row["prefs"] if row else "") or ""
+def get_client_preferences_by_phone(_phone: str) -> str:
+    """Phone-only discovery is not authority to read another Client profile."""
+    return ""
 
-
-# ─── Веб-вход без Telegram (VK ID / телефон): коды и сессии ──────────────
 
 def save_web_login_code(phone_hash: str, code_hash: str, channel: str = "call",
                         ttl_minutes: int = 5):

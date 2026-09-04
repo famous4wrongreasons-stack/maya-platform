@@ -137,6 +137,23 @@ async def verify_phone_login(phone: str, code: str) -> dict:
     return _issue_session(phone=norm, vk_user_id=None, yandex_user_id=None, name=name)
 
 
+async def verify_phone_evidence(phone: str, code: str) -> dict:
+    """B8 possession evidence only: no session, Client lookup or contact write."""
+    norm = normalize_phone(phone)
+    if not norm or not isinstance(code, str) or not code.isascii() or not code.isdigit() or not 4 <= len(code) <= 8:
+        return {"ok": False, "error": "bad_input"}
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as cli:
+            response = await cli.post(f"{_YC_BASE}/user/auth", headers=_yc_headers(),
+                                      json={"phone": norm, "code": code})
+        data = response.json()
+        if response.status_code >= 400 or not isinstance(data, dict) or not data.get("success"):
+            return {"ok": False, "error": "wrong_code"}
+        return {"ok": True, "phone_evidence_only": True}
+    except Exception:
+        return {"ok": False, "error": "verify_failed"}
+
+
 # ─── VK ID ──────────────────────────────────────────────────────────────
 async def exchange_vk_code(code: str, redirect_uri: str | None = None,
                            code_verifier: str = "", device_id: str = "") -> dict:

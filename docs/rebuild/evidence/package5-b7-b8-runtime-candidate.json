@@ -1,0 +1,128 @@
+{
+  "approvedCheckpoint": "47454962",
+  "schemaCheckpoint": "5e3a8e7a",
+  "productionMigrationApplied": "20260904193000_client_habits_v1",
+  "pendingMigrations": 0,
+  "postApplyDrift": "NONE",
+  "productionBaseline": "fb820b3b",
+  "newRuntimeDeployed": false,
+  "proofs": {
+    "schema": "19/19 PASS",
+    "runtimePostgres": "20/20 PASS",
+    "ratchets": "39/39 PASS",
+    "pythonTargeted": "28/28 PASS",
+    "php": "PASS",
+    "htmlNative": "PASS",
+    "fullRegression": "331 suites / 2758 tests PASS",
+    "lintTypechecksBuild": "PASS"
+  },
+  "productionBusinessProviderMutations": 0,
+  "logs": {
+    "production-migration-gate.log": {
+      "sha256": "a9a48c24d29add6e04d698be1ce1279a624ab99273bc4535ee2afd98418e7187",
+      "text": "Welcome to LTD BeGet SSH Server 'prime'\nWelcome to LTD BeGet SSH Server 'prime'\nWelcome to LTD BeGet SSH Server 'prime'\nWelcome to LTD BeGet SSH Server 'prime'\nnpm warn allow-scripts   @scarf/scarf@1.4.0 (postinstall: node ./report.js)\nnpm warn allow-scripts   bcrypt@6.0.0 (install: node-gyp-build)\nnpm warn allow-scripts   prisma@7.9.1 (preinstall: node scripts/preinstall-entry.js)\nnpm warn allow-scripts\nnpm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.\nLoaded Prisma config from prisma.config.ts.\n\nPrisma schema loaded from prisma/schema.prisma.\n\n\u2714 Generated Prisma Client (v7.9.1) to ./node_modules/@prisma/client in 2.09s\n\nStart by importing your Prisma Client (See: https://pris.ly/d/importing-client)\n\n\n{\n  \"ok\": true,\n  \"environment\": \"production\",\n  \"config\": \"safe\",\n  \"local_migrations\": 75,\n  \"database\": {\n    \"status\": \"pending\",\n    \"applied_migrations\": 77,\n    \"pending_migrations\": 1\n  }\n}\n{\"stage\":\"before\",\"source\":\"5e3a8e7aeab7fb525da18a72e15c29ac390e39d1\",\"expectedOnlyPending\":[\"20260904193000_client_habits_v1\"],\"structuralChecks\":\"PASS\",\"fakeBackfill\":0,\"productionBusinessProviderMutations\":0}\nLoaded Prisma config from prisma.config.ts.\n\nNo difference detected.\n\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  Update available 7.9.1 -> 8.0.0-rc.13                  \u2502\n\u2502                                                         \u2502\n\u2502  This is a major update - please follow the guide at    \u2502\n\u2502  https://pris.ly/d/major-version-upgrade                \u2502\n\u2502                                                         \u2502\n\u2502  Run the following to update                            \u2502\n\u2502    npm i --save-dev prisma@latest                       \u2502\n\u2502    npm i @prisma/client@latest                          \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n{\"path\":\"health\",\"status\":\"ok\"}\n{\"path\":\"health/ready\",\"status\":\"ready\"}\nMainPID=1487276\nNRestarts=0\nActiveState=active\n"
+    },
+    "production-migration-apply.log": {
+      "sha256": "158e8bec35a9717231a7838d31b361b3ca54e605cdd6eff2793076109b916eeb",
+      "text": "Welcome to LTD BeGet SSH Server 'prime'\n{\"stage\":\"before\",\"source\":\"5e3a8e7aeab7fb525da18a72e15c29ac390e39d1\",\"expectedOnlyPending\":[\"20260904193000_client_habits_v1\"],\"structuralChecks\":\"PASS\",\"fakeBackfill\":0,\"productionBusinessProviderMutations\":0}\nLoaded Prisma config from prisma.config.ts.\n\nNo difference detected.\n\nLoaded Prisma config from prisma.config.ts.\n\nPrisma schema loaded from prisma/schema.prisma.\nDatasource \"db\": PostgreSQL database \"maya_saas\", schema \"public\" at \"127.0.0.1:5432\"\n\n75 migrations found in prisma/migrations\n\nApplying migration `20260904193000_client_habits_v1`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  \u2514\u2500 20260904193000_client_habits_v1/\n    \u2514\u2500 migration.sql\n\nAll migrations have been successfully applied.\n{\n  \"ok\": true,\n  \"environment\": \"production\",\n  \"config\": \"safe\",\n  \"local_migrations\": 75,\n  \"database\": {\n    \"status\": \"ready\",\n    \"applied_migrations\": 78,\n    \"pending_migrations\": 0\n  }\n}\nLoaded Prisma config from prisma.config.ts.\n\nNo difference detected.\n\n{\"stage\":\"after\",\"source\":\"5e3a8e7aeab7fb525da18a72e15c29ac390e39d1\",\"expectedOnlyPending\":[],\"structuralChecks\":\"PASS\",\"fakeBackfill\":0,\"productionBusinessProviderMutations\":0}\n{\"path\":\"health\",\"status\":\"ok\"}\n{\"path\":\"health/ready\",\"status\":\"ready\"}\nMainPID=1487276\nNRestarts=0\nActiveState=active\n"
+    },
+    "runtime-proof.log": {
+      "sha256": "76b8440aa9be36c42d0070c4819ee65f46b171f1998e17dfdf8004a42ab352a2",
+      "text": "waiting for server to start.... done\nserver started\nLoaded Prisma config from prisma.config.ts.\n\nPrisma schema loaded from prisma/schema.prisma.\nDatasource \"db\": PostgreSQL database \"maya_c06_habits_runtime_v1_20260904195324_75391\", schema \"public\" at \"127.0.0.1:55487\"\n\n75 migrations found in prisma/migrations\n\nApplying migration `20260702230000_init`\nApplying migration `20260703121500_phone_auth`\nApplying migration `20260703143000_user_profile_name`\nApplying migration `20260705110553_social_auth`\nApplying migration `20260705152532_tenant_billing_fields`\nApplying migration `20260705154916_billing_payments`\nApplying migration `20260711120000_multi_tenant_foundation`\nApplying migration `20260711170000_billing_tenant_isolation`\nApplying migration `20260711200000_auth_tenant_isolation`\nApplying migration `20260711230000_session_security`\nApplying migration `20260711233000_auth_abuse_protection`\nApplying migration `20260711234500_auth_retention_maintenance`\nApplying migration `20260712150000_internal_calendar`\nApplying migration `20260713010000_ai_onboarding_foundation`\nApplying migration `20260713150000_human_onboarding_trial`\nApplying migration `20260714003000_email_code_auth`\nApplying migration `20260715190000_operational_core`\nApplying migration `20260715210000_ai_tool_runtime`\nApplying migration `20260716190000_secure_crm_integration_lifecycle`\nApplying migration `20260717223000_tenant_past_due_grace`\nApplying migration `20260717233000_membership_branch_source`\nApplying migration `20260717234500_canonical_plan_quotas`\nApplying migration `20260717235900_strict_tenant_relations`\nApplying migration `20260720131500_sync_feature_registry_entitlements`\nApplying migration `20260801143000_crm_staff_role_access`\nApplying migration `20260802160000_dashboard_preferences`\nApplying migration `20260803120000_tenant_commerce_integrations_and_addons`\nApplying migration `20260803165000_platform_bootstrap_tenant`\nApplying migration `20260804010000_user_status_merged`\nApplying migration `20260804011000_user_merge_map`\nApplying migration `20260805190000_maya_brain_v1`\nApplying migration `20260807120000_expense_source_and_idempotency`\nApplying migration `20260808120000_inbox_and_push_tokens`\nApplying migration `20260812180000_expense_period_declarations`\nApplying migration `20260814120000_recovery_attribution`\nApplying migration `20260814153000_marketing_campaigns`\nApplying migration `20260814170000_appointment_notifications`\nApplying migration `20260814190000_business_content_registry`\nApplying migration `20260814191000_reviews_feature`\nApplying migration `20260816120000_audit_scope`\nApplying migration `20260816130000_hot_path_indexes`\nApplying migration `20260816140000_client_identity`\nApplying migration `20260816160000_reconcile_marketing_schema`\nApplying migration `20260817090000_staff_identity_phase_a`\nApplying migration `20260817180000_event_persistence_foundation`\nApplying migration `20260817200000_appointment_identity_split`\nApplying migration `20260818090000_attendance_and_reconciliation_runs`\nApplying migration `20260818120000_reconciliation_lease`\nApplying migration `20260821120000_opportunity_lifecycle`\nApplying migration `20260821190000_action_execution_kernel`\nApplying migration `20260822120000_communication_delivery_foundation`\nApplying migration `20260829120000_action_execution_policy_attestation`\nApplying migration `20260829180000_billing_payment_action_binding`\nApplying migration `20260829200000_loyalty_transaction_action_binding`\nApplying migration `20260829220000_expense_action_binding`\nApplying migration `20260829230000_expense_period_declaration_action_binding`\nApplying migration `20260829233000_loyalty_redemption_grant`\nApplying migration `20260829234500_referral_reward_fulfillment`\nApplying migration `20260829235900_customer_subscription`\nApplying migration `20260830001000_gift_certificate`\nApplying migration `20260830100000_loyalty_redemption_grant_revocation`\nApplying migration `20260831110000_unresolved_client_identity_hold`\nApplying migration `20260831130000_client_owned_loyalty_account`\nApplying migration `20260901130000_p4_04_contract_to_value`\nApplying migration `20260902150000_gift_certificate_presentation_key_version`\nApplying migration `20260902200000_expense_period_declaration_epoch`\nApplying migration `20260902230000_p4_09_immutable_offer_value_version`\nApplying migration `20260903010000_p4_09_offer_replacement_lineage`\nApplying migration `20260903020000_enable_core_notifications`\nApplying migration `20260903120000_package5_common_authority_foundation`\nApplying migration `20260904090000_a18_client_channel_link_v1`\nApplying migration `20260904100000_a18_client_link_challenge_v1`\nApplying migration `20260904110000_ai_confirmation_receipt_v1`\nApplying migration `20260904170000_client_preferences_v1`\nApplying migration `20260904193000_client_habits_v1`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  \u2514\u2500 20260702230000_init/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260703121500_phone_auth/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260703143000_user_profile_name/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260705110553_social_auth/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260705152532_tenant_billing_fields/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260705154916_billing_payments/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260711120000_multi_tenant_foundation/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260711170000_billing_tenant_isolation/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260711200000_auth_tenant_isolation/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260711230000_session_security/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260711233000_auth_abuse_protection/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260711234500_auth_retention_maintenance/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260712150000_internal_calendar/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260713010000_ai_onboarding_foundation/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260713150000_human_onboarding_trial/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260714003000_email_code_auth/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260715190000_operational_core/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260715210000_ai_tool_runtime/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260716190000_secure_crm_integration_lifecycle/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260717223000_tenant_past_due_grace/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260717233000_membership_branch_source/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260717234500_canonical_plan_quotas/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260717235900_strict_tenant_relations/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260720131500_sync_feature_registry_entitlements/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260801143000_crm_staff_role_access/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260802160000_dashboard_preferences/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260803120000_tenant_commerce_integrations_and_addons/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260803165000_platform_bootstrap_tenant/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260804010000_user_status_merged/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260804011000_user_merge_map/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260805190000_maya_brain_v1/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260807120000_expense_source_and_idempotency/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260808120000_inbox_and_push_tokens/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260812180000_expense_period_declarations/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260814120000_recovery_attribution/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260814153000_marketing_campaigns/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260814170000_appointment_notifications/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260814190000_business_content_registry/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260814191000_reviews_feature/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260816120000_audit_scope/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260816130000_hot_path_indexes/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260816140000_client_identity/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260816160000_reconcile_marketing_schema/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260817090000_staff_identity_phase_a/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260817180000_event_persistence_foundation/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260817200000_appointment_identity_split/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260818090000_attendance_and_reconciliation_runs/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260818120000_reconciliation_lease/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260821120000_opportunity_lifecycle/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260821190000_action_execution_kernel/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260822120000_communication_delivery_foundation/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260829120000_action_execution_policy_attestation/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260829180000_billing_payment_action_binding/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260829200000_loyalty_transaction_action_binding/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260829220000_expense_action_binding/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260829230000_expense_period_declaration_action_binding/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260829233000_loyalty_redemption_grant/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260829234500_referral_reward_fulfillment/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260829235900_customer_subscription/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260830001000_gift_certificate/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260830100000_loyalty_redemption_grant_revocation/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260831110000_unresolved_client_identity_hold/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260831130000_client_owned_loyalty_account/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260901130000_p4_04_contract_to_value/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260902150000_gift_certificate_presentation_key_version/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260902200000_expense_period_declaration_epoch/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260902230000_p4_09_immutable_offer_value_version/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260903010000_p4_09_offer_replacement_lineage/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260903020000_enable_core_notifications/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260903120000_package5_common_authority_foundation/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260904090000_a18_client_channel_link_v1/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260904100000_a18_client_link_challenge_v1/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260904110000_ai_confirmation_receipt_v1/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260904170000_client_preferences_v1/\n    \u2514\u2500 migration.sql\n  \u2514\u2500 20260904193000_client_habits_v1/\n    \u2514\u2500 migration.sql\n\nAll migrations have been successfully applied.\n{\n  \"executableProof\": \"PASS\",\n  \"passed\": 20,\n  \"cases\": [\n    \"read and empty no-op do not create Client/profile/execution/generation\",\n    \"missing binding\",\n    \"phone identity\",\n    \"legacy session\",\n    \"cross tenant\",\n    \"forged Client payload\",\n    \"forged tenant payload\",\n    \"verified guest Client without Maya User stores canonical encrypted habit\",\n    \"duplicate, restart and identical no-op preserve byte-identical ciphertext and generation\",\n    \"changed material cannot reuse identity\",\n    \"four concurrent identical commands have one durable effect\",\n    \"different concurrent commands at one generation have one winner\",\n    \"crash before domain write\",\n    \"restart resumes durable admitted child without lost or repeated effect\",\n    \"201-code-point overflow preserves existing state and generation\",\n    \"runtime accepts 12 entries, each 200 code points, at exact 8192/10963 byte boundaries\",\n    \"13th entry rejected with byte-identical ciphertext and unchanged generation\",\n    \"8193 plaintext bytes rejected atomically before domain mutation\",\n    \"10964 persisted bytes rejected and transaction leaves prior ciphertext/generation unchanged\",\n    \"encrypted execution payload, immutable HMAC audit, no consent or hidden Client creation\"\n  ],\n  \"productionBusinessProviderMutations\": 0\n}\nLoaded Prisma config from prisma.config.ts.\n\nNo difference detected.\n\nwaiting for server to shut down.... done\nserver stopped\nOWNED_POSTGRES_PROCESS_AND_DATABASE_REMOVED: YES\n"
+    },
+    "ratchets.log": {
+      "sha256": "440c3a08507db99941a76e070135dce9144e22c2e295583753fb31e1f8c4bd8f",
+      "text": "\nTest Suites: 4 passed, 4 total\nTests:       39 passed, 39 total\nSnapshots:   0 total\nTime:        0.406 s, estimated 1 s\nRan all test suites matching client-habits.architecture.spec|client-habits-schema.architecture.spec|client-preferences.architecture.spec|package5-final-remediation.architecture.spec.\n"
+    },
+    "python-proof.log": {
+      "sha256": "aef97716919629d72c8e9f3d41edde67dbdc890246d2aaf40243caf484e0e947",
+      "text": "............................\n----------------------------------------------------------------------\nRan 28 tests in 2.331s\n\nOK\n"
+    },
+    "php-proof.log": {
+      "sha256": "4f0768a598bd12732dc94ff7faa120bec31a9ea0af952796af67c42ad945552e",
+      "text": "Welcome to LTD BeGet SSH Server 'prime'\nWelcome to LTD BeGet SSH Server 'prime'\nPHP CONSENT TRANSPORT: 8/8 PASS; HTTP MUTATIONS: 0\nPHP PREFERENCE TRANSPORT: 5/5 PASS; HTTP MUTATIONS: 0\nB8 PHP STRICT TRANSPORT: PASS; HTTP MUTATIONS: 0\n"
+    },
+    "html-proof.log": {
+      "sha256": "41b454f5f0b2a506af3d8b07da83ab7a6e90852e5766788f511fcd31eddd42fb",
+      "text": "{\"file\":\"/Users/stanislavmosin/Desktop/Projects/maya-platform/\u0441\u0430\u0439\u0442 \u0438 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435/app.html\",\"scripts\":28,\"parse\":\"PASS\",\"phoneLinkContract\":\"PASS\"}\n{\"file\":\"/Users/stanislavmosin/Desktop/Projects/maya-platform/maya-os-site/index.html\",\"scripts\":27,\"parse\":\"PASS\",\"phoneLinkContract\":\"PASS\"}\n{\"file\":\"/Users/stanislavmosin/Desktop/maya-ios/www/index.html\",\"scripts\":28,\"parse\":\"PASS\",\"phoneLinkContract\":\"PASS\"}\n"
+    },
+    "native-sync.log": {
+      "sha256": "020ab1ff89c44ef5a71547f0317b7b56ee1da7a331837954adbed44494ffb428",
+      "text": "\u2714 Copying web assets from www to ios/App/App/public in 20.36ms\n\u2714 Creating capacitor.config.json in ios/App/App in 432.13\u03bcs\n\u2714 copy ios in 28.98ms\n\u2714 Updating iOS plugins in 360.13\u03bcs\n[info] All Capacitor plugins have a Package.swift file and will be included in Package.swift\n[info] Writing Package.swift\n[info] Found 8 Capacitor plugins for ios:\n       @capacitor-community/app-icon@7.0.0\n       @capacitor/app@8.1.0\n       @capacitor/app-launcher@8.0.1\n       @capacitor/haptics@8.0.2\n       @capacitor/keyboard@8.0.5\n       @capacitor/push-notifications@8.1.2\n       @capacitor/splash-screen@8.0.1\n       @capacitor/status-bar@8.0.2\n\u2714 update ios in 10.33ms\n[info] Sync finished in 0.05s\n"
+    },
+    "deployment-gates.log": {
+      "sha256": "d8639606a8204c2939b0c438dca0e007b501c9a63d1ddb02d6d7cbffd8240322"
+    }
+  },
+  "python-manifest.json": {
+    "webhook_server.py": {
+      "before": "25a285d9f693b0b0fc15f7c6d7bf379176436c477741446c4dc057fcc7ca6a78",
+      "after": "25f6f4f0f68637dd9a507de1bf053d783d056f9a58bff86342b577c8b5c9ba85",
+      "functions": [
+        "chat_handler",
+        "chat_stream_handler",
+        "realtime_handler",
+        "cabinet_link_phone_handler"
+      ]
+    },
+    "database.py": {
+      "before": "ba1cb1e6926f2f885678b655913c1a02a2c5da5dc934b6d807de96dfa723bdd2",
+      "after": "5b3875aa4e9b45f5582386c8f59cf3c862b70ff2cbfaa5e062d7a3805869bd65",
+      "functions": [
+        "add_client_preference",
+        "get_client_preferences",
+        "get_client_preferences_by_phone"
+      ]
+    },
+    "claude_ai.py": {
+      "before": "365055929f50a95a00f2fa7a5a9de6e28ccdcaddd15953061eddfed862076703",
+      "after": "c4dc858d4fc7dab23c9c29176c80dbf7d6a8462fe0ca6d2ac565bca075263dd7",
+      "functions": [
+        "_execute_tool",
+        "get_ai_response",
+        "get_ai_response_stream"
+      ]
+    },
+    "web_auth.py": {
+      "before": "94b891dc9ce1447491f49ca0f8edd625177dc803aeefeccd1744ae9f115e940e",
+      "after": "d5af185be0073187de9fc0023c3b0ea4d711991344523a0fa5fbe4fd88513a19",
+      "functions": [
+        "verify_phone_evidence"
+      ]
+    },
+    "realtime_bridge.py": {
+      "before": "e1f2cf51a43e8be8437d87c18243f106dc402262b4d0e623c43100bddc18dcc7",
+      "after": "6f2c7e63133194561b1e6ab36a532efea32aa3dc45a890de58fa95addfa5a4ce",
+      "functions": [
+        "run_session"
+      ]
+    },
+    "legacy_client_habits_bridge.py": {
+      "before": null,
+      "after": "cbdded611c17d601df58fcdfebe8e910567239d780849d2bff5ae136bb75d554",
+      "functions": "new canonical transport"
+    }
+  },
+  "html-manifest.json": {
+    "live-mayaos-app.html": {
+      "before": "45caff9c53d1b422e1b261e8e39660adf9daafbf62481f0b1019908dece6b064",
+      "after": "b06b7d2a6db828023efe14d0a0f13115510c3bbda695dfe12e66451823728d48"
+    },
+    "live-legacy-app.html": {
+      "before": "15b8855e1363dece68854f859222ed18425963fc94bae70130e8b367f8d97887",
+      "after": "384ae3a2dfb783dad21f5d5159cf8685c7e2145a809657778b02a352ef1ea6d3"
+    },
+    "live-vps-app.html": {
+      "before": "2e23492b81801b293edb215ed188bb9af26a91cc2cd17d566c5d503e24dc431c",
+      "after": "08177c652e7c8f0097981c5a8e8163c3f33b70d241e1f001c06931b640296bc3"
+    },
+    "api-proxy.php": {
+      "before": "a46bc246359691233ad7414f6c3928472d5149b3eeef43c571f3ce29761cd306",
+      "after": "df2749fb1f85e33787ac1d01b2f7542ae9d85a986dad80c21c552145386afed5"
+    },
+    "package5-client-consent-proxy.php": {
+      "before": "31333596cf8e0356c0aaffbd313d4577534b9ff0f52d45829522ad7c7525d76a",
+      "after": "e650bc0f2dd73958607c864f06c2c20a61a76d00b45673ecf2a14e6c22381710"
+    }
+  }
+}
