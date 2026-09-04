@@ -1,0 +1,150 @@
+{
+  "acceptedCheckpoint": "35dd890e",
+  "foundationSource": "8e517147d5ba6d4fd489e0f0653e03a73e400dc7",
+  "productionReceiptMigrationApplied": true,
+  "productionRuntimeRemediationDeployed": false,
+  "newBlocker": "B2-C1: ordinary internal trial initial owner/provider contract",
+  "productionReadOnly": {
+    "release": "/opt/maya-saas/releases/20260904-c06-p5-wave6-cutover-3b545671",
+    "route": {
+      "controller": "onboarding",
+      "path": "trial",
+      "method": 1,
+      "public": true,
+      "moduleLoaded": true
+    },
+    "selfServeEnabled": true,
+    "internalModeProductionGuard": true,
+    "trialCallsExistingOwnerProviderBootstrap": true,
+    "trialHasNodeEnvInternalTestGuard": false,
+    "ownerProviderCreatesDirectly": true,
+    "ownerProviderBindsExistingUser": true,
+    "canonicalBootstrapCalendarExternal": true,
+    "canonicalBootstrapIncludesOwnerProvider": false,
+    "sourceHashes": {
+      "trial": "522a1517b4f64bd7340aee2e02f60f60fcc66c775edde7cb0bc7ddf327479bf9",
+      "ownerProvider": "8dd8b00c002cc245fc4739a64e8d7e951250da8d1bc514d8dd98fc86a4e353a2",
+      "canonicalBootstrap": "691bdd3f7a7160ed410ed6d407587bfe73da7f062e62d30115a45d81253fae5d"
+    },
+    "realProductionBusinessProviderMutations": 0
+  },
+  "runtimePostgreSQLProof": {
+    "verdict": "PASS",
+    "cases": 32,
+    "results": [
+      "crash before child 1 preserves durable plan",
+      "fresh process resumes crash before child 1 without replaying successful children",
+      "crash before child 2 preserves durable plan",
+      "fresh process resumes crash before child 2 without replaying successful children",
+      "canonical child authority failure preserves earlier success",
+      "suspended owner cannot resume receipt",
+      "authorized recovery preserves the same successful child",
+      "mock CRM provider cannot enter approved confirmation",
+      "trial concurrent retry creates one logical tenant owner branch and configuration",
+      "post-tenant trial failure does not compensate by deletion",
+      "trial restart converges from durable activation outcome",
+      "trial retry cannot reactivate a suspended durable outcome",
+      "plain trial endpoint cannot consume draft-bound activation",
+      "trial refuses missing activation identity",
+      "reserved platform host remains forbidden",
+      "admin is an authorized initiator of the same TrialActivation; no owner impersonation session",
+      "tenant admin cannot create another tenant",
+      "stale confirmation rejected",
+      "CRM unavailable preserves tenant and successful children without mock links",
+      "duplicate confirmation skips successful children",
+      "changed draft cannot reuse frozen receipt",
+      "changed owner intent cannot reuse receipt",
+      "wrong owner resume rejected",
+      "wrong tenant resume rejected",
+      "fresh process restores waiting receipt and preserves successful children",
+      "actual A17 canonical import and AC5 projection create local staff links",
+      "later real CRM resumes same immutable receipt; concurrent workers produce one logical outcome",
+      "completed confirmation retry creates no duplicate business effects",
+      "tenant physical delete forbidden",
+      "different CRM company cannot resume approved staff plan",
+      "concurrent initial confirmations converge to one tenant and receipt",
+      "production CRM-only AI orchestration creates no A28/internal calendar rows"
+    ],
+    "providerWrites": 0,
+    "realProductionMutations": 0
+  },
+  "a18RuntimePostgreSQLProof": {
+    "verdict": "PASS",
+    "cases": 22,
+    "results": [
+      "unbound Telegram cannot issue Client challenge",
+      "unbound Telegram cannot consent",
+      "real signed Telegram proof + valid challenge links Client without Maya User",
+      "replay rejected",
+      "canonical guest consent success; retry/restart yields same two facts without fake User",
+      "status read creates no execution or consent mutation",
+      "consumer cannot override clientId",
+      "consumer cannot override userId",
+      "consumer cannot override tenantId",
+      "consumer cannot override phone",
+      "consumer cannot override occurredAt",
+      "cross-tenant signed Telegram cannot select Client",
+      "forged signed Telegram rejected",
+      "expired Telegram proof rejected",
+      "future Telegram proof rejected",
+      "concurrent duplicate command has one outcome; revoke/new consent preserves original facts",
+      "tenant-qualified delivery reader observes canonical revocation and creates no facts or bindings",
+      "bare Client.userId does not issue first challenge",
+      "bare Client.userId does not authorize canonical consent",
+      "verified channel can issue exact Client challenge; PWA consumes and consents without heuristic Client reassignment",
+      "revoked Maya session cannot consent",
+      "phone-only payload cannot consume"
+    ],
+    "providerWrites": 0,
+    "productionMutations": 0
+  },
+  "targetedBackendTests": {
+    "passed": 68,
+    "total": 68
+  },
+  "finalRemediationRatchets": {
+    "passed": 8,
+    "total": 8
+  },
+  "pythonBridgeTests": {
+    "passed": 8,
+    "total": 8
+  },
+  "checkpointTargetedLint": "PASS",
+  "applicationTypecheck": "PASS",
+  "scriptsTypecheck": "PASS",
+  "fullRegressionGate": "NOT RUN — NEW CONTRACT STOP",
+  "deploymentGate": "NOT RUN — NEW CONTRACT STOP",
+  "finalPackage5Gate": "NOT RE-RUN — LAST ACCEPTED FAIL",
+  "package5Complete": false,
+  "wavesComplete": "6/6",
+  "wave7Created": false,
+  "chapter7Started": false,
+  "ownedProcessHygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0
+  },
+  "unrelatedChangesPreserved": {
+    "preExistingDirtyFiles": 30,
+    "unrelatedContentsPreserved": true,
+    "mixedFilesStagedTaskHunksOnly": [
+      "ai администратор/bot.py",
+      "ai администратор/webhook_server.py",
+      "maya-os-site/index.html"
+    ]
+  },
+  "proofLogsSha256": {
+    "ai-confirm-foundation/runtime-proof.log": "2f3d94b59270e11a544cbcadad051cc83b547900745fc2e98e9aab3b68a3a498",
+    "ai-confirm-foundation/trial-calendar-readonly.log": "0988b6ebfa891292926602c487eaa0e61593436d6414fc381d88349368b25299",
+    "package5-final-remediation/a18-runtime-proof.log": "3599c79df104704db2cb4072d6a6f4a6c351a7a69d60032297425873128e2352"
+  },
+  "inlineJavascriptSyntax": {
+    "site": 27,
+    "app": 28,
+    "verdict": "PASS"
+  }
+}

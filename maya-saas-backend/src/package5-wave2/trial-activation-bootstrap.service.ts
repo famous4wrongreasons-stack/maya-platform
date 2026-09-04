@@ -68,6 +68,14 @@ export class TrialActivationBootstrapService {
       const activation = await tx.trialActivation.findUniqueOrThrow({
         where: { activationTokenHash: command.activationTokenHash },
       });
+      const boundDraft = await tx.aiOnboardingDraft.findUnique({
+        where: { trialActivationId: activation.id },
+        select: { confirmationReceiptJson: true },
+      });
+      if (boundDraft && !boundDraft.confirmationReceiptJson)
+        throw new ConflictException(
+          'Draft activation requires a verified immutable confirmation receipt',
+        );
       if (activation.status === 'completed' && activation.tenantId) {
         const ids = this.ids(command.activationTokenHash);
         if (activation.tenantId !== ids.tenantId) {

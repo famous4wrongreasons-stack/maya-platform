@@ -15,14 +15,10 @@ import {
   featureKeysFromFlags,
   normalizeFeatureFlags,
 } from '../common/feature-catalog';
-import {
-  DEFAULT_INDUSTRY_PRESET_ID,
-  getIndustryPreset,
-} from '../common/industry-presets';
+import { getIndustryPreset } from '../common/industry-presets';
 import { asJson } from '../common/json.util';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { DEFAULT_SALON_TIMEZONE } from './salon-timezone';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { serializePublicCrmSettings } from '../crm/crm-provider-settings';
 import { CreateTenantDto } from './dto/create-tenant.dto';
@@ -415,110 +411,22 @@ export class TenantsService {
     return tenants.map((tenant) => this.serializeTenant(tenant));
   }
 
-  async createTenant(dto: CreateTenantDto) {
-    // 🔴 Страж стоял только на обновлении. А создание идёт и из ПУБЛИЧНОГО
-    // самообслуживаемого триала (`POST /api/onboarding/trial`), где subdomain
-    // становится равен слагу: заявка со слагом `app` создавала арендатора, в
-    // которого потом резолвился `app.<домен>`. Резервные имена — www, api, app,
-    // admin, auth, login, billing — на этом пути не проверялись вовсе, а
-    // единственный тест звал функцию изолированно и создавал ложное
-    // впечатление покрытия.
-    this.assertHostNamesAllowed(dto);
-    if (
-      dto.currentPeriodStart !== undefined ||
-      dto.currentPeriodEnd !== undefined ||
-      dto.billingMethodId !== undefined ||
-      dto.status === TenantStatus.ACTIVE ||
-      dto.status === TenantStatus.PAST_DUE
-    ) {
-      throw new BadRequestException('payment_derived_billing_fields_forbidden');
-    }
-
-    const existing = await this.prisma.tenant.findUnique({
-      where: { slug: dto.slug.toLowerCase() },
-      select: { id: true },
-    });
-
-    if (existing) {
-      throw new ConflictException('Tenant slug already exists');
-    }
-
-    if (dto.planId) {
-      await this.subscriptionsService.getPlanByIdOrThrow(dto.planId);
-    }
-
-    const billingDates = this.resolveBillingDates({
-      status: dto.status ?? TenantStatus.TRIAL,
-      trialEndsAt: normalizeOptionalDateString(dto.trialEndsAt),
-    });
-    const status = dto.status ?? TenantStatus.TRIAL;
-
-    const tenant = await this.prisma.$transaction(async (tx) => {
-      const normalizedBranchName = asNonEmptyString(dto.branchName) ?? dto.name;
-      // 🔴 Здесь стоял московский пояс по умолчанию, и он ПЕРЕКРЫВАЛ то, что
-      // позже сообщит CRM: филиал разрешается раньше арендатора, а сам он не
-      // обновлялся никогда. Салон в Новосибирске подключал CRM, арендатор
-      // получал верный пояс, а бронирование продолжало считать по Москве.
-      // Незаданный пояс филиала теперь означает «как у арендатора».
-      const normalizedBranchTimezone = asNonEmptyString(dto.branchTimezone);
-      const created = await tx.tenant.create({
-        data: {
-          name: dto.name,
-          slug: dto.slug.toLowerCase(),
-          status,
-          planId: dto.planId,
-          industryPresetId: dto.industryPresetId ?? DEFAULT_INDUSTRY_PRESET_ID,
-          calendarSource: dto.calendarSource ?? CalendarSource.EXTERNAL,
-          defaultCurrency: dto.defaultCurrency ?? 'RUB',
-          defaultTimezone:
-            dto.defaultTimezone ??
-            normalizedBranchTimezone ??
-            DEFAULT_SALON_TIMEZONE,
-          defaultLocale: dto.defaultLocale ?? 'ru-RU',
-          customDomain: dto.customDomain?.toLowerCase(),
-          subdomain: (dto.subdomain ?? dto.slug).toLowerCase(),
-          trialEndsAt: billingDates.trialEndsAt,
-          currentPeriodStart: null,
-          currentPeriodEnd: null,
-          pastDueAt: null,
-          graceEndsAt: null,
-          trialFullAccess: dto.trialFullAccess ?? false,
-          allowSelfRegistration: dto.allowSelfRegistration ?? true,
-        },
-      });
-
-      await tx.brandingSettings.create({
-        data: {
-          tenantId: created.id,
-          appName: dto.name,
-          themeJson: asJson({}),
-        },
-      });
-
-      await tx.branch.create({
-        data: {
-          tenantId: created.id,
-          name: normalizedBranchName,
-          address: asNonEmptyString(dto.branchAddress),
-          phone: asNonEmptyString(dto.branchPhone),
-          timezone: normalizedBranchTimezone,
-        },
-      });
-
-      return created;
-    });
-
-    return this.serializeTenant(await this.getTenantByIdOrThrow(tenant.id));
+  createTenant(dto: CreateTenantDto): Promise<never> {
+    void dto;
+    return Promise.reject(
+      new ForbiddenException(
+        'Tenant creation requires the canonical TrialActivation flow',
+      ),
+    );
   }
 
-  async deleteFailedTrialTenant(id: string) {
-    return this.prisma.tenant.deleteMany({
-      where: {
-        id,
-        status: TenantStatus.TRIAL,
-        currentPeriodStart: null,
-      },
-    });
+  deleteFailedTrialTenant(id: string): Promise<never> {
+    void id;
+    return Promise.reject(
+      new ForbiddenException(
+        'Tenant hard delete is forbidden; preserve the canonical activation outcome',
+      ),
+    );
   }
 
   /**
@@ -563,7 +471,7 @@ export class TenantsService {
     'local',
   ]);
 
-  private assertHostNamesAllowed(dto: {
+  assertHostNamesAllowed(dto: {
     subdomain?: string | null;
     customDomain?: string | null;
     slug?: string | null;

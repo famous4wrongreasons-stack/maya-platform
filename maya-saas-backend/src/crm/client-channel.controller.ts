@@ -134,6 +134,21 @@ export class LegacyClientChannelController {
       'client_bridge_tenant_unresolved',
     );
     return this.context.runAsPublicTenant(tenant.tenantId, () => {
+      if (operation === 'delivery-consent') {
+        const payload = input.payload;
+        if (
+          !payload ||
+          typeof payload !== 'object' ||
+          Array.isArray(payload) ||
+          Object.keys(payload).join(',') !== 'telegramSubject' ||
+          !('telegramSubject' in payload) ||
+          typeof payload.telegramSubject !== 'string'
+        )
+          throw new BadRequestException(
+            'Only the exact delivery recipient is accepted',
+          );
+        return this.runtime.telegramDeliveryConsent(payload.telegramSubject);
+      }
       if (operation === 'issue') {
         empty(input.payload);
         return this.runtime.issue(input.channelProof);

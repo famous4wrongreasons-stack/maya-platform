@@ -173,6 +173,13 @@ export class AiOnboardingTeamMemberDto {
 }
 
 export class ConfirmAiOnboardingDraftDto {
+  @ApiProperty({
+    description: 'Exact server revision shown in the approved preview',
+  })
+  @IsInt()
+  @Min(0)
+  expectedDraftRevision!: number;
+
   @ApiProperty()
   @IsString()
   @MinLength(32)

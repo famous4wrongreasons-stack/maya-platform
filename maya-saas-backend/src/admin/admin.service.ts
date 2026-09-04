@@ -21,7 +21,8 @@ import { QuotaResource } from '../quotas/quota-resource';
 import { QuotaService } from '../quotas/quota.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
-import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
+import { CreateTrialSignupDto } from '../onboarding/dto/create-trial-signup.dto';
+import { CanonicalTrialOnboardingService } from '../onboarding/canonical-trial-onboarding.service';
 import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
 import { CreateProviderUserDto } from './dto/create-provider-user.dto';
 import { CreateTenantUserDto } from './dto/create-tenant-user.dto';
@@ -56,25 +57,16 @@ export class AdminService {
     private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
     private readonly encryptionService: EncryptionService,
     private readonly canonicalWave3: Package5Wave3CanonicalCutoverService,
+    private readonly canonicalTrial: CanonicalTrialOnboardingService,
   ) {}
 
-  createTenant(dto: CreateTenantDto, actor: AuthenticatedUser) {
-    return this.tenantsService.createTenant(dto).then(async (tenant) => {
-      await this.tenantContext.runAsSystemTenant(tenant.id, () =>
-        this.auditLogService.log({
-          tenantId: tenant.id,
-          userId: actor.userId,
-          action: 'tenant.created',
-          entityType: 'tenant',
-          entityId: tenant.id,
-          metadata: {
-            slug: tenant.slug,
-          },
-        }),
-      );
-
-      return tenant;
-    });
+  async createTenant(dto: CreateTrialSignupDto, actor: AuthenticatedUser) {
+    if (actor.role !== UserRole.PLATFORM_OWNER)
+      throw new ForbiddenException('Platform owner authority required');
+    const result = await this.canonicalTrial.activate(dto);
+    return this.tenantsService.serializeTenant(
+      await this.tenantsService.getTenantByIdOrThrow(result.tenantId),
+    );
   }
 
   listTenants() {

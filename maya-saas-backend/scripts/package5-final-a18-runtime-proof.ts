@@ -235,6 +235,7 @@ async function run() {
     linked: true,
     privacy: true,
     marketing: false,
+    marketing_decided: true,
     client_link_required: false,
   });
   assert.equal(await db.actionExecution.count(), readBefore);
@@ -298,6 +299,32 @@ async function run() {
     );
   results.push(
     'concurrent duplicate command has one outcome; revoke/new consent preserves original facts',
+  );
+  const readBaseline = await db.clientConsentFact.count({
+    where: { tenantId: tenant },
+  });
+  const delivery = await scope(tenant, () =>
+    runtime().telegramDeliveryConsent('10001'),
+  );
+  assert.equal(delivery.privacy, false);
+  assert.equal(delivery.marketing, true);
+  assert.equal(delivery.marketing_decided, true);
+  assert.equal(
+    (await scope(other, () => runtime().telegramDeliveryConsent('10001')))
+      .marketing,
+    false,
+  );
+  assert.equal(
+    (await scope(tenant, () => runtime().telegramDeliveryConsent('999999')))
+      .privacy,
+    false,
+  );
+  assert.equal(
+    await db.clientConsentFact.count({ where: { tenantId: tenant } }),
+    readBaseline,
+  );
+  results.push(
+    'tenant-qualified delivery reader observes canonical revocation and creates no facts or bindings',
   );
   const user = await db.user.create({
     data: {

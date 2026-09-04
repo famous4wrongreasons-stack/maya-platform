@@ -7141,73 +7141,66 @@ async def booking_prefill_handler(request: web.Request) -> web.Response:
     })
 
 
-async def consent_status_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/consent/status — какие согласия нужны клиенту?
-    Возвращает: { status: 'pass'|'need_pdn'|'need_marketing', privacy_text, version }
-    """
+async def client_link_consume_handler(request: web.Request) -> web.Response:
+    """Present a server-issued challenge using the original authenticated channel."""
+    import legacy_client_command_bridge as client_commands
     try:
         body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"auth_data", "session_token", "token"} or not isinstance(body.get("token"), str):
+            raise ValueError("invalid_client_link_request")
+        proof = client_commands.channel_proof(request.headers, body)
+        await asyncio.to_thread(client_commands.command, "consume", proof, {"token": body["token"]})
+        return _cabinet_response({"linked": True})
+    except ValueError:
+        return _cabinet_response({"error": "verified_client_link_required"}, status=403)
     except Exception:
-        body = {}
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
+        logger.error("canonical client linking unavailable")
+        return _cabinet_response({"error": "client_link_unavailable"}, status=503)
+
+
+async def consent_status_handler(request: web.Request) -> web.Response:
+    """Canonical read: never create a Client, link, profile or consent fact."""
+    import legacy_client_command_bridge as client_commands
     try:
-        status = database.consent_gate_status(chat_id)
-    except Exception as e:
-        logger.error(f"consent_status: {e}")
-        return _cabinet_response({"error": "internal"}, status=500)
-    return _cabinet_response({
-        "status": status,            # 'pass' | 'need_pdn' | 'need_marketing'
-        "privacy_text": _PRIVACY_SHORT,
-        "version": database.CONSENT_VERSION,
-    })
+        body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"auth_data", "session_token"}:
+            raise ValueError("invalid_consent_request")
+        proof = client_commands.channel_proof(request.headers, body)
+        result = await asyncio.to_thread(client_commands.command, "status", proof, {})
+        return _cabinet_response({"status": client_commands.consent_status(result),
+            "privacy_text": _PRIVACY_SHORT, "version": database.CONSENT_VERSION,
+            "client_link_required": result.get("client_link_required", False)})
+    except ValueError:
+        return _cabinet_response({"error": "verified_client_link_required",
+            "message": "Подтвердите привязку клиента к этому каналу."}, status=403)
+    except Exception:
+        logger.error("canonical consent status unavailable")
+        return _cabinet_response({"error": "consent_unavailable"}, status=503)
 
 
 async def consent_submit_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/consent/submit — клиент подписывает согласия.
-    Body: { accept_pdn: bool, accept_marketing: bool, auth_data?: ... }
-    Возвращает новый статус (должен стать 'pass').
-    """
+    """A18 initiator: backend independently authenticates the original channel."""
+    import legacy_client_command_bridge as client_commands
     try:
         body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"auth_data", "session_token", "accept_pdn", "accept_marketing", "idempotency_key"}:
+            raise ValueError("invalid_consent_request")
+        if type(body.get("accept_pdn")) is not bool or type(body.get("accept_marketing")) is not bool:
+            raise ValueError("explicit_consent_decisions_required")
+        proof = client_commands.channel_proof(request.headers, body)
+        await asyncio.to_thread(client_commands.command, "consent", proof, {
+            "privacy": body["accept_pdn"], "marketing": body["accept_marketing"],
+            "idempotencyKey": body.get("idempotency_key"),
+        })
+        result = await asyncio.to_thread(client_commands.command, "status", proof, {})
+        return _cabinet_response({"status": client_commands.consent_status(result), "marketing": result.get("marketing", False)})
+    except ValueError:
+        return _cabinet_response({"error": "verified_client_link_required",
+            "message": "Подтвердите привязку клиента и повторите тот же запрос."}, status=403)
     except Exception:
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-    if not isinstance(body, dict):
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-
-    accept_pdn = bool(body.get("accept_pdn"))
-    accept_marketing = bool(body.get("accept_marketing"))
-
-    # ПДн обязателен — без него отказ
-    if not accept_pdn:
-        return _cabinet_response({
-            "error": "pdn_required",
-            "message": "Для общения с ассистентом нужно согласие на обработку персональных данных.",
-        }, status=400)
-
-    try:
-        client_id = database.get_or_create_client(chat_id)
-        # ПДн — записываем (если уже подписано в Telegram, save_consent просто добавит ещё
-        # одну запись с source='app'; журнал согласий по 152-ФЗ хранит всю историю)
-        if not database.has_valid_consent_by_chat_id(chat_id):
-            database.save_consent(client_id, True, source="app")
-        # Маркетинг — явный выбор клиента (Да/Нет)
-        database.set_marketing_consent(client_id, accept_marketing)
-    except Exception as e:
-        logger.error(f"consent_submit chat_id={chat_id}: {e}")
-        return _cabinet_response({"error": "save_failed"}, status=500)
-
-    return _cabinet_response({
-        "status": database.consent_gate_status(chat_id),
-        "marketing": accept_marketing,
-    })
+        logger.error("canonical consent command unavailable; no local fallback")
+        return _cabinet_response({"error": "consent_unavailable",
+            "message": "Не удалось получить результат. Повторите тот же запрос."}, status=503)
 
 
 def _applogin_nonce_ok(n) -> bool:
@@ -13719,6 +13712,7 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/tips/sent", chat_options_handler)
 
     # API согласий 152-ФЗ для приложения (та же БД и логика, что у бота)
+    web_app.router.add_post("/api/client-link/consume", client_link_consume_handler)
     web_app.router.add_post("/api/consent/status", consent_status_handler)
     web_app.router.add_options("/api/consent/status", chat_options_handler)
     web_app.router.add_post("/api/consent/submit", consent_submit_handler)

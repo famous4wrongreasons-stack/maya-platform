@@ -65,7 +65,7 @@
   "scriptsTypecheck": "PASS",
   "projectLint": "PASS",
   "buildAndPreflight": "PASS",
-  "productionMigrationApplied": false,
+  "productionMigrationApplied": true,
   "runtimeRemediationDeployed": false,
   "unrelatedDirtyFilesUnchanged": 30,
   "proofLogsSha256": {
@@ -78,5 +78,16 @@
     "src/onboarding/ai-confirmation-receipt.service.ts": "7626e45c8ffedf10d4ac609c87d38850598b3f34d231c2fcbed5529ee1fccc12",
     "src/action-engine/ai-confirmation-receipt-schema.architecture.spec.ts": "9ca159576daec72b3a56024fa709f281f2bd710b79dd6f007291996c44ee289c",
     "scripts/package5-ai-confirmation-receipt-proof.ts": "6d67368f1015c326b81cdd2bd684e13ff7a424b10a3e3444c129869e97429a7c"
+  },
+  "productionMigration": {
+    "source": "8e517147d5ba6d4fd489e0f0653e03a73e400dc7",
+    "gate": "PASS",
+    "pending": 0,
+    "drift": "NONE",
+    "historicalReceiptsBackfilled": 0,
+    "healthReadiness": "PASS",
+    "runtimeChanged": false,
+    "serviceRestarts": 0,
+    "productionBusinessProviderMutations": 0
   }
 }

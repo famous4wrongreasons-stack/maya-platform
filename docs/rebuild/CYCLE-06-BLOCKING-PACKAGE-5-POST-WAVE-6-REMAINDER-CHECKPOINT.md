@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — D1 receipt V1 and D2 handoff A APPROVED; receipt local foundation PASS; production migration gate next; runtime remediation undeployed**
+Status: **CURRENT — D1 migration APPLIED; A18/A26/AI candidate undeployed; STOP on ordinary internal trial owner/provider contract B2-C1**
 
 Date: 2026-09-04. This supersedes the Wave 6 pre-cutover remainder after the
 explicit AC6 owner decision and successful production cutover from gated source
@@ -230,3 +230,31 @@ approved. Apply the receipt migration after its green gate, then continue the
 authorized remediation and automatic full Final Package 5
 Gate as specified after all gates pass. Chapter 6
 completion acceptance stays separate; Chapter 7 is not started automatically.
+
+Current D1 migration apply: `8e517147`, expected-only PASS, pending 0, drift NONE, zero receipt backfill, unchanged healthy runtime. Three approved remediation schema foundations are now durable in production (one migration applied in this cycle). A18/A26/AI runtime remediation and the full final gate remain required.
+
+## Current final-remediation stop after D1/D2 approval
+
+D1 receipt migration from `8e517147` is applied: pending 0, drift NONE, no
+historical receipts. Runtime candidate reached PostgreSQL AI/external-trial
+proof 32/32, targeted tests 68/68, final-remediation ratchets 8/8 and Python
+bridge tests 8/8. Current A18 proof and checkpoint type/lint results are in
+`evidence/package5-ai-remediation-internal-trial-blocker.json`.
+
+**B2-C1:** ordinary public `/onboarding/trial` supports internal calendar and
+directly binds the already created owner to an initial InternalProvider. This
+path is enabled in production and has no AI test-only guard. The approved
+atomic TrialActivation does not include that provider; existing A28 provider
+creation leaves userId null, and A26 provider-user creation creates a new User.
+D2 A makes AI onboarding CRM-only; it does not retire ordinary internal trial.
+
+Do not deploy the current external-only candidate or claim A26 complete. See
+`package5-a26-internal-trial-bootstrap-v1-decision-proposal.md` and
+`CYCLE-06-BLOCKING-PACKAGE-5-AI-REMEDIATION-INTERNAL-TRIAL-STOP-REPORT.md`.
+After explicit decision, finish that contract and the full DTO/caller review
+(including both site/app copies and existing Package 4 plan authority), finish
+A18 integration/ratchets, run full candidate gates, then the authorized unified
+deploy and read-only production verification. Only after production PASS,
+restart the complete 13-family final gate. Production remains Wave 6; accepted
+waves 6/6, Package 5 incomplete, no Wave 7 or Chapter 7. Historical 17 DBs remain
+untouched. No automatic Chapter 6 completion.

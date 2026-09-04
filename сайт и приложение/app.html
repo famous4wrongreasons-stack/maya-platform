@@ -25200,6 +25200,31 @@ function AConsentGate() {
   var pol = React.useState(false);
   var showPol = pol[0],
     setShowPol = pol[1];
+  function canonicalConsentRequest(payload) {
+    var rq = window.__meAuthReq ? window.__meAuthReq(payload) : null;
+    try {
+      var tg = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
+      var auth = window.__tgAuthData || JSON.parse(localStorage.getItem('tg_auth_data') || 'null');
+      var bundle = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
+      var headers = { 'Content-Type': 'application/json' };
+      if (tg) headers['X-Telegram-InitData'] = tg;
+      else if (bundle && bundle.token) headers.Authorization = 'Bearer ' + bundle.token;
+      else if (auth && auth.hash && auth.auth_date) payload.auth_data = auth;
+      else return rq;
+      return { headers: headers, body: JSON.stringify(payload) };
+    } catch (e) { return rq; }
+  }
+  function consentCommandId(marketing) {
+    var key = 'maya.consent.pending.v1';
+    var saved = JSON.parse(sessionStorage.getItem(key) || 'null');
+    if (!saved || saved.marketing !== marketing) {
+      var bytes = new Uint8Array(24);
+      window.crypto.getRandomValues(bytes);
+      saved = { marketing: marketing, id: Array.prototype.map.call(bytes, function (v) { return ('0' + v.toString(16)).slice(-2); }).join('') };
+      sessionStorage.setItem(key, JSON.stringify(saved));
+    }
+    return saved.id;
+  }
   var checkedRef = React.useRef(false);
   React.useEffect(function () {
     var done = false;
@@ -25219,7 +25244,7 @@ function AConsentGate() {
       if (!force && window.__meCurMode === 'staff') return; // не сотруднику (force — для теста)
       if (!loggedIn()) return; // только после логина
       checkedRef.current = true;
-      var rq = window.__meAuthReq({});
+      var rq = canonicalConsentRequest({});
       if (!rq) {
         checkedRef.current = false;
         return;
@@ -25268,10 +25293,12 @@ function AConsentGate() {
     }
     setErr('');
     setBusy(true);
-    var rq = window.__meAuthReq({
+    var rq;
+    try { rq = canonicalConsentRequest({
       accept_pdn: true,
-      accept_marketing: !!mkt
-    });
+      accept_marketing: !!mkt,
+      idempotency_key: consentCommandId(!!mkt)
+    }); } catch (e) { setBusy(false); setErr('Не удалось подготовить безопасный запрос. Перезагрузите приложение.'); return; }
     if (!rq) {
       setBusy(false);
       return;

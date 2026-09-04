@@ -1,6 +1,6 @@
 # Package 5 — Approved AI confirmation receipt V1 foundation
 
-Status: **LOCAL FOUNDATION PASS — production migration gate/apply next**
+Status: **FOUNDATION AND PRODUCTION MIGRATION PASS — subsequent runtime STOP on B2-C1**
 
 Date: 2026-09-04. User accepted `35dd890e` and approved the exact D1 receipt
 schema plus D2 CRM handoff option A. These decisions supersede the preceding
@@ -68,8 +68,12 @@ NEW MODELS: 0
 LOCAL RECEIPT FOUNDATION PROOF: PASS — 42/42
 SCHEMA ARCHITECTURAL CHECKS: PASS — 6/6
 CLEAN REPLAY: PASS — 73 MIGRATIONS
-PRODUCTION RECEIPT MIGRATION APPLIED: NOT YET
+PRODUCTION RECEIPT MIGRATION APPLIED: YES
 RUNTIME REMEDIATION DEPLOYED: NO
 PACKAGE 5 COMPLETE: NO
 REAL PRODUCTION BUSINESS/PROVIDER MUTATIONS FOR PROOF: 0
 ```
+
+Production migration applied from pushed source `8e517147d5ba6d4fd489e0f0653e03a73e400dc7`. The expected-only gate allowed only `20260904110000_ai_confirmation_receipt_v1`; post-apply pending 0, drift NONE, all lifecycle guards active, 21 draft columns, receipt backfill 0. Applied history is 76 entries (73 repository migrations plus 3 acknowledged historical entries). Health/readiness PASS; runtime release and PID 1470307 unchanged, restarts 0. Verification used structural/read-only queries only. Continue authorized runtime remediation without an intermediate STOP.
+
+Subsequent runtime work reached a new ordinary internal-trial contract boundary (B2-C1). See the current Internal Trial Stop Report; foundation/apply PASS remains valid, runtime is undeployed.

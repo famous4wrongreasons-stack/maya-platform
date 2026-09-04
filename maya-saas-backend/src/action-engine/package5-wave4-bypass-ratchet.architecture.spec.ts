@@ -121,15 +121,10 @@ describe('Package 5 Wave 4 ownership/bypass ratchet', () => {
     expect(calendarController.match(/idempotency-key/g)).toHaveLength(9);
   });
 
-  it('keeps pre-tenant calendar provisioning narrowly classified under A26', () => {
-    expect(onboarding).toContain('private async provisionInternalCalendar');
-    expect(onboarding).toContain('createdTenantId');
-    expect(onboarding).toContain(
-      'this.internalCalendarService.bootstrapCreateProvider',
-    );
-    expect(onboarding).toContain(
-      'this.internalCalendarService.bootstrapCreateService',
-    );
+  it('keeps AI confirmation outside direct calendar provisioning', () => {
+    expect(onboarding).not.toContain('provisionInternalCalendar');
+    expect(onboarding).not.toContain('internalCalendarService');
+    expect(onboarding).toContain('this.confirmation.confirm');
     expect(internalCalendar).toContain('async bootstrapCreateProvider');
     expect(internalCalendar).toContain('async bootstrapCreateService');
     expect(internalCalendar).not.toMatch(/\n\s{2}async createService\(/);

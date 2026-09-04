@@ -783,44 +783,14 @@ async def cmd_privacy(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/unsubscribe — отозвать согласие на маркетинговые рассылки."""
-    chat_id = update.effective_user.id
-    client = database.get_client(chat_id)
-    if not client:
-        await update.message.reply_text(
-            "Ты пока не записывался у нас — рассылки и так не приходят 🙂"
-        )
-        return
-    database.set_marketing_consent(client["id"], False)
-    await update.message.reply_text(
-        "🔕 Готово, рассылки отключены.\n\n"
-        "Что больше НЕ придёт:\n"
-        "• ДР-промокоды\n"
-        "• «Соскучились, давно не были»\n"
-        "• Уведомления об освободившихся слотах\n"
-        "• Сезонные акции\n\n"
-        "Что ВСЁ ЕЩЁ работает (это не реклама, а часть услуги):\n"
-        "• Напоминания о твоих записях\n"
-        "• Подтверждения бронирования / отмены\n"
-        "• Чеки об оплате\n\n"
-        "_Передумаешь — команда /subscribe._",
-        parse_mode="Markdown",
+    await update.effective_message.reply_text(
+        "Согласия настраиваются в приложении после подтверждённой привязки клиента. Откройте настройки согласий: " + APP_URL
     )
 
 
 async def cmd_subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/subscribe — вернуть согласие на маркетинговые рассылки."""
-    chat_id = update.effective_user.id
-    client = database.get_client(chat_id)
-    if not client:
-        await update.message.reply_text(
-            "Сначала запишись у нас хотя бы раз — после этого согласие "
-            "можно настраивать. Для записи жми «✂️ Записаться».",
-        )
-        return
-    database.set_marketing_consent(client["id"], True)
-    await update.message.reply_text(
-        "🔔 Промокоды и акции снова приходят. Спасибо ✨",
+    await update.effective_message.reply_text(
+        "Согласия настраиваются в приложении после подтверждённой привязки клиента. Откройте настройки согласий: " + APP_URL
     )
 
 
@@ -2228,93 +2198,11 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text(PRIVACY_TEXT, parse_mode="Markdown")
         return
 
-    # Согласие на обработку ПД дано — спрашиваем второй шаг (маркетинг)
-    if data == "pdn_accept":
-        client_id = database.get_or_create_client(chat_id)
-        database.save_consent(client_id, True, source="telegram")
-        # Если было оформление записи — двигаем флоу на следующий этап
-        flow = booking_flow.get(chat_id)
-        if flow:
-            flow["client_id"] = client_id
-            flow["stage"] = "marketing_consent"
-        await query.edit_message_text("Согласие на обработку ПД принято ✅")
-
-        # Второй шаг — маркетинговое согласие. По 152-ФЗ и Закону о рекламе
-        # рекламные рассылки требуют отдельного согласия.
-        kb = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔔 Да, хочу получать", callback_data="mkt_accept")],
-            [InlineKeyboardButton("✖️ Только запись, без рассылок", callback_data="mkt_decline")],
-        ])
-        await context.bot.send_message(
-            chat_id,
-            "🎁 *Хотите получать промокоды, акции и напоминания?*\n\n"
-            "Это:\n"
-            "• День рождения — промокод −20%\n"
-            "• «Не были давно? Соскучились» — раз в 1-2 месяца\n"
-            "• «У вашего мастера освободилось окно» — точечно\n"
-            "• Сезонные акции и скидки\n\n"
-            "_Согласие можно отозвать в любой момент командой /unsubscribe._\n"
-            "_На напоминания о ваших записях согласие не нужно — они придут в любом случае._",
-            parse_mode="Markdown",
-            reply_markup=kb,
+    # Telegram callback identifies the channel only; it cannot establish Client authority.
+    if data in ("pdn_accept", "mkt_accept", "mkt_decline"):
+        await query.edit_message_text(
+            "Подтвердите привязку клиента и настройте согласия в приложении: " + APP_URL
         )
-        return
-
-    # Маркетинговое согласие
-    if data in ("mkt_accept", "mkt_decline"):
-        agreed = data == "mkt_accept"
-        flow = booking_flow.get(chat_id)
-        client_id = (
-            (flow or {}).get("client_id") or database.get_or_create_client(chat_id)
-        )
-        database.set_marketing_consent(client_id, agreed)
-
-        if agreed:
-            await query.edit_message_text(
-                "Спасибо ✨ Промокоды и напоминания включены.",
-            )
-        else:
-            await query.edit_message_text(
-                "Окей, только запись 👌 Если передумаешь — команда /subscribe.",
-            )
-
-        if flow:
-            # Согласия дошли из флоу записи — двигаем дальше: спросить имя
-            flow["stage"] = "name"
-            await context.bot.send_message(chat_id, "Как вас зовут?")
-        elif chat_id in pending_linkphone:
-            # Клиент пришёл из приложения «Поделитесь номером» ДО согласия —
-            # теперь согласие есть, показываем кнопку-контакт (интент не теряем).
-            pending_linkphone.discard(chat_id)
-            _lc = database.get_client(chat_id)
-            if _lc and _lc.get("phone"):
-                await context.bot.send_message(
-                    chat_id,
-                    "Готово — номер уже привязан 🙂 Откройте «Личный кабинет» в "
-                    "приложении: там ваши баллы и история визитов.",
-                    reply_markup=_keyboard_for(chat_id),
-                )
-            else:
-                _lkb = ReplyKeyboardMarkup(
-                    [[KeyboardButton("📱 Поделиться номером", request_contact=True)]],
-                    resize_keyboard=True, one_time_keyboard=True,
-                )
-                await context.bot.send_message(
-                    chat_id,
-                    "Остался последний шаг 👇\n\nПоделитесь номером — найду вас в "
-                    "нашей базе и подтяну баллы и историю прямо в приложение.\n\n"
-                    "_Жмите кнопку ниже. Номер нужен только чтобы вас узнать._",
-                    parse_mode="Markdown",
-                    reply_markup=_lkb,
-                )
-        else:
-            # Согласия пришли из глобального гейта (не из записи) — пускаем
-            # клиента в обычное общение с ботом.
-            await context.bot.send_message(
-                chat_id,
-                "Готово ✅ Теперь можно пользоваться ботом. Чем помочь?",
-                reply_markup=_keyboard_for(chat_id),
-            )
         return
 
     # Подтверждение записи

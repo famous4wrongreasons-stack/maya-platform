@@ -1131,60 +1131,32 @@ def applogin_poll(nonce: str) -> dict:
 
 # ─── Согласия на обработку ПД ───────────────────────────────────────────
 
-def save_consent(client_id: int, consent_given: bool, source: str = "telegram",
-                  consent_version: str = CONSENT_VERSION):
-    """Логирует факт согласия (или отказа) на обработку персональных данных."""
-    with _db() as conn:
-        conn.execute(
-            "INSERT INTO consents (client_id, consent_given, consent_at, "
-            "consent_version, source) VALUES (?, ?, ?, ?, ?)",
-            (client_id, 1 if consent_given else 0, _now(), consent_version, source),
-        )
+def save_consent(client_id: int, consent_given: bool, source: str = "telegram", consent_version: str = CONSENT_VERSION):
+    """Historical entry point is fail closed; only canonical Client commands write."""
+    raise RuntimeError("canonical_client_consent_required")
 
 
 def set_marketing_consent(client_id: int, consent_given: bool):
-    """
-    Помечает согласие/отказ на маркетинговые рассылки.
-    consent_given=True  → пишем marketing_consent_at = сейчас, чистим _revoked_at.
-    consent_given=False → чистим marketing_consent_at, пишем _revoked_at = сейчас.
-    """
+    """No SQL fallback may replace a canonical consent fact."""
+    raise RuntimeError("canonical_client_consent_required")
+
+
+def _canonical_delivery_consent_for_client(client_id: int) -> dict:
+    # Local id selects only the outgoing Telegram recipient. Canonical Client
+    # authority is resolved exclusively by an existing verified backend link.
+    from legacy_client_command_bridge import delivery_consent
     with _db() as conn:
-        if consent_given:
-            conn.execute(
-                "UPDATE clients SET marketing_consent_at = ?, "
-                "marketing_consent_revoked_at = NULL WHERE id = ?",
-                (_now(), client_id),
-            )
-        else:
-            conn.execute(
-                "UPDATE clients SET marketing_consent_at = NULL, "
-                "marketing_consent_revoked_at = ? WHERE id = ?",
-                (_now(), client_id),
-            )
+        row = conn.execute("SELECT telegram_chat_id FROM clients WHERE id = ?", (client_id,)).fetchone()
+    return delivery_consent(row["telegram_chat_id"]) if row else {}
 
 
 def has_marketing_consent(client_id: int) -> bool:
-    """True, если клиент согласился на маркетинговые рассылки и не отозвал."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT marketing_consent_at FROM clients WHERE id = ?",
-            (client_id,),
-        ).fetchone()
-        if not row:
-            return False
-        return bool(row["marketing_consent_at"])
+    return bool(_canonical_delivery_consent_for_client(client_id).get("marketing"))
 
 
 def has_marketing_consent_by_chat_id(telegram_chat_id: int) -> bool:
-    """То же, но по chat_id (удобно для рассылок)."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT marketing_consent_at FROM clients WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        ).fetchone()
-        if not row:
-            return False
-        return bool(row["marketing_consent_at"])
+    from legacy_client_command_bridge import delivery_consent
+    return bool(delivery_consent(telegram_chat_id).get("marketing"))
 
 
 # ─── Персональные настройки уведомлений клиента ──────────────────────────
@@ -1431,62 +1403,22 @@ def marketing_sent_within(client_id: int, days: int) -> bool:
 
 
 def has_valid_consent(client_id: int, consent_version: str = CONSENT_VERSION) -> bool:
-    """True, если у клиента есть действующее согласие текущей версии."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT consent_given FROM consents "
-            "WHERE client_id = ? AND consent_version = ? "
-            "ORDER BY id DESC LIMIT 1",
-            (client_id, consent_version),
-        ).fetchone()
-        return bool(row and row["consent_given"])
+    return bool(_canonical_delivery_consent_for_client(client_id).get("privacy"))
 
 
 def has_valid_consent_by_chat_id(telegram_chat_id: int) -> bool:
-    """True, если по этому Telegram-аккаунту есть подписанное согласие на ПД.
-
-    Используется глобальным гейтом до того, как пользователь как-либо
-    взаимодействовал с ботом (записи у него ещё нет → можно только
-    проверить, есть ли запись в clients и было ли подписано согласие).
-    """
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT id FROM clients WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        ).fetchone()
-        if not row:
-            return False
-        return has_valid_consent(row["id"])
+    from legacy_client_command_bridge import delivery_consent
+    return bool(delivery_consent(telegram_chat_id).get("privacy"))
 
 
 def has_made_marketing_decision_by_chat_id(telegram_chat_id: int) -> bool:
-    """True, если пользователь явно сделал выбор по маркетинговому согласию
-    (либо принял, либо отказался — главное, что вопрос ему задавали и
-    он на него ответил)."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT marketing_consent_at, marketing_consent_revoked_at "
-            "FROM clients WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        ).fetchone()
-        if not row:
-            return False
-        return bool(row["marketing_consent_at"] or row["marketing_consent_revoked_at"])
+    from legacy_client_command_bridge import delivery_consent
+    return bool(delivery_consent(telegram_chat_id).get("marketing_decided"))
 
 
 def consent_gate_status(telegram_chat_id: int) -> str:
-    """Сводный статус «все ли документы подписаны» для глобального гейта.
-
-    Возвращает:
-      'pass'           — ПД и маркетинг (любой выбор) пройдены, бот доступен
-      'need_pdn'       — нужно подписать согласие на ПД
-      'need_marketing' — ПД подписано, но решение по рассылке ещё не сделано
-    """
-    if not has_valid_consent_by_chat_id(telegram_chat_id):
-        return "need_pdn"
-    if not has_made_marketing_decision_by_chat_id(telegram_chat_id):
-        return "need_marketing"
-    return "pass"
+    from legacy_client_command_bridge import delivery_consent, consent_status
+    return consent_status(delivery_consent(telegram_chat_id))
 
 
 def export_consents_csv() -> str:

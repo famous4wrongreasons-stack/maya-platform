@@ -10,14 +10,12 @@ import { createHash } from 'crypto';
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import { CalendarSource, CrmProvider, UserRole } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
-import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { TenantContextService } from '../tenancy/tenant-context.service';
-import { UsersService } from '../users/users.service';
 import type { AiOnboardingBlueprint } from './ai-onboarding.types';
 import { AiOnboardingService } from './ai-onboarding.service';
 import { ConversationalOnboardingInterpreter } from './conversational-onboarding-interpreter';
-import { OnboardingService } from './onboarding.service';
+import { CanonicalTrialOnboardingService } from './canonical-trial-onboarding.service';
+import { AiConfirmationCoordinatorService } from './ai-confirmation-coordinator.service';
 import { SafeOnboardingInterpreter } from './safe-onboarding-interpreter';
 import { TrialActivationService } from './trial-activation.service';
 
@@ -102,14 +100,23 @@ describe('AiOnboardingService', () => {
     };
     const rateLimit = { assertPreflight: jest.fn() };
     const onboarding = {
-      createTrialSignup: jest.fn(),
-      resumeConfirmedTrialSignup: jest.fn(),
+      ownerSession: jest.fn().mockResolvedValue({
+        tenant: { id: 'tenant-1' },
+        user: { id: 'owner-1' },
+      }),
+      confirm: jest.fn().mockResolvedValue({
+        tenantId: 'tenant-1',
+        ownerUserId: 'owner-1',
+        ai_onboarding: {
+          status: 'waiting_for_crm',
+          next_step: 'connect_crm',
+        },
+      }),
     };
     const crm = {
       discoverCompaniesForCredential: jest.fn(),
       previewCredentials: jest.fn(),
     };
-    const internalCalendar = {};
     const safeInterpreter = new SafeOnboardingInterpreter();
     const interpreter = new ConversationalOnboardingInterpreter(
       { get: jest.fn().mockReturnValue(undefined) } as unknown as ConfigService,
@@ -118,18 +125,11 @@ describe('AiOnboardingService', () => {
     const service = new AiOnboardingService(
       prisma as unknown as PrismaService,
       interpreter,
-      onboarding as unknown as OnboardingService,
+      onboarding as unknown as CanonicalTrialOnboardingService,
+      onboarding as unknown as AiConfirmationCoordinatorService,
       crm as unknown as CrmService,
-      internalCalendar as InternalCalendarService,
       rateLimit as unknown as AuthRateLimitService,
-      new TenantContextService(),
-      {
-        authorizePendingToken: jest.fn(),
-        releaseCompletedTenant: jest.fn(),
-      } as unknown as TrialActivationService,
-      {
-        provisionCrmTeamAccess: jest.fn(),
-      } as unknown as UsersService,
+      { authorizePendingToken: jest.fn() } as unknown as TrialActivationService,
     );
 
     return {
@@ -359,30 +359,31 @@ describe('AiOnboardingService', () => {
     );
   });
 
-  it('does not create a second tenant when another confirmation owns the draft', async () => {
-    const token = 'a'.repeat(43);
-    const { service, onboarding } = createService({
-      findDraft: jest.fn().mockResolvedValue({
-        id: 'draft-1',
-        status: 'draft',
-        draftTokenHash: createHash('sha256').update(token).digest('hex'),
-        blueprintJson: completeBlueprint,
-        missingFieldsJson: [],
-        expiresAt: new Date(Date.now() + 60_000),
-        confirmedTenantId: null,
-      }),
-      claimDraft: jest.fn().mockResolvedValue({ count: 0 }),
+  it('propagates receipt conflicts without resetting the draft or deleting a tenant', async () => {
+    const { service, prisma, onboarding } = createService();
+    prisma.aiOnboardingDraft.findUnique.mockResolvedValue({
+      id: 'draft-1',
+      revision: 0,
+      status: 'confirming',
+      draftTokenHash: createHash('sha256').update('d'.repeat(43)).digest('hex'),
+      expiresAt: new Date(Date.now() + 10000),
+      blueprintJson: completeBlueprint,
     });
-
+    onboarding.confirm.mockRejectedValue(
+      new ConflictException('Changed receipt'),
+    );
     await expect(
       service.confirmDraft('draft-1', {
-        draftToken: token,
-        ownerEmail: 'owner@example.ru',
-        ownerName: 'Владелец',
-        ownerPhone: '+79990000000',
+        expectedDraftRevision: 0,
+        draftToken: 'd'.repeat(43),
+        trialActivationToken: 'a'.repeat(43),
+        ownerEmail: 'owner@example.invalid',
+        ownerName: 'Owner',
+        ownerPhone: '+79990001001',
       }),
-    ).rejects.toBeInstanceOf(ConflictException);
-    expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
+    ).rejects.toThrow(ConflictException);
+    expect(prisma.aiOnboardingDraft.updateMany).not.toHaveBeenCalled();
+    expect(prisma.tenant.delete).not.toHaveBeenCalled();
   });
 
   it('rejects a CRM staff identity that was not verified for the imported branch', async () => {
@@ -410,6 +411,8 @@ describe('AiOnboardingService', () => {
 
     await expect(
       service.confirmDraft('draft-1', {
+        expectedDraftRevision: 0,
+        trialActivationToken: 'a'.repeat(43),
         draftToken: token,
         ownerEmail: 'owner@example.ru',
         ownerName: 'Владелец',
@@ -425,7 +428,7 @@ describe('AiOnboardingService', () => {
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(claimDraft).not.toHaveBeenCalled();
-    expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
+    expect(onboarding.confirm).not.toHaveBeenCalled();
   });
 
   it('requires the owner to select their verified CRM employee profile', async () => {
@@ -453,6 +456,8 @@ describe('AiOnboardingService', () => {
 
     await expect(
       service.confirmDraft('draft-1', {
+        expectedDraftRevision: 0,
+        trialActivationToken: 'a'.repeat(43),
         draftToken: token,
         ownerEmail: 'owner@example.ru',
         ownerName: 'Владелец',
@@ -464,91 +469,40 @@ describe('AiOnboardingService', () => {
       },
     });
     expect(claimDraft).not.toHaveBeenCalled();
-    expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
+    expect(onboarding.confirm).not.toHaveBeenCalled();
   });
 
-  it('resumes the confirmed business instead of consuming another signup', async () => {
-    const token = 'a'.repeat(43);
-    const { service, onboarding } = createService({
-      findDraft: jest.fn().mockResolvedValue({
-        id: 'draft-1',
-        status: 'confirmed',
-        draftTokenHash: createHash('sha256').update(token).digest('hex'),
-        blueprintJson: completeBlueprint,
-        missingFieldsJson: [],
-        expiresAt: new Date(Date.now() + 60_000),
-        confirmedTenantId: 'tenant-1',
-      }),
+  it('delegates duplicate confirmation to the receipt and selects only its reserved owner', async () => {
+    const { service, prisma, onboarding } = createService();
+    prisma.aiOnboardingDraft.findUnique.mockResolvedValue({
+      id: 'draft-1',
+      revision: 0,
+      status: 'confirming',
+      draftTokenHash: createHash('sha256').update('d'.repeat(43)).digest('hex'),
+      expiresAt: new Date(Date.now() + 10000),
+      blueprintJson: completeBlueprint,
     });
-    onboarding.resumeConfirmedTrialSignup.mockResolvedValue({
-      access_token: 'access-token',
-      refresh_token: 'refresh-token',
-      tenant: { id: 'tenant-1', slug: 'muzhskaya-estetika' },
-      user: { id: 'owner-1', role: 'tenant_admin' },
-    });
-
-    const result = await service.confirmDraft('draft-1', {
-      draftToken: token,
-      ownerEmail: 'owner@example.ru',
-      ownerName: 'Владелец',
-      ownerPhone: '+79990000000',
-    });
-
-    expect(onboarding.resumeConfirmedTrialSignup).toHaveBeenCalledWith(
+    const dto = {
+      expectedDraftRevision: 0,
+      draftToken: 'd'.repeat(43),
+      trialActivationToken: 'a'.repeat(43),
+      ownerEmail: 'owner@example.invalid',
+      ownerName: 'Owner',
+      ownerPhone: '+79990001001',
+    };
+    const result = await service.confirmDraft('draft-1', dto);
+    expect(onboarding.confirm).toHaveBeenCalledWith(
+      'draft-1',
+      dto,
+      completeBlueprint,
+      expect.any(String),
+    );
+    expect(onboarding.ownerSession).toHaveBeenCalledWith(
       'tenant-1',
-      'owner@example.ru',
+      'owner-1',
       {},
     );
-    expect(onboarding.createTrialSignup).not.toHaveBeenCalled();
-    expect(result.ai_onboarding).toMatchObject({
-      draft_id: 'draft-1',
-      resumed: true,
-    });
-  });
-
-  it('uses the owner name internally when a solo specialist skipped a brand name', async () => {
-    const token = 'a'.repeat(43);
-    const deferredBlueprint: AiOnboardingBlueprint = {
-      ...completeBlueprint,
-      workMode: 'solo',
-      categoryId: 'solo_barber',
-      businessName: null,
-      businessNameDeferred: true,
-    };
-    const claimDraft = jest.fn().mockResolvedValue({ count: 0 });
-    const { service } = createService({
-      findDraft: jest.fn().mockResolvedValue({
-        id: 'draft-1',
-        status: 'draft',
-        draftTokenHash: createHash('sha256').update(token).digest('hex'),
-        blueprintJson: deferredBlueprint,
-        missingFieldsJson: [],
-        expiresAt: new Date(Date.now() + 60_000),
-        confirmedTenantId: null,
-      }),
-      claimDraft,
-    });
-
-    await expect(
-      service.confirmDraft('draft-1', {
-        draftToken: token,
-        ownerEmail: 'owner@example.ru',
-        ownerName: 'Артем',
-        ownerPhone: '+79990000000',
-      }),
-    ).rejects.toBeInstanceOf(ConflictException);
-
-    expect(claimDraft).toHaveBeenCalled();
-    const typedClaimDraft = claimDraft as jest.MockedFunction<
-      (args: {
-        data?: { blueprintJson?: AiOnboardingBlueprint };
-      }) => Promise<{ count: number }>
-    >;
-    const claim = typedClaimDraft.mock.calls[0]?.[0];
-    expect(claim.data?.blueprintJson).toMatchObject({
-      businessName: 'Артем',
-      businessNameDeferred: true,
-      businessNameGenerated: true,
-    });
+    expect(result.ai_onboarding.status).toBe('waiting_for_crm');
+    expect(prisma.tenant.delete).not.toHaveBeenCalled();
   });
 });

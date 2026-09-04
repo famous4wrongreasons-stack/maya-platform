@@ -1,3 +1,7 @@
+import { ForbiddenException } from '@nestjs/common';
+import { CurrentUser } from '../decorators/current-user.decorator';
+import { TenantScoped } from '../decorators/tenant-scoped.decorator';
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import {
   Body,
   Controller,
@@ -151,6 +155,33 @@ export class OnboardingController {
       draftId,
       dto,
       resolveAuthClientMetadata(request),
+    );
+  }
+
+  @Get('ai/confirmations/pending')
+  @TenantScoped()
+  pendingAiConfirmations(@CurrentUser() actor: AuthenticatedUser) {
+    if (!actor.tenantId)
+      throw new ForbiddenException('Tenant owner session required');
+    return this.aiOnboardingService.pendingConfirmations(
+      actor.tenantId,
+      actor.userId,
+    );
+  }
+
+  @Post('ai/drafts/:draftId/resume')
+  @TenantScoped()
+  @HttpCode(200)
+  resumeAiDraft(
+    @Param('draftId') draftId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    if (!actor.tenantId)
+      throw new ForbiddenException('Tenant owner session required');
+    return this.aiOnboardingService.resumeConfirmation(
+      draftId,
+      actor.tenantId,
+      actor.userId,
     );
   }
 

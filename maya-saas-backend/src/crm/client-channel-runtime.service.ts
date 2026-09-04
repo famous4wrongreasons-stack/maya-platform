@@ -18,6 +18,7 @@ import {
 } from './client-channel-link.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
+import { clientChannelSubjectHash } from './client-channel-subject';
 
 /** Only already verified provenance can issue another channel's challenge.
  * A cold-start Client with no trusted resolution fails closed; no heuristic enrollment.
@@ -30,7 +31,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     private readonly prisma: PrismaService,
     private readonly context: TenantContextService,
     private readonly channels: ClientChannelAuthenticatorService,
-    encryption: EncryptionService,
+    private readonly encryption: EncryptionService,
     private readonly consent: Package5Wave3CanonicalCutoverService,
   ) {
     const closedVerifier = {
@@ -184,8 +185,59 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         linked: true,
         privacy: Boolean(profile?.privacyConsentAt),
         marketing: Boolean(profile?.marketingConsentAt),
+        marketing_decided: Boolean(
+          await tx.clientConsentFact.findFirst({
+            where: {
+              tenantId: channel.tenantId,
+              clientId: links[0].clientId,
+              kind: 'marketing',
+            },
+            select: { id: true },
+          }),
+        ),
         client_link_required: false,
       };
     });
+  }
+
+  /** AC4 delivery reader. Caller must be the configured internal transport;
+   * recipient id selects an existing verified link and never creates authority.
+   * This is intentionally unavailable as a public channel authentication path.
+   */
+  async telegramDeliveryConsent(subject: string) {
+    if (!/^[1-9][0-9]{0,19}$/.test(subject))
+      throw new BadRequestException(
+        'Exact Telegram delivery recipient required',
+      );
+    const tenantId = this.context.requireTenantId();
+    const links = await this.prisma.clientChannelLink.findMany({
+      where: {
+        tenantId,
+        provider: 'telegram',
+        providerSubjectHash: clientChannelSubjectHash(
+          this.encryption,
+          'telegram',
+          subject,
+        ),
+        revokedAt: null,
+        verificationVersion: 1,
+        subjectHashVersion: 1,
+      },
+      take: 2,
+    });
+    if (links.length !== 1)
+      return { privacy: false, marketing: false, marketing_decided: false };
+    const profile = await this.prisma.customerProfile.findFirst({
+      where: { tenantId, clientId: links[0].clientId },
+    });
+    const decision = await this.prisma.clientConsentFact.findFirst({
+      where: { tenantId, clientId: links[0].clientId, kind: 'marketing' },
+      select: { id: true },
+    });
+    return {
+      privacy: Boolean(profile?.privacyConsentAt),
+      marketing: Boolean(profile?.marketingConsentAt),
+      marketing_decided: Boolean(decision),
+    };
   }
 }

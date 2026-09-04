@@ -1,3 +1,5 @@
+import { AiConfirmationCoordinatorService } from './ai-confirmation-coordinator.service';
+import { CanonicalTrialOnboardingService } from './canonical-trial-onboarding.service';
 import {
   BadRequestException,
   ConflictException,
@@ -13,10 +15,7 @@ import type { AuthClientMetadata } from '../auth/auth-client-metadata';
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import { CalendarSource, CrmProvider } from '../common/domain.enums';
 import { CrmService } from '../crm/crm.service';
-import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { TenantContextService } from '../tenancy/tenant-context.service';
-import { UsersService } from '../users/users.service';
 import type {
   AiOnboardingBlueprint,
   AiOnboardingInterpretation,
@@ -37,7 +36,6 @@ import {
   DiscoverAiOnboardingCrmDto,
   ImportAiOnboardingCrmDto,
 } from './dto/ai-onboarding.dto';
-import { OnboardingService } from './onboarding.service';
 import { ConversationalOnboardingInterpreter } from './conversational-onboarding-interpreter';
 import { TrialActivationService } from './trial-activation.service';
 
@@ -49,13 +47,11 @@ export class AiOnboardingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly interpreter: ConversationalOnboardingInterpreter,
-    private readonly onboardingService: OnboardingService,
+    private readonly canonicalTrial: CanonicalTrialOnboardingService,
+    private readonly confirmation: AiConfirmationCoordinatorService,
     private readonly crmService: CrmService,
-    private readonly internalCalendarService: InternalCalendarService,
     private readonly rateLimitService: AuthRateLimitService,
-    private readonly tenantContext: TenantContextService,
     private readonly trialActivationService: TrialActivationService,
-    private readonly usersService: UsersService,
   ) {}
 
   listTemplates() {
@@ -155,8 +151,9 @@ export class AiOnboardingService {
       ),
     );
     const updated = await this.prisma.aiOnboardingDraft.update({
-      where: { id: draft.id },
+      where: { id: draft.id, revision: draft.revision, status: 'draft' },
       data: {
+        revision: { increment: 1 },
         templateId: interpretation.blueprint.templateId,
         blueprintJson: this.asJson(interpretation.blueprint),
         missingFieldsJson: interpretation.missingFields,
@@ -298,8 +295,9 @@ export class AiOnboardingService {
       source: 'safe_fallback',
     };
     const updated = await this.prisma.aiOnboardingDraft.update({
-      where: { id: draft.id },
+      where: { id: draft.id, revision: draft.revision, status: 'draft' },
       data: {
+        revision: { increment: 1 },
         templateId: blueprint.templateId,
         blueprintJson: this.asJson(blueprint),
         missingFieldsJson: missingFields,
@@ -333,30 +331,6 @@ export class AiOnboardingService {
   ) {
     const draft = await this.getAuthorizedDraft(draftId, dto.draftToken);
     this.assertNotExpired(draft);
-    if (draft.status === 'confirmed' && draft.confirmedTenantId) {
-      const signup = await this.onboardingService.resumeConfirmedTrialSignup(
-        draft.confirmedTenantId,
-        dto.ownerEmail,
-        metadata,
-      );
-      const blueprint = this.readBlueprint(draft.blueprintJson);
-
-      return {
-        ...signup,
-        ai_onboarding: {
-          draft_id: draft.id,
-          template_id: blueprint.templateId,
-          blueprint,
-          resumed: true,
-        },
-        branding_mode: 'logo_only',
-        next_step:
-          blueprint.calendarSource === CalendarSource.EXTERNAL
-            ? 'connect_crm'
-            : 'upload_logo_or_open_app',
-      };
-    }
-    this.assertEditable(draft);
     let blueprint = this.applyConfirmationOverrides(
       this.readBlueprint(draft.blueprintJson),
       dto,
@@ -376,166 +350,79 @@ export class AiOnboardingService {
     }
     this.assertCrmTeamAssignments(blueprint, dto);
 
-    const claimed = await this.prisma.aiOnboardingDraft.updateMany({
-      where: {
-        id: draft.id,
-        status: 'draft',
-        expiresAt: { gt: new Date() },
-      },
-      data: {
-        status: 'confirming',
-        blueprintJson: this.asJson(blueprint),
-        missingFieldsJson: [],
-      },
-    });
-    if (claimed.count !== 1) {
-      throw new ConflictException({
-        message: 'AI onboarding draft is already being confirmed',
-        error: { code: 'ai_onboarding_confirmation_in_progress' },
-      });
-    }
-
-    let createdTenantId: string | null = null;
-    try {
-      const businessName = blueprint.businessName!;
-      const signup = await this.onboardingService.createTrialSignup(
-        {
-          name: businessName,
-          slug: await this.createAvailableSlug(businessName),
-          ownerEmail: dto.ownerEmail,
-          ownerName: dto.ownerName,
-          ownerPhone: dto.ownerPhone,
-          password: dto.password,
-          trialActivationToken: dto.trialActivationToken,
-          industryPresetId: blueprint.industryPresetId,
-          calendarSource: blueprint.calendarSource,
-          branchName: businessName,
-          branchAddress: blueprint.crmAddress ?? undefined,
-          branchTimezone: blueprint.crmTimezone ?? undefined,
-        },
+    const result = await this.confirmation.confirm(
+      draft.id,
+      dto,
+      blueprint,
+      `${this.slugify(blueprint.businessName!) || 'maya'}-${this.hashToken(draft.id).slice(0, 12)}`,
+    );
+    return {
+      ...(await this.canonicalTrial.ownerSession(
+        result.tenantId,
+        result.ownerUserId,
         metadata,
-        { expectedActivationId: draft.trialActivationId },
-      );
-      createdTenantId = signup.tenant.id;
-      const teamSetup =
-        blueprint.crmImported &&
-        (dto.ownerExternalStaffId || (dto.teamMembers?.length ?? 0) > 0)
-          ? await this.tenantContext.runAsSystemTenant(createdTenantId, () =>
-              this.usersService.provisionCrmTeamAccess({
-                tenantId: createdTenantId!,
-                tenantSlug: signup.tenant.slug,
-                ownerUserId: signup.user.id,
-                ownerExternalStaffId: dto.ownerExternalStaffId,
-                members: (dto.teamMembers ?? []).map((member) => ({
-                  externalStaffId: member.externalStaffId,
-                  displayName: member.displayName,
-                  title: member.title,
-                  role: member.role,
-                  email: member.email,
-                  phone: member.phone,
-                })),
-              }),
-            )
-          : null;
-
-      if (blueprint.crmImported) {
-        await this.prisma.brandingSettings.update({
-          where: { tenantId: createdTenantId },
-          data: {
-            appName: businessName,
-            logoUrl: blueprint.crmLogoUrl ?? undefined,
-          },
-        });
-      }
-
-      if (blueprint.calendarSource === CalendarSource.INTERNAL) {
-        await this.tenantContext.runAsSystemTenant(createdTenantId, () =>
-          this.provisionInternalCalendar(createdTenantId!, blueprint),
-        );
-      }
-
-      await this.prisma.aiOnboardingDraft.update({
-        where: { id: draft.id },
-        data: {
-          status: 'confirmed',
-          confirmedTenantId: createdTenantId,
-          blueprintJson: this.asJson(blueprint),
-        },
-      });
-
-      return {
-        ...signup,
-        ai_onboarding: {
-          draft_id: draft.id,
-          template_id: blueprint.templateId,
-          blueprint,
-        },
-        branding_mode: 'logo_only',
-        next_step:
-          blueprint.calendarSource === CalendarSource.EXTERNAL
-            ? 'connect_crm'
-            : 'upload_logo_or_open_app',
-        team_setup: teamSetup,
-      };
-    } catch (error) {
-      if (createdTenantId) {
-        await this.trialActivationService.releaseCompletedTenant(
-          createdTenantId,
-        );
-        await this.prisma.tenant.delete({
-          where: { id: createdTenantId },
-        });
-      }
-      await this.prisma.aiOnboardingDraft.updateMany({
-        where: { id: draft.id, status: 'confirming' },
-        data: { status: 'draft', confirmedTenantId: null },
-      });
-      throw error;
-    }
+      )),
+      ai_onboarding: result.ai_onboarding,
+      branding_mode: 'logo_only',
+      next_step: result.ai_onboarding.next_step,
+    };
   }
 
-  private async provisionInternalCalendar(
-    tenantId: string,
-    blueprint: AiOnboardingBlueprint,
-  ) {
-    const setup = await this.internalCalendarService.getSetup(tenantId);
-    const ownerProvider = setup.providers[0];
-    if (!ownerProvider) {
-      throw new ConflictException('Owner provider was not created');
-    }
-
-    await this.internalCalendarService.bootstrapUpdateProvider(
-      tenantId,
-      ownerProvider.id,
-      {
-        title: blueprint.providerTitle,
+  async pendingConfirmations(tenantId: string, ownerUserId: string) {
+    const member = await this.prisma.membership.findUnique({
+      where: { userId_tenantId: { tenantId, userId: ownerUserId } },
+      include: { user: true },
+    });
+    if (
+      !member ||
+      member.status !== 'active' ||
+      member.user.status !== 'active' ||
+      !['tenant_owner', 'business_owner'].includes(member.role)
+    )
+      throw new UnauthorizedException('Exact active owner required');
+    const drafts = await this.prisma.aiOnboardingDraft.findMany({
+      where: {
+        status: 'confirming',
+        AND: [
+          {
+            confirmationReceiptJson: {
+              path: ['expectedTenantId'],
+              equals: tenantId,
+            },
+          },
+          {
+            confirmationReceiptJson: {
+              path: ['ownerUserId'],
+              equals: ownerUserId,
+            },
+          },
+        ],
+        trialActivation: { tenantId, status: 'completed' },
       },
+      select: { id: true, revision: true },
+      take: 2,
+    });
+    if (drafts.length > 1)
+      throw new ConflictException(
+        'Ambiguous confirmation requires explicit review',
+      );
+    return { confirmations: drafts };
+  }
+
+  async resumeConfirmation(
+    draftId: string,
+    tenantId: string,
+    ownerUserId: string,
+  ) {
+    const result = await this.confirmation.resume(
+      draftId,
+      tenantId,
+      ownerUserId,
     );
-    const providers = [ownerProvider];
-    for (let index = 1; index < blueprint.providerCount!; index += 1) {
-      providers.push(
-        await this.internalCalendarService.bootstrapCreateProvider(tenantId, {
-          displayName: `${blueprint.providerTitle} ${index + 1}`,
-          title: blueprint.providerTitle,
-        }),
-      );
-    }
-
-    for (const service of blueprint.services) {
-      await this.internalCalendarService.bootstrapCreateService(tenantId, {
-        name: service.name,
-        price: service.price,
-        durationMinutes: service.durationMinutes,
-      });
-    }
-
-    for (const provider of providers) {
-      await this.internalCalendarService.bootstrapReplaceWeeklyAvailability(
-        tenantId,
-        provider.id,
-        blueprint.weeklyRules,
-      );
-    }
+    return {
+      ai_onboarding: result.ai_onboarding,
+      next_step: result.ai_onboarding.next_step,
+    };
   }
 
   private applyConfirmationOverrides(
@@ -935,19 +822,6 @@ export class AiOnboardingService {
     }
   }
 
-  private async createAvailableSlug(name: string): Promise<string> {
-    const base = this.slugify(name) || `maya-${randomBytes(4).toString('hex')}`;
-    for (let attempt = 0; attempt < 20; attempt += 1) {
-      const slug = attempt === 0 ? base : `${base}-${attempt + 1}`;
-      const existing = await this.prisma.tenant.findUnique({
-        where: { slug },
-        select: { id: true },
-      });
-      if (!existing) return slug;
-    }
-    return `${base}-${randomBytes(4).toString('hex')}`;
-  }
-
   private slugify(value: string): string {
     const transliterated = value
       .toLowerCase()
@@ -972,6 +846,7 @@ export class AiOnboardingService {
     draft: {
       id: string;
       status: string;
+      revision: number;
       blueprintJson: unknown;
       missingFieldsJson: unknown;
       expiresAt: Date;
@@ -989,6 +864,7 @@ export class AiOnboardingService {
   ) {
     return {
       draft_id: draft.id,
+      revision: draft.revision,
       draft_token: draftToken,
       status: draft.status,
       assistant_message:
