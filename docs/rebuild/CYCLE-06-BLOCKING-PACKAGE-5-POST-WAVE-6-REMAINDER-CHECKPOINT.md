@@ -1,20 +1,27 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — approved A18/A26/AI remediation DEPLOYED; final inventory
-FAIL / STOP on B5/B6 legacy Client/preference writers**.
+Status: **CURRENT — A18/A26/AI deployed baseline ACCEPTED; B5/B6 contracts
+reconstructed; STOP on minimal schema and explicit preference/CRM policy proposals**.
 
-Date: 2026-09-04. Latest accepted decision: `03c1c3a7`, A26 Internal Trial
-Bootstrap V1. Runtime source `94543056` is deployed at
+Date: 2026-09-04. Latest accepted checkpoint: `225ba5e1`; the user accepted the
+A18/A26/AI deployment and authorized conditional B5/B6 remediation.
+Runtime source `94543056` is deployed at
 `/opt/maya-saas/releases/20260904-p5-final-remediation-94543056`.
 Package 5 is not complete. No Wave 7 or Chapter 7 is created or started.
 
 Current evidence and exact STOP:
 
+- `CYCLE-06-BLOCKING-PACKAGE-5-B5-B6-CONTRACT-RECONSTRUCTION-STOP-REPORT.md`;
+- `package5-b5-visit-mood-v1-decision-proposal.md`;
+- `package5-b5-b6-client-preferences-schema-v1-proposal.md`;
+- `evidence/package5-b5-b6-contract-reconstruction.json`;
 - `CYCLE-06-BLOCKING-PACKAGE-5-DEPLOYED-REMEDIATION-FINAL-RECHECK-STOP-REPORT.md`;
 - `evidence/package5-deployed-remediation-final-recheck.json`;
 - `CYCLE-06-BLOCKING-PACKAGE-5-A26-INTERNAL-BOOTSTRAP-REMEDIATION-REPORT.md`.
 
-This replaces the previous undeployed/internal-trial-contract remainder.
+This replaces the prior request to authorize B5/B6 reconstruction. That
+authorization is now supplied; implementation stops only because the user's
+Stage 1/2 require approval of the newly identified schema/business decisions.
 Earlier STOP reports remain historical evidence; their unresolved statuses
 are not the current statuses of already repaired paths.
 
@@ -86,15 +93,37 @@ submitted to those live mutation endpoints. Global bypass totals are not
 inferred from the two observed endpoints: further inventory certification
 stopped when these blockers were confirmed.
 
+## Current reconstruction result
+
+B5 is a Client-owned default plus an exact per-visit preference. CustomerProfile
+and Appointment have no local mood fields. CRM presentation is a separate effect;
+Package 1 A07 already supplies a canonical comment executor, but does not decide
+whether B5 must automatically synchronize or how its local/provider outcomes
+are coupled. Proposed option A keeps V1 local to Maya; option B retains CRM sync
+only with an explicitly proved durable handoff and Client/appointment authority.
+
+B6 is Client-owned communication preference state, separate from consent.
+Existing tenant-wide/member-owned preference models cannot represent it. Row
+existence currently changes downstream policy, and enabled reminder hours 0 has
+inconsistent meanings. Those decisions cannot be inferred from legacy constants.
+The exact proposal is three nullable fields, no new models, no backfill, plus
+explicit V1 default/no-op/reminder semantics. Neither proposal is yet approved.
+
+Production catalogs/source hashes and health were checked read-only; runtime is
+unchanged, all 73 repository migrations are present, pending 0. No new schema,
+runtime, ratchet, proof or deployment implementation has begun.
+
 ## Remaining work, in order
 
-1. Obtain separate authorization for B5/B6 remediation. Reconstruct exact
-   Client preference/settings contracts and the existing Package 1 comment
-   command route from approved foundations. If new business/schema scope is
-   required, propose it and STOP; do not invent fields, authority, migration
-   exclusions or transport exceptions. Preserve the newly deployed remediation.
-2. After approved remediation passes local proof and mandatory deployment
-   gates, deploy and verify its actual live Python/PHP/Nest routing read-only.
+1. Obtain the owner decision on the exact **B5 mood/CRM option** and
+   **B5/B6 three-field schema plus V1 preference policy** proposals. Preserve
+   the deployed A18/A26/AI baseline. Do not request repeat approval for the
+   already accepted Client binding/challenge/receipt or generic A07 foundation.
+2. After approval, implement the bounded additive schema, guards, local proof
+   and clean replay; apply only after an expected-only green production migration
+   gate. Then finish the canonical runtime/callers/readers and strict ratchets.
+   After local adversarial proof and mandatory deployment gates, deploy and
+   verify actual live Python/PHP/Nest routing read-only.
    A local helper's canonical code is not evidence that production runs it.
 3. Restart **PACKAGE 5 FINAL ADVERSARIAL VERIFICATION / COMPLETION GATE** from
    the beginning, including all 13 families, production-reachable scripts,
@@ -123,11 +152,16 @@ PACKAGE 5 FAMILY INVENTORY COVERAGE: 13/13
 APPROVED A18/A26/AI REMEDIATION DEPLOYED: YES
 REMEDIATION PRODUCTION VERIFICATION: PASS
 CURRENT BLOCKERS: B5 /api/set-visit-mood; B6 /api/cabinet/notify-prefs
+B5/B6 CONTRACT RECONSTRUCTION: COMPLETE
+EXISTING SCHEMA SUFFICIENT: NO
+ADDITIONAL SCHEMA REQUIRED: YES — THREE NULLABLE FIELDS PROPOSED
+B5/B6 SCHEMA/POLICY APPROVED: NO
+B5/B6 RUNTIME IMPLEMENTATION STARTED: NO
 PACKAGE 5 GLOBAL CANONICAL COVERAGE: NOT PROVEN
 REMEDIATION FULL REGRESSION: PASS — 327 SUITES / 2726 TESTS
 FINAL FULL REGRESSION: NOT RUN — STOP AFTER NEW INVENTORY BLOCKERS
 PENDING MIGRATIONS: 0
-SCHEMA DRIFT: NONE
+SCHEMA DRIFT: NONE AT ACCEPTED DEPLOYMENT BASELINE; FULL GATE NOT RERUN
 REAL PRODUCTION MUTATIONS FOR FINAL PROOF: 0
 WAVE 7 CREATED: NO
 CHAPTER 6 COMPLETE: NOT DECLARED
