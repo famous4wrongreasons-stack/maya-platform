@@ -41,6 +41,12 @@ const CONTROLLED_PROOF_FIXTURES = [
     refusalMarker: 'P4-09 lineage proof refuses non-disposable databases',
   },
   {
+    path: 'scripts/package5-a18-client-link-challenge-proof.ts',
+    databaseGuard: "url.pathname.startsWith('/maya_c06_a18_challenge_v1_')",
+    refusalMarker:
+      'Challenge proof requires its owned isolated PostgreSQL database',
+  },
+  {
     path: 'scripts/package5-common-authority-foundation-proof.ts',
     databaseGuard: "name.startsWith('maya_c06_p5_foundation_')",
     refusalMarker:
@@ -93,7 +99,10 @@ function isControlledProofFixture(file: SourceFile): boolean {
   return Boolean(
     fixture &&
     file.code.includes(fixture.databaseGuard) &&
-    file.code.includes(fixture.refusalMarker),
+    file.code.includes(fixture.refusalMarker) &&
+    (file.path !== 'scripts/package5-a18-client-link-challenge-proof.ts' ||
+      (file.code.includes("url.hostname !== '127.0.0.1'") &&
+        file.code.includes("url.port !== '55487'"))),
   );
 }
 
@@ -123,6 +132,7 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
       'scripts/p4-09-all7-executable-proof.ts',
       'scripts/p4-09-immutable-offer-value-version-schema-proof.ts',
       'scripts/p4-09-offer-replacement-lineage-schema-proof.ts',
+      'scripts/package5-a18-client-link-challenge-proof.ts',
       'scripts/package5-common-authority-foundation-proof.ts',
       'scripts/package5-wave3-all8-executable-proof.ts',
       CANONICAL_OWNER,
@@ -137,6 +147,20 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
     expect(productionRegistrationOwners(files)).toEqual([CANONICAL_OWNER]);
   });
 
+  it('requires loopback and the owned port for the exact A18 challenge proof', () => {
+    const file = files.find(
+      (x) => x.path === 'scripts/package5-a18-client-link-challenge-proof.ts',
+    )!;
+    for (const marker of [
+      "url.hostname !== '127.0.0.1'",
+      "url.port !== '55487'",
+    ])
+      expect(
+        productionRegistrationOwners([
+          { ...file, code: file.code.replace(marker, 'false') },
+        ]),
+      ).toEqual([file.path]);
+  });
   it('still catches a real direct Client or CrmClientLink owner', () => {
     const syntheticBypasses: SourceFile[] = [
       {

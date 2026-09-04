@@ -39,13 +39,10 @@ export class CanonicalTrialOnboardingService {
     if (!dto.trialActivationToken || dto.trialActivationToken.length < 32)
       throw new BadRequestException('Trial activation claim is required');
     this.tenants.assertHostNamesAllowed({ slug: dto.slug });
-    // Billing/extra calendar setup remains under its existing canonical flow.
-    if (
-      dto.planId ||
-      (dto.calendarSource && dto.calendarSource !== CalendarSource.EXTERNAL)
-    )
+    // Paid plan selection remains under the existing Package 4 authority.
+    if (dto.planId)
       throw new BadRequestException(
-        'Trial activation requires canonical external CRM setup; configure other capabilities after activation',
+        'Choose a paid plan through canonical billing after trial activation',
       );
     const activationTokenHash = createHash('sha256')
       .update(dto.trialActivationToken)
@@ -73,6 +70,7 @@ export class CanonicalTrialOnboardingService {
         defaultCurrency: 'RUB',
         defaultLocale: 'ru-RU',
         trialEndsAt: new Date(Date.now() + TRIAL_PERIOD_DAYS * 86400000),
+        calendarSource: dto.calendarSource ?? CalendarSource.EXTERNAL,
       },
       owner: {
         email: dto.ownerEmail.trim().toLowerCase(),
@@ -81,6 +79,7 @@ export class CanonicalTrialOnboardingService {
           ? this.encryption.encrypt(dto.ownerName.trim())
           : null,
         passwordHash: await bcrypt.hash(password, 10),
+        displayName: dto.ownerName?.trim(),
       },
       branch: {
         name: dto.branchName || dto.name,
@@ -130,9 +129,12 @@ export class CanonicalTrialOnboardingService {
         user: this.users.serializeUser(member.user),
         tenant: this.tenants.serializeTenant(tenant),
         temporary_password: null,
-        booking_mode: 'preview',
+        booking_mode: tenant.calendarSource === 'internal' ? 'live' : 'preview',
         calendar_source: tenant.calendarSource,
-        next_step: 'connect_crm',
+        next_step:
+          tenant.calendarSource === 'internal'
+            ? 'configure_internal_calendar'
+            : 'connect_crm',
         trial: {
           days: TRIAL_PERIOD_DAYS,
           ends_at: tenant.trialEndsAt,

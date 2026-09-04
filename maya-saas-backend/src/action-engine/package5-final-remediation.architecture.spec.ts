@@ -33,7 +33,7 @@ function assertCanonicalInitiator(source: string, required: string) {
   if (
     !source.includes(required) ||
     directBusinessWrite.test(source) ||
-    /(?:tenantsService\.createTenant|deleteFailedTrialTenant|releaseCompletedTenant|provisionCrmTeamAccess|bootstrapCreateProvider|bootstrapCreateService)/.test(
+    /(?:tenantsService\.createTenant|deleteFailedTrialTenant|releaseCompletedTenant|provisionCrmTeamAccess|bootstrapCreateProvider|bootstrapCreateService|bootstrapEnsureProviderForUser)/.test(
       source,
     )
   )
@@ -129,6 +129,52 @@ describe('Package 5 final A18/A26/AI production bypass protection', () => {
         'this.confirmation.confirm',
       ),
     ).toThrow();
+  });
+  it('preserves channel proof and stable consent identity through the PHP transport', () => {
+    const proxy = read(
+      'maya-saas-backend/deploy/vps/package5-client-consent-proxy.php',
+    );
+    expect(proxy).toContain("'idempotency_key'");
+    expect(proxy).toContain("'HTTP_AUTHORIZATION' => 'Authorization'");
+    expect(proxy).toContain(
+      "'HTTP_X_TELEGRAM_INITDATA' => 'X-Telegram-InitData'",
+    );
+    expect(proxy).toContain('array_diff(array_keys($input), $allowed)');
+    expect(proxy).not.toMatch(/INSERT INTO|UPDATE clients|\(bool\)/);
+  });
+  it('confines the initial owner/provider to the atomic activation with no generated schedules', () => {
+    const bootstrap = backend(
+      'package5-wave2/trial-activation-bootstrap.service.ts',
+    );
+    expect(bootstrap).toContain('tx.internalProvider.create');
+    expect(bootstrap).toContain('userId: ids.ownerUserId');
+    expect(bootstrap).toContain('branchId: ids.branchId');
+    expect(bootstrap).toContain("command.tenant.calendarSource === 'internal'");
+    expect(bootstrap).not.toMatch(
+      /internal(?:Availability|Service|ProviderService)\w*\.(?:create|upsert|update)/,
+    );
+    const legacy = backend('internal-calendar/internal-calendar.service.ts');
+    const helper = legacy.slice(
+      legacy.indexOf('  bootstrapEnsureProviderForUser('),
+      legacy.indexOf('  async getSetup('),
+    );
+    expect(helper).toContain('Promise.reject');
+    expect(helper).not.toMatch(/\.(?:create|upsert|update|delete)/);
+    expect(() =>
+      assertCanonicalInitiator(
+        trial + '\nthis.calendar.bootstrapEnsureProviderForUser(a,b)',
+        'this.bootstrapper.activate',
+      ),
+    ).toThrow();
+    for (const file of [
+      'maya-os-site/index.html',
+      'сайт и приложение/app.html',
+    ]) {
+      const client = read(file);
+      expect(client.match(/expectedDraftRevision:/g)).toHaveLength(2);
+      expect(client).toContain('body.trialActivationToken = activationToken');
+      expect(client).toContain('meResumeAiConfirmation');
+    }
   });
   it('requires a real durable CRM prerequisite and keeps completed child outcomes', () => {
     expect(coordinator).toContain("'waiting_for_crm'");

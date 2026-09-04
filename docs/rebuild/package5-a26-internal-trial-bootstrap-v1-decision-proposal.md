@@ -1,6 +1,11 @@
 # Package 5 final remediation — ordinary internal trial bootstrap decision
 
-Status: **PROPOSED — NOT APPROVED; runtime deployment STOP**
+Status: **APPROVED at checkpoint 03c1c3a7 — local implementation/proof PASS; production gates pending**
+
+The approving instruction narrows the initial facts to tenant/owner/provider.
+No automatic schedules/availability rules, services, prices, extra staff or CRM
+identities are created. This explicit approval restriction supersedes the
+proposed default availability below; later setup uses existing canonical owners.
 
 This is a remaining contract within A26 final remediation, not a new wave. The
 approved D1 AI receipt schema and D2 CRM handoff A remain unchanged.
@@ -88,3 +93,5 @@ INTERNAL TRIAL PROTOCOL EXTENSION IMPLEMENTED: NO
 PRODUCTION RUNTIME REMEDIATION DEPLOYED: NO
 WAVE 7 CREATED: NO
 ```
+
+Current implementation/proof: see `CYCLE-06-BLOCKING-PACKAGE-5-A26-INTERNAL-BOOTSTRAP-REMEDIATION-REPORT.md`. The proposed extension is now implemented with the approval's no-automatic-schedules restriction; the original proposal verdict above is historical.

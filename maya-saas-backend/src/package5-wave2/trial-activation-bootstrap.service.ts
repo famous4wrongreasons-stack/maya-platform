@@ -17,12 +17,14 @@ export interface TrialActivationBootstrapCommand {
     defaultLocale: string;
     defaultCurrency: string;
     trialEndsAt: Date;
+    calendarSource?: 'internal' | 'external';
   };
   owner: {
     email: string;
     phone?: string | null;
     encryptedName?: string | null;
     passwordHash: string;
+    displayName?: string;
   };
   branch: {
     name: string;
@@ -76,6 +78,8 @@ export class TrialActivationBootstrapService {
         throw new ConflictException(
           'Draft activation requires a verified immutable confirmation receipt',
         );
+      if (boundDraft && command.tenant.calendarSource === 'internal')
+        throw new ConflictException('AI receipt requires real CRM onboarding');
       if (activation.status === 'completed' && activation.tenantId) {
         const ids = this.ids(command.activationTokenHash);
         if (activation.tenantId !== ids.tenantId) {
@@ -103,7 +107,7 @@ export class TrialActivationBootstrapService {
           slug,
           subdomain: slug,
           status: 'trial',
-          calendarSource: 'external',
+          calendarSource: command.tenant.calendarSource ?? 'external',
           defaultTimezone: command.tenant.defaultTimezone,
           defaultLocale: command.tenant.defaultLocale,
           defaultCurrency: command.tenant.defaultCurrency,
@@ -150,6 +154,20 @@ export class TrialActivationBootstrapService {
           },
         },
       });
+      // Approved A26 V1: one initial provider, inside the same activation commit.
+      // Schedules/services and all later changes belong to canonical A28 commands.
+      if (command.tenant.calendarSource === 'internal') {
+        await tx.internalProvider.create({
+          data: {
+            id: `p5ip_${ids.tenantId.slice(4)}`,
+            tenantId: ids.tenantId,
+            userId: ids.ownerUserId,
+            branchId: ids.branchId,
+            displayName: command.owner.displayName?.trim() || 'Владелец',
+            title: 'Специалист',
+          },
+        });
+      }
       await tx.trialActivation.update({
         where: { id: activation.id },
         data: {
@@ -174,6 +192,34 @@ export class TrialActivationBootstrapService {
   }
 
   private validate(command: TrialActivationBootstrapCommand) {
+    const allowed = (value: object, fields: string[]) =>
+      Object.keys(value).every((key) => fields.includes(key));
+    if (
+      !allowed(command, ['activationTokenHash', 'tenant', 'owner', 'branch']) ||
+      !allowed(command.tenant, [
+        'name',
+        'slug',
+        'defaultTimezone',
+        'defaultLocale',
+        'defaultCurrency',
+        'trialEndsAt',
+        'calendarSource',
+      ]) ||
+      !allowed(command.owner, [
+        'email',
+        'phone',
+        'encryptedName',
+        'passwordHash',
+        'displayName',
+      ]) ||
+      !allowed(command.branch, ['name', 'address', 'phone', 'timezone']) ||
+      !['internal', 'external'].includes(
+        command.tenant.calendarSource ?? 'external',
+      )
+    )
+      throw new BadRequestException(
+        'Bootstrap identity and mode must be server-derived',
+      );
     if (!/^[0-9a-f]{64}$/.test(command.activationTokenHash)) {
       throw new BadRequestException('Activation token hash is invalid');
     }

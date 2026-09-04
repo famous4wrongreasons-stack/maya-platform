@@ -5056,6 +5056,25 @@ const TabIcUser = (c, s) => TabSvg(c, s, ["M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
 const TabIcCard = (c, s) => TabSvg(c, s, ["M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z", "M3 10h18", "M7 15h4"]);
 // SaaS bundle is used here only to choose the shell. Every protected request
 // still verifies the JWT and tenant membership on the backend.
+async function meManualTrialActivation(api, flow) {
+  var key = 'me_manual_trial_activation:' + (flow || 'manual') + ':' + api;
+  var token = sessionStorage.getItem(key);
+  if (token) return token;
+  var response = await fetch(api + '/onboarding/trial-activations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'maya_os' }) });
+  var value = await response.json();
+  if (!response.ok || !value.activation_token) throw new Error('Не удалось начать регистрацию. Повторите попытку.');
+  sessionStorage.setItem(key, value.activation_token);
+  return value.activation_token;
+}
+async function meResumeAiConfirmation(af) {
+  var pending = await af('/onboarding/ai/confirmations/pending', { method: 'GET' });
+  var items = pending && pending.confirmations || [];
+  if (items.length > 1) throw new Error('Нужна проверка незавершённой настройки.');
+  if (!items.length) return;
+  var resumed = await af('/onboarding/ai/drafts/' + encodeURIComponent(items[0].id) + '/resume', { method: 'POST' });
+  if (!resumed.ai_onboarding || resumed.ai_onboarding.status !== 'completed')
+    throw new Error('Настройка сохранена и ожидает подключения выбранной CRM.');
+}
 function meSaasCurrentBundle() {
   try {
     var ctx = window.__ME_SAAS_CTX;
@@ -6983,7 +7002,7 @@ function ALogin() {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ draftToken: s.draftToken })
       }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (res) {
         if (!res.ok) { lgAiClearDraftSession(); setLgAiMsgs([{ role: 'bot', text: lgAiGreeting }]); return; } // invalid/expired — не залипаем
-        lgAiDraft.current = { id: s.draftId, token: s.draftToken };
+        lgAiDraft.current = { id: s.draftId, token: s.draftToken, revision: res.d.revision };
         if (res.d.blueprint) setLgAiBlueprint(res.d.blueprint);
         if (res.d.missing_fields) setLgAiMissing(res.d.missing_fields);
         setLgAiMsgs([{ role: 'bot', text: 'С возвращением — я сохранила ваш черновик. Продолжим или можно «Начать заново».' }]);
@@ -7029,9 +7048,11 @@ function ALogin() {
     api = String(api).replace(/\/+$/, '');
     var slugBase = lgCrTranslit(nm) || ('maya-' + Date.now().toString(36));
     try {
+      var activationToken = await meManualTrialActivation(api);
       var res = null, lastErr = null, slug = slugBase, attempt = 0;
       while (attempt < 2) {
         var body = { name: nm, slug: slug, ownerEmail: em, branchName: nm, branchTimezone: 'Europe/Moscow', calendarSource: lgCr.cal };
+        body.trialActivationToken = activationToken;
         if (lgCr.cal === 'internal' && lgCr.tpl) body.industryPresetId = lgCr.tpl; // не форсим solo_specialist: профессию/шаблон не выдумываем, backend решит если не задан
         var onm = String(lgCr.oname || '').trim();
         if (onm) body.ownerName = onm;
@@ -7430,6 +7451,7 @@ function ALogin() {
     return m[code] || fallback || 'Не получилось — попробуйте ещё раз.';
   };
   const lgAiApply = (data) => {
+    if (data && Number.isInteger(data.revision)) lgAiDraft.current.revision = data.revision;
     if (data && data.assistant_message) setLgAiMsgs(prev => prev.concat([{ role: 'bot', text: data.assistant_message }]));
     if (data && data.blueprint) setLgAiBlueprint(data.blueprint);
     if (data && data.missing_fields) setLgAiMissing(data.missing_fields);
@@ -7464,7 +7486,7 @@ function ALogin() {
     try {
       var r, data;
       if (!lgAiDraft.current.id) {
-        var body = { message: msg };
+        var body = { message: msg, trialActivationToken: await meManualTrialActivation(api, 'ai') };
         if (lgAiTpl) body.templateId = lgAiTpl;
         r = await fetch(api + '/onboarding/ai/drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         data = await r.json();
@@ -7543,6 +7565,8 @@ function ALogin() {
     try {
       var body = {
         draftToken: lgAiDraft.current.token,
+        expectedDraftRevision: lgAiDraft.current.revision,
+        trialActivationToken: await meManualTrialActivation(api, 'ai'),
         ownerEmail: em,
         businessName: String(c.businessName || '').trim() || undefined,
         calendarSource: c.calendarSource,
@@ -17699,6 +17723,7 @@ function AChat() {
 	  }
 	  function onbExitToLogin() { onbClearAllSS(); try { window.__meOnb = null; } catch (e) {} if (window.__meGo) window.__meGo('login'); }
 	  function onbApply(data) {
+        if (data && Number.isInteger(data.revision)) onbDraft.current.revision = data.revision;
 	    setMsgs(function (m) { var b = m.filter(function (x) { return !x.typing; }); if (data && data.assistant_message) b = b.concat([{ role: 'bot', text: data.assistant_message }]); return b; });
 	    if (data && data.blueprint) setOnbBlueprint(data.blueprint);
 	    if (data && Array.isArray(data.crm_staff)) setOnbCrmStaff(data.crm_staff);
@@ -18130,6 +18155,7 @@ function AChat() {
 	    try {
 	      var body = {
 	        draftToken: onbDraft.current.token,
+	        expectedDraftRevision: onbDraft.current.revision,
 	        trialActivationToken: onbTokenNow(),
 	        ownerEmail: normalized.ownerEmail,
 	        ownerName: normalized.ownerName,
@@ -18266,6 +18292,12 @@ function AChat() {
 	    var activate = await fetch(res.api + '/integrations/crm/activate', { method: 'POST', headers: { Authorization: 'Bearer ' + res.token } });
 	    var ad = await activate.json();
 	    if (!activate.ok) { var ae = onbCrmErrorPayload(ad, 'CRM проверена, но не активирована. Повторите попытку.'); setOnbCrmMsg({ kind: 'err', text: ae.text }); return false; }
+        await meResumeAiConfirmation(async function (path, options) {
+          var response = await fetch(res.api + path, Object.assign({}, options, { headers: { Authorization: 'Bearer ' + res.token } }));
+          var value = await response.json();
+          if (!response.ok) throw new Error(value.message || 'Настройка сохранена; не удалось продолжить.');
+          return value;
+        });
 	    if (onbCommerce.enabled) {
 	      var shopId = String(onbCommerce.shopId || '').trim();
 	      var secretKey = String(onbCommerce.secretKey || '').trim();
@@ -18552,7 +18584,7 @@ function AChat() {
 	            onbHardReset(onbErrText(code, 'Черновик настройки больше недоступен.') + ' Вернитесь на вход и активируйте пробную версию заново.');
 	            return;
 	          }
-	          onbDraft.current = { id: s.draftId, token: s.draftToken };
+	          onbDraft.current = { id: s.draftId, token: s.draftToken, revision: res.d.revision };
 	          if (res.d.blueprint) setOnbBlueprint(res.d.blueprint);
 	          if (res.d.missing_fields) setOnbMissing(res.d.missing_fields);
 	          if (Array.isArray(res.d.missing_fields) && res.d.missing_fields.indexOf('crm_import') >= 0) setOnbStage('crm');
@@ -26131,6 +26163,7 @@ function ACrmCenter() {
   function doActivate() {
     if (reqRef.current) return; reqRef.current = true; setBusyKind('activate'); setErr(''); setNote('');
     af('/integrations/crm/activate', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+      .then(async function (d) { await meResumeAiConfirmation(af); return d; })
       .then(function (d) { setStatus(Object.assign({}, status, { configured: true, connection: d.connection, next_action: d.next_action })); setPreview((d && d.preview) || preview); setBusyKind(''); reqRef.current = false; setNote('CRM подключена и активна.'); try { window.dispatchEvent(new CustomEvent('me-saas-data-changed', { detail: { kind: 'crm' } })); } catch (e2) {} })
       .catch(function (x) { setBusyKind(''); reqRef.current = false; setErr(errText(x)); refreshStatus().catch(function () {}); });
   }

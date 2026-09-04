@@ -19,7 +19,11 @@ import {
 import { EncryptionService } from '../src/encryption/encryption.service';
 import { AiConfirmationReceiptService } from '../src/onboarding/ai-confirmation-receipt.service';
 import { AiConfirmationCoordinatorService } from '../src/onboarding/ai-confirmation-coordinator.service';
-import { TrialActivationBootstrapService } from '../src/package5-wave2/trial-activation-bootstrap.service';
+import {
+  TrialActivationBootstrapService,
+  type TrialActivationBootstrapCommand,
+  type TrialActivationBootstrapResult,
+} from '../src/package5-wave2/trial-activation-bootstrap.service';
 import { Package5Wave2CanonicalCutoverService } from '../src/package5-wave2/package5-wave2-canonical-cutover.service';
 import {
   Package5Wave2ShadowService,
@@ -315,6 +319,210 @@ async function connect(f: Fixture, companyId = '900001') {
   });
 }
 
+async function internalTrialProof() {
+  async function fixtureCommand(): Promise<TrialActivationBootstrapCommand> {
+    const tokenHash = hash(randomBytes(32).toString('base64url'));
+    await db.trialActivation.create({
+      data: {
+        activationTokenHash: tokenHash,
+        expiresAt: new Date(Date.now() + 86400000),
+      },
+    });
+    return {
+      activationTokenHash: tokenHash,
+      tenant: {
+        name: 'Internal proof',
+        slug: `internal-${randomUUID()}`,
+        defaultTimezone: 'Europe/Moscow',
+        defaultLocale: 'ru-RU',
+        defaultCurrency: 'RUB',
+        trialEndsAt: new Date(Date.now() + 86400000),
+        calendarSource: 'internal',
+      },
+      owner: {
+        email: `${randomUUID()}@example.invalid`,
+        passwordHash: 'synthetic-proof-hash',
+        displayName: 'Synthetic owner',
+      },
+      branch: { name: 'First branch' },
+    };
+  }
+  const child = (command: TrialActivationBootstrapCommand, model?: string) =>
+    execFileSync(
+      process.execPath,
+      [
+        'node_modules/ts-node/dist/bin.js',
+        '--project',
+        'tsconfig.scripts.json',
+        '--transpile-only',
+        __filename,
+        '--internal-worker',
+        ...(model ? [model] : []),
+      ],
+      {
+        input: JSON.stringify(command),
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+      },
+    );
+  for (const model of ['Tenant', 'User', 'InternalProvider']) {
+    const command = await fixtureCommand();
+    const ids = receipts.reservedIds(command.activationTokenHash);
+    assert.throws(
+      () => child(command, model),
+      (error: unknown) => (error as { status: number }).status === 86,
+    );
+    assert.equal(await db.tenant.count({ where: { id: ids.tenantId } }), 0);
+    assert.equal(await db.user.count({ where: { id: ids.ownerUserId } }), 0);
+    assert.equal(
+      await db.internalProvider.count({ where: { tenantId: ids.tenantId } }),
+      0,
+    );
+    assert.equal(
+      (
+        await db.trialActivation.findUniqueOrThrow({
+          where: { activationTokenHash: command.activationTokenHash },
+        })
+      ).status,
+      'pending',
+    );
+    results.push(
+      `process crash after ${model} creation leaves activation pending and no partial commit`,
+    );
+    const resumed = JSON.parse(
+      child(command),
+    ) as TrialActivationBootstrapResult;
+    assert.equal(resumed.tenantId, ids.tenantId);
+    const providers = await db.internalProvider.findMany({
+      where: { tenantId: ids.tenantId },
+    });
+    assert.equal(providers.length, 1);
+    assert.equal(providers[0].userId, ids.ownerUserId);
+    assert.equal(providers[0].branchId, resumed.branchId);
+    const before = JSON.stringify(providers);
+    assert.equal(
+      (JSON.parse(child(command)) as TrialActivationBootstrapResult).tenantId,
+      ids.tenantId,
+    );
+    assert.equal(
+      JSON.stringify(
+        await db.internalProvider.findMany({
+          where: { tenantId: ids.tenantId },
+        }),
+      ),
+      before,
+    );
+    results.push(
+      `fresh-process retry after ${model} crash converges to the same owner/provider outcome`,
+    );
+  }
+  const command = await fixtureCommand();
+  const attempts = await Promise.allSettled(
+    Array.from({ length: 4 }, () => bootstrap.activate(command)),
+  );
+  assert(attempts.some((x) => x.status === 'fulfilled'));
+  const created = await bootstrap.activate(command);
+  for (const result of attempts)
+    if (result.status === 'fulfilled')
+      assert.equal(result.value.tenantId, created.tenantId);
+  assert.equal(
+    await db.internalProvider.count({ where: { tenantId: created.tenantId } }),
+    1,
+  );
+  assert.equal(
+    await db.user.count({ where: { tenantId: created.tenantId } }),
+    1,
+  );
+  assert.equal(
+    await db.membership.count({ where: { tenantId: created.tenantId } }),
+    1,
+  );
+  assert.equal(
+    await db.branch.count({ where: { tenantId: created.tenantId } }),
+    1,
+  );
+  results.push(
+    'concurrent internal activation has one tenant owner membership branch and provider',
+  );
+  const where = { tenantId: created.tenantId };
+  assert.deepEqual(
+    await Promise.all([
+      db.internalService.count({ where }),
+      db.internalAvailabilityRule.count({ where }),
+      db.internalAvailabilityException.count({ where }),
+      db.staffProviderLink.count({ where }),
+      db.crmIntegration.count({ where }),
+    ]),
+    [0, 0, 0, 0, 0],
+  );
+  results.push(
+    'minimal bootstrap manufactures no schedules services prices CRM identities or staff links',
+  );
+  for (const [key, value] of [
+    ['userId', created.ownerUserId],
+    ['providerId', 'forged'],
+    ['tenantId', created.tenantId],
+  ])
+    await rejects(
+      `consumer ${key} cannot override server bootstrap identities`,
+      () =>
+        bootstrap.activate({
+          ...command,
+          owner: { ...command.owner, [key]: value },
+        }),
+    );
+  await rejects('cross-tenant branch binding rejected', () =>
+    bootstrap.activate({
+      ...command,
+      branch: { ...command.branch, tenantId: created.tenantId },
+    } as TrialActivationBootstrapCommand),
+  );
+  const foreign = await fixtureCommand();
+  const other = await bootstrap.activate(foreign);
+  await rejects('database rejects cross-tenant provider owner binding', () =>
+    db.internalProvider.update({
+      where: {
+        tenantId_userId: {
+          tenantId: other.tenantId,
+          userId: other.ownerUserId,
+        },
+      },
+      data: { userId: created.ownerUserId },
+    }),
+  );
+  await db.tenant.update({
+    where: { id: created.tenantId },
+    data: { status: 'suspended' },
+  });
+  await bootstrap.activate(command);
+  assert.equal(
+    (await db.tenant.findUniqueOrThrow({ where: { id: created.tenantId } }))
+      .status,
+    'suspended',
+  );
+  assert.equal(
+    await db.internalProvider.count({ where: { tenantId: created.tenantId } }),
+    1,
+  );
+  results.push(
+    'suspended internal tenant retains its owner/provider; activation retry does not reactivate or delete it',
+  );
+  const ai = await fixture();
+  await confirm(ai);
+  await rejects(
+    'AI receipt activation cannot be repurposed for internal bootstrap',
+    () =>
+      bootstrap.activate({
+        ...command,
+        activationTokenHash: hash(ai.dto.trialActivationToken!),
+      }),
+  );
+  assert.equal(
+    await db.internalProvider.count({ where: { tenantId: ai.tenantId } }),
+    0,
+  );
+}
+
 async function trialProof() {
   const tenantReader = Object.assign(
     Object.create(TenantsService.prototype) as TenantsService,
@@ -373,7 +581,10 @@ async function trialProof() {
   results.push(
     'trial concurrent retry creates one logical tenant owner branch and configuration',
   );
-  const failed = await input();
+  const failed = {
+    ...(await input()),
+    calendarSource: CalendarSource.INTERNAL,
+  };
   const fault = new Package5Wave2CanonicalCutoverService(
     planner,
     executor,
@@ -400,7 +611,15 @@ async function trialProof() {
     (await makeTrial().activate(failed)).tenantId,
     reserved.tenantId,
   );
-  results.push('trial restart converges from durable activation outcome');
+  assert.equal(
+    await db.internalProvider.count({
+      where: { tenantId: reserved.tenantId, userId: reserved.ownerUserId },
+    }),
+    1,
+  );
+  results.push(
+    'trial restart converges from durable activation outcome and preserves the internal provider',
+  );
   await db.tenant.update({
     where: { id: reserved.tenantId },
     data: { status: 'suspended' },
@@ -441,7 +660,10 @@ async function trialProof() {
     {} as never,
     makeTrial(),
   );
-  const adminDto = await input();
+  const adminDto = {
+    ...(await input()),
+    calendarSource: CalendarSource.INTERNAL,
+  };
   const actor = {
     userId: 'synthetic-platform-actor',
     role: UserRole.PLATFORM_OWNER,
@@ -449,6 +671,10 @@ async function trialProof() {
   const created = await admin.createTenant(adminDto, actor);
   const again = await admin.createTenant(adminDto, actor);
   assert.equal(created.id, again.id);
+  assert.equal(
+    await db.internalProvider.count({ where: { tenantId: created.id } }),
+    1,
+  );
   assert.equal(
     created.id,
     receipts.reservedIds(hash(adminDto.trialActivationToken)).tenantId,
@@ -467,6 +693,34 @@ async function trialProof() {
 }
 
 async function run() {
+  if (process.argv.includes('--internal-worker')) {
+    const command = JSON.parse(
+      readFileSync(0, 'utf8'),
+    ) as TrialActivationBootstrapCommand;
+    command.tenant.trialEndsAt = new Date(command.tenant.trialEndsAt);
+    const crashModel =
+      process.argv[process.argv.indexOf('--internal-worker') + 1];
+    const workerDb = db.$extends({
+      query: {
+        $allModels: {
+          $allOperations: async ({ model, operation, args, query }) => {
+            const result = await query(args);
+            if (operation === 'create' && model === crashModel)
+              process.exit(86);
+            return result;
+          },
+        },
+      },
+    });
+    console.log(
+      JSON.stringify(
+        await new TrialActivationBootstrapService(
+          workerDb as unknown as PrismaClient,
+        ).activate(command),
+      ),
+    );
+    return;
+  }
   if (process.argv.includes('--resume')) {
     const f = JSON.parse(readFileSync(0, 'utf8')) as {
       draftId: string;
@@ -592,6 +846,7 @@ async function run() {
   );
   assert.equal(await db.tenant.count({ where: { id: mock.tenantId } }), 0);
   await trialProof();
+  await internalTrialProof();
   const f = await fixture();
   await rejects('stale confirmation rejected', () =>
     confirm({ ...f, dto: { ...f.dto, expectedDraftRevision: 1 } }),

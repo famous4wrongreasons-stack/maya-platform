@@ -4785,6 +4785,16 @@ const TabIcClip = (c, s) => TabSvg(c, s, ["M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2
 const TabIcUser = (c, s) => TabSvg(c, s, ["M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", "M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"]);
 // SaaS bundle is used here only to choose the shell. Every protected request
 // still verifies the JWT and tenant membership on the backend.
+async function meManualTrialActivation(api, flow) {
+  var key = 'me_manual_trial_activation:' + (flow || 'manual') + ':' + api;
+  var token = sessionStorage.getItem(key);
+  if (token) return token;
+  var response = await fetch(api + '/onboarding/trial-activations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'maya_os' }) });
+  var value = await response.json();
+  if (!response.ok || !value.activation_token) throw new Error('Не удалось начать регистрацию. Повторите попытку.');
+  sessionStorage.setItem(key, value.activation_token);
+  return value.activation_token;
+}
 async function meResumeAiConfirmation(af) {
   var pending = await af('/onboarding/ai/confirmations/pending', { method: 'GET' });
   var items = pending && pending.confirmations || [];
@@ -5725,9 +5735,11 @@ function ALogin() {
     api = String(api).replace(/\/+$/, '');
     var slugBase = lgCrTranslit(nm) || ('maya-' + Date.now().toString(36));
     try {
+      var activationToken = await meManualTrialActivation(api);
       var res = null, lastErr = null, slug = slugBase, attempt = 0;
       while (attempt < 2) {
         var body = { name: nm, slug: slug, ownerEmail: em, branchName: nm, branchTimezone: 'Europe/Moscow', calendarSource: lgCr.cal };
+        body.trialActivationToken = activationToken;
         if (lgCr.cal === 'internal' && lgCr.tpl) body.industryPresetId = lgCr.tpl; // не форсим solo_specialist: профессию/шаблон не выдумываем, backend решит если не задан
         var onm = String(lgCr.oname || '').trim();
         if (onm) body.ownerName = onm;
@@ -6160,7 +6172,7 @@ function ALogin() {
     try {
       var r, data;
       if (!lgAiDraft.current.id) {
-        var body = { message: msg };
+        var body = { message: msg, trialActivationToken: await meManualTrialActivation(api, 'ai') };
         if (lgAiTpl) body.templateId = lgAiTpl;
         r = await fetch(api + '/onboarding/ai/drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         data = await r.json();
@@ -6240,6 +6252,7 @@ function ALogin() {
       var body = {
         draftToken: lgAiDraft.current.token,
         expectedDraftRevision: lgAiDraft.current.revision,
+        trialActivationToken: await meManualTrialActivation(api, 'ai'),
         ownerEmail: em,
         businessName: String(c.businessName || '').trim() || undefined,
         calendarSource: c.calendarSource,

@@ -46,6 +46,58 @@ function relativeSourcePath(path: string): string {
   return relative(SOURCE_ROOT, path).replaceAll('\\', '/');
 }
 
+function isReadOnlyConsentVerifier(source: string): boolean {
+  const parsed = ts.createSourceFile(
+    'client-consent-authority.ts',
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  let valid =
+    !/\.(?:create|createMany|update|updateMany|upsert|delete|deleteMany|\$executeRaw|\$queryRaw)\s*\(/.test(
+      source,
+    );
+  parsed.forEachChild((node) => {
+    if (
+      ts.isImportDeclaration(node) &&
+      !node.importClause?.isTypeOnly &&
+      (!ts.isStringLiteral(node.moduleSpecifier) ||
+        node.moduleSpecifier.text !== '@nestjs/common')
+    )
+      valid = false;
+  });
+  const visit = (node: ts.Node) => {
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.getText(parsed) !== 'db.clientChannelLink.findUnique'
+    )
+      valid = false;
+    if (
+      ts.isNewExpression(node) &&
+      node.expression.getText(parsed) !== 'ForbiddenException'
+    )
+      valid = false;
+    ts.forEachChild(node, visit);
+  };
+  visit(parsed);
+  return valid && source.includes('db.clientChannelLink.findUnique(');
+}
+function allowsConsentVerifier(
+  path: string,
+  imported: string,
+  source: string,
+): boolean {
+  return (
+    [
+      'action-engine/action-engine.ingress.ts',
+      'action-engine/action-engine.kernel.ts',
+      'action-engine/action-engine.policy-resolver.ts',
+    ].includes(path) &&
+    imported === '../crm/client-consent-authority' &&
+    isReadOnlyConsentVerifier(source)
+  );
+}
+
 describe('appointment action execution boundary', () => {
   it('keeps provider appointment writes behind CrmService only', () => {
     const directProviderCalls: string[] = [];
@@ -111,6 +163,14 @@ describe('appointment action execution boundary', () => {
         }
         const imported = node.moduleSpecifier.text.toLowerCase();
         if (
+          !allowsConsentVerifier(
+            relativeSourcePath(path),
+            imported,
+            readFileSync(
+              join(SOURCE_ROOT, 'crm/client-consent-authority.ts'),
+              'utf8',
+            ),
+          ) &&
           FORBIDDEN_ACTION_ENGINE_IMPORTS.some((part) =>
             imported.includes(part),
           )
@@ -123,6 +183,41 @@ describe('appointment action execution boundary', () => {
     expect(violations).toEqual([]);
   });
 
+  it('allows only the exact read-only consent verifier and still rejects mutation owners', () => {
+    const source = readFileSync(
+      join(SOURCE_ROOT, 'crm/client-consent-authority.ts'),
+      'utf8',
+    );
+    expect(
+      allowsConsentVerifier(
+        'action-engine/action-engine.kernel.ts',
+        '../crm/client-consent-authority',
+        source,
+      ),
+    ).toBe(true);
+    expect(
+      allowsConsentVerifier(
+        'action-engine/action-engine.kernel.ts',
+        '../crm/crm.service',
+        source,
+      ),
+    ).toBe(false);
+    expect(
+      allowsConsentVerifier(
+        'action-engine/rogue.ts',
+        '../crm/client-consent-authority',
+        source,
+      ),
+    ).toBe(false);
+    for (const injection of [
+      'db.clientChannelLink.update({});',
+      'db.clientChannelLink.delete({});',
+      'db.$executeRaw(`DELETE FROM x`);',
+      "fetch('https://provider.invalid/write');",
+      "import { CrmService } from './crm.service';",
+    ])
+      expect(isReadOnlyConsentVerifier(source + '\n' + injection)).toBe(false);
+  });
   it('owns every migrated residual appointment mutation in the Action Engine', () => {
     const registry = new ActionCapabilityRegistry();
     const capabilities = [

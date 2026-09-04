@@ -54,81 +54,17 @@ export class InternalCalendarService {
     private readonly quotas: QuotaService,
   ) {}
 
-  async bootstrapEnsureProviderForUser(
-    tenantId: string,
-    userId: string,
-    options: { displayName?: string | null; branchId?: string | null } = {},
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.assertInternalSource(scopedTenantId);
-    const user = await this.usersService.getTenantUserOrThrow(
-      userId,
-      scopedTenantId,
+  bootstrapEnsureProviderForUser(
+    _tenantId: string,
+    _userId: string,
+    _options?: { displayName?: string | null; branchId?: string | null },
+  ): Promise<never> {
+    void [_tenantId, _userId, _options];
+    return Promise.reject(
+      new BadRequestException(
+        'Initial owner provider requires canonical TrialActivation',
+      ),
     );
-    const branchId =
-      options.branchId ??
-      user.branchId ??
-      (await this.findFirstBranchId(scopedTenantId));
-    const displayName =
-      options.displayName?.trim() ||
-      this.usersService.getUserName(user) ||
-      user.email.split('@')[0] ||
-      'Специалист';
-    const provider = await this.prisma.internalProvider.upsert({
-      where: {
-        tenantId_userId: {
-          tenantId: scopedTenantId,
-          userId,
-        },
-      },
-      update: {
-        branchId,
-        displayName,
-        active: true,
-      },
-      create: {
-        tenantId: scopedTenantId,
-        userId,
-        branchId,
-        displayName,
-        title: 'Специалист',
-      },
-    });
-
-    const [ruleCount, services] = await Promise.all([
-      this.prisma.internalAvailabilityRule.count({
-        where: { tenantId: scopedTenantId, providerId: provider.id },
-      }),
-      this.prisma.internalService.findMany({
-        where: { tenantId: scopedTenantId, active: true },
-        select: { id: true },
-      }),
-    ]);
-
-    if (ruleCount === 0) {
-      await this.prisma.internalAvailabilityRule.createMany({
-        data: DEFAULT_WEEKLY_RULES.map((rule) => ({
-          tenantId: scopedTenantId,
-          providerId: provider.id,
-          weekday: rule.weekday,
-          startMinute: parseTimeToMinute(rule.startTime),
-          endMinute: parseTimeToMinute(rule.endTime),
-        })),
-      });
-    }
-
-    if (services.length > 0) {
-      await this.prisma.internalProviderService.createMany({
-        data: services.map((service) => ({
-          tenantId: scopedTenantId,
-          providerId: provider.id,
-          serviceId: service.id,
-        })),
-        skipDuplicates: true,
-      });
-    }
-
-    return this.getProvider(scopedTenantId, provider.id);
   }
 
   async getSetup(tenantId: string) {

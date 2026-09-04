@@ -67,7 +67,7 @@ export class CreateTrialSignupDto {
   @ApiPropertyOptional({
     example: 'StrongPass123',
     description:
-      'Optional. If omitted, backend generates a temporary password and returns it once.',
+      'Optional. If omitted, backend generates an inaccessible random password; the verified activation receives an owner session.',
   })
   @IsOptional()
   @IsString()
@@ -97,7 +97,7 @@ export class CreateTrialSignupDto {
   @ApiPropertyOptional({
     example: 'cm-demo-plan',
     description:
-      'Optional. Useful when the frontend wants to preselect a plan.',
+      'Paid plan assignment is not part of TrialActivation; select through canonical billing after activation.',
   })
   @IsOptional()
   @IsString()
