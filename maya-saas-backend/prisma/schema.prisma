@@ -1454,6 +1454,9 @@ model CustomerProfile {
   clientId           String?
   userId             String?
   preferredLocale    String?
+  /// Explicit Client choices only; NULL inherits policy and is not consent.
+  defaultVisitMood   String?
+  notificationPreferencesJson Json?
   privacyConsentAt   DateTime?
   marketingConsentAt DateTime?
   encryptedNotes     String?
@@ -2463,6 +2466,8 @@ model Appointment {
    * бы правок в 47 местах ради ясности, поэтому вынесено отдельным шагом.
    */
   mayaClientId      String?
+  /// Maya-local Client choice, independent of provider facts and later defaults.
+  clientVisitMood   String?
   branchId          String?
   crmExternalId     String?
   /// 🔴 Cycle 03 B1. Провайдер, у которого живёт `crmExternalId`.
