@@ -1,41 +1,39 @@
-# Package 5 post-Wave-6 remainder — B10/B11 owner decision STOP
+# Package 5 post-Wave-6 remainder — B10/B11 deployed, Final Gate stopped at B12
 
-Accepted owner checkpoint `573c3e7b`. Waves 1–6 remain accepted 6/6. B9 schema
-commit `0d640318` and runtime commit `9b483768` are deployed as production
-release `/opt/maya-saas/releases/20260904-p5-b9-9b483768`.
+Accepted owner checkpoint `b932f86f`. Waves 1–6 remain accepted 6/6. B9 remains
+the accepted production baseline and B10/B11 runtime commit `ce08e931` is now
+deployed.
 
-1. The verified Client delivery endpoint is durable and nullable. It stores no
-   plaintext or fake historical backfill; HMAC remains channel identity authority.
-2. `ClientWantedSlotInterest` owns exact-time wanted-slot intent with expiry at
-   slot start, max ten active per Client and max-three earliest eligible delivery.
-3. Original B9 AI bypasses are closed: `get_referral_link` is mutation-free and
-   `remember_wanted_slot` requires verified ClientChannelLink authority. Production
-   structural/read-only verification passed without real mutations.
-4. Production migration state is 78 repository / 81 accepted production records,
-   pending 0 and drift NONE. Health/readiness and error-priority logs are clean.
-5. The mandatory fresh 13-family Final Gate found **B10/A18**: published
-   `promo_gift` and `sub_create` routes both call direct SQLite
-   `get_or_create_client`. `sub_create` creates the Client before returning
-   `no_phone`; both routes also lead to direct legacy value/provider effects.
-6. It also found **B11**: the record-delete freed-slot initiator runs a separate
-   cycle-scoring branch that sends Telegram directly to legacy `chat_id` and
-   writes a legacy offer fact outside Communication Delivery.
-7. B10/B11 contract reconstruction is now complete. `/api/sub/create` maps exactly
-   to P4-05 `initiate_customer_subscription_purchase` and needs no schema decision.
-   `/api/promo_gift` issues a separate first-visit discount entitlement for which
-   no approved canonical owner or value lifecycle exists.
-8. The record-delete opportunity and Communication Delivery owners already exist.
-   `freed_slot_offers` is delivery outcome/cooldown evidence, so no new offer model
-   is needed. The missing decision is whether heuristic cycle-scored outreach is
-   removed, owner-confirmed, or granted a new automatic policy authority.
-9. Package 5 remains FAIL/NO. Runtime/schema implementation is stopped at
-   `package5-b10-b11-owner-contract-v1-proposal.md`. After the owner decides the
-   promo disposition and B11 outreach authority, resume the same remediation,
-   deploy with zero real smoke mutations, and restart the complete 13-family Final
-   Gate from scratch.
+1. `/api/sub/create` is a verified Client initiator for existing P4-05
+   `initiate_customer_subscription_purchase`; hidden Client creation is zero.
+2. `/api/promo_gift` is retired with an explicit mutation-free 410 outcome.
+   Historical promo facts remain untouched and no canonical promo lifecycle was
+   invented.
+3. Record-delete retains B9 exact wanted-slot matching but cycle-scored outreach
+   is disabled. The scorer sends no Telegram message, reads no legacy delivery
+   `chat_id` and writes no legacy offer/cooldown fact.
+4. The B10/B11 deployment gate passed 336 suites / 2779 tests. Backend and PWA
+   health/readiness passed, post-start error logs were empty, pending migrations
+   are 0 and drift is NONE. No real production business/provider mutation was
+   used for proof.
+5. The complete 13-family Final Gate restarted from scratch and stopped at new
+   blocker **B12**. The active published PWA source lacks accepted Package 4
+   fail-closed legacy guards that exist in repository HEAD.
+6. Exact reachable B12 paths are public loyalty booking, gift-certificate
+   creation/redemption and the record-delete legacy loyalty refund. They can
+   directly write legacy loyalty/certificate facts and call YClients/YooKassa
+   outside their accepted P4-03/P4-06 owners.
+7. This is production source/deployment convergence work, not Wave 7. No B12
+   change was made because the Final Gate requires STOP on a new bypass.
 
-Preserve B9 and all earlier production baselines, D1-A…D7-A, P02/P03 holds,
-Client ownership, immutable evidence, tenant hard-delete prohibition, Package 2
-Communication Delivery and the AC6 A30 owner. Do not create Wave 7 or start
-Chapter 7. All 17 old databases remain untouched; owned processes, watchers,
-Chrome and temporary databases are zero.
+Package 5 remains FAIL/NO. The next controlled cycle must restore the accepted
+Package 4 guards/canonical ownership on the exact active PWA runtime, pass the
+mandatory deployment gates, deploy without real loyalty/certificate/provider
+smoke mutations, and then restart the full 13-family Package 5 Final Gate from
+the beginning.
+
+Preserve B7–B11, all Waves 1–6, D1-A…D7-A, P02/P03 holds, Client ownership,
+immutable evidence, the tenant hard-delete prohibition, Package 2 Communication
+Delivery and AC6 A30 ownership. Do not create Wave 7, start Chapter 7 or declare
+Chapter 6 complete. All 17 old databases remain untouched; owned processes,
+watchers, Chrome and temporary databases are zero.
