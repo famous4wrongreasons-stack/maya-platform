@@ -141,9 +141,13 @@ export function canonicalProductionPolicyDefinitions(
         policyProfileKey: `canonical.${capability.actionClass}`,
         policyProfileVersion: 1,
         actorPolicy:
-          trustedServiceSourceTypes.length > 0
-            ? 'OPTIONAL_TRUSTED_SERVICE'
-            : 'REQUIRED',
+          /^package5\.wave3\.record-client-consent\.(?:execute|shadow)\.v1$/.test(
+            capability.capability,
+          )
+            ? 'VERIFIED_CLIENT_CHANNEL'
+            : trustedServiceSourceTypes.length > 0
+              ? 'OPTIONAL_TRUSTED_SERVICE'
+              : 'REQUIRED',
         allowedActorRoles: allowedActorRoles(capability.capability),
         trustedServiceSourceTypes,
         requiredFeatures: requiredFeatures(capability.capability),

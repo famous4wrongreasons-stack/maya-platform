@@ -29,6 +29,11 @@ import {
   type Package5Wave3ActionClass,
   type TrustedActionExecutionRequestV1,
 } from '../action-engine';
+import { lockClientChannelIdentity } from '../crm/client-channel-link.service';
+import {
+  assertConsentChannelBinding,
+  type ConsentChannelBinding,
+} from '../crm/client-consent-authority';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 
@@ -101,7 +106,9 @@ export type Package5Wave3Command =
     };
 
 export interface Package5Wave3Actor {
-  userId: string;
+  userId: string | null;
+  consentChannel?: ConsentChannelBinding;
+  recheckChannel?: (tx: Tx) => Promise<void>;
 }
 
 export interface Package5Wave3ProviderGateway {
@@ -265,7 +272,7 @@ export class Package5Wave3ShadowService {
     );
     if (!registration)
       throw new BadRequestException('Unknown Wave 3 operation');
-    const authority = await this.resolveActor(scoped, actor.userId, command);
+    const authority = await this.resolveActor(scoped, actor, command);
     const sourceIntentRef = this.bounded(command.sourceIntentRef);
     const sourceRef = `p5w3:${wave3Hash(
       command.operation === 'update_staff_schedule_day'
@@ -357,7 +364,7 @@ export class Package5Wave3ShadowService {
         type: mode === 'shadow' ? 'synthetic_shadow' : 'authenticated_request',
         occurrenceScope: `package5-wave3:${command.operation}:${facts.targetRef}:g${targetGeneration}`,
         sourceRef,
-        actorUserId: actor.userId,
+        actorUserId: actor.userId ?? undefined,
       },
       targetRef: facts.targetRef,
       input: {
@@ -371,6 +378,9 @@ export class Package5Wave3ShadowService {
         desiredStateHash,
         requestMaterialHash,
         actorMembershipId: authority.membershipId,
+        ...(actor.consentChannel
+          ? { consentChannel: actor.consentChannel }
+          : {}),
         actorRole: authority.role,
         actorIdentityHash: authority.actorIdentityHash,
         policyVersion: PACKAGE5_WAVE3_POLICY_VERSION,
@@ -411,7 +421,7 @@ export class Package5Wave3ShadowService {
     tenantId: string,
     capability: string,
     sourceRef: string,
-    actorUserId: string,
+    actorUserId: string | null,
     execution: ActionExecution,
     input: Record<string, unknown>,
     mode: Mode,
@@ -424,7 +434,7 @@ export class Package5Wave3ShadowService {
         type: mode === 'shadow' ? 'synthetic_shadow' : 'authenticated_request',
         occurrenceScope: `package5-wave3:${String(input.operation)}:${execution.targetRef}:g${String(input.targetGeneration)}`,
         sourceRef,
-        actorUserId,
+        actorUserId: actorUserId ?? undefined,
       },
       targetRef: execution.targetRef,
       input,
@@ -449,12 +459,13 @@ export class Package5Wave3ShadowService {
 
   async assertStillCurrent(
     tenantId: string,
-    actorUserId: string,
+    actor: Package5Wave3Actor,
     command: Package5Wave3Command,
     input: Record<string, unknown>,
+    db: PrismaClient | Tx = this.prisma,
   ) {
-    await this.resolveActor(tenantId, actorUserId, command);
-    const facts = await this.resolveFacts(tenantId, actorUserId, command);
+    await this.resolveActor(tenantId, actor, command, db);
+    const facts = await this.resolveFacts(tenantId, actor.userId, command, db);
     const beforeHash = facts.before === null ? null : wave3Hash(facts.before);
     if (
       beforeHash !== input.beforeStateHash ||
@@ -468,10 +479,36 @@ export class Package5Wave3ShadowService {
 
   private async resolveActor(
     tenantId: string,
-    userId: string,
+    actor: Package5Wave3Actor,
     command: Package5Wave3Command,
+    db: PrismaClient | Tx = this.prisma,
   ) {
-    const membership = await this.prisma.membership.findUnique({
+    if (command.operation === 'record_client_consent') {
+      if (!actor.consentChannel)
+        throw new ForbiddenException(
+          'Verified Client channel binding required',
+        );
+      await assertConsentChannelBinding(
+        db,
+        tenantId,
+        command.clientId,
+        actor.consentChannel,
+      );
+      return {
+        membershipId: null,
+        role: 'client',
+        actorIdentityHash: wave3Hash({
+          tenantId,
+          consentChannel: actor.consentChannel,
+        }),
+      };
+    }
+    if (actor.consentChannel || !actor.userId)
+      throw new ForbiddenException(
+        'Account authority required for this operation',
+      );
+    const userId = actor.userId;
+    const membership = await db.membership.findUnique({
       where: { userId_tenantId: { userId, tenantId } },
       select: {
         id: true,
@@ -514,8 +551,9 @@ export class Package5Wave3ShadowService {
 
   private async resolveFacts(
     tenantId: string,
-    actorUserId: string,
+    actorUserId: string | null,
     command: Package5Wave3Command,
+    db: PrismaClient | Tx = this.prisma,
   ): Promise<Facts> {
     const empty = {
       providerRequestIdentityHash: null,
@@ -536,7 +574,7 @@ export class Package5Wave3ShadowService {
         command.slots.length > 24
       )
         throw new BadRequestException('Staff day is invalid or unbounded');
-      const staff = await this.prisma.staff.findUnique({
+      const staff = await db.staff.findUnique({
         where: { id_tenantId: { id: command.staffId, tenantId } },
         include: { providerLinks: { where: { unlinkedAt: null } } },
       });
@@ -591,7 +629,7 @@ export class Package5Wave3ShadowService {
         !command.encryptedApiToken.trim()
       )
         throw new BadRequestException('Credential boundary material invalid');
-      const existing = await this.prisma.crmIntegration.findUnique({
+      const existing = await db.crmIntegration.findUnique({
         where: { tenantId },
       });
       const existingSettings =
@@ -697,7 +735,7 @@ export class Package5Wave3ShadowService {
         ],
       };
     }
-    const client = await this.prisma.client.findUnique({
+    const client = await db.client.findUnique({
       where: { id_tenantId: { id: command.clientId, tenantId } },
       include: {
         crmLinks: {
@@ -708,13 +746,13 @@ export class Package5Wave3ShadowService {
     });
     if (!client || client.mergedIntoClientId)
       throw new NotFoundException('Exact active Client missing');
-    await this.assertNoClientHold(tenantId, client.crmLinks);
+    await this.assertNoClientHold(tenantId, client.crmLinks, db);
     if (
-      command.operation !== 'update_client_notes' &&
+      command.operation === 'update_client_profile' &&
       client.userId !== actorUserId
     )
       throw new ForbiddenException('Client account does not own this profile');
-    const profiles = await this.prisma.customerProfile.findMany({
+    const profiles = await db.customerProfile.findMany({
       where: {
         tenantId,
         OR: [
@@ -765,7 +803,7 @@ export class Package5Wave3ShadowService {
         clientId: client.id,
       };
     }
-    const existing = await this.prisma.clientConsentFact.findUnique({
+    const existing = await db.clientConsentFact.findUnique({
       where: {
         tenantId_sourceType_sourceIdentityHash: {
           tenantId,
@@ -840,9 +878,10 @@ export class Package5Wave3ShadowService {
   private async assertNoClientHold(
     tenantId: string,
     links: Array<{ provider: string; externalId: string }>,
+    db: PrismaClient | Tx = this.prisma,
   ) {
     if (!links.length) return;
-    const hold = await this.prisma.unresolvedClientIdentityHold.findFirst({
+    const hold = await db.unresolvedClientIdentityHold.findFirst({
       where: {
         tenantId,
         resolvedAt: null,
@@ -944,11 +983,21 @@ export class Package5Wave3ExecutableService {
     );
     await this.planner.assertStillCurrent(
       execution.tenantId,
-      prepared.actor.userId,
+      prepared.actor,
       prepared.command,
       input,
     );
     return this.serializable(async (tx) => {
+      if (prepared.actor.consentChannel) {
+        const binding = prepared.actor.consentChannel;
+        await lockClientChannelIdentity(
+          tx,
+          execution.tenantId,
+          binding.provider,
+          binding.providerSubjectHash,
+        );
+        await prepared.actor.recheckChannel?.(tx);
+      }
       await this.lock(
         tx,
         execution.tenantId,
@@ -964,6 +1013,15 @@ export class Package5Wave3ExecutableService {
         return this.restore(locked);
       this.assertExecutable(locked, registration.actionClass);
       await this.assertActor(tx, locked, input);
+      if (prepared.command.operation === 'record_client_consent') {
+        await this.planner.assertStillCurrent(
+          execution.tenantId,
+          prepared.actor,
+          prepared.command,
+          input,
+          tx,
+        );
+      }
       const attemptId = await this.begin(
         tx,
         locked,
@@ -1009,7 +1067,7 @@ export class Package5Wave3ExecutableService {
         await this.assertActor(this.prisma, execution, input);
         await this.planner.assertStillCurrent(
           context.tenantId,
-          prepared.actor.userId,
+          prepared.actor,
           command,
           input,
         );
@@ -1329,7 +1387,8 @@ export class Package5Wave3ExecutableService {
       where: { id_tenantId: { id: clientId, tenantId } },
       select: { userId: true },
     });
-    const userId = client.userId ?? actorUserId;
+    const userId = client.userId;
+    void actorUserId;
     const profiles = await tx.customerProfile.findMany({
       where: {
         tenantId,
@@ -1371,6 +1430,15 @@ export class Package5Wave3ExecutableService {
     execution: ActionExecution,
     input: Record<string, unknown>,
   ) {
+    if (input.operation === 'record_client_consent') {
+      await assertConsentChannelBinding(
+        tx,
+        execution.tenantId,
+        this.text(input.clientId),
+        input.consentChannel as ConsentChannelBinding,
+      );
+      return;
+    }
     if (!execution.actorUserId)
       throw new Package5Wave3Error('Actor binding missing');
     const membership = await tx.membership.findUnique({

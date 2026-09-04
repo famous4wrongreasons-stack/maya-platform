@@ -1,3 +1,4 @@
+import type { ConsentChannelBinding } from '../crm/client-consent-authority';
 import { Injectable } from '@nestjs/common';
 import { ActionPolicyDecision, type ActionExecution } from '@prisma/client';
 
@@ -73,6 +74,15 @@ export class CanonicalActionIngressService {
         : {}),
       targetRef: preview.targetRef,
       normalizedInputHash: preview.normalizedInputHash,
+      ...(/^package5\.wave3\.record-client-consent\.(?:execute|shadow)\.v1$/.test(
+        preview.capability,
+      )
+        ? {
+            clientChannel: (
+              request.input as { consentChannel: ConsentChannelBinding }
+            ).consentChannel,
+          }
+        : {}),
     };
     const policy = await this.policyResolver.resolve(policyRequest);
     this.assertResolverOwnsDecision(preview, policy);

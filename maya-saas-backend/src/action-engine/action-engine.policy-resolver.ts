@@ -2,6 +2,10 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 
 import { ActionPolicyDecision, type PrismaClient } from '@prisma/client';
 
+import {
+  assertConsentChannelBinding,
+  type ConsentChannelBinding,
+} from '../crm/client-consent-authority';
 import { UserRole } from '../common/domain.enums';
 import {
   isMayaFeatureKey,
@@ -37,6 +41,7 @@ const ALLOWED_REQUEST_KEYS = new Set([
   'actorUserId',
   'targetRef',
   'normalizedInputHash',
+  'clientChannel',
 ]);
 const PERMITTED_TENANT_ACCESS_STATES = new Set<
   TenantAccessState['accessState']
@@ -62,7 +67,8 @@ export interface CanonicalActionPolicyDefinitionV1 {
   capability: string;
   policyProfileKey: string;
   policyProfileVersion: number;
-  actorPolicy: 'REQUIRED' | 'OPTIONAL_TRUSTED_SERVICE';
+  actorPolicy:
+    'REQUIRED' | 'OPTIONAL_TRUSTED_SERVICE' | 'VERIFIED_CLIENT_CHANNEL';
   allowedActorRoles: readonly UserRole[];
   trustedServiceSourceTypes: readonly TrustedServiceSourceType[];
   requiredFeatures: readonly MayaFeatureKey[];
@@ -86,6 +92,7 @@ export interface ActionPolicyResolutionRequestV1 {
   targetRef: string;
   /** Produced by the trusted capability normalizer. */
   normalizedInputHash: string;
+  clientChannel?: ConsentChannelBinding;
 }
 
 export interface CanonicalActionPolicyResolutionV1 {
@@ -120,7 +127,8 @@ export interface CanonicalActionPolicyResolverOptions {
   now?: () => Date;
 }
 
-type PolicyPrisma = Pick<PrismaClient, 'tenant' | 'membership'>;
+type PolicyPrisma = Pick<PrismaClient, 'tenant' | 'membership'> &
+  Partial<Pick<PrismaClient, 'clientChannelLink'>>;
 type PolicyEntitlements = Pick<
   EntitlementsService,
   'resolveFeatureRequirements'
@@ -206,7 +214,8 @@ export class CanonicalActionPolicyRegistry {
     }
     if (
       definition.actorPolicy !== 'REQUIRED' &&
-      definition.actorPolicy !== 'OPTIONAL_TRUSTED_SERVICE'
+      definition.actorPolicy !== 'OPTIONAL_TRUSTED_SERVICE' &&
+      definition.actorPolicy !== 'VERIFIED_CLIENT_CHANNEL'
     ) {
       throw new ActionContractError('Actor policy is not registered');
     }
@@ -368,7 +377,7 @@ export class CanonicalActionPolicyResolver {
         request.sourceType === 'legacy_bridge' &&
         request.actorUserId === undefined &&
         SUSPENDED_TENANT_RECOVERY_CAPABILITIES.has(request.capability));
-    const actorDecision = this.resolveActorPermission(
+    const actorDecision = await this.resolveActorPermission(
       request,
       policy,
       membership,
@@ -558,21 +567,54 @@ export class CanonicalActionPolicyResolver {
     }
   }
 
-  private resolveActorPermission(
+  private async resolveActorPermission(
     request: ActionPolicyResolutionRequestV1,
     policy: CanonicalActionPolicyDefinitionV1,
     membership: PolicyMembershipRecord | null,
-  ): {
+  ): Promise<{
     allowed: boolean;
     reasonCodes: string[];
-    principalKind: 'actor' | 'trusted_service';
+    principalKind: 'actor' | 'trusted_service' | 'client_channel';
     actorRef: string | null;
     membershipRef: string | null;
     role: string | null;
     branchScopeRef: string | null;
     membershipStatus: string | null;
     userStatus: string | null;
-  } {
+  }> {
+    if (policy.actorPolicy === 'VERIFIED_CLIENT_CHANNEL') {
+      if (
+        !/^package5\.wave3\.record-client-consent\.(?:execute|shadow)\.v1$/.test(
+          request.capability,
+        ) ||
+        !this.prisma.clientChannelLink ||
+        !request.clientChannel
+      )
+        throw new ActionContractError(
+          'Exact Client consent policy requires durable channel binding',
+        );
+      const link = await assertConsentChannelBinding(
+        { clientChannelLink: this.prisma.clientChannelLink },
+        request.tenantId,
+        request.targetRef,
+        request.clientChannel,
+      );
+      return {
+        allowed: true,
+        reasonCodes: [],
+        principalKind: 'client_channel',
+        actorRef: this.refHash('client-channel', link.id),
+        membershipRef: null,
+        role: 'client',
+        branchScopeRef: null,
+        membershipStatus: null,
+        userStatus: null,
+      };
+    }
+    if (request.clientChannel)
+      throw new ActionContractError(
+        'Client channel authority cannot authorize another capability',
+      );
     if (!request.actorUserId) {
       const serviceAllowed =
         policy.actorPolicy === 'OPTIONAL_TRUSTED_SERVICE' &&
@@ -654,8 +696,8 @@ export class CanonicalActionPolicyResolver {
     tenantAccess: TenantAccessState;
     tenantAllowed: boolean;
     membership: PolicyMembershipRecord | null;
-    actorDecision: ReturnType<
-      CanonicalActionPolicyResolver['resolveActorPermission']
+    actorDecision: Awaited<
+      ReturnType<CanonicalActionPolicyResolver['resolveActorPermission']>
     >;
     entitlementDecision: FeatureRequirementDecision;
     evaluatedAt: Date;

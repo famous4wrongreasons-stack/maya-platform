@@ -24,7 +24,18 @@ function input(
     afterStateHash: hash,
     desiredStateHash: hash,
     requestMaterialHash: hash,
-    actorMembershipId: 'membership:one',
+    actorMembershipId:
+      operation === 'record_client_consent' ? null : 'membership:one',
+    ...(operation === 'record_client_consent'
+      ? {
+          consentChannel: {
+            linkId: 'link:one',
+            provider: 'telegram',
+            providerSubjectHash: hash,
+            verificationEvidenceHash: hash,
+          },
+        }
+      : {}),
     actorRole: family18 ? 'client' : 'tenant_owner',
     actorIdentityHash: hash,
     policyVersion: PACKAGE5_WAVE3_POLICY_VERSION,

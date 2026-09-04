@@ -1,0 +1,186 @@
+{
+  "date": "2026-09-04",
+  "acceptedCheckpoint": "84696bc9",
+  "schemaManifest": {
+    "source": "77c611c79248fce887c6aa22fb817958ef672c8d",
+    "schemaSha256": "33e98dc19384f1ca58a2d982461f40c230e2a93a0785817cbb2c0b768676da8a",
+    "migration": "20260904100000_a18_client_link_challenge_v1",
+    "migrationSha256": "9be914ab62bd2f6b8be45eb57fac62429739170c3d8def624c5d0dbacb11232c",
+    "baselineRelease": "/opt/maya-saas/releases/20260904-c06-p5-wave6-cutover-3b545671",
+    "baselineSchema": "/opt/maya-saas/schema-releases/20260904-a18-client-channel-link-ae3f7438/prisma/schema.prisma",
+    "baselineSchemaSha256": "3dedb13ec0ea25c69eac7c24b0b27fea98fe83fb60953c60f6576e94c47952c7"
+  },
+  "productionMigrationGate": {
+    "stage": "before",
+    "source": "77c611c79248fce887c6aa22fb817958ef672c8d",
+    "expectedOnlyPending": [
+      "20260904100000_a18_client_link_challenge_v1"
+    ],
+    "clientChannelLinks": 0,
+    "clientLinkChallenges": null,
+    "structuralChecks": "PASS",
+    "productionBusinessProviderMutations": 0
+  },
+  "productionMigrationPostApply": {
+    "stage": "after",
+    "source": "77c611c79248fce887c6aa22fb817958ef672c8d",
+    "expectedOnlyPending": [],
+    "clientChannelLinks": 0,
+    "clientLinkChallenges": 0,
+    "structuralChecks": "PASS",
+    "productionBusinessProviderMutations": 0
+  },
+  "pendingMigrations": 0,
+  "postApplyDrift": "NONE",
+  "productionSchemaMigrationsApplied": 1,
+  "runtimeReleaseChanged": false,
+  "runtimeServiceRestarted": false,
+  "newBypass": {
+    "release": "/opt/maya-saas/releases/20260904-c06-p5-wave6-cutover-3b545671",
+    "metadata": {
+      "controller": "onboarding",
+      "path": "ai/drafts/:draftId/confirm",
+      "method": 1,
+      "isPublic": true,
+      "moduleLoaded": true,
+      "serviceProvided": true
+    },
+    "confirmSha256": "9cf5b5c03e1d66d1ae955cacb6bc60891dc965369478eeb8cb4b97a4f4fabab5",
+    "confirmCallsTrial": true,
+    "confirmCallsProvision": true,
+    "postTenantPhysicalDelete": true,
+    "resetCompletedActivation": true,
+    "directBrandingUpdate": true,
+    "provisionSha256": "e5df75d1b88f83e85069249560eb375069086c0206d4b007885aec8c5f443b80",
+    "provisionSource": "async provisionInternalCalendar(tenantId, blueprint) {\n        const setup = await this.internalCalendarService.getSetup(tenantId);\n        const ownerProvider = setup.providers[0];\n        if (!ownerProvider) {\n            throw new common_1.ConflictException('Owner provider was not created');\n        }\n        await this.internalCalendarService.bootstrapUpdateProvider(tenantId, ownerProvider.id, {\n            title: blueprint.providerTitle,\n        });\n        const providers = [ownerProvider];\n        for (let index = 1; index < blueprint.providerCount; index += 1) {\n            providers.push(await this.internalCalendarService.bootstrapCreateProvider(tenantId, {\n                displayName: `${blueprint.providerTitle} ${index + 1}`,\n                title: blueprint.providerTitle,\n            }));\n        }\n        for (const service of blueprint.services) {\n            await this.internalCalendarService.bootstrapCreateService(tenantId, {\n                name: service.name,\n                price: service.price,\n                durationMinutes: service.durationMinutes,\n            });\n        }\n        for (const provider of providers) {\n            await this.internalCalendarService.bootstrapReplaceWeeklyAvailability(tenantId, provider.id, blueprint.weeklyRules);\n        }\n    }",
+    "owners": [
+      {
+        "name": "bootstrapCreateService",
+        "sha256": "a5a3c3285539878036a6bb40e154d978510e00fee7c7b2d9402bd83ac9e6a75e",
+        "directPrismaMutation": true,
+        "source": "async bootstrapCreateService(tenantId, dto) {\n        const scopedTenantId = this.tenantContext.assertTenantId(tenantId);\n        await this.assertInternalSource(scopedTenantId);\n        const providerIds = await this.prisma.internalProvider.findMany({\n            where: { tenantId: scopedTenantId, active: true },\n            select: { id: true },\n        });\n        const created = await this.prisma.$transaction(async (tx) => {\n            const service = await tx.internalService.create({\n                data: {\n                    tenantId: scopedTenantId,\n                    name: dto.name.trim(),\n                    description: dto.description?.trim() || null,\n                    price: dto.price,\n                    currency: dto.currency ?? 'RUB',\n                    durationMinutes: dto.durationMinutes,\n                    bufferBeforeMinutes: dto.bufferBeforeMinutes ?? 0,\n                    bufferAfterMinutes: dto.bufferAfterMinutes ?? 0,\n                    sortOrder: dto.sortOrder ?? 0,\n                },\n            });\n            if (providerIds.length > 0) {\n                await tx.internalProviderService.createMany({\n                    data: providerIds.map((provider) => ({\n                        tenantId: scopedTenantId,\n                        providerId: provider.id,\n                        serviceId: service.id,\n                    })),\n                });\n            }\n            return service;\n        });\n        return this.serializeService(created);\n    }"
+      },
+      {
+        "name": "bootstrapCreateProvider",
+        "sha256": "18c525ca542a996f8c05bcee7fd75b89996a93f4893d50a90e8861d53e37501b",
+        "directPrismaMutation": true,
+        "source": "async bootstrapCreateProvider(tenantId, dto) {\n        const scopedTenantId = this.tenantContext.assertTenantId(tenantId);\n        await this.assertInternalSource(scopedTenantId);\n        await this.quotas.assertCanCreate(scopedTenantId, quota_resource_1.QuotaResource.STAFF);\n        const branchId = dto.branchId ?? (await this.findFirstBranchId(scopedTenantId));\n        if (branchId) {\n            const branch = await this.prisma.branch.findFirst({\n                where: { id: branchId, tenantId: scopedTenantId },\n                select: { id: true },\n            });\n            if (!branch) {\n                throw new common_1.NotFoundException('Branch not found for this tenant');\n            }\n        }\n        const services = await this.prisma.internalService.findMany({\n            where: { tenantId: scopedTenantId, active: true },\n            select: { id: true },\n        });\n        const provider = await this.prisma.$transaction(async (tx) => {\n            const created = await tx.internalProvider.create({\n                data: {\n                    tenantId: scopedTenantId,\n                    userId: null,\n                    branchId,\n                    displayName: dto.displayName.trim(),\n                    title: dto.title?.trim() || 'Специалист',\n                    specialization: dto.specialization?.trim() || null,\n                    avatarUrl: dto.avatarUrl,\n                    slotIntervalMinutes: dto.slotIntervalMinutes ?? 30,\n                },\n            });\n            await tx.internalAvailabilityRule.createMany({\n                data: DEFAULT_WEEKLY_RULES.map((rule) => ({\n                    tenantId: scopedTenantId,\n                    providerId: created.id,\n                    weekday: rule.weekday,\n                    startMinute: (0, internal_calendar_utils_1.parseTimeToMinute)(rule.startTime),\n                    endMinute: (0, internal_calendar_utils_1.parseTimeToMinute)(rule.endTime),\n                })),\n            });\n            if (services.length > 0) {\n                await tx.internalProviderService.createMany({\n                    data: services.map((service) => ({\n                        tenantId: scopedTenantId,\n                        providerId: created.id,\n                        serviceId: service.id,\n                    })),\n                });\n            }\n            return created;\n        });\n        return this.getProvider(scopedTenantId, provider.id);\n    }"
+      },
+      {
+        "name": "bootstrapUpdateProvider",
+        "sha256": "4cf01b0351942e606cfc5ed62e0719095c7e84f15d8e68128958c07514f9d444",
+        "directPrismaMutation": true,
+        "source": "async bootstrapUpdateProvider(tenantId, providerId, dto) {\n        const scopedTenantId = this.tenantContext.assertTenantId(tenantId);\n        await this.assertInternalSource(scopedTenantId);\n        if (dto.active === true) {\n            const existing = await this.prisma.internalProvider.findFirst({\n                where: { id: providerId, tenantId: scopedTenantId },\n                select: { active: true, userId: true },\n            });\n            if (!existing) {\n                throw new common_1.NotFoundException('Internal provider not found');\n            }\n            if (!existing.active && existing.userId === null) {\n                await this.quotas.assertCanCreate(scopedTenantId, quota_resource_1.QuotaResource.STAFF);\n            }\n        }\n        if (dto.branchId) {\n            const branch = await this.prisma.branch.findFirst({\n                where: { id: dto.branchId, tenantId: scopedTenantId },\n                select: { id: true },\n            });\n            if (!branch) {\n                throw new common_1.NotFoundException('Branch not found for this tenant');\n            }\n        }\n        const result = await this.prisma.internalProvider.updateMany({\n            where: { id: providerId, tenantId: scopedTenantId },\n            data: {\n                displayName: dto.displayName?.trim(),\n                title: dto.title === undefined ? undefined : dto.title.trim() || null,\n                specialization: dto.specialization === undefined\n                    ? undefined\n                    : dto.specialization.trim() || null,\n                avatarUrl: dto.avatarUrl,\n                branchId: dto.branchId,\n                slotIntervalMinutes: dto.slotIntervalMinutes,\n                active: dto.active,\n            },\n        });\n        if (result.count !== 1) {\n            throw new common_1.NotFoundException('Internal provider not found');\n        }\n        return this.getProvider(scopedTenantId, providerId);\n    }"
+      },
+      {
+        "name": "bootstrapReplaceWeeklyAvailability",
+        "sha256": "757b3116c41d2b6204227cf81a9efb5dce6f7b69f3c1f515b9a80dc6e6753424",
+        "directPrismaMutation": true,
+        "source": "async bootstrapReplaceWeeklyAvailability(tenantId, providerId, rules) {\n        const scopedTenantId = this.tenantContext.assertTenantId(tenantId);\n        await this.assertInternalSource(scopedTenantId);\n        await this.getProvider(scopedTenantId, providerId);\n        const normalizedRules = rules.map((rule) => ({\n            tenantId: scopedTenantId,\n            providerId,\n            weekday: rule.weekday,\n            startMinute: (0, internal_calendar_utils_1.parseTimeToMinute)(rule.startTime),\n            endMinute: (0, internal_calendar_utils_1.parseTimeToMinute)(rule.endTime),\n        }));\n        this.assertValidWeeklyRules(normalizedRules);\n        await this.prisma.$transaction(async (tx) => {\n            await tx.internalAvailabilityRule.deleteMany({\n                where: { tenantId: scopedTenantId, providerId },\n            });\n            if (normalizedRules.length > 0) {\n                await tx.internalAvailabilityRule.createMany({ data: normalizedRules });\n            }\n        });\n        return this.getProviderSchedule(scopedTenantId, providerId);\n    }"
+      }
+    ],
+    "realProductionBusinessMutations": 0
+  },
+  "healthAfterReadOnlyProbe": [
+    {
+      "status": "ok",
+      "service": "maya-saas-backend",
+      "release": "20260904-c06-p5-wave6-cutover-3b545671",
+      "started_at": "2026-09-03T22:41:18.715Z",
+      "timestamp": "2026-09-04T09:36:02.571Z"
+    },
+    {
+      "status": "ready",
+      "service": "maya-saas-backend",
+      "checks": {
+        "database": "ready"
+      },
+      "timestamp": "2026-09-04T09:36:02.584Z"
+    }
+  ],
+  "localRuntimeProof": {
+    "verdict": "PASS",
+    "cases": 21,
+    "results": [
+      "unbound Telegram cannot issue Client challenge",
+      "unbound Telegram cannot consent",
+      "real signed Telegram proof + valid challenge links Client without Maya User",
+      "replay rejected",
+      "canonical guest consent success; retry/restart yields same two facts without fake User",
+      "status read creates no execution or consent mutation",
+      "consumer cannot override clientId",
+      "consumer cannot override userId",
+      "consumer cannot override tenantId",
+      "consumer cannot override phone",
+      "consumer cannot override occurredAt",
+      "cross-tenant signed Telegram cannot select Client",
+      "forged signed Telegram rejected",
+      "expired Telegram proof rejected",
+      "future Telegram proof rejected",
+      "concurrent duplicate command has one outcome; revoke/new consent preserves original facts",
+      "bare Client.userId does not issue first challenge",
+      "bare Client.userId does not authorize canonical consent",
+      "verified channel can issue exact Client challenge; PWA consumes and consents without heuristic Client reassignment",
+      "revoked Maya session cannot consent",
+      "phone-only payload cannot consume"
+    ],
+    "providerWrites": 0,
+    "productionMutations": 0
+  },
+  "targetedTests": {
+    "suites": 10,
+    "passed": 84,
+    "total": 84
+  },
+  "applicationTypecheck": "PASS",
+  "scriptsTypecheck": "PASS",
+  "projectLint": "PASS",
+  "fullRegressionGate": "NOT RUN — new bypass STOP",
+  "runtimeReleaseBuild": "NOT RUN — new bypass STOP",
+  "sourceSha256": {
+    "maya-saas-backend/src/action-engine/action-engine.ingress.ts": "8f50eda7a71177b6f24f748dc9bc3e3d681addd7a7a99dbcab975800cbca5968",
+    "maya-saas-backend/src/action-engine/action-engine.kernel.ts": "9e0b633d86c66db693a770c74f0736221da3c5b7088ebbad8a1b2fad2a1650f7",
+    "maya-saas-backend/src/action-engine/action-engine.policy-registry.ts": "c99f00570753b3f7dd4913c00c8db680a06f5e68f497d8bb342d3da9308a5c0d",
+    "maya-saas-backend/src/action-engine/action-engine.policy-resolver.ts": "522e005d4c069f844d595cad2411d2e080b99fae442d7453c757dfd122159ce5",
+    "maya-saas-backend/src/action-engine/package5-wave3-executable.contract.spec.ts": "72ecdbeb0ef866ec748904c60aaa53d36b0daf63dace957a94bb24f6dc2a191d",
+    "maya-saas-backend/src/action-engine/package5-wave3-executable.contract.ts": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513",
+    "maya-saas-backend/src/crm/crm.module.ts": "b205ba40c8d408636ae23271a308f55af3150d52537ace9acb08ba7a8df6335c",
+    "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+    "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts": "a686a79143dce98c124c7acf8101c8793340b51f586a3ab63435daaf6be0299d",
+    "maya-saas-backend/scripts/package5-final-a18-runtime-proof.ts": "dbf6189cbd05793e7a4e105e98364cc9f854518c031b08195cdcc4079f53bca7",
+    "maya-saas-backend/src/crm/client-channel-authenticator.service.ts": "6d1b03c3c28907a831938c34260836d9ff504ea7c04dd6a606574dd5e24b87a6",
+    "maya-saas-backend/src/crm/client-channel-runtime.service.ts": "f7fadc599e4e30484c5424b3071e57b83eb77852a0633c74cf585a347c662724",
+    "maya-saas-backend/src/crm/client-channel-subject.ts": "333d84c7361d8e637d4c30ef43677aa61dae7b31a291ed239a1a11f536270484",
+    "maya-saas-backend/src/crm/client-channel.controller.ts": "0d8f799534737196ca9e64113d7adaabdd0a997bda70c3938504939f7fa3cc7a",
+    "maya-saas-backend/src/crm/client-consent-authority.ts": "a7807b38b947fb6545fde3ef71d2dde99f375c02d4ab95c0246a93a6cdefd2d4"
+  },
+  "hygiene": {
+    "preExistingLocalDatabases": 17,
+    "preExistingDatabasesTouched": 0,
+    "unrelatedDirtyFilesUnchanged": 18,
+    "ownedTempProcesses": 0,
+    "ownedWatchers": 0,
+    "ownedPlaywrightChromeProcesses": 0,
+    "ownedTempDatabases": 0
+  },
+  "openPaths": [
+    "A18 /api/consent/submit",
+    "A26 /api/onboarding/trial",
+    "A26 /api/admin/tenants",
+    "A26/A28 /api/onboarding/ai/drafts/:draftId/confirm"
+  ],
+  "runtimeRemediationDeployed": false,
+  "fullFinalGateRerun": false,
+  "package5Complete": false,
+  "realProductionBusinessProviderMutationsForProof": 0,
+  "rawLogSha256": {
+    "work/a18-challenge-foundation/production-migration-gate.log": "5686a22e7e483049b17b9c120d684f20bf1e4d6ed443a28f09fdde35156df637",
+    "work/a18-challenge-foundation/production-migration-apply.log": "7243cb8f75f737e0262b609b4f57fc9ef5dbaeea4bf8a4d2b59b3bd76b5095c9",
+    "work/package5-final-remediation/a18-runtime-proof.log": "447ff6f97f415658ac9c10f9266d5be3b37d7661b5b5df5e4e3435e000c8a841",
+    "work/package5-final-remediation/ai-onboarding-production-evidence.json": "0388b4e794b729b420a60e91fd40eefc678096b4eca4d4165d14fc065b130ebf",
+    "a18-final-types.log": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+    "a18-final-script-types.log": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+    "a18-final-lint.log": "80f5295fdc4b3e55d92f2aa33e3773ba6f2b9305c454e513f870e95ae3fa198d",
+    "a18-targeted-tests.log": "ed880b68ed1b7a081145658e88858b4f971f386526dcf6f2c0f688bcb36f0014"
+  }
+}

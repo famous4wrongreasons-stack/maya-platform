@@ -1,4 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ClientChannelAuthenticatorService } from './client-channel-authenticator.service';
+import { ClientChannelRuntimeService } from './client-channel-runtime.service';
+import {
+  ClientChannelController,
+  LegacyClientChannelController,
+} from './client-channel.controller';
 
 import {
   ActionEngineKernel,
@@ -45,12 +51,16 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     UsersModule,
   ],
   controllers: [
+    ClientChannelController,
+    LegacyClientChannelController,
     CrmController,
     CrmIntegrationController,
     LegacyAppointmentBridgeController,
     ShadowIngestionController,
   ],
   providers: [
+    ClientChannelAuthenticatorService,
+    ClientChannelRuntimeService,
     AppointmentChangeService,
     AppointmentMirrorService,
     AppointmentObservationService,

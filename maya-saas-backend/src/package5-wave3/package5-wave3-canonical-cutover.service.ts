@@ -1,11 +1,15 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { CrmProvider } from '../common/domain.enums';
 
+import type { Prisma } from '@prisma/client';
+import { clientChannelSubjectHash } from '../crm/client-channel-subject';
+import type { CurrentClientChannel } from '../crm/client-channel-authenticator.service';
 import { CrmService } from '../crm/crm.service';
 import type { ConnectCrmIntegrationDto } from '../crm/dto/connect-crm-integration.dto';
 import type { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
@@ -267,20 +271,89 @@ export class Package5Wave3CanonicalCutoverService {
     occurredAt: Date,
     idempotencyKey: string,
   ) {
+    const subjectHash = clientChannelSubjectHash(
+      this.encryption,
+      'maya_user',
+      userId,
+    );
+    const link = await this.prisma.clientChannelLink.findFirst({
+      where: {
+        tenantId,
+        provider: 'maya_user',
+        providerSubjectHash: subjectHash,
+        revokedAt: null,
+      },
+    });
+    if (!link || link.clientId !== clientId)
+      throw new ForbiddenException('Verified Client binding required');
+    const membership = await this.prisma.membership.findUnique({
+      where: { userId_tenantId: { userId, tenantId } },
+      include: { user: true },
+    });
+    if (
+      !membership ||
+      membership.status !== 'active' ||
+      membership.user.status !== 'active'
+    )
+      throw new ForbiddenException('Current Maya account required');
+    return this.recordChannelConsent(
+      tenantId,
+      { userId, provider: 'maya_user', providerSubjectHash: subjectHash },
+      kind,
+      granted,
+      occurredAt,
+      idempotencyKey,
+    );
+  }
+
+  async recordChannelConsent(
+    tenantId: string,
+    channel: Pick<
+      CurrentClientChannel,
+      'userId' | 'provider' | 'providerSubjectHash'
+    >,
+    kind: 'privacy' | 'marketing',
+    granted: boolean,
+    occurredAt: Date,
+    idempotencyKey: string,
+    recheckChannel?: (tx: Prisma.TransactionClient) => Promise<void>,
+  ) {
+    this.tenantContext.assertTenantId(tenantId);
+    const links = await this.prisma.clientChannelLink.findMany({
+      where: {
+        tenantId,
+        provider: channel.provider,
+        providerSubjectHash: channel.providerSubjectHash,
+        revokedAt: null,
+      },
+      take: 2,
+    });
+    if (links.length !== 1)
+      throw new ForbiddenException('client_link_required');
+    const link = links[0];
     const source = `${this.intentRef(idempotencyKey)}:consent:${kind}`;
     return this.execute(
       tenantId,
-      { userId },
+      {
+        userId: channel.userId,
+        consentChannel: {
+          linkId: link.id,
+          provider: channel.provider,
+          providerSubjectHash: link.providerSubjectHash,
+          verificationEvidenceHash: link.verificationEvidenceHash,
+        },
+        recheckChannel,
+      },
       {
         operation: 'record_client_consent',
-        clientId,
+        clientId: link.clientId,
         kind,
         decision: granted ? 'grant' : 'revoke',
         occurredAt,
         effectiveAt: occurredAt,
         sourceIdentityHash: this.encryption.opaqueReference(
           'package5.wave3.client-consent',
-          `${tenantId}\0${clientId}\0${source}`,
+          `${tenantId}\0${link.clientId}\0${source}`,
         ),
       },
       source,

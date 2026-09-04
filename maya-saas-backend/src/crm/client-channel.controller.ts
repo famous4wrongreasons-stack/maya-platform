@@ -1,0 +1,155 @@
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  Post,
+} from '@nestjs/common';
+
+import { Public } from '../decorators/public.decorator';
+import { TenantScoped } from '../decorators/tenant-scoped.decorator';
+import { BridgeSourceService } from '../tenancy/bridge-source.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
+import { ClientChannelRuntimeService } from './client-channel-runtime.service';
+
+function mayaProof(authorization: string | undefined) {
+  if (!authorization?.startsWith('Bearer '))
+    throw new BadRequestException('Maya session required');
+  return JSON.stringify({
+    type: 'maya_jwt',
+    credential: authorization.slice(7),
+  });
+}
+function onlyToken(value: unknown) {
+  if (
+    !value ||
+    typeof value !== 'object' ||
+    Array.isArray(value) ||
+    Object.keys(value).join(',') !== 'token' ||
+    !('token' in value) ||
+    typeof value.token !== 'string'
+  )
+    throw new BadRequestException('Only challenge token is accepted');
+  return value.token;
+}
+function empty(value: unknown) {
+  if (
+    !value ||
+    typeof value !== 'object' ||
+    Array.isArray(value) ||
+    Object.keys(value).length
+  )
+    throw new BadRequestException('No Client identity may be supplied');
+}
+
+@Controller('client-channel')
+@TenantScoped()
+export class ClientChannelController {
+  constructor(private readonly runtime: ClientChannelRuntimeService) {}
+  @Post('challenges')
+  issue(
+    @Headers('authorization') authorization: string | undefined,
+    @Body() body: unknown,
+  ) {
+    empty(body);
+    return this.runtime.issue(mayaProof(authorization));
+  }
+  @Post('consume')
+  consume(
+    @Headers('authorization') authorization: string | undefined,
+    @Body() body: unknown,
+  ) {
+    return this.runtime.consume(mayaProof(authorization), onlyToken(body));
+  }
+  @Post('consent')
+  consent(
+    @Headers('authorization') authorization: string | undefined,
+    @Body() body: unknown,
+  ) {
+    return this.runtime.submitConsent(mayaProof(authorization), body);
+  }
+  @Get('status')
+  status(@Headers('authorization') authorization: string | undefined) {
+    return this.runtime.status(mayaProof(authorization));
+  }
+}
+
+/** The transport credential binds the integration/tenant only. The raw channel
+ * credential is independently authenticated; neither credential is Client authority.
+ */
+@Controller('internal/legacy/client-commands')
+export class LegacyClientChannelController {
+  constructor(
+    private readonly bridge: BridgeSourceService,
+    private readonly context: TenantContextService,
+    private readonly runtime: ClientChannelRuntimeService,
+  ) {}
+
+  @Public()
+  @Post(':operation')
+  async command(
+    @Headers('x-maya-legacy-bridge') secret: string | undefined,
+    @Param('operation') operation: string,
+    @Body() value: unknown,
+  ) {
+    this.bridge.assertBridgeSecret(
+      secret,
+      'MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN',
+      {
+        disabled: 'client_bridge_disabled',
+        unauthorized: 'client_bridge_unauthorized',
+      },
+    );
+    if (
+      !value ||
+      typeof value !== 'object' ||
+      Array.isArray(value) ||
+      Object.keys(value).sort().join(',') !==
+        'channelProof,externalCompanyId,payload,provider'
+    )
+      throw new BadRequestException('Invalid channel bridge envelope');
+    const input = value as {
+      channelProof: string;
+      externalCompanyId: string;
+      payload: unknown;
+      provider: string;
+    };
+    if (typeof input.channelProof !== 'string')
+      throw new BadRequestException('Channel proof required');
+    const source = this.bridge.assertBridgeIntegrationBinding(
+      input,
+      {
+        provider: 'MAYA_LEGACY_APPOINTMENT_BRIDGE_SOURCE_PROVIDER',
+        externalCompanyId: 'MAYA_LEGACY_APPOINTMENT_BRIDGE_SOURCE_COMPANY_ID',
+      },
+      {
+        disabled: 'client_bridge_binding_disabled',
+        mismatch: 'client_bridge_source_mismatch',
+      },
+    );
+    const tenant = await this.bridge.resolveTenantByIntegration(
+      source,
+      'client_bridge_tenant_unresolved',
+    );
+    return this.context.runAsPublicTenant(tenant.tenantId, () => {
+      if (operation === 'issue') {
+        empty(input.payload);
+        return this.runtime.issue(input.channelProof);
+      }
+      if (operation === 'consume')
+        return this.runtime.consume(
+          input.channelProof,
+          onlyToken(input.payload),
+        );
+      if (operation === 'consent')
+        return this.runtime.submitConsent(input.channelProof, input.payload);
+      if (operation === 'status') {
+        empty(input.payload);
+        return this.runtime.status(input.channelProof);
+      }
+      throw new BadRequestException('Unsupported client command');
+    });
+  }
+}

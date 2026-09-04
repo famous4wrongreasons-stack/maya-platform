@@ -144,6 +144,7 @@ const KEYS = new Set([
   'desiredStateHash',
   'requestMaterialHash',
   'actorMembershipId',
+  'consentChannel',
   'actorRole',
   'actorIdentityHash',
   'policyVersion',
@@ -252,6 +253,32 @@ export function normalizePackage5Wave3Input(
     throw new ActionContractError('changedFields invalid');
   const role = text(input, 'actorRole');
   if (!ROLES.has(role!)) throw new ActionContractError('actorRole invalid');
+  let consentChannel: Record<string, unknown> | undefined;
+  if (input.consentChannel !== undefined) {
+    if (
+      operation !== 'record_client_consent' ||
+      role !== 'client' ||
+      input.actorMembershipId !== null
+    )
+      throw new ActionContractError('Channel authority is consent-only');
+    const binding = object(input.consentChannel);
+    if (
+      Object.keys(binding).sort().join(',') !==
+        'linkId,provider,providerSubjectHash,verificationEvidenceHash' ||
+      !['maya_user', 'telegram'].includes(String(binding.provider))
+    )
+      throw new ActionContractError('Exact verified channel binding required');
+    consentChannel = {
+      linkId: opaque(binding, 'linkId'),
+      provider: binding.provider,
+      providerSubjectHash: hash(binding, 'providerSubjectHash'),
+      verificationEvidenceHash: hash(binding, 'verificationEvidenceHash'),
+    };
+  }
+  if (operation === 'record_client_consent' && !consentChannel)
+    throw new ActionContractError(
+      'Consent requires durable Client channel authority',
+    );
   const normalized: Record<string, unknown> = {
     operation,
     targetKind: registration.targetKind,
@@ -262,7 +289,12 @@ export function normalizePackage5Wave3Input(
     afterStateHash: hash(input, 'afterStateHash'),
     desiredStateHash: hash(input, 'desiredStateHash'),
     requestMaterialHash: hash(input, 'requestMaterialHash'),
-    actorMembershipId: opaque(input, 'actorMembershipId'),
+    actorMembershipId: opaque(
+      input,
+      'actorMembershipId',
+      Boolean(consentChannel),
+    ),
+    ...(consentChannel ? { consentChannel } : {}),
     actorRole: role,
     actorIdentityHash: hash(input, 'actorIdentityHash'),
     policyVersion: PACKAGE5_WAVE3_POLICY_VERSION,

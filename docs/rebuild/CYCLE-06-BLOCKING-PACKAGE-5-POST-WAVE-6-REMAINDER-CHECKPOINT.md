@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — challenge schema + TTL APPROVED; local foundation PASS; migration gate then A18/A26 remediation**
+Status: **CURRENT — challenge schema APPLIED; A18 runtime candidate local PASS; STOP on new AI onboarding A26/A28 production bypass**
 
 Date: 2026-09-04. This supersedes the Wave 6 pre-cutover remainder after the
 explicit AC6 owner decision and successful production cutover from gated source
@@ -63,11 +63,21 @@ STOP applies. Current report:
 
 The user subsequently accepted `84696bc9` and approved both exact proposals,
 including central TTL V1 = 600 seconds. That proposal STOP is superseded.
-The 14-field challenge foundation is implemented locally: PostgreSQL proof 49/49,
-targeted checks 33/33, clean replay of 72 migrations, validate/typechecks/lint and
-preflight build PASS. Production migration gate/apply is next, followed by the
-already authorized A18/A26 remediation and complete Final Package 5 Gate.
-See `CYCLE-06-BLOCKING-PACKAGE-5-A18-CLIENT-LINK-CHALLENGE-FOUNDATION-REPORT.md`.
+The 14-field challenge foundation passed PostgreSQL proof 49/49, targeted checks
+33/33, clean replay of 72 migrations, validate/typechecks/lint and preflight build.
+Production migration from pushed source `77c611c7` passed the expected-only gate
+and was applied: pending 0, post-apply drift NONE, challenge/link rows 0, no
+backfill, healthy unchanged runtime.
+
+Work continued into A18 runtime alignment: the undeployed backend candidate has
+21/21 local PostgreSQL checks and 84/84 targeted tests, plus both typechecks/lint.
+Python consent cutover and A26 remediation are not complete. While tracing A26
+callers, a new production-reachable bypass B4 was confirmed read-only:
+`POST /api/onboarding/ai/drafts/:draftId/confirm` → post-tenant direct A28
+provider/service/availability writes, direct A26 branding, and physical tenant
+delete + activation-reset compensation. The user's new-bypass STOP applies
+before runtime deployment. No full final-gate rerun or aggregate PASS is claimed.
+See `CYCLE-06-BLOCKING-PACKAGE-5-A18-CHALLENGE-APPLY-AND-AI-BYPASS-STOP-REPORT.md`.
 
 Production release: `20260904-c06-p5-wave6-cutover-3b545671`.
 Wave 6 behavioral proof remains the accepted `bf21d9d6` proof; it was not rerun.
@@ -84,22 +94,24 @@ as classified in the Authority Gate. No new Action Engine route was introduced.
 | 6 | A30 | COMPLETE; six AC6 classes |
 
 The inventory is exactly the 13 narrowed Entry Gate families, missing 0 and
-extra 0. Final production-wide canonical coverage is not proven: A18 and A26
-have confirmed alternate mutation paths. Preserve the six accepted wave
+extra 0. Final production-wide canonical coverage is not proven: A18, A26
+and A28 have confirmed alternate mutation paths. Preserve the six accepted wave
 checkpoints; resolve the aggregate blockers without inventing another wave.
 
 Remaining work, in order:
 
-1. Run the **authorized ClientLinkChallenge production migration gate/apply**:
-   expected-only pending set, additive DDL, health/readiness and drift NONE.
-   Afterwards verify pending 0, approved-schema drift NONE and backfill 0.
-   Preserve the already applied ClientChannelLink foundation.
-   No phone-derived issue, Client payload override or challenge encoded in a
-   pending ClientChannelLink is allowed.
-2. Complete the **already authorized A18/A26 remediation** for all three paths,
-   final bypass ratchets and targeted adversarial proofs. Retain D2-A/D3-A;
-   mandatory local/deployment gates precede release; production verification is
-   structural/read-only. No A30 tenant purge or real consent/trial smoke.
+1. Preserve the **applied ClientChannelLink + ClientLinkChallenge foundations**;
+   no schema approval or 600-second TTL decision remains pending. Review the
+   undeployed A18 candidate's trusted issuance context, verify production auth
+   wiring, finish the Python consent initiator/read boundaries and durable
+   frontend command identity. No phone-derived linking, arbitrary Client payload,
+   raw bearer persistence or synthetic cold-start provenance is permitted.
+2. Resume the **final remediation with B4 explicitly included**: the original
+   three A18/A26 endpoints plus AI onboarding's post-tenant A26/A28 ownership and
+   compensation. Keep canonical TrialActivation atomicity, no hard delete, and
+   the accepted post-tenant Action Engine owners. Complete targeted adversarial
+   proof and mandatory deployment gates before any runtime release. The prior
+   21/21 A18 backend proof is not the complete A18/A26 production-remediation gate.
 3. **Automatically restart PACKAGE 5 FINAL ADVERSARIAL VERIFICATION / COMPLETION
    GATE from the beginning** once remediation production verification passes.
    Reconcile the complete Entry Gate inventory and all

@@ -1,6 +1,6 @@
 # CYCLE 06 — A18 Client Link Challenge Foundation
 
-Status: **LOCAL FOUNDATION PASS — AUTHORIZED MIGRATION GATE/APPLY NEXT**
+Status: **FOUNDATION + PRODUCTION MIGRATION PASS — RUNTIME REMEDIATION BLOCKED BY NEW AI ONBOARDING BYPASS**
 
 Date: 2026-09-04. The user accepted `84696bc9`, approved the exact 14-field
 ClientLinkChallenge Schema V1 and TTL V1 = 600 seconds, and authorized conditional
@@ -53,22 +53,43 @@ Reproducible script:
 It refuses databases outside `127.0.0.1:55487/maya_c06_a18_challenge_v1_*`.
 `--replay-only` asserts empty challenge and link tables after clean migration.
 
-## Migration and continuation boundary
+## Production migration applied
 
-No production migration or runtime deployment has occurred at this source
-checkpoint. Next gate requires only the new migration pending, additive DDL,
-health/readiness PASS and pre-apply drift NONE against the already-applied
-ClientChannelLink schema candidate from `ae3f7438`. The unchanged live Wave 6
-runtime's older schema file is not the current migrated schema baseline.
+The expected-only migration gate passed from pushed source
+`77c611c79248fce887c6aa22fb817958ef672c8d`. The candidate is
+`/opt/maya-saas/schema-releases/20260904-a18-client-link-challenge-77c611c7`.
+Pre-apply drift was NONE against the already-applied ClientChannelLink schema
+artifact from `ae3f7438`, not against the older immutable runtime schema.
 
-After authorized apply, verify pending 0, approved-candidate drift NONE,
-challenge rows/backfill 0, exact guards/FKs/indexes and healthy unchanged runtime.
-Then **continue**, without another schema-only stopping point, through A18
-canonical consent and both A26 endpoints, their adversarial proof, required
-deployment gates, read-only production verification and the complete 13-family
-Final Package 5 Gate. Stop only at an applicable new blocker/gate boundary.
+`20260904100000_a18_client_link_challenge_v1` was applied successfully at the
+2026-09-04 09:22 UTC verification. The database has 75 finished migration records
+(72 repository migrations plus 3 previously acknowledged records), pending 0,
+and post-apply drift NONE against the approved candidate. Read-only verification
+found the exact 14 columns, both enabled lifecycle/outcome triggers, three
+RESTRICT FKs and required uniqueness. ClientLinkChallenge and ClientChannelLink
+row counts remained 0; no historical facts were backfilled.
+
+Health/readiness remained PASS. The production runtime stayed at
+`20260904-c06-p5-wave6-cutover-3b545671`, PID 1470307, NRestarts 0; it was neither
+replaced nor restarted. This cycle applied one authorized schema migration and
+performed zero real production business/provider mutations for proof.
+
+## Continuation and STOP
+
+Work continued into A18 runtime alignment after apply. The undeployed candidate
+has real Maya-session / signed Telegram channel authentication, verified-link
+consent authority with optional User and local PostgreSQL proof 21/21 PASS.
+It does not yet replace the Python `/api/consent/submit` initiator. Its production
+cold-start trusted Client resolution has not been proved by synthetic fixtures.
+
+While tracing the shared A26 bootstrap callers, read-only production inspection
+confirmed another reachable bypass: AI onboarding confirmation directly mutates
+A28 provider/service/availability state and A26 branding after tenant creation,
+and its compensation resets TrialActivation and physically deletes the tenant.
+The user's explicit new-bypass STOP boundary applies before runtime deployment.
+See `CYCLE-06-BLOCKING-PACKAGE-5-A18-CHALLENGE-APPLY-AND-AI-BYPASS-STOP-REPORT.md`.
 
 All owned PostgreSQL proof clusters/processes have been stopped and removed.
 No watchers/browsers were started. The 17 pre-existing databases were untouched.
-Real production business/provider mutations for proof: 0. Waves 1–6 are accepted;
-no Wave 7, Chapter 7 or automatic Chapter 6 completion.
+Waves 1–6 remain accepted. No Wave 7, Chapter 7, full final-gate rerun or automatic
+Chapter 6 completion occurred.
