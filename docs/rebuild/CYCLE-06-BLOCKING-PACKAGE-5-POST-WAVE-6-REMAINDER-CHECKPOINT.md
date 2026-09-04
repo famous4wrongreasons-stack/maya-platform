@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — accepted waves retained; A18/A26 remediation authorized but STOPPED on A18 channel-to-Client identity contract**
+Status: **CURRENT — A18 binding V1 contract COMPLETE; schema insufficient; STOP after minimal schema proposal**
 
 Date: 2026-09-04. This supersedes the Wave 6 pre-cutover remainder after the
 explicit AC6 owner decision and successful production cutover from gated source
@@ -23,6 +23,15 @@ and production remain unchanged under the user's new-business/schema STOP rule.
 See `CYCLE-06-BLOCKING-PACKAGE-5-FINAL-A18-A26-REMEDIATION-STOP-REPORT.md` and
 `package5-final-a18-client-channel-binding-v1-proposal.md`.
 
+The user then accepted `9ae29bed` and completed the A18 binding V1 business
+decision: verified durable tenant/provider-qualified Client binding, no heuristic
+authority, explicit initial Telegram linking/rebinding and fail-closed ambiguity.
+The resulting schema assessment found no equivalent existing foundation in
+repository or production catalogs. One `ClientChannelLink` model is proposed;
+schema/runtime are not implemented. Current documents:
+`CYCLE-06-BLOCKING-PACKAGE-5-FINAL-A18-BINDING-V1-SCHEMA-ASSESSMENT.md` and
+`package5-final-a18-client-channel-link-schema-v1-proposal.md`.
+
 Production release: `20260904-c06-p5-wave6-cutover-3b545671`.
 Wave 6 behavioral proof remains the accepted `bf21d9d6` proof; it was not rerun.
 The A30 owner is AC6 maintenance coordinator with MaintenanceRun/ItemClaim,
@@ -44,10 +53,11 @@ checkpoints; resolve the aggregate blockers without inventing another wave.
 
 Remaining work, in order:
 
-1. Resolve the new **A18 authenticated channel → canonical Client binding
-   establishment/provenance decision**. D2-A optional User and Client ownership
-   are already approved. The proposal recommends exact durable binding and
-   fail-closed unresolved identity; no new schema is approved/applied yet.
+1. Review/approve the **minimal A18 ClientChannelLink schema proposal**. The
+   binding V1 business contract is COMPLETE. Existing schema is insufficient;
+   no new schema is approved/applied yet. After approval, complete the additive
+   binding foundation with required isolation/concurrency/evidence proof and
+   migration gates. No heuristic backfill or runtime workaround.
 2. Complete the **already authorized A18/A26 remediation** for all three paths,
    final bypass ratchets and targeted adversarial proofs. Retain D2-A/D3-A;
    mandatory local/deployment gates precede release; production verification is
@@ -80,7 +90,11 @@ MAINTENANCE RUN/ITEM CLAIM OWNERSHIP: ENFORCED
 AUTH RETENTION POLICY V1: ENFORCED
 PACKAGE 5 COMPLETE: NO
 PACKAGE 5 FINAL ADVERSARIAL VERIFICATION: FAIL
-PACKAGE 5 FINAL A18/A26 REMEDIATION: BLOCKED — NEW IDENTITY CONTRACT
+PACKAGE 5 FINAL A18/A26 REMEDIATION: BLOCKED — SCHEMA PROPOSAL STOP
+A18 CLIENT-CHANNEL BINDING CONTRACT: COMPLETE
+EXISTING SCHEMA SUFFICIENT: NO
+ADDITIONAL SCHEMA REQUIRED: YES
+A18 CONSENT REMEDIATION CAN RESUME: NO
 UNRESOLVED ACCEPTED PRODUCTION BLOCKER PATHS: 3
 SCHEMA CHANGES APPLIED IN REMEDIATION: 0
 PRODUCTION DEPLOYMENT IN REMEDIATION: NO
@@ -96,7 +110,7 @@ OWNED PLAYWRIGHT/CHROME PROCESSES REMAINING: 0
 OWNED TEMP DATABASES REMAINING: 0
 ```
 
-Current contract STOP: reports → commit/push → HEAD=origin → STOP. After the
-identity decision, the authorized remediation and conditional automatic full
+Current schema proposal STOP: reports → commit/push → HEAD=origin → STOP. After
+schema approval and binding foundation completion, remediation and automatic full
 Final Package 5 Gate resumption remain as listed above. Chapter 6 completion
 acceptance stays separate; Chapter 7 is not started automatically.

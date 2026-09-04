@@ -1,6 +1,13 @@
 # Package 5 Final — A18 Client channel binding V1 proposal
 
-Status: **PROPOSED — new identity-establishment contract; NOT approved or implemented**
+Status: **HISTORICAL PROPOSAL — superseded by the user's binding V1 decision after `9ae29bed`**
+
+The current approved contract and schema sufficiency verdict are recorded in
+`CYCLE-06-BLOCKING-PACKAGE-5-FINAL-A18-BINDING-V1-SCHEMA-ASSESSMENT.md`.
+The current schema proposal is
+`package5-final-a18-client-channel-link-schema-v1-proposal.md`.
+The older sketch below is retained as checkpoint history, not as current policy
+or schema approval.
 
 Date: 2026-09-04. Source checkpoint: `ba9e9234`.
 
