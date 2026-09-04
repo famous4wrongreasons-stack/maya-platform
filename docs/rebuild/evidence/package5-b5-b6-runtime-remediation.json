@@ -54,8 +54,8 @@
   "phpTransportTests": "13/13 PASS",
   "frontendSourceAndCandidateParse": "PASS",
   "nativeSync": "PASS",
-  "productionRuntimeDeployed": false,
-  "fullFinalGateRerun": false,
+  "productionRuntimeDeployed": true,
+  "fullFinalGateRerun": true,
   "productionBusinessProviderProofMutations": 0,
   "pythonCandidates": {
     "webhook_server.py": {
@@ -128,5 +128,25 @@
       "before": "583916e8309ea616b851fb19348aaa27df7523337cc66eb3bca660e11745df68",
       "after": "31333596cf8e0356c0aaffbd313d4577534b9ff0f52d45829522ad7c7525d76a"
     }
+  },
+  "deployedSource": "fb820b3bbdaacd07394ca494b630b771697254bc",
+  "deployedRelease": "/opt/maya-saas/releases/20260904-p5-b5-b6-fb820b3b",
+  "productionStructuralReadOnlyVerification": "PASS",
+  "finalGate": "FAIL — mandatory STOP after B7/B8 production-reachable inventory blockers",
+  "hygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "unrelatedDirtyFilesPreserved": 30,
+    "mixedFilesTaskDeltaOnly": [
+      "ai администратор/bot.py",
+      "ai администратор/webhook_server.py",
+      "maya-os-site/index.html"
+    ],
+    "nativeMirrorGeneratedCopyMatches": true,
+    "proofPort55487Listening": false
   }
 }
