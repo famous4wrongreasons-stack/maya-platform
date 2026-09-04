@@ -1,6 +1,6 @@
 # Package 5 — AI confirmation CRM handoff V1 decision
 
-Status: **PROPOSED — BUSINESS HANDOFF DECISION REQUIRED**
+Status: **APPROVED OPTION A — explicit user decision after checkpoint 35dd890e**
 
 This concerns the already identified AI confirmation route, not a new family or
 wave. It accompanies the minimal confirmation receipt schema proposal. The
@@ -50,8 +50,8 @@ fields nor the pre-tenant preview's hashes can replace that boundary.
    platform actor, tenant deletion, or resetting the activation claim.
 
 This changes **when team setup completes**: it waits for the actual canonical
-tenant integration. That business timing decision is why it is proposed for
-approval rather than silently implemented as a refactor. It reuses A16/A17/A26
+tenant integration. That business timing decision was explicitly approved by
+the user after checkpoint 35dd890e. It reuses A16/A17/A26
 owners without changing their contracts or increasing the 13-family inventory.
 
 ## Production internal-calendar boundary
@@ -88,7 +88,7 @@ resume, auth ownership mismatch and successful-child preservation must all be
 covered. Real production CRM, trial and consent mutations for proof stay zero.
 
 ```text
-CRM HANDOFF V1: PROPOSED — WAIT FOR CANONICAL TENANT CRM CONNECTION
+CRM HANDOFF V1: APPROVED — WAIT FOR CANONICAL TENANT CRM CONNECTION
 PREVIEW ALONE AS CRM ACCESS AUTHORITY: NO
 MOCK PROVIDER SUBSTITUTION: FORBIDDEN
 NEW PRE-TENANT CREDENTIAL STORAGE PROPOSED: NO

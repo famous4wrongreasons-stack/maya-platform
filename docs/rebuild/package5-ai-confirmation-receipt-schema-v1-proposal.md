@@ -1,6 +1,6 @@
 # Package 5 — AI confirmation receipt schema V1 proposal
 
-Status: **PROPOSED — NOT IMPLEMENTED OR APPROVED**
+Status: **APPROVED — exact D1 V1 approved after checkpoint 35dd890e; foundation cycle in progress**
 
 Source checkpoint: `d9799b2a`. Companion assessment:
 `CYCLE-06-BLOCKING-PACKAGE-5-AI-CONFIRM-CONTRACT-STOP-REPORT.md`.
@@ -135,11 +135,12 @@ expired claim, owner-session mismatch, and zero historical receipt backfill.
 
 Then implement canonical orchestration, final bypass ratchets and A18/A26/AI
 targeted proof; proceed to the authorized unified deployment/final gate only
-after resolving the companion CRM handoff decision. This proposal alone does
-not authorize runtime work or migration apply.
+under the separately approved companion CRM handoff option A. The user's
+post-35dd890e instruction authorizes migration apply after the expected-only
+green gate and continuation into the existing remediation cycle.
 
 ```text
-AI CONFIRMATION RECEIPT SCHEMA V1: PROPOSED
+AI CONFIRMATION RECEIPT SCHEMA V1: APPROVED
 EXISTING AGGREGATE REUSED: AiOnboardingDraft
 ADDITIONAL FIELDS PROPOSED: 3
 NEW MODELS PROPOSED: 0
@@ -147,5 +148,5 @@ NEW ACTION CLASSES PROPOSED: 0
 CHILD EXECUTION OWNER: EXISTING CANONICAL ACTION ENGINE EXECUTORS
 PRE-TENANT CREATION OWNER: TRIAL ACTIVATION FLOW
 FAKE HISTORICAL APPROVAL BACKFILL: FORBIDDEN
-SCHEMA IMPLEMENTED/APPLIED IN THIS CYCLE: NO
+SCHEMA FOUNDATION/APPLY STATUS: SEE CURRENT FOUNDATION REPORT
 ```

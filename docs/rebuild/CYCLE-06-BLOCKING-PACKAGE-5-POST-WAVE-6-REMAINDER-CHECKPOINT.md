@@ -1,6 +1,6 @@
 # CYCLE 06 — PACKAGE 5 POST-WAVE-6 REMAINDER CHECKPOINT
 
-Status: **CURRENT — STOP on AI confirmation receipt schema and CRM handoff decision; challenge schema remains APPLIED; A18 runtime candidate remains undeployed**
+Status: **CURRENT — D1 receipt V1 and D2 handoff A APPROVED; receipt local foundation PASS; production migration gate next; runtime remediation undeployed**
 
 Date: 2026-09-04. This supersedes the Wave 6 pre-cutover remainder after the
 explicit AC6 owner decision and successful production cutover from gated source
@@ -102,6 +102,15 @@ families or waves. See
 `package5-ai-confirmation-receipt-schema-v1-proposal.md` and
 `package5-ai-confirm-crm-handoff-v1-decision.md`.
 
+The user subsequently approved both exact decisions after `35dd890e`: three
+AiOnboardingDraft fields plus guards, and CRM handoff option A. The prior
+schema/business STOP is superseded. Receipt foundation now passes 42/42 local
+PostgreSQL cases, 6/6 schema checks and separate replay of 73 migrations. The
+next step is the expected-only production migration gate/apply, followed without
+an intermediate STOP by A18/A26/AI remediation and its mandatory deployment
+gates. No runtime cutover has occurred. Current foundation report:
+`CYCLE-06-BLOCKING-PACKAGE-5-AI-CONFIRMATION-FOUNDATION-REPORT.md`.
+
 Production release: `20260904-c06-p5-wave6-cutover-3b545671`.
 Wave 6 behavioral proof remains the accepted `bf21d9d6` proof; it was not rerun.
 The A30 owner is AC6 maintenance coordinator with MaintenanceRun/ItemClaim,
@@ -125,11 +134,11 @@ checkpoints; resolve the aggregate blockers without inventing another wave.
 
 Remaining work, in order:
 
-1. Resolve **B4-C1 receipt schema and B4-C2 CRM handoff** using the two exact
-   proposals above. Do not silently store a new execution journal in blueprint
+1. Complete the approved **receipt foundation migration gate/apply**, then
+   implement approved **CRM handoff option A**. Do not store an execution journal in blueprint
    JSON, infer approval from retry payload, bind staff to mock, enable internal
-   AI onboarding, or extend accepted action contracts. Any approved foundation
-   must pass its local/migration gates before runtime continuation.
+   AI onboarding, or extend accepted action contracts. Continue directly into
+   runtime remediation after the foundation migration gate/apply passes.
 2. Preserve the **applied ClientChannelLink + ClientLinkChallenge foundations**;
    no schema approval or 600-second TTL decision remains pending. Review the
    undeployed A18 candidate's trusted issuance context, verify production auth
@@ -172,7 +181,7 @@ MAINTENANCE RUN/ITEM CLAIM OWNERSHIP: ENFORCED
 AUTH RETENTION POLICY V1: ENFORCED
 PACKAGE 5 COMPLETE: NO
 PACKAGE 5 FINAL ADVERSARIAL VERIFICATION: FAIL
-PACKAGE 5 FINAL REMEDIATION: STOP — AI CONFIRMATION SCHEMA/HANDOFF
+PACKAGE 5 FINAL REMEDIATION: IN PROGRESS — APPROVED RECEIPT FOUNDATION
 AI DRAFT CONFIRM CONTRACT RECONSTRUCTION: COMPLETE
 AI DRAFT CONFIRM RUNTIME CONTRACT SUFFICIENT: NO
 A18 CLIENT-CHANNEL BINDING CONTRACT: COMPLETE
@@ -180,8 +189,8 @@ A18 FIRST-LINK CHALLENGE AUTHORITY: APPROVED
 APPROVED COMPLETED-LINK SCHEMA SUFFICIENT: YES
 EXISTING CHALLENGE SCHEMA SUFFICIENT: YES
 ADDITIONAL SCHEMA REQUIRED: YES — AiOnboardingDraft confirmation receipt
-AI CONFIRMATION RECEIPT SCHEMA V1: PROPOSED, NOT APPROVED
-CRM HANDOFF V1: PROPOSED, NOT APPROVED
+AI CONFIRMATION RECEIPT SCHEMA V1: APPROVED; LOCAL FOUNDATION PASS
+CRM HANDOFF V1: APPROVED OPTION A
 CHALLENGE SCHEMA V1: APPROVED
 TTL V1: APPROVED — 600 SECONDS
 CHALLENGE SCHEMA IMPLEMENTED: YES
@@ -197,13 +206,13 @@ CLIENT CHANNEL LINK DURABLE IN PRODUCTION: YES
 CLIENT LINK CHALLENGE DURABLE IN PRODUCTION: YES
 CLIENT LINK CHALLENGE TTL: 600 SECONDS
 A18 LOCAL RUNTIME CANDIDATE PROOF: PASS — accepted d9799b2a, undeployed
-A18 CONSENT REMEDIATION CAN RESUME: AFTER CURRENT AI CONTRACT STOP IS RESOLVED
+A18 CONSENT REMEDIATION CAN RESUME: AFTER APPROVED RECEIPT MIGRATION GATE/APPLY
 UNRESOLVED ACCEPTED PRODUCTION BLOCKER ENDPOINTS: 4
 SCHEMA MIGRATIONS APPLIED IN REMEDIATION: 2
 SCHEMA MIGRATIONS APPLIED IN THIS ASSESSMENT CYCLE: 0
 PRODUCTION RUNTIME DEPLOYMENT IN REMEDIATION: NO
 FINAL PACKAGE 5 GATE STARTED: YES — STOPPED ON CONFIRMED BYPASSES; NOT RERUN
-FULL REGRESSION GATE: NOT RUN — current contract STOP
+FULL REGRESSION GATE: NOT YET RUN — unified remediation still pending
 WAVE 7 CREATED: NO
 CHAPTER 7 STARTED: NO
 REAL PRODUCTION BUSINESS/PROVIDER MUTATIONS FOR CUTOVER PROOF: 0
@@ -216,7 +225,8 @@ OWNED TEMP DATABASES REMAINING: 0
 ```
 
 The completed-link and challenge foundations/applies and challenge TTL decision
-are accepted; do not reapply them. Resolve the new AI receipt/handoff proposals,
-then continue the authorized remediation and automatic full Final Package 5
+are accepted; do not reapply them. AI receipt/handoff decisions are also
+approved. Apply the receipt migration after its green gate, then continue the
+authorized remediation and automatic full Final Package 5
 Gate as specified after all gates pass. Chapter 6
 completion acceptance stays separate; Chapter 7 is not started automatically.

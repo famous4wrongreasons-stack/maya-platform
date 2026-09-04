@@ -1418,6 +1418,10 @@ model AiOnboardingDraft {
   expiresAt            DateTime
   confirmedTenantId    String?
   trialActivationId    String?          @unique
+  /// Approved Package 5 confirmation receipt V1; no historical approval backfill.
+  revision             Int              @default(0)
+  confirmationReceiptJson Json?
+  confirmationMaterialEncrypted String?
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
   confirmedTenant      Tenant?          @relation("AiOnboardingConfirmedTenant", fields: [confirmedTenantId], references: [id], onDelete: SetNull)
