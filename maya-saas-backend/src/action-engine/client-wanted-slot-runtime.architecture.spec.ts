@@ -47,14 +47,13 @@ describe('Package 5 B9 production identity and delivery ratchet', () => {
   });
 
   it('removes legacy waitlist/chat delivery from the freed-slot path', () => {
-    const canonical = branch(
-      freedSlot,
-      '# 1) Canonical B9 exact-time interests.',
-      '# 2) Скоринг по циклу',
+    const canonical = freedSlot.slice(
+      freedSlot.indexOf('async def offer_freed_slot('),
     );
+    expect(canonical).toContain('async def offer_freed_slot(');
     expect(canonical).toContain('match_available_slot');
     expect(canonical).not.toMatch(
-      /get_slot_waitlist|mark_slot_waitlist_notified|send_message|chat_id/,
+      /get_slot_waitlist|mark_slot_waitlist_notified|send_message|chat_id|find_candidates|log_freed_slot_offer/,
     );
   });
 

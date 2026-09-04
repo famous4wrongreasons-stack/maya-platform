@@ -1667,7 +1667,12 @@ async def _process_record_delete(app: Application, record_id: int, payload: dict
             "master_notified": master_notified,
         }
 
-    freed_result = await freed_slot.offer_freed_slot(app, int(staff_id), slot_dt)
+    freed_result = await freed_slot.offer_freed_slot(
+        app,
+        int(staff_id),
+        slot_dt,
+        source_event_id=f"yclients-record-delete:{record_id}",
+    )
     if isinstance(freed_result, dict):
         freed_result["master_notified"] = master_notified
     return freed_result
@@ -2537,88 +2542,21 @@ async def panel_options_handler(request: web.Request) -> web.Response:
     return _cabinet_response({"ok": True})
 
 
-GIFT_PROMO_PERCENT = 20
-GIFT_PROMO_VALID_DAYS = 14
-
-
-async def _promo_gift_notify(app, chat_id: int, code: str, pct: int, until_str: str = "") -> None:
-    """Шлём клиенту промокод в Telegram (+ web-push). Ошибки доставки глотаем —
-    код всё равно создан и возвращается фронту для показа прямо в приложении."""
-    date_line = ""
-    if until_str:
-        try:
-            d = date.fromisoformat(str(until_str)[:10])
-            date_line = f"Действует до {d.strftime('%d.%m.%Y')}.\n"
-        except Exception:
-            date_line = ""
-    text = (
-        "🎁 Ваш подарок от «Мужской Эстетики»!\n\n"
-        f"Промокод *{code}* — *скидка {pct}%* на первое посещение.\n"
-        f"{date_line}\n"
-        "Назовите код мастеру при оплате. Хорошей стрижки! 💈"
-    )
-    try:
-        await app["bot_app"].bot.send_message(chat_id=chat_id, text=text, parse_mode="Markdown")
-    except Exception as e:
-        logger.error(f"promo_gift tg send {chat_id}: {e}")
-    try:
-        await _send_client_push(chat_id, title=f"Ваш промокод −{pct}% 🎁",
-                                body=f"{code} — скидка {pct}% на первое посещение.", url="/app/",
-                                tag="promo-gift",
-                                persist_in_chat=True,
-                                chat_text=(
-                                    "🎁 Для вас готов промокод на первое посещение.\n\n"
-                                    f"{code} — скидка {pct}%.\n"
-                                    + (f"Действует до {until_str[:10]}.\n" if until_str else "")
-                                    + "Когда будете готовы, откройте запись в приложении."
-                                ),
-                                chat_action={
-                                    "type": "open_booking",
-                                    "label": "Записаться",
-                                    "screen": "book",
-                                },
-                                chat_dedupe_key=f"promo-gift:{code}",
-                                )
-    except Exception:
-        pass
+PROMO_GIFT_RETIRED_CODE = "legacy_promo_issuance_retired"
 
 
 async def promo_gift_handler(request: web.Request) -> web.Response:
-    """POST /api/promo_gift — клиент в баннере дошёл до «−20%» и нажал «Записаться».
-    Создаём/находим промокод −20% на первое посещение и шлём его клиенту в Telegram
-    (+ web-push). Код тот же, что AI проверяет при записи (таблица birthday_promo)."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    chat_id = tg_user.get("id") if tg_user else None
-    if not chat_id:
-        return _cabinet_response({"ok": False, "needs_telegram": True,
-                                  "message": "Промокод приходит в Telegram-бот — зайдите через него."})
-    chat_id = int(chat_id)
-    # Идемпотентность: уже есть активный −20%-код → отдаём его, не плодим и не спамим.
-    try:
-        existing = database.get_active_birthday_promo(chat_id)
-    except Exception:
-        existing = None
-    if existing and existing.get("code"):
-        # Код уже есть — отдаём его (приложение покажет чип из JSON). Telegram повторно
-        # НЕ дёргаем: иначе на каждый повторный тап/переоткрытие баннера летит дубль
-        # «🎁 Ваш подарок». Доставку клиенту уже обеспечивает чип в приложении.
-        return _cabinet_response({"ok": True, "code": existing["code"],
-                                  "percent": existing.get("percent") or GIFT_PROMO_PERCENT, "new": False})
-    # Новый «подарочный» код
-    code = "GIFT-" + database.new_birthday_promo_code().split("-", 1)[-1]
-    until = (date.today() + timedelta(days=GIFT_PROMO_VALID_DAYS))
-    try:
-        client_id = database.get_or_create_client(chat_id)
-        database.save_birthday_promo(client_id, code, GIFT_PROMO_PERCENT, date.today().year, until.isoformat())
-    except Exception as e:
-        logger.error(f"promo_gift save chat={chat_id}: {e}")
-        return _cabinet_response({"ok": False, "message": "Не удалось создать промокод."}, status=500)
-    await _promo_gift_notify(request.app, chat_id, code, GIFT_PROMO_PERCENT, until.isoformat())
-    return _cabinet_response({"ok": True, "code": code, "percent": GIFT_PROMO_PERCENT, "new": True})
+    """Compatibility response for the retired legacy 20% promo issuer.
+
+    Historical promo rows remain untouched. This read-compatible endpoint never
+    resolves or creates a Client, grants value, or attempts delivery.
+    """
+    return _cabinet_response({
+        "ok": False,
+        "error": PROMO_GIFT_RETIRED_CODE,
+        "message": "Выдача этого промокода завершена.",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_me_handler(request: web.Request) -> web.Response:
@@ -7365,21 +7303,7 @@ async def cert_create_handler(request: web.Request) -> web.Response:
 
 
 async def sub_create_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/sub/create — покупка абонемента картой прямо в приложении.
-
-    Body: { plan: 'haircut'|'complex'|'beard', tier: 'senior'|'top', auth_data?: {...} }
-
-    Создаёт pending-подписку и платёж ЮKassa, возвращает confirmation_url
-    (страница оплаты открывается внутри приложения). После оплаты фоновый поллер
-    (внедрён из бота) активирует абонемент и уведомляет покупателя в Telegram.
-    Абонемент личный — получателя не спрашиваем; телефон для чека 54-ФЗ берём из БД.
-    """
-    logger.warning("p4_05_legacy_mutation_disabled:initiate_customer_subscription_purchase")
-    return _cabinet_response({
-        "error": "canonical_subscription_ingress_required",
-        "message": "Покупка абонемента временно недоступна. Попробуйте позже.",
-    }, status=503)
+    """Verified Client initiator for canonical P4-05 subscription checkout."""
     try:
         body = await request.json()
     except Exception:
@@ -7387,117 +7311,57 @@ async def sub_create_handler(request: web.Request) -> web.Response:
     if not isinstance(body, dict):
         return _cabinet_response({"error": "invalid_json"}, status=400)
 
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-
-    plan_code = (body.get("plan") or "").strip()
-    tier = (body.get("tier") or "").strip()
-    plan = subscriptions.get_plan(plan_code)
-    if not plan or tier not in ("senior", "top"):
+    plan_code = str(body.get("plan") or "").strip().lower()
+    tier = str(body.get("tier") or "").strip().lower()
+    if plan_code not in ("haircut", "complex", "beard") or tier not in ("senior", "top"):
         return _cabinet_response({
             "error": "bad_plan",
             "message": "Тариф не найден. Обновите приложение и попробуйте снова.",
         }, status=400)
 
-    # Телефон обязателен для чека 54-ФЗ — берём из БД (появляется после первой записи)
-    client_id = database.get_or_create_client(chat_id)
-    client_row = database.get_client(chat_id)
-    customer_phone = (client_row or {}).get("phone")
-    if not customer_phone:
-        return _cabinet_response({
-            "error": "no_phone",
-            "message": ("Чтобы оформить абонемент, нужен ваш телефон для чека. Оформите одну "
-                        "запись через @malesthetic_bot (я попрошу телефон) — после этого покупка "
-                        "в приложении заработает. Или позвоните: 8-962-447-67-47."),
-        }, status=400)
-
-    # Не плодим вторую активную подписку (как в боте)
-    active = database.get_active_subscription_for_client(client_id)
-    if active:
-        try:
-            days_left = (datetime.fromisoformat(active["expires_at"]).date() - datetime.now().date()).days
-        except Exception:
-            days_left = 999
-        if days_left > subscriptions.RENEW_PUSH_DAYS_BEFORE:
-            try:
-                expires = datetime.fromisoformat(active["expires_at"]).strftime("%d.%m")
-            except Exception:
-                expires = "—"
-            return _cabinet_response({
-                "error": "already_active",
-                "message": (f"У вас уже активный абонемент до {expires}. Новый можно будет купить, "
-                            f"когда останется ≤ {subscriptions.RENEW_PUSH_DAYS_BEFORE} дней."),
-            }, status=400)
-
-    price = subscriptions.get_plan_price(plan, tier)
-    tier_label = subscriptions.TIER_LABELS.get(tier, "")
-    started_at = datetime.now().isoformat(timespec="seconds")
-    expires_at = (datetime.now() + timedelta(days=subscriptions.SUBSCRIPTION_DURATION_DAYS)).isoformat(timespec="seconds")
-
     try:
-        sub_id = database.create_subscription(
-            client_id=client_id, plan_code=plan_code, tier=tier,
-            price_rub=price, visits_included=plan["visits_per_month"],
-            started_at=started_at, expires_at=expires_at,
+        import legacy_client_command_bridge as client_commands
+        import maya_subscription_purchase_bridge as purchase_bridge
+
+        proof = client_commands.channel_proof(request.headers, body)
+        explicit_intent = str(body.get("idempotency_key") or "").strip()
+        if explicit_intent:
+            if not re.fullmatch(r"[A-Za-z0-9._:-]{8,180}", explicit_intent):
+                return _cabinet_response({"error": "invalid_idempotency_key"}, status=400)
+            purchase_intent_ref = explicit_intent
+        else:
+            purchase_intent_ref = "pwa-sub:" + hashlib.sha256(
+                f"{proof}|{plan_code}.{tier}".encode("utf-8")
+            ).hexdigest()
+        result = await asyncio.to_thread(
+            purchase_bridge.initiate_purchase,
+            channel_proof=proof,
+            purchase_intent_ref=purchase_intent_ref,
+            offer_code=f"{plan_code}.{tier}",
         )
-    except Exception as e:
-        logger.error(f"sub_create save chat_id={chat_id} plan={plan_code}: {e}")
+    except ValueError as exc:
+        code = str(exc)
+        status = 401 if code == "verified_channel_required" else 403
         return _cabinet_response({
-            "error": "save_failed",
-            "message": "Не удалось создать абонемент. Попробуйте позже.",
-        }, status=500)
-
-    description = (
-        f"Абонемент «{plan['title']} ({tier_label})» — «Мужская Эстетика». "
-        f"{plan['visits_per_month']} визита: {', '.join(plan['services_included'])}. "
-        f"Срок действия 30 дней."
-    )
-    return_url = "https://t.me/malesthetic_bot"
-
-    try:
-        payment = await yukassa_api.create_payment(
-            amount_rub=price,
-            description=description,
-            return_url=return_url,
-            metadata={"subscription_id": sub_id, "plan_code": plan_code, "tier": tier},
-            customer_phone=customer_phone,
-            idempotence_key=f"sub-{sub_id}",
-        )
-    except Exception as e:
-        logger.error(f"sub_create payment chat_id={chat_id} sub={sub_id}: {e}")
-        try:
-            database.update_subscription_status(sub_id, "refunded")
-        except Exception:
-            pass
+            "error": "verified_client_required",
+            "message": "Сначала подтвердите связь профиля с клиентом.",
+        }, status=status)
+    except Exception as exc:
+        logger.error("canonical subscription purchase unavailable: %s", type(exc).__name__)
         return _cabinet_response({
-            "error": "payment_failed",
-            "message": ("Не получилось создать оплату. Попробуйте позже или "
-                        "позвоните 8-962-447-67-47."),
-        }, status=502)
-
-    try:
-        database.set_subscription_payment_id(sub_id, payment["id"])
-    except Exception as e:
-        logger.error(f"sub_create set_payment_id sub={sub_id}: {e}")
-
-    # Фоновый опрос статуса + активация + уведомление в Telegram — переиспользуем
-    # протестированный _poll_subscription_payment бота (внедрён при старте).
-    if _poll_sub_payment_fn is not None:
-        try:
-            asyncio.create_task(_poll_sub_payment_fn(request.app["bot_app"], sub_id, payment["id"]))
-        except Exception as e:
-            logger.error(f"sub_create poll start sub={sub_id}: {e}")
-    else:
-        logger.error(f"sub_create: _poll_sub_payment_fn не внедрён — sub#{sub_id} не активируется автоматически")
+            "error": "canonical_subscription_unavailable",
+            "message": "Покупка абонемента временно недоступна. Попробуйте позже.",
+        }, status=503)
 
     return _cabinet_response({
         "ok": True,
-        "subscription_id": sub_id,
-        "plan": plan_code,
-        "tier": tier,
-        "amount": price,
-        "confirmation_url": payment.get("confirmation_url"),
+        "action_execution_id": result.get("actionExecutionId"),
+        "plan": result.get("plan"),
+        "tier": result.get("tier"),
+        "amount_kopecks": result.get("amount"),
+        "currency": result.get("currency"),
+        "confirmation_url": result.get("confirmation_url"),
+        "provider_state": result.get("providerState"),
     })
 
 

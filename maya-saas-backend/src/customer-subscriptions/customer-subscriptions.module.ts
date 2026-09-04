@@ -13,6 +13,8 @@ import { CustomerSubscriptionActivationShadowController } from './customer-subsc
 import { CustomerSubscriptionActivationShadowService } from './customer-subscription-activation-shadow.service';
 import { CustomerSubscriptionPurchaseShadowController } from './customer-subscription-purchase-shadow.controller';
 import { CustomerSubscriptionPurchaseShadowService } from './customer-subscription-purchase-shadow.service';
+import { CustomerSubscriptionPurchaseCutoverController } from './customer-subscription-purchase-cutover.controller';
+import { CustomerSubscriptionPurchaseCutoverService } from './customer-subscription-purchase-cutover.service';
 import { CustomerSubscriptionRenewalShadowController } from './customer-subscription-renewal-shadow.controller';
 import { CustomerSubscriptionRenewalShadowService } from './customer-subscription-renewal-shadow.service';
 import { CustomerSubscriptionRenewalActivationShadowController } from './customer-subscription-renewal-activation-shadow.controller';
@@ -39,6 +41,7 @@ import {
     BusinessContentModule,
   ],
   controllers: [
+    CustomerSubscriptionPurchaseCutoverController,
     CustomerSubscriptionPurchaseShadowController,
     CustomerSubscriptionActivationShadowController,
     CustomerSubscriptionRenewalShadowController,
@@ -49,6 +52,7 @@ import {
     CustomerSubscriptionRevocationShadowController,
   ],
   providers: [
+    CustomerSubscriptionPurchaseCutoverService,
     CustomerSubscriptionPurchaseShadowService,
     CustomerSubscriptionActivationShadowService,
     CustomerSubscriptionRenewalShadowService,

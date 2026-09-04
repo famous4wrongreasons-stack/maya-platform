@@ -158,6 +158,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
   exports: [
     AppointmentMirrorService,
     AppointmentReconciliationService,
+    ClientChannelRuntimeService,
     ClientIdentityService,
     CrmService,
     Package5Wave3CanonicalCutoverService,

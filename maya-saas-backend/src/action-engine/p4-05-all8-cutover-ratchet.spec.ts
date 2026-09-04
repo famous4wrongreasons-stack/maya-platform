@@ -31,6 +31,7 @@ interface Guard {
   entrypoint: string;
   marker: string;
   mutation: string;
+  canonical?: readonly string[];
 }
 
 const SUBGROUP_GUARDS: Readonly<
@@ -47,9 +48,12 @@ const SUBGROUP_GUARDS: Readonly<
     {
       file: LEGACY_WEB,
       entrypoint: 'async def sub_create_handler',
-      marker:
-        'p4_05_legacy_mutation_disabled:initiate_customer_subscription_purchase',
+      marker: 'purchase_bridge.initiate_purchase',
       mutation: 'database.create_subscription(',
+      canonical: [
+        'client_commands.channel_proof',
+        'purchase_bridge.initiate_purchase',
+      ],
     },
     {
       file: LEGACY_DB,
@@ -137,6 +141,12 @@ function isFailClosed(guard: Guard, overrides?: SourceOverrides): boolean {
   const body = functionBody(source(guard.file, overrides), guard.entrypoint);
   const marker = body.indexOf(guard.marker);
   const mutation = body.indexOf(guard.mutation);
+  if (guard.canonical) {
+    return (
+      mutation < 0 &&
+      guard.canonical.every((required) => body.includes(required))
+    );
+  }
   return marker >= 0 && mutation >= 0 && marker < mutation;
 }
 
@@ -210,6 +220,16 @@ describe('P4-05 all-8 production cutover ratchet', () => {
     );
     expect(currentLegacyBypasses(new Map([[LEGACY_DB, unguarded]]))).toContain(
       'usage_consumption',
+    );
+  });
+
+  it('still detects a direct checkout write added beside the verified P4-05 initiator', () => {
+    const directWeb = source(LEGACY_WEB).replace(
+      'purchase_bridge.initiate_purchase,',
+      'purchase_bridge.initiate_purchase,\n            database.create_subscription(client_id=1),',
+    );
+    expect(currentLegacyBypasses(new Map([[LEGACY_WEB, directWeb]]))).toContain(
+      'checkout_and_provider_correlation',
     );
   });
 
