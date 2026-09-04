@@ -1,0 +1,563 @@
+{
+  "checkpoint": "001bef4b7446feb1e198077ab5559c54a8c15f23",
+  "activeRelease": "/opt/maya-saas/releases/20260904-c06-p5-wave6-cutover-3b545671",
+  "status": "FAIL",
+  "scope": "Independent production-reachable inventory; not a full no-bypass attestation",
+  "families": {
+    "A15": [
+      {
+        "wave": 3,
+        "actionClass": "update_external_staff_schedule_day",
+        "authorityClass": "AC2",
+        "executableCapability": "package5.wave3.update-staff-schedule-day.execute.v1",
+        "executorKey": "package5.wave3.staff-day-command"
+      }
+    ],
+    "A16": [
+      {
+        "wave": 2,
+        "actionClass": "configure_crm_staff_access",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.configure-staff-access.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      },
+      {
+        "wave": 2,
+        "actionClass": "claim_crm_team_owner",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.claim-team-owner.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      }
+    ],
+    "A17": [
+      {
+        "wave": 3,
+        "actionClass": "install_or_replace_crm_credentials",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave3.install-crm-credentials.execute.v1",
+        "executorKey": "package5.wave3.local-command"
+      },
+      {
+        "wave": 3,
+        "actionClass": "activate_crm_integration",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave3.activate-crm-integration.execute.v1",
+        "executorKey": "package5.wave3.local-command"
+      },
+      {
+        "wave": 3,
+        "actionClass": "confirm_crm_import",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave3.confirm-crm-import.execute.v1",
+        "executorKey": "package5.wave3.local-command"
+      },
+      {
+        "wave": 3,
+        "actionClass": "disconnect_crm_integration",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave3.disconnect-crm-integration.execute.v1",
+        "executorKey": "package5.wave3.local-command"
+      }
+    ],
+    "A18": [
+      {
+        "wave": 3,
+        "actionClass": "update_client_profile",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave3.update-client-profile.execute.v1",
+        "executorKey": "package5.wave3.local-command"
+      },
+      {
+        "wave": 3,
+        "actionClass": "record_client_consent",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave3.record-client-consent.execute.v1",
+        "executorKey": "package5.wave3.local-command"
+      },
+      {
+        "wave": 3,
+        "actionClass": "update_client_notes",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave3.update-client-notes.execute.v1",
+        "executorKey": "package5.wave3.local-command"
+      }
+    ],
+    "A22": [
+      {
+        "wave": 1,
+        "actionClass": "update_assistant_preferences",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.settings.assistant.execute.v1",
+        "executorKey": "package5.wave1.local-command"
+      },
+      {
+        "wave": 1,
+        "actionClass": "update_finance_dashboard_preferences",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.settings.finance.execute.v1",
+        "executorKey": "package5.wave1.local-command"
+      },
+      {
+        "wave": 1,
+        "actionClass": "update_appointment_notification_settings",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.settings.appointment-notifications.execute.v1",
+        "executorKey": "package5.wave1.local-command"
+      }
+    ],
+    "A23": [
+      {
+        "wave": 1,
+        "actionClass": "create_operational_task",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.work-item.task-create.execute.v1",
+        "executorKey": "package5.wave1.local-command"
+      },
+      {
+        "wave": 1,
+        "actionClass": "complete_operational_task",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.work-item.task-complete.execute.v1",
+        "executorKey": "package5.wave1.local-command"
+      },
+      {
+        "wave": 1,
+        "actionClass": "request_administrator_contact",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.work-item.admin-contact.execute.v1",
+        "executorKey": "package5.wave1.local-command"
+      }
+    ],
+    "A25": [
+      {
+        "wave": 2,
+        "actionClass": "revoke_other_auth_session",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.revoke-other-session.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      },
+      {
+        "wave": 2,
+        "actionClass": "revoke_all_auth_sessions",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.revoke-all-sessions.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      },
+      {
+        "wave": 2,
+        "actionClass": "link_social_auth_identity",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.link-social-identity.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      }
+    ],
+    "A26": [
+      {
+        "wave": 2,
+        "actionClass": "update_tenant_configuration",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.update-tenant-configuration.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      },
+      {
+        "wave": 2,
+        "actionClass": "update_tenant_branding",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.update-tenant-branding.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      },
+      {
+        "wave": 2,
+        "actionClass": "upload_tenant_logo",
+        "authorityClass": "AC2",
+        "executableCapability": "package5.wave2.upload-tenant-logo.execute.v1",
+        "executorKey": "package5.wave2.object-command"
+      },
+      {
+        "wave": 2,
+        "actionClass": "create_tenant_user",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.create-tenant-user.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      },
+      {
+        "wave": 2,
+        "actionClass": "create_internal_provider_user",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.create-provider-user.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      },
+      {
+        "wave": 2,
+        "actionClass": "suspend_tenant",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.suspend-tenant.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      },
+      {
+        "wave": 2,
+        "actionClass": "reactivate_tenant",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.reactivate-tenant.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      },
+      {
+        "wave": 2,
+        "actionClass": "create_tenant_branch",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave2.create-tenant-branch.execute.v1",
+        "executorKey": "package5.wave2.local-command"
+      }
+    ],
+    "A27": [
+      {
+        "wave": 4,
+        "actionClass": "create_inventory_item",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.create-inventory-item.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      },
+      {
+        "wave": 4,
+        "actionClass": "update_inventory_item",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.update-inventory-item.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      },
+      {
+        "wave": 4,
+        "actionClass": "archive_inventory_item",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.archive-inventory-item.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      }
+    ],
+    "A28": [
+      {
+        "wave": 4,
+        "actionClass": "create_internal_service",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.create-internal-service.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      },
+      {
+        "wave": 4,
+        "actionClass": "update_internal_service",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.update-internal-service.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      },
+      {
+        "wave": 4,
+        "actionClass": "archive_internal_service",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.archive-internal-service.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      },
+      {
+        "wave": 4,
+        "actionClass": "create_internal_provider",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.create-internal-provider.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      },
+      {
+        "wave": 4,
+        "actionClass": "update_internal_provider",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.update-internal-provider.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      },
+      {
+        "wave": 4,
+        "actionClass": "replace_weekly_availability",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.replace-weekly-availability.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      },
+      {
+        "wave": 4,
+        "actionClass": "create_time_off",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.create-time-off.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      },
+      {
+        "wave": 4,
+        "actionClass": "delete_time_off",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave4.delete-time-off.execute.v1",
+        "executorKey": "package5.wave4.local-command"
+      },
+      {
+        "wave": 4,
+        "actionClass": "upload_provider_avatar",
+        "authorityClass": "AC2",
+        "executableCapability": "package5.wave4.upload-provider-avatar.execute.v1",
+        "executorKey": "package5.wave4.object-command"
+      }
+    ],
+    "A29": [
+      {
+        "wave": 5,
+        "actionClass": "correct_recovery_attribution",
+        "authorityClass": "AC1",
+        "executableCapability": "package5.wave5.recovery-attribution-correction.execute.v1",
+        "executorKey": "package5.wave5.local-correction"
+      }
+    ],
+    "A30": [
+      {
+        "wave": 6,
+        "actionClass": "purge_auth_sessions",
+        "authorityClass": "AC6",
+        "owner": "Package5Wave6MaintenanceService",
+        "policy": {
+          "table": "AuthSession",
+          "stamp": "createdAt",
+          "terminal": "revokedAt",
+          "expiry": "expiresAt",
+          "retentionMs": 2592000000,
+          "policyKey": "package5.a30.auth-retention"
+        }
+      },
+      {
+        "wave": 6,
+        "actionClass": "purge_phone_auth_codes",
+        "authorityClass": "AC6",
+        "owner": "Package5Wave6MaintenanceService",
+        "policy": {
+          "table": "PhoneAuthCode",
+          "stamp": "createdAt",
+          "terminal": "consumedAt",
+          "expiry": "expiresAt",
+          "retentionMs": 86400000,
+          "policyKey": "package5.a30.auth-retention"
+        }
+      },
+      {
+        "wave": 6,
+        "actionClass": "purge_email_auth_codes",
+        "authorityClass": "AC6",
+        "owner": "Package5Wave6MaintenanceService",
+        "policy": {
+          "table": "EmailAuthCode",
+          "stamp": "createdAt",
+          "terminal": "consumedAt",
+          "expiry": "expiresAt",
+          "retentionMs": 86400000,
+          "policyKey": "package5.a30.auth-retention"
+        }
+      },
+      {
+        "wave": 6,
+        "actionClass": "purge_auth_flow_states",
+        "authorityClass": "AC6",
+        "owner": "Package5Wave6MaintenanceService",
+        "policy": {
+          "table": "AuthFlowState",
+          "stamp": "createdAt",
+          "terminal": "consumedAt",
+          "expiry": "expiresAt",
+          "retentionMs": 86400000,
+          "policyKey": "package5.a30.auth-retention"
+        }
+      },
+      {
+        "wave": 6,
+        "actionClass": "purge_auth_rate_limit_buckets",
+        "authorityClass": "AC6",
+        "owner": "Package5Wave6MaintenanceService",
+        "policy": {
+          "table": "AuthRateLimitBucket",
+          "stamp": "createdAt",
+          "terminal": null,
+          "expiry": "windowEndsAt",
+          "retentionMs": 86400000,
+          "policyKey": "package5.a30.auth-retention"
+        }
+      },
+      {
+        "wave": 6,
+        "actionClass": "purge_ingestion_quarantine",
+        "authorityClass": "AC6",
+        "owner": "Package5Wave6MaintenanceService",
+        "policy": {
+          "table": "IngestionQuarantine",
+          "stamp": "receivedAt",
+          "terminal": null,
+          "expiry": "expiresAt",
+          "retentionMs": 0,
+          "policyKey": "package5.a30.quarantine-expiry"
+        }
+      }
+    ],
+    "A31": [
+      {
+        "wave": 5,
+        "authorityClass": "AC4/AC5",
+        "sourceOwnerInventory": [
+          "Package5Wave5RecoveryFactPlaneService",
+          "AppointmentChangeService",
+          "EventStoreService",
+          "AppointmentReconciliationService"
+        ],
+        "note": "Fact-plane source inventory; no separate governed action registration; aggregate no-bypass verification incomplete after STOP."
+      }
+    ]
+  },
+  "liveServices": {
+    "maya-saas": {
+      "MainPID": "1470307",
+      "WorkingDirectory": "/opt/maya-saas/current",
+      "ActiveState": "active",
+      "ActiveEnterTimestamp": "Fri 2026-09-04 01:41:17 MSK",
+      "selfServeTrialSignupEnabled": true,
+      "pythonEntryPoints": []
+    },
+    "barbershop-pwa": {
+      "MainPID": "1435620",
+      "WorkingDirectory": "/home/botadmin/barbershop-bot",
+      "ActiveState": "active",
+      "ActiveEnterTimestamp": "Thu 2026-09-03 01:17:18 MSK",
+      "selfServeTrialSignupEnabled": false,
+      "pythonEntryPoints": [
+        "/home/botadmin/barbershop-bot/pwa_api.py"
+      ]
+    },
+    "pwaServerStartup": [
+      {
+        "line": 35,
+        "call": "webhook_server.start_webhook_server"
+      }
+    ],
+    "consentRoutes": [
+      {
+        "line": 13839,
+        "route": "web_app.router.add_post('/api/consent/submit', consent_submit_handler)"
+      }
+    ]
+  },
+  "pythonEvidence": {
+    "database.py": {
+      "fileHash": "3c1ddfb8948e2cbf582ee91b7f78ea1dfa00fa557f1ad2a5c4ae4a763e2491c5",
+      "routes": [],
+      "functions": [
+        {
+          "name": "save_consent",
+          "line": 1134,
+          "end": 1142,
+          "sha256": "e19f0c9983fe6ffe7ceed902f16b7140a3cf298c111198b3bf69e64eaf4830fc",
+          "source": "def save_consent(client_id: int, consent_given: bool, source: str = \"telegram\",\n                  consent_version: str = CONSENT_VERSION):\n    \"\"\"Логирует факт согласия (или отказа) на обработку персональных данных.\"\"\"\n    with _db() as conn:\n        conn.execute(\n            \"INSERT INTO consents (client_id, consent_given, consent_at, \"\n            \"consent_version, source) VALUES (?, ?, ?, ?, ?)\",\n            (client_id, 1 if consent_given else 0, _now(), consent_version, source),\n        )"
+        },
+        {
+          "name": "set_marketing_consent",
+          "line": 1145,
+          "end": 1163,
+          "sha256": "8df024e1bc2cf8eea85d5a9fbd071cf215ee2d23aaf77185530f8e4f58d7fc81",
+          "source": "def set_marketing_consent(client_id: int, consent_given: bool):\n    \"\"\"\n    Помечает согласие/отказ на маркетинговые рассылки.\n    consent_given=True  → пишем marketing_consent_at = сейчас, чистим _revoked_at.\n    consent_given=False → чистим marketing_consent_at, пишем _revoked_at = сейчас.\n    \"\"\"\n    with _db() as conn:\n        if consent_given:\n            conn.execute(\n                \"UPDATE clients SET marketing_consent_at = ?, \"\n                \"marketing_consent_revoked_at = NULL WHERE id = ?\",\n                (_now(), client_id),\n            )\n        else:\n            conn.execute(\n                \"UPDATE clients SET marketing_consent_at = NULL, \"\n                \"marketing_consent_revoked_at = ? WHERE id = ?\",\n                (_now(), client_id),\n            )"
+        }
+      ]
+    },
+    "webhook_server.py": {
+      "fileHash": "b5dd66307b0dce5f6fdba7be24f1833224f48a521f9c23e0606fd8ca16771cea",
+      "routes": [
+        {
+          "line": 13839,
+          "call": "web_app.router.add_post('/api/consent/submit', consent_submit_handler)"
+        }
+      ],
+      "functions": [
+        {
+          "name": "consent_submit_handler",
+          "line": 7155,
+          "end": 7197,
+          "sha256": "60fcdb0bf1cfb0a39548eaec7aba54abf423337a7134fd6df2aa8e27d28f6149",
+          "source": "async def consent_submit_handler(request: web.Request) -> web.Response:\n    \"\"\"\n    POST /api/consent/submit — клиент подписывает согласия.\n    Body: { accept_pdn: bool, accept_marketing: bool, auth_data?: ... }\n    Возвращает новый статус (должен стать 'pass').\n    \"\"\"\n    try:\n        body = await request.json()\n    except Exception:\n        return _cabinet_response({\"error\": \"invalid_json\"}, status=400)\n    if not isinstance(body, dict):\n        return _cabinet_response({\"error\": \"invalid_json\"}, status=400)\n\n    chat_id = _authed_chat_id(request, body)\n    if not chat_id:\n        return _cabinet_response({\"error\": \"unauthorized\"}, status=401)\n\n    accept_pdn = bool(body.get(\"accept_pdn\"))\n    accept_marketing = bool(body.get(\"accept_marketing\"))\n\n    # ПДн обязателен — без него отказ\n    if not accept_pdn:\n        return _cabinet_response({\n            \"error\": \"pdn_required\",\n            \"message\": \"Для общения с ассистентом нужно согласие на обработку персональных данных.\",\n        }, status=400)\n\n    try:\n        client_id = database.get_or_create_client(chat_id)\n        # ПДн — записываем (если уже подписано в Telegram, save_consent просто добавит ещё\n        # одну запись с source='app'; журнал согласий по 152-ФЗ хранит всю историю)\n        if not database.has_valid_consent_by_chat_id(chat_id):\n            database.save_consent(client_id, True, source=\"app\")\n        # Маркетинг — явный выбор клиента (Да/Нет)\n        database.set_marketing_consent(client_id, accept_marketing)\n    except Exception as e:\n        logger.error(f\"consent_submit chat_id={chat_id}: {e}\")\n        return _cabinet_response({\"error\": \"save_failed\"}, status=500)\n\n    return _cabinet_response({\n        \"status\": database.consent_gate_status(chat_id),\n        \"marketing\": accept_marketing,\n    })"
+        }
+      ]
+    },
+    "pwa_api.py": {
+      "fileHash": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "routes": [],
+      "functions": []
+    }
+  },
+  "lifecycleEvidence": {
+    "onboarding/onboarding.service.js": {
+      "hash": "5a1c44f5b1ecb231841f8ed1021aa398a4c136e0b189f4491077fdbe370dcbe3",
+      "methods": [
+        {
+          "name": "createTrialSignup",
+          "source": "async createTrialSignup(dto, metadata = {}, options = {}) {\n        this.assertSelfServeTrialSignupEnabled();\n        await this.rateLimitService.assertPreflight('trial_signup', {\n            clientIp: metadata.clientIp,\n            identity: dto.ownerEmail.trim().toLowerCase(),\n        });\n        if (options.expectedActivationId && !dto.trialActivationToken) {\n            throw new common_1.BadRequestException({\n                message: 'Trial activation token is required for this draft',\n                error: { code: 'trial_activation_token_required' },\n            });\n        }\n        let activationId = null;\n        let createdTenantId = null;\n        try {\n            if (dto.trialActivationToken) {\n                const activation = await this.trialActivationService.claim(dto.trialActivationToken, options.expectedActivationId);\n                activationId = activation.id;\n            }\n            const temporaryPassword = dto.password?.trim() || this.generatePassword();\n            const industryPresetId = dto.industryPresetId ?? industry_presets_1.DEFAULT_INDUSTRY_PRESET_ID;\n            const calendarSource = dto.calendarSource ??\n                (industryPresetId === 'solo_specialist'\n                    ? domain_enums_1.CalendarSource.INTERNAL\n                    : domain_enums_1.CalendarSource.EXTERNAL);\n            const plan = dto.planId\n                ? await this.subscriptionsService.getPlanByIdOrThrow(dto.planId)\n                : await this.subscriptionsService.getPlanByNameOrThrow(calendarSource === domain_enums_1.CalendarSource.INTERNAL ? 'solo' : 'business');\n            const trialFullAccess = Boolean(activationId);\n            const trialEndsAt = this.addDays(new Date(), trial_activation_service_1.TRIAL_PERIOD_DAYS);\n            const bookingMode = trialFullAccess && calendarSource === domain_enums_1.CalendarSource.INTERNAL\n                ? 'live'\n                : 'preview';\n            const tenant = await this.tenantsService.createTenant({\n                name: dto.name,\n                slug: dto.slug,\n                status: domain_enums_1.TenantStatus.TRIAL,\n                planId: plan.id,\n                industryPresetId,\n                calendarSource,\n                trialEndsAt: trialEndsAt.toISOString(),\n                trialFullAccess,\n                branchName: dto.branchName ?? dto.name,\n                branchAddress: dto.branchAddress,\n                branchPhone: dto.branchPhone,\n                branchTimezone: dto.branchTimezone,\n            });\n            createdTenantId = tenant.id;\n            const signup = await this.tenantContext.runAsSystemTenant(tenant.id, async () => {\n                await this.brandingService.upsertBranding(tenant.id, {\n                    appName: dto.name,\n                    themeJson: {\n                        industryPresetId,\n                        calendarSource,\n                        booking: {\n                            mode: bookingMode,\n                        },\n                    },\n                });\n                if (calendarSource === domain_enums_1.CalendarSource.EXTERNAL) {\n                    await this.crmService.ensureBootstrapMockIntegration(tenant.id, {\n                        provider: domain_enums_1.CrmProvider.MOCK,\n                        settingsJson: {\n                            industryPresetId,\n                        },\n                    });\n                }\n                const user = await this.usersService.createUser({\n                    tenantId: tenant.id,\n                    email: dto.ownerEmail,\n                    phone: (0, phone_util_1.normalizePhoneE164)(dto.ownerPhone),\n                    name: dto.ownerName ?? null,\n                    passwordHash: await bcrypt.hash(temporaryPassword, 10),\n                    role: domain_enums_1.UserRole.TENANT_ADMIN,\n                    status: domain_enums_1.UserStatus.ACTIVE,\n                });\n                if (calendarSource === domain_enums_1.CalendarSource.INTERNAL) {\n                    await this.internalCalendarService.bootstrapEnsureProviderForUser(tenant.id, user.id, { displayName: dto.ownerName });\n                }\n                await this.auditLogService.log({\n                    tenantId: tenant.id,\n                    action: 'tenant.self_serve_created',\n                    entityType: 'tenant',\n                    entityId: tenant.id,\n                    metadata: {\n                        slug: tenant.slug,\n                        trial_full_access: trialFullAccess,\n                    },\n                });\n                await this.auditLogService.log({\n                    tenantId: tenant.id,\n                    userId: user.id,\n                    action: 'tenant.self_serve_owner_created',\n                    entityType: 'user',\n                    entityId: user.id,\n                    metadata: {\n                        role: user.role,\n                    },\n                });\n                return {\n                    ...(await this.authService.issueSession(user, metadata)),\n                    user: this.usersService.serializeUser(user),\n                    tenant: {\n                        id: tenant.id,\n                        name: tenant.name,\n                        slug: tenant.slug,\n                        status: tenant.status,\n                        allow_self_registration: tenant.allow_self_registration,\n                        industry_preset_id: industryPresetId,\n                        industry_preset: (0, industry_presets_1.getIndustryPreset)(industryPresetId),\n                        calendar_source: calendarSource,\n                        plan_id: plan.id,\n                        trial_full_access: trialFullAccess,\n                        trial_ends_at: trialEndsAt,\n                    },\n                    temporary_password: dto.password ? null : temporaryPassword,\n                    booking_mode: bookingMode,\n                    calendar_source: calendarSource,\n                    trial: {\n                        days: trial_activation_service_1.TRIAL_PERIOD_DAYS,\n                        starts_at: new Date(trialEndsAt.getTime() - trial_activation_service_1.TRIAL_PERIOD_DAYS * 24 * 60 * 60 * 1000),\n                        ends_at: trialEndsAt,\n                        full_access: trialFullAccess,\n                    },\n                    next_step: calendarSource === domain_enums_1.CalendarSource.EXTERNAL\n                        ? 'connect_crm'\n                        : 'upload_logo_or_open_app',\n                };\n            });\n            if (activationId) {\n                await this.trialActivationService.complete(activationId, tenant.id);\n            }\n            return {\n                ...signup,\n                trial_activation: activationId\n                    ? {\n                        activation_id: activationId,\n                        status: 'completed',\n                        counted_as_connected_business: true,\n                    }\n                    : null,\n            };\n        }\n        catch (error) {\n            if (createdTenantId) {\n                await this.tenantsService.deleteFailedTrialTenant(createdTenantId);\n            }\n            if (activationId) {\n                await this.trialActivationService.release(activationId);\n            }\n            throw error;\n        }\n    }",
+          "line": 91
+        },
+        {
+          "name": "assertSelfServeTrialSignupEnabled",
+          "source": "assertSelfServeTrialSignupEnabled() {\n        if (this.configService.get('SELF_SERVE_TRIAL_SIGNUP') === 'true') {\n            return;\n        }\n        if (this.configService.get('NODE_ENV') !== 'production') {\n            return;\n        }\n        throw new common_1.ForbiddenException({\n            message: 'Регистрация новых салонов сейчас закрыта. Напишите нам — откроем доступ.',\n            error: { code: 'self_serve_signup_disabled' },\n        });\n    }",
+          "line": 287
+        }
+      ]
+    },
+    "tenants/tenants.service.js": {
+      "hash": "55d041d88d07bb7c72d2d52ee55be035850a90ea9b2bd858b9acfcde10d654b2",
+      "methods": [
+        {
+          "name": "createTenant",
+          "source": "async createTenant(dto) {\n        this.assertHostNamesAllowed(dto);\n        if (dto.currentPeriodStart !== undefined ||\n            dto.currentPeriodEnd !== undefined ||\n            dto.billingMethodId !== undefined ||\n            dto.status === domain_enums_1.TenantStatus.ACTIVE ||\n            dto.status === domain_enums_1.TenantStatus.PAST_DUE) {\n            throw new common_1.BadRequestException('payment_derived_billing_fields_forbidden');\n        }\n        const existing = await this.prisma.tenant.findUnique({\n            where: { slug: dto.slug.toLowerCase() },\n            select: { id: true },\n        });\n        if (existing) {\n            throw new common_1.ConflictException('Tenant slug already exists');\n        }\n        if (dto.planId) {\n            await this.subscriptionsService.getPlanByIdOrThrow(dto.planId);\n        }\n        const billingDates = this.resolveBillingDates({\n            status: dto.status ?? domain_enums_1.TenantStatus.TRIAL,\n            trialEndsAt: normalizeOptionalDateString(dto.trialEndsAt),\n        });\n        const status = dto.status ?? domain_enums_1.TenantStatus.TRIAL;\n        const tenant = await this.prisma.$transaction(async (tx) => {\n            const normalizedBranchName = asNonEmptyString(dto.branchName) ?? dto.name;\n            const normalizedBranchTimezone = asNonEmptyString(dto.branchTimezone);\n            const created = await tx.tenant.create({\n                data: {\n                    name: dto.name,\n                    slug: dto.slug.toLowerCase(),\n                    status,\n                    planId: dto.planId,\n                    industryPresetId: dto.industryPresetId ?? industry_presets_1.DEFAULT_INDUSTRY_PRESET_ID,\n                    calendarSource: dto.calendarSource ?? domain_enums_1.CalendarSource.EXTERNAL,\n                    defaultCurrency: dto.defaultCurrency ?? 'RUB',\n                    defaultTimezone: dto.defaultTimezone ??\n                        normalizedBranchTimezone ??\n                        salon_timezone_1.DEFAULT_SALON_TIMEZONE,\n                    defaultLocale: dto.defaultLocale ?? 'ru-RU',\n                    customDomain: dto.customDomain?.toLowerCase(),\n                    subdomain: (dto.subdomain ?? dto.slug).toLowerCase(),\n                    trialEndsAt: billingDates.trialEndsAt,\n                    currentPeriodStart: null,\n                    currentPeriodEnd: null,\n                    pastDueAt: null,\n                    graceEndsAt: null,\n                    trialFullAccess: dto.trialFullAccess ?? false,\n                    allowSelfRegistration: dto.allowSelfRegistration ?? true,\n                },\n            });\n            await tx.brandingSettings.create({\n                data: {\n                    tenantId: created.id,\n                    appName: dto.name,\n                    themeJson: (0, json_util_1.asJson)({}),\n                },\n            });\n            await tx.branch.create({\n                data: {\n                    tenantId: created.id,\n                    name: normalizedBranchName,\n                    address: asNonEmptyString(dto.branchAddress),\n                    phone: asNonEmptyString(dto.branchPhone),\n                    timezone: normalizedBranchTimezone,\n                },\n            });\n            return created;\n        });\n        return this.serializeTenant(await this.getTenantByIdOrThrow(tenant.id));\n    }",
+          "line": 302
+        },
+        {
+          "name": "deleteFailedTrialTenant",
+          "source": "async deleteFailedTrialTenant(id) {\n        return this.prisma.tenant.deleteMany({\n            where: {\n                id,\n                status: domain_enums_1.TenantStatus.TRIAL,\n                currentPeriodStart: null,\n            },\n        });\n    }",
+          "line": 373
+        }
+      ]
+    },
+    "admin/admin.service.js": {
+      "hash": "37fc1f5afdcd6d563db8fb673a63978f0e42a7e05921f0b01efbbcc6f0a5ee61",
+      "methods": [
+        {
+          "name": "createTenant",
+          "source": "createTenant(dto, actor) {\n        return this.tenantsService.createTenant(dto).then(async (tenant) => {\n            await this.tenantContext.runAsSystemTenant(tenant.id, () => this.auditLogService.log({\n                tenantId: tenant.id,\n                userId: actor.userId,\n                action: 'tenant.created',\n                entityType: 'tenant',\n                entityId: tenant.id,\n                metadata: {\n                    slug: tenant.slug,\n                },\n            }));\n            return tenant;\n        });\n    }",
+          "line": 92
+        }
+      ]
+    },
+    "admin/admin.controller.js": {
+      "path": "admin/tenants",
+      "methodPath": "/",
+      "method": 1,
+      "roles": [
+        "platform_owner"
+      ]
+    },
+    "onboarding/onboarding.controller.js": {
+      "path": "onboarding",
+      "methodPath": "trial",
+      "method": 1,
+      "public": true
+    },
+    "bootstrapReferences": [
+      "dist/src/package5-wave2/package5-wave2.module.js",
+      "dist/src/package5-wave2/trial-activation-bootstrap.service.js"
+    ]
+  },
+  "moduleBindings": {
+    "appImportsOnboarding": true,
+    "appImportsAdmin": true
+  },
+  "verificationExecuted": {
+    "productionReadsOnly": true,
+    "mutationEndpointsInvoked": false,
+    "productionPythonModulesImported": false,
+    "fullRegressionRun": false,
+    "cleanMigrationReplayRun": false,
+    "ownedTemporaryDatabasesCreated": 0
+  },
+  "confirmedBlockers": [
+    "A18 legacy consent SQL path",
+    "A26 noncanonical trial bootstrap and physical tenant cleanup",
+    "A26 direct administrative tenant creation"
+  ]
+}
