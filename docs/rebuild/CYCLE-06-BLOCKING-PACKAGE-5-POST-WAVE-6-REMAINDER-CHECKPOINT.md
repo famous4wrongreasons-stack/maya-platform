@@ -1,30 +1,33 @@
-# Package 5 post-Wave-6 remainder — B9 delivery endpoint decision STOP
+# Package 5 post-Wave-6 remainder — B9 deployed; B10/B11 Final Gate STOP
 
-Accepted checkpoint `57196b09`. Waves 1–6 remain accepted 6/6; B7/B8 runtime
-`4b96b546` remains the production application baseline. Package 5 Final Gate
-remains FAIL and Package 5 is not complete.
+Accepted owner checkpoint `8ab9dcf3`. Waves 1–6 remain accepted 6/6. B9 schema
+commit `0d640318` and runtime commit `9b483768` are deployed as production
+release `/opt/maya-saas/releases/20260904-p5-b9-9b483768`.
 
-1. Approved `ClientWantedSlotInterest` schema foundation is committed at
-   `8a316f4c`, locally proven 8/8, clean-replayed, and applied in production.
-   Pending migrations are 0, drift is NONE, backfill is 0, health/readiness PASS.
-2. Approved exact-time, expiry-at-start, max-10-active, Client-only delivery and
-   max-three-earliest invariants are enforced by the additive foundation.
-3. Runtime did not begin because delivery reconstruction found a new blocker:
-   Telegram `ClientChannelLink` stores only an irreversible subject HMAC.
-   `ClientWantedSlotInterest` intentionally has no chat id; User/device schemas
-   cannot route a Client without Maya User; Communication Delivery needs the real
-   recipient address before it stores its durable hash.
-4. Legacy SQLite `telegram_chat_id` cannot be used as identity/delivery fallback.
-   No runtime workaround, referral write, hidden Client creation or provider send
-   was introduced. Production business/provider mutations remain 0.
-5. Owner decision is required in
-   `package5-b9-client-delivery-endpoint-v1-decision.md`. Recommended option A:
-   a nullable encrypted address on the verified ClientChannelLink, populated only
-   by explicit verified linking, no backfill, and revalidated against its HMAC.
-6. **STOP** before B9 runtime/ratchet/deployment and before restarting the full
-   13-family Final Gate. After the decision, resume the same remediation cycle.
+1. The verified Client delivery endpoint is durable and nullable. It stores no
+   plaintext or fake historical backfill; HMAC remains channel identity authority.
+2. `ClientWantedSlotInterest` owns exact-time wanted-slot intent with expiry at
+   slot start, max ten active per Client and max-three earliest eligible delivery.
+3. Original B9 AI bypasses are closed: `get_referral_link` is mutation-free and
+   `remember_wanted_slot` requires verified ClientChannelLink authority. Production
+   structural/read-only verification passed without real mutations.
+4. Production migration state is 78 repository / 81 accepted production records,
+   pending 0 and drift NONE. Health/readiness and error-priority logs are clean.
+5. The mandatory fresh 13-family Final Gate found **B10/A18**: published
+   `promo_gift` and `sub_create` routes both call direct SQLite
+   `get_or_create_client`. `sub_create` creates the Client before returning
+   `no_phone`; both routes also lead to direct legacy value/provider effects.
+6. It also found **B11**: the record-delete freed-slot initiator runs a separate
+   cycle-scoring branch that sends Telegram directly to legacy `chat_id` and
+   writes a legacy offer fact outside Communication Delivery.
+7. Package 5 Final Adversarial Verification is FAIL and Package 5 is not complete.
+   STOP before B10/B11 remediation and before the remaining aggregate gates. The
+   next controlled cycle must reconstruct/approve these exact identity, value and
+   delivery boundaries, remediate them, deploy, and restart the complete 13-family
+   Final Gate from scratch.
 
-Preserve deployed B7/B8, all accepted waves, D1-A…D7-A, P02/P03 holds, Client
-ownership, immutable evidence, tenant hard-delete prohibition and AC6 A30 owner.
-No Wave 7, Chapter 7 or automatic Chapter 6 completion. All 17 old databases
-remain untouched; owned processes/watchers/Chrome/temp DB are zero.
+Preserve B9 and all earlier production baselines, D1-A…D7-A, P02/P03 holds,
+Client ownership, immutable evidence, tenant hard-delete prohibition, Package 2
+Communication Delivery and the AC6 A30 owner. Do not create Wave 7 or start
+Chapter 7. All 17 old databases remain untouched; owned processes, watchers,
+Chrome and temporary databases are zero.

@@ -1,0 +1,328 @@
+{
+  "acceptedOwnerCheckpoint": "8ab9dcf3",
+  "schemaCommit": "0d640318",
+  "runtimeCommit": "9b48376878c6eee97c5904cf50f8a2019cf2b79d",
+  "productionRelease": "/opt/maya-saas/releases/20260904-p5-b9-9b483768",
+  "b9RemediationProductionVerification": "PASS",
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "productionDataReadOnly": {
+    "clientChannelLinks": 0,
+    "encryptedDeliveryEndpoints": 0,
+    "wantedSlotInterests": 0,
+    "fakeHistoricalBackfill": 0
+  },
+  "b9": {
+    "verifiedClientDeliveryEndpoint": "DURABLE",
+    "plaintextDeliveryAddressPersisted": false,
+    "deliveryEndpointHmacVerifiedBeforeSend": true,
+    "legacyWantedSlotSqliteFallback": false,
+    "aiHiddenClientCreationPaths": 0,
+    "getReferralLinkBusinessMutations": 0,
+    "canonicalOwner": "ClientWantedSlotInterest",
+    "maxActiveInterests": 10,
+    "maxMatchFanOut": 3,
+    "wantedSlotCreatesMarketingConsent": false
+  },
+  "proofs": {
+    "deliveryEndpointSchemaPostgres": "PASS — 6 cases",
+    "wantedSlotSchemaPostgres": "PASS — 8 cases",
+    "wantedSlotRuntimePostgres": "PASS — 8 cases",
+    "targetedRatchets": "PASS",
+    "remediationFullRegression": "PASS — 334 suites / 2768 tests",
+    "typechecksLintBuildPreflight": "PASS",
+    "serverReadonlyCandidateStartup": "PASS",
+    "productionMigrationGateApply": "PASS",
+    "postdeployStructuralReadonly": "PASS",
+    "finalAggregateRegression": "NOT RUN — mandatory STOP at fresh production inventory blockers"
+  },
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "wavesAccepted": "6/6",
+  "familySetCoverage": "13/13",
+  "familyInventory": [
+    {
+      "family": "A15",
+      "canonical": "Wave 3 AC2 staff-day executor",
+      "result": "registered; aggregate certification stopped after new bypass"
+    },
+    {
+      "family": "A16",
+      "canonical": "Wave 2 AC1 access commands and AC5 reducer",
+      "result": "registered; aggregate certification stopped after new bypass"
+    },
+    {
+      "family": "A17",
+      "canonical": "Wave 3 CRM connection/import and AC3/AC4/AC5 facts",
+      "result": "registered; aggregate certification stopped after new bypass"
+    },
+    {
+      "family": "A18",
+      "canonical": "Client-owned profile/consent/preferences, verified channel and wanted-slot foundations",
+      "result": "FAIL — active promo_gift and sub_create routes call direct SQLite get_or_create_client"
+    },
+    {
+      "family": "A22",
+      "canonical": "Wave 1 settings and notification preferences",
+      "result": "registered; aggregate certification stopped after new bypass"
+    },
+    {
+      "family": "A23",
+      "canonical": "Wave 1 OperationalWorkItem and approved protocol facts",
+      "result": "registered; aggregate certification stopped after new bypass"
+    },
+    {
+      "family": "A25",
+      "canonical": "Wave 2 explicit security commands and AC3 auth protocol",
+      "result": "registered; aggregate certification stopped after new bypass"
+    },
+    {
+      "family": "A26",
+      "canonical": "Wave 2 TrialActivation tenant authority",
+      "result": "accepted production baseline retained; aggregate certification stopped"
+    },
+    {
+      "family": "reduced A27",
+      "canonical": "Wave 4 inventory and AC4 review ingestion",
+      "result": "registered; aggregate certification stopped after new bypass"
+    },
+    {
+      "family": "A28",
+      "canonical": "Wave 4 prospective calendar/catalog actions and immutable AI receipt children",
+      "result": "registered; aggregate certification stopped after new bypass"
+    },
+    {
+      "family": "A29",
+      "canonical": "Wave 5 correction and immutable recovery facts",
+      "result": "BLOCKER — record.delete initiator also runs legacy cycle-scored direct Telegram delivery outside CommunicationDelivery"
+    },
+    {
+      "family": "A30",
+      "canonical": "AC6 coordinator to MaintenanceRun/ItemClaim, Policy V1",
+      "result": "six canonical classes present; aggregate certification stopped"
+    },
+    {
+      "family": "A31",
+      "canonical": "AC4/AC5 event, ingestion, reconciliation and recovery facts",
+      "result": "classified; aggregate certification stopped after new bypass"
+    }
+  ],
+  "globalCanonicalOnlyOwnership": "NOT PROVEN",
+  "freshFinalGateInventoryStartedFromScratch": true,
+  "newBlockers": [
+    {
+      "id": "B10-A18-legacy-client-creation",
+      "paths": [
+        {
+          "publishedAction": "promo_gift",
+          "endpoint": "POST /api/promo_gift",
+          "handler": "promo_gift_handler",
+          "writer": "database.get_or_create_client",
+          "writerLine": 2614,
+          "subsequentDirectEffects": [
+            "database.save_birthday_promo",
+            "Telegram promo delivery"
+          ]
+        },
+        {
+          "publishedAction": "sub_create",
+          "endpoint": "POST /api/sub/create",
+          "handler": "sub_create_handler",
+          "writer": "database.get_or_create_client",
+          "writerLine": 7379,
+          "ordering": "Client row is created before missing-phone rejection",
+          "subsequentDirectEffects": [
+            "database.create_subscription",
+            "YooKassa create_payment",
+            "legacy subscription status/payment-id writes"
+          ]
+        }
+      ],
+      "invariant": "AI/read/payment surface may not implicitly create canonical Client; verified channel identity is not Client creation authority"
+    },
+    {
+      "id": "B11-A29-adjacent-direct-communication",
+      "path": "POST /yclients-webhook -> handle_yclients_webhook -> _process_record_delete -> offer_freed_slot -> cycle scoring",
+      "directProviderWrite": "app.bot.send_message using legacy SQLite chat_id",
+      "directBusinessWrite": "database.log_freed_slot_offer",
+      "candidateSource": "database.list_telegram_clients plus legacy preferences/consent and YClients booking reads",
+      "canonicalB9Branch": "present before this separate legacy cycle-scoring branch",
+      "invariant": "scheduler/webhook may initiate but may not own direct Communication Delivery or use legacy address authority"
+    }
+  ],
+  "deployedEvidence": {
+    "service": "barbershop-pwa active",
+    "pwaPid": "1497130",
+    "files": {
+      "webhook_server.py": {
+        "sha256": "25f6f4f0f68637dd9a507de1bf053d783d056f9a58bff86342b577c8b5c9ba85",
+        "selected": {
+          "promo_gift_handler": {
+            "line": 2585,
+            "end": 2620,
+            "sha256": "ffaff2f3a790d6d3d9b17ffcda003272a9f36a046a26aff671ad3a6bb910f6dc",
+            "getOrCreateCalls": [
+              {
+                "line": 2614,
+                "call": "database.get_or_create_client"
+              }
+            ],
+            "canonicalIdentityTerms": [],
+            "directClientInsert": false
+          },
+          "sub_create_handler": {
+            "line": 7347,
+            "end": 7476,
+            "sha256": "a177dea645bd9d1fe7f054a304dfabbe541c4ee5b647824d7a6042f4710ff4bf",
+            "getOrCreateCalls": [
+              {
+                "line": 7379,
+                "call": "database.get_or_create_client"
+              }
+            ],
+            "canonicalIdentityTerms": [],
+            "directClientInsert": false
+          }
+        }
+      },
+      "database.py": {
+        "sha256": "5b3875aa4e9b45f5582386c8f59cf3c862b70ff2cbfaa5e062d7a3805869bd65",
+        "selected": {
+          "get_or_create_client": {
+            "line": 745,
+            "end": 759,
+            "sha256": "e470450037d08b85e87ea6def92e7623baa5570cc28c39eb200e74086b290dcf",
+            "getOrCreateCalls": [],
+            "canonicalIdentityTerms": [],
+            "directClientInsert": true
+          }
+        }
+      },
+      "pwa_api.py": {
+        "sha256": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+        "selected": {}
+      },
+      "claude_ai.py": {
+        "sha256": "efe1e7b94be9124619940d1e115b42163d86a13d71fb436b44d197a7bb0e0ec6",
+        "selected": {}
+      }
+    },
+    "routes": [
+      {
+        "line": 13761,
+        "declaration": "web_app.router.add_post(\"/api/sub/create\", sub_create_handler)"
+      },
+      {
+        "line": 13843,
+        "declaration": "web_app.router.add_post(\"/api/promo_gift\", promo_gift_handler)"
+      }
+    ],
+    "publishedProxy": {
+      "sha256": "df2749fb1f85e33787ac1d01b2f7542ae9d85a986dad80c21c552145386afed5",
+      "promoGiftLines": [
+        2087,
+        2093
+      ],
+      "subCreateLines": [
+        2717
+      ],
+      "paths": [
+        "/api/promo_gift",
+        "/api/sub/create"
+      ]
+    },
+    "recordDeleteDelivery": {
+      "route": "POST /yclients-webhook",
+      "handler": "handle_yclients_webhook",
+      "processor": "_process_record_delete",
+      "offerFunction": {
+        "line": 356,
+        "end": 443,
+        "sha256": "04ce38d1d1fb0d295812798a864466843d062ef1a910cf609a59c2ed6154d466"
+      },
+      "candidateFunction": {
+        "line": 148,
+        "end": 230,
+        "sha256": "1ef18a32f0bfcabfe0929ebe2685886dd5e3611060f8e4f1ada2889f1e6b93f5"
+      },
+      "fileSha256": "61aa3ff9199ba6f12a76d6686fc6df766060a3ab1f9e1fcdfb4fc7cc555b869c"
+    }
+  },
+  "isolatedReproduction": {
+    "result": "NEW PRODUCTION BYPASSES REPRODUCED",
+    "checksPassed": 4,
+    "checks": [
+      "promo_gift creates a legacy Client before downstream promo failure",
+      "promo_gift retry retains the hidden Client",
+      "sub_create creates a legacy Client before the no_phone rejection",
+      "sub_create retry retains the hidden Client"
+    ],
+    "database": ":memory:",
+    "productionMutations": 0,
+    "providerCalls": 0,
+    "networkCalls": 0,
+    "importedProductionApplication": false,
+    "sourceHashes": {
+      "webhook_server.py": "25f6f4f0f68637dd9a507de1bf053d783d056f9a58bff86342b577c8b5c9ba85",
+      "database.py": "5b3875aa4e9b45f5582386c8f59cf3c862b70ff2cbfaa5e062d7a3805869bd65"
+    },
+    "functions": {
+      "promo_gift_handler": {
+        "line": 2585,
+        "end": 2620,
+        "sha256": "ffaff2f3a790d6d3d9b17ffcda003272a9f36a046a26aff671ad3a6bb910f6dc"
+      },
+      "sub_create_handler": {
+        "line": 7347,
+        "end": 7476,
+        "sha256": "a177dea645bd9d1fe7f054a304dfabbe541c4ee5b647824d7a6042f4710ff4bf"
+      },
+      "get_or_create_client": {
+        "line": 745,
+        "end": 759,
+        "sha256": "e470450037d08b85e87ea6def92e7623baa5570cc28c39eb200e74086b290dcf"
+      }
+    },
+    "mocks": [
+      "valid authenticated channel subject",
+      "valid subscription plan",
+      "missing receipt phone",
+      "downstream promo persistence failure"
+    ]
+  },
+  "productionRegistry": {
+    "allCapabilities": 205,
+    "wave1": 6,
+    "wave2": 13,
+    "wave3": 8,
+    "wave4": 12,
+    "wave5": 1,
+    "wave6": 6,
+    "b9WantedSlotCapabilities": 2,
+    "clientPreferenceHabitCapabilities": 3
+  },
+  "freshSourceInventory": {
+    "trackedTypescriptFiles": 859,
+    "productionTypescriptFiles": 528,
+    "httpRouteDecorators": 214,
+    "mutationLikeCalls": 499,
+    "activeRootPythonFiles": 84,
+    "recursivePythonFilesExcludingVenv": 295,
+    "registeredPythonHttpRoutes": 99,
+    "pythonMutationLikeCalls": 505
+  },
+  "realProductionBusinessProviderMutationsForProof": 0,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0
+  }
+}
