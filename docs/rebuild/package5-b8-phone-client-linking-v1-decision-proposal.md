@@ -1,9 +1,8 @@
 # Package 5 B8 — phone possession / Client linking decision V1
 
-Status: **DECISION PROPOSAL — not approved or implemented**.
-Accepted checkpoint `2a6d645d`. Date: 2026-09-04.
-B5/B6 and accepted waves remain unchanged. B7 independently requires its minimal
-schema proposal; no runtime implementation has begun in this cycle.
+Status: **OPTION A APPROVED — linking only; runtime implementation pending**.
+Accepted checkpoint `47454962`. Date: 2026-09-04.
+B5/B6 and accepted waves remain unchanged. B7 schema and exact limits are approved. No contact-phone persistence is authorized.
 
 ## What the current endpoint proves and changes
 
@@ -35,7 +34,7 @@ requires an existing verified channel-to-Client link as its trusted resolution
 source. An unbound caller cannot bootstrap authority by asking for a challenge;
 a bare `Client.userId`, provider subject, SMS success or phone match is insufficient.
 
-## Exact remaining choice
+## Approved choice: A
 
 The identity-link schema is sufficient for **linking to an already proven Client**.
 However, no approved self-service canonical Client phone-update command was found:
@@ -54,7 +53,7 @@ phone-based first Client creation.
 | **A — verified Client linking only (recommended)** | Use existing valid channel proof and verified ClientChannelLink, or consume an already issued exact ClientLinkChallenge. Unbound/ambiguous callers without such challenge fail closed and receive an explicit linking-required outcome. SMS cannot select Client or issue a challenge. No Client phone/profile write; the response must not claim a phone was saved. | Reuse existing identity schema and approved atomic link command. No new phone field, Client-creation authority or provider business-write contract. The old “enter a phone to find a CRM Client” behavior is intentionally removed. |
 | **B — verified contact phone on an already proven Client** | First prove exact Client through existing binding/challenge; then a separate canonical command may save a server-verified contact phone, without changing Client identity, links, CRM membership or any other Client. Unbound callers still fail closed. | Requires an explicit contact-phone command/storage/proof-lifecycle proposal before implementation: exact canonical field, current-vs-historical verification, replay/concurrency and durable evidence. The current schema/locale command does not settle these. |
 
-**Recommendation: A for Chapter 6.** It reuses the approved linking authority
+**Owner-approved: A for Chapter 6.** It reuses the approved linking authority
 without preserving phone-based Client discovery as an authentication shortcut.
 Customers without a usable verified link must complete the approved linking flow;
 a phone code alone will no longer unlock a different CRM card. If storing a
@@ -98,7 +97,7 @@ VERIFIED PHONE POSSESSION: EVIDENCE ONLY
 EXISTING VERIFIED CLIENT LINK FOUNDATION: SUFFICIENT
 EXISTING CANONICAL CLIENT PHONE-UPDATE CONTRACT: NOT FOUND
 FIRST CANONICAL CLIENT CREATION FROM PHONE: NOT APPROVED / NOT PROPOSED
-RECOMMENDED: OPTION A — VERIFIED CLIENT LINKING ONLY
+APPROVED: OPTION A — VERIFIED CLIENT LINKING ONLY
 CROSS-TENANT LINKING: FORBIDDEN
 SILENT CLIENT MERGE: FORBIDDEN
 MISSING/AMBIGUOUS CLIENT: FAIL CLOSED

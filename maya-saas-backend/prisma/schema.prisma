@@ -1460,6 +1460,8 @@ model CustomerProfile {
   privacyConsentAt   DateTime?
   marketingConsentAt DateTime?
   encryptedNotes     String?
+  /// B7 Client-stated habits, encrypted under canonical limits V1; no backfill.
+  encryptedClientPreferences String?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   tenant             Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)

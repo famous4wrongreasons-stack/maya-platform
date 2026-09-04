@@ -1,7 +1,7 @@
 # Package 5 B7 — Client habit/preference schema proposal V1
 
-Status: **PROPOSED — owner approval required; no schema/runtime implementation**.
-Accepted checkpoint: `2a6d645d`. Date: 2026-09-04.
+Status: **APPROVED V1 — owner accepted schema and exact limits at checkpoint `47454962`**.
+Accepted checkpoint: `47454962`. Date: 2026-09-04.
 This is Final Package 5 remediation. B5/B6 and Waves 1–6 stay accepted.
 
 ## Exact meaning and existing-schema gap
@@ -43,7 +43,7 @@ Add exactly one field to the existing model:
 CustomerProfile.encryptedClientPreferences String?
 ```
 
-This is a declaration for review, not a migration. **No new model** and no extra
+This approved representation requires an additive migration. **No new model** and no extra
 revision, actor, history or identity columns are proposed.
 
 - Canonical owner: tenant-qualified `Client` through `CustomerProfile.clientId`.
@@ -65,19 +65,22 @@ revision, actor, history or identity columns are proposed.
   command identity, generation, immutable audit fingerprints and outcomes.
   Do not copy raw preferences into unencrypted execution/audit/log fields.
 
-## Proposed bounded behavior included in this V1 approval
+## Owner-approved bounded behavior V1
 
-These choices are **proposals**, not silently inherited constants:
+These choices include the explicit owner limits decision; legacy capacity constants are superseded:
 
 1. Store only a Client's explicitly stated preference; AI is an initiator. It may
    redact/format the supplied text, but cannot infer a preference, select Client
    identity, or convert it into a different business command.
 2. Preserve the observed normalization and case-insensitive identical-text no-op.
-   One normalized preference is at most **200 Unicode characters**. A stored list
-   is at most **12 entries / 800 Unicode characters including separators**.
-3. Unlike legacy truncation/eviction, reject an addition that exceeds either
-   bound; do not silently delete an old choice or truncate a saved sentence.
-   This explicit capacity behavior is part of the decision requested here.
+   One normalized preference is at most **200 Unicode code points**. A stored list
+   is at most **12 entries**, the complete UTF-8 JSON at most **8192 bytes**,
+   and the complete encrypted persisted representation at most **10963 bytes**.
+   All bounds apply simultaneously; policy version is V1.
+3. Unlike legacy truncation/eviction, reject atomically with `CLIENT_PREFERENCES_LIMIT_EXCEEDED` when any
+   bound is exceeded; do not silently delete an old choice or truncate a saved sentence.
+   Prior preferences, ciphertext bytes and generation remain unchanged.
+   Automatic LLM summarization/compression to fit is forbidden.
    No remove/reorder/automatic conflict-resolution command is added in V1.
 4. Missing or ambiguous canonical Client, stale/revoked link, identity hold or
    cross-tenant target fails closed. Resolve the current channel through the
@@ -125,11 +128,11 @@ Final Gate. No real profile/phone/provider business mutations for smoke.
 ```text
 B7 CANONICAL OWNER: CLIENT / CustomerProfile
 B7 EXISTING SCHEMA SUFFICIENT: NO
-B7 ADDITIONAL SCHEMA REQUIRED: YES — ONE NULLABLE ENCRYPTED FIELD PROPOSED
-B7 SCHEMA PROPOSAL V1: READY FOR OWNER DECISION
-NEW MODELS PROPOSED: 0
+B7 ADDITIONAL SCHEMA REQUIRED: YES — ONE NULLABLE ENCRYPTED FIELD APPROVED
+B7 SCHEMA PROPOSAL V1: APPROVED
+NEW MODELS: 0
 FAKE HISTORICAL BACKFILL: FORBIDDEN
 PHONE MATCH AS CLIENT AUTHORITY: NO
-RUNTIME/SCHEMA IMPLEMENTATION STARTED: NO
+SCHEMA FOUNDATION: IMPLEMENTED LOCALLY; PRODUCTION APPLY GATED
 PRODUCTION MUTATIONS: 0
 ```
