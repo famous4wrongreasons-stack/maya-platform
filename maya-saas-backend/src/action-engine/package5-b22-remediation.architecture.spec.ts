@@ -55,7 +55,7 @@ describe('Package 5 B22 tip self-report retirement', () => {
         meMasterMatches: (m: { id: number }, id: number) => m.id === id,
         meTipsPaymentURL: (company: string, staff: number) =>
           `https://yclients.com/companies/${company}/staff/${staff}/tips/pay/?master_tips_source=payed_from_pos_qr`,
-        openTipsLink: async (url: string) => open(url),
+        openTipsLink: (url: string) => Promise.resolve(open(url)),
         copyTipsLink: jest.fn(),
       };
       runInNewContext(helper, sandbox);
