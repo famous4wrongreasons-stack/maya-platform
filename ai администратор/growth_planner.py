@@ -1009,31 +1009,12 @@ def set_growth_goal(
     workstations_count: int | None = None,
     created_by: int | str | None = None,
 ) -> dict:
-    """Persist an owner-approved target and immediately rebuild the plan."""
-    import database
-
-    target = _rub(target_rub)
-    if target < 10_000 or target > 100_000_000:
-        return {"ok": False, "error": "bad_target", "message": "Цель должна быть от 10 000 до 100 000 000 ₽."}
-    deadline_day = _as_date(deadline, _month_end(date.today())) or _month_end(date.today())
-    if deadline_day < date.today():
-        return {"ok": False, "error": "bad_deadline", "message": "Дата цели не может быть в прошлом."}
-    if deadline_day > date.today() + timedelta(days=365):
-        return {"ok": False, "error": "bad_deadline", "message": "Горизонт плана должен быть не больше 12 месяцев."}
-    chairs = _rub(workstations_count)
-    if workstations_count is not None and not (1 <= chairs <= 100):
-        return {"ok": False, "error": "bad_workstations", "message": "Количество рабочих мест должно быть от 1 до 100."}
-    goal = {
-        "target_rub": target,
-        "deadline": deadline_day.isoformat(),
-        "workstations_count": chairs or None,
-        "created_at": datetime.now().isoformat(timespec="seconds"),
-        "created_by": str(created_by or "owner"),
-        "status": "active",
+    """Daily/growth/capacity goal mutation is retired in Package 5 V1."""
+    del target_rub, deadline, workstations_count, created_by
+    return {
+        "ok": False,
+        "error": "legacy_business_goal_mutation_retired",
+        "canonical_action": "update_finance_dashboard_preferences",
+        "supported_goal": "monthly_financial_target",
+        "business_mutations": 0,
     }
-    _save_json_setting(GOAL_SETTING, goal)
-    database.set_setting("owner_month_gross_target_rub", str(target))
-    if chairs:
-        database.set_setting(WORKSTATIONS_SETTING, str(chairs))
-    snapshot = calculate_growth_plan(goal=goal)
-    return {"ok": True, "goal": goal, "growth_plan": owner_view(snapshot)}

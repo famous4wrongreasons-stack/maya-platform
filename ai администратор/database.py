@@ -1562,19 +1562,10 @@ def is_admin(telegram_user_id: int) -> bool:
 
 
 def can_redeem_codes(telegram_user_id: int) -> bool:
-    """
-    True если пользователь имеет право гасить коды (баллы лояльности,
-    сертификаты): он либо админ, либо привязанный мастер с can_redeem=1.
-    """
-    if is_admin(telegram_user_id):
-        return True
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT 1 FROM masters_telegram WHERE telegram_chat_id = ? "
-            "AND can_redeem = 1 LIMIT 1",
-            (telegram_user_id,),
-        ).fetchone()
-        return bool(row)
+    """Legacy cashier flags never grant Package 4 value authority."""
+    del telegram_user_id
+    # p5_b13_legacy_cashier_value_authority_disabled
+    return False
 
 
 def list_cashiers() -> list[dict]:
@@ -1588,14 +1579,9 @@ def list_cashiers() -> list[dict]:
 
 
 def set_cashier_role(yclients_staff_id: int, can_redeem: bool) -> bool:
-    """Включает/выключает роль кассира у мастера. True если строка нашлась."""
-    with _db() as conn:
-        cur = conn.execute(
-            "UPDATE masters_telegram SET can_redeem = ? "
-            "WHERE yclients_staff_id = ?",
-            (1 if can_redeem else 0, yclients_staff_id),
-        )
-        return cur.rowcount > 0
+    """Historical cashier flags are read-only compatibility data."""
+    del yclients_staff_id, can_redeem
+    raise RuntimeError("canonical_package4_value_authority_required")
 
 
 def find_master_by_partial_name(query: str) -> dict | None:
@@ -1636,116 +1622,27 @@ from datetime import timedelta
 
 
 def create_master_with_bind_code(yclients_staff_id: int, full_name: str) -> str:
-    """
-    Регистрирует мастера в системе и генерирует bind-код. Идемпотентно:
-    если мастер уже есть и ещё не привязан — возвращает существующий код.
-    Если уже привязан — возвращает None.
-    """
-    with _db() as conn:
-        existing = conn.execute(
-            "SELECT bind_code, telegram_chat_id FROM masters_telegram "
-            "WHERE yclients_staff_id = ?",
-            (yclients_staff_id,),
-        ).fetchone()
-        if existing:
-            if existing["telegram_chat_id"]:
-                return None  # уже привязан
-            return existing["bind_code"]
-
-        # Генерируем уникальный код вида ME-XXXXXX
-        alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        for _ in range(10):
-            code = "ME-" + "".join(secrets.choice(alphabet) for _ in range(6))
-            try:
-                conn.execute(
-                    "INSERT INTO masters_telegram "
-                    "(yclients_staff_id, full_name, bind_code, created_at) "
-                    "VALUES (?, ?, ?, ?)",
-                    (yclients_staff_id, full_name, code, _now()),
-                )
-                return code
-            except sqlite3.IntegrityError:
-                continue
-        raise RuntimeError("Не удалось сгенерировать уникальный bind-код")
+    """Telegram bind codes were retired in favor of canonical A16 access."""
+    del yclients_staff_id, full_name
+    raise RuntimeError("canonical_crm_staff_access_required")
 
 
 def reset_master_bind_code(yclients_staff_id: int, full_name: str) -> str:
-    """
-    Генерирует НОВЫЙ bind-код для мастера, сбрасывая текущую привязку.
-    Создаёт запись, если её ещё не было. Используется когда админ просит
-    «выдать новый код» (мастер сменил телефон, потерял доступ и т.п.).
-    Возвращает новый код.
-    """
-    alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-    with _db() as conn:
-        existing = conn.execute(
-            "SELECT id FROM masters_telegram WHERE yclients_staff_id = ?",
-            (yclients_staff_id,),
-        ).fetchone()
-        for _ in range(10):
-            code = "ME-" + "".join(secrets.choice(alphabet) for _ in range(6))
-            try:
-                if existing:
-                    conn.execute(
-                        "UPDATE masters_telegram SET bind_code = ?, "
-                        "telegram_chat_id = NULL, bound_at = NULL, "
-                        "full_name = ?, is_active = 1 "
-                        "WHERE yclients_staff_id = ?",
-                        (code, full_name, yclients_staff_id),
-                    )
-                else:
-                    conn.execute(
-                        "INSERT INTO masters_telegram "
-                        "(yclients_staff_id, full_name, bind_code, created_at) "
-                        "VALUES (?, ?, ?, ?)",
-                        (yclients_staff_id, full_name, code, _now()),
-                    )
-                return code
-            except sqlite3.IntegrityError:
-                continue
-        raise RuntimeError("Не удалось сгенерировать уникальный bind-код")
+    """Telegram bind-code reset cannot mutate staff authority."""
+    del yclients_staff_id, full_name
+    raise RuntimeError("canonical_crm_staff_access_required")
 
 
 def bind_master(bind_code: str, telegram_chat_id: int) -> dict | None:
-    """
-    Привязывает Telegram-аккаунт к мастеру по bind-коду.
-    Возвращает запись мастера при успехе, None — если код невалидный или уже использован.
-    """
-    code = (bind_code or "").strip().upper()
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT id, yclients_staff_id, full_name, telegram_chat_id "
-            "FROM masters_telegram WHERE bind_code = ?",
-            (code,),
-        ).fetchone()
-        if not row:
-            return None
-        # Уже привязан кем-то другим
-        if row["telegram_chat_id"] and row["telegram_chat_id"] != telegram_chat_id:
-            return None
-        # Этот же мастер уже привязан к этому же chat_id — успех (идемпотентно)
-        if row["telegram_chat_id"] == telegram_chat_id:
-            return dict(row)
-        # Свободный код — привязываем
-        conn.execute(
-            "UPDATE masters_telegram SET telegram_chat_id = ?, bound_at = ?, is_active = 1 "
-            "WHERE id = ?",
-            (telegram_chat_id, _now(), row["id"]),
-        )
-        result = dict(row)
-        result["telegram_chat_id"] = telegram_chat_id
-        return result
+    """Legacy Telegram bind codes no longer establish staff authority."""
+    del bind_code, telegram_chat_id
+    raise RuntimeError("canonical_crm_staff_access_required")
 
 
 def unbind_master(telegram_chat_id: int) -> bool:
-    """Отвязывает мастера от Telegram-аккаунта. True если был привязан."""
-    with _db() as conn:
-        cur = conn.execute(
-            "UPDATE masters_telegram SET telegram_chat_id = NULL, bound_at = NULL "
-            "WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        )
-        return cur.rowcount > 0
+    """Legacy Telegram staff bindings are immutable compatibility history."""
+    del telegram_chat_id
+    raise RuntimeError("canonical_crm_staff_access_required")
 
 
 def get_master_by_chat_id(telegram_chat_id: int) -> dict | None:
@@ -2286,32 +2183,15 @@ def list_maya_tenants() -> list[dict]:
 
 def add_maya_tenant(name: str, city: str = "", plan: str = "", owner_name: str = "",
                     phone: str = "", mrr: int = 0, status: str = "pending") -> int:
-    """Заводит салон-подписчик. Возвращает id."""
-    with _db() as conn:
-        cur = conn.execute(
-            "INSERT INTO maya_tenants (name, city, plan, status, owner_name, phone, "
-            "mrr, created_at, activated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (name, city, plan, status, owner_name, phone, int(mrr or 0), _now(),
-             _now() if status == "active" else None),
-        )
-        return cur.lastrowid
+    """Legacy subscriber registry cannot create canonical tenants."""
+    del name, city, plan, owner_name, phone, mrr, status
+    raise RuntimeError("canonical_trial_activation_required")
 
 
 def set_maya_tenant_status(tenant_id: int, status: str) -> bool:
-    """Меняет статус салона (active|suspended|pending). Активация ставит activated_at."""
-    with _db() as conn:
-        if status == "active":
-            conn.execute(
-                "UPDATE maya_tenants SET status = ?, "
-                "activated_at = COALESCE(activated_at, ?) WHERE id = ?",
-                (status, _now(), int(tenant_id)),
-            )
-        else:
-            conn.execute(
-                "UPDATE maya_tenants SET status = ? WHERE id = ?",
-                (status, int(tenant_id)),
-            )
-        return True
+    """Legacy subscriber rows cannot activate or suspend canonical tenants."""
+    del tenant_id, status
+    raise RuntimeError("canonical_a26_tenant_lifecycle_required")
 
 
 # ─── Расходы по салону (от ассистента Антона) ─────────────────────────────

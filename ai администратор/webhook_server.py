@@ -2467,27 +2467,8 @@ async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
 # ─────────────────────────────────────────────────────────────────────
 
 def _panel_resolve_role(tg_id: int) -> dict:
-    """Возвращает роль, права и признак привязанного мастера по Telegram-id."""
-    managers = set()
-    try:
-        raw = database.get_setting("panel_manager_ids") or ""
-        for x in raw.replace(" ", "").split(","):
-            x = x.strip()
-            if x.lstrip("-").isdigit():
-                managers.add(int(x))
-    except Exception:
-        managers = set()
-
-    # Привязанный мастер (бывает и у владельца, если он сам стрижёт)
-    master_row = None
-    try:
-        master_row = database.get_master_by_chat_id(int(tg_id))
-    except Exception:
-        master_row = None
-    is_master = bool(master_row)
-    staff_id = master_row.get("yclients_staff_id") if master_row else None
-    master_name = (master_row.get("full_name") if master_row else "") or ""
-    is_cashier = bool(master_row.get("can_redeem")) if master_row else False
+    """Resolve only legacy owner access; staff/manager authority is canonical A16."""
+    # p5_b13_raw_telegram_staff_manager_authority_disabled
     try:
         from config import FOUNDER_IDS as _FIDS
         founders = {int(x) for x in _FIDS}
@@ -2495,19 +2476,25 @@ def _panel_resolve_role(tg_id: int) -> dict:
         founders = set()
     is_founder = int(tg_id) in founders
     is_admin = bool(database.is_admin(int(tg_id)))
-
     role = resolve_panel_role(
         tg_id=int(tg_id),
         is_founder=is_founder,
         is_admin=is_admin,
-        is_master=is_master,
-        manager_ids=managers,
+        is_master=False,
+        manager_ids=set(),
     )
-
-    perms = panel_permissions(role, is_master=is_master, is_cashier=is_cashier)
-    return {"role": role, "is_cashier": is_cashier, "is_master": is_master,
-            "staff_id": staff_id, "master_name": master_name, "permissions": perms,
-            "is_founder": is_founder, "is_admin": is_admin}
+    perms = panel_permissions(role, is_master=False, is_cashier=False)
+    return {
+        "role": role,
+        "is_cashier": False,
+        "is_master": False,
+        "staff_id": None,
+        "master_name": "",
+        "permissions": perms,
+        "is_founder": is_founder,
+        "is_admin": is_admin,
+        "staff_authority": "CrmStaffAccess",
+    }
 
 
 def _panel_auth(body: dict, init_data_header: str):
@@ -2830,7 +2817,7 @@ async def panel_command_center_handler(request: web.Request) -> web.Response:
 
 
 async def panel_plan_target_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/plan_target — daily target or strategic growth goal."""
+    """Retired daily/growth/capacity writer; monthly target is canonical A22."""
     try:
         body = await request.json()
     except Exception:
@@ -2838,55 +2825,17 @@ async def panel_plan_target_handler(request: web.Request) -> web.Response:
     tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
     if not tg_user:
         return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Настройка плана доступна только владельцу.",
-        }, status=403)
-    if body.get("mode") == "growth" or body.get("growth_target_rub") is not None:
-        raw_growth = body.get("growth_target_rub", body.get("target_rub"))
-        try:
-            growth_target = int(round(float(str(raw_growth).replace(" ", "").replace(",", ".") or 0)))
-            workstations = body.get("workstations_count")
-            workstations = int(workstations) if workstations not in (None, "") else None
-        except Exception:
-            return _cabinet_response({
-                "error": "bad_request",
-                "message": "Цель и количество рабочих мест должны быть числами.",
-            }, status=400)
-        try:
-            result = await asyncio.to_thread(
-                growth_planner.set_growth_goal,
-                target_rub=growth_target,
-                deadline=body.get("deadline"),
-                workstations_count=workstations,
-                created_by=tg_id,
-            )
-        except Exception as e:
-            logger.error(f"panel growth target error: {e}")
-            return _cabinet_response({
-                "error": "server_error",
-                "message": "Не удалось рассчитать план роста.",
-            }, status=500)
-        if not result.get("ok"):
-            return _cabinet_response(result, status=400)
-        return _cabinet_response({"role": info["role"], **result})
-    raw = body.get("target_rub", body.get("daily_target_rub", 0))
-    try:
-        target = int(round(float(str(raw).replace(" ", "").replace(",", ".") or 0)))
-    except Exception:
-        return _cabinet_response({"error": "bad_request", "message": "target_rub должен быть числом."}, status=400)
-    if target < 0 or target > 5000000:
-        return _cabinet_response({"error": "bad_request", "message": "План должен быть от 0 до 5 000 000 ₽."}, status=400)
-    try:
-        database.set_setting("owner_daily_target_rub", str(target))
-        payload = await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_plan_target error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось сохранить план."}, status=500)
-    return _cabinet_response({"ok": True, "role": info["role"], **payload})
+    return _cabinet_response({
+        "ok": False,
+        "error": "legacy_business_goal_mutation_retired",
+        "canonical_action": "update_finance_dashboard_preferences",
+        "canonical_endpoint": "/api/me/dashboard/finance",
+        "supported_goal": "monthly_financial_target",
+        "daily_revenue_goal": "retired",
+        "dated_growth_goal": "retired",
+        "workstation_capacity_goal": "retired",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_action_evaluate_handler(request: web.Request) -> web.Response:
@@ -4453,15 +4402,13 @@ def _panel_get_manager_ids() -> list:
 
 
 def _panel_set_manager_ids(ids: list) -> None:
-    uniq = []
-    for i in ids:
-        if i not in uniq:
-            uniq.append(i)
-    database.set_setting("panel_manager_ids", ",".join(str(i) for i in uniq))
+    """Historical panel_manager_ids are read-only and grant no authority."""
+    del ids
+    raise RuntimeError("canonical_crm_staff_access_required")
 
 
 async def panel_team_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team — мастера: ростер, bind-коды, роль кассира (owner)."""
+    """Compatibility boundary; canonical staff access is owned by A16."""
     try:
         body = await request.json()
     except Exception:
@@ -4469,80 +4416,27 @@ async def panel_team_handler(request: web.Request) -> web.Response:
     tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
     if not tg_user:
         return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
-    if not info.get("permissions", {}).get("staff"):
-        return _cabinet_response({"error": "forbidden", "message": "Недостаточно прав."}, status=403)
-
     mode = str(body.get("mode") or "list")
-
     if mode == "list":
-        try:
-            roster = _yc.get_masters() or []
-        except Exception:
-            roster = []
-        mt = {}
-        try:
-            for m in database.list_masters():
-                mt[m.get("yclients_staff_id")] = m
-        except Exception:
-            mt = {}
-        out = []
-        for r in roster:
-            if not isinstance(r, dict) or r.get("error"):
-                continue
-            sid = r.get("id")
-            row = mt.get(sid)
-            bound = bool(row and row.get("telegram_chat_id"))
-            out.append({
-                "staff_id": sid,
-                "name": r.get("name", ""),
-                "specialization": r.get("specialization", ""),
-                "registered": bool(row),
-                "bound": bound,
-                "code": (row.get("bind_code") if (row and not bound) else None),
-                "cashier": bool(row and row.get("can_redeem")),
-            })
-        return _cabinet_response({"masters": out})
-
-    if mode == "bind_code":
-        try:
-            sid = int(body.get("staff_id") or 0)
-        except Exception:
-            sid = 0
-        name = str(body.get("name") or "").strip() or f"staff_{sid}"
-        if not sid:
-            return _cabinet_response({"ok": False, "reason": "Не указан мастер."}, status=400)
-        try:
-            if bool(body.get("reset")):
-                code = database.reset_master_bind_code(sid, name)
-            else:
-                code = database.create_master_with_bind_code(sid, name)
-        except Exception as e:
-            logger.error(f"panel team bind_code: {e}")
-            return _cabinet_response({"ok": False, "reason": "Ошибка генерации кода."}, status=500)
-        if code is None:
-            return _cabinet_response({"ok": False, "reason": "Мастер уже привязан. Нажмите «Новый код», чтобы сбросить привязку."})
-        return _cabinet_response({"ok": True, "code": code})
-
-    if mode == "cashier":
-        try:
-            sid = int(body.get("staff_id") or 0)
-        except Exception:
-            sid = 0
-        on = bool(body.get("on"))
-        if not sid:
-            return _cabinet_response({"ok": False, "reason": "Не указан мастер."}, status=400)
-        ok = database.set_cashier_role(sid, on)
-        if not ok:
-            return _cabinet_response({"ok": False, "reason": "Сначала выдайте мастеру код — после этого он появится в системе."})
-        return _cabinet_response({"ok": True, "cashier": on})
-
-    return _cabinet_response({"ok": False, "reason": "Неизвестный режим."}, status=400)
+        return _cabinet_response({
+            "masters": [],
+            "authority": "CrmStaffAccess",
+            "canonical_action": "configure_crm_staff_access",
+            "legacy_telegram_bind_code": "retired",
+            "legacy_cashier_flag": "retired",
+            "business_mutations": 0,
+        })
+    return _cabinet_response({
+        "ok": False,
+        "error": "legacy_staff_authority_retired",
+        "authority": "CrmStaffAccess",
+        "canonical_action": "configure_crm_staff_access",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_managers_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/managers — назначение управляющих (owner, право roles)."""
+    """Compatibility boundary; manager access is canonical A16 administrator."""
     try:
         body = await request.json()
     except Exception:
@@ -4550,69 +4444,30 @@ async def panel_managers_handler(request: web.Request) -> web.Response:
     tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
     if not tg_user:
         return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
-    if not info.get("permissions", {}).get("roles"):
-        return _cabinet_response({"error": "forbidden", "message": "Недостаточно прав."}, status=403)
-
     mode = str(body.get("mode") or "list")
-
     if mode == "list":
-        out = []
-        for i in _panel_get_manager_ids():
-            name = ""
-            try:
-                m = database.get_master_by_chat_id(i)
-                if m:
-                    name = m.get("full_name") or ""
-            except Exception:
-                pass
-            out.append({"id": i, "name": name})
-        return _cabinet_response({"managers": out})
-
-    if mode == "add":
-        try:
-            new_id = int(body.get("tg_id"))
-        except Exception:
-            return _cabinet_response({"ok": False, "reason": "Введите числовой Telegram ID."}, status=400)
-        if database.is_admin(new_id):
-            return _cabinet_response({"ok": False, "reason": "Это владелец — у него уже полный доступ."})
-        ids = _panel_get_manager_ids()
-        if new_id not in ids:
-            ids.append(new_id)
-        _panel_set_manager_ids(ids)
-        return _cabinet_response({"ok": True})
-
-    if mode == "remove":
-        try:
-            rid = int(body.get("tg_id"))
-        except Exception:
-            return _cabinet_response({"ok": False, "reason": "Некорректный ID."}, status=400)
-        _panel_set_manager_ids([i for i in _panel_get_manager_ids() if i != rid])
-        return _cabinet_response({"ok": True})
-
+        return _cabinet_response({
+            "managers": [],
+            "authority": "CrmStaffAccess",
+            "canonical_role": "administrator",
+            "canonical_action": "configure_crm_staff_access",
+            "historical_panel_manager_ids_authoritative": False,
+            "business_mutations": 0,
+        })
     if mode == "recent":
-        # Недавно заходившие — кандидаты в управляющие (исключаем владельцев, текущих управляющих, мастеров)
-        mgr_ids = set(_panel_get_manager_ids())
-        out = []
-        for s in _panel_get_seen():
-            sid = s.get("id")
-            if not sid or sid in mgr_ids:
-                continue
-            try:
-                if database.is_admin(int(sid)):
-                    continue
-            except Exception:
-                pass
-            is_m = False
-            try:
-                is_m = bool(database.get_master_by_chat_id(int(sid)))
-            except Exception:
-                pass
-            out.append({"id": sid, "name": s.get("name", ""), "is_master": is_m})
-        return _cabinet_response({"recent": out[:20]})
-
-    return _cabinet_response({"ok": False, "reason": "Неизвестный режим."}, status=400)
+        return _cabinet_response({
+            "recent": [],
+            "authority": "CrmStaffAccess",
+            "business_mutations": 0,
+        })
+    return _cabinet_response({
+        "ok": False,
+        "error": "legacy_manager_authority_retired",
+        "authority": "CrmStaffAccess",
+        "canonical_role": "administrator",
+        "canonical_action": "configure_crm_staff_access",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_masters_stats_handler(request: web.Request) -> web.Response:
@@ -5614,55 +5469,75 @@ async def god_billing_handler(request: web.Request) -> web.Response:
 
 
 async def god_subscribers_handler(request: web.Request) -> web.Response:
-    """POST /api/god/subscribers — реестр салонов-подписчиков MAYA.
-    action: list (по умолч.) | add {name,city,plan,owner,phone,mrr,status} |
-            set_status {id, status:active|suspended|pending}."""
+    """Read-only projection of canonical tenants for a platform-owner bearer."""
     try:
         body = await request.json()
     except Exception:
         body = {}
-    _tg, err = _god_gate(request, body)
-    if err:
-        return err
     action = str(body.get("action") or "list")
-    if action == "add":
-        name = str(body.get("name") or "").strip()
-        if not name:
-            return _cabinet_response({"error": "bad_request",
-                                      "message": "Укажите название салона."}, status=400)
-        _st = str(body.get("status") or "pending")
-        if _st not in ("active", "suspended", "pending"):
-            _st = "pending"
+    if action != "list":
+        return _cabinet_response({
+            "ok": False,
+            "error": "god_subscriber_mutation_retired",
+            "canonical_tenant_creation": "TrialActivation",
+            "canonical_tenant_configuration": "A26",
+            "canonical_plan_entitlement": "Package4",
+            "business_mutations": 0,
+        }, status=410)
+    authorization = str(request.headers.get("Authorization") or "").strip()
+    if not authorization.startswith("Bearer "):
+        return _cabinet_response({
+            "error": "canonical_platform_authority_required",
+            "projection": "canonical_admin_tenants",
+        }, status=401)
+
+    # p5_b13_god_subscribers_read_only_canonical_projection
+    import urllib.error
+    import urllib.request
+
+    url = os.getenv(
+        "MAYA_CANONICAL_TENANT_PROJECTION_URL",
+        "http://127.0.0.1:3107/api/admin/tenants",
+    ).strip()
+
+    def _load_projection() -> tuple[int, object]:
+        req = urllib.request.Request(
+            url,
+            method="GET",
+            headers={"Accept": "application/json", "Authorization": authorization},
+        )
         try:
-            database.add_maya_tenant(
-                name=name, city=str(body.get("city") or ""),
-                plan=str(body.get("plan") or ""), owner_name=str(body.get("owner") or ""),
-                phone=str(body.get("phone") or ""), mrr=int(body.get("mrr") or 0),
-                status=_st)
-        except Exception as e:
-            logger.error(f"god add tenant: {e}")
-            return _cabinet_response({"error": "server_error"}, status=500)
-    elif action == "set_status":
-        tid = body.get("id")
-        status = str(body.get("status") or "")
-        if not tid or status not in ("active", "suspended", "pending"):
-            return _cabinet_response({"error": "bad_request"}, status=400)
-        try:
-            database.set_maya_tenant_status(int(tid), status)
-        except Exception as e:
-            logger.error(f"god set tenant status: {e}")
-            return _cabinet_response({"error": "server_error"}, status=500)
+            with urllib.request.urlopen(req, timeout=10) as response:
+                return int(response.status), _json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            try:
+                payload = _json.loads(exc.read().decode("utf-8"))
+            except Exception:
+                payload = {"error": "canonical_projection_rejected"}
+            return int(exc.code), payload
+
     try:
-        items = database.list_maya_tenants()
-    except Exception:
-        items = []
+        status, payload = await asyncio.to_thread(_load_projection)
+    except Exception as exc:
+        logger.error("canonical tenant projection unavailable: %s", exc)
+        return _cabinet_response({"error": "canonical_projection_unavailable"}, status=502)
+    if status != 200:
+        return _cabinet_response(
+            payload if isinstance(payload, dict) else {"error": "canonical_projection_rejected"},
+            status=status,
+        )
+    tenants = payload if isinstance(payload, list) else []
     return _cabinet_response({
-        "subscribers": items,
-        "summary": {"total": len(items),
-                    "active": sum(1 for s in items if s.get("status") == "active"),
-                    "pending": sum(1 for s in items if s.get("status") == "pending"),
-                    "suspended": sum(1 for s in items if s.get("status") == "suspended"),
-                    "mrr": sum(int(s.get("mrr") or 0) for s in items if s.get("status") == "active")},
+        "subscribers": tenants,
+        "summary": {
+            "total": len(tenants),
+            "active": sum(1 for item in tenants if str(item.get("status") or "").lower() == "active"),
+            "suspended": sum(1 for item in tenants if str(item.get("status") or "").lower() == "suspended"),
+            "mrr": None,
+        },
+        "projection": "canonical_admin_tenants",
+        "read_only": True,
+        "business_mutations": 0,
     })
 
 
@@ -10894,26 +10769,13 @@ def _master_day_brief_send_hour() -> int:
 
 
 def _growth_role_recipients() -> dict[str, set[int]]:
-    """Resolve owner and manager recipients from server-side role sources."""
+    """Legacy raw Telegram manager lists never grant brief access."""
+    # p5_b13_raw_telegram_manager_brief_authority_disabled
     try:
         founders = {int(value) for value in (getattr(config, "FOUNDER_IDS", []) or [])}
     except Exception:
         founders = set()
-    try:
-        admins = {int(value) for value in (database.list_admins() or [])}
-    except Exception:
-        admins = set()
-    managers = set(admins) - founders
-    try:
-        raw = database.get_setting("panel_manager_ids") or ""
-        managers.update(
-            int(value) for value in raw.replace(" ", "").split(",")
-            if value.strip().lstrip("-").isdigit()
-        )
-    except Exception:
-        pass
-    managers.difference_update(founders)
-    return {"owner": founders, "manager": managers}
+    return {"owner": founders, "manager": set()}
 
 
 async def _send_growth_role_briefs_once(

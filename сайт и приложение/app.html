@@ -27108,7 +27108,24 @@ function AGodMode(props) {
         : 'Не удалось получить расходы: ' + String((j && j.error) || 'нет ответа') + '.');
     });
   }
-  function loadSubs() { setBusy(true); gfetch('god_subscribers', { action: 'list' }).then(function (j) { setBusy(false); if (j && !j.error) setSu(j); }); }
+  function loadSubs() {
+    setBusy(true);
+    meWidgetAf('/admin/tenants').then(function (items) {
+      var tenants = Array.isArray(items) ? items : [];
+      setBusy(false);
+      setSu({
+        subscribers: tenants,
+        summary: {
+          total: tenants.length,
+          active: tenants.filter(function (x) { return String(x.status || '').toLowerCase() === 'active'; }).length,
+          suspended: tenants.filter(function (x) { return String(x.status || '').toLowerCase() === 'suspended'; }).length,
+          mrr: null
+        },
+        projection: 'canonical_admin_tenants',
+        read_only: true
+      });
+    }).catch(function () { setBusy(false); setSu({ subscribers: [], summary: {}, error: 'canonical_projection_unavailable' }); });
+  }
   // MAYA OS: GET /api/admin/analytics/trials (platform-owner JWT). Метрика — с сервера, не из локальных жестов.
   function loadTrials() {
     try {
@@ -27338,37 +27355,12 @@ function AGodMode(props) {
     return t.dim;
   }
   function editPlanTarget(sm) {
-    sm = sm || {};
-    setModal({ title: 'План на сегодня', fields: [{ key: 'target', label: 'Цель по выручке, ₽ (0 — средняя за 30 дней)', value: String(sm.target_source === 'manual_setting' ? (sm.daily_target_rub || 0) : 0) }], submit: function (v) {
-      var target = parseInt(String(v.target || '0').replace(/\s/g, ''), 10) || 0;
-      setBusy(true);
-      gfetch('panel_plan_target', { target_rub: target }).then(function (j) {
-        setBusy(false);
-        if (j && !j.error) setCc(j);
-      });
-    } });
+    void sm;
+    alert('Дневной план выведен из эксплуатации. Общий план на месяц настраивается в canonical панели владельца.');
   }
   function editGrowthTarget(plan) {
-    plan = plan || {};
-    var goal = plan.goal || {}, capacity = plan.capacity || {}, period = plan.period || {};
-    setModal({ title: 'Цель роста MAYA', fields: [
-      { key: 'target', label: 'Цель валовой выручки, ₽', value: String(goal.requested_target_rub || goal.committed_target_rub || '') },
-      { key: 'deadline', label: 'Достичь к дате (ГГГГ-ММ-ДД)', value: String(period.to || goal.deadline || '') },
-      { key: 'workstations', label: 'Количество рабочих мест', value: String(capacity.workstations_count || '') }
-    ], submit: function (v) {
-      var target = parseInt(String(v.target || '').replace(/\s/g, ''), 10) || 0;
-      var workstations = parseInt(String(v.workstations || '').replace(/\s/g, ''), 10) || 0;
-      if (!target || !workstations) return;
-      setBusy(true);
-      gfetch('panel_plan_target', {
-        mode: 'growth', growth_target_rub: target,
-        deadline: String(v.deadline || '').trim(),
-        workstations_count: workstations
-      }).then(function (j) {
-        if (!j || j.error) { setBusy(false); return; }
-        loadCommand();
-      }).catch(function () { setBusy(false); });
-    } });
+    void plan;
+    alert('Цели роста и рабочих мест выведены из эксплуатации. Общий план на месяц доступен в canonical панели владельца.');
   }
   function statusText(s) { s = String(s || 'ok'); return s === 'risk' || s === 'high' ? 'Риск' : (s === 'warn' || s === 'medium' ? 'Внимание' : 'Норма'); }
   function statusColor(s) { s = String(s || 'ok'); return s === 'risk' || s === 'high' || s === 'fail' ? '#72706e' : (s === 'warn' || s === 'medium' || s === 'soon' ? '#a6a4a0' : '#93918e'); }
@@ -28623,7 +28615,7 @@ function AGodMode(props) {
   }
 
   function addTenant() {
-    setModal({ title: 'Новый бизнес-подписчик', fields: [{ key: 'name', label: 'Название бизнеса' }, { key: 'city', label: 'Город' }, { key: 'plan', label: 'Тариф (Start / Pro / Max)' }, { key: 'owner', label: 'Владелец' }, { key: 'phone', label: 'Телефон' }, { key: 'mrr', label: 'MRR, ₽/мес', value: '0' }], submit: function (v) { var nm = (v.name || '').trim(); if (!nm) return; setBusy(true); gfetch('god_subscribers', { action: 'add', name: nm, city: v.city || '', plan: v.plan || '', owner: v.owner || '', phone: v.phone || '', mrr: parseInt(v.mrr, 10) || 0 }).then(function (j) { setBusy(false); if (j && !j.error) setSu(j); }); } });
+    alert('Создание бизнеса выполняется только через canonical TrialActivation.');
   }
   function renderModal() {
     if (!modal) return null;
@@ -28639,7 +28631,10 @@ function AGodMode(props) {
           e('div', { style: { flex: 1 } }, btn('Отмена', function () { setModal(null); }, {})),
           e('div', { style: { flex: 1 } }, btn('Сохранить', function () { var vals = {}; modal.fields.forEach(function (f) { var el = document.getElementById('godf_' + f.key); vals[f.key] = el ? el.value : ''; }); var sub = modal.submit; setModal(null); if (sub) sub(vals); }, { primary: true })))));
   }
-  function setTenantStatus(id, status) { setBusy(true); gfetch('god_subscribers', { action: 'set_status', id: id, status: status }).then(function (j) { setBusy(false); if (j && !j.error) setSu(j); }); }
+  function setTenantStatus(id, status) {
+    void id; void status;
+    alert('Статус бизнеса изменяется только через canonical A26 tenant lifecycle.');
+  }
   function renderSubs() {
     if (!su) return loadingMsg();
     var items = su.subscribers || [], sm = su.summary || {};
@@ -35975,30 +35970,12 @@ function ALivePanel() {
     })));
   }
   function teamBind(m) {
-    setTeamNotice('');
-    const reset = !!m.bound;
-    pfetch('panel_team', {
-      mode: 'bind_code',
-      staff_id: m.staff_id,
-      name: m.name,
-      reset: reset
-    }).then(r => {
-      const b = r.body || {};
-      if (b.ok && b.code) {
-        setTeamNotice('Код для ' + m.name + ': ' + b.code + ' — мастер вводит «/bind ' + b.code + '» в Telegram-боте.');
-        loadTeam();
-      } else setTeamNotice(b.reason || diag(r.status, b));
-    });
+    void m;
+    setTeamNotice('Telegram bind-коды выведены из эксплуатации. Доступ сотрудника назначается в canonical A16 панели.');
   }
   function teamCashier(m) {
-    pfetch('panel_team', {
-      mode: 'cashier',
-      staff_id: m.staff_id,
-      on: !m.cashier
-    }).then(r => {
-      const b = r.body || {};
-      if (b.ok) loadTeam();else setTeamNotice(b.reason || diag(r.status, b));
-    });
+    void m;
+    setTeamNotice('Legacy роль кассира выведена из эксплуатации. Value authority принадлежит canonical Package 4 flows.');
   }
   function bcPreview() {
     if (!bcText.trim()) {
