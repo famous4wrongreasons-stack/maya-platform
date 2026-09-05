@@ -1,0 +1,335 @@
+{
+  "acceptedOwnerCheckpoint": "ab4bd333",
+  "runtimeCommit": "a15741c06c3bcbab416a4a94aaa75626148a0d7d",
+  "b22RuntimeChangeCommit": "daa7f91a",
+  "productionRelease": "/opt/maya-saas/releases/20260905-p5-b22-a15741c0",
+  "b22ProductionRemediation": "PASS",
+  "b22": {
+    "unverifiedTipSignal": "RETIRED",
+    "externalTipPayment": "PRESERVED",
+    "callerSuppliedValueAuthority": 0,
+    "callerSuppliedRecordAppointmentAuthority": 0,
+    "directSqliteTipFactWriters": 0,
+    "directTelegramDelivery": 0,
+    "directWebPushDelivery": 0,
+    "legacySqliteCurrentFinancialProjections": "RETIRED",
+    "historicalSelfReportsChanged": false,
+    "newCanonicalTipOwner": false,
+    "realProductionTipOrDeliveryRequestsForProof": 0
+  },
+  "schemaChanged": false,
+  "newModels": 0,
+  "newActionClasses": 0,
+  "newMigrations": 0,
+  "productionStructuralReadOnlyVerification": {
+    "health": {
+      "status": "ok",
+      "service": "maya-saas-backend",
+      "release": "20260905-p5-b22-a15741c0",
+      "started_at": "2026-09-05T20:58:50.941Z",
+      "timestamp": "2026-09-05T20:59:32.377Z"
+    },
+    "readiness": {
+      "status": "ready",
+      "service": "maya-saas-backend",
+      "checks": {
+        "database": "ready"
+      },
+      "timestamp": "2026-09-05T20:59:32.387Z"
+    },
+    "maya-saas": "active",
+    "barbershop-pwa": "active",
+    "barbershop-bot": "inactive",
+    "pwaPortListening": true,
+    "maya-saasErrorCount": 0,
+    "barbershop-pwaErrorCount": 0,
+    "pwaRequestOnly": true,
+    "spareSmokePortListening": false,
+    "hashes": {
+      "webhook_server.py": "6f31a5a3ca387f2e98c4e60a2b1e550d181fb8afb8ba19316ec3d922755d6bb7",
+      "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+      "package5_control_plane_runtime_guard.py": "2e72f185fd39e14289dd8c50d4fab9badda2c4e93af28e71ebc29318e1e936a0",
+      "realtime_bridge.py": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+      "legacy_client_command_bridge.py": "bf102f2db07203ed7297caa674dec7ce710e75a16442c749705de321b3d82b52",
+      "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d"
+    }
+  },
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "proofs": {
+    "targetedTypescript": "PASS — 1 suite / 5 tests",
+    "targetedPython": "PASS — 5 tests, including 75 concurrent forged/invalid requests and negative ratchets",
+    "existingControlPlaneGuard": "PASS — 31 tests",
+    "chatTipsRegression": "PASS — 5 tests",
+    "mandatoryDeploymentRegression": "PASS — 352 suites / 2880 tests",
+    "prismaValidate": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "scriptTypecheck": "PASS",
+    "build": "PASS",
+    "stagedActivePythonGuard": "PASS",
+    "activePackage4Guard": "PASS",
+    "activePackage5Guard": "PASS — B13–B22",
+    "php83Syntax": "PASS",
+    "sourceAndPublishedInlineScripts": "PASS — 28/27/19 source blocks; 26/28 published blocks; 28 iOS blocks",
+    "iosSyncAndByteComparison": "PASS",
+    "finalAggregateRegression": "NOT RUN — STOP AT NEW B23 INVENTORY BLOCKER"
+  },
+  "gateInterruptions": [
+    {
+      "cause": "One require-await error in B22 test adapter",
+      "resolution": "Removed unnecessary async; targeted lint/test and full gate passed",
+      "productionCutoverBeforeGreen": false
+    },
+    {
+      "cause": "Node 24.15 native V8 GC SIGSEGV during full Jest run",
+      "resolution": "Unchanged complete gates passed on installed Node 24.19; optional local runtime selection added to deployment script",
+      "productionCutoverBeforeGreen": false
+    }
+  ],
+  "artifactHashes": {
+    "api-proxy.php": "f6abd0971723c331dc1c8b3607a5aa3f5cb015ac784f47700cd2f2ca25f79285",
+    "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+    "package5_control_plane_runtime_guard.py": "2e72f185fd39e14289dd8c50d4fab9badda2c4e93af28e71ebc29318e1e936a0",
+    "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+    "maya-app.html": "49e4203116afa5f79e9332ce0b23c00b01fdf284abc996a3f84c0ef3672c34e9",
+    "app.html": "b6dc521be88899f80122aa70494e1c811529dbfb6717c3a816a083494610f1a7",
+    "webhook_server.py": "6f31a5a3ca387f2e98c4e60a2b1e550d181fb8afb8ba19316ec3d922755d6bb7"
+  },
+  "freshFinalGateStartedFromScratch": true,
+  "sourceInventoryCounts": {
+    "pythonFiles": 89,
+    "productionPythonFiles": 69,
+    "pythonRoutes": 99,
+    "pythonMutationLikeSites": 627,
+    "backendJs": 537,
+    "sourceTs": 537,
+    "tsRoutes": 218,
+    "tsMutationLikeSites": 516,
+    "webhookHttpRoutes": 94
+  },
+  "inventoryCountersMeaning": "Syntactic sites; not all are business writes or reachable owners. Test modules excluded; routed B23 reachability reconstructed separately.",
+  "familyInventory": [
+    {
+      "family": "A15",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A16",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A17",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A18",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A22",
+      "acceptedWave": 1,
+      "foundationSource": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "sourceSha256": "1cee4166d218a0748dcab14560aef6c489a1d246dc3aa92296ab6da1cc4b4c25",
+      "deployedFoundation": {
+        "file": "package5-wave1/package5-wave1-canonical-cutover.service.js",
+        "sha256": "727cca98d82deef7760d36788441c733c86fae82a2f0a96fb0654f90ac038482"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A23",
+      "acceptedWave": 1,
+      "foundationSource": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "sourceSha256": "1cee4166d218a0748dcab14560aef6c489a1d246dc3aa92296ab6da1cc4b4c25",
+      "deployedFoundation": {
+        "file": "package5-wave1/package5-wave1-canonical-cutover.service.js",
+        "sha256": "727cca98d82deef7760d36788441c733c86fae82a2f0a96fb0654f90ac038482"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A25",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A26",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A27",
+      "acceptedWave": 4,
+      "foundationSource": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+      "sourceSha256": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+      "deployedFoundation": {
+        "file": "package5-wave4/package5-wave4-canonical-cutover.service.js",
+        "sha256": "d5eab02857a3b017dd739077049722204457d96d5f47ef4e2e71ff3a57231d6f"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A28",
+      "acceptedWave": 4,
+      "foundationSource": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+      "sourceSha256": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+      "deployedFoundation": {
+        "file": "package5-wave4/package5-wave4-canonical-cutover.service.js",
+        "sha256": "d5eab02857a3b017dd739077049722204457d96d5f47ef4e2e71ff3a57231d6f"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A29",
+      "acceptedWave": 5,
+      "foundationSource": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+      "sourceSha256": "fb3e3ef76153d3f880936c950175de53dee18f519d74218cc46b79ca003e2bc4",
+      "deployedFoundation": {
+        "file": "package5-wave5/package5-wave5-canonical-cutover.service.js",
+        "sha256": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A30",
+      "acceptedWave": 6,
+      "foundationSource": "package5-wave6/package5-wave6.service.ts",
+      "sourceSha256": "9c87dbf0db375ee48c55ecf6ca26225577ce6d0cef5a96463d4f2d0d8f9bfe08",
+      "deployedFoundation": {
+        "file": "package5-wave6/package5-wave6.service.js",
+        "sha256": "cc8a10e97b30e1c44a0d924afd83527768cce293e7f85bda68e6707fc8cbcd02"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    },
+    {
+      "family": "A31",
+      "acceptedWave": 5,
+      "foundationSource": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+      "sourceSha256": "fb3e3ef76153d3f880936c950175de53dee18f519d74218cc46b79ca003e2bc4",
+      "deployedFoundation": {
+        "file": "package5-wave5/package5-wave5-canonical-cutover.service.js",
+        "sha256": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d"
+      },
+      "verdict": "registered; aggregate completion stopped at B23"
+    }
+  ],
+  "familyInventoryCoverage": "13/13",
+  "newBlocker": {
+    "blocker": "B23",
+    "route": "POST /api/chat/delete",
+    "handlerLines": [
+      8642,
+      8738
+    ],
+    "handlerSha256": "61cbf4bba790583425fb34cb2f0dfc4361aac0e48c35714758064f57dca7650d",
+    "activeWebhookSha256": "6f31a5a3ca387f2e98c4e60a2b1e550d181fb8afb8ba19316ec3d922755d6bb7",
+    "memorySourceSha256": "b286f39327adcc3e82c544ad4409d2e5c75a28e0b8367ceb9e16e320850c1b41",
+    "verifiedClientBindingPresent": false,
+    "syntheticLegacySessionAccepted": true,
+    "noMatch": {
+      "status": 200,
+      "deleted": false,
+      "privateMessagesReturned": 1,
+      "durableSaveCalls": 1
+    },
+    "clearAll": {
+      "status": 200,
+      "legacyHistoryErased": true,
+      "durableSaveCalls": 1
+    },
+    "productionMutations": 0,
+    "productionEndpointInvoked": false,
+    "providerCalls": 0,
+    "limitation": "Exact deployed handler/resolver/mode/key/serialization AST; synthetic session adapters and one owned temporary history file. Text formatting is identity, all message content synthetic."
+  },
+  "b23Reachability": {
+    "routeRegistrationLine": 12508,
+    "proxyCaseLine": 2545,
+    "publishedPwaDeleteLines": [
+      15806,
+      15833
+    ],
+    "mayaPwaDeleteLines": [
+      19472,
+      19505
+    ],
+    "resolverLines": [
+      8280,
+      8294
+    ],
+    "memoryWriterLines": [
+      565,
+      574
+    ],
+    "sourceMemoryMatchesActive": true
+  },
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "productionDirectBusinessProviderValueMutationBypasses": "PRESENT — B23 legacy Client history mutation/projection authority",
+  "legacyIdentityProjectionFallbacks": "PRESENT — B23",
+  "wavesAccepted": "6/6",
+  "realProductionMutationsForFinalProof": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "acceptedPreExistingLocalTestDatabasesPreserved": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "audit": {
+      "ownedNodeProcesses": 0,
+      "ownedTestTempDirectories": 0,
+      "ownedPlaywrightChromeProcesses": 0,
+      "backgroundWatchersStarted": 0,
+      "postgresDatabasesCreatedByCycle": 0,
+      "databasesDeletedByCycle": 0
+    }
+  }
+}
