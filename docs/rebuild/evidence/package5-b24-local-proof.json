@@ -24,14 +24,16 @@
     "permanent provider result terminates exact episode only; repeated finalization safe",
     "inactive/missing endpoints do not deliver",
     "real canonical communication wiring dispatches verified Client push once; raw identity and non-actionable wanted slot do not send",
-    "concurrent canonical communication attempts produce one logical device outcome"
+    "concurrent canonical communication attempts produce one logical device outcome",
+    "empty intent-time device set remains empty on retry after later registration"
   ],
-  "total": 24,
+  "total": 25,
   "productionMutations": 0,
   "acceptedCheckpoint": "e068772c",
   "schemaDrift": "NONE",
   "cleanReplay": "PASS",
   "newModels": 1,
   "backfill": 0,
-  "targetedTests": "18 PASS"
+  "targetedTests": "20 PASS",
+  "historicalRetryBoundary": "new/tied channel bindings and later registered devices excluded"
 }

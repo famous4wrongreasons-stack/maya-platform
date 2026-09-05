@@ -27,6 +27,7 @@ type Input = {
   title: string;
   bodyText: string;
   expiresAt: Date;
+  issuedAt: Date;
 };
 
 /** Server-internal existing communication initiators only. No HTTP send route,
@@ -93,6 +94,13 @@ export class CommunicationWebPushService {
       take: 2,
     });
     if (links.length !== 1) return { status: 'NO_VERIFIED_CLIENT_RECIPIENT' };
+    // A later verified re-link never retargets a historical communication.
+    // Fail closed on timestamp ties as well; no inferred historical ownership.
+    if (
+      links[0].createdAt >= execution.createdAt ||
+      links[0].verifiedAt >= execution.createdAt
+    )
+      return { status: 'CLIENT_BINDING_POSTDATES_INTENT' };
     let expiresAt = execution.intentExpiresAt;
     if (!expiresAt) return { status: 'NO_CANONICAL_COMMUNICATION_EXPIRY' };
     if (input.messageType === 'wanted_slot_available') {
@@ -133,6 +141,7 @@ export class CommunicationWebPushService {
       title: String(input.title),
       bodyText: String(input.bodyText),
       expiresAt,
+      issuedAt: execution.createdAt,
     });
   }
 
@@ -160,7 +169,11 @@ export class CommunicationWebPushService {
       : null;
     const endpointIds = persisted
       ? (persisted.endpointIds as string[])
-      : await this.endpoints.eligibleIds(input.tenantId, input.clientId);
+      : await this.endpoints.eligibleIds(
+          input.tenantId,
+          input.clientId,
+          input.issuedAt,
+        );
     if (!endpointIds.length)
       return { status: 'NO_ELIGIBLE_ENDPOINT', actionExecutionId: null };
     const normalized = {

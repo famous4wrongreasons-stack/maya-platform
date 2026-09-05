@@ -505,6 +505,7 @@ async function deliveryProof() {
         )
       ).endpointId,
     );
+  await new Promise((resolve) => setTimeout(resolve, 5));
   const input = {
     tenantId: d.tenantId,
     clientId: d.client.id,
@@ -513,6 +514,7 @@ async function deliveryProof() {
     title: 'Synthetic reminder',
     bodyText: 'Synthetic canonical communication',
     expiresAt: new Date(Date.now() + 3600000),
+    issuedAt: new Date(),
   };
   const receipt = await scope(d.tenantId, () => delivery['deliver'](input));
   assert.equal(sends, 5);
@@ -746,6 +748,7 @@ async function deliveryProof() {
     tenantId: x.tenantId,
     clientId: x.client.id,
     sourceEventId: 'synthetic-concurrent-communication',
+    issuedAt: new Date(),
   };
   const beforeConcurrent = sends;
   await Promise.allSettled(
@@ -756,6 +759,37 @@ async function deliveryProof() {
   assert.equal(sends, beforeConcurrent + 1);
   cases.push(
     'concurrent canonical communication attempts produce one logical device outcome',
+  );
+  const empty = await fixture();
+  await db.customerProfile.create({
+    data: {
+      tenantId: empty.tenantId,
+      clientId: empty.client.id,
+      privacyConsentAt: new Date(),
+    },
+  });
+  const oldIntent = {
+    ...input,
+    tenantId: empty.tenantId,
+    clientId: empty.client.id,
+    sourceEventId: 'synthetic-empty-snapshot',
+    issuedAt: new Date(),
+  };
+  const beforeLateRegistration = sends;
+  assert.equal(
+    (await scope(empty.tenantId, () => delivery['deliver'](oldIntent))).status,
+    'NO_ELIGIBLE_ENDPOINT',
+  );
+  await scope(empty.tenantId, () =>
+    service.register(empty.proof, { subscription: subscription() }),
+  );
+  assert.equal(
+    (await scope(empty.tenantId, () => delivery['deliver'](oldIntent))).status,
+    'NO_ELIGIBLE_ENDPOINT',
+  );
+  assert.equal(sends, beforeLateRegistration);
+  cases.push(
+    'empty intent-time device set remains empty on retry after later registration',
   );
 }
 

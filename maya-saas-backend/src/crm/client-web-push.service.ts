@@ -196,13 +196,14 @@ export class ClientWebPushService {
   }
 
   /** Read-only delivery candidate snapshot. Only opaque episode IDs leave here. */
-  async eligibleIds(tenantId: string, clientId: string) {
+  async eligibleIds(tenantId: string, clientId: string, issuedAt: Date) {
     if (this.context.requireTenantId() !== tenantId)
       throw new ForbiddenException('Tenant mismatch');
     const rows = await this.prisma.clientWebPushEndpoint.findMany({
       where: {
         tenantId,
         clientId,
+        createdAt: { lt: issuedAt },
         endedAt: null,
         clientChannelLink: { revokedAt: null },
       },
