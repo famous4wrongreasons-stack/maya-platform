@@ -1,0 +1,295 @@
+{
+  "acceptedOwnerCheckpoint": "14738ce3",
+  "runtimeCommit": "3ea401a508045c96aedb94844c075c1ff8a21f2a",
+  "productionRelease": "/opt/maya-saas/releases/20260905-p5-b12-3ea401a5",
+  "b12ProductionRemediation": "PASS",
+  "b12ContractMapping": [
+    {
+      "path": "POST /api/client/book-with-loyalty",
+      "family": "P4-03 / A20-L",
+      "action": "redeem_legacy_loyalty",
+      "owner": "P403LegacyLoyaltyExecutableService",
+      "legacyOutcome": "fail closed; direct loyalty/provider/legacy booking value path removed",
+      "unknown": "not applicable to current local executor/provider projection disabled"
+    },
+    {
+      "path": "POST /api/cert/create",
+      "family": "P4-06",
+      "actions": [
+        "initiate_gift_certificate_purchase",
+        "activate_gift_certificate"
+      ],
+      "owner": "P406GiftCertificateExecutableService",
+      "legacyOutcome": "fail closed; direct certificate/YooKassa/payment-reference path removed",
+      "unknown": "preserved on canonical provider request/reconciliation"
+    },
+    {
+      "path": "POST /api/panel/redeem",
+      "family": "P4-06 + P4-03",
+      "actions": [
+        "redeem_gift_certificate",
+        "consume_loyalty_redemption_grant"
+      ],
+      "owners": [
+        "P406GiftCertificateExecutableService",
+        "P403LegacyLoyaltyExecutableService"
+      ],
+      "legacyOutcome": "lookup remains read-only; confirmation fails closed"
+    },
+    {
+      "path": "YClients record-delete",
+      "family": "P4-03 / A20-L",
+      "action": "refund_legacy_loyalty",
+      "owner": "P403LegacyLoyaltyExecutableService",
+      "legacyOutcome": "provider event is evidence only; direct refund removed"
+    }
+  ],
+  "b12RuntimeProtection": {
+    "activePwaIncludedInPackage4FinalProtection": true,
+    "package4GuardsApplyToLaterPackageChanges": true,
+    "syntheticDirectPwaLoyaltyBreaksGate": true,
+    "syntheticDirectPwaGiftCertificateBreaksGate": true,
+    "syntheticDirectPwaRefundBreaksGate": true,
+    "architecturalBypassProtectionWeakened": false
+  },
+  "productionStructuralReadOnlyVerification": {
+    "backendHealth": "PASS",
+    "backendReadiness": "PASS",
+    "activePwa": "PASS",
+    "activePwaRuntimeGuard": "PASS",
+    "legacyPostRoutesStructuralGet": "405/405/405",
+    "backendErrorPriorityLogs": 0,
+    "pwaErrorPriorityLogs": 0,
+    "candidatePort3199": "CLOSED"
+  },
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "proofs": {
+    "targetedP403P406": "PASS — 41 Jest suites / 275 tests",
+    "runtimeGuardRegression": "PASS — 5/5",
+    "mandatoryLint": "PASS",
+    "mandatoryTypecheck": "PASS",
+    "mandatoryScriptTypecheck": "PASS",
+    "mandatoryBuild": "PASS",
+    "deploymentRegression": "PASS — 337 suites / 2781 tests",
+    "finalPackage5AndP4Ratchets": "PASS — 14 suites / 96 tests",
+    "finalAggregateRegression": "NOT RUN — mandatory STOP at new production-reachable inventory blocker"
+  },
+  "freshFinalGateStartedFromScratch": true,
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "wavesAccepted": "6/6",
+  "familySetCoverage": "13/13",
+  "familyInventory": [
+    {
+      "family": "A15",
+      "canonicalFoundation": "Wave 3 AC2 staff-day executor",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A16",
+      "canonicalFoundation": "Wave 2 AC1 access commands and AC5 reducer",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A17",
+      "canonicalFoundation": "Wave 3 CRM connection/import and AC3/AC4/AC5 facts",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A18",
+      "canonicalFoundation": "Client-owned profile, consent, preferences, verified channel and B7-B10 foundations",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A22",
+      "canonicalFoundation": "Wave 1 settings/preferences",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A23",
+      "canonicalFoundation": "Wave 1 OperationalWorkItem and approved protocol state",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A25",
+      "canonicalFoundation": "Wave 2 security commands and AC3 auth protocol",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A26",
+      "canonicalFoundation": "Canonical TrialActivation and Wave 2 lifecycle commands",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "reduced A27",
+      "canonicalFoundation": "Wave 4 inventory and AC4 review ingestion",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A28",
+      "canonicalFoundation": "Wave 4 prospective calendar actions and immutable AI receipt children",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A29",
+      "canonicalFoundation": "Wave 5 recovery correction and immutable evidence",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A30",
+      "canonicalFoundation": "AC6 coordinator, MaintenanceRun/ItemClaim and Policy V1",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    },
+    {
+      "family": "A31",
+      "canonicalFoundation": "AC4/AC5 event, ingestion and reconciliation facts",
+      "result": "registered; aggregate certification stopped at B13 production bypass"
+    }
+  ],
+  "sourceInventory": {
+    "productionTypescriptFiles": 537,
+    "typescriptHttpRouteDecorators": 218,
+    "typescriptMutationLikeCalls": 500,
+    "activeRootPythonFiles": 86,
+    "activeProductionRootPythonFiles": 66,
+    "activePythonHttpRoutes": 99,
+    "publishedProxySha256": "df2749fb1f85e33787ac1d01b2f7542ae9d85a986dad80c21c552145386afed5",
+    "activeWebhookServerSha256": "8f84ca9f7bb68b2db1c176c55a19ae2c42f7308d4bf467508bde9a7780746452"
+  },
+  "newBlocker": {
+    "id": "B13-A16-A22-A26-LEGACY-CONTROL-PLANE-OWNERS",
+    "summary": "Published active PWA control-plane endpoints still mutate staff authority, business settings and legacy tenant/subscriber state directly in SQLite outside accepted Package 5 canonical owners.",
+    "publishedPaths": [
+      {
+        "family": "A16",
+        "endpoint": "POST /api/panel/team",
+        "proxyLines": [
+          1817,
+          1827
+        ],
+        "function": {
+          "line": 4462,
+          "end": 4540,
+          "sha256": "7e93fc4f16f8ef41e8754f9cfe1316244c3d29915c60fdc0a35ff72bf8533fa1",
+          "selectedCalls": [
+            {
+              "line": 4517,
+              "call": "database.reset_master_bind_code"
+            },
+            {
+              "line": 4519,
+              "call": "database.create_master_with_bind_code"
+            },
+            {
+              "line": 4535,
+              "call": "database.set_cashier_role"
+            }
+          ]
+        },
+        "effects": [
+          "direct staff identity/binding creation or reset",
+          "direct cashier role mutation"
+        ]
+      },
+      {
+        "family": "A16",
+        "endpoint": "POST /api/panel/managers",
+        "proxyLines": [
+          1881,
+          1888
+        ],
+        "function": {
+          "line": 4543,
+          "end": 4614,
+          "sha256": "78691b46e718c7df4cbd4a29695578ca4f1cb5612bb70873328e1d4a3bd18f9c",
+          "selectedCalls": [
+            {
+              "line": 4582,
+              "call": "_panel_set_manager_ids"
+            },
+            {
+              "line": 4590,
+              "call": "_panel_set_manager_ids"
+            }
+          ]
+        },
+        "effects": [
+          "direct manager authority list mutation through tenant-unqualified legacy setting"
+        ]
+      },
+      {
+        "family": "A22",
+        "endpoint": "POST /api/panel/plan_target",
+        "proxyLines": [
+          1403,
+          1410
+        ],
+        "function": {
+          "line": 2831,
+          "end": 2888,
+          "sha256": "c6ae911b5da861b430b59a72ff9e6e7cbceaf93597768db808ef5adcf29953e7",
+          "selectedCalls": [
+            {
+              "line": 2883,
+              "call": "database.set_setting"
+            }
+          ]
+        },
+        "effects": [
+          "direct owner business target setting upsert"
+        ]
+      },
+      {
+        "family": "A26",
+        "endpoint": "POST /api/god/subscribers",
+        "proxyLines": [
+          1328,
+          1337
+        ],
+        "function": {
+          "line": 5615,
+          "end": 5665,
+          "sha256": "8f6fd9f4902a673b7ce22f6cfb1692bbae7db419a8edb5a93ef7fbd7407e8005",
+          "selectedCalls": [
+            {
+              "line": 5636,
+              "call": "database.add_maya_tenant"
+            },
+            {
+              "line": 5650,
+              "call": "database.set_maya_tenant_status"
+            }
+          ]
+        },
+        "effects": [
+          "direct legacy tenant/subscriber fact creation",
+          "direct active/suspended/pending lifecycle mutation"
+        ]
+      }
+    ],
+    "canonicalBoundariesBypassed": [
+      "A16 explicit access/role commands via Action Engine",
+      "A22 governed setting command via Action Engine",
+      "A26 TrialActivation/canonical tenant lifecycle authority"
+    ]
+  },
+  "b12ProductionDirectValueBypasses": 0,
+  "productionDirectBusinessMutationBypasses": "PRESENT — B13",
+  "legacyMutatingOwnersActive": "PRESENT — B13",
+  "realProductionMutationsForProof": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}
