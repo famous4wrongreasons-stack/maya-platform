@@ -11,6 +11,7 @@ import type { ClientChannelAuthenticatorService } from '../src/crm/client-channe
 import { ClientChannelRuntimeService } from '../src/crm/client-channel-runtime.service';
 import { clientChannelSubjectHash } from '../src/crm/client-channel-subject';
 import { ClientWantedSlotService } from '../src/crm/client-wanted-slot.service';
+import type { CrmService } from '../src/crm/crm.service';
 import type { CurrentClientChannel } from '../src/crm/client-channel-authenticator.service';
 import { EncryptionService } from '../src/encryption/encryption.service';
 import { FEATURE_REQUIREMENT_DECISION_CONTRACT } from '../src/entitlements/entitlements.service';
@@ -89,6 +90,7 @@ const channelRuntime = new ClientChannelRuntimeService(
   authenticator,
   encryption,
   {} as Package5Wave3CanonicalCutoverService,
+  {} as CrmService,
 );
 const communication = new CommunicationDeliveryService(
   db as unknown as PrismaService,

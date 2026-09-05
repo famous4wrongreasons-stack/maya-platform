@@ -19,6 +19,7 @@ import {
 import { EncryptionService } from '../encryption/encryption.service';
 import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { clientChannelSubjectHash } from './client-channel-subject';
+import { CrmService } from './crm.service';
 
 /** Only already verified provenance can issue another channel's challenge.
  * A cold-start Client with no trusted resolution fails closed; no heuristic enrollment.
@@ -34,6 +35,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     private readonly channels: ClientChannelAuthenticatorService,
     private readonly encryption: EncryptionService,
     private readonly consent: Package5Wave3CanonicalCutoverService,
+    private readonly crm: CrmService,
   ) {
     const closedVerifier = {
       verifyLink: () =>
@@ -305,6 +307,142 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         client_link_required: false,
       };
     });
+  }
+
+  /**
+   * B16 read-only booking projection. Channel authentication and the exact
+   * active ClientChannelLink select the Client before any PII is read. The
+   * legacy channel id, phone and caller payload never participate in identity
+   * resolution, and this reader creates no Client, link or consent fact.
+   */
+  async bookingPrefill(channelProof: string) {
+    const identity = await this.prisma.$transaction(async (tx) => {
+      const channel = await this.channels.authenticate(channelProof, tx);
+      const links = await tx.clientChannelLink.findMany({
+        where: {
+          tenantId: channel.tenantId,
+          provider: channel.provider,
+          providerSubjectHash: channel.providerSubjectHash,
+          revokedAt: null,
+          verificationVersion: 1,
+          subjectHashVersion: 1,
+        },
+        take: 2,
+      });
+      if (links.length !== 1) return null;
+
+      const client = await tx.client.findUnique({
+        where: {
+          id_tenantId: {
+            id: links[0].clientId,
+            tenantId: channel.tenantId,
+          },
+        },
+        select: {
+          id: true,
+          tenantId: true,
+          mergedIntoClientId: true,
+          user: {
+            select: {
+              tenantId: true,
+              status: true,
+              phone: true,
+              encryptedName: true,
+            },
+          },
+          crmLinks: {
+            where: { unlinkedAt: null },
+            select: { provider: true, externalId: true },
+          },
+        },
+      });
+      if (!client || client.mergedIntoClientId) return null;
+
+      const profile = await tx.customerProfile.findUnique({
+        where: {
+          tenantId_clientId: {
+            tenantId: channel.tenantId,
+            clientId: client.id,
+          },
+        },
+        select: { privacyConsentAt: true },
+      });
+      return {
+        tenantId: channel.tenantId,
+        clientId: client.id,
+        privacy: Boolean(profile?.privacyConsentAt),
+        user: client.user,
+        crmLinks: client.crmLinks,
+      };
+    });
+
+    if (!identity)
+      return {
+        linked: false,
+        known: false,
+        has_phone: false,
+        name: '',
+        phone: '',
+        client_link_required: true,
+      };
+    if (!identity.privacy)
+      return {
+        linked: true,
+        known: true,
+        needs_consent: true,
+        has_phone: false,
+        name: '',
+        phone: '',
+        client_link_required: false,
+      };
+
+    let name = '';
+    let phone = '';
+    if (
+      identity.user?.tenantId === identity.tenantId &&
+      identity.user.status === 'active'
+    ) {
+      phone = identity.user.phone?.trim() ?? '';
+      if (identity.user.encryptedName) {
+        try {
+          name = this.encryption.decrypt(identity.user.encryptedName).trim();
+        } catch {
+          name = '';
+        }
+      }
+    }
+
+    if (!name || !phone) {
+      try {
+        const registry = await this.crm.getClientRegistry(identity.tenantId);
+        const exactLinks = identity.crmLinks.filter(
+          (link) => link.provider === registry.provider,
+        );
+        if (exactLinks.length === 1) {
+          const matches = registry.clients.filter(
+            (candidate) => candidate.external_id === exactLinks[0].externalId,
+          );
+          if (matches.length === 1) {
+            name ||= matches[0].name?.trim() ?? '';
+            phone ||= matches[0].phone?.trim() ?? '';
+          }
+        }
+      } catch {
+        // A provider read failure is an unavailable prefill, never a fallback
+        // to a legacy channel/phone identity or a reason to expose other PII.
+      }
+    }
+
+    const phoneDigits = phone.replace(/\D/g, '');
+    const hasPhone = phoneDigits.length >= 10;
+    return {
+      linked: true,
+      known: true,
+      has_phone: hasPhone,
+      name,
+      phone: hasPhone ? phone : '',
+      client_link_required: false,
+    };
   }
 
   /** AC4 delivery reader. Caller must be the configured internal transport;

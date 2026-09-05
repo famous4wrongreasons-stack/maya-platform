@@ -176,6 +176,10 @@ export class LegacyClientChannelController {
         empty(input.payload);
         return this.runtime.status(input.channelProof);
       }
+      if (operation === 'booking-prefill') {
+        empty(input.payload);
+        return this.runtime.bookingPrefill(input.channelProof);
+      }
       throw new BadRequestException('Unsupported client command');
     });
   }

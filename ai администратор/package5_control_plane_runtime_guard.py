@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed when the active PWA restores B13-B15 legacy owners."""
+"""Fail closed when the active PWA restores B13-B16 legacy owners."""
 
 from __future__ import annotations
 
@@ -175,9 +175,36 @@ WEB_FUNCTIONS = {
             "memory.save_conversations",
         ),
     },
+    "booking_prefill_handler": {
+        "markers": (
+            "p5_b16_booking_prefill_read_only",
+            "client_commands.channel_proof",
+            'client_commands.command, "booking-prefill"',
+            'result.get("linked")',
+            'result.get("client_link_required")',
+        ),
+        "forbidden": (
+            "_authed_chat_id",
+            "database.get_client",
+            "database.get_or_create_client",
+            "database.has_valid_consent_by_chat_id",
+            'body.get("chat_id")',
+            "int(chat_id)",
+            'body.get("phone")',
+            'body.get("clientId")',
+            "database.create_",
+            "database.add_",
+            "database.update_",
+            "database.set_",
+            "database.delete_",
+        ),
+    },
 }
 
-READ_ONLY_MARKER = "p5_b15_chat_history_read_only"
+READ_ONLY_MARKERS = (
+    "p5_b15_chat_history_read_only",
+    "p5_b16_booking_prefill_read_only",
+)
 READ_ONLY_BUSINESS_WRITERS = (
     "get_or_create_client",
     "save_conversations",
@@ -257,7 +284,7 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
             if forbidden in body:
                 findings.append(Finding("control_plane_boundary", f"{name} references {forbidden}"))
     for name, body in web_functions.items():
-        if READ_ONLY_MARKER not in body:
+        if not any(marker in body for marker in READ_ONLY_MARKERS):
             continue
         for writer in READ_ONLY_BUSINESS_WRITERS:
             if writer in body:
@@ -331,6 +358,7 @@ def main() -> int:
         "b13LegacyControlPlaneOwners": 0 if not findings else None,
         "b14LegacyGodOwners": 0 if not findings else None,
         "b15ChatHistoryReadOwners": 0 if not findings else None,
+        "b16BookingPrefillLegacyIdentityOwners": 0 if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }
@@ -340,7 +368,7 @@ def main() -> int:
         for finding in findings:
             print(f"FAIL {finding.check}: {finding.detail}")
     else:
-        print("Package 5 B13/B14/B15 active PWA control-plane guard: PASS")
+        print("Package 5 B13/B14/B15/B16 active PWA control-plane guard: PASS")
     return 0 if not findings else 1
 
 

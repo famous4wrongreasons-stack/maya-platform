@@ -25,7 +25,7 @@ def channel_proof(headers, body: dict) -> str:
 
 
 def command(operation: str, proof: str, payload: dict) -> dict:
-    if operation not in {"consent", "status", "issue", "consume", "delivery-consent"}:
+    if operation not in {"consent", "status", "issue", "consume", "delivery-consent", "booking-prefill"}:
         raise ValueError("unsupported_client_command")
     from config import YCLIENTS_COMPANY_ID
     token = os.getenv("MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN", "").strip()

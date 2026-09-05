@@ -102,7 +102,14 @@ const facade = new Package5Wave3CanonicalCutoverService(
   provider as Package5Wave3ProductionGatewayService,
 );
 const runtime = () =>
-  new ClientChannelRuntimeService(prisma, context, auth, encryption, facade);
+  new ClientChannelRuntimeService(
+    prisma,
+    context,
+    auth,
+    encryption,
+    facade,
+    {} as CrmService,
+  );
 const hash = (value: string) =>
   createHash('sha256').update(value).digest('hex');
 const results: string[] = [];

@@ -6519,10 +6519,8 @@ async def client_book_with_loyalty_handler(request: web.Request) -> web.Response
 
 
 async def booking_prefill_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/booking/prefill — имя и телефон для финального шага онлайн-записи.
-    Отдаём полный телефон только авторизованному клиенту с действующим согласием.
-    """
+    """B16 read-only PII projection through a verified ClientChannelLink."""
+    import legacy_client_command_bridge as client_commands
     try:
         body = await request.json()
     except Exception:
@@ -6535,44 +6533,58 @@ async def booking_prefill_handler(request: web.Request) -> web.Response:
         resp.headers["Cache-Control"] = "no-store"
         return resp
 
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _booking_response({"success": False, "error": "unauthorized"}, status=401)
-
     try:
-        client = database.get_client(int(chat_id))
-    except Exception as e:
-        logger.error(f"booking_prefill: get_client {chat_id}: {e}")
-        return _booking_response({"success": False, "error": "internal"}, status=500)
-
-    if not client:
+        # p5_b16_booking_prefill_read_only: the original authenticated channel
+        # is authoritative; body chat_id, phone and clientId are never read.
+        if set(body) - {"auth_data", "session_token"}:
+            raise ValueError("invalid_booking_prefill_request")
+        proof = client_commands.channel_proof(request.headers, body)
+        result = await asyncio.to_thread(
+            client_commands.command, "booking-prefill", proof, {}
+        )
+    except ValueError:
         return _booking_response({
             "success": True,
             "known": False,
             "has_phone": False,
             "name": "",
             "phone": "",
+            "client_link_required": True,
         })
+    except Exception:
+        logger.error("canonical booking prefill unavailable")
+        return _booking_response({
+            "success": False, "error": "booking_prefill_unavailable"
+        }, status=503)
 
-    if not database.has_valid_consent_by_chat_id(int(chat_id)):
+    if not result.get("linked") or result.get("client_link_required"):
+        return _booking_response({
+            "success": True,
+            "known": False,
+            "has_phone": False,
+            "name": "",
+            "phone": "",
+            "client_link_required": True,
+        })
+    if result.get("needs_consent"):
         return _booking_response({
             "success": True,
             "known": True,
             "needs_consent": True,
             "has_phone": False,
-            "name": client.get("name") or "",
+            "name": "",
             "phone": "",
+            "client_link_required": False,
         })
-
-    phone = (client.get("phone") or "").strip()
-    phone_digits = "".join(ch for ch in phone if ch.isdigit())
-    has_phone = len(phone_digits) >= 10
+    phone = result.get("phone") if isinstance(result.get("phone"), str) else ""
+    name = result.get("name") if isinstance(result.get("name"), str) else ""
     return _booking_response({
         "success": True,
         "known": True,
-        "has_phone": has_phone,
-        "name": client.get("name") or "",
-        "phone": phone if has_phone else "",
+        "has_phone": bool(result.get("has_phone")) and bool(phone),
+        "name": name,
+        "phone": phone if result.get("has_phone") else "",
+        "client_link_required": False,
     })
 
 

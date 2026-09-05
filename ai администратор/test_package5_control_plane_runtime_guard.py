@@ -66,6 +66,18 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
             '_store_assistant_message_in_chat(1, "offer")',
         )
 
+    def test_booking_prefill_raw_chat_id_resolution_fails(self):
+        self._web_bypass("booking_prefill_handler", "database.get_client(chat_id)")
+
+    def test_booking_prefill_legacy_session_authority_fails(self):
+        self._web_bypass("booking_prefill_handler", "_authed_chat_id(request, body)")
+
+    def test_booking_prefill_hidden_client_creation_fails(self):
+        self._web_bypass("booking_prefill_handler", "database.get_or_create_client(1)")
+
+    def test_booking_prefill_phone_only_projection_fails(self):
+        self._web_bypass("booking_prefill_handler", 'database.get_client(body.get("phone"))')
+
     def test_marked_future_read_surface_writer_fails(self):
         source = (ROOT / "webhook_server.py").read_text(encoding="utf-8")
         injected = source + (
