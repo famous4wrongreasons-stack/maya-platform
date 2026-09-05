@@ -1,0 +1,42 @@
+{
+  "reproduced": true,
+  "execution": "real compiled reminder and inbox services; mocked DB reads and final Communication Delivery boundary",
+  "cases": [
+    {
+      "matchingAccounts": 1,
+      "phoneMatches": true,
+      "canonicalClientOrLinkRecordsInFixture": 0,
+      "privateReminderCommandsAtCanonicalDeliveryBoundary": 1,
+      "clientLinkConsentPreferenceReads": 0,
+      "privateAppointmentProjectionPresent": true,
+      "secondTickAddsNoCallsWithExistingSourceFact": true,
+      "realDatabaseWrites": 0,
+      "realProviderCalls": 0
+    },
+    {
+      "matchingAccounts": 2,
+      "phoneMatches": true,
+      "canonicalClientOrLinkRecordsInFixture": 0,
+      "privateReminderCommandsAtCanonicalDeliveryBoundary": 2,
+      "clientLinkConsentPreferenceReads": 0,
+      "privateAppointmentProjectionPresent": true,
+      "secondTickAddsNoCallsWithExistingSourceFact": true,
+      "realDatabaseWrites": 0,
+      "realProviderCalls": 0
+    },
+    {
+      "matchingAccounts": 1,
+      "phoneMatches": false,
+      "canonicalClientOrLinkRecordsInFixture": 0,
+      "privateReminderCommandsAtCanonicalDeliveryBoundary": 0,
+      "clientLinkConsentPreferenceReads": 0,
+      "privateAppointmentProjectionPresent": false,
+      "secondTickAddsNoCallsWithExistingSourceFact": true,
+      "realDatabaseWrites": 0,
+      "realProviderCalls": 0
+    }
+  ],
+  "bareUnauthenticatedRequestTested": false,
+  "productionDataAccessed": false,
+  "realProductionMutations": 0
+}
