@@ -167,7 +167,11 @@ run "set -e
   # 🔴 Строгий preflight СРАЗУ после миграции и ДО переключения симлинка:
   # частично применённая или незавершённая миграция обязана остановить выкат
   # здесь, а не проявиться в рантайме у салона.
-  node dist/scripts/release-preflight.js" \
+  node dist/scripts/release-preflight.js
+  # B24: migration-history agreement is not a structural schema comparison.
+  # Stop before runtime activation if the applied database differs from this release.
+  node node_modules/prisma/build/index.js migrate diff \\
+    --from-config-datasource --to-schema prisma/schema.prisma --exit-code" \
   || fail "миграция или строгая проверка после неё"
 
 step "8/10 клиент базы под свежую схему"
