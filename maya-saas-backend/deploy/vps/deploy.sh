@@ -144,7 +144,7 @@ run "set -e
   test -f /home/botadmin/barbershop-bot/package5_control_plane_runtime_guard.py
   python3 /home/botadmin/barbershop-bot/package5_control_plane_runtime_guard.py \
     --root /home/botadmin/barbershop-bot" \
-  || fail "активный PWA восстановил legacy Package 5 B13 control-plane owner"
+  || fail "активный PWA восстановил legacy Package 5 B13/B14 control-plane owner"
 
 run "set -e
   cd '$REL'

@@ -5120,28 +5120,10 @@ def _god_gate(request: web.Request, body: dict):
     return int(tg_id), None
 
 
-def _god_get_renewals() -> list:
-    raw = database.get_setting("god_renewals")
-    if raw:
-        try:
-            data = _json.loads(raw)
-            if isinstance(data, list):
-                return data
-        except Exception:
-            pass
-    return [dict(r) for r in getattr(config, "GOD_DEFAULT_RENEWALS", [])]
 
 
-def _god_set_renewals(items: list):
-    database.set_setting("god_renewals", _json.dumps(items, ensure_ascii=False))
 
 
-def _god_ai_budget_usd() -> float:
-    raw = database.get_setting("god_ai_budget_usd")
-    try:
-        return float(raw) if raw else float(getattr(config, "GOD_AI_BUDGET_USD", 50.0))
-    except Exception:
-        return 50.0
 
 
 def _god_ai_spent_usd(days: int = 30) -> float:
@@ -5152,26 +5134,9 @@ def _god_ai_spent_usd(days: int = 30) -> float:
 
 
 def _god_renewals_view() -> list:
-    """Оплаты к продлению с обратным отсчётом и статусом (overdue/soon/ok/unset)."""
-    warn = int(getattr(config, "GOD_RENEWAL_WARN_DAYS", 7))
-    today = date.today()
-    out = []
-    for r in _god_get_renewals():
-        due = str(r.get("due_date") or "").strip()
-        days_left, status = None, "unset"
-        if due:
-            try:
-                d = date.fromisoformat(due[:10])
-                days_left = (d - today).days
-                status = "overdue" if days_left < 0 else ("soon" if days_left <= warn else "ok")
-            except Exception:
-                status = "unset"  # кривая дата — честно показываем «не задана», не маскируем под ok
-        out.append({"key": r.get("key"), "label": r.get("label"),
-                    "amount": int(r.get("amount") or 0), "due_date": due,
-                    "days_left": days_left, "status": status})
-    out.sort(key=lambda x: (x["days_left"] is None,
-                            x["days_left"] if x["days_left"] is not None else 99999))
-    return out
+    """B14 tombstone: legacy renewal settings are not current authority."""
+    # p5_b14_legacy_renewal_tracker_retired
+    return []
 
 
 def _god_health_checks() -> dict:
@@ -5211,12 +5176,10 @@ def _god_health_checks() -> dict:
     else:
         add("ai_keys", "Ключи ИИ (OpenAI/fal)", "ok", "Все ключи на месте")
 
-    # 3) База данных пишется
+    # 3) Read-only database availability. A health read must not create facts.
     try:
-        database.set_setting("god_probe_ts", date.today().isoformat())
-        rb = database.get_setting("god_probe_ts")
-        add("db", "База данных", "ok" if rb else "fail",
-            "Запись и чтение успешны" if rb else "Чтение вернуло пусто")
+        database.get_setting("last_daily_report_at")
+        add("db", "База данных", "ok", "Чтение доступно")
     except Exception as e:
         add("db", "База данных", "fail", str(e)[:90])
 
@@ -5244,31 +5207,17 @@ def _god_health_checks() -> dict:
     except Exception:
         add("daily_report", "Дневной отчёт владельцу", "warn", "Нет данных")
 
-    # 6) Бюджет ИИ за месяц
+    # 6) Measured AI usage is a read-only projection, not a mutable budget.
     try:
         spent = _god_ai_spent_usd(30)
-        budget = _god_ai_budget_usd()
-        st = "ok" if spent <= budget else "warn"
-        add("ai_budget", "Бюджет ИИ (месяц)", st, "$%.2f из $%.0f" % (spent, budget))
+        add("ai_usage", "Расход ИИ (30 дней)", "ok", "$%.2f" % spent)
     except Exception:
-        add("ai_budget", "Бюджет ИИ (месяц)", "ok", "")
+        add("ai_usage", "Расход ИИ (30 дней)", "warn", "Данные недоступны")
 
-    # 7) Предстоящие оплаты
+    # 7) Dual-role audit is diagnostic only; repair belongs to an explicit job.
     try:
-        soon = [r for r in _god_renewals_view() if r["status"] in ("soon", "overdue")]
-        if soon:
-            n = soon[0]
-            add("renewals", "Предстоящие оплаты", "warn",
-                n["label"] + ": " + ("просрочено" if n["status"] == "overdue"
-                                      else "через %s дн." % n["days_left"]))
-        else:
-            add("renewals", "Предстоящие оплаты", "ok", "В ближайшее время нет")
-    except Exception:
-        add("renewals", "Предстоящие оплаты", "ok", "")
-
-    # 8) Dual-role аккаунты (мастер + клиент): контекст не должен теряться.
-    try:
-        audit = memory.audit_dual_role_client_context(yc=_yc, repair=True, limit=20)
+        # p5_b14_god_health_read_only
+        audit = memory.audit_dual_role_client_context(yc=_yc, repair=False, limit=20)
         issues = audit.get("issues") or []
         repaired = audit.get("repaired") or []
         dual_role = int(audit.get("dual_role") or 0)
@@ -5298,7 +5247,7 @@ def _god_health_checks() -> dict:
     except Exception as e:
         add("dual_role", "Dual-role аккаунты", "warn", str(e)[:90])
 
-    # 9) Ролевая матрица: founder=owner, прочие админы=manager, мастера не теряются.
+    # 8) Ролевая матрица: founder=owner, прочие админы=manager, мастера не теряются.
     try:
         role_issues = []
         admin_ids = [int(x) for x in (database.list_admins() or [])]
@@ -5347,8 +5296,7 @@ def _god_health_checks() -> dict:
 
 
 async def god_overview_handler(request: web.Request) -> web.Response:
-    """POST /api/god/overview — витрина основателя: пульс салона + расход ИИ +
-    сводка здоровья + ближайшая оплата + кол-во подписчиков."""
+    """Read-only founder projection without legacy subscriber authority."""
     try:
         body = await request.json()
     except Exception:
@@ -5375,12 +5323,15 @@ async def god_overview_handler(request: web.Request) -> web.Response:
     except Exception:
         cost = {}
     health = await asyncio.to_thread(_god_health_checks)
-    renewals = _god_renewals_view()
-    nearest = next((r for r in renewals if r["days_left"] is not None), None)
-    try:
-        subs = database.list_maya_tenants()
-    except Exception:
-        subs = []
+    # p5_b14_god_overview_canonical_projection_only
+    subscribers = {
+        "total": None,
+        "active": None,
+        "pending": None,
+        "status": "unavailable",
+        "projection": "canonical_admin_tenants",
+        "read_only": True,
+    }
     return _cabinet_response({
         "period_label": pp["label"],
         "salon": {
@@ -5391,10 +5342,9 @@ async def god_overview_handler(request: web.Request) -> web.Response:
         "ai_cost": {"ai_rub": cost.get("ai_rub"), "ai_usd": cost.get("ai_usd"),
                     "servers_rub": cost.get("servers_rub"), "total_rub": cost.get("total_rub")},
         "health": health["summary"],
-        "nearest_renewal": nearest,
-        "subscribers": {"total": len(subs),
-                        "active": sum(1 for s in subs if s.get("status") == "active"),
-                        "pending": sum(1 for s in subs if s.get("status") == "pending")},
+        "nearest_renewal": None,
+        "subscribers": subscribers,
+        "business_mutations": 0,
     })
 
 
@@ -5412,8 +5362,7 @@ async def god_health_handler(request: web.Request) -> web.Response:
 
 
 async def god_billing_handler(request: web.Request) -> web.Response:
-    """POST /api/god/billing — расходы ИИ+серверы, оплаты к продлению, бюджет ИИ.
-    action: view (по умолч.) | set_renewal {key,label,due_date,amount} | set_budget {usd}."""
+    """Read-only measured cost projection; legacy billing controls are retired."""
     try:
         body = await request.json()
     except Exception:
@@ -5422,35 +5371,15 @@ async def god_billing_handler(request: web.Request) -> web.Response:
     if err:
         return err
     action = str(body.get("action") or "view")
-    if action == "set_renewal":
-        key = str(body.get("key") or "").strip()
-        if not key:
-            return _cabinet_response({"error": "bad_request"}, status=400)
-        items = _god_get_renewals()
-        found = False
-        for it in items:
-            if it.get("key") == key:
-                if "due_date" in body:
-                    it["due_date"] = str(body.get("due_date") or "")[:10]
-                if "amount" in body:
-                    try:
-                        it["amount"] = int(body.get("amount") or 0)
-                    except Exception:
-                        pass
-                if body.get("label"):
-                    it["label"] = str(body.get("label"))[:60]
-                found = True
-                break
-        if not found:
-            items.append({"key": key, "label": str(body.get("label") or key)[:60],
-                          "amount": int(body.get("amount") or 0),
-                          "due_date": str(body.get("due_date") or "")[:10]})
-        _god_set_renewals(items)
-    elif action == "set_budget":
-        try:
-            database.set_setting("god_ai_budget_usd", str(float(body.get("usd") or 0)))
-        except Exception:
-            return _cabinet_response({"error": "bad_request"}, status=400)
+    if action != "view":
+        # p5_b14_legacy_god_billing_mutations_retired
+        return _cabinet_response({
+            "ok": False,
+            "error": "god_billing_controls_retired",
+            "retired_controls": ["legacy_renewal_tracker", "editable_ai_budget"],
+            "measured_cost_projection": "read_only",
+            "business_mutations": 0,
+        }, status=410)
     cost = {}
     try:
         cost = ai_billing.build_cost_data(30) or {}
@@ -5462,9 +5391,14 @@ async def god_billing_handler(request: web.Request) -> web.Response:
         "servers": {"servers_rub": cost.get("servers_rub"),
                     "breakdown": cost.get("servers_breakdown", {})},
         "total_rub": cost.get("total_rub"),
-        "renewals": _god_renewals_view(),
-        "ai_budget_usd": _god_ai_budget_usd(),
+        "renewals": [],
+        "renewal_tracker_status": "retired",
+        "ai_budget_usd": None,
+        "ai_budget_status": "retired",
         "ai_spent_usd": _god_ai_spent_usd(30),
+        "read_only": True,
+        "business_mutations": 0,
+        "historical_legacy_settings_authoritative": False,
     })
 
 

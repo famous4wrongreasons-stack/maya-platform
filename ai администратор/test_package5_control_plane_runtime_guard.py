@@ -41,6 +41,18 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
     def test_god_tenant_writer_fails(self):
         self._web_bypass("god_subscribers_handler", 'database.add_maya_tenant("x", plan="pro", mrr=1)')
 
+    def test_god_billing_settings_writer_fails(self):
+        self._web_bypass("god_billing_handler", 'database.set_setting("god_ai_budget_usd", "1")')
+
+    def test_god_overview_legacy_projection_fails(self):
+        self._web_bypass("god_overview_handler", "database.list_maya_tenants()")
+
+    def test_god_health_write_probe_fails(self):
+        self._web_bypass("_god_health_checks", 'database.set_setting("god_probe_ts", "today")')
+
+    def test_retired_renewal_reader_fails(self):
+        self._web_bypass("_god_renewals_view", 'database.get_setting("god_renewals")')
+
     def test_later_pwa_control_plane_writer_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
             temp_root = Path(tmp)
@@ -53,6 +65,22 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
             }
             findings = guard.scan_runtime(temp_root, overrides)
         self.assertTrue(any(item.check == "later_pwa_module" for item in findings), findings)
+
+    def test_later_pwa_god_settings_and_projection_bypasses_fail(self):
+        for bypass in (
+            'database.set_setting("god_renewals", "[]")',
+            'database.set_setting("god_ai_budget_usd", "10")',
+            'database.list_maya_tenants()',
+        ):
+            with tempfile.TemporaryDirectory() as tmp:
+                temp_root = Path(tmp)
+                (temp_root / "later_route.py").write_text(bypass + "\n", encoding="utf-8")
+                overrides = {
+                    name: (ROOT / name).read_text(encoding="utf-8")
+                    for name in ("webhook_server.py", "database.py", "growth_planner.py")
+                }
+                findings = guard.scan_runtime(temp_root, overrides)
+            self.assertTrue(any(item.check == "later_pwa_module" for item in findings), findings)
 
     def test_bind_cli_cannot_restore_create_reset_or_delete(self):
         source = (ROOT / "generate_bind_codes.py").read_text(encoding="utf-8")

@@ -27031,7 +27031,7 @@ function AGodMode(props) {
   });
   var PX = 'https://malesthetic.pro/app/api-proxy.php';
   // В центре управления оставлены только деньги платформы: расходы на ИИ и на
-  // серверы, оплаты к продлению и бюджет ИИ. Остальные вкладки (обзор
+  // серверы. Legacy renewals и изменяемый AI budget выведены из эксплуатации. Остальные вкладки (обзор
   // платформы, здоровье системы, список бизнесов) убраны — их рендеры ниже
   // сохранены, но из интерфейса не вызываются.
   var TABS = [{ k: 'money', label: 'Расходы' }];
@@ -28556,7 +28556,7 @@ function AGodMode(props) {
 
   function renderOverview() {
     if (!ov) return loadingMsg();
-    var s = ov.salon || {}, ai = ov.ai_cost || {}, h = ov.health || {}, nr = ov.nearest_renewal, sub = ov.subscribers || {};
+    var s = ov.salon || {}, ai = ov.ai_cost || {}, h = ov.health || {}, sub = ov.subscribers || {};
     var acq = s.acquisition || {}, bk = s.bookings || {};
     var trT = tr && tr.totals ? tr.totals : null;
     var trPick = function (o, keys) { for (var i = 0; i < keys.length; i++) if (o && o[keys[i]] != null) return o[keys[i]]; return null; };
@@ -28574,8 +28574,7 @@ function AGodMode(props) {
           ' · активных ' + (trPick(trT, ['active_trials', 'active']) != null ? trPick(trT, ['active_trials', 'active']) : '—') +
           ' · оплатили ' + (trPick(trT, ['paid_conversions', 'paid']) != null ? trPick(trT, ['paid_conversions', 'paid']) : '—')))) : null,
       Card(e('div', { style: { display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }, onClick: function () { setTab('health'); } }, e('div', { style: { flex: 1 } }, eyebrow('Здоровье системы'), e('div', { style: { fontFamily: BODY, fontSize: 13, color: t.ink } }, (h.ok || 0) + ' ок · ' + (h.warn || 0) + ' внимание · ' + (h.fail || 0) + ' проблем')), e('div', { style: { width: 12, height: 12, borderRadius: 999, background: h.fail ? sCol('fail') : (h.warn ? sCol('warn') : sCol('ok')) } }))),
-      nr ? Card(e('div', null, eyebrow('Ближайшая оплата'), e('div', { style: { fontFamily: BODY, fontSize: 13, color: t.ink } }, nr.label), e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: (nr.days_left != null && nr.days_left <= 7) ? sCol('soon') : t.faint, marginTop: 3 } }, nr.days_left == null ? 'дата не задана — задайте в «Деньги»' : (nr.days_left < 0 ? 'просрочено на ' + (-nr.days_left) + ' дн.' : 'через ' + nr.days_left + ' дн.') + (nr.amount ? ' · ' + money(nr.amount) : '')))) : null,
-      Card(e('div', { style: { display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }, onClick: function () { setTab('subs'); } }, e('div', { style: { flex: 1 } }, eyebrow('Подписчики MAYA'), e('div', { style: { fontFamily: BODY, fontSize: 13, color: t.ink } }, (sub.total || 0) + ' бизнесов · ' + (sub.active || 0) + ' активных')), e('div', { style: { fontFamily: DISPLAY, fontSize: 18, color: t.faint } }, '›'))),
+      Card(e('div', { style: { display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }, onClick: function () { setTab('subs'); } }, e('div', { style: { flex: 1 } }, eyebrow('Подписчики MAYA'), e('div', { style: { fontFamily: BODY, fontSize: 13, color: t.ink } }, sub.status === 'unavailable' || sub.total == null ? 'Canonical данные временно недоступны' : String(sub.total) + ' бизнесов · ' + String(sub.active || 0) + ' активных')), e('div', { style: { fontFamily: DISPLAY, fontSize: 18, color: t.faint } }, '›'))),
       e('div', { style: { display: 'flex', gap: 8, marginTop: 4 } }, e('div', { style: { flex: 1 } }, btn(busy ? 'Проверяю…' : 'Проверить систему', function () { setTab('health'); loadHealth(); }, { primary: true, busy: busy })), e('div', { style: { flex: 1 } }, btn('Обновить', function () { loadOverview(); }, {}))));
   }
 
@@ -28590,28 +28589,20 @@ function AGodMode(props) {
       }));
   }
 
-  function editRenewal(r) {
-    setModal({ title: 'Оплата · ' + r.label, fields: [{ key: 'due_date', label: 'Дата оплаты (ГГГГ-ММ-ДД, пусто = убрать)', value: r.due_date || '' }, { key: 'amount', label: 'Сумма, ₽', value: String(r.amount || 0) }], submit: function (v) { setBusy(true); gfetch('god_billing', { action: 'set_renewal', key: r.key, label: r.label, due_date: (v.due_date || '').trim(), amount: parseInt(v.amount, 10) || 0 }).then(function (j) { setBusy(false); if (j && !j.error) setMo(j); }); } });
-  }
-  function editBudget() {
-    setModal({ title: 'Бюджет ИИ (месяц)', fields: [{ key: 'usd', label: '$ в месяц' , value: String(Math.round((mo && mo.ai_budget_usd) || 0)) }], submit: function (v) { setBusy(true); gfetch('god_billing', { action: 'set_budget', usd: parseFloat(v.usd) || 0 }).then(function (j) { setBusy(false); if (j && !j.error) setMo(j); }); } });
-  }
   function renderMoney() {
     if (!mo && moErr) {
       return e('div', { style: { padding: '34px 18px', textAlign: 'center', fontFamily: BODY, fontSize: 13, lineHeight: 1.55, color: t.dim } }, moErr);
     }
     if (!mo) return loadingMsg();
-    var ai = mo.ai || {}, srv = mo.servers || {}, rs = mo.renewals || [], byF = ai.by_feature || [];
+    var ai = mo.ai || {}, srv = mo.servers || {}, byF = ai.by_feature || [];
     var fmap = { anton_chat: 'Чат MAYA', cutmatch: 'CutMatch', haircut: 'CutMatch', cutmatch_analyze: 'CutMatch анализ', face: 'CutMatch анализ', masters_advice: 'Совет мастеру' };
     return e(React.Fragment, null,
       grid2([kpiCell(money(ai.ai_rub), 'ИИ · ' + (ai.days || 30) + ' дн.'), kpiCell(money(srv.servers_rub), 'Серверы · мес')]),
-      eyebrow('Оплаты к продлению'),
-      rs.length ? rs.map(function (r, i) {
-        return e('div', { key: r.key || i, style: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', border: '1px solid ' + t.line, borderRadius: 14, marginBottom: 8, background: t.card } }, e('div', { style: { width: 9, height: 9, borderRadius: 999, background: sCol(r.status), flexShrink: 0 } }), e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontWeight: 500, fontSize: 13, color: t.ink } }, r.label), e('div', { style: { fontFamily: BODY, fontSize: 11, color: t.faint, marginTop: 2 } }, (r.due_date ? r.due_date : 'дата не задана') + (r.amount ? ' · ' + money(r.amount) : ''))), e('div', { style: { fontFamily: DISPLAY, fontSize: 11.5, color: sCol(r.status), whiteSpace: 'nowrap' } }, r.days_left == null ? '—' : (r.days_left < 0 ? 'просроч.' : 'через ' + r.days_left + ' дн.')), e('div', { onClick: function () { editRenewal(r); }, style: { color: t.faint, fontSize: 15, cursor: 'pointer', padding: '0 2px' } }, '✎'));
-      }) : e('div', { style: { fontFamily: BODY, fontSize: 12, color: t.dim, marginBottom: 10 } }, 'Список пуст.'),
       byF.length ? e(React.Fragment, null, eyebrow('Расход ИИ по функциям'), Card(byF.map(function (f, i) { return e('div', { key: i, style: { display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: i < byF.length - 1 ? '1px solid ' + t.line : 'none' } }, e('span', { style: { fontFamily: BODY, fontSize: 12, color: t.dim } }, (fmap[f.feature] || f.feature) + ' · ' + (f.calls || 0)), e('span', { style: { fontFamily: DISPLAY, fontSize: 12, color: t.ink } }, '$' + (Number(f.cost_usd) || 0).toFixed(2))); }))) : null,
-      eyebrow('Бюджет ИИ (месяц)'),
-      Card(e('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } }, e('div', { style: { flex: 1, fontFamily: BODY, fontSize: 13, color: t.ink } }, '$' + (Number(mo.ai_spent_usd) || 0).toFixed(2) + ' из $' + (Number(mo.ai_budget_usd) || 0).toFixed(0)), e('div', null, btn('Изменить', function () { editBudget(); }, {})))));
+      eyebrow('Фактический расход ИИ'),
+      Card(e('div', null,
+        e('div', { style: { fontFamily: DISPLAY, fontSize: 18, color: t.ink } }, '$' + (Number(mo.ai_spent_usd) || 0).toFixed(2)),
+        e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.faint, marginTop: 4 } }, 'Последние 30 дней · только чтение'))));
   }
 
   function addTenant() {

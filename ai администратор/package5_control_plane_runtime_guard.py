@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed when the active PWA restores a B13 control-plane owner."""
+"""Fail closed when the active PWA restores B13/B14 control-plane owners."""
 
 from __future__ import annotations
 
@@ -77,6 +77,65 @@ WEB_FUNCTIONS = {
             "database.list_maya_tenants",
         ),
     },
+    "_god_renewals_view": {
+        "markers": ("p5_b14_legacy_renewal_tracker_retired", "return []"),
+        "forbidden": (
+            "database.get_setting",
+            "database.set_setting",
+            "GOD_DEFAULT_RENEWALS",
+            "GOD_RENEWAL_WARN_DAYS",
+        ),
+    },
+    "_god_health_checks": {
+        "markers": (
+            "p5_b14_god_health_read_only",
+            "repair=False",
+            "Расход ИИ (30 дней)",
+        ),
+        "forbidden": (
+            "database.set_setting",
+            "god_probe_ts",
+            "_god_ai_budget_usd",
+            "_god_renewals_view",
+            "repair=True",
+        ),
+    },
+    "god_overview_handler": {
+        "markers": (
+            "p5_b14_god_overview_canonical_projection_only",
+            "canonical_admin_tenants",
+            '"status": "unavailable"',
+            '"read_only": True',
+            '"business_mutations": 0',
+        ),
+        "forbidden": (
+            "database.list_maya_tenants",
+            "_god_renewals_view",
+            "database.set_setting",
+            "repair=True",
+        ),
+    },
+    "god_billing_handler": {
+        "markers": (
+            "p5_b14_legacy_god_billing_mutations_retired",
+            'action != "view"',
+            "god_billing_controls_retired",
+            '"read_only": True',
+            '"business_mutations": 0',
+            '"renewal_tracker_status": "retired"',
+            '"ai_budget_status": "retired"',
+        ),
+        "forbidden": (
+            "database.set_setting",
+            "database.get_setting",
+            "_god_set_renewals",
+            "_god_get_renewals",
+            "_god_ai_budget_usd",
+            'body.get("usd")',
+            'body.get("due_date")',
+            'body.get("amount")',
+        ),
+    },
 }
 
 DATABASE_RETIREMENTS = {
@@ -96,6 +155,11 @@ GLOBAL_FORBIDDEN = (
     "database.set_cashier_role",
     "database.add_maya_tenant",
     "database.set_maya_tenant_status",
+    'database.set_setting("god_renewals"',
+    'database.set_setting("god_ai_budget_usd"',
+    'database.get_setting("god_renewals"',
+    'database.get_setting("god_ai_budget_usd"',
+    "database.list_maya_tenants",
 )
 
 
@@ -204,6 +268,7 @@ def main() -> int:
     payload = {
         "pass": not findings,
         "b13LegacyControlPlaneOwners": 0 if not findings else None,
+        "b14LegacyGodOwners": 0 if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }
@@ -213,7 +278,7 @@ def main() -> int:
         for finding in findings:
             print(f"FAIL {finding.check}: {finding.detail}")
     else:
-        print("Package 5 B13 active PWA control-plane guard: PASS")
+        print("Package 5 B13/B14 active PWA control-plane guard: PASS")
     return 0 if not findings else 1
 
 
