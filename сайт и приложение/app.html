@@ -40922,10 +40922,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     if (initData) { headers['X-Telegram-InitData'] = initData; return { headers: headers, body: JSON.stringify(body) }; }
     var mayaTok = canonicalMayaTok();
     if (mayaTok) { headers.Authorization = 'Bearer ' + mayaTok; return { headers: headers, body: JSON.stringify(body) }; }
-    var tok = webTok();
-    if (tok) { headers['X-Session-Token'] = tok; body.session_token = tok; return { headers: headers, body: JSON.stringify(body) }; }
     var auth = tgAuth();
     if (auth) { body.auth_data = auth; return { headers: headers, body: JSON.stringify(body) }; }
+    var tok = webTok();
+    if (tok) { headers['X-Session-Token'] = tok; body.session_token = tok; return { headers: headers, body: JSON.stringify(body) }; }
     return null;
   }
   // exposed so staff screens (schedule/panel) can reuse the exact 3-channel auth
@@ -40943,16 +40943,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + mayaTok }, body: JSON.stringify({})
       });
     }
-    var tok = webTok();
-    if (tok) {
-      return fetch(PROXY + '?action=cabinet_session', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': tok }, body: JSON.stringify({})
-      });
-    }
     var auth = tgAuth();
     if (auth) {
       return fetch(PROXY + '?action=cabinet_me_login', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ auth_data: auth })
+      });
+    }
+    var tok = webTok();
+    if (tok) {
+      return fetch(PROXY + '?action=cabinet_session', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': tok }, body: JSON.stringify({})
       });
     }
     return null;
