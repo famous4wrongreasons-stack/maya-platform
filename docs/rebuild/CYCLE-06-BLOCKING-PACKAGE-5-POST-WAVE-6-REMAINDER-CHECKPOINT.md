@@ -1,7 +1,7 @@
-# Package 5 post-Wave-6 remainder — B13 deployed, Final Gate stopped at B14
+# Package 5 post-Wave-6 remainder — B14 owner decision STOP
 
-Accepted owner checkpoint `a9a5ff24`. Waves 1–6 remain accepted 6/6. B7–B12
-remain accepted production baselines. B13 runtime commits `e3aec34a` and
+Accepted checkpoint `a4a50d2f`. Waves 1–6 remain accepted 6/6. B7–B12 remain
+accepted production baselines. B13 runtime commits `e3aec34a` and
 `031977e4` are deployed in the active PWA, published app/proxy and backend
 release `/opt/maya-saas/releases/20260905-p5-b13-031977e4`.
 
@@ -19,24 +19,31 @@ release `/opt/maya-saas/releases/20260905-p5-b13-031977e4`.
 4. The fresh Final Gate restarted from the beginning across backend, active PWA,
    proxy, background/event paths and Package 4 guards. The inventory covered all
    13 families and stopped at new blocker **B14**.
-5. `/api/god/billing` directly UPSERTs caller-supplied renewal data and AI budget
-   into global SQLite `settings`. No approved canonical owner defines those
-   platform-level semantics; A22 only defines the existing governed settings
-   contract and monthly tenant finance target.
-6. `/api/god/overview` still derives current subscriber counts/status from
-   legacy `maya_tenants` rather than the approved canonical Tenant,
-   TrialActivation and subscription projection. It is a read-only path but a
-   current legacy fallback.
-7. B14 requires owner decisions for whether platform AI budget and renewal
-   records remain mutable in Chapter 6 and, if so, their exact canonical owner,
-   authority, scope, identity and audit semantics. No B14 implementation,
-   schema or production endpoint call was attempted.
+5. B14 contract reconstruction is complete. `god_renewals` is a manual global
+   infrastructure-payment reminder list (Yandex Cloud, Timeweb, Beget, domain,
+   YClients and AI top-up). It is used only for display/countdown warnings and
+   is not consumed by P4-05, a payment scheduler or a provider mutation.
+6. `god_ai_budget_usd` is a global USD warning threshold for measured 30-day AI
+   cost. It is used only to color a health warning and does not stop models,
+   schedule work or change customer/business value.
+7. Neither setting has an approved canonical owner. The bounded decision sheet
+   recommends D1-A (retire the writable infrastructure renewal tracker) and D2-A
+   (retire the writable global AI-budget threshold while retaining measured
+   spend visibility). Both recommendations require zero new models and zero new
+   action classes.
+8. `/api/god/overview` is fully covered by approved D4-A: `maya_tenants` is
+   neither current subscriber authority nor a fallback projection. The future
+   remediation must also remove the `god_probe_ts` write and the `repair=True`
+   identity audit from its read/health call chain.
+9. Owner approval remains required before B14 implementation. No B14 runtime,
+   schema, migration or production endpoint mutation was attempted.
 
 Package 5 remains FAIL/NO. This is Final Gate remediation, not P4-11 or Wave 7.
-After a bounded B14 owner decision, remediate or retire the two mutation modes,
-replace/retire the legacy overview projection, add active-PWA/proxy ratchets,
-prove the boundary, deploy without real settings/tenant mutations, and restart
-the complete 13-family Final Gate from the beginning.
+After the bounded D1/D2 owner decision, remediate or retire the two mutation
+modes, replace/retire the legacy overview projection, remove hidden read-path
+side effects, add active-PWA/proxy ratchets, prove the boundary, deploy without
+real settings/tenant mutations, and restart the complete 13-family Final Gate
+from the beginning.
 
 Preserve B7–B13, all Waves 1–6, D1-A…D7-A, P02/P03 holds, Client ownership,
 immutable evidence, the tenant hard-delete prohibition, Package 2 Communication
