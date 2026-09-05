@@ -77,6 +77,20 @@ def _load_webhook_server():
     fake_memory.save_conversations = _save_conversations
     fake_memory._store = _conversations_store
 
+    fake_client_commands = types.ModuleType("legacy_client_command_bridge")
+    fake_client_commands.channel_proof = lambda _headers, _body: "verified-proof"
+    fake_client_commands.command = lambda operation, _proof, _payload: (
+        {
+            "linked": True,
+            "privacy": True,
+            "marketing": False,
+            "marketing_decided": True,
+            "client_link_required": False,
+        }
+        if operation == "status"
+        else {}
+    )
+
     stubs = {
         "aiohttp": fake_aiohttp,
         "aiohttp.web": fake_web,
@@ -89,6 +103,7 @@ def _load_webhook_server():
         "cutmatch": types.ModuleType("cutmatch"),
         "database": fake_database,
         "lead_alerts": types.ModuleType("lead_alerts"),
+        "legacy_client_command_bridge": fake_client_commands,
         "master_briefing": types.ModuleType("master_briefing"),
         "masters_ai": types.ModuleType("masters_ai"),
         "memory": fake_memory,
@@ -727,7 +742,7 @@ class ChatRoutingTests(unittest.TestCase):
         history = mem.load_conversations().get("pwa:client:948205934") or []
         self.assertEqual(len(history), 1)
 
-    def test_client_loyalty_offer_defers_service_until_slot_is_checked(self):
+    def test_client_loyalty_history_offer_hook_is_retired(self):
         ws = _load_webhook_server()
         mem = sys.modules["memory"]
         db = sys.modules["database"]
@@ -750,15 +765,10 @@ class ChatRoutingTests(unittest.TestCase):
         first = ws._ensure_client_loyalty_chat_offer(948205934)
         second = ws._ensure_client_loyalty_chat_offer(948205934)
 
-        self.assertTrue(first)
+        self.assertFalse(first)
         self.assertFalse(second)
         history = mem.load_conversations().get("pwa:client:948205934") or []
-        self.assertEqual(len(history), 1)
-        self.assertIn("600 баллов", history[0]["content"])
-        self.assertIn("проверю оставшееся окно", history[0]["content"])
-        self.assertNotIn("Массаж — 450 баллов", history[0]["content"])
-        self.assertEqual(history[0]["widget"], "book")
-        self.assertEqual(history[0]["action"]["type"], "open_booking")
+        self.assertEqual(history, [])
 
     def test_loyalty_booking_rechecks_combined_slot_and_spends_once(self):
         ws = _load_webhook_server()
@@ -962,7 +972,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertTrue(response["data"]["idempotent"])
         self.assertEqual(called, {"slots": False, "create": False})
 
-    def test_repeat_booking_offer_is_grounded_and_deduplicated(self):
+    def test_repeat_booking_history_offer_hook_is_retired(self):
         ws = _load_webhook_server()
         mem = sys.modules["memory"]
         db = sys.modules["database"]
@@ -981,12 +991,10 @@ class ChatRoutingTests(unittest.TestCase):
         first = ws._ensure_client_repeat_booking_offer(948205934)
         second = ws._ensure_client_repeat_booking_offer(948205934)
 
-        self.assertTrue(first)
+        self.assertFalse(first)
         self.assertFalse(second)
         history = mem.load_conversations().get("pwa:client:948205934") or []
-        self.assertEqual(len(history), 1)
-        self.assertIn("Вам как в прошлый раз", history[0]["content"])
-        self.assertEqual(history[0]["action"]["type"], "repeat_booking")
+        self.assertEqual(history, [])
 
     def test_repeat_booking_offer_is_suppressed_for_upcoming_visit(self):
         ws = _load_webhook_server()

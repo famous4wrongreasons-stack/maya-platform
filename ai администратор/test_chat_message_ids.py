@@ -67,7 +67,7 @@ class ChatMessageIdTests(unittest.TestCase):
         self.assertEqual(payload["message_id"], history[1]["id"])
         self.assertEqual(payload["id"], history[1]["id"])
 
-    def test_history_handler_persists_migrated_ids(self):
+    def test_history_handler_projects_stable_ids_without_writeback(self):
         ws = self._load()
         memory = sys.modules["memory"]
         key = ws._chat_history_key(12345, "client")
@@ -75,6 +75,7 @@ class ChatMessageIdTests(unittest.TestCase):
             {"role": "user", "content": "Привет"},
             {"role": "assistant", "content": "Здравствуйте"},
         ]
+        before = [dict(item) for item in memory._store[key]]
 
         first = asyncio.run(ws.chat_history_handler(_Request({})))
         first_ids = [item["id"] for item in first["data"]["messages"]]
@@ -83,8 +84,8 @@ class ChatMessageIdTests(unittest.TestCase):
 
         self.assertEqual(first["status"], 200)
         self.assertEqual(first_ids, second_ids)
-        self.assertEqual(first_ids, [item["id"] for item in memory._store[key]])
-        self.assertTrue(all(ws._is_chat_message_id(value) for value in first_ids))
+        self.assertEqual(first_ids, [0, 1])
+        self.assertEqual(memory._store[key], before)
 
     def test_history_handler_does_not_prune_messages(self):
         ws = self._load()

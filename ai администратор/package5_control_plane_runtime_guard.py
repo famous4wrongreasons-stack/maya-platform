@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed when the active PWA restores B13/B14 control-plane owners."""
+"""Fail closed when the active PWA restores B13-B15 legacy owners."""
 
 from __future__ import annotations
 
@@ -136,7 +136,60 @@ WEB_FUNCTIONS = {
             'body.get("amount")',
         ),
     },
+    "_ensure_client_loyalty_chat_offer": {
+        "markers": ("Retired B15 hook", "return False"),
+        "forbidden": (
+            "database.get_client",
+            "lazy_backfill_for_client",
+            "loyalty_balance",
+            "_store_assistant_message_in_chat",
+        ),
+    },
+    "_ensure_client_repeat_booking_offer": {
+        "markers": ("Retired B15 hook", "return False"),
+        "forbidden": (
+            "database.get_client",
+            "memory.get_usual_booking",
+            "get_client_bookings",
+            "_store_assistant_message_in_chat",
+        ),
+    },
+    "chat_history_handler": {
+        "markers": (
+            "p5_b15_chat_history_read_only",
+            "client_commands.channel_proof",
+            'client_commands.command, "status"',
+            'status.get("linked")',
+            "load_conversations",
+            "_chat_history_payload",
+        ),
+        "forbidden": (
+            "database.has_valid_consent_by_chat_id",
+            "database.get_client",
+            "get_or_create_client",
+            "_ensure_client_loyalty_chat_offer",
+            "_ensure_client_repeat_booking_offer",
+            "_store_assistant_message_in_chat",
+            "save_conversations",
+            "_ensure_chat_history_ids",
+            "memory.save_conversations",
+        ),
+    },
 }
+
+READ_ONLY_MARKER = "p5_b15_chat_history_read_only"
+READ_ONLY_BUSINESS_WRITERS = (
+    "get_or_create_client",
+    "save_conversations",
+    "_store_assistant_message_in_chat",
+    "_ensure_client_loyalty_chat_offer",
+    "_ensure_client_repeat_booking_offer",
+    "database.create_",
+    "database.add_",
+    "database.update_",
+    "database.set_",
+    "database.delete_",
+)
 
 DATABASE_RETIREMENTS = {
     "can_redeem_codes": "p5_b13_legacy_cashier_value_authority_disabled",
@@ -203,6 +256,14 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
         for forbidden in contract["forbidden"]:
             if forbidden in body:
                 findings.append(Finding("control_plane_boundary", f"{name} references {forbidden}"))
+    for name, body in web_functions.items():
+        if READ_ONLY_MARKER not in body:
+            continue
+        for writer in READ_ONLY_BUSINESS_WRITERS:
+            if writer in body:
+                findings.append(
+                    Finding("read_only_business_boundary", f"{name} references {writer}")
+                )
 
     database = _read(root, "database.py", overrides)
     db_functions = _functions(database, "database.py")
@@ -269,6 +330,7 @@ def main() -> int:
         "pass": not findings,
         "b13LegacyControlPlaneOwners": 0 if not findings else None,
         "b14LegacyGodOwners": 0 if not findings else None,
+        "b15ChatHistoryReadOwners": 0 if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }
@@ -278,7 +340,7 @@ def main() -> int:
         for finding in findings:
             print(f"FAIL {finding.check}: {finding.detail}")
     else:
-        print("Package 5 B13/B14 active PWA control-plane guard: PASS")
+        print("Package 5 B13/B14/B15 active PWA control-plane guard: PASS")
     return 0 if not findings else 1
 
 

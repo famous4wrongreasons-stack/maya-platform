@@ -26,7 +26,8 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
         original = functions[function_name]
         injected = source.replace(original, original + "\n    " + needle + "\n", 1)
         findings = guard.scan_runtime(ROOT, {"webhook_server.py": injected})
-        symbols = {needle.split("(", 1)[0], "panel_manager_ids"}
+        called = needle.split("(", 1)[0]
+        symbols = {called, called.rsplit(".", 1)[-1], "panel_manager_ids"}
         self.assertTrue(any(any(symbol in item.detail for symbol in symbols) for item in findings), findings)
 
     def test_direct_staff_writer_fails(self):
@@ -52,6 +53,31 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
 
     def test_retired_renewal_reader_fails(self):
         self._web_bypass("_god_renewals_view", 'database.get_setting("god_renewals")')
+
+    def test_chat_history_save_fails(self):
+        self._web_bypass("chat_history_handler", "memory.save_conversations({})")
+
+    def test_chat_history_client_creation_fails(self):
+        self._web_bypass("chat_history_handler", "database.get_or_create_client(1)")
+
+    def test_chat_history_recommendation_creation_fails(self):
+        self._web_bypass(
+            "chat_history_handler",
+            '_store_assistant_message_in_chat(1, "offer")',
+        )
+
+    def test_marked_future_read_surface_writer_fails(self):
+        source = (ROOT / "webhook_server.py").read_text(encoding="utf-8")
+        injected = source + (
+            "\n\ndef future_read_handler():\n"
+            "    # p5_b15_chat_history_read_only\n"
+            "    database.update_client(1)\n"
+        )
+        findings = guard.scan_runtime(ROOT, {"webhook_server.py": injected})
+        self.assertTrue(
+            any(item.check == "read_only_business_boundary" for item in findings),
+            findings,
+        )
 
     def test_later_pwa_control_plane_writer_fails(self):
         with tempfile.TemporaryDirectory() as tmp:

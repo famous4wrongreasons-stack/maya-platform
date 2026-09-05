@@ -8706,118 +8706,15 @@ def _store_assistant_message_in_chat(
 
 
 def _ensure_client_loyalty_chat_offer(chat_id: int) -> bool:
-    """Invite a client into the slot-aware loyalty booking flow once per balance."""
-    try:
-        client = database.get_client(int(chat_id))
-    except Exception:
-        client = None
-    if not isinstance(client, dict):
-        return False
-    client_id = int(client.get("id") or 0)
-    phone = str(client.get("phone") or "").strip()
-    if not client_id or len("".join(ch for ch in phone if ch.isdigit())) < 10:
-        return False
-    try:
-        import loyalty as _loy
-
-        _loy.lazy_backfill_for_client(client_id, phone)
-        balance = int(database.loyalty_balance(client_id))
-        spend = _loy.loyalty_spend_summary(balance)
-    except Exception as exc:
-        logger.error("client loyalty offer lookup %s: %s", client_id, exc)
-        return False
-    affordable = list(spend.get("affordable_services") or [])
-    if balance <= 0 or not affordable:
-        return False
-    text = (
-        f"У вас {balance} баллов — ими уже можно оплатить дополнительный уход. "
-        "Выберите мастера, услугу и время: я проверю оставшееся окно и предложу "
-        "только тот уход, который мастер действительно успеет сделать."
-    )
-    signature = "|".join(
-        f'{item.get("id") or item.get("title")}:{item.get("price")}'
-        for item in affordable
-    )
-    return _store_assistant_message_in_chat(
-        int(chat_id),
-        text,
-        mode="client",
-        action={
-            "type": "open_booking",
-            "label": "Подобрать по времени",
-            "screen": "book",
-        },
-        widget="book",
-        dedupe_key=f"loyalty-spend:{client_id}:{balance}:{signature}"[:160],
-    )
+    """Retired B15 hook: a history read cannot create loyalty communication."""
+    _ = chat_id
+    return False
 
 
 def _ensure_client_repeat_booking_offer(chat_id: int) -> bool:
-    """Offer one-click repeat booking from confirmed visit history."""
-    try:
-        client = database.get_client(int(chat_id))
-    except Exception:
-        client = None
-    if not isinstance(client, dict):
-        return False
-    client_id = int(client.get("id") or 0)
-    phone = str(client.get("phone") or "").strip()
-    if not client_id or len("".join(ch for ch in phone if ch.isdigit())) < 10:
-        return False
-    try:
-        usual = memory.get_usual_booking(int(chat_id), warm=True)
-    except Exception as exc:
-        logger.error("client repeat offer lookup %s: %s", client_id, exc)
-        return False
-    if not isinstance(usual, dict) or usual.get("source") != "yclients_history":
-        return False
-    widget_data = _repeat_booking_widget_data(usual)
-    if not widget_data:
-        return False
-
-    signature = "|".join([
-        str(usual.get("visit_date") or "")[:19],
-        str(usual.get("master_id") or usual.get("master_name") or ""),
-        ",".join(widget_data.get("service_ids") or widget_data.get("service_names") or []),
-    ])
-    dedupe_key = f"repeat-booking:{client_id}:{signature}"[:160]
-    if _chat_has_assistant_dedupe_key(int(chat_id), "client", dedupe_key):
-        return False
-
-    # Do not push a new repeat offer while the client already has an active visit.
-    try:
-        today = date.today().isoformat()
-        for booking in _yc.get_client_bookings(phone, days_back=1, days_ahead=90) or []:
-            if not isinstance(booking, dict) or booking.get("error") or booking.get("message"):
-                continue
-            visit_day = str(booking.get("datetime") or booking.get("date") or "")[:10]
-            attendance = booking.get("attendance", booking.get("status"))
-            try:
-                attendance = int(attendance)
-            except (TypeError, ValueError):
-                attendance = 0
-            if visit_day >= today and attendance not in (-1, 1):
-                return False
-    except Exception as exc:
-        # The attended-history result is still authoritative. A temporary CRM
-        # error must not make MAYA invent data, but it need not disable repeat.
-        logger.warning("client repeat upcoming lookup %s: %s", client_id, exc)
-
-    service_text = str(usual.get("service_text") or "").strip()
-    text = (
-        f"Вам как в прошлый раз: к {usual['master_name']}"
-        f"{f' на {service_text}' if service_text else ''}?"
-    )
-    return _store_assistant_message_in_chat(
-        int(chat_id),
-        text,
-        mode="client",
-        action={
-            "type": "repeat_booking",
-            "label": "Да, как в прошлый раз",
-        },
-        dedupe_key=dedupe_key,
-    )
+    """Retired B15 hook: a history read cannot create repeat communication."""
+    _ = chat_id
+    return False
 
 
 _TELEGRAM_CHAT_MIRROR_BOT_IDS: set[int] = set()
@@ -8910,8 +8807,8 @@ def install_staff_telegram_chat_mirror(bot) -> bool:
 
 
 async def chat_history_handler(request: web.Request) -> web.Response:
-    """POST /api/chat/history — return the saved MAYA chat history for the logged-in user."""
-    from memory import load_conversations, save_conversations
+    """B15 read-only projection: verified channel history without side effects."""
+    from memory import load_conversations
 
     try:
         body = await request.json()
@@ -8932,25 +8829,38 @@ async def chat_history_handler(request: web.Request) -> web.Response:
         return _cabinet_response({"error": "no_user_id"}, status=400)
     chat_id = int(chat_id)
 
-    if not database.has_valid_consent_by_chat_id(chat_id):
-        return _cabinet_response({
-            "error": "needs_consent",
-            "message": ("Чтобы общаться с ассистентом, подпишите согласие на обработку "
-                        "персональных данных: откройте @malesthetic_bot и нажмите /start."),
-        }, status=403)
-
     chat_mode = _chat_effective_mode(body, chat_id)
-    history_key = _chat_history_key(chat_id, chat_mode)
     if chat_mode == "client":
-        await asyncio.to_thread(_ensure_client_loyalty_chat_offer, chat_id)
-        await asyncio.to_thread(_ensure_client_repeat_booking_offer, chat_id)
+        import legacy_client_command_bridge as client_commands
+
+        try:
+            proof = client_commands.channel_proof(request.headers, body)
+            status = await asyncio.to_thread(
+                client_commands.command, "status", proof, {}
+            )
+        except ValueError:
+            return _cabinet_response(
+                {"error": "verified_client_link_required"}, status=403
+            )
+        except Exception:
+            logger.error("canonical chat history identity unavailable")
+            return _cabinet_response({"error": "chat_history_unavailable"}, status=503)
+        if status.get("client_link_required") or not status.get("linked"):
+            return _cabinet_response(
+                {"error": "verified_client_link_required"}, status=403
+            )
+        if not status.get("privacy"):
+            return _cabinet_response({
+                "error": "needs_consent",
+                "message": ("Чтобы общаться с ассистентом, подпишите согласие на обработку "
+                            "персональных данных: откройте @malesthetic_bot и нажмите /start."),
+            }, status=403)
+
+    # p5_b15_chat_history_read_only: authenticated channel selects a legacy
+    # presentation key only after canonical Client authority has been verified.
+    history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
-    full_history, migrated = _ensure_chat_history_ids(
-        list(conversations.get(history_key) or [])
-    )
-    if migrated:
-        conversations[history_key] = full_history
-        save_conversations(conversations)
+    full_history = list(conversations.get(history_key) or [])
     messages = _chat_history_payload(full_history)
 
     return _cabinet_response({"messages": messages})
