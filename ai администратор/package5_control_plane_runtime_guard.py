@@ -165,10 +165,22 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
         if forbidden in growth_body:
             findings.append(Finding("retired_goal", f"set_growth_goal references {forbidden}"))
 
+    bind_cli_path = root / "generate_bind_codes.py"
+    if bind_cli_path.is_file():
+        bind_cli = overrides.get("generate_bind_codes.py")
+        if bind_cli is None:
+            bind_cli = bind_cli_path.read_text(encoding="utf-8")
+        if "configure_crm_staff_access" not in bind_cli:
+            findings.append(Finding("legacy_bind_cli", "generate_bind_codes.py lacks A16 retirement marker"))
+        for forbidden in ("create_master_with_bind_code", "reset_master_bind_code", "DELETE FROM masters_telegram"):
+            if forbidden in bind_cli:
+                findings.append(Finding("legacy_bind_cli", f"generate_bind_codes.py references {forbidden}"))
+
     excluded = {
         "bot.py",  # historical caller; database functions above fail closed
         "database.py",
         "growth_planner.py",
+        "generate_bind_codes.py",
         "package5_control_plane_runtime_guard.py",
     }
     for path in sorted(root.glob("*.py")):

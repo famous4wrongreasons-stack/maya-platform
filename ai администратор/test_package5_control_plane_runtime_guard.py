@@ -54,6 +54,19 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
             findings = guard.scan_runtime(temp_root, overrides)
         self.assertTrue(any(item.check == "later_pwa_module" for item in findings), findings)
 
+    def test_bind_cli_cannot_restore_create_reset_or_delete(self):
+        source = (ROOT / "generate_bind_codes.py").read_text(encoding="utf-8")
+        for bypass in (
+            "database.create_master_with_bind_code(1, 'x')",
+            "database.reset_master_bind_code(1, 'x')",
+            'conn.execute("DELETE FROM masters_telegram")',
+        ):
+            findings = guard.scan_runtime(
+                ROOT,
+                {"generate_bind_codes.py": source + "\n" + bypass},
+            )
+            self.assertTrue(any(item.check == "legacy_bind_cli" for item in findings), findings)
+
 
 if __name__ == "__main__":
     unittest.main()

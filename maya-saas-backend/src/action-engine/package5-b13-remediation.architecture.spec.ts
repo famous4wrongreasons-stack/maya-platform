@@ -78,6 +78,11 @@ describe('Package 5 B13 control-plane remediation', () => {
     expect(pythonFunction(database, 'can_redeem_codes')).toContain(
       'return False',
     );
+    const bindCli = read('ai администратор/generate_bind_codes.py');
+    expect(bindCli).toContain('configure_crm_staff_access');
+    expect(bindCli).not.toMatch(
+      /create_master_with_bind_code|reset_master_bind_code|DELETE FROM masters_telegram/,
+    );
     const briefRecipients = pythonFunction(webhook, '_growth_role_recipients');
     expect(briefRecipients).toContain(
       'p5_b13_raw_telegram_manager_brief_authority_disabled',
