@@ -252,6 +252,35 @@ WEB_FUNCTIONS = {
             "client.get",
         ),
     },
+    "panel_journal_attendance_handler": {
+        "markers": ("B18", "canonical_staff_session_required", "CrmStaffAccess", "set_appointment_attendance", "business_mutations"),
+        "forbidden": ("_panel_auth", "_panel_resolve_role", "_panel_record_guard", "_yc", "database."),
+    },
+    "panel_journal_add_service_handler": {
+        "markers": ("B18", "canonical_staff_session_required", "CrmStaffAccess", "set_appointment_services", "business_mutations"),
+        "forbidden": ("_panel_auth", "_panel_resolve_role", "_panel_record_guard", "_yc", "database."),
+    },
+    "panel_journal_set_services_handler": {
+        "markers": ("B18", "canonical_staff_session_required", "CrmStaffAccess", "set_appointment_services", "business_mutations"),
+        "forbidden": ("_panel_auth", "_panel_resolve_role", "_panel_record_guard", "_yc", "database."),
+    },
+    "panel_journal_set_duration_handler": {
+        "markers": ("B18", "canonical_staff_session_required", "CrmStaffAccess", "set_appointment_duration", "business_mutations"),
+        "forbidden": ("_panel_auth", "_panel_resolve_role", "_panel_record_guard", "_yc", "database."),
+    },
+    "panel_journal_set_client_name_handler": {
+        "markers": ("B18", "canonical_staff_session_required", "CrmStaffAccess", "set_appointment_fields", "business_mutations"),
+        "forbidden": ("_panel_auth", "_panel_resolve_role", "_panel_record_guard", "_yc", "database."),
+    },
+}
+
+B18_APPOINTMENT_SITES = {
+    "update_booking": "set_appointment_services",
+    "set_record_attendance": "set_appointment_attendance",
+    "add_services_to_record": "set_appointment_services",
+    "set_record_services": "set_appointment_services",
+    "set_record_duration": "set_appointment_duration",
+    "set_record_client_name": "set_appointment_fields",
 }
 
 READ_ONLY_MARKERS = (
@@ -316,7 +345,14 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
     root = Path(root)
     overrides = overrides or {}
     findings: list[Finding] = []
-    required = ("webhook_server.py", "database.py", "growth_planner.py")
+    required = (
+        "webhook_server.py",
+        "database.py",
+        "growth_planner.py",
+        "claude_ai.py",
+        "yclients.py",
+        "legacy_client_command_bridge.py",
+    )
     for filename in required:
         if filename not in overrides and not (root / filename).is_file():
             findings.append(Finding("runtime_surface", f"{filename} missing"))
@@ -369,6 +405,57 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
     for forbidden in ("_save_json_setting", "database.set_setting", "calculate_growth_plan"):
         if forbidden in growth_body:
             findings.append(Finding("retired_goal", f"set_growth_goal references {forbidden}"))
+
+    ai = _read(root, "claude_ai.py", overrides)
+    ai_functions = _functions(ai, "claude_ai.py")
+    ai_tool = ai_functions.get("_execute_tool", "")
+    ai_command = ai_functions.get("_client_appointment_command", "")
+    for marker in (
+        "B18",
+        "current_context",
+        "legacy_client_command_bridge",
+        "appointment-reschedule",
+        "appointment-services",
+        "appointment-cancel",
+    ):
+        if marker not in ai_command + ai_tool:
+            findings.append(Finding("b18_ai_appointment_authority", f"AI appointment path lacks {marker}"))
+    for forbidden in (
+        "_resolve_user_record_id",
+        "_check_record_ownership",
+        "yclients.update_booking",
+        "yclients.reschedule_booking",
+        "yclients.cancel_booking",
+        "database.mark_reschedule_actor",
+        "database.mark_cancel_actor",
+    ):
+        if forbidden in ai_command + ai_tool or forbidden in ai_functions:
+            findings.append(Finding("b18_ai_legacy_identity", f"claude_ai.py references {forbidden}"))
+    for forbidden in (
+        "database.get_client",
+        "get_client_bookings",
+        "_authed_chat_id",
+        "client_row",
+    ):
+        if forbidden in ai_command:
+            findings.append(Finding("b18_ai_legacy_identity", f"AI appointment command references {forbidden}"))
+
+    yclients = _read(root, "yclients.py", overrides)
+    yclients_functions = _functions(yclients, "yclients.py")
+    for name, action in B18_APPOINTMENT_SITES.items():
+        body = yclients_functions.get(name, "")
+        if not body:
+            findings.append(Finding("b18_all_six", f"yclients.py:{name} missing"))
+            continue
+        if "dispatch_appointment_action" not in body or action not in body:
+            findings.append(Finding("b18_all_six", f"yclients.py:{name} lacks canonical {action}"))
+        for forbidden in ("self._put", "requests.put", "requests.request"):
+            if forbidden in body:
+                findings.append(Finding("b18_direct_provider_owner", f"yclients.py:{name} references {forbidden}"))
+
+    client_bridge = _read(root, "legacy_client_command_bridge.py", overrides)
+    if '"appointment-services"' not in client_bridge:
+        findings.append(Finding("b18_client_command", "appointment-services command missing"))
 
     client_actions_path = root / "client_record_actions.py"
     if client_actions_path.is_file():
@@ -431,6 +518,9 @@ def main() -> int:
         "b15ChatHistoryReadOwners": 0 if not findings else None,
         "b16BookingPrefillLegacyIdentityOwners": 0 if not findings else None,
         "b17ClientAppointmentLegacyIdentityOwners": 0 if not findings else None,
+        "b18ActiveLegacyProviderMutationOwners": 0 if not findings else None,
+        "b18LegacyAppointmentAuthorityBypasses": 0 if not findings else None,
+        "b18AppointmentSitesMapped": "6/6" if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }

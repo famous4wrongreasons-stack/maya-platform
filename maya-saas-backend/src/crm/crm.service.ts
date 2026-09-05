@@ -1520,6 +1520,10 @@ export class CrmService {
           beforeHash: this.appointmentFingerprint(await readState()),
         }),
         dispatch: async (normalizedInput) => {
+          // Authority is rechecked immediately before the only provider write.
+          // This closes revocation/race gaps between HTTP acceptance and the
+          // durable Action Engine claim for both Client and staff initiators.
+          await invocation.authorizationCheck?.();
           const durable = this.residualAppointmentInput(
             action,
             normalizedInput,
@@ -1881,6 +1885,7 @@ export class CrmService {
   private nestResidualAppointmentInvocation(
     action: ResidualAppointmentAction,
     externalId: string,
+    authorizationCheck?: () => Promise<void>,
   ): AppointmentActionInvocation {
     const requestId = this.tenantContext.get()?.requestId;
     return {
@@ -1894,6 +1899,7 @@ export class CrmService {
             },
           }
         : {}),
+      ...(authorizationCheck ? { authorizationCheck } : {}),
     };
   }
 
@@ -2710,6 +2716,8 @@ export class CrmService {
           this.nestResidualAppointmentInvocation(
             'set_appointment_attendance',
             externalId,
+            () =>
+              this.assertJournalRecordAccess(scopedTenantId, actor, externalId),
           ),
         )
       ).value;
@@ -2753,6 +2761,8 @@ export class CrmService {
           this.nestResidualAppointmentInvocation(
             'set_appointment_duration',
             externalId,
+            () =>
+              this.assertJournalRecordAccess(scopedTenantId, actor, externalId),
           ),
         )
       ).value;
@@ -2792,6 +2802,8 @@ export class CrmService {
           this.nestResidualAppointmentInvocation(
             'set_appointment_services',
             externalId,
+            () =>
+              this.assertJournalRecordAccess(scopedTenantId, actor, externalId),
           ),
         )
       ).value;

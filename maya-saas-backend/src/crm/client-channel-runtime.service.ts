@@ -487,6 +487,58 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     );
   }
 
+  /** B18 customer-originated service replacement. AI remains an initiator:
+   * the verified channel resolves the Client, the canonical Appointment mirror
+   * proves ownership, and the existing residual Action Engine executor owns the
+   * only provider write and UNKNOWN reconciliation contract.
+   */
+  async setClientAppointmentServices(channelProof: string, value: unknown) {
+    const input = this.clientAppointmentServicesPayload(value);
+    const authority = await this.clientAppointmentAuthority(
+      channelProof,
+      input.recordId,
+    );
+    const identity = createHash('sha256')
+      .update(
+        JSON.stringify([
+          authority.tenantId,
+          authority.clientId,
+          'set_appointment_services',
+          input.recordId,
+          input.serviceIds,
+        ]),
+      )
+      .digest('hex');
+    const invocation = {
+      sourceType: 'authenticated_request' as const,
+      sourceRef: authority.resolutionEvidenceRef,
+      callerIdempotency: {
+        scope: 'client-channel.appointment.services.v1',
+        key: identity,
+      },
+      authorizationCheck: async () => {
+        await this.clientAppointmentAuthority(channelProof, input.recordId);
+      },
+    };
+    let execution: ExecutionResultV1;
+    try {
+      execution = (
+        await this.crm.executeResidualAppointmentWithReceipt(
+          authority.tenantId,
+          'set_appointment_services',
+          input.recordId,
+          { serviceIds: input.serviceIds },
+          invocation,
+        )
+      ).execution;
+    } catch (error) {
+      const canonical = actionExecutionResultFromError(error);
+      if (!canonical) throw error;
+      execution = canonical;
+    }
+    return this.clientAppointmentExecutionResponse(execution);
+  }
+
   private clientAppointmentPayload(value: unknown, reschedule: boolean) {
     if (!value || typeof value !== 'object' || Array.isArray(value))
       throw new BadRequestException('Appointment command payload required');
@@ -509,6 +561,35 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     return {
       recordId: input.recordId,
       start: reschedule ? String(input.start) : '',
+    };
+  }
+
+  private clientAppointmentServicesPayload(value: unknown) {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      throw new BadRequestException('Appointment command payload required');
+    const input = value as Record<string, unknown>;
+    if (Object.keys(input).sort().join(',') !== 'recordId,serviceIds')
+      throw new BadRequestException(
+        'Only the exact appointment command fields are accepted',
+      );
+    if (
+      typeof input.recordId !== 'string' ||
+      !/^[A-Za-z0-9._:-]{1,128}$/.test(input.recordId)
+    )
+      throw new BadRequestException('Exact appointment reference required');
+    if (
+      !Array.isArray(input.serviceIds) ||
+      input.serviceIds.length === 0 ||
+      input.serviceIds.length > 64 ||
+      !input.serviceIds.every(
+        (item: unknown): item is string =>
+          typeof item === 'string' && /^[A-Za-z0-9._:-]{1,128}$/.test(item),
+      )
+    )
+      throw new BadRequestException('Exact appointment services required');
+    return {
+      recordId: input.recordId,
+      serviceIds: [...new Set(input.serviceIds)],
     };
   }
 
@@ -616,6 +697,10 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       if (!canonical) throw error;
       execution = canonical;
     }
+    return this.clientAppointmentExecutionResponse(execution);
+  }
+
+  private clientAppointmentExecutionResponse(execution: ExecutionResultV1) {
     return {
       contract: 'maya.client-appointment-command-result/1' as const,
       accepted: true,

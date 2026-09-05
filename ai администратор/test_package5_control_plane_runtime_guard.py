@@ -27,7 +27,12 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
         injected = source.replace(original, original + "\n    " + needle + "\n", 1)
         findings = guard.scan_runtime(ROOT, {"webhook_server.py": injected})
         called = needle.split("(", 1)[0]
-        symbols = {called, called.rsplit(".", 1)[-1], "panel_manager_ids"}
+        symbols = {
+            called,
+            called.rsplit(".", 1)[-1],
+            called.split(".", 1)[0],
+            "panel_manager_ids",
+        }
         self.assertTrue(any(any(symbol in item.detail for symbol in symbols) for item in findings), findings)
 
     def test_direct_staff_writer_fails(self):
@@ -101,6 +106,50 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
             findings,
         )
 
+    def test_b18_legacy_journal_provider_call_fails(self):
+        for function_name in (
+            "panel_journal_attendance_handler",
+            "panel_journal_add_service_handler",
+            "panel_journal_set_services_handler",
+            "panel_journal_set_duration_handler",
+            "panel_journal_set_client_name_handler",
+        ):
+            with self.subTest(function_name=function_name):
+                self._web_bypass(function_name, "_yc.set_record_duration(77, 3600)")
+
+    def test_b18_all_six_direct_provider_updates_fail(self):
+        source = (ROOT / "yclients.py").read_text(encoding="utf-8")
+        functions = guard._functions(source, "yclients.py")
+        for function_name in guard.B18_APPOINTMENT_SITES:
+            with self.subTest(function_name=function_name):
+                original = functions[function_name]
+                injected = source.replace(
+                    original,
+                    original + '\n        self._put("record/1/2", {})\n',
+                    1,
+                )
+                findings = guard.scan_runtime(ROOT, {"yclients.py": injected})
+                self.assertTrue(
+                    any(item.check == "b18_direct_provider_owner" for item in findings),
+                    findings,
+                )
+
+    def test_b18_ai_phone_identity_and_direct_helpers_fail(self):
+        source = (ROOT / "claude_ai.py").read_text(encoding="utf-8")
+        functions = guard._functions(source, "claude_ai.py")
+        original = functions["_client_appointment_command"]
+        for bypass in (
+            "database.get_client(user_id)",
+            "yclients.update_booking(77, [1])",
+        ):
+            with self.subTest(bypass=bypass):
+                injected = source.replace(original, original + "\n    " + bypass + "\n", 1)
+                findings = guard.scan_runtime(ROOT, {"claude_ai.py": injected})
+                self.assertTrue(
+                    any(item.check == "b18_ai_legacy_identity" for item in findings),
+                    findings,
+                )
+
     def test_marked_future_read_surface_writer_fails(self):
         source = (ROOT / "webhook_server.py").read_text(encoding="utf-8")
         injected = source + (
@@ -122,7 +171,14 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
             )
             overrides = {
                 name: (ROOT / name).read_text(encoding="utf-8")
-                for name in ("webhook_server.py", "database.py", "growth_planner.py")
+                for name in (
+                    "webhook_server.py",
+                    "database.py",
+                    "growth_planner.py",
+                    "claude_ai.py",
+                    "yclients.py",
+                    "legacy_client_command_bridge.py",
+                )
             }
             findings = guard.scan_runtime(temp_root, overrides)
         self.assertTrue(any(item.check == "later_pwa_module" for item in findings), findings)
@@ -138,7 +194,14 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
                 (temp_root / "later_route.py").write_text(bypass + "\n", encoding="utf-8")
                 overrides = {
                     name: (ROOT / name).read_text(encoding="utf-8")
-                    for name in ("webhook_server.py", "database.py", "growth_planner.py")
+                    for name in (
+                        "webhook_server.py",
+                        "database.py",
+                        "growth_planner.py",
+                        "claude_ai.py",
+                        "yclients.py",
+                        "legacy_client_command_bridge.py",
+                    )
                 }
                 findings = guard.scan_runtime(temp_root, overrides)
             self.assertTrue(any(item.check == "later_pwa_module" for item in findings), findings)

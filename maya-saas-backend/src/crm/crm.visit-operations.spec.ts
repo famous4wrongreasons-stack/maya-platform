@@ -42,6 +42,7 @@ describe('CrmService: операции над визитом', () => {
     adapter: Record<string, unknown>,
     staffAccess: unknown = null,
   ) {
+    const crmStaffAccessFindFirst = jest.fn().mockResolvedValue(staffAccess);
     const prisma = {
       tenant: {
         findUnique: jest.fn().mockResolvedValue({
@@ -50,7 +51,7 @@ describe('CrmService: операции над визитом', () => {
         }),
       },
       crmStaffAccess: {
-        findFirst: jest.fn().mockResolvedValue(staffAccess),
+        findFirst: crmStaffAccessFindFirst,
       },
       // 🔴 После cutover страж сравнивает идентичности Maya. Значение из CRM
       // разрешается через связь; неизвестный внешний id даёт null ⇒ отказ.
@@ -183,6 +184,8 @@ describe('CrmService: операции над визитом', () => {
 
     return {
       service,
+      prisma,
+      crmStaffAccessFindFirst,
       actionEngineRuntime,
       run: <T>(fn: () => Promise<T>) =>
         tenantContext.runAsSystemTenant('tenant-1', fn),
@@ -335,8 +338,39 @@ describe('CrmService: операции над визитом', () => {
     );
 
     expect(markAppointmentAttendance).toHaveBeenCalledTimes(1);
-    // Владельца визита проверяем ОДНИМ запросом, без полной карточки.
-    expect(getAppointmentStaffId).toHaveBeenCalledTimes(1);
+    // Первая проверка отклоняет до Action Engine, вторая закрывает гонку
+    // отзыва authority между acceptance и provider dispatch.
+    expect(getAppointmentStaffId).toHaveBeenCalledTimes(2);
+  });
+
+  it('отзыв staff authority перед dispatch не доходит до provider write', async () => {
+    const getAppointmentStaffId = jest.fn().mockResolvedValue('1461615');
+    const markAppointmentAttendance = jest.fn();
+    const built = build(
+      {
+        getAppointmentStaffId,
+        getAppointmentMutationState: jest
+          .fn()
+          .mockResolvedValue(mutationState()),
+        markAppointmentAttendance,
+      },
+      { staffId: 'staff-1', status: 'active' },
+    );
+    built.crmStaffAccessFindFirst
+      .mockResolvedValueOnce({ staffId: 'staff-1', status: 'active' })
+      .mockResolvedValueOnce(null);
+
+    await expect(
+      built.run(() =>
+        built.service.markAppointmentAttendance(
+          'tenant-1',
+          MASTER,
+          '77',
+          'arrived',
+        ),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(markAppointmentAttendance).not.toHaveBeenCalled();
   });
 
   it('проводит A04-A06 только через Action Engine и доказывает результат read-back', async () => {

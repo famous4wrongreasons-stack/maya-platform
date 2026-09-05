@@ -190,6 +190,11 @@ export class LegacyClientChannelController {
           input.channelProof,
           input.payload,
         );
+      if (operation === 'appointment-services')
+        return this.runtime.setClientAppointmentServices(
+          input.channelProof,
+          input.payload,
+        );
       throw new BadRequestException('Unsupported client command');
     });
   }

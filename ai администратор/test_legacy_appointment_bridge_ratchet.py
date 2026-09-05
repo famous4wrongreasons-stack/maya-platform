@@ -14,19 +14,13 @@ PRODUCTION_CALLERS = (
 )
 EXPECTED_ORIGINS = Counter(
     {
-        "client_record_actions": 2,
-        "webhook.loyalty": 1,
         "webhook.chat": 1,
         "webhook.panel": 3,
         "telegram.bot": 3,
-        "claude_ai": 2,
     }
 )
 EXPECTED_ENTRY_POINTS = Counter(
     {
-        ("cancel_booking", "client_record_actions"): 1,
-        ("reschedule_booking", "client_record_actions"): 1,
-        ("create_booking", "webhook.loyalty"): 1,
         ("create_booking", "webhook.chat"): 1,
         ("create_record_admin", "webhook.panel"): 1,
         ("reschedule_booking", "webhook.panel"): 1,
@@ -34,8 +28,6 @@ EXPECTED_ENTRY_POINTS = Counter(
         ("create_booking", "telegram.bot"): 1,
         ("cancel_booking", "telegram.bot"): 1,
         ("pay_visit", "telegram.bot"): 1,
-        ("reschedule_booking", "claude_ai"): 1,
-        ("cancel_booking", "claude_ai"): 1,
     }
 )
 MIGRATED_WRAPPERS = (
@@ -104,7 +96,7 @@ def function_nodes(tree):
 
 
 class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
-    def test_all_twelve_production_entry_points_declare_a_known_origin(self):
+    def test_all_remaining_production_entry_points_declare_a_known_origin(self):
         origins = Counter()
         entry_points = Counter()
         for filename in PRODUCTION_CALLERS:
@@ -122,7 +114,7 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
 
         self.assertEqual(origins, EXPECTED_ORIGINS)
         self.assertEqual(entry_points, EXPECTED_ENTRY_POINTS)
-        self.assertEqual(sum(origins.values()), 12)
+        self.assertEqual(sum(origins.values()), 7)
 
     def test_migrated_wrappers_have_exactly_one_bridge_dispatch(self):
         tree = parsed(ROOT / "yclients.py")

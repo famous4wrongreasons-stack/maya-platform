@@ -12397,39 +12397,16 @@ async def team_chat_fetch_handler(request: web.Request) -> web.Response:
 
 
 async def panel_journal_attendance_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_attendance — статус визита (только ВЛАДЕЛЕЦ).
-    Тело: {record_id, attendance}. attendance: -1 не пришёл, 0 ожидание, 1 пришёл, 2 подтвердил."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    try:
-        attendance = int(body.get("attendance"))
-    except Exception:
-        attendance = None
-    if not record_id or attendance not in (-1, 0, 1, 2):
-        return _cabinet_response({"error": "missing", "message": "Нужны запись и корректный статус."}, status=400)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    try:
-        result = await asyncio.to_thread(_yc.set_record_attendance, record_id, attendance)
-    except Exception as e:
-        logger.error("journal_attendance: %s", e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось обновить статус."}, status=502)
-    if result.get("success"):
-        return _cabinet_response({"ok": True, "record_id": result.get("record_id"), "attendance": attendance})
-    return _cabinet_response({"error": "attendance_failed", "message": result.get("error") or "YClients отклонил статус."}, status=400)
+    """B18: legacy journal write retired; use authenticated SaaS CRM journal."""
+    del request
+    return _cabinet_response({
+        "ok": False,
+        "error": "canonical_staff_session_required",
+        "message": "Войдите в рабочий кабинет, чтобы изменить статус визита.",
+        "canonical_authority": "CrmStaffAccess",
+        "canonical_action": "set_appointment_attendance",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_journal_record_handler(request: web.Request) -> web.Response:
@@ -12584,164 +12561,55 @@ async def panel_journal_pay_handler(request: web.Request) -> web.Response:
 
 
 async def panel_journal_add_service_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_add_service {record_id, service_ids[]} — добавить
-    услугу(и) к визиту (только ВЛАДЕЛЕЦ)."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    add_ids = []
-    for x in (body.get("service_ids") or []):
-        try:
-            add_ids.append(int(x))
-        except Exception:
-            pass
-    if not record_id or not add_ids:
-        return _cabinet_response({"error": "missing", "message": "Нужны запись и услуга."}, status=400)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    try:
-        result = await asyncio.to_thread(_yc.add_services_to_record, record_id, add_ids)
-    except Exception as e:
-        logger.error("journal_add_service %s: %s", record_id, e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось добавить услугу."}, status=502)
-    if result.get("success"):
-        return _cabinet_response({"ok": True, "record_id": record_id})
-    return _cabinet_response({"error": "add_failed", "message": result.get("error") or "YClients отклонил добавление."}, status=400)
+    """B18: legacy journal service mutation retired."""
+    del request
+    return _cabinet_response({
+        "ok": False,
+        "error": "canonical_staff_session_required",
+        "message": "Войдите в рабочий кабинет, чтобы изменить услуги визита.",
+        "canonical_authority": "CrmStaffAccess",
+        "canonical_action": "set_appointment_services",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_journal_set_services_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_set_services {record_id, service_ids[]} — задать
-    полный список услуг визита (добавить/удалить/заменить). Персонал.
-    Длительность визита пересчитывается = сумме длительностей услуг."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    ids = []
-    for x in (body.get("service_ids") or []):
-        try:
-            ids.append(int(x))
-        except Exception:
-            pass
-    if not record_id:
-        return _cabinet_response({"error": "missing", "message": "Нужен ID записи."}, status=400)
-    if not ids:
-        return _cabinet_response({"error": "missing", "message": "В визите должна остаться хотя бы одна услуга."}, status=400)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    try:
-        result = await asyncio.to_thread(_yc.set_record_services, record_id, ids)
-    except Exception as e:
-        logger.error("journal_set_services %s: %s", record_id, e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось изменить услуги."}, status=502)
-    if result.get("success"):
-        return _cabinet_response({"ok": True, "record_id": record_id})
-    return _cabinet_response({"error": "set_failed", "message": result.get("error") or "YClients отклонил изменение."}, status=400)
+    """B18: legacy journal service mutation retired."""
+    del request
+    return _cabinet_response({
+        "ok": False,
+        "error": "canonical_staff_session_required",
+        "message": "Войдите в рабочий кабинет, чтобы изменить услуги визита.",
+        "canonical_authority": "CrmStaffAccess",
+        "canonical_action": "set_appointment_services",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_journal_set_duration_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_set_duration {record_id, duration_minutes} — изменить
-    длительность визита («стянуть»/растянуть запись в журнале). Персонал.
-    Время начала, услуги, цены и клиент не меняются."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    try:
-        minutes = int(body.get("duration_minutes") or 0)
-    except Exception:
-        minutes = 0
-    if not record_id:
-        return _cabinet_response({"error": "missing", "message": "Нужен ID записи."}, status=400)
-    if not (5 <= minutes <= 720):
-        return _cabinet_response({"error": "bad_duration", "message": "Длительность — от 5 минут до 12 часов."}, status=400)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    try:
-        result = await asyncio.to_thread(_yc.set_record_duration, record_id, minutes * 60)
-    except Exception as e:
-        logger.error("journal_set_duration %s: %s", record_id, e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось изменить длительность."}, status=502)
-    if result.get("success"):
-        return _cabinet_response({"ok": True, "record_id": record_id, "duration_minutes": minutes})
-    return _cabinet_response({"error": "set_failed", "message": result.get("error") or "YClients отклонил изменение."}, status=400)
+    """B18: legacy journal duration mutation retired."""
+    del request
+    return _cabinet_response({
+        "ok": False,
+        "error": "canonical_staff_session_required",
+        "message": "Войдите в рабочий кабинет, чтобы изменить длительность визита.",
+        "canonical_authority": "CrmStaffAccess",
+        "canonical_action": "set_appointment_duration",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_journal_set_client_name_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_set_client_name {record_id, client_name?, client_phone?} —
-    обновить имя и/или телефон клиента в карточке записи. Персонал."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    name = str(body.get("client_name") or body.get("name") or "").strip()
-    phone = str(body.get("client_phone") or body.get("phone") or "").strip()
-    if not record_id:
-        return _cabinet_response({"error": "missing", "message": "Нужен ID записи."}, status=400)
-    if not name and not phone:
-        return _cabinet_response({"error": "missing", "message": "Введите имя или телефон клиента."}, status=400)
-    if phone and info.get("role") != "owner":
-        return _cabinet_response({"error": "forbidden", "message": "Телефон клиента может менять только владелец."}, status=403)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    try:
-        result = await asyncio.to_thread(_yc.set_record_client_name, record_id, name or None, phone or None)
-    except Exception as e:
-        logger.error("journal_set_client_name %s: %s", record_id, e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось сохранить данные клиента."}, status=502)
-    if result.get("success"):
-        return _cabinet_response({
-            "ok": True,
-            "record_id": record_id,
-            "client": result.get("client") or name,
-            "phone": result.get("phone") or phone,
-        })
-    return _cabinet_response({"error": "set_failed", "message": result.get("error") or "YClients отклонил изменение."}, status=400)
+    """B18: legacy journal Client-field mutation retired."""
+    del request
+    return _cabinet_response({
+        "ok": False,
+        "error": "canonical_staff_session_required",
+        "message": "Это действие доступно только через подтверждённый рабочий кабинет.",
+        "canonical_authority": "CrmStaffAccess",
+        "canonical_action": "set_appointment_fields",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def start_webhook_server(bot_app: Application):

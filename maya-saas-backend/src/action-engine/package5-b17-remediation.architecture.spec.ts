@@ -45,11 +45,15 @@ describe('Package 5 B17 Client appointment identity remediation', () => {
     expect(context).toContain(
       'allowed = {"record_id", "date", "time", "datetime", "auth_data", "session_token"}',
     );
-    const authority = runtime.slice(
+    const payload = runtime.slice(
       runtime.indexOf('private clientAppointmentPayload('),
+      runtime.indexOf('private clientAppointmentServicesPayload('),
+    );
+    const authority = runtime.slice(
+      runtime.indexOf('private async clientAppointmentAuthority('),
       runtime.indexOf('private async executeClientAppointment('),
     );
-    expect(authority).toContain(
+    expect(payload).toContain(
       "expected = reschedule ? 'recordId,start' : 'recordId'",
     );
     expect(runtime.slice(0, runtime.indexOf('issue(channelProof'))).toContain(
@@ -59,7 +63,7 @@ describe('Package 5 B17 Client appointment identity remediation', () => {
     expect(authority).toContain(
       'appointment.mayaClientId !== identity.clientId',
     );
-    expect(authority).not.toMatch(
+    expect(`${payload}\n${authority}`).not.toMatch(
       /phoneHash|clientPhone|chat_id|staffId|serviceIds|branchId/,
     );
   });

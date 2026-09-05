@@ -22,6 +22,14 @@ type AppointmentInvocation = {
   authorizationCheck: () => Promise<void>;
 };
 
+type ResidualAppointmentExecutor = (
+  tenant: string,
+  action: string,
+  record: string,
+  input: { serviceIds: string[] },
+  invocation: AppointmentInvocation,
+) => Promise<{ value: object; execution: ReturnType<typeof execution> }>;
+
 function setup(options: Options = {}) {
   const links =
     options.links === undefined
@@ -82,6 +90,19 @@ function setup(options: Options = {}) {
       validUntil: new Date('2099-01-01T00:00:00.000Z'),
     }),
   };
+  const executeResidualAppointmentWithReceipt =
+    jest.fn<ResidualAppointmentExecutor>(
+      async (
+        _tenant: string,
+        _action: string,
+        _record: string,
+        _input: { serviceIds: string[] },
+        invocation: AppointmentInvocation,
+      ) => {
+        await invocation.authorizationCheck();
+        return { value: {}, execution: execution() };
+      },
+    );
   const crm = {
     executeCancelAppointmentWithReceipt: jest.fn<
       (
@@ -115,6 +136,7 @@ function setup(options: Options = {}) {
         return { value: {}, execution: execution() };
       },
     ),
+    executeResidualAppointmentWithReceipt,
   };
   const service = new ClientChannelRuntimeService(
     prisma as never,
@@ -130,6 +152,7 @@ function setup(options: Options = {}) {
     prisma,
     channels,
     crm,
+    executeResidualAppointmentWithReceipt,
   };
 }
 
@@ -192,6 +215,91 @@ describe('B17 verified Client appointment authority', () => {
     expect(rescheduleCall[2].callerIdempotency.scope).toBe(
       'client-channel.appointment.reschedule.v1',
     );
+  });
+
+  it('routes an AI service change through the existing residual canonical executor', async () => {
+    const { service, executeResidualAppointmentWithReceipt, tx } = setup();
+
+    await expect(
+      service.setClientAppointmentServices('signed-proof', {
+        recordId: 'record-7',
+        serviceIds: ['service-2', 'service-1', 'service-2'],
+      }),
+    ).resolves.toMatchObject({
+      identity_authority: 'verified_client_channel_link',
+      execution_owner: 'action_engine',
+      provider_writes_outside_canonical_executor: 0,
+      execution: { state: 'SUCCEEDED' },
+    });
+
+    expect(executeResidualAppointmentWithReceipt).toHaveBeenCalledTimes(1);
+    const residualCalls = executeResidualAppointmentWithReceipt.mock
+      .calls as Array<Parameters<ResidualAppointmentExecutor>>;
+    const [tenant, action, record, input, invocation] = residualCalls[0];
+    expect({ tenant, action, record, input }).toEqual({
+      tenant: 'tenant-1',
+      action: 'set_appointment_services',
+      record: 'record-7',
+      input: { serviceIds: ['service-2', 'service-1'] },
+    });
+    expect(invocation).toMatchObject({
+      sourceType: 'authenticated_request',
+      sourceRef: 'client-channel-link:link-1',
+      callerIdempotency: {
+        scope: 'client-channel.appointment.services.v1',
+      },
+    });
+    expect(tx.appointment.findUnique).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects forged identity and malformed service replacement fields', async () => {
+    for (const forged of [
+      {
+        recordId: 'record-7',
+        serviceIds: ['service-1'],
+        phone: '+79990001122',
+      },
+      { recordId: 'record-7', serviceIds: ['service-1'], clientId: 'client-2' },
+      { recordId: 'record-7', serviceIds: [] },
+      { recordId: 'record-7', serviceIds: ['service-1', '../escape'] },
+    ]) {
+      const { service, executeResidualAppointmentWithReceipt } = setup();
+      await expect(
+        service.setClientAppointmentServices('signed-proof', forged),
+      ).rejects.toThrow();
+      expect(executeResidualAppointmentWithReceipt).not.toHaveBeenCalled();
+    }
+  });
+
+  it('uses one durable identity for concurrent duplicate service changes', async () => {
+    const { service, executeResidualAppointmentWithReceipt } = setup();
+    await Promise.all(
+      Array.from({ length: 8 }, () =>
+        service.setClientAppointmentServices('signed-proof', {
+          recordId: 'record-7',
+          serviceIds: ['service-1'],
+        }),
+      ),
+    );
+    const residualCalls = executeResidualAppointmentWithReceipt.mock
+      .calls as Array<Parameters<ResidualAppointmentExecutor>>;
+    const keys = residualCalls.map((call) => call[4].callerIdempotency.key);
+    expect(new Set(keys)).toEqual(new Set([keys[0]]));
+  });
+
+  it('preserves UNKNOWN for a service change without authorizing blind retry', async () => {
+    const { service, executeResidualAppointmentWithReceipt } = setup();
+    const error = Object.assign(new Error('uncertain'), {
+      actionExecutionResult: execution('UNKNOWN'),
+    });
+    executeResidualAppointmentWithReceipt.mockRejectedValue(error);
+
+    const result = await service.setClientAppointmentServices('signed-proof', {
+      recordId: 'record-7',
+      serviceIds: ['service-1'],
+    });
+    expect(result.execution.state).toBe('UNKNOWN');
+    expect(result.safe_explanation).toContain('Не повторяйте');
   });
 
   it.each([

@@ -1587,112 +1587,55 @@ def _resolve_service_ids(names, staff_id: int = None) -> list[int]:
     return ids
 
 
-def _check_record_ownership(user_id: int, record_id: int) -> dict | None:
+def _client_appointment_command(operation: str, payload: dict) -> dict:
+    """B18: AI supplies intent only; verified channel binding owns identity.
+
+    The backend resolves the tenant-qualified Client, proves that the exact
+    canonical Appointment belongs to it, and dispatches through Action Engine.
+    Raw phone/chat/session values never participate and there is no legacy
+    provider or local-mutation fallback.
     """
-    Проверяет, что запись принадлежит этому пользователю (его номеру).
-    Защита от случая, когда A записал друга B, а потом пытается через бота
-    перенести/отменить запись друга — нельзя.
+    from legacy_client_habits_bridge import current_context
+    from legacy_client_command_bridge import command
 
-    Возвращает None если всё ок (доступ разрешён), либо dict с status=error,
-    если доступа нет / запись не найдена / не можем проверить.
-    """
-    # У клиента должен быть сохранён телефон — иначе ничего не сравним
-    client_row = database.get_client(user_id) if user_id else None
-    if not client_row or not client_row.get("phone"):
+    context = current_context()
+    if context is None:
         return {
-            "status": "error",
-            "error": "телефон_не_известен",
-            "message": (
-                "Не получается проверить, что запись твоя — я тебя ещё не узнал. "
-                "Вызови инструмент request_client_contact, чтобы система показала "
-                "кнопку «Поделиться контактом». НЕ отправляй клиента к "
-                "администратору ради этого."
-            ),
-        }
-
-    record = yclients.get_record(record_id)
-    if not record:
-        return {
-            "status": "error",
-            "error": "запись_не_найдена",
-            "message": f"Запись #{record_id} не найдена в системе.",
-        }
-
-    record_phone = (record.get("client") or {}).get("phone") or ""
-
-    # Сравниваем последние 10 цифр — чтобы +7 / 8 / без +7 одинаково обрабатывались
-    def _digits10(p: str) -> str:
-        d = "".join(c for c in (p or "") if c.isdigit())
-        return d[-10:]
-
-    if _digits10(record_phone) != _digits10(client_row["phone"]):
-        return {
-            "status": "error",
-            "error": "не_ваша_запись",
-            "message": (
-                "Эта запись оформлена на другой номер телефона. "
-                "Изменить или отменить её может только владелец того номера. "
-                "Если нужно срочно — свяжитесь с администратором: 8-962-447-67-47"
-            ),
-        }
-
-    return None  # доступ разрешён
-
-
-def _resolve_user_record_id(user_id: int, ai_record_id) -> tuple:
-    """LLM часто ИСКАЖАЕТ длинный record_id (теряет/путает цифры), из-за чего
-    отмена/перенос падают с «запись не найдена». Сопоставляем переданный моделью
-    id с РЕАЛЬНЫМИ предстоящими записями клиента (по его телефону):
-      • точное совпадение -> берём его;
-      • если предстоящая запись ровно одна -> берём её (модель явно про неё);
-      • иначе -> просим уточнить (несколько записей).
-    Возвращает (real_record_id|None, upcoming_list, err_dict|None). Заодно это
-    гарантирует, что мы НИКОГДА не трогаем чужую запись."""
-    client_row = database.get_client(user_id) if user_id else None
-    if not client_row or not client_row.get("phone"):
-        return None, [], {
-            "status": "error",
-            "error": "телефон_не_известен",
-            "message": ("Чтобы найти твои записи, мне нужно тебя узнать. Вызови "
-                        "инструмент request_client_contact — система попросит "
-                        "поделиться контактом кнопкой. НЕ предлагай звонить "
-                        "администратору."),
+            "success": False,
+            "error": "client_link_required",
+            "message": "Нужна подтверждённая привязка клиента.",
         }
     try:
-        bookings = yclients.get_client_bookings(client_row["phone"]) or []
-    except Exception as e:
-        logger.error(f"_resolve_user_record_id: get_client_bookings err: {e}")
-        return None, [], {"status": "error",
-                          "message": "Не удалось получить ваши записи, попробуйте ещё раз."}
-    today = datetime.now().strftime("%Y-%m-%d")
-    upcoming = []
-    for b in bookings:
-        if isinstance(b, dict) and b.get("record_id"):
-            dt = (b.get("datetime") or b.get("date") or "")[:10]
-            if dt < today or b.get("attendance") == 1:
-                continue
-            upcoming.append(b)
-    if not upcoming:
-        return None, [], {"status": "error",
-                          "message": "У вас нет предстоящих записей."}
-    ids = [int(b["record_id"]) for b in upcoming if str(b.get("record_id")).isdigit()]
-    try:
-        aid = int(ai_record_id)
+        response = command(operation, context.proof, payload)
+    except ValueError:
+        return {
+            "success": False,
+            "error": "client_link_or_appointment_authority_required",
+            "message": "Не удалось подтвердить вашу запись.",
+        }
     except Exception:
-        aid = None
-    if aid in ids:
-        return aid, upcoming, None
-    if len(ids) == 1:
-        return ids[0], upcoming, None
-    lst = "; ".join(
-        f"{(b.get('datetime') or '')[:16].replace('T', ' ')} — {b.get('master') or ''}"
-        for b in upcoming
-    )
-    return None, upcoming, {
-        "status": "need_clarification",
-        "message": (f"У клиента несколько предстоящих записей: {lst}. "
-                    "Уточни у него, какую именно отменить/перенести, и вызови "
-                    "инструмент с её record_id из get_my_bookings."),
+        return {
+            "success": False,
+            "error": "appointment_command_unavailable",
+            "message": "Не удалось безопасно выполнить операцию.",
+        }
+    execution = response.get("execution") if isinstance(response, dict) else None
+    state = str((execution or {}).get("state") or "").upper()
+    if state == "SUCCEEDED":
+        return {"success": True, "execution_id": execution.get("executionId")}
+    if state == "UNKNOWN":
+        return {
+            "success": False,
+            "unknown": True,
+            "retry_allowed": False,
+            "execution_id": execution.get("executionId"),
+            "message": "Результат операции уточняется. Не повторяйте действие.",
+        }
+    return {
+        "success": False,
+        "error": "appointment_command_rejected",
+        "execution_id": (execution or {}).get("executionId"),
+        "message": "Операция не выполнена.",
     }
 
 
@@ -2464,56 +2407,30 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
             else:
                 result = {"history": "empty_for_upsell", "reason": "Нет подходящих допуслуг"}
         elif tool_name == "reschedule_booking":
-            # сопоставляем (часто искажённый моделью) record_id с реальными записями клиента
-            rid, _up, rerr = _resolve_user_record_id(user_id, tool_input.get("record_id"))
-            if rerr:
-                return json.dumps(rerr, ensure_ascii=False)
-            # Новый мастер (если указан) — переносим к нему, цена пересчитается по
-            # его рангу. service_ids резолвим под нового мастера.
-            new_staff_id = _resolve_staff_id(tool_input["staff_name"]) if tool_input.get("staff_name") else None
-            service_ids = None
-            if tool_input.get("service_names"):
-                service_ids = _resolve_service_ids(tool_input["service_names"], new_staff_id)
-            result = yclients.reschedule_booking(
-                record_id=rid,
-                new_datetime_str=tool_input["new_datetime_str"],
-                service_ids=service_ids,
-                staff_id=new_staff_id,
-                bridge_origin="claude_ai",
+            result = _client_appointment_command(
+                "appointment-reschedule",
+                {
+                    "recordId": str(tool_input.get("record_id") or ""),
+                    "start": str(tool_input.get("new_datetime_str") or ""),
+                },
             )
-            # Помечаем, КТО перенёс: владелец/админ в своём чате с MAYA → 'staff',
-            # обычный клиент → 'client'. Webhook record.update прочитает метку и
-            # напишет мастеру «Клиент перенёс сам» vs «перенесено администратором».
-            try:
-                if isinstance(result, dict) and result.get("success"):
-                    _actor = "staff" if database.is_admin(user_id) else "client"
-                    database.mark_reschedule_actor(result.get("record_id") or rid, _actor)
-            except Exception:
-                pass
         elif tool_name == "update_booking":
-            rid, _up, rerr = _resolve_user_record_id(user_id, tool_input.get("record_id"))
-            if rerr:
-                return json.dumps(rerr, ensure_ascii=False)
             staff_id = _resolve_staff_id(tool_input["staff_name"])
             service_ids = _resolve_service_ids(tool_input.get("service_names", []), staff_id)
             if not service_ids:
                 return json.dumps({"error": "Услуги не найдены"})
-            result = yclients.update_booking(
-                record_id=rid,
-                service_ids=service_ids,
+            result = _client_appointment_command(
+                "appointment-services",
+                {
+                    "recordId": str(tool_input.get("record_id") or ""),
+                    "serviceIds": [str(service_id) for service_id in service_ids],
+                },
             )
         elif tool_name == "cancel_booking":
-            rid, _up, rerr = _resolve_user_record_id(user_id, tool_input.get("record_id"))
-            if rerr:
-                return json.dumps(rerr, ensure_ascii=False)
-            result = yclients.cancel_booking(rid, bridge_origin="claude_ai")
-            # Если отменил САМ клиент (не владелец в своём чате) — помечаем, чтобы
-            # webhook написал мастеру «Запись отменена клиентом».
-            try:
-                if isinstance(result, dict) and result.get("success") and not database.is_admin(user_id):
-                    database.mark_cancel_actor(rid, "client")
-            except Exception:
-                pass
+            result = _client_appointment_command(
+                "appointment-cancel",
+                {"recordId": str(tool_input.get("record_id") or "")},
+            )
         elif tool_name == "get_business_report":
             # Read-only аналитика для владельца. Ворота: только админ/владелец.
             if not user_id or not database.is_admin(int(user_id)):
