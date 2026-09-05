@@ -1058,6 +1058,7 @@ export class CrmService {
       }),
       handlers: {
         dispatch: async (input) => {
+          await invocation.authorizationCheck?.();
           const durable = this.createAppointmentInput(input);
           const value = await adapter.createAppointment({
             tenantId: scopedTenantId,

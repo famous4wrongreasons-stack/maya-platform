@@ -6822,110 +6822,64 @@ async def sub_create_handler(request: web.Request) -> web.Response:
     })
 
 
-def _finalize_booking_for_chat(chat_id: int, cr: dict) -> str | None:
+def _finalize_booking_for_chat(command_context, cr: dict) -> str | None:
+    """B19: verified Client initiator -> canonical create_appointment only.
+
+    Chat never resolves a Client from raw chat_id/phone, writes the retired
+    SQLite booking cache, or enters a Package 4 loyalty mutation. The durable
+    ActionExecution owns retry/UNKNOWN/reconciliation and is the only source of
+    the booking result used by this response projection.
     """
-    Оформляет запись для авторизованного клиента приложения. Имя/телефон берём из
-    БД (клиент известен по Telegram-id), создаём запись в YClients и сохраняем —
-    как делает бот в _finalize_booking, но без Telegram-UI (контакт уже есть).
-    Возвращает текст-подтверждение, либо None (тогда оставим исходный текст ИИ).
-    """
+    import legacy_client_command_bridge as client_commands
+
+    if command_context is None:
+        return ("Чтобы оформить запись, подтвердите связь этого канала с вашей "
+                "клиентской карточкой. Я ничего не создала и не изменила.")
     try:
-        client = database.get_client(chat_id)
-        name = (client or {}).get("name") or "Клиент"
-        phone = (client or {}).get("phone") or ""
-        if not phone:
-            return ("Почти готово! Для записи нужен ваш номер телефона. Оформите эту запись "
-                    "один раз через @malesthetic_bot (я попрошу телефон) — дальше всё будет "
-                    "автоматически. Или позвоните: 8-962-447-67-47.")
-        loyalty_quote = None
-        requested_points = list(cr.get("pay_with_points") or [])
-        if requested_points and client and client.get("id"):
-            try:
-                import loyalty as _loy
-
-                _loy.lazy_backfill_for_client(int(client["id"]), phone)
-                balance = int(database.loyalty_balance(int(client["id"])))
-                in_order = {
-                    _loy._normalize_service_title(title)
-                    for title in (cr.get("service_names") or [])
-                }
-                candidates = [
-                    care for care in _loy.current_care_services()
-                    if _loy._normalize_service_title(care.get("title")) in in_order
-                    and _loy._normalize_service_title(care.get("title")) in {
-                        _loy._normalize_service_title(title) for title in requested_points
-                    }
-                    and int(care.get("price") or 0) <= balance
-                ]
-                if candidates:
-                    loyalty_quote = max(candidates, key=lambda care: int(care["price"]))
-            except Exception as exc:
-                logger.error("chat loyalty validation client_id=%s: %s", client.get("id"), exc)
-        # YClients SMS/WhatsApp-напоминание — по персональной настройке клиента:
-        # выключил напоминание → notify_by_sms=0 (YClients молчит); иначе за reminder_hours.
-        try:
-            _np = database.get_notify_prefs_by_chat_id(chat_id)
-            _nbs = _np.get("reminder_hours") if _np.get("reminder") is not False else 0
-        except Exception:
-            _nbs = 0
-        result = _yc.create_booking(
-            staff_id=cr["staff_id"],
-            service_ids=cr["service_ids"],
-            datetime_str=cr["datetime_str"],
-            client_name=name,
-            client_phone=phone,
-            notify_by_sms=_nbs,
-            bridge_origin="webhook.chat",
+        staff_id = str(cr["staff_id"])
+        service_ids = [str(value) for value in cr["service_ids"]]
+        start = str(cr["datetime_str"])
+        identity_material = _json.dumps(
+            [command_context.intent, staff_id, sorted(set(service_ids)), start],
+            ensure_ascii=False,
+            separators=(",", ":"),
         )
-        if not result.get("success"):
-            logger.error(
-                "chat booking failed chat_id=%s code=%s status=%s error=%s",
-                chat_id,
-                result.get("code"),
-                result.get("http_status"),
-                result.get("error"),
-            )
-            return _booking_failure_reply(result)
-        try:
-            if client and client.get("id"):
-                database.save_booking(
-                    client["id"],
-                    service=", ".join(cr["service_names"]),
-                    master=cr["staff_name"],
-                    datetime_str=cr["datetime_str"],
-                    yclients_record_id=result.get("record_id"),
-                )
-        except Exception as e:
-            logger.error(f"chat save_booking chat_id={chat_id}: {e}")
-        redemption = None
-        record_id = result.get("record_id")
-        if loyalty_quote and record_id and client and client.get("id"):
-            try:
-                import loyalty as _loy
-
-                redemption = _loy.apply_redemption_for_booking(
-                    client_id=int(client["id"]),
-                    record_id=int(record_id),
-                    service_titles=[loyalty_quote["title"]],
-                    service_quotes=[loyalty_quote],
-                )
-            except Exception as exc:
-                logger.error("chat loyalty redemption record_id=%s: %s", record_id, exc)
-        dt = str(cr["datetime_str"]).replace("T", " ")[:16]
-        reply = ("Готово, записала вас! ✅\n\n"
-                 "✂️ " + ", ".join(cr["service_names"]) + "\n"
-                 "💈 " + cr["staff_name"] + "\n"
-                 "📅 " + dt)
-        if redemption and int(redemption.get("total_points") or 0) > 0:
-            reply += (
-                f"\n🪙 {int(redemption['total_points'])} баллов списано за "
-                f"{loyalty_quote['title']}. Осталось "
-                f"{int(redemption.get('remaining') or 0)} баллов."
-            )
-        return reply + "\n\nЖдём вас в «Мужской Эстетике»! 💈"
-    except Exception as e:
-        logger.error(f"_finalize_booking_for_chat chat_id={chat_id}: {e}")
-        return None
+        result = client_commands.command("appointment-create", command_context.proof, {
+            "idempotencyKey": "chat-booking:" + hashlib.sha256(
+                identity_material.encode("utf-8")
+            ).hexdigest(),
+            "staffId": staff_id,
+            "serviceIds": service_ids,
+            "start": start,
+        })
+        execution = result.get("execution") if isinstance(result, dict) else None
+        if not isinstance(execution, dict):
+            raise RuntimeError("canonical_booking_result_missing")
+        state = str(execution.get("state") or "").upper()
+        if state == "UNKNOWN":
+            return ("Результат записи уточняется. Не повторяйте действие — MAYA "
+                    "сверит результат с системой записи.")
+        if state in {"READY", "EXECUTING", "PENDING_APPROVAL"}:
+            return "Запись принята в обработку. Не отправляйте её повторно."
+        if state != "SUCCEEDED":
+            return str(result.get("safe_explanation") or "Запись не выполнена.")
+        dt = start.replace("T", " ")[:16]
+        return ("Готово, записала вас! ✅\n\n"
+                "✂️ " + ", ".join(cr["service_names"]) + "\n"
+                "💈 " + cr["staff_name"] + "\n"
+                "📅 " + dt + "\n\nЖдём вас в «Мужской Эстетике»! 💈")
+    except ValueError:
+        return ("Чтобы оформить запись, нужна подтверждённая связь с клиентской "
+                "карточкой. Я ничего не создала и не изменила.")
+    except RuntimeError as exc:
+        if str(exc) == "client_command_outcome_unknown":
+            return ("Результат записи уточняется. Не повторяйте действие — MAYA "
+                    "сверит результат с системой записи.")
+        logger.error("B19 canonical chat booking unavailable: RuntimeError")
+        return "Не удалось безопасно оформить запись. Попробуйте позже."
+    except Exception as exc:
+        logger.error("B19 canonical chat booking unavailable: %s", type(exc).__name__)
+        return "Не удалось безопасно оформить запись. Ничего не создано; попробуйте позже."
 
 
 async def chat_options_handler(request: web.Request) -> web.Response:
@@ -9397,9 +9351,12 @@ async def chat_handler(request: web.Request) -> web.Response:
         _vmodel = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
     try:
         from legacy_client_habits_bridge import request_context
+        client_command_context = request_context(
+            request.headers, body, safe_message, chat_mode
+        )
         response_text, contact_request, gift_cert_action = get_ai_response(
             llm_history,
-            _client_command_context=request_context(request.headers, body, safe_message, chat_mode),
+            _client_command_context=client_command_context,
             user_id=chat_id,
             model=_vmodel,
             disabled_tools=_chat_disabled_tools(chat_mode),
@@ -9430,7 +9387,9 @@ async def chat_handler(request: web.Request) -> web.Response:
             response_text = STAFF_BOOKING_SCOPE_REPLY
             contact_request = None
         else:
-            booking_msg = _finalize_booking_for_chat(chat_id, contact_request)
+            booking_msg = _finalize_booking_for_chat(
+                client_command_context, contact_request
+            )
             if booking_msg:
                 response_text = booking_msg
 
@@ -9983,12 +9942,16 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     queue: asyncio.Queue = asyncio.Queue()
     SENTINEL = object()
 
+    from legacy_client_habits_bridge import request_context
+    client_command_context = request_context(
+        request.headers, body, safe_message, chat_mode
+    )
+
     def _producer() -> None:
         try:
-            from legacy_client_habits_bridge import request_context
             for ev in get_ai_response_stream(
                 llm_history,
-                _client_command_context=request_context(request.headers, body, safe_message, chat_mode),
+                _client_command_context=client_command_context,
                 user_id=chat_id,
                 model=model_override,
                 disabled_tools=_chat_disabled_tools(chat_mode),
@@ -10136,7 +10099,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         else:
             try:
                 booking_msg = await loop.run_in_executor(
-                    None, _finalize_booking_for_chat, chat_id, contact_request)
+                    None, _finalize_booking_for_chat,
+                    client_command_context, contact_request)
             except Exception as e:
                 logger.error(f"chat_stream: booking finalize: {e}")
                 booking_msg = None

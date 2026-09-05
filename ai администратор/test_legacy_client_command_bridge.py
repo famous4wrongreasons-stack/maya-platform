@@ -1,5 +1,6 @@
 import ast
 import asyncio
+import os
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -71,6 +72,32 @@ class ClientBridgeTests(unittest.TestCase):
         with patch.object(bridge, "command", side_effect=RuntimeError("unavailable")):
             result = asyncio.run(self.handlers["consent_submit_handler"](Request({"accept_pdn": True, "accept_marketing": False, "idempotency_key": "same-command"}, {"X-Telegram-InitData": "signed"})))
             self.assertEqual(result["status"], 503)
+
+    def test_chat_booking_lost_response_is_unknown_and_never_blindly_retried(self):
+        with patch.dict(os.environ, {
+            "MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN": "test-bridge-token"
+        }), patch.object(
+            bridge.requests, "post", side_effect=bridge.requests.Timeout()
+        ) as post:
+            with self.assertRaisesRegex(RuntimeError, "client_command_outcome_unknown"):
+                bridge.command("appointment-create", "verified-proof", {
+                    "idempotencyKey": "chat-booking:stable",
+                    "staffId": "7", "serviceIds": ["2"],
+                    "start": "2099-04-05T09:00:00+03:00",
+                })
+        post.assert_called_once()
+
+    def test_chat_booking_server_error_is_unknown(self):
+        response = SimpleNamespace(status_code=503)
+        with patch.dict(os.environ, {
+            "MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN": "test-bridge-token"
+        }), patch.object(bridge.requests, "post", return_value=response):
+            with self.assertRaisesRegex(RuntimeError, "client_command_outcome_unknown"):
+                bridge.command("appointment-create", "verified-proof", {
+                    "idempotencyKey": "chat-booking:stable",
+                    "staffId": "7", "serviceIds": ["2"],
+                    "start": "2099-04-05T09:00:00+03:00",
+                })
 
     def test_status_is_read_only_and_observes_canonical_revocation(self):
         with patch.object(bridge, "command", return_value={"privacy": False, "marketing": False}) as command:

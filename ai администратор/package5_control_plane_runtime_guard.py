@@ -252,6 +252,50 @@ WEB_FUNCTIONS = {
             "client.get",
         ),
     },
+    "_finalize_booking_for_chat": {
+        "markers": (
+            "B19",
+            'client_commands.command("appointment-create"',
+            "verified Client initiator",
+            'state == "UNKNOWN"',
+            "Не повторяйте действие",
+        ),
+        "forbidden": (
+            "database.",
+            "_yc.",
+            "get_or_create_client",
+            "save_booking",
+            "lazy_backfill_for_client",
+            "apply_redemption_for_booking",
+            "get_notify_prefs_by_chat_id",
+        ),
+    },
+    "chat_handler": {
+        "markers": (
+            "client_command_context = request_context",
+            "_client_command_context=client_command_context",
+            "client_command_context, contact_request",
+        ),
+        "forbidden": (
+            "_finalize_booking_for_chat(chat_id",
+            "_yc.create_booking",
+            "database.save_booking",
+            "apply_redemption_for_booking",
+        ),
+    },
+    "chat_stream_handler": {
+        "markers": (
+            "client_command_context = request_context",
+            "_client_command_context=client_command_context",
+            "client_command_context, contact_request",
+        ),
+        "forbidden": (
+            "_finalize_booking_for_chat, chat_id",
+            "_yc.create_booking",
+            "database.save_booking",
+            "apply_redemption_for_booking",
+        ),
+    },
     "panel_journal_attendance_handler": {
         "markers": ("B18", "canonical_staff_session_required", "CrmStaffAccess", "set_appointment_attendance", "business_mutations"),
         "forbidden": ("_panel_auth", "_panel_resolve_role", "_panel_record_guard", "_yc", "database."),
@@ -456,6 +500,8 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
     client_bridge = _read(root, "legacy_client_command_bridge.py", overrides)
     if '"appointment-services"' not in client_bridge:
         findings.append(Finding("b18_client_command", "appointment-services command missing"))
+    if '"appointment-create"' not in client_bridge:
+        findings.append(Finding("b19_chat_booking", "appointment-create command missing"))
 
     client_actions_path = root / "client_record_actions.py"
     if client_actions_path.is_file():
@@ -521,6 +567,10 @@ def main() -> int:
         "b18ActiveLegacyProviderMutationOwners": 0 if not findings else None,
         "b18LegacyAppointmentAuthorityBypasses": 0 if not findings else None,
         "b18AppointmentSitesMapped": "6/6" if not findings else None,
+        "b19ChatBookingLegacyWriteSites": 0 if not findings else None,
+        "b19ChatBookingInventoryCoverage": "3/3" if not findings else None,
+        "b19ChatStreamAuthorityParity": True if not findings else None,
+        "b19ChatStreamMutationOwnerParity": True if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }

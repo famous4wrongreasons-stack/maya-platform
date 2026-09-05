@@ -450,6 +450,186 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     };
   }
 
+  /** B19 authenticated Client appointment creation. Chat supplies only the
+   * requested slot and a stable intent identity. The verified active channel
+   * link selects the canonical Client, while Maya derives provider PII from
+   * that Client's exact account/CRM binding. The existing Action Engine
+   * create_appointment executor remains the sole provider mutation owner.
+   */
+  async createClientAppointment(channelProof: string, value: unknown) {
+    const input = this.clientAppointmentCreatePayload(value);
+    const authority = await this.clientAppointmentCreateAuthority(channelProof);
+    const invocation = {
+      sourceType: 'authenticated_request' as const,
+      sourceRef: authority.resolutionEvidenceRef,
+      callerIdempotency: {
+        scope: 'client-channel.appointment.create.v1',
+        key: input.idempotencyKey,
+      },
+      authorizationCheck: async () => {
+        const current = await this.prisma.$transaction((tx) =>
+          this.resolve(channelProof, tx),
+        );
+        if (
+          current.tenantId !== authority.tenantId ||
+          current.clientId !== authority.clientId ||
+          current.resolutionEvidenceRef !== authority.resolutionEvidenceRef ||
+          current.resolutionEvidenceHash !== authority.resolutionEvidenceHash
+        )
+          throw new ForbiddenException('Verified Client identity changed');
+      },
+    };
+    let execution: ExecutionResultV1;
+    try {
+      execution = (
+        await this.crm.executeCreateAppointmentWithReceipt(
+          authority.tenantId,
+          {
+            clientId: authority.clientId,
+            clientName: authority.name,
+            clientPhone: authority.phone,
+            staffId: input.staffId,
+            serviceIds: input.serviceIds,
+            start: input.start,
+            creationMode: 'client',
+            allowBusy: false,
+            // B6 policy forbids an implicit legacy three-hour default. Chat
+            // does not own Communication Delivery or reminder preferences.
+            notifyBySmsHours: 0,
+          },
+          invocation,
+        )
+      ).execution;
+    } catch (error) {
+      const canonical = actionExecutionResultFromError(error);
+      if (!canonical) throw error;
+      execution = canonical;
+    }
+    return this.clientAppointmentExecutionResponse(execution);
+  }
+
+  private clientAppointmentCreatePayload(value: unknown) {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      throw new BadRequestException('Appointment command payload required');
+    const input = value as Record<string, unknown>;
+    if (
+      Object.keys(input).sort().join(',') !==
+      'idempotencyKey,serviceIds,staffId,start'
+    )
+      throw new BadRequestException(
+        'Only the exact appointment command fields are accepted',
+      );
+    if (
+      typeof input.idempotencyKey !== 'string' ||
+      !/^[A-Za-z0-9._:-]{8,180}$/.test(input.idempotencyKey) ||
+      typeof input.staffId !== 'string' ||
+      !/^[A-Za-z0-9._:-]{1,128}$/.test(input.staffId) ||
+      !Array.isArray(input.serviceIds) ||
+      input.serviceIds.length === 0 ||
+      input.serviceIds.length > 64 ||
+      !input.serviceIds.every(
+        (item: unknown): item is string =>
+          typeof item === 'string' && /^[A-Za-z0-9._:-]{1,128}$/.test(item),
+      ) ||
+      typeof input.start !== 'string' ||
+      input.start.length > 64
+    )
+      throw new BadRequestException('Exact appointment request required');
+    const start = new Date(input.start);
+    if (Number.isNaN(start.getTime()) || start <= new Date())
+      throw new BadRequestException('Future appointment datetime required');
+    return {
+      idempotencyKey: input.idempotencyKey,
+      staffId: input.staffId,
+      serviceIds: [...new Set(input.serviceIds)],
+      start: input.start,
+    };
+  }
+
+  private async clientAppointmentCreateAuthority(channelProof: string) {
+    const identity = await this.prisma.$transaction(async (tx) => {
+      const verified = await this.resolve(channelProof, tx);
+      const client = await tx.client.findUnique({
+        where: {
+          id_tenantId: {
+            id: verified.clientId,
+            tenantId: verified.tenantId,
+          },
+        },
+        select: {
+          id: true,
+          mergedIntoClientId: true,
+          user: {
+            select: {
+              tenantId: true,
+              status: true,
+              phone: true,
+              encryptedName: true,
+            },
+          },
+          crmLinks: {
+            where: { unlinkedAt: null },
+            select: { provider: true, externalId: true },
+          },
+        },
+      });
+      if (!client || client.mergedIntoClientId)
+        throw new ForbiddenException('Verified active Client required');
+      const profile = await tx.customerProfile.findUnique({
+        where: {
+          tenantId_clientId: {
+            tenantId: verified.tenantId,
+            clientId: verified.clientId,
+          },
+        },
+        select: { privacyConsentAt: true },
+      });
+      if (!profile?.privacyConsentAt)
+        throw new ForbiddenException('Canonical Client consent required');
+      return { ...verified, user: client.user, crmLinks: client.crmLinks };
+    });
+
+    let name = '';
+    let phone = '';
+    if (
+      identity.user?.tenantId === identity.tenantId &&
+      identity.user.status === 'active'
+    ) {
+      phone = identity.user.phone?.trim() ?? '';
+      if (identity.user.encryptedName) {
+        try {
+          name = this.encryption.decrypt(identity.user.encryptedName).trim();
+        } catch {
+          name = '';
+        }
+      }
+    }
+    if (!name || !phone) {
+      try {
+        const registry = await this.crm.getClientRegistry(identity.tenantId);
+        const exactLinks = identity.crmLinks.filter(
+          (link) => link.provider === registry.provider,
+        );
+        if (exactLinks.length === 1) {
+          const matches = registry.clients.filter(
+            (candidate) => candidate.external_id === exactLinks[0].externalId,
+          );
+          if (matches.length === 1) {
+            name ||= matches[0].name?.trim() ?? '';
+            phone ||= matches[0].phone?.trim() ?? '';
+          }
+        }
+      } catch {
+        // A failed provider read cannot authorize a phone/name fallback.
+      }
+    }
+    if (!name || phone.replace(/\D/g, '').length < 10)
+      throw new ForbiddenException(
+        'Verified Client booking identity unavailable',
+      );
+    return { ...identity, name, phone };
+  }
+
   /** B17 authenticated Client appointment mutation boundary. The channel link
    * resolves the Client and the canonical Appointment mirror proves ownership;
    * only the existing Action Engine appointment executor may write the provider.

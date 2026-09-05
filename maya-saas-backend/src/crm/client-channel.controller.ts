@@ -180,6 +180,11 @@ export class LegacyClientChannelController {
         empty(input.payload);
         return this.runtime.bookingPrefill(input.channelProof);
       }
+      if (operation === 'appointment-create')
+        return this.runtime.createClientAppointment(
+          input.channelProof,
+          input.payload,
+        );
       if (operation === 'appointment-cancel')
         return this.runtime.cancelClientAppointment(
           input.channelProof,
