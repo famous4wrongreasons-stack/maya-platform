@@ -1,0 +1,124 @@
+{
+  "acceptedOwnerCheckpoint": "480c1f41",
+  "assessmentType": "Package 5 Final Remediation B21 contract/schema STOP",
+  "b20ProductionBaselinePreserved": true,
+  "productionRuntimeChanged": false,
+  "schemaChanged": false,
+  "migrationAddedOrApplied": false,
+  "productionMutations": 0,
+  "readOnlyProductionVerification": {
+    "healthHttpStatus": 200,
+    "readinessHttpStatus": 200,
+    "healthStatus": "ok",
+    "readinessStatus": "ready",
+    "activeRelease": "20260905-p5-b20-16c24bd1"
+  },
+  "currentRealtimeStateMachine": [
+    "CONNECT",
+    "Telegram init data, Telegram Login Widget, or legacy web_session_token",
+    "reduce identity to raw chat_id",
+    "legacy consent lookup by chat_id",
+    "ready",
+    "optional canonical channel proof whose failure is ignored",
+    "role/private projection/history by raw chat_id",
+    "legacy durable conversation write by raw chat_id",
+    "close/reconnect reuses raw key"
+  ],
+  "requiredRealtimeStateMachine": [
+    "CONNECT",
+    "AUTHENTICATING",
+    "canonical client or staff authority plane",
+    "tenant-qualified identity and access resolution",
+    "canonical consent/preferences after identity",
+    "CLIENT_READY or STAFF_READY",
+    "permitted private projection and tool capabilities",
+    "canonical action initiation",
+    "close; reconnect repeats authentication and active authority resolution"
+  ],
+  "activeRuntimeEvidence": {
+    "webhookServerSha256": "73e2b1306f24113211993a54cda2749ed0ae9299cbbb82931c095ca10d1e9628",
+    "realtimeBridgeSha256": "6f2c7e63133194561b1e6ab36a532efea32aa3dc45a890de58fa95addfa5a4ce",
+    "memorySha256": "b286f39327adcc3e82c544ad4409d2e5c75a28e0b8367ceb9e16e320850c1b41",
+    "webAuthSha256": "d5af185be0073187de9fc0023c3b0ea4d711991344523a0fa5fbe4fd88513a19",
+    "claudeAiSha256": "a0906f3a6c8cec37bf97961625196f8bc0412b1304138ec3eede1b0d6d8436c9",
+    "package5GuardSha256": "5cacf39c128bc112c042ff966f6f300985a5f9f218aae98a38441103bcf8819c",
+    "publishedApplicationSha256": "56fc2f1238f366d51ac975176207e5d1c89318b03aadf9c8738c21009a4bb861",
+    "productionRealtimeEndpointInvoked": false
+  },
+  "sourceEvidence": {
+    "handler": "ai администратор/webhook_server.py:realtime_handler",
+    "handlerLines": [9966, 10036],
+    "legacySessionResolutionLine": 10007,
+    "rawChatIdDerivationLine": 10010,
+    "legacyConsentBeforeIdentityLine": 10015,
+    "readyBeforeCanonicalProofLine": 10024,
+    "optionalProofFailureIgnoredLines": [10026, 10030],
+    "bridgeStartedWithOptionalProofLine": 10031,
+    "bridge": "ai администратор/realtime_bridge.py:run_session",
+    "bridgeLines": [375, 710],
+    "roleFromRawChatIdLine": 388,
+    "historyReadByRawChatIdLines": [508, 509, 631, 632],
+    "optionalClientCommandContextLine": 525,
+    "rawChatIdPassedAsAiUserIdLine": 532,
+    "historyWriteByRawChatIdLines": [543, 544, 549],
+    "legacyConversationWriter": "ai администратор/memory.py:save_conversations"
+  },
+  "existingFoundations": {
+    "clientIdentity": "ClientChannelLink plus ClientChannelAuthenticatorService and ClientChannelRuntimeService",
+    "staffAuthority": "AuthIdentity plus Membership plus A16 CrmStaffAccess",
+    "consentPreferences": "canonical Client consent and preference foundations",
+    "businessMutations": "existing canonical action ingress/executors",
+    "identityRoleFoundationSufficient": true,
+    "newIdentityModelRequired": false,
+    "newActionClassRequired": false
+  },
+  "durableHistoryGap": {
+    "canonicalDurableClientHistoryFoundationSufficient": false,
+    "aiBrainSession": "raw messages deliberately not persisted; Maya User and Membership required",
+    "aiMemoryFact": "explicit bounded REMEMBER fact for Maya User, not dialogue history",
+    "inboxItem": "User projection, not Client conversation owner",
+    "domainEvent": "immutable event evidence, not ordered conversation",
+    "clientChannelLink": "identity evidence, not transcript payload owner",
+    "communicationDelivery": "outbound delivery facts, not interactive conversation",
+    "legacyConversationWriterAllowedAsCanonicalOwner": false
+  },
+  "proposal": {
+    "artifact": "docs/rebuild/package5-b21-realtime-session-history-v1-proposal.md",
+    "d1Recommended": "A — ephemeral realtime context V1",
+    "d1A": {
+      "existingSchemaSufficient": true,
+      "additionalSchemaRequired": false,
+      "newModels": 0,
+      "newMigrations": 0,
+      "newActionClasses": 0,
+      "durableTranscript": false,
+      "crossReconnectHistory": false,
+      "crossChannelHistory": false
+    },
+    "d1B": {
+      "additionalSchemaRequired": true,
+      "proposedModel": "ClientRealtimeConversation",
+      "newModels": 1,
+      "backfill": 0,
+      "requiresRetentionPrivacyLimitDecisions": true
+    },
+    "d2Recommended": "A — fail closed and require verified Client linking",
+    "ownerDecisionRequired": true,
+    "runtimeRemediationCanResume": false
+  },
+  "finalAdversarialVerification": "FAIL — open B21 blocker",
+  "package5Complete": false,
+  "wavesAccepted": "6/6",
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}
