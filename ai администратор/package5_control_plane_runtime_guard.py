@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed when the active PWA restores B13-B22 legacy owners."""
+"""Fail closed when the active PWA restores B13-B23 legacy owners."""
 
 from __future__ import annotations
 
@@ -19,6 +19,10 @@ class Finding:
 
 
 WEB_FUNCTIONS = {
+    "chat_delete_handler": {
+        "markers": ("p5_b23_server_history_delete_retired", "FEATURE_NOT_AVAILABLE", "status=410"),
+        "forbidden": ("request.json", "request.app", "chat_id", "session", "phone", "memory", "database.", "messages", "client_command", "load_conversations", "save_conversations"),
+    },
     "tip_sent_handler": {
         "markers": ("p5_b22_unverified_tip_signal_retired", '"ok": False', '"payment_confirmed": False', "status=410"),
         "forbidden": ("request.json", "request.app", "database.", "_master_by", "send_message", "_send_master_push", "client_command", "_yc", ".execute("),
@@ -509,6 +513,17 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
         if len(statements) != 1 or not isinstance(statements[0], ast.Return) or len(calls) != 1 or not isinstance(calls[0].func, ast.Name) or calls[0].func.id != "_cabinet_response":
             findings.append(Finding("b22_tip_authority", "Retired endpoint must only return unsupported"))
 
+    delete_body = web_functions.get("chat_delete_handler", "")
+    if delete_body:
+        node = ast.parse(delete_body).body[0]
+        statements = [n for n in node.body if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant) and isinstance(n.value.value, str))]
+        expected = ast.parse('return _cabinet_response({"ok": False, "error": "FEATURE_NOT_AVAILABLE"}, status=410)').body[0]
+        if len(statements) != 1 or ast.dump(statements[0]) != ast.dump(expected):
+            findings.append(Finding("b23_history_delete", "Retired delete must return a fixed unsupported response without input/state access"))
+    routes = [n for n in ast.walk(ast.parse(web)) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr != "add_options" and any(isinstance(a, ast.Constant) and a.value == "/api/chat/delete" for a in n.args)]
+    if len(routes) != 1 or len(routes[0].args) != 2 or not isinstance(routes[0].args[1], ast.Name) or routes[0].args[1].id != "chat_delete_handler":
+        findings.append(Finding("b23_history_delete", "Compatibility route must use the retired handler"))
+
     database = _read(root, "database.py", overrides)
     db_functions = _functions(database, "database.py")
     for name, marker in DATABASE_RETIREMENTS.items():
@@ -703,6 +718,7 @@ def main() -> int:
         "b21RealtimeLegacyHistoryWriters": 0 if not findings else None,
         "b21RealtimePreReadyBypasses": 0 if not findings else None,
         "b22UnverifiedTipOwners": 0 if not findings else None,
+        "b23LegacyHistoryDeleteOwners": 0 if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }
@@ -712,7 +728,7 @@ def main() -> int:
         for finding in findings:
             print(f"FAIL {finding.check}: {finding.detail}")
     else:
-        print("Package 5 B13-B22 active PWA control-plane guard: PASS")
+        print("Package 5 B13-B23 active PWA control-plane guard: PASS")
     return 0 if not findings else 1
 
 

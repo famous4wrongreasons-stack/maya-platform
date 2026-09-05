@@ -86,3 +86,12 @@ PRODUCTION MUTATIONS: 0
 ```
 
 STOP after Proposal/report/remainder commit and push, as explicitly required by the owner's B23 instruction. No deployment or new Final Gate run before owner closure and successful remediation. Waves 1–6/B22 remain accepted; no P4-11, Wave 7, Chapter 7 or automatic Chapter 6 completion.
+
+
+## Owner closure — Option A approved (2026-09-06)
+
+The owner accepted checkpoint `9c6ee8bf` and explicitly approved retirement of legacy server-side chat history deletion. No models, schema or action classes are introduced. The compatibility endpoint and proxy return a fixed HTTP 410 `{ "ok": false, "error": "FEATURE_NOT_AVAILABLE" }` with no identity, history or storage access. Saved history and protected evidence are neither erased nor rewritten.
+
+Existing local-only SaaS/inbox hiding remains local and is labelled as hiding on this device; it does not claim server erasure. Legacy server-delete controls and upstream requests are removed. B15 authorized read and B21 ephemeral voice remain unchanged. D7-A/AC6 scope is not expanded.
+
+This is a temporary Chapter 6 limitation. A future separately approved conversation lifecycle may restore deletion after defining ownership, voice/text/Telegram unification, user deletion, retention, legal/audit preservation, employee access, privacy, limits and cross-channel identity. No future capability is implemented by B23.

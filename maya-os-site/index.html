@@ -16929,13 +16929,16 @@ function AChat() {
 	    userHasSentRef.current = loaded.some(m => m && m.role === 'user');
 	    setMsgs(loaded.length ? loaded : fallbackToGreeting ? defaultChatMsgs() : []);
 	  }
-	  async function deleteChatMessage(m, i) {
+	  // p5_b23_server_history_delete_retired: retain only existing local SaaS/inbox hiding.
+  function canHideLocalChatMessage(m) { return !!(window.__ME_SAAS_CTX || (m && m.inbox_id)); }
+  async function deleteChatMessage(m, i) {
+    if (!canHideLocalChatMessage(m)) return { ok: false, error: 'FEATURE_NOT_AVAILABLE' };
 	    if (!m || m.typing) {
 	      setMsgs(cur => cur.filter((_, idx) => idx !== i));
 	      return;
 	    }
-	    if (!(await meConfirmDialog({ kind: 'chat-message', title: 'Удалить сообщение?', message: 'Это действие нельзя отменить.', confirmLabel: 'Удалить' }))) return;
-	    const mutationRevision = protectLocalChat(8000);
+	    if (!(await meConfirmDialog({ kind: 'chat-message', title: 'Скрыть сообщение?', message: 'Сообщение будет скрыто на этом устройстве. История на сервере сохранится.', confirmLabel: 'Скрыть' }))) return;
+	    protectLocalChat(8000);
 	    try {
 	      if (window.tactile) window.tactile();else if (navigator.vibrate) navigator.vibrate(8);
 	    } catch (e) {}
@@ -16963,26 +16966,11 @@ function AChat() {
 	      });
 	      return next.length ? next : defaultChatMsgs();
 	    });
-	    if (window.__ME_SAAS_CTX) { setDeleteMode(false); return; } // локальное удаление tenant-scoped SaaS-ленты
-	    try {
-	      const ap = authPayload({
-	        delete_mode: 'one',
-	        message_id: m.id,
-	        role: m.role,
-	        text: m.text || ''
-	      });
-	      const resp = await fetch(CHAT_PROXY + '?action=chat_delete', {
-	        method: 'POST',
-	        headers: ap.headers,
-	        body: JSON.stringify(ap.payload)
-	      });
-	      if (!resp.ok) return;
-	      const data = await resp.json();
-	      if (data && Array.isArray(data.messages) && mutationRevision === chatMutationRef.current.revision) applyServerChatMessages(data, true);
-	    } catch (e) {}
+	    setDeleteMode(false);
 	  }
 	  async function clearMayaChat() {
-	    if (!(await meConfirmDialog({ kind: 'chat-all', title: 'Удалить переписку?', message: 'Вся история чата с MAYA будет удалена.', confirmLabel: 'Удалить' }))) return;
+    if (!window.__ME_SAAS_CTX) return { ok: false, error: 'FEATURE_NOT_AVAILABLE' };
+	    if (!(await meConfirmDialog({ kind: 'chat-all', title: 'Скрыть переписку?', message: 'Лента будет скрыта на этом устройстве. История на сервере сохранится.', confirmLabel: 'Скрыть' }))) return;
 	    chatMutationRef.current.clearPending = true;
 	    protectLocalChat(10000);
 	    try {
@@ -17001,20 +16989,11 @@ function AChat() {
 	      chatHistoryStorage().removeItem(chatHistoryCacheKey());
 	      chatHistoryStorage().removeItem(meChatDelStoreKey());
 	    } catch (e) {}
-	    if (window.__ME_SAAS_CTX) { chatMutationRef.current.clearPending = false; protectLocalChat(1200); setDeleteMode(false); return; }
-		    try {
-		      const ap = authPayload({ delete_mode: 'all' });
-		      await fetch(CHAT_PROXY + '?action=chat_delete', {
-		        method: 'POST',
-		        headers: ap.headers,
-		        body: JSON.stringify(ap.payload)
-		      });
-		    } catch (e) {}
-		    chatMutationRef.current.clearPending = false;
-		    protectLocalChat(1200);
-		    setDeleteMode(false);
-		  }
-		  function clearLongPress() {
+	    chatMutationRef.current.clearPending = false;
+    protectLocalChat(1200);
+    setDeleteMode(false);
+  }
+    function clearLongPress() {
 		    const lp = longPressRef.current;
 		    if (lp.timer) clearTimeout(lp.timer);
 		    lp.timer = null;
@@ -18552,11 +18531,11 @@ function AChat() {
         cursor: 'pointer'
       }
     }))) : null;
-	    const canDeleteMsg = !m.typing && !isChatIntroMsg(m);
+	    const canDeleteMsg = canHideLocalChatMessage(m) && !m.typing && !isChatIntroMsg(m);
 	    const deleteBtn = canDeleteMsg && deleteMode ? e('button', {
 	      key: 'del',
 	      type: 'button',
-	      title: 'Удалить сообщение',
+	      title: 'Скрыть сообщение на устройстве',
 	      onClick: ev => {
 	        ev.stopPropagation();
 	        deleteChatMessage(m, i);
@@ -18633,7 +18612,7 @@ function AChat() {
 	      }
 	    }, user ? [deleteBtn, bubbleEl] : [bubbleEl, deleteBtn]);
 	  };
-	  const canClearChat = chatDisplayMsgs().some(function (m) {
+	  const canClearChat = !!window.__ME_SAAS_CTX && chatDisplayMsgs().some(function (m) {
 	    return m && !m.typing && (m.role === 'user' || m.inbox_id || m.widget || m.aiApproval || m.action || (m.role === 'bot' && m.text && !isChatIntroMsg(m)));
 	  });
 	  return e(IOSDevice, {
@@ -18728,7 +18707,7 @@ function AChat() {
     }
 	  }, (chatSurface() === 'owner' ? 'Владелец' : (chatSurface() === 'staff' ? 'Сотрудник' : (chatSurface() === 'client' ? 'Клиент' : 'Администратор'))) + ' · онлайн'))), canClearChat && deleteMode ? e('button', {
 	    type: 'button',
-	    title: 'Удалить всю переписку',
+	    title: 'Скрыть переписку на устройстве',
 	    onClick: clearMayaChat,
 	    style: {
 	      width: 38,
