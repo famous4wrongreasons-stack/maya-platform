@@ -1,25 +1,26 @@
-# Package 5 post-Wave-6 remainder — B21 deployed, B22 Final Gate STOP
+# Package 5 post-Wave-6 remainder — B22 owner decision STOP
 
-Accepted checkpoint `e86e1cfc`. Waves 1–6 remain accepted 6/6. B7–B21 are accepted production baselines and must not be reopened.
+Accepted checkpoint `99e403c4`. Waves 1–6 remain accepted 6/6. B7–B21 are accepted production baselines and must not be reopened.
 
-1. B21 is deployed in backend release `/opt/maya-saas/releases/20260905-p5-b21-dc266820`, the request-only Python runtime and published PWA.
-2. Realtime requires one verified authority plane before ready: active tenant-qualified `ClientChannelLink` for Client mode, or Maya JWT, `AuthIdentity`, active Membership and matching A16 access for staff mode.
-3. Raw `chat_id`, legacy session, phone and consent are not identity/role authority. Missing, revoked, ambiguous and wrong-tenant authority fails closed before private projections, AI or tools.
-4. Voice context is bounded and per-WebSocket only. It is cleared at close, never read from or written to legacy conversation storage and never shared across reconnect or concurrent sockets. No durable voice-history model was introduced.
-5. B21 deployment regression passed 351 suites / 2875 tests. Health, readiness and guards pass; pending migrations are `0`, drift is `NONE`, errors are `0`, and proof used zero production business/provider/value mutations.
-6. The full 13-family Final Gate restarted from the beginning and stopped at new B22. Package 5 remains `FAIL/NO`; accepted waves and prior remediations stay closed.
-7. The published tips UI reaches the public proxy `tip_sent` case, which forwards caller master, amount and record fields to `POST /api/tips/sent` without verified Client proof.
-8. The active handler performs no Client/staff authority check. It directly inserts a legacy SQLite `tips` fact, sends Telegram via legacy staff `telegram_chat_id` and invokes direct Web Push.
-9. The event is explicitly not bank/payment confirmation, yet its caller amount is accumulated in owner tip analytics. No canonical owner, authoritative field semantics, idempotency/event identity or verified Client/record/staff binding is established.
-10. Telegram/Web Push bypasses Communication Delivery. The public proxy drops even the optional session/auth fields constructed by the UI.
-11. B22 needs an owner decision before implementation: classify the event, identify authoritative amount/record/staff evidence and decide whether staff communication is allowed through canonical Communication Delivery.
-12. Do not move `tips` mechanically into a new table or preserve direct Telegram/Web Push. Do not create schema/action classes until B22 business ownership and evidence semantics are approved.
+1. B21 remains deployed and healthy in release `/opt/maya-saas/releases/20260905-p5-b21-dc266820`. Realtime requires canonical Client/staff authority before ready and keeps only ephemeral per-WebSocket context.
+2. Package 5 Final Adversarial Verification remains `FAIL/NO` only because of open B22 found by the fresh 13-family scan.
+3. The current `/api/tips/sent` is emitted before the external YClients/ЮMoney payment page opens. It is not authoritative payment evidence.
+4. The public proxy forwards caller staff, amount and record fields without an authentication proof. The handler directly creates a SQLite tip fact and sends Telegram/Web Push outside Communication Delivery.
+5. Package 4 has no canonical tip owner. `BillingPayment`, Gift Certificate, Customer Subscription, referral and loyalty facts are domain-specific and cannot honestly store a customer-to-staff tip.
+6. Existing ClientChannelLink and Appointment foundations can authenticate a future Client command and prove visit ownership, but cannot prove payment outcome.
+7. Communication Delivery is reusable infrastructure, but no tip notification type/authority has been approved.
+8. `B22 TIP VALUE OWNER: NOT FOUND`. A new value lifecycle cannot be introduced without owner approval.
+9. Proposal Option A is recommended: retire the unverified `/tips/sent` mutation/delivery while preserving the external tip-payment page. Maya creates no tip/value fact and sends no staff notification. Schema/action-class additions are zero.
+10. Option B would add a verified non-payment `ClientTipIntent`; Option C would add a provider-backed tip-payment lifecycle. Both require new schema/action and additional authority/policy decisions.
+11. No runtime/schema/migration changes or production mutations were made in this contract cycle.
 
-STOP report: `CYCLE-06-BLOCKING-PACKAGE-5-B21-DEPLOYED-FINAL-GATE-STOP-REPORT.md`.
+Decision artifact: `package5-b22-tip-contract-v1-proposal.md`.
 
-Machine-readable evidence: `evidence/package5-b21-deployed-final-recheck.json`.
+STOP report: `CYCLE-06-BLOCKING-PACKAGE-5-B22-CONTRACT-STOP-REPORT.md`.
 
-Next controlled cycle: reconstruct B22 authority/evidence/delivery semantics and return a minimal owner decision sheet if existing contracts do not cover them. After approval, remediate locally, run targeted and mandatory deployment gates, deploy without real tip/Telegram/push mutations, structurally verify and restart the full 13-family Final Gate from the beginning.
+Machine-readable assessment: `evidence/package5-b22-contract-assessment.json`.
+
+Next controlled cycle starts only after the owner selects A/B/C. If A is approved, retire `/api/tips/sent` writes/delivery, keep the external payment link, align both PWA sources and proxy, add ratchets/proof, pass deployment gates, deploy without real tip/delivery mutations and restart the full 13-family Final Gate. Options B/C require their listed schema, value, provider and notification decisions before implementation.
 
 Preserve B7–B21, Waves 1–6, D1-A…D7-A, P02/P03 holds, verified Client identity, Communication Delivery, Package 4 value ownership, immutable evidence, no tenant hard delete and AC6 A30 ownership. Do not create P4-11 or Wave 7, start Chapter 7 or declare Chapter 6 complete.
 

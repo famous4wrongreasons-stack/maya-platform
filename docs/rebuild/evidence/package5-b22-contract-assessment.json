@@ -1,0 +1,88 @@
+{
+  "acceptedCheckpoint": "99e403c4",
+  "assessmentType": "Package 5 Final Remediation B22 owner contract STOP",
+  "b21ProductionBaselinePreserved": true,
+  "runtimeChanged": false,
+  "schemaChanged": false,
+  "migrationAddedOrApplied": false,
+  "productionMutations": 0,
+  "currentPath": {
+    "publicEndpoint": "POST /api/tips/sent",
+    "publishedUiEmitsBeforeExternalPaymentPage": true,
+    "publishedProxyForwardsAuthenticationProof": false,
+    "verifiedClientAuthority": false,
+    "callerSuppliedFields": [
+      "master",
+      "master_id",
+      "amount",
+      "record_id"
+    ],
+    "directSqliteTipFactWriter": true,
+    "directTelegramDelivery": true,
+    "directWebPushDelivery": true,
+    "communicationDeliveryUsed": false,
+    "providerPaymentOutcomeEvidence": false
+  },
+  "existingContractMapping": {
+    "BillingPayment": "tenant subscription billing only — not tips",
+    "GiftCertificate": "certificate payment/issuance only — not tips",
+    "CustomerSubscription": "activated subscription term only — not tips",
+    "ReferralAndLoyalty": "exact approved rights/ledgers only — not generic value",
+    "Appointment": "can prove visit ownership; cannot prove tip payment",
+    "ClientChannelLink": "can prove Client identity; cannot prove value outcome",
+    "CommunicationDelivery": "kernel reusable, but no approved tip message type/authority",
+    "tipModelFound": false,
+    "tipActionClassFound": false,
+    "canonicalTipValueOwnerFound": false
+  },
+  "invariants": {
+    "callerSuppliedTipAmountAsValueAuthority": false,
+    "callerSuppliedRecordIdAsAppointmentAuthority": false,
+    "legacySqliteTipFactAsCanonicalOwner": false
+  },
+  "options": {
+    "A": {
+      "name": "retire unverified signal; preserve external payment page",
+      "recommended": true,
+      "mayaTipFact": false,
+      "staffNotification": false,
+      "newSchema": false,
+      "newActionClass": false,
+      "lost": [
+        "unverified immediate staff alert",
+        "SQLite totals derived from self-report"
+      ]
+    },
+    "B": {
+      "name": "verified non-monetary Client tip intent",
+      "recommended": false,
+      "newSchema": true,
+      "newActionClass": true,
+      "communicationPolicyDecisionRequired": true
+    },
+    "C": {
+      "name": "provider-backed canonical tip payment lifecycle",
+      "recommended": false,
+      "newSchema": true,
+      "newActionClass": true,
+      "providerContractRequired": true,
+      "unknownAndReconciliationRequired": true
+    }
+  },
+  "proposal": "docs/rebuild/package5-b22-tip-contract-v1-proposal.md",
+  "ownerDecisionRequired": true,
+  "package5FinalAdversarialVerification": "FAIL — open B22 blocker",
+  "package5Complete": false,
+  "wavesAccepted": "6/6",
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "hygiene": {
+    "preExistingLocalTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}
