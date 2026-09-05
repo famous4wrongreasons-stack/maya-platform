@@ -1,0 +1,112 @@
+{
+  "contract": "maya.package5-b13-contract-mapping-evidence/1",
+  "generatedAt": "2026-09-05T10:03:59+03:00",
+  "sourceCheckpoint": "2f6471791e74c1a9f312eeccdd3d52187e899c70",
+  "headMatchedOriginBeforeAnalysis": true,
+  "productionMutations": 0,
+  "implementation": {
+    "runtime": false,
+    "schema": false,
+    "migration": false,
+    "ratchet": false,
+    "newActionClasses": 0
+  },
+  "sourceDigests": {
+    "ai-administrator/webhook_server.py": "bd682f796f881c22f508a50ca2b8c79a441aee6e3386da9f3c241b428ff80cf1",
+    "ai-administrator/growth_planner.py": "c0daff5187d4b39f4da04e04ae2cb4c11c7ee86a56272c8514b4f225fcde64f2",
+    "ai-administrator/database.py": "b819a149cb113f275afdddcae664fa950db87834313888f589f0523171f049ca",
+    "package5-wave1-executable.contract.ts": "96e0d5426fe22e6e6f18ee8cce112bab83f57239bcce05d6f6a2f799b845142b",
+    "package5-wave2-executable.contract.ts": "1458ea4477460c5795d71804e10af869c4533885162b11d8c1fa3318ba726eb9",
+    "package5-wave2.service.ts": "7cadb06f74361d9a09053be7d9f2de3e3869da00f94bd21ddcbbbb8fc1b634fa"
+  },
+  "acceptedRegistries": {
+    "A16": [
+      "configure_crm_staff_access",
+      "claim_crm_team_owner"
+    ],
+    "A22": [
+      "update_assistant_preferences",
+      "update_finance_dashboard_preferences",
+      "update_appointment_notification_settings"
+    ],
+    "A26": [
+      "update_tenant_configuration",
+      "update_tenant_branding",
+      "upload_tenant_logo",
+      "create_tenant_user",
+      "create_internal_provider_user",
+      "suspend_tenant",
+      "reactivate_tenant",
+      "create_tenant_branch"
+    ],
+    "preTenantCreationOwner": "TrialActivation"
+  },
+  "routeMapping": [
+    {
+      "endpoint": "/api/panel/team",
+      "readModes": ["list"],
+      "unmappedMutations": [
+        "legacy staff bind-code creation",
+        "legacy channel unlink/rebind/reactivation during bind-code reset",
+        "legacy cashier value-redemption capability toggle"
+      ],
+      "existingActionMatch": null
+    },
+    {
+      "endpoint": "/api/panel/managers",
+      "readModes": ["list", "recent"],
+      "unmappedMutations": [
+        "raw Telegram manager-authority grant",
+        "raw Telegram manager-authority removal without canonical successor role"
+      ],
+      "existingActionMatch": null
+    },
+    {
+      "endpoint": "/api/panel/plan_target",
+      "unmappedMutations": [
+        "tenant daily revenue target",
+        "dated strategic growth target",
+        "workstation-capacity goal",
+        "derived growth-plan snapshot lifecycle"
+      ],
+      "existingActionMatch": null,
+      "whyFinancePreferenceDoesNotMatch": "The accepted command owns actor-scoped monthly_target_rub and staff_targets_rub, not tenant-wide daily/deadline/capacity goal state."
+    },
+    {
+      "endpoint": "/api/god/subscribers",
+      "readModes": ["list"],
+      "unmappedMutations": [
+        "legacy subscriber row creation outside TrialActivation",
+        "caller-supplied plan and MRR facts",
+        "legacy subscriber activation without canonical Tenant and entitlement evidence",
+        "legacy subscriber suspension without canonical Tenant",
+        "reverse-to-pending lifecycle transition"
+      ],
+      "conditionalExistingMatches": {
+        "canonicalTenantSuspension": "suspend_tenant",
+        "canonicalSuspendedTenantReactivation": "reactivate_tenant"
+      }
+    }
+  ],
+  "verdict": {
+    "b13ExactCanonicalMapping": "FAIL",
+    "minimalContractProposal": "READY",
+    "package5FinalAdversarialVerification": "FAIL",
+    "package5Complete": false,
+    "stopRequired": true
+  },
+  "preserved": {
+    "wavesComplete": "6/6",
+    "familyInventoryCoverage": "13/13",
+    "b12BaselineReopened": false,
+    "p4_11Created": false,
+    "wave7Created": false,
+    "chapter7Started": false,
+    "preExistingLocalTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcesses": 0,
+    "backgroundWatchers": 0,
+    "ownedPlaywrightChromeProcesses": 0,
+    "ownedTempDatabases": 0
+  }
+}

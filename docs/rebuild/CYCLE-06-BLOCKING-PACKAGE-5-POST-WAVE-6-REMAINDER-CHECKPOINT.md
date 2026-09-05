@@ -1,6 +1,6 @@
-# Package 5 post-Wave-6 remainder — B12 deployed, Final Gate stopped at B13
+# Package 5 post-Wave-6 remainder — B13 contract mapping stopped for owner decision
 
-Accepted owner checkpoint `14738ce3`. Waves 1–6 remain accepted 6/6. B7–B11
+Accepted owner checkpoint `2f647179`. Waves 1–6 remain accepted 6/6. B7–B11
 remain accepted production baselines. B12 runtime commit `3ea401a5` is deployed
 in the active PWA and backend release
 `/opt/maya-saas/releases/20260905-p5-b12-3ea401a5`.
@@ -31,14 +31,25 @@ in the active PWA and backend release
 8. This is Package 5 Final Gate remediation, not P4-11 or Wave 7. B13 was not
    changed because the Final Gate requires STOP on a new bypass.
 
-Package 5 remains FAIL/NO. The next controlled cycle must reconstruct the exact
-B13 business semantics against the already approved A16/A22/A26 contracts,
-identify whether compatibility endpoints retire or become authorized canonical
-initiators, and STOP on any genuinely new business/schema decision. Where the
-existing contracts are sufficient, remove direct SQLite ownership, add active
-PWA ratchets, prove retry/concurrency/tenant and authority isolation, deploy
-without real staff/settings/tenant mutations, and restart the full 13-family
-Final Gate from the beginning.
+Package 5 remains FAIL/NO. The exact B13 comparison found unmapped operations,
+so no runtime or schema implementation started. The minimum choices are recorded
+in `package5-b13-control-plane-contract-v1-proposal.md`:
+
+1. retire legacy staff bind-code create/reset or approve a verified canonical
+   staff-channel linking contract;
+2. retire legacy cashier/raw-Telegram manager authority or approve the missing
+   canonical capabilities;
+3. narrow plan target to the existing monthly finance preference and reject
+   daily/growth modes, or approve a tenant growth-goal aggregate;
+4. make GOD subscribers a canonical read projection and retire legacy writes,
+   or restrict it to exact TrialActivation/suspend/reactivate initiation.
+
+After owner approval, the same B13 Final Remediation cycle may remove direct
+SQLite ownership, add active-PWA and published-proxy ratchets, prove
+retry/concurrency/tenant and authority isolation, deploy without real
+staff/settings/tenant mutations, and restart the full 13-family Final Gate from
+the beginning. If an option requiring a new contract/schema is selected, return
+that bounded proposal before implementation.
 
 Preserve B7–B12, all Waves 1–6, D1-A…D7-A, P02/P03 holds, Client ownership,
 immutable evidence, the tenant hard-delete prohibition, Package 2 Communication
