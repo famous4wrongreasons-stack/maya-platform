@@ -180,6 +180,16 @@ export class LegacyClientChannelController {
         empty(input.payload);
         return this.runtime.bookingPrefill(input.channelProof);
       }
+      if (operation === 'appointment-cancel')
+        return this.runtime.cancelClientAppointment(
+          input.channelProof,
+          input.payload,
+        );
+      if (operation === 'appointment-reschedule')
+        return this.runtime.rescheduleClientAppointment(
+          input.channelProof,
+          input.payload,
+        );
       throw new BadRequestException('Unsupported client command');
     });
   }

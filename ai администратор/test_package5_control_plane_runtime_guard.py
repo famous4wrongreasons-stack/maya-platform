@@ -78,6 +78,29 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
     def test_booking_prefill_phone_only_projection_fails(self):
         self._web_bypass("booking_prefill_handler", 'database.get_client(body.get("phone"))')
 
+    def test_client_cancel_legacy_session_authority_fails(self):
+        self._web_bypass("_client_record_request_context", "_authed_chat_id(request, body)")
+
+    def test_client_cancel_phone_identity_fails(self):
+        self._web_bypass("_client_record_request_context", 'database.get_client(body.get("phone"))')
+
+    def test_client_cancel_direct_provider_writer_fails(self):
+        self._web_bypass("client_cancel_record_handler", "_yc.cancel_booking(77)")
+
+    def test_client_reschedule_direct_provider_writer_fails(self):
+        self._web_bypass("client_reschedule_record_handler", "_yc.reschedule_booking(77)")
+
+    def test_client_record_legacy_owner_module_fails(self):
+        source = (ROOT / "client_record_actions.py").read_text(encoding="utf-8")
+        findings = guard.scan_runtime(
+            ROOT,
+            {"client_record_actions.py": source + "\n\ndef cancel_for_client():\n    pass\n"},
+        )
+        self.assertTrue(
+            any(item.check == "b17_client_appointment_owner" for item in findings),
+            findings,
+        )
+
     def test_marked_future_read_surface_writer_fails(self):
         source = (ROOT / "webhook_server.py").read_text(encoding="utf-8")
         injected = source + (

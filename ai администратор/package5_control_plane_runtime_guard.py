@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed when the active PWA restores B13-B16 legacy owners."""
+"""Fail closed when the active PWA restores B13-B17 legacy owners."""
 
 from __future__ import annotations
 
@@ -199,6 +199,59 @@ WEB_FUNCTIONS = {
             "database.delete_",
         ),
     },
+    "_client_record_request_context": {
+        "markers": (
+            "p5_b17_verified_client_appointment_authority",
+            "client_commands.channel_proof",
+            '"record_id"',
+        ),
+        "forbidden": (
+            "_authed_chat_id",
+            "database.get_client",
+            "database.get_or_create_client",
+            "database.has_valid_consent_by_chat_id",
+            'body.get("phone")',
+            'body.get("chat_id")',
+            'body.get("clientId")',
+            'body.get("client_id")',
+            "database.create_",
+            "database.update_",
+        ),
+    },
+    "client_cancel_record_handler": {
+        "markers": (
+            "B17 verified Client",
+            "client_commands.command",
+            '"appointment-cancel"',
+            "_client_appointment_command_response",
+        ),
+        "forbidden": (
+            "_authed_chat_id",
+            "database.",
+            "_yc",
+            "cancel_for_client",
+            "cancel_booking",
+            "mark_cancel_actor",
+            "client.get",
+        ),
+    },
+    "client_reschedule_record_handler": {
+        "markers": (
+            "B17 verified Client",
+            "client_commands.command",
+            '"appointment-reschedule"',
+            "_client_appointment_command_response",
+        ),
+        "forbidden": (
+            "_authed_chat_id",
+            "database.",
+            "_yc",
+            "reschedule_for_client",
+            "reschedule_booking",
+            "mark_reschedule_actor",
+            "client.get",
+        ),
+    },
 }
 
 READ_ONLY_MARKERS = (
@@ -317,6 +370,24 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
         if forbidden in growth_body:
             findings.append(Finding("retired_goal", f"set_growth_goal references {forbidden}"))
 
+    client_actions_path = root / "client_record_actions.py"
+    if client_actions_path.is_file():
+        client_actions = overrides.get("client_record_actions.py")
+        if client_actions is None:
+            client_actions = client_actions_path.read_text(encoding="utf-8")
+        for forbidden in (
+            "def cancel_for_client",
+            "def reschedule_for_client",
+            "def _owned_upcoming_record",
+            "cancel_booking",
+            "reschedule_booking",
+            "client_phone",
+        ):
+            if forbidden in client_actions:
+                findings.append(
+                    Finding("b17_client_appointment_owner", f"client_record_actions.py references {forbidden}")
+                )
+
     bind_cli_path = root / "generate_bind_codes.py"
     if bind_cli_path.is_file():
         bind_cli = overrides.get("generate_bind_codes.py")
@@ -359,6 +430,7 @@ def main() -> int:
         "b14LegacyGodOwners": 0 if not findings else None,
         "b15ChatHistoryReadOwners": 0 if not findings else None,
         "b16BookingPrefillLegacyIdentityOwners": 0 if not findings else None,
+        "b17ClientAppointmentLegacyIdentityOwners": 0 if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }
@@ -368,7 +440,7 @@ def main() -> int:
         for finding in findings:
             print(f"FAIL {finding.check}: {finding.detail}")
     else:
-        print("Package 5 B13/B14/B15/B16 active PWA control-plane guard: PASS")
+        print("Package 5 B13/B14/B15/B16/B17 active PWA control-plane guard: PASS")
     return 0 if not findings else 1
 
 

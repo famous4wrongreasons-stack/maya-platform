@@ -3,8 +3,13 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
+import { createHash } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 
+import {
+  actionExecutionResultFromError,
+  type ExecutionResultV1,
+} from '../action-engine';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { ClientChannelAuthenticatorService } from './client-channel-authenticator.service';
@@ -442,6 +447,190 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       name,
       phone: hasPhone ? phone : '',
       client_link_required: false,
+    };
+  }
+
+  /** B17 authenticated Client appointment mutation boundary. The channel link
+   * resolves the Client and the canonical Appointment mirror proves ownership;
+   * only the existing Action Engine appointment executor may write the provider.
+   */
+  async cancelClientAppointment(channelProof: string, value: unknown) {
+    const input = this.clientAppointmentPayload(value, false);
+    const authority = await this.clientAppointmentAuthority(
+      channelProof,
+      input.recordId,
+    );
+    return this.executeClientAppointment(
+      'cancel',
+      authority,
+      input.recordId,
+      undefined,
+      channelProof,
+    );
+  }
+
+  async rescheduleClientAppointment(channelProof: string, value: unknown) {
+    const input = this.clientAppointmentPayload(value, true);
+    const requested = new Date(input.start);
+    if (Number.isNaN(requested.getTime()) || requested <= new Date())
+      throw new BadRequestException('Future appointment datetime required');
+    const authority = await this.clientAppointmentAuthority(
+      channelProof,
+      input.recordId,
+    );
+    return this.executeClientAppointment(
+      'reschedule',
+      authority,
+      input.recordId,
+      input.start,
+      channelProof,
+    );
+  }
+
+  private clientAppointmentPayload(value: unknown, reschedule: boolean) {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      throw new BadRequestException('Appointment command payload required');
+    const input = value as Record<string, unknown>;
+    const expected = reschedule ? 'recordId,start' : 'recordId';
+    if (Object.keys(input).sort().join(',') !== expected)
+      throw new BadRequestException(
+        'Only the exact appointment command fields are accepted',
+      );
+    if (
+      typeof input.recordId !== 'string' ||
+      !/^[A-Za-z0-9._:-]{1,128}$/.test(input.recordId)
+    )
+      throw new BadRequestException('Exact appointment reference required');
+    if (
+      reschedule &&
+      (typeof input.start !== 'string' || input.start.length > 64)
+    )
+      throw new BadRequestException('Exact appointment datetime required');
+    return {
+      recordId: input.recordId,
+      start: reschedule ? String(input.start) : '',
+    };
+  }
+
+  private async clientAppointmentAuthority(
+    channelProof: string,
+    externalId: string,
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const identity = await this.resolve(channelProof, tx);
+      const client = await tx.client.findUnique({
+        where: {
+          id_tenantId: {
+            id: identity.clientId,
+            tenantId: identity.tenantId,
+          },
+        },
+        select: { id: true, mergedIntoClientId: true },
+      });
+      if (!client || client.mergedIntoClientId)
+        throw new ForbiddenException('Verified active Client required');
+
+      const integration = await tx.crmIntegration.findUnique({
+        where: { tenantId: identity.tenantId },
+        select: { provider: true, status: true },
+      });
+      if (!integration || integration.status !== 'active')
+        throw new ForbiddenException('Active CRM integration required');
+
+      const appointment = await tx.appointment.findUnique({
+        where: {
+          tenantId_crmProvider_crmExternalId: {
+            tenantId: identity.tenantId,
+            crmProvider: integration.provider,
+            crmExternalId: externalId,
+          },
+        },
+        select: {
+          mayaClientId: true,
+          startAt: true,
+        },
+      });
+      if (!appointment || appointment.mayaClientId !== identity.clientId)
+        throw new ForbiddenException(
+          'Appointment does not belong to the verified Client',
+        );
+      if (appointment.startAt <= new Date())
+        throw new BadRequestException('Only a future appointment may change');
+      return { ...identity, provider: integration.provider };
+    });
+  }
+
+  private async executeClientAppointment(
+    operation: 'cancel' | 'reschedule',
+    authority: {
+      tenantId: string;
+      clientId: string;
+      resolutionEvidenceRef: string;
+    },
+    externalId: string,
+    start: string | undefined,
+    channelProof: string,
+  ) {
+    const identity = createHash('sha256')
+      .update(
+        JSON.stringify([
+          authority.tenantId,
+          authority.clientId,
+          operation,
+          externalId,
+          start ?? null,
+        ]),
+      )
+      .digest('hex');
+    const invocation = {
+      sourceType: 'authenticated_request' as const,
+      sourceRef: authority.resolutionEvidenceRef,
+      callerIdempotency: {
+        scope: `client-channel.appointment.${operation}.v1`,
+        key: identity,
+      },
+      authorizationCheck: async () => {
+        await this.clientAppointmentAuthority(channelProof, externalId);
+      },
+    };
+    let execution: ExecutionResultV1;
+    try {
+      execution =
+        operation === 'cancel'
+          ? (
+              await this.crm.executeCancelAppointmentWithReceipt(
+                authority.tenantId,
+                externalId,
+                invocation,
+              )
+            ).execution
+          : (
+              await this.crm.executeRescheduleAppointmentWithReceipt(
+                authority.tenantId,
+                { externalId, start: start as string },
+                invocation,
+              )
+            ).execution;
+    } catch (error) {
+      const canonical = actionExecutionResultFromError(error);
+      if (!canonical) throw error;
+      execution = canonical;
+    }
+    return {
+      contract: 'maya.client-appointment-command-result/1' as const,
+      accepted: true,
+      identity_authority: 'verified_client_channel_link' as const,
+      execution_owner: 'action_engine' as const,
+      provider_writes_outside_canonical_executor: 0 as const,
+      execution,
+      safe_explanation:
+        execution.state === 'SUCCEEDED'
+          ? 'Операция выполнена.'
+          : execution.state === 'UNKNOWN'
+            ? 'Результат операции уточняется. Не повторяйте действие.'
+            : execution.state === 'FAILED' || execution.state === 'NOT_EXECUTED'
+              ? 'Операция не выполнена.'
+              : 'Операция принята в обработку.',
     };
   }
 

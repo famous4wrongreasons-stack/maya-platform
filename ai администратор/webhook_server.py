@@ -6374,7 +6374,10 @@ def _client_record_failure(error: client_record_actions.ClientRecordError) -> we
 
 async def _client_record_request_context(
     request: web.Request,
-) -> tuple[dict | None, dict | None, int | None, web.Response | None]:
+) -> tuple[dict | None, str | None, int | None, web.Response | None]:
+    """B17 transport parsing only; verified channel identity lives in backend."""
+    import legacy_client_command_bridge as client_commands
+
     try:
         body = await request.json()
     except Exception:
@@ -6386,124 +6389,144 @@ async def _client_record_request_context(
             "success": False, "error": "invalid_json", "code": "invalid_json",
         }, status=400)
 
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
+    # p5_b17_verified_client_appointment_authority: caller fields never select
+    # a Client or appointment owner. Even legacy session_token is only ignored
+    # compatibility input; channel_proof requires a trusted signed channel.
+    allowed = {"record_id", "date", "time", "datetime", "auth_data", "session_token"}
+    if set(body) - allowed:
         return body, None, None, _client_record_response({
-            "success": False, "error": "unauthorized", "code": "unauthorized",
-        }, status=401)
-    if not database.has_valid_consent_by_chat_id(int(chat_id)):
-        return body, None, None, _client_record_response({
-            "success": False, "error": "needs_consent", "code": "needs_consent",
+            "success": False,
+            "error": "client_link_required",
+            "code": "client_link_required",
         }, status=403)
-
-    client = database.get_client(int(chat_id))
-    if not client:
-        return body, None, None, _client_record_response({
-            "success": False, "error": "client_not_found", "code": "client_not_found",
-        }, status=404)
-    phone = str(client.get("phone") or "").strip()
-    if len("".join(ch for ch in phone if ch.isdigit())) < 10:
-        return body, client, None, _client_record_response({
-            "success": False, "error": "phone_required", "code": "phone_required",
-        }, status=409)
     try:
         record_id = int(body.get("record_id") or 0)
     except (TypeError, ValueError):
         record_id = 0
     if record_id <= 0:
-        return body, client, None, _client_record_response({
+        return body, None, None, _client_record_response({
             "success": False, "error": "not_found", "code": "not_found",
             "message": "Запись не найдена.",
         }, status=404)
-    return body, client, record_id, None
+    try:
+        proof = client_commands.channel_proof(request.headers, body)
+    except ValueError:
+        return body, None, None, _client_record_response({
+            "success": False,
+            "error": "client_link_required",
+            "code": "client_link_required",
+            "message": "Подтвердите связь с клиентом.",
+        }, status=403)
+    return body, proof, record_id, None
+
+
+def _client_appointment_command_response(result: dict, record_id: int, **extra) -> web.Response:
+    execution = result.get("execution") if isinstance(result, dict) else None
+    execution = execution if isinstance(execution, dict) else {}
+    state = str(execution.get("state") or "")
+    execution_id = str(execution.get("executionId") or "")
+    if state == "SUCCEEDED":
+        return _client_record_response({
+            "success": True,
+            "ok": True,
+            "record_id": record_id,
+            "widget": "mybookings",
+            **extra,
+        })
+    if state == "UNKNOWN":
+        return _client_record_response({
+            "success": False,
+            "ok": False,
+            "error": "outcome_unknown",
+            "code": "outcome_unknown",
+            "message": "Результат операции уточняется. Не повторяйте действие.",
+            "unknown": True,
+            "retry_allowed": False,
+            **({"execution_id": execution_id} if execution_id else {}),
+        }, status=202)
+    if state in {"PENDING", "CLAIMED", "DISPATCHING", "RECONCILING"}:
+        return _client_record_response({
+            "success": False,
+            "ok": False,
+            "error": "action_in_progress",
+            "code": "action_in_progress",
+            "message": "Операция уже принята в работу.",
+            "retry_allowed": False,
+            **({"execution_id": execution_id} if execution_id else {}),
+        }, status=202)
+    return _client_record_response({
+        "success": False,
+        "ok": False,
+        "error": "appointment_change_rejected",
+        "code": "appointment_change_rejected",
+        "message": str(result.get("safe_explanation") or "Операция не выполнена."),
+        **({"execution_id": execution_id} if execution_id else {}),
+    }, status=409)
 
 
 async def client_cancel_record_handler(request: web.Request) -> web.Response:
-    """Cancel only the authenticated client's future YClients record."""
-    body, client, record_id, error_response = await _client_record_request_context(request)
+    """B17 verified Client -> canonical cancel_appointment Action Engine."""
+    import legacy_client_command_bridge as client_commands
+
+    body, proof, record_id, error_response = await _client_record_request_context(request)
     if error_response is not None:
         return error_response
-
-    marker_set = False
-
-    def _mark_authorized(rid: int) -> None:
-        nonlocal marker_set
-        database.mark_cancel_actor(rid, "client")
-        marker_set = True
-
     try:
         result = await asyncio.to_thread(
-            client_record_actions.cancel_for_client,
-            _yc,
-            int(record_id),
-            str(client.get("phone") or ""),
-            before_write=_mark_authorized,
+            client_commands.command,
+            "appointment-cancel",
+            proof,
+            {"recordId": str(record_id)},
         )
-    except client_record_actions.ClientRecordError as exc:
-        if marker_set:
-            database.pop_recent_cancel_actor(int(record_id), max_age=3600)
-        return _client_record_failure(exc)
+    except ValueError:
+        return _client_record_response({
+            "success": False, "error": "client_link_required",
+            "code": "client_link_required",
+        }, status=403)
     except Exception as exc:
-        if marker_set:
-            database.pop_recent_cancel_actor(int(record_id), max_age=3600)
-        logger.error("client cancel record_id=%s: %s", record_id, exc)
+        logger.error("canonical client cancel unavailable record_id=%s: %s", record_id, exc)
         return _client_record_response({
             "success": False,
-            "error": "yclients_unavailable",
-            "code": "yclients_unavailable",
+            "error": "appointment_command_unavailable",
+            "code": "appointment_command_unavailable",
             "message": "Не удалось связаться с системой записи.",
-        }, status=502)
-    return _client_record_response({
-        "success": True,
-        "ok": True,
-        "record_id": result["record_id"],
-        "widget": "mybookings",
-    })
+        }, status=503)
+    return _client_appointment_command_response(result, int(record_id))
 
 
 async def client_reschedule_record_handler(request: web.Request) -> web.Response:
-    """Reschedule only the authenticated client's future record via PUT."""
-    body, client, record_id, error_response = await _client_record_request_context(request)
+    """B17 verified Client -> canonical reschedule_appointment Action Engine."""
+    import legacy_client_command_bridge as client_commands
+
+    body, proof, record_id, error_response = await _client_record_request_context(request)
     if error_response is not None:
         return error_response
-
-    marker_set = False
-
-    def _mark_authorized(rid: int) -> None:
-        nonlocal marker_set
-        database.mark_reschedule_actor(rid, "client")
-        marker_set = True
-
     try:
+        new_datetime = client_record_actions.parse_new_datetime(body)
         result = await asyncio.to_thread(
-            client_record_actions.reschedule_for_client,
-            _yc,
-            int(record_id),
-            str(client.get("phone") or ""),
-            body,
-            before_write=_mark_authorized,
+            client_commands.command,
+            "appointment-reschedule",
+            proof,
+            {"recordId": str(record_id), "start": new_datetime},
         )
     except client_record_actions.ClientRecordError as exc:
-        if marker_set:
-            database.pop_recent_reschedule_actor(int(record_id), max_age=3600)
         return _client_record_failure(exc)
+    except ValueError:
+        return _client_record_response({
+            "success": False, "error": "client_link_required",
+            "code": "client_link_required",
+        }, status=403)
     except Exception as exc:
-        if marker_set:
-            database.pop_recent_reschedule_actor(int(record_id), max_age=3600)
-        logger.error("client reschedule record_id=%s: %s", record_id, exc)
+        logger.error("canonical client reschedule unavailable record_id=%s: %s", record_id, exc)
         return _client_record_response({
             "success": False,
-            "error": "yclients_unavailable",
-            "code": "yclients_unavailable",
+            "error": "appointment_command_unavailable",
+            "code": "appointment_command_unavailable",
             "message": "Не удалось связаться с системой записи.",
-        }, status=502)
-    return _client_record_response({
-        "success": True,
-        "ok": True,
-        "record_id": result["record_id"],
-        "datetime": result["datetime"],
-        "widget": "mybookings",
-    })
+        }, status=503)
+    return _client_appointment_command_response(
+        result, int(record_id), datetime=new_datetime,
+    )
 
 
 async def client_book_with_loyalty_handler(request: web.Request) -> web.Response:

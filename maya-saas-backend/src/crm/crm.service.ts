@@ -102,6 +102,10 @@ export type AppointmentActionInvocation = {
   sourceType?: ActionSourceType;
   agentTaskId?: string;
   sourceRef?: string;
+  /** Server-only authority recheck immediately before provider dispatch.
+   * This callback is excluded from the durable action identity and payload.
+   */
+  authorizationCheck?: () => Promise<void>;
 };
 
 export type ResidualAppointmentShadowCapability =
@@ -1156,6 +1160,7 @@ export class CrmService {
       }),
       handlers: {
         dispatch: async (input) => {
+          await invocation.authorizationCheck?.();
           const durableExternalId = requireString(
             input.externalId,
             'externalId',
@@ -1291,6 +1296,7 @@ export class CrmService {
           } satisfies AppointmentStateEvidence;
         },
         dispatch: async (input) => {
+          await invocation.authorizationCheck?.();
           const durable = this.rescheduleAppointmentInput(input);
           const value = await adapter.rescheduleAppointment({
             tenantId: scopedTenantId,

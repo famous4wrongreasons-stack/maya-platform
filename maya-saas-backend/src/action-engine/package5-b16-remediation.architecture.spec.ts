@@ -44,7 +44,7 @@ describe('Package 5 B16 booking prefill identity and PII remediation', () => {
       'maya-saas-backend/src/crm/client-channel-runtime.service.ts',
     );
     const start = service.indexOf('async bookingPrefill(');
-    const end = service.indexOf('/** AC4 delivery reader', start);
+    const end = service.indexOf('/** B17 authenticated Client', start);
     const method = service.slice(start, end);
     expect(method).toBeDefined();
     expect(method).toContain(
