@@ -1,45 +1,42 @@
-# Package 5 post-Wave-6 remainder — B15 owner decision STOP
+# Package 5 post-Wave-6 remainder — B16 A18 identity/projection STOP
 
-Accepted checkpoint `c73134ea`. Waves 1–6 remain accepted 6/6. B7–B13 remain
-accepted production baselines. B14 runtime commit `7260a5a4` is deployed in the
-active request-only PWA, published app/proxy and backend release
-`/opt/maya-saas/releases/20260905-p5-b14-7260a5a4`.
+Accepted checkpoint `d531fa75`. Waves 1–6 remain accepted 6/6. B7–B14 remain
+accepted production baselines. B15 runtime commit `8c186a54` is deployed in
+backend release `/opt/maya-saas/releases/20260905-p5-b15-8c186a54` and the
+active request-only PWA.
 
-1. B14 is closed in production. GOD renewal and editable AI-budget mutations
-   are retired, GOD overview has no `maya_tenants` fallback, the health path is
-   read-only, and both PWA controls and proxy mutation forwarding are removed.
-2. The deployment Gate passed 339 suites / 2793 tests, lint, both typechecks,
-   build, release preflight, no-op migration, candidate smoke, health/readiness,
-   active P4 and P5 guards, and edge syntax/availability checks. Pending
-   migrations are `0`; drift is `NONE`; post-cutover error logs are empty.
-3. The fresh Package 5 Final Gate restarted from the beginning across all 13
-   families, backend, active PWA, published edge, background/event paths and
-   Package 4 guards. It stopped at new blocker **B15 / A18**.
-4. Published `chat_history` reaches active `POST /api/chat/history`. The endpoint
-   is a read projection but invokes `_ensure_client_loyalty_chat_offer` and
-   `_ensure_client_repeat_booking_offer` for client mode.
-5. The repeat helper resolves legacy Client state by raw `chat_id` and writes a
-   new recommendation into legacy conversation storage through
-   `_store_assistant_message_in_chat`. The read handler independently rewrites
-   history to add generated message IDs. An isolated reproduction using exact
-   deployed function text changed state with one save call; production
-   mutations were `0`.
-6. The P4 loyalty backfill itself remains fail-closed. The new blocker is
-   hidden chat/recommendation state creation from a read endpoint, legacy
-   channel identity as Client/communication authority, and the absence of an
-   approved canonical Opportunity/outreach/Communication Delivery owner.
-7. Before implementation, the owner must decide whether automatic loyalty and
-   repeat-booking suggestions are retired or represented by an explicit
-   canonical action, who owns persisted in-app recommendations, and whether the
-   read-time ID migration is removed or separately classified as protocol
-   migration.
+1. B15 is closed in production. `/api/chat/history` requires canonical
+   `ClientChannelLink` status in client mode, reads canonical privacy consent,
+   creates no recommendation/communication/value fact, never saves history and
+   never rewrites old messages. Its legacy loyalty/repeat offer hooks fail
+   closed.
+2. B15 proof passed 34 targeted Python tests, 5 architecture checks and the
+   mandatory 340-suite / 2798-test deployment regression. Active P4 and P5
+   guards pass. Pending migrations are `0`, drift is `NONE`, health/readiness
+   pass and post-deploy error logs are empty.
+3. The fresh Final Gate restarted from the beginning over all 13 families,
+   backend, active PWA, published edge, background/event surfaces and Package 4
+   guards. It stopped at new blocker **B16 / A18**.
+4. Public proxy action `booking_prefill` reaches active
+   `POST /api/booking/prefill`. The handler uses `_authed_chat_id`,
+   `database.get_client(chat_id)` and legacy consent to return a Client name and
+   full phone. It does not require verified `ClientChannelLink` identity.
+5. An isolated reproduction of the exact deployed function returned legacy PII
+   from a legacy session/raw channel binding. No production endpoint was
+   invoked and production mutations were `0`.
+6. Before implementation, reconstruct the prefill/contact presentation
+   contract. Prefill must require a verified canonical Client. Missing or
+   ambiguous identity must fail closed or return empty/unavailable without PII.
+   Do not migrate legacy name/phone mechanically; if an approved canonical
+   Client-owned contact projection is insufficient, return the minimal owner or
+   schema proposal and STOP.
 
-Package 5 remains FAIL/NO. B15 is Final Gate remediation, not P4-11 or Wave 7.
-No B15 runtime/schema work is authorized by the B14 decision. Preserve B7–B14,
-all Waves 1–6, D1-A…D7-A, P02/P03 holds, Client ownership, Package 2
-Communication Delivery, Package 4 value ownership, immutable evidence, the
-tenant hard-delete prohibition and AC6 A30 ownership. Do not create P4-11,
-Wave 7, start Chapter 7 or declare Chapter 6 complete.
+Package 5 remains FAIL/NO. B16 is Final Gate remediation, not P4-11 or Wave 7.
+Preserve B7–B15, Waves 1–6, D1-A…D7-A, P02/P03 holds, Client ownership,
+ClientChannelLink/ClientLinkChallenge, Package 2 Communication Delivery,
+Package 4 value ownership, immutable evidence, the tenant hard-delete
+prohibition and AC6 A30 ownership. Do not create P4-11 or Wave 7, start Chapter
+7 or declare Chapter 6 complete.
 
 All 17 old databases remain untouched. Owned processes, watchers, Chrome and
 temporary databases are zero.

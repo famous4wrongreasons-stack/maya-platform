@@ -1,0 +1,108 @@
+{
+  "acceptedOwnerCheckpoint": "d531fa75",
+  "runtimeCommit": "8c186a54a4f206d4ce04a2a975eda4fb9587ab83",
+  "productionRelease": "/opt/maya-saas/releases/20260905-p5-b15-8c186a54",
+  "b15ProductionRemediation": "PASS",
+  "b15": {
+    "verifiedClientChannelRequired": true,
+    "historyReadBusinessMutations": 0,
+    "historyClientCreation": 0,
+    "historyCommunicationCreation": 0,
+    "historyHistoricalRewrite": 0,
+    "historyValueMutations": 0,
+    "rawChatIdClientAuthority": 0,
+    "loyaltyHistoryOfferHook": "RETIRED",
+    "repeatHistoryOfferHook": "RETIRED",
+    "legacyMessageIdBehavior": "DETERMINISTIC RESPONSE-ONLY INDEX"
+  },
+  "productionStructuralReadOnlyVerification": "PASS",
+  "artifactHashes": {
+    "publishedApp": "fe804992306c50d5e8544a48d59d496c75664dd0af542b13b0e1f7810e59ebc7",
+    "publishedProxy": "886ca639708a766996716fcb4b1a6b85690c1c61baca35d6b5959495df4e75f5",
+    "activeWebhookServer": "77a33e03afa340ce08d1e2c3d4772992f48243c39b1a3e8a27acf2ab97028569",
+    "activePackage5Guard": "a9cc2af98a8ae5972e6fc96f83aeb991d778483bff3722169d8c8b4961d6c3a1"
+  },
+  "proofs": {
+    "targetedPythonB15": "PASS — 34 tests",
+    "b15ArchitectureRatchet": "PASS — 5/5",
+    "mandatoryLint": "PASS",
+    "mandatoryTypecheck": "PASS",
+    "mandatoryScriptTypecheck": "PASS",
+    "mandatoryBuild": "PASS",
+    "deploymentRegression": "PASS — 340 suites / 2798 tests",
+    "package4CrossPackageGuard": "PASS",
+    "package5ActiveRuntimeGuard": "PASS",
+    "finalAggregateRegression": "NOT RUN — mandatory STOP at new B16 inventory blocker"
+  },
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "freshFinalGateStartedFromScratch": true,
+  "sourceInventory": {
+    "productionTypescriptFiles": 537,
+    "typescriptHttpRouteDecorators": 218,
+    "typescriptMutationLikeCalls": 500,
+    "activeRootPythonFiles": 89,
+    "activeProductionRootPythonFiles": 69,
+    "activePythonHttpRoutes": 94,
+    "activePythonHttpRouteHandlers": 93,
+    "publishedProxySha256": "886ca639708a766996716fcb4b1a6b85690c1c61baca35d6b5959495df4e75f5",
+    "activeWebhookServerSha256": "77a33e03afa340ce08d1e2c3d4772992f48243c39b1a3e8a27acf2ab97028569"
+  },
+  "familyInventory": [
+    {"family": "A15", "canonicalFoundation": "Wave 3 AC2 staff-day executor", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "A16", "canonicalFoundation": "Wave 2 AC1 access commands and AC5 reducer", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "A17", "canonicalFoundation": "Wave 3 CRM connection/import and AC3/AC4/AC5 facts", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "A18", "canonicalFoundation": "Client-owned profile, consent, preferences and verified channel foundations", "result": "B15 verified; B16 legacy booking prefill identity/PII projection found"},
+    {"family": "A22", "canonicalFoundation": "Wave 1 governed settings/preferences", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "A23", "canonicalFoundation": "Wave 1 OperationalWorkItem and approved protocol state", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "A25", "canonicalFoundation": "Wave 2 security commands and AC3 auth protocol", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "A26", "canonicalFoundation": "Canonical TrialActivation and Wave 2 lifecycle commands", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "reduced A27", "canonicalFoundation": "Wave 4 inventory and AC4 review ingestion", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "A28", "canonicalFoundation": "Wave 4 prospective calendar actions and immutable AI receipt children", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "A29", "canonicalFoundation": "Wave 5 recovery correction and immutable evidence", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "A30", "canonicalFoundation": "AC6 coordinator, MaintenanceRun/ItemClaim and Policy V1", "result": "registered; aggregate certification stopped at B16"},
+    {"family": "A31", "canonicalFoundation": "AC4/AC5 event, ingestion and reconciliation facts", "result": "registered; aggregate certification stopped at B16"}
+  ],
+  "familySetCoverage": "13/13",
+  "newBlocker": {
+    "id": "B16-A18-BOOKING-PREFILL-LEGACY-IDENTITY-PROJECTION",
+    "summary": "Published booking prefill trusts a legacy session/raw chat_id Client lookup and returns legacy name/full phone without verified ClientChannelLink authority.",
+    "endpoint": "POST /api/booking/prefill",
+    "publishedProxyLine": 993,
+    "activeRouteLine": 12901,
+    "functions": {
+      "authedChatId": {"line": 6331, "end": 6350, "sha256": "2ddfb7cc82ef17e876860be27757419ac72e31e14e13282f604c6c9bdcad679f"},
+      "bookingPrefillHandler": {"line": 6520, "end": 6575, "sha256": "040816ac534c47cf997e601eefbf5a117f2fbe9e520d7d255280fa50900e5c41"}
+    },
+    "isolatedReproduction": {
+      "pass": true,
+      "rawChatIdResolved": 777,
+      "legacyClientReads": 1,
+      "legacyConsentReads": 1,
+      "returnedLegacyPii": true,
+      "httpStatus": 200,
+      "productionMutations": 0
+    },
+    "implementationAttempted": false,
+    "productionEndpointInvoked": false
+  },
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "legacyIdentityProjectionFallbacks": "PRESENT — B16",
+  "wavesAccepted": "6/6",
+  "realProductionMutationsForProof": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}
