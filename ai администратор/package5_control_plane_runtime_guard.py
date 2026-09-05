@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed when the active PWA restores B13-B17 legacy owners."""
+"""Fail closed when the active PWA restores B13-B21 legacy owners."""
 
 from __future__ import annotations
 
@@ -18,6 +18,23 @@ class Finding:
 
 
 WEB_FUNCTIONS = {
+    "realtime_handler": {
+        "markers": (
+            "p5_b21_verified_realtime_authority",
+            'client_command, "realtime-authority"',
+            'authority.get("ready") is not True',
+            '"type": "ready"',
+        ),
+        "forbidden": (
+            "session_token",
+            "resolve_session",
+            "session_tg_user",
+            "has_valid_consent_by_chat_id",
+            "chat_id",
+            "database.",
+            "_verify_telegram_",
+        ),
+    },
     "_growth_role_recipients": {
         "markers": ("p5_b13_raw_telegram_manager_brief_authority_disabled",),
         "forbidden": ("panel_manager_ids", "database.list_admins", "database.get_master_by_chat_id"),
@@ -446,6 +463,7 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
         "claude_ai.py",
         "yclients.py",
         "legacy_client_command_bridge.py",
+        "realtime_bridge.py",
     )
     for filename in required:
         if filename not in overrides and not (root / filename).is_file():
@@ -552,6 +570,31 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
         findings.append(Finding("b18_client_command", "appointment-services command missing"))
     if '"appointment-create"' not in client_bridge:
         findings.append(Finding("b19_chat_booking", "appointment-create command missing"))
+    if '"realtime-authority"' not in client_bridge or "def staff_ai_turn" not in client_bridge:
+        findings.append(Finding("b21_realtime_authority", "canonical realtime transport missing"))
+
+    realtime = _read(root, "realtime_bridge.py", overrides)
+    realtime_session = _functions(realtime, "realtime_bridge.py").get("run_session", "")
+    for marker in (
+        "history: list[dict] = []",
+        "turn_lock = asyncio.Lock()",
+        "client_link_verified",
+        "crm_staff_access_verified",
+        "staff_ai_turn",
+        "history.clear()",
+    ):
+        if marker not in realtime_session:
+            findings.append(Finding("b21_realtime_boundary", f"run_session lacks {marker}"))
+    for forbidden in (
+        "chat_id",
+        "load_conversations",
+        "save_conversations",
+        "database.",
+        "_resolve_role",
+        "ClientRealtimeConversation",
+    ):
+        if forbidden in realtime_session:
+            findings.append(Finding("b21_realtime_boundary", f"run_session references {forbidden}"))
 
     client_actions_path = root / "client_record_actions.py"
     if client_actions_path.is_file():
@@ -625,6 +668,9 @@ def main() -> int:
         "b20CabinetReadSurfaceWriters": 0 if not findings else None,
         "b20CabinetEndpointIdentityParity": True if not findings else None,
         "b20CabinetEndpointReadOnlyParity": True if not findings else None,
+        "b21RealtimeLegacyIdentityOwners": 0 if not findings else None,
+        "b21RealtimeLegacyHistoryWriters": 0 if not findings else None,
+        "b21RealtimePreReadyBypasses": 0 if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }
@@ -634,7 +680,7 @@ def main() -> int:
         for finding in findings:
             print(f"FAIL {finding.check}: {finding.detail}")
     else:
-        print("Package 5 B13-B20 active PWA control-plane guard: PASS")
+        print("Package 5 B13-B21 active PWA control-plane guard: PASS")
     return 0 if not findings else 1
 
 

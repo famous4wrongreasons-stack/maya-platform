@@ -9971,7 +9971,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 async def realtime_handler(request: web.Request) -> web.Response:
     """
     GET /api/realtime — голосовой мост «как ChatGPT» (WebSocket).
-    Авторизация первым сообщением {type:"auth", session_token|auth_data|init_data}
+    B21: авторизация первым сообщением только canonical channel proof.
     (браузерный WS не умеет кастомные заголовки). Дальше — realtime_bridge.run_session.
     Наружу открыт только этот путь (nginx), мост сам гоняет звук realtime↔OpenAI tool-loop.
     """
@@ -10001,39 +10001,33 @@ async def realtime_handler(request: web.Request) -> web.Response:
     except Exception:
         auth = {}
 
-    tg_user = None
-    init_data = auth.get("init_data") or request.headers.get("X-Telegram-InitData", "")
-    if init_data:
-        tg_user = _verify_telegram_init_data(init_data, TELEGRAM_TOKEN)
-    if not tg_user and isinstance(auth.get("auth_data"), dict):
-        tg_user = _verify_telegram_login_widget(auth["auth_data"], TELEGRAM_TOKEN)
-    if not tg_user and auth.get("session_token"):
-        try:
-            tg_user = session_tg_user(web_auth.resolve_session(auth.get("session_token")))
-        except Exception:
-            pass
-    chat_id = int(tg_user["id"]) if (tg_user and tg_user.get("id")) else None
-    if not chat_id:
-        await ws.send_json({"type": "error", "message": "unauthorized"})
-        await ws.close()
-        return ws
-    if not database.has_valid_consent_by_chat_id(chat_id):
-        await ws.send_json({"type": "error", "message": "needs_consent"})
-        await ws.close()
-        return ws
-
-    # Режим страницы: 'staff' (рабочий кабинет сотрудника) или 'client' (по умолч.).
-    # Мост сам проверит серверную роль — клиент не получит staff-Майю.
+    # p5_b21_verified_realtime_authority: mode is only a requested authority
+    # plane. The backend proves the exact ClientChannelLink or Maya
+    # AuthIdentity+Membership+A16 access before any ready/OpenAI/tool capability.
     mode = "staff" if str(auth.get("mode") or "").lower() == "staff" else "client"
-
-    await ws.send_json({"type": "ready"})
     try:
-        from legacy_client_command_bridge import channel_proof
-        try:
-            verified_channel_proof = channel_proof({"X-Telegram-InitData": init_data}, auth)
-        except ValueError:
-            verified_channel_proof = None
-        await realtime_bridge.run_session(ws, chat_id, mode=mode, client_channel_proof=verified_channel_proof)
+        from legacy_client_command_bridge import channel_proof, command as client_command
+        verified_channel_proof = channel_proof({}, auth)
+        authority = await asyncio.to_thread(
+            client_command, "realtime-authority", verified_channel_proof, {"mode": mode}
+        )
+        if authority.get("ready") is not True or authority.get("authority") != mode:
+            raise ValueError("realtime_authority_required")
+    except ValueError:
+        await ws.send_json({"type": "error", "message": "client_link_or_staff_access_required"})
+        await ws.close()
+        return ws
+    except Exception:
+        await ws.send_json({"type": "error", "message": "realtime_authority_unavailable"})
+        await ws.close()
+        return ws
+
+    await ws.send_json({"type": "ready", "authority": mode})
+    try:
+        await realtime_bridge.run_session(
+            ws, authority=authority, mode=mode,
+            client_channel_proof=verified_channel_proof,
+        )
     except Exception as e:
         logger.error(f"realtime_handler: {e}")
     if not ws.closed:

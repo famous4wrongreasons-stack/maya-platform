@@ -314,6 +314,121 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     });
   }
 
+  /** B21 realtime readiness. The WebSocket transport receives only a bounded
+   * authority verdict: no Client id, channel subject, phone, PII or reusable
+   * role shortcut leaves the canonical runtime. Every new socket calls this
+   * method again, so revoked links/sessions/access cannot be inherited.
+   */
+  async realtimeAuthority(channelProof: string, value: unknown) {
+    if (
+      !value ||
+      typeof value !== 'object' ||
+      Array.isArray(value) ||
+      Object.keys(value).join(',') !== 'mode' ||
+      !('mode' in value) ||
+      !['client', 'staff'].includes(String(value.mode))
+    )
+      throw new BadRequestException('Exact realtime mode required');
+    const mode = String(value.mode) as 'client' | 'staff';
+    return this.prisma.$transaction(async (tx) => {
+      const channel = await this.channels.authenticate(channelProof, tx);
+      if (mode === 'client') {
+        const links = await tx.clientChannelLink.findMany({
+          where: {
+            tenantId: channel.tenantId,
+            provider: channel.provider,
+            providerSubjectHash: channel.providerSubjectHash,
+            revokedAt: null,
+            verificationVersion: 1,
+            subjectHashVersion: 1,
+          },
+          select: { clientId: true },
+          take: 2,
+        });
+        if (links.length !== 1)
+          throw new ForbiddenException('client_link_required');
+        const client = await tx.client.findUnique({
+          where: {
+            id_tenantId: {
+              id: links[0].clientId,
+              tenantId: channel.tenantId,
+            },
+          },
+          select: { mergedIntoClientId: true },
+        });
+        if (!client || client.mergedIntoClientId)
+          throw new ForbiddenException('client_link_required');
+        const profile = await tx.customerProfile.findUnique({
+          where: {
+            tenantId_clientId: {
+              tenantId: channel.tenantId,
+              clientId: links[0].clientId,
+            },
+          },
+          select: { privacyConsentAt: true },
+        });
+        if (!profile?.privacyConsentAt)
+          throw new ForbiddenException('privacy_consent_required');
+        return {
+          ready: true,
+          authority: 'client' as const,
+          role: 'client' as const,
+          client_link_verified: true,
+          privacy_verified: true,
+          durable_history: false,
+          business_mutations: 0,
+        };
+      }
+
+      if (channel.provider !== 'maya_user' || !channel.userId)
+        throw new ForbiddenException('canonical_staff_session_required');
+      const [identities, membership, accesses] = await Promise.all([
+        tx.authIdentity.findMany({
+          where: { tenantId: channel.tenantId, userId: channel.userId },
+          select: { id: true },
+          take: 1,
+        }),
+        tx.membership.findUnique({
+          where: {
+            userId_tenantId: {
+              userId: channel.userId,
+              tenantId: channel.tenantId,
+            },
+          },
+          select: { id: true, role: true, status: true },
+        }),
+        tx.crmStaffAccess.findMany({
+          where: {
+            tenantId: channel.tenantId,
+            userId: channel.userId,
+            status: 'active',
+            role: { in: ['administrator', 'staff'] },
+          },
+          select: { role: true },
+          take: 2,
+        }),
+      ]);
+      if (
+        identities.length < 1 ||
+        !membership ||
+        membership.status !== 'active' ||
+        accesses.length !== 1 ||
+        accesses[0].role !== membership.role
+      )
+        throw new ForbiddenException('canonical_staff_access_required');
+      return {
+        ready: true,
+        authority: 'staff' as const,
+        role: accesses[0].role,
+        auth_identity_verified: true,
+        membership_verified: true,
+        crm_staff_access_verified: true,
+        durable_history: false,
+        business_mutations: 0,
+      };
+    });
+  }
+
   /**
    * B16 read-only booking projection. Channel authentication and the exact
    * active ClientChannelLink select the Client before any PII is read. The

@@ -31,10 +31,7 @@ import time
 import aiohttp
 from aiohttp import web
 
-import ai_billing
 import anonymizer
-from maya_roles import AI_STAFF_ROLES, SURFACE_STAFF, normalize_surface
-from memory import load_conversations, save_conversations
 from voice_guard import (
     CLARIFY_REPEAT_TEXT,
     is_hard_noise,
@@ -48,7 +45,6 @@ except Exception:                       # pragma: no cover
     _cfg = None
 
 logger = logging.getLogger(__name__)
-_CHAT_LOCKS: dict[int, asyncio.Lock] = {}
 
 OPENAI_API_KEY = getattr(_cfg, "OPENAI_API_KEY", "") if _cfg else ""
 PROXY_URL = (getattr(_cfg, "PROXY_URL", "") if _cfg else "") or None
@@ -153,34 +149,6 @@ def _external_tts_enabled() -> bool:
         return voice.is_enabled() and voice._tts_provider() != "openai"
     except Exception:
         return False
-
-
-def _knowledge_images_for_chat(chat_id: int, message: str, limit: int = 3) -> list[dict]:
-    """Attach barber-book visuals to staff technical questions in realtime chat."""
-    try:
-        import database
-        is_staff = bool(chat_id and (
-            database.get_master_by_chat_id(int(chat_id)) or database.is_admin(int(chat_id))
-        ))
-        if not is_staff:
-            return []
-        import barber_knowledge
-        if not barber_knowledge.looks_like_technical_query(message):
-            return []
-        return barber_knowledge.images_for(message, limit=limit)
-    except Exception as e:
-        logger.error(f"RT knowledge images: {e}")
-        return []
-
-
-def _chat_lock(chat_id: int) -> asyncio.Lock:
-    """One serialized brain turn per user, even if the client opens two realtime sessions."""
-    key = int(chat_id)
-    lock = _CHAT_LOCKS.get(key)
-    if lock is None:
-        lock = asyncio.Lock()
-        _CHAT_LOCKS[key] = lock
-    return lock
 
 
 def _spoken_hours(hours: list[str]) -> str:
@@ -325,7 +293,10 @@ _VOICE_NUDGE_STAFF = (
 # Обратная совместимость: прежнее имя = клиентский режим.
 _VOICE_NUDGE = _VOICE_NUDGE_CLIENT
 # Клиент в голосе: без техники стрижек. Сотрудник: без клиентских продаж-инструментов.
-CLIENT_CHAT_DISABLED_TOOLS = {"barber_knowledge"}
+CLIENT_CHAT_DISABLED_TOOLS = {
+    "barber_knowledge", "check_loyalty_balance", "get_my_bookings",
+    "suggest_upsell", "request_client_contact",
+}
 STAFF_CHAT_DISABLED_TOOLS = {
     "suggest_upsell", "start_gift_cert_purchase",
     "show_subscription_plans", "check_birthday_promo",
@@ -372,28 +343,39 @@ def _session_config() -> dict:
     }}
 
 
-async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
+async def run_session(ws_client: web.WebSocketResponse, authority: dict,
                       mode: str = "client", client_channel_proof: str | None = None) -> None:
-    """Главный цикл моста для одного авторизованного пользователя.
+    """One B21-authorized socket with bounded, in-memory-only conversation context.
 
-    mode — «режим страницы», с которой запущен голос: 'client' (клиентский
-    кабинет) или 'staff' (рабочий кабинет сотрудника). Сотруднический режим
-    выдаётся ТОЛЬКО если серверная роль реально сотрудническая — клиент не может
-    получить staff-Майю, даже если фронт пришлёт mode='staff' (RBAC на месте).
-    Изоляция: staff — коллега-наставник (база знаний вкл, клиентские продажи выкл),
-    client — консьерж (техника выкл), и одно не подменяет другое."""
+    ``authority`` is the sanitized verdict from the canonical backend. It has no
+    Client id, raw provider subject, phone or reusable role id. A reconnect must
+    obtain a fresh verdict before this function is entered.
+    """
     loop = asyncio.get_event_loop()
-    try:
-        from claude_ai import _resolve_role as _rr
-        _role = _rr(chat_id)
-    except Exception:
-        _role = "client"
-    # Гейт по РЕЖИМУ СТРАНИЦЫ (кабинет): staff-Майя (база знаний/схемы/наставник)
-    # только в кабинете сотрудника (mode='staff'); в клиентском кабинете — клиентская
-    # Майя даже у сотрудника (клиент схем НЕ видит). Роль — серверная проверка сверху:
-    # клиент staff-режим не получит, даже если фронт пришлёт mode='staff'.
-    staff_mode = normalize_surface(mode) == SURFACE_STAFF and _role in AI_STAFF_ROLES
-    logger.info(f"RT session chat={chat_id} role={_role} mode={mode} staff_mode={staff_mode}")
+    staff_mode = (
+        mode == "staff"
+        and authority.get("ready") is True
+        and authority.get("authority") == "staff"
+        and authority.get("role") in {"administrator", "staff"}
+        and authority.get("auth_identity_verified") is True
+        and authority.get("membership_verified") is True
+        and authority.get("crm_staff_access_verified") is True
+    )
+    client_mode = (
+        mode == "client"
+        and authority.get("ready") is True
+        and authority.get("authority") == "client"
+        and authority.get("client_link_verified") is True
+        and authority.get("privacy_verified") is True
+    )
+    if not (staff_mode or client_mode) or not client_channel_proof:
+        raise PermissionError("canonical_realtime_authority_required")
+    logger.info("RT canonical session authority=%s", "staff" if staff_mode else "client")
+    # D1-A: the list and lock belong to this exact socket object. No module
+    # cache, chat id key, conversation file, database reader or writer exists.
+    history: list[dict] = []
+    turn_lock = asyncio.Lock()
+    turn_number = 0
     headers = {"Authorization": f"Bearer {OPENAI_API_KEY}"}
     # send_lock: сериализует отправку ответов — ровно один говорящий за раз (без гонок).
     # response_done: «нет активного ответа» (set) / «ответ звучит» (clear). Ставится в
@@ -503,13 +485,10 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
                     state["turn_speaking"] = False
                     try:
                         await ws_client.send_json({"type": "transcript", "text": transcript})
-                        async with _chat_lock(chat_id):
-                            # История общая с текстовым чатом/Telegram (memory по chat_id)
-                            conversations = await loop.run_in_executor(None, load_conversations)
-                            history = conversations.get(chat_id) or []
+                        nonlocal turn_number
+                        async with turn_lock:
                             history.append({"role": "user", "content": anonymizer.redact_pii(transcript)})
-                            if len(history) > 30:
-                                history = history[-30:]
+                            del history[:-12]
                             # Изоляция режимов: сотруднику — наставнический хвост и
                             # доступ к базе знаний; клиенту — консьерж без техники.
                             nudge = _VOICE_NUDGE_STAFF if staff_mode else _VOICE_NUDGE_CLIENT
@@ -519,21 +498,35 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
                                 "content": history[-1]["content"] + nudge,
                             }]
                             # Tool-loop синхронный, гоним в executor, чтобы не вешать сокет.
-                            from claude_ai import VOICE_CLAUDE_MODEL, get_ai_response
-                            from legacy_client_habits_bridge import ClientCommandContext
                             from hashlib import sha256
-                            client_context = ClientCommandContext(client_channel_proof, sha256(history[-1]["content"].encode("utf-8")).hexdigest()) if client_channel_proof and not staff_mode else None
-                            voice_model = None if _role == "founder" else VOICE_CLAUDE_MODEL
-                            reply, *_ = await loop.run_in_executor(
-                                None,
-                                lambda: get_ai_response(
-                                    llm_history,
-                                    _client_command_context=client_context,
-                                    user_id=chat_id,
-                                    model=voice_model,
-                                    disabled_tools=disabled,
-                                ),
-                            )
+                            turn_number += 1
+                            intent = sha256(history[-1]["content"].encode("utf-8")).hexdigest()
+                            if staff_mode:
+                                from legacy_client_command_bridge import staff_ai_turn
+                                response = await loop.run_in_executor(
+                                    None,
+                                    lambda: staff_ai_turn(
+                                        client_channel_proof,
+                                        llm_history,
+                                        "rt_" + intent[:48] + "_" + str(turn_number),
+                                    ),
+                                )
+                                reply = response.get("reply")
+                            else:
+                                from claude_ai import VOICE_CLAUDE_MODEL, get_ai_response
+                                from legacy_client_habits_bridge import ClientCommandContext
+                                client_context = ClientCommandContext(client_channel_proof, intent)
+                                reply, *_ = await loop.run_in_executor(
+                                    None,
+                                    lambda: get_ai_response(
+                                        llm_history,
+                                        _client_command_context=client_context,
+                                        user_id=None,
+                                        model=VOICE_CLAUDE_MODEL,
+                                        disabled_tools=disabled,
+                                        mode="client",
+                                    ),
+                                )
                             reply = _naturalize_voice_reply(
                                 reply or "Секунду, повторите, пожалуйста."
                             )
@@ -541,16 +534,11 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
                             # (решение Стаса 2026-07-06) — схемы не прикрепляем.
                             images = []
                             history.append({"role": "assistant", "content": reply})
-                            conversations[chat_id] = history
                             payload = {"type": "reply_text", "text": reply}
                             if images:
                                 payload["images"] = images
                             await ws_client.send_json(payload)
-                            save_task = loop.run_in_executor(None, save_conversations, conversations)
-                            try:
-                                await say(reply)
-                            finally:
-                                await save_task
+                            await say(reply)
                     except Exception as e:
                         logger.error(f"realtime think_and_reply: {e}")
                         try:
@@ -628,8 +616,6 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
                                 if tr:
                                     logger.info(f"RT: отброшен шум/галлюцинация в транскрипте: {tr[:60]!r}")
                                 continue
-                            conversations = await loop.run_in_executor(None, load_conversations)
-                            history = conversations.get(chat_id) or []
                             # Микрофон мог расшифровать хвост речи самой MAYA → не отвечаем
                             # сами себе, тихо игнорируем (без переспроса).
                             if looks_like_self_echo(tr, history):
@@ -671,13 +657,6 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
                         elif et == "response.done":
                             _st = (ev.get("response", {}) or {}).get("status")
                             logger.info(f"RT ← response.done status={_st} answer_active={state['answer_active']}")
-                            # учёт стоимости MAYA (realtime: STT-аудио + озвучка) в ИИ-бюджет
-                            try:
-                                ai_billing.log_audio_usage(
-                                    "maya_voice", RT_MODEL,
-                                    (ev.get("response", {}) or {}).get("usage") or {}, chat_id)
-                            except Exception:
-                                pass
                             response_done.set()        # слот свободен — можно слать следующий ответ
                             state["speaking"] = False
                             if state["answer_active"]:
@@ -708,3 +687,6 @@ async def run_session(ws_client: web.WebSocketResponse, chat_id: int,
                 await ws_client.send_json({"type": "error", "message": "bridge_error"})
         except Exception:
             pass
+    finally:
+        # Explicit destruction makes the D1-A lifecycle auditable in tests.
+        history.clear()

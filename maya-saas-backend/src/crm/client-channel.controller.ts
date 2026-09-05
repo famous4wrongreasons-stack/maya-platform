@@ -184,6 +184,11 @@ export class LegacyClientChannelController {
         empty(input.payload);
         return this.runtime.cabinetProjection(input.channelProof);
       }
+      if (operation === 'realtime-authority')
+        return this.runtime.realtimeAuthority(
+          input.channelProof,
+          input.payload,
+        );
       if (operation === 'appointment-create')
         return this.runtime.createClientAppointment(
           input.channelProof,

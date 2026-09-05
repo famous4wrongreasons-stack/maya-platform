@@ -17374,19 +17374,10 @@ function AChat() {
   function rtAuthMsg() {
     const m = { type: 'auth' };
     try {
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) m.init_data = window.Telegram.WebApp.initData;
+      const bundle = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
+      if (bundle && bundle.token) m.maya_token = bundle.token;
+      else if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) m.init_data = window.Telegram.WebApp.initData;
       else if (window.__tgAuthData) m.auth_data = window.__tgAuthData;
-      else {
-        const tok = localStorage.getItem('web_session_token');
-        if (tok) m.session_token = tok;
-        else {
-          const raw = localStorage.getItem('tg_auth_data') || localStorage.getItem('maya_auth');
-          if (raw) {
-            const data = JSON.parse(raw);
-            if (data && data.id) m.auth_data = data;
-          }
-        }
-	      }
 	    } catch (e) {}
     // Режим берём из каноничного режима приложения (экран «Я клиент / Я сотрудник»):
     // window.__meCurMode==='staff' → сотрудническая Майя, иначе клиентская. Бэкенд

@@ -62,6 +62,30 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
     def test_chat_history_save_fails(self):
         self._web_bypass("chat_history_handler", "memory.save_conversations({})")
 
+    def test_realtime_ready_before_authority_fails(self):
+        self._web_bypass("realtime_handler", "database.has_valid_consent_by_chat_id(1)")
+
+    def test_realtime_legacy_session_authority_fails(self):
+        self._web_bypass("realtime_handler", "session_tg_user(web_auth.resolve_session('x'))")
+
+    def test_realtime_legacy_history_and_raw_identity_fail(self):
+        source = (ROOT / "realtime_bridge.py").read_text(encoding="utf-8")
+        functions = guard._functions(source, "realtime_bridge.py")
+        original = functions["run_session"]
+        for bypass in (
+            "load_conversations()",
+            "save_conversations({})",
+            "database.get_client(1)",
+            "_resolve_role(chat_id)",
+        ):
+            with self.subTest(bypass=bypass):
+                injected = source.replace(original, original + "\n    " + bypass + "\n", 1)
+                findings = guard.scan_runtime(ROOT, {"realtime_bridge.py": injected})
+                self.assertTrue(
+                    any(item.check == "b21_realtime_boundary" for item in findings),
+                    findings,
+                )
+
     def test_chat_history_client_creation_fails(self):
         self._web_bypass("chat_history_handler", "database.get_or_create_client(1)")
 
@@ -178,6 +202,7 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
                     "claude_ai.py",
                     "yclients.py",
                     "legacy_client_command_bridge.py",
+                    "realtime_bridge.py",
                 )
             }
             findings = guard.scan_runtime(temp_root, overrides)
@@ -201,6 +226,7 @@ class Package5ControlPlaneRuntimeGuardTest(unittest.TestCase):
                         "claude_ai.py",
                         "yclients.py",
                         "legacy_client_command_bridge.py",
+                        "realtime_bridge.py",
                     )
                 }
                 findings = guard.scan_runtime(temp_root, overrides)

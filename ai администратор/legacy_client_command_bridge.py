@@ -13,7 +13,10 @@ import requests
 def channel_proof(headers, body: dict) -> str:
     init_data = headers.get("X-Telegram-InitData", "")
     authorization = headers.get("Authorization", "")
-    if init_data:
+    maya_token = body.get("maya_token")
+    if isinstance(maya_token, str) and maya_token:
+        value = {"type": "maya_jwt", "credential": maya_token}
+    elif init_data:
         value = {"type": "telegram_init_data", "credential": init_data}
     elif authorization.startswith("Bearer "):
         value = {"type": "maya_jwt", "credential": authorization[7:]}
@@ -28,7 +31,7 @@ def command(operation: str, proof: str, payload: dict) -> dict:
     if operation not in {
         "consent", "status", "issue", "consume", "delivery-consent",
         "booking-prefill", "appointment-create", "appointment-cancel", "appointment-reschedule",
-        "appointment-services", "cabinet-projection",
+        "appointment-services", "cabinet-projection", "realtime-authority",
     }:
         raise ValueError("unsupported_client_command")
     from config import YCLIENTS_COMPANY_ID
@@ -58,6 +61,49 @@ def command(operation: str, proof: str, payload: dict) -> dict:
     result = response.json()
     if not isinstance(result, dict):
         raise RuntimeError("client_bridge_invalid_result")
+    return result
+
+
+def staff_ai_turn(proof: str, messages: list[dict], request_id: str) -> dict:
+    """One staff voice turn through canonical AI Core.
+
+    The Maya JWT is an in-memory transport credential for this socket. Raw
+    Telegram/channel ids and legacy role databases never enter staff authority.
+    """
+    try:
+        parsed = json.loads(proof)
+    except (TypeError, ValueError):
+        raise ValueError("canonical_staff_session_required")
+    if (
+        not isinstance(parsed, dict)
+        or set(parsed) != {"type", "credential"}
+        or parsed.get("type") != "maya_jwt"
+        or not isinstance(parsed.get("credential"), str)
+        or not parsed["credential"]
+    ):
+        raise ValueError("canonical_staff_session_required")
+    safe_messages = []
+    for item in messages[-12:]:
+        if not isinstance(item, dict) or item.get("role") not in {"user", "assistant"}:
+            raise ValueError("invalid_realtime_context")
+        content = item.get("content")
+        if not isinstance(content, str) or not content or len(content) > 2000:
+            raise ValueError("invalid_realtime_context")
+        safe_messages.append({"role": item["role"], "content": content})
+    if not safe_messages or not isinstance(request_id, str):
+        raise ValueError("invalid_realtime_context")
+    response = requests.post(
+        "http://127.0.0.1:3107/api/ai/chat",
+        headers={"Authorization": "Bearer " + parsed["credential"]},
+        json={"surface": "voice", "audience": "staff",
+              "requestId": request_id, "messages": safe_messages},
+        timeout=45,
+    )
+    if response.status_code >= 400:
+        raise ValueError("canonical_staff_ai_unavailable")
+    result = response.json()
+    if not isinstance(result, dict) or not isinstance(result.get("reply"), str):
+        raise RuntimeError("canonical_staff_ai_invalid_result")
     return result
 
 
