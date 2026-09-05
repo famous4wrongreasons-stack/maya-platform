@@ -1646,17 +1646,12 @@ async def _process_record_delete(app: Application, record_id: int, payload: dict
     except Exception:
         pass
 
-    # Возврат баллов, если за эту запись списывали баллы лояльности
-    try:
-        import loyalty
-        refund = loyalty.refund_for_cancelled_record(record_id)
-        if refund.get("refunded"):
-            logger.info(
-                f"🪙 loyalty refund по отменённой записи {record_id}: "
-                f"+{refund['refunded']} баллов"
-            )
-    except Exception as e:
-        logger.error(f"loyalty refund на отмене записи {record_id}: {e}")
+    # P4-03: record-delete is evidence only. A canonical refund action owns
+    # any compensating ledger outcome; this PWA surface performs no value write.
+    logger.info(
+        "p4_03_canonical_refund_required record_id=%s; legacy refund skipped",
+        record_id,
+    )
 
     # Если дату не распарсили — оффер слота другим невозможен, но мастера
     # мы уже уведомили; выходим.
@@ -3634,8 +3629,7 @@ async def panel_master_day_handler(request: web.Request) -> web.Response:
 
 
 async def panel_redeem_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/redeem — погашение кода лояльности или сертификата (кассир/владелец).
-    body: {code, mode:'lookup'|'confirm'}. lookup только показывает данные, confirm — гасит."""
+    """Read legacy claims only; every value redemption fails closed."""
     try:
         body = await request.json()
     except Exception:
@@ -3646,15 +3640,26 @@ async def panel_redeem_handler(request: web.Request) -> web.Response:
     tg_id = tg_user.get("id")
     info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
     if not info.get("permissions", {}).get("redeem"):
-        return _cabinet_response({"error": "forbidden",
-                                  "message": "Гасить коды могут кассиры или владелец."}, status=403)
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Гасить коды могут кассиры или владелец.",
+        }, status=403)
 
     code = str(body.get("code") or "").strip().upper()
     mode = str(body.get("mode") or "lookup")
     if not code:
         return _cabinet_response({"ok": False, "reason": "Введите код."}, status=400)
+    if mode not in {"lookup", "confirm"}:
+        return _cabinet_response({"ok": False, "reason": "Некорректный режим."}, status=400)
+    if mode == "confirm":
+        logger.warning("p4_06_legacy_mutation_disabled:redeem_gift_certificate")
+        logger.warning("p4_03_legacy_mutation_disabled:consume_loyalty_redemption_grant")
+        return _cabinet_response({
+            "ok": False,
+            "error": "canonical_value_ingress_required",
+            "reason": "Погашение через старый контур отключено.",
+        }, status=409)
 
-    # 1) Подарочный сертификат?
     try:
         cert = database.get_gift_certificate(code)
     except Exception:
@@ -3663,69 +3668,58 @@ async def panel_redeem_handler(request: web.Request) -> web.Response:
         if cert.get("payment_status") != "paid":
             return _cabinet_response({"ok": False, "type": "cert", "reason": "Сертификат ещё не оплачен."})
         if cert.get("used_at"):
-            return _cabinet_response({"ok": False, "type": "cert", "reason": "Сертификат уже погашен",
-                                      "used_at": cert["used_at"][:10]})
+            return _cabinet_response({
+                "ok": False, "type": "cert", "reason": "Сертификат уже погашен",
+                "used_at": cert["used_at"][:10],
+            })
         try:
             if datetime.fromisoformat(cert["expires_at"]) < datetime.now():
                 return _cabinet_response({"ok": False, "type": "cert", "reason": "Срок действия истёк."})
         except Exception:
             pass
-        details = {
-            "type": "cert", "code": cert["code"], "amount": cert.get("amount"),
-            "recipient_name": cert.get("recipient_name", ""),
-            "recipient_phone": cert.get("recipient_phone", ""),
-            "expires_at": (cert.get("expires_at") or "")[:10],
-        }
-        if mode != "confirm":
-            return _cabinet_response({"ok": True, "type": "cert", "valid": True, "details": details})
-        logger.warning("p4_06_legacy_mutation_disabled:redeem_gift_certificate")
         return _cabinet_response({
-            "ok": False,
+            "ok": True,
             "type": "cert",
-            "error": "canonical_gift_certificate_ingress_required",
-            "reason": "Погашение сертификата временно недоступно.",
-        }, status=503)
-        try:
-            database.mark_cert_used(code, int(tg_id))
-        except Exception as e:
-            logger.error(f"panel redeem cert: {e}")
-            return _cabinet_response({"ok": False, "type": "cert", "reason": "Ошибка при погашении."}, status=500)
-        return _cabinet_response({"ok": True, "type": "cert", "redeemed": True, "details": details})
+            "valid": True,
+            "details": {
+                "type": "cert",
+                "code": cert["code"],
+                "amount": cert.get("amount"),
+                "recipient_name": cert.get("recipient_name", ""),
+                "recipient_phone": cert.get("recipient_phone", ""),
+                "expires_at": (cert.get("expires_at") or "")[:10],
+            },
+        })
 
-    # 2) Код лояльности?
     try:
-        lc = database.get_loyalty_code(code)
+        loyalty_claim = database.get_loyalty_code(code)
     except Exception:
-        lc = None
-    if lc:
-        if mode != "confirm":
-            valid = True
-            reason = ""
-            if lc.get("used_at"):
-                valid, reason = False, "Код уже погашен"
-            else:
-                try:
-                    if datetime.fromisoformat(lc["expires_at"]) < datetime.now():
-                        valid, reason = False, "Срок действия истёк"
-                except Exception:
-                    pass
-            return _cabinet_response({"ok": True, "type": "loyalty", "valid": valid, "reason": reason,
-                                      "details": {"type": "loyalty", "code": code,
-                                                  "points": lc.get("points"),
-                                                  "service_title": lc.get("service_title", "")}})
-        try:
-            import loyalty as _loy
-            res = _loy.consume_redeem_code(code, int(tg_id))
-        except Exception as e:
-            logger.error(f"panel redeem loyalty: {e}")
-            return _cabinet_response({"ok": False, "type": "loyalty", "reason": "Ошибка при погашении."}, status=500)
-        res = dict(res or {})
-        res["type"] = "loyalty"
-        if res.get("ok"):
-            res["redeemed"] = True
-        return _cabinet_response(res)
-
+        loyalty_claim = None
+    if loyalty_claim:
+        valid = True
+        reason = ""
+        if loyalty_claim.get("used_at"):
+            valid, reason = False, "Код уже погашен"
+        else:
+            try:
+                if datetime.fromisoformat(loyalty_claim["expires_at"]) < datetime.now():
+                    valid, reason = False, "Срок действия истёк"
+            except Exception:
+                pass
+        return _cabinet_response({
+            "ok": True,
+            "type": "loyalty",
+            "valid": valid,
+            "reason": reason,
+            "details": {
+                "type": "loyalty",
+                "code": code,
+                "points": loyalty_claim.get("points"),
+                "service_title": loyalty_claim.get("service_title", ""),
+            },
+        })
     return _cabinet_response({"ok": False, "reason": "Код не найден."})
+
 
 
 _panel_bg_tasks = set()
@@ -6704,274 +6698,15 @@ async def client_reschedule_record_handler(request: web.Request) -> web.Response
 
 
 async def client_book_with_loyalty_handler(request: web.Request) -> web.Response:
-    """Create the authenticated client's booking and redeem one care service.
-
-    Nothing monetary is trusted from the browser. The service, current price,
-    balance and exact slot for the combined duration are rechecked server-side.
-    """
+    """Retired P4-03 legacy writer; canonical loyalty owns all value changes."""
+    logger.warning("p4_03_legacy_mutation_disabled:redeem_legacy_loyalty")
     return _client_record_response({
         "success": False,
-        "error": "p4_03_legacy_mutation_disabled",
-        "code": "p4_03_legacy_mutation_disabled",
+        "error": "p4_03_canonical_loyalty_ingress_required",
+        "code": "p4_03_canonical_loyalty_ingress_required",
+        "message": "Оплата баллами временно недоступна. Выберите обычную запись.",
     }, status=409)
 
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _client_record_response({
-            "success": False, "error": "unauthorized", "code": "unauthorized",
-        }, status=401)
-    if not database.has_valid_consent_by_chat_id(int(chat_id)):
-        return _client_record_response({
-            "success": False, "error": "needs_consent", "code": "needs_consent",
-        }, status=403)
-    client = database.get_client(int(chat_id))
-    if not client:
-        return _client_record_response({
-            "success": False, "error": "client_not_found", "code": "client_not_found",
-        }, status=404)
-    phone = str(client.get("phone") or "").strip()
-    if len("".join(ch for ch in phone if ch.isdigit())) < 10:
-        return _client_record_response({
-            "success": False, "error": "phone_required", "code": "phone_required",
-        }, status=409)
-
-    try:
-        staff_id = int(body.get("staff_id") or 0)
-        service_ids = list(dict.fromkeys(
-            int(item) for item in (body.get("service_ids") or []) if int(item) > 0
-        ))
-    except (TypeError, ValueError):
-        staff_id, service_ids = 0, []
-    if staff_id <= 0 or not service_ids or len(service_ids) > 8:
-        return _client_record_response({
-            "success": False, "error": "invalid_booking", "code": "invalid_booking",
-        }, status=400)
-    try:
-        active_ids = {int(item) for item in getattr(config, "ACTIVE_MASTER_IDS", [])}
-    except Exception:
-        active_ids = set()
-    if active_ids and staff_id not in active_ids:
-        return _client_record_response({
-            "success": False, "error": "staff_unavailable", "code": "staff_unavailable",
-        }, status=409)
-
-    start_raw = str(body.get("datetime") or body.get("start") or "").strip()
-    start_match = re.match(r"^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(?::\d{2})?", start_raw)
-    if not start_match:
-        return _client_record_response({
-            "success": False, "error": "invalid_datetime", "code": "invalid_datetime",
-        }, status=400)
-    date_value, time_value = start_match.group(1), start_match.group(2)
-    try:
-        booking_dt = datetime.strptime(f"{date_value} {time_value}", "%Y-%m-%d %H:%M")
-    except ValueError:
-        return _client_record_response({
-            "success": False, "error": "invalid_datetime", "code": "invalid_datetime",
-        }, status=400)
-    if booking_dt < datetime.now() - timedelta(minutes=2) or booking_dt > datetime.now() + timedelta(days=90):
-        return _client_record_response({
-            "success": False, "error": "invalid_datetime", "code": "invalid_datetime",
-        }, status=400)
-
-    request_id = str(body.get("request_id") or "").strip()
-    if not re.fullmatch(r"[A-Za-z0-9_-]{8,80}", request_id):
-        return _client_record_response({
-            "success": False, "error": "invalid_request_id", "code": "invalid_request_id",
-        }, status=400)
-    requested_care_title = str(body.get("loyalty_service_title") or "").strip()
-    try:
-        requested_care_id = int(body.get("loyalty_service_id") or 0)
-    except (TypeError, ValueError):
-        requested_care_id = 0
-
-    try:
-        catalog = await asyncio.to_thread(_yc.get_services, staff_id)
-    except Exception as exc:
-        logger.error("loyalty booking catalog staff_id=%s: %s", staff_id, exc)
-        catalog = []
-    catalog = [row for row in (catalog or []) if isinstance(row, dict) and not row.get("error")]
-    catalog_by_id = {
-        int(row["id"]): row for row in catalog
-        if str(row.get("id") or "").isdigit()
-    }
-    if any(service_id not in catalog_by_id for service_id in service_ids):
-        return _client_record_response({
-            "success": False, "error": "service_not_found", "code": "service_not_found",
-        }, status=409)
-
-    import loyalty as _loy
-
-    care = _loy.current_care_service(requested_care_title, catalog)
-    if not care:
-        return _client_record_response({
-            "success": False, "error": "loyalty_service_unavailable",
-            "code": "loyalty_service_unavailable",
-        }, status=409)
-    care_id = int(care.get("id") or 0)
-    if care_id <= 0 or care_id not in service_ids or (requested_care_id and requested_care_id != care_id):
-        return _client_record_response({
-            "success": False, "error": "loyalty_service_mismatch",
-            "code": "loyalty_service_mismatch",
-        }, status=400)
-
-    try:
-        await asyncio.to_thread(
-            _loy.lazy_backfill_for_client,
-            int(client["id"]),
-            phone,
-        )
-    except Exception as exc:
-        logger.error("loyalty booking import client_id=%s: %s", client.get("id"), exc)
-
-    # Reserve before checking the live slot so a retry can return the already
-    # finalized booking even though that booking has made the slot unavailable.
-    # Invalid/taken slots release the temporary hold immediately below.
-    reservation = database.reserve_loyalty_points(
-        client_id=int(client["id"]),
-        points=int(care["price"]),
-        request_id=request_id,
-    )
-    if reservation.get("state") == "finalized":
-        return _client_record_response({
-            "success": True,
-            "ok": True,
-            "record_id": reservation.get("record_id"),
-            "spent_points": int(reservation.get("points") or care["price"]),
-            "remaining_points": int(reservation.get("balance") or 0),
-            "loyalty_service": care["title"],
-            "idempotent": True,
-        })
-    if reservation.get("state") == "in_progress":
-        return _client_record_response({
-            "success": False, "error": "booking_in_progress", "code": "booking_in_progress",
-        }, status=409)
-    if not reservation.get("ok"):
-        return _client_record_response({
-            "success": False, "error": "insufficient_points", "code": "insufficient_points",
-            "balance": int(reservation.get("balance") or 0),
-        }, status=409)
-
-    try:
-        slots = await asyncio.to_thread(
-            _yc.get_available_slots,
-            staff_id,
-            date_value,
-            service_ids,
-        )
-    except Exception as exc:
-        logger.error("loyalty booking slots staff_id=%s: %s", staff_id, exc)
-        slots = [{"error": "yclients_unavailable"}]
-    if slots and isinstance(slots[0], dict) and slots[0].get("error"):
-        database.release_loyalty_reservation(
-            client_id=int(client["id"]), request_id=request_id,
-        )
-        return _client_record_response({
-            "success": False, "error": "yclients_unavailable", "code": "yclients_unavailable",
-        }, status=502)
-
-    def _slot_time(slot: dict) -> str:
-        raw = str((slot or {}).get("time") or (slot or {}).get("datetime") or "")
-        match = re.search(r"(?:T|\s)(\d{2}:\d{2})", raw)
-        return match.group(1) if match else raw[:5]
-
-    if not any(_slot_time(slot) == time_value for slot in (slots or [])):
-        database.release_loyalty_reservation(
-            client_id=int(client["id"]), request_id=request_id,
-        )
-        return _client_record_response({
-            "success": False, "error": "slot_taken", "code": "slot_taken",
-            "message": "Это время уже недоступно. Выберите другое.",
-        }, status=409)
-
-    try:
-        prefs = database.get_notify_prefs_by_chat_id(int(chat_id))
-        notify_hours = prefs.get("reminder_hours") if prefs.get("reminder") is not False else 0
-    except Exception:
-        notify_hours = 0
-    booking_result = await asyncio.to_thread(
-        _yc.create_booking,
-        staff_id=staff_id,
-        service_ids=service_ids,
-        datetime_str=f"{date_value}T{time_value}:00",
-        client_name=str(client.get("name") or "Клиент"),
-        client_phone=phone,
-        notify_by_sms=notify_hours,
-        bridge_origin="webhook.loyalty",
-    )
-    if not booking_result.get("success"):
-        if _action_outcome_unknown(booking_result):
-            return _client_record_response(_action_unknown_payload(
-                booking_result,
-                "Результат записи уточняется. Не повторяйте действие. Баллы пока зарезервированы.",
-            ), status=202)
-        database.release_loyalty_reservation(
-            client_id=int(client["id"]), request_id=request_id,
-        )
-        code = str(booking_result.get("code") or "booking_failed")
-        status = 409 if code in {"slot_taken", "staff_unavailable"} else 502
-        return _client_record_response({
-            "success": False,
-            "error": code,
-            "code": code,
-            "message": _booking_failure_reply(booking_result),
-        }, status=status)
-
-    record_id = int(booking_result.get("record_id") or 0)
-    service_names = [
-        str(catalog_by_id[service_id].get("title") or "Услуга")
-        for service_id in service_ids
-    ]
-    if record_id <= 0:
-        database.release_loyalty_reservation(
-            client_id=int(client["id"]), request_id=request_id,
-        )
-        return _client_record_response({
-            "success": True,
-            "ok": True,
-            "record_id": None,
-            "loyalty_applied": False,
-            "warning": "booking_created_loyalty_needs_admin",
-        })
-
-    redemption = await asyncio.to_thread(
-        _loy.apply_redemption_for_booking,
-        client_id=int(client["id"]),
-        record_id=record_id,
-        service_titles=[care["title"]],
-        service_quotes=[care],
-        reservation_id=request_id,
-    )
-    if int(redemption.get("total_points") or 0) <= 0:
-        database.release_loyalty_reservation(
-            client_id=int(client["id"]), request_id=request_id,
-        )
-    try:
-        database.save_booking(
-            int(client["id"]),
-            service=", ".join(service_names),
-            master=str(catalog_by_id.get(care_id, {}).get("staff_name") or ""),
-            datetime_str=f"{date_value}T{time_value}:00",
-            yclients_record_id=record_id,
-        )
-    except Exception as exc:
-        logger.error("loyalty booking save record_id=%s: %s", record_id, exc)
-    return _client_record_response({
-        "success": True,
-        "ok": True,
-        "record_id": record_id,
-        "loyalty_applied": int(redemption.get("total_points") or 0) > 0,
-        "spent_points": int(redemption.get("total_points") or 0),
-        "remaining_points": int(redemption.get("remaining") or 0),
-        "loyalty_service": care["title"],
-        "datetime": f"{date_value}T{time_value}:00",
-        "services": service_names,
-    })
 
 
 async def booking_prefill_handler(request: web.Request) -> web.Response:
@@ -7171,135 +6906,13 @@ async def notify_prefs_handler(request: web.Request) -> web.Response:
 
 
 async def cert_create_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/cert/create — покупка подарочного сертификата картой прямо в приложении.
-
-    Body: { amount: 2000|3000|5000, auth_data?: {...} }  (+ заголовок X-Telegram-InitData)
-
-    Создаёт сертификат (pending) и платёж ЮKassa, возвращает confirmation_url —
-    приложение открывает страницу оплаты ЮKassa внутри себя. После успешной оплаты
-    фоновый _poll_payment (внедрён из бота) помечает сертификат paid и присылает
-    PDF покупателю в его Telegram-чат с ботом.
-
-    Получатель по умолчанию — сам покупатель (имя/телефон из БД); полученный PDF
-    он может переслать тому, кому дарит. Реквизиты карты в приложение НЕ вводятся —
-    оплата проходит на стороне ЮKassa.
-    """
+    """Retired P4-06 writer; canonical purchase/activation owns certificate value."""
     logger.warning("p4_06_legacy_mutation_disabled:initiate_gift_certificate_purchase")
     return _cabinet_response({
         "error": "canonical_gift_certificate_ingress_required",
         "message": "Покупка сертификата временно недоступна. Попробуйте позже.",
     }, status=503)
-    try:
-        body = await request.json()
-    except Exception:
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-    if not isinstance(body, dict):
-        return _cabinet_response({"error": "invalid_json"}, status=400)
 
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-
-    try:
-        amount = int(body.get("amount") or 0)
-    except (TypeError, ValueError):
-        amount = 0
-    if amount not in _CERT_AMOUNTS:
-        return _cabinet_response({
-            "error": "bad_amount",
-            "message": "Доступны сертификаты на 2 000, 3 000 и 5 000 ₽.",
-        }, status=400)
-
-    # Получатель: либо явно заданный (режим «в подарок»), либо сам покупатель («себе»).
-    # Телефон проверяем тем же валидатором, что и бот; hash_phone берёт последние
-    # 10 цифр, поэтому любой формат (+7 / 8 / без префикса) ищется одинаково.
-    raw_phone = (body.get("recipient_phone") or "").strip()
-    raw_name = (body.get("recipient_name") or "").strip()
-    if raw_phone:
-        if not anonymizer.is_valid_phone(raw_phone):
-            return _cabinet_response({
-                "error": "bad_phone",
-                "message": "Проверьте номер телефона получателя.",
-            }, status=400)
-        recipient_phone = raw_phone
-        recipient_name = raw_name or "Получатель"
-    else:
-        # «Себе» — имя/телефон покупателя из БД (клиент известен по Telegram-id)
-        client = database.get_client(chat_id)
-        recipient_name = (client or {}).get("name") or "Клиент"
-        recipient_phone = (client or {}).get("phone") or ""
-        if not recipient_phone:
-            return _cabinet_response({
-                "error": "no_phone",
-                "message": ("Укажите получателя (имя и телефон) — либо оформите одну запись "
-                            "через @malesthetic_bot, чтобы покупка «себе» заработала. "
-                            "Телефон: 8-962-447-67-47."),
-            }, status=400)
-
-    code = database.new_cert_code(amount)
-    expires_at = (datetime.now() + timedelta(days=365)).isoformat(timespec="seconds")
-    try:
-        database.save_gift_certificate(
-            code=code,
-            amount=amount,
-            recipient_phone=recipient_phone,
-            recipient_name=recipient_name,
-            buyer_chat_id=chat_id,
-            expires_at=expires_at,
-            payment_status="pending",
-        )
-    except Exception as e:
-        logger.error(f"cert_create save chat_id={chat_id} code={code}: {e}")
-        return _cabinet_response({
-            "error": "save_failed",
-            "message": "Не удалось создать сертификат. Попробуйте позже.",
-        }, status=500)
-
-    description = (
-        f"Подарочный сертификат {amount} ₽ — «Мужская Эстетика». "
-        f"Срок действия 12 месяцев."
-    )
-    return_url = "https://t.me/malesthetic_bot"
-
-    try:
-        payment = await yukassa_api.create_payment(
-            amount_rub=amount,
-            description=description,
-            return_url=return_url,
-            metadata={"cert_code": code, "buyer_chat_id": chat_id},
-            customer_phone=recipient_phone,
-            idempotence_key=f"cert-{code}",
-        )
-    except Exception as e:
-        logger.error(f"cert_create payment chat_id={chat_id} code={code}: {e}")
-        return _cabinet_response({
-            "error": "payment_failed",
-            "message": ("Не получилось создать оплату. Попробуйте позже или "
-                        "позвоните 8-962-447-67-47."),
-        }, status=502)
-
-    try:
-        database.set_cert_payment_id(code, payment["id"])
-    except Exception as e:
-        logger.error(f"cert_create set_payment_id code={code}: {e}")
-
-    # Фоновый опрос статуса + выдача PDF покупателю в Telegram — переиспользуем
-    # протестированную _poll_payment бота (внедрена через register_payment_poller).
-    if _poll_payment_fn is not None:
-        try:
-            asyncio.create_task(_poll_payment_fn(request.app["bot_app"], code, payment["id"]))
-        except Exception as e:
-            logger.error(f"cert_create poll start code={code}: {e}")
-    else:
-        logger.error(f"cert_create: _poll_payment_fn не внедрён — PDF для {code} не уйдёт автоматически")
-
-    return _cabinet_response({
-        "ok": True,
-        "code": code,
-        "amount": amount,
-        "confirmation_url": payment.get("confirmation_url"),
-    })
 
 
 async def sub_create_handler(request: web.Request) -> web.Response:

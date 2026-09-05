@@ -135,6 +135,12 @@ step "6/10 release:preflight (блокирующий, до базы)"
 #
 # Наружу печатаются только имена переменных и имена миграций, значения — нет.
 run "set -e
+  test -f /home/botadmin/barbershop-bot/package4_value_runtime_guard.py
+  python3 /home/botadmin/barbershop-bot/package4_value_runtime_guard.py \
+    --root /home/botadmin/barbershop-bot" \
+  || fail "активный PWA обходит canonical Package 4 value owners"
+
+run "set -e
   cd '$REL'
   set -a; . <(sudo -n cat /etc/maya-saas/live-widgets.env); set +a
   /opt/node-v24/bin/node dist/scripts/release-preflight.js --allow-pending" \

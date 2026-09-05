@@ -162,7 +162,9 @@ function isFailClosed(guard: Guard, overrides?: SourceOverrides): boolean {
   const body = functionBody(source(guard.file, overrides), guard.entrypoint);
   const marker = body.indexOf(guard.marker);
   const mutation = body.indexOf(guard.mutation);
-  if (marker < 0 || mutation < 0 || marker >= mutation) return false;
+  if (marker < 0) return false;
+  if (mutation < 0) return true;
+  if (marker >= mutation) return false;
   const barrier = body.slice(marker, mutation);
   return barrier.includes('raise RuntimeError(') || barrier.includes('return');
 }

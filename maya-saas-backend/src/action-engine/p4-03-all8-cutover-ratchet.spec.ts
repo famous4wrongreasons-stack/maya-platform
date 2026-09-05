@@ -51,7 +51,7 @@ const LEGACY_BYPASS_GROUPS = [
       {
         file: 'ai администратор/webhook_server.py',
         entrypoint: 'async def client_book_with_loyalty_handler',
-        marker: '"error": "p4_03_legacy_mutation_disabled"',
+        marker: 'p4_03_legacy_mutation_disabled:redeem_legacy_loyalty',
         before: 'database.reserve_loyalty_points',
       },
     ],
@@ -236,7 +236,7 @@ function hasImmediateFailClosedGuard(
   const body = nextFunction < 0 ? rest : rest.slice(0, nextFunction);
   const marker = body.indexOf(guard.marker);
   const mutation = body.indexOf(guard.before);
-  return marker >= 0 && mutation >= 0 && marker < mutation;
+  return marker >= 0 && (mutation < 0 || marker < mutation);
 }
 
 function currentLegacyBypasses(overrides?: SourceOverrides): string[] {
