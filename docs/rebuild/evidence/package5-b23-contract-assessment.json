@@ -1,0 +1,205 @@
+{
+  "acceptedCheckpoint": "0d0c86fa1d7afe9ec26fdc8c619d800f3c6c62ea",
+  "cycle": "B23/A18 contract reconstruction only",
+  "productionRelease": "/opt/maya-saas/releases/20260905-p5-b22-a15741c0",
+  "b22BaselinePreserved": true,
+  "activeSourceHashes": {
+    "webhook_server.py": "6f31a5a3ca387f2e98c4e60a2b1e550d181fb8afb8ba19316ec3d922755d6bb7",
+    "memory.py": "b286f39327adcc3e82c544ad4409d2e5c75a28e0b8367ceb9e16e320850c1b41"
+  },
+  "activeFunctions": {
+    "webhook_server.py": {
+      "_chat_effective_mode": {
+        "lines": [
+          7058,
+          7068
+        ],
+        "sha256": "c02f8380d5a9d559d3de1dc98f660e3c55289e28734528f9a51bc2ad32483161"
+      },
+      "_chat_history_key": {
+        "lines": [
+          7071,
+          7074
+        ],
+        "sha256": "5a048583112d24fe3318085d816c3422eb67ca60bdaf10b7e33543578f58ac07"
+      },
+      "_resolve_chat_tg_user": {
+        "lines": [
+          8280,
+          8291
+        ],
+        "sha256": "fa2ad35e12cd7fa0f64bc03ac3f03b54858db53f5c5fc7f5ea5a7b6c791035dc"
+      },
+      "_ensure_chat_history_ids": {
+        "lines": [
+          8305,
+          8323
+        ],
+        "sha256": "483f166003a833486b5ecda11217714cbcdce38b925be4d10a544094750ea33c"
+      },
+      "_chat_history_payload": {
+        "lines": [
+          8356,
+          8383
+        ],
+        "sha256": "13b03315805f36d81e0281ef3303da91d9f113b4072c6afbcf1039975d53ca4b"
+      },
+      "chat_delete_handler": {
+        "lines": [
+          8642,
+          8738
+        ],
+        "sha256": "61cbf4bba790583425fb34cb2f0dfc4361aac0e48c35714758064f57dca7650d"
+      }
+    },
+    "memory.py": {
+      "load_conversations": {
+        "lines": [
+          545,
+          562
+        ],
+        "sha256": "a8f6bdb5eab3cd8c50bbe0532370e3858ff9b7c489978fdf3238c4fcbe1f784f"
+      },
+      "save_conversations": {
+        "lines": [
+          565,
+          574
+        ],
+        "sha256": "f5b17afc8f67f095832b999abe517e1545a48c5ba8da38a49ae4aae8c936ec41"
+      }
+    }
+  },
+  "reviewedFoundationHashes": {
+    "maya-saas-backend/prisma/schema.prisma": "6776b380b88a13122d327901f7523fc1be866ef9dc27caf041727e66f2b1ae76",
+    "maya-saas-backend/src/action-engine/action-engine.registry.ts": "7c55e380490d5f926d837067176daae620cf973718c21e899248c5118311c598",
+    "maya-saas-backend/src/crm/client-channel.controller.ts": "9152c22348a1dbcc4f8c19040f5d1325c0d6626a4834c199abd9ecc2362c8c3c",
+    "maya-saas-backend/src/crm/client-channel-link.service.ts": "742ec211e8186c0d7e6f0c6abc4232db6a20a5c1a10ae53627075b23f0293309",
+    "maya-saas-backend/src/ai-tools/ai-memory.service.ts": "73314870fe7a5fd47a21dc242595f00c0b8558456b8da5cc59e84f14241e7323",
+    "maya-saas-backend/src/package5-wave6/package5-wave6.policy.ts": "84104711a8aca595c5174a7960a0d9071c5aca5a4b50efab6a3b5da494ae3530",
+    "maya-saas-backend/src/package5-wave6/package5-wave6.service.ts": "9c87dbf0db375ee48c55ecf6ca26225577ce6d0cef5a96463d4f2d0d8f9bfe08",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-BUSINESS-DECISION-CLOSURE-REPORT.md": "d860cb7cda91a2c3a87a19cff6b5102755f380431a079e6148dbdf02a31ca265",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-A30-APPROVED-RUNTIME-CONTRACT-GATE.md": "5783a4f6b09e64a3936e6bd279c11831e28c889f1c8a0c9e72faa3cc52874a7c",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-B15-DEPLOYED-FINAL-GATE-STOP-REPORT.md": "e2cb18a56cf427e835811f6c6fd62a0f8ead24bdee482a720241a6f3768a2fef",
+    "docs/rebuild/package5-b21-realtime-session-history-v1-proposal.md": "a484d6a3b516907e27f9fbec1aefce585fa16b139a3190a75f5722d4221368fa",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-B21-DEPLOYED-FINAL-GATE-STOP-REPORT.md": "41ec87876bde125e2cbf3667419450f1456056828db1576e21bb5e3a28f1d252"
+  },
+  "exactWriteInventory": [
+    {
+      "operation": "single delete",
+      "logicalTarget": "one whole message dictionary inside pwa:<client|staff>:<raw chat_id>",
+      "selectors": [
+        "message_id",
+        "legacy index",
+        "role/text fallback"
+      ],
+      "canonicalClientTenantOwnershipProven": false
+    },
+    {
+      "operation": "all/clear/reset",
+      "logicalTarget": "whole selected PWA history key and all its message dictionaries",
+      "canonicalClientTenantOwnershipProven": false
+    },
+    {
+      "operation": "before selection",
+      "effect": "normalizes missing/duplicate legacy message IDs; persisted on ordinary no-match path"
+    },
+    {
+      "operation": "save_conversations",
+      "physicalTarget": "global conversations.json via shared conversations.json.tmp and os.replace",
+      "broaderEffects": [
+        "rewrites all loaded histories",
+        "drops all falsy entries, including unrelated keys",
+        "no per-Client CAS/lock; concurrent whole-file snapshots can lose updates",
+        "load parse failure yields empty mapping; save errors swallowed"
+      ]
+    },
+    {
+      "operation": "browser presentation",
+      "effects": [
+        "optimistic message hiding",
+        "local deleted-signature store",
+        "clear removes cached history and hide markers",
+        "separate SaaS branch returns before legacy server API"
+      ]
+    }
+  ],
+  "failureResponses": {
+    "invalidJsonOrMissingLegacyAuthentication": "400/401 without history",
+    "missingCanonicalBinding": "not checked; valid legacy authentication reaches mutation/projection",
+    "unmatchedMessageId": "200 deleted=false; durable save plus stored messages",
+    "storageFailure": "save helper suppresses exception; handler can report success"
+  },
+  "outsideDeletionOwnership": [
+    "Client/ClientChannelLink",
+    "CustomerProfile and explicit preferences",
+    "ClientConsentFact",
+    "Appointment and value facts",
+    "AiMemoryFact",
+    "AuditLog/DomainEvent/ActionExecution/ActionAttempt",
+    "Communication Delivery",
+    "B21 ephemeral socket context",
+    "underlying media objects referenced by message URLs"
+  ],
+  "existingFoundations": {
+    "ClientChannelLink": "principal identity sufficient; does not retrospectively bind old transcript ownership",
+    "AiBrainSession": "User/Membership structured plan, raw messages explicitly forbidden",
+    "AiMemoryFact": "explicit User notes and their soft deletion, not Client conversation",
+    "InboxItem": "User message-of-record projection, not Client transcript",
+    "CustomerProfile": "Client choices/preferences, not dialogue storage",
+    "AuditAndExecutionEvidence": "immutable/approved audit lifecycle, not user-deletable history",
+    "MaintenanceRunAndItemClaim": "six system-policy allowlisted classes only; no user history delete",
+    "B15": "approved read-only presentation; no deletion authority",
+    "B21": "approved ephemeral realtime context; no durable text/history owner"
+  },
+  "ac6Allowlist": [
+    "purge_auth_sessions",
+    "purge_phone_auth_codes",
+    "purge_email_auth_codes",
+    "purge_auth_flow_states",
+    "purge_auth_rate_limit_buckets",
+    "purge_ingestion_quarantine"
+  ],
+  "canonicalUserRequestedHistoryDeleteOwner": "NOT FOUND",
+  "canonicalDeletionScopeProven": false,
+  "identityPatchAloneSufficient": false,
+  "recommendedOption": "A — retire legacy server history-delete; preserve existing authorized read and historical data",
+  "optionA": {
+    "newModels": 0,
+    "newActionClasses": 0,
+    "newSchema": false,
+    "serverHistoryDeletion": "UNSUPPORTED",
+    "historyOrPiiOnFailure": false,
+    "unconditionalNoStorageOrProjection": true,
+    "fakeBackfill": false,
+    "userVisibleLoss": "server-side deletion of one/all legacy PWA messages; no false deletion UI"
+  },
+  "optionB": {
+    "purpose": "separate canonical Client-owned durable conversation lifecycle/deletion contract",
+    "schemaProposalRequired": true,
+    "modelAndActionCounts": "UNDECIDED — not approved",
+    "legacyOwnershipBackfillAutomatic": false
+  },
+  "reusedAcceptedProof": "docs/rebuild/evidence/package5-b23-chat-delete.probe.py and package5-b22-deployed-final-recheck.json",
+  "newExecutableProofRun": false,
+  "runtimeChanges": false,
+  "schemaChanges": false,
+  "migrationChanges": false,
+  "deploymentPerformed": false,
+  "productionConversationFilesRead": false,
+  "productionMutations": 0,
+  "package5Complete": false,
+  "finalGateResumed": false,
+  "wavesAccepted": "6/6",
+  "wave7Created": false,
+  "p4_11Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "acceptedPreExistingTestDatabasesProtected": 17,
+    "databasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}
