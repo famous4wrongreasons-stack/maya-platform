@@ -1,0 +1,229 @@
+{
+  "acceptedOwnerCheckpoint": "dd70c09b",
+  "runtimeCommits": [
+    "0eb193b14ba017605e7409906c2b6b11bd65d988",
+    "e674b7433323f3377fd98f81c60ed4c735ce3598"
+  ],
+  "productionRelease": "/opt/maya-saas/releases/20260905-p5-b19-e674b743",
+  "b19ProductionRemediation": "PASS",
+  "b19": {
+    "family": "A18",
+    "legacyMutationCapableSitesReconstructed": 3,
+    "legacyMutationCapableSitesRemaining": 0,
+    "inventoryCoverage": "3/3",
+    "verifiedClientChannelLinkRequired": true,
+    "rawChatIdClientAuthority": false,
+    "legacyBookingFactWriters": 0,
+    "chatDirectLoyaltyMutationPaths": 0,
+    "chatStreamAuthorityParity": true,
+    "chatStreamMutationOwnerParity": true,
+    "executionOwner": "ACTION ENGINE",
+    "deterministicActionIdentity": true,
+    "authorizationRecheckedBeforeProviderDispatch": true,
+    "unknownRemainsUnknown": true,
+    "blindRetryAfterUnknown": false,
+    "reconciliationRequired": true,
+    "newSchema": false,
+    "newActionClass": false,
+    "productionMutationEndpointsInvoked": false
+  },
+  "productionStructuralReadOnlyVerification": "PASS",
+  "pwaCandidateSafety": {
+    "firstCandidateGateResult": "FAIL — request-only launcher compatibility parameter omitted",
+    "rollback": "PASS — exact B18 PWA files and health restored",
+    "productionBusinessMutationBoundaryCrossed": false,
+    "correctedCandidate": "PASS — exact active B18 webhook plus bounded B19 diff",
+    "requestOnlyLauncherCompatibilityPreserved": true,
+    "unrelatedWorkingTreeChangesDeployed": false
+  },
+  "artifactHashes": {
+    "backendClientChannelRuntimeJs": "b1b2b97ccbd1e211356ff95a1fcd5a8a505fbb2c25e097e6a6a85254b88cbeac",
+    "backendClientChannelControllerJs": "4f9eefef94937a957a2684852aa9ee63db80b442baaaa5e7afc68bc75d9ffa24",
+    "backendCrmServiceJs": "09459e8d5624ca497fc16b9776f6a81ba96e62f2d78b7a233df14ee0143852a9",
+    "activeWebhookServer": "91074718709d9d88dcf2064ea1a61d66950590c0d5097c09cce00dbd379a89ec",
+    "activeYclients": "55cf23f02d6e81c91f1f79ae2ef21bda1307f07f6206212b14dd426395617b5a",
+    "activeClaudeAi": "a0906f3a6c8cec37bf97961625196f8bc0412b1304138ec3eede1b0d6d8436c9",
+    "activeClientCommandBridge": "c8157dce73b11b3721d3539cc3ab3c823f587cd069301f7a1577bae9ee59f274",
+    "activePackage5Guard": "7c4d82873fcb1adc12198ec30c02c6933f9402fc8b0c735b6752f4eefb87cf04",
+    "publishedProxy": "1538ccf4aef8467a6af3ad4dab4ec17b0ea525d1334087464ef49f9d6043211e",
+    "publishedApp": "fe804992306c50d5e8544a48d59d496c75664dd0af542b13b0e1f7810e59ebc7"
+  },
+  "proofs": {
+    "targetedB19Typescript": "PASS — 2 suites / 11 tests",
+    "targetedB19PythonAndGuard": "PASS — 34 tests",
+    "legacyBridgeAndB18Preservation": "PASS — 18 tests",
+    "mandatoryPrismaValidate": "PASS",
+    "mandatoryLint": "PASS",
+    "mandatoryTypecheck": "PASS",
+    "mandatoryScriptTypecheck": "PASS",
+    "mandatoryBuild": "PASS",
+    "deploymentRegression": "PASS — 347 suites / 2850 tests",
+    "package4CrossPackageGuard": "PASS",
+    "package5ActiveRuntimeGuard": "PASS",
+    "backendHealthReadiness": "PASS",
+    "pwaReadiness": "PASS",
+    "postActivationBackendErrorLogs": 0,
+    "postActivationPwaErrorLogs": 0,
+    "candidatePort3199Open": false,
+    "finalAggregateRegression": "NOT RUN — mandatory STOP at new B20 inventory blocker"
+  },
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "freshFinalGateStartedFromScratch": true,
+  "sourceInventory": {
+    "productionTypescriptFiles": 537,
+    "typescriptHttpRouteDecorators": 218,
+    "typescriptMutationLikeCalls": 502,
+    "activeRootPythonFiles": 89,
+    "activeProductionRootPythonFiles": 69,
+    "activePythonHttpRoutes": 94,
+    "activePythonHttpRouteHandlers": 93,
+    "publishedProxySha256": "1538ccf4aef8467a6af3ad4dab4ec17b0ea525d1334087464ef49f9d6043211e",
+    "publishedAppSha256": "fe804992306c50d5e8544a48d59d496c75664dd0af542b13b0e1f7810e59ebc7",
+    "activeWebhookServerSha256": "91074718709d9d88dcf2064ea1a61d66950590c0d5097c09cce00dbd379a89ec"
+  },
+  "familyInventory": [
+    {
+      "family": "A15",
+      "canonicalFoundation": "Wave 3 AC2 staff-day executor",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "A16",
+      "canonicalFoundation": "Wave 2 AC1 access commands and AC5 reducer",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "A17",
+      "canonicalFoundation": "Wave 3 CRM connection/import and AC3/AC4/AC5 facts",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "A18",
+      "canonicalFoundation": "Client-owned profile, consent, verified channel and appointment authority foundations",
+      "result": "B19 3/3 remediation verified; B20 cabinet raw identity/PII/read-write bypass found"
+    },
+    {
+      "family": "A22",
+      "canonicalFoundation": "Wave 1 governed settings/preferences",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "A23",
+      "canonicalFoundation": "Wave 1 OperationalWorkItem and approved protocol state",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "A25",
+      "canonicalFoundation": "Wave 2 security commands and AC3 auth protocol",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "A26",
+      "canonicalFoundation": "Canonical TrialActivation and Wave 2 lifecycle commands",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "reduced A27",
+      "canonicalFoundation": "Wave 4 inventory and AC4 review ingestion",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "A28",
+      "canonicalFoundation": "Wave 4 prospective calendar actions and immutable AI receipt children",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "A29",
+      "canonicalFoundation": "Wave 5 recovery correction and immutable evidence",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "A30",
+      "canonicalFoundation": "AC6 coordinator, MaintenanceRun/ItemClaim and Policy V1",
+      "result": "registered; aggregate certification stopped at B20"
+    },
+    {
+      "family": "A31",
+      "canonicalFoundation": "AC4/AC5 event, ingestion and reconciliation facts",
+      "result": "registered; aggregate certification stopped at B20"
+    }
+  ],
+  "familySetCoverage": "13/13",
+  "newBlocker": {
+    "id": "B20-A18-CABINET-RAW-IDENTITY-PII-READ-WRITE",
+    "summary": "Published cabinet projection routes resolve a legacy SQLite Client from raw Telegram/session chat_id, expose Client PII/state without verified ClientChannelLink and actively warm a legacy history cache during the read.",
+    "publicEntryEvidence": {
+      "publishedProxyCabinetSessionLine": 667,
+      "publishedProxyCabinetMeLine": 877,
+      "publishedProxyCabinetLoginLine": 949,
+      "activeCabinetMeRouteLine": 12733,
+      "activeCabinetLoginRouteLine": 12748,
+      "activeCabinetSessionRouteLine": 12764
+    },
+    "activeIdentityProjectionAndMutationEvidence": {
+      "cabinetMeHandler": {
+        "line": 1942,
+        "end": 1959,
+        "sha256": "ce3bf6dffb52dcdd32e4bc49ff71031d8a6ee775c728cb887f4e5af8e76c68ec"
+      },
+      "cabinetLoginHandler": {
+        "line": 2189,
+        "end": 2217,
+        "sha256": "08400db2f3559cddf417dcba448cc90ae6ab1fe96def075106a8a81265231d79"
+      },
+      "cabinetSessionHandler": {
+        "line": 10457,
+        "end": 10475,
+        "sha256": "363f8665d8e0801dae40cd26760c71e30d0dc5259847dc96fbb73085dc3b69b6"
+      },
+      "fullCabinetHelper": {
+        "line": 2220,
+        "end": 2458,
+        "sha256": "f381e4c0bc1b04671e65675bd59ce9ba216361ab15f48e4a49726d34880fdac6"
+      },
+      "legacyClientLookupLine": 2226,
+      "legacyConsentGateLine": 2240,
+      "tombstonedLegacyLoyaltyEntryLine": 2257,
+      "activeLegacyHistoryCacheWriteLine": 2357,
+      "tombstonedReferralGetOrCreateEntryLine": 2383,
+      "verifiedClientChannelLinkRequired": false,
+      "tenantQualifiedCanonicalClientRequired": false,
+      "fullBookingPhoneReturned": true,
+      "clientNoteAndHistoryReturned": true,
+      "activeReadTimeLegacyWriter": "database.set_client_history_cache",
+      "activeValueMutationObserved": false,
+      "activeReferralMutationObserved": false
+    },
+    "staticReachabilityProof": {
+      "result": "B20 REPRODUCED BY EXACT-ACTIVE AST/CALL-GRAPH INVENTORY",
+      "networkCalls": 0,
+      "providerCalls": 0,
+      "productionMutations": 0,
+      "productionApplicationInvoked": false
+    },
+    "implementationAttempted": false,
+    "productionMutationEndpointsInvoked": false
+  },
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "productionDirectBusinessProviderValueMutationBypasses": "PRESENT — B20 read/projection path",
+  "legacyIdentityFallbacks": "PRESENT — B20",
+  "legacyMutatingOwnersActive": "PRESENT — B20 legacy read-time cache writer",
+  "wavesAccepted": "6/6",
+  "realProductionMutationsForProof": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}
