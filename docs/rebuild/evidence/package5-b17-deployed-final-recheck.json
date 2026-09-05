@@ -1,0 +1,296 @@
+{
+  "acceptedOwnerCheckpoint": "f69bf0f9",
+  "runtimeCommit": "eb17dff458ae39511f023f5eede308dd73128f90",
+  "productionRelease": "/opt/maya-saas/releases/20260905-p5-b17-eb17dff4",
+  "b17ProductionRemediation": "PASS",
+  "b17": {
+    "endpoints": [
+      "POST /api/client/cancel-record",
+      "POST /api/client/reschedule-record"
+    ],
+    "verifiedClientChannelRequired": true,
+    "tenantQualifiedCanonicalClientRequired": true,
+    "exactAppointmentOwnershipRequired": true,
+    "preDispatchAuthorizationRecheck": true,
+    "cancelActionClass": "cancel_appointment",
+    "rescheduleActionClass": "reschedule_appointment",
+    "executionOwner": "ACTION ENGINE",
+    "legacyPhoneSessionAppointmentAuthority": 0,
+    "callerSuppliedClientTenantStaffServiceAuthority": 0,
+    "legacyActorMarkerWrites": 0,
+    "directProviderMutationBypasses": 0,
+    "legacyMutatingFallbacks": 0,
+    "unknownRemainsUnknown": true,
+    "blindRetry": false,
+    "productionMutationEndpointsInvoked": false
+  },
+  "productionStructuralReadOnlyVerification": "PASS",
+  "artifactHashes": {
+    "backendClientChannelRuntime": "9a0f03f34d689dfc5c1967e1e87a72d85b4083bcef16f893b469b110bcd875cb",
+    "backendClientChannelController": "092aebab426ed895829e6e214bbb5ac26ee8664c46892388420e2cbea18b9eea",
+    "backendCrmService": "daab700ce0f5be57e85c02ceafd80bc1118ff0714d676c84a07ecf179348ea6d",
+    "activeWebhookServer": "4ed1ba82ea61f4131c45c3d47133c2950fefdacf06c5929d4eaa01822db64a40",
+    "activeClientRecordActions": "fbab221191169fdd0e6ec4615f699ce6041a99407a30445d62358481c7f84048",
+    "activeClientCommandBridge": "3b480772474f9b43767c12c750112c94567a972b3b8b8503a5537d10c27f717d",
+    "activePackage5Guard": "a5137ab694ac17d2ee077e975b81542aeaf48fc0d93eeacb68f5b1906cfa1db3",
+    "publishedProxy": "1538ccf4aef8467a6af3ad4dab4ec17b0ea525d1334087464ef49f9d6043211e",
+    "publishedApp": "fe804992306c50d5e8544a48d59d496c75664dd0af542b13b0e1f7810e59ebc7"
+  },
+  "proofs": {
+    "targetedPythonB17AndGuard": "PASS — 35 tests",
+    "b17ServiceAndArchitecture": "PASS — 18 tests",
+    "mandatoryLint": "PASS",
+    "mandatoryTypecheck": "PASS",
+    "mandatoryScriptTypecheck": "PASS",
+    "mandatoryBuild": "PASS",
+    "deploymentRegression": "PASS — 344 suites / 2829 tests",
+    "package4CrossPackageGuard": "PASS",
+    "package5ActiveRuntimeGuard": "PASS",
+    "backendHealthReadiness": "PASS",
+    "pwaAndProxyStructuralVerification": "PASS",
+    "postActivationBackendErrorLogs": 0,
+    "postActivationPwaErrorLogs": 0,
+    "candidatePort3199Open": false,
+    "finalAggregateRegression": "NOT RUN — mandatory STOP at new B18 inventory blocker"
+  },
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "freshFinalGateStartedFromScratch": true,
+  "sourceInventory": {
+    "productionTypescriptFiles": 537,
+    "typescriptHttpRouteDecorators": 218,
+    "typescriptMutationLikeCalls": 500,
+    "activeRootPythonFiles": 89,
+    "activeProductionRootPythonFiles": 69,
+    "activePythonHttpRoutes": 94,
+    "activePythonHttpRouteHandlers": 93,
+    "publishedProxySha256": "1538ccf4aef8467a6af3ad4dab4ec17b0ea525d1334087464ef49f9d6043211e",
+    "publishedAppSha256": "fe804992306c50d5e8544a48d59d496c75664dd0af542b13b0e1f7810e59ebc7",
+    "activeWebhookServerSha256": "4ed1ba82ea61f4131c45c3d47133c2950fefdacf06c5929d4eaa01822db64a40",
+    "activeYclientsSha256": "31ba0990ed39929b068017fa71c6749043dc54f6887d60bf00cb72d114ccd876",
+    "canonicalRepositoryYclientsSha256": "55cf23f02d6e81c91f1f79ae2ef21bda1307f07f6206212b14dd426395617b5a"
+  },
+  "familyInventory": [
+    {
+      "family": "A15",
+      "canonicalFoundation": "Wave 3 AC2 staff-day executor",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "A16",
+      "canonicalFoundation": "Wave 2 AC1 access commands and AC5 reducer",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "A17",
+      "canonicalFoundation": "Wave 3 CRM connection/import and AC3/AC4/AC5 facts",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "A18",
+      "canonicalFoundation": "Client-owned profile, consent, preferences and verified channel foundations",
+      "result": "B17 endpoints verified; B18 AI phone/chat appointment authority found"
+    },
+    {
+      "family": "A22",
+      "canonicalFoundation": "Wave 1 governed settings/preferences",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "A23",
+      "canonicalFoundation": "Wave 1 OperationalWorkItem and approved protocol state",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "A25",
+      "canonicalFoundation": "Wave 2 security commands and AC3 auth protocol",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "A26",
+      "canonicalFoundation": "Canonical TrialActivation and Wave 2 lifecycle commands",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "reduced A27",
+      "canonicalFoundation": "Wave 4 inventory and AC4 review ingestion",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "A28",
+      "canonicalFoundation": "Wave 4 prospective calendar actions and immutable AI receipt children",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "A29",
+      "canonicalFoundation": "Wave 5 recovery correction and immutable evidence",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "A30",
+      "canonicalFoundation": "AC6 coordinator, MaintenanceRun/ItemClaim and Policy V1",
+      "result": "registered; aggregate certification stopped at B18"
+    },
+    {
+      "family": "A31",
+      "canonicalFoundation": "AC4/AC5 event, ingestion and reconciliation facts",
+      "result": "registered; aggregate certification stopped at B18"
+    }
+  ],
+  "familySetCoverage": "13/13",
+  "newBlocker": {
+    "id": "B18-ACTIVE-AI-JOURNAL-APPOINTMENT-IDENTITY-PROVIDER-OWNERS",
+    "summary": "The exact active PWA contains an older yclients.py whose AI and journal appointment mutations use legacy phone/chat authority and six direct provider PUT owners outside Action Engine.",
+    "activeArtifactDrift": {
+      "activeYclientsSha256": "31ba0990ed39929b068017fa71c6749043dc54f6887d60bf00cb72d114ccd876",
+      "canonicalRepositoryYclientsSha256": "55cf23f02d6e81c91f1f79ae2ef21bda1307f07f6206212b14dd426395617b5a",
+      "same": false
+    },
+    "publicEntryEvidence": {
+      "chatProxyLines": "2567-2575",
+      "chatRouteLine": 12966,
+      "journalAttendanceProxyLines": "2337-2357",
+      "journalMutationProxyLines": "2365-2393",
+      "publishedAppJournalLines": "26321-26558"
+    },
+    "legacyAiIdentityEvidence": {
+      "recordOwnershipFunctionLines": "1590-1639",
+      "recordResolutionFunctionLines": "1642-1695",
+      "appointmentToolLines": "2466-2515",
+      "sqliteClientByUserId": true,
+      "phoneAsAppointmentAuthority": true,
+      "verifiedClientChannelLinkRequired": false
+    },
+    "activeYclientsFunctions": {
+      "update_booking": {
+        "line": 1308,
+        "end": 1344,
+        "sha256": "0af35cddf9c64c00cc9255b9568e2be1bff9bb24d335c84f769ff26f530ceca9",
+        "directProviderPut": true,
+        "canonicalDispatch": false
+      },
+      "set_record_attendance": {
+        "line": 1346,
+        "end": 1392,
+        "sha256": "0c1b9022ca56e9a2d65c8e66390f09ba052e5f537926599f70dd2f7109824a30",
+        "directProviderPut": true,
+        "canonicalDispatch": false
+      },
+      "add_services_to_record": {
+        "line": 1914,
+        "end": 1998,
+        "sha256": "4551630c0ba9b6f2c82efb386102572c568d41797876ec14462e0805a2b285aa",
+        "directProviderPut": true,
+        "canonicalDispatch": false
+      },
+      "set_record_services": {
+        "line": 2000,
+        "end": 2098,
+        "sha256": "70bfc29dc5f822dcf138ee00e0a0d9150b17d12c9888567a155741e7d79070e9",
+        "directProviderPut": true,
+        "canonicalDispatch": false
+      },
+      "set_record_duration": {
+        "line": 2100,
+        "end": 2152,
+        "sha256": "50d8ad3100f2e4d4c70f11270729e40eb484d1226e01b351e5b25aa3f19656d3",
+        "directProviderPut": true,
+        "canonicalDispatch": false
+      },
+      "set_record_client_name": {
+        "line": 2154,
+        "end": 2223,
+        "sha256": "a6ab5fecb6e54bfc9559c8da81cbe55af39c3e40a5ed500f31fa02aacfc35164",
+        "directProviderPut": true,
+        "canonicalDispatch": false
+      }
+    },
+    "activeWebhookHandlers": {
+      "panel_journal_attendance_handler": {
+        "line": 12530,
+        "end": 12563,
+        "sha256": "6e1a00488320a3bb5a31142b1299c6258755b60a4205f5d94a2a75e4fb5b00d2"
+      },
+      "panel_journal_add_service_handler": {
+        "line": 12717,
+        "end": 12752,
+        "sha256": "c28a56bfd3e25b138d83238eb125cd628aa44bbac0017ff538807674454f90fb"
+      },
+      "panel_journal_set_services_handler": {
+        "line": 12755,
+        "end": 12793,
+        "sha256": "a0a6ae409d7b7ee615694c973da689906c02e896dc048fbc6c0c56a9fc87fa76"
+      },
+      "panel_journal_set_duration_handler": {
+        "line": 12796,
+        "end": 12832,
+        "sha256": "c723a8c45cf7fe15af207fd28d4ce4c77220ddbb9035ee1f7baee80944893462"
+      },
+      "panel_journal_set_client_name_handler": {
+        "line": 12835,
+        "end": 12875,
+        "sha256": "9c76fe29256b37cad18a66d3542fff7be99add57dad7ad8b3c7e72f5395a154c"
+      }
+    },
+    "isolatedReproduction": {
+      "exactActiveArtifact": true,
+      "networkProviderCalls": 0,
+      "productionMutations": 0,
+      "directPutCount": 6,
+      "checks": [
+        {
+          "operation": "update_booking",
+          "directProviderPutReached": true,
+          "putDelta": 1
+        },
+        {
+          "operation": "set_record_attendance",
+          "directProviderPutReached": true,
+          "putDelta": 1
+        },
+        {
+          "operation": "add_services_to_record",
+          "directProviderPutReached": true,
+          "putDelta": 1
+        },
+        {
+          "operation": "set_record_services",
+          "directProviderPutReached": true,
+          "putDelta": 1
+        },
+        {
+          "operation": "set_record_duration",
+          "directProviderPutReached": true,
+          "putDelta": 1
+        },
+        {
+          "operation": "set_record_client_name",
+          "directProviderPutReached": true,
+          "putDelta": 1
+        }
+      ]
+    },
+    "implementationAttempted": false,
+    "productionMutationEndpointsInvoked": false
+  },
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "productionDirectBusinessProviderMutationBypasses": "PRESENT — B18",
+  "legacyIdentityProviderOwnersActive": "PRESENT — B18",
+  "wavesAccepted": "6/6",
+  "realProductionMutationsForProof": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}
