@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed when the active PWA restores B13-B23 legacy owners."""
+"""Fail closed when the active PWA restores B13-B24 legacy owners."""
 
 from __future__ import annotations
 
@@ -19,6 +19,14 @@ class Finding:
 
 
 WEB_FUNCTIONS = {
+    "push_subscribe_handler": {
+        "markers": ('channel_proof(request.headers, body)', 'command, "push-subscribe"', 'CLIENT_WEB_PUSH_LIMIT_EXCEEDED'),
+        "forbidden": ('_authed_chat_id', 'database.', 'sqlite3', '_save_master_push', '_send_', 'get_or_create_client', 'body.get("clientId")'),
+    },
+    "push_unsubscribe_handler": {
+        "markers": ('channel_proof(request.headers, body)', 'command, "push-unsubscribe"'),
+        "forbidden": ('_authed_chat_id', 'database.', 'sqlite3', '_send_', 'get_or_create_client'),
+    },
     "chat_delete_handler": {
         "markers": ("p5_b23_server_history_delete_retired", "FEATURE_NOT_AVAILABLE", "status=410"),
         "forbidden": ("request.json", "request.app", "chat_id", "session", "phone", "memory", "database.", "messages", "client_command", "load_conversations", "save_conversations"),
@@ -485,6 +493,19 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
 
     web = _read(root, "webhook_server.py", overrides)
     web_functions = _functions(web, "webhook_server.py")
+    for path, handler in (("/api/push/subscribe", "push_subscribe_handler"), ("/api/push/unsubscribe", "push_unsubscribe_handler")):
+        push_routes = [n for n in ast.walk(ast.parse(web)) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr != 'add_options' and any(isinstance(a, ast.Constant) and a.value == path for a in n.args)]
+        if len(push_routes) != 1 or len(push_routes[0].args) != 2 or not isinstance(push_routes[0].args[1], ast.Name) or push_routes[0].args[1].id != handler:
+            findings.append(Finding("b24_web_push", "Web Push route must use its verified registry handler"))
+    for name, expected in (("_send_master_push", 'return 0'), ("_send_client_push", 'return 0'), ("_push_subscriptions_for_master", 'return []')):
+        body = web_functions.get(name, '')
+        if not body:
+            findings.append(Finding("b24_web_push", f"{name} fail-closed adapter missing"))
+            continue
+        node = ast.parse(body).body[0]
+        statements = [n for n in node.body if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant) and isinstance(n.value.value, str))]
+        if len(statements) != 1 or ast.dump(statements[0]) != ast.dump(ast.parse(expected).body[0]):
+            findings.append(Finding("b24_web_push", f"{name} restores legacy identity/delivery/storage"))
     for name, contract in WEB_FUNCTIONS.items():
         body = web_functions.get(name)
         if body is None:
@@ -678,13 +699,19 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
         source = overrides.get(path.name, path.read_text(encoding="utf-8"))
         tree = ast.parse(source, filename=path.name)
         for node in ast.walk(tree):
+            if isinstance(node, (ast.Import, ast.ImportFrom)) and ('pywebpush' in ast.unparse(node)):
+                findings.append(Finding("b24_web_push", f"{path.name}:{node.lineno} imports direct Web Push transport"))
             if isinstance(node, ast.Call):
                 func = node.func
                 name = func.attr if isinstance(func, ast.Attribute) else func.id if isinstance(func, ast.Name) else ""
                 if name == "save_tip":
                     findings.append(Finding("b22_tip_authority", f"{path.name}:{node.lineno} calls retired tip writer"))
+                if name in ('webpush', '_save_master_push_subscription', '_save_master_push_subscription_sqlite', '_push_db', '_list_master_push_subscriptions_sqlite', '_delete_master_push_subscription_sqlite'):
+                    findings.append(Finding("b24_web_push", f"{path.name}:{node.lineno} calls legacy Web Push owner"))
             if isinstance(node, ast.Constant) and isinstance(node.value, str):
                 normalized = " ".join(node.value.upper().split())
+                if re.search(r"\b(?:INSERT INTO|UPDATE|DELETE FROM|FROM|CREATE TABLE IF NOT EXISTS) (?:MASTER|CLIENT)_PUSH_SUBSCRIPTIONS\b", normalized):
+                    findings.append(Finding("b24_web_push", f"{path.name}:{node.lineno} uses plaintext legacy Web Push registry"))
                 if re.search(r"\b(?:INSERT INTO|UPDATE|DELETE FROM|FROM) TIPS\b", normalized):
                     findings.append(Finding("b22_tip_authority", f"{path.name}:{node.lineno} uses legacy tip facts"))
     return findings
@@ -719,6 +746,7 @@ def main() -> int:
         "b21RealtimePreReadyBypasses": 0 if not findings else None,
         "b22UnverifiedTipOwners": 0 if not findings else None,
         "b23LegacyHistoryDeleteOwners": 0 if not findings else None,
+        "b24LegacyWebPushOwners": 0 if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }
@@ -728,7 +756,7 @@ def main() -> int:
         for finding in findings:
             print(f"FAIL {finding.check}: {finding.detail}")
     else:
-        print("Package 5 B13-B23 active PWA control-plane guard: PASS")
+        print("Package 5 B13-B24 active PWA control-plane guard: PASS")
     return 0 if not findings else 1
 
 

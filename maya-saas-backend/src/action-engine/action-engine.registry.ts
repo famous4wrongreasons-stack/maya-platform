@@ -1,3 +1,4 @@
+import { normalizeClientWebPushDelivery } from '../communication-delivery/communication-web-push.contract';
 import { clientHabitsCapability } from './client-habits.contract';
 import { clientPreferenceCapabilities } from './client-preferences.contract';
 import { clientWantedSlotCapabilities } from './client-wanted-slot.contract';
@@ -365,6 +366,8 @@ function package2SingleDeliveryNormalizer(
   value: unknown,
 ): Record<string, unknown> {
   const source = recordInput(value);
+  if (source.channel === 'web_push')
+    return normalizeClientWebPushDelivery(source);
   assertOnlyKeys(source, [
     'channel',
     'messageType',

@@ -274,6 +274,7 @@ model Tenant {
   clientConsentFacts             ClientConsentFact[]
   clientLinkChallenges           ClientLinkChallenge[]
   clientWantedSlotInterests       ClientWantedSlotInterest[]
+  clientWebPushEndpoints          ClientWebPushEndpoint[]
   maintenanceRuns                MaintenanceRun[]
 
   @@index([status, graceEndsAt])
@@ -2080,6 +2081,7 @@ model Client {
   channelLinks ClientChannelLink[]
   linkChallenges ClientLinkChallenge[]
   wantedSlotInterests ClientWantedSlotInterest[]
+  webPushEndpoints ClientWebPushEndpoint[]
 
   @@unique([id, tenantId])
   @@index([tenantId, phoneHash])
@@ -2144,6 +2146,7 @@ model ClientChannelLink {
   successors ClientChannelLink[] @relation("ClientChannelLinkHistory")
   consumedChallenges ClientLinkChallenge[] @relation("ClientLinkChallengeOutcome")
   wantedSlotInterests ClientWantedSlotInterest[]
+  webPushEndpoints ClientWebPushEndpoint[]
 
   @@unique([id, tenantId])
   @@unique([id, tenantId, clientId], map: "ClientChannelLink_client_reference_key")
@@ -2151,6 +2154,41 @@ model ClientChannelLink {
   @@unique([tenantId, verificationIdentityHash], map: "ClientChannelLink_verification_identity_key")
   @@unique([tenantId, revocationIdentityHash], map: "ClientChannelLink_revocation_identity_key")
   @@index([tenantId, clientId])
+}
+
+/// B24 V1: immutable encrypted delivery episode, never Client identity.
+/// SQL guards enforce verified ownership, terminal lifecycle and the active cap.
+model ClientWebPushEndpoint {
+  id                       String    @id @default(uuid())
+  tenantId                 String
+  clientId                 String
+  clientChannelLinkId      String
+  endpointHash             String
+  hashVersion              Int       @default(1)
+  subscriptionEncrypted    String
+  materialHash             String
+  registrationIdentityHash String
+  policyVersion            Int       @default(1)
+  createdAt                DateTime  @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+  registrationEvidenceJson Json
+  registrationEvidenceHash String
+  supersedesEndpointId     String?   @unique
+  endedAt                  DateTime?
+  endReason                String?
+  terminationIdentityHash  String?   @unique
+  terminationEvidenceJson  Json?
+  terminationEvidenceHash  String?
+
+  tenant            Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  client            Client                  @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  clientChannelLink ClientChannelLink       @relation(fields: [clientChannelLinkId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict)
+  predecessor       ClientWebPushEndpoint?  @relation("WebPushEpisode", fields: [supersedesEndpointId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict)
+  successors        ClientWebPushEndpoint[] @relation("WebPushEpisode")
+
+  @@unique([id, tenantId, clientId])
+  @@unique([tenantId, registrationIdentityHash])
+  @@index([tenantId, clientId, endedAt, createdAt, id])
+  @@index([endpointHash])
 }
 
 /// Approved after 84696bc9: Client-bound, single-use challenge; TTL V1 = 600s.

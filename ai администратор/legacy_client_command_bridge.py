@@ -29,7 +29,7 @@ def channel_proof(headers, body: dict) -> str:
 
 def command(operation: str, proof: str, payload: dict) -> dict:
     if operation not in {
-        "consent", "status", "issue", "consume", "delivery-consent",
+        "consent", "status", "issue", "consume", "delivery-consent", "push-subscribe", "push-unsubscribe",
         "booking-prefill", "appointment-create", "appointment-cancel", "appointment-reschedule",
         "appointment-services", "cabinet-projection", "realtime-authority",
     }:
@@ -42,7 +42,9 @@ def command(operation: str, proof: str, payload: dict) -> dict:
     # bridge. The backend independently checks the configured provider/company.
     try:
         response = requests.post(
-            "http://127.0.0.1:3107/api/internal/legacy/client-commands/" + operation,
+            ("http://127.0.0.1:3107/api/internal/legacy/client-web-push/" + operation[5:]
+             if operation in {"push-subscribe", "push-unsubscribe"}
+             else "http://127.0.0.1:3107/api/internal/legacy/client-commands/" + operation),
             headers={"x-maya-legacy-bridge": token},
             json={"provider": "yclients", "externalCompanyId": str(YCLIENTS_COMPANY_ID),
                   "channelProof": proof, "payload": payload}, timeout=8,
@@ -55,6 +57,12 @@ def command(operation: str, proof: str, payload: dict) -> dict:
         raise
     if response.status_code >= 500 and operation == "appointment-create":
         raise RuntimeError("client_command_outcome_unknown")
+    if operation == "push-subscribe" and response.status_code == 409:
+        try:
+            if response.json().get("message") == "CLIENT_WEB_PUSH_LIMIT_EXCEEDED":
+                raise ValueError("CLIENT_WEB_PUSH_LIMIT_EXCEEDED")
+        except (AttributeError, requests.exceptions.JSONDecodeError):
+            pass
     if response.status_code >= 400:
         # Never echo bearer, channel payload, upstream stack, or customer data.
         raise ValueError("client_link_or_authority_required" if response.status_code in (400, 401, 403, 404, 409) else "client_command_unavailable")

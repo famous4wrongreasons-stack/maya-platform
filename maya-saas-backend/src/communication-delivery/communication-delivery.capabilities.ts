@@ -146,6 +146,32 @@ const TEST_CAPABILITIES: readonly CommunicationProviderCapabilitiesV1[] = [
 const PRODUCTION_CAPABILITIES: readonly CommunicationProviderCapabilitiesV1[] =
   [
     {
+      key: 'communication.production.web-push.client-single',
+      version: 1,
+      channel: 'web_push',
+      testOnly: false,
+      externalDispatchEnabled: true,
+      providerIdempotencySupported: false,
+      providerReferenceReturned: false,
+      reconciliationSupported: false,
+      proofOfNonDeliverySupported: false,
+      acceptedIsTerminal: true,
+      retry: {
+        key: 'communication.production.web-push.no-blind-retry',
+        version: 1,
+        maxExecutionAttempts: 1,
+        retryablePreDispatchErrors: new Set(),
+        backoffMs: [],
+      },
+      reconciliation: {
+        key: 'communication.production.web-push.manual-only',
+        version: 1,
+        maxInconclusiveAttempts: 1,
+      },
+      payloadRetentionMs: 7 * DAY,
+      auditRetentionMs: 365 * DAY,
+    },
+    {
       key: 'communication.production.inbox.new-appointment',
       version: 1,
       channel: 'inbox',

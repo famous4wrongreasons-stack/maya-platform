@@ -42,6 +42,8 @@ export interface CreateCommunicationEnvelopeV1 {
   contentIdentityHash: string;
   expiresAt: Date;
   recipients: CommunicationRecipientV1[];
+  /** Web Push only: one logical canonical Client with at most five devices. */
+  clientId?: string;
   audienceId?: string;
   audienceSnapshotHash?: string;
   createdByUserId?: string;

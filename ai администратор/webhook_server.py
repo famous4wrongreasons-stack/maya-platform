@@ -358,109 +358,14 @@ def _master_by_tip_key(key: Any, master_id: Any = None) -> dict | None:
     return None
 
 
-def _push_db_path() -> str:
-    return os.environ.get(
-        "MASTER_PUSH_DB",
-        os.path.join(os.path.dirname(__file__), "master_push_subscriptions.sqlite3"),
-    )
 
 
-def _push_db() -> sqlite3.Connection:
-    conn = sqlite3.connect(_push_db_path())
-    conn.row_factory = sqlite3.Row
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS master_push_subscriptions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            staff_id INTEGER,
-            telegram_chat_id INTEGER NOT NULL,
-            endpoint TEXT NOT NULL UNIQUE,
-            subscription_json TEXT NOT NULL,
-            user_agent TEXT,
-            created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
-        )
-    """)
-    conn.execute("""
-        CREATE INDEX IF NOT EXISTS idx_master_push_staff
-        ON master_push_subscriptions(staff_id)
-    """)
-    conn.execute("""
-        CREATE INDEX IF NOT EXISTS idx_master_push_chat
-        ON master_push_subscriptions(telegram_chat_id)
-    """)
-    conn.commit()
-    return conn
 
 
-def _save_master_push_subscription_sqlite(
-    staff_id: int | None,
-    chat_id: int,
-    subscription: dict,
-    user_agent: str = "",
-) -> bool:
-    endpoint = subscription.get("endpoint")
-    if not endpoint:
-        return False
-    now_s = datetime.now().isoformat(timespec="seconds")
-    with _push_db() as conn:
-        conn.execute("""
-            INSERT INTO master_push_subscriptions
-                (staff_id, telegram_chat_id, endpoint, subscription_json, user_agent, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(endpoint) DO UPDATE SET
-                staff_id=excluded.staff_id,
-                telegram_chat_id=excluded.telegram_chat_id,
-                subscription_json=excluded.subscription_json,
-                user_agent=excluded.user_agent,
-                updated_at=excluded.updated_at
-        """, (
-            staff_id,
-            int(chat_id),
-            endpoint,
-            _json.dumps(subscription, ensure_ascii=False),
-            user_agent or "",
-            now_s,
-            now_s,
-        ))
-        conn.commit()
-    return True
 
 
-def _list_master_push_subscriptions_sqlite(staff_id: int | None, chat_id: int | None) -> list[dict]:
-    where = []
-    params = []
-    if staff_id:
-        where.append("staff_id = ?")
-        params.append(int(staff_id))
-    if chat_id:
-        where.append("telegram_chat_id = ?")
-        params.append(int(chat_id))
-    if not where:
-        return []
-    sql = (
-        "SELECT subscription_json FROM master_push_subscriptions "
-        "WHERE " + " OR ".join(where)
-    )
-    with _push_db() as conn:
-        rows = conn.execute(sql, params).fetchall()
-    out = []
-    for row in rows:
-        try:
-            out.append(_json.loads(row["subscription_json"]))
-        except Exception:
-            pass
-    return out
 
 
-def _delete_master_push_subscription_sqlite(endpoint: str):
-    if not endpoint:
-        return
-    try:
-        with _push_db() as conn:
-            conn.execute("DELETE FROM master_push_subscriptions WHERE endpoint = ?", (endpoint,))
-            conn.commit()
-    except Exception as e:
-        logger.error(f"push sqlite delete failed: {e}")
 
 
 def _record_push_body(record: dict) -> str:
@@ -477,60 +382,11 @@ def _record_push_body(record: dict) -> str:
     return f"{when} · {client_name}"
 
 
-def _save_master_push_subscription(master: dict, chat_id: int, subscription: dict, user_agent: str = "") -> bool:
-    staff_id = _master_staff_id(master)
-    for name in ("save_master_push_subscription", "upsert_master_push_subscription", "save_push_subscription"):
-        fn = getattr(database, name, None)
-        if not callable(fn):
-            continue
-        try:
-            fn(
-                staff_id=staff_id,
-                telegram_chat_id=int(chat_id),
-                subscription=subscription,
-                user_agent=user_agent,
-            )
-            return True
-        except TypeError:
-            try:
-                fn(staff_id, int(chat_id), subscription)
-                return True
-            except Exception as e:
-                logger.error(f"{name}: {e}")
-        except Exception as e:
-            logger.error(f"{name}: {e}")
-    try:
-        return _save_master_push_subscription_sqlite(staff_id, int(chat_id), subscription, user_agent)
-    except Exception as e:
-        logger.error(f"push sqlite save failed: {e}")
-        return False
 
 
 def _push_subscriptions_for_master(master: dict) -> list[dict]:
-    staff_id = _master_staff_id(master)
-    chat_id = master.get("telegram_chat_id") if master else None
-    for name in ("list_master_push_subscriptions", "get_master_push_subscriptions", "list_push_subscriptions_for_master"):
-        fn = getattr(database, name, None)
-        if not callable(fn):
-            continue
-        try:
-            rows = fn(staff_id=staff_id, telegram_chat_id=chat_id)
-        except TypeError:
-            try:
-                rows = fn(staff_id)
-            except Exception as e:
-                logger.error(f"{name}: {e}")
-                rows = []
-        except Exception as e:
-            logger.error(f"{name}: {e}")
-            rows = []
-        if rows:
-            return list(rows)
-    try:
-        return _list_master_push_subscriptions_sqlite(staff_id, chat_id)
-    except Exception as e:
-        logger.error(f"push sqlite list failed: {e}")
-        return []
+    """B24: legacy raw-identity push has no canonical delivery authority."""
+    return []
 
 
 async def _send_master_push(
@@ -541,56 +397,8 @@ async def _send_master_push(
     tag: str = "",
     data: dict | None = None,
 ) -> int:
-    if not master or not WEBPUSH_VAPID_PRIVATE_KEY:
-        return 0
-    rows = _push_subscriptions_for_master(master)
-    if not rows:
-        return 0
-    try:
-        from pywebpush import WebPushException, webpush
-    except Exception as e:
-        logger.error(f"Web Push отключён: установите pywebpush ({e})")
-        return 0
-
-    payload = _json.dumps({
-        "title": title,
-        "body": body,
-        "url": url,
-        "tag": tag or f"master-{_master_staff_id(master) or 'notice'}",
-        **(data or {}),
-    }, ensure_ascii=False)
-
-    sent = 0
-    for row in rows:
-        sub = row
-        if isinstance(row, dict):
-            sub = row.get("subscription") or row.get("subscription_json") or row
-        endpoint = sub.get("endpoint") if isinstance(sub, dict) else ""
-        if isinstance(sub, str):
-            try:
-                sub = _json.loads(sub)
-                endpoint = sub.get("endpoint") if isinstance(sub, dict) else endpoint
-            except Exception:
-                continue
-        try:
-            await asyncio.to_thread(
-                webpush,
-                subscription_info=sub,
-                data=payload,
-                vapid_private_key=WEBPUSH_VAPID_PRIVATE_KEY,
-                vapid_claims=WEBPUSH_VAPID_CLAIMS,
-            )
-            sent += 1
-        except WebPushException as e:
-            status = getattr(getattr(e, "response", None), "status_code", None)
-            if status in (403, 404, 410):
-                _delete_master_push_subscription_sqlite(endpoint)
-                logger.info(f"master push stale subscription removed status={status}")
-                continue
-            logger.error(f"master push failed: {e}")
-        except Exception as e:
-            logger.error(f"master push failed: {e}")
-    return sent
+    """B24: legacy raw-identity push has no canonical delivery authority."""
+    return 0
 
 
 async def _send_client_push(chat_id, title: str, body: str,
@@ -604,76 +412,8 @@ async def _send_client_push(chat_id, title: str, body: str,
                             chat_link=None,
                             chat_mode: str = "client",
                             chat_dedupe_key: str = "") -> int:
-    """Push конкретному КЛИЕНТУ (по telegram_chat_id) — напр. предложение оставить чай
-    после визита. Подписки клиента лежат в той же таблице (staff_id NULL)."""
-    if persist_in_chat and chat_id:
-        try:
-            text_for_chat = (chat_text or "").strip()
-            if not text_for_chat:
-                text_for_chat = (f"{title}\n\n{body}" if body else title).strip()
-            _store_assistant_message_in_chat(
-                int(chat_id),
-                text_for_chat,
-                mode=chat_mode,
-                action=chat_action,
-                widget=chat_widget,
-                widget_data=chat_widget_data,
-                link=chat_link,
-                dedupe_key=chat_dedupe_key or tag or "",
-            )
-        except Exception as e:
-            logger.error(f"client push chat mirror {chat_id}: {e}")
-    if not chat_id or not WEBPUSH_VAPID_PRIVATE_KEY:
-        return 0
-    try:
-        rows = _list_master_push_subscriptions_sqlite(None, int(chat_id))
-    except Exception as e:
-        logger.error(f"client push list: {e}")
-        return 0
-    if not rows:
-        return 0
-    try:
-        from pywebpush import WebPushException, webpush
-    except Exception as e:
-        logger.error(f"Web Push отключён: {e}")
-        return 0
-    push_data = dict(data or {})
-    widget = normalize_chat_widget(chat_widget)
-    push_data.pop("widget_data", None)
-    if widget:
-        push_data["widget"] = widget
-        widget_data = normalize_chat_widget_data(widget, chat_widget_data)
-        if widget_data:
-            push_data["widget_data"] = widget_data
-    payload = _json.dumps({
-        "title": title, "body": body, "url": url,
-        "tag": tag or f"client-{chat_id}", **push_data,
-    }, ensure_ascii=False)
-    sent = 0
-    for row in rows:
-        sub = row.get("subscription") or row.get("subscription_json") or row if isinstance(row, dict) else row
-        endpoint = sub.get("endpoint") if isinstance(sub, dict) else ""
-        if isinstance(sub, str):
-            try:
-                sub = _json.loads(sub)
-                endpoint = sub.get("endpoint") if isinstance(sub, dict) else endpoint
-            except Exception:
-                continue
-        try:
-            await asyncio.to_thread(
-                webpush, subscription_info=sub, data=payload,
-                vapid_private_key=WEBPUSH_VAPID_PRIVATE_KEY, vapid_claims=WEBPUSH_VAPID_CLAIMS)
-            sent += 1
-        except WebPushException as e:
-            status = getattr(getattr(e, "response", None), "status_code", None)
-            if status in (403, 404, 410):
-                _delete_master_push_subscription_sqlite(endpoint)
-                logger.info(f"client push stale subscription removed status={status}")
-                continue
-            logger.error(f"client push failed: {e}")
-        except Exception as e:
-            logger.error(f"client push failed: {e}")
-    return sent
+    """B24: legacy raw-identity push has no canonical delivery authority."""
+    return 0
 
 
 def _tip_offer_details(record: dict, master_name: str = "") -> tuple[str, int]:
@@ -10163,50 +9903,39 @@ async def cabinet_me_via_session_handler(request: web.Request) -> web.Response:
 
 
 async def push_subscribe_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/push/subscribe
-    Сохраняет Web Push subscription только для распознанного мастера/сотрудника.
-    """
+    """B24 AC3: verified Client registration only; no send or legacy store."""
+    from legacy_client_command_bridge import channel_proof, command
     try:
         body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"subscription", "expectedEndpointId", "auth_data", "session_token", "maya_token"}:
+            raise ValueError("invalid_push_request")
+        proof = channel_proof(request.headers, body)
+        payload = {"subscription": body.get("subscription")}
+        if "expectedEndpointId" in body:
+            payload["expectedEndpointId"] = body["expectedEndpointId"]
+        result = await asyncio.to_thread(command, "push-subscribe", proof, payload)
+        return _cabinet_response({"ok": True, **result})
+    except ValueError as exc:
+        code = "CLIENT_WEB_PUSH_LIMIT_EXCEEDED" if str(exc) == "CLIENT_WEB_PUSH_LIMIT_EXCEEDED" else "verified_client_push_required"
+        return _cabinet_response({"ok": False, "error": code}, status=409)
     except Exception:
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-    if not isinstance(body, dict):
-        return _cabinet_response({"error": "invalid_json"}, status=400)
+        return _cabinet_response({"ok": False, "error": "push_registration_unavailable"}, status=503)
 
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
 
-    subscription = body.get("subscription")
-    if not isinstance(subscription, dict) or not subscription.get("endpoint"):
-        return _cabinet_response({"error": "bad_subscription"}, status=400)
-
-    ua = request.headers.get("User-Agent", "")
-    master = _master_by_chat_id(chat_id)
-    if master:
-        # Мастер/сотрудник — подписка с staff_id (записи/переносы/отмены/чаевые)
-        saved = _save_master_push_subscription(
-            master=master, chat_id=chat_id, subscription=subscription, user_agent=ua)
-        staff_id = _master_staff_id(master)
-        role = "master"
-    else:
-        # Клиент — подписка по chat_id (staff_id NULL): напоминания + предложение чаевых после визита
-        saved = _save_master_push_subscription_sqlite(None, chat_id, subscription, ua)
-        staff_id = None
-        role = "client"
-    if not saved:
-        return _cabinet_response({
-            "error": "push_storage_not_configured",
-            "message": "Не удалось сохранить push-подписку.",
-        }, status=501)
-
-    return _cabinet_response({
-        "ok": True,
-        "role": role,
-        "staff_id": staff_id,
-        "push_enabled": bool(WEBPUSH_VAPID_PRIVATE_KEY),
-    })
+async def push_unsubscribe_handler(request: web.Request) -> web.Response:
+    """Exact verified owner may terminate only its own endpoint episode."""
+    from legacy_client_command_bridge import channel_proof, command
+    try:
+        body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"endpointId", "auth_data", "session_token", "maya_token"}:
+            raise ValueError("invalid_push_request")
+        proof = channel_proof(request.headers, body)
+        result = await asyncio.to_thread(command, "push-unsubscribe", proof, {"endpointId": body.get("endpointId")})
+        return _cabinet_response({"ok": True, **result})
+    except ValueError:
+        return _cabinet_response({"ok": False, "error": "verified_client_push_required"}, status=409)
+    except Exception:
+        return _cabinet_response({"ok": False, "error": "push_unsubscribe_unavailable"}, status=503)
 
 
 async def tip_sent_handler(request: web.Request) -> web.Response:
@@ -12291,6 +12020,7 @@ async def start_webhook_server(bot_app: Application):
 
     # API push-уведомлений для мастеров
     web_app.router.add_post("/api/push/subscribe", push_subscribe_handler)
+    web_app.router.add_post("/api/push/unsubscribe", push_unsubscribe_handler)
     web_app.router.add_options("/api/push/subscribe", chat_options_handler)
 
     # API события чаевых с внутреннего экрана приложения

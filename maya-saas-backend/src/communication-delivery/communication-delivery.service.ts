@@ -1,6 +1,7 @@
+import { CommunicationWebPushService } from './communication-web-push.service';
 import { createHash } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 
@@ -208,6 +209,7 @@ export class CommunicationDeliveryService {
     private readonly prisma: PrismaService,
     private readonly actionEngine: ActionEngineRuntimeService,
     config: ConfigService,
+    @Optional() private readonly webPush?: CommunicationWebPushService,
   ) {
     const compatibilitySecret = config.get<string>('CRM_ENCRYPTION_KEY');
     const identitySecret =
@@ -746,6 +748,16 @@ export class CommunicationDeliveryService {
         classifyError: (error, phase) => this.classify(error, phase),
       },
     );
+    if (this.webPush) {
+      // Primary acceptance is durable. A supplemental device's UNKNOWN outcome
+      // stays in Communication Delivery and cannot undo/resend that acceptance.
+      await this.webPush
+        .deliverFromAcceptedReceipt(
+          input.tenantId,
+          receipt.execution.executionId,
+        )
+        .catch(() => undefined);
+    }
     return {
       ...receipt.value,
       actionExecutionId: receipt.execution.executionId,
@@ -1107,6 +1119,16 @@ export class CommunicationDeliveryService {
         classifyError: (error, phase) => this.classify(error, phase),
       },
     );
+    if (this.webPush) {
+      // Primary acceptance is durable. A supplemental device's UNKNOWN outcome
+      // stays in Communication Delivery and cannot undo/resend that acceptance.
+      await this.webPush
+        .deliverFromAcceptedReceipt(
+          input.tenantId,
+          receipt.execution.executionId,
+        )
+        .catch(() => undefined);
+    }
     return {
       ...receipt.value,
       actionExecutionId: receipt.execution.executionId,

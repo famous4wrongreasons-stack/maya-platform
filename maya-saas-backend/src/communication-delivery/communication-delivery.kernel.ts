@@ -246,6 +246,23 @@ export class CommunicationDeliveryKernel {
             }
             this.assertExecutionAllowsDelivery(execution);
 
+            if (input.channel === 'web_push') {
+              const endpointIds = input.recipients.map((r) => r.recipientRef);
+              const endpoints = await tx.clientWebPushEndpoint.findMany({
+                where: {
+                  id: { in: endpointIds },
+                  tenantId: input.tenantId,
+                  clientId: input.clientId,
+                },
+                select: { id: true },
+              });
+              if (endpoints.length !== endpointIds.length)
+                throw new CommunicationContractError(
+                  'WEB_PUSH_CLIENT_MISMATCH',
+                  'All devices must belong to the same canonical Client',
+                );
+            }
+
             const campaignIdentity = this.identity.campaignIdentity({
               tenantId: input.tenantId,
               actionIdentityFingerprint: execution.identityFingerprint,
@@ -1595,7 +1612,36 @@ export class CommunicationDeliveryKernel {
         'At least one recipient is required',
       );
     }
-    if (input.scope === 'SINGLE' && input.recipients.length !== 1) {
+    const clientWebPush =
+      input.channel === 'web_push' &&
+      input.capabilityKey === 'communication.production.web-push.client-single';
+    if (
+      clientWebPush &&
+      (input.scope !== 'SINGLE' ||
+        !input.clientId ||
+        input.recipients.length > 5 ||
+        new Set(input.recipients.map((r) => r.recipientRef)).size !==
+          input.recipients.length ||
+        input.recipients.some(
+          (r) =>
+            r.recipientKind !== 'client_web_push_endpoint' ||
+            r.eligibility.evidenceRef !== `web-push-endpoint:${r.recipientRef}`,
+        ))
+    )
+      throw new CommunicationContractError(
+        'WEB_PUSH_DEVICE_SCOPE_INVALID',
+        'At most five exact devices for one canonical Client are required',
+      );
+    if (!clientWebPush && input.clientId)
+      throw new CommunicationContractError(
+        'CLIENT_SCOPE_FORBIDDEN',
+        'Client device scope is Web Push only',
+      );
+    if (
+      input.scope === 'SINGLE' &&
+      input.recipients.length !== 1 &&
+      !clientWebPush
+    ) {
       throw new CommunicationContractError(
         'SINGLE_SCOPE_CARDINALITY',
         'SINGLE communication must contain exactly one recipient',

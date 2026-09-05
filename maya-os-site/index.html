@@ -14271,6 +14271,22 @@ function mayaClientPreferenceCall(action, payload) {
   });
 }
 
+// p5_b24_web_push_controls: only a confirmed server outcome is displayed as success.
+function AWebPushControls(props) {
+  var e = React.createElement, c = props.colors;
+  var pair = React.useState(window.__meWebPushStatus || { message: 'Подключите это устройство для разрешённых уведомлений.' });
+  var state = pair[0], update = pair[1], pending = React.useState(false), busy = pending[0], setBusy = pending[1];
+  React.useEffect(function () { function changed(event) { update(event.detail); } window.addEventListener('me-web-push-status', changed); return function () { window.removeEventListener('me-web-push-status', changed); }; }, []);
+  function call(name) { setBusy(true); Promise.resolve().then(function () { if (!window[name]) throw new Error('unavailable'); return window[name](true); }).catch(function () { update({ message: 'Не удалось подтвердить изменение. Попробуйте ещё раз.' }); }).then(function () { setBusy(false); }); }
+  var button = { font: 'inherit', fontSize: 12, padding: '9px 12px', borderRadius: 12, border: '1px solid ' + c.line, color: c.ink, background: 'transparent', cursor: busy ? 'wait' : 'pointer' };
+  return e('div', { style: { borderTop: '1px solid ' + c.line, paddingTop: 14, marginTop: 10 } },
+    e('div', { style: { fontSize: 13, fontWeight: 600, color: c.ink } }, 'Уведомления на этом устройстве'),
+    e('div', { role: 'status', 'aria-live': 'polite', style: { fontSize: 12, lineHeight: 1.5, color: c.muted || c.dim, margin: '6px 0 10px' } }, state.message),
+    e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8 } },
+      e('button', { type: 'button', disabled: busy, style: button, onClick: function () { call('__meSubscribePush'); } }, busy ? 'Проверяем…' : 'Подключить устройство'),
+      e('button', { type: 'button', disabled: busy, style: button, onClick: function () { call('__meUnsubscribePush'); } }, 'Отключить устройство')));
+}
+
 function ANotifyCard(props) {
   var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
   var PROXY = 'https://malesthetic.pro/app/api-proxy.php';
@@ -14287,7 +14303,7 @@ function ANotifyCard(props) {
   if (unavailable || (!s.loading && s.prefs === null)) return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'), e('div', { style: { fontSize: 13, color: c.muted, lineHeight: 1.5 } }, 'Настройки уведомлений этого бизнеса пока недоступны в чате.'));
   if (s.loading) return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'), e('div', { style: { fontSize: 12.5, color: c.muted, padding: '6px 2px' } }, 'Секунду…'));
   return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'),
-    ROWS.map(function (r, i) { return e('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: 12, padding: '13px 2px', borderTop: i ? '1px solid ' + c.line : 'none' } }, e('span', { style: { flex: 1, fontSize: 13.5, color: c.ink } }, r[1]), Sw(on(r[0]), function () { toggle(r[0]); })); }));
+    e(AWebPushControls, { colors: c }), ROWS.map(function (r, i) { return e('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: 12, padding: '13px 2px', borderTop: i ? '1px solid ' + c.line : 'none' } }, e('span', { style: { flex: 1, fontSize: 13.5, color: c.ink } }, r[1]), Sw(on(r[0]), function () { toggle(r[0]); })); }));
 }
 window.ANotifyCard = ANotifyCard;
 
@@ -22610,7 +22626,7 @@ function ASettings() {
           e('div', { style: { fontFamily: BODY, fontWeight: 700, fontSize: 15, color: t.ink } }, 'Все уведомления'),
           e('div', { style: { fontFamily: BODY, fontSize: 11.5, color: t.dim, marginTop: 3, lineHeight: 1.4 } }, anyOn ? 'Отключить всё разом' : 'Все отключены — нажмите, чтобы включить')),
         Toggle(anyOn, function () { setAll(!anyOn); })),
-      Eb('Напоминания'),
+      e(AWebPushControls, { colors: t }), Eb('Напоминания'),
       Row('Напоминание перед визитом', 'SMS/WhatsApp от бизнеса и сообщение в Telegram', Toggle(on('reminder'), function () { setK('reminder', !on('reminder')); })),
       on('reminder') && p.reminder_hours == null ? e('div', { style: { color: t.dim } }, 'Время напоминаний — по правилам бизнеса') : null,
       on('reminder') ? Seg([{ v: 2, l: 'за 2 ч' }, { v: 3, l: 'за 3 ч' }, { v: 24, l: 'за день' }], p.reminder_hours, function (v) { setK('reminder_hours', v); }) : null,
@@ -37483,29 +37499,59 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     }
     return next();
   }
-  window.__meSubscribePush = function () {
+  // p5_b24_verified_web_push_v1: server receipt, never browser permission as registration proof.
+  function __mePushStatus(value) {
+    window.__meWebPushStatus = value;
+    window.dispatchEvent(new CustomEvent('me-web-push-status', { detail: value }));
+    return value;
+  }
+  function __mePushFailure(error) {
+    var limited = error && error.message === 'CLIENT_WEB_PUSH_LIMIT_EXCEEDED';
+    return __mePushStatus({ ok: false, error: limited ? 'CLIENT_WEB_PUSH_LIMIT_EXCEEDED' : 'WEB_PUSH_UNAVAILABLE',
+      message: limited ? 'Подключено пять устройств. Сначала отключите уведомления на одном из них.' : 'Уведомления не подключены. Проверьте вход и подтверждённую связь с клиентом.' });
+  }
+  function __mePushCall(action, data) {
+    var rq = window.__meAuthReq && window.__meAuthReq(data);
+    if (!rq) return Promise.reject(new Error('CLIENT_LINK_REQUIRED'));
+    return fetch('https://malesthetic.pro/app/api-proxy.php?action=' + action, { method: 'POST', headers: rq.headers, body: rq.body }).then(function (r) {
+      return r.json().then(function (value) {
+        if (!r.ok || !value.ok || !value.endpointId) throw new Error(value.error === 'CLIENT_WEB_PUSH_LIMIT_EXCEEDED' ? value.error : 'WEB_PUSH_UNAVAILABLE');
+        return value;
+      });
+    });
+  }
+  window.__meSubscribePush = function (manual) {
     try {
-      if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined') return;
-      if (!window.__meAuthReq || !window.__meAuthReq({})) return;   // только залогиненным
-      if (Notification.permission === 'denied') return;
-      var doSub = function () {
-        __meRegisterPushWorker().then(function () {
-          return navigator.serviceWorker.ready;
-        }).then(function (reg) {
-          return reg.pushManager.getSubscription().then(function (sub) {
-            if (sub) return sub;
-            return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: __meU8FromB64Url(__ME_VAPID) });
-          });
-        }).then(function (sub) {
-          if (!sub) return;
-          var rq = window.__meAuthReq({ subscription: sub.toJSON() });
-          if (!rq) return;
-          fetch('https://malesthetic.pro/app/api-proxy.php?action=push_subscribe', { method: 'POST', headers: rq.headers, body: rq.body }).catch(function () {});
-        }).catch(function () {});
-      };
-      if (Notification.permission === 'granted') { doSub(); }
-      else { Notification.requestPermission().then(function (p) { if (p === 'granted') doSub(); }).catch(function () {}); }
-    } catch (e) {}
+      if (!manual && localStorage.getItem('me_web_push_disabled') === '1') return Promise.resolve(__mePushStatus({ ok: true, status: 'INACTIVE', message: 'Уведомления на этом устройстве отключены.' }));
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined' || Notification.permission === 'denied') return Promise.resolve(__mePushFailure());
+      var permission = Notification.permission === 'granted' ? Promise.resolve('granted') : Notification.requestPermission();
+      return permission.then(function (p) {
+        if (p !== 'granted') throw new Error('PERMISSION_REQUIRED');
+        return __meRegisterPushWorker();
+      }).then(function () { return navigator.serviceWorker.ready; }).then(function (reg) {
+        return reg.pushManager.getSubscription().then(function (sub) { return sub || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: __meU8FromB64Url(__ME_VAPID) }); });
+      }).then(function (sub) {
+        return __mePushCall('push_subscribe', { subscription: sub.toJSON() });
+      }).then(function (receipt) {
+        if (receipt.status !== 'ACTIVE') throw new Error('ENDPOINT_INACTIVE');
+        localStorage.setItem('me_web_push_episode_id', receipt.endpointId);
+        localStorage.removeItem('me_web_push_disabled');
+        return __mePushStatus({ ok: true, status: 'ACTIVE', message: 'Это устройство подключено. Отправка зависит от ваших согласий и настроек.' });
+      }).catch(__mePushFailure);
+    } catch (error) { return Promise.resolve(__mePushFailure(error)); }
+  };
+  window.__meUnsubscribePush = function () {
+    var id;
+    try { id = localStorage.getItem('me_web_push_episode_id'); } catch (_) {}
+    if (!id) return Promise.resolve(__mePushStatus({ ok: false, message: 'Сначала подтвердите подключение этого устройства.' }));
+    return __mePushCall('push_unsubscribe', { endpointId: id }).then(function (receipt) {
+      if (receipt.status !== 'INACTIVE') throw new Error('UNSUBSCRIBE_NOT_CONFIRMED');
+      localStorage.setItem('me_web_push_disabled', '1');
+      localStorage.removeItem('me_web_push_episode_id');
+      return navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); }).then(function (sub) { return sub ? sub.unsubscribe() : true; }).catch(function () { return false; }).then(function () {
+        return __mePushStatus({ ok: true, status: 'INACTIVE', message: 'Уведомления на этом устройстве отключены.' });
+      });
+    }).catch(__mePushFailure);
   };
   var __mePushTries = 0;
   function __meMaybePush() {
