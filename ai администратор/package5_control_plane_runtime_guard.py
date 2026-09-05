@@ -272,9 +272,9 @@ WEB_FUNCTIONS = {
     },
     "chat_handler": {
         "markers": (
-            "client_command_context = request_context",
-            "_client_command_context=client_command_context",
-            "client_command_context, contact_request",
+            "_client_command_context=request_context",
+            "_client_command_context=_client_command_context",
+            "_client_command_context, contact_request",
         ),
         "forbidden": (
             "_finalize_booking_for_chat(chat_id",
@@ -285,9 +285,9 @@ WEB_FUNCTIONS = {
     },
     "chat_stream_handler": {
         "markers": (
-            "client_command_context = request_context",
-            "_client_command_context=client_command_context",
-            "client_command_context, contact_request",
+            "_client_command_context=request_context",
+            "_client_command_context=_client_command_context",
+            "_client_command_context, contact_request",
         ),
         "forbidden": (
             "_finalize_booking_for_chat, chat_id",

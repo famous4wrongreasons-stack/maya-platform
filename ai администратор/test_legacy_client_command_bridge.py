@@ -1,6 +1,7 @@
 import ast
 import asyncio
 import os
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -76,6 +77,8 @@ class ClientBridgeTests(unittest.TestCase):
     def test_chat_booking_lost_response_is_unknown_and_never_blindly_retried(self):
         with patch.dict(os.environ, {
             "MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN": "test-bridge-token"
+        }), patch.dict(sys.modules, {
+            "config": SimpleNamespace(YCLIENTS_COMPANY_ID="test-company")
         }), patch.object(
             bridge.requests, "post", side_effect=bridge.requests.Timeout()
         ) as post:
@@ -91,6 +94,8 @@ class ClientBridgeTests(unittest.TestCase):
         response = SimpleNamespace(status_code=503)
         with patch.dict(os.environ, {
             "MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN": "test-bridge-token"
+        }), patch.dict(sys.modules, {
+            "config": SimpleNamespace(YCLIENTS_COMPANY_ID="test-company")
         }), patch.object(bridge.requests, "post", return_value=response):
             with self.assertRaisesRegex(RuntimeError, "client_command_outcome_unknown"):
                 bridge.command("appointment-create", "verified-proof", {

@@ -36,9 +36,9 @@ describe('Package 5 B19 chat booking ownership remediation', () => {
     );
     for (const handler of ['chat_handler', 'chat_stream_handler']) {
       const body = pythonFunction(source, handler);
-      expect(body).toContain('client_command_context = request_context');
-      expect(body).toContain('_client_command_context=client_command_context');
-      expect(body).toContain('client_command_context, contact_request');
+      expect(body).toContain('_client_command_context=request_context');
+      expect(body).toContain('_client_command_context=_client_command_context');
+      expect(body).toContain('_client_command_context, contact_request');
       expect(body).not.toMatch(
         /_finalize_booking_for_chat(?:\(|,\s*)chat_id|_yc\.create_booking|database\.save_booking|apply_redemption_for_booking/,
       );

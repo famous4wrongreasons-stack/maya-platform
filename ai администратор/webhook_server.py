@@ -9351,12 +9351,12 @@ async def chat_handler(request: web.Request) -> web.Response:
         _vmodel = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
     try:
         from legacy_client_habits_bridge import request_context
-        client_command_context = request_context(
+        _client_command_context=request_context(
             request.headers, body, safe_message, chat_mode
         )
         response_text, contact_request, gift_cert_action = get_ai_response(
             llm_history,
-            _client_command_context=client_command_context,
+            _client_command_context=_client_command_context,
             user_id=chat_id,
             model=_vmodel,
             disabled_tools=_chat_disabled_tools(chat_mode),
@@ -9388,7 +9388,7 @@ async def chat_handler(request: web.Request) -> web.Response:
             contact_request = None
         else:
             booking_msg = _finalize_booking_for_chat(
-                client_command_context, contact_request
+                _client_command_context, contact_request
             )
             if booking_msg:
                 response_text = booking_msg
@@ -9943,7 +9943,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     SENTINEL = object()
 
     from legacy_client_habits_bridge import request_context
-    client_command_context = request_context(
+    _client_command_context=request_context(
         request.headers, body, safe_message, chat_mode
     )
 
@@ -9951,7 +9951,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         try:
             for ev in get_ai_response_stream(
                 llm_history,
-                _client_command_context=client_command_context,
+                _client_command_context=_client_command_context,
                 user_id=chat_id,
                 model=model_override,
                 disabled_tools=_chat_disabled_tools(chat_mode),
@@ -10100,7 +10100,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             try:
                 booking_msg = await loop.run_in_executor(
                     None, _finalize_booking_for_chat,
-                    client_command_context, contact_request)
+                    _client_command_context, contact_request)
             except Exception as e:
                 logger.error(f"chat_stream: booking finalize: {e}")
                 booking_msg = None
