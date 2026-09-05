@@ -450,6 +450,315 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     };
   }
 
+  /** B20 read-only cabinet projection. The authenticated channel and its one
+   * active ClientChannelLink are the only Client selector. All sections are
+   * read from canonical Package 4/5 facts; a cabinet read never warms a cache,
+   * creates identity, or writes a business/projection fact.
+   */
+  async cabinetProjection(channelProof: string) {
+    const now = new Date();
+    const projection = await this.prisma.$transaction(async (tx) => {
+      const channel = await this.channels.authenticate(channelProof, tx);
+      const links = await tx.clientChannelLink.findMany({
+        where: {
+          tenantId: channel.tenantId,
+          provider: channel.provider,
+          providerSubjectHash: channel.providerSubjectHash,
+          revokedAt: null,
+          verificationVersion: 1,
+          subjectHashVersion: 1,
+        },
+        take: 2,
+      });
+      if (links.length !== 1) return null;
+
+      const client = await tx.client.findUnique({
+        where: {
+          id_tenantId: {
+            id: links[0].clientId,
+            tenantId: channel.tenantId,
+          },
+        },
+        select: {
+          id: true,
+          tenantId: true,
+          mergedIntoClientId: true,
+          user: {
+            select: {
+              tenantId: true,
+              status: true,
+              phone: true,
+              encryptedName: true,
+            },
+          },
+          crmLinks: {
+            where: { unlinkedAt: null },
+            select: { provider: true, externalId: true },
+          },
+        },
+      });
+      if (!client || client.mergedIntoClientId) return null;
+
+      const profile = await tx.customerProfile.findUnique({
+        where: {
+          tenantId_clientId: {
+            tenantId: channel.tenantId,
+            clientId: client.id,
+          },
+        },
+        select: { privacyConsentAt: true },
+      });
+      if (!profile?.privacyConsentAt)
+        return {
+          tenantId: channel.tenantId,
+          clientId: client.id,
+          privacy: false as const,
+          user: client.user,
+          crmLinks: client.crmLinks,
+          appointments: [],
+          loyalty: null,
+          subscription: null,
+          referrals: [],
+        };
+
+      const [appointments, loyalty, subscription, referrals] =
+        await Promise.all([
+          tx.appointment.findMany({
+            where: {
+              tenantId: channel.tenantId,
+              mayaClientId: client.id,
+            },
+            orderBy: { startAt: 'desc' },
+            take: 200,
+            select: {
+              id: true,
+              crmProvider: true,
+              crmExternalId: true,
+              staffExternalId: true,
+              serviceIds: true,
+              startAt: true,
+              endAt: true,
+              status: true,
+              attendance: true,
+              totalPriceKopecks: true,
+            },
+          }),
+          tx.loyaltyAccount.findUnique({
+            where: {
+              tenantId_clientId: {
+                tenantId: channel.tenantId,
+                clientId: client.id,
+              },
+            },
+            select: { balance: true, source: true },
+          }),
+          tx.customerSubscription.findFirst({
+            where: {
+              tenantId: channel.tenantId,
+              clientId: client.id,
+              status: 'active',
+              termEndsAt: { gt: now },
+            },
+            orderBy: { termStartsAt: 'desc' },
+            select: {
+              planCode: true,
+              visitsIncluded: true,
+              termEndsAt: true,
+              usages: { select: { units: true } },
+            },
+          }),
+          tx.customerReferral.findMany({
+            where: {
+              tenantId: channel.tenantId,
+              referrerClientId: client.id,
+            },
+            select: { status: true },
+          }),
+        ]);
+
+      return {
+        tenantId: channel.tenantId,
+        clientId: client.id,
+        privacy: true as const,
+        user: client.user,
+        crmLinks: client.crmLinks,
+        appointments,
+        loyalty,
+        subscription,
+        referrals,
+      };
+    });
+
+    if (!projection)
+      return {
+        linked: false,
+        known: false,
+        has_phone: false,
+        needs_phone: true,
+        name: '',
+        full_name: '',
+        phone_tail: '',
+        booking_phone: '',
+        client_link_required: true,
+        business_mutations: 0,
+      };
+    if (!projection.privacy)
+      return {
+        linked: true,
+        known: false,
+        needs_consent: true,
+        has_phone: false,
+        needs_phone: true,
+        name: '',
+        full_name: '',
+        phone_tail: '',
+        booking_phone: '',
+        client_link_required: false,
+        business_mutations: 0,
+      };
+
+    let name = '';
+    let phone = '';
+    if (
+      projection.user?.tenantId === projection.tenantId &&
+      projection.user.status === 'active'
+    ) {
+      phone = projection.user.phone?.trim() ?? '';
+      if (projection.user.encryptedName) {
+        try {
+          name = this.encryption.decrypt(projection.user.encryptedName).trim();
+        } catch {
+          name = '';
+        }
+      }
+    }
+    if (!name || !phone) {
+      try {
+        const registry = await this.crm.getClientRegistry(projection.tenantId);
+        const exactLinks = projection.crmLinks.filter(
+          (link) => link.provider === registry.provider,
+        );
+        if (exactLinks.length === 1) {
+          const matches = registry.clients.filter(
+            (candidate) => candidate.external_id === exactLinks[0].externalId,
+          );
+          if (matches.length === 1) {
+            name ||= matches[0].name?.trim() ?? '';
+            phone ||= matches[0].phone?.trim() ?? '';
+          }
+        }
+      } catch {
+        // Provider reads may make PII temporarily unavailable; they never
+        // authorize a legacy chat/session/phone fallback.
+      }
+    }
+
+    const phoneDigits = phone.replace(/\D/g, '');
+    const hasPhone = phoneDigits.length >= 10;
+    const rows = projection.appointments.map((appointment) => {
+      const serviceIds = Array.isArray(appointment.serviceIds)
+        ? appointment.serviceIds
+            .filter((value): value is string => typeof value === 'string')
+            .slice(0, 40)
+        : [];
+      return {
+        record_id: appointment.crmExternalId ?? appointment.id,
+        provider: appointment.crmProvider,
+        date: appointment.startAt.toISOString(),
+        end_at: appointment.endAt.toISOString(),
+        services: serviceIds,
+        master: appointment.staffExternalId,
+        master_id: appointment.staffExternalId,
+        cost:
+          appointment.totalPriceKopecks === null
+            ? null
+            : appointment.totalPriceKopecks / 100,
+        status: appointment.status,
+        attendance: appointment.attendance,
+      };
+    });
+    const upcoming = rows
+      .filter(
+        (appointment, index) =>
+          projection.appointments[index].startAt >= now &&
+          !['cancelled', 'canceled'].includes(
+            projection.appointments[index].status.toLowerCase(),
+          ),
+      )
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const history = rows.filter(
+      (_appointment, index) => projection.appointments[index].startAt < now,
+    );
+    const lastYear = new Date(now);
+    lastYear.setUTCFullYear(lastYear.getUTCFullYear() - 1);
+    const visitsLastYear = projection.appointments.filter(
+      (appointment) =>
+        appointment.startAt >= lastYear && appointment.startAt < now,
+    ).length;
+    const used =
+      projection.subscription?.usages.reduce(
+        (total, item) => total + item.units,
+        0,
+      ) ?? 0;
+    const fullName = name;
+    const firstName = fullName.split(/\s+/).filter(Boolean)[0] ?? '';
+
+    return {
+      linked: true,
+      known: true,
+      has_phone: hasPhone,
+      needs_phone: !hasPhone,
+      name: firstName,
+      full_name: fullName,
+      phone_tail: hasPhone ? phoneDigits.slice(-4) : '',
+      booking_phone: hasPhone ? phone : '',
+      loyalty: {
+        balance: projection.loyalty?.balance ?? 0,
+        source: projection.loyalty?.source ?? 'unavailable',
+        care_services: [],
+        affordable_services: [],
+        best_service: null,
+        next_service: null,
+        redemption_rule: 'one_care_service_per_visit',
+      },
+      visits: {
+        total: history.length,
+        last_year: visitsLastYear,
+        last_visit: history[0] ?? null,
+      },
+      client_card: null,
+      client_note: '',
+      usual_master: null,
+      upcoming,
+      history: history.slice(0, 30),
+      subscription: projection.subscription
+        ? {
+            title: projection.subscription.planCode,
+            tier_label: '',
+            used,
+            total: projection.subscription.visitsIncluded,
+            expires_at: projection.subscription.termEndsAt
+              .toISOString()
+              .slice(0, 10),
+            services_included: [],
+          }
+        : null,
+      referral: {
+        code: null,
+        link: null,
+        invited: projection.referrals.filter(
+          (referral) => referral.status === 'resolved',
+        ).length,
+        pending: projection.referrals.filter(
+          (referral) => referral.status === 'pending',
+        ).length,
+      },
+      tg_user: {},
+      client_link_required: false,
+      business_mutations: 0,
+    };
+  }
+
   /** B19 authenticated Client appointment creation. Chat supplies only the
    * requested slot and a stable intent identity. The verified active channel
    * link selects the canonical Client, while Maya derives provider PII from

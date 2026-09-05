@@ -1940,24 +1940,10 @@ def _load_cabinet_yclients(phone: str) -> dict:
     }
 
 
+
 async def cabinet_me_handler(request: web.Request) -> web.Response:
-    """
-    GET /api/cabinet/me
-    Заголовок: X-Telegram-InitData: <строка от Telegram WebApp>
-    Возвращает данные клиента: имя, баллы, визиты, записи, абонемент, рефералка.
-    """
-    init_data = request.headers.get("X-Telegram-InitData", "")
-    tg_user = _verify_telegram_init_data(init_data, TELEGRAM_TOKEN)
-    if not tg_user:
-        return _cabinet_response(
-            {"error": "invalid_init_data",
-             "message": "Подпись Telegram WebApp невалидна или устарела."},
-            status=401,
-        )
-    chat_id = tg_user.get("id")
-    if not chat_id:
-        return _cabinet_response({"error": "no_user_id"}, status=400)
-    return await _build_full_cabinet(int(chat_id), tg_user)
+    """GET /api/cabinet/me — B20 canonical read-only Client projection."""
+    return await _build_full_cabinet(request, {})
 
 
 async def internal_loyalty_snapshot_handler(request: web.Request) -> web.Response:
@@ -2187,284 +2173,87 @@ def _verify_telegram_login_widget(auth_data: dict, bot_token: str,
     }
 
 
-async def cabinet_me_via_login_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/cabinet/me-via-login
-    Body: { "auth_data": { id, first_name, ..., hash, auth_date } }
 
-    Авторизация через Telegram Login Widget (для PWA в браузере, не Mini App).
-    Логика fetch'а данных ЛК — копия cabinet_me_handler с подменой источника auth.
-    """
+async def cabinet_me_via_login_handler(request: web.Request) -> web.Response:
+    """Telegram Login Widget is channel proof, never raw Client authority."""
     try:
         body = await request.json()
     except Exception:
         return _cabinet_response({"error": "invalid_json"}, status=400)
+    if not isinstance(body, dict) or set(body) != {"auth_data"} or not isinstance(body.get("auth_data"), dict):
+        return _cabinet_response({"error": "invalid_login_proof"}, status=400)
+    return await _build_full_cabinet(request, body)
 
-    auth_data = body.get("auth_data") if isinstance(body, dict) else None
-    tg_user = _verify_telegram_login_widget(auth_data or {}, TELEGRAM_TOKEN)
-    if not tg_user:
+
+
+def _unlinked_cabinet_projection(*, needs_consent: bool = False) -> dict:
+    """No stored Client PII is present in an unverified projection."""
+    return {
+        "linked": needs_consent,
+        "known": False,
+        "needs_consent": needs_consent,
+        "has_phone": False,
+        "needs_phone": True,
+        "name": "",
+        "full_name": "",
+        "phone_tail": "",
+        "booking_phone": "",
+        "loyalty": None,
+        "visits": {"total": 0, "last_year": 0, "last_visit": None},
+        "client_card": None,
+        "client_note": "",
+        "usual_master": None,
+        "upcoming": [],
+        "history": [],
+        "subscription": None,
+        "referral": {"code": None, "link": None, "invited": 0, "pending": 0},
+        "tg_user": {},
+        "client_link_required": not needs_consent,
+        "business_mutations": 0,
+    }
+
+
+async def _build_full_cabinet(request: web.Request, body: dict) -> web.Response:
+    """p5_b20_verified_client_cabinet_read_only.
+
+    All cabinet routes share this boundary. The original signed channel proof
+    is authenticated again by Maya OS, and its active tenant-qualified
+    ClientChannelLink selects the Client. A raw chat id, legacy web session,
+    phone, consent row or caller Client id is never accepted. The projection
+    performs no cache warm, lazy migration or business write.
+    """
+    import legacy_client_command_bridge as client_commands
+
+    try:
+        proof = client_commands.channel_proof(request.headers, body)
+    except ValueError:
+        return _cabinet_response(_unlinked_cabinet_projection())
+
+    try:
+        result = await asyncio.to_thread(
+            client_commands.command, "cabinet-projection", proof, {}
+        )
+    except ValueError:
+        return _cabinet_response(_unlinked_cabinet_projection())
+    except Exception:
         return _cabinet_response(
-            {"error": "invalid_login_signature",
-             "message": "Подпись Telegram Login невалидна или устарела."},
-            status=401,
+            {"error": "cabinet_projection_unavailable", "business_mutations": 0},
+            status=503,
         )
 
-    chat_id = tg_user.get("id")
-    if not chat_id:
-        return _cabinet_response({"error": "no_user_id"}, status=400)
+    if not isinstance(result, dict) or not result.get("linked"):
+        return _cabinet_response(_unlinked_cabinet_projection())
+    if result.get("needs_consent"):
+        return _cabinet_response(
+            _unlinked_cabinet_projection(needs_consent=True), status=403
+        )
+    if not result.get("known"):
+        return _cabinet_response(_unlinked_cabinet_projection())
 
-    # Дальше — идентичная логика что и в cabinet_me_handler.
-    # Чтобы не дублировать ~200 строк — переиспользуем приватный helper.
-    return await _build_full_cabinet(int(chat_id), tg_user)
+    # The internal bridge is the only projection source. No legacy enrichment
+    # is permitted here because it would reintroduce a second Client/PII owner.
+    return _cabinet_response(result)
 
-
-async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
-    """
-    Общая логика построения ответа ЛК — используется и cabinet_me_handler,
-    и cabinet_me_via_login_handler. Возвращает ту же структуру что ждёт фронт.
-    """
-    tg_profile = normalize_tg_user(tg_user)
-    client = database.get_client(int(chat_id))
-    if not client:
-        return _cabinet_response({
-            "known": False,
-            "tg_user": {
-                "first_name": tg_profile.get("first_name", ""),
-                "last_name": tg_profile.get("last_name", ""),
-                "full_name": tg_profile.get("full_name", ""),
-                "username": tg_profile.get("username", ""),
-                "photo_url": tg_profile.get("photo_url", ""),
-            },
-            "message": "Сначала запишись через бот — после первой записи мы будем знать тебя.",
-        })
-
-    if not database.has_valid_consent_by_chat_id(int(chat_id)):
-        return _cabinet_response({
-            "known": False,
-            "needs_consent": True,
-            "message": (
-                "Чтобы открыть личный кабинет, подпишите согласие на обработку "
-                "персональных данных. Откройте бот @malesthetic_bot и нажмите /start."
-            ),
-        }, status=403)
-
-    client_id = client["id"]
-    phone = client.get("phone") or ""
-    # Телефон известен → идемпотентно начисляем welcome-баллы за прошлые визиты,
-    # чтобы баллы были видны сразу после привязки номера (как в cabinet_me_handler).
-    if phone:
-        try:
-            import loyalty as _loy
-            await asyncio.to_thread(_loy.lazy_backfill_for_client, client_id, phone)
-        except Exception as e:
-            logger.error(f"_build_full_cabinet: lazy_backfill {client_id}: {e}")
-    # YClients card is imported into the MAYA ledger once. From that moment
-    # the ledger is authoritative: otherwise every cabinet refresh would put
-    # already-spent points back by overwriting the balance with the old card.
-    balance = database.loyalty_balance(client_id)
-    loyalty_source = (
-        "yclients_import"
-        if database.client_has_loyalty_yclients_import(client_id)
-        else "maya_ledger"
-    )
-
-    bookings = []
-    yc_client_id = None
-    yc_client_card = None
-    phone_digits = "".join(ch for ch in phone if ch.isdigit())
-    has_valid_phone = len(phone_digits) >= 10
-    if has_valid_phone:
-        try:
-            yc_payload = await asyncio.to_thread(_load_cabinet_yclients, phone)
-            yc_client_id = yc_payload.get("yc_client_id")
-            yc_client_card = yc_payload.get("client_card")
-            bookings = yc_payload.get("bookings") or []
-        except Exception as e:
-            logger.error(f"cabinet_via_login: yc bookings err: {e}")
-            bookings = []
-
-    today_str = date.today().isoformat()
-    upcoming = []
-    history = []
-    history_cache = []
-    visits_total = 0
-    visits_last_year = 0
-    year_ago = (date.today() - timedelta(days=365)).isoformat()
-    last_visit = None
-
-    for b in bookings:
-        if not isinstance(b, dict):
-            continue
-        record_id = b.get("id") or b.get("record_id")
-        if not record_id:
-            continue
-        dt = (b.get("datetime") or b.get("date") or "")[:10]
-        attended = b.get("attendance") == 1 or b.get("visit_attendance") == 1
-        services = []
-        total_cost = 0
-        for svc in (b.get("services") or []):
-            if isinstance(svc, dict):
-                title = str(svc.get("title") or "").strip()
-                if not title:
-                    continue
-                cost = svc.get("cost")
-                if cost in (None, ""):
-                    cost = svc.get("price")
-                try:
-                    total_cost += int(float(cost or 0))
-                except (TypeError, ValueError):
-                    pass
-                normalized_service = {"title": title, "cost": cost or 0}
-                service_id = svc.get("id", svc.get("service_id"))
-                if isinstance(service_id, (str, int)) and str(service_id).strip():
-                    normalized_service["id"] = service_id
-                services.append(normalized_service)
-            elif str(svc or "").strip():
-                services.append({"title": str(svc).strip(), "cost": 0})
-        service_titles = [svc["title"] for svc in services if svc.get("title")]
-        master = b.get("master") or (b.get("staff") or {}).get("name") or ""
-        master_id = _norm_id((b.get("staff") or {}).get("id") or b.get("staff_id"))
-        item = {
-            "record_id": int(record_id),
-            "date": b.get("date") or b.get("datetime", ""),
-            "services": service_titles,
-            "master": master,
-            "master_id": master_id,
-            "cost": total_cost or None,
-        }
-        if not attended and dt >= today_str:
-            upcoming.append(item)
-        elif attended:
-            history.append(item)
-            history_cache.append(memory.normalize_history_visit({
-                "date": b.get("date") or b.get("datetime", ""),
-                "services": services,
-                "staff": {"id": master_id, "name": master},
-                "master_id": master_id,
-                "master": master,
-            }))
-            visits_total += 1
-            if dt >= year_ago:
-                visits_last_year += 1
-            if last_visit is None or dt > last_visit.get("date_short", ""):
-                last_visit = {**item, "date_short": dt}
-
-    upcoming.sort(key=lambda x: x["date"])
-    history.sort(key=lambda x: x["date"], reverse=True)
-    history_cache.sort(key=lambda x: str(x.get("date") or ""), reverse=True)
-
-    if has_valid_phone:
-        try:
-            database.set_client_history_cache(client_id, history_cache[:30])
-        except Exception as e:
-            logger.error(f"_build_full_cabinet: cache warm {client_id}: {e}")
-
-    sub = database.get_active_subscription_for_client(client_id)
-    sub_info = None
-    if sub:
-        try:
-            import subscriptions as _subs
-            plan = _subs.get_plan(sub["plan_code"])
-            if plan:
-                tier = (sub.get("tier") or "top").lower()
-                sub_info = {
-                    "title": plan["title"],
-                    "tier_label": _subs.TIER_LABELS.get(tier, ""),
-                    "used": sub.get("visits_used", 0),
-                    "total": sub["visits_included"],
-                    "expires_at": sub["expires_at"][:10],
-                    "services_included": plan["services_included"],
-                }
-        except Exception:
-            pass
-
-    ref_code, ref_link, ref_stats = None, None, {}
-    try:
-        import referral as _ref
-        ref_code = _ref.get_or_create_ref_code(client_id)
-        ref_link = _ref.build_ref_link(ref_code, "malesthetic_bot")
-        ref_stats = database.referral_stats_for_client(client_id)
-    except Exception as e:
-        logger.error(f"cabinet_via_login: ref err: {e}")
-
-    client_card = _client_card_view(yc_client_card, visits_total)
-    client_note = (client_card or {}).get("comment") or ""
-    client_card_name = (client_card or {}).get("name") or client.get("name") or ""
-    full_name = (
-        tg_profile.get("full_name")
-        or client_card_name
-        or tg_profile.get("first_name")
-        or ""
-    )
-    first_name = tg_profile.get("first_name") or (full_name.split() or [""])[0]
-
-    loyalty_details = {
-        "balance": balance,
-        "source": loyalty_source,
-        "care_services": [],
-        "affordable_services": [],
-        "best_service": None,
-        "next_service": None,
-        "redemption_rule": "one_care_service_per_visit",
-    }
-    try:
-        import loyalty as _loy
-
-        spend = await asyncio.to_thread(_loy.loyalty_spend_summary, balance)
-        loyalty_details.update({
-            "care_services": spend.get("care_services") or [],
-            "affordable_services": spend.get("affordable_services") or [],
-            "best_service": spend.get("best_service"),
-            "next_service": spend.get("next_service"),
-            "redemption_rule": spend.get("redemption_rule"),
-        })
-    except Exception as e:
-        logger.error(f"_build_full_cabinet: loyalty spend options {client_id}: {e}")
-
-    return _cabinet_response({
-        "known": True,
-        "has_phone": has_valid_phone,
-        "needs_phone": not has_valid_phone,
-        "name": first_name,
-        "full_name": full_name,
-        "phone_tail": phone[-4:] if has_valid_phone else "",
-        "booking_phone": phone if has_valid_phone else "",
-        "loyalty": loyalty_details,
-        "visits": {
-            "total": visits_total,
-            "last_year": visits_last_year,
-            "last_visit": last_visit,
-        },
-        "yc_client_id": yc_client_id,
-        "client_card": client_card,
-        "client_note": client_note,
-        "usual_master": _usual_master(history),
-        "upcoming": upcoming,
-        "history": history[:30],
-        "subscription": sub_info,
-        "referral": {
-            "code": ref_code,
-            "link": ref_link,
-            "invited": ref_stats.get("granted", 0),
-            "pending": ref_stats.get("pending", 0),
-        },
-        "tg_user": {
-            "id": tg_profile.get("id"),
-            "first_name": tg_profile.get("first_name", ""),
-            "last_name": tg_profile.get("last_name", ""),
-            "full_name": tg_profile.get("full_name", ""),
-            "username": tg_profile.get("username", ""),
-            "photo_url": tg_profile.get("photo_url", ""),
-        },
-    })
-
-
-# ─────────────────────────────────────────────────────────────────────
-# ПАНЕЛЬ УПРАВЛЕНИЯ (ролевой интерфейс в приложении)
-# Роли: owner (полный доступ) / manager (аналитика + операционка, без
-# управления правами и выгрузки ПД) / master (свои инструменты, +кассир).
-# Роль и права определяются ТОЛЬКО на сервере — фронт ничего не решает.
-# ─────────────────────────────────────────────────────────────────────
 
 def _panel_resolve_role(tg_id: int) -> dict:
     """Resolve only legacy owner access; staff/manager authority is canonical A16."""
@@ -10456,25 +10245,20 @@ async def auth_yandex_handler(request: web.Request) -> web.Response:
     return _cabinet_response(res)
 
 
+
 async def cabinet_me_via_session_handler(request: web.Request) -> web.Response:
-    """POST /api/cabinet/me-via-session  Header: X-Session-Token.
-    Кабинет для входа без Telegram. Если телефон сматчился с Telegram-клиентом —
-    полный кабинет; иначе мягко зовём записаться (YClients-only кабинет — следующий шаг)."""
-    sess = web_auth.resolve_session(request.headers.get("X-Session-Token", ""))
-    if not sess:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_user = session_tg_user(sess)
-    chat_id = tg_user.get("id") if tg_user else None
-    if chat_id:
-        return await _build_full_cabinet(int(chat_id), tg_user)
-    sess_profile = normalize_tg_user({"full_name": sess.get("display_name")})
-    return _cabinet_response({
-        "known": False,
-        "needs_booking": True,
-        "has_phone": bool(sess.get("phone_hash")),
-        "name": sess_profile.get("display_name", ""),
-        "message": "Запишись на первую стрижку — и здесь появятся твой кабинет, баллы и история.",
-    })
+    """B20 session parity: only a Maya JWT with an active maya_user link works.
+
+    X-Session-Token remains a legacy compatibility credential and deliberately
+    resolves to the unlinked projection; it is never reduced to chat_id/phone.
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict) or body:
+        return _cabinet_response({"error": "invalid_request"}, status=400)
+    return await _build_full_cabinet(request, {})
 
 
 async def push_subscribe_handler(request: web.Request) -> web.Response:

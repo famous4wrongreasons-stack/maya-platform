@@ -40894,6 +40894,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   function webTok() {
     try { return localStorage.getItem('web_session_token') || ''; } catch (e) { return ''; }
   }
+  function canonicalMayaTok() {
+    try {
+      var bundle = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
+      return bundle && bundle.token ? String(bundle.token) : '';
+    } catch (e) { return ''; }
+  }
   function hasSession() {
     if (tgInitData() || tgAuth() || webTok()) return true;
     try {
@@ -40914,6 +40920,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     var body = extra || {};
     var initData = tgInitData();
     if (initData) { headers['X-Telegram-InitData'] = initData; return { headers: headers, body: JSON.stringify(body) }; }
+    var mayaTok = canonicalMayaTok();
+    if (mayaTok) { headers.Authorization = 'Bearer ' + mayaTok; return { headers: headers, body: JSON.stringify(body) }; }
     var tok = webTok();
     if (tok) { headers['X-Session-Token'] = tok; body.session_token = tok; return { headers: headers, body: JSON.stringify(body) }; }
     var auth = tgAuth();
@@ -40928,6 +40936,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     var initData = tgInitData();
     if (initData) {
       return fetch(PROXY + '?action=cabinet_me', { method: 'GET', headers: { 'X-Telegram-InitData': initData } });
+    }
+    var mayaTok = canonicalMayaTok();
+    if (mayaTok) {
+      return fetch(PROXY + '?action=cabinet_session', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + mayaTok }, body: JSON.stringify({})
+      });
     }
     var tok = webTok();
     if (tok) {

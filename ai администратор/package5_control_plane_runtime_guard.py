@@ -199,6 +199,55 @@ WEB_FUNCTIONS = {
             "database.delete_",
         ),
     },
+    "cabinet_me_handler": {
+        "markers": ("B20", "_build_full_cabinet(request, {})"),
+        "forbidden": (
+            "_verify_telegram_init_data",
+            "database.",
+            "int(chat_id)",
+        ),
+    },
+    "cabinet_me_via_login_handler": {
+        "markers": ("Telegram Login Widget", "_build_full_cabinet(request, body)"),
+        "forbidden": (
+            "_verify_telegram_login_widget",
+            "database.",
+            'body.get("chat_id")',
+            'body.get("clientId")',
+            'body.get("phone")',
+        ),
+    },
+    "cabinet_me_via_session_handler": {
+        "markers": ("B20 session parity", "_build_full_cabinet(request, {})"),
+        "forbidden": (
+            "resolve_session",
+            "session_tg_user",
+            "database.",
+            'body.get("chat_id")',
+            'body.get("clientId")',
+            'body.get("phone")',
+        ),
+    },
+    "_build_full_cabinet": {
+        "markers": (
+            "p5_b20_verified_client_cabinet_read_only",
+            "client_commands.channel_proof",
+            'client_commands.command, "cabinet-projection"',
+            "_unlinked_cabinet_projection",
+        ),
+        "forbidden": (
+            "database.",
+            "_yc",
+            "chat_id",
+            'body.get("clientId")',
+            'body.get("phone")',
+            "get_or_create",
+            "set_client_history_cache",
+            "lazy_backfill",
+            "save_conversations",
+            "memory.",
+        ),
+    },
     "_client_record_request_context": {
         "markers": (
             "p5_b17_verified_client_appointment_authority",
@@ -330,6 +379,7 @@ B18_APPOINTMENT_SITES = {
 READ_ONLY_MARKERS = (
     "p5_b15_chat_history_read_only",
     "p5_b16_booking_prefill_read_only",
+    "p5_b20_verified_client_cabinet_read_only",
 )
 READ_ONLY_BUSINESS_WRITERS = (
     "get_or_create_client",
@@ -571,6 +621,10 @@ def main() -> int:
         "b19ChatBookingInventoryCoverage": "3/3" if not findings else None,
         "b19ChatStreamAuthorityParity": True if not findings else None,
         "b19ChatStreamMutationOwnerParity": True if not findings else None,
+        "b20CabinetLegacyIdentityOwners": 0 if not findings else None,
+        "b20CabinetReadSurfaceWriters": 0 if not findings else None,
+        "b20CabinetEndpointIdentityParity": True if not findings else None,
+        "b20CabinetEndpointReadOnlyParity": True if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }
@@ -580,7 +634,7 @@ def main() -> int:
         for finding in findings:
             print(f"FAIL {finding.check}: {finding.detail}")
     else:
-        print("Package 5 B13/B14/B15/B16/B17 active PWA control-plane guard: PASS")
+        print("Package 5 B13-B20 active PWA control-plane guard: PASS")
     return 0 if not findings else 1
 
 

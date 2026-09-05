@@ -28,7 +28,7 @@ def command(operation: str, proof: str, payload: dict) -> dict:
     if operation not in {
         "consent", "status", "issue", "consume", "delivery-consent",
         "booking-prefill", "appointment-create", "appointment-cancel", "appointment-reschedule",
-        "appointment-services",
+        "appointment-services", "cabinet-projection",
     }:
         raise ValueError("unsupported_client_command")
     from config import YCLIENTS_COMPANY_ID

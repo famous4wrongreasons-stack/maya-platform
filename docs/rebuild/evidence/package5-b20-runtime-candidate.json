@@ -1,0 +1,48 @@
+{
+  "checkpoint": "171fcdc5",
+  "cycle": "Package 5 Final Remediation B20",
+  "result": "LOCAL CANDIDATE PASS",
+  "existingSchemaSufficient": true,
+  "additionalSchemaRequired": false,
+  "canonicalIdentityOwner": "verified active tenant-qualified ClientChannelLink",
+  "endpointParity": [
+    "/api/cabinet/me",
+    "/api/cabinet/me-via-login",
+    "/api/cabinet/me-via-session"
+  ],
+  "channelProofs": {
+    "me": "telegram_init_data",
+    "meViaLogin": "telegram_widget",
+    "meViaSession": "maya_jwt",
+    "legacySession": "fail_closed_unlinked"
+  },
+  "cabinetReadBusinessMutations": 0,
+  "historyCacheWrites": 0,
+  "legacyClientResolutionCalls": 0,
+  "targetedProof": {
+    "python": "56 PASS including preserved B13-B20 set",
+    "typescript": "55 PASS across 10 preserved/targeted suites",
+    "b20Python": "7/7 PASS",
+    "b20Typescript": "10/10 PASS"
+  },
+  "deploymentGates": {
+    "eslint": "PASS",
+    "typecheck": "PASS",
+    "scriptTypecheck": "PASS",
+    "build": "PASS",
+    "fullRegression": "349 suites / 2860 tests PASS",
+    "pwaInlineScripts": "28 parsed",
+    "proxyPhpSyntax": "PASS on production PHP 5.6"
+  },
+  "productionMutations": 0,
+  "providerWrites": 0,
+  "proxyCandidateSha256": "37d14444c195a7bfa5b035669a9add067795050bef945212a609a4b60cdb5fc6",
+  "sourceSha256": {
+    "ai администратор/webhook_server.py": "6d904f3c72715b863b5df297fd9f6c805c90dff0d913311521564ac9c2f59699",
+    "ai администратор/legacy_client_command_bridge.py": "edb19cc97fbe7fbbf08a6ec3de8b6b5ee5573c9991c80b2c0b68255bc3b3c9d2",
+    "ai администратор/package5_control_plane_runtime_guard.py": "5cacf39c128bc112c042ff966f6f300985a5f9f218aae98a38441103bcf8819c",
+    "сайт и приложение/app.html": "ed67539454eb6fb974503f5365cf6e6be579b896c60d89710b26a33bd9f1a2bd",
+    "maya-saas-backend/src/crm/client-channel-runtime.service.ts": "04bf7eae92856df6589e20386eddc1f4509cac43ef883038b1b25b45dd5d5805",
+    "maya-saas-backend/src/crm/client-channel.controller.ts": "bff56d3d40f8d5f3b649b6ef466e9b4c229b01064eea931ea6316a921ff64232"
+  }
+}
