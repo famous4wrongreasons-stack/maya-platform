@@ -46,6 +46,12 @@ run() { ssh "${SSH_OPTS[@]}" "$HOST" "$@"; }
 step() { echo; echo "### $*"; }
 fail() { echo "ПРОВАЛ: $* — боевой релиз не тронут"; exit 1; }
 
+# Optional installed Node runtime for local gates/build (e.g. a fixed V8 patch).
+# This changes no gate or production runtime; absent override keeps the default.
+if [ -n "${MAYA_DEPLOY_NODE_BIN:-}" ]; then
+  test -x "$MAYA_DEPLOY_NODE_BIN/node" || fail "не найден выбранный локальный Node"
+fi
+
 step "1/10 шлюз: чистое дерево, линт, типизация, тесты, схема"
 # 🔴 Выкат синхронизирует РАБОЧЕЕ ДЕРЕВО, а не коммит. Это уже приводило к
 # потере правки: диагностику убрали через git checkout, и откат уехал в прод
@@ -62,7 +68,7 @@ step "1/10 шлюз: чистое дерево, линт, типизация, т
 
 (
   cd "$BE"
-  export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+  export PATH="${MAYA_DEPLOY_NODE_BIN:+$MAYA_DEPLOY_NODE_BIN:}/opt/homebrew/bin:/usr/local/bin:$PATH"
   npx prisma validate            || exit 1
   npm run lint                   || exit 1
   npm run typecheck              || exit 1
@@ -76,7 +82,7 @@ step "2/10 локальная сборка dist"
 # (как с trialFullAccess в AuthFlowSystemGateway 08.08).
 (
   cd "$BE"
-  export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+  export PATH="${MAYA_DEPLOY_NODE_BIN:+$MAYA_DEPLOY_NODE_BIN:}/opt/homebrew/bin:/usr/local/bin:$PATH"
   npm run build
 ) || fail "локальный nest build"
 test -f "$BE/dist/src/main.js" || fail "нет dist/src/main.js после build"
