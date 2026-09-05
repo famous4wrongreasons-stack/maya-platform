@@ -14312,7 +14312,20 @@ function ATipsCard(props) {
   var money = function (n) { return Number(n || 0).toLocaleString('ru-RU'); };
   var master = MASTERS[s.mi] || MASTERS[0] || { name: 'Мастер' };
   var noteLabel = (function () { var f = NOTES.filter(function (x) { return x[0] === s.note; })[0]; return f ? f[1] : ''; })();
-  function doSend() { if (s.busy) return; patch({ busy: true }); try { if (window.__tipsSend) window.__tipsSend(s.mi, s.amt, noteLabel || undefined); } catch (er) {} setTimeout(function () { patch({ busy: false, sent: true }); }, 350); }
+  function doSend() {
+    if (s.busy) return;
+    patch({ busy: true, sent: false, status: '' });
+    var operation;
+    try {
+      if (!window.__tipsSend) throw new Error('tips_unavailable');
+      operation = window.__tipsSend(s.mi, s.amt);
+    } catch (err) { operation = Promise.reject(err); }
+    Promise.resolve(operation).then(function (result) {
+      patch({ busy: false, sent: true, status: result && result.opened
+        ? 'Продолжите оплату на странице YClients. MAYA не подтверждает перевод.'
+        : 'Не удалось открыть оплату. Попробуйте ещё раз.' });
+    }).catch(function () { patch({ busy: false, sent: true, status: 'Не удалось открыть оплату. Попробуйте ещё раз.' }); });
+  }
   var wrap = { border: '1px solid ' + c.line, borderRadius: 22, padding: 16, marginTop: 10, maxWidth: 420, background: c.surf };
   var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, margin: '15px 0 11px' };
   var prim = { width: '100%', height: 48, marginTop: 18, borderRadius: 999, border: 0, background: c.invBg, color: c.invText, fontFamily: c.BODYF, fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500, cursor: 'pointer' };
@@ -14320,11 +14333,9 @@ function ATipsCard(props) {
   if (!tipsCompanyReady) return e('div', { style: wrap }, e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted } }, 'Чаевые'), e('div', { style: { fontSize: 13, color: c.muted, lineHeight: 1.5, marginTop: 10 } }, 'Чаевые для этого бизнеса пока не подключены. Владелец может указать ID компании чаевых в настройке CRM.'));
   if (!MASTERS.length) return e('div', { style: wrap }, e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted } }, 'Чаевые'), e('div', { style: { fontSize: 13, color: c.muted, lineHeight: 1.5, marginTop: 10 } }, 'Список мастеров ещё загружается. Откройте запись или обновите экран.'));
   if (s.sent) {
-    return e('div', { style: wrap }, e('div', { style: { textAlign: 'center', padding: '6px 4px' } },
-      e('div', { style: { width: 54, height: 54, borderRadius: '50%', background: c.invBg, color: c.invText, display: 'grid', placeItems: 'center', margin: '0 auto', fontSize: 26 } }, '✓'),
-      e('div', { style: { fontFamily: c.DISPF, fontWeight: 300, fontSize: 17, color: c.ink, marginTop: 14 } }, 'Чаевые отправлены'),
-      e('div', { style: { fontFamily: c.DISPF, fontWeight: 200, fontSize: 26, color: c.ink, marginTop: 4 } }, money(s.amt) + ' ₽'),
-      e('div', { style: { fontSize: 12.5, color: c.muted, marginTop: 6, lineHeight: 1.5 } }, (master.name || 'Мастер') + ' получит перевод по СБП' + (noteLabel ? (' вместе с благодарностью «' + noteLabel + '».') : '.'))));
+    return e('div', { style: wrap },
+      e('div', { style: { fontSize: 13, color: c.muted, lineHeight: 1.5 } }, s.status),
+      e('button', { style: prim, onClick: function () { patch({ sent: false }); } }, 'Вернуться'));
   }
   var masterRow = e('div', { style: { display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 } }, MASTERS.map(function (m, i) {
     var on = i === s.mi; var ph = (window.__meMasterPhoto && window.__meMasterPhoto(m.id)) || '';
@@ -14351,8 +14362,7 @@ function ATipsCard(props) {
     e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 4 } }, 'Чаевые мастеру'),
     e('div', { style: Object.assign({}, lab, { margin: '13px 0 10px' }) }, 'Кого благодарим'), masterRow,
     e('div', { style: lab }, 'Сумма чаевых'), amountGrid, customRow, customChips,
-    e('div', { style: lab }, 'Благодарность · по желанию'), noteChips,
-    e('button', { style: Object.assign({}, prim, { opacity: s.busy ? 0.6 : 1 }), onClick: doSend }, s.busy ? 'Открываю СБП…' : ('Отправить · ' + money(s.amt) + ' ₽')),
+    e('button', { style: Object.assign({}, prim, { opacity: s.busy ? 0.6 : 1 }), onClick: doSend }, s.busy ? 'Открываю СБП…' : ('Перейти к оплате · ' + money(s.amt) + ' ₽')),
     e('div', { style: { textAlign: 'center', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.faint, marginTop: 9 } }, 'Перевод напрямую мастеру по СБП · без комиссии'));
 }
 window.ATipsCard = ATipsCard;
@@ -19062,9 +19072,8 @@ function AChat() {
 }
 window.AChat = AChat;
 
-// Tips: open YClients tips pay page (company + staff). Optional ME analytics ping.
+// Tips: external payment only; no self-report or notification.
 (function () {
-  var TIPS_PROXY = 'https://malesthetic.pro/app/api-proxy.php';
   var TIPS_STAFF = [1461615, 1460233, 1461618, 1461621, 3278920];
   var TIPS_SLUG = ['stas', 'ilya', 'alexey', 'maxim', 'alexander'];
   window.__meTipsCompanyId = function () {
@@ -19073,6 +19082,7 @@ window.AChat = AChat;
     if (!(window.__ME_SAAS_CTX && window.__ME_SAAS_CTX.api)) return '503759';
     return null;
   };
+  // p5_b22_external_payment_only: opening a page never confirms payment.
   window.__tipsSend = function (idx, amount, note) {
     var masters = window.__meBookMasters || [];
     var sid = null, slug = null, mname = '';
@@ -19093,30 +19103,16 @@ window.AChat = AChat;
       alert('Чаевые ещё не настроены. Владелец указывает ID компании чаевых в CRM.');
       return;
     }
-    try {
-      if (!(window.__ME_SAAS_CTX && window.__ME_FOREIGN_TENANT)) {
-        var headers = { 'Content-Type': 'application/json' };
-        var body = { master: slug, master_id: sid, amount: amount, source: 'app' };
-        if (note) body.note = String(note);
-        try {
-          var tok = localStorage.getItem('web_session_token');
-          if (tok) body.session_token = tok;
-        } catch (e) {}
-        if (window.__tgAuthData) body.auth_data = window.__tgAuthData;
-        fetch(TIPS_PROXY + '?action=tip_sent', { method: 'POST', headers: headers, body: JSON.stringify(body) }).catch(function () {});
-      }
-    } catch (e) {}
     var url = 'https://yclients.com/companies/' + encodeURIComponent(String(companyId)) + '/staff/' + encodeURIComponent(String(sid)) + '/tips/pay/?master_tips_source=payed_from_pos_qr';
     try {
-      if (window.__meExt) { window.__meExt(url); return; }
+      if (window.__meExt) { window.__meExt(url); return { opened: true }; }
     } catch (e2) {}
     try {
       if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
-        window.Telegram.WebApp.openLink(url);
-        return;
+        window.Telegram.WebApp.openLink(url); return { opened: true };
       }
     } catch (e) {}
-    window.open(url, '_blank');
+    return { opened: !!window.open(url, '_blank') };
   };
   // ?tips= deep-link (post-visit push opens /app/?tips=<master>) → open the tips screen
   try {

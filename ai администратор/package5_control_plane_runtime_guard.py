@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Fail closed when the active PWA restores B13-B21 legacy owners."""
+"""Fail closed when the active PWA restores B13-B22 legacy owners."""
 
 from __future__ import annotations
 
 import argparse
 import ast
 import json
+import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Mapping
@@ -18,6 +19,10 @@ class Finding:
 
 
 WEB_FUNCTIONS = {
+    "tip_sent_handler": {
+        "markers": ("p5_b22_unverified_tip_signal_retired", '"ok": False', '"payment_confirmed": False', "status=410"),
+        "forbidden": ("request.json", "request.app", "database.", "_master_by", "send_message", "_send_master_push", "client_command", "_yc", ".execute("),
+    },
     "realtime_handler": {
         "markers": (
             "p5_b21_verified_realtime_authority",
@@ -412,6 +417,9 @@ READ_ONLY_BUSINESS_WRITERS = (
 )
 
 DATABASE_RETIREMENTS = {
+    "save_tip": "p5_b22_unverified_tip_signal_retired",
+    "tips_totals_by_master": "p5_b22_legacy_tip_projection_retired",
+    "tips_for_master": "p5_b22_legacy_tip_projection_retired",
     "can_redeem_codes": "p5_b13_legacy_cashier_value_authority_disabled",
     "set_cashier_role": "canonical_package4_value_authority_required",
     "create_master_with_bind_code": "canonical_crm_staff_access_required",
@@ -492,6 +500,14 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
                 findings.append(
                     Finding("read_only_business_boundary", f"{name} references {writer}")
                 )
+
+    tip_body = web_functions.get("tip_sent_handler", "")
+    if tip_body:
+        tip_node = ast.parse(tip_body).body[0]
+        statements = [n for n in tip_node.body if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant) and isinstance(n.value.value, str))]
+        calls = [n for n in ast.walk(tip_node) if isinstance(n, ast.Call)]
+        if len(statements) != 1 or not isinstance(statements[0], ast.Return) or len(calls) != 1 or not isinstance(calls[0].func, ast.Name) or calls[0].func.id != "_cabinet_response":
+            findings.append(Finding("b22_tip_authority", "Retired endpoint must only return unsupported"))
 
     database = _read(root, "database.py", overrides)
     db_functions = _functions(database, "database.py")
@@ -641,6 +657,21 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
         for forbidden in GLOBAL_FORBIDDEN:
             if forbidden in source:
                 findings.append(Finding("later_pwa_module", f"{path.name} references {forbidden}"))
+    for path in sorted(root.glob("*.py")):
+        if path.name == "package5_control_plane_runtime_guard.py" or path.name.startswith("test_"):
+            continue
+        source = overrides.get(path.name, path.read_text(encoding="utf-8"))
+        tree = ast.parse(source, filename=path.name)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                func = node.func
+                name = func.attr if isinstance(func, ast.Attribute) else func.id if isinstance(func, ast.Name) else ""
+                if name == "save_tip":
+                    findings.append(Finding("b22_tip_authority", f"{path.name}:{node.lineno} calls retired tip writer"))
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                normalized = " ".join(node.value.upper().split())
+                if re.search(r"\b(?:INSERT INTO|UPDATE|DELETE FROM|FROM) TIPS\b", normalized):
+                    findings.append(Finding("b22_tip_authority", f"{path.name}:{node.lineno} uses legacy tip facts"))
     return findings
 
 
@@ -671,6 +702,7 @@ def main() -> int:
         "b21RealtimeLegacyIdentityOwners": 0 if not findings else None,
         "b21RealtimeLegacyHistoryWriters": 0 if not findings else None,
         "b21RealtimePreReadyBypasses": 0 if not findings else None,
+        "b22UnverifiedTipOwners": 0 if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }
@@ -680,7 +712,7 @@ def main() -> int:
         for finding in findings:
             print(f"FAIL {finding.check}: {finding.detail}")
     else:
-        print("Package 5 B13-B21 active PWA control-plane guard: PASS")
+        print("Package 5 B13-B22 active PWA control-plane guard: PASS")
     return 0 if not findings else 1
 
 

@@ -3939,45 +3939,18 @@ init_db()
 # ─── Чаевые (аналитика по каждому мастеру) ──────────────────────────────
 def save_tip(master_id=None, master_slug: str = "", master_name: str = "",
              amount=0, record_id=None, note: str = "") -> None:
-    """Записать факт перевода чаевых (служебный сигнал клиента «Я перевёл»)."""
-    try:
-        amount_i = int(float(amount or 0))
-    except (TypeError, ValueError):
-        amount_i = 0
-    with _db() as conn:
-        conn.execute(
-            "INSERT INTO tips (master_id, master_slug, master_name, amount, record_id, note, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (int(master_id) if master_id else None, master_slug or "", master_name or "",
-             amount_i, int(record_id) if record_id else None, str(note or "").strip()[:240], _now()),
-        )
+    """B22: preserve history; self-reported tips are not payment evidence."""
+    raise RuntimeError("p5_b22_unverified_tip_signal_retired")
 
 
-def tips_totals_by_master(from_iso: str = None, to_iso: str = None) -> list:
-    """Сумма и количество чаевых по каждому мастеру за период (для владельца)."""
-    q = ("SELECT master_id, MAX(master_name) AS master_name, MAX(master_slug) AS master_slug, "
-         "COUNT(*) AS cnt, COALESCE(SUM(amount),0) AS total FROM tips WHERE 1=1")
-    params = []
-    if from_iso:
-        q += " AND created_at >= ?"; params.append(from_iso)
-    if to_iso:
-        q += " AND created_at <= ?"; params.append(to_iso)
-    q += " GROUP BY master_id ORDER BY total DESC"
-    with _db() as conn:
-        return [dict(r) for r in conn.execute(q, params).fetchall()]
+def tips_totals_by_master(from_iso: str = None, to_iso: str = None):
+    """B22: historical self-reports cannot project current financial totals."""
+    raise RuntimeError("p5_b22_legacy_tip_projection_retired")
 
 
-def tips_for_master(master_id, from_iso: str = None, to_iso: str = None) -> dict:
-    """Сумма и количество чаевых конкретного мастера (для его собственной панели)."""
-    q = "SELECT COUNT(*) AS cnt, COALESCE(SUM(amount),0) AS total FROM tips WHERE master_id = ?"
-    params = [int(master_id) if master_id else 0]
-    if from_iso:
-        q += " AND created_at >= ?"; params.append(from_iso)
-    if to_iso:
-        q += " AND created_at <= ?"; params.append(to_iso)
-    with _db() as conn:
-        r = conn.execute(q, params).fetchone()
-        return {"count": (r["cnt"] or 0), "total": (r["total"] or 0)}
+def tips_for_master(master_id, from_iso: str = None, to_iso: str = None):
+    """B22: historical self-reports cannot project current financial totals."""
+    raise RuntimeError("p5_b22_legacy_tip_projection_retired")
 
 
 # ── CutMatch: лимит ИИ-консультаций (2/день на пользователя) ─────────────────

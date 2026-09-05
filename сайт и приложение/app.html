@@ -16525,7 +16525,7 @@ function ATipsCard(props) {
     }
     Promise.resolve(operation).then(function (result) {
       if (result && result.opened) {
-        patch({ busy: false, status: 'Страница оплаты открыта в Safari. После перевода вернитесь в MAYA.' });
+        patch({ busy: false, status: 'Продолжите оплату на странице YClients. MAYA не подтверждает перевод.' });
       } else if (result && result.copied) {
         patch({ busy: false, status: 'Ссылка на оплату скопирована.' });
       } else {
@@ -16566,8 +16566,7 @@ function ATipsCard(props) {
     e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 4 } }, 'Чаевые мастеру'),
     e('div', { style: Object.assign({}, lab, { margin: '13px 0 10px' }) }, 'Кого благодарим'), masterRow,
     e('div', { style: lab }, 'Сумма чаевых'), amountGrid, customRow, customChips,
-    e('div', { style: lab }, 'Благодарность · по желанию'), noteChips,
-    e('button', { style: Object.assign({}, prim, { opacity: s.busy ? 0.6 : 1 }), onClick: doSend }, s.busy ? 'Проверяю оплату…' : ('Перейти к оплате · ' + money(s.amt) + ' ₽')),
+    e('button', { style: Object.assign({}, prim, { opacity: s.busy ? 0.6 : 1 }), onClick: doSend }, s.busy ? 'Открываю оплату…' : ('Перейти к оплате · ' + money(s.amt) + ' ₽')),
     s.status ? e('div', { style: { textAlign: 'center', fontSize: 11.5, lineHeight: 1.45, color: c.muted, marginTop: 10 } }, s.status) : null,
     e('div', { style: { textAlign: 'center', fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.faint, marginTop: 9 } }, 'Защищённая оплата на странице YClients и ЮKassa'));
 }
@@ -22144,9 +22143,8 @@ function AChat() {
 }
 window.AChat = AChat;
 
-// Tips: open YClients tips pay page (company + staff). Optional ME analytics ping.
+// Tips: external payment only; no self-report or notification.
 (function () {
-  var TIPS_PROXY = 'https://malesthetic.pro/app/api-proxy.php';
   var TIPS_STAFF = [1461615, 1460233, 1461618, 1461621, 3278920];
   var TIPS_SLUG = ['stas', 'ilya', 'alexey', 'maxim', 'alexander'];
   window.__meTipsCompanyId = function () {
@@ -22284,6 +22282,7 @@ window.AChat = AChat;
     });
   }
 
+  // p5_b22_external_payment_only: opening a page never confirms payment.
   window.__tipsSend = function (idx, amount, note, preferredStaffId) {
     var masters = window.__meBookMasters || [];
     var sid = null, slug = null, mname = '';

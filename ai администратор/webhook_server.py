@@ -10303,75 +10303,15 @@ async def push_subscribe_handler(request: web.Request) -> web.Response:
 
 
 async def tip_sent_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/tips/sent
-    Клиент нажал «Я перевёл» на экране чаевых. Это служебный сигнал мастеру,
-    не банковское подтверждение поступления денег.
-    """
-    try:
-        body = await request.json()
-    except Exception:
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-    if not isinstance(body, dict):
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-
-    master = _master_by_tip_key(body.get("master"), body.get("master_id"))
-    if not master:
-        return _cabinet_response({"error": "master_not_found"}, status=404)
-
-    amount = body.get("amount") or 0
-    try:
-        amount_i = int(float(amount))
-    except (TypeError, ValueError):
-        amount_i = 0
-    record_id = body.get("record_id")
-    note = _plain_maya_text(str(body.get("note") or "")).strip()[:240]
-    # Записываем чаевые для аналитики по каждому мастеру (служебный сигнал, не банк. подтверждение)
-    try:
-        database.save_tip(
-            master_id=body.get("master_id") or master.get("id") or master.get("staff_id"),
-            master_slug=body.get("master") or master.get("slug", ""),
-            master_name=master.get("name", ""),
-            amount=amount_i, record_id=record_id, note=note,
-        )
-    except Exception as e:
-        logger.error(f"tip_sent: save_tip failed: {e}")
-    record_part = f"\nЗапись: #{record_id}" if record_id else ""
-    note_part = f"\nСообщение: {note.replace('[', '(').replace(']', ')')}" if note else ""
-    text = (
-        "💸 *Клиент отметил перевод чаевых*\n\n"
-        f"Сумма: *{amount_i:,} ₽*".replace(",", " ")
-        + record_part + note_part +
-        "\n\n_Проверь поступление в банковском приложении._"
-    )
-
-    sent_tg = False
-    if master.get("telegram_chat_id") and not database.is_master_muted(master["telegram_chat_id"]):
-        try:
-            await request.app["bot_app"].bot.send_message(
-                chat_id=master["telegram_chat_id"],
-                text=text,
-                parse_mode="Markdown",
-            )
-            sent_tg = True
-        except Exception as e:
-            logger.error(f"tip_sent: Telegram send failed: {e}")
-
-    sent_push = await _send_master_push(
-        master,
-        title="Вам оставили чай",
-        body="Вам оставили чай" + (" и сообщение" if note else ""),
-        url="/app/?panel=schedule",
-        tag=f"tip-{record_id or _master_staff_id(master) or 'master'}",
-        data={"record_id": record_id, "event": "tip.sent", "amount": amount_i},
-    )
-
+    """B22: opening external payment is not a verified tip/payment outcome."""
+    # p5_b22_unverified_tip_signal_retired: never parse or forward the payload.
     return _cabinet_response({
-        "ok": True,
-        "telegram": sent_tg,
-        "push_sent": sent_push,
-        "note_saved": bool(note),
-    })
+        "ok": False,
+        "error": "tip_signal_retired",
+        "payment_confirmed": False,
+        "external_payment_available": True,
+        "business_mutations": 0,
+    }, status=410)
 
 
 _SHIFT_REMINDER_OFFSETS = (60, 30)

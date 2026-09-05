@@ -120,3 +120,9 @@ No approved canonical owner covers this event:
 `NEW ACTION CLASSES IF A: NO`
 
 No runtime/schema/migration or production mutation is authorized by this proposal. After owner approval, Option A can be implemented as a narrow retirement remediation, with ratchets proving zero SQLite tip facts, direct Telegram/Web Push, caller value authority and legacy delivery fallback.
+
+## Owner approval — checkpoint ab4bd333
+
+Option A is approved: retire unverified tip signals and their SQLite financial projections; preserve the existing external payment page. No new schema, model, action class or canonical tip lifecycle is authorized. Historical self-reports remain untouched and cannot become current payment evidence. Existing read-only YClients provider reports are a separate source and are not converted into Maya payment facts.
+
+The compatibility endpoint and proxy return HTTP 410 with `ok=false`, `tip_signal_retired` and `payment_confirmed=false`. Neither accepts caller value/Appointment authority nor invokes business, identity or delivery adapters. PWA opening/return is not payment confirmation. A future verified tips capability requires a separate contract.
