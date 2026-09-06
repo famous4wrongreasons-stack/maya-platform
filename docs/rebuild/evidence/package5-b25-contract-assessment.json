@@ -1,0 +1,140 @@
+{
+  "acceptedCheckpoint": "ae6fa96c",
+  "cycle": "B25 reminder authority contract reconstruction",
+  "b24ProductionBaseline": "ACCEPTED; unchanged",
+  "productionReadOnlyVerification": {
+    "release": "/opt/maya-saas/releases/20260906-p5-b24-9c208d2b",
+    "readiness": "ready",
+    "compiledCodeHashes": {
+      "appointment-notifications/appointment-notifications.service.js": "84589198cc2996f89bf419d88766c410ffa40bcbb826a49d6aea4375baef12ff",
+      "appointment-notifications/appointment-notifications.scheduler.js": "64f377475c7a94f83919fc8e9fc26f0e01b56600ba8904362a81b7f8e747303a",
+      "inbox/inbox.service.js": "a3a2b93f13af372e3ea724180a2bae5ad683f787cec1159ac6fd22bfb9a041ad",
+      "communication-delivery/communication-delivery.service.js": "eee0f7d51782b0ef2d6909122c6d7456675171341777ed1b336da4d36557929b",
+      "communication-delivery/communication-web-push.service.js": "767f4bc4fbf8063580bee56c3d70c75eb5b1f304f226e64219263ee0c419425c",
+      "crm/client-channel-runtime.service.js": "aee177932be490054593480e9053d666c189d7b0f93adc8a2ab50c097dc9ebab"
+    },
+    "productionBusinessRowsRead": 0,
+    "providerCalls": 0,
+    "productionMutations": 0
+  },
+  "runtimeSchemaSourceHashes": {
+    "maya-saas-backend/prisma/schema.prisma": "4f623067f7a54d8a7c10db6d4cf21d80b278e57536c739bdcd9e49f787341c97",
+    "maya-saas-backend/src/appointment-notifications/appointment-notifications.service.ts": "3b72a30ec30e05f82bd934c3e09bc880c06cffd14876e124571058ba2b775b9e",
+    "maya-saas-backend/src/appointment-notifications/appointment-notifications.scheduler.ts": "5d6942130af5016206d0c99314858e318161244c239ea35819e82e0698543d93",
+    "maya-saas-backend/src/crm/appointment-observation.service.ts": "b4fbca3bb87e87037ef609af14efaca2f7cf1d4c6982991573b2b85157918ba3",
+    "maya-saas-backend/src/crm/appointment-mirror.service.ts": "82e1939cd062284d4a7b1ca8f482fda5583532e8589402a517a00a6a0698375d",
+    "maya-saas-backend/src/crm/client-channel-runtime.service.ts": "ebfd44af19a900c6e08d86288651026bdc24bfbd6d8f02c966a0d55450a94965",
+    "maya-saas-backend/src/crm/client-preferences.service.ts": "b7ff791b9b0137c758638561a25a36228e95b300624c2368bb71a19943a7b7e8",
+    "maya-saas-backend/src/inbox/inbox.service.ts": "ea568f3d395a5baa3677158762a928403ce9e92619ab6745d4cbba2c77cbd044",
+    "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts": "bcf1e41bbd90bf3ff22b19211e02ac0e54769a0155c8a0e8162951e06d24f618",
+    "maya-saas-backend/src/communication-delivery/communication-web-push.service.ts": "b60d78189e81d7a9b5a29ae6eb55bc90f9b85f7b36f00a0ad22d5dc5e92aa59e"
+  },
+  "runtimeSchemaMigrationChanges": 0,
+  "exactFlowReconstruction": "COMPLETE",
+  "existingAppointmentClientFoundation": {
+    "sufficient": true,
+    "canonicalField": "Appointment.mayaClientId",
+    "tenantQualifiedForeignKey": [
+      "mayaClientId",
+      "tenantId"
+    ],
+    "references": [
+      "Client.id",
+      "Client.tenantId"
+    ],
+    "nullableMeans": "unresolved; no reminder, no hidden repair/backfill",
+    "accountAssociationNotAuthority": "Appointment.clientId",
+    "origin": "canonical observation/mirror via tenant/provider/external Client CrmClientLink",
+    "b17Reused": true
+  },
+  "existingEndpoints": {
+    "clientChannelLink": "verified identity plus HMAC-checked encrypted delivery address",
+    "clientWebPushEndpoint": "verified Client-owned encrypted Web Push episode; cap 5",
+    "mayaUserRequired": "NO for verified Telegram or Web Push-only proposed route",
+    "identityFromPhoneOrEndpoint": false
+  },
+  "currentReminder": {
+    "source": "CRM journal/detail, not canonical Appointment owner",
+    "recipient": "CRM phone matched to active membership User.phone",
+    "channels": [
+      "inbox",
+      "APNs"
+    ],
+    "canonicalExecutionOwner": "Action Engine / Communication Delivery",
+    "directSchedulerTelegramWebPush": false,
+    "privateBodyFields": [
+      "time",
+      "service names",
+      "staff name"
+    ],
+    "privatePayloadFields": [
+      "appointment_id",
+      "record_id",
+      "staff_id",
+      "start_at",
+      "end_at",
+      "lead_time_minutes"
+    ],
+    "fullPhoneInBody": false,
+    "clientSpecificConsentPreferenceGate": false,
+    "logicalSourceIdentity": "appointment_reminder:<provider appointment key>:<lead minutes>",
+    "currentScheduleInIdentity": false,
+    "transactionalClassification": "PRESERVE"
+  },
+  "ownerDecisions": [
+    {
+      "id": "D1",
+      "question": "single primary route and device delivery composition across verified Client capabilities",
+      "recommended": "A",
+      "proposal": "pin Maya inbox else Telegram else Web Push-only; deterministic same-provider verified link selection; no retry/UNKNOWN channel failover",
+      "existingContractFullyDefinesComposition": false
+    },
+    {
+      "id": "D2",
+      "question": "one Client reminder_hours versus multiple tenant policy occurrences",
+      "recommended": "A",
+      "proposal": "present Client hour override replaces tenant lead list; absent inherits; disabled wins",
+      "threeHourDefaultIntroduced": false
+    }
+  ],
+  "compositionEvidence": {
+    "package2ChannelExecutionIdentitiesDistinct": true,
+    "b24ChildSourceIncludesParentExecutionId": true,
+    "unsafeDualPrimaryComposition": "source-derived prospective risk; not a reproduced current B24 duplicate",
+    "b24Reopened": false
+  },
+  "proposal": "package5-b25-reminder-orchestration-policy-v1-proposal.md",
+  "proposalApproved": false,
+  "newModelsProposed": 0,
+  "newBusinessActionClassesProposed": 0,
+  "additionalSchemaRequiredForRecommendedV1": false,
+  "runtimeCanResume": false,
+  "stopReason": "User requires proposal/STOP when reminder policy needs new business semantics; D1/D2 pending",
+  "b25ProductionRemediation": "NOT PERFORMED",
+  "package5FinalGate": "FAIL — accepted B25 blocker",
+  "package5Complete": false,
+  "newFullFinalGateRun": false,
+  "newExecutableProofRun": false,
+  "newRegressionGateRun": false,
+  "acceptedB24Regression": "356 suites / 2904 tests PASS; not rerun",
+  "acceptedB24PendingMigrations": 0,
+  "acceptedB24SchemaDrift": "NONE; not rerun",
+  "wavesAccepted": "6/6",
+  "familyInventoryCoverage": "13/13 — accepted inventory, not rerun",
+  "realProductionMutations": 0,
+  "providerCalls": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "ownedBackgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "tempDatabasesCreatedThisCycle": 0,
+    "protectedPreExistingDatabases": 17,
+    "preExistingDatabasesTouched": 0,
+    "existingUnownedProcessesUntouched": true
+  }
+}
