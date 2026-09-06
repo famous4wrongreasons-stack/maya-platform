@@ -6,6 +6,10 @@ import type {
 } from '@prisma/client';
 
 import type { ActionIntentV1 } from '../opportunities';
+import type {
+  ClientBookingIntentContext,
+  ClientBookingSnapshot,
+} from './client-booking-intent.contract';
 
 export const ACTION_EXECUTION_REQUEST_CONTRACT =
   'maya.action-execution-request/1' as const;
@@ -49,6 +53,7 @@ export interface TrustedActionExecutionRequestV1 {
   evidenceRefs: string[];
   intentExpiresAt?: Date;
   callerIdempotency?: CallerIdempotencyV1;
+  bookingIntent?: ClientBookingIntentContext;
 }
 
 export interface Chapter5IntentContextV1 {
@@ -179,6 +184,11 @@ export interface RegisteredActionCapabilityV1 {
 }
 
 export interface NormalizedActionExecutionV1 {
+  bookingIntent?: {
+    snapshot: ClientBookingSnapshot;
+    hash: string;
+    encrypted: string;
+  };
   capability: RegisteredActionCapabilityV1;
   targetRef: string;
   normalizedInput: Record<string, unknown>;

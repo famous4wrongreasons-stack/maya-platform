@@ -36,6 +36,12 @@ function setup() {
     crmLinks: [],
   };
   const prisma = {
+    crmIntegration: {
+      findUnique: jest.fn().mockResolvedValue({
+        provider: 'yclients',
+        settingsJson: { companyId: 42 },
+      }),
+    },
     unresolvedClientIdentityHold: {
       findFirst: jest.fn().mockResolvedValue(null),
     },
@@ -105,6 +111,7 @@ function setup() {
   }> = [];
   const registry = new ActionCapabilityRegistry();
   const runtime = {
+    resolveClientBookingRetry: jest.fn().mockResolvedValue(null),
     preview: jest.fn((request: TrustedActionExecutionRequestV1) =>
       Promise.resolve({
         identityFingerprint: createHash('sha256')

@@ -1,53 +1,47 @@
-# Package 5 remainder — B31 local candidate; contract STOP at G1
+# Package 5 remainder — B31 immutable idempotency local gate PASS
 
-The [B31 local contract STOP report](CYCLE-06-BLOCKING-PACKAGE-5-B31-LOCAL-CONTRACT-STOP-REPORT.md)
-at accepted checkpoint `49e3376f` remains the executable evidence baseline.
-The owner confirmed STOP and requested only a
-[B31 Idempotency Schema Decision Sheet](CYCLE-06-BLOCKING-PACKAGE-5-B31-IDEMPOTENCY-SCHEMA-DECISION-SHEET.md).
-The owner subsequently accepted checkpoint `724d3ef6` and **approved Option A**,
-including implementation and the gated production migration. The
-[Option A foundation report](CYCLE-06-BLOCKING-PACKAGE-5-B31-OPTION-A-SCHEMA-FOUNDATION-REPORT.md)
-records the additive schema and local PostgreSQL proof. The runtime candidate
-is **not deployed and not accepted for deployment**.
+The owner accepted `724d3ef6` and approved Option A. The historical
+[G1 STOP](CYCLE-06-BLOCKING-PACKAGE-5-B31-LOCAL-CONTRACT-STOP-REPORT.md)
+at `49e3376f` is closed locally by the approved durable alias binding.
+[Schema foundation](CYCLE-06-BLOCKING-PACKAGE-5-B31-OPTION-A-SCHEMA-FOUNDATION-REPORT.md)
+`05ea5c25` and [production migration PASS](CYCLE-06-BLOCKING-PACKAGE-5-B31-OPTION-A-PRODUCTION-MIGRATION-REPORT.md)
+`25119d99`: exact additive migration applied, pending 0, drift NONE,
+9 persisted columns / 1 model / 0 new action classes, no historical backfill.
 
-B29/B30 remain accepted production baselines; the last documented release is
-`20260906-p5-b30-ad1d91b9`. Package 4 remains complete. Package 5 has 6/6 waves
-and 13/13 inventoried families, but is **not complete**. Chapter 6 is not
-complete. No Wave 7 or Chapter 7.
+The [B31 runtime local gate](CYCLE-06-BLOCKING-PACKAGE-5-B31-IMMUTABLE-IDEMPOTENCY-LOCAL-GATE.md)
+is PASS, including compiled HTTP/AI + real PostgreSQL, K1/K2 secondary aliases,
+changed intent conflicts, independent processes, crash/restart, UNKNOWN,
+verified Client ownership and all mandatory checks. Full backend:
+373 suites / 3046 tests. No mandatory failure remains.
 
-B31 HTTP/AI creation now locally resolves the existing verified Client binding
-and uses `create_appointment` / Action Engine for internal and CRM calendars.
-Accepted rows carry exact `mayaClientId + tenantId`. The candidate also
-coalesces concurrent loops after canonical ingress, while preserving database
-claims and UNKNOWN/reconciliation. No schema/model/action class was added.
+Next authorized steps in this same cycle: push runtime, canonical documented
+deployment, structural/read-only production verification, then a fresh full
+Package 5 Final Adversarial Gate across all 13 families. Any new B32+ finding
+must be reported with exact evidence, committed/pushed, then STOP without fixing
+it in that Final Gate. A clean Final Gate permits Package 5 completion only;
+Chapter 6 acceptance remains separate.
 
-**STOP / B31-G1:** one ActionExecution stores only the first caller key.
-A second key accepted as a logical duplicate is not durably bound. Reusing
-that second key with changed booking data creates a second successful
-Appointment/Execution. The first-key control correctly rejects the change.
-This violates the existing Schema Gate's changed-payload conflict rule.
+```text
+B31 IMMUTABLE IDEMPOTENCY LOCAL REMEDIATION: PASS
+B31 SCHEMA FOUNDATION DURABLE IN PRODUCTION: YES
+B31 RUNTIME DEPLOYMENT: NOT STARTED
+B29 PRODUCTION REMEDIATION: PASS
+B30 PRODUCTION REMEDIATION: PASS
+ACTIVE BLOCKER: B31 — PRODUCTION VERIFICATION / FINAL GATE PENDING
+PACKAGE 4 COMPLETE: YES
+PACKAGE 5 WAVES COMPLETE: 6/6
+PACKAGE 5 FAMILY INVENTORY COVERAGE: 13/13
+PACKAGE 5 COMPLETE: NO
+WAVE 7 CREATED: NO
+CHAPTER 7 STARTED: NO
+CHAPTER 6 COMPLETE: NO
+FAKE HISTORICAL BACKFILL: 0
+PRODUCTION BUSINESS/PROVIDER MUTATIONS FOR PROOF: 0
+MAIN DIRTY WORKTREE TOUCHED: NO
+PRE-EXISTING DATABASES TOUCHED: 0
+```
 
-[Exact real-PostgreSQL proof](evidence/package5-b31-secondary-idempotency-alias.proof.json)
-uses compiled HTTP/canonical execution, synthetic fixtures and zero provider
-calls. Required alias storage must be approved before a schema extension is
-implemented. No in-memory or unrelated-ledger substitute was introduced.
-
-Current gate: ordinary regressions/architecture/lint/typechecks/build and clean
-79-migration replay pass; the mandatory executable alias case fails. Full
-ordinary backend result is recorded in the STOP report. **Do not deploy this
-checkpoint just because ordinary Jest is green.** No post-B31 production
-Final Gate has run.
-
-The [production schema gate/apply](CYCLE-06-BLOCKING-PACKAGE-5-B31-OPTION-A-PRODUCTION-MIGRATION-REPORT.md)
-is PASS: exact migration applied, pending 0, drift NONE, no backfill, B30 runtime
-unchanged. Next: continue runtime remediation in the same cycle. Approved A adds one alias
-model and three execution columns (9 persisted scalar columns in total);
-its schema proof is PASS. Historical fingerprints are not backfilled.
-Resolve G1, complete B31's failing runtime regression, repeat every mandatory gate, and
-deploy only after all pass. Then restart the full Package 5 Final Completion
-Gate across all 13 families. Chapter 6 acceptance remains separate.
-
-The main dirty worktree and all 17 pre-existing test databases were untouched.
-The existing isolated worktree is retained. Owned synthetic database/process
-state and the final commit are recorded at handoff; no destructive cleanup was
-performed.
+Owned synthetic PostgreSQL data/process and the temporary schema tooling stage
+remain only for this active cycle; all owned temporary DBs/processes must be
+removed before final STOP. The main checkout and 17 pre-existing DBs are outside
+this scope and remain untouched.

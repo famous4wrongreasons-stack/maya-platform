@@ -1,4 +1,11 @@
 import { verifiedClientChannelCapability } from './client-preferences.contract';
+import {
+  CLIENT_BOOKING_IDEMPOTENCY_SCOPE,
+  CLIENT_BOOKING_INTENT_CONTRACT,
+  normalizeClientBookingIntent,
+  type BoundClientBookingSnapshot,
+  type ClientBookingSnapshot,
+} from './client-booking-intent.contract';
 import type { ConsentChannelBinding } from '../crm/client-consent-authority';
 import { randomBytes, randomUUID } from 'node:crypto';
 
@@ -270,7 +277,12 @@ export class ActionEngineKernel {
   ): Promise<ActionExecution> {
     const now = this.now();
 
-    for (let databaseAttempt = 0; databaseAttempt < 3; databaseAttempt += 1) {
+    const databaseAttempts = normalized.bookingIntent ? 12 : 3;
+    for (
+      let databaseAttempt = 0;
+      databaseAttempt < databaseAttempts;
+      databaseAttempt += 1
+    ) {
       try {
         return await this.prisma.$transaction(
           async (tx) => {
@@ -291,6 +303,13 @@ export class ActionEngineKernel {
               now,
               policy,
             );
+            if (
+              normalized.bookingIntent &&
+              initial.state !== ActionExecutionState.READY
+            )
+              throw new ActionContractError(
+                'Canonical booking intent was not accepted',
+              );
             const approval = this.initialApproval(
               normalized.capability,
               normalized.normalizedInputHash,
@@ -307,7 +326,7 @@ export class ActionEngineKernel {
               now.getTime() + normalized.capability.auditRetentionMs,
             );
 
-            return tx.actionExecution.create({
+            const execution = await tx.actionExecution.create({
               data: {
                 id: executionId,
                 tenantId: request.tenantId,
@@ -315,6 +334,14 @@ export class ActionEngineKernel {
                 identityFingerprint: normalized.identityFingerprint,
                 idempotencyScope: normalized.idempotencyScope,
                 requestIdempotencyKeyHash: normalized.requestIdempotencyKeyHash,
+                ...(normalized.bookingIntent
+                  ? {
+                      bookingIntentContract: CLIENT_BOOKING_INTENT_CONTRACT,
+                      bookingIntentHash: normalized.bookingIntent.hash,
+                      bookingIntentEncrypted:
+                        normalized.bookingIntent.encrypted,
+                    }
+                  : {}),
                 sourceType: request.source.type,
                 sourceRef:
                   request.source.type === 'agent_task'
@@ -389,14 +416,28 @@ export class ActionEngineKernel {
                 auditRetentionUntil,
               },
             });
+            if (normalized.bookingIntent)
+              await this.bindClientBookingKey(
+                tx,
+                request,
+                normalized,
+                execution,
+              );
+            return execution;
           },
           { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
         );
       } catch (error) {
+        // A B31 unique loser must retry the entire transaction: returning a
+        // logical duplicate outside it would lose the newly accepted alias.
+        if (normalized.bookingIntent && isUniqueConflict(error)) continue;
         if (isUniqueConflict(error)) {
           return this.resolveDuplicate(request, normalized);
         }
-        if (isSerializationConflict(error) && databaseAttempt < 2) {
+        if (
+          isSerializationConflict(error) &&
+          databaseAttempt < databaseAttempts - 1
+        ) {
           continue;
         }
         throw error;
@@ -1421,7 +1462,38 @@ export class ActionEngineKernel {
       normalizedInputHash,
       occurrenceScope,
     });
+    let bookingIntent: NormalizedActionExecutionV1['bookingIntent'];
+    if (request.bookingIntent) {
+      if (
+        capability.capability !== 'crm.appointment.create.v1' ||
+        idempotencyScope !== CLIENT_BOOKING_IDEMPOTENCY_SCOPE ||
+        !requestIdempotencyKeyHash
+      )
+        throw new ActionContractError(
+          'Canonical booking requires the common immutable caller binding',
+        );
+      const snapshot = normalizeClientBookingIntent(
+        request.tenantId,
+        normalizedInput,
+        request.bookingIntent,
+      );
+      bookingIntent = {
+        snapshot,
+        hash: this.identity.hmac(
+          CLIENT_BOOKING_INTENT_CONTRACT,
+          snapshot.descriptor,
+        ),
+        encrypted: this.identity.encryptNormalizedPayload(
+          stableActionJson(snapshot),
+        ),
+      };
+    } else if (idempotencyScope === CLIENT_BOOKING_IDEMPOTENCY_SCOPE) {
+      throw new ActionContractError(
+        'Canonical Client booking cannot omit its immutable intent',
+      );
+    }
     return {
+      bookingIntent,
       capability,
       targetRef,
       normalizedInput,
@@ -1716,10 +1788,60 @@ export class ActionEngineKernel {
   }
 
   private async findDuplicate(
-    tx: Pick<Prisma.TransactionClient, 'actionExecution'>,
+    tx: Pick<
+      Prisma.TransactionClient,
+      'actionExecution' | 'actionExecutionIdempotencyBinding'
+    >,
     request: TrustedActionExecutionRequestV1,
     normalized: NormalizedActionExecutionV1,
   ): Promise<ActionExecution | null> {
+    if (normalized.bookingIntent) {
+      const bound = await tx.actionExecutionIdempotencyBinding.findUnique({
+        where: {
+          tenantId_idempotencyScope_requestIdempotencyKeyHash: {
+            tenantId: request.tenantId,
+            idempotencyScope: CLIENT_BOOKING_IDEMPOTENCY_SCOPE,
+            requestIdempotencyKeyHash: normalized.requestIdempotencyKeyHash!,
+          },
+        },
+        include: { execution: true },
+      });
+      if (bound) {
+        if (
+          bound.clientId !==
+          normalized.bookingIntent.snapshot.descriptor.mayaClientId
+        )
+          throw new ActionConflictError(
+            'Caller key belongs to a different canonical Client',
+          );
+        this.assertBookingEquivalent(bound.execution, normalized);
+        return bound.execution;
+      }
+      // No historical fingerprint is inferred, including from old HTTP/AI keys.
+      if (
+        await this.legacyClientBookingKey(
+          tx,
+          request.tenantId,
+          request.callerIdempotency!.key,
+        )
+      )
+        throw new ActionConflictError(
+          'Historical booking identity has no provable canonical binding',
+        );
+      const duplicate = await tx.actionExecution.findUnique({
+        where: {
+          tenantId_identityFingerprint: {
+            tenantId: request.tenantId,
+            identityFingerprint: normalized.identityFingerprint,
+          },
+        },
+      });
+      if (duplicate) {
+        this.assertBookingEquivalent(duplicate, normalized);
+        await this.bindClientBookingKey(tx, request, normalized, duplicate);
+      }
+      return duplicate;
+    }
     if (normalized.requestIdempotencyKeyHash && normalized.idempotencyScope) {
       const byCallerKey = await tx.actionExecution.findUnique({
         where: {
@@ -1745,6 +1867,122 @@ export class ActionEngineKernel {
     });
     if (byIdentity) this.assertDuplicateEquivalent(byIdentity, normalized);
     return byIdentity;
+  }
+
+  private assertBookingEquivalent(
+    execution: ActionExecution,
+    normalized: NormalizedActionExecutionV1,
+  ): void {
+    if (
+      execution.bookingIntentContract !== CLIENT_BOOKING_INTENT_CONTRACT ||
+      execution.bookingIntentHash !== normalized.bookingIntent?.hash
+    )
+      throw new ActionConflictError(
+        'Caller idempotency identity was reused with a changed canonical booking intent',
+      );
+    this.assertDuplicateEquivalent(execution, normalized);
+  }
+
+  private async bindClientBookingKey(
+    tx: Pick<Prisma.TransactionClient, 'actionExecutionIdempotencyBinding'>,
+    request: TrustedActionExecutionRequestV1,
+    normalized: NormalizedActionExecutionV1,
+    execution: ActionExecution,
+  ): Promise<void> {
+    await tx.actionExecutionIdempotencyBinding.create({
+      data: {
+        tenantId: request.tenantId,
+        clientId: normalized.bookingIntent!.snapshot.descriptor.mayaClientId,
+        idempotencyScope: CLIENT_BOOKING_IDEMPOTENCY_SCOPE,
+        requestIdempotencyKeyHash: normalized.requestIdempotencyKeyHash!,
+        actionExecutionId: execution.id,
+      },
+    });
+  }
+
+  private async legacyClientBookingKey(
+    tx: Pick<Prisma.TransactionClient, 'actionExecution'>,
+    tenantId: string,
+    key: string,
+  ) {
+    for (const scope of [
+      CLIENT_BOOKING_IDEMPOTENCY_SCOPE,
+      'appointments.http.create',
+      'ai-tool.appointment-mutation',
+    ]) {
+      const execution = await tx.actionExecution.findUnique({
+        where: {
+          tenantId_idempotencyScope_requestIdempotencyKeyHash: {
+            tenantId,
+            idempotencyScope: scope,
+            requestIdempotencyKeyHash: this.identity.callerIdempotencyHash({
+              tenantId,
+              scope,
+              key,
+            }),
+          },
+        },
+      });
+      if (execution?.capability === 'crm.appointment.create.v1')
+        return execution;
+    }
+    return null;
+  }
+
+  /** Called only after the initiator's verified Client authorization. */
+  async resolveClientBookingRetry(
+    tenantId: string,
+    clientId: string,
+    key: string,
+  ): Promise<BoundClientBookingSnapshot | null> {
+    if (!key.trim())
+      throw new ActionContractError('Caller idempotency key is blank');
+    const binding =
+      await this.prisma.actionExecutionIdempotencyBinding.findUnique({
+        where: {
+          tenantId_idempotencyScope_requestIdempotencyKeyHash: {
+            tenantId,
+            idempotencyScope: CLIENT_BOOKING_IDEMPOTENCY_SCOPE,
+            requestIdempotencyKeyHash: this.identity.callerIdempotencyHash({
+              tenantId,
+              scope: CLIENT_BOOKING_IDEMPOTENCY_SCOPE,
+              key,
+            }),
+          },
+        },
+        include: { execution: true },
+      });
+    if (!binding) {
+      if (await this.legacyClientBookingKey(this.prisma, tenantId, key))
+        throw new ActionConflictError(
+          'Historical booking identity cannot be rebound',
+        );
+      return null;
+    }
+    const execution = binding.execution;
+    if (
+      binding.clientId !== clientId ||
+      execution.bookingIntentContract !== CLIENT_BOOKING_INTENT_CONTRACT ||
+      !execution.bookingIntentEncrypted
+    )
+      throw new ActionConflictError(
+        'Caller key cannot prove the requested canonical Client intent',
+      );
+    const snapshot = JSON.parse(
+      this.identity.decryptNormalizedPayload(execution.bookingIntentEncrypted),
+    ) as ClientBookingSnapshot;
+    if (
+      snapshot.descriptor.tenantId !== tenantId ||
+      snapshot.descriptor.mayaClientId !== clientId ||
+      this.identity.hmac(
+        CLIENT_BOOKING_INTENT_CONTRACT,
+        snapshot.descriptor,
+      ) !== execution.bookingIntentHash
+    )
+      throw new ActionConflictError(
+        'Canonical booking snapshot integrity failed',
+      );
+    return { ...snapshot, executionId: execution.id };
   }
 
   private async resolveDuplicate(

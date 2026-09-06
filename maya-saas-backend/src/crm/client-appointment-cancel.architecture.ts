@@ -113,10 +113,17 @@ export function scanClientAppointmentCommands(
       'verificationVersion !== 1',
       'current.clientId !== link.clientId',
       'executeCanonicalClientCreateWithReceipt(',
+      'resolveCanonicalClientBookingRetry(',
+      'CLIENT_BOOKING_IDEMPOTENCY_SCOPE',
+      'bookingIntent:',
       'mayaClientId: link.clientId',
     ])
       if (!source.includes(required))
         failures.push(`Required create authority missing: ${required}`);
+    if (/callerIdempotency:\s*invocation\.callerIdempotency/.test(source))
+      failures.push(
+        'HTTP/AI must use the common canonical booking idempotency scope',
+      );
   }
   if (dedicatedCancel) {
     for (const required of [

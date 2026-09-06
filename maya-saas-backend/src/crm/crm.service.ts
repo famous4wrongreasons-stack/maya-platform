@@ -110,6 +110,7 @@ import {
 } from './crm-request.errors';
 
 export type AppointmentActionInvocation = {
+  bookingIntent?: import('../action-engine/client-booking-intent.contract').ClientBookingIntentContext;
   callerIdempotency?: {
     scope: string;
     key: string;
@@ -1119,7 +1120,11 @@ export class CrmService {
     invocation: AppointmentActionInvocation,
   ): Promise<ActionRuntimeReceipt<CreatedAppointment>> {
     // Reject missing/changed authority before ingress as well as at dispatch.
-    if (!invocation.authorizationCheck)
+    if (
+      !invocation.authorizationCheck ||
+      !invocation.bookingIntent ||
+      !invocation.callerIdempotency
+    )
       throw new ForbiddenException('Verified Client create authority required');
     await invocation.authorizationCheck();
     const plan = await this.canonicalClientCreatePlan(
@@ -1127,9 +1132,50 @@ export class CrmService {
       params,
       invocation,
     );
-    return this.actionEngineRuntime.executeWithReceipt(
-      plan.request,
-      plan.handlers,
+    return this.actionEngineRuntime.executeWithReceipt(plan.request, {
+      ...plan.handlers,
+      authorizeIngress: invocation.authorizationCheck,
+    });
+  }
+
+  async canonicalClientBookingTarget(
+    tenantId: string,
+  ): Promise<
+    import('../action-engine/client-booking-intent.contract').ClientBookingCalendarTarget
+  > {
+    this.tenantContext.assertTenantId(tenantId);
+    if ((await this.getCalendarSource(tenantId)) === CalendarSource.INTERNAL)
+      return { source: 'internal', provider: null, companyId: null };
+    const integration = await this.prisma.crmIntegration.findUnique({
+      where: { tenantId },
+      select: { provider: true, settingsJson: true },
+    });
+    if (!integration)
+      throw new ConflictException('Canonical booking provider unavailable');
+    const settings = normalizeCrmProviderSettings(
+      integration.provider as CrmProvider,
+      integration.settingsJson,
+    );
+    return {
+      source: 'external',
+      provider: integration.provider,
+      companyId:
+        typeof settings.companyId === 'number'
+          ? String(settings.companyId)
+          : null,
+    };
+  }
+
+  resolveCanonicalClientBookingRetry(
+    tenantId: string,
+    clientId: string,
+    key: string,
+  ) {
+    this.tenantContext.assertTenantId(tenantId);
+    return this.actionEngineRuntime.resolveClientBookingRetry(
+      tenantId,
+      clientId,
+      key,
     );
   }
 
@@ -2663,6 +2709,9 @@ export class CrmService {
       input: input.input,
       evidenceRefs: [],
       callerIdempotency: input.invocation.callerIdempotency,
+      ...(input.invocation.bookingIntent
+        ? { bookingIntent: input.invocation.bookingIntent }
+        : {}),
     };
   }
 

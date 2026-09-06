@@ -26,6 +26,7 @@ const ALLOWED_REQUEST_KEYS = new Set([
   'evidenceRefs',
   'intentExpiresAt',
   'callerIdempotency',
+  'bookingIntent',
 ]);
 const ALLOWED_SOURCE_KEYS = new Set([
   'type',

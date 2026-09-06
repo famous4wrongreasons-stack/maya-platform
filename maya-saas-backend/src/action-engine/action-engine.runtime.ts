@@ -47,6 +47,8 @@ export interface ActionRuntimeContextV1 {
 }
 
 export interface ActionRuntimeHandlers<T> {
+  /** B31 rechecks its existing verified-Client callback after any local wait. */
+  authorizeIngress?(): Promise<void>;
   prepare?(
     normalizedInput: Record<string, unknown>,
     context: ActionRuntimeContextV1,
@@ -101,6 +103,11 @@ function sleep(ms: number): Promise<void> {
 
 @Injectable()
 export class ActionEngineRuntimeService {
+  // B31 alias INSERT locks its execution owner. Identical local requests wait
+  // outside the pool while that owner is being claimed/executed. Every waiter
+  // still performs its own authorized, atomic canonical ingress afterwards.
+  // Cross-process ownership and changed-intent conflicts remain database-owned.
+  private readonly bookingExecutions = new Map<string, Promise<unknown>>();
   // Each transport alias still passes canonical ingress. Coalesce only the
   // execution loop after the database has established one durable identity;
   // waiting claims must not occupy the pool needed by its policy recheck.
@@ -166,7 +173,48 @@ export class ActionEngineRuntimeService {
     return this.kernel.getExecutionResult(tenantId, executionId);
   }
 
+  resolveClientBookingRetry(tenantId: string, clientId: string, key: string) {
+    return this.kernel.resolveClientBookingRetry(tenantId, clientId, key);
+  }
+
   async executeWithReceipt<T>(
+    request: TrustedActionExecutionRequestV1,
+    handlers: ActionRuntimeHandlers<T>,
+  ): Promise<ActionRuntimeReceipt<T>> {
+    if (!request.bookingIntent)
+      return this.executeCanonicalWithReceipt(request, handlers);
+    if (!handlers.authorizeIngress)
+      throw new ActionContractError(
+        'Verified Client booking ingress authorization required',
+      );
+    const identity = this.kernel.previewExecution(request).identityFingerprint;
+    let previous = this.bookingExecutions.get(identity);
+    while (previous) {
+      try {
+        await previous;
+      } catch {
+        /* Re-read the durable outcome in this caller's ingress. */
+      }
+      previous = this.bookingExecutions.get(identity);
+    }
+    const work = this.executeAuthorizedBooking(request, handlers);
+    this.bookingExecutions.set(identity, work);
+    try {
+      return await work;
+    } finally {
+      this.bookingExecutions.delete(identity);
+    }
+  }
+
+  private async executeAuthorizedBooking<T>(
+    request: TrustedActionExecutionRequestV1,
+    handlers: ActionRuntimeHandlers<T>,
+  ) {
+    await handlers.authorizeIngress!();
+    return this.executeCanonicalWithReceipt(request, handlers);
+  }
+
+  private async executeCanonicalWithReceipt<T>(
     request: TrustedActionExecutionRequestV1,
     handlers: ActionRuntimeHandlers<T>,
   ): Promise<ActionRuntimeReceipt<T>> {

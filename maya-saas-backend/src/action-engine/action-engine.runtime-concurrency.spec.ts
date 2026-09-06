@@ -28,6 +28,9 @@ function setup() {
     }),
   };
   const kernel = {
+    previewExecution: jest.fn((request: TrustedActionExecutionRequestV1) => ({
+      identityFingerprint: `logical:${request.tenantId}`,
+    })),
     claimExecution: jest.fn(({ tenantId }: { tenantId: string }) =>
       Promise.resolve({
         execution: {
@@ -94,6 +97,59 @@ function setup() {
 }
 
 describe('Action Engine concurrent transport aliases', () => {
+  it('keeps B31 waiters outside ingress until the owner releases its claim, then binds every authorized alias', async () => {
+    const h = setup();
+    let release!: () => void;
+    let started!: () => void;
+    const start = new Promise<void>((resolve) => {
+      started = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    h.dispatch.mockImplementationOnce(async () => {
+      started();
+      await gate;
+      return { value: 'accepted', safeResult: { result: 'accepted' } };
+    });
+    const authorizeIngress = jest.fn().mockResolvedValue(undefined);
+    h.handlers.authorizeIngress = authorizeIngress;
+    const requests = Array.from({ length: 12 }, (_, i) =>
+      h.runtime.executeWithReceipt(
+        { ...h.request(String(i)), bookingIntent: {} as never },
+        h.handlers,
+      ),
+    );
+    await start;
+    expect(h.ingress.createExecution).toHaveBeenCalledTimes(1);
+    release();
+    await Promise.all(requests);
+    expect(authorizeIngress).toHaveBeenCalledTimes(12);
+    expect(h.ingress.createExecution).toHaveBeenCalledTimes(12);
+    expect(h.dispatch).toHaveBeenCalledTimes(1);
+  });
+
+  it('rechecks B31 authorization for a queued retry and never returns a cached outcome in its place', async () => {
+    const h = setup();
+    h.handlers.authorizeIngress = jest
+      .fn()
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('binding revoked'));
+    const results = await Promise.allSettled(
+      ['first', 'second'].map((key) =>
+        h.runtime.executeWithReceipt(
+          { ...h.request(key), bookingIntent: {} as never },
+          h.handlers,
+        ),
+      ),
+    );
+    expect(results[0].status).toBe('fulfilled');
+    expect(results[1]).toMatchObject({
+      status: 'rejected',
+      reason: new Error('binding revoked'),
+    });
+    expect(h.ingress.createExecution).toHaveBeenCalledTimes(1);
+  });
   it('passes every caller key through ingress but claims and dispatches the durable execution only once', async () => {
     const h = setup();
     const result = await Promise.all(
