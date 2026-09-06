@@ -168,6 +168,7 @@ enum CommunicationCampaignState {
 }
 
 model Tenant {
+  bookingConfirmations ClientBookingConfirmation[]
   id                             String                          @id @default(cuid())
   name                           String
   slug                           String                          @unique
@@ -2071,6 +2072,7 @@ enum AuditScope {
 /// системе. Вторую CRM внутри Maya не строим. Личность существует и для гостя
 /// без аккаунта — таких в салоне большинство.
 model Client {
+  bookingConfirmations ClientBookingConfirmation[]
   actionIdempotencyBindings ActionExecutionIdempotencyBinding[]
   id                 String   @id @default(cuid())
   tenantId           String
@@ -2145,6 +2147,7 @@ model CrmClientLink {
 /// Active subject uniqueness and immutable verification history are enforced
 /// by the additive PostgreSQL migration, including a partial unique index.
 model ClientChannelLink {
+  bookingConfirmations ClientBookingConfirmation[]
   id                       String   @id @default(uuid())
   tenantId                 String
   clientId                 String
@@ -3139,4 +3142,22 @@ model DevicePushToken {
 
   @@unique([tenantId, token])
   @@index([tenantId, userId])
+}
+
+/// B33: immutable source receipt accepted before booking interpretation; no backfill.
+model ClientBookingConfirmation {
+  id                       String   @id
+  tenantId                 String
+  clientId                 String
+  clientChannelLinkId      String
+  actionNamespace          String
+  confirmationEvidenceJson Json
+  confirmationEvidenceHash String
+  acceptedAt               DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  client Client @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  clientChannelLink ClientChannelLink @relation(fields: [clientChannelLinkId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict, map: "ClientBookingConfirmation_link_fkey")
+
+  @@index([tenantId, clientId])
 }
