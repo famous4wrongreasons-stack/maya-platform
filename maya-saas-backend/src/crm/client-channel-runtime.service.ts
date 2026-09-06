@@ -1,3 +1,4 @@
+import { ClientBookingConfirmationService } from './client-booking-confirmation.service';
 import {
   BadRequestException,
   ForbiddenException,
@@ -893,6 +894,42 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       client_link_required: false,
       business_mutations: 0,
     };
+  }
+
+  private bookingConfirmations() {
+    return new ClientBookingConfirmationService(
+      this.prisma,
+      this.encryption,
+      this.resolve.bind(this),
+    );
+  }
+
+  acceptBookingConfirmation(channelProof: string, value: unknown) {
+    return this.bookingConfirmations().accept(channelProof, value);
+  }
+
+  async createConfirmedChatAppointment(channelProof: string, value: unknown) {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      throw new BadRequestException('Durable booking confirmation required');
+    const input = value as Record<string, unknown>;
+    if (
+      Object.keys(input).sort().join(',') !==
+        'confirmationId,serviceIds,staffId,start' ||
+      typeof input.confirmationId !== 'string'
+    )
+      throw new BadRequestException(
+        'Only confirmed chat appointment fields accepted',
+      );
+    const key = await this.bookingConfirmations().resolveKey(
+      channelProof,
+      input.confirmationId,
+    );
+    return this.createClientAppointment(channelProof, {
+      idempotencyKey: key,
+      staffId: input.staffId,
+      serviceIds: input.serviceIds,
+      start: input.start,
+    });
   }
 
   /** B19 authenticated Client appointment creation. Chat supplies only the

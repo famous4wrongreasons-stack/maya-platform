@@ -1,0 +1,16 @@
+{
+  "gate": "PASS",
+  "pending": 0,
+  "postApplyDrift": "NONE",
+  "migration": "20260906180000_b33_client_booking_confirmation",
+  "migrationChecksum": "02f473415f8c21c096995a5ca2a227f7ac03722ef7d94936a074ca6271fb5a1c",
+  "newColumns": 8,
+  "guards": 1,
+  "receipts": 0,
+  "fakeBackfill": 0,
+  "release": "/opt/maya-saas/releases/20260906-p5-b32-2b89db4d",
+  "health": 200,
+  "readiness": 200,
+  "runtimeSwitched": false,
+  "productionBusinessMutations": 0
+}

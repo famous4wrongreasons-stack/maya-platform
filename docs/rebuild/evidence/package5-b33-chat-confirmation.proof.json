@@ -1,0 +1,70 @@
+{
+  "actualChatHandler": true,
+  "actualStreamHandler": true,
+  "actualRequestContext": true,
+  "actualFinalizer": true,
+  "actualPythonWidgetVerifier": true,
+  "sameUserStatementAndContext": true,
+  "sameModelResultSameKey": true,
+  "changedModelResultKeepsConfirmation": true,
+  "receiptBeforeModel": true,
+  "sourceContextReplayed": true,
+  "payloads": [
+    {
+      "confirmationId": "8a45efcd-227b-45ef-aa67-9020f1004de3",
+      "staffId": "synthetic-provider",
+      "serviceIds": [
+        "svc-1"
+      ],
+      "start": "2099-09-20T10:00:00.000Z"
+    },
+    {
+      "confirmationId": "8a45efcd-227b-45ef-aa67-9020f1004de3",
+      "staffId": "synthetic-provider",
+      "serviceIds": [
+        "svc-1"
+      ],
+      "start": "2099-09-20T10:00:00.000Z"
+    },
+    {
+      "confirmationId": "8a45efcd-227b-45ef-aa67-9020f1004de3",
+      "staffId": "synthetic-provider",
+      "serviceIds": [
+        "svc-1"
+      ],
+      "start": "2099-09-20T12:00:00.000Z"
+    },
+    {
+      "confirmationId": "8a45efcd-227b-45ef-aa67-9020f1004de3",
+      "staffId": "synthetic-provider",
+      "serviceIds": [
+        "svc-1"
+      ],
+      "start": "2099-09-20T10:00:00.000Z"
+    },
+    {
+      "confirmationId": "8a45efcd-227b-45ef-aa67-9020f1004de3",
+      "staffId": "synthetic-provider",
+      "serviceIds": [
+        "svc-1"
+      ],
+      "start": "2099-09-20T10:00:00.000Z"
+    },
+    {
+      "confirmationId": "8a45efcd-227b-45ef-aa67-9020f1004de3",
+      "staffId": "synthetic-provider",
+      "serviceIds": [
+        "svc-1"
+      ],
+      "start": "2099-09-20T12:00:00.000Z"
+    }
+  ],
+  "stubs": [
+    "LLM response",
+    "history memory",
+    "consent read (backend rechecked)",
+    "bridge HTTP transport/result projection",
+    "aiohttp response"
+  ],
+  "productionMutations": 0
+}

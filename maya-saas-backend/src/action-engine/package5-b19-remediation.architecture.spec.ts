@@ -28,7 +28,9 @@ describe('Package 5 B19 chat booking ownership remediation', () => {
   it('routes chat booking through verified ClientChannelLink and the existing action', () => {
     const source = read('ai администратор/webhook_server.py');
     const finalize = pythonFunction(source, '_finalize_booking_for_chat');
-    expect(finalize).toContain('client_commands.command("appointment-create"');
+    expect(finalize).toContain(
+      'client_commands.command("chat-appointment-create"',
+    );
     expect(finalize).toContain('command_context.proof');
     expect(finalize).toContain('state == "UNKNOWN"');
     expect(finalize).not.toMatch(

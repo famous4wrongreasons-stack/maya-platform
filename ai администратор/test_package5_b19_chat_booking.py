@@ -63,7 +63,7 @@ class Package5B19ChatBookingTest(unittest.TestCase):
         return ws
 
     def _context(self):
-        return types.SimpleNamespace(proof="verified-proof", intent="intent-hash")
+        return types.SimpleNamespace(proof="verified-proof", intent="intent-hash", confirmation_id="12345678-1234-4123-8123-123456789abc")
 
     def test_verified_client_chat_and_stream_share_one_canonical_command(self):
         ws = self._load()
@@ -79,12 +79,12 @@ class Package5B19ChatBookingTest(unittest.TestCase):
         self.assertEqual(len(calls), 2)
         self.assertEqual(calls[0], calls[1])
         operation, proof, payload = calls[0]
-        self.assertEqual(operation, "appointment-create")
+        self.assertEqual(operation, "chat-appointment-create")
         self.assertEqual(proof, "verified-proof")
         self.assertEqual(
-            set(payload), {"idempotencyKey", "staffId", "serviceIds", "start"}
+            set(payload), {"confirmationId", "staffId", "serviceIds", "start"}
         )
-        self.assertTrue(payload["idempotencyKey"].startswith("chat-booking:"))
+        self.assertEqual(payload["confirmationId"], self._context().confirmation_id)
         self.assertNotIn("clientId", payload)
         self.assertNotIn("phone", payload)
         self.assertNotIn("pay_with_points", payload)
@@ -128,8 +128,24 @@ class Package5B19ChatBookingTest(unittest.TestCase):
         for _ in range(12):
             ws._finalize_booking_for_chat(self._context(), dict(BOOKING))
 
-        identities = {call[2]["idempotencyKey"] for call in calls}
+        identities = {call[2]["confirmationId"] for call in calls}
         self.assertEqual(len(identities), 1)
+
+    def test_no_receipt_cannot_create_even_when_model_proposes_booking(self):
+        ws = self._load()
+        sys.modules["legacy_client_command_bridge"].command = lambda *_a: self.fail("no receipt reached command")
+        context = self._context()
+        context.confirmation_id = None
+        self.assertIn("Подтвердите запись", ws._finalize_booking_for_chat(context, dict(BOOKING)))
+
+    def test_changed_model_fields_cannot_change_confirmation_identity(self):
+        ws = self._load()
+        calls = []
+        sys.modules["legacy_client_command_bridge"].command = lambda *a: calls.append(a) or _result("UNKNOWN")
+        for changes in ({}, {"datetime_str":"2099-05-01T11:00:00Z"}, {"staff_id":8}, {"service_ids":[9]}):
+            ws._finalize_booking_for_chat(self._context(), {**BOOKING, **changes})
+        self.assertEqual({x[2]["confirmationId"] for x in calls}, {self._context().confirmation_id})
+        self.assertTrue(all("idempotencyKey" not in x[2] for x in calls))
 
     def test_unknown_is_preserved_without_blind_retry_or_legacy_fallback(self):
         ws = self._load()

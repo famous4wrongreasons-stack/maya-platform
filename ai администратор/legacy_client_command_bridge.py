@@ -30,7 +30,7 @@ def channel_proof(headers, body: dict) -> str:
 def command(operation: str, proof: str, payload: dict) -> dict:
     if operation not in {
         "consent", "status", "issue", "consume", "delivery-consent", "push-subscribe", "push-unsubscribe",
-        "booking-prefill", "appointment-create", "appointment-cancel", "appointment-reschedule",
+        "booking-prefill", "booking-confirmation", "chat-appointment-create", "appointment-create", "appointment-cancel", "appointment-reschedule",
         "appointment-services", "cabinet-projection", "realtime-authority", "loyalty-projection",
     }:
         raise ValueError("unsupported_client_command")
@@ -52,16 +52,24 @@ def command(operation: str, proof: str, payload: dict) -> dict:
     except (requests.Timeout, requests.ConnectionError):
         # A lost response after create dispatch cannot prove failure. The
         # caller must not retry outside the durable ActionExecution identity.
-        if operation == "appointment-create":
+        if operation in {"appointment-create", "chat-appointment-create"}:
             raise RuntimeError("client_command_outcome_unknown")
         raise
-    if response.status_code >= 500 and operation == "appointment-create":
+    if response.status_code >= 500 and operation in {"appointment-create", "chat-appointment-create"}:
         raise RuntimeError("client_command_outcome_unknown")
     if operation == "push-subscribe" and response.status_code == 409:
         try:
             if response.json().get("message") == "CLIENT_WEB_PUSH_LIMIT_EXCEEDED":
                 raise ValueError("CLIENT_WEB_PUSH_LIMIT_EXCEEDED")
         except (AttributeError, requests.exceptions.JSONDecodeError):
+            pass
+    if response.status_code == 409 and operation in {"booking-confirmation", "chat-appointment-create"}:
+        try:
+            error = response.json()
+            if (isinstance(error, dict) and (error.get("message") == "IDEMPOTENCY_CONFLICT"
+                    or (isinstance(error.get("error"), dict) and error["error"].get("code") == "IDEMPOTENCY_CONFLICT"))):
+                raise ValueError("IDEMPOTENCY_CONFLICT")
+        except requests.exceptions.JSONDecodeError:
             pass
     if response.status_code >= 400:
         # Never echo bearer, channel payload, upstream stack, or customer data.

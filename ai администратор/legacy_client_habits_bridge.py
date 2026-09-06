@@ -13,6 +13,7 @@ import requests
 class ClientCommandContext:
     proof: str
     intent: str
+    confirmation_id: str | None = None
 
 
 _current = contextvars.ContextVar("maya_client_command_context", default=None)
@@ -36,6 +37,17 @@ def request_context(headers, body: dict, message: str, mode: str):
     # The request's statement, not an AI-generated tool id, survives HTTP/model retries.
     # Exact Client/link qualification and keyed fingerprints are derived by Maya.
     intent = hashlib.sha256(message.encode("utf-8")).hexdigest()
+    confirmation = body.get("booking_confirmation")
+    if confirmation is not None:
+        from legacy_client_command_bridge import command
+        if (not isinstance(confirmation, dict)
+                or confirmation.get("sourceStatement") != message):
+            raise ValueError("original_confirmation_source_required")
+        accepted = command("booking-confirmation", proof, confirmation)
+        confirmation_id = accepted.get("confirmationId")
+        if not isinstance(confirmation_id, str) or confirmation_id != confirmation.get("id"):
+            raise ValueError("durable_confirmation_required")
+        return ClientCommandContext(proof, intent, confirmation_id)
     return ClientCommandContext(proof, intent)
 
 

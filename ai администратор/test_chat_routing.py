@@ -318,7 +318,7 @@ class ChatRoutingTests(unittest.TestCase):
             mode="client",
         ))
 
-    def test_linked_founder_revenue_defaults_to_personal_on_staff_surface(self):
+    def test_legacy_founder_binding_cannot_supply_canonical_staff_identity(self):
         ws = _load_webhook_server()
         sys.modules["database"].get_master_by_chat_id = lambda _tg_id: {
             "yclients_staff_id": 1461615,
@@ -356,11 +356,13 @@ class ChatRoutingTests(unittest.TestCase):
             mode="staff",
         )
 
-        self.assertIn("Ваша личная статистика", reply)
-        self.assertIn("99 400 ₽", reply)
-        self.assertNotIn("622 500 ₽", reply)
-        self.assertNotIn("100%", reply)
-        self.assertIn("Зарплату владельца не приравниваю", reply)
+        # B13: legacy master links cannot confer canonical staff identity.
+        authority = ws._panel_resolve_role(948205934)
+        self.assertFalse(authority["is_master"])
+        self.assertIsNone(authority["staff_id"])
+        self.assertIn("Общая статистика бизнеса", reply)
+        self.assertNotIn("99 400 ₽", reply)
+        self.assertNotIn("Ваша личная статистика", reply)
 
     def test_explicit_business_revenue_uses_company_total(self):
         ws = _load_webhook_server()
@@ -673,9 +675,9 @@ class ChatRoutingTests(unittest.TestCase):
             mode="staff",
         )
 
-        self.assertIn("только владельцу", reply)
-        self.assertNotIn("Илья Третьяков", reply)
-        self.assertNotIn("240 000 ₽", reply)
+        # B13: raw Telegram manager settings are not A16 authority.
+        self.assertIsNone(reply)
+        self.assertFalse(ws._panel_resolve_role(123456789)["permissions"].get("analytics"))
 
     def test_founder_client_surface_blocks_master_profit_question(self):
         ws = _load_webhook_server()
@@ -770,7 +772,7 @@ class ChatRoutingTests(unittest.TestCase):
         history = mem.load_conversations().get("pwa:client:948205934") or []
         self.assertEqual(history, [])
 
-    def test_loyalty_booking_rechecks_combined_slot_and_spends_once(self):
+    def test_retired_loyalty_booking_cannot_reserve_create_or_cache(self):
         ws = _load_webhook_server()
         db = sys.modules["database"]
         ws._authed_chat_id = lambda _request, _body: 948205934
@@ -841,12 +843,12 @@ class ChatRoutingTests(unittest.TestCase):
 
         response = asyncio.run(ws.client_book_with_loyalty_handler(Request()))
 
-        self.assertEqual(response["status"], 200)
-        self.assertEqual(response["data"]["spent_points"], 100)
-        self.assertEqual(fake_yc.checked_service_ids, [10, 11])
-        self.assertEqual(calls, {"reserve": 1, "release": 0, "create": 1, "save": 1})
+        self.assertEqual(response["status"], 409)
+        self.assertEqual(response["data"]["code"], "p4_03_canonical_loyalty_ingress_required")
+        self.assertFalse(hasattr(fake_yc, "checked_service_ids"))
+        self.assertEqual(calls, {"reserve": 0, "release": 0, "create": 0, "save": 0})
 
-    def test_loyalty_booking_never_spends_when_addon_does_not_fit(self):
+    def test_retired_loyalty_booking_never_reaches_slot_or_reservation(self):
         ws = _load_webhook_server()
         db = sys.modules["database"]
         ws._authed_chat_id = lambda _request, _body: 948205934
@@ -905,10 +907,10 @@ class ChatRoutingTests(unittest.TestCase):
         response = asyncio.run(ws.client_book_with_loyalty_handler(Request()))
 
         self.assertEqual(response["status"], 409)
-        self.assertEqual(response["data"]["code"], "slot_taken")
-        self.assertEqual(called, {"reserve": True, "release": True, "create": False})
+        self.assertEqual(response["data"]["code"], "p4_03_canonical_loyalty_ingress_required")
+        self.assertEqual(called, {"reserve": False, "release": False, "create": False})
 
-    def test_loyalty_booking_retry_returns_finalized_record_before_slot_check(self):
+    def test_retired_loyalty_booking_cannot_replay_legacy_cached_outcome(self):
         ws = _load_webhook_server()
         db = sys.modules["database"]
         ws._authed_chat_id = lambda _request, _body: 948205934
@@ -967,9 +969,9 @@ class ChatRoutingTests(unittest.TestCase):
 
         response = asyncio.run(ws.client_book_with_loyalty_handler(Request()))
 
-        self.assertEqual(response["status"], 200)
-        self.assertEqual(response["data"]["record_id"], 7003)
-        self.assertTrue(response["data"]["idempotent"])
+        self.assertEqual(response["status"], 409)
+        self.assertEqual(response["data"]["code"], "p4_03_canonical_loyalty_ingress_required")
+        self.assertNotIn("record_id", response["data"])
         self.assertEqual(called, {"slots": False, "create": False})
 
     def test_repeat_booking_history_offer_hook_is_retired(self):
@@ -1020,7 +1022,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertFalse(offered)
         self.assertFalse(mem.load_conversations().get("pwa:client:948205934"))
 
-    def test_marketing_broadcast_is_mirrored_into_client_chat(self):
+    def test_legacy_push_does_not_fabricate_canonical_client_chat_history(self):
         ws = _load_webhook_server()
         mem = sys.modules["memory"]
         db = sys.modules["database"]
@@ -1047,9 +1049,9 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("Стас", sent[0][1])
 
         history = mem.load_conversations().get("pwa:client:948205934") or []
-        self.assertEqual(len(history), 1)
-        self.assertEqual(history[0]["role"], "assistant")
-        self.assertIn("Привет, Стас! Новая акция.", history[0]["content"])
+        # B23/B24 retired the raw chat-id push/cache authority; this legacy
+        # helper does not manufacture a canonical Client communication fact.
+        self.assertEqual(history, [])
 
     def test_staff_surface_blocks_client_booking_intent(self):
         ws = _load_webhook_server()

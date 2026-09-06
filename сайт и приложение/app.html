@@ -19869,7 +19869,34 @@ function AChat() {
       return clean.concat(addition);
     });
   }
-  async function send(textArg, displayTextArg) {
+  function pendingBookingConfirmation() {
+    var raw = localStorage.getItem(chatHistoryCacheKey() + ':booking-confirmation:v1');
+    return raw ? JSON.parse(raw) : null;
+  }
+  function confirmChatBooking(offer, replay) {
+    if (sending || chatSurface() !== 'client') return;
+    try {
+      var pending = pendingBookingConfirmation();
+      if (!replay) {
+        if (!offer || !offer.id || !String(offer.text || '').startsWith('Подтвердите запись отдельным действием:')) throw new Error('offer_required');
+        if (!pending || pending.offerRef !== offer.id) {
+          if (!window.crypto || !window.crypto.randomUUID) throw new Error('durable_identity_unavailable');
+          pending = {offerRef: offer.id, event: {
+            id: window.crypto.randomUUID(), kind: 'client_booking_confirmation.v1',
+            sourceStatement: 'Подтверждаю запись', sourceContext: String(offer.text)
+          }};
+          var stored = JSON.stringify(pending);
+          localStorage.setItem(chatHistoryCacheKey() + ':booking-confirmation:v1', stored);
+          if (localStorage.getItem(chatHistoryCacheKey() + ':booking-confirmation:v1') !== stored) throw new Error('durable_send_required');
+        }
+      }
+      if (!pending || !pending.event || !pending.event.id) throw new Error('original_confirmation_required');
+      send(pending.event.sourceStatement, pending.event.sourceStatement, pending.event);
+    } catch (_) {
+      setMsgs(m => m.concat([{role:'bot', text:'Не удалось сохранить подтверждение. Запись не отправлена. Проверьте доступ к хранилищу приложения.'}]));
+    }
+  }
+  async function send(textArg, displayTextArg, bookingConfirmation) {
     if (onbOnRef.current) { onbSend(textArg); return; } // онбординг: тот же чат, другой backend
     var widgetText = String(textArg != null ? textArg : input).trim();
     if (saasAiCtx() && chatSurface() === 'owner' && ownerCapabilitiesIntent(widgetText)) {
@@ -19882,13 +19909,13 @@ function AChat() {
     }
     var pendingRepeat = pendingRepeatBookingData();
     var directRepeat = window.__ME_SAAS_CTX && (repeatBookingIntent(widgetText) ? window.__meRepeatBookingData : (/^\s*(?:да|ага|угу|конечно|верно|точно|подходит|хочу|можно|давайте|давай\s+так|повтор(?:и|им|ить)|(?:то\s+же|тоже)\s+самое|как\s+(?:обычно|в\s+прошл\w*\s+раз))\s*[.!?]*\s*$/i.test(widgetText) ? pendingRepeat : null));
-    if (directRepeat) {
+    if (directRepeat && !bookingConfirmation) {
       setInput('');
       appendChatWidget('book', widgetText, directRepeat, false);
       return;
     }
     var widgetKind = chatWidgetIntent(widgetText);
-    if (widgetKind) {
+    if (widgetKind && !bookingConfirmation) {
       setInput('');
       appendChatWidget(widgetKind, widgetText, null, false);
       return;
@@ -19897,7 +19924,7 @@ function AChat() {
     const text = String(textArg != null ? textArg : input).trim();
     if (!text) return;
     const displayText = String(displayTextArg != null ? displayTextArg : text).trim() || text;
-    var qDraft = quoteDraft;
+    var qDraft = bookingConfirmation ? null : quoteDraft;
     var apiText = text;
     if (qDraft && String(qDraft.text || '').trim()) {
       var qWho = qDraft.from === 'bot' ? 'Maya' : 'пользователь';
@@ -19920,11 +19947,9 @@ function AChat() {
       typing: true
     }]));
     // P0-1: авторизованный SaaS-пользователь → единый серверный мозг /api/ai/chat
-    if (saasAiCtx()) { saasAiSend(apiText); return; }
+    if (saasAiCtx() && !bookingConfirmation) { saasAiSend(apiText); return; }
     setSending(true);
-    const ap = authPayload({
-      message: apiText
-    });
+    const ap = authPayload(Object.assign({message: apiText}, bookingConfirmation ? {booking_confirmation: bookingConfirmation} : {}));
     try {
       const resp = await fetch(CHAT_PROXY + '?action=chat_stream', {
         method: 'POST',
@@ -21729,6 +21754,13 @@ function AChat() {
     if (sending) return null;
     if (msgs.filter(function (m) { return m.role === 'user'; }).length === 0) return null;
     var last = msgs[msgs.length - 1];
+    if (chatSurface() === 'client') {
+      var offer = last && last.role === 'bot' && !last.typing && !last.typewriter && String(last.text || '').startsWith('Подтвердите запись отдельным действием:') ? last : null;
+      var pending = null;
+      try { pending = pendingBookingConfirmation(); } catch (_) {}
+      if (offer || pending) return e('div', {key:'booking-confirmation', style:{display:'flex',gap:8,marginTop:12}},
+        e('button', {type:'button', onClick:function(){confirmChatBooking(offer, !offer);}, style:{cursor:'pointer',fontFamily:BODY,fontSize:12.5,color:t.ink,background:'transparent',border:'1px solid '+t.line,borderRadius:999,padding:'9px 15px'}}, offer ? 'Подтверждаю запись' : 'Проверить результат записи'));
+    }
     if (!last || last.role !== 'bot' || last.typing || last.typewriter || !last.text || last.action || last.aiApproval) return null;
 	    var sug = chatSuggest(last.text, msgs);
 	    // В клиентском чате основные действия не исчезают после первого ответа:

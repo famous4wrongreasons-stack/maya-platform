@@ -6338,15 +6338,13 @@ def _finalize_booking_for_chat(command_context, cr: dict) -> str | None:
         staff_id = str(cr["staff_id"])
         service_ids = [str(value) for value in cr["service_ids"]]
         start = str(cr["datetime_str"])
-        identity_material = _json.dumps(
-            [command_context.intent, staff_id, sorted(set(service_ids)), start],
-            ensure_ascii=False,
-            separators=(",", ":"),
-        )
-        result = client_commands.command("appointment-create", command_context.proof, {
-            "idempotencyKey": "chat-booking:" + hashlib.sha256(
-                identity_material.encode("utf-8")
-            ).hexdigest(),
+        if not command_context.confirmation_id:
+            return ("Подтвердите запись отдельным действием:\n\n"
+                    "✂️ " + ", ".join(cr["service_names"]) + "\n"
+                    "💈 " + cr["staff_name"] + "\n"
+                    "📅 " + start + "\n\nНажмите «Подтверждаю запись».")
+        result = client_commands.command("chat-appointment-create", command_context.proof, {
+            "confirmationId": command_context.confirmation_id,
             "staffId": staff_id,
             "serviceIds": service_ids,
             "start": start,
@@ -6367,7 +6365,9 @@ def _finalize_booking_for_chat(command_context, cr: dict) -> str | None:
                 "✂️ " + ", ".join(cr["service_names"]) + "\n"
                 "💈 " + cr["staff_name"] + "\n"
                 "📅 " + dt + "\n\nЖдём вас в «Мужской Эстетике»! 💈")
-    except ValueError:
+    except ValueError as exc:
+        if str(exc) == "IDEMPOTENCY_CONFLICT":
+            return "Это подтверждение уже связано с другими параметрами записи. Новая запись не создана."
         return ("Чтобы оформить запись, нужна подтверждённая связь с клиентской "
                 "карточкой. Я ничего не создала и не изменила.")
     except RuntimeError as exc:
@@ -8760,6 +8760,11 @@ async def chat_handler(request: web.Request) -> web.Response:
         _client_command_context=request_context(
             request.headers, body, safe_message, chat_mode
         )
+        if _client_command_context and _client_command_context.confirmation_id:
+            llm_history = [
+                {"role": "assistant", "content": anonymizer.redact_pii(body["booking_confirmation"]["sourceContext"])},
+                {"role": "user", "content": safe_message},
+            ]
         response_text, contact_request, gift_cert_action = get_ai_response(
             llm_history,
             _client_command_context=_client_command_context,
@@ -9352,6 +9357,11 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     _client_command_context=request_context(
         request.headers, body, safe_message, chat_mode
     )
+    if _client_command_context and _client_command_context.confirmation_id:
+        llm_history = [
+            {"role": "assistant", "content": anonymizer.redact_pii(body["booking_confirmation"]["sourceContext"])},
+            {"role": "user", "content": safe_message},
+        ]
 
     def _producer() -> None:
         try:

@@ -338,7 +338,7 @@ WEB_FUNCTIONS = {
     "_finalize_booking_for_chat": {
         "markers": (
             "B19",
-            'client_commands.command("appointment-create"',
+            'client_commands.command("chat-appointment-create"',
             "verified Client initiator",
             'state == "UNKNOWN"',
             "Не повторяйте действие",

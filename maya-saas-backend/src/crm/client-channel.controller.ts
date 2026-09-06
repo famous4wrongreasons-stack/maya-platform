@@ -241,6 +241,16 @@ export class LegacyClientChannelController {
           input.channelProof,
           input.payload,
         );
+      if (operation === 'booking-confirmation')
+        return this.runtime.acceptBookingConfirmation(
+          input.channelProof,
+          input.payload,
+        );
+      if (operation === 'chat-appointment-create')
+        return this.runtime.createConfirmedChatAppointment(
+          input.channelProof,
+          input.payload,
+        );
       if (operation === 'appointment-create')
         return this.runtime.createClientAppointment(
           input.channelProof,
