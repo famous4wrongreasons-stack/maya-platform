@@ -1,6 +1,6 @@
 # B25 — Appointment reminder orchestration policy V1 proposal
 
-Status: **PROPOSED, NOT APPROVED / NOT IMPLEMENTED**. Accepted checkpoint: `ae6fa96c`. B24 remains the production baseline. This is Package 5 final remediation, not a new wave.
+Status: **D1-A / D2-A APPROVED** by owner at checkpoint `43007f03`. Runtime implementation is in this B25 candidate; deployment/final-gate status is reported separately. B24 remains the production baseline. This is Package 5 final remediation, not a new wave.
 
 ## Foundation assessment
 
@@ -67,6 +67,6 @@ These requirements preserve the user's B25 invariants; they are not new outreach
 
 ## STOP and scope
 
-**Await owner approval of D1-A / D2-A or alternatives.** No schema/runtime/migration implementation was started. The current B25 bypass remains in production; no remediation success is claimed. Under A/A the proposal uses existing models/action classes; normalizers/authorized orchestration may be extended within existing owners after approval, without fabricating a parent delivery outcome or expanding B24's device policy.
+**Owner approval received: D1-A / D2-A, no new schema/action classes.** The original contract STOP is superseded by the approved implementation cycle. The original alternatives below are retained as the decision record. No production remediation success is claimed until deployment verification. Under A/A the proposal uses existing models/action classes; normalizers/authorized orchestration may be extended within existing owners after approval, without fabricating a parent delivery outcome or expanding B24's device policy.
 
 Waves 1–6 and B24 stay accepted. No P4-11, Wave 7, Chapter 7, old-DB cleanup or Chapter 6 completion declaration. Production mutations: 0; owned processes/watchers/Chrome/temp DBs: 0.

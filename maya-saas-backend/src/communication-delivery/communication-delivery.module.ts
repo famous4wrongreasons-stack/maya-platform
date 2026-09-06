@@ -14,6 +14,6 @@ import { CommunicationWebPushTransport } from './communication-web-push.transpor
     CommunicationWebPushService,
     CommunicationWebPushTransport,
   ],
-  exports: [CommunicationDeliveryService],
+  exports: [CommunicationDeliveryService, CommunicationWebPushService],
 })
 export class CommunicationDeliveryModule {}

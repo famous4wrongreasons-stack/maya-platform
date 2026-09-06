@@ -1,3 +1,4 @@
+import { type ReminderDispatch } from './appointment-reminder.contract';
 import { CommunicationWebPushService } from './communication-web-push.service';
 import { createHash } from 'node:crypto';
 
@@ -454,6 +455,103 @@ export class CommunicationDeliveryService {
     };
   }
 
+  async deliverAppointmentReminder(dispatch: ReminderDispatch) {
+    await dispatch.authorize();
+    const n = dispatch.request.input as Record<string, unknown>;
+    if (n.messageType !== 'appointment_reminder' || !n.reminderPlan)
+      throw new Error('REMINDER_PLAN_REQUIRED');
+    const common = {
+      tenantId: dispatch.request.tenantId,
+      messageType: 'appointment_reminder' as const,
+      sourceType: 'scheduler' as const,
+      sourceEventId: String(n.sourceEventId),
+      title: String(n.title),
+      bodyText: String(n.bodyText),
+      recipientIdentityRef: String(n.recipientIdentityRef),
+    };
+    if (n.channel === 'telegram')
+      return this.deliverPackage2Telegram(
+        { ...common, telegramChatId: String(n.telegramChatId) },
+        dispatch,
+      );
+    if (n.channel === 'inbox')
+      return this.deliverPackage2Single(
+        {
+          ...common,
+          userId: String(n.userId),
+          deepLink: String(n.deepLink),
+          payload: n.payload as Record<string, unknown>,
+        },
+        'inbox',
+        dispatch,
+      );
+    throw new Error('REMINDER_PRIMARY_ROUTE_INVALID');
+  }
+
+  async deliverReminderApns(
+    parent: ReminderDispatch,
+    deviceToken: string,
+    authorize: () => Promise<void>,
+  ) {
+    const n = parent.request.input as Record<string, unknown>;
+    if (
+      n.channel !== 'inbox' ||
+      n.messageType !== 'appointment_reminder' ||
+      !n.reminderPlan
+    )
+      throw new Error('REMINDER_INBOX_REQUIRED');
+    if (
+      !(await this.prisma.actionExecution.findFirst({
+        where: {
+          tenantId: parent.request.tenantId,
+          capability: 'communication.appointment-reminders.execute.v1',
+          sourceRef: parent.request.source.sourceRef,
+          state: 'SUCCEEDED',
+          dryRun: false,
+        },
+      }))
+    )
+      throw new Error('REMINDER_PRIMARY_NOT_ACCEPTED');
+    const child: Record<string, unknown> = {
+      ...n,
+      channel: 'apns',
+      deviceToken,
+    };
+    delete child.reminderPlan;
+    const identity = sha256('apns-device', deviceToken);
+    return this.deliverPackage2Single(
+      {
+        tenantId: parent.request.tenantId,
+        userId: String(n.userId),
+        sourceEventId: String(n.sourceEventId),
+        title: String(n.title),
+        bodyText: String(n.bodyText),
+        messageType: 'appointment_reminder',
+        sourceType: 'scheduler',
+        recipientIdentityRef: String(n.recipientIdentityRef),
+        deviceToken,
+      },
+      'apns',
+      {
+        authorize,
+        request: {
+          ...parent.request,
+          input: child,
+          source: {
+            ...parent.request.source,
+            sourceRef: `b25.reminder.apns:${identity}`,
+            occurrenceScope: `${parent.request.source.occurrenceScope}:apns:${identity}`,
+          },
+          targetRef: `device:${identity}`,
+          callerIdempotency: {
+            scope: 'communication:appointment:apns:v1',
+            key: `${String(n.sourceEventId)}:${identity}`,
+          },
+        },
+      },
+    );
+  }
+
   deliverPackage2Inbox(input: Package2SingleInput): Promise<DeliveryResult> {
     return this.deliverPackage2Single(input, 'inbox');
   }
@@ -466,6 +564,7 @@ export class CommunicationDeliveryService {
 
   async deliverPackage2Telegram(
     input: Package2TelegramInput,
+    reminder?: ReminderDispatch,
   ): Promise<DeliveryResult> {
     const recipientRef = this.recipientIdentity(
       input.recipientIdentityRef,
@@ -485,7 +584,7 @@ export class CommunicationDeliveryService {
         : {}),
     };
     const receipt = await this.actionEngine.executeWithReceipt(
-      {
+      reminder?.request ?? {
         contract: ACTION_EXECUTION_REQUEST_CONTRACT,
         tenantId: input.tenantId,
         capability: PACKAGE2_CAPABILITY_BY_TYPE[input.messageType],
@@ -505,6 +604,7 @@ export class CommunicationDeliveryService {
       },
       {
         prepare: async (normalized, context) => {
+          await reminder?.authorize();
           if (!this.bridgeToken || this.bridgeToken.length < 24) {
             throw new CommunicationDispatchError(
               'definitive',
@@ -551,7 +651,9 @@ export class CommunicationDeliveryService {
               parseMode,
               JSON.stringify(buttons),
             ),
-            expiresAt: new Date(Date.now() + 7 * DAY),
+            expiresAt:
+              reminder?.request.intentExpiresAt ??
+              new Date(Date.now() + 7 * DAY),
             recipients: [
               {
                 recipientRef: durableRecipientRef,
@@ -626,6 +728,7 @@ export class CommunicationDeliveryService {
             leaseToken: claim.leaseToken,
             recipientRevision: claim.recipient.revision,
           };
+          await reminder?.authorize();
           await this.kernel.markDispatchBoundary(owned);
           let response: Response;
           try {
@@ -748,7 +851,7 @@ export class CommunicationDeliveryService {
         classifyError: (error, phase) => this.classify(error, phase),
       },
     );
-    if (this.webPush) {
+    if (this.webPush && !reminder) {
       // Primary acceptance is durable. A supplemental device's UNKNOWN outcome
       // stays in Communication Delivery and cannot undo/resend that acceptance.
       await this.webPush
@@ -767,6 +870,7 @@ export class CommunicationDeliveryService {
   private async deliverPackage2Single(
     input: Package2SingleInput,
     channel: 'inbox' | 'apns',
+    reminder?: ReminderDispatch,
   ): Promise<DeliveryResult> {
     const deviceToken = channel === 'apns' ? input.deviceToken?.trim() : '';
     const deviceIdentity = deviceToken
@@ -794,7 +898,7 @@ export class CommunicationDeliveryService {
       typeof prepareInboxApnsCanonical
     > | null = null;
     const receipt = await this.actionEngine.executeWithReceipt(
-      {
+      reminder?.request ?? {
         contract: ACTION_EXECUTION_REQUEST_CONTRACT,
         tenantId: input.tenantId,
         capability: PACKAGE2_CAPABILITY_BY_TYPE[input.messageType],
@@ -817,6 +921,7 @@ export class CommunicationDeliveryService {
       },
       {
         prepare: async (normalized, context) => {
+          await reminder?.authorize();
           const normalizedChannel = requiredString(normalized, 'channel');
           const messageType = requiredString(normalized, 'messageType');
           const userId = requiredString(normalized, 'userId');
@@ -860,7 +965,9 @@ export class CommunicationDeliveryService {
                 ? normalized.deepLink
                 : '',
             ),
-            expiresAt: new Date(Date.now() + 7 * DAY),
+            expiresAt:
+              reminder?.request.intentExpiresAt ??
+              new Date(Date.now() + 7 * DAY),
             recipients: [
               {
                 recipientRef:
@@ -939,6 +1046,7 @@ export class CommunicationDeliveryService {
             leaseToken: claim.leaseToken,
             recipientRevision: claim.recipient.revision,
           };
+          await reminder?.authorize();
           await this.kernel.markDispatchBoundary(owned);
           if (channel === 'inbox') {
             try {
@@ -1119,7 +1227,7 @@ export class CommunicationDeliveryService {
         classifyError: (error, phase) => this.classify(error, phase),
       },
     );
-    if (this.webPush) {
+    if (this.webPush && !reminder) {
       // Primary acceptance is durable. A supplemental device's UNKNOWN outcome
       // stays in Communication Delivery and cannot undo/resend that acceptance.
       await this.webPush

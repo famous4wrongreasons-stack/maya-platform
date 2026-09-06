@@ -1,3 +1,7 @@
+import {
+  type ReminderDispatch,
+  type ReminderPlan,
+} from './appointment-reminder.contract';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -73,6 +77,7 @@ export class CommunicationWebPushService {
       tenantId,
       executionId,
     );
+    if (input.reminderPlan) return { status: 'FIXED_REMINDER_PLAN_REQUIRED' };
     if (
       !['telegram', 'inbox'].includes(String(input.channel)) ||
       !['appointment_reminder', 'wanted_slot_available'].includes(
@@ -145,7 +150,46 @@ export class CommunicationWebPushService {
     });
   }
 
-  private async deliver(input: Input) {
+  async deliverReminder(dispatch: ReminderDispatch, primary: boolean) {
+    const n = dispatch.request.input as Record<string, unknown>;
+    const p = n.reminderPlan as ReminderPlan;
+    if (!p || n.messageType !== 'appointment_reminder')
+      throw new ForbiddenException('REMINDER_PLAN_REQUIRED');
+    await dispatch.authorize();
+    if (
+      !primary &&
+      !(await this.prisma.actionExecution.findFirst({
+        where: {
+          tenantId: dispatch.request.tenantId,
+          capability: ACTION,
+          sourceRef: dispatch.request.source.sourceRef,
+          state: 'SUCCEEDED',
+          dryRun: false,
+        },
+      }))
+    )
+      throw new ForbiddenException('REMINDER_PRIMARY_NOT_ACCEPTED');
+    return this.deliver(
+      {
+        tenantId: dispatch.request.tenantId,
+        clientId: p.clientId,
+        sourceEventId: String(n.sourceEventId),
+        messageType: 'appointment_reminder',
+        title: String(n.title),
+        bodyText: String(n.bodyText),
+        expiresAt: new Date(p.expiresAt),
+        issuedAt: new Date(p.issuedAt),
+      },
+      dispatch,
+      primary,
+    );
+  }
+
+  private async deliver(
+    input: Input,
+    reminder?: ReminderDispatch,
+    primary = false,
+  ) {
     if (this.context.requireTenantId() !== input.tenantId)
       throw new ForbiddenException('Tenant mismatch');
     const identity = this.hash([
@@ -167,42 +211,51 @@ export class CommunicationWebPushService {
           prior[0].id,
         )
       : null;
-    const endpointIds = persisted
-      ? (persisted.endpointIds as string[])
-      : await this.endpoints.eligibleIds(
-          input.tenantId,
-          input.clientId,
-          input.issuedAt,
-        );
-    if (!endpointIds.length)
+    const endpointIds = reminder
+      ? ((reminder.request.input as Record<string, unknown>)
+          .reminderPlan as ReminderPlan)
+      : null;
+    const deviceIds = endpointIds
+      ? endpointIds.endpointIds
+      : persisted
+        ? (persisted.endpointIds as string[])
+        : await this.endpoints.eligibleIds(
+            input.tenantId,
+            input.clientId,
+            input.issuedAt,
+          );
+    if (!deviceIds.length)
       return { status: 'NO_ELIGIBLE_ENDPOINT', actionExecutionId: null };
     const normalized = {
       channel: 'web_push',
       messageType: input.messageType,
       clientId: input.clientId,
-      endpointIds,
+      endpointIds: deviceIds,
       sourceEventId: input.sourceEventId,
       title: input.title,
       bodyText: input.bodyText,
       expiresAt: input.expiresAt.toISOString(),
     };
     const receipt = await this.engine.executeWithReceipt(
-      {
-        contract: ACTION_EXECUTION_REQUEST_CONTRACT,
-        tenantId: input.tenantId,
-        capability: ACTION,
-        source: { type: 'scheduler', sourceRef, occurrenceScope: identity },
-        targetRef: `client-communication:${this.hash(input.clientId)}`,
-        input: normalized,
-        evidenceRefs: [`source-event:${input.sourceEventId}`],
-        intentExpiresAt: input.expiresAt,
-        callerIdempotency: {
-          scope: 'communication:web-push:client',
-          key: identity,
-        },
-      },
+      primary && reminder
+        ? reminder.request
+        : {
+            contract: ACTION_EXECUTION_REQUEST_CONTRACT,
+            tenantId: input.tenantId,
+            capability: ACTION,
+            source: { type: 'scheduler', sourceRef, occurrenceScope: identity },
+            targetRef: `client-communication:${this.hash(input.clientId)}`,
+            input: normalized,
+            evidenceRefs: [`source-event:${input.sourceEventId}`],
+            intentExpiresAt: input.expiresAt,
+            callerIdempotency: {
+              scope: 'communication:web-push:client',
+              key: identity,
+            },
+          },
       {
         prepare: async (value, ctx) => {
+          await reminder?.authorize();
           const allow = await this.allowed(
             ctx.tenantId,
             String(value.clientId),
@@ -289,6 +342,7 @@ export class CommunicationWebPushService {
               });
               continue;
             }
+            await reminder?.authorize();
             await this.kernel.markDispatchBoundary(owned);
             const after = {
               ...owned,

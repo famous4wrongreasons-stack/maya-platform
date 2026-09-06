@@ -1,3 +1,4 @@
+import { normalizeReminderPlan } from '../communication-delivery/appointment-reminder.contract';
 import { normalizeClientWebPushDelivery } from '../communication-delivery/communication-web-push.contract';
 import { clientHabitsCapability } from './client-habits.contract';
 import { clientPreferenceCapabilities } from './client-preferences.contract';
@@ -382,6 +383,7 @@ function package2SingleDeliveryNormalizer(
     'parseMode',
     'buttons',
     'recipientIdentityRef',
+    'reminderPlan',
   ]);
   const channel = requiredText(source, 'channel', 40);
   if (channel !== 'inbox' && channel !== 'apns' && channel !== 'telegram') {
@@ -471,6 +473,9 @@ function package2SingleDeliveryNormalizer(
     ...(parseMode ? { parseMode } : {}),
     ...(buttons.length ? { buttons } : {}),
     ...(recipientIdentityRef ? { recipientIdentityRef } : {}),
+    ...(normalizeReminderPlan(source)
+      ? { reminderPlan: normalizeReminderPlan(source) }
+      : {}),
   };
 }
 

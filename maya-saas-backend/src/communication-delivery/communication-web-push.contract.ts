@@ -1,3 +1,4 @@
+import { normalizeReminderPlan } from './appointment-reminder.contract';
 import { ActionContractError } from '../action-engine/action-engine.errors';
 
 /** Existing single-Client communication authority; device fan-out is transport. */
@@ -12,6 +13,10 @@ export function normalizeClientWebPushDelivery(value: Record<string, unknown>) {
     'bodyText',
     'expiresAt',
   ];
+  if (value.reminderPlan !== undefined) {
+    allowed.push('reminderPlan');
+    normalizeReminderPlan(value);
+  }
   if (
     Object.keys(value).sort().join(',') !== allowed.sort().join(',') ||
     value.channel !== 'web_push' ||

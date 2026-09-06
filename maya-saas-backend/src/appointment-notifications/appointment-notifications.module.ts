@@ -1,3 +1,7 @@
+import { ActionEngineModule } from '../action-engine';
+import { CommunicationDeliveryModule } from '../communication-delivery';
+import { ClientWebPushModule } from '../crm/client-web-push.module';
+import { AppointmentReminderOrchestratorService } from './appointment-reminder-orchestrator.service';
 import { Module } from '@nestjs/common';
 
 import { CrmModule } from '../crm/crm.module';
@@ -11,12 +15,16 @@ import { AppointmentNotificationsService } from './appointment-notifications.ser
 @Module({
   imports: [
     PrismaModule,
+    ActionEngineModule,
+    CommunicationDeliveryModule,
+    ClientWebPushModule,
     CrmModule,
     InboxModule,
     EntitlementsModule,
     Package5Wave1Module,
   ],
   providers: [
+    AppointmentReminderOrchestratorService,
     AppointmentNotificationsService,
     AppointmentNotificationsScheduler,
   ],
