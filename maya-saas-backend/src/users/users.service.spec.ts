@@ -178,12 +178,10 @@ describe('UsersService', () => {
       decrypt: decryptMock,
     };
     const tenantContext = new TenantContextService();
-    const verifiedProfileReadMock = jest
-      .fn()
-      .mockResolvedValue({
-        clientId: 'client-1',
-        profile: { profile_id: null },
-      });
+    const verifiedProfileReadMock = jest.fn().mockResolvedValue({
+      clientId: 'client-1',
+      profile: { profile_id: null },
+    });
 
     return {
       service: new UsersService(

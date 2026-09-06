@@ -115,12 +115,10 @@ describe('CustomersService', () => {
         loyaltyService as LoyaltyService,
         undefined as never,
         {
-          forStaffAccount: jest
-            .fn()
-            .mockResolvedValue({
-              clientId: 'canonical-client-a',
-              profile: { profile_id: null, notes: null },
-            }),
+          forStaffAccount: jest.fn().mockResolvedValue({
+            clientId: 'canonical-client-a',
+            profile: { profile_id: null, notes: null },
+          }),
         } as unknown as ClientProfileReadService,
       ),
     };
