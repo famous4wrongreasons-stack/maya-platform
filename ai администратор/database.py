@@ -426,22 +426,7 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_review_requests_client
                 ON review_requests (client_id);
 
-            -- Публичные отзывы с внешних площадок. Имена авторов не сохраняем;
-            -- текст перед записью обезличивает reputation.py.
-            CREATE TABLE IF NOT EXISTS external_reviews (
-                id              INTEGER PRIMARY KEY AUTOINCREMENT,
-                source          TEXT    NOT NULL,
-                external_id     TEXT    NOT NULL,
-                rating          REAL,
-                review_text     TEXT,
-                published_at    TEXT,
-                imported_at     TEXT    NOT NULL,
-                response_state  TEXT    NOT NULL DEFAULT '',
-                alerted_at      TEXT,
-                UNIQUE (source, external_id)
-            );
-            CREATE INDEX IF NOT EXISTS idx_external_reviews_source_date
-                ON external_reviews (source, published_at);
+            -- B34: legacy external review storage is no longer provisioned or mutated.
 
             -- Состояние «текущего открытого диалога» клиента с ботом.
             -- Нужно для алерта о зависшей заявке: если клиент писал,
@@ -2656,29 +2641,8 @@ def list_recent_reviews(limit: int = 40, days: int = 180) -> list[dict]:
 
 
 def _external_reviews_ensure(conn):
-    """Ленивая миграция для production-БД, созданной до reputation v1."""
-    conn.executescript("""
-        CREATE TABLE IF NOT EXISTS external_reviews (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            source          TEXT    NOT NULL,
-            external_id     TEXT    NOT NULL,
-            rating          REAL,
-            review_text     TEXT,
-            published_at    TEXT,
-            imported_at     TEXT    NOT NULL,
-            response_state  TEXT    NOT NULL DEFAULT '',
-            alerted_at      TEXT,
-            UNIQUE (source, external_id)
-        );
-        CREATE INDEX IF NOT EXISTS idx_external_reviews_source_date
-            ON external_reviews (source, published_at);
-    """)
-    columns = {
-        str(row[1])
-        for row in conn.execute("PRAGMA table_info(external_reviews)").fetchall()
-    }
-    if "alerted_at" not in columns:
-        conn.execute("ALTER TABLE external_reviews ADD COLUMN alerted_at TEXT")
+    """B34: historical review storage is retained without schema writes."""
+    return None
 
 
 def upsert_external_review(
@@ -2690,102 +2654,28 @@ def upsert_external_review(
     published_at: str = "",
     response_state: str = "",
 ) -> dict:
-    """Идемпотентно сохраняет обезличенный публичный отзыв без автора."""
-    with _db() as conn:
-        _external_reviews_ensure(conn)
-        existing = conn.execute(
-            "SELECT id FROM external_reviews WHERE source = ? AND external_id = ?",
-            (str(source or "")[:24], str(external_id or "")[:160]),
-        ).fetchone()
-        conn.execute(
-            "INSERT INTO external_reviews "
-            "(source, external_id, rating, review_text, published_at, imported_at, response_state) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?) "
-            "ON CONFLICT(source, external_id) DO UPDATE SET "
-            "rating=excluded.rating, review_text=excluded.review_text, "
-            "published_at=excluded.published_at, imported_at=excluded.imported_at, "
-            "response_state=excluded.response_state",
-            (
-                str(source or "")[:24],
-                str(external_id or "")[:160],
-                rating,
-                str(review_text or "")[:4000],
-                str(published_at or "")[:32],
-                _now(),
-                str(response_state or "")[:32],
-            ),
-        )
-        row = conn.execute(
-            "SELECT * FROM external_reviews WHERE source = ? AND external_id = ?",
-            (str(source or "")[:24], str(external_id or "")[:160]),
-        ).fetchone()
-        result = dict(row) if row else {}
-        result["created"] = existing is None and bool(row)
-        return result
+    """B34: the legacy review writer is retired; historical evidence stays intact."""
+    return {"ok": False, "error": "LEGACY_REVIEW_SOURCE_RETIRED", "created": False, "business_mutations": 0}
 
 
 def list_external_reviews(days: int = 365, limit: int = 300) -> list[dict]:
-    cutoff = (datetime.now() - timedelta(days=max(1, int(days or 365)))).isoformat(
-        timespec="seconds"
-    )
-    with _db() as conn:
-        _external_reviews_ensure(conn)
-        rows = conn.execute(
-            "SELECT source, external_id, rating, review_text, published_at, imported_at, response_state "
-            "FROM external_reviews "
-            "WHERE COALESCE(NULLIF(published_at, ''), imported_at) >= ? "
-            "ORDER BY COALESCE(NULLIF(published_at, ''), imported_at) DESC LIMIT ?",
-            (cutoff, max(1, min(int(limit or 300), 1000))),
-        ).fetchall()
-        return [dict(row) for row in rows]
+    """B34: legacy review projections are unavailable, not canonical facts."""
+    return []
 
 
 def list_unalerted_external_reviews(limit: int = 20) -> list[dict]:
-    """Новые отзывы, которые ещё не были показаны владельцу."""
-    with _db() as conn:
-        _external_reviews_ensure(conn)
-        rows = conn.execute(
-            "SELECT id, source, external_id, rating, review_text, published_at, imported_at "
-            "FROM external_reviews WHERE alerted_at IS NULL "
-            "ORDER BY COALESCE(NULLIF(published_at, ''), imported_at) ASC LIMIT ?",
-            (max(1, min(int(limit or 20), 100)),),
-        ).fetchall()
-        return [dict(row) for row in rows]
+    """B34: legacy review projections are unavailable, not canonical facts."""
+    return []
 
 
 def mark_external_reviews_alerted(review_ids: list[int]) -> int:
-    ids = set()
-    for value in review_ids or []:
-        try:
-            parsed = int(value)
-        except (TypeError, ValueError):
-            continue
-        if parsed > 0:
-            ids.add(parsed)
-    ids = sorted(ids)
-    if not ids:
-        return 0
-    placeholders = ",".join("?" for _ in ids)
-    with _db() as conn:
-        _external_reviews_ensure(conn)
-        cur = conn.execute(
-            f"UPDATE external_reviews SET alerted_at = ? "
-            f"WHERE id IN ({placeholders}) AND alerted_at IS NULL",
-            (_now(), *ids),
-        )
-        return cur.rowcount
+    """B34: no legacy review metadata mutation is authorized."""
+    return 0
 
 
 def mark_external_reviews_alerted_for_source(source: str) -> int:
-    """Первичный снимок становится базой и не рассылается как новый."""
-    with _db() as conn:
-        _external_reviews_ensure(conn)
-        cur = conn.execute(
-            "UPDATE external_reviews SET alerted_at = ? "
-            "WHERE source = ? AND alerted_at IS NULL",
-            (_now(), str(source or "")[:24]),
-        )
-        return cur.rowcount
+    """B34: no legacy review metadata mutation is authorized."""
+    return 0
 
 
 # ─── Алерт админу о зависшей заявке ──────────────────────────────

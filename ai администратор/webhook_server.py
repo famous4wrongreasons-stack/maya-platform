@@ -3648,76 +3648,13 @@ async def panel_reviews_handler(request: web.Request) -> web.Response:
 
 
 async def panel_external_reviews_import_handler(request: web.Request) -> web.Response:
-    """Owner-only разрешённый импорт отзывов/снимка рейтинга с карт."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Импорт внешних отзывов доступен только владельцу.",
-        }, status=403)
-    source = str(body.get("source") or "").strip().lower()
-    imported = await asyncio.to_thread(
-        reputation.import_reviews,
-        source,
-        body.get("reviews") or [],
-    )
-    if not imported.get("ok"):
-        return _cabinet_response(imported, status=400)
-    source_snapshot = None
-    if body.get("rating") is not None or body.get("reviews_count") is not None:
-        source_snapshot = await asyncio.to_thread(
-            reputation.save_source_snapshot,
-            source,
-            rating=body.get("rating"),
-            reviews_count=body.get("reviews_count"),
-            observed_at=body.get("observed_at") or "",
-            origin="owner_authorized_import",
-        )
-    snapshot = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=False)
-    return _cabinet_response({
-        "ok": True,
-        "import": imported,
-        "source_snapshot": source_snapshot,
-        "reputation": snapshot,
-    })
+    """B34: legacy review ingestion/sync is retired without side effects."""
+    return _cabinet_response(reputation.retired_review_source(), status=410)
 
 
 async def panel_reputation_refresh_handler(request: web.Request) -> web.Response:
-    """Owner-only обновление официальной статистики подключённых площадок."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") != "owner":
-        return _cabinet_response({"error": "forbidden"}, status=403)
-    public_refresh = await asyncio.to_thread(reputation.refresh_public_reviews)
-    pending = await asyncio.to_thread(database.list_unalerted_external_reviews, 20)
-    notification = {"delivered": False, "count": 0}
-    if pending:
-        notification = await _notify_owner_reputation(request.app["bot_app"], pending)
-        if notification.get("delivered"):
-            await asyncio.to_thread(
-                database.mark_external_reviews_alerted,
-                [row.get("id") for row in pending if row.get("id")],
-            )
-    snapshot = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=True)
-    return _cabinet_response({
-        "ok": True,
-        "public_refresh": public_refresh,
-        "notification": notification,
-        "reputation": snapshot,
-    })
+    """B34: legacy review ingestion/sync is retired without side effects."""
+    return _cabinet_response(reputation.retired_review_source(), status=410)
 
 
 async def broadcast_send_to_base(bot, text: str) -> dict:
@@ -10541,64 +10478,13 @@ async def notify_owner_cycle_candidates(snapshot: dict) -> dict:
 
 
 async def _notify_owner_reputation(app: Application, rows: list[dict]) -> dict:
-    alert = reputation.build_owner_review_alert(rows)
-    if not alert.get("text"):
-        return {"delivered": False, "count": 0, "owners": 0}
-    owner_ids = _owner_reputation_ids()
-    if not owner_ids:
-        return {"delivered": False, "count": alert.get("count", 0), "owners": 0}
-
-    review_ids = sorted(str(row.get("id")) for row in rows if row.get("id"))
-    try:
-        import maya_inbox_bridge
-
-        delivered = await maya_inbox_bridge.publish_inbox_item(
-            type="review_alert",
-            title=alert.get("push_title") or "Новый отзыв",
-            body_text=alert["text"],
-            source_seed="reviews|" + "|".join(review_ids),
-            telegram_chat_ids=owner_ids,
-            deep_link="/app/?god=1",
-            payload={"event": "reputation.new_review", "review_ids": review_ids},
-            fanout_owners=True,
-        )
-    except Exception as e:
-        logger.error(f"reputation owner Action Engine delivery: {e}")
-        delivered = False
-    return {
-        "delivered": delivered,
-        "count": alert.get("count", 0),
-        "positive": alert.get("positive", 0),
-        "negative": alert.get("negative", 0),
-        "owners": len(owner_ids),
-        "accepted": bool(delivered),
-    }
+    """B34: unverified legacy review evidence cannot initiate delivery."""
+    return {"delivered": False, "count": 0, "owners": 0, "error": "LEGACY_REVIEW_SOURCE_RETIRED"}
 
 
 async def reputation_monitor_loop(app: Application):
-    """Раз в час проверяет публичные карточки и сообщает только о новых отзывах."""
-    await asyncio.sleep(150)
-    while True:
-        try:
-            refresh = await asyncio.to_thread(reputation.refresh_public_reviews)
-            pending = await asyncio.to_thread(database.list_unalerted_external_reviews, 20)
-            notification = {"delivered": False, "count": 0}
-            if pending:
-                notification = await _notify_owner_reputation(app, pending)
-                if notification.get("delivered"):
-                    await asyncio.to_thread(
-                        database.mark_external_reviews_alerted,
-                        [row.get("id") for row in pending if row.get("id")],
-                    )
-            logger.info(
-                "reputation monitor: sources=%s new=%s notified=%s",
-                refresh.get("sources_ready"),
-                refresh.get("new"),
-                notification.get("count"),
-            )
-        except Exception as e:
-            logger.error(f"reputation monitor loop: {e}")
-        await asyncio.sleep(3600)
+    """B34: retired job, including direct calls and alternative launchers."""
+    return None
 
 
 async def waitlist_admin_alert_loop(app: Application):
@@ -12157,7 +12043,6 @@ async def start_webhook_server(bot_app: Application):
     globals()["_WEBHOOK_SITE"] = site
     asyncio.create_task(master_day_brief_loop(bot_app))
     asyncio.create_task(client_retention_refresh_loop(bot_app))
-    asyncio.create_task(reputation_monitor_loop(bot_app))
     asyncio.create_task(master_shift_reminder_loop(bot_app))
     asyncio.create_task(waitlist_admin_alert_loop(bot_app))
     asyncio.create_task(maya_operating_rhythm_loop(bot_app))

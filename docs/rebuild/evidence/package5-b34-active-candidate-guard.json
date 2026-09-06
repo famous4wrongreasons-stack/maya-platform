@@ -1,0 +1,5 @@
+{
+  "inspection": "read-only candidate guard over active root; historical archives excluded, active archive imports forbidden",
+  "findings": [],
+  "pass": true
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed when the active PWA restores B13-B24 legacy owners."""
+"""Fail closed when the active PWA restores retired Package 5 owners."""
 
 from __future__ import annotations
 
@@ -721,6 +721,12 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
     loyalty_guard = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(loyalty_guard)
     findings.extend(Finding('b27_loyalty_read', detail) for detail in loyalty_guard.scan_loyalty_reads(root, overrides))
+    review_spec = importlib.util.spec_from_file_location('package5_review_source_guard', Path(__file__).with_name('package5_review_source_guard.py'))
+    if review_spec is None or review_spec.loader is None:
+        raise RuntimeError('B34 review source guard is required')
+    review_guard = importlib.util.module_from_spec(review_spec)
+    review_spec.loader.exec_module(review_guard)
+    findings.extend(Finding('b34_review_authority', detail) for detail in review_guard.scan_review_sources(root, overrides))
     return findings
 
 
@@ -754,6 +760,7 @@ def main() -> int:
         "b22UnverifiedTipOwners": 0 if not findings else None,
         "b23LegacyHistoryDeleteOwners": 0 if not findings else None,
         "b24LegacyWebPushOwners": 0 if not findings else None,
+        "b34LegacyReviewOwners": 0 if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }
@@ -763,7 +770,7 @@ def main() -> int:
         for finding in findings:
             print(f"FAIL {finding.check}: {finding.detail}")
     else:
-        print("Package 5 B13-B24 active PWA control-plane guard: PASS")
+        print("Package 5 active PWA control-plane / B34 review guard: PASS")
     return 0 if not findings else 1
 
 

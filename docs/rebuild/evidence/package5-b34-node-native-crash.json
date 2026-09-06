@@ -1,0 +1,28 @@
+{
+  "nodeVersion": "24.19.0",
+  "ownedProcessPid": 67661,
+  "exitCode": -11,
+  "exception": {
+    "codes": "0x0000000000000001, 0x000000000000000e",
+    "rawCodes": [
+      1,
+      14
+    ],
+    "type": "EXC_BAD_ACCESS",
+    "signal": "SIGSEGV",
+    "subtype": "KERN_INVALID_ADDRESS at 0x000000000000000e"
+  },
+  "triggeredSymbols": [
+    "v8::internal::ClearStaleLeftTrimmedPointerVisitor::VisitRootPointers(v8::internal::Root, char const*, v8::internal::FullObjectSlot, v8::internal::FullObjectSlot)",
+    "v8::internal::InternalFrame::Iterate(v8::internal::RootVisitor*) const",
+    "v8::internal::Isolate::Iterate(v8::internal::RootVisitor*, v8::internal::ThreadLocalTop*)",
+    "v8::internal::Heap::IterateRoots(v8::internal::RootVisitor*, v8::base::EnumSet<v8::internal::SkipRoot, int>, v8::internal::Heap::IterateRootsMode)",
+    "v8::internal::MarkCompactCollector::MarkRoots(v8::internal::RootVisitor*)",
+    "v8::internal::MarkCompactCollector::MarkLiveObjects()",
+    "v8::internal::MarkCompactCollector::CollectGarbage()",
+    "v8::internal::Heap::MarkCompact()"
+  ],
+  "testVerdict": "NO VERDICT \u2014 not PASS",
+  "productionChangesAfterThisFailure": 0,
+  "disposition": "rerun complete mandatory suite on final source; no check waived"
+}

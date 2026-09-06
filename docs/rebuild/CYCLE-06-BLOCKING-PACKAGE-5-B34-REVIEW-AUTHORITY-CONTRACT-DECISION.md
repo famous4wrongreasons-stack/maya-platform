@@ -1,5 +1,11 @@
 # B34 / reduced A27 — exact review contract reconstruction and authority decision
 
+> Option A was approved after checkpoint `7a2cc296`: retire legacy Python
+> review import/sync, preserve canonical Maya ingress, zero schema/backfill.
+> [Runtime local gate](CYCLE-06-BLOCKING-PACKAGE-5-B34-RUNTIME-LOCAL-GATE.md).
+> The proposal's pending-decision status below is historical and superseded;
+> its exact AC4 conflict contract remains unchanged.
+
 Base checkpoint: `6a2cbb81b7c664ebff833c6ae02b1cd0d13f820f`. Date: 2026-09-06.
 Status: **Stage 1 complete; source-authority / retirement decision required.**
 This is a proposal, not an approved runtime cutover. B29–B33 remain accepted.
