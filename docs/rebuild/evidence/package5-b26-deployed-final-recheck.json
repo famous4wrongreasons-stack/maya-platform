@@ -1,0 +1,332 @@
+{
+  "acceptedOwnerCheckpoint": "cec7bdfd",
+  "runtimeCommit": "e426e55749803c6eec82f65942102e050b2e290f",
+  "productionRelease": "/opt/maya-saas/releases/20260906-p5-b26-e426e557",
+  "b26ProductionRemediation": "PASS",
+  "b26": {
+    "verifiedClientAuthority": "ENFORCED",
+    "phoneAsAppointmentAuthority": 0,
+    "getAppointmentMutations": 0,
+    "clientWithoutMayaUser": "SUPPORTED via authenticated channel bridge",
+    "newSchema": false,
+    "rawProviderPayloadProjection": 0,
+    "getTriggersSynchronization": false
+  },
+  "proofs": {
+    "postgresqlReadStateScenarios": 18,
+    "targetedSuites": 6,
+    "targetedTests": 72,
+    "mandatoryDeploymentRegressionSuites": 360,
+    "mandatoryDeploymentRegressionTests": 2937,
+    "mandatoryDeploymentGate": "PASS",
+    "finalAggregateRegression": "NOT RUN \u2014 STOP AT NEW B27 INVENTORY BLOCKER"
+  },
+  "schema": {
+    "pendingMigrations": 0,
+    "drift": "NONE",
+    "repositoryMigrations": 79,
+    "accountedHistoricalProductionMigrations": 82
+  },
+  "productionStructuralReadOnlyVerification": {
+    "health": {
+      "status": "ok",
+      "service": "maya-saas-backend",
+      "release": "20260906-p5-b26-e426e557",
+      "started_at": "2026-09-06T09:13:28.326Z",
+      "timestamp": "2026-09-06T09:13:50.603Z"
+    },
+    "readiness": {
+      "status": "ready",
+      "service": "maya-saas-backend",
+      "checks": {
+        "database": "ready"
+      },
+      "timestamp": "2026-09-06T09:13:50.614Z"
+    },
+    "maya-saas": "active",
+    "barbershop-pwa": "active",
+    "barbershop-bot": "inactive",
+    "pwaPortListening": true,
+    "maya-saasErrorCount": 0,
+    "barbershop-pwaErrorCount": 0,
+    "pwaRequestOnly": true,
+    "spareSmokePortListening": false,
+    "hashes": {
+      "webhook_server.py": "994e7b27af40bfd4e8ade8ca998c03e2c4a5d9eebd09c82cbdffaecb5dbcd1d6",
+      "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+      "package5_control_plane_runtime_guard.py": "31f73e4a9f3f81dd91f929c26c3f346d1151066b97cbf30ee54e079a9c369243",
+      "realtime_bridge.py": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+      "legacy_client_command_bridge.py": "2e705209e62bd81283bd5cfa66320f72eab41e2ccfccd006d75797f1fefa5b2a",
+      "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d"
+    }
+  },
+  "freshFinalGateStartedFromScratch": true,
+  "sourceInventoryCounts": {
+    "release": "/opt/maya-saas/releases/20260906-p5-b26-e426e557",
+    "pythonFiles": 89,
+    "productionPythonFiles": 69,
+    "pythonRoutes": 100,
+    "pythonMutationLikeSites": 619,
+    "backendJs": 551,
+    "backendScripts": 14,
+    "sourceTs": 551,
+    "tsRoutes": 222,
+    "tsMutationLikeSites": 518,
+    "freshSurfaceHashes": {
+      "api-proxy.php": "df803a6455b186ec37db426250205107b8501afbb6192e22b67238e70c87fe66",
+      "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "package5_control_plane_runtime_guard.py": "31f73e4a9f3f81dd91f929c26c3f346d1151066b97cbf30ee54e079a9c369243",
+      "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+      "maya-app.html": "d0d24628674a1b76a838d2200e1865ba7dad0c334371a2b0d2c517544f00cd6e",
+      "app.html": "4db1416d2bb6dbd72ec7801552c6f4f3084252bd28464f76b47d1679c3d60e53",
+      "webhook_server.py": "994e7b27af40bfd4e8ade8ca998c03e2c4a5d9eebd09c82cbdffaecb5dbcd1d6"
+    }
+  },
+  "compiledArtifactsMatched": 551,
+  "compiledScriptsMatched": 14,
+  "familyInventory": [
+    {
+      "family": "A15",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A16",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A17",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A18",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A22",
+      "acceptedWave": 1,
+      "foundationSource": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "sourceSha256": "1cee4166d218a0748dcab14560aef6c489a1d246dc3aa92296ab6da1cc4b4c25",
+      "deployedFoundation": {
+        "file": "package5-wave1/package5-wave1-canonical-cutover.service.js",
+        "sha256": "727cca98d82deef7760d36788441c733c86fae82a2f0a96fb0654f90ac038482"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A23",
+      "acceptedWave": 1,
+      "foundationSource": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "sourceSha256": "1cee4166d218a0748dcab14560aef6c489a1d246dc3aa92296ab6da1cc4b4c25",
+      "deployedFoundation": {
+        "file": "package5-wave1/package5-wave1-canonical-cutover.service.js",
+        "sha256": "727cca98d82deef7760d36788441c733c86fae82a2f0a96fb0654f90ac038482"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A25",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A26",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A27",
+      "acceptedWave": 4,
+      "foundationSource": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+      "sourceSha256": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+      "deployedFoundation": {
+        "file": "package5-wave4/package5-wave4-canonical-cutover.service.js",
+        "sha256": "d5eab02857a3b017dd739077049722204457d96d5f47ef4e2e71ff3a57231d6f"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A28",
+      "acceptedWave": 4,
+      "foundationSource": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+      "sourceSha256": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+      "deployedFoundation": {
+        "file": "package5-wave4/package5-wave4-canonical-cutover.service.js",
+        "sha256": "d5eab02857a3b017dd739077049722204457d96d5f47ef4e2e71ff3a57231d6f"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A29",
+      "acceptedWave": 5,
+      "foundationSource": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+      "sourceSha256": "fb3e3ef76153d3f880936c950175de53dee18f519d74218cc46b79ca003e2bc4",
+      "deployedFoundation": {
+        "file": "package5-wave5/package5-wave5-canonical-cutover.service.js",
+        "sha256": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A30",
+      "acceptedWave": 6,
+      "foundationSource": "package5-wave6/package5-wave6.service.ts",
+      "sourceSha256": "9c87dbf0db375ee48c55ecf6ca26225577ce6d0cef5a96463d4f2d0d8f9bfe08",
+      "deployedFoundation": {
+        "file": "package5-wave6/package5-wave6.service.js",
+        "sha256": "cc8a10e97b30e1c44a0d924afd83527768cce293e7f85bda68e6707fc8cbcd02"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    },
+    {
+      "family": "A31",
+      "acceptedWave": 5,
+      "foundationSource": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+      "sourceSha256": "fb3e3ef76153d3f880936c950175de53dee18f519d74218cc46b79ca003e2bc4",
+      "deployedFoundation": {
+        "file": "package5-wave5/package5-wave5-canonical-cutover.service.js",
+        "sha256": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B27"
+    }
+  ],
+  "familyInventoryCoverage": "13/13",
+  "acceptedWaveFoundationsUnchanged": true,
+  "newBlocker": {
+    "id": "B27",
+    "scope": "A18 Client/value projection + Package4 loyalty read boundary",
+    "primaryRoute": "GET /api/loyalty/me",
+    "sharedCallers": [
+      "GET /api/customer-portal (loyalty section)",
+      "GET /api/admin/loyalty/:userId",
+      "getStateForUser callers"
+    ],
+    "evidence": [
+      "LoyaltyService.getForUser:55; User.phone:66; LoyaltyAccount.upsert:68",
+      "getExternalAccount/getClientLoyaltyEvidenceReadOnly:773; YclientsCRMAdapter.getClientLoyalty:2444 selects phone candidates without exact Client comparison at this caller",
+      "getLegacyMayaAccount:835; raw telegram_user_id request:899; Python internal_loyalty_snapshot_handler:1688"
+    ],
+    "localProbe": {
+      "verdict": "B27 CONFIRMED",
+      "internal": {
+        "requests": 2,
+        "loyaltyAccountRowsCreated": 1,
+        "canonicalClientOwner": null,
+        "actionExecutions": 0,
+        "verifiedClientLinks": 0
+      },
+      "external": {
+        "privateBalanceReturned": true,
+        "providerPhoneLookup": true,
+        "providerReadCount": 1,
+        "exactCanonicalCrmClient": "101",
+        "returnedCardCrmClient": "202",
+        "exactClientMismatchAccepted": true,
+        "verifiedClientLinks": 0,
+        "providerWrites": 0
+      },
+      "legacy": {
+        "syntheticBridgeCalls": 1,
+        "rawTelegramAuthIdentityAsClientSelector": true,
+        "privateLegacyBalanceReturned": true,
+        "verifiedClientLinks": 0,
+        "realNetworkCalls": 0
+      },
+      "productionMutations": 0,
+      "realProviderCalls": 0,
+      "realCompiledControllerServiceCrmReaderAdapter": true,
+      "realPostgreSQL": true
+    },
+    "runtimeRemediationStarted": false
+  },
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "productionDirectBusinessProviderValueMutationBypasses": "PRESENT \u2014 B27 loyalty read account creation",
+  "legacyIdentityProjectionFallbacks": "PRESENT \u2014 B27 phone/raw Telegram loyalty projection",
+  "legacyMutatingOwnersActive": "PRESENT \u2014 B27 conditional internal-calendar read writer",
+  "wavesAccepted": "6/6",
+  "d1ThroughD7": "PRESERVED in B26; aggregate enforcement not certified due to B27",
+  "package4CrossPackageGuards": "Existing mandatory guards PASS; new cross-package read/identity gap B27 confirmed",
+  "realProductionMutationsForFinalProof": 0,
+  "productionPiiEndpointsInvokedForSmoke": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesTouched": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "proofDatabaseCleanup": {
+      "ownedDatabaseDropped": true,
+      "ownedPostgresStopped": true,
+      "ownedDataDirectoryRemoved": true,
+      "preexistingDatabasesTouched": 0
+    },
+    "blockerProbeCleanup": {
+      "ownedProbeDatabaseDropped": true,
+      "ownedPostgresStopped": true,
+      "ownedDataDirectoryRemoved": true,
+      "preexistingDatabasesTouched": 0
+    },
+    "ownedPostgresPortsClosed": [
+      55494,
+      55495
+    ]
+  }
+}
