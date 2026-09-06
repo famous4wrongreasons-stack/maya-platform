@@ -4,6 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
+import { ClientAppointmentCreateService } from '../appointments/client-appointment-create.service';
 import { Prisma } from '@prisma/client';
 
 import {
@@ -41,6 +42,12 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     private readonly encryption: EncryptionService,
     private readonly consent: Package5Wave3CanonicalCutoverService,
     private readonly crm: CrmService,
+    private readonly appointmentCreator: ClientAppointmentCreateService = new ClientAppointmentCreateService(
+      prisma,
+      context,
+      encryption,
+      crm,
+    ),
   ) {
     const closedVerifier = {
       verifyLink: () =>
@@ -94,6 +101,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     return {
       tenantId: link.tenantId,
       clientId: link.clientId,
+      linkId: link.id,
       resolver: this.resolverId,
       resolutionEvidenceRef: `client-channel-link:${link.id}`,
       resolutionEvidenceHash: link.verificationEvidenceHash,
@@ -900,7 +908,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       sourceType: 'authenticated_request' as const,
       sourceRef: authority.resolutionEvidenceRef,
       callerIdempotency: {
-        scope: 'client-channel.appointment.create.v1',
+        scope: 'appointments.client.create.v1',
         key: input.idempotencyKey,
       },
       authorizationCheck: async () => {
@@ -919,20 +927,13 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     let execution: ExecutionResultV1;
     try {
       execution = (
-        await this.crm.executeCreateAppointmentWithReceipt(
+        await this.appointmentCreator.forVerifiedChannel(
           authority.tenantId,
+          authority.linkId,
           {
-            clientId: authority.clientId,
-            clientName: authority.name,
-            clientPhone: authority.phone,
             staffId: input.staffId,
             serviceIds: input.serviceIds,
             start: input.start,
-            creationMode: 'client',
-            allowBusy: false,
-            // B6 policy forbids an implicit legacy three-hour default. Chat
-            // does not own Communication Delivery or reminder preferences.
-            notifyBySmsHours: 0,
           },
           invocation,
         )
@@ -973,7 +974,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     )
       throw new BadRequestException('Exact appointment request required');
     const start = new Date(input.start);
-    if (Number.isNaN(start.getTime()) || start <= new Date())
+    if (Number.isNaN(start.getTime()))
       throw new BadRequestException('Future appointment datetime required');
     return {
       idempotencyKey: input.idempotencyKey,
@@ -984,7 +985,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
   }
 
   private async clientAppointmentCreateAuthority(channelProof: string) {
-    const identity = await this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx) => {
       const verified = await this.resolve(channelProof, tx);
       const client = await tx.client.findUnique({
         where: {
@@ -996,18 +997,6 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         select: {
           id: true,
           mergedIntoClientId: true,
-          user: {
-            select: {
-              tenantId: true,
-              status: true,
-              phone: true,
-              encryptedName: true,
-            },
-          },
-          crmLinks: {
-            where: { unlinkedAt: null },
-            select: { provider: true, externalId: true },
-          },
         },
       });
       if (!client || client.mergedIntoClientId)
@@ -1023,48 +1012,8 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       });
       if (!profile?.privacyConsentAt)
         throw new ForbiddenException('Canonical Client consent required');
-      return { ...verified, user: client.user, crmLinks: client.crmLinks };
+      return verified;
     });
-
-    let name = '';
-    let phone = '';
-    if (
-      identity.user?.tenantId === identity.tenantId &&
-      identity.user.status === 'active'
-    ) {
-      phone = identity.user.phone?.trim() ?? '';
-      if (identity.user.encryptedName) {
-        try {
-          name = this.encryption.decrypt(identity.user.encryptedName).trim();
-        } catch {
-          name = '';
-        }
-      }
-    }
-    if (!name || !phone) {
-      try {
-        const registry = await this.crm.getClientRegistry(identity.tenantId);
-        const exactLinks = identity.crmLinks.filter(
-          (link) => link.provider === registry.provider,
-        );
-        if (exactLinks.length === 1) {
-          const matches = registry.clients.filter(
-            (candidate) => candidate.external_id === exactLinks[0].externalId,
-          );
-          if (matches.length === 1) {
-            name ||= matches[0].name?.trim() ?? '';
-            phone ||= matches[0].phone?.trim() ?? '';
-          }
-        }
-      } catch {
-        // A failed provider read cannot authorize a phone/name fallback.
-      }
-    }
-    if (!name || phone.replace(/\D/g, '').length < 10)
-      throw new ForbiddenException(
-        'Verified Client booking identity unavailable',
-      );
-    return { ...identity, name, phone };
   }
 
   /** B17 authenticated Client appointment mutation boundary. The channel link
@@ -1132,6 +1081,10 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       callerIdempotency: {
         scope: 'client-channel.appointment.services.v1',
         key: identity,
+      },
+      clientPrincipal: {
+        linkId: authority.linkId,
+        appointmentId: authority.appointmentId,
       },
       authorizationCheck: async () => {
         await this.clientAppointmentAuthority(channelProof, input.recordId);
@@ -1244,6 +1197,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
           },
         },
         select: {
+          id: true,
           mayaClientId: true,
           startAt: true,
         },
@@ -1254,7 +1208,11 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         );
       if (appointment.startAt <= new Date())
         throw new BadRequestException('Only a future appointment may change');
-      return { ...identity, provider: integration.provider };
+      return {
+        ...identity,
+        provider: integration.provider,
+        appointmentId: appointment.id,
+      };
     });
   }
 
@@ -1263,6 +1221,8 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     authority: {
       tenantId: string;
       clientId: string;
+      linkId: string;
+      appointmentId: string;
       resolutionEvidenceRef: string;
     },
     externalId: string,
@@ -1286,6 +1246,10 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       callerIdempotency: {
         scope: `client-channel.appointment.${operation}.v1`,
         key: identity,
+      },
+      clientPrincipal: {
+        linkId: authority.linkId,
+        appointmentId: authority.appointmentId,
       },
       authorizationCheck: async () => {
         await this.clientAppointmentAuthority(channelProof, externalId);

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { clientPrincipalEvidence } from '../action-engine/client-action-principal.contract';
 
 import {
   BadRequestException,
@@ -110,6 +111,8 @@ import {
 } from './crm-request.errors';
 
 export type AppointmentActionInvocation = {
+  /** Server-resolved channel and canonical target; never copied from a DTO. */
+  clientPrincipal?: { linkId: string; appointmentId?: string };
   bookingIntent?: import('../action-engine/client-booking-intent.contract').ClientBookingIntentContext;
   callerIdempotency?: {
     scope: string;
@@ -1122,6 +1125,7 @@ export class CrmService {
     // Reject missing/changed authority before ingress as well as at dispatch.
     if (
       !invocation.authorizationCheck ||
+      !invocation.clientPrincipal ||
       !invocation.bookingIntent ||
       !invocation.callerIdempotency
     )
@@ -2703,11 +2707,18 @@ export class CrmService {
         ...(sourceType === 'agent_task' && input.invocation.agentTaskId
           ? { agentTaskId: input.invocation.agentTaskId }
           : {}),
-        ...(context?.userId ? { actorUserId: context.userId } : {}),
+        ...(!input.invocation.clientPrincipal && context?.userId
+          ? { actorUserId: context.userId }
+          : {}),
       },
       targetRef: input.targetRef,
       input: input.input,
-      evidenceRefs: [],
+      evidenceRefs: input.invocation.clientPrincipal
+        ? clientPrincipalEvidence(
+            input.invocation.clientPrincipal.linkId,
+            input.invocation.clientPrincipal.appointmentId,
+          )
+        : [],
       callerIdempotency: input.invocation.callerIdempotency,
       ...(input.invocation.bookingIntent
         ? { bookingIntent: input.invocation.bookingIntent }

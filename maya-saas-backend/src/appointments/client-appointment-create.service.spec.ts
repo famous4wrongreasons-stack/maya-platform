@@ -33,7 +33,7 @@ function setup() {
     tenantId: 'tenant-1',
     mergedIntoClientId: null,
     user: null,
-    crmLinks: [],
+    crmLinks: [] as Array<{ provider: string; externalId: string }>,
   };
   const prisma = {
     crmIntegration: {
@@ -46,7 +46,10 @@ function setup() {
       findFirst: jest.fn().mockResolvedValue(null),
     },
     membership: { findFirst: jest.fn().mockResolvedValue({ id: 'member-1' }) },
-    clientChannelLink: { findMany: jest.fn().mockResolvedValue([link]) },
+    clientChannelLink: {
+      findMany: jest.fn().mockResolvedValue([link]),
+      findUnique: jest.fn().mockResolvedValue(link),
+    },
     client: { findUnique: jest.fn().mockResolvedValue(client) },
     tenant: {
       findUnique: jest
@@ -177,6 +180,7 @@ function setup() {
       () => service.forAccount(tenantId, userId, input),
     );
   return {
+    context,
     service,
     prisma,
     client,
@@ -193,6 +197,54 @@ function setup() {
 }
 
 describe('B31 verified Client create initiator and canonical executor', () => {
+  it('uses the common creator for an authenticated channel without an account actor', async () => {
+    const h = setup();
+    h.client.crmLinks.push({
+      provider: 'yclients',
+      externalId: 'canonical-contact',
+    });
+    Object.assign(h.crm, {
+      getClientRegistry: jest.fn().mockResolvedValue({
+        provider: 'yclients',
+        clients: [
+          {
+            external_id: 'canonical-contact',
+            name: 'Verified guest',
+            phone: '+79990001122',
+          },
+        ],
+      }),
+    });
+    await h.context.runAsPublicTenant('tenant-1', () =>
+      h.service.forVerifiedChannel(
+        'tenant-1',
+        h.link.id,
+        {
+          staffId: h.dto.staffId,
+          serviceIds: h.dto.serviceIds,
+          start: h.dto.start,
+        },
+        { authorizationCheck: () => Promise.resolve() },
+      ),
+    );
+    expect(h.plans[0].request.source.actorUserId).toBeUndefined();
+    expect(h.plans[0].request.evidenceRefs).toEqual([
+      'client-authority:v1:link-1',
+    ]);
+    expect(h.prisma.membership.findFirst).not.toHaveBeenCalled();
+    expect(h.rows[0].mayaClientId).toBe('client-1');
+  });
+
+  it('rejects a new external intent without canonical contact instead of inventing a User', async () => {
+    const h = setup();
+    (h.crm.getCalendarSource as jest.Mock).mockResolvedValue('external');
+    await expect(h.run()).rejects.toThrow(
+      'Verified Client booking identity unavailable',
+    );
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+  });
+
   it('creates an owned internal Appointment through the existing action without a Maya User', async () => {
     const h = setup();
     const result = await h.run();

@@ -1,4 +1,8 @@
 import { verifiedClientChannelCapability } from './client-preferences.contract';
+import {
+  clientPrincipalTarget,
+  type ClientActionPrincipal,
+} from './client-action-principal.contract';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 import { ActionPolicyDecision, type PrismaClient } from '@prisma/client';
@@ -43,6 +47,7 @@ const ALLOWED_REQUEST_KEYS = new Set([
   'targetRef',
   'normalizedInputHash',
   'clientChannel',
+  'clientPrincipal',
 ]);
 const PERMITTED_TENANT_ACCESS_STATES = new Set<
   TenantAccessState['accessState']
@@ -70,6 +75,7 @@ export interface CanonicalActionPolicyDefinitionV1 {
   policyProfileVersion: number;
   actorPolicy:
     'REQUIRED' | 'OPTIONAL_TRUSTED_SERVICE' | 'VERIFIED_CLIENT_CHANNEL';
+  clientPrincipalTarget?: 'create_appointment' | 'appointment';
   allowedActorRoles: readonly UserRole[];
   trustedServiceSourceTypes: readonly TrustedServiceSourceType[];
   requiredFeatures: readonly MayaFeatureKey[];
@@ -87,13 +93,15 @@ export interface ActionPolicyResolutionRequestV1 {
   sourceType: ActionSourceType;
   /** Durable server-side request, task, job, webhook, or bridge occurrence. */
   sourceRef: string;
-  /** Authenticated principal. Omitted only for policy-registered services. */
+  /** Real Maya User, when this action uses account authority. Client and
+   * registered service principals do not require a Maya User. */
   actorUserId?: string;
   /** Opaque tenant-qualified target chosen before policy evaluation. */
   targetRef: string;
   /** Produced by the trusted capability normalizer. */
   normalizedInputHash: string;
   clientChannel?: ConsentChannelBinding;
+  clientPrincipal?: ClientActionPrincipal;
 }
 
 export interface CanonicalActionPolicyResolutionV1 {
@@ -129,7 +137,12 @@ export interface CanonicalActionPolicyResolverOptions {
 }
 
 type PolicyPrisma = Pick<PrismaClient, 'tenant' | 'membership'> &
-  Partial<Pick<PrismaClient, 'clientChannelLink'>>;
+  Partial<
+    Pick<
+      PrismaClient,
+      'clientChannelLink' | 'client' | 'appointment' | 'crmIntegration'
+    >
+  >;
 type PolicyEntitlements = Pick<
   EntitlementsService,
   'resolveFeatureRequirements'
@@ -191,6 +204,12 @@ export class CanonicalActionPolicyRegistry {
   private assertDefinition(
     definition: CanonicalActionPolicyDefinitionV1,
   ): void {
+    if (
+      definition.clientPrincipalTarget !== undefined &&
+      definition.clientPrincipalTarget !==
+        clientPrincipalTarget(definition.capability)
+    )
+      throw new ActionContractError('Unregistered Client target authority');
     assertCode(definition.capability, 'capability');
     assertCode(definition.policyProfileKey, 'policy profile key');
     assertCode(definition.approverPolicyKey, 'approver policy key');
@@ -560,6 +579,35 @@ export class CanonicalActionPolicyResolver {
     if (request.actorUserId !== undefined) {
       assertOpaque(request.actorUserId, 'actorUserId');
     }
+    if (request.clientPrincipal) {
+      const principal = request.clientPrincipal;
+      const target = principal.target;
+      if (
+        Object.keys(principal).sort().join(',') !== 'linkId,target' ||
+        !target ||
+        typeof target !== 'object' ||
+        target.kind !== clientPrincipalTarget(request.capability) ||
+        request.sourceType !== 'authenticated_request' ||
+        request.actorUserId ||
+        request.clientChannel
+      )
+        throw new ActionContractError('Invalid Client action principal');
+      assertOpaque(principal.linkId, 'Client link');
+      if (target.kind === 'create_appointment') {
+        if (Object.keys(target).sort().join(',') !== 'clientId,kind')
+          throw new ActionContractError('Invalid Client create target');
+        assertOpaque(target.clientId, 'canonical Client');
+      } else {
+        if (
+          Object.keys(target).sort().join(',') !==
+            'appointmentId,externalId,kind' ||
+          request.targetRef !== `appointment/${target.externalId}`
+        )
+          throw new ActionContractError('Invalid Client Appointment target');
+        assertOpaque(target.appointmentId, 'canonical Appointment');
+        assertOpaque(target.externalId, 'Appointment reference');
+      }
+    }
     assertOpaque(request.targetRef, 'targetRef');
     if (!HASH_PATTERN.test(request.normalizedInputHash)) {
       throw new ActionContractError(
@@ -582,7 +630,121 @@ export class CanonicalActionPolicyResolver {
     branchScopeRef: string | null;
     membershipStatus: string | null;
     userStatus: string | null;
+    clientEvidence?: Record<string, unknown>;
   }> {
+    if (request.clientPrincipal) {
+      const principal = request.clientPrincipal;
+      if (
+        policy.clientPrincipalTarget !== principal.target.kind ||
+        !this.prisma.clientChannelLink ||
+        !this.prisma.client
+      )
+        throw new ActionContractError(
+          'Client principal is not permitted for this capability',
+        );
+      const link = await this.prisma.clientChannelLink.findUnique({
+        where: {
+          id_tenantId: { id: principal.linkId, tenantId: request.tenantId },
+        },
+      });
+      if (
+        !link ||
+        link.revokedAt ||
+        link.tenantId !== request.tenantId ||
+        !['telegram', 'maya_user'].includes(link.provider) ||
+        link.verificationVersion !== 1 ||
+        link.subjectHashVersion !== 1 ||
+        !HASH_PATTERN.test(link.verificationIdentityHash) ||
+        !HASH_PATTERN.test(link.verificationEvidenceHash) ||
+        !HASH_PATTERN.test(link.providerSubjectHash)
+      )
+        throw new ActionContractError('Verified active Client link required');
+      const client = await this.prisma.client.findUnique({
+        where: {
+          id_tenantId: { id: link.clientId, tenantId: request.tenantId },
+        },
+        select: { id: true, mergedIntoClientId: true },
+      });
+      if (!client || client.mergedIntoClientId)
+        throw new ActionContractError(
+          'Verified active canonical Client required',
+        );
+      if (principal.target.kind === 'create_appointment') {
+        if (
+          principal.target.clientId !== client.id ||
+          !request.targetRef.startsWith('create/')
+        )
+          throw new ActionContractError(
+            'Client does not own the booking intent',
+          );
+      } else {
+        if (!this.prisma.appointment)
+          throw new ActionContractError(
+            'Canonical Appointment authority unavailable',
+          );
+        const appointment = await this.prisma.appointment.findFirst({
+          where: {
+            id: principal.target.appointmentId,
+            tenantId: request.tenantId,
+            mayaClientId: client.id,
+          },
+          select: {
+            id: true,
+            source: true,
+            crmProvider: true,
+            crmExternalId: true,
+          },
+        });
+        if (!appointment)
+          throw new ActionContractError('Client does not own the Appointment');
+        if (appointment.source === 'internal') {
+          if (appointment.id !== principal.target.externalId)
+            throw new ActionContractError(
+              'Internal Appointment target mismatch',
+            );
+        } else {
+          const integration = await this.prisma.crmIntegration?.findUnique({
+            where: { tenantId: request.tenantId },
+            select: { provider: true, status: true },
+          });
+          if (
+            !integration ||
+            integration.status !== 'active' ||
+            integration.provider !== appointment.crmProvider ||
+            appointment.crmExternalId !== principal.target.externalId
+          )
+            throw new ActionContractError(
+              'Canonical provider Appointment target mismatch',
+            );
+        }
+      }
+      return {
+        allowed: true,
+        reasonCodes: [],
+        principalKind: 'client_channel',
+        actorRef: this.refHash('client-channel', link.id),
+        membershipRef: null,
+        role: 'client',
+        branchScopeRef: null,
+        membershipStatus: null,
+        userStatus: null,
+        clientEvidence: {
+          contract: 'maya.client-action-principal/1',
+          clientRef: this.refHash('client', client.id),
+          linkRef: this.refHash('client-channel', link.id),
+          provider: link.provider,
+          verificationVersion: link.verificationVersion,
+          bindingRef: this.refHash(
+            'client-binding',
+            link.verificationIdentityHash,
+          ),
+          evidenceRef: this.refHash(
+            'client-evidence',
+            link.verificationEvidenceHash,
+          ),
+        },
+      };
+    }
     if (policy.actorPolicy === 'VERIFIED_CLIENT_CHANNEL') {
       if (
         !verifiedClientChannelCapability(request.capability) ||
@@ -724,6 +886,9 @@ export class CanonicalActionPolicyResolver {
         membershipRef: input.actorDecision.membershipRef,
         membershipStatus: input.actorDecision.membershipStatus,
         userStatus: input.actorDecision.userStatus,
+        ...(input.actorDecision.clientEvidence
+          ? { client: input.actorDecision.clientEvidence }
+          : {}),
         role: input.actorDecision.role,
         branchScopeRef: input.actorDecision.branchScopeRef,
         membershipUpdatedAt: input.membership?.updatedAt.toISOString() ?? null,
@@ -748,6 +913,9 @@ export class CanonicalActionPolicyResolver {
         profileVersion: input.policy.policyProfileVersion,
         codes: [...input.policy.permissionCodes].sort(),
         actorPolicy: input.policy.actorPolicy,
+        ...(input.request.clientPrincipal
+          ? { clientPrincipalTarget: input.policy.clientPrincipalTarget }
+          : {}),
         allowed: input.actorDecision.allowed,
       },
       entitlement: {

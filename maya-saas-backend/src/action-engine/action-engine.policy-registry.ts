@@ -1,4 +1,5 @@
 import { verifiedClientChannelCapability } from './client-preferences.contract';
+import { clientPrincipalTarget } from './client-action-principal.contract';
 import { UserRole } from '../common/domain.enums';
 import type { MayaFeatureKey } from '../common/feature-catalog';
 import {
@@ -141,6 +142,7 @@ export function canonicalProductionPolicyDefinitions(
         capability: capability.capability,
         policyProfileKey: `canonical.${capability.actionClass}`,
         policyProfileVersion: 1,
+        clientPrincipalTarget: clientPrincipalTarget(capability.capability),
         actorPolicy: verifiedClientChannelCapability(capability.capability)
           ? 'VERIFIED_CLIENT_CHANNEL'
           : trustedServiceSourceTypes.length > 0

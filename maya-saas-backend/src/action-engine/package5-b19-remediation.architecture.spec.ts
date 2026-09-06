@@ -53,10 +53,16 @@ describe('Package 5 B19 chat booking ownership remediation', () => {
     const end = runtime.indexOf('async cancelClientAppointment(', start);
     const create = runtime.slice(start, end);
     expect(create).toContain('this.resolve(channelProof, tx)');
-    expect(create).toContain('executeCreateAppointmentWithReceipt(');
-    expect(create).toContain("scope: 'client-channel.appointment.create.v1'");
+    expect(create).toContain('this.appointmentCreator.forVerifiedChannel(');
+    expect(create).toContain("scope: 'appointments.client.create.v1'");
     expect(create).toContain('authorizationCheck: async () =>');
-    expect(create).toContain('clientId: authority.clientId');
+    expect(create).toContain('authority.linkId,');
+    expect(create).not.toContain('executeCreateAppointmentWithReceipt(');
+    const creator = read(
+      'maya-saas-backend/src/appointments/client-appointment-create.service.ts',
+    );
+    expect(creator).toContain('executeCanonicalClientCreateWithReceipt(');
+    expect(creator).toContain('clientPrincipal: { linkId: link.id }');
     expect(create).not.toMatch(
       /input\.(?:clientId|clientPhone|phone|tenantId|chat_id)/,
     );

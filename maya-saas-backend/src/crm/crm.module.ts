@@ -1,4 +1,5 @@
 import { ClientProfileReadModule } from '../crm/client-profile-read.module';
+import { ClientAppointmentCreateService } from '../appointments/client-appointment-create.service';
 import { ClientLoyaltyReadService } from './client-loyalty-read.service';
 import { ClientAppointmentReadService } from './client-appointment-read.service';
 import { ClientAppointmentCancelService } from './client-appointment-cancel.service';
@@ -84,6 +85,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionController,
   ],
   providers: [
+    ClientAppointmentCreateService,
     ClientLoyaltyReadService,
     ClientAppointmentReadService,
     ClientAppointmentCancelService,
@@ -166,6 +168,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionService,
   ],
   exports: [
+    ClientAppointmentCreateService,
     ClientLoyaltyReadService,
     ClientAppointmentReadService,
     ClientAppointmentCancelService,

@@ -1,4 +1,5 @@
 import { verifiedClientChannelCapability } from './client-preferences.contract';
+import { readClientActionPrincipal } from './client-action-principal.contract';
 import {
   CLIENT_BOOKING_IDEMPOTENCY_SCOPE,
   CLIENT_BOOKING_INTENT_CONTRACT,
@@ -1526,6 +1527,14 @@ export class ActionEngineKernel {
         : {}),
       targetRef: normalized.targetRef,
       normalizedInputHash: normalized.normalizedInputHash,
+      clientPrincipal: readClientActionPrincipal({
+        capability: normalized.capability.capability,
+        sourceType: request.source.type,
+        targetRef: normalized.targetRef,
+        input: normalized.normalizedInput,
+        evidenceRefs: request.evidenceRefs,
+        hasBookingIntent: Boolean(normalized.bookingIntent),
+      }),
       ...(verifiedClientChannelCapability(normalized.capability.capability)
         ? {
             clientChannel: normalized.normalizedInput
@@ -2164,11 +2173,18 @@ export class ActionEngineKernel {
       repository,
       { now: () => now },
     );
-    const clientChannelInput = verifiedClientChannelCapability(
-      execution.capability,
-    )
-      ? await this.readTrustedNormalizedInput(execution.tenantId, execution.id)
-      : null;
+    const clientChannelInput =
+      verifiedClientChannelCapability(execution.capability) ||
+      (execution.evidenceRefsJson as string[]).some(
+        (ref) =>
+          ref.startsWith('client-authority:') ||
+          ref.startsWith('client-target:'),
+      )
+        ? await this.readTrustedNormalizedInput(
+            execution.tenantId,
+            execution.id,
+          )
+        : null;
     const result = await approval.authorizeForClaim({
       contract: ACTION_APPROVAL_AUTHORIZATION_REQUEST_CONTRACT,
       executionId: execution.id,
@@ -2184,7 +2200,16 @@ export class ActionEngineKernel {
           : {}),
         targetRef: execution.targetRef,
         normalizedInputHash: execution.normalizedInputHash,
-        ...(clientChannelInput
+        clientPrincipal: readClientActionPrincipal({
+          capability: execution.capability,
+          sourceType: execution.sourceType,
+          targetRef: execution.targetRef,
+          input: clientChannelInput,
+          evidenceRefs: execution.evidenceRefsJson as string[],
+          hasBookingIntent: Boolean(execution.bookingIntentContract),
+        }),
+        ...(clientChannelInput &&
+        verifiedClientChannelCapability(execution.capability)
           ? {
               clientChannel:
                 clientChannelInput.consentChannel as ConsentChannelBinding,

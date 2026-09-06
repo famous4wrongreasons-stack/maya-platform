@@ -1,4 +1,5 @@
 import { verifiedClientChannelCapability } from './client-preferences.contract';
+import { readClientActionPrincipal } from './client-action-principal.contract';
 import type { ConsentChannelBinding } from '../crm/client-consent-authority';
 import { Injectable } from '@nestjs/common';
 import { ActionPolicyDecision, type ActionExecution } from '@prisma/client';
@@ -76,6 +77,14 @@ export class CanonicalActionIngressService {
         : {}),
       targetRef: preview.targetRef,
       normalizedInputHash: preview.normalizedInputHash,
+      clientPrincipal: readClientActionPrincipal({
+        capability: preview.capability,
+        sourceType: request.source.type,
+        targetRef: preview.targetRef,
+        input: request.input,
+        evidenceRefs: request.evidenceRefs,
+        hasBookingIntent: Boolean(request.bookingIntent),
+      }),
       ...(verifiedClientChannelCapability(preview.capability)
         ? {
             clientChannel: (

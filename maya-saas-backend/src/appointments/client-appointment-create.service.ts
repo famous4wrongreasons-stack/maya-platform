@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import type { ClientChannelLink } from '@prisma/client';
 import {
   BadRequestException,
   ConflictException,
@@ -79,7 +80,12 @@ export class ClientAppointmentCreateService {
     invocation: AppointmentActionInvocation = {},
   ) {
     try {
-      return await this.forVerifiedAccount(tenantId, userId, dto, invocation);
+      return await this.forVerifiedLink(
+        tenantId,
+        () => this.resolveAccount(tenantId, userId),
+        dto,
+        invocation,
+      );
     } catch (error) {
       if (error instanceof ActionConflictError)
         throw new ConflictException({
@@ -89,13 +95,56 @@ export class ClientAppointmentCreateService {
     }
   }
 
-  private async forVerifiedAccount(
+  /** Channel authentication stays in the existing channel resolver. No User
+   * identity is manufactured for this shared canonical booking initiator. */
+  async forVerifiedChannel(
     tenantId: string,
-    userId: string,
+    linkId: string,
     dto: CreateAppointmentDto,
     invocation: AppointmentActionInvocation,
   ) {
-    const link = await this.resolveAccount(tenantId, userId);
+    if (!invocation.authorizationCheck)
+      throw new ForbiddenException('Authenticated channel required');
+    const resolve = async () => {
+      this.context.assertTenantId(tenantId);
+      await invocation.authorizationCheck!();
+      const link = await this.prisma.clientChannelLink.findUnique({
+        where: { id_tenantId: { id: linkId, tenantId } },
+      });
+      if (
+        !link ||
+        link.revokedAt ||
+        link.verificationVersion !== 1 ||
+        link.subjectHashVersion !== 1
+      )
+        throw new ForbiddenException('Verified active Client binding required');
+      return link;
+    };
+    try {
+      return await this.forVerifiedLink(
+        tenantId,
+        resolve,
+        dto,
+        invocation,
+        true,
+      );
+    } catch (error) {
+      if (error instanceof ActionConflictError)
+        throw new ConflictException({
+          error: { code: 'IDEMPOTENCY_CONFLICT' },
+        });
+      throw error;
+    }
+  }
+
+  private async forVerifiedLink(
+    tenantId: string,
+    resolveLink: () => Promise<ClientChannelLink>,
+    dto: CreateAppointmentDto,
+    invocation: AppointmentActionInvocation,
+    preserveExecutionError = false,
+  ) {
+    const link = await resolveLink();
     const client = await this.prisma.client.findUnique({
       where: { id_tenantId: { id: link.clientId, tenantId } },
       select: {
@@ -212,12 +261,14 @@ export class ClientAppointmentCreateService {
     };
     const services = await this.crm
       .getServices(tenantId)
-      .catch((error: unknown) => {
-        // Catalog labels are presentation data on a bound replay. The executor
-        // still owns any checks required before a not-yet-completed create.
-        if (bound) return [];
-        throw error;
-      });
+      .catch(
+        (error: unknown): Awaited<ReturnType<CrmService['getServices']>> => {
+          // Catalog labels are presentation data on a bound replay. The executor
+          // still owns any checks required before a not-yet-completed create.
+          if (bound) return [];
+          throw error;
+        },
+      );
     if (
       !bound &&
       (!dto.serviceIds.length ||
@@ -257,6 +308,7 @@ export class ClientAppointmentCreateService {
     const ownedInvocation: AppointmentActionInvocation = {
       sourceType: 'authenticated_request',
       sourceRef: `client-channel-link:${link.id}`,
+      clientPrincipal: { linkId: link.id },
       callerIdempotency: { scope: CLIENT_BOOKING_IDEMPOTENCY_SCOPE, key },
       bookingIntent: {
         contract: CLIENT_BOOKING_INTENT_CONTRACT,
@@ -264,7 +316,7 @@ export class ClientAppointmentCreateService {
         timezone,
       },
       authorizationCheck: async () => {
-        const current = await this.resolveAccount(tenantId, userId);
+        const current = await resolveLink();
         if (
           current.id !== link.id ||
           current.clientId !== link.clientId ||
@@ -274,16 +326,20 @@ export class ClientAppointmentCreateService {
       },
     };
     let externalId: string;
+    let execution;
     try {
-      externalId = (
-        await this.crm.executeCanonicalClientCreateWithReceipt(
-          tenantId,
-          input,
-          ownedInvocation,
-        )
-      ).value.external_id;
+      const receipt = await this.crm.executeCanonicalClientCreateWithReceipt(
+        tenantId,
+        input,
+        ownedInvocation,
+      );
+      externalId = receipt.value.external_id;
+      execution = receipt.execution;
     } catch (error) {
-      if (actionExecutionResultFromError(error)?.state === 'UNKNOWN')
+      if (
+        !preserveExecutionError &&
+        actionExecutionResultFromError(error)?.state === 'UNKNOWN'
+      )
         throw new ServiceUnavailableException({
           error: { code: 'crm_outcome_unknown' },
         });
@@ -306,6 +362,6 @@ export class ClientAppointmentCreateService {
       throw new ServiceUnavailableException(
         'Canonical Appointment outcome unavailable',
       );
-    return { appointment, services, bookingIdentity, timezone };
+    return { appointment, services, bookingIdentity, timezone, execution };
   }
 }

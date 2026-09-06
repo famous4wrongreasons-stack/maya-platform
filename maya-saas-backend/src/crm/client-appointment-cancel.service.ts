@@ -104,6 +104,10 @@ export class ClientAppointmentCancelService {
     const ownedInvocation: AppointmentActionInvocation = {
       sourceType: 'authenticated_request',
       sourceRef: `client-channel-link:${target.linkId}`,
+      clientPrincipal: {
+        linkId: target.linkId,
+        appointmentId: target.appointment.id,
+      },
       callerIdempotency: invocation.callerIdempotency ?? {
         scope: 'appointments.http.cancel.v1',
         key: identity,

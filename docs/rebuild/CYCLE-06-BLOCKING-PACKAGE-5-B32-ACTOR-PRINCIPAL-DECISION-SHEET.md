@@ -1,5 +1,9 @@
 # B32 — Client action actor/principal contract assessment and Owner Decision
 
+> Subsequent Owner decision: **Option A APPROVED** on 2026-09-06 after checkpoint
+> `b49c5c15`. The Stage 1 assessment below remains historical. Approved wiring
+> and validation: [B32 local gate](CYCLE-06-BLOCKING-PACKAGE-5-B32-PRINCIPAL-LOCAL-GATE.md).
+
 Date: 2026-09-06. Stage 1 only. Baseline: `70f37ba18343dd279895e2c410bf70e279434302`.
 **Recommendation: Option A, a bounded extension of the existing Client principal
 contract using existing immutable evidence storage. No database schema change.**

@@ -76,8 +76,15 @@ function setup(options: Options = {}) {
       .mockResolvedValue(
         options.registry ?? { provider: 'yclients', clients: [] },
       ),
-    executeCreateAppointmentWithReceipt: jest.fn(
-      async (_tenant: string, _input: unknown, invocation: unknown) => {
+  };
+  const creator = {
+    forVerifiedChannel: jest.fn(
+      async (
+        _tenant: string,
+        _link: string,
+        _input: unknown,
+        invocation: unknown,
+      ) => {
         await (
           invocation as { authorizationCheck: () => Promise<void> }
         ).authorizationCheck();
@@ -92,6 +99,7 @@ function setup(options: Options = {}) {
     encryption as never,
     {} as never,
     crm as never,
+    creator as never,
   );
   const payload = {
     idempotencyKey: 'chat-booking:stable-intent',
@@ -99,12 +107,12 @@ function setup(options: Options = {}) {
     serviceIds: ['service-2', 'service-1'],
     start: '2099-04-05T09:00:00.000Z',
   };
-  return { service, tx, prisma, channels, encryption, crm, payload };
+  return { service, tx, prisma, channels, encryption, crm, creator, payload };
 }
 
 describe('B19 verified Client chat appointment creation', () => {
   it('uses the verified Client and existing canonical Action Engine executor', async () => {
-    const { service, crm, payload } = setup();
+    const { service, creator, payload } = setup();
 
     await expect(
       service.createClientAppointment('signed-proof', payload),
@@ -114,32 +122,27 @@ describe('B19 verified Client chat appointment creation', () => {
       provider_writes_outside_canonical_executor: 0,
       execution: { state: 'SUCCEEDED', executionId: 'execution-create-1' },
     });
-    expect(crm.executeCreateAppointmentWithReceipt).toHaveBeenCalledWith(
+    expect(creator.forVerifiedChannel).toHaveBeenCalledWith(
       'tenant-1',
+      'link-1',
       {
-        clientId: 'client-1',
-        clientName: 'Verified user',
-        clientPhone: '+79990001122',
         staffId: 'staff-7',
         serviceIds: ['service-2', 'service-1'],
         start: '2099-04-05T09:00:00.000Z',
-        creationMode: 'client',
-        allowBusy: false,
-        notifyBySmsHours: 0,
       },
       expect.objectContaining({
         sourceType: 'authenticated_request',
         sourceRef: 'client-channel-link:link-1',
         callerIdempotency: {
-          scope: 'client-channel.appointment.create.v1',
+          scope: 'appointments.client.create.v1',
           key: 'chat-booking:stable-intent',
         },
       }),
     );
   });
 
-  it('supports a verified Client without a Maya User through one exact CRM link', async () => {
-    const { service, crm, payload } = setup({
+  it('passes a verified Client without a Maya User to the common contact/intent resolver', async () => {
+    const { service, creator, payload } = setup({
       client: {
         id: 'client-1',
         mergedIntoClientId: null,
@@ -160,12 +163,12 @@ describe('B19 verified Client chat appointment creation', () => {
 
     await service.createClientAppointment('signed-proof', payload);
 
-    expect(crm.executeCreateAppointmentWithReceipt).toHaveBeenCalledWith(
+    expect(creator.forVerifiedChannel).toHaveBeenCalledWith(
       'tenant-1',
+      'link-1',
       expect.objectContaining({
-        clientId: 'client-1',
-        clientName: 'Verified guest',
-        clientPhone: '+79990003344',
+        staffId: payload.staffId,
+        serviceIds: payload.serviceIds,
       }),
       expect.any(Object),
     );
@@ -199,12 +202,12 @@ describe('B19 verified Client chat appointment creation', () => {
       ],
     ],
   ])('fails closed for %s', async (_label, links) => {
-    const { service, crm, payload } = setup({ links });
+    const { service, creator, payload } = setup({ links });
 
     await expect(
       service.createClientAppointment('signed-proof', payload),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(crm.executeCreateAppointmentWithReceipt).not.toHaveBeenCalled();
+    expect(creator.forVerifiedChannel).not.toHaveBeenCalled();
   });
 
   it('rejects caller Client, phone, tenant, and legacy chat authority fields', async () => {
@@ -215,19 +218,19 @@ describe('B19 verified Client chat appointment creation', () => {
       { chat_id: '42' },
       { tenantId: 'tenant-2' },
     ]) {
-      const { service, crm, payload } = setup();
+      const { service, creator, payload } = setup();
       await expect(
         service.createClientAppointment('signed-proof', {
           ...payload,
           ...forged,
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
-      expect(crm.executeCreateAppointmentWithReceipt).not.toHaveBeenCalled();
+      expect(creator.forVerifiedChannel).not.toHaveBeenCalled();
     }
   });
 
   it('preserves UNKNOWN and stable retry identity without a second owner', async () => {
-    const { service, crm, payload } = setup({ state: 'UNKNOWN' });
+    const { service, creator, payload } = setup({ state: 'UNKNOWN' });
 
     const results = await Promise.all(
       Array.from({ length: 8 }, () =>
@@ -238,37 +241,32 @@ describe('B19 verified Client chat appointment creation', () => {
     expect(
       results.every((result) => result.execution.state === 'UNKNOWN'),
     ).toBe(true);
-    const calls = crm.executeCreateAppointmentWithReceipt.mock.calls as Array<
-      [string, unknown, { callerIdempotency: { scope: string; key: string } }]
+    const calls = creator.forVerifiedChannel.mock.calls as Array<
+      [
+        string,
+        string,
+        unknown,
+        { callerIdempotency: { scope: string; key: string } },
+      ]
     >;
-    const invocations = calls.map((call) => call[2].callerIdempotency);
+    const invocations = calls.map((call) => call[3].callerIdempotency);
     expect(new Set(invocations.map(JSON.stringify))).toEqual(
       new Set([
         JSON.stringify({
-          scope: 'client-channel.appointment.create.v1',
+          scope: 'appointments.client.create.v1',
           key: 'chat-booking:stable-intent',
         }),
       ]),
     );
   });
 
-  it('fails before dispatch when privacy or exact server-derived booking PII is unavailable', async () => {
-    for (const options of [
-      { privacy: false },
-      {
-        client: {
-          id: 'client-1',
-          mergedIntoClientId: null,
-          user: null,
-          crmLinks: [],
-        },
-      },
-    ]) {
-      const { service, crm, payload } = setup(options);
+  it('fails before the shared creator when canonical privacy consent is unavailable', async () => {
+    for (const options of [{ privacy: false }]) {
+      const { service, creator, payload } = setup(options);
       await expect(
         service.createClientAppointment('signed-proof', payload),
       ).rejects.toBeInstanceOf(ForbiddenException);
-      expect(crm.executeCreateAppointmentWithReceipt).not.toHaveBeenCalled();
+      expect(creator.forVerifiedChannel).not.toHaveBeenCalled();
     }
   });
 });
