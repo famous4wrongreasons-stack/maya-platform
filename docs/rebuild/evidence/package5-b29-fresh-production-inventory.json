@@ -1,0 +1,49 @@
+{
+  "scope": "new full Package 5 all-13-family inventory after B29 production verification",
+  "summary": {
+    "release": "/opt/maya-saas/releases/20260906-p5-b29-6b3c32f2",
+    "backendJs": 558,
+    "backendScripts": 14,
+    "sourceTsNonSpec": 558,
+    "tsRoutes": 224,
+    "tsMutationLikeSites": 521,
+    "freshSurfaceHashes": {
+      "maya-app.html": "d0d24628674a1b76a838d2200e1865ba7dad0c334371a2b0d2c517544f00cd6e",
+      "app.html": "4db1416d2bb6dbd72ec7801552c6f4f3084252bd28464f76b47d1679c3d60e53",
+      "webhook_server.py": "e7d426d284d3fd0b817e51f33b3b958ea14e0eac56763599d8ff113404e5cdb1",
+      "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+      "package5_control_plane_runtime_guard.py": "7e23a8adb5afa48417bf2eba0928a7b7a5d386113093c9706a1d07e9c438a262",
+      "realtime_bridge.py": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+      "legacy_client_command_bridge.py": "c539c3176bd26cda723a79d7ec7f0a5ef1032127809b6dac41d019009a87837e",
+      "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "claude_ai.py": "d70e49ddbbf6880d5f7ad931709c1b1c04cdd6d0908ea7fbd737f86a1e525a59",
+      "package5_loyalty_read_guard.py": "09df868144ae2c5d828a4a55a4efdb769fa84663c365e4b6d79669426f2c4fd9"
+    },
+    "pythonAndPwaAcceptedSurfaces": "hash-identical to B28 production baseline; B29 did not deploy Python/PWA/proxy"
+  },
+  "appointmentCommandSites": {
+    "http": [
+      "POST /api/appointments",
+      "POST /api/appointments/preview",
+      "GET /api/appointments/my",
+      "POST /api/appointments/:id/cancel",
+      "POST /api/appointments/:id/reschedule"
+    ],
+    "ai": [
+      "cancelOwnAppointment -> cancelForClient",
+      "createOwnAppointment -> createForClient",
+      "rescheduleOwnAppointment -> rescheduleForClient"
+    ],
+    "pwaCallersPresent": {
+      "cancel": true,
+      "reschedule": true
+    }
+  },
+  "foundations": {
+    "compiledArtifactsMatched": 558,
+    "compiledScriptsMatched": 14,
+    "familyInventoryCoverage": "13/13",
+    "acceptedWaveFoundationsUnchanged": true
+  },
+  "verdict": "FAIL — STOP at B30; collected inventory is not aggregate ownership certification"
+}
