@@ -1,0 +1,35 @@
+{
+  "reproduced": true,
+  "scope": "GET /api/appointments/my; authenticated same-tenant account and booking access assumed, no authentication bypass claimed",
+  "execution": "real compiled AppointmentsController / AppointmentsService / TenantAppointmentRepository; synthetic CRM and in-memory DB",
+  "cases": [
+    {
+      "fixture": "missing local mirror",
+      "verifiedClientLinks": 0,
+      "canonicalAuthorityReads": 0,
+      "phoneLookups": 2,
+      "appointmentCreatesFromTwoReads": 1,
+      "appointmentUpdatesFromTwoReads": 1,
+      "privateAppointmentProjectionReturned": true,
+      "userAssociationSetByRead": true,
+      "canonicalClientNotChecked": true,
+      "realDbMutations": 0,
+      "realProviderCalls": 0
+    },
+    {
+      "fixture": "canonical mirror has another Client and no User association",
+      "verifiedClientLinks": 0,
+      "canonicalAuthorityReads": 0,
+      "phoneLookups": 2,
+      "appointmentCreatesFromTwoReads": 0,
+      "appointmentUpdatesFromTwoReads": 2,
+      "privateAppointmentProjectionReturned": true,
+      "userAssociationSetByRead": true,
+      "canonicalClientNotChecked": true,
+      "realDbMutations": 0,
+      "realProviderCalls": 0
+    }
+  ],
+  "productionPiiEndpointsCalled": 0,
+  "realProductionMutations": 0
+}

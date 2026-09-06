@@ -1,0 +1,323 @@
+{
+  "acceptedOwnerCheckpoint": "43007f03",
+  "runtimeCommit": "c22668ac6f5a61ddf4db75b08265a21e8fada405",
+  "productionRelease": "/opt/maya-saas/releases/20260906-p5-b25-c22668ac",
+  "b25ProductionRemediation": "PASS",
+  "b25": {
+    "phoneMatchAuthority": 0,
+    "canonicalAppointmentClientAuthority": "ENFORCED",
+    "clientWithoutMayaUser": "SUPPORTED",
+    "crossClientAppointmentDelivery": "BLOCKED BY VERIFIED AUTHORITY",
+    "deterministicPrimaryRoute": "ENFORCED",
+    "primaryRouteFixedBeforeEffect": true,
+    "crossChannelRetryAfterUnknown": false,
+    "fallbackAfterDeterministicFailure": false,
+    "reselectionAfterRevocation": false,
+    "explicitClientOverrideReplacesTenantSchedule": true,
+    "maxCurrentPolicyOccurrences": 4,
+    "maxWebPushFanOut": 5,
+    "duplicateLogicalReminderPossible": false,
+    "newSchema": false,
+    "newModels": 0,
+    "newActionClasses": 0
+  },
+  "proofs": {
+    "postgresAdversarialConcurrency": "20 cases PASS",
+    "cleanReplay": "79 migrations PASS; isolated owned DB",
+    "targeted": "6 suites / 47 tests PASS",
+    "deploymentRegression": "358 suites / 2924 tests PASS",
+    "mandatoryGates": "Prisma validate, lint, typecheck, script typecheck, regression, build, preflight, migration/drift, spare readiness: PASS",
+    "finalAggregateRegression": "NOT RUN — STOP at new full-inventory blocker B26"
+  },
+  "schema": {
+    "repositoryMigrations": 79,
+    "accountedProductionMigrationRecords": 82,
+    "pendingMigrations": 0,
+    "drift": "NONE",
+    "newMigrations": 0
+  },
+  "productionStructuralReadOnlyVerification": {
+    "health": {
+      "status": "ok",
+      "service": "maya-saas-backend",
+      "release": "20260906-p5-b25-c22668ac",
+      "started_at": "2026-09-06T08:47:42.500Z",
+      "timestamp": "2026-09-06T08:51:16.818Z"
+    },
+    "readiness": {
+      "status": "ready",
+      "service": "maya-saas-backend",
+      "checks": {
+        "database": "ready"
+      },
+      "timestamp": "2026-09-06T08:51:16.825Z"
+    },
+    "maya-saas": "active",
+    "barbershop-pwa": "active",
+    "barbershop-bot": "inactive",
+    "pwaPortListening": true,
+    "maya-saasErrorCount": 0,
+    "barbershop-pwaErrorCount": 0,
+    "pwaRequestOnly": true,
+    "spareSmokePortListening": false,
+    "hashes": {
+      "webhook_server.py": "994e7b27af40bfd4e8ade8ca998c03e2c4a5d9eebd09c82cbdffaecb5dbcd1d6",
+      "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+      "package5_control_plane_runtime_guard.py": "31f73e4a9f3f81dd91f929c26c3f346d1151066b97cbf30ee54e079a9c369243",
+      "realtime_bridge.py": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+      "legacy_client_command_bridge.py": "2e705209e62bd81283bd5cfa66320f72eab41e2ccfccd006d75797f1fefa5b2a",
+      "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d"
+    }
+  },
+  "freshFinalGateStartedFromScratch": true,
+  "sourceInventoryCounts": {
+    "release": "/opt/maya-saas/releases/20260906-p5-b25-c22668ac",
+    "pythonFiles": 89,
+    "productionPythonFiles": 69,
+    "pythonRoutes": 100,
+    "pythonMutationLikeSites": 619,
+    "backendJs": 549,
+    "backendScripts": 14,
+    "sourceTs": 549,
+    "tsRoutes": 221,
+    "tsMutationLikeSites": 518,
+    "freshSurfaceHashes": {
+      "api-proxy.php": "df803a6455b186ec37db426250205107b8501afbb6192e22b67238e70c87fe66",
+      "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "package5_control_plane_runtime_guard.py": "31f73e4a9f3f81dd91f929c26c3f346d1151066b97cbf30ee54e079a9c369243",
+      "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+      "maya-app.html": "d0d24628674a1b76a838d2200e1865ba7dad0c334371a2b0d2c517544f00cd6e",
+      "app.html": "4db1416d2bb6dbd72ec7801552c6f4f3084252bd28464f76b47d1679c3d60e53",
+      "webhook_server.py": "994e7b27af40bfd4e8ade8ca998c03e2c4a5d9eebd09c82cbdffaecb5dbcd1d6"
+    }
+  },
+  "compiledArtifactsMatched": 549,
+  "familyInventory": [
+    {
+      "family": "A15",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A16",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A17",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A18",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A22",
+      "acceptedWave": 1,
+      "foundationSource": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "sourceSha256": "1cee4166d218a0748dcab14560aef6c489a1d246dc3aa92296ab6da1cc4b4c25",
+      "deployedFoundation": {
+        "file": "package5-wave1/package5-wave1-canonical-cutover.service.js",
+        "sha256": "727cca98d82deef7760d36788441c733c86fae82a2f0a96fb0654f90ac038482"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A23",
+      "acceptedWave": 1,
+      "foundationSource": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "sourceSha256": "1cee4166d218a0748dcab14560aef6c489a1d246dc3aa92296ab6da1cc4b4c25",
+      "deployedFoundation": {
+        "file": "package5-wave1/package5-wave1-canonical-cutover.service.js",
+        "sha256": "727cca98d82deef7760d36788441c733c86fae82a2f0a96fb0654f90ac038482"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A25",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A26",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A27",
+      "acceptedWave": 4,
+      "foundationSource": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+      "sourceSha256": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+      "deployedFoundation": {
+        "file": "package5-wave4/package5-wave4-canonical-cutover.service.js",
+        "sha256": "d5eab02857a3b017dd739077049722204457d96d5f47ef4e2e71ff3a57231d6f"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A28",
+      "acceptedWave": 4,
+      "foundationSource": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+      "sourceSha256": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+      "deployedFoundation": {
+        "file": "package5-wave4/package5-wave4-canonical-cutover.service.js",
+        "sha256": "d5eab02857a3b017dd739077049722204457d96d5f47ef4e2e71ff3a57231d6f"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A29",
+      "acceptedWave": 5,
+      "foundationSource": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+      "sourceSha256": "fb3e3ef76153d3f880936c950175de53dee18f519d74218cc46b79ca003e2bc4",
+      "deployedFoundation": {
+        "file": "package5-wave5/package5-wave5-canonical-cutover.service.js",
+        "sha256": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A30",
+      "acceptedWave": 6,
+      "foundationSource": "package5-wave6/package5-wave6.service.ts",
+      "sourceSha256": "9c87dbf0db375ee48c55ecf6ca26225577ce6d0cef5a96463d4f2d0d8f9bfe08",
+      "deployedFoundation": {
+        "file": "package5-wave6/package5-wave6.service.js",
+        "sha256": "cc8a10e97b30e1c44a0d924afd83527768cce293e7f85bda68e6707fc8cbcd02"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    },
+    {
+      "family": "A31",
+      "acceptedWave": 5,
+      "foundationSource": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+      "sourceSha256": "fb3e3ef76153d3f880936c950175de53dee18f519d74218cc46b79ca003e2bc4",
+      "deployedFoundation": {
+        "file": "package5-wave5/package5-wave5-canonical-cutover.service.js",
+        "sha256": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d"
+      },
+      "acceptedFoundationUnchanged": true,
+      "verdict": "freshly inventoried; aggregate STOP at B26"
+    }
+  ],
+  "familyInventoryCoverage": "13/13",
+  "acceptedWaveFoundationsUnchanged": true,
+  "newBlocker": {
+    "id": "B26",
+    "family": "A18",
+    "path": "GET /api/appointments/my",
+    "activePwaCallers": true,
+    "canonicalAuthorityReadsInProbe": 0,
+    "phoneAsClientAuthority": true,
+    "readSurfaceAppointmentWrites": true,
+    "description": "Authenticated tenant User.phone selects CRM client appointments; GET sync creates/updates Appointment and may fill account clientId while mayaClientId belongs to another Client, without verified ClientChannelLink. The same read returns private appointment details.",
+    "evidence": [
+      {
+        "file": "maya-saas-backend/src/appointments/appointments.controller.ts",
+        "line": 56
+      },
+      {
+        "file": "maya-saas-backend/src/appointments/appointments.service.ts",
+        "line": 420
+      },
+      {
+        "file": "maya-saas-backend/src/appointments/appointments.service.ts",
+        "line": 453
+      },
+      {
+        "file": "maya-saas-backend/src/appointments/tenant-appointment.repository.ts",
+        "line": 75
+      },
+      {
+        "file": "maya-saas-backend/src/appointments/tenant-appointment.repository.ts",
+        "line": 149
+      },
+      {
+        "file": "maya-saas-backend/src/appointments/tenant-appointment.repository.ts",
+        "line": 184
+      },
+      {
+        "file": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+        "line": 893
+      }
+    ],
+    "proof": "package5-b26-appointments-read-authority.proof.json",
+    "productionPiiEndpointInvocations": 0,
+    "remediated": false,
+    "limitations": "Real compiled controller/service/repository with synthetic CRM and in-memory Prisma boundary. Existing authentication/tenant/booking gates are prerequisites; no unauthenticated or cross-tenant HTTP bypass claimed."
+  },
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "productionDirectBusinessProviderValueMutationBypasses": "PRESENT — B26 appointment GET writer",
+  "legacyIdentityProjectionFallbacks": "PRESENT — B26 phone/account appointment authority",
+  "legacyMutatingOwnersActive": "PRESENT — B26 GET sync",
+  "wavesAccepted": "6/6",
+  "d1ThroughD7": "Accepted baselines preserved; global enforcement not certified while B26 remains",
+  "package4CrossPackageGuards": "PASS — fresh active runtime guard + deployment regression",
+  "realProductionMutationsForFinalProof": 0,
+  "realRemindersForSmoke": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesTouched": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "scope": "only B25-owned resources; no browser/watcher created",
+    "method": "owned process selectors; isolated DB dropped/PostgreSQL stopped/data directory removed; production spare reaped"
+  }
+}
