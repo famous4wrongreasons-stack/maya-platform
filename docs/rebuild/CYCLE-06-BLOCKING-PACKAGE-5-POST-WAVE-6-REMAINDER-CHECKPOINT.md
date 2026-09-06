@@ -1,6 +1,11 @@
-# Package 5 post-Wave-6 remainder — B33 production PASS; STOP at B34
+# Package 5 post-Wave-6 remainder — B34 authority decision STOP
 
-Current continuation: [post-B33 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B33-REMAINDER-CHECKPOINT.md)
+Current continuation: [B34 contract reconstruction / minimal authority proposal](CYCLE-06-BLOCKING-PACKAGE-5-B34-REVIEW-AUTHORITY-CONTRACT-DECISION.md).
+Changed evidence already conflicts under the accepted AC4 contract. Stage 1
+found no approved legacy map-card/provider → tenant binding. Proposed Option A
+retires the legacy import/sync path and keeps existing canonical manual ingress;
+approval pending, no runtime/schema/deployment changes. This does not reopen B33.
+Accepted production baseline: [post-B33 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B33-REMAINDER-CHECKPOINT.md)
 → [B33 production / B34 Final Gate STOP report](CYCLE-06-BLOCKING-PACKAGE-5-B33-DEPLOYED-FINAL-GATE-STOP-REPORT.md).
 
 Runtime `0636e559`, release `20260906-p5-b33-0636e559`. B29–B33 production PASS.

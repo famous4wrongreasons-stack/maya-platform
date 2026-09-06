@@ -1,0 +1,62 @@
+{
+  "scope": "B34 Stage 1 documentation/source-authority proposal only",
+  "baseCommit": "6a2cbb81b7c664ebff833c6ae02b1cd0d13f820f",
+  "preflight": {
+    "fetchOrigin": "PASS",
+    "isolatedBranch": "contour/b29-remediation",
+    "canonicalBranch": "codex/maya-brain-systemic-release-20260815",
+    "headEqualsOriginAtStart": true,
+    "ahead": 0,
+    "behind": 0,
+    "unpushed": 0,
+    "dirtyAtStart": 0
+  },
+  "staticInventory": {
+    "result": "PASS",
+    "applicationImports": 0,
+    "pythonRootNonTestModules": 85,
+    "relevantFunctions": 22,
+    "syntacticCalls": 56,
+    "sqlLiteralSites": 6,
+    "sourceHashesRechecked": true,
+    "runtimeGuard": false
+  },
+  "existingUnitCase": {
+    "command": "node node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/package5-wave4/package5-wave4-canonical-cutover.service.spec.ts --testNamePattern=ReviewFactService",
+    "result": "PASS",
+    "passed": 1,
+    "failed": 0,
+    "unselected": 3,
+    "persistence": "mock",
+    "databaseConnections": 0,
+    "logSha256": "1ec457a1dc41757b35462bb57fc58127adb343eacd7404d5c26de348e03ede39"
+  },
+  "b34ExecutableAuthorizationConcurrencyProof": "NOT RUN \u2014 awaiting source-authority/retirement decision",
+  "mandatoryRuntimeGates": "NOT RUN \u2014 no runtime/schema implementation",
+  "deployment": "NOT STARTED",
+  "freshFullFinalGate": "NOT STARTED \u2014 B34 remains unresolved",
+  "productionRequests": 0,
+  "productionReviewProviderBusinessMutations": 0,
+  "protectedMain": {
+    "statusEntries": 24,
+    "recordedFileHashesVerified": 22,
+    "statusMatchesAcceptedBaseline": true,
+    "recordedHashesMatchAcceptedBaseline": true,
+    "writes": 0
+  },
+  "preExistingDatabases": {
+    "protected": 17,
+    "accessed": 0
+  },
+  "ownedHygiene": {
+    "testDatabasesCreated": 0,
+    "backgroundProcessesStarted": 0,
+    "serversStarted": 0,
+    "browsersStarted": 0,
+    "productionStagingCreated": 0,
+    "remainingOwnedResources": 0
+  },
+  "chapter6Complete": false,
+  "chapter7Started": false,
+  "wave7Created": false
+}

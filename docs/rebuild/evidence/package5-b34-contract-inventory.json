@@ -1,0 +1,930 @@
+{
+  "audit": "B34 Stage 1 source/contract reconstruction; no remediation",
+  "baseCommit": "6a2cbb81b7c664ebff833c6ae02b1cd0d13f820f",
+  "canonicalReviewScalarFields": [
+    "id",
+    "tenantId",
+    "externalRef",
+    "source",
+    "rating",
+    "occurredAt",
+    "encryptedText",
+    "topicTagsJson",
+    "branchId",
+    "staffExternalId",
+    "createdAt",
+    "updatedAt"
+  ],
+  "canonicalKey": [
+    "tenantId",
+    "source",
+    "externalRef"
+  ],
+  "runtimeImports": 0,
+  "databaseConnections": 0,
+  "productionRequests": 0,
+  "pythonRootNonTestModules": 85,
+  "modules": [
+    {
+      "path": "ai администратор/admin_nlu.py",
+      "sha256": "394a37cc1cd272c20e915731e0bf4d9fcb44c3039c4e107bafe17466ca01153c"
+    },
+    {
+      "path": "ai администратор/ai_billing.py",
+      "sha256": "167c97fe839f50bca86e6120ed7a40d218b9fdb04207d2ebf3b1cbcb64ff2010"
+    },
+    {
+      "path": "ai администратор/analytics.py",
+      "sha256": "482bf63f01c580c319d3c02adb7c19190b72466a29d9aa270dfd9288fd93bf72"
+    },
+    {
+      "path": "ai администратор/anonymizer.py",
+      "sha256": "435e3fbe46d484ef479e5ca9c3ea502b9faf0ea1e6f5ffa830c392612ec141e2"
+    },
+    {
+      "path": "ai администратор/barber_knowledge.py",
+      "sha256": "54cf59b2ae7e0d21a91433214197bccfe2599410ddac3a81c0b57b352d4b300c"
+    },
+    {
+      "path": "ai администратор/birthday.py",
+      "sha256": "aa0bc1daa676df5e4c73bae91bfa58accc829b7638709bf2cbd044af6ee4b0e0"
+    },
+    {
+      "path": "ai администратор/bot.py",
+      "sha256": "af8e093c8c008f6078995a6cfe116e308f4bcc5a000e29ab9d22688ab31e4450"
+    },
+    {
+      "path": "ai администратор/broadcast_templates.py",
+      "sha256": "240f1cdf1b7f350b7679c93831c8ef6a3b8057ca0db5f9140b44fa087e6dca2d"
+    },
+    {
+      "path": "ai администратор/business_rules.py",
+      "sha256": "2a6b6246e7aad21800b34ba79df595386624fb52a65f798fd64fa680299cf2f4"
+    },
+    {
+      "path": "ai администратор/cert_pdf.py",
+      "sha256": "2b27531ee7b20453ce9275ef11b522cc12f75bb5abe70ba28fdb7b157d56f411"
+    },
+    {
+      "path": "ai администратор/chat_widgets.py",
+      "sha256": "b8cad7a4c4fe7a5ee2bf17786f24e3273c7342b023927e7729298eea3e7e0c62"
+    },
+    {
+      "path": "ai администратор/claude_ai.py",
+      "sha256": "d70e49ddbbf6880d5f7ad931709c1b1c04cdd6d0908ea7fbd737f86a1e525a59"
+    },
+    {
+      "path": "ai администратор/client_record_actions.py",
+      "sha256": "fbab221191169fdd0e6ec4615f699ce6041a99407a30445d62358481c7f84048"
+    },
+    {
+      "path": "ai администратор/config.example.py",
+      "sha256": "144113a61d77df253a4fc487a21738093131862ee16fabb420fe263c69133f9c"
+    },
+    {
+      "path": "ai администратор/cutmatch.py",
+      "sha256": "2d394832cc296f8f8d90417b04c787574aee8f32f1e89efea0b44b0692912612"
+    },
+    {
+      "path": "ai администратор/cycle_reminder.py",
+      "sha256": "3331cab02c1b5fdf9efad901d556aa3e8c8f101ab16078c6caf0984d51a1de87"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "sha256": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63"
+    },
+    {
+      "path": "ai администратор/freed_slot.py",
+      "sha256": "e0fa7df0cca9c80d159720c564bbd4bcf5c6869b2035a21408884fe59d4ec3c3"
+    },
+    {
+      "path": "ai администратор/generate_bind_codes.py",
+      "sha256": "32a20af2254fea27419351426137f9f73c42a048b226f4e0a5277d1eaf974aee"
+    },
+    {
+      "path": "ai администратор/growth_planner.py",
+      "sha256": "529ecf522677c8e141615ba8469a4a358a2cbc78f1908c3219b32294862e1bda"
+    },
+    {
+      "path": "ai администратор/identity_utils.py",
+      "sha256": "74375c8d75d68e76d3fefc44a9808ce677c2b2a9cee9a1a463fac74fd6f2342b"
+    },
+    {
+      "path": "ai администратор/import_gift_certs.py",
+      "sha256": "c1207d74f84e427c52e0593b7249f094729ec061a0990584a1b5821480b3e23e"
+    },
+    {
+      "path": "ai администратор/lead_alerts.py",
+      "sha256": "f8ae33186e832cdf2532d8cc8fcc8374ac2fc8e1bac7791daaff8119fb514db9"
+    },
+    {
+      "path": "ai администратор/legacy_appointment_bridge.py",
+      "sha256": "cdaf6df1e42343d22ea3272c17b2975c2f1a70b70941aca776f55303f4131a10"
+    },
+    {
+      "path": "ai администратор/legacy_client_command_bridge.py",
+      "sha256": "7c3e14d2a860233996eb416a862ba0bbec20b891348ea5b60b3e48c0e1f5ea64"
+    },
+    {
+      "path": "ai администратор/legacy_client_habits_bridge.py",
+      "sha256": "da048864a466a33d366ed64fc17b3fd2aa78be0c2bf2f10fc395d8010517bef1"
+    },
+    {
+      "path": "ai администратор/legacy_client_preferences_bridge.py",
+      "sha256": "e5b380291685d2a4c467f94560035a5e65f40d26b2ca22c15f78ef8a87b2b720"
+    },
+    {
+      "path": "ai администратор/legacy_wanted_slot_bridge.py",
+      "sha256": "9f331c19525093bf61e07ca08f382b0dc65c85308b9d76e3a058b50b641944cc"
+    },
+    {
+      "path": "ai администратор/local_stt.py",
+      "sha256": "76d583c4758e7b8ee96e4189a35059adb724952657b2d52cfeed80ec83ca6b32"
+    },
+    {
+      "path": "ai администратор/loyalty.py",
+      "sha256": "a73d0c0db7a00d908518188a8f8e394218959c73a1b84b40cfcc88e62339dc17"
+    },
+    {
+      "path": "ai администратор/market_intelligence.py",
+      "sha256": "fff91f11e6b43c2137afc3926ca0d85d80aa99879c665d0ebaaca9d950fd11be"
+    },
+    {
+      "path": "ai администратор/master_briefing.py",
+      "sha256": "24522ae9a1842c5628007934b65456f9253ebbfcce8b10dadfeba9babdce947f"
+    },
+    {
+      "path": "ai администратор/masters_ai.py",
+      "sha256": "a3d0b1a8f6cedcdc37ebc3dcd92caef96f94523d110a4bbd1769f3177dd43d08"
+    },
+    {
+      "path": "ai администратор/maya_capabilities.py",
+      "sha256": "5b5a06eb5124faf6a48428c14cadf61cbb1c7d62e84c609007403f953b8d747c"
+    },
+    {
+      "path": "ai администратор/maya_gift_certificate_activation_shadow_bridge.py",
+      "sha256": "532d9d62e8c751f9e7c1bf5dc0354d19676de357dddd67ceab13ae5e09d150a5"
+    },
+    {
+      "path": "ai администратор/maya_gift_certificate_purchase_shadow_bridge.py",
+      "sha256": "9e4a4f16f720a4ed1f9744464414a74048c40a2ce1856e947cc054095e4cbc1f"
+    },
+    {
+      "path": "ai администратор/maya_gift_certificate_redemption_shadow_bridge.py",
+      "sha256": "bc21230a6c134966f96cd389feb80bd4b64f8cf0ccd7d6b75b04335abdc576d7"
+    },
+    {
+      "path": "ai администратор/maya_identity.py",
+      "sha256": "99ece7c70319713e2f32ade3417af9990603f54aee31b42d55589f74a8ddd054"
+    },
+    {
+      "path": "ai администратор/maya_inbox_bridge.py",
+      "sha256": "d458b40932bd3a7c58ee9043822d864dca017c88ee15e00042d351dab6dbde3f"
+    },
+    {
+      "path": "ai администратор/maya_loyalty_backfill_shadow_bridge.py",
+      "sha256": "ac95f73f4ac24434c0e4b919fbf25cd33105adb5169dd71898cb929ea332c5ad"
+    },
+    {
+      "path": "ai администратор/maya_loyalty_expiry_shadow_bridge.py",
+      "sha256": "e1dd249483b729dc0ec7f11bde0f32491f6929222e62e80007d53110a297ce11"
+    },
+    {
+      "path": "ai администратор/maya_loyalty_grant_consume_shadow_bridge.py",
+      "sha256": "27edc3d49c5eb05945887292b39add63941d4d362ce785dfd3cdbfaf4d3fd62d"
+    },
+    {
+      "path": "ai администратор/maya_loyalty_grant_issue_shadow_bridge.py",
+      "sha256": "180e1e5d51dad7218f86cd9db0f41d9e7f7b6882a5b44dd0873dcf4752b61019"
+    },
+    {
+      "path": "ai администратор/maya_loyalty_import_shadow_bridge.py",
+      "sha256": "7bf26592f466d1a8cc7d84f98825718581266703ed8a1b62eaafb1b3faafbaad"
+    },
+    {
+      "path": "ai администратор/maya_loyalty_redemption_shadow_bridge.py",
+      "sha256": "7a928b71cbd32714bf149c473831a4afa9c4f8f50d8c9fbc44a82cef3516ca38"
+    },
+    {
+      "path": "ai администратор/maya_loyalty_refund_shadow_bridge.py",
+      "sha256": "bfb0180ed179316eedbf1d98152b5d455ea75f36eb8d7a4587de478ad57291c3"
+    },
+    {
+      "path": "ai администратор/maya_loyalty_shadow_bridge.py",
+      "sha256": "44ca839565134956b9ddd660abf306513150eacf9dcea753e9d0cb9061c871ba"
+    },
+    {
+      "path": "ai администратор/maya_recovery_bridge.py",
+      "sha256": "54c574a3140ca0eed97a4a39e608a0c986fe405708626552a3fac11a24cadfef"
+    },
+    {
+      "path": "ai администратор/maya_referral_create_shadow_bridge.py",
+      "sha256": "6f85a035653db8bbd581f2968e39018533b6f59f0ba083b77ef7d88875e76d6c"
+    },
+    {
+      "path": "ai администратор/maya_referral_resolve_shadow_bridge.py",
+      "sha256": "0bb218195d641b07ccaf4d48d4200fa9b2d507e5aa5aadf6888584f9ae7584bb"
+    },
+    {
+      "path": "ai администратор/maya_referral_reward_fulfill_shadow_bridge.py",
+      "sha256": "5d9b167c9aa6468a79681cf0a7d70bf849fd2c1cbe29ad15dbf23c59bd7d28c1"
+    },
+    {
+      "path": "ai администратор/maya_referral_reward_issue_shadow_bridge.py",
+      "sha256": "e4e4b9c61944d25810c3ffa4239f70de836b9386263e9364af950c62b5618ada"
+    },
+    {
+      "path": "ai администратор/maya_roles.py",
+      "sha256": "523eaf200fc8a7b1f433913982cd85f5b84e0680f570df726e701454abf7195a"
+    },
+    {
+      "path": "ai администратор/maya_shadow_bridge.py",
+      "sha256": "fae47049dccb1c9b2120100b622718be969ec4d9c217eec02b5c057cc444ff5f"
+    },
+    {
+      "path": "ai администратор/maya_subscription_activation_shadow_bridge.py",
+      "sha256": "3e3b859397b4deccb9519ccb288f239f246ef618effdd73365f80ecb6186cce3"
+    },
+    {
+      "path": "ai администратор/maya_subscription_cancellation_shadow_bridge.py",
+      "sha256": "4e8436258142236cf6968130911a4ac7561658c70866f9657950d5a3c6cc47a1"
+    },
+    {
+      "path": "ai администратор/maya_subscription_expiry_shadow_bridge.py",
+      "sha256": "72891f1f9ce000f5c37cfdc3252f3c3fe9beb9afb880e2f268dea0967b57c53f"
+    },
+    {
+      "path": "ai администратор/maya_subscription_purchase_bridge.py",
+      "sha256": "f6aece7fae433699b18b4287e994577ab24513a00abbb6c665df827b74d25af8"
+    },
+    {
+      "path": "ai администратор/maya_subscription_purchase_shadow_bridge.py",
+      "sha256": "740d3c35f316e22822d819b924e6dc3e22936f2d819050a5a97c62ce63e929f3"
+    },
+    {
+      "path": "ai администратор/maya_subscription_renewal_activation_shadow_bridge.py",
+      "sha256": "74bc58f53d9887d3de605d08f1042df9ee9bd874f5c5da3cbfd2418525ebfd1e"
+    },
+    {
+      "path": "ai администратор/maya_subscription_renewal_shadow_bridge.py",
+      "sha256": "a6b03f36fb9ac0fc111bbcb1a2696ef2ea2232cea0b75ac3a3b0ade269e3c923"
+    },
+    {
+      "path": "ai администратор/maya_subscription_revocation_shadow_bridge.py",
+      "sha256": "d7d6889a7fbe3e43333bc0ab5e9ce9459dc1fab7950afc203d3cd5747b4439ec"
+    },
+    {
+      "path": "ai администратор/maya_subscription_usage_shadow_bridge.py",
+      "sha256": "79e20cc5c3571327a3e47199d06f957d53b4ce381fbf53390fa44adda88678bf"
+    },
+    {
+      "path": "ai администратор/memory.py",
+      "sha256": "b286f39327adcc3e82c544ad4409d2e5c75a28e0b8367ceb9e16e320850c1b41"
+    },
+    {
+      "path": "ai администратор/migration.py",
+      "sha256": "3c6b5eea263026e9a70353ebb461e7caef64c7daf0ec932afffd50a9dfa19791"
+    },
+    {
+      "path": "ai администратор/owner_ai.py",
+      "sha256": "ffc92a469dada5525832f49574448ae30da2fa65867f5eeeb954691b36666311"
+    },
+    {
+      "path": "ai администратор/package4_value_runtime_guard.py",
+      "sha256": "8fa94249d1aa42d2eff14260c30fccf0949a263a9ce8c3d0dd893ebf3b7e3a51"
+    },
+    {
+      "path": "ai администратор/package5_control_plane_runtime_guard.py",
+      "sha256": "e379c6a965be9e5654b9dfd015b5c556f84228659247b7ae4c48e388777f9122"
+    },
+    {
+      "path": "ai администратор/package5_loyalty_read_guard.py",
+      "sha256": "09df868144ae2c5d828a4a55a4efdb769fa84663c365e4b6d79669426f2c4fd9"
+    },
+    {
+      "path": "ai администратор/pii_crypto.py",
+      "sha256": "4b3ebf61cfd0db3b8e13879aabccd46ff570d1da85492b10438f9669bbbdd9b0"
+    },
+    {
+      "path": "ai администратор/privacy_policy.py",
+      "sha256": "66f8a003dcb3eab27138acebc2cd7daffefa1afcc2487599e55d773008cd0701"
+    },
+    {
+      "path": "ai администратор/prompts.py",
+      "sha256": "02c29e8717d1394770351f05378f3557d8bb1ffe0c4fcfa26ab6f6bf464bf0f5"
+    },
+    {
+      "path": "ai администратор/reactivation.py",
+      "sha256": "0f0ab3769ba502c2226e080e3d5743f74863a695c94cf655c9662ab2f924f2b9"
+    },
+    {
+      "path": "ai администратор/realtime_bridge.py",
+      "sha256": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437"
+    },
+    {
+      "path": "ai администратор/referral.py",
+      "sha256": "6e495d02f3a6441af097bf99c5c384529b3e6ba818f3194311a87b72f3b87b99"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "sha256": "35e230a2fa67ada544592905f907df30b05929d18f3f0a0849d10b03f695cdc6"
+    },
+    {
+      "path": "ai администратор/reviews.py",
+      "sha256": "16654d2a3f087c92a5dab8ce6941156ba29c371a840c336b906120afdb0a92df"
+    },
+    {
+      "path": "ai администратор/sources.py",
+      "sha256": "b5f64a7ec451125d48a8e4b599ecfc7feab5bab431dd11c2b835a09602ba0c1f"
+    },
+    {
+      "path": "ai администратор/subscriptions.py",
+      "sha256": "72c1f2525e8fb7ee188ecbb002a5ecfe7cae3b3a0f87d382b9c7c7b63e2afac7"
+    },
+    {
+      "path": "ai администратор/voice.py",
+      "sha256": "9482b4f221fe9e309e9b8edc472b091b7ca48b64fbb5dd55d76d7794d1a83459"
+    },
+    {
+      "path": "ai администратор/voice_guard.py",
+      "sha256": "e0f0446fa6f4e94720daed9a1a4861b5b3ebcb56cbe8b514af3da135af796b0d"
+    },
+    {
+      "path": "ai администратор/web_auth.py",
+      "sha256": "d5af185be0073187de9fc0023c3b0ea4d711991344523a0fa5fbe4fd88513a19"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "sha256": "dbe8f4ccf6d1811c82e8f3401457156eaa2ca289611eb8d231dc1d01c00d4f61"
+    },
+    {
+      "path": "ai администратор/yclients.py",
+      "sha256": "55cf23f02d6e81c91f1f79ae2ef21bda1307f07f6206212b14dd426395617b5a"
+    },
+    {
+      "path": "ai администратор/yukassa_api.py",
+      "sha256": "8b4655c8591762a21a9481da6a986b07b8f3a5b5dda2ae0a0dadedff6d703e7d"
+    }
+  ],
+  "functions": [
+    {
+      "path": "ai администратор/database.py",
+      "name": "_external_reviews_ensure",
+      "line": 2658,
+      "endLine": 2681,
+      "sourceSha256": "3534d0e980b307d7561f14cbd6018b1b38b4e486e00854251b2b84cc2366e911"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "name": "upsert_external_review",
+      "line": 2684,
+      "endLine": 2724,
+      "sourceSha256": "806241a1e516a703d7670f94f6976f991516e312348a07773ca6a4ed22e176f5"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "name": "list_external_reviews",
+      "line": 2727,
+      "endLine": 2740,
+      "sourceSha256": "932d422f19fc7ff4060d364e9adedd90fbe23b353628e623fa310a59a4c8c970"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "name": "list_unalerted_external_reviews",
+      "line": 2743,
+      "endLine": 2753,
+      "sourceSha256": "a05fd048878a0541cae5ef2578f907266d4ebd52a3baf3c3ab20ac374a4c5296"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "name": "mark_external_reviews_alerted",
+      "line": 2756,
+      "endLine": 2776,
+      "sourceSha256": "9a8bd4fa27afb02e757c0046eeaa51314fcd6ca23c3890e4bb21bac31c21576b"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "name": "mark_external_reviews_alerted_for_source",
+      "line": 2779,
+      "endLine": 2788,
+      "sourceSha256": "48e61d497581ca3fde7df16e962f9bcd118d37ed115efbc94c3507fb6c9753f7"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "name": "parse_yandex_public_page",
+      "line": 135,
+      "endLine": 198,
+      "sourceSha256": "e0f9a1d68829035be78d724f8a93ae42db8387a729bc749760c1b199c5da164e"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "name": "parse_2gis_public_page",
+      "line": 201,
+      "endLine": 260,
+      "sourceSha256": "ef3c7bb0689b0ea2f2d9d945d914577ea4061b84c4bb173b0c1d6cfba1279800"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "name": "_public_page_url",
+      "line": 263,
+      "endLine": 283,
+      "sourceSha256": "f4ebed8514c2fcb2450f9f113783d80452f5f82c60c0576676cb0f0417956efe"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "name": "fetch_public_source",
+      "line": 286,
+      "endLine": 318,
+      "sourceSha256": "256a541e8b32fa0738ac2c58452cfbf99d0897c15b80d2c9481f3211c743dcfc"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "name": "save_source_snapshot",
+      "line": 399,
+      "endLine": 422,
+      "sourceSha256": "6fd59535267b4e34f16999375194a2d0eb960953e305314b9d9d69d37c2491d6"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "name": "refresh_2gis_stats",
+      "line": 458,
+      "endLine": 515,
+      "sourceSha256": "c0ebff7df9ab7befaca3ac2e06a396e2ec9d8b3106b2fc7f29f327a99658c673"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "name": "import_reviews",
+      "line": 518,
+      "endLine": 564,
+      "sourceSha256": "cdea9dbf3c7cde1f916452fc91378fa31fa5c6bb1b01b08dc5da25382f15cbf8"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "name": "refresh_public_reviews",
+      "line": 567,
+      "endLine": 639,
+      "sourceSha256": "6f2eefe936991f92c5d26e7e94383fdd680fa89ae5d03428493742264a6d1aa5"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "name": "reputation_snapshot",
+      "line": 787,
+      "endLine": 878,
+      "sourceSha256": "c72be12c9c57b7febe1a2b8e2d8695a29bef956e1ea2156c77a531e283bfff10"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "name": "_panel_resolve_role",
+      "line": 1968,
+      "endLine": 1996,
+      "sourceSha256": "c32613a9979d4b13cf16b1272c76f1678e46a6fae3ec640bb571ce709730d709"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "name": "_panel_auth",
+      "line": 1999,
+      "endLine": 2019,
+      "sourceSha256": "19c2d25865b2db6d4b4c0dbb7261ef7ca8d63634b606dfe1f2b89bc9f9fbc182"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "name": "panel_reviews_handler",
+      "line": 3598,
+      "endLine": 3647,
+      "sourceSha256": "ca3d62100ae785866c2a433c493f6e99e9014aafa9dab7dac69b823e8ca3e000"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "name": "panel_external_reviews_import_handler",
+      "line": 3650,
+      "endLine": 3689,
+      "sourceSha256": "44b17d43f75a6e4cdd6050cf5df54f8eaeb94b7e0b2a061a66314303011bcfd5"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "name": "panel_reputation_refresh_handler",
+      "line": 3692,
+      "endLine": 3720,
+      "sourceSha256": "03ac74db1056d56baf8821ffa3eaf3517f1d584f616998e3183f736b63f62162"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "name": "_notify_owner_reputation",
+      "line": 10543,
+      "endLine": 10575,
+      "sourceSha256": "0a51018702e809143b060d17034b60c0d65b9d75a8153fcf506de9c305acee6f"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "name": "reputation_monitor_loop",
+      "line": 10578,
+      "endLine": 10601,
+      "sourceSha256": "54142649cd18bbcca46519f45d1f78393c6174098b2dcc5ba6e6affd8039b61b"
+    }
+  ],
+  "calls": [
+    {
+      "path": "ai администратор/database.py",
+      "line": 2660,
+      "callee": "conn.executescript"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 56,
+      "callee": "conn.executescript"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2681,
+      "callee": "conn.execute"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2695,
+      "callee": "_external_reviews_ensure"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2696,
+      "callee": "conn.execute('SELECT id FROM external_reviews WHERE source = ? AND external_id = ?', (str(source or '')[:24], str(external_id or '')[:160])).fetchone"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2700,
+      "callee": "conn.execute"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2718,
+      "callee": "conn.execute('SELECT * FROM external_reviews WHERE source = ? AND external_id = ?', (str(source or '')[:24], str(external_id or '')[:160])).fetchone"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2732,
+      "callee": "_external_reviews_ensure"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2733,
+      "callee": "conn.execute(\"SELECT source, external_id, rating, review_text, published_at, imported_at, response_state FROM external_reviews WHERE COALESCE(NULLIF(published_at, ''), imported_at) >= ? ORDER BY COALESCE(NULLIF(published_at, ''), imported_at) DESC LIMIT ?\", (cutoff, max(1, min(int(limit or 300), 1000)))).fetchall"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2746,
+      "callee": "_external_reviews_ensure"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2747,
+      "callee": "conn.execute(\"SELECT id, source, external_id, rating, review_text, published_at, imported_at FROM external_reviews WHERE alerted_at IS NULL ORDER BY COALESCE(NULLIF(published_at, ''), imported_at) ASC LIMIT ?\", (max(1, min(int(limit or 20), 100)),)).fetchall"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2770,
+      "callee": "_external_reviews_ensure"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2771,
+      "callee": "conn.execute"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2782,
+      "callee": "_external_reviews_ensure"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2783,
+      "callee": "conn.execute"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2678,
+      "callee": "conn.execute('PRAGMA table_info(external_reviews)').fetchall"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2696,
+      "callee": "conn.execute"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2718,
+      "callee": "conn.execute"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2733,
+      "callee": "conn.execute"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2747,
+      "callee": "conn.execute"
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2678,
+      "callee": "conn.execute"
+    },
+    {
+      "path": "ai администратор/market_intelligence.py",
+      "line": 563,
+      "callee": "reputation.parse_2gis_public_page"
+    },
+    {
+      "path": "ai администратор/owner_ai.py",
+      "line": 6135,
+      "callee": "reputation.reputation_snapshot"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 289,
+      "callee": "_public_page_url"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 295,
+      "callee": "parse_yandex_public_page"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 417,
+      "callee": "database.set_setting"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 794,
+      "callee": "refresh_2gis_stats"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 293,
+      "callee": "parse_2gis_public_page"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 307,
+      "callee": "parse_yandex_public_page"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 323,
+      "callee": "database.get_setting"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 501,
+      "callee": "save_source_snapshot"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 539,
+      "callee": "database.upsert_external_review"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 789,
+      "callee": "database.list_external_reviews"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 575,
+      "callee": "fetch_public_source"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 576,
+      "callee": "import_reviews"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 577,
+      "callee": "save_source_snapshot"
+    },
+    {
+      "path": "ai администратор/reputation.py",
+      "line": 585,
+      "callee": "database.mark_external_reviews_alerted_for_source"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 12070,
+      "callee": "web_app.router.add_post"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 12072,
+      "callee": "web_app.router.add_post"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 12073,
+      "callee": "web_app.router.add_options"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 12074,
+      "callee": "web_app.router.add_post"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 12160,
+      "callee": "asyncio.create_task"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 3666,
+      "callee": "asyncio.to_thread"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 3683,
+      "callee": "asyncio.to_thread"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 3704,
+      "callee": "asyncio.to_thread"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 3705,
+      "callee": "asyncio.to_thread"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 3714,
+      "callee": "asyncio.to_thread"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 12160,
+      "callee": "reputation_monitor_loop"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 3638,
+      "callee": "asyncio.to_thread"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 3675,
+      "callee": "asyncio.to_thread"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 3708,
+      "callee": "_notify_owner_reputation"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 3710,
+      "callee": "asyncio.to_thread"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 10583,
+      "callee": "asyncio.to_thread"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 10584,
+      "callee": "asyncio.to_thread"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 10587,
+      "callee": "_notify_owner_reputation"
+    },
+    {
+      "path": "ai администратор/webhook_server.py",
+      "line": 10589,
+      "callee": "asyncio.to_thread"
+    }
+  ],
+  "reviewSqlLiteralSites": [
+    {
+      "path": "ai администратор/database.py",
+      "line": 2660,
+      "literalSha256": "b254830be3cb6d5d1eee4a82bce804c88560cdfa338c48d8199e12c81cdcbc9e",
+      "operations": [
+        "CREATE TABLE"
+      ]
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 56,
+      "literalSha256": "9e5858ff39d3ff509313fc86d36253ea850d89a3f4cb73542a306739f6a928b4",
+      "operations": [
+        "CREATE TABLE",
+        "update"
+      ]
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2681,
+      "literalSha256": "46b020ca7a7465f3a58818f3dd6d4a212533bad13b8a7a1bfab73f644d38b12a",
+      "operations": [
+        "ALTER TABLE"
+      ]
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2701,
+      "literalSha256": "ac3dcff5a1499192efdd0e38f1c2a8f99355a9cae9093b726fcc318d2b30d388",
+      "operations": [
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2784,
+      "literalSha256": "5128e8892d9c3025e0566c8de10ece13605762e153d6c04fd9d01b89156e2fe0",
+      "operations": [
+        "UPDATE"
+      ]
+    },
+    {
+      "path": "ai администратор/database.py",
+      "line": 2772,
+      "literalSha256": "797605eee6bde0c638c97d33381fac7cdc87a7ab0ff164382e57bd2f6f781a0c",
+      "operations": [
+        "UPDATE"
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "ff311c9f19c1bd27c931604a27e695e6120caad1f6045c662c98fd46d58c0aaa"
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260814190000_business_content_registry/migration.sql",
+      "sha256": "5e7c942953a1e2caeb99a432ff5639fc6c05d2cd06fe086bc7c9d8daf0bc5faa"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "sha256": "16630d572e0379bb2eaf9fe3e65aa9542a6c62b20341efc103be83a1842fe94f"
+    },
+    {
+      "path": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "sha256": "e38488f7f2e28bf0dfdc487f10b71e22ec6493bb3af93aeaf5f522da12d4922a"
+    },
+    {
+      "path": "maya-saas-backend/src/business-content/business-content.service.ts",
+      "sha256": "09461170bb24a4b92793d4d2d6e2cd2ea6e8932ca8564e29bf103064355a03d4"
+    },
+    {
+      "path": "maya-saas-backend/src/business-content/dto/business-review.dto.ts",
+      "sha256": "f422283480eeabafebbdddc6dbff5edc967d01830298b5ba0d561d508cda2d53"
+    },
+    {
+      "path": "maya-saas-backend/src/auth/jwt.strategy.ts",
+      "sha256": "4ce30ef505890a8f6d7fc83be337ed7e1de5b8c967b709c689174695edc0f177"
+    },
+    {
+      "path": "maya-saas-backend/src/main.ts",
+      "sha256": "b866a57663c01f729b05924926101e65f3d572ec6367fd2e89f44ce4592ecac4"
+    },
+    {
+      "path": "maya-saas-backend/src/guards/roles.guard.ts",
+      "sha256": "fc145030d1609d6973731e14d29e7d34a9e514f4369cb5da8552a4e0197d11b8"
+    },
+    {
+      "path": "maya-saas-backend/src/guards/tenant-access.guard.ts",
+      "sha256": "11a60139e4ead95894f0a50ead0dfdb5c75c6fbc6fd098de86469e4c69f29281"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave4/package5-wave4-canonical-cutover.service.spec.ts",
+      "sha256": "31a1c4b6e1ee0abf164537cdadad36a66c95bcd1c5a1f85f3425a53ef46759cc"
+    },
+    {
+      "path": "maya-saas-backend/src/tenancy/bridge-source.service.ts",
+      "sha256": "3cc2ea66f0cd72e7c21c052938d8cb1c7e953685db55023ec79dc2b12abf1f85"
+    },
+    {
+      "path": "maya-saas-backend/src/common/feature-catalog.ts",
+      "sha256": "d0acf1f7b653daeee5dc1437b61e8ba15a4041bb865584c46d9e76c6291f704d"
+    },
+    {
+      "path": "ai администратор/legacy_client_command_bridge.py",
+      "sha256": "7c3e14d2a860233996eb416a862ba0bbec20b891348ea5b60b3e48c0e1f5ea64"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-4-A27-A28-RUNTIME-CONTRACT-GATE.md",
+      "sha256": "6f39ff57431da691f92938e4903e9552cd60d011e09e372187216d18e9d2d6f4"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-AUTHORITY-CLASSIFICATION-MINIMUM-SCHEMA-DECISION-GATE.md",
+      "sha256": "9889c5978d71f5be7437f8e42c42e33316663941c18cf81b0fee4c22058cd6db"
+    }
+  ],
+  "limits": [
+    "Syntactic call/literal inventory, not an executable closure proof.",
+    "No live production freshness claim; use accepted checkpoint anchors separately.",
+    "Missing source-binding contract is a documented review conclusion, not a regex proof."
+  ]
+}

@@ -1,5 +1,14 @@
 # Package 5 remainder — B33 production PASS; STOP at B34
 
+Current continuation: [B34 exact review contract / authority decision](CYCLE-06-BLOCKING-PACKAGE-5-B34-REVIEW-AUTHORITY-CONTRACT-DECISION.md).
+Stage 1 confirms that changed-source evidence already **conflicts and preserves
+the original**. The unresolved boundary is legacy source/tenant authority:
+global Yandex/2GIS card configuration plus a Telegram owner is not a canonical
+tenant binding. Proposed Option A retires legacy import/sync and retains the
+existing Maya-authenticated manual ingress, with zero new schema/actions and no
+historical backfill. That retirement is not yet approved or implemented.
+B34 remains active; production remediation/deployment not started. No B33 reopen.
+
 Accepted B33 decision checkpoint: `8a5bd92c`, Option A. Schema commit `3e27bc9c`;
 runtime commit `0636e559`, active release `20260906-p5-b33-0636e559`.
 
