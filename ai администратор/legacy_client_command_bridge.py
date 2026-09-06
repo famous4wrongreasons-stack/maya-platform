@@ -31,7 +31,7 @@ def command(operation: str, proof: str, payload: dict) -> dict:
     if operation not in {
         "consent", "status", "issue", "consume", "delivery-consent", "push-subscribe", "push-unsubscribe",
         "booking-prefill", "appointment-create", "appointment-cancel", "appointment-reschedule",
-        "appointment-services", "cabinet-projection", "realtime-authority",
+        "appointment-services", "cabinet-projection", "realtime-authority", "loyalty-projection",
     }:
         raise ValueError("unsupported_client_command")
     from config import YCLIENTS_COMPANY_ID
@@ -132,3 +132,12 @@ def consent_status(result: dict) -> str:
     if not result.get("privacy"):
         return "need_pdn"
     return "pass" if result.get("marketing_decided") else "need_marketing"
+
+
+def loyalty_projection() -> dict:
+    """Query exact verified Client only; no legacy identity or value fallback."""
+    from legacy_client_habits_bridge import current_context
+    context = current_context()
+    if context is None:
+        raise ValueError("verified_client_link_required")
+    return command("loyalty-projection", context.proof, {})

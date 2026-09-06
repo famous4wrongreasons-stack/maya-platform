@@ -714,6 +714,8 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
                     findings.append(Finding("b24_web_push", f"{path.name}:{node.lineno} uses plaintext legacy Web Push registry"))
                 if re.search(r"\b(?:INSERT INTO|UPDATE|DELETE FROM|FROM) TIPS\b", normalized):
                     findings.append(Finding("b22_tip_authority", f"{path.name}:{node.lineno} uses legacy tip facts"))
+    from package5_loyalty_read_guard import scan_loyalty_reads
+    findings.extend(Finding('b27_loyalty_read', detail) for detail in scan_loyalty_reads(root, overrides))
     return findings
 
 

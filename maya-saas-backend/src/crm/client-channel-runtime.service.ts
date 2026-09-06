@@ -573,6 +573,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
   async cabinetProjection(channelProof: string) {
     const now = new Date();
     const projection = await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SET TRANSACTION READ ONLY`;
       const channel = await this.channels.authenticate(channelProof, tx);
       const links = await tx.clientChannelLink.findMany({
         where: {
@@ -613,6 +614,18 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         },
       });
       if (!client || client.mergedIntoClientId) return null;
+      if (
+        client.crmLinks.length &&
+        (await tx.unresolvedClientIdentityHold.findFirst({
+          where: {
+            tenantId: channel.tenantId,
+            resolvedAt: null,
+            OR: client.crmLinks,
+          },
+          select: { id: true },
+        }))
+      )
+        return null;
 
       const profile = await tx.customerProfile.findUnique({
         where: {

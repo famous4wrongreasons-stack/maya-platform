@@ -1686,39 +1686,9 @@ async def cabinet_me_handler(request: web.Request) -> web.Response:
     return await _build_full_cabinet(request, {})
 
 
-async def internal_loyalty_snapshot_handler(request: web.Request) -> web.Response:
-    """Read-only bridge from MAYA OS to the existing loyalty ledger.
-
-    The route deliberately returns no profile or contact data. It is protected
-    by a server-only token because the public reverse proxy can also reach this
-    aiohttp application.
-    """
-    supplied_token = request.headers.get("X-Maya-Legacy-Bridge", "").strip()
-    if (
-        not _MAYA_LEGACY_BRIDGE_TOKEN
-        or not supplied_token
-        or not hmac.compare_digest(supplied_token, _MAYA_LEGACY_BRIDGE_TOKEN)
-    ):
-        raise web.HTTPNotFound()
-
-    try:
-        body = await request.json()
-        telegram_user_id = int(body.get("telegram_user_id", 0))
-    except (AttributeError, TypeError, ValueError, _json.JSONDecodeError):
-        return web.json_response({"error": "invalid_request"}, status=400)
-
-    if telegram_user_id <= 0:
-        return web.json_response({"error": "invalid_request"}, status=400)
-
-    client = database.get_client(telegram_user_id)
-    if not client:
-        return web.json_response({"found": False})
-
-    return web.json_response({
-        "found": True,
-        "balance": max(0, int(database.loyalty_balance(int(client["id"])) or 0)),
-        "source": "maya_ledger",
-    })
+async def internal_loyalty_snapshot_handler(request):
+    """B27: raw Telegram identity is not a Client/value read authority."""
+    return web.json_response({"error": "FEATURE_NOT_AVAILABLE"}, status=410)
 
 
 async def internal_privacy_telegram_handler(request: web.Request) -> web.Response:

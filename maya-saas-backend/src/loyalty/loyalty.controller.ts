@@ -60,7 +60,7 @@ export class AdminLoyaltyController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('userId') userId: string,
   ) {
-    return this.loyaltyService.getForUser(user.tenantId!, userId);
+    return this.loyaltyService.getStateForUser(user.tenantId!, userId);
   }
 
   @Post(':userId/adjust')

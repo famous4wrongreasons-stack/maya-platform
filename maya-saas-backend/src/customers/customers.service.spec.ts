@@ -83,8 +83,20 @@ describe('CustomersService', () => {
     const authoritySnapshotMock: jest.MockedFunction<
       LoyaltyService['authoritySnapshot']
     > = jest.fn().mockResolvedValue(snapshotAuthorityView('legacy_bot'));
-    const loyaltyService: Pick<LoyaltyService, 'authoritySnapshot'> = {
+    const loyaltyService: Pick<
+      LoyaltyService,
+      'authoritySnapshot' | 'getStateForUser'
+    > = {
       authoritySnapshot: authoritySnapshotMock,
+      getStateForUser: jest.fn().mockResolvedValue({
+        balance: 640,
+        source: 'internal',
+        authority: 'maya',
+        authority_scope: 'resolved',
+        sync_status: 'current',
+        stale: false,
+        verification_required: false,
+      }),
     };
 
     return {
@@ -113,15 +125,14 @@ describe('CustomersService', () => {
       setup.service.listCustomers('tenant-a', 50),
     );
 
-    expect(setup.authoritySnapshotMock).toHaveBeenCalledTimes(1);
-    expect(setup.authoritySnapshotMock).toHaveBeenCalledWith('tenant-a');
+    expect(setup.authoritySnapshotMock).not.toHaveBeenCalled();
     expect(result[0]).toMatchObject({
-      loyalty_authority: 'legacy_bot',
+      loyalty_authority: 'maya',
       // Снимок назван снимком: к владельцу за этой строкой не ходили.
-      loyalty_authority_scope: 'configured',
-      loyalty_sync_status: 'list_snapshot',
-      loyalty_stale: true,
-      loyalty_verification_required: true,
+      loyalty_authority_scope: 'resolved',
+      loyalty_sync_status: 'current',
+      loyalty_stale: false,
+      loyalty_verification_required: false,
     });
   });
 
@@ -154,8 +165,8 @@ describe('CustomersService', () => {
         id: 'client-a',
         tenant_id: 'tenant-a',
         appointments_count: 39,
-        loyalty_balance: 2133,
-        loyalty_source: 'yclients',
+        loyalty_balance: 640,
+        loyalty_source: 'internal',
       }),
     ]);
   });

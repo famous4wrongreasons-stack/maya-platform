@@ -71,7 +71,7 @@ import {
   computePeriodMoneyMotivation,
   toMotivationVisit,
 } from './master-money-motivation';
-import { parseVisitOutcome, unavailableAuthorityView } from '../domain';
+import { parseVisitOutcome } from '../domain';
 import type { PeriodRead } from '../domain';
 
 const CRM_FINANCE_ROLES = new Set<UserRole>([
@@ -569,39 +569,32 @@ export class AiToolHandlerService {
     // До P5 досье брало карту провайдера напрямую и выдавало её за баланс —
     // при том что для этого арендатора авторитетен другой источник, и один
     // человек получал в кабинете и в досье два разных числа без объяснения.
-    const [historyRead, loyalty, timezone, loyaltyAuthority] =
-      await Promise.all([
-        /**
-         * 🔴 Cycle 04 P9.1. Отказ чтения истории больше не превращается в пустой
-         * массив. Пустота и молчание источника — разные вещи: первая означает «за
-         * окном не было приходов», второе — «мы не смотрели». Схлопнув их, досье
-         * говорило про постоянного гостя «ни одного подтверждённого визита за два
-         * года» ровно тогда, когда CRM не ответила.
-         */
-        this.crmService
-          .getClientVisitHistory(
-            principal.tenantId,
-            client.id,
-            DOSSIER_HISTORY_LIMIT,
-          )
-          .then((rows) => ({ ok: true as const, rows }))
-          .catch((error: unknown) => ({
-            ok: false as const,
-            reason: this.historyFailureReason(error),
-          })),
-        client.phone
-          ? this.crmService
-              .getClientLoyalty(principal.tenantId, client.phone)
-              .catch(() => null)
-          : Promise.resolve(null),
-        this.reportingTimezone(principal.tenantId).catch(() => 'UTC'),
-        // 🔴 Снимок границы, а не собственный вывод. При отказе владелец
-        // НЕИЗВЕСТЕН: подставлять `crm` значило бы выдумать его — при внутреннем
-        // календаре владелец `maya`, при внешнем журнале `legacy_bot`.
-        this.loyaltyService
-          .authoritySnapshot(principal.tenantId)
-          .catch(() => unavailableAuthorityView()),
-      ]);
+    const [historyRead, loyalty, timezone] = await Promise.all([
+      /**
+       * 🔴 Cycle 04 P9.1. Отказ чтения истории больше не превращается в пустой
+       * массив. Пустота и молчание источника — разные вещи: первая означает «за
+       * окном не было приходов», второе — «мы не смотрели». Схлопнув их, досье
+       * говорило про постоянного гостя «ни одного подтверждённого визита за два
+       * года» ровно тогда, когда CRM не ответила.
+       */
+      this.crmService
+        .getClientVisitHistory(
+          principal.tenantId,
+          client.id,
+          DOSSIER_HISTORY_LIMIT,
+        )
+        .then((rows) => ({ ok: true as const, rows }))
+        .catch((error: unknown) => ({
+          ok: false as const,
+          reason: this.historyFailureReason(error),
+        })),
+      matches.length === 1
+        ? this.loyaltyService
+            .getStateForCrmClient(principal.tenantId, client.id)
+            .catch(() => null)
+        : Promise.resolve(null),
+      this.reportingTimezone(principal.tenantId).catch(() => 'UTC'),
+    ]);
 
     // Услуги и ритм считаются по прочитанному; при отказе их просто нет, и это
     // отдельно сказано полем `services_scope`.
@@ -752,19 +745,11 @@ export class AiToolHandlerService {
       loyalty_rule: 'Лояльный клиент — не менее 3 визитов по карточке CRM.',
       bonus_balance: loyalty?.balance ?? null,
       bonus_currency: loyalty?.currency ?? null,
-      // Число прочитано с карты провайдера — это наблюдение, а не обязательно
-      // авторитетный баланс. Если владелец другой, так и сказано.
-      bonus_observed_from: 'crm' as const,
-      bonus_authority: loyaltyAuthority.authority,
-      // Досье к владельцу за КОНКРЕТНЫМ человеком не ходит — это снимок
-      // настройки арендатора. Область действия названа, а не подразумевается.
-      bonus_authority_scope: loyaltyAuthority.authority_scope,
-      bonus_is_authoritative: loyaltyAuthority.authority === 'crm',
-      bonus_status: !loyalty
-        ? 'unavailable'
-        : loyaltyAuthority.authority === 'crm'
-          ? 'available'
-          : 'observed_not_authoritative',
+      bonus_observed_from: loyalty ? 'maya' : null,
+      bonus_authority: loyalty?.authority ?? null,
+      bonus_authority_scope: loyalty?.authority_scope ?? 'unknown',
+      bonus_is_authoritative: Boolean(loyalty),
+      bonus_status: loyalty ? 'available' : 'unavailable',
       note:
         matches.length > 1
           ? 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.'

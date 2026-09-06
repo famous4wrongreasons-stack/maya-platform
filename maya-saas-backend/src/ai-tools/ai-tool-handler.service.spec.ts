@@ -109,18 +109,16 @@ describe('AiToolHandlerService output minimization', () => {
       loyal: true,
       loyalty_segment: 'core',
       loyalty_rule: 'Лояльный клиент — не менее 3 визитов по карточке CRM.',
-      bonus_balance: 2133,
-      bonus_currency: 'RUB',
-      // Досье называет, ОТКУДА число и авторитетно ли оно для арендатора.
-      bonus_observed_from: 'crm',
-      bonus_authority: 'crm',
-      // Досье к владельцу за конкретным человеком не ходит — и говорит об этом.
-      bonus_authority_scope: 'configured',
-      bonus_is_authoritative: true,
-      bonus_status: 'available',
+      bonus_balance: null,
+      bonus_currency: null,
+      bonus_observed_from: null,
+      bonus_authority: null,
+      bonus_authority_scope: 'unknown',
+      bonus_is_authoritative: false,
+      bonus_status: 'unavailable',
       note: 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.',
     });
-    expect(getClientLoyalty).toHaveBeenCalledWith('tenant-a', '+79991234567');
+    expect(getClientLoyalty).not.toHaveBeenCalled();
     expect(JSON.stringify(result)).not.toContain('Иван');
     expect(JSON.stringify(result)).not.toContain('7999');
     expect(JSON.stringify(result)).not.toContain('phone');
@@ -529,6 +527,12 @@ describe('AiToolHandlerService output minimization', () => {
       authoritySnapshot: jest.fn(() =>
         Promise.resolve(snapshotAuthorityView('crm')),
       ),
+      getStateForCrmClient: jest.fn().mockResolvedValue({
+        balance: 2133,
+        currency: 'RUB',
+        authority: 'maya',
+        authority_scope: 'resolved',
+      }),
       getForUser: jest.fn().mockResolvedValue({
         balance: 2133,
         currency: 'RUB',
@@ -3003,6 +3007,12 @@ describe('AiToolHandlerService output minimization', () => {
           // 🔴 Досье берёт владельца СНИМКОМ границы. Собственного вывода у
           // него нет: до P7.1 оно спрашивало арендаторное значение отдельно и
           // могло назвать не того владельца, что карточка того же клиента.
+          getStateForCrmClient: jest.fn().mockResolvedValue({
+            balance: 2133,
+            currency: 'RUB',
+            authority: 'maya',
+            authority_scope: 'resolved',
+          }),
           authoritySnapshot: jest.fn(() =>
             Promise.resolve(snapshotAuthorityView('crm')),
           ),

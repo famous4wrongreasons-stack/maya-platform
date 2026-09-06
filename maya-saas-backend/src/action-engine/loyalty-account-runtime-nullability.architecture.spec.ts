@@ -64,7 +64,10 @@ describe('Cycle 06 P4-03 client-owned LoyaltyAccount runtime alignment', () => {
     const loyalty = read('loyalty/loyalty.service.ts');
     expect(loyalty).toContain('async getStateForClient(');
     expect(loyalty).toContain('async listTransactionsForClient(');
-    expect(loyalty).toContain('tenantId_clientId');
+    expect(loyalty).toContain('this.requireClientReader().forClient(');
+    expect(read('crm/client-loyalty-read.service.ts')).toContain(
+      'tenantId_clientId',
+    );
     expect(loyalty).toContain('userId: string | null');
   });
 

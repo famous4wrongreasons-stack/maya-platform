@@ -1,3 +1,4 @@
+import { ClientLoyaltyReadService } from '../crm/client-loyalty-read.service';
 import { ConflictException, ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -171,7 +172,32 @@ describe('LoyaltyService', () => {
       executeWithReceipt: executeWithReceiptMock,
     } as unknown as ActionEngineRuntimeService;
 
+    const readState = {
+      account_id: 'verified-account',
+      balance: 640,
+      currency: 'RUB',
+      source: 'internal',
+      authoritative: 'maya',
+      authority: 'maya',
+      authority_scope: 'resolved',
+      sync_status: 'current',
+      stale: false,
+      verification_required: false,
+      transactions: [],
+    };
+    const forAccount = jest.fn().mockResolvedValue(readState);
+    const forClient = jest.fn().mockResolvedValue(readState);
+    const forStaffAccount = jest.fn().mockResolvedValue(readState);
+    const reader = {
+      forAccount,
+      forClient,
+      forStaffAccount,
+    } as unknown as ClientLoyaltyReadService;
     return {
+      reader,
+      forAccount,
+      forClient,
+      forStaffAccount,
       tenantContext,
       prisma,
       usersService,
@@ -210,283 +236,65 @@ describe('LoyaltyService', () => {
         encryptionService,
         auditLogService,
         actionEngine,
+        reader,
       ),
     };
   };
 
-  it('reads a guest Client-owned account and history without a User or Membership', async () => {
+  it('routes private state/history through verified Client identity', async () => {
     const setup = createService();
-    const createdAt = new Date('2026-08-31T09:00:00.000Z');
-    setup.loyaltyFindUniqueMock.mockResolvedValue({
-      id: 'account-guest-a',
-      tenantId: 'tenant-a',
-      clientId: 'client-canonical-a',
-      userId: null,
-      source: CalendarSource.INTERNAL,
-      balance: 640,
-      externalReference: null,
-      syncedAt: null,
-      createdAt,
-      updatedAt: createdAt,
+    await setup.tenantContext.runAsSystemTenant('tenant-a', async () => {
+      expect(
+        (await setup.service.getForUser('tenant-a', 'user-a')).balance,
+      ).toBe(640);
+      await setup.service.listTransactions('tenant-a', 'user-a');
+      await setup.service.getStateForClient('tenant-a', 'client-a');
+      await setup.service.listTransactionsForClient('tenant-a', 'client-a');
     });
-    setup.loyaltyTransactionFindManyMock.mockResolvedValue([
-      {
-        id: 'transaction-guest-a',
-        kind: 'credit',
-        delta: 640,
-        balanceAfter: 640,
-        encryptedReason: 'encrypted:historical migration',
-        createdAt,
-      },
-    ]);
-
-    const state = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getStateForClient('tenant-a', 'client-canonical-a'),
-    );
-    const history = await setup.tenantContext.runAsSystemTenant(
+    expect(setup.forAccount).toHaveBeenCalledWith('tenant-a', 'user-a');
+    expect(setup.forAccount).toHaveBeenCalledWith(
       'tenant-a',
-      () =>
-        setup.service.listTransactionsForClient(
-          'tenant-a',
-          'client-canonical-a',
-        ),
+      'user-a',
+      true,
+      50,
     );
-
-    expect(state).toMatchObject({
-      account_id: 'account-guest-a',
-      balance: 640,
-      authoritative: 'maya',
-    });
-    expect(history).toEqual([
-      {
-        id: 'transaction-guest-a',
-        kind: 'credit',
-        delta: 640,
-        balance_after: 640,
-        reason: 'historical migration',
-        created_at: createdAt,
-      },
-    ]);
-    expect(setup.clientFindUniqueMock).toHaveBeenCalledWith({
-      where: {
-        id_tenantId: { id: 'client-canonical-a', tenantId: 'tenant-a' },
-      },
-      select: { id: true, mergedIntoClientId: true },
-    });
-    expect(setup.loyaltyFindUniqueMock).toHaveBeenCalledWith({
-      where: {
-        tenantId_clientId: {
-          tenantId: 'tenant-a',
-          clientId: 'client-canonical-a',
-        },
-      },
-    });
-    expect(setup.getTenantUserOrThrowMock).not.toHaveBeenCalled();
+    expect(setup.forClient).toHaveBeenCalledWith('tenant-a', 'client-a');
     expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
+    expect(setup.getClientLoyaltyMock).not.toHaveBeenCalled();
   });
 
-  it('returns the exact external CRM balance without persisting it', async () => {
+  it('does not fall back to legacy Telegram/phone when verified identity fails', async () => {
     const setup = createService();
-
-    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getForUser('tenant-a', 'client-a'),
+    setup.forAccount.mockRejectedValue(
+      new ForbiddenException('client_link_required'),
     );
-
-    expect(result).toMatchObject({
-      balance: 2133,
-      source: CrmProvider.YCLIENTS,
-      authoritative: 'crm',
-      sync_status: 'current',
-      stale: false,
-      sold_amount: 62150,
-      spend_options: {
-        status: 'available',
-        verification_required: true,
-        best_service: {
-          id: 'service-spa',
-          points_required: 1200,
-        },
-        next_service: {
-          id: 'service-premium',
-          points_needed: 367,
-        },
-      },
-    });
-    expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
-    expect(setup.auditLogMock).not.toHaveBeenCalled();
-    expect(setup.getUpsertTenantId()).toBeNull();
-    expect(setup.getUpsertUserId()).toBeNull();
-    expect(setup.getUpsertBalance()).toBeUndefined();
-  });
-
-  it('берёт баланс из внешнего журнала и называет владельца честно', async () => {
-    const setup = createService();
     process.env.MAYA_LEGACY_BRIDGE_TOKEN = 'x'.repeat(48);
-    process.env.MAYA_LEGACY_BRIDGE_URL =
-      'http://127.0.0.1:8080/api/internal/loyalty-snapshot';
     process.env.MAYA_LEGACY_LOYALTY_TENANT_SLUGS = 'tenant-a-slug';
-    setup.tenantFindUniqueMock.mockResolvedValueOnce({ slug: 'tenant-a-slug' });
-    setup.authIdentityFindFirstMock.mockResolvedValueOnce({
-      providerUserId: '987654321',
-    });
-    const fetchMock: jest.MockedFunction<typeof fetch> = jest
-      .fn()
-      .mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            found: true,
-            balance: 385,
-            source: 'maya_ledger',
-          }),
-          { status: 200 },
-        ),
-      );
+    const fetchMock = jest.fn();
     global.fetch = fetchMock;
-
-    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getForUser('tenant-a', 'client-a'),
-    );
-
-    expect(result).toMatchObject({
-      balance: 385,
-      source: 'legacy_maya',
-      // 🔴 P5: число НЕ изменилось, изменилось имя владельца. Раньше баланс
-      // чужого журнала выдавался за собственный реестр Maya, и подтверждение
-      // перед тратой из-за этого не запрашивалось.
-      authoritative: 'legacy_bot',
-      authority: 'legacy_bot',
-      verification_required: true,
-      sync_status: 'current',
-      stale: false,
-    });
+    await expect(
+      setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+        setup.service.getForUser('tenant-a', 'user-a'),
+      ),
+    ).rejects.toThrow('client_link_required');
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(setup.authIdentityFindFirstMock).not.toHaveBeenCalled();
     expect(setup.getClientLoyaltyMock).not.toHaveBeenCalled();
     expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
-    expect(setup.auditLogMock).not.toHaveBeenCalled();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [requestUrl, requestInit] = fetchMock.mock.calls[0] ?? [];
-    expect(requestUrl).toEqual(
-      new URL('http://127.0.0.1:8080/api/internal/loyalty-snapshot'),
-    );
-    expect(requestInit?.method).toBe('POST');
-    expect(new Headers(requestInit?.headers).get('X-Maya-Legacy-Bridge')).toBe(
-      'x'.repeat(48),
-    );
   });
 
-  it('does not mutate canonical value when the legacy read fails', async () => {
+  it('preserves canonical balance if public service catalog is unavailable', async () => {
     const setup = createService();
-    process.env.MAYA_LEGACY_BRIDGE_TOKEN = 'x'.repeat(48);
-    process.env.MAYA_LEGACY_BRIDGE_URL =
-      'http://127.0.0.1:8080/api/internal/loyalty-snapshot';
-    process.env.MAYA_LEGACY_LOYALTY_TENANT_SLUGS = 'tenant-a-slug';
-    setup.tenantFindUniqueMock.mockResolvedValueOnce({ slug: 'tenant-a-slug' });
-    setup.authIdentityFindFirstMock.mockResolvedValueOnce({
-      providerUserId: '987654321',
-    });
-    setup.loyaltyFindUniqueMock.mockResolvedValueOnce({
-      id: 'account-a',
-      tenantId: 'tenant-a',
-      userId: 'client-a',
-      source: 'legacy_maya',
-      balance: 385,
-      externalReference: null,
-      syncedAt: new Date('2026-07-15T09:00:00.000Z'),
-      createdAt: new Date('2026-07-15T09:00:00.000Z'),
-      updatedAt: new Date('2026-07-15T09:00:00.000Z'),
-    });
-    global.fetch = jest.fn().mockRejectedValue(new Error('bridge timeout'));
-
-    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getForUser('tenant-a', 'client-a'),
-    );
-
-    expect(result).toMatchObject({
-      balance: 385,
-      authoritative: 'legacy_bot',
-      sync_status: 'temporarily_unavailable',
-      stale: true,
-    });
-    expect(setup.getClientLoyaltyMock).not.toHaveBeenCalled();
-    expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
-    expect(setup.transactionMock).not.toHaveBeenCalled();
-    expect(setup.auditLogMock).not.toHaveBeenCalled();
-  });
-
-  it('keeps repeated external reads free of canonical value writes', async () => {
-    const setup = createService();
-    setup.loyaltyFindUniqueMock.mockResolvedValue({
-      id: 'account-a',
-      tenantId: 'tenant-a',
-      userId: 'client-a',
-      source: CalendarSource.INTERNAL,
+    setup.getServicesMock.mockRejectedValue(new Error('catalog unavailable'));
+    expect(
+      await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+        setup.service.getForUser('tenant-a', 'user-a'),
+      ),
+    ).toMatchObject({
       balance: 640,
-      externalReference: null,
-      syncedAt: null,
-      createdAt: new Date('2026-07-15T09:00:00.000Z'),
-      updatedAt: new Date('2026-07-15T09:00:00.000Z'),
+      authority: 'maya',
+      spend_options: { status: 'catalog_unavailable' },
     });
-
-    const first = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getForUser('tenant-a', 'client-a'),
-    );
-    const second = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getForUser('tenant-a', 'client-a'),
-    );
-
-    expect(first.balance).toBe(2133);
-    expect(second.balance).toBe(2133);
-    expect(setup.getClientLoyaltyMock).toHaveBeenCalledTimes(2);
-    expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
-    expect(setup.transactionMock).not.toHaveBeenCalled();
-    expect(setup.auditLogMock).not.toHaveBeenCalled();
-  });
-
-  it('keeps the confirmed balance available when the service catalog fails', async () => {
-    const setup = createService();
-    setup.getServicesMock.mockRejectedValueOnce(new Error('Catalog timeout'));
-
-    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getForUser('tenant-a', 'client-a'),
-    );
-
-    expect(result).toMatchObject({
-      balance: 2133,
-      authoritative: 'crm',
-      spend_options: {
-        status: 'catalog_unavailable',
-        items: [],
-      },
-    });
-  });
-
-  it('returns a cached CRM balance as stale instead of inventing zero', async () => {
-    const setup = createService();
-    setup.loyaltyFindUniqueMock.mockResolvedValueOnce({
-      id: 'account-a',
-      tenantId: 'tenant-a',
-      userId: 'client-a',
-      source: CrmProvider.YCLIENTS,
-      balance: 2133,
-      externalReference: 'card-a',
-      syncedAt: new Date('2026-07-15T09:00:00.000Z'),
-      createdAt: new Date('2026-07-15T09:00:00.000Z'),
-      updatedAt: new Date('2026-07-15T09:00:00.000Z'),
-    });
-    setup.getClientLoyaltyMock.mockRejectedValueOnce(new Error('CRM timeout'));
-
-    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
-      setup.service.getForUser('tenant-a', 'client-a'),
-    );
-
-    expect(result).toMatchObject({
-      balance: 2133,
-      authoritative: 'crm',
-      sync_status: 'temporarily_unavailable',
-      stale: true,
-    });
-    expect(setup.loyaltyUpsertMock).not.toHaveBeenCalled();
-    expect(setup.transactionMock).not.toHaveBeenCalled();
-    expect(setup.auditLogMock).not.toHaveBeenCalled();
   });
 
   it('keeps external CRM balances read-only', async () => {

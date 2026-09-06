@@ -1,3 +1,4 @@
+import { ClientLoyaltyReadService } from './client-loyalty-read.service';
 import { ClientAppointmentReadService } from './client-appointment-read.service';
 import {
   BadRequestException,
@@ -51,7 +52,16 @@ export class ClientChannelController {
   constructor(
     private readonly runtime: ClientChannelRuntimeService,
     private readonly appointments: ClientAppointmentReadService,
+    private readonly loyalty?: ClientLoyaltyReadService,
   ) {}
+
+  @Get('loyalty')
+  loyaltyProjection(
+    @Headers('authorization') authorization: string | undefined,
+  ) {
+    if (!this.loyalty) throw new Error('Verified loyalty reader required');
+    return this.loyalty.forChannel(mayaProof(authorization));
+  }
 
   @Get('appointments')
   appointmentsProjection(
@@ -105,6 +115,7 @@ export class LegacyClientChannelController {
     private readonly context: TenantContextService,
     private readonly runtime: ClientChannelRuntimeService,
     private readonly appointments: ClientAppointmentReadService,
+    private readonly loyalty?: ClientLoyaltyReadService,
   ) {}
 
   @Public()
@@ -191,6 +202,11 @@ export class LegacyClientChannelController {
       if (operation === 'booking-prefill') {
         empty(input.payload);
         return this.runtime.bookingPrefill(input.channelProof);
+      }
+      if (operation === 'loyalty-projection') {
+        empty(input.payload);
+        if (!this.loyalty) throw new Error('Verified loyalty reader required');
+        return this.loyalty.forChannel(input.channelProof);
       }
       if (operation === 'appointments-projection') {
         empty(input.payload);

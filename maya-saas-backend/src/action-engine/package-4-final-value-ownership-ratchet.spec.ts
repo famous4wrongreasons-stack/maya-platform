@@ -53,6 +53,11 @@ const CANONICAL_OWNER_FILES = new Set([
 
 const CONTROLLED_VALUE_PROOFS = [
   {
+    path: 'scripts/package5-b27-loyalty-read-proof.ts',
+    databaseGuard: "url.pathname !== '/maya_c06_b27_owned'",
+    refusalMarker: 'Owned isolated B27 database required',
+  },
+  {
     path: 'scripts/p4-03-all8-executable-proof.ts',
     databaseGuard: "database.startsWith('maya_c06_p403_all8_')",
     refusalMarker: 'P4-03 proof refuses non-disposable databases',
@@ -175,13 +180,6 @@ function isControlledProof(file: SourceFile): boolean {
 function isApprovedProductionOwner(site: ValueWriteSite): boolean {
   if (CANONICAL_OWNER_FILES.has(site.path)) return true;
   if (site.path === 'src/loyalty/loyalty.service.ts') {
-    if (site.method === 'getForUser') {
-      return (
-        site.model === 'loyaltyAccount' &&
-        site.operation === 'upsert' &&
-        !/\bbalance\s*:/.test(site.code)
-      );
-    }
     return ['applyInternalAdjustment', 'bindConcurrentAdjustment'].includes(
       site.method,
     );

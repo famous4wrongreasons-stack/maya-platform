@@ -1964,21 +1964,17 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 norm = _loy._normalize_service_title(svc)
                 if norm in care_lookup and norm in in_order_lower:
                     candidates.append(care_lookup[norm])
-            # 2) проверяем баланс клиента
-            balance = 0
-            client_row = None
-            if user_id:
-                client_row = database.get_client(user_id)
-                if client_row:
-                    phone = client_row.get("phone") or ""
-                    if phone:
-                        _loy.lazy_backfill_for_client(client_row["id"], phone)
-                    balance = database.loyalty_balance(client_row["id"])
+            # B27: no raw session/phone/SQLite loyalty authority.
+            from legacy_client_command_bridge import loyalty_projection
+            try:
+                balance = loyalty_projection()["balance"]
+            except Exception:
+                balance = None
             # 3) оставляем максимум 1 услугу — самую дорогую из тех, на которые
             # хватает баллов
             valid_pwp: list[str] = []
             valid_pwp_quotes: list[dict] = []
-            affordable = [c for c in candidates if balance >= c["price"]]
+            affordable = [c for c in candidates if balance is not None and balance >= c["price"]]
             if affordable:
                 # самая дорогая = максимальная экономия для клиента
                 best = max(affordable, key=lambda c: c["price"])
@@ -2047,16 +2043,12 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 c for c in _loy.current_care_services()
                 if _loy._normalize_service_title(c.get("title")) in current_lower
             ]
-            client_row = database.get_client(user_id) if user_id else None
-            if client_row:
-                card = _loy._yc_loyalty_card(client_row.get("phone") or "")
-                balance = (
-                    int(card["balance"])
-                    if card is not None
-                    else database.loyalty_balance(client_row["id"])
-                )
-            else:
-                balance = 0
+            from legacy_client_command_bridge import loyalty_projection
+            try:
+                balance = loyalty_projection()["balance"]
+            except Exception:
+                return json.dumps({"status": "unavailable", "balance": None,
+                    "can_redeem": False, "instruction": "Баланс недоступен. Не утверждай, что он нулевой, и не обещай списание."}, ensure_ascii=False)
             affordable = [
                 {"title": c["title"], "price": c["price"]}
                 for c in care_in_order if balance >= c["price"]

@@ -322,37 +322,13 @@ describe('P4-03 all-8 production cutover ratchet', () => {
     const serviceSource = source(
       'maya-saas-backend/src/loyalty/loyalty.service.ts',
     );
-    const externalStart = serviceSource.indexOf(
-      '  private async getExternalAccount(',
-    );
-    const legacyStart = serviceSource.indexOf(
-      '  private async getLegacyMayaAccount(',
-    );
-    const emptyStart = serviceSource.indexOf('  private emptyExternalAccount(');
-    const externalRead = serviceSource.slice(externalStart, legacyStart);
-    const legacyRead = serviceSource.slice(legacyStart, emptyStart);
-
-    expect(externalStart).toBeGreaterThan(-1);
-    expect(legacyStart).toBeGreaterThan(externalStart);
-    expect(emptyStart).toBeGreaterThan(legacyStart);
-    expect(externalRead).toContain('getClientLoyaltyEvidenceReadOnly');
-    expect(externalRead).not.toContain('.getClientLoyalty(');
-    for (const readSurface of [externalRead, legacyRead]) {
-      expect(readSurface).not.toMatch(
-        /\.loyaltyAccount\.(?:create|createMany|update|updateMany|upsert|delete|deleteMany)\s*\(/,
-      );
-      expect(readSurface).not.toContain('auditLogService.log');
-    }
+    expect(serviceSource).not.toContain('getExternalAccount');
+    expect(serviceSource).not.toContain('getLegacyMayaAccount');
+    expect(serviceSource).toContain('this.requireClientReader().forAccount(');
   });
 
   it('allows only the exact canonical loyalty-account writer sites', () => {
     expect(loyaltyAccountWriteSites()).toEqual([
-      {
-        file: 'maya-saas-backend/src/loyalty/loyalty.service.ts',
-        method: 'getForUser',
-        operation: 'upsert',
-        writesBalance: false,
-      },
       {
         file: 'maya-saas-backend/src/loyalty/loyalty.service.ts',
         method: 'applyInternalAdjustment',

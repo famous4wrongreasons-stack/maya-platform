@@ -3130,26 +3130,16 @@ export class CrmService {
       : null;
   }
 
-  async getClientLoyalty(tenantId: string, phone: string) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const loyalty = await this.getClientLoyaltyEvidenceReadOnly(
-      scopedTenantId,
-      phone,
+  /** Retired phone-based public loyalty helper. Exact evidence imports retain
+   * their separate P4 boundary above; reads cannot register a Client. */
+  getClientLoyalty(tenantId: string, phone: string): Promise<never> {
+    void phone;
+    this.tenantContext.assertTenantId(tenantId);
+    return Promise.reject(
+      new ForbiddenException(
+        'Verified canonical Client loyalty projection required',
+      ),
     );
-
-    // Теневая регистрация личности: единственное место, где Maya вообще видит
-    // внешний идентификатор клиента. Раньше он вычислялся и выбрасывался.
-    // Запись строго побочная — ответ не меняется и от её сбоя не зависит.
-    if (loyalty?.external_client_id) {
-      await this.clientIdentityService.tryRegisterCrmClient({
-        tenantId: scopedTenantId,
-        provider: loyalty.provider,
-        externalId: loyalty.external_client_id,
-        phone,
-      });
-    }
-
-    return loyalty;
   }
 
   async testConnection(tenantId: string) {

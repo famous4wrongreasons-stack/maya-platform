@@ -143,10 +143,6 @@ export class CustomersService {
           where: { tenantId: scopedTenantId },
           take: 1,
         },
-        loyaltyAccounts: {
-          where: { tenantId: scopedTenantId },
-          take: 1,
-        },
         _count: {
           select: {
             appointments: { where: { tenantId: scopedTenantId } },
@@ -157,30 +153,27 @@ export class CustomersService {
       take: Math.min(Math.max(limit, 1), 100),
     });
 
-    // 🔴 Список НЕ ходит к владельцу: это N сетевых вызовов на страницу. Но
-    // владельца он и НЕ считает сам — берёт его у границы одним вызовом на
-    // страницу. До P7.1 здесь стояла вторая формула (из колонки кэша), и одна и
-    // та же строка получала в списке одного владельца, а в карточке другого.
-    const snapshot =
-      await this.loyaltyService.authoritySnapshot(scopedTenantId);
+    return Promise.all(
+      users.map(async (user) => {
+        const profile = user.customerProfiles[0] ?? null;
+        const loyalty = await this.loyaltyService
+          .getStateForUser(scopedTenantId, user.id)
+          .catch(() => null);
 
-    return users.map((user) => {
-      const profile = user.customerProfiles[0] ?? null;
-      const loyaltyAccount = user.loyaltyAccounts[0] ?? null;
-
-      return {
-        ...this.usersService.serializeUser(user),
-        appointments_count: user._count.appointments,
-        loyalty_balance: loyaltyAccount?.balance ?? null,
-        loyalty_source: loyaltyAccount?.source ?? null,
-        loyalty_authority: snapshot.authority,
-        loyalty_authority_scope: snapshot.authority_scope,
-        loyalty_stale: snapshot.stale,
-        loyalty_sync_status: snapshot.sync_status,
-        loyalty_verification_required: snapshot.verification_required,
-        profile: this.serializeAdminProfile(profile),
-      };
-    });
+        return {
+          ...this.usersService.serializeUser(user),
+          appointments_count: user._count.appointments,
+          loyalty_balance: loyalty?.balance ?? null,
+          loyalty_source: loyalty?.source ?? null,
+          loyalty_authority: loyalty?.authority ?? null,
+          loyalty_authority_scope: loyalty?.authority_scope ?? null,
+          loyalty_stale: loyalty?.stale ?? null,
+          loyalty_sync_status: loyalty?.sync_status ?? null,
+          loyalty_verification_required: loyalty?.verification_required ?? null,
+          profile: this.serializeAdminProfile(profile),
+        };
+      }),
+    );
   }
 
   async countCustomers(tenantId: string) {

@@ -58,7 +58,7 @@ describe('P4-03 legacy loyalty import Shadow architecture', () => {
       'async getClientLoyaltyEvidenceByExternalIdReadOnly',
     );
     const mutatingStart = crmService.indexOf(
-      'async getClientLoyalty(',
+      'getClientLoyalty(tenantId:',
       readOnlyStart,
     );
     const readOnlyMethod = crmService.slice(readOnlyStart, mutatingStart);
