@@ -1,9 +1,6 @@
 --- webhook_server.py
 +++ webhook_server.py
-@@ -3644,76 +3644,13 @@
- 
- 
- async def panel_external_reviews_import_handler(request: web.Request) -> web.Response:
+@@ -3647,39 +3647,2 @@
 -    """Owner-only разрешённый импорт отзывов/снимка рейтинга с карт."""
 -    try:
 -        body = await request.json()
@@ -45,9 +42,7 @@
 -    })
 +    """B34: legacy review ingestion/sync is retired without side effects."""
 +    return _cabinet_response(reputation.retired_review_source(), status=410)
- 
- 
- async def panel_reputation_refresh_handler(request: web.Request) -> web.Response:
+@@ -3689,28 +3652,2 @@
 -    """Owner-only обновление официальной статистики подключённых площадок."""
 -    try:
 -        body = await request.json()
@@ -78,13 +73,7 @@
 -    })
 +    """B34: legacy review ingestion/sync is retired without side effects."""
 +    return _cabinet_response(reputation.retired_review_source(), status=410)
- 
- 
- async def broadcast_send_to_base(bot, text: str) -> dict:
-@@ -10650,83 +10587,13 @@
- 
- 
- async def _notify_owner_reputation(app: Application, rows: list[dict]) -> dict:
+@@ -10653,51 +10590,2 @@
 -    alert = reputation.build_owner_review_alert(rows)
 -    if not alert.get("text"):
 -        return {"delivered": False, "count": 0, "owners": 0}
@@ -138,9 +127,7 @@
 -    }
 +    """B34: unverified legacy review evidence cannot initiate delivery."""
 +    return {"delivered": False, "count": 0, "owners": 0, "error": "LEGACY_REVIEW_SOURCE_RETIRED"}
- 
- 
- async def reputation_monitor_loop(app: Application):
+@@ -10707,23 +10595,2 @@
 -    """Раз в час проверяет публичные карточки и сообщает только о новых отзывах."""
 -    await asyncio.sleep(150)
 -    while True:
@@ -166,14 +153,5 @@
 -        await asyncio.sleep(3600)
 +    """B34: retired job, including direct calls and alternative launchers."""
 +    return None
- 
- 
- async def waitlist_admin_alert_loop(app: Application):
-@@ -12291,7 +12158,6 @@
-     if start_background_tasks:
-         asyncio.create_task(master_day_brief_loop(bot_app))
-         asyncio.create_task(client_retention_refresh_loop(bot_app))
+@@ -12294 +12160,0 @@
 -        asyncio.create_task(reputation_monitor_loop(bot_app))
-         asyncio.create_task(master_shift_reminder_loop(bot_app))
-         asyncio.create_task(waitlist_admin_alert_loop(bot_app))
-         asyncio.create_task(maya_operating_rhythm_loop(bot_app))
