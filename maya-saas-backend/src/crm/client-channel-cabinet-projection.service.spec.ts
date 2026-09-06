@@ -23,6 +23,10 @@ function setup(options: SetupOptions = {}) {
         ]
       : options.links;
   const tx = {
+    $executeRaw: jest.fn().mockResolvedValue(0),
+    unresolvedClientIdentityHold: {
+      findFirst: jest.fn().mockResolvedValue(null),
+    },
     clientChannelLink: { findMany: jest.fn().mockResolvedValue(links) },
     client: {
       findUnique: jest.fn().mockResolvedValue(

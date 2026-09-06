@@ -5,7 +5,7 @@ from pathlib import Path
 
 def scan_loyalty_reads(root: Path, overrides=None) -> list[str]:
     overrides = overrides or {}
-    read = lambda name: overrides.get(name, (root / name).read_text())
+    read = lambda name: overrides[name] if name in overrides else (root / name).read_text()
     failures = []
     source = read('claude_ai.py')
     tree = ast.parse(source)

@@ -246,6 +246,7 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
       .map(({ path }) => path)
       .sort();
 
-    expect(callSurfaces).toEqual(['src/crm/crm.service.ts']);
+    // B27 removes the last read-triggered identity registration caller.
+    expect(callSurfaces).toEqual([]);
   });
 });

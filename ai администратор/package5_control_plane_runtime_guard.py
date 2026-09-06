@@ -714,8 +714,13 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
                     findings.append(Finding("b24_web_push", f"{path.name}:{node.lineno} uses plaintext legacy Web Push registry"))
                 if re.search(r"\b(?:INSERT INTO|UPDATE|DELETE FROM|FROM) TIPS\b", normalized):
                     findings.append(Finding("b22_tip_authority", f"{path.name}:{node.lineno} uses legacy tip facts"))
-    from package5_loyalty_read_guard import scan_loyalty_reads
-    findings.extend(Finding('b27_loyalty_read', detail) for detail in scan_loyalty_reads(root, overrides))
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('package5_loyalty_read_guard', Path(__file__).with_name('package5_loyalty_read_guard.py'))
+    if spec is None or spec.loader is None:
+        raise RuntimeError('B27 loyalty guard is required')
+    loyalty_guard = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(loyalty_guard)
+    findings.extend(Finding('b27_loyalty_read', detail) for detail in loyalty_guard.scan_loyalty_reads(root, overrides))
     return findings
 
 
