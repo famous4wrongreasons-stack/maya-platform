@@ -1,5 +1,7 @@
 # Package 5 B34 — approved Option A runtime retirement / local gate
 
+> Current continuation: [B34 production PASS / B35 STOP](CYCLE-06-BLOCKING-PACKAGE-5-B34-DEPLOYED-FINAL-GATE-STOP-REPORT.md) and [current remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B34-REMAINDER-CHECKPOINT.md). Pending statuses below describe their historical checkpoint.
+
 Approved decision checkpoint: `7a2cc296`. B29–B33 remain accepted.
 [Exact review contract](CYCLE-06-BLOCKING-PACKAGE-5-B34-REVIEW-AUTHORITY-CONTRACT-DECISION.md).
 

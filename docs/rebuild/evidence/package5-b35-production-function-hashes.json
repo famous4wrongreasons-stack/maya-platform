@@ -1,0 +1,98 @@
+{
+  "webhook_server.py": {
+    "_send_client_push": {
+      "line": 404,
+      "sha256": "bf70fa0a73ed3e172b69abbd3399d86641be70765ad033b407b91991549e5eb9"
+    },
+    "_verify_telegram_login_widget": {
+      "line": 1840,
+      "sha256": "2f34c3c02577429cc77d76409e39db9a01dfed506733736274e74bba4f9c9e3c"
+    },
+    "_panel_resolve_role": {
+      "line": 1964,
+      "sha256": "c32613a9979d4b13cf16b1272c76f1678e46a6fae3ec640bb571ce709730d709"
+    },
+    "_panel_auth": {
+      "line": 1995,
+      "sha256": "19c2d25865b2db6d4b4c0dbb7261ef7ca8d63634b606dfe1f2b89bc9f9fbc182"
+    },
+    "broadcast_send_to_base": {
+      "line": 3656,
+      "sha256": "bb8a69c5d8c0549286f7808f1a9bbb509e4e4c476290864ad405fcc24763a12b"
+    },
+    "_panel_broadcast_recipients": {
+      "line": 3721,
+      "sha256": "baf2a0194a4901b1fc8786df8f9153f3f0656ea6b90a47c2cae49c03f04992e9"
+    },
+    "panel_broadcast_handler": {
+      "line": 3736,
+      "sha256": "050da17deb1992121d18b95500e1b66db21968421663788c6ad748cebb603339"
+    }
+  },
+  "database.py": {
+    "_db": {
+      "line": 31,
+      "sha256": "2da5cd9dad382af72f4f46a58a82d6ed471c5cafb33bc863f58ed280ce6fa5df"
+    },
+    "_now": {
+      "line": 49,
+      "sha256": "e6688d71f9a6c4179268c6f7d16ce491d8b4b056cbc6e82427a4d56c76c1ad51"
+    },
+    "_client_row_to_dict": {
+      "line": 771,
+      "sha256": "581317c680e591ea01ecb4b0bb00c7afe565f7477a0fa30ce8234c9344bbe181"
+    },
+    "_canonical_delivery_consent_for_client": {
+      "line": 1092,
+      "sha256": "62e572eb2d8769e4ac68cde2f9e1988700c5816b3a1036a90d4cfa3ac3ca4c9c"
+    },
+    "has_marketing_consent": {
+      "line": 1101,
+      "sha256": "c79b005ee3d6b2c667d5f3731fd154df18201540d3e0a5142b29d0d9e3d0a861"
+    },
+    "_preference_delivery_subject": {
+      "line": 1123,
+      "sha256": "2fba3cb746b2c31a43721cd2e3c200e3df56391a54a1ea92fee0d5c46f86ae30"
+    },
+    "get_notify_prefs": {
+      "line": 1131,
+      "sha256": "9edfcdb6f940e9acdbd485b3a0fe2a8bd7f25aa34c497fc6321a2824f696186b"
+    },
+    "has_saved_notify_prefs": {
+      "line": 1230,
+      "sha256": "7292569244df12ed0f273f547473625d9b0342fd8315ac24629c00e18ff79f95"
+    },
+    "_marketing_last_ensure": {
+      "line": 1238,
+      "sha256": "dd0611e7744a3dce5d0b4c500717745ef7488cdd5d426c45a1e93db93d248ec6"
+    },
+    "set_marketing_last_sent": {
+      "line": 1244,
+      "sha256": "ff6fbe7042034a4350f030932b429b9f31e4b4156510fdc60f8d6563146355fb"
+    },
+    "marketing_sent_within": {
+      "line": 1254,
+      "sha256": "88f9246224875a7b4e71e757ad088f98978074eb04cd6fba8fe1c49e00a45623"
+    },
+    "list_telegram_clients": {
+      "line": 2431,
+      "sha256": "d40c8dae8a5ae645953d8361dcfae53d376b59590e142d1722574acf59a953be"
+    }
+  },
+  "legacy_client_command_bridge.py": {
+    "delivery_consent": {
+      "line": 126,
+      "sha256": "9e3afb760c1a064f66c5ea5740f35fb2cf4a64577f818ec9a652ffb54c64e53a"
+    }
+  },
+  "legacy_client_preferences_bridge.py": {
+    "delivery_read": {
+      "line": 28,
+      "sha256": "7b4b584a808a32981e8fcc25383f997d24a268064cb628fd3c851381698fa8ae"
+    },
+    "delivery_preferences": {
+      "line": 38,
+      "sha256": "56d89ebef73f57958203a9ca90ace81d0a15211c4c408e1ded0ea8d34f56c95a"
+    }
+  }
+}

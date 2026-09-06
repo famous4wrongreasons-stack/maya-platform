@@ -1,6 +1,6 @@
 # Cycle 06 — Package 5 B29 handoff checkpoint
 
-> Current continuation: [B34 exact review contract / source-authority decision STOP](CYCLE-06-BLOCKING-PACKAGE-5-B34-REVIEW-AUTHORITY-CONTRACT-DECISION.md). B33 production PASS remains accepted; no B34 runtime/schema/deployment change.
+> Current continuation: [B34 production PASS / fresh B35 Final Gate STOP](CYCLE-06-BLOCKING-PACKAGE-5-B34-DEPLOYED-FINAL-GATE-STOP-REPORT.md) → [current remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B34-REMAINDER-CHECKPOINT.md). Legacy review import/sync is retired; B29–B33 remain preserved. Package 5 is not complete.
 > The original checkpoint/proposal below is historical; its old pending/STOP status is superseded.
 
 Status: **HANDOFF READY — STOP AT B29 / A18**

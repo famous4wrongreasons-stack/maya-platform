@@ -1,0 +1,31 @@
+{
+  "beforeSchemaPreflight": "{\n  \"ok\": true,\n  \"environment\": \"production\",\n  \"config\": \"safe\",\n  \"local_migrations\": 81,\n  \"database\": {\n    \"status\": \"ready\",\n    \"applied_migrations\": 84,\n    \"pending_migrations\": 0\n  }\n}\nNo difference detected.\n\n",
+  "afterSchemaPreflight": "{\n  \"ok\": true,\n  \"environment\": \"production\",\n  \"config\": \"safe\",\n  \"local_migrations\": 81,\n  \"database\": {\n    \"status\": \"ready\",\n    \"applied_migrations\": 84,\n    \"pending_migrations\": 0\n  }\n}\nNo difference detected.\n\n",
+  "newMigrations": 0,
+  "beforeHistory": {
+    "readOnly": true,
+    "table": "external_reviews",
+    "productionMutations": 0,
+    "exists": true,
+    "rows": 312,
+    "sha256": "c1a70b4a2b891dbe4ed43662885da67e04f176544079cc209515f3148d64f869"
+  },
+  "afterHistory": {
+    "readOnly": true,
+    "table": "external_reviews",
+    "productionMutations": 0,
+    "exists": true,
+    "rows": 312,
+    "sha256": "c1a70b4a2b891dbe4ed43662885da67e04f176544079cc209515f3148d64f869"
+  },
+  "historyUnchanged": true,
+  "productionBusinessMutationsForProof": 0,
+  "deployment": {
+    "release": "20260906-p5-b34-6f6745f2",
+    "result": "PASS",
+    "mandatorySuites": 376,
+    "mandatoryTests": 3078,
+    "seconds": 214.506,
+    "pythonOverlayResult": "PASS"
+  }
+}

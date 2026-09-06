@@ -1,5 +1,7 @@
 # B34 / reduced A27 — exact review contract reconstruction and authority decision
 
+> Current continuation: [B34 production PASS / B35 STOP](CYCLE-06-BLOCKING-PACKAGE-5-B34-DEPLOYED-FINAL-GATE-STOP-REPORT.md) and [current remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B34-REMAINDER-CHECKPOINT.md). Pending statuses below describe their historical checkpoint.
+
 > Option A was approved after checkpoint `7a2cc296`: retire legacy Python
 > review import/sync, preserve canonical Maya ingress, zero schema/backfill.
 > [Runtime local gate](CYCLE-06-BLOCKING-PACKAGE-5-B34-RUNTIME-LOCAL-GATE.md).

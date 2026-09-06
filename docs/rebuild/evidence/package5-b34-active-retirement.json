@@ -1,0 +1,53 @@
+{
+  "inspection": "read-only AST and architectural guard; no business endpoints or application modules invoked",
+  "functions": {
+    "panel_external_reviews_import_handler": {
+      "line": 3646,
+      "sha256": "a341124f224b900ab2c7bac2cfd61e9105e1c27c83f91c7d9a19c9c223c78269"
+    },
+    "panel_reputation_refresh_handler": {
+      "line": 3651,
+      "sha256": "889e9842fb477ec8a0a5dc5a7985542a7df7aee4a72b68cc0d494acb76d6987d"
+    },
+    "_notify_owner_reputation": {
+      "line": 10589,
+      "sha256": "2ba846017beacfe1d531f2cbe6f53d221c6b2cbe3fa668116d12726e32f0f9cc"
+    },
+    "reputation_monitor_loop": {
+      "line": 10594,
+      "sha256": "8c0840a0d3da1091659930460cf379226d356767c615d6635228cbf9675f942a"
+    }
+  },
+  "monitorReferences": 0,
+  "requestOnlyLauncher": true,
+  "guard": {
+    "activePwaIncluded": true,
+    "b13LegacyControlPlaneOwners": 0,
+    "b14LegacyGodOwners": 0,
+    "b15ChatHistoryReadOwners": 0,
+    "b16BookingPrefillLegacyIdentityOwners": 0,
+    "b17ClientAppointmentLegacyIdentityOwners": 0,
+    "b18ActiveLegacyProviderMutationOwners": 0,
+    "b18AppointmentSitesMapped": "6/6",
+    "b18LegacyAppointmentAuthorityBypasses": 0,
+    "b19ChatBookingInventoryCoverage": "3/3",
+    "b19ChatBookingLegacyWriteSites": 0,
+    "b19ChatStreamAuthorityParity": true,
+    "b19ChatStreamMutationOwnerParity": true,
+    "b20CabinetEndpointIdentityParity": true,
+    "b20CabinetEndpointReadOnlyParity": true,
+    "b20CabinetLegacyIdentityOwners": 0,
+    "b20CabinetReadSurfaceWriters": 0,
+    "b21RealtimeLegacyHistoryWriters": 0,
+    "b21RealtimeLegacyIdentityOwners": 0,
+    "b21RealtimePreReadyBypasses": 0,
+    "b22UnverifiedTipOwners": 0,
+    "b23LegacyHistoryDeleteOwners": 0,
+    "b24LegacyWebPushOwners": 0,
+    "b34LegacyReviewOwners": 0,
+    "findings": [],
+    "pass": true
+  },
+  "productionReviewMutations": 0,
+  "productionProviderMutations": 0
+}

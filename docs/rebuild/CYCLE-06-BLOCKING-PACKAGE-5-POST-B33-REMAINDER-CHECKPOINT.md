@@ -1,5 +1,7 @@
 # Package 5 remainder — B33 production PASS; STOP at B34
 
+> Current continuation: [B34 production PASS / B35 STOP](CYCLE-06-BLOCKING-PACKAGE-5-B34-DEPLOYED-FINAL-GATE-STOP-REPORT.md) and [current remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B34-REMAINDER-CHECKPOINT.md). Pending statuses below describe their historical checkpoint.
+
 Current continuation: [B34 exact review contract / authority decision](CYCLE-06-BLOCKING-PACKAGE-5-B34-REVIEW-AUTHORITY-CONTRACT-DECISION.md).
 Stage 1 confirms that changed-source evidence already **conflicts and preserves
 the original**. The unresolved boundary is legacy source/tenant authority:
