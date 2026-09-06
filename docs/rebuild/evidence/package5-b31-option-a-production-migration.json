@@ -1,0 +1,35 @@
+{
+  "sourceCheckpoint": "05ea5c25",
+  "preflight": {
+    "gate": "PASS",
+    "pending": [
+      "20260906120000_b31_immutable_booking_idempotency"
+    ],
+    "preApplyDrift": "NONE",
+    "newColumns": 0,
+    "newTablePresent": false,
+    "competingMigrations": 0,
+    "release": "/opt/maya-saas/releases/20260906-p5-b30-ad1d91b9",
+    "health": 200,
+    "readiness": 200,
+    "migrationSha256": "31a4e9bc49892d2a43a06a3f70addaceb9fe1ab247e7b48b5f912702860e472c",
+    "productionBusinessMutations": 0
+  },
+  "postApply": {
+    "gate": "PASS",
+    "pending": 0,
+    "postApplyDrift": "NONE",
+    "migration": "20260906120000_b31_immutable_booking_idempotency",
+    "migrationChecksum": "31a4e9bc49892d2a43a06a3f70addaceb9fe1ab247e7b48b5f912702860e472c",
+    "newColumns": 9,
+    "guards": 3,
+    "bindings": 0,
+    "fingerprints": 0,
+    "fakeBackfill": 0,
+    "release": "/opt/maya-saas/releases/20260906-p5-b30-ad1d91b9",
+    "health": 200,
+    "readiness": 200,
+    "runtimeSwitched": false,
+    "productionBusinessMutations": 0
+  }
+}

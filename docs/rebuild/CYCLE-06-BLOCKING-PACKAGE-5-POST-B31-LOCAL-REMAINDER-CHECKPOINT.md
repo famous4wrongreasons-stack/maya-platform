@@ -38,8 +38,9 @@ ordinary backend result is recorded in the STOP report. **Do not deploy this
 checkpoint just because ordinary Jest is green.** No post-B31 production
 Final Gate has run.
 
-Next: complete the approved production schema migration gate/apply, then
-continue runtime remediation in the same cycle. Approved A adds one alias
+The [production schema gate/apply](CYCLE-06-BLOCKING-PACKAGE-5-B31-OPTION-A-PRODUCTION-MIGRATION-REPORT.md)
+is PASS: exact migration applied, pending 0, drift NONE, no backfill, B30 runtime
+unchanged. Next: continue runtime remediation in the same cycle. Approved A adds one alias
 model and three execution columns (9 persisted scalar columns in total);
 its schema proof is PASS. Historical fingerprints are not backfilled.
 Resolve G1, complete B31's failing runtime regression, repeat every mandatory gate, and
