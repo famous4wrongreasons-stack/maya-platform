@@ -1,0 +1,3965 @@
+{
+  "kind": "fresh all-13-family source inventory; inventory is not aggregate certification",
+  "familyInventoryCoverage": "13/13",
+  "familyOwners": {
+    "A15": "Wave 3 / external staff schedule",
+    "A16": "Wave 2 / CRM staff access",
+    "A17": "Wave 3 / CRM lifecycle and source facts",
+    "A18": "Wave 3 + verified Client profile/consent/appointment boundaries",
+    "A22": "Wave 1 / settings and preferences",
+    "A23": "Wave 1 / operational work and inbox projections",
+    "A25": "Wave 2 / security actions and AC3 auth protocol",
+    "A26": "Wave 2 + canonical trial bootstrap / tenant lifecycle",
+    "A27": "Wave 4 / reduced inventory and review facts",
+    "A28": "Wave 4 / internal calendar configuration and objects",
+    "A29": "Wave 5 / recovery correction and facts",
+    "A30": "Wave 6 / approved AC6 maintenance owner",
+    "A31": "Event store / reconciliation / mirror and recovery fact plane"
+  },
+  "registrations": {
+    "wave1": 6,
+    "wave2": 13,
+    "wave3": 8,
+    "wave4": 12,
+    "wave5": 1,
+    "wave6": 6
+  },
+  "sourceTsNonSpec": 562,
+  "tsRoutes": 224,
+  "tsMutationLikeSites": 516,
+  "acceptedWaveFoundationChangesSinceB30": [],
+  "routes": [
+    {
+      "file": "maya-saas-backend/src/admin/admin-analytics.controller.ts",
+      "line": 16,
+      "method": "Get",
+      "route": "'trials'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin-catalog.controller.ts",
+      "line": 14,
+      "method": "Get",
+      "route": "'plans'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 49,
+      "method": "Post",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 59,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 66,
+      "method": "Get",
+      "route": "':id'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 75,
+      "method": "Patch",
+      "route": "':id'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 87,
+      "method": "Patch",
+      "route": "':id/branding'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 99,
+      "method": "Post",
+      "route": "':id/logo'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 126,
+      "method": "Post",
+      "route": "':id/crm'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 139,
+      "method": "Patch",
+      "route": "':id/crm'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 152,
+      "method": "Post",
+      "route": "':id/test-crm'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 160,
+      "method": "Post",
+      "route": "':id/users'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 173,
+      "method": "Post",
+      "route": "':id/providers/:providerId/user'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 188,
+      "method": "Post",
+      "route": "':id/suspend'"
+    },
+    {
+      "file": "maya-saas-backend/src/admin/admin.controller.ts",
+      "line": 199,
+      "method": "Post",
+      "route": "':id/activate'"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-core.controller.ts",
+      "line": 34,
+      "method": "Post",
+      "route": "'chat'"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-core.controller.ts",
+      "line": 42,
+      "method": "Post",
+      "route": "'transcribe'"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tools.controller.ts",
+      "line": 19,
+      "method": "Get",
+      "route": "'tools'"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tools.controller.ts",
+      "line": 28,
+      "method": "Post",
+      "route": "'tools/:toolName/execute'"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tools.controller.ts",
+      "line": 38,
+      "method": "Get",
+      "route": "'approvals'"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tools.controller.ts",
+      "line": 47,
+      "method": "Post",
+      "route": "'approvals/:id/approve'"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tools.controller.ts",
+      "line": 57,
+      "method": "Post",
+      "route": "'approvals/:id/reject'"
+    },
+    {
+      "file": "maya-saas-backend/src/analytics/operations-analytics.controller.ts",
+      "line": 100,
+      "method": "Get",
+      "route": "'business'"
+    },
+    {
+      "file": "maya-saas-backend/src/analytics/operations-analytics.controller.ts",
+      "line": 115,
+      "method": "Get",
+      "route": "'business/finance'"
+    },
+    {
+      "file": "maya-saas-backend/src/analytics/operations-analytics.controller.ts",
+      "line": 128,
+      "method": "Get",
+      "route": "'me'"
+    },
+    {
+      "file": "maya-saas-backend/src/app.controller.ts",
+      "line": 19,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/app.controller.ts",
+      "line": 26,
+      "method": "Get",
+      "route": "'ready'"
+    },
+    {
+      "file": "maya-saas-backend/src/app.controller.ts",
+      "line": 32,
+      "method": "Get",
+      "route": "'metrics'"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/appointments.controller.ts",
+      "line": 21,
+      "method": "Post",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/appointments.controller.ts",
+      "line": 38,
+      "method": "Post",
+      "route": "'preview'"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/appointments.controller.ts",
+      "line": 53,
+      "method": "Get",
+      "route": "'my'"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/appointments.controller.ts",
+      "line": 64,
+      "method": "Post",
+      "route": "':id/cancel'"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/appointments.controller.ts",
+      "line": 81,
+      "method": "Post",
+      "route": "':id/reschedule'"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/availability.controller.ts",
+      "line": 20,
+      "method": "Get",
+      "route": "'available-slots'"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/availability.controller.ts",
+      "line": 31,
+      "method": "Get",
+      "route": "'available-days'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 54,
+      "method": "Post",
+      "route": "'login'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 61,
+      "method": "Post",
+      "route": "'register'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 68,
+      "method": "Post",
+      "route": "'phone/start'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 80,
+      "method": "Post",
+      "route": "'phone/verify'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 92,
+      "method": "Post",
+      "route": "'email/start'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 102,
+      "method": "Post",
+      "route": "'email/verify'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 115,
+      "method": "Post",
+      "route": "'oauth/yandex/start'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 127,
+      "method": "Post",
+      "route": "'oauth/yandex/complete'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 141,
+      "method": "Post",
+      "route": "'oauth/yandex/link/complete'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 159,
+      "method": "Post",
+      "route": "'oauth/telegram/start'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 171,
+      "method": "Post",
+      "route": "'oauth/telegram/complete'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 185,
+      "method": "Post",
+      "route": "'oauth/telegram/link/complete'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 202,
+      "method": "Get",
+      "route": "'oauth/links'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 210,
+      "method": "Get",
+      "route": "'oauth/native/callback'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 233,
+      "method": "Post",
+      "route": "'refresh'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 242,
+      "method": "Post",
+      "route": "'logout'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 249,
+      "method": "Get",
+      "route": "'sessions'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 256,
+      "method": "Delete",
+      "route": "'sessions'"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.controller.ts",
+      "line": 263,
+      "method": "Delete",
+      "route": "'sessions/:id'"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/billing.controller.ts",
+      "line": 33,
+      "method": "Get",
+      "route": "'billing/plans'"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/billing.controller.ts",
+      "line": 48,
+      "method": "Get",
+      "route": "'billing/subscription'"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/billing.controller.ts",
+      "line": 57,
+      "method": "Post",
+      "route": "'billing/checkout'"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/billing.controller.ts",
+      "line": 73,
+      "method": "Get",
+      "route": "'billing/payments'"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/billing.controller.ts",
+      "line": 82,
+      "method": "Post",
+      "route": "'admin/tenants/:id/billing/checkout'"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/billing.controller.ts",
+      "line": 95,
+      "method": "Get",
+      "route": "'admin/tenants/:id/billing/payments'"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/billing.controller.ts",
+      "line": 104,
+      "method": "Post",
+      "route": "'admin/tenants/:id/billing/charge'"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/billing.controller.ts",
+      "line": 116,
+      "method": "Post",
+      "route": "'admin/billing/run-due'"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/billing.controller.ts",
+      "line": 125,
+      "method": "Post",
+      "route": "'billing/yookassa/webhook'"
+    },
+    {
+      "file": "maya-saas-backend/src/branches/branches.controller.ts",
+      "line": 21,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/branches/branches.controller.ts",
+      "line": 27,
+      "method": "Post",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/branding/branding.controller.ts",
+      "line": 21,
+      "method": "Get",
+      "route": "'tenant-logos/:filename'"
+    },
+    {
+      "file": "maya-saas-backend/src/branding/branding.controller.ts",
+      "line": 36,
+      "method": "Get",
+      "route": "'provider-avatars/:filename'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 64,
+      "method": "Get",
+      "route": "'inventory'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 78,
+      "method": "Post",
+      "route": "'inventory'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 95,
+      "method": "Put",
+      "route": "'inventory/:itemId'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 114,
+      "method": "Delete",
+      "route": "'inventory/:itemId'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 131,
+      "method": "Get",
+      "route": "'certificates'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 143,
+      "method": "Post",
+      "route": "'certificates'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 158,
+      "method": "Put",
+      "route": "'certificates/:itemId'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 175,
+      "method": "Delete",
+      "route": "'certificates/:itemId'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 190,
+      "method": "Get",
+      "route": "'memberships'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 202,
+      "method": "Post",
+      "route": "'memberships'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 217,
+      "method": "Put",
+      "route": "'memberships/:itemId'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 234,
+      "method": "Delete",
+      "route": "'memberships/:itemId'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 249,
+      "method": "Get",
+      "route": "'referrals'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 256,
+      "method": "Put",
+      "route": "'referrals'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 266,
+      "method": "Get",
+      "route": "'reviews'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 276,
+      "method": "Post",
+      "route": "'reviews'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 286,
+      "method": "Get",
+      "route": "'reviews/topics'"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/business-content.controller.ts",
+      "line": 296,
+      "method": "Get",
+      "route": "'reviews/trend'"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/commerce-integration.controller.ts",
+      "line": 36,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/commerce-integration.controller.ts",
+      "line": 43,
+      "method": "Put",
+      "route": "'yookassa'"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/commerce-integration.controller.ts",
+      "line": 59,
+      "method": "Post",
+      "route": "'yookassa/recheck'"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/commerce-integration.controller.ts",
+      "line": 69,
+      "method": "Delete",
+      "route": "'yookassa'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel.controller.ts",
+      "line": 60,
+      "method": "Get",
+      "route": "'profile'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel.controller.ts",
+      "line": 69,
+      "method": "Get",
+      "route": "'loyalty'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel.controller.ts",
+      "line": 77,
+      "method": "Get",
+      "route": "'appointments'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel.controller.ts",
+      "line": 83,
+      "method": "Post",
+      "route": "'challenges'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel.controller.ts",
+      "line": 91,
+      "method": "Post",
+      "route": "'consume'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel.controller.ts",
+      "line": 98,
+      "method": "Post",
+      "route": "'consent'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel.controller.ts",
+      "line": 105,
+      "method": "Post",
+      "route": "'delivery-endpoint/refresh'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel.controller.ts",
+      "line": 113,
+      "method": "Get",
+      "route": "'status'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel.controller.ts",
+      "line": 134,
+      "method": "Post",
+      "route": "':operation'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.controller.ts",
+      "line": 32,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.controller.ts",
+      "line": 36,
+      "method": "Post",
+      "route": "'add'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.controller.ts",
+      "line": 53,
+      "method": "Post",
+      "route": "':operation'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.controller.ts",
+      "line": 32,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.controller.ts",
+      "line": 36,
+      "method": "Post",
+      "route": "'notifications'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.controller.ts",
+      "line": 43,
+      "method": "Post",
+      "route": "'visit-mood'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.controller.ts",
+      "line": 60,
+      "method": "Post",
+      "route": "':operation'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.controller.ts",
+      "line": 24,
+      "method": "Post",
+      "route": "':operation'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-web-push.controller.ts",
+      "line": 28,
+      "method": "Post",
+      "route": "'subscribe'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-web-push.controller.ts",
+      "line": 35,
+      "method": "Post",
+      "route": "'unsubscribe'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-web-push.controller.ts",
+      "line": 52,
+      "method": "Post",
+      "route": "':operation'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 90,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 97,
+      "method": "Post",
+      "route": "'discover'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 123,
+      "method": "Post",
+      "route": "'connect'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 156,
+      "method": "Get",
+      "route": "'preview'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 178,
+      "method": "Get",
+      "route": "'journal'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 190,
+      "method": "Post",
+      "route": "'journal/appointments'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 244,
+      "method": "Get",
+      "route": "'journal/appointments/:externalId'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 271,
+      "method": "Post",
+      "route": "'journal/appointments/:externalId/attendance'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 304,
+      "method": "Post",
+      "route": "'journal/appointments/:externalId/duration'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 334,
+      "method": "Post",
+      "route": "'journal/appointments/:externalId/services'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 362,
+      "method": "Post",
+      "route": "'journal/appointments/:externalId/reschedule'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 396,
+      "method": "Post",
+      "route": "'journal/appointments/:externalId/cancel'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 429,
+      "method": "Get",
+      "route": "'clients/search'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 446,
+      "method": "Get",
+      "route": "'team-access'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 463,
+      "method": "Patch",
+      "route": "'team-access/:externalStaffId'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 499,
+      "method": "Patch",
+      "route": "'team-access/:externalStaffId/claim-owner'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 528,
+      "method": "Post",
+      "route": "'activate'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 553,
+      "method": "Post",
+      "route": "'recheck'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "line": 574,
+      "method": "Delete",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.controller.ts",
+      "line": 11,
+      "method": "Get",
+      "route": "'providers'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/legacy-appointment-bridge.controller.ts",
+      "line": 25,
+      "method": "Post",
+      "route": "'shadow'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/legacy-appointment-bridge.controller.ts",
+      "line": 38,
+      "method": "Post",
+      "route": "'execute'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/legacy-appointment-bridge.controller.ts",
+      "line": 51,
+      "method": "Get",
+      "route": "'executions/:executionId'"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/shadow-ingestion.controller.ts",
+      "line": 21,
+      "method": "Post",
+      "route": "'deliveries'"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-portal/customer-portal.controller.ts",
+      "line": 39,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-activation-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'activate'"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-cancellation-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'cancel'"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-expiry-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'expire'"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-purchase-cutover.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'initiate-purchase'"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-purchase-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'initiate-purchase'"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-renewal-activation-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'activate-renewal'"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-renewal-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'initiate-renewal'"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-revocation-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'revoke'"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-usage-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'sync-usage'"
+    },
+    {
+      "file": "maya-saas-backend/src/customers/customers.controller.ts",
+      "line": 38,
+      "method": "Get",
+      "route": "'me/profile'"
+    },
+    {
+      "file": "maya-saas-backend/src/customers/customers.controller.ts",
+      "line": 44,
+      "method": "Patch",
+      "route": "'me/profile'"
+    },
+    {
+      "file": "maya-saas-backend/src/customers/customers.controller.ts",
+      "line": 59,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/customers/customers.controller.ts",
+      "line": 72,
+      "method": "Get",
+      "route": "':userId'"
+    },
+    {
+      "file": "maya-saas-backend/src/customers/customers.controller.ts",
+      "line": 82,
+      "method": "Patch",
+      "route": "':userId/notes'"
+    },
+    {
+      "file": "maya-saas-backend/src/dashboard-preferences/dashboard-preferences.controller.ts",
+      "line": 33,
+      "method": "Get",
+      "route": "'finance'"
+    },
+    {
+      "file": "maya-saas-backend/src/dashboard-preferences/dashboard-preferences.controller.ts",
+      "line": 39,
+      "method": "Patch",
+      "route": "'finance'"
+    },
+    {
+      "file": "maya-saas-backend/src/dashboard-preferences/dashboard-preferences.controller.ts",
+      "line": 54,
+      "method": "Get",
+      "route": "'assistant'"
+    },
+    {
+      "file": "maya-saas-backend/src/dashboard-preferences/dashboard-preferences.controller.ts",
+      "line": 60,
+      "method": "Patch",
+      "route": "'assistant'"
+    },
+    {
+      "file": "maya-saas-backend/src/entitlements/features.controller.ts",
+      "line": 20,
+      "method": "Get",
+      "route": "'registry'"
+    },
+    {
+      "file": "maya-saas-backend/src/entitlements/features.controller.ts",
+      "line": 32,
+      "method": "Get",
+      "route": "'add-ons'"
+    },
+    {
+      "file": "maya-saas-backend/src/entitlements/features.controller.ts",
+      "line": 41,
+      "method": "Get",
+      "route": "'effective'"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/expense-canonical-shadow.controller.ts",
+      "line": 25,
+      "method": "Post",
+      "route": "'create'"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/expense-canonical-shadow.controller.ts",
+      "line": 41,
+      "method": "Post",
+      "route": "'delete'"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/expense-canonical-shadow.controller.ts",
+      "line": 57,
+      "method": "Post",
+      "route": "'declare-period'"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/expenses.controller.ts",
+      "line": 40,
+      "method": "Post",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/expenses.controller.ts",
+      "line": 54,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/expenses.controller.ts",
+      "line": 63,
+      "method": "Delete",
+      "route": "':id'"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/gift-certificate-activation-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'activate'"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/gift-certificate-purchase-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'initiate-purchase'"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/gift-certificate-redemption-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'redeem'"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.controller.ts",
+      "line": 45,
+      "method": "Post",
+      "route": "'internal/ingest'"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.controller.ts",
+      "line": 58,
+      "method": "Post",
+      "route": "'internal/observe-legacy-telegram'"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.controller.ts",
+      "line": 72,
+      "method": "Post",
+      "route": "'internal/deliver-privacy-telegram'"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.controller.ts",
+      "line": 88,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.controller.ts",
+      "line": 103,
+      "method": "Post",
+      "route": "'devices'"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.controller.ts",
+      "line": 115,
+      "method": "Post",
+      "route": "':id/read'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 64,
+      "method": "Get",
+      "route": "'setup'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 70,
+      "method": "Get",
+      "route": "'journal'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 81,
+      "method": "Post",
+      "route": "'services'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 96,
+      "method": "Patch",
+      "route": "'services/:serviceId'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 113,
+      "method": "Delete",
+      "route": "'services/:serviceId'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 128,
+      "method": "Patch",
+      "route": "'providers/:providerId'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 145,
+      "method": "Post",
+      "route": "'providers/:providerId/avatar'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 173,
+      "method": "Post",
+      "route": "'providers'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 189,
+      "method": "Get",
+      "route": "'providers/:providerId/schedule'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 201,
+      "method": "Put",
+      "route": "'providers/:providerId/schedule'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 218,
+      "method": "Post",
+      "route": "'providers/:providerId/time-off'"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.controller.ts",
+      "line": 235,
+      "method": "Delete",
+      "route": "'providers/:providerId/time-off/:exceptionId'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-backfill-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'legacy-backfill'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-expiry-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'legacy-expire'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-grant-consume-shadow.controller.ts",
+      "line": 16,
+      "method": "Post",
+      "route": "'legacy-grant-consume'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-grant-issue-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'legacy-grant-issue'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-import-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'legacy-import'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-redemption-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'legacy-redeem'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-refund-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'legacy-refund'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'legacy-earn'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/loyalty.controller.ts",
+      "line": 28,
+      "method": "Get",
+      "route": "'me'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/loyalty.controller.ts",
+      "line": 34,
+      "method": "Get",
+      "route": "'me/transactions'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/loyalty.controller.ts",
+      "line": 57,
+      "method": "Get",
+      "route": "':userId'"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/loyalty.controller.ts",
+      "line": 66,
+      "method": "Post",
+      "route": "':userId/adjust'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 43,
+      "method": "Post",
+      "route": "'trial-activations'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 58,
+      "method": "Get",
+      "route": "'templates'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 65,
+      "method": "Post",
+      "route": "'ai/drafts'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 78,
+      "method": "Post",
+      "route": "'ai/drafts/:draftId/messages'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 94,
+      "method": "Post",
+      "route": "'ai/drafts/:draftId/read'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 107,
+      "method": "Post",
+      "route": "'ai/drafts/:draftId/crm/discover'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 126,
+      "method": "Post",
+      "route": "'ai/drafts/:draftId/crm/import'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 145,
+      "method": "Post",
+      "route": "'ai/drafts/:draftId/confirm'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 161,
+      "method": "Get",
+      "route": "'ai/confirmations/pending'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 172,
+      "method": "Post",
+      "route": "'ai/drafts/:draftId/resume'"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/onboarding.controller.ts",
+      "line": 189,
+      "method": "Post",
+      "route": "'trial'"
+    },
+    {
+      "file": "maya-saas-backend/src/quotas/quotas.controller.ts",
+      "line": 25,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/recovery/recovery.controller.ts",
+      "line": 40,
+      "method": "Post",
+      "route": "'attribution/corrections'"
+    },
+    {
+      "file": "maya-saas-backend/src/recovery/recovery.controller.ts",
+      "line": 63,
+      "method": "Post",
+      "route": "'internal/touchpoints'"
+    },
+    {
+      "file": "maya-saas-backend/src/recovery/recovery.controller.ts",
+      "line": 77,
+      "method": "Get",
+      "route": "'report'"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-create-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'create-customer-referral'"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-resolve-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'resolve-customer-referral'"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-reward-fulfill-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'fulfill-referral-reward'"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-reward-issue-shadow.controller.ts",
+      "line": 14,
+      "method": "Post",
+      "route": "'issue-referral-rewards'"
+    },
+    {
+      "file": "maya-saas-backend/src/services/services.controller.ts",
+      "line": 16,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/staff/staff.controller.ts",
+      "line": 16,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/tenants/industry-presets.controller.ts",
+      "line": 14,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/tenants/tenant-pwa.controller.ts",
+      "line": 21,
+      "method": "Get",
+      "route": "'search'"
+    },
+    {
+      "file": "maya-saas-backend/src/tenants/tenant-pwa.controller.ts",
+      "line": 31,
+      "method": "Get",
+      "route": "':tenantSlug/install'"
+    },
+    {
+      "file": "maya-saas-backend/src/tenants/tenant-pwa.controller.ts",
+      "line": 38,
+      "method": "Get",
+      "route": "':tenantSlug/manifest.webmanifest'"
+    },
+    {
+      "file": "maya-saas-backend/src/tenants/tenant-pwa.controller.ts",
+      "line": 53,
+      "method": "Get",
+      "route": "':tenantSlug/icon/:size.png'"
+    },
+    {
+      "file": "maya-saas-backend/src/tenants/tenant-pwa.controller.ts",
+      "line": 75,
+      "method": "Get",
+      "route": "':tenantSlug/qr.svg'"
+    },
+    {
+      "file": "maya-saas-backend/src/tenants/tenants.controller.ts",
+      "line": 13,
+      "method": "Get",
+      "route": "':tenantSlug'"
+    },
+    {
+      "file": "maya-saas-backend/src/users/users.controller.ts",
+      "line": 15,
+      "method": "Get",
+      "route": "''"
+    },
+    {
+      "file": "maya-saas-backend/src/users/users.controller.ts",
+      "line": 24,
+      "method": "Patch",
+      "route": "''"
+    }
+  ],
+  "mutations": [
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.identity.ts",
+      "line": 78,
+      "call": "createHmac('sha256', payloadSecret)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.identity.ts",
+      "line": 84,
+      "call": "createHmac('sha256', this.identitySecret)\n      .update(namespace)\n      .update('\\u0000')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.identity.ts",
+      "line": 84,
+      "call": "createHmac('sha256', this.identitySecret)\n      .update(namespace)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.identity.ts",
+      "line": 84,
+      "call": "createHmac('sha256', this.identitySecret)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.identity.ts",
+      "line": 152,
+      "call": "cipher.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.identity.ts",
+      "line": 175,
+      "call": "decipher.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 330,
+      "call": "tx.actionExecution.create"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 522,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 558,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 571,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 640,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 654,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 708,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 726,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 762,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 769,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 784,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 831,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 835,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 880,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 893,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 942,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 948,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 989,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 1029,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 1075,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 1088,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 1107,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 1121,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 1161,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 1176,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 1299,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 1901,
+      "call": "tx.actionExecutionIdempotencyBinding.create"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "line": 2344,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.policy-resolver.ts",
+      "line": 956,
+      "call": "createHmac('sha256', this.secret)\n      .update(namespace)\n      .update('\\u0000')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.policy-resolver.ts",
+      "line": 956,
+      "call": "createHmac('sha256', this.secret)\n      .update(namespace)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.policy-resolver.ts",
+      "line": 956,
+      "call": "createHmac('sha256', this.secret)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.runtime.ts",
+      "line": 205,
+      "call": "this.bookingExecutions.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/action-engine.runtime.ts",
+      "line": 239,
+      "call": "this.runningExecutions.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/legacy-loyalty-refund-shadow.contract.ts",
+      "line": 15,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/p4-03-legacy-loyalty-executable.contract.ts",
+      "line": 135,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/p4-05-customer-subscription-executable.contract.ts",
+      "line": 209,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/p4-08-tenant-billing-executable.contract.ts",
+      "line": 483,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/action-engine/referral-reward-scheduler-envelope.contract.ts",
+      "line": 40,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "line": 1428,
+      "call": "enabled.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "line": 4610,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-memory.service.ts",
+      "line": 65,
+      "call": "this.prisma.aiMemoryFact.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-memory.service.ts",
+      "line": 118,
+      "call": "this.prisma.aiMemoryFact.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-memory.service.ts",
+      "line": 202,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "line": 2169,
+      "call": "this.expensesService.create"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "line": 2722,
+      "call": "this.businessQueryCache.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "line": 2857,
+      "call": "this.employeeQueryCache.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "line": 3272,
+      "call": "cache.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "line": 3278,
+      "call": "cache.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 211,
+      "call": "this.prisma.aiApprovalRequest.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 274,
+      "call": "this.prisma.aiApprovalRequest.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 317,
+      "call": "this.prisma.aiApprovalRequest.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 368,
+      "call": "this.prisma.aiApprovalRequest.create"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 523,
+      "call": "this.prisma.aiToolExecution.create"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 547,
+      "call": "this.prisma.aiApprovalRequest.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 556,
+      "call": "this.prisma.aiToolExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 595,
+      "call": "this.prisma.aiToolExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 605,
+      "call": "this.prisma.aiApprovalRequest.update"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 643,
+      "call": "this.prisma.aiToolExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 653,
+      "call": "this.prisma.aiApprovalRequest.update"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 863,
+      "call": "this.prisma.aiApprovalRequest.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 880,
+      "call": "this.prisma.aiApprovalRequest.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 909,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/staff-schedule-command.service.ts",
+      "line": 970,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/client-appointment-create.service.ts",
+      "line": 196,
+      "call": "createHash('sha256')\n        .update"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/tenant-appointment.repository.ts",
+      "line": 75,
+      "call": "this.prisma.appointment.create"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/tenant-appointment.repository.ts",
+      "line": 149,
+      "call": "this.prisma.appointment.update"
+    },
+    {
+      "file": "maya-saas-backend/src/appointments/tenant-appointment.repository.ts",
+      "line": 184,
+      "call": "this.prisma.appointment.update"
+    },
+    {
+      "file": "maya-saas-backend/src/audit-log/audit-log.service.ts",
+      "line": 37,
+      "call": "this.prisma.auditLog.create"
+    },
+    {
+      "file": "maya-saas-backend/src/audit-log/audit-log.service.ts",
+      "line": 62,
+      "call": "this.prisma.auditLog.create"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-rate-limit.service.ts",
+      "line": 219,
+      "call": "createHmac('sha256', this.getSecret())\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-session.repository.ts",
+      "line": 37,
+      "call": "this.prisma.authSession.create"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-session.repository.ts",
+      "line": 65,
+      "call": "transaction.authRefreshToken.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-session.repository.ts",
+      "line": 120,
+      "call": "transaction.authSession.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-session.repository.ts",
+      "line": 135,
+      "call": "transaction.authRefreshToken.create"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-session.repository.ts",
+      "line": 209,
+      "call": "transaction.authSession.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-session.repository.ts",
+      "line": 213,
+      "call": "transaction.authRefreshToken.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-session.repository.ts",
+      "line": 229,
+      "call": "transaction.authSession.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-session.repository.ts",
+      "line": 240,
+      "call": "transaction.authRefreshToken.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-session.service.ts",
+      "line": 454,
+      "call": "createHmac('sha256', this.getRefreshSecret())\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth-session.service.ts",
+      "line": 464,
+      "call": "createHmac('sha256', this.getMetadataSecret())\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/auth.service.ts",
+      "line": 587,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/email-auth.service.ts",
+      "line": 623,
+      "call": "createHmac('sha256', secret)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/social-auth.service.ts",
+      "line": 958,
+      "call": "verifier.update"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/social-auth.service.ts",
+      "line": 1436,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/social-auth.service.ts",
+      "line": 1522,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 21,
+      "call": "this.prisma.phoneAuthCode.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 65,
+      "call": "transaction.phoneAuthCode.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 99,
+      "call": "this.prisma.phoneAuthCode.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 120,
+      "call": "this.prisma.emailAuthCode.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 164,
+      "call": "transaction.emailAuthCode.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 194,
+      "call": "this.prisma.emailAuthCode.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 217,
+      "call": "this.prisma.authFlowState.create"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 231,
+      "call": "this.prisma.authFlowState.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 277,
+      "call": "this.prisma.authIdentity.create"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 300,
+      "call": "this.prisma.authIdentity.update"
+    },
+    {
+      "file": "maya-saas-backend/src/auth/tenant-auth.repository.ts",
+      "line": 322,
+      "call": "this.prisma.authIdentity.update"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/p4-08-tenant-billing-executable.service.ts",
+      "line": 200,
+      "call": "this.prisma.billingPayment.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/p4-08-tenant-billing-executable.service.ts",
+      "line": 217,
+      "call": "this.prisma.billingPayment.update"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/p4-08-tenant-billing-executable.service.ts",
+      "line": 283,
+      "call": "this.prisma.billingPayment.update"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/p4-08-tenant-billing-executable.service.ts",
+      "line": 481,
+      "call": "this.prisma.billingPayment.create"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/p4-08-tenant-billing-executable.service.ts",
+      "line": 684,
+      "call": "tx.billingPayment.update"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/p4-08-tenant-billing-executable.service.ts",
+      "line": 726,
+      "call": "tx.billingPayment.update"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/p4-08-tenant-billing-executable.service.ts",
+      "line": 734,
+      "call": "tx.tenant.update"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/p4-08-tenant-billing-executable.service.ts",
+      "line": 832,
+      "call": "tx.tenant.update"
+    },
+    {
+      "file": "maya-saas-backend/src/billing/p4-08-tenant-billing-executable.service.ts",
+      "line": 917,
+      "call": "this.prisma.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/branding/branding.service.ts",
+      "line": 41,
+      "call": "this.prisma.brandingSettings.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-canonical-offer-materialization.contract.ts",
+      "line": 80,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 136,
+      "call": "tx.tenantCatalogItem.create"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 185,
+      "call": "tx.tenantCatalogItemValueVersion.create"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 201,
+      "call": "tx.tenantCatalogItem.update"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 245,
+      "call": "tx.referralProgram.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 272,
+      "call": "tx.referralProgramValueVersion.create"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 299,
+      "call": "tx.referralProgram.update"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 406,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 422,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 447,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 457,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-executable.service.ts",
+      "line": 501,
+      "call": "tx.auditLog.create"
+    },
+    {
+      "file": "maya-saas-backend/src/business-content/p4-09-value-configuration-shadow.service.ts",
+      "line": 82,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 296,
+      "call": "tx.commerceIntegration.create"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 300,
+      "call": "tx.commerceIntegration.update"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 307,
+      "call": "tx.commerceIntegration.update"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 318,
+      "call": "tx.commerceIntegration.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 348,
+      "call": "tx.auditLog.create"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 494,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 525,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 550,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 559,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 584,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-executable.service.ts",
+      "line": 595,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-shadow.service.ts",
+      "line": 73,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 391,
+      "call": "tx.marketingCampaign.create"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 432,
+      "call": "tx.marketingCampaignRecipient.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 558,
+      "call": "tx.marketingDeliveryAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 582,
+      "call": "tx.marketingCampaignRecipient.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 619,
+      "call": "tx.marketingCampaign.update"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 941,
+      "call": "tx.marketingDeliveryAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 961,
+      "call": "tx.marketingCampaignRecipient.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 1217,
+      "call": "tx.marketingDeliveryAttempt.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 1241,
+      "call": "tx.marketingCampaignRecipient.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 1284,
+      "call": "tx.marketingDeliveryAttempt.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 1308,
+      "call": "tx.marketingCampaignRecipient.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 1364,
+      "call": "tx.marketingDeliveryAttempt.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 1390,
+      "call": "tx.marketingCampaignRecipient.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 1474,
+      "call": "tx.marketingCampaignRecipient.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 1950,
+      "call": "tx.marketingCampaignRecipient.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 1984,
+      "call": "tx.marketingDeliveryAttempt.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.kernel.ts",
+      "line": 2076,
+      "call": "tx.marketingCampaign.update"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts",
+      "line": 145,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts",
+      "line": 364,
+      "call": "this.prisma.inboxItem.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts",
+      "line": 1059,
+      "call": "this.prisma.inboxItem.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts",
+      "line": 1492,
+      "call": "this.prisma.inboxItem.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-shadow/communication-shadow.service.ts",
+      "line": 194,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/communication-shadow/communication-shadow.service.ts",
+      "line": 202,
+      "call": "createHmac('sha256', this.identitySecret)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/appointment-change.service.ts",
+      "line": 129,
+      "call": "tx.appointment.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/appointment-change.service.ts",
+      "line": 204,
+      "call": "tx.appointment.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/appointment-mirror.service.ts",
+      "line": 214,
+      "call": "this.prisma.appointment.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/appointment-mirror.service.ts",
+      "line": 260,
+      "call": "this.prisma.appointment.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/appointment-reconciliation.service.ts",
+      "line": 217,
+      "call": "this.prisma.reconciliationRun.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/appointment-reconciliation.service.ts",
+      "line": 250,
+      "call": "this.prisma.reconciliationRun.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/appointment-reconciliation.service.ts",
+      "line": 298,
+      "call": "this.prisma.reconciliationRun.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/appointment-reconciliation.service.ts",
+      "line": 321,
+      "call": "this.prisma.reconciliationRun.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-appointment-cancel.service.ts",
+      "line": 94,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-appointment-reschedule.service.ts",
+      "line": 215,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel-authenticator.service.ts",
+      "line": 128,
+      "call": "createHmac('sha256', 'WebAppData').update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel-authenticator.service.ts",
+      "line": 147,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel-authenticator.service.ts",
+      "line": 155,
+      "call": "createHmac('sha256', key).update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 53,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 202,
+      "call": "tx.clientChannelLink.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 255,
+      "call": "tx.clientChannelLink.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "line": 332,
+      "call": "tx.clientChannelLink.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel-runtime.service.ts",
+      "line": 1067,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-channel-runtime.service.ts",
+      "line": 1232,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.service.ts",
+      "line": 62,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.service.ts",
+      "line": 292,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.service.ts",
+      "line": 307,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.service.ts",
+      "line": 324,
+      "call": "tx.actionTargetMutation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.service.ts",
+      "line": 345,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.service.ts",
+      "line": 354,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.service.ts",
+      "line": 486,
+      "call": "tx.customerProfile.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-habits.service.ts",
+      "line": 491,
+      "call": "tx.customerProfile.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-identity.service.ts",
+      "line": 111,
+      "call": "tx.crmClientLink.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-identity.service.ts",
+      "line": 125,
+      "call": "tx.client.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-identity.service.ts",
+      "line": 194,
+      "call": "tx.client.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-identity.service.ts",
+      "line": 346,
+      "call": "createHmac('sha256', secret)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-link-challenge.service.ts",
+      "line": 99,
+      "call": "tx.clientLinkChallenge.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-link-challenge.service.ts",
+      "line": 109,
+      "call": "createHash('sha256')\n            .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-link-challenge.service.ts",
+      "line": 193,
+      "call": "tx.clientLinkChallenge.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.controller.ts",
+      "line": 41,
+      "call": "this.preferences.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.controller.ts",
+      "line": 48,
+      "call": "this.preferences.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.controller.ts",
+      "line": 110,
+      "call": "this.preferences.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.service.ts",
+      "line": 57,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.service.ts",
+      "line": 431,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.service.ts",
+      "line": 446,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.service.ts",
+      "line": 459,
+      "call": "tx.actionTargetMutation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.service.ts",
+      "line": 480,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.service.ts",
+      "line": 489,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.service.ts",
+      "line": 695,
+      "call": "tx.customerProfile.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.service.ts",
+      "line": 697,
+      "call": "tx.customerProfile.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-preferences.service.ts",
+      "line": 705,
+      "call": "tx.appointment.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 273,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 288,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 311,
+      "call": "tx.clientWantedSlotInterest.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 323,
+      "call": "tx.actionTargetMutation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 501,
+      "call": "tx.clientWantedSlotInterest.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 510,
+      "call": "tx.actionTargetMutation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 543,
+      "call": "tx.clientWantedSlotInterest.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 741,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 756,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 778,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-wanted-slot.service.ts",
+      "line": 787,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-web-push.service.ts",
+      "line": 153,
+      "call": "tx.clientWebPushEndpoint.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/client-web-push.service.ts",
+      "line": 419,
+      "call": "tx.clientWebPushEndpoint.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 367,
+      "call": "this.adapterFactory.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 466,
+      "call": "this.prisma.crmIntegration.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 481,
+      "call": "this.prisma.crmIntegration.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 596,
+      "call": "this.prisma.crmIntegration.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 645,
+      "call": "this.prisma.tenant.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 660,
+      "call": "this.prisma.branch.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 716,
+      "call": "this.prisma.brandingSettings.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 767,
+      "call": "this.adapterFactory.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 787,
+      "call": "this.prisma.crmIntegration.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 816,
+      "call": "this.adapterFactory.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 1459,
+      "call": "this.prisma.appointment.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 1478,
+      "call": "this.prisma.appointment.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 1709,
+      "call": "this.prisma.appointment.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 1720,
+      "call": "this.prisma.appointment.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 1925,
+      "call": "this.prisma.appointment.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 1984,
+      "call": "this.prisma.appointment.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 2654,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 2771,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4060,
+      "call": "this.adapterFactory.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4177,
+      "call": "this.adapterFactory.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4288,
+      "call": "tx.crmStaffAccess.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4307,
+      "call": "tx.crmStaffAccess.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4321,
+      "call": "tx.membership.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4328,
+      "call": "tx.membership.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4332,
+      "call": "tx.authSession.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4349,
+      "call": "tx.staffProviderLink.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4355,
+      "call": "tx.staffProviderLink.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4376,
+      "call": "tx.staff.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4387,
+      "call": "tx.staffProviderLink.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4392,
+      "call": "tx.crmStaffAccess.create"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/crm.service.ts",
+      "line": 4461,
+      "call": "this.prisma.crmIntegration\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/legacy-appointment-bridge.service.ts",
+      "line": 146,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/quarantine-catchup.service.ts",
+      "line": 191,
+      "call": "this.prisma.ingestionQuarantine.update"
+    },
+    {
+      "file": "maya-saas-backend/src/crm/staff-schedule.utils.ts",
+      "line": 67,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-activation-shadow.service.ts",
+      "line": 554,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-cancellation-shadow.service.ts",
+      "line": 466,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-expiry-shadow.service.ts",
+      "line": 324,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-purchase-cutover.service.ts",
+      "line": 343,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-purchase-shadow.service.ts",
+      "line": 378,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-renewal-activation-shadow.service.ts",
+      "line": 683,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-renewal-shadow.service.ts",
+      "line": 489,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-revocation-shadow.service.ts",
+      "line": 472,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/customer-subscription-usage-shadow.service.ts",
+      "line": 521,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/p4-05-customer-subscription-executable.service.ts",
+      "line": 549,
+      "call": "tx.customerSubscription.create"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/p4-05-customer-subscription-executable.service.ts",
+      "line": 641,
+      "call": "tx.customerSubscriptionUsage.create"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/p4-05-customer-subscription-executable.service.ts",
+      "line": 712,
+      "call": "tx.customerSubscription.update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/p4-05-customer-subscription-executable.service.ts",
+      "line": 1256,
+      "call": "this.prisma.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/customer-subscriptions/p4-05-customer-subscription-executable.service.ts",
+      "line": 1490,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/domain/domain-event.ts",
+      "line": 132,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/encryption/encryption.service.ts",
+      "line": 25,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/encryption/encryption.service.ts",
+      "line": 26,
+      "call": "createHmac('sha256', this.key)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/encryption/encryption.service.ts",
+      "line": 35,
+      "call": "cipher.update"
+    },
+    {
+      "file": "maya-saas-backend/src/encryption/encryption.service.ts",
+      "line": 64,
+      "call": "decipher.update"
+    },
+    {
+      "file": "maya-saas-backend/src/encryption/encryption.service.ts",
+      "line": 83,
+      "call": "createHmac('sha256', this.opaqueReferenceKey)\n      .update(normalizedNamespace, 'utf8')\n      .update('\\0', 'utf8')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/encryption/encryption.service.ts",
+      "line": 83,
+      "call": "createHmac('sha256', this.opaqueReferenceKey)\n      .update(normalizedNamespace, 'utf8')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/encryption/encryption.service.ts",
+      "line": 83,
+      "call": "createHmac('sha256', this.opaqueReferenceKey)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/events/event-store.service.ts",
+      "line": 100,
+      "call": "db.domainEvent.create"
+    },
+    {
+      "file": "maya-saas-backend/src/events/event-store.service.ts",
+      "line": 146,
+      "call": "this.prisma.ingestionQuarantine.create"
+    },
+    {
+      "file": "maya-saas-backend/src/events/event-store.service.ts",
+      "line": 208,
+      "call": "tx.domainEvent.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/events/event-store.service.ts",
+      "line": 222,
+      "call": "this.prisma.domainEvent.update"
+    },
+    {
+      "file": "maya-saas-backend/src/events/event-store.service.ts",
+      "line": 245,
+      "call": "this.prisma.domainEvent.update"
+    },
+    {
+      "file": "maya-saas-backend/src/events/event-store.service.ts",
+      "line": 252,
+      "call": "this.prisma.domainEvent.update"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/expense-canonical-shadow.service.ts",
+      "line": 55,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/expenses.controller.ts",
+      "line": 47,
+      "call": "this.expensesService.create"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/expenses.service.ts",
+      "line": 101,
+      "call": "this.requireCanonicalCutover().create"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 99,
+      "call": "this.create"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 116,
+      "call": "tx.expense.create"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 181,
+      "call": "tx.expense.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 282,
+      "call": "tx.expensePeriodDeclaration.create"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 346,
+      "call": "tx.expensePeriodDeclarationInvalidation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 360,
+      "call": "tx.expensePeriodDeclaration.deleteMany"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 403,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 419,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 443,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 453,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 588,
+      "call": "tx.auditLog.create"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/gift-certificate-activation-shadow.service.ts",
+      "line": 661,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/gift-certificate-claim.contract.ts",
+      "line": 57,
+      "call": "createHmac('sha256', secret)\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/gift-certificate-claim.contract.ts",
+      "line": 83,
+      "call": "createHmac('sha256', input.presentationKey)\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/gift-certificate-claim.contract.ts",
+      "line": 92,
+      "call": "createHmac('sha256', input.presentationKey)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/gift-certificate-purchase-shadow.service.ts",
+      "line": 400,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/gift-certificate-redemption-shadow.service.ts",
+      "line": 658,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/p4-06-gift-certificate-executable.service.ts",
+      "line": 365,
+      "call": "tx.giftCertificate.create"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/p4-06-gift-certificate-executable.service.ts",
+      "line": 435,
+      "call": "tx.giftCertificateRedemption.create"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/p4-06-gift-certificate-executable.service.ts",
+      "line": 1083,
+      "call": "this.prisma.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/gift-certificates/p4-06-gift-certificate-executable.service.ts",
+      "line": 1233,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/apns-push.ts",
+      "line": 70,
+      "call": "createSign('SHA256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.service.ts",
+      "line": 394,
+      "call": "this.prisma.inboxItem.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.service.ts",
+      "line": 484,
+      "call": "this.prisma.inboxItem.update"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.service.ts",
+      "line": 542,
+      "call": "this.prisma.inboxItem.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.service.ts",
+      "line": 590,
+      "call": "this.prisma.inboxItem.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/inbox/inbox.service.ts",
+      "line": 602,
+      "call": "this.prisma.devicePushToken.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.service.ts",
+      "line": 264,
+      "call": "tx.internalService.create"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.service.ts",
+      "line": 279,
+      "call": "tx.internalProviderService.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.service.ts",
+      "line": 331,
+      "call": "tx.internalProvider.create"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.service.ts",
+      "line": 344,
+      "call": "tx.internalAvailabilityRule.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.service.ts",
+      "line": 355,
+      "call": "tx.internalProviderService.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.service.ts",
+      "line": 403,
+      "call": "this.prisma.internalProvider.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.service.ts",
+      "line": 479,
+      "call": "tx.internalAvailabilityRule.deleteMany"
+    },
+    {
+      "file": "maya-saas-backend/src/internal-calendar/internal-calendar.service.ts",
+      "line": 484,
+      "call": "tx.internalAvailabilityRule.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-backfill-shadow.service.ts",
+      "line": 358,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-expiry-shadow.service.ts",
+      "line": 336,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-grant-consume-shadow.service.ts",
+      "line": 491,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-grant-issue-shadow.service.ts",
+      "line": 399,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-import-shadow.service.ts",
+      "line": 340,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-redemption-shadow.service.ts",
+      "line": 380,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-refund-shadow.service.ts",
+      "line": 411,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/legacy-loyalty-shadow.service.ts",
+      "line": 176,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/loyalty-redemption-claim.contract.ts",
+      "line": 25,
+      "call": "createHmac('sha256', secret)\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/loyalty.service.ts",
+      "line": 362,
+      "call": "tx.loyaltyTransaction.update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/loyalty.service.ts",
+      "line": 380,
+      "call": "tx.loyaltyAccount.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/loyalty.service.ts",
+      "line": 406,
+      "call": "tx.loyaltyAccount.update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/loyalty.service.ts",
+      "line": 412,
+      "call": "tx.loyaltyTransaction.create"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/loyalty.service.ts",
+      "line": 486,
+      "call": "tx.loyaltyTransaction.update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/p4-03-legacy-loyalty-executable.service.ts",
+      "line": 503,
+      "call": "tx.loyaltyAccount.update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/p4-03-legacy-loyalty-executable.service.ts",
+      "line": 507,
+      "call": "tx.loyaltyTransaction.create"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/p4-03-legacy-loyalty-executable.service.ts",
+      "line": 711,
+      "call": "tx.loyaltyRedemptionGrant.create"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/p4-03-legacy-loyalty-executable.service.ts",
+      "line": 818,
+      "call": "tx.loyaltyRedemption.create"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/p4-03-legacy-loyalty-executable.service.ts",
+      "line": 832,
+      "call": "tx.loyaltyAccount.update"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/p4-03-legacy-loyalty-executable.service.ts",
+      "line": 836,
+      "call": "tx.loyaltyTransaction.create"
+    },
+    {
+      "file": "maya-saas-backend/src/loyalty/p4-03-legacy-loyalty-executable.service.ts",
+      "line": 1184,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/main.ts",
+      "line": 24,
+      "call": "NestFactory.create"
+    },
+    {
+      "file": "maya-saas-backend/src/marketing/bulk-audience-equivalence.ts",
+      "line": 60,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/marketing/marketing.service.ts",
+      "line": 108,
+      "call": "this.prisma.marketingAudience.create"
+    },
+    {
+      "file": "maya-saas-backend/src/marketing/marketing.service.ts",
+      "line": 172,
+      "call": "this.prisma.marketingCampaign.create"
+    },
+    {
+      "file": "maya-saas-backend/src/marketing/marketing.service.ts",
+      "line": 238,
+      "call": "this.prisma.marketingCampaign.update"
+    },
+    {
+      "file": "maya-saas-backend/src/marketing/marketing.service.ts",
+      "line": 248,
+      "call": "this.prisma.marketingCampaign.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/marketing/marketing.service.ts",
+      "line": 397,
+      "call": "this.prisma.marketingCampaign.update"
+    },
+    {
+      "file": "maya-saas-backend/src/marketing/marketing.service.ts",
+      "line": 669,
+      "call": "this.prisma.marketingAudience.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/marketing/marketing.service.ts",
+      "line": 722,
+      "call": "this.prisma.marketingConsentEvidence.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/marketing/marketing.service.ts",
+      "line": 877,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-confirmation-coordinator.service.ts",
+      "line": 287,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-confirmation-coordinator.service.ts",
+      "line": 348,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-confirmation-receipt.service.ts",
+      "line": 212,
+      "call": "tx.aiOnboardingDraft.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-confirmation-receipt.service.ts",
+      "line": 337,
+      "call": "this.prisma.aiOnboardingDraft.update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-confirmation-receipt.service.ts",
+      "line": 431,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-confirmation-receipt.service.ts",
+      "line": 447,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-onboarding.service.ts",
+      "line": 116,
+      "call": "this.prisma.aiOnboardingDraft.create"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-onboarding.service.ts",
+      "line": 153,
+      "call": "this.prisma.aiOnboardingDraft.update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-onboarding.service.ts",
+      "line": 297,
+      "call": "this.prisma.aiOnboardingDraft.update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-onboarding.service.ts",
+      "line": 529,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-onboarding.service.ts",
+      "line": 890,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/ai-onboarding.service.ts",
+      "line": 894,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/canonical-trial-onboarding.service.ts",
+      "line": 47,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/trial-activation.service.ts",
+      "line": 32,
+      "call": "this.prisma.trialActivation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/trial-activation.service.ts",
+      "line": 97,
+      "call": "this.prisma.trialActivation.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/trial-activation.service.ts",
+      "line": 117,
+      "call": "this.prisma.trialActivation.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/trial-activation.service.ts",
+      "line": 146,
+      "call": "this.prisma.trialActivation.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/trial-activation.service.ts",
+      "line": 162,
+      "call": "this.prisma.trialActivation.update"
+    },
+    {
+      "file": "maya-saas-backend/src/onboarding/trial-activation.service.ts",
+      "line": 266,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.engine.ts",
+      "line": 915,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.lifecycle.ts",
+      "line": 589,
+      "call": "tx.opportunity.update"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.lifecycle.ts",
+      "line": 629,
+      "call": "tx.opportunity.update"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.lifecycle.ts",
+      "line": 652,
+      "call": "tx.opportunity.create"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.lifecycle.ts",
+      "line": 706,
+      "call": "tx.opportunity.update"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.lifecycle.ts",
+      "line": 746,
+      "call": "tx.agentTask.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.lifecycle.ts",
+      "line": 822,
+      "call": "tx.agentTask.update"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.lifecycle.ts",
+      "line": 835,
+      "call": "tx.agentTask.create"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.lifecycle.ts",
+      "line": 861,
+      "call": "tx.agentTask.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.lifecycle.ts",
+      "line": 883,
+      "call": "tx.opportunity.update"
+    },
+    {
+      "file": "maya-saas-backend/src/opportunities/opportunity.shadow.ts",
+      "line": 346,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 151,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 970,
+      "call": "tx.dashboardPreference.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 987,
+      "call": "tx.appointmentNotificationSetting.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 1015,
+      "call": "tx.operationalWorkItem.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 1061,
+      "call": "tx.operationalWorkItem.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 1136,
+      "call": "tx.actionTargetMutation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 1200,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 1215,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 1240,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 1250,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2-object-store.service.ts",
+      "line": 87,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 310,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1378,
+      "call": "tx.brandingSettings.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1425,
+      "call": "tx.brandingSettings.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1696,
+      "call": "tx.user.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1723,
+      "call": "tx.user.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1732,
+      "call": "tx.membership.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1742,
+      "call": "tx.crmStaffAccess.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1751,
+      "call": "tx.authIdentity.deleteMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1756,
+      "call": "tx.authSession.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1776,
+      "call": "tx.crmStaffAccess.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1787,
+      "call": "tx.authSession.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1791,
+      "call": "tx.authRefreshToken.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1808,
+      "call": "tx.authSession.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1812,
+      "call": "tx.authRefreshToken.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1837,
+      "call": "tx.authIdentity.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1839,
+      "call": "tx.authIdentity.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1875,
+      "call": "tx.tenant.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1896,
+      "call": "tx.brandingSettings.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1916,
+      "call": "tx.brandingSettings.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1926,
+      "call": "tx.user.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1958,
+      "call": "tx.user.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1980,
+      "call": "tx.internalProvider.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1989,
+      "call": "tx.tenant.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 1995,
+      "call": "tx.tenant.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 2001,
+      "call": "tx.branch.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 2024,
+      "call": "tx.actionTargetMutation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 2077,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 2092,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 2116,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "line": 2126,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "line": 103,
+      "call": "tx.tenant.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "line": 118,
+      "call": "tx.brandingSettings.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "line": 125,
+      "call": "tx.branch.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "line": 135,
+      "call": "tx.user.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "line": 160,
+      "call": "tx.internalProvider.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "line": 171,
+      "call": "tx.trialActivation.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "line": 184,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 221,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1204,
+      "call": "tx.crmIntegration.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1234,
+      "call": "tx.crmIntegration.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1244,
+      "call": "tx.tenant.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1257,
+      "call": "tx.brandingSettings.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1280,
+      "call": "tx.crmIntegration.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1296,
+      "call": "tx.staffProviderLink.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1309,
+      "call": "tx.crmStaffAccess.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1317,
+      "call": "tx.authSession.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1321,
+      "call": "tx.crmIntegration.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1339,
+      "call": "tx.clientConsentFact.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1403,
+      "call": "tx.customerProfile.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1409,
+      "call": "tx.customerProfile.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1499,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1514,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1536,
+      "call": "tx.actionTargetMutation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1563,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "line": 1573,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4-object-store.service.ts",
+      "line": 81,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 236,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1304,
+      "call": "tx.internalProvider.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1353,
+      "call": "tx.internalProvider.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1374,
+      "call": "tx.tenantCatalogItem.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1384,
+      "call": "tx.tenantCatalogItem.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1390,
+      "call": "tx.tenantCatalogItem.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1396,
+      "call": "tx.internalService.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1408,
+      "call": "tx.internalProviderService.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1418,
+      "call": "tx.internalService.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1424,
+      "call": "tx.internalService.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1434,
+      "call": "tx.internalProvider.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1442,
+      "call": "tx.internalAvailabilityRule.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1456,
+      "call": "tx.internalProviderService.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1466,
+      "call": "tx.internalProvider.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1475,
+      "call": "tx.internalAvailabilityRule.deleteMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1479,
+      "call": "tx.internalAvailabilityRule.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1490,
+      "call": "tx.internalAvailabilityException.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1502,
+      "call": "tx.internalAvailabilityException.delete"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1574,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1589,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1611,
+      "call": "tx.actionTargetMutation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1638,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1648,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "line": 1833,
+      "call": "tx.businessReview.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 147,
+      "call": "createHash('sha256')\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 215,
+      "call": "tx.recoveryTouchpoint.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 252,
+      "call": "tx.recoveryTouchpoint.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 338,
+      "call": "tx.recoveryConversion.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 383,
+      "call": "tx.recoveryConversion.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 440,
+      "call": "tx.recoveryConversion.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 507,
+      "call": "tx.domainEvent.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 1033,
+      "call": "tx.recoveryConversion.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 1037,
+      "call": "tx.actionTargetMutation.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 1210,
+      "call": "tx.actionAttempt.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 1225,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 1250,
+      "call": "tx.actionAttempt.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+      "line": 1260,
+      "call": "tx.actionExecution.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave6/package5-wave6.policy.ts",
+      "line": 68,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave6/package5-wave6.service.ts",
+      "line": 297,
+      "call": "tx.maintenanceRun.create"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave6/package5-wave6.service.ts",
+      "line": 315,
+      "call": "tx.maintenanceItemClaim.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave6/package5-wave6.service.ts",
+      "line": 349,
+      "call": "tx.maintenanceItemClaim.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave6/package5-wave6.service.ts",
+      "line": 353,
+      "call": "tx.maintenanceRun.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave6/package5-wave6.service.ts",
+      "line": 470,
+      "call": "tx.maintenanceItemClaim.update"
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave6/package5-wave6.service.ts",
+      "line": 481,
+      "call": "tx.maintenanceRun.update"
+    },
+    {
+      "file": "maya-saas-backend/src/recovery/recovery.service.ts",
+      "line": 329,
+      "call": "createHmac('sha256', secret)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/p4-04-referral-reward-executable.service.ts",
+      "line": 322,
+      "call": "tx.customerReferral.create"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/p4-04-referral-reward-executable.service.ts",
+      "line": 406,
+      "call": "tx.customerReferral.update"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/p4-04-referral-reward-executable.service.ts",
+      "line": 478,
+      "call": "tx.referralRewardIssuance.create"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/p4-04-referral-reward-executable.service.ts",
+      "line": 495,
+      "call": "tx.referralReward.createMany"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/p4-04-referral-reward-executable.service.ts",
+      "line": 582,
+      "call": "tx.referralRewardFulfillment.create"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/p4-04-referral-reward-executable.service.ts",
+      "line": 1071,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-create-shadow.service.ts",
+      "line": 304,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-resolve-shadow.service.ts",
+      "line": 403,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-reward-claim.contract.ts",
+      "line": 45,
+      "call": "createHmac('sha256', secret)\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-reward-claim.contract.ts",
+      "line": 66,
+      "call": "createHmac('sha256', input.presentationKey)\n    .update"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-reward-claim.contract.ts",
+      "line": 78,
+      "call": "createHmac('sha256', input.presentationKey)\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-reward-fulfill-shadow.service.ts",
+      "line": 689,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/referrals/referral-reward-issue-shadow.service.ts",
+      "line": 591,
+      "call": "createHash('sha256')\n      .update"
+    },
+    {
+      "file": "maya-saas-backend/src/tenancy/bridge-source.service.ts",
+      "line": 92,
+      "call": "createHash('sha256').update"
+    },
+    {
+      "file": "maya-saas-backend/src/tenants/tenants.service.ts",
+      "line": 560,
+      "call": "tx.tenant.update"
+    },
+    {
+      "file": "maya-saas-backend/src/tenants/tenants.service.ts",
+      "line": 579,
+      "call": "tx.brandingSettings.upsert"
+    },
+    {
+      "file": "maya-saas-backend/src/tenants/tenants.service.ts",
+      "line": 620,
+      "call": "this.prisma.tenant.update"
+    },
+    {
+      "file": "maya-saas-backend/src/users/users.service.ts",
+      "line": 408,
+      "call": "this.prisma.user.create"
+    },
+    {
+      "file": "maya-saas-backend/src/users/users.service.ts",
+      "line": 496,
+      "call": "tx.user.create"
+    },
+    {
+      "file": "maya-saas-backend/src/users/users.service.ts",
+      "line": 527,
+      "call": "tx.internalProvider.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/users/users.service.ts",
+      "line": 835,
+      "call": "this.prisma.user.create"
+    },
+    {
+      "file": "maya-saas-backend/src/users/users.service.ts",
+      "line": 914,
+      "call": "this.prisma.user.updateMany"
+    },
+    {
+      "file": "maya-saas-backend/src/users/users.service.ts",
+      "line": 936,
+      "call": "this.prisma.user.update"
+    },
+    {
+      "file": "maya-saas-backend/src/users/users.service.ts",
+      "line": 984,
+      "call": "this.prisma.user.updateMany"
+    }
+  ],
+  "runtimeCommit": "2b89db4d",
+  "activeRelease": "20260906-p5-b32-2b89db4d",
+  "finalGate": "FAIL \u2014 new B33; no aggregate certification",
+  "compiledBackendModules": 562,
+  "compiledScripts": 14,
+  "compiledToolingArtifacts": 2
+}

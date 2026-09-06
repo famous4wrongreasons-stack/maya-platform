@@ -1,0 +1,16 @@
+{
+  "mainDirtyWorktreeTouched": false,
+  "mainPreExistingStatusEntries": 24,
+  "mainPreExistingDirtyFilesPreserved": true,
+  "mainStatusAndFileHashesMatchReadonlySnapshot": true,
+  "preExistingDatabasesTouched": 0,
+  "ownedDatabaseDropped": "maya_c06_b32_proof",
+  "ownedTempDatabasesRemaining": 0,
+  "ownedPostgresStopped": true,
+  "ownedDataAndSocketRemoved": true,
+  "ownedPort55502Closed": true,
+  "ownedTempProcessesStillRunning": 0,
+  "backgroundWatchersLeft": 0,
+  "ownedPlaywrightChromeRemaining": 0,
+  "productionMutationsForProof": 0
+}
