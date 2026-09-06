@@ -1,0 +1,17 @@
+{
+  "b31HttpCreateStillAcceptsWithoutVerifiedClient": true,
+  "cases": [
+    {"mode": "missing", "createAccepted": true, "appointmentClientIdIsAuthenticatedUser": true, "mayaClientId": null, "newActionExecutions": 0},
+    {"mode": "revoked", "createAccepted": true, "appointmentClientIdIsAuthenticatedUser": true, "mayaClientId": null, "newActionExecutions": 0},
+    {"mode": "verified_to_other_client", "createAccepted": true, "appointmentClientIdIsAuthenticatedUser": true, "mayaClientId": null, "newActionExecutions": 0}
+  ],
+  "route": "POST /api/appointments",
+  "aiPath": "createOwnAppointment -> createForClient",
+  "testedCalendarSource": "internal",
+  "compiledControllerServiceRepository": true,
+  "realPostgresql": true,
+  "syntheticFixturesOnly": true,
+  "actionEngineCreateCalls": 0,
+  "providerCalls": 0,
+  "realProductionMutations": 0
+}
