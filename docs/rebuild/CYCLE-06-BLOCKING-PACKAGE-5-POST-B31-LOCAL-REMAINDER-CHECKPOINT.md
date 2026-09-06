@@ -4,9 +4,11 @@ The [B31 local contract STOP report](CYCLE-06-BLOCKING-PACKAGE-5-B31-LOCAL-CONTR
 at accepted checkpoint `49e3376f` remains the executable evidence baseline.
 The owner confirmed STOP and requested only a
 [B31 Idempotency Schema Decision Sheet](CYCLE-06-BLOCKING-PACKAGE-5-B31-IDEMPOTENCY-SCHEMA-DECISION-SHEET.md).
-That sheet is a proposal awaiting approval, not authority to implement it.
-Read both before changing runtime or schema. The candidate is **not deployed
-and not accepted for deployment**.
+The owner subsequently accepted checkpoint `724d3ef6` and **approved Option A**,
+including implementation and the gated production migration. The
+[Option A foundation report](CYCLE-06-BLOCKING-PACKAGE-5-B31-OPTION-A-SCHEMA-FOUNDATION-REPORT.md)
+records the additive schema and local PostgreSQL proof. The runtime candidate
+is **not deployed and not accepted for deployment**.
 
 B29/B30 remain accepted production baselines; the last documented release is
 `20260906-p5-b30-ad1d91b9`. Package 4 remains complete. Package 5 has 6/6 waves
@@ -36,11 +38,11 @@ ordinary backend result is recorded in the STOP report. **Do not deploy this
 checkpoint just because ordinary Jest is green.** No post-B31 production
 Final Gate has run.
 
-Next: obtain approval of the schema decision; do not implement migration/runtime
-before it. Recommended A adds one alias model and three execution columns
-(9 persisted scalar columns in total); alternative B uses two models. Neither
-is implemented. Historical fingerprints are not backfilled. After approval,
-resolve G1, complete B31's failing regression, repeat every mandatory gate, and
+Next: complete the approved production schema migration gate/apply, then
+continue runtime remediation in the same cycle. Approved A adds one alias
+model and three execution columns (9 persisted scalar columns in total);
+its schema proof is PASS. Historical fingerprints are not backfilled.
+Resolve G1, complete B31's failing runtime regression, repeat every mandatory gate, and
 deploy only after all pass. Then restart the full Package 5 Final Completion
 Gate across all 13 families. Chapter 6 acceptance remains separate.
 

@@ -268,6 +268,7 @@ model Tenant {
   opportunities                  Opportunity[]
   agentTasks                     AgentTask[]
   actionExecutions               ActionExecution[]
+  actionIdempotencyBindings       ActionExecutionIdempotencyBinding[]
   actionAttempts                 ActionAttempt[]
   actionTargetMutations          ActionTargetMutation[]
   operationalWorkItems           OperationalWorkItem[]
@@ -368,6 +369,9 @@ model ActionExecution {
   identityFingerprint       String
   idempotencyScope          String?
   requestIdempotencyKeyHash String?
+  bookingIntentContract    String?
+  bookingIntentHash        String?
+  bookingIntentEncrypted   String?
 
   sourceType  String
   sourceRef   String?
@@ -471,6 +475,7 @@ model ActionExecution {
   wantedSlotInterestsCreated  ClientWantedSlotInterest[] @relation("ClientWantedSlotCreateExecution")
   wantedSlotInterestsMutated  ClientWantedSlotInterest[] @relation("ClientWantedSlotMutationExecution")
   maintenanceRuns             MaintenanceRun[]
+  idempotencyBindings          ActionExecutionIdempotencyBinding[]
 
   @@unique([id, tenantId])
   @@unique([tenantId, identityFingerprint])
@@ -479,6 +484,25 @@ model ActionExecution {
   @@index([tenantId, reconciliationState, leaseExpiresAt])
   @@index([tenantId, agentTaskId])
   @@index([tenantId, createdAt])
+}
+
+/// B31: every accepted caller alias is immutable and tenant/Client qualified.
+/// Intent and execution lifecycle remain owned by ActionExecution.
+model ActionExecutionIdempotencyBinding {
+  tenantId                  String
+  clientId                  String
+  idempotencyScope          String
+  requestIdempotencyKeyHash  String
+  actionExecutionId         String
+  createdAt                 DateTime @default(now())
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client    Client          @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  execution ActionExecution @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict)
+
+  @@id([tenantId, idempotencyScope, requestIdempotencyKeyHash])
+  @@index([actionExecutionId, tenantId])
+  @@index([clientId, tenantId])
 }
 
 /// Immutable-after-finish ledger entry for execution and reconciliation work.
@@ -2047,6 +2071,7 @@ enum AuditScope {
 /// системе. Вторую CRM внутри Maya не строим. Личность существует и для гостя
 /// без аккаунта — таких в салоне большинство.
 model Client {
+  actionIdempotencyBindings ActionExecutionIdempotencyBinding[]
   id                 String   @id @default(cuid())
   tenantId           String
   /// Аккаунт Maya, если человек им обзавёлся.
