@@ -1,15 +1,12 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
-import { AppointmentStatus, CalendarSource } from '../common/domain.enums';
-import { asJson } from '../common/json.util';
+import { CalendarSource } from '../common/domain.enums';
 import { ServiceItem, StaffMember } from '../crm/crm-adapter.interface';
 import {
   CrmService,
@@ -42,7 +39,8 @@ import { ClientAppointmentCancelService } from '../crm/client-appointment-cancel
 import { ClientAppointmentRescheduleService } from '../crm/client-appointment-reschedule.service';
 import { ClientAppointmentReadService } from '../crm/client-appointment-read.service';
 import { TenantAppointmentRepository } from './tenant-appointment.repository';
-import { isCanceledOutcome, kopecksToMajor, majorToKopecks } from '../domain';
+import { isCanceledOutcome, kopecksToMajor } from '../domain';
+import { ClientAppointmentCreateService } from './client-appointment-create.service';
 
 interface AppointmentErrorPayload {
   message: string;
@@ -89,173 +87,51 @@ export class AppointmentsService {
     private readonly clientAppointmentReader?: ClientAppointmentReadService,
     private readonly clientAppointmentCanceler?: ClientAppointmentCancelService,
     private readonly clientAppointmentRescheduler?: ClientAppointmentRescheduleService,
+    private readonly clientAppointmentCreator?: ClientAppointmentCreateService,
   ) {}
 
   async createForClient(
     tenantId: string,
-    clientId: string,
+    userId: string,
     dto: CreateAppointmentDto,
     invocation: AppointmentActionInvocation = {},
   ) {
     this.tenantContext.assertTenantId(tenantId);
     await this.tenantsService.assertLiveBookingEnabled(tenantId);
-
-    if (dto.branchId) {
-      await this.tenantsService.assertBranchBelongsToTenant(
-        dto.branchId,
-        tenantId,
+    if (!this.clientAppointmentCreator)
+      throw new ServiceUnavailableException(
+        'Verified Client creator unavailable',
       );
-    }
-
-    const client = await this.usersService.getTenantUserOrThrow(
-      clientId,
-      tenantId,
-    );
-    const clientProfile = this.usersService.serializeUser(client);
-    const branch = await this.resolveBranchForBooking(tenantId, dto.branchId);
-    const timezone = await this.resolveBookingTimezone(tenantId, branch);
-    const services = await this.crmService.getServices(tenantId);
-    this.assertRequestedServicesExist(dto.serviceIds, services);
+    const { appointment, services, bookingIdentity, timezone } =
+      await this.clientAppointmentCreator.forAccount(
+        tenantId,
+        userId,
+        dto,
+        invocation,
+      );
+    const calendarSource = appointment.source;
     const selectedServices = services.filter((service) =>
       dto.serviceIds.includes(service.id),
     );
-    const totalPrice = selectedServices.reduce(
-      (sum, service) => sum + service.price,
-      0,
-    );
-    const currency = selectedServices[0]?.currency ?? 'RUB';
-    const requestedStart = normalizeRequestedStart(dto.start, timezone);
-    const slots = await this.crmService.getAvailableSlots(tenantId, {
-      date: requestedStart,
-      staffId: dto.staffId,
-      serviceIds: dto.serviceIds,
-      branchId: dto.branchId,
-    });
-    const matchedSlot = findMatchingSlotByLocalStart(
-      slots,
-      requestedStart,
-      timezone,
-    );
-
-    if (!matchedSlot) {
-      throw new BadRequestException(
-        this.buildAppointmentError(
-          'slot_taken',
-          'Selected slot is no longer available. Refresh times and try again.',
-          'start',
-        ),
-      );
-    }
-
-    const bookingIdentity = this.resolveBookingIdentity(clientProfile, {
-      clientName: dto.clientName,
-      clientPhone: dto.clientPhone,
-    });
-    const calendarSource = await this.crmService.getCalendarSource(tenantId);
-    const crmProvider =
-      calendarSource === CalendarSource.EXTERNAL
-        ? await this.crmService.getExternalProviderKey(tenantId)
-        : null;
-    const timing =
-      calendarSource === CalendarSource.INTERNAL
-        ? await this.internalCalendarService.getServiceTiming(
-            tenantId,
-            dto.staffId,
-            dto.serviceIds,
-          )
-        : {
-            bufferBeforeMinutes: 0,
-            bufferAfterMinutes: 0,
-          };
-    const startAt = new Date(matchedSlot.start);
-    const endAt = new Date(matchedSlot.end);
-    const blockedStartAt = new Date(
-      startAt.getTime() - timing.bufferBeforeMinutes * 60 * 1000,
-    );
-    const blockedEndAt = new Date(
-      endAt.getTime() + timing.bufferAfterMinutes * 60 * 1000,
-    );
-    const remoteAppointment =
-      calendarSource === CalendarSource.EXTERNAL
-        ? await this.crmService.createAppointment(
-            tenantId,
-            {
-              clientId,
-              clientName: bookingIdentity.clientName,
-              clientPhone: bookingIdentity.clientPhone,
-              branchId: dto.branchId ?? null,
-              staffId: dto.staffId,
-              serviceIds: dto.serviceIds,
-              start: requestedStart,
-              notes: dto.notes ?? null,
-            },
-            invocation,
-          )
-        : null;
-    let appointment: Awaited<
-      ReturnType<TenantAppointmentRepository['createForClient']>
-    >;
-
-    try {
-      appointment = await this.appointmentRepository.createForClient({
-        clientId,
-        branchId: dto.branchId ?? matchedSlot.branch_id ?? null,
-        crmExternalId: remoteAppointment?.external_id ?? null,
-        crmProvider,
-        source: calendarSource,
-        // 🔴 Разрешается ТО ЖЕ значение, что ложится в совместимую колонку:
-        // иначе два поля описывали бы разных мастеров.
-        staffId: await this.crmService.resolveStaffIdForBooking(
-          tenantId,
-          dto.staffId,
-        ),
-        staffExternalId: dto.staffId,
-        serviceIds: asJson(dto.serviceIds),
-        startAt,
-        endAt,
-        blockedStartAt,
-        blockedEndAt,
-        status: remoteAppointment?.status ?? AppointmentStatus.CONFIRMED,
-        notes: dto.notes ?? null,
-        totalPriceKopecks: majorToKopecks(totalPrice),
-        currency,
-        providerPayload: asJson(
-          remoteAppointment?.raw ?? { provider: CalendarSource.INTERNAL },
-        ),
-      });
-    } catch (error) {
-      if (
-        calendarSource === CalendarSource.INTERNAL &&
-        this.isInternalSlotConstraintError(error)
-      ) {
-        throw new ConflictException(
-          this.buildAppointmentError(
-            'slot_taken',
-            'Selected slot was just booked. Choose another time.',
-            'start',
-          ),
-        );
-      }
-
-      throw error;
-    }
+    const totalPrice = kopecksToMajor(appointment.totalPriceKopecks ?? 0);
+    const currency = appointment.currency;
 
     await this.auditLogService.log({
       tenantId,
-      userId: clientId,
+      userId,
       action: 'appointment.created',
       entityType: 'appointment',
       entityId: appointment.id,
       metadata: {
         source: calendarSource,
-        crm_external_id: remoteAppointment?.external_id ?? null,
+        crm_external_id: appointment.crmExternalId,
         start_at: appointment.startAt.toISOString(),
       },
     });
 
     // EXTERNAL/YClients: Python webhook dual-writes inbox. Nest publishes
     // only when Nest calendar is the source of truth (avoid duplicate cards).
-    if (calendarSource === CalendarSource.INTERNAL) {
+    if (calendarSource === 'internal') {
       void this.publishNewAppointmentInbox({
         tenantId,
         appointmentId: appointment.id,
@@ -280,7 +156,7 @@ export class AppointmentsService {
         tenantId,
         phone: bookingIdentity.clientPhone,
         externalBookingRef: appointment.id,
-        crmExternalId: remoteAppointment?.external_id ?? null,
+        crmExternalId: appointment.crmExternalId,
         bookedAt: appointment.createdAt,
         visitAt: appointment.startAt,
         bookedValueKopecks: appointment.totalPriceKopecks,
@@ -1083,20 +959,6 @@ export class AppointmentsService {
         'One or more selected services are no longer available.',
         'serviceIds',
       ),
-    );
-  }
-
-  private isInternalSlotConstraintError(error: unknown): boolean {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      (error.code === 'P2002' || error.code === 'P2004')
-    ) {
-      return true;
-    }
-
-    return (
-      error instanceof Error &&
-      error.message.includes('Appointment_internal_no_overlap')
     );
   }
 

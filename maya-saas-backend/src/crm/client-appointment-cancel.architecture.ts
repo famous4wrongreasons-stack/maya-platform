@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-/** Permanent B29/B30 Client-originated Appointment mutation guard.
+/** Permanent B29/B30/B31 Client-originated Appointment mutation guard.
  * Verified Client → Appointment.mayaClientId ownership → Action Engine.
  * Test exclusions are filename-qualified.
  */
@@ -21,7 +21,9 @@ export function scanClientAppointmentCommands(
   const dedicatedReschedule = file.endsWith(
     'client-appointment-reschedule.service.ts',
   );
+  const dedicatedCreate = file.endsWith('client-appointment-create.service.ts');
   const initiator =
+    dedicatedCreate ||
     file.endsWith('appointments.controller.ts') ||
     file.endsWith('appointments.service.ts') ||
     file.endsWith('ai-tool-handler.service.ts');
@@ -45,7 +47,15 @@ export function scanClientAppointmentCommands(
           name === 'rescheduleForClient') ||
         (file.endsWith('ai-tool-handler.service.ts') &&
           name === 'rescheduleOwnAppointment');
-      if (!clientCancel && !clientReschedule) {
+      const clientCreate =
+        dedicatedCreate ||
+        (file.endsWith('appointments.controller.ts') &&
+          name === 'createAppointment') ||
+        (file.endsWith('appointments.service.ts') &&
+          name === 'createForClient') ||
+        (file.endsWith('ai-tool-handler.service.ts') &&
+          name === 'createOwnAppointment');
+      if (!clientCancel && !clientReschedule && !clientCreate) {
         ts.forEachChild(node, visit);
         return;
       }
@@ -56,15 +66,30 @@ export function scanClientAppointmentCommands(
         )
       )
         failures.push(`${name}: legacy User/phone/chat authority`);
-      if (initiator && /appointment\.(?:update|updateMany|create)\(/.test(body))
+      if (
+        initiator &&
+        /appointment\.(?:update|updateMany|create|createMany|upsert|delete|deleteMany)\(/.test(
+          body,
+        )
+      )
         failures.push(`${name}: direct Appointment mutation from initiator`);
       if (
         initiator &&
-        /adapter\.(?:cancel|reschedule)Appointment|cancelInCrmForClient|crmService\.(?:cancel|reschedule)Appointment\(/.test(
+        /adapter\.(?:cancel|reschedule|create)Appointment|cancelInCrmForClient|crmService\.(?:cancel|reschedule|create)Appointment\(/.test(
           body,
         )
       )
         failures.push(`${name}: direct provider mutation from initiator`);
+      if (
+        clientCreate &&
+        !dedicatedCreate &&
+        !/clientAppointmentCreator\.forAccount|createForClient\(/.test(body)
+      )
+        failures.push(`${name}: missing verified Client create initiator`);
+      if (clientCreate && /getTenantUserOrThrow/.test(body))
+        failures.push(`${name}: legacy User create authority`);
+      if (clientCreate && /appointmentRepository\.createForClient/.test(body))
+        failures.push(`${name}: direct Appointment repository write`);
       if (
         (name === 'cancelForClient' || name === 'cancelAppointment') &&
         !/clientAppointmentCanceler\.forAccount|cancelForClient\(/.test(body)
@@ -81,6 +106,18 @@ export function scanClientAppointmentCommands(
     ts.forEachChild(node, visit);
   };
   visit(ast);
+  if (dedicatedCreate) {
+    for (const required of [
+      'this.links.resolveActive(',
+      'clientChannelSubjectHash(',
+      'verificationVersion !== 1',
+      'current.clientId !== link.clientId',
+      'executeCanonicalClientCreateWithReceipt(',
+      'mayaClientId: link.clientId',
+    ])
+      if (!source.includes(required))
+        failures.push(`Required create authority missing: ${required}`);
+  }
   if (dedicatedCancel) {
     for (const required of [
       'clientChannelSubjectHash(',

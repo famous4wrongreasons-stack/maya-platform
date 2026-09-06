@@ -1,0 +1,26 @@
+{
+  "verdict": "PASS",
+  "compiledHttpAiAndCanonicalExecutor": true,
+  "realActionEngine": true,
+  "realPostgresql": true,
+  "syntheticOnly": true,
+  "realProductionMutations": 0,
+  "results": {
+    "missing": "denied; appointments=0; executions=0",
+    "revoked": "denied; appointments=0; executions=0",
+    "concurrentHttpAndAi": {
+      "requests": 14,
+      "immediateAccepted": 12,
+      "transientFailures": 0,
+      "appointments": 1,
+      "executions": 1,
+      "actionClass": "create_appointment",
+      "exactCanonicalClient": true
+    },
+    "clientWithoutMayaUser": "PASS — HTTP contact and AI exact CRM binding",
+    "wrongContext": "denied before ingress; caller ownership ignored",
+    "internalProviderWrites": 0,
+    "crmUnknownReconciled": "one provider dispatch; one canonical Appointment; SUCCEEDED",
+    "crmUnknownNoBlindRetry": "UNKNOWN; provider calls=1; appointments=0"
+  }
+}

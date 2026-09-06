@@ -87,7 +87,12 @@ import {
   serializePublicCrmSettings,
 } from './crm-provider-settings';
 import type { StaffId, VisitAttendance } from '../domain';
-import { asStaffId, asStaffIdOrNull } from '../domain';
+import {
+  asStaffId,
+  asStaffIdOrNull,
+  majorToKopecks,
+  kopecksToMajor,
+} from '../domain';
 import { Prisma } from '@prisma/client';
 import {
   findMatchingSlotByLocalStart,
@@ -1027,6 +1032,7 @@ export class CrmService {
     tenantId: string,
     params: CreateAppointmentRequest,
     invocation: AppointmentActionInvocation,
+    verifiedCanonicalClient = false,
   ): Promise<AppointmentActionPlan<CreatedAppointment>> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
@@ -1035,10 +1041,9 @@ export class CrmService {
     const actionInput: CreateAppointmentRequest = {
       ...params,
       start: canonicalAppointmentInstant(params.start, timezone),
-      clientId: this.appointmentClientIdentity(
-        params.clientId,
-        params.clientPhone,
-      ),
+      clientId: verifiedCanonicalClient
+        ? params.clientId
+        : this.appointmentClientIdentity(params.clientId, params.clientPhone),
       clientPhone: params.clientPhone || undefined,
       branchId: params.branchId || undefined,
       notes: params.notes || undefined,
@@ -1104,6 +1109,334 @@ export class CrmService {
           this.classifyAppointmentActionError(error, phase),
       },
     };
+  }
+
+  /** B31 reuses the registered create action for both calendars. The durable
+   * normalized clientId is a verified canonical Client, never a User id. */
+  async executeCanonicalClientCreateWithReceipt(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation,
+  ): Promise<ActionRuntimeReceipt<CreatedAppointment>> {
+    // Reject missing/changed authority before ingress as well as at dispatch.
+    if (!invocation.authorizationCheck)
+      throw new ForbiddenException('Verified Client create authority required');
+    await invocation.authorizationCheck();
+    const plan = await this.canonicalClientCreatePlan(
+      tenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  async findCanonicalClientCreate(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+  ) {
+    const plan = await this.canonicalClientCreatePlan(tenantId, params, {});
+    const preview = await this.actionEngineRuntime.preview(plan.request);
+    return this.prisma.actionExecution.findUnique({
+      where: {
+        tenantId_identityFingerprint: {
+          tenantId,
+          identityFingerprint: preview.identityFingerprint,
+        },
+      },
+      select: { id: true },
+    });
+  }
+
+  private async canonicalClientCreatePlan(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<CreatedAppointment>> {
+    this.tenantContext.assertTenantId(tenantId);
+    const source = await this.getCalendarSource(tenantId);
+    const input = {
+      ...params,
+      creationMode: 'client' as const,
+      allowBusy: false,
+      notifyBySmsHours: 0,
+    };
+    if (source !== CalendarSource.INTERNAL) {
+      // Preserve the existing provider dispatch, UNKNOWN classification and
+      // reconciliation. Mirror persistence belongs to these handlers too.
+      const plan = await this.createAppointmentActionPlan(
+        tenantId,
+        input,
+        invocation,
+        true,
+      );
+      const provider = await this.getExternalProviderKey(tenantId);
+      return {
+        request: plan.request,
+        handlers: {
+          ...plan.handlers,
+          dispatch: async (durable, key, context) => {
+            const result = await plan.handlers.dispatch(durable, key, context);
+            try {
+              await this.persistCanonicalClientCreate(
+                tenantId,
+                this.createAppointmentInput(durable),
+                result.value,
+                provider,
+              );
+            } catch (error) {
+              throw new CrmOutcomeUnknownError(
+                'Provider accepted; canonical mirror requires reconciliation',
+                error,
+              );
+            }
+            return result;
+          },
+          reconcile: async (durable, prepared, context) => {
+            const result = await plan.handlers.reconcile(
+              durable,
+              prepared,
+              context,
+            );
+            if (result.outcome === 'PROVEN_SUCCEEDED' && result.safeResult)
+              await this.persistCanonicalClientCreate(
+                tenantId,
+                this.createAppointmentInput(durable),
+                this.restoreCreatedAppointment(result.safeResult),
+                provider,
+              );
+            return result;
+          },
+        },
+      };
+    }
+    const actionInput = {
+      ...input,
+      start: canonicalAppointmentInstant(
+        input.start,
+        await this.tenantTimezone(tenantId),
+      ),
+    };
+    return {
+      request: this.appointmentActionRequest({
+        tenantId,
+        capability: 'crm.appointment.create.v1',
+        targetRef: `create/${this.appointmentFingerprint({ clientId: actionInput.clientId, start: actionInput.start, staffId: actionInput.staffId, serviceIds: normalizedServiceIds(actionInput.serviceIds) })}`,
+        input: actionInput,
+        invocation,
+      }),
+      handlers: {
+        dispatch: async (durable, _key, context) => {
+          await invocation.authorizationCheck?.();
+          const request = this.createAppointmentInput(durable);
+          const id = `appointment-action:${context.executionId}`;
+          const existing = await this.prisma.appointment.findFirst({
+            where: { id, tenantId, mayaClientId: request.clientId },
+          });
+          if (existing) {
+            const value = this.internalCreatedAppointment(existing);
+            return { value, safeResult: this.createdAppointmentSafe(value) };
+          }
+          const branch = request.branchId
+            ? await this.prisma.branch.findFirst({
+                where: { id: request.branchId, tenantId },
+              })
+            : null;
+          if (request.branchId && !branch)
+            throw new BadRequestException('Branch not found for this tenant');
+          const timezone = await this.bookingTimezone(tenantId, branch);
+          const localStart = formatDateTimeInTimeZone(request.start, timezone);
+          const slots = await this.internalCalendarService.getAvailableSlots({
+            tenantId,
+            date: localStart,
+            staffId: request.staffId,
+            serviceIds: request.serviceIds,
+            branchId: request.branchId,
+          });
+          const slot = findMatchingSlotByLocalStart(
+            slots,
+            localStart,
+            timezone,
+          );
+          if (!slot)
+            throw new ConflictException({ error: { code: 'slot_taken' } });
+          const value: CreatedAppointment = {
+            external_id: id,
+            status: AppointmentStatus.CONFIRMED,
+            start: slot.start,
+            end: slot.end,
+            staff_id: request.staffId,
+            service_ids: request.serviceIds,
+            branch_id: request.branchId ?? slot.branch_id ?? null,
+          };
+          try {
+            const row = await this.persistCanonicalClientCreate(
+              tenantId,
+              request,
+              value,
+              null,
+            );
+            const accepted = this.internalCreatedAppointment(row);
+            return {
+              value: accepted,
+              safeResult: this.createdAppointmentSafe(accepted),
+            };
+          } catch (error) {
+            if (this.isInternalSlotConstraintError(error))
+              throw new ConflictException({ error: { code: 'slot_taken' } });
+            throw new CrmOutcomeUnknownError(
+              'Local create outcome requires reconciliation',
+              error,
+            );
+          }
+        },
+        reconcile: async (durable, _prepared, context) => {
+          if (!context) return { outcome: 'STILL_UNKNOWN' };
+          const row = await this.prisma.appointment.findFirst({
+            where: {
+              id: `appointment-action:${context.executionId}`,
+              tenantId,
+              mayaClientId: requireString(durable.clientId, 'clientId'),
+            },
+          });
+          if (!row) return { outcome: 'PROVEN_NOT_EXECUTED' };
+          return {
+            outcome: 'PROVEN_SUCCEEDED',
+            safeResult: this.createdAppointmentSafe(
+              this.internalCreatedAppointment(row),
+            ),
+          };
+        },
+        restore: (safe) => this.restoreCreatedAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  private internalCreatedAppointment(row: {
+    id: string;
+    status: string;
+    startAt: Date;
+    endAt: Date;
+    staffExternalId: string;
+    serviceIds: Prisma.JsonValue;
+    branchId: string | null;
+    totalPriceKopecks: number | null;
+    currency: string;
+  }): CreatedAppointment {
+    return {
+      external_id: row.id,
+      status: row.status,
+      start: row.startAt.toISOString(),
+      end: row.endAt.toISOString(),
+      staff_id: row.staffExternalId,
+      service_ids: this.jsonStringArray(row.serviceIds),
+      branch_id: row.branchId,
+      total_price:
+        row.totalPriceKopecks === null
+          ? null
+          : kopecksToMajor(row.totalPriceKopecks),
+      currency: row.currency,
+    };
+  }
+
+  private async persistCanonicalClientCreate(
+    tenantId: string,
+    input: CreateAppointmentRequest,
+    value: CreatedAppointment,
+    provider: string | null,
+  ) {
+    const client = await this.prisma.client.findUnique({
+      where: { id_tenantId: { id: input.clientId, tenantId } },
+      select: { id: true, mergedIntoClientId: true },
+    });
+    if (!client || client.mergedIntoClientId)
+      throw new ForbiddenException('Canonical Client unavailable');
+    const services = (await this.getServices(tenantId)).filter((service) =>
+      input.serviceIds.includes(service.id),
+    );
+    const timing = provider
+      ? { bufferBeforeMinutes: 0, bufferAfterMinutes: 0 }
+      : await this.internalCalendarService.getServiceTiming(
+          tenantId,
+          input.staffId,
+          input.serviceIds,
+        );
+    const startAt = new Date(value.start);
+    const endAt = value.end
+      ? new Date(value.end)
+      : new Date(
+          startAt.getTime() +
+            services.reduce(
+              (sum, service) => sum + service.duration_minutes,
+              0,
+            ) *
+              60_000,
+        );
+    const data = {
+      tenantId,
+      mayaClientId: client.id,
+      clientId: null,
+      branchId: value.branch_id ?? input.branchId ?? null,
+      source: provider ? CalendarSource.EXTERNAL : CalendarSource.INTERNAL,
+      crmProvider: provider,
+      crmExternalId: provider ? value.external_id : null,
+      staffId: await this.resolveStaffIdForBooking(tenantId, input.staffId),
+      staffExternalId: input.staffId,
+      serviceIds: asJson(input.serviceIds),
+      startAt,
+      endAt,
+      blockedStartAt: new Date(
+        startAt.getTime() - timing.bufferBeforeMinutes * 60_000,
+      ),
+      blockedEndAt: new Date(
+        endAt.getTime() + timing.bufferAfterMinutes * 60_000,
+      ),
+      status: value.status,
+      notes: input.notes ?? null,
+      totalPriceKopecks: majorToKopecks(
+        value.total_price ??
+          services.reduce((sum, service) => sum + service.price, 0),
+      ),
+      currency: value.currency ?? services[0]?.currency ?? 'RUB',
+      providerPayload: asJson(
+        value.raw ?? { provider: provider ?? CalendarSource.INTERNAL },
+      ),
+    };
+    const row = await this.prisma.appointment.upsert({
+      where: provider
+        ? {
+            tenantId_crmProvider_crmExternalId: {
+              tenantId,
+              crmProvider: provider,
+              crmExternalId: value.external_id,
+            },
+          }
+        : { id: value.external_id },
+      create: { ...data, ...(!provider ? { id: value.external_id } : {}) },
+      update: {},
+    });
+    if (
+      row.tenantId !== tenantId ||
+      (row.mayaClientId && row.mayaClientId !== client.id)
+    )
+      throw new ConflictException('Canonical Appointment Client conflict');
+    if (!row.mayaClientId) {
+      await this.prisma.appointment.updateMany({
+        where: { id: row.id, tenantId, mayaClientId: null },
+        data: { mayaClientId: client.id },
+      });
+      const owned = await this.prisma.appointment.findFirst({
+        where: { id: row.id, tenantId, mayaClientId: client.id },
+      });
+      if (!owned)
+        throw new ConflictException('Canonical Appointment Client conflict');
+      return owned;
+    }
+    return row;
   }
 
   async cancelAppointment(

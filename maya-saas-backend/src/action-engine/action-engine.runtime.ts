@@ -101,6 +101,13 @@ function sleep(ms: number): Promise<void> {
 
 @Injectable()
 export class ActionEngineRuntimeService {
+  // Each transport alias still passes canonical ingress. Coalesce only the
+  // execution loop after the database has established one durable identity;
+  // waiting claims must not occupy the pool needed by its policy recheck.
+  private readonly runningExecutions = new Map<
+    string,
+    Promise<ActionRuntimeReceipt<unknown>>
+  >();
   private readonly workerId = `action-runtime:${randomUUID()}`;
 
   constructor(
@@ -163,7 +170,32 @@ export class ActionEngineRuntimeService {
     request: TrustedActionExecutionRequestV1,
     handlers: ActionRuntimeHandlers<T>,
   ): Promise<ActionRuntimeReceipt<T>> {
-    let execution = await this.canonicalIngress.createExecution(request);
+    const execution = await this.canonicalIngress.createExecution(request);
+    const key = JSON.stringify([execution.tenantId, execution.id]);
+    const running = this.runningExecutions.get(key);
+    if (running) {
+      const result = await running;
+      const current = (
+        await this.kernel.getAudit(execution.tenantId, execution.id)
+      ).execution;
+      return {
+        execution: result.execution,
+        value: handlers.restore(this.requireSafeResult(current)),
+      };
+    }
+    const operation = this.continueExecution(execution, handlers);
+    this.runningExecutions.set(key, operation);
+    try {
+      return await operation;
+    } finally {
+      this.runningExecutions.delete(key);
+    }
+  }
+
+  private async continueExecution<T>(
+    execution: ActionExecution,
+    handlers: ActionRuntimeHandlers<T>,
+  ): Promise<ActionRuntimeReceipt<T>> {
     try {
       for (
         let transition = 0;

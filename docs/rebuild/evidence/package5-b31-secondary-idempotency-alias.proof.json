@@ -1,0 +1,19 @@
+{
+  "verdict": "FAIL_B31_G1",
+  "requiredInvariant": "Every accepted caller idempotency key stays bound to its original normalized action",
+  "firstAndSecondaryKeyInitiallySameOutcome": true,
+  "secondaryKeyWithChangedPayloadAccepted": true,
+  "appointments": 2,
+  "actionExecutions": 2,
+  "states": [
+    "SUCCEEDED",
+    "SUCCEEDED"
+  ],
+  "primaryKeyWithChangedPayloadRejected": true,
+  "providerCalls": 0,
+  "realActionEngine": true,
+  "compiledHttpAndCanonicalExecutor": true,
+  "realPostgresql": true,
+  "syntheticOnly": true,
+  "realProductionMutations": 0
+}
