@@ -11,11 +11,7 @@ import { Prisma } from '@prisma/client';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AppointmentStatus, CalendarSource } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
-import {
-  CreatedAppointment,
-  ServiceItem,
-  StaffMember,
-} from '../crm/crm-adapter.interface';
+import { ServiceItem, StaffMember } from '../crm/crm-adapter.interface';
 import {
   CrmOutcomeUnknownError,
   CrmRecordGoneError,
@@ -47,6 +43,7 @@ import { AvailableDaysQueryDto } from './dto/available-days-query.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
 import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
+import { ClientAppointmentReadService } from '../crm/client-appointment-read.service';
 import { TenantAppointmentRepository } from './tenant-appointment.repository';
 import { isCanceledOutcome, kopecksToMajor, majorToKopecks } from '../domain';
 
@@ -100,6 +97,7 @@ export class AppointmentsService {
     private readonly auditLogService: AuditLogService,
     private readonly inboxService: InboxService,
     private readonly recoveryService?: RecoveryService,
+    private readonly clientAppointmentReader?: ClientAppointmentReadService,
   ) {}
 
   async createForClient(
@@ -417,117 +415,12 @@ export class AppointmentsService {
     };
   }
 
-  async listClientAppointments(tenantId: string, clientId: string) {
-    this.tenantContext.assertTenantId(tenantId);
-    const calendarSource = await this.crmService.getCalendarSource(tenantId);
-
-    if (calendarSource === CalendarSource.EXTERNAL) {
-      const client = await this.usersService.getTenantUserOrThrow(
-        clientId,
-        tenantId,
+  listClientAppointments(tenantId: string, userId: string) {
+    if (!this.clientAppointmentReader)
+      throw new ServiceUnavailableException(
+        'Verified Client appointment reader unavailable',
       );
-      const profile = this.usersService.serializeUser(client);
-
-      if (profile.phone) {
-        const remoteAppointments = await this.crmService.getClientAppointments(
-          tenantId,
-          profile.phone,
-        );
-        await this.syncExternalClientAppointments(
-          tenantId,
-          clientId,
-          remoteAppointments,
-        );
-      }
-    }
-
-    const appointments =
-      await this.appointmentRepository.listForClient(clientId);
-    const catalog = await this.loadAppointmentCatalog(tenantId);
-
-    return appointments.map((appointment) =>
-      this.serializeAppointment(appointment, catalog),
-    );
-  }
-
-  private async syncExternalClientAppointments(
-    tenantId: string,
-    clientId: string,
-    remoteAppointments: CreatedAppointment[],
-  ): Promise<void> {
-    const crmProvider = await this.crmService.getExternalProviderKey(tenantId);
-
-    for (const remote of remoteAppointments) {
-      const startAt = new Date(remote.start);
-      const endAt = remote.end
-        ? new Date(remote.end)
-        : new Date(startAt.getTime() + 60 * 60 * 1000);
-
-      if (
-        Number.isNaN(startAt.getTime()) ||
-        Number.isNaN(endAt.getTime()) ||
-        endAt.getTime() <= startAt.getTime() ||
-        !remote.external_id ||
-        !remote.staff_id
-      ) {
-        continue;
-      }
-
-      const existing =
-        await this.appointmentRepository.findByCrmExternalIdForClient(
-          crmProvider,
-          remote.external_id,
-          clientId,
-        );
-      const data = {
-        source: CalendarSource.EXTERNAL,
-        // Импорт — такой же писатель, как бронь: идентичность мастера
-        // разрешается здесь же, иначе привезённая запись осталась бы без неё.
-        staffId: await this.crmService.resolveStaffIdForBooking(
-          tenantId,
-          remote.staff_id,
-        ),
-        staffExternalId: remote.staff_id,
-        serviceIds: asJson(remote.service_ids),
-        startAt,
-        endAt,
-        blockedStartAt: startAt,
-        blockedEndAt: endAt,
-        status: remote.status || AppointmentStatus.CONFIRMED,
-        totalPriceKopecks:
-          remote.total_price === undefined || remote.total_price === null
-            ? null
-            : majorToKopecks(remote.total_price),
-        currency: remote.currency || 'RUB',
-        providerPayload: asJson(
-          remote.raw ?? {
-            provider: CalendarSource.EXTERNAL,
-            imported: true,
-          },
-        ),
-      };
-
-      if (existing) {
-        await this.appointmentRepository.updateForClient(
-          existing.id,
-          clientId,
-          {
-            ...data,
-            notes: existing.notes,
-          },
-        );
-        continue;
-      }
-
-      await this.appointmentRepository.createForClient({
-        clientId,
-        branchId: null,
-        crmExternalId: remote.external_id,
-        crmProvider,
-        notes: null,
-        ...data,
-      });
-    }
+    return this.clientAppointmentReader.forAccount(tenantId, userId);
   }
 
   async cancelForClient(

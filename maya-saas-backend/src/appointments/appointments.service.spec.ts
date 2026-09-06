@@ -389,6 +389,8 @@ describe('AppointmentsService', () => {
             .fn()
             .mockResolvedValue({ stored: 0, user_ids: [] }),
         } as never,
+        undefined,
+        { forAccount: jest.fn().mockResolvedValue([]) } as never,
       ),
       mocks: {
         assertLiveBookingEnabledMock,
@@ -584,87 +586,14 @@ describe('AppointmentsService', () => {
     );
   });
 
-  it('imports exact CRM history into the tenant-scoped client cabinet', async () => {
-    const {
-      service,
-      mocks: {
-        appointmentCreateMock,
-        appointmentFindFirstMock,
-        appointmentFindManyMock,
-        getClientAppointmentsMock,
-      },
-    } = createService();
-    const importedStart = new Date('2026-07-31T07:00:00.000Z');
-    const importedEnd = new Date('2026-07-31T08:15:00.000Z');
-    const importedRecord: AppointmentRecord = {
-      id: 'appt-imported',
-      tenantId: 'tenant-1',
-      clientId: 'user-1',
-      branchId: null,
-      crmExternalId: 'crm-imported',
-      source: CalendarSource.EXTERNAL,
-      staffExternalId: 'staff-1',
-      serviceIds: ['svc-1'],
-      startAt: importedStart,
-      endAt: importedEnd,
-      blockedStartAt: importedStart,
-      blockedEndAt: importedEnd,
-      status: 'confirmed',
-      notes: null,
-      totalPriceKopecks: 250_000,
-      currency: 'RUB',
-      providerPayload: { imported: true },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      branch: null,
-    };
-    getClientAppointmentsMock.mockResolvedValue([
-      {
-        external_id: 'crm-imported',
-        status: 'confirmed',
-        start: importedStart.toISOString(),
-        end: importedEnd.toISOString(),
-        staff_id: 'staff-1',
-        service_ids: ['svc-1'],
-        total_price: 2500,
-        currency: 'RUB',
-        raw: { imported: true },
-      },
-    ]);
-    appointmentFindFirstMock.mockResolvedValueOnce(null);
-    appointmentCreateMock.mockResolvedValueOnce(importedRecord);
-    appointmentFindManyMock.mockResolvedValueOnce([importedRecord]);
-
-    const result = await service.listClientAppointments('tenant-1', 'user-1');
-
-    expect(getClientAppointmentsMock).toHaveBeenCalledWith(
-      'tenant-1',
-      '+79990000000',
-    );
-    const createPayload = appointmentCreateMock.mock.calls[0]?.[0] as {
-      data: Record<string, unknown>;
-      include: Record<string, unknown>;
-    };
-    expect(createPayload.data).toMatchObject({
-      tenantId: 'tenant-1',
-      clientId: 'user-1',
-      crmExternalId: 'crm-imported',
-      source: CalendarSource.EXTERNAL,
-      startAt: importedStart,
-      endAt: importedEnd,
-      totalPriceKopecks: 250_000,
-    });
-    expect(createPayload.include).toEqual({ branch: true });
-    expect(result).toEqual([
-      expect.objectContaining({
-        id: 'appt-imported',
-        crm_external_id: 'crm-imported',
-        staff_external_id: 'staff-1',
-        service_ids: ['svc-1'],
-        total_price: 2500,
-        duration_minutes: 60,
-      }),
-    ]);
+  it('delegates every account/AI/cabinet appointment read to the verified reader', async () => {
+    const { service, mocks } = createService();
+    await expect(
+      service.listClientAppointments('tenant-1', 'user-1'),
+    ).resolves.toEqual([]);
+    expect(mocks.appointmentCreateMock).not.toHaveBeenCalled();
+    expect(mocks.appointmentUpdateMock).not.toHaveBeenCalled();
+    expect(mocks.getClientAppointmentsMock).not.toHaveBeenCalled();
   });
 
   it('uses the stored client profile when preview payload omits name and phone', async () => {

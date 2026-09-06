@@ -1,3 +1,4 @@
+import { ClientAppointmentReadService } from './client-appointment-read.service';
 import {
   BadRequestException,
   Body,
@@ -47,7 +48,17 @@ function empty(value: unknown) {
 @Controller('client-channel')
 @TenantScoped()
 export class ClientChannelController {
-  constructor(private readonly runtime: ClientChannelRuntimeService) {}
+  constructor(
+    private readonly runtime: ClientChannelRuntimeService,
+    private readonly appointments: ClientAppointmentReadService,
+  ) {}
+
+  @Get('appointments')
+  appointmentsProjection(
+    @Headers('authorization') authorization: string | undefined,
+  ) {
+    return this.appointments.forChannel(mayaProof(authorization));
+  }
   @Post('challenges')
   issue(
     @Headers('authorization') authorization: string | undefined,
@@ -93,6 +104,7 @@ export class LegacyClientChannelController {
     private readonly bridge: BridgeSourceService,
     private readonly context: TenantContextService,
     private readonly runtime: ClientChannelRuntimeService,
+    private readonly appointments: ClientAppointmentReadService,
   ) {}
 
   @Public()
@@ -179,6 +191,10 @@ export class LegacyClientChannelController {
       if (operation === 'booking-prefill') {
         empty(input.payload);
         return this.runtime.bookingPrefill(input.channelProof);
+      }
+      if (operation === 'appointments-projection') {
+        empty(input.payload);
+        return this.appointments.forChannel(input.channelProof);
       }
       if (operation === 'cabinet-projection') {
         empty(input.payload);

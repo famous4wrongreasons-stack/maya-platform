@@ -1,3 +1,4 @@
+import { ClientAppointmentReadService } from './client-appointment-read.service';
 import { ClientHabitsService } from './client-habits.service';
 import { ClientWantedSlotService } from './client-wanted-slot.service';
 import { LegacyClientWantedSlotController } from './client-wanted-slot.controller';
@@ -78,6 +79,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionController,
   ],
   providers: [
+    ClientAppointmentReadService,
     ClientHabitsService,
     ClientWantedSlotService,
     ClientPreferencesService,
@@ -156,6 +158,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionService,
   ],
   exports: [
+    ClientAppointmentReadService,
     AppointmentMirrorService,
     AppointmentReconciliationService,
     ClientChannelRuntimeService,

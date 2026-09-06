@@ -51,7 +51,9 @@ export class AppointmentsController {
   }
 
   @Get('my')
-  @ApiOperation({ summary: 'List appointments for the current client user' })
+  @ApiOperation({
+    summary: 'Read canonical appointments for the verified Client binding',
+  })
   listMyAppointments(@CurrentUser() user: AuthenticatedUser) {
     return this.appointmentsService.listClientAppointments(
       user.tenantId!,
