@@ -299,6 +299,31 @@ describe('AppointmentsService', () => {
       updatedAt: new Date(now.getTime() + 1000),
     });
 
+    const rescheduleForAccountMock: jest.MockedFunction<
+      (
+        tenantId: string,
+        userId: string,
+        appointmentId: string,
+        dto: unknown,
+        invocation?: unknown,
+      ) => Promise<{
+        appointment: AppointmentRecord;
+        previousStartAt: Date;
+        timezone: string;
+        matchedSlotStart: string;
+      }>
+    > = jest.fn().mockResolvedValue({
+      appointment: {
+        ...appointmentRecord,
+        startAt: new Date('2026-07-05T08:00:00.000Z'),
+        notes: 'Move later',
+        providerPayload: { rescheduled: true },
+      },
+      previousStartAt: appointmentRecord.startAt,
+      timezone: 'Europe/Moscow',
+      matchedSlotStart: '2026-07-05T11:00:00',
+    });
+
     const prisma = {
       appointment: {
         create: appointmentCreateMock,
@@ -405,6 +430,7 @@ describe('AppointmentsService', () => {
         undefined,
         { forAccount: jest.fn().mockResolvedValue([]) } as never,
         { forAccount: cancelForAccountMock } as never,
+        { forAccount: rescheduleForAccountMock } as never,
       ),
       mocks: {
         assertLiveBookingEnabledMock,
@@ -415,6 +441,7 @@ describe('AppointmentsService', () => {
         appointmentCreateMock,
         cancelAppointmentMock,
         cancelForAccountMock,
+        rescheduleForAccountMock,
         branchFindFirstMock,
         tenantFindUniqueMock,
         createAppointmentMock,
@@ -873,25 +900,8 @@ describe('AppointmentsService', () => {
   it('reschedules an upcoming appointment for the current client', async () => {
     const {
       service,
-      mocks: { appointmentUpdateMock, auditLogMock, rescheduleAppointmentMock },
+      mocks: { appointmentUpdateMock, auditLogMock, rescheduleForAccountMock },
     } = createService();
-
-    appointmentUpdateMock.mockResolvedValue({
-      id: 'appt-1',
-      tenantId: 'tenant-1',
-      clientId: 'user-1',
-      branchId: 'branch-1',
-      crmExternalId: 'crm-1',
-      staffExternalId: 'staff-1',
-      serviceIds: ['svc-1'],
-      startAt: new Date('2026-07-05T08:00:00.000Z'),
-      status: 'confirmed',
-      notes: 'Move later',
-      providerPayload: { rescheduled: true },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      branch,
-    });
 
     const result = await service.rescheduleForClient(
       'tenant-1',
@@ -903,45 +913,17 @@ describe('AppointmentsService', () => {
       },
     );
 
-    expect(rescheduleAppointmentMock).toHaveBeenCalledWith(
+    expect(rescheduleForAccountMock).toHaveBeenCalledWith(
       'tenant-1',
+      'user-1',
+      'appt-1',
       {
-        externalId: 'crm-1',
         start: '2026-07-05T11:00:00',
-        staffId: 'staff-1',
-        serviceIds: ['svc-1'],
         notes: 'Move later',
       },
       {},
     );
-    const updateArgs = appointmentUpdateMock.mock.calls[0]?.[0] as
-      | {
-          where: {
-            id_tenantId_clientId: {
-              id: string;
-              tenantId: string;
-              clientId: string;
-            };
-          };
-          data: {
-            staffExternalId: string;
-            status: string;
-            notes: string | null;
-          };
-        }
-      | undefined;
-
-    expect(updateArgs).toBeDefined();
-    expect(updateArgs?.where).toEqual({
-      id_tenantId_clientId: {
-        id: 'appt-1',
-        tenantId: 'tenant-1',
-        clientId: 'user-1',
-      },
-    });
-    expect(updateArgs?.data.staffExternalId).toBe('staff-1');
-    expect(updateArgs?.data.status).toBe('confirmed');
-    expect(updateArgs?.data.notes).toBe('Move later');
+    expect(appointmentUpdateMock).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       ok: true,
       appointment: {
@@ -949,21 +931,26 @@ describe('AppointmentsService', () => {
         status: 'confirmed',
       },
     });
-    expect(auditLogMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        action: 'appointment.rescheduled',
-        entityId: 'appt-1',
-      }),
-    );
+    const logged = auditLogMock.mock.calls[0]?.[0] as {
+      action?: string;
+      entityId?: string;
+      metadata?: { execution_owner?: string };
+    };
+    expect(logged.action).toBe('appointment.rescheduled');
+    expect(logged.entityId).toBe('appt-1');
+    expect(logged.metadata?.execution_owner).toBe('action_engine');
   });
 
   it('returns slot_taken when a new slot is unavailable during reschedule', async () => {
     const {
       service,
-      mocks: { getAvailableSlotsMock, rescheduleAppointmentMock },
+      mocks: { rescheduleForAccountMock, appointmentUpdateMock },
     } = createService();
-
-    getAvailableSlotsMock.mockResolvedValue([]);
+    rescheduleForAccountMock.mockRejectedValue(
+      new BadRequestException({
+        error: { code: 'slot_taken', field: 'start' },
+      }),
+    );
 
     await expect(
       service.rescheduleForClient('tenant-1', 'user-1', 'appt-1', {
@@ -977,31 +964,19 @@ describe('AppointmentsService', () => {
         },
       },
     });
-    expect(rescheduleAppointmentMock).not.toHaveBeenCalled();
+    expect(appointmentUpdateMock).not.toHaveBeenCalled();
   });
 
   it('returns too_late_to_reschedule when the appointment has already started', async () => {
     const {
       service,
-      mocks: { appointmentFindFirstMock, rescheduleAppointmentMock },
+      mocks: { rescheduleForAccountMock, appointmentUpdateMock },
     } = createService();
-
-    appointmentFindFirstMock.mockResolvedValue({
-      id: 'appt-1',
-      tenantId: 'tenant-1',
-      clientId: 'user-1',
-      branchId: 'branch-1',
-      crmExternalId: 'crm-1',
-      staffExternalId: 'staff-1',
-      serviceIds: ['svc-1'],
-      startAt: new Date(Date.now() - 60 * 1000),
-      status: 'confirmed',
-      notes: null,
-      providerPayload: {},
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      branch,
-    });
+    rescheduleForAccountMock.mockRejectedValue(
+      new BadRequestException({
+        error: { code: 'too_late_to_reschedule' },
+      }),
+    );
 
     await expect(
       service.rescheduleForClient('tenant-1', 'user-1', 'appt-1', {
@@ -1014,6 +989,6 @@ describe('AppointmentsService', () => {
         },
       },
     });
-    expect(rescheduleAppointmentMock).not.toHaveBeenCalled();
+    expect(appointmentUpdateMock).not.toHaveBeenCalled();
   });
 });

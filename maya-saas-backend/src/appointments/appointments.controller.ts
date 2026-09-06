@@ -79,7 +79,10 @@ export class AppointmentsController {
   }
 
   @Post(':id/reschedule')
-  @ApiOperation({ summary: 'Reschedule a client appointment' })
+  @ApiOperation({
+    summary:
+      'Reschedule a verified Client appointment through the Action Engine',
+  })
   rescheduleAppointment(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') appointmentId: string,

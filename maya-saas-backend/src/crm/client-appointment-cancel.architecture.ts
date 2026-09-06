@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-/** Permanent B29 Client-originated Appointment mutation guard.
+/** Permanent B29/B30 Client-originated Appointment mutation guard.
  * Verified Client → Appointment.mayaClientId ownership → Action Engine.
  * Test exclusions are filename-qualified.
  */
@@ -8,9 +8,19 @@ export function scanClientAppointmentCancel(
   file: string,
   source: string,
 ): string[] {
+  return scanClientAppointmentCommands(file, source);
+}
+
+export function scanClientAppointmentCommands(
+  file: string,
+  source: string,
+): string[] {
   if (file.endsWith('.spec.ts') || file.endsWith('.architecture.ts')) return [];
   const failures: string[] = [];
-  const dedicated = file.endsWith('client-appointment-cancel.service.ts');
+  const dedicatedCancel = file.endsWith('client-appointment-cancel.service.ts');
+  const dedicatedReschedule = file.endsWith(
+    'client-appointment-reschedule.service.ts',
+  );
   const initiator =
     file.endsWith('appointments.controller.ts') ||
     file.endsWith('appointments.service.ts') ||
@@ -20,14 +30,22 @@ export function scanClientAppointmentCancel(
     if (ts.isMethodDeclaration(node) && node.body) {
       const name = node.name.getText(ast);
       const clientCancel =
-        dedicated ||
+        dedicatedCancel ||
         (file.endsWith('appointments.controller.ts') &&
           name === 'cancelAppointment') ||
         (file.endsWith('appointments.service.ts') &&
           name === 'cancelForClient') ||
         (file.endsWith('ai-tool-handler.service.ts') &&
           name === 'cancelOwnAppointment');
-      if (!clientCancel) {
+      const clientReschedule =
+        dedicatedReschedule ||
+        (file.endsWith('appointments.controller.ts') &&
+          name === 'rescheduleAppointment') ||
+        (file.endsWith('appointments.service.ts') &&
+          name === 'rescheduleForClient') ||
+        (file.endsWith('ai-tool-handler.service.ts') &&
+          name === 'rescheduleOwnAppointment');
+      if (!clientCancel && !clientReschedule) {
         ts.forEachChild(node, visit);
         return;
       }
@@ -42,7 +60,7 @@ export function scanClientAppointmentCancel(
         failures.push(`${name}: direct Appointment mutation from initiator`);
       if (
         initiator &&
-        /adapter\.cancelAppointment|cancelInCrmForClient|crmService\.cancelAppointment\(/.test(
+        /adapter\.(?:cancel|reschedule)Appointment|cancelInCrmForClient|crmService\.(?:cancel|reschedule)Appointment\(/.test(
           body,
         )
       )
@@ -52,11 +70,18 @@ export function scanClientAppointmentCancel(
         !/clientAppointmentCanceler\.forAccount|cancelForClient\(/.test(body)
       )
         failures.push(`${name}: missing verified Client cancel initiator`);
+      if (
+        (name === 'rescheduleForClient' || name === 'rescheduleAppointment') &&
+        !/clientAppointmentRescheduler\.forAccount|rescheduleForClient\(/.test(
+          body,
+        )
+      )
+        failures.push(`${name}: missing verified Client reschedule initiator`);
     }
     ts.forEachChild(node, visit);
   };
   visit(ast);
-  if (dedicated) {
+  if (dedicatedCancel) {
     for (const required of [
       'clientChannelSubjectHash(',
       'links.length !== 1',
@@ -70,10 +95,29 @@ export function scanClientAppointmentCancel(
     if (/findForClient|updateForClient/.test(source))
       failures.push('Dedicated canceler still uses User association lookup');
   }
+  if (dedicatedReschedule) {
+    for (const required of [
+      'clientChannelSubjectHash(',
+      'links.length !== 1',
+      'revokedAt: null',
+      'mayaClientId: client.id',
+      'executeInternalAppointmentRescheduleWithReceipt',
+      'executeRescheduleAppointmentWithReceipt',
+    ])
+      if (!source.includes(required))
+        failures.push(`Required reschedule authority missing: ${required}`);
+    if (/findForClient|updateForClient/.test(source))
+      failures.push('Dedicated rescheduler still uses User association lookup');
+  }
   if (
     file === 'appointments/appointments.service.ts' &&
     !source.includes('this.clientAppointmentCanceler.forAccount(')
   )
     failures.push('HTTP cancel must use verified Client canceler');
+  if (
+    file === 'appointments/appointments.service.ts' &&
+    !source.includes('this.clientAppointmentRescheduler.forAccount(')
+  )
+    failures.push('HTTP reschedule must use verified Client rescheduler');
   return failures;
 }

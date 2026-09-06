@@ -11,7 +11,7 @@ function files(dir: string): string[] {
   );
 }
 
-describe('B29 permanent Client appointment cancel protection', () => {
+describe('B29/B30 permanent Client appointment command protection', () => {
   it('scans all production sources including HTTP, AI and channel paths', () => {
     for (const path of files(root).filter((file) => file.endsWith('.ts'))) {
       const file = relative(root, path);
@@ -36,6 +36,20 @@ describe('B29 permanent Client appointment cancel protection', () => {
     ).not.toEqual([]);
   });
 
+  it.each([
+    'return this.appointmentRepository.findForClient(id, userId);',
+    'await this.appointmentRepository.updateForClient(id, userId, { startAt: new Date() });',
+    'await adapter.rescheduleAppointment({ tenantId, externalId, start });',
+    'await this.crmService.rescheduleAppointment(tenantId, params);',
+  ])('rejects a future Client reschedule bypass: %s', (body) => {
+    expect(
+      scan(
+        'appointments/appointments.service.ts',
+        `class Future { async rescheduleForClient() { ${body} } }`,
+      ),
+    ).not.toEqual([]);
+  });
+
   it('removing an ownership predicate or Action Engine executor fails', () => {
     const file = 'crm/client-appointment-cancel.service.ts';
     const source = readFileSync(resolve(root, file), 'utf8');
@@ -44,6 +58,18 @@ describe('B29 permanent Client appointment cancel protection', () => {
       'links.length !== 1',
       'mayaClientId: client.id',
       'executeInternalAppointmentCancelWithReceipt',
+    ])
+      expect(scan(file, source.replaceAll(from, 'REMOVED'))).not.toEqual([]);
+  });
+
+  it('removing a reschedule ownership predicate or Action Engine executor fails', () => {
+    const file = 'crm/client-appointment-reschedule.service.ts';
+    const source = readFileSync(resolve(root, file), 'utf8');
+    for (const from of [
+      'revokedAt: null',
+      'links.length !== 1',
+      'mayaClientId: client.id',
+      'executeInternalAppointmentRescheduleWithReceipt',
     ])
       expect(scan(file, source.replaceAll(from, 'REMOVED'))).not.toEqual([]);
   });

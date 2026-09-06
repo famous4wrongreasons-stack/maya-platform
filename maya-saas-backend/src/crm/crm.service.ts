@@ -38,7 +38,10 @@ import { phoneMatchKey } from '../common/phone.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { resolveSalonTimezone } from '../tenants/salon-timezone';
+import {
+  isUsableTimezone,
+  resolveSalonTimezone,
+} from '../tenants/salon-timezone';
 import { ClientIdentityService } from './client-identity.service';
 import { canonicalAppointmentInstant } from './appointment-time.utils';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -85,6 +88,12 @@ import {
 } from './crm-provider-settings';
 import type { StaffId, VisitAttendance } from '../domain';
 import { asStaffId, asStaffIdOrNull } from '../domain';
+import { Prisma } from '@prisma/client';
+import {
+  findMatchingSlotByLocalStart,
+  formatDateTimeInTimeZone,
+  normalizeRequestedStart,
+} from '../appointments/appointment-preview.utils';
 import {
   assertWritableAttendance,
   attendanceFromWritableCode,
@@ -1331,6 +1340,327 @@ export class CrmService {
     });
   }
 
+  async executeInternalAppointmentRescheduleWithReceipt(
+    tenantId: string,
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<RescheduledAppointment>> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const plan = this.internalAppointmentRescheduleActionPlan(
+      scopedTenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private internalAppointmentRescheduleActionPlan(
+    tenantId: string,
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation,
+  ): AppointmentActionPlan<RescheduledAppointment> {
+    return {
+      request: this.appointmentActionRequest({
+        tenantId,
+        capability: 'crm.appointment.reschedule.v1',
+        targetRef: `appointment/${params.externalId}`,
+        input: {
+          externalId: params.externalId,
+          start: params.start,
+          ...(params.staffId ? { staffId: params.staffId } : {}),
+          ...(params.serviceIds ? { serviceIds: params.serviceIds } : {}),
+          ...(params.notes ? { notes: params.notes } : {}),
+        },
+        invocation,
+      }),
+      handlers: {
+        dispatch: async (input) => {
+          await invocation.authorizationCheck?.();
+          const durable = this.rescheduleAppointmentInput(input);
+          const owned = await this.prisma.appointment.findFirst({
+            where: { id: durable.externalId, tenantId },
+            include: { branch: true },
+          });
+          if (!owned?.mayaClientId) {
+            throw new NotFoundException(
+              'Appointment not found for the current client.',
+            );
+          }
+          const timezone = await this.bookingTimezone(tenantId, owned.branch);
+          const staffId = durable.staffId ?? owned.staffExternalId;
+          const serviceIds =
+            durable.serviceIds ?? this.jsonStringArray(owned.serviceIds);
+          const startAt = new Date(durable.start);
+          const localStart = formatDateTimeInTimeZone(startAt, timezone);
+          const alreadyAtTarget =
+            owned.startAt.getTime() === startAt.getTime() &&
+            owned.staffExternalId === staffId &&
+            this.sameStringArray(
+              this.jsonStringArray(owned.serviceIds),
+              serviceIds,
+            );
+          if (!alreadyAtTarget) {
+            const slots = await this.internalCalendarService.getAvailableSlots({
+              tenantId,
+              date: localStart,
+              staffId,
+              serviceIds,
+              branchId: owned.branchId ?? undefined,
+            });
+            const matchedSlot = findMatchingSlotByLocalStart(
+              slots,
+              localStart,
+              timezone,
+            );
+            if (!matchedSlot) {
+              throw new BadRequestException({
+                message:
+                  'Selected slot is no longer available. Refresh times and try again.',
+                error: {
+                  code: 'slot_taken',
+                  message:
+                    'Selected slot is no longer available. Refresh times and try again.',
+                  field: 'start',
+                },
+              });
+            }
+            const timing = await this.internalCalendarService.getServiceTiming(
+              tenantId,
+              staffId,
+              serviceIds,
+            );
+            const slotStart = new Date(matchedSlot.start);
+            const slotEnd = new Date(matchedSlot.end);
+            try {
+              await this.persistInternalRescheduledAppointment({
+                tenantId,
+                appointmentId: owned.id,
+                mayaClientId: owned.mayaClientId,
+                branchId: owned.branchId ?? matchedSlot.branch_id ?? null,
+                staffId: await this.resolveStaffIdForBooking(tenantId, staffId),
+                staffExternalId: staffId,
+                serviceIds,
+                startAt: slotStart,
+                endAt: slotEnd,
+                blockedStartAt: new Date(
+                  slotStart.getTime() - timing.bufferBeforeMinutes * 60 * 1000,
+                ),
+                blockedEndAt: new Date(
+                  slotEnd.getTime() + timing.bufferAfterMinutes * 60 * 1000,
+                ),
+                status: AppointmentStatus.CONFIRMED,
+                notes: durable.notes ?? owned.notes,
+              });
+            } catch (error) {
+              if (this.isInternalSlotConstraintError(error)) {
+                throw new ConflictException({
+                  message:
+                    'Selected slot was just booked. Choose another time.',
+                  error: {
+                    code: 'slot_taken',
+                    message:
+                      'Selected slot was just booked. Choose another time.',
+                    field: 'start',
+                  },
+                });
+              }
+              throw error;
+            }
+          }
+          const value = {
+            external_id: owned.id,
+            status: AppointmentStatus.CONFIRMED,
+            start: durable.start,
+            staff_id: staffId,
+            service_ids: serviceIds,
+          };
+          return {
+            value,
+            safeResult: this.rescheduledAppointmentSafe(value),
+          };
+        },
+        reconcile: async (input) => {
+          const durable = this.rescheduleAppointmentInput(input);
+          const row = await this.prisma.appointment.findFirst({
+            where: { id: durable.externalId, tenantId },
+            include: { branch: true },
+          });
+          if (!row || isCanceledStatus(row.status)) {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          const timezone = await this.bookingTimezone(tenantId, row.branch);
+          const localStart = formatDateTimeInTimeZone(row.startAt, timezone);
+          const desiredLocal = normalizeRequestedStart(durable.start, timezone);
+          if (
+            localStart === desiredLocal &&
+            (durable.staffId === undefined ||
+              row.staffExternalId === durable.staffId) &&
+            (durable.serviceIds === undefined ||
+              this.sameStringArray(
+                this.jsonStringArray(row.serviceIds),
+                durable.serviceIds,
+              ))
+          ) {
+            return {
+              outcome: 'PROVEN_SUCCEEDED',
+              safeResult: this.rescheduledAppointmentSafe({
+                external_id: durable.externalId,
+                status: row.status,
+                start: durable.start,
+                staff_id: row.staffExternalId,
+                service_ids: this.jsonStringArray(row.serviceIds),
+              }),
+            };
+          }
+          return { outcome: 'STILL_UNKNOWN' };
+        },
+        restore: (safe) => this.restoreRescheduledAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  private persistInternalRescheduledAppointment(input: {
+    tenantId: string;
+    appointmentId: string;
+    mayaClientId: string;
+    branchId: string | null;
+    staffId: string | null;
+    staffExternalId: string;
+    serviceIds: string[];
+    startAt: Date;
+    endAt: Date;
+    blockedStartAt: Date;
+    blockedEndAt: Date;
+    status: string;
+    notes: string | null;
+  }) {
+    return this.prisma.appointment.updateMany({
+      where: {
+        id: input.appointmentId,
+        tenantId: input.tenantId,
+        mayaClientId: input.mayaClientId,
+      },
+      data: {
+        branchId: input.branchId,
+        staffId: input.staffId,
+        staffExternalId: input.staffExternalId,
+        serviceIds: asJson(input.serviceIds),
+        startAt: input.startAt,
+        endAt: input.endAt,
+        blockedStartAt: input.blockedStartAt,
+        blockedEndAt: input.blockedEndAt,
+        status: input.status,
+        notes: input.notes,
+        providerPayload: asJson({ provider: CalendarSource.INTERNAL }),
+      },
+    });
+  }
+
+  private async persistRescheduledAppointmentMirror(
+    tenantId: string,
+    crmProvider: string,
+    value: RescheduledAppointment,
+    desired: RescheduleAppointmentInput,
+    timezone: string,
+  ) {
+    const existing = await this.prisma.appointment.findFirst({
+      where: {
+        tenantId,
+        crmProvider,
+        crmExternalId: value.external_id,
+      },
+      select: {
+        startAt: true,
+        endAt: true,
+        blockedStartAt: true,
+        blockedEndAt: true,
+      },
+    });
+    if (!existing) return;
+    const startAt = new Date(
+      canonicalAppointmentInstant(value.start, timezone),
+    );
+    const durationMs = Math.max(
+      60_000,
+      existing.endAt.getTime() - existing.startAt.getTime(),
+    );
+    const bufferBefore = Math.max(
+      0,
+      existing.startAt.getTime() - existing.blockedStartAt.getTime(),
+    );
+    const bufferAfter = Math.max(
+      0,
+      existing.blockedEndAt.getTime() - existing.endAt.getTime(),
+    );
+    const endAt = new Date(startAt.getTime() + durationMs);
+    await this.prisma.appointment.updateMany({
+      where: {
+        tenantId,
+        crmProvider,
+        crmExternalId: value.external_id,
+      },
+      data: {
+        startAt,
+        endAt,
+        blockedStartAt: new Date(startAt.getTime() - bufferBefore),
+        blockedEndAt: new Date(endAt.getTime() + bufferAfter),
+        staffExternalId: value.staff_id,
+        staffId: await this.resolveStaffIdForBooking(tenantId, value.staff_id),
+        serviceIds: asJson(value.service_ids),
+        status: value.status,
+        ...(desired.notes !== undefined ? { notes: desired.notes } : {}),
+        ...(value.raw ? { providerPayload: asJson(value.raw) } : {}),
+      },
+    });
+  }
+
+  private jsonStringArray(value: Prisma.JsonValue): string[] {
+    if (!Array.isArray(value)) return [];
+    return value.filter((item): item is string => typeof item === 'string');
+  }
+
+  private sameStringArray(left: string[], right: string[]): boolean {
+    return (
+      left.length === right.length &&
+      left.every((item, index) => item === right[index])
+    );
+  }
+
+  private isInternalSlotConstraintError(error: unknown): boolean {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      (error.code === 'P2002' || error.code === 'P2004')
+    ) {
+      return true;
+    }
+    return (
+      error instanceof Error &&
+      error.message.includes('Appointment_internal_no_overlap')
+    );
+  }
+
+  private async bookingTimezone(
+    tenantId: string,
+    branch: { timezone: string | null } | null,
+  ) {
+    if (isUsableTimezone(branch?.timezone)) {
+      return resolveSalonTimezone({ branchTimezone: branch?.timezone });
+    }
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { defaultTimezone: true },
+    });
+    return resolveSalonTimezone({
+      branchTimezone: branch?.timezone,
+      tenantTimezone: tenant?.defaultTimezone,
+    });
+  }
+
   async rescheduleAppointment(
     tenantId: string,
     params: RescheduleAppointmentRequest,
@@ -1386,6 +1716,7 @@ export class CrmService {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
+    const crmProvider = await this.providerOfTenant(scopedTenantId);
     const timezone = await this.tenantTimezone(scopedTenantId);
     const actionInput: RescheduleAppointmentRequest = {
       ...params,
@@ -1423,6 +1754,13 @@ export class CrmService {
             timezone,
             ...durable,
           });
+          await this.persistRescheduledAppointmentMirror(
+            scopedTenantId,
+            crmProvider,
+            value,
+            durable,
+            timezone,
+          );
           return { value, safeResult: this.rescheduledAppointmentSafe(value) };
         },
         reconcile: async (input, previous) => {
@@ -1433,6 +1771,19 @@ export class CrmService {
           );
           const current = this.appointmentEvidence(detail);
           if (this.matchesDesiredAppointment(current, durable)) {
+            await this.persistRescheduledAppointmentMirror(
+              scopedTenantId,
+              crmProvider,
+              {
+                external_id: current.externalId,
+                status: current.status,
+                start: current.start,
+                staff_id: current.staffId,
+                service_ids: current.serviceIds,
+              },
+              durable,
+              timezone,
+            );
             return {
               outcome: 'PROVEN_SUCCEEDED',
               safeResult: this.rescheduledAppointmentSafe({

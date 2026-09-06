@@ -3,7 +3,6 @@ import {
   ConflictException,
   Injectable,
   Logger,
-  NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -40,6 +39,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
 import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
 import { ClientAppointmentCancelService } from '../crm/client-appointment-cancel.service';
+import { ClientAppointmentRescheduleService } from '../crm/client-appointment-reschedule.service';
 import { ClientAppointmentReadService } from '../crm/client-appointment-read.service';
 import { TenantAppointmentRepository } from './tenant-appointment.repository';
 import { isCanceledOutcome, kopecksToMajor, majorToKopecks } from '../domain';
@@ -88,6 +88,7 @@ export class AppointmentsService {
     private readonly recoveryService?: RecoveryService,
     private readonly clientAppointmentReader?: ClientAppointmentReadService,
     private readonly clientAppointmentCanceler?: ClientAppointmentCancelService,
+    private readonly clientAppointmentRescheduler?: ClientAppointmentRescheduleService,
   ) {}
 
   async createForClient(
@@ -516,233 +517,65 @@ export class AppointmentsService {
 
   async rescheduleForClient(
     tenantId: string,
-    clientId: string,
+    userId: string,
     appointmentId: string,
     dto: RescheduleAppointmentDto,
     invocation: AppointmentActionInvocation = {},
   ) {
+    if (!this.clientAppointmentRescheduler)
+      throw new ServiceUnavailableException(
+        'Verified Client appointment rescheduler unavailable',
+      );
     this.tenantContext.assertTenantId(tenantId);
-    const appointment = await this.appointmentRepository.findForClient(
+    const {
+      appointment,
+      previousStartAt: previous,
+      timezone,
+      matchedSlotStart,
+    } = await this.clientAppointmentRescheduler.forAccount(
+      tenantId,
+      userId,
       appointmentId,
-      clientId,
+      dto,
+      invocation,
     );
-
-    if (!appointment) {
-      throw new NotFoundException(
-        this.buildAppointmentError(
-          'not_found',
-          'Appointment not found for the current client.',
-        ),
-      );
-    }
-
-    if (this.isCancelledStatus(appointment.status)) {
-      throw new ConflictException(
-        this.buildAppointmentError(
-          'already_cancelled',
-          'Appointment is already cancelled.',
-        ),
-      );
-    }
-
-    if (appointment.startAt.getTime() <= Date.now()) {
-      throw new BadRequestException(
-        this.buildAppointmentError(
-          'too_late_to_reschedule',
-          'Appointment can no longer be rescheduled because it has already started.',
-        ),
-      );
-    }
-
+    const catalog = await this.loadAppointmentCatalog(tenantId);
     const appointmentSource =
       appointment.source === 'internal'
         ? CalendarSource.INTERNAL
         : CalendarSource.EXTERNAL;
 
-    if (
-      appointmentSource === CalendarSource.EXTERNAL &&
-      !appointment.crmExternalId
-    ) {
-      throw new NotFoundException(
-        this.buildAppointmentError(
-          'not_found',
-          'Appointment not found for the current client.',
-        ),
-      );
-    }
-
-    const branchId = dto.branchId ?? appointment.branchId ?? undefined;
-
-    if (branchId) {
-      await this.tenantsService.assertBranchBelongsToTenant(branchId, tenantId);
-    }
-
-    const branch = branchId
-      ? await this.resolveBranchForBooking(tenantId, branchId)
-      : (appointment.branch ?? null);
-    const timezone = await this.resolveBookingTimezone(tenantId, branch);
-    const serviceIds =
-      dto.serviceIds && dto.serviceIds.length > 0
-        ? dto.serviceIds
-        : this.normalizeServiceIds(appointment.serviceIds);
-
-    if (serviceIds.length === 0) {
-      throw new BadRequestException(
-        this.buildAppointmentError(
-          'validation',
-          'Appointment must keep at least one service when rescheduling.',
-          'serviceIds',
-        ),
-      );
-    }
-
-    const services = await this.crmService.getServices(tenantId);
-    this.assertRequestedServicesExist(serviceIds, services);
-    const selectedServices = services.filter((service) =>
-      serviceIds.includes(service.id),
-    );
-    const totalPrice = selectedServices.reduce(
-      (sum, service) => sum + service.price,
-      0,
-    );
-    const currency = selectedServices[0]?.currency ?? appointment.currency;
-
-    const staffId = dto.staffId ?? appointment.staffExternalId;
-    const requestedStart = normalizeRequestedStart(dto.start, timezone);
-    const slots = await this.crmService.getAvailableSlots(tenantId, {
-      date: requestedStart,
-      staffId,
-      serviceIds,
-      branchId,
-    });
-    const matchedSlot = findMatchingSlotByLocalStart(
-      slots,
-      requestedStart,
-      timezone,
-    );
-
-    if (!matchedSlot) {
-      throw new BadRequestException(
-        this.buildAppointmentError(
-          'slot_taken',
-          'Selected slot is no longer available. Refresh times and try again.',
-          'start',
-        ),
-      );
-    }
-
-    const timing =
-      appointmentSource === CalendarSource.INTERNAL
-        ? await this.internalCalendarService.getServiceTiming(
-            tenantId,
-            staffId,
-            serviceIds,
-          )
-        : {
-            bufferBeforeMinutes: 0,
-            bufferAfterMinutes: 0,
-          };
-    const startAt = new Date(matchedSlot.start);
-    const endAt = new Date(matchedSlot.end);
-    const blockedStartAt = new Date(
-      startAt.getTime() - timing.bufferBeforeMinutes * 60 * 1000,
-    );
-    const blockedEndAt = new Date(
-      endAt.getTime() + timing.bufferAfterMinutes * 60 * 1000,
-    );
-    const remoteAppointment =
-      appointmentSource === CalendarSource.EXTERNAL
-        ? await this.crmService.rescheduleAppointment(
-            tenantId,
-            {
-              externalId: appointment.crmExternalId!,
-              start: requestedStart,
-              staffId,
-              serviceIds,
-              notes: dto.notes ?? appointment.notes,
-            },
-            invocation,
-          )
-        : null;
-    let updatedAppointment: Awaited<
-      ReturnType<TenantAppointmentRepository['updateForClient']>
-    >;
-
-    try {
-      updatedAppointment = await this.appointmentRepository.updateForClient(
-        appointment.id,
-        clientId,
-        {
-          branchId: branchId ?? matchedSlot.branch_id ?? null,
-          source: appointmentSource,
-          // Перенос может сменить мастера — значит меняются ОБА поля.
-          staffId: await this.crmService.resolveStaffIdForBooking(
-            tenantId,
-            remoteAppointment?.staff_id ?? staffId,
-          ),
-          staffExternalId: remoteAppointment?.staff_id ?? staffId,
-          serviceIds: asJson(remoteAppointment?.service_ids ?? serviceIds),
-          startAt,
-          endAt,
-          blockedStartAt,
-          blockedEndAt,
-          status: remoteAppointment?.status ?? AppointmentStatus.CONFIRMED,
-          notes: dto.notes ?? appointment.notes,
-          totalPriceKopecks: majorToKopecks(totalPrice),
-          currency,
-          providerPayload: asJson(
-            remoteAppointment?.raw ?? { provider: CalendarSource.INTERNAL },
-          ),
-        },
-      );
-    } catch (error) {
-      if (
-        appointmentSource === CalendarSource.INTERNAL &&
-        this.isInternalSlotConstraintError(error)
-      ) {
-        throw new ConflictException(
-          this.buildAppointmentError(
-            'slot_taken',
-            'Selected slot was just booked. Choose another time.',
-            'start',
-          ),
-        );
-      }
-
-      throw error;
-    }
-    const catalog = await this.loadAppointmentCatalog(tenantId);
-
     await this.auditLogService.log({
       tenantId,
-      userId: clientId,
+      userId,
       action: 'appointment.rescheduled',
       entityType: 'appointment',
       entityId: appointment.id,
       metadata: {
         source: appointmentSource,
         crm_external_id: appointment.crmExternalId,
-        previous_start_at: appointment.startAt.toISOString(),
-        requested_start: requestedStart,
-        matched_slot_start: matchedSlot.start,
+        previous_start_at: previous.toISOString(),
+        requested_start: dto.start,
+        matched_slot_start: matchedSlotStart,
+        execution_owner: 'action_engine',
       },
     });
 
     if (appointmentSource === CalendarSource.INTERNAL) {
       const clientProfile = this.usersService.serializeUser(
-        await this.usersService.getTenantUserOrThrow(clientId, tenantId),
+        await this.usersService.getTenantUserOrThrow(userId, tenantId),
       );
       void this.publishAppointmentLifecycleInbox({
         tenantId,
         type: 'appointment_rescheduled',
-        sourceEventId: `appointment_rescheduled:nest:${appointment.id}:${matchedSlot.start}`,
+        sourceEventId: `appointment_rescheduled:nest:${appointment.id}:${matchedSlotStart}`,
         title: 'Клиент перенёс запись',
         bodyText: [
           'Клиент перенёс свою запись сам',
           '',
           `Клиент: ${clientProfile.name || '—'}`,
-          `Было: ${this.formatInboxWhen(appointment.startAt, timezone)}`,
-          `Стало: ${this.formatInboxWhen(new Date(matchedSlot.start), timezone)}`,
+          `Было: ${this.formatInboxWhen(previous, timezone)}`,
+          `Стало: ${this.formatInboxWhen(new Date(matchedSlotStart), timezone)}`,
         ].join('\n'),
         staffExternalId: dto.staffId ?? appointment.staffExternalId,
         payload: {
@@ -760,8 +593,8 @@ export class AppointmentsService {
 
     return {
       ok: true,
-      previous_start_at: appointment.startAt,
-      appointment: this.serializeAppointment(updatedAppointment, catalog),
+      previous_start_at: previous,
+      appointment: this.serializeAppointment(appointment, catalog),
     };
   }
 
