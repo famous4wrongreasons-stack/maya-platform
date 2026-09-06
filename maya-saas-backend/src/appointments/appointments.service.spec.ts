@@ -1,12 +1,13 @@
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { CalendarSource } from '../common/domain.enums';
 import { asStaffId } from '../domain';
-import {
-  CrmOutcomeUnknownError,
-  CrmRecordGoneError,
-} from '../crm/crm-request.errors';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -285,6 +286,18 @@ describe('AppointmentsService', () => {
     const auditLogMock: jest.MockedFunction<
       (args: Record<string, unknown>) => Promise<void>
     > = jest.fn().mockResolvedValue(undefined);
+    const cancelForAccountMock: jest.MockedFunction<
+      (
+        tenantId: string,
+        userId: string,
+        appointmentId: string,
+        invocation?: unknown,
+      ) => Promise<AppointmentRecord>
+    > = jest.fn().mockResolvedValue({
+      ...appointmentRecord,
+      status: 'canceled',
+      updatedAt: new Date(now.getTime() + 1000),
+    });
 
     const prisma = {
       appointment: {
@@ -391,6 +404,7 @@ describe('AppointmentsService', () => {
         } as never,
         undefined,
         { forAccount: jest.fn().mockResolvedValue([]) } as never,
+        { forAccount: cancelForAccountMock } as never,
       ),
       mocks: {
         assertLiveBookingEnabledMock,
@@ -400,6 +414,7 @@ describe('AppointmentsService', () => {
         appointmentUpdateMock,
         appointmentCreateMock,
         cancelAppointmentMock,
+        cancelForAccountMock,
         branchFindFirstMock,
         tenantFindUniqueMock,
         createAppointmentMock,
@@ -733,79 +748,15 @@ describe('AppointmentsService', () => {
     expect(getAvailableSlotsMock).not.toHaveBeenCalled();
   });
 
-  it('lets the client cancel when the CRM record is already gone', async () => {
-    // 🔴 ВОСПРОИЗВЕДЕНИЕ ДОКАЗАННОГО ДЕФЕКТА.
-    // Порядок операций — сначала CRM, потом своя база, компенсации нет. Если
-    // локальное обновление упало (обрыв связи с БД), запись в YClients уже
-    // удалена, а локальный статус остался confirmed. Повторная отмена снова
-    // уходила в CRM, где записи больше нет, адаптер бросал голую ошибку — и
-    // клиент получал 500. Каждый раз, навсегда.
+  it('delegates client cancel to the verified Client Action Engine initiator', async () => {
     const {
       service,
-      mocks: { appointmentUpdateMock, auditLogMock, cancelAppointmentMock },
-    } = createService();
-    cancelAppointmentMock.mockRejectedValue(
-      new CrmRecordGoneError('YClients request failed with status 404'),
-    );
-
-    const result = await service.cancelForClient(
-      'tenant-1',
-      'user-1',
-      'appt-1',
-    );
-
-    // Локальная строка догоняет внешнее состояние вместо бесконечной пятисотки.
-    expect(result).toMatchObject({ appointment: { status: 'canceled' } });
-    expect(appointmentUpdateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ data: { status: 'canceled' } }),
-    );
-    // И это отличимо в журнале от обычной отмены.
-    const auditCall = auditLogMock.mock.calls[0]?.[0];
-    expect(auditCall).toMatchObject({
-      action: 'appointment.cancelled',
-      metadata: { external_outcome: 'already_gone' },
-    });
-  });
-
-  it('does not mark the appointment cancelled when the CRM outcome is unknown', async () => {
-    // Обрыв или таймаут — это НЕ отказ: запрос мог дойти и выполниться.
-    // Объявить запись отменённой было бы ложью, объявить провалом — тоже.
-    const {
-      service,
-      mocks: { appointmentUpdateMock, cancelAppointmentMock },
-    } = createService();
-    cancelAppointmentMock.mockRejectedValue(
-      new CrmOutcomeUnknownError('YClients did not answer in time'),
-    );
-
-    await expect(
-      service.cancelForClient('tenant-1', 'user-1', 'appt-1'),
-    ).rejects.toMatchObject({ status: 503 });
-
-    // Локальное состояние не тронуто — повтор безопасен.
-    expect(appointmentUpdateMock).not.toHaveBeenCalled();
-  });
-
-  it('still surfaces a confirmed CRM refusal without touching local state', async () => {
-    // Подтверждённый отказ провайдера ведёт себя как раньше.
-    const {
-      service,
-      mocks: { appointmentUpdateMock, cancelAppointmentMock },
-    } = createService();
-    cancelAppointmentMock.mockRejectedValue(
-      new Error('YClients request failed with status 403'),
-    );
-
-    await expect(
-      service.cancelForClient('tenant-1', 'user-1', 'appt-1'),
-    ).rejects.toThrow('status 403');
-    expect(appointmentUpdateMock).not.toHaveBeenCalled();
-  });
-
-  it('cancels an upcoming appointment for the current client', async () => {
-    const {
-      service,
-      mocks: { appointmentUpdateMock, auditLogMock, cancelAppointmentMock },
+      mocks: {
+        appointmentUpdateMock,
+        auditLogMock,
+        cancelAppointmentMock,
+        cancelForAccountMock,
+      },
     } = createService();
 
     const result = await service.cancelForClient(
@@ -814,19 +765,14 @@ describe('AppointmentsService', () => {
       'appt-1',
     );
 
-    expect(cancelAppointmentMock).toHaveBeenCalledWith('tenant-1', 'crm-1', {});
-    expect(appointmentUpdateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: {
-          id_tenantId_clientId: {
-            id: 'appt-1',
-            tenantId: 'tenant-1',
-            clientId: 'user-1',
-          },
-        },
-        data: { status: 'canceled' },
-      }),
+    expect(cancelForAccountMock).toHaveBeenCalledWith(
+      'tenant-1',
+      'user-1',
+      'appt-1',
+      {},
     );
+    expect(cancelAppointmentMock).not.toHaveBeenCalled();
+    expect(appointmentUpdateMock).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       ok: true,
       appointment: {
@@ -840,15 +786,54 @@ describe('AppointmentsService', () => {
         entityId: 'appt-1',
       }),
     );
+    const logged = auditLogMock.mock.calls[0]?.[0] as {
+      metadata?: { execution_owner?: string };
+    };
+    expect(logged.metadata?.execution_owner).toBe('action_engine');
   });
 
-  it('returns not_found when the appointment does not belong to the client', async () => {
+  it('does not write Appointment state when the canceler reports UNKNOWN', async () => {
     const {
       service,
-      mocks: { appointmentFindFirstMock, cancelAppointmentMock },
+      mocks: { appointmentUpdateMock, cancelForAccountMock },
     } = createService();
+    cancelForAccountMock.mockRejectedValue(
+      new ServiceUnavailableException({
+        error: { code: 'crm_outcome_unknown' },
+      }),
+    );
 
-    appointmentFindFirstMock.mockResolvedValue(null);
+    await expect(
+      service.cancelForClient('tenant-1', 'user-1', 'appt-1'),
+    ).rejects.toMatchObject({ status: 503 });
+    expect(appointmentUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it('still surfaces a confirmed CRM refusal without touching local state', async () => {
+    const {
+      service,
+      mocks: { appointmentUpdateMock, cancelForAccountMock },
+    } = createService();
+    cancelForAccountMock.mockRejectedValue(
+      new Error('YClients request failed with status 403'),
+    );
+
+    await expect(
+      service.cancelForClient('tenant-1', 'user-1', 'appt-1'),
+    ).rejects.toThrow('status 403');
+    expect(appointmentUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it('returns not_found when the verified Client does not own the appointment', async () => {
+    const {
+      service,
+      mocks: { cancelAppointmentMock, cancelForAccountMock },
+    } = createService();
+    cancelForAccountMock.mockRejectedValue(
+      new NotFoundException({
+        error: { code: 'not_found' },
+      }),
+    );
 
     await expect(
       service.cancelForClient('tenant-1', 'user-1', 'missing-appt'),
@@ -862,63 +847,16 @@ describe('AppointmentsService', () => {
     expect(cancelAppointmentMock).not.toHaveBeenCalled();
   });
 
-  it('returns already_cancelled for an appointment that is already canceled', async () => {
-    const {
-      service,
-      mocks: { appointmentFindFirstMock, cancelAppointmentMock },
-    } = createService();
-
-    appointmentFindFirstMock.mockResolvedValue({
-      id: 'appt-1',
-      tenantId: 'tenant-1',
-      clientId: 'user-1',
-      branchId: 'branch-1',
-      crmExternalId: 'crm-1',
-      staffExternalId: 'staff-1',
-      serviceIds: ['svc-1'],
-      startAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      status: 'canceled',
-      notes: null,
-      providerPayload: {},
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      branch,
-    });
-
-    await expect(
-      service.cancelForClient('tenant-1', 'user-1', 'appt-1'),
-    ).rejects.toMatchObject({
-      response: {
-        error: {
-          code: 'already_cancelled',
-        },
-      },
-    });
-    expect(cancelAppointmentMock).not.toHaveBeenCalled();
-  });
-
   it('returns too_late_to_cancel when the appointment has already started', async () => {
     const {
       service,
-      mocks: { appointmentFindFirstMock, cancelAppointmentMock },
+      mocks: { cancelAppointmentMock, cancelForAccountMock },
     } = createService();
-
-    appointmentFindFirstMock.mockResolvedValue({
-      id: 'appt-1',
-      tenantId: 'tenant-1',
-      clientId: 'user-1',
-      branchId: 'branch-1',
-      crmExternalId: 'crm-1',
-      staffExternalId: 'staff-1',
-      serviceIds: ['svc-1'],
-      startAt: new Date(Date.now() - 60 * 1000),
-      status: 'confirmed',
-      notes: null,
-      providerPayload: {},
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      branch,
-    });
+    cancelForAccountMock.mockRejectedValue(
+      new BadRequestException({
+        error: { code: 'too_late_to_cancel' },
+      }),
+    );
 
     await expect(
       service.cancelForClient('tenant-1', 'user-1', 'appt-1'),

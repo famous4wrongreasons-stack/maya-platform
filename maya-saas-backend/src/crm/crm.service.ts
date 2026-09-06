@@ -26,6 +26,7 @@ import {
   type TrustedActionExecutionRequestV1,
 } from '../action-engine';
 import {
+  AppointmentStatus,
   CalendarSource,
   CrmIntegrationStatus,
   CrmProvider,
@@ -1151,6 +1152,7 @@ export class CrmService {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
+    const crmProvider = await this.providerOfTenant(scopedTenantId);
     return {
       request: this.appointmentActionRequest({
         tenantId: scopedTenantId,
@@ -1171,6 +1173,11 @@ export class CrmService {
               tenantId: scopedTenantId,
               externalId: durableExternalId,
             });
+            await this.persistCancelledAppointmentMirror(
+              scopedTenantId,
+              crmProvider,
+              durableExternalId,
+            );
             return { value, safeResult: this.cancelledAppointmentSafe(value) };
           } catch (error) {
             if (!(error instanceof CrmRecordGoneError)) throw error;
@@ -1178,6 +1185,11 @@ export class CrmService {
               external_id: durableExternalId,
               status: 'canceled',
             };
+            await this.persistCancelledAppointmentMirror(
+              scopedTenantId,
+              crmProvider,
+              durableExternalId,
+            );
             return { value, safeResult: this.cancelledAppointmentSafe(value) };
           }
         },
@@ -1197,6 +1209,11 @@ export class CrmService {
           } catch (error) {
             if (!(error instanceof CrmRecordGoneError)) throw error;
           }
+          await this.persistCancelledAppointmentMirror(
+            scopedTenantId,
+            crmProvider,
+            durableExternalId,
+          );
           return {
             outcome: 'PROVEN_SUCCEEDED',
             safeResult: this.cancelledAppointmentSafe({
@@ -1210,6 +1227,108 @@ export class CrmService {
           this.classifyAppointmentActionError(error, phase),
       },
     };
+  }
+
+  async executeInternalAppointmentCancelWithReceipt(
+    tenantId: string,
+    appointmentId: string,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<CancelledAppointment>> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const plan = this.internalAppointmentCancelActionPlan(
+      scopedTenantId,
+      appointmentId,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private internalAppointmentCancelActionPlan(
+    tenantId: string,
+    appointmentId: string,
+    invocation: AppointmentActionInvocation,
+  ): AppointmentActionPlan<CancelledAppointment> {
+    return {
+      request: this.appointmentActionRequest({
+        tenantId,
+        capability: 'crm.appointment.cancel.v1',
+        targetRef: `appointment/${appointmentId}`,
+        input: { externalId: appointmentId },
+        invocation,
+      }),
+      handlers: {
+        dispatch: async (input) => {
+          await invocation.authorizationCheck?.();
+          const durableId = requireString(input.externalId, 'externalId');
+          const owned = await this.prisma.appointment.findFirst({
+            where: { id: durableId, tenantId },
+            select: { mayaClientId: true, status: true },
+          });
+          if (!owned?.mayaClientId) {
+            throw new NotFoundException(
+              'Appointment not found for the current client.',
+            );
+          }
+          if (!isCanceledStatus(owned.status)) {
+            await this.persistInternalCancelledAppointment(
+              tenantId,
+              durableId,
+              owned.mayaClientId,
+            );
+          }
+          const value = {
+            external_id: durableId,
+            status: AppointmentStatus.CANCELED,
+          };
+          return { value, safeResult: this.cancelledAppointmentSafe(value) };
+        },
+        reconcile: async (input) => {
+          const durableId = requireString(input.externalId, 'externalId');
+          const row = await this.prisma.appointment.findFirst({
+            where: { id: durableId, tenantId },
+            select: { status: true },
+          });
+          if (!row || !isCanceledStatus(row.status)) {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          return {
+            outcome: 'PROVEN_SUCCEEDED',
+            safeResult: this.cancelledAppointmentSafe({
+              external_id: durableId,
+              status: AppointmentStatus.CANCELED,
+            }),
+          };
+        },
+        restore: (safe) => this.restoreCancelledAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  private persistCancelledAppointmentMirror(
+    tenantId: string,
+    crmProvider: string,
+    crmExternalId: string,
+  ) {
+    return this.prisma.appointment.updateMany({
+      where: { tenantId, crmProvider, crmExternalId },
+      data: { status: AppointmentStatus.CANCELED },
+    });
+  }
+
+  private persistInternalCancelledAppointment(
+    tenantId: string,
+    appointmentId: string,
+    mayaClientId: string,
+  ) {
+    return this.prisma.appointment.updateMany({
+      where: { id: appointmentId, tenantId, mayaClientId },
+      data: { status: AppointmentStatus.CANCELED },
+    });
   }
 
   async rescheduleAppointment(

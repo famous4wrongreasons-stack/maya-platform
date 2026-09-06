@@ -62,7 +62,9 @@ export class AppointmentsController {
   }
 
   @Post(':id/cancel')
-  @ApiOperation({ summary: 'Cancel a client appointment' })
+  @ApiOperation({
+    summary: 'Cancel a verified Client appointment through the Action Engine',
+  })
   cancelAppointment(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') appointmentId: string,

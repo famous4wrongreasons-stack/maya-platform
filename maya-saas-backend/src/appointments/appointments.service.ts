@@ -13,10 +13,6 @@ import { AppointmentStatus, CalendarSource } from '../common/domain.enums';
 import { asJson } from '../common/json.util';
 import { ServiceItem, StaffMember } from '../crm/crm-adapter.interface';
 import {
-  CrmOutcomeUnknownError,
-  CrmRecordGoneError,
-} from '../crm/crm-request.errors';
-import {
   CrmService,
   type AppointmentActionInvocation,
 } from '../crm/crm.service';
@@ -43,6 +39,7 @@ import { AvailableDaysQueryDto } from './dto/available-days-query.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PreviewAppointmentDto } from './dto/preview-appointment.dto';
 import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
+import { ClientAppointmentCancelService } from '../crm/client-appointment-cancel.service';
 import { ClientAppointmentReadService } from '../crm/client-appointment-read.service';
 import { TenantAppointmentRepository } from './tenant-appointment.repository';
 import { isCanceledOutcome, kopecksToMajor, majorToKopecks } from '../domain';
@@ -71,14 +68,6 @@ interface AppointmentCatalog {
   staffById: Map<string, StaffMember>;
 }
 
-/**
- * Чем кончилась отмена во внешней системе.
- *
- * Узкий тип именно этого потока, а не общая модель состояний действия — она
- * относится к главе 6 и здесь не строится.
- */
-type CrmCancellationOutcome = 'canceled' | 'already_gone' | 'not_applicable';
-
 const AVAILABLE_DAYS_MAX_RANGE = 31;
 const AVAILABLE_DAYS_BATCH_SIZE = 4;
 
@@ -98,6 +87,7 @@ export class AppointmentsService {
     private readonly inboxService: InboxService,
     private readonly recoveryService?: RecoveryService,
     private readonly clientAppointmentReader?: ClientAppointmentReadService,
+    private readonly clientAppointmentCanceler?: ClientAppointmentCancelService,
   ) {}
 
   async createForClient(
@@ -425,79 +415,26 @@ export class AppointmentsService {
 
   async cancelForClient(
     tenantId: string,
-    clientId: string,
+    userId: string,
     appointmentId: string,
     invocation: AppointmentActionInvocation = {},
   ) {
+    if (!this.clientAppointmentCanceler)
+      throw new ServiceUnavailableException(
+        'Verified Client appointment canceler unavailable',
+      );
     this.tenantContext.assertTenantId(tenantId);
-    const appointment = await this.appointmentRepository.findForClient(
+    const appointment = await this.clientAppointmentCanceler.forAccount(
+      tenantId,
+      userId,
       appointmentId,
-      clientId,
+      invocation,
     );
-
-    if (!appointment) {
-      throw new NotFoundException(
-        this.buildAppointmentError(
-          'not_found',
-          'Appointment not found for the current client.',
-        ),
-      );
-    }
-
-    if (this.isCancelledStatus(appointment.status)) {
-      throw new ConflictException(
-        this.buildAppointmentError(
-          'already_cancelled',
-          'Appointment is already cancelled.',
-        ),
-      );
-    }
-
-    if (appointment.startAt.getTime() <= Date.now()) {
-      throw new BadRequestException(
-        this.buildAppointmentError(
-          'too_late_to_cancel',
-          'Appointment can no longer be cancelled because it has already started.',
-        ),
-      );
-    }
-
+    const catalog = await this.loadAppointmentCatalog(tenantId);
     const appointmentSource =
       appointment.source === 'internal'
         ? CalendarSource.INTERNAL
         : CalendarSource.EXTERNAL;
-
-    // Чем кончилась отмена во внешней системе. Для внутреннего календаря
-    // внешней системы нет, поэтому исход тривиален.
-    let externalOutcome: CrmCancellationOutcome = 'not_applicable';
-
-    if (appointmentSource === CalendarSource.EXTERNAL) {
-      if (!appointment.crmExternalId) {
-        throw new NotFoundException(
-          this.buildAppointmentError(
-            'not_found',
-            'Appointment not found for the current client.',
-          ),
-        );
-      }
-
-      externalOutcome = await this.cancelInCrmForClient(
-        tenantId,
-        appointment.crmExternalId,
-        invocation,
-      );
-    }
-
-    const updatedAppointment = await this.appointmentRepository.updateForClient(
-      appointment.id,
-      clientId,
-      {
-        status: AppointmentStatus.CANCELED,
-      },
-    );
-    const catalog = await this.loadAppointmentCatalog(tenantId);
-    // Пояс для карточки об отмене: у записи уже загружен филиал, арендатор
-    // нужен только как запасной вариант, когда у филиала пояса нет.
     const cancelTimezoneHint = isUsableTimezone(appointment.branch?.timezone)
       ? appointment.branch?.timezone
       : (
@@ -509,18 +446,15 @@ export class AppointmentsService {
 
     await this.auditLogService.log({
       tenantId,
-      userId: clientId,
+      userId,
       action: 'appointment.cancelled',
       entityType: 'appointment',
       entityId: appointment.id,
       metadata: {
         source: appointmentSource,
         crm_external_id: appointment.crmExternalId,
-        cancelled_at: updatedAppointment.updatedAt.toISOString(),
-        // already_gone означает, что запись в CRM отсутствовала ещё до нашего
-        // вызова: локальная строка догнала внешнее состояние. Без этой пометки
-        // такой случай в журнале неотличим от обычной отмены.
-        external_outcome: externalOutcome,
+        cancelled_at: appointment.updatedAt.toISOString(),
+        execution_owner: 'action_engine',
       },
     });
 
@@ -540,7 +474,7 @@ export class AppointmentsService {
 
     if (appointmentSource === CalendarSource.INTERNAL) {
       const clientProfile = this.usersService.serializeUser(
-        await this.usersService.getTenantUserOrThrow(clientId, tenantId),
+        await this.usersService.getTenantUserOrThrow(userId, tenantId),
       );
       void this.publishAppointmentLifecycleInbox({
         tenantId,
@@ -576,7 +510,7 @@ export class AppointmentsService {
 
     return {
       ok: true,
-      appointment: this.serializeAppointment(updatedAppointment, catalog),
+      appointment: this.serializeAppointment(appointment, catalog),
     };
   }
 
@@ -1022,62 +956,6 @@ export class AppointmentsService {
    * Настенное время считается именно этим поясом и в этом же виде уходит в
    * CRM, поэтому расхождение садило запись на неверный час.
    */
-  /**
-   * Отмена во внешней CRM: три разных исхода, а не два.
-   *
-   * 🔴 Доказанный дефект. Порядок операций — сначала CRM, потом своя база, и
-   * компенсации нет. Если локальное обновление падает (обрыв связи с БД),
-   * запись в YClients уже удалена, а локальный статус остался `confirmed`.
-   * Повторная отмена снова уходила в CRM, где записи больше нет, адаптер бросал
-   * голую ошибку — и клиент получал 500. Каждый раз. Отменить визит становилось
-   * невозможно НИКОГДА.
-   *
-   * Разрыв петли: «записи нет» — это не сбой, а подтверждение того самого
-   * состояния, которого мы добиваемся. Локальная строка просто догоняет
-   * внешнюю систему.
-   *
-   * Неизвестный исход НЕ превращается в провал: при обрыве или таймауте запрос
-   * мог дойти и выполниться. Локальное состояние не трогаем вовсе и honestly
-   * говорим клиенту, что результат неизвестен — повтор безопасен ровно потому,
-   * что «записи нет» теперь обрабатывается выше.
-   */
-  private async cancelInCrmForClient(
-    tenantId: string,
-    crmExternalId: string,
-    invocation: AppointmentActionInvocation,
-  ): Promise<CrmCancellationOutcome> {
-    try {
-      await this.crmService.cancelAppointment(
-        tenantId,
-        crmExternalId,
-        invocation,
-      );
-      return 'canceled';
-    } catch (error) {
-      if (error instanceof CrmRecordGoneError) {
-        this.logger.warn(
-          `CRM record ${crmExternalId} is already gone; local cancellation catches up`,
-        );
-        return 'already_gone';
-      }
-
-      if (error instanceof CrmOutcomeUnknownError) {
-        throw new ServiceUnavailableException({
-          message:
-            'Не удалось получить ответ CRM. Отмена могла не примениться — повторите попытку.',
-          error: {
-            code: 'crm_outcome_unknown',
-            message:
-              'CRM did not answer in time. The cancellation outcome is unknown.',
-          },
-        });
-      }
-
-      // Подтверждённый отказ CRM — поведение прежнее.
-      throw error;
-    }
-  }
-
   private async resolveBookingTimezone(
     tenantId: string,
     branch: { timezone: string | null } | null,

@@ -1,6 +1,7 @@
 import { ClientProfileReadModule } from '../crm/client-profile-read.module';
 import { ClientLoyaltyReadService } from './client-loyalty-read.service';
 import { ClientAppointmentReadService } from './client-appointment-read.service';
+import { ClientAppointmentCancelService } from './client-appointment-cancel.service';
 import { ClientHabitsService } from './client-habits.service';
 import { ClientWantedSlotService } from './client-wanted-slot.service';
 import { LegacyClientWantedSlotController } from './client-wanted-slot.controller';
@@ -84,6 +85,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
   providers: [
     ClientLoyaltyReadService,
     ClientAppointmentReadService,
+    ClientAppointmentCancelService,
     ClientHabitsService,
     ClientWantedSlotService,
     ClientPreferencesService,
@@ -164,6 +166,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
   exports: [
     ClientLoyaltyReadService,
     ClientAppointmentReadService,
+    ClientAppointmentCancelService,
     AppointmentMirrorService,
     AppointmentReconciliationService,
     ClientChannelRuntimeService,
