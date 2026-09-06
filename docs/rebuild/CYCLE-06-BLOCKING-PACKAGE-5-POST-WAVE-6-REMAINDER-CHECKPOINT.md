@@ -1,23 +1,18 @@
-# Package 5 post-Wave-6 remainder — B32 production PASS; B33 STOP
+# Package 5 post-Wave-6 remainder — B33 source contract/schema decision pending
 
-Current canonical continuation:
-[post-B32 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B32-REMAINDER-CHECKPOINT.md)
-→ [B32 production / B33 Final Gate report](CYCLE-06-BLOCKING-PACKAGE-5-B32-DEPLOYED-FINAL-GATE-STOP-REPORT.md).
+Current continuation: [B33 foundation assessment and minimal proposal](CYCLE-06-BLOCKING-PACKAGE-5-B33-CONFIRMATION-IDENTITY-PROPOSAL.md)
+→ [current remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B32-REMAINDER-CHECKPOINT.md).
+Accepted runtime/Final Gate evidence remains [B32 production / B33 STOP](CYCLE-06-BLOCKING-PACKAGE-5-B32-DEPLOYED-FINAL-GATE-STOP-REPORT.md), checkpoint `a8577c9d`.
 
-Runtime `2b89db4d`, release `20260906-p5-b32-2b89db4d` active.
-B29/B30/B31/B32 production PASS. B32 common verified Client principal enforced;
-Maya User optional; no fake actor; exact Client→target authority. Mandatory and
-deployment regression 374 suites / 3065 tests PASS; 578/578 artifacts match;
-pending migrations 0; drift NONE. No new schema/models/fields/action classes.
+B29/B30/B31/B32 production PASS. B31 immutable intent and B32 verified Client
+principal preserved. B33 has no existing durable confirmation event that precedes
+model interpretation. Stage 1 STOP: proposed typed source-event contract plus
+1 new receipt model / 8 persisted fields / 0 action classes; migration required,
+backfill NO. Proposal only; no runtime/schema/deployment change.
 
-Fresh all-13-family Final Gate: FAIL — B33 / A18 upstream chat booking identity.
-Changed model booking parameters change the key under the same authenticated
-statement/context, permitting another execution/provider operation, including
-while the first is UNKNOWN. No B33 implementation/deployment.
+PACKAGE 4 COMPLETE: YES. PACKAGE 5 WAVES: 6/6. Prior family inventory: 13/13.
+PACKAGE 5 COMPLETE: NO. ACTIVE BLOCKER: B33. CHAPTER 6 COMPLETE: NO.
+Wave 7 and Chapter 7 not started. Proposal/evidence/remainder commit/push, then STOP.
 
-PACKAGE 4 COMPLETE: YES. PACKAGE 5 WAVES: 6/6. FAMILY INVENTORY: 13/13.
-PACKAGE 5 COMPLETE: NO. CHAPTER 6 COMPLETE: NO. Wave 7 and Chapter 7 not started.
-Report/evidence/remainder commit/push, then STOP. Chapter 6 acceptance is separate.
-
-Production proof mutations 0. Main dirty checkout's 24 entries preserved and
-all 17 pre-existing DBs untouched. Owned processes/watchers/browsers/databases 0.
+Main 24 dirty entries preserved; all 17 old DBs untouched. Production access and
+mutations this assessment: 0. Owned processes/watchers/browsers/databases: 0.
