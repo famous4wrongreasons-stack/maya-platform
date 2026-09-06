@@ -1,17 +1,23 @@
-# Package 5 post-Wave-6 remainder — B28 deployed; STOP at B29
+# Package 5 post-Wave-6 remainder — B31 deployed; STOP at B32
 
-Accepted checkpoint **866181f7** / B27. B28 runtime commits **80b6d81b**, **c738bc1b**; production `/opt/maya-saas/releases/20260906-p5-b28-c738bc1b`. **B28 production remediation PASS. Package5 Final Adversarial Verification FAIL; Package5 complete NO.**
+Current canonical continuation:
+[post-B31 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B31-REMAINDER-CHECKPOINT.md)
+→ [B31 production completion / B32 Final Gate STOP](CYCLE-06-BLOCKING-PACKAGE-5-B31-DEPLOYED-FINAL-GATE-STOP-REPORT.md).
 
-1. Waves1–6 remain accepted6/6. All13 family foundations inventoried with unchanged source/deployed hashes. B27 and earlier baselines remain closed. No P4-11, Wave7 or Chapter7.
-2. B28 profile endpoint, customer-portal profile section and User profile-linked metadata share verified account/channel → active ClientChannelLink → exact tenant-qualified Client → exact CustomerProfile. READ ONLY transactions prevent materialization; no phone/User fallback. Guest Client works through verified channel. Existing staff authority and B7 encrypted habits boundaries remain separate and enforced. No schema/model/action added.
-3. PostgreSQL27 cases PASS; targeted5 suites/52 tests PASS. Initial formatting gate fixed narrowly, then full deployment gates PASS:362 suites/2952 tests, validate/lint/typechecks/build. Production health/readiness PASS, service errors0, pending0/driftNONE, spare process closed. No production private/PII/business/provider proof call.
-4. Final Gate restarted from scratch:90 Python modules/70 production,100 Python routes,556 source/deployed backend modules,224 TS route sites,14 scripts,mutation/identity/projection indices,fresh active PWA/proxy/background inventory,all13 families. Package4 guards PASS. Inventory coverage does not certify all reachable owners.
-5. **New B29 / A18: POST /api/appointments/:id/cancel.** The controller passes User id; service/repository authorize using Appointment.clientId (optional User association), without active ClientChannelLink or comparison to Appointment.mayaClientId (canonical Client). The internal branch writes appointment status directly without ActionExecution.
-6. Actual compiled controller/service/repository/User/audit services + synthetic PostgreSQL prove cancellation succeeds with missing link, revoked link and verified Client A while the target belongs to Client B. Accepted B26 read correctly rejects/hides that target. All3 cases change status to canceled with zero new ActionExecution; Client/profile/link/consent unchanged. No provider calls. Normal authenticated membership/booking-feature prerequisites remain; no anonymous access or real affected-population claim.
-7. **STOP at B29.** No B29 runtime/schema remediation. Adjacent create/reschedule paths require authority reconstruction; they were not executed/certified. Canonical provider executors and accepted B26/B27/B28 readers unchanged. Final aggregate regression NOT RUN after inventory blocker; B28 deployment regression PASS. Package5 and Chapter6 incomplete.
+B31 runtime `2aeaacff` is active in release `20260906-p5-b31-2aeaacff`.
+B29/B30/B31 production PASS. Package 4 complete. Six Package 5 waves and all
+13 family foundations remain accepted, but fresh aggregate verification stops
+at B32: the published verified channel create cannot satisfy canonical create
+actor policy and returns NOT_EXECUTED / actor_required.
 
-[Current B28 completion / B29 STOP report](CYCLE-06-BLOCKING-PACKAGE-5-B28-DEPLOYED-FINAL-GATE-STOP-REPORT.md) · [Deployed evidence](evidence/package5-b28-deployed-final-recheck.json) · [Fresh inventory](evidence/package5-b28-fresh-production-inventory.json) · [B29 proof](evidence/package5-b29-appointment-command-authority.proof.json).
+PACKAGE 5 COMPLETE: NO. CHAPTER 6 COMPLETE: NO. Wave 7 and Chapter 7 were not
+started. No B32 implementation. A separate owner instruction is required;
+Chapter 6 acceptance remains a later gate after Package 5 completion.
 
-Next: B29 owner instruction/contract reconstruction for canonical Client authority in appointment commands, then remediation and a fresh full all13-family Final Gate. Preserve Packages1–4/common foundation,Waves1–6,D1-A…D7-A,P02/P03,Client-owned profile/consent,immutable evidence,versioned retention,no tenant hard delete,A30 AC6 owner. Chapter6 acceptance is separate after Package5 PASS.
+The former B28/B29 checkpoint remains in the historical
+[B28 report](CYCLE-06-BLOCKING-PACKAGE-5-B28-DEPLOYED-FINAL-GATE-STOP-REPORT.md)
+and [B29 handoff](CYCLE-06-PACKAGE-5-B29-HANDOFF-CHECKPOINT.md). Do not treat that
+historical status as the current active blocker.
 
-All17 old databases untouched. Owned DB dropped, PostgreSQL stopped/data removed, port55498 closed. Owned processes/watchers/Chrome/tempDB0. Real production mutations for proof0.
+Production proof mutations 0. Main dirty checkout untouched; all 17 old test
+databases untouched. Owned temporary processes/watchers/browser processes/DBs 0.
