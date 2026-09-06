@@ -1,5 +1,8 @@
 # Package 5 remainder — B33 foundation NO; Contract/Schema Proposal pending
 
+> Current continuation after approved B33 implementation: [B33 production PASS / B34 STOP](CYCLE-06-BLOCKING-PACKAGE-5-POST-B33-REMAINDER-CHECKPOINT.md).
+> The original checkpoint/proposal below is historical; its old pending/STOP status is superseded.
+
 Accepted runtime evidence checkpoint: `a8577c9d`. B32 runtime `2b89db4d` and
 production release `20260906-p5-b32-2b89db4d` remain the accepted baseline.
 B29/B30/B31/B32 production PASS; B31 immutable idempotency and B32 Client principal

@@ -1,0 +1,75 @@
+{
+  "blocker": "B34 / reduced A27",
+  "sourceHashes": {
+    "reputation.py": {
+      "_float": "6f6e930e3ce9876563da10e08d14cfdf7c07e82ae9273f3cba711c970849ef5e",
+      "import_reviews": "cdea9dbf3c7cde1f916452fc91378fa31fa5c6bb1b01b08dc5da25382f15cbf8"
+    },
+    "database.py": {
+      "_db": "2da5cd9dad382af72f4f46a58a82d6ed471c5cafb33bc863f58ed280ce6fa5df",
+      "_now": "e6688d71f9a6c4179268c6f7d16ce491d8b4b056cbc6e82427a4d56c76c1ad51",
+      "_external_reviews_ensure": "3534d0e980b307d7561f14cbd6018b1b38b4e486e00854251b2b84cc2366e911",
+      "upsert_external_review": "806241a1e516a703d7670f94f6976f991516e312348a07773ca6a4ed22e176f5"
+    },
+    "webhook_server.py": {
+      "_verify_telegram_login_widget": "2f34c3c02577429cc77d76409e39db9a01dfed506733736274e74bba4f9c9e3c",
+      "_panel_resolve_role": "c32613a9979d4b13cf16b1272c76f1678e46a6fae3ec640bb571ce709730d709",
+      "_panel_auth": "19c2d25865b2db6d4b4c0dbb7261ef7ca8d63634b606dfe1f2b89bc9f9fbc182",
+      "panel_external_reviews_import_handler": "44b17d43f75a6e4cdd6050cf5df54f8eaeb94b7e0b2a061a66314303011bcfd5"
+    }
+  },
+  "unauthenticated": 401,
+  "signedNonOwner": 403,
+  "signedOwnerSameSourceIdentity": [
+    {
+      "request": "first",
+      "http": 200,
+      "created": 1,
+      "rows": [
+        {
+          "id": 1,
+          "source": "yandex",
+          "external_id": "synthetic-review-1",
+          "rating": 5.0,
+          "review_text": "original synthetic review"
+        }
+      ]
+    },
+    {
+      "request": "same",
+      "http": 200,
+      "created": 0,
+      "rows": [
+        {
+          "id": 1,
+          "source": "yandex",
+          "external_id": "synthetic-review-1",
+          "rating": 5.0,
+          "review_text": "original synthetic review"
+        }
+      ]
+    },
+    {
+      "request": "changed",
+      "http": 200,
+      "created": 0,
+      "rows": [
+        {
+          "id": 1,
+          "source": "yandex",
+          "external_id": "synthetic-review-1",
+          "rating": 1.0,
+          "review_text": "changed synthetic review"
+        }
+      ]
+    }
+  ],
+  "tenantColumn": false,
+  "changedEvidenceUnderSameSourceIdentity": "overwrites original row, HTTP 200; no conflict",
+  "canonicalReviewFactCalls": 0,
+  "canonicalActionExecutionCalls": 0,
+  "providerWrites": 0,
+  "networkCalls": 0,
+  "productionBusinessMutations": 0,
+  "limits": "Actual handler, widget verifier, founder-role resolver, import normalizer and SQLite writer. Synthetic founder config, empty admin registry, anonymizer for non-PII fixture, response projection and Request envelope. No HTTP server, production DB, provider or canonical backend invoked."
+}

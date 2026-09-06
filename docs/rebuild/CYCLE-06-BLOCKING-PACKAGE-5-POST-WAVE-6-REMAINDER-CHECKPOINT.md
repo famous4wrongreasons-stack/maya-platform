@@ -1,18 +1,19 @@
-# Package 5 post-Wave-6 remainder — B33 source contract/schema decision pending
+# Package 5 post-Wave-6 remainder — B33 production PASS; STOP at B34
 
-Current continuation: [B33 foundation assessment and minimal proposal](CYCLE-06-BLOCKING-PACKAGE-5-B33-CONFIRMATION-IDENTITY-PROPOSAL.md)
-→ [current remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B32-REMAINDER-CHECKPOINT.md).
-Accepted runtime/Final Gate evidence remains [B32 production / B33 STOP](CYCLE-06-BLOCKING-PACKAGE-5-B32-DEPLOYED-FINAL-GATE-STOP-REPORT.md), checkpoint `a8577c9d`.
+Current continuation: [post-B33 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B33-REMAINDER-CHECKPOINT.md)
+→ [B33 production / B34 Final Gate STOP report](CYCLE-06-BLOCKING-PACKAGE-5-B33-DEPLOYED-FINAL-GATE-STOP-REPORT.md).
 
-B29/B30/B31/B32 production PASS. B31 immutable intent and B32 verified Client
-principal preserved. B33 has no existing durable confirmation event that precedes
-model interpretation. Stage 1 STOP: proposed typed source-event contract plus
-1 new receipt model / 8 persisted fields / 0 action classes; migration required,
-backfill NO. Proposal only; no runtime/schema/deployment change.
+Runtime `0636e559`, release `20260906-p5-b33-0636e559`. B29–B33 production PASS.
+B33 same confirmation keeps one receipt/key; B31 immutable intent and B32 verified
+Client principal are preserved. Approved migration: 1 model / 8 persisted fields /
+0 action classes; backfill 0; pending migrations 0; drift NONE.
 
-PACKAGE 4 COMPLETE: YES. PACKAGE 5 WAVES: 6/6. Prior family inventory: 13/13.
-PACKAGE 5 COMPLETE: NO. ACTIVE BLOCKER: B33. CHAPTER 6 COMPLETE: NO.
-Wave 7 and Chapter 7 not started. Proposal/evidence/remainder commit/push, then STOP.
+Fresh inventory 13/13; six PostgreSQL wave proofs and 110 suites / 753 tests PASS.
+Final Gate STOP: **B34 / reduced A27 legacy review fact owner**. Published Python
+import overwrites source-identical review evidence in separate SQLite storage,
+outside the existing tenant-qualified immutable AC4 owner. B34 not remediated.
 
-Main 24 dirty entries preserved; all 17 old DBs untouched. Production access and
-mutations this assessment: 0. Owned processes/watchers/browsers/databases: 0.
+PACKAGE 4 COMPLETE: YES. PACKAGE 5 WAVES: 6/6. PACKAGE 5 COMPLETE: NO.
+ACTIVE BLOCKER: B34. CHAPTER 6 COMPLETE: NO. No Wave 7 or Chapter 7.
+Main 24 dirty entries/hashes and all 17 old DBs preserved. Owned hygiene 0.
+Report/evidence/remainder → commit/push → STOP.

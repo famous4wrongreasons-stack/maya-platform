@@ -1,5 +1,8 @@
 # B33 — confirmation identity foundation assessment and minimal proposal
 
+> Current continuation after approved B33 implementation: [B33 production PASS / B34 STOP](CYCLE-06-BLOCKING-PACKAGE-5-POST-B33-REMAINDER-CHECKPOINT.md).
+> The original checkpoint/proposal below is historical; its old pending/STOP status is superseded.
+
 Stage 1 only, 2026-09-06. Accepted checkpoint `a8577c9d`.
 **Existing durable booking-confirmation identity: NO. Runtime remains stopped.**
 The schema and transport contract below are proposed, not approved or implemented.

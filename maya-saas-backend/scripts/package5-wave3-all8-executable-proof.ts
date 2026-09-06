@@ -15,6 +15,7 @@ import {
   PACKAGE5_WAVE3_MAX_CRM_TEAM_CHILDREN,
   Package5Wave3ExecutableService,
   Package5Wave3ShadowService,
+  type Package5Wave3Actor,
   type Package5Wave3Command,
   type Package5Wave3ProviderGateway,
   type StaffDaySlot,
@@ -27,6 +28,7 @@ import {
 } from '../src/entitlements/entitlements.service';
 import type { PrismaService } from '../src/prisma/prisma.service';
 import type { TenantContextService } from '../src/tenancy/tenant-context.service';
+import type { ConsentChannelBinding } from '../src/crm/client-consent-authority';
 
 const NOW = new Date('2026-09-03T22:00:00.000Z');
 const HASH_A = 'a'.repeat(64);
@@ -173,6 +175,7 @@ interface Scope {
   clientId: string;
   staffId: string;
   externalStaffId: string;
+  consentChannel: ConsentChannelBinding;
 }
 const scopes = new Map<string, Scope>();
 
@@ -233,6 +236,39 @@ async function createScope(
   await prisma.client.create({
     data: { id: clientId, tenantId, userId: clientUserId },
   });
+  // Synthetic seed evidence; production creates this through the verified link
+  // protocol. Consent no longer accepts the historical bare User fixture.
+  const subjectHash = wave3Hash({ tenantId, clientUserId });
+  const verificationIdentityHash = wave3Hash({ tenantId, clientId, label });
+  const verificationEvidenceJson = {
+    contract: 'a18.client-channel-verification.v1',
+    verifier: 'synthetic-wave3-proof',
+    channelControlProofHash: subjectHash,
+    clientAuthorityProofHash: verificationIdentityHash,
+    verificationIdentityHash,
+    tenantId,
+    provider: 'maya_user',
+    providerSubjectHash: subjectHash,
+    clientId,
+  };
+  const link = await prisma.clientChannelLink.create({
+    data: {
+      tenantId,
+      clientId,
+      provider: 'maya_user',
+      providerSubjectHash: subjectHash,
+      verificationMethod: 'proven_user_client_link',
+      verificationIdentityHash,
+      verificationEvidenceJson,
+      verificationEvidenceHash: wave3Hash(verificationEvidenceJson),
+    },
+  });
+  const consentChannel: ConsentChannelBinding = {
+    linkId: link.id,
+    provider: 'maya_user',
+    providerSubjectHash: subjectHash,
+    verificationEvidenceHash: link.verificationEvidenceHash,
+  };
   await prisma.staff.create({
     data: {
       id: staffId,
@@ -253,6 +289,7 @@ async function createScope(
     clientId,
     staffId,
     externalStaffId,
+    consentChannel,
   };
   scopes.set(tenantId, scope);
   return scope;
@@ -319,6 +356,20 @@ function commands(scope: Scope): Package5Wave3Command[] {
       notesFingerprint: wave3Hash('notes-marker-wave3'),
     },
   ];
+}
+
+function actorFor(
+  scope: Scope,
+  command: Package5Wave3Command,
+): Package5Wave3Actor {
+  if (command.operation === 'record_client_consent')
+    return { userId: null, consentChannel: scope.consentChannel };
+  return {
+    userId:
+      command.operation === 'update_client_profile'
+        ? scope.clientUserId
+        : scope.ownerId,
+  };
 }
 
 async function main() {
@@ -390,14 +441,20 @@ async function main() {
       (row) => row.operation !== 'activate_crm_integration',
     );
     const shadows = [];
+    const consentCommand = commands(primary).find(
+      (row) => row.operation === 'record_client_consent',
+    )!;
+    await rejects(
+      () =>
+        planner.plan(
+          primary.tenantId,
+          { userId: primary.clientUserId },
+          consentCommand,
+        ),
+      'bare User is not verified Client consent authority',
+    );
     for (const command of shadowCommands) {
-      const actor = {
-        userId:
-          command.operation === 'update_client_profile' ||
-          command.operation === 'record_client_consent'
-            ? primary.clientUserId
-            : primary.ownerId,
-      };
+      const actor = actorFor(primary, command);
       shadows.push(await planner.plan(primary.tenantId, actor, command));
     }
     shadows.push(
@@ -447,13 +504,7 @@ async function main() {
     });
     const results = [];
     for (const command of commands(primary)) {
-      const actor = {
-        userId:
-          command.operation === 'update_client_profile' ||
-          command.operation === 'record_client_consent'
-            ? primary.clientUserId
-            : primary.ownerId,
-      };
+      const actor = actorFor(primary, command);
       const prepared = await planner.build(
         primary.tenantId,
         actor,

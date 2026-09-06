@@ -1,5 +1,8 @@
 # Cycle 06 — Package 5 B29 handoff checkpoint
 
+> Current continuation after approved B33 implementation: [B33 production PASS / B34 STOP](CYCLE-06-BLOCKING-PACKAGE-5-POST-B33-REMAINDER-CHECKPOINT.md).
+> The original checkpoint/proposal below is historical; its old pending/STOP status is superseded.
+
 Status: **HANDOFF READY — STOP AT B29 / A18**
 
 Handoff source checkpoint: `917d2ed4ce02162ca6a753e4251fc3067d3024d1`.
