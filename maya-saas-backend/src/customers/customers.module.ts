@@ -1,3 +1,4 @@
+import { ClientProfileReadModule } from '../crm/client-profile-read.module';
 import { Module } from '@nestjs/common';
 
 import { AuditLogModule } from '../audit-log/audit-log.module';
@@ -10,6 +11,7 @@ import { CustomersService } from './customers.service';
 
 @Module({
   imports: [
+    ClientProfileReadModule,
     UsersModule,
     EncryptionModule,
     AuditLogModule,

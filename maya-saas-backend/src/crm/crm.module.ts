@@ -1,3 +1,4 @@
+import { ClientProfileReadModule } from '../crm/client-profile-read.module';
 import { ClientLoyaltyReadService } from './client-loyalty-read.service';
 import { ClientAppointmentReadService } from './client-appointment-read.service';
 import { ClientHabitsService } from './client-habits.service';
@@ -59,6 +60,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 
 @Module({
   imports: [
+    ClientProfileReadModule,
     ActionEngineModule,
     AuditLogModule,
     CommunicationDeliveryModule,

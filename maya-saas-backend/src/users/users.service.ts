@@ -1,3 +1,4 @@
+import { ClientProfileReadService } from '../crm/client-profile-read.service';
 import {
   BadRequestException,
   ConflictException,
@@ -99,6 +100,7 @@ export class UsersService {
     private readonly encryptionService: EncryptionService,
     private readonly tenantContext: TenantContextService,
     private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
+    private readonly profiles?: ClientProfileReadService,
   ) {}
 
   async findTenantUserByEmail(tenantId: string, email: string) {
@@ -1157,13 +1159,12 @@ export class UsersService {
           },
           select: { title: true, externalStaffId: true, staffId: true },
         }),
-        this.prisma.customerProfile.findFirst({
-          where: {
-            tenantId,
-            userId: serialized.id,
-          },
-          select: { id: true },
-        }),
+        this.profiles
+          ? this.profiles
+              .forAccount(tenantId, serialized.id)
+              .then((result) => result.profile.profile_id)
+              .catch(() => null)
+          : Promise.resolve(null),
         this.prisma.authIdentity.findFirst({
           where: {
             tenantId,

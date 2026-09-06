@@ -1,3 +1,4 @@
+import { ClientProfileReadService } from '../crm/client-profile-read.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -23,15 +24,17 @@ export class CustomersService {
     private readonly auditLogService: AuditLogService,
     private readonly loyaltyService: LoyaltyService,
     private readonly canonicalWave3: Package5Wave3CanonicalCutoverService,
+    private readonly profiles?: ClientProfileReadService,
   ) {}
 
+  private profileReader() {
+    if (!this.profiles)
+      throw new Error('Verified Client profile reader required');
+    return this.profiles;
+  }
+
   async getOwnProfile(tenantId: string, userId: string) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.usersService.getTenantUserOrThrow(userId, scopedTenantId);
-    const profile = await this.prisma.customerProfile.findUnique({
-      where: { userId_tenantId: { userId, tenantId: scopedTenantId } },
-    });
-    return this.serializeOwnProfile(profile);
+    return (await this.profileReader().forAccount(tenantId, userId)).profile;
   }
 
   async updateOwnProfile(
@@ -51,19 +54,18 @@ export class CustomersService {
         'At least one customer profile field must be provided',
       );
     }
-    const client = await this.exactClientForUser(scopedTenantId, userId);
+    const resolved = await this.profileReader().forAccount(
+      scopedTenantId,
+      userId,
+    );
+    const client = { id: resolved.clientId };
     const source = this.canonicalWave3.intentRef(idempotencyKey);
     const now = new Date();
-    const currentProfile = await this.prisma.customerProfile.findFirst({
-      where: {
-        tenantId: scopedTenantId,
-        OR: [{ clientId: client.id }, { userId }],
-      },
-    });
+    const currentProfile = resolved.profile;
     if (
       dto.preferredLocale !== undefined &&
       (!currentProfile ||
-        currentProfile.preferredLocale !== dto.preferredLocale)
+        currentProfile.preferred_locale !== dto.preferredLocale)
     ) {
       await this.canonicalWave3.updateClientLocale(
         scopedTenantId,
@@ -95,19 +97,16 @@ export class CustomersService {
         source,
       );
     }
-    const profile = await this.prisma.customerProfile.findFirstOrThrow({
-      where: {
-        tenantId: scopedTenantId,
-        OR: [{ clientId: client.id }, { userId }],
-      },
-    });
+    const profile = await this.getOwnProfile(scopedTenantId, userId);
+    if (!profile.profile_id)
+      throw new BadRequestException('Client profile is unavailable');
 
     await this.auditLogService.log({
       tenantId: scopedTenantId,
       userId,
       action: 'customer.profile_updated',
       entityType: 'customer_profile',
-      entityId: profile.id,
+      entityId: profile.profile_id,
       metadata: {
         preferred_locale_changed: dto.preferredLocale !== undefined,
         privacy_consent: dto.privacyConsent ?? 'unchanged',
@@ -115,7 +114,7 @@ export class CustomersService {
       },
     });
 
-    return this.serializeOwnProfile(profile);
+    return profile;
   }
 
   async listCustomers(tenantId: string, limit = 50) {
@@ -139,10 +138,6 @@ export class CustomersService {
           },
           include: { tenant: true, branch: true },
         },
-        customerProfiles: {
-          where: { tenantId: scopedTenantId },
-          take: 1,
-        },
         _count: {
           select: {
             appointments: { where: { tenantId: scopedTenantId } },
@@ -155,7 +150,10 @@ export class CustomersService {
 
     return Promise.all(
       users.map(async (user) => {
-        const profile = user.customerProfiles[0] ?? null;
+        const profile = await this.profileReader()
+          .forStaffAccount(scopedTenantId, user.id)
+          .then((result) => result.profile)
+          .catch(() => null);
         const loyalty = await this.loyaltyService
           .getStateForUser(scopedTenantId, user.id)
           .catch(() => null);
@@ -170,7 +168,7 @@ export class CustomersService {
           loyalty_stale: loyalty?.stale ?? null,
           loyalty_sync_status: loyalty?.sync_status ?? null,
           loyalty_verification_required: loyalty?.verification_required ?? null,
-          profile: this.serializeAdminProfile(profile),
+          profile,
         };
       }),
     );
@@ -204,9 +202,9 @@ export class CustomersService {
       throw new BadRequestException('User is not a customer');
     }
     const [profile, loyalty, appointmentsCount] = await Promise.all([
-      this.prisma.customerProfile.findUnique({
-        where: { userId_tenantId: { userId, tenantId: scopedTenantId } },
-      }),
+      this.profileReader()
+        .forStaffAccount(scopedTenantId, userId)
+        .then((result) => result.profile),
       // 🔴 Через каноническую границу, а не напрямую из таблицы: до P5 здесь
       // кэш выдавался за текущее значение — без владельца, свежести и
       // требования подтверждения.
@@ -226,7 +224,7 @@ export class CustomersService {
       loyalty_stale: loyalty?.stale ?? null,
       loyalty_verification_required: loyalty?.verification_required ?? null,
       loyalty_warnings: loyalty?.warnings ?? [],
-      profile: this.serializeAdminProfile(profile),
+      profile,
     };
   }
 
@@ -246,7 +244,11 @@ export class CustomersService {
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.getCustomer(scopedTenantId, userId);
-    const client = await this.exactClientForUser(scopedTenantId, userId);
+    const resolved = await this.profileReader().forStaffAccount(
+      scopedTenantId,
+      userId,
+    );
+    const client = { id: resolved.clientId };
     const notes = dto.notes?.trim() || null;
     await this.canonicalWave3.updateClientNotes(
       scopedTenantId,
@@ -255,69 +257,21 @@ export class CustomersService {
       notes,
       idempotencyKey,
     );
-    const profile = await this.prisma.customerProfile.findFirstOrThrow({
-      where: {
-        tenantId: scopedTenantId,
-        OR: [{ clientId: client.id }, { userId }],
-      },
-    });
+    const profile = (
+      await this.profileReader().forStaffAccount(scopedTenantId, userId)
+    ).profile;
+    if (!profile.profile_id)
+      throw new BadRequestException('Client profile is unavailable');
 
     await this.auditLogService.log({
       tenantId: scopedTenantId,
       userId: actorUserId,
       action: 'customer.notes_updated',
       entityType: 'customer_profile',
-      entityId: profile.id,
+      entityId: profile.profile_id,
       metadata: { target_user_id: userId, notes_present: Boolean(notes) },
     });
 
     return this.getCustomer(scopedTenantId, userId);
-  }
-
-  private async exactClientForUser(tenantId: string, userId: string) {
-    const clients = await this.prisma.client.findMany({
-      where: { tenantId, userId, mergedIntoClientId: null },
-      take: 2,
-      select: { id: true },
-    });
-    if (clients.length !== 1)
-      throw new BadRequestException('Exact canonical Client is unresolved');
-    return clients[0];
-  }
-
-  private serializeOwnProfile(
-    profile: {
-      id: string;
-      preferredLocale: string | null;
-      privacyConsentAt: Date | null;
-      marketingConsentAt: Date | null;
-      updatedAt: Date;
-    } | null,
-  ) {
-    return {
-      profile_id: profile?.id ?? null,
-      preferred_locale: profile?.preferredLocale ?? null,
-      privacy_consent_at: profile?.privacyConsentAt ?? null,
-      marketing_consent_at: profile?.marketingConsentAt ?? null,
-      updated_at: profile?.updatedAt ?? null,
-    };
-  }
-
-  private serializeAdminProfile(
-    profile: {
-      id: string;
-      preferredLocale: string | null;
-      privacyConsentAt: Date | null;
-      marketingConsentAt: Date | null;
-      encryptedNotes: string | null;
-      updatedAt: Date;
-    } | null,
-  ) {
-    return {
-      ...this.serializeOwnProfile(profile),
-      notes: profile?.encryptedNotes
-        ? this.encryptionService.decrypt(profile.encryptedNotes)
-        : null,
-    };
   }
 }

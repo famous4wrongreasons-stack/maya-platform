@@ -1,3 +1,4 @@
+import { ClientProfileReadService } from './client-profile-read.service';
 import { ClientLoyaltyReadService } from './client-loyalty-read.service';
 import { ClientAppointmentReadService } from './client-appointment-read.service';
 import {
@@ -53,7 +54,17 @@ export class ClientChannelController {
     private readonly runtime: ClientChannelRuntimeService,
     private readonly appointments: ClientAppointmentReadService,
     private readonly loyalty?: ClientLoyaltyReadService,
+    private readonly profiles?: ClientProfileReadService,
   ) {}
+
+  @Get('profile')
+  async profileProjection(
+    @Headers('authorization') authorization: string | undefined,
+  ) {
+    if (!this.profiles)
+      throw new Error('Verified Client profile reader required');
+    return (await this.profiles.forChannel(mayaProof(authorization))).profile;
+  }
 
   @Get('loyalty')
   loyaltyProjection(
@@ -116,6 +127,7 @@ export class LegacyClientChannelController {
     private readonly runtime: ClientChannelRuntimeService,
     private readonly appointments: ClientAppointmentReadService,
     private readonly loyalty?: ClientLoyaltyReadService,
+    private readonly profiles?: ClientProfileReadService,
   ) {}
 
   @Public()
@@ -202,6 +214,14 @@ export class LegacyClientChannelController {
       if (operation === 'booking-prefill') {
         empty(input.payload);
         return this.runtime.bookingPrefill(input.channelProof);
+      }
+      if (operation === 'profile-projection') {
+        empty(input.payload);
+        if (!this.profiles)
+          throw new Error('Verified Client profile reader required');
+        return this.profiles
+          .forChannel(input.channelProof)
+          .then((result) => result.profile);
       }
       if (operation === 'loyalty-projection') {
         empty(input.payload);

@@ -1,3 +1,4 @@
+import { ClientProfileReadService } from '../crm/client-profile-read.service';
 import {
   ConflictException,
   ForbiddenException,
@@ -177,15 +178,26 @@ describe('UsersService', () => {
       decrypt: decryptMock,
     };
     const tenantContext = new TenantContextService();
+    const verifiedProfileReadMock = jest
+      .fn()
+      .mockResolvedValue({
+        clientId: 'client-1',
+        profile: { profile_id: null },
+      });
 
     return {
       service: new UsersService(
         prisma as PrismaService,
         encryptionService as EncryptionService,
         tenantContext,
+        undefined as never,
+        {
+          forAccount: verifiedProfileReadMock,
+        } as unknown as ClientProfileReadService,
       ),
       tenantContext,
       mocks: {
+        verifiedProfileReadMock,
         decryptMock,
         encryptMock,
         authIdentityFindFirstMock,
@@ -293,9 +305,12 @@ describe('UsersService', () => {
   it('grants a linked client one client mode without a chooser', async () => {
     const {
       service,
-      mocks: { customerProfileFindFirstMock },
+      mocks: { verifiedProfileReadMock },
     } = createService();
-    customerProfileFindFirstMock.mockResolvedValue({ id: 'customer-1' });
+    verifiedProfileReadMock.mockResolvedValue({
+      clientId: 'client-1',
+      profile: { profile_id: 'customer-1' },
+    });
 
     const result = await service.serializeCurrentUser(tenantUser());
 
@@ -363,7 +378,11 @@ describe('UsersService', () => {
   it('keeps tenant and user fences on linked app profiles', async () => {
     const {
       service,
-      mocks: { crmStaffAccessFindFirstMock, customerProfileFindFirstMock },
+      mocks: {
+        crmStaffAccessFindFirstMock,
+        customerProfileFindFirstMock,
+        verifiedProfileReadMock,
+      },
     } = createService();
     const owner = tenantUser({ role: UserRole.TENANT_OWNER });
     owner.memberships![0].role = UserRole.TENANT_OWNER;
@@ -379,13 +398,8 @@ describe('UsersService', () => {
         },
       }),
     );
-    expect(customerProfileFindFirstMock).toHaveBeenCalledWith({
-      where: {
-        tenantId: 'tenant-1',
-        userId: 'user-1',
-      },
-      select: { id: true },
-    });
+    expect(customerProfileFindFirstMock).not.toHaveBeenCalled();
+    expect(verifiedProfileReadMock).toHaveBeenCalledWith('tenant-1', 'user-1');
   });
 
   it('returns a platform-only mode outside tenant context', async () => {

@@ -1,3 +1,4 @@
+import { ClientProfileReadService } from '../crm/client-profile-read.service';
 import { ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -112,6 +113,15 @@ describe('CustomersService', () => {
         encryptionService,
         auditLogService,
         loyaltyService as LoyaltyService,
+        undefined as never,
+        {
+          forStaffAccount: jest
+            .fn()
+            .mockResolvedValue({
+              clientId: 'canonical-client-a',
+              profile: { profile_id: null, notes: null },
+            }),
+        } as unknown as ClientProfileReadService,
       ),
     };
   };
