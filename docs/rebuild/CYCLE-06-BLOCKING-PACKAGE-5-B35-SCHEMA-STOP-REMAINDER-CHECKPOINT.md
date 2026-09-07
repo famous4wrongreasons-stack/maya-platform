@@ -1,4 +1,8 @@
-# Package 5 remainder — B35 exact schema mapping complete; approval STOP
+# Historical B35 schema decision STOP — superseded by owner approval
+
+The owner approved `c3641411` and authorized schema/runtime implementation.
+Current continuation: [B35 local schema foundation](CYCLE-06-BLOCKING-PACKAGE-5-B35-LOCAL-SCHEMA-FOUNDATION-REPORT.md).
+The Stage 2 record below describes the earlier approval boundary, not the current authorization.
 
 Business direction A approved after accepted checkpoint `1e524c2a`.
 Current source of truth: [B35 exact schema mapping V1](package5-b35-exact-schema-mapping-v1-proposal.md).

@@ -1,0 +1,87 @@
+{
+  "approvedCheckpoint": "c3641411",
+  "newModels": 0,
+  "newColumns": {
+    "MarketingCampaign": [
+      "bulkIntentContract",
+      "bulkIntentHash",
+      "parentRecipientId",
+      "bulkSlotKey"
+    ],
+    "MarketingAudience": [
+      "snapshotContract"
+    ],
+    "MarketingAudienceRecipient": [
+      "clientId"
+    ],
+    "MarketingCampaignRecipient": [
+      "clientId",
+      "routePlanJson",
+      "contentEncrypted",
+      "aggregateState"
+    ],
+    "MarketingDeliveryAttempt": [
+      "dispatchEligibilityJson"
+    ],
+    "MarketingPolicy": [
+      "canonicalHistoryStartedAt"
+    ]
+  },
+  "newColumnCount": 12,
+  "alteredExistingColumns": [
+    "MarketingCampaign.channel nullable",
+    "MarketingCampaign.provider nullable"
+  ],
+  "newUniqueIndexes": 3,
+  "newNonUniqueIndexes": 2,
+  "newForeignKeys": 3,
+  "newActionClasses": 0,
+  "historicalBackfill": 0,
+  "migration": "20260907120000_b35_canonical_bulk_foundation",
+  "migrationSha256": "973bf4797fcc50d13365cca1c088c342a25bbee2d37e0c20428529348a06206c",
+  "cleanReplay": "PASS",
+  "schemaDiff": "NONE",
+  "prismaValidate": "PASS",
+  "schemaGates": [
+    {
+      "gate": "lint",
+      "exit": 0,
+      "seconds": 28.7
+    },
+    {
+      "gate": "typecheck",
+      "exit": 0,
+      "seconds": 4.8
+    },
+    {
+      "gate": "typecheck-scripts",
+      "exit": 0,
+      "seconds": 10.7
+    }
+  ],
+  "compatibilityRegression": {
+    "suites": 5,
+    "tests": 38,
+    "status": "PASS"
+  },
+  "proofScope": "PostgreSQL ownership and storage transitions, existing kernels with synthetic adapters; not runtime remediation certification",
+  "runtimePolicyProofs": "REQUIRED AFTER SCHEMA APPLY: fresh consent/preferences/authority/quiet/frequency, real marketing ingress and fixed-route executors, five-device fanout and admission reconciliation",
+  "sourceHashes": {
+    "maya-saas-backend/prisma/migrations/20260907120000_b35_canonical_bulk_foundation/migration.sql": "973bf4797fcc50d13365cca1c088c342a25bbee2d37e0c20428529348a06206c",
+    "maya-saas-backend/prisma/schema.prisma": "9b5af970bf6d91be9230fcd228b47d9e38fe407b94fd12aeaa64fcff7da873b6",
+    "maya-saas-backend/scripts/package5-b35-schema-proof.ts": "515616bbe5f2380450693f953ce3fed21d12ca861ac223917d0c0fc30bbd9a34",
+    "maya-saas-backend/scripts/package5-b35-transport-schema-proof.ts": "a7c2cef7668f8a057170d84b30b49b474f1b24c3e49c7fd0426223bf7d5bb800"
+  },
+  "productionMessages": 0,
+  "productionMigration": "NOT STARTED",
+  "oldDatabasesTouched": 0,
+  "proofDatabaseMigrationChecksumMatches": true,
+  "logHashes": {
+    "final-clean-replay.log": "29e4b9b2ec0b28b8775e2f2b6c1f1f5003b7b625b22fc483a4d33aa5452b58f9",
+    "final-schema-diff.log": "83a3899d598a301cb810d4a0f8fa71a7f9514cf5009373f46a2e2e115405950c",
+    "lint.log": "80f5295fdc4b3e55d92f2aa33e3773ba6f2b9305c454e513f870e95ae3fa198d",
+    "typecheck.log": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+    "typecheck-scripts.log": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+    "schema-compatibility-tests.log": "b6d705e8afec1feaaff925d30487138db5b753b3a5d2cc6ed99de49902c2c162"
+  }
+}

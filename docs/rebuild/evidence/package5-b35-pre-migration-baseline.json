@@ -1,0 +1,12 @@
+{
+  "gate": "PASS",
+  "release": "/opt/maya-saas/releases/20260906-p5-b34-6f6745f2",
+  "preApplyDrift": "NONE",
+  "incompatibleCampaignRows": 0,
+  "b35ColumnsPresent": 0,
+  "baselineSchemaHash": "ff311c9f19c1bd27c931604a27e695e6120caad1f6045c662c98fd46d58c0aaa",
+  "health": 200,
+  "readiness": 200,
+  "productionMessages": 0,
+  "businessMutations": 0
+}

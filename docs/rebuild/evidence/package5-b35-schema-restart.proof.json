@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "checks": [
+    "PostgreSQL restart preserves accepted/UNKNOWN/failed outcomes",
+    "no repeat attempt for accepted/UNKNOWN/failed",
+    "original pending sibling continues after restart",
+    "same root and four Client children; no duplicate outcome"
+  ],
+  "productionMessages": 0
+}

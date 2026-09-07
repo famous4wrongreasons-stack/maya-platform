@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "phase": "schema ownership (transport proof follows)",
+  "checks": [
+    "unsealed audience cannot commit",
+    "cross-tenant Client FK rejects during audience assembly",
+    "duplicate canonical Client violates exact audience unique",
+    "canonical Client audience seals atomically without Maya User",
+    "sealed audience immutable",
+    "sealed member insertion forbidden",
+    "sealed member deletion forbidden",
+    "duplicate Client child unique independent of opaque transport identity",
+    "approval and exact child graph committed atomically",
+    "confirmed message conflict",
+    "confirmed audienceId conflict",
+    "confirmed bulkIntentHash conflict",
+    "confirmed expiresAt conflict",
+    "confirmed confirmedByUserId conflict",
+    "fixed route cannot change",
+    "logical recipient cannot create fake provider attempt",
+    "concurrent logical CAS claim one winner",
+    "live lease cannot be stolen with a fresh revision",
+    "stale revision cannot update",
+    "terminal logical outcome cannot reopen",
+    "epoch uses current database time, never caller history",
+    "epoch cannot clear",
+    "epoch cannot delete/recreate"
+  ],
+  "fixture": {
+    "tenantId": "cmtr3u3yf0000ajc9pmv5pkie",
+    "campaignId": "cmtr3u40g000aajc904xe4z1e",
+    "childId": "ae5f6ff6-4efa-4de8-8046-de9c82c18c80"
+  },
+  "productionMessages": 0
+}

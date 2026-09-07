@@ -1,6 +1,6 @@
-# Package 5 post-Wave-6 remainder — B34 production PASS; B35 schema STOP
+# Package 5 post-Wave-6 remainder — B34 production PASS; B35 implementation
 
-Current continuation: [B35 schema STOP remainder](CYCLE-06-BLOCKING-PACKAGE-5-B35-SCHEMA-STOP-REMAINDER-CHECKPOINT.md)
+Current continuation: [B35 local schema foundation checkpoint](CYCLE-06-BLOCKING-PACKAGE-5-B35-LOCAL-SCHEMA-FOUNDATION-REPORT.md)
 and [exact schema mapping](package5-b35-exact-schema-mapping-v1-proposal.md).
 Option A business direction is approved. All 25 requirements are mapped; proposed
 delta is 0 models, 12 new fields, 2 existing nullability changes, 3 uniques,
@@ -20,7 +20,7 @@ Fresh full gate inventoried 13/13 families and reran six PostgreSQL wave proofs
 plus 111 suites / 762 cross-boundary tests. It stopped at B35: published panel
 broadcast calls direct Telegram send outside canonical A14 bulk execution and
 durable Communication Delivery. Exact production hashes/local lost-response
-proof are committed. B35 is not implemented; final aggregate certification is
+proof are committed. B35 schema implementation is in progress; runtime remediation and final aggregate certification are
 not complete. No production business/provider proof mutations.
 
 PACKAGE 4 COMPLETE: YES. PACKAGE 5 WAVES: 6/6. PACKAGE 5 COMPLETE: NO.
