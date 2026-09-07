@@ -1,0 +1,192 @@
+{
+  "contract": "package5.wave-ra.r10.stage1-proof/1",
+  "acceptedBaseline": "4a253449",
+  "package": "R10",
+  "blockers": [
+    "B50"
+  ],
+  "scope": "Stage1 assessment + hermetic executable foundation/baseline proof only",
+  "assessment": {
+    "canonicalOwner": "AI invocation/approval receipt owner over existing ActionExecution",
+    "foundationSufficient": true,
+    "businessDecisionRequired": false,
+    "schemaRequired": false,
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "runtimeOnly": true,
+    "dependencies": [],
+    "dependenciesSatisfied": true,
+    "readyForImplementation": true,
+    "readyForProduction": false
+  },
+  "jest": {
+    "status": "PASS",
+    "suites": 6,
+    "passedSuites": 6,
+    "tests": 39,
+    "passedTests": 39,
+    "failedTests": 0,
+    "suitesDetail": [
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "tests": 8,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/canonical-action-ingress.architecture.spec.ts",
+        "tests": 7,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/action-engine.canonical-kernel.spec.ts",
+        "tests": 4,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/client-booking-idempotency.kernel.spec.ts",
+        "tests": 10,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/action-engine.ingress.spec.ts",
+        "tests": 6,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/action-engine.runtime-concurrency.spec.ts",
+        "tests": 4,
+        "status": "passed"
+      }
+    ],
+    "command": [
+      "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/ai-tools/ai-tool-runtime.service.spec.ts",
+      "src/action-engine/action-engine.runtime-concurrency.spec.ts",
+      "src/action-engine/action-engine.canonical-kernel.spec.ts",
+      "src/action-engine/client-booking-idempotency.kernel.spec.ts",
+      "src/action-engine/action-engine.ingress.spec.ts",
+      "src/action-engine/canonical-action-ingress.architecture.spec.ts",
+      "--json",
+      "--outputFile=../work/package5-wave-ra-r10/foundation-jest.json"
+    ],
+    "workingDirectory": "/tmp/maya-b29-contour/maya-saas-backend",
+    "exitCode": 0,
+    "rawSha256": "0b304466f8275216a3e938b813d4753a9de596db13993bfd527051db2ae4f0d7"
+  },
+  "probe": {
+    "package": "R10",
+    "blockers": [
+      "B50"
+    ],
+    "mode": "STAGE1_ASSESSMENT_ONLY",
+    "baseline": [
+      {
+        "case": "wrapper_timeout_then_late_effect_same_key",
+        "status": "DEFECT_REPRODUCED",
+        "wrapper": "failed",
+        "approval": "failed",
+        "replay": "ai_tool_previous_execution_failed",
+        "syntheticEffects": 1,
+        "handlerCalls": 1
+      },
+      {
+        "case": "lower_unknown_receipt_collapsed_by_wrapper",
+        "status": "DEFECT_REPRODUCED",
+        "canonical": "UNKNOWN",
+        "wrapper": "failed",
+        "approval": "failed",
+        "durableCompatibilityReceipt": false
+      },
+      {
+        "case": "post_success_audit_failure_overwrites_completion",
+        "status": "DEFECT_REPRODUCED",
+        "statusWrites": [
+          "completed",
+          "failed"
+        ],
+        "handlerCalls": 1
+      }
+    ],
+    "foundation": [
+      {
+        "case": "canonical_unknown_manual_required_same_receipt_no_dispatch",
+        "status": "FOUNDATION_PASS",
+        "dispatched": 0,
+        "reconciled": 0,
+        "ingressCalls": 2
+      },
+      {
+        "case": "canonical_unknown_reconcile_then_same_receipt_replay",
+        "status": "FOUNDATION_PASS",
+        "dispatched": 0,
+        "reconciled": 1,
+        "ingressCalls": 2
+      }
+    ],
+    "limitations": "Actual TypeScript services with in-memory persistence and synthetic handlers. No PostgreSQL lock/transaction, process-restart durability, real provider or remediation acceptance proof.",
+    "databaseConnections": 0,
+    "networkRequests": 0,
+    "productionMutations": 0,
+    "blockedIoAttempts": 0
+  },
+  "verification": {
+    "runtimeFilesUnchangedVsAcceptedBaseline": [
+      "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+      "maya-saas-backend/src/action-engine/canonical-action-ingress.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/action-engine.canonical-kernel.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.kernel.spec.ts",
+      "maya-saas-backend/src/action-engine/action-engine.ingress.spec.ts",
+      "maya-saas-backend/src/action-engine/action-engine.runtime-concurrency.spec.ts",
+      "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "maya-saas-backend/src/action-engine/action-engine.runtime.ts",
+      "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "maya-saas-backend/prisma/schema.prisma"
+    ],
+    "schemaUnchanged": true,
+    "newFailingRegisteredTests": 0,
+    "existingSuitesUseMockedOrInMemoryDependencies": true,
+    "prismaClientsInstantiated": 0,
+    "databaseConnections": 0,
+    "productionReads": 0,
+    "productionEffects": 0,
+    "oldDatabasesTouched": 0,
+    "mainWorktreeTouched": false,
+    "activeOwnedProcesses": 0,
+    "ioProbeBlocksSocketTlsFetchAndChildProcess": true
+  },
+  "sourceSha256": {
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts": "b459b36cb34eb64239195f10677162dee8ee8a6275a86a24e12b55a7afe30b9a",
+    "maya-saas-backend/src/action-engine/canonical-action-ingress.architecture.spec.ts": "ca70c313e2e8bd8a7781ba15c4421707357972fa522281167f3adf57189d405d",
+    "maya-saas-backend/src/action-engine/action-engine.canonical-kernel.spec.ts": "033e77db90f08d202d1c7861177ec21c8846f8a68fcd5b9d2a9fb961b6cd373c",
+    "maya-saas-backend/src/action-engine/client-booking-idempotency.kernel.spec.ts": "c8e9a7bf138c4225383a8a9abe74e0a3d6fd8174dafa3763132086a3db61acf4",
+    "maya-saas-backend/src/action-engine/action-engine.ingress.spec.ts": "6e46e64994a4de3c5c74ef531cbea721ff7ff909233264979c510187856ed88e",
+    "maya-saas-backend/src/action-engine/action-engine.runtime-concurrency.spec.ts": "62a96c27cb9b17aede86fb9b557780d7d3eba619b03c21cfe633e61a9d91ec59",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "0c780feee85bb5a179185aebf281a713338c4a4d4ad20662fb5ed9fcb66d27ef",
+    "maya-saas-backend/src/action-engine/action-engine.runtime.ts": "37e4175c0cc21ef4270e4a36763ca189cf36d097f744dd17a77de39ef95da6b8",
+    "maya-saas-backend/src/action-engine/action-engine.kernel.ts": "2697c0aaed44da58ec56f8d607c693010a9e9718c3b99b9b35db945a8115adbc",
+    "maya-saas-backend/prisma/schema.prisma": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8",
+    "docs/rebuild/evidence/package5-wave-ra-r10-local-probe.cjs": "5b6387b4a1e4cfd040a1b132651856eca411935bd8277b8139e55ba275dcad56"
+  },
+  "limits": [
+    "No runtime or schema implementation",
+    "No durable attachment or process-crash proof",
+    "No PostgreSQL concurrency/transaction proof",
+    "No real provider operation",
+    "No R10 remediation acceptance",
+    "No wave proof/cutover",
+    "Existing architectural ratchet passes; future R10 guard specified, not installed"
+  ],
+  "resultsLocation": {
+    "localRawJest": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra/r10/foundation-jest.json",
+    "localRawProbe": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra/r10/local-probe.json",
+    "repeatProbe": "node docs/rebuild/evidence/package5-wave-ra-r10-local-probe.cjs <owned-output-path>"
+  },
+  "package5Complete": false,
+  "chapter6Complete": false
+}
