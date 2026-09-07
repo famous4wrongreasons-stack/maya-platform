@@ -1,0 +1,65 @@
+{
+  "status": "STAGE1_GAPS_REPRODUCED",
+  "partial": {
+    "admittedInboxRecipients": 1,
+    "intendedRecipients": 2,
+    "retryResult": "skipped",
+    "pendingSecondRecipientResumed": false,
+    "pendingApnsResumed": false,
+    "actualOwnerMethod": true,
+    "actualInboxLoopAndHasSourceEvent": true
+  },
+  "rawRecipient": {
+    "canonicalAuthIdentities": 0,
+    "canonicalUsers": 0,
+    "callToCommunicationDeliveryWithRawTelegram": true,
+    "providerCalls": 0,
+    "limitation": "CD is a recording fixture; this proves missing owner-side authority, not a live provider acceptance."
+  },
+  "identities": {
+    "sameLeafKeySameInput": "SAME_EXECUTION",
+    "sameLeafKeyChangedInput": "ACTION_IDEMPOTENCY_CONFLICT",
+    "changedRouteHasDifferentCallerKey": true,
+    "changedProducerOccurrenceHasDifferentCallerKey": true,
+    "rootReportBindingUsed": false,
+    "newActionExecutionsCreated": 0,
+    "limitation": "Real request builder/normalizer/duplicate resolver with fixture storage; no DB concurrency claim."
+  },
+  "content": {
+    "sameReportPeriodSourceId": true,
+    "recomputedContentDifferent": true,
+    "frozenReportContentLoaded": false,
+    "limitation": "Changed business facts/composition are synthetic; actual report control flow is executed."
+  },
+  "executedArtifacts": {
+    "owner-reports/owner-reports.service": {
+      "sourceSha256": "0c09f8535fe360c597782ee53b076e994e1d1c2729e96b8ddf6cb6c8d25a8cbf",
+      "compiledSha256": "784d9d710a27ad10dc8fcccd86951b6e72bf095356d8be64fefa17bb1ccec174"
+    },
+    "inbox/inbox.service": {
+      "sourceSha256": "ea568f3d395a5baa3677158762a928403ce9e92619ab6745d4cbba2c77cbd044",
+      "compiledSha256": "a3a2b93f13af372e3ea724180a2bae5ad683f787cec1159ac6fd22bfb9a041ad"
+    },
+    "communication-delivery/communication-delivery.service": {
+      "sourceSha256": "d039b3b5b36c7a80a75994d9d10f704d65edc99fb26776088d0fd0241a18a66c",
+      "compiledSha256": "82e7a76645b93c419e846e97597f72af673ec1de371edb8d01411ced80431de3"
+    },
+    "action-engine/action-engine.kernel": {
+      "sourceSha256": "ab745f61c1ea7f334d91c012a5c43b6797a5ac1c8b7f36209755f50a5e27366a",
+      "compiledSha256": "a31cac52eb8cb539eb70c259d9eea7ab7a0bb2bdc91cd14852369d36b77e5c1d"
+    },
+    "action-engine/action-engine.registry": {
+      "sourceSha256": "01183c51f544a6be5c31cbf5209748c591346fd3a36ab9d7ce2eabdc0e9e48d5",
+      "compiledSha256": "7f166cbe8cce264d54f8e83959405aa8df7ff4b04ecc4aea3bf33dbd6f3b8cb6"
+    },
+    "action-engine/action-engine.identity": {
+      "sourceSha256": "c02e7fb4f9d5a549ab67854250ae146f4108321fd16721cccd15d25000654317",
+      "compiledSha256": "f9469fcc9ce34411d1e45f4f624d7bb54c6215784f30ae8b564bcaf4f67be624"
+    }
+  },
+  "databaseConnections": 0,
+  "providerCalls": 0,
+  "productionMessages": 0,
+  "productionBusinessProviderMutations": 0,
+  "runtimeRemediationClaimed": false
+}

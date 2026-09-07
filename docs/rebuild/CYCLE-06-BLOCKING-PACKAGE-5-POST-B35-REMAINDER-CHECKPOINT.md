@@ -1,5 +1,7 @@
 # Package 5 post-B35 remainder — production PASS; STOP at B36
 
+> Current continuation after accepted `48557868`: [B36 Stage 1 contract/schema STOP](CYCLE-06-BLOCKING-PACKAGE-5-B36-CONTRACT-STOP-REMAINDER-CHECKPOINT.md) and [proposal](package5-b36-owner-report-contract-schema-proposal.md). Existing report owner and transport were found, but the complete staff recipient / immutable report identity/content/plan foundation is insufficient. No runtime/schema/deployment change; proposal awaits approval. The B35 production evidence below remains the accepted baseline.
+
 Canonical report: [B35 production / fresh Final Gate STOP](CYCLE-06-BLOCKING-PACKAGE-5-B35-DEPLOYED-FINAL-GATE-STOP-REPORT.md).
 Approved schema `c3641411` → implementation `82816b26` → migration PASS
 `4b13b9f1` → runtime `c8c7a8eb` → portable guard `be4fe563`.
