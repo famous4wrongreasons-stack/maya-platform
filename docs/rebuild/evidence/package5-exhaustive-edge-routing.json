@@ -1,0 +1,298 @@
+{
+  "productionWrites": 0,
+  "databaseConnections": 0,
+  "roots": {
+    "muzhskayaestetika.rf": [
+      {
+        "path": ".htaccess",
+        "sha256": "e745c6490a775061c53208dc07b9c10226a60201306a8cbb3bab41be2cc3637b",
+        "directives": [
+          {
+            "line": 9,
+            "directive": "  RewriteEngine On"
+          },
+          {
+            "line": 10,
+            "directive": "  RewriteCond %{HTTP_HOST} ^(www\\.)?xn--80aaocmjdk0cclbf8l3a\\.xn--p1ai(:[0-9]+)?$ [NC]"
+          },
+          {
+            "line": 11,
+            "directive": "  RewriteRule ^ https://malesthetic.pro%{REQUEST_URI} [R=301,L,NE]"
+          },
+          {
+            "line": 14,
+            "directive": "  RewriteCond %{HTTP_HOST} ^www\\.malesthetic\\.pro(:[0-9]+)?$ [NC]"
+          },
+          {
+            "line": 15,
+            "directive": "  RewriteRule ^ https://malesthetic.pro%{REQUEST_URI} [R=301,L,NE]"
+          },
+          {
+            "line": 51,
+            "directive": "  <FilesMatch \"\\.(jpg|jpeg|png|webp|avif|gif|svg|mp4|webm|woff2?|ico)$\">"
+          },
+          {
+            "line": 53,
+            "directive": "  </FilesMatch>"
+          },
+          {
+            "line": 54,
+            "directive": "  <FilesMatch \"\\.(html)$\">"
+          },
+          {
+            "line": 56,
+            "directive": "  </FilesMatch>"
+          },
+          {
+            "line": 57,
+            "directive": "  <FilesMatch \"\\.apk$\">"
+          },
+          {
+            "line": 60,
+            "directive": "  </FilesMatch>"
+          },
+          {
+            "line": 61,
+            "directive": "  <Files \"apple-app-site-association\">"
+          },
+          {
+            "line": 64,
+            "directive": "  </Files>"
+          },
+          {
+            "line": 69,
+            "directive": "  <Files \"apple-app-site-association\">"
+          },
+          {
+            "line": 71,
+            "directive": "  </Files>"
+          },
+          {
+            "line": 80,
+            "directive": "  RewriteEngine On"
+          },
+          {
+            "line": 81,
+            "directive": "  RewriteRule ^g/.*$ /g-landing.html [L]"
+          }
+        ]
+      },
+      {
+        "path": "app/.htaccess",
+        "sha256": "cb4b8aa2a8913d9697f2d07c7627bfb91d23bcbd9bbade72e0c159170a643731",
+        "directives": [
+          {
+            "line": 2,
+            "directive": "<Files \"tg-config.php\">"
+          },
+          {
+            "line": 3,
+            "directive": "    Order allow,deny"
+          },
+          {
+            "line": 4,
+            "directive": "    Deny from all"
+          },
+          {
+            "line": 5,
+            "directive": "</Files>"
+          },
+          {
+            "line": 6,
+            "directive": "<FilesMatch \"\\.(env|ini|log|conf|pem|sqlite|sqlite3|db)$\">"
+          },
+          {
+            "line": 7,
+            "directive": "    Order allow,deny"
+          },
+          {
+            "line": 8,
+            "directive": "    Deny from all"
+          },
+          {
+            "line": 9,
+            "directive": "</FilesMatch>"
+          },
+          {
+            "line": 13,
+            "directive": "<FilesMatch \"\\.bak\">"
+          },
+          {
+            "line": 14,
+            "directive": "    Order allow,deny"
+          },
+          {
+            "line": 15,
+            "directive": "    Deny from all"
+          },
+          {
+            "line": 16,
+            "directive": "</FilesMatch>"
+          },
+          {
+            "line": 17,
+            "directive": "[REDACTED ROUTING LINE]"
+          },
+          {
+            "line": 18,
+            "directive": "    Order allow,deny"
+          },
+          {
+            "line": 19,
+            "directive": "    Deny from all"
+          },
+          {
+            "line": 20,
+            "directive": "</FilesMatch>"
+          },
+          {
+            "line": 26,
+            "directive": "    <FilesMatch \"(index\\.html|service-worker\\.js)$\">"
+          },
+          {
+            "line": 28,
+            "directive": "    </FilesMatch>"
+          }
+        ]
+      },
+      {
+        "path": "app/media/.htaccess",
+        "sha256": "879ff85596bd7a31621e8a948324187d7085b5f4031179c23327b9e8529afebe",
+        "directives": [
+          {
+            "line": 1,
+            "directive": "php_flag engine off"
+          },
+          {
+            "line": 2,
+            "directive": "RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .pht"
+          },
+          {
+            "line": 3,
+            "directive": "Options -ExecCGI -Indexes"
+          }
+        ]
+      },
+      {
+        "path": "new/.htaccess",
+        "sha256": "d1af58ecb83e0e602b5b0889559fef4f518ceecf89e2dd0d4a9a1c01027a69f1",
+        "directives": [
+          {
+            "line": 5,
+            "directive": "  <FilesMatch \"\\.html$\">"
+          },
+          {
+            "line": 7,
+            "directive": "  </FilesMatch>"
+          },
+          {
+            "line": 8,
+            "directive": "  <FilesMatch \"\\.(js|css|woff2|woff|otf)$\">"
+          },
+          {
+            "line": 10,
+            "directive": "  </FilesMatch>"
+          },
+          {
+            "line": 11,
+            "directive": "  <FilesMatch \"\\.(jpg|jpeg|png|webp|mp4)$\">"
+          },
+          {
+            "line": 13,
+            "directive": "  </FilesMatch>"
+          }
+        ]
+      },
+      {
+        "path": "new.bak/.htaccess",
+        "sha256": "d1af58ecb83e0e602b5b0889559fef4f518ceecf89e2dd0d4a9a1c01027a69f1",
+        "directives": [
+          {
+            "line": 5,
+            "directive": "  <FilesMatch \"\\.html$\">"
+          },
+          {
+            "line": 7,
+            "directive": "  </FilesMatch>"
+          },
+          {
+            "line": 8,
+            "directive": "  <FilesMatch \"\\.(js|css|woff2|woff|otf)$\">"
+          },
+          {
+            "line": 10,
+            "directive": "  </FilesMatch>"
+          },
+          {
+            "line": 11,
+            "directive": "  <FilesMatch \"\\.(jpg|jpeg|png|webp|mp4)$\">"
+          },
+          {
+            "line": 13,
+            "directive": "  </FilesMatch>"
+          }
+        ]
+      }
+    ],
+    "mayaos.ru": [
+      {
+        "path": ".htaccess",
+        "sha256": "b265cfd8a86708ec88589921091240c1f21f12892870f615747bff2f675b2e98",
+        "directives": [
+          {
+            "line": 1,
+            "directive": "Options -Indexes"
+          },
+          {
+            "line": 2,
+            "directive": "DirectoryIndex index.html"
+          },
+          {
+            "line": 5,
+            "directive": "  RewriteEngine On"
+          },
+          {
+            "line": 8,
+            "directive": "  RewriteCond %{HTTP_HOST} ^www\\.mayaos\\.ru$ [NC]"
+          },
+          {
+            "line": 9,
+            "directive": "  RewriteRule ^ https://mayaos.ru%{REQUEST_URI} [R=301,L,NE]"
+          },
+          {
+            "line": 12,
+            "directive": "  RewriteRule ^app\\.html$ https://mayaos.ru/app/?booking_tenant=maya-os [R=302,L,NE]"
+          },
+          {
+            "line": 13,
+            "directive": "  RewriteCond %{QUERY_STRING} !(^|&)booking_tenant= [NC]"
+          },
+          {
+            "line": 14,
+            "directive": "  RewriteRule ^app/?$ https://mayaos.ru/app/?booking_tenant=maya-os [R=302,L,NE]"
+          },
+          {
+            "line": 18,
+            "directive": "  RewriteRule ^api(?:/(.*))?$ maya-platform-api.php/$1 [QSA,L]"
+          },
+          {
+            "line": 22,
+            "directive": "  <FilesMatch \"^(app|oauth-callback)\\.html$\">"
+          },
+          {
+            "line": 25,
+            "directive": "  </FilesMatch>"
+          },
+          {
+            "line": 27,
+            "directive": "  <Files \"service-worker.js\">"
+          },
+          {
+            "line": 29,
+            "directive": "  </Files>"
+          }
+        ]
+      }
+    ]
+  }
+}

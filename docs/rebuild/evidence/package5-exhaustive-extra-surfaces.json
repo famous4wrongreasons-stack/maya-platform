@@ -1,0 +1,343 @@
+{
+  "productionWrites": 0,
+  "databaseConnections": 0,
+  "static": {
+    "oauth-callback.html": {
+      "sha256": "9bdb1dbfb83386ebd3555302c263cb4875316439fb6b0a225d48fad43fe572d6",
+      "bytes": 11604,
+      "refs": []
+    },
+    "app.html": {
+      "sha256": "08177c652e7c8f0097981c5a8e8163c3f33b70d241e1f001c06931b640296bc3",
+      "bytes": 2379412,
+      "refs": [
+        "/api/billing/plans",
+        "/api/mobile/pwa/",
+        "https://malesthetic.pro/app/api-proxy.php",
+        "https://malesthetic.pro/app/api-proxy.php?action=nearest_slot",
+        "https://malesthetic.pro/app/api-proxy.php?action=panel_command_center",
+        "https://malesthetic.pro/app/api-proxy.php?action=panel_job_run",
+        "https://malesthetic.pro/app/api-proxy.php?action=promo_gift",
+        "https://malesthetic.pro/app/api-proxy.php?action=push_subscribe",
+        "https://malesthetic.pro/app/api-proxy.php?action=team_chat_media&file="
+      ]
+    },
+    "service-worker.js": {
+      "sha256": "8e5cbb806ecacad22337e442e5e01a3b37a7e07b3462fc0f98f9e895ee0a2f75",
+      "bytes": 3060,
+      "refs": []
+    }
+  },
+  "operatorEntrypoints": {},
+  "main": {
+    "dist/prisma.config.js": {
+      "sha256": "138ade6291cee99a2564aec2e2b4c0e5f5933655b289b026932aa601c2bf407d",
+      "bytes": 455
+    },
+    "dist/prisma/seed.js": {
+      "sha256": "89fc672a1263d16882ec8f10b8e2f5f7a5cbb0e8ba0c26f151bdcf2b955d663e",
+      "bytes": 21297
+    }
+  },
+  "observer": {
+    "sha256": "d018ee62ced28296dc74b76d4e12a57790eb4fe90208641c773705f6ccc37095",
+    "functions": [
+      {
+        "name": "utc_now",
+        "line": 93,
+        "calls": [
+          "datetime.now",
+          "datetime.now(timezone.utc).isoformat",
+          "datetime.now(timezone.utc).isoformat().replace"
+        ]
+      },
+      {
+        "name": "atomic_json_write",
+        "line": 97,
+        "calls": [
+          "handle.fileno",
+          "handle.flush",
+          "handle.write",
+          "json.dump",
+          "os.fsync",
+          "os.replace",
+          "path.parent.mkdir",
+          "path.with_suffix",
+          "temporary.open"
+        ]
+      },
+      {
+        "name": "safe_string",
+        "line": 108,
+        "calls": [
+          "isinstance",
+          "len",
+          "value.strip"
+        ]
+      },
+      {
+        "name": "journal_message_text",
+        "line": 117,
+        "calls": [
+          "all",
+          "bytes",
+          "bytes(value).decode",
+          "isinstance",
+          "len"
+        ]
+      },
+      {
+        "name": "safe_integer",
+        "line": 141,
+        "calls": [
+          "isinstance"
+        ]
+      },
+      {
+        "name": "safe_hex_64",
+        "line": 147,
+        "calls": [
+          "HEX_64.fullmatch",
+          "safe_string"
+        ]
+      },
+      {
+        "name": "zero_side_effect",
+        "line": 154,
+        "calls": [
+          "safe_integer"
+        ]
+      },
+      {
+        "name": "sanitize_observation",
+        "line": 159,
+        "calls": [
+          "authorization.get",
+          "isinstance",
+          "legacy_outcome.get",
+          "raw.get",
+          "safe_hex_64",
+          "safe_integer",
+          "safe_string",
+          "shadow_side_effects.get",
+          "zero_side_effect"
+        ]
+      },
+      {
+        "name": "evaluate_observation",
+        "line": 228,
+        "calls": [
+          "ACTION_CLASSES.get",
+          "AUTHORIZATION_CONTEXTS.get",
+          "authorization.get",
+          "expected_authorization.items",
+          "isinstance",
+          "legacy_outcome.get",
+          "observation.get",
+          "reasons.append",
+          "required_equalities.items",
+          "safe_hex_64",
+          "safe_integer",
+          "safe_string",
+          "set",
+          "shadow_side_effects.get",
+          "side_effect_fields.items",
+          "side_effect_fields.update",
+          "sorted",
+          "str"
+        ]
+      },
+      {
+        "name": "current_journal_cursor",
+        "line": 647,
+        "calls": [
+          "RuntimeError",
+          "len",
+          "line.startswith",
+          "line[len(marker):].strip",
+          "result.stdout.splitlines",
+          "reversed",
+          "subprocess.run"
+        ]
+      },
+      {
+        "name": "follow_journal",
+        "line": 671,
+        "calls": [
+          "current_journal_cursor",
+          "isinstance",
+          "json.loads",
+          "print",
+          "process.terminate",
+          "process.wait",
+          "store.connection.commit",
+          "store.increment_metadata",
+          "store.metadata",
+          "store.process_journal_record",
+          "store.set_baseline_cursor",
+          "store.write_summary",
+          "subprocess.Popen"
+        ]
+      },
+      {
+        "name": "request_stop",
+        "line": 715,
+        "calls": [
+          "FOLLOW_PROCESS.poll",
+          "FOLLOW_PROCESS.terminate"
+        ]
+      },
+      {
+        "name": "parse_args",
+        "line": 722,
+        "calls": [
+          "Path",
+          "argparse.ArgumentParser",
+          "parser.add_argument",
+          "parser.parse_args"
+        ]
+      },
+      {
+        "name": "main",
+        "line": 739,
+        "calls": [
+          "ObserverStore",
+          "follow_journal",
+          "json.dumps",
+          "parse_args",
+          "print",
+          "signal.signal",
+          "store.close",
+          "store.summary"
+        ]
+      },
+      {
+        "name": "__init__",
+        "line": 321,
+        "calls": [
+          "database_path.parent.mkdir",
+          "self._initialize",
+          "self.connection.execute",
+          "sqlite3.connect"
+        ]
+      },
+      {
+        "name": "close",
+        "line": 332,
+        "calls": [
+          "self.connection.close"
+        ]
+      },
+      {
+        "name": "_initialize",
+        "line": 335,
+        "calls": [
+          "self.connection.commit",
+          "self.connection.executescript",
+          "self.metadata",
+          "self.set_metadata",
+          "self.write_summary",
+          "utc_now"
+        ]
+      },
+      {
+        "name": "metadata",
+        "line": 382,
+        "calls": [
+          "self.connection.execute",
+          "self.connection.execute('SELECT value FROM observer_metadata WHERE key = ?', (key,)).fetchone",
+          "str"
+        ]
+      },
+      {
+        "name": "set_metadata",
+        "line": 388,
+        "calls": [
+          "self.connection.execute"
+        ]
+      },
+      {
+        "name": "increment_metadata",
+        "line": 397,
+        "calls": [
+          "int",
+          "self.metadata",
+          "self.set_metadata",
+          "str"
+        ]
+      },
+      {
+        "name": "set_baseline_cursor",
+        "line": 401,
+        "calls": [
+          "self.connection.commit",
+          "self.set_metadata",
+          "self.write_summary",
+          "utc_now"
+        ]
+      },
+      {
+        "name": "process_journal_record",
+        "line": 407,
+        "calls": [
+          "evaluate_observation",
+          "isinstance",
+          "journal_message_text",
+          "json.JSONDecoder",
+          "json.JSONDecoder().raw_decode",
+          "len",
+          "message.find",
+          "message[marker_offset + len(OBSERVATION_PREFIX):].lstrip",
+          "record.get",
+          "safe_string",
+          "sanitize_observation",
+          "self._record_delivery",
+          "self.connection.commit",
+          "self.increment_metadata",
+          "self.set_metadata",
+          "self.write_summary",
+          "utc_now"
+        ]
+      },
+      {
+        "name": "_record_delivery",
+        "line": 450,
+        "calls": [
+          "isinstance",
+          "json.dumps",
+          "observation.get",
+          "self.connection.execute",
+          "self.connection.execute('\\n            SELECT verdict FROM logical_actions\\n            WHERE tenant_ref = ? AND action_class = ? AND identity_fingerprint = ?\\n            ', (tenant_ref, action_class, identity)).fetchone",
+          "shadow_effects.get",
+          "str",
+          "utc_now"
+        ]
+      },
+      {
+        "name": "summary",
+        "line": 533,
+        "calls": [
+          "action_summary.values",
+          "all",
+          "int",
+          "max",
+          "self.connection.execute",
+          "self.connection.execute(\"\\n                    SELECT COUNT(*) AS count FROM shadow_deliveries\\n                    WHERE action_class = ? AND verdict = 'DIVERGENT'\\n                    \", (action_class,)).fetchone",
+          "self.connection.execute('SELECT COUNT(*) AS count FROM logical_actions WHERE action_class = ?', (action_class,)).fetchone",
+          "self.connection.execute('SELECT COUNT(*) AS count FROM shadow_deliveries WHERE action_class = ?', (action_class,)).fetchone",
+          "self.connection.execute('\\n            SELECT\\n              COALESCE(SUM(preview_external_side_effects), 0) AS preview_effects,\\n              COALESCE(SUM(bridge_external_side_effects), 0) AS bridge_effects,\\n              COALESCE(SUM(shadow_crm_writes), 0) AS crm_writes,\\n              COALESCE(SUM(shadow_messages), 0) AS messages,\\n              COALESCE(SUM(shadow_campaigns), 0) AS campaigns,\\n              SUM(CASE WHEN preview_external_side_effects IS NULL\\n                        OR bridge_external_side_effects IS NULL\\n                        OR shadow_crm_writes IS NULL\\n                        OR shadow_messages IS NULL\\n                        OR shadow_campaigns IS NULL\\n                       THEN 1 ELSE 0 END) AS incomplete\\n            FROM shadow_deliveries\\n            ').fetchone",
+          "self.metadata",
+          "utc_now"
+        ]
+      },
+      {
+        "name": "write_summary",
+        "line": 643,
+        "calls": [
+          "atomic_json_write",
+          "self.summary"
+        ]
+      }
+    ]
+  }
+}

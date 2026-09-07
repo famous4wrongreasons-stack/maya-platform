@@ -1,0 +1,883 @@
+{
+  "candidateSites": 1081,
+  "filesWithCandidates": 175,
+  "sourceFiles": 570,
+  "routes": 226,
+  "dispositions": [
+    {
+      "file": "action-engine/action-engine.identity.ts",
+      "candidateSites": 6,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/action-engine.kernel.ts",
+      "candidateSites": 33,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/action-engine.policy-resolver.ts",
+      "candidateSites": 5,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/action-engine.registry.ts",
+      "candidateSites": 9,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/action-engine.runtime.ts",
+      "candidateSites": 2,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/client-booking-intent.contract.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/legacy-loyalty-backfill-shadow.contract.ts",
+      "candidateSites": 2,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/legacy-loyalty-earn-shadow.contract.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/legacy-loyalty-refund-shadow.contract.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/p4-03-legacy-loyalty-executable.contract.ts",
+      "candidateSites": 6,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/p4-05-customer-subscription-executable.contract.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/p4-08-tenant-billing-executable.contract.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "action-engine/referral-reward-scheduler-envelope.contract.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "admin/admin.service.ts",
+      "candidateSites": 8,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "ai-tools/ai-core-model.service.ts",
+      "candidateSites": 2,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "ai-tools/ai-core.service.ts",
+      "candidateSites": 13,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "ai-tools/ai-memory.service.ts",
+      "candidateSites": 3,
+      "disposition": "Exact authenticated User explicit note owner; does not authorize B51 global business rules"
+    },
+    {
+      "file": "ai-tools/ai-speech.service.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "ai-tools/ai-tool-handler.service.ts",
+      "candidateSites": 6,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "ai-tools/ai-tool-runtime.service.ts",
+      "candidateSites": 16,
+      "disposition": "B50 wrapper outcome; draft/approval persistence alone is not a second business outcome"
+    },
+    {
+      "file": "ai-tools/ai-tools.controller.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "ai-tools/staff-schedule-command.service.ts",
+      "candidateSites": 2,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "analytics/operations-analytics.controller.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "appointments/appointment-preview.utils.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "appointments/appointments.service.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "appointments/client-appointment-create.service.ts",
+      "candidateSites": 7,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "appointments/tenant-appointment.repository.ts",
+      "candidateSites": 3,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "audit-log/audit-log.service.ts",
+      "candidateSites": 2,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "auth/auth-rate-limit.repository.ts",
+      "candidateSites": 1,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/auth-rate-limit.service.ts",
+      "candidateSites": 1,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/auth-retention.repository.ts",
+      "candidateSites": 1,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/auth-session-system.gateway.ts",
+      "candidateSites": 1,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/auth-session.repository.ts",
+      "candidateSites": 13,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/auth-session.service.ts",
+      "candidateSites": 24,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/auth.controller.ts",
+      "candidateSites": 7,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/auth.service.ts",
+      "candidateSites": 36,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/email-auth-delivery.service.ts",
+      "candidateSites": 1,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/email-auth.service.ts",
+      "candidateSites": 3,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/jwt.strategy.ts",
+      "candidateSites": 2,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/phone-auth-delivery.service.ts",
+      "candidateSites": 4,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/social-auth.service.ts",
+      "candidateSites": 20,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "auth/tenant-auth.repository.ts",
+      "candidateSites": 15,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    },
+    {
+      "file": "billing/p4-08-tenant-billing-canonical-cutover.service.ts",
+      "candidateSites": 12,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "billing/p4-08-tenant-billing-executable.service.ts",
+      "candidateSites": 10,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "billing/p4-08-yookassa-payment-provider.ts",
+      "candidateSites": 5,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "billing/yookassa-client.service.ts",
+      "candidateSites": 3,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "branches/branches.service.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "branding/branding.service.ts",
+      "candidateSites": 1,
+      "disposition": "Direct bootstrap/update helper bodies have no active non-test callers after cutover; active controllers delegate Waves2/4. Read methods and cryptographic helpers are not business writes."
+    },
+    {
+      "file": "business-content/p4-09-canonical-offer-authority.service.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "business-content/p4-09-canonical-offer-materialization.contract.ts",
+      "candidateSites": 2,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "business-content/p4-09-value-configuration-canonical-cutover.service.ts",
+      "candidateSites": 5,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "business-content/p4-09-value-configuration-executable.service.ts",
+      "candidateSites": 15,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "business-content/p4-09-value-configuration-shadow.service.ts",
+      "candidateSites": 4,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "commerce/p4-10-commerce-credential-canonical-cutover.service.ts",
+      "candidateSites": 4,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "commerce/p4-10-commerce-credential-executable.service.ts",
+      "candidateSites": 15,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "commerce/p4-10-commerce-credential-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "commerce/p4-10-yookassa-credential-verifier.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "common/phone.util.ts",
+      "candidateSites": 8,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "communication-delivery/communication-bulk-delivery.service.ts",
+      "candidateSites": 8,
+      "disposition": "Existing CD admission/attempt/UNKNOWN/reconciliation owner; callers bypassing it are B44/B45/B48/B49/B57/B58"
+    },
+    {
+      "file": "communication-delivery/communication-bulk-policy.service.ts",
+      "candidateSites": 1,
+      "disposition": "Existing CD admission/attempt/UNKNOWN/reconciliation owner; callers bypassing it are B44/B45/B48/B49/B57/B58"
+    },
+    {
+      "file": "communication-delivery/communication-delivery.kernel.ts",
+      "candidateSites": 20,
+      "disposition": "Existing CD admission/attempt/UNKNOWN/reconciliation owner; callers bypassing it are B44/B45/B48/B49/B57/B58"
+    },
+    {
+      "file": "communication-delivery/communication-delivery.service.ts",
+      "candidateSites": 6,
+      "disposition": "Existing CD admission/attempt/UNKNOWN/reconciliation owner; callers bypassing it are B44/B45/B48/B49/B57/B58"
+    },
+    {
+      "file": "communication-delivery/communication-web-push.service.ts",
+      "candidateSites": 1,
+      "disposition": "Existing CD admission/attempt/UNKNOWN/reconciliation owner; callers bypassing it are B44/B45/B48/B49/B57/B58"
+    },
+    {
+      "file": "communication-delivery/communication-web-push.transport.ts",
+      "candidateSites": 1,
+      "disposition": "Existing CD admission/attempt/UNKNOWN/reconciliation owner; callers bypassing it are B44/B45/B48/B49/B57/B58"
+    },
+    {
+      "file": "communication-shadow/communication-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "config/runtime-config.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "crm/adapters/mock-crm.adapter.ts",
+      "candidateSites": 2,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "crm/adapters/yclients-crm.adapter.ts",
+      "candidateSites": 57,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "crm/appointment-change.service.ts",
+      "candidateSites": 2,
+      "disposition": "AC4/AC5 exact source ingestion/recheck/mirror facts; provider writes require admitted execution. Tenant timezone/branding and team projection refresh explicitly approved Wave3; not an invented exception."
+    },
+    {
+      "file": "crm/appointment-mirror.service.ts",
+      "candidateSites": 2,
+      "disposition": "AC4/AC5 exact source ingestion/recheck/mirror facts; provider writes require admitted execution. Tenant timezone/branding and team projection refresh explicitly approved Wave3; not an invented exception."
+    },
+    {
+      "file": "crm/appointment-reconciliation.service.ts",
+      "candidateSites": 4,
+      "disposition": "AC4/AC5 exact source ingestion/recheck/mirror facts; provider writes require admitted execution. Tenant timezone/branding and team projection refresh explicitly approved Wave3; not an invented exception."
+    },
+    {
+      "file": "crm/client-appointment-cancel.service.ts",
+      "candidateSites": 2,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-appointment-read.service.ts",
+      "candidateSites": 1,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-appointment-reschedule.service.ts",
+      "candidateSites": 2,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-booking-confirmation.service.ts",
+      "candidateSites": 2,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-channel-authenticator.service.ts",
+      "candidateSites": 6,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-channel-link.service.ts",
+      "candidateSites": 7,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-channel-runtime.service.ts",
+      "candidateSites": 11,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-habits.service.ts",
+      "candidateSites": 8,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-identity.service.ts",
+      "candidateSites": 6,
+      "disposition": "AC4/AC5 exact source ingestion/recheck/mirror facts; provider writes require admitted execution. Tenant timezone/branding and team projection refresh explicitly approved Wave3; not an invented exception."
+    },
+    {
+      "file": "crm/client-link-challenge.service.ts",
+      "candidateSites": 5,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-loyalty-read.service.ts",
+      "candidateSites": 7,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-preferences.controller.ts",
+      "candidateSites": 3,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-preferences.service.ts",
+      "candidateSites": 9,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-profile-read.service.ts",
+      "candidateSites": 5,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-wanted-slot.service.ts",
+      "candidateSites": 12,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/client-web-push.service.ts",
+      "candidateSites": 2,
+      "disposition": "Existing B26/B28/B29/B30/B31/B32/B33 verified Client bindings, intent receipts and canonical executors; native legacy callers tracked separately"
+    },
+    {
+      "file": "crm/crm-integration.controller.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "crm/crm.service.ts",
+      "candidateSites": 39,
+      "disposition": "AC4/AC5 exact source ingestion/recheck/mirror facts; provider writes require admitted execution. Tenant timezone/branding and team projection refresh explicitly approved Wave3; not an invented exception."
+    },
+    {
+      "file": "crm/legacy-appointment-bridge.controller.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "crm/legacy-appointment-bridge.service.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "crm/quarantine-catchup.service.ts",
+      "candidateSites": 1,
+      "disposition": "AC4/AC5 exact source ingestion/recheck/mirror facts; provider writes require admitted execution. Tenant timezone/branding and team projection refresh explicitly approved Wave3; not an invented exception."
+    },
+    {
+      "file": "crm/staff-schedule.utils.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "customer-subscriptions/customer-subscription-activation-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "customer-subscriptions/customer-subscription-cancellation-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "customer-subscriptions/customer-subscription-expiry-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "customer-subscriptions/customer-subscription-purchase-cutover.service.ts",
+      "candidateSites": 3,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "customer-subscriptions/customer-subscription-purchase-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "customer-subscriptions/customer-subscription-renewal-activation-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "customer-subscriptions/customer-subscription-renewal-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "customer-subscriptions/customer-subscription-revocation-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "customer-subscriptions/customer-subscription-usage-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "customer-subscriptions/p4-05-customer-subscription-executable.service.ts",
+      "candidateSites": 6,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "customer-subscriptions/p4-05-yookassa-checkout-provider.ts",
+      "candidateSites": 4,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "domain/domain-event.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "encryption/encryption.service.ts",
+      "candidateSites": 7,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "events/event-store.service.ts",
+      "candidateSites": 7,
+      "disposition": "AC4/AC5 source/projection lifecycle or Wave6 AC6 bounded retention; no direct business/provider effect from projection"
+    },
+    {
+      "file": "expenses/expense-canonical-shadow.service.ts",
+      "candidateSites": 5,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "expenses/expenses.controller.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "expenses/expenses.service.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "expenses/p4-07-expense-canonical-cutover.service.ts",
+      "candidateSites": 3,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "expenses/p4-07-expense-executable.service.ts",
+      "candidateSites": 15,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "gift-certificates/gift-certificate-activation-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "gift-certificates/gift-certificate-claim.contract.ts",
+      "candidateSites": 3,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "gift-certificates/gift-certificate-purchase-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "gift-certificates/gift-certificate-redemption-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "gift-certificates/p4-06-gift-certificate-executable.service.ts",
+      "candidateSites": 5,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "gift-certificates/p4-06-yookassa-checkout-provider.ts",
+      "candidateSites": 4,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "inbox/apns-push.ts",
+      "candidateSites": 3,
+      "disposition": "B49 default delivery branch; Inbox consumption/device registration themselves are AC3 protocol state"
+    },
+    {
+      "file": "inbox/inbox.controller.ts",
+      "candidateSites": 1,
+      "disposition": "B49 default delivery branch; Inbox consumption/device registration themselves are AC3 protocol state"
+    },
+    {
+      "file": "inbox/inbox.service.ts",
+      "candidateSites": 8,
+      "disposition": "B49 default delivery branch; Inbox consumption/device registration themselves are AC3 protocol state"
+    },
+    {
+      "file": "internal-calendar/internal-calendar.service.ts",
+      "candidateSites": 8,
+      "disposition": "Direct bootstrap/update helper bodies have no active non-test callers after cutover; active controllers delegate Waves2/4. Read methods and cryptographic helpers are not business writes."
+    },
+    {
+      "file": "loyalty/legacy-loyalty-backfill-shadow.service.ts",
+      "candidateSites": 3,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "loyalty/legacy-loyalty-expiry-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "loyalty/legacy-loyalty-grant-consume-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "loyalty/legacy-loyalty-grant-issue-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "loyalty/legacy-loyalty-import-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "loyalty/legacy-loyalty-redemption-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "loyalty/legacy-loyalty-refund-shadow.service.ts",
+      "candidateSites": 3,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "loyalty/legacy-loyalty-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "loyalty/loyalty-redemption-claim.contract.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "loyalty/loyalty.service.ts",
+      "candidateSites": 5,
+      "disposition": "Internal adjustment guarded by existing Action Engine receipt and execution-bound transaction; P403 legacy value paths retain canonical cutover"
+    },
+    {
+      "file": "loyalty/p4-03-legacy-loyalty-executable.service.ts",
+      "candidateSites": 8,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "main.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "marketing/bulk-audience-equivalence.ts",
+      "candidateSites": 6,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "marketing/canonical-bulk.service.ts",
+      "candidateSites": 10,
+      "disposition": "B35 canonical admitted audience/root/recipient binding; baseline preserved"
+    },
+    {
+      "file": "marketing/marketing.service.ts",
+      "candidateSites": 7,
+      "disposition": "Old User audience methods have no active callers; live bulk handlers use CanonicalBulkService. Historical preview presence is not evidence of an active sender."
+    },
+    {
+      "file": "onboarding/ai-confirmation-coordinator.service.ts",
+      "candidateSites": 8,
+      "disposition": "Canonical trial/AI confirmation cutover; immutable receipt plus Wave2 bootstrap; draft materialization is not activation"
+    },
+    {
+      "file": "onboarding/ai-confirmation-receipt.service.ts",
+      "candidateSites": 9,
+      "disposition": "Canonical trial/AI confirmation cutover; immutable receipt plus Wave2 bootstrap; draft materialization is not activation"
+    },
+    {
+      "file": "onboarding/ai-onboarding.service.ts",
+      "candidateSites": 10,
+      "disposition": "Canonical trial/AI confirmation cutover; immutable receipt plus Wave2 bootstrap; draft materialization is not activation"
+    },
+    {
+      "file": "onboarding/canonical-trial-onboarding.service.ts",
+      "candidateSites": 5,
+      "disposition": "Canonical trial/AI confirmation cutover; immutable receipt plus Wave2 bootstrap; draft materialization is not activation"
+    },
+    {
+      "file": "onboarding/conversational-onboarding-interpreter.ts",
+      "candidateSites": 2,
+      "disposition": "Canonical trial/AI confirmation cutover; immutable receipt plus Wave2 bootstrap; draft materialization is not activation"
+    },
+    {
+      "file": "onboarding/onboarding.service.ts",
+      "candidateSites": 1,
+      "disposition": "Canonical trial/AI confirmation cutover; immutable receipt plus Wave2 bootstrap; draft materialization is not activation"
+    },
+    {
+      "file": "onboarding/trial-activation.service.ts",
+      "candidateSites": 6,
+      "disposition": "Canonical trial/AI confirmation cutover; immutable receipt plus Wave2 bootstrap; draft materialization is not activation"
+    },
+    {
+      "file": "opportunities/opportunity.engine.ts",
+      "candidateSites": 1,
+      "disposition": "AC4/AC5 source/projection lifecycle or Wave6 AC6 bounded retention; no direct business/provider effect from projection"
+    },
+    {
+      "file": "opportunities/opportunity.lifecycle.ts",
+      "candidateSites": 9,
+      "disposition": "AC4/AC5 source/projection lifecycle or Wave6 AC6 bounded retention; no direct business/provider effect from projection"
+    },
+    {
+      "file": "opportunities/opportunity.shadow.ts",
+      "candidateSites": 1,
+      "disposition": "AC4/AC5 source/projection lifecycle or Wave6 AC6 bounded retention; no direct business/provider effect from projection"
+    },
+    {
+      "file": "owner-reports/owner-reports.service.ts",
+      "candidateSites": 2,
+      "disposition": "B36/B43"
+    },
+    {
+      "file": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "candidateSites": 2,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave1/package5-wave1.service.ts",
+      "candidateSites": 20,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave2/package5-wave2-object-store.service.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave2/package5-wave2.service.ts",
+      "candidateSites": 65,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave2/trial-activation-bootstrap.service.ts",
+      "candidateSites": 11,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "candidateSites": 10,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave3/package5-wave3.service.ts",
+      "candidateSites": 23,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+      "candidateSites": 13,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave4/package5-wave4-object-store.service.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave4/package5-wave4.service.ts",
+      "candidateSites": 30,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave5/package5-wave5.service.ts",
+      "candidateSites": 20,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave6/package5-wave6.policy.ts",
+      "candidateSites": 1,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "package5-wave6/package5-wave6.service.ts",
+      "candidateSites": 13,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "quotas/quota.service.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "recovery/recovery.service.ts",
+      "candidateSites": 4,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "referrals/p4-04-referral-reward-executable.service.ts",
+      "candidateSites": 6,
+      "disposition": "Existing canonical executor/kernel/action or exact provider adapter; admission/claims govern business writes"
+    },
+    {
+      "file": "referrals/referral-create-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "referrals/referral-resolve-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "referrals/referral-reward-claim.contract.ts",
+      "candidateSites": 3,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "referrals/referral-reward-fulfill-shadow.service.ts",
+      "candidateSites": 2,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "referrals/referral-reward-issue-shadow.service.ts",
+      "candidateSites": 1,
+      "disposition": "Shadow/planning/hash metadata inspected; no permission to deliver or create business outcomes inferred from shadow admission"
+    },
+    {
+      "file": "tenancy/bridge-source.service.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "tenancy/memberships.service.ts",
+      "candidateSites": 1,
+      "disposition": "Reverse candidate checked against controller/callers: canonical facade, scoped reader, crypto/cache/audit or protocol/AI transport; no independent business sink found"
+    },
+    {
+      "file": "tenants/tenants.service.ts",
+      "candidateSites": 3,
+      "disposition": "Direct bootstrap/update helper bodies have no active non-test callers after cutover; active controllers delegate Waves2/4. Read methods and cryptographic helpers are not business writes."
+    },
+    {
+      "file": "users/users.service.ts",
+      "candidateSites": 44,
+      "disposition": "Canonical User/auth protocol/verified social facts (AC3); staff commands delegate Wave2; unused bootstrap helpers are not active routes. User personal name is not canonical Client profile authority."
+    }
+  ]
+}

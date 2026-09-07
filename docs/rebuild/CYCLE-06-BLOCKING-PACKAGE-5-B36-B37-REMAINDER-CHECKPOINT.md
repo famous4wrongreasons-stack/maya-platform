@@ -1,5 +1,7 @@
 # Package 5 current remainder — B36 schema PASS, runtime WIP, B37 STOP
 
+> Current user-directed cycle: [Exhaustive remainder inventory](CYCLE-06-BLOCKING-PACKAGE-5-EXHAUSTIVE-REMAINDER-INVENTORY.md), entry checkpoint `8400a7ff`. **24 known blockers B36–B59**, grouped into 14 owner packages; no remediation. Independent reverse pass added 4 IDs and 3 path groups. **Inventory COMPLETE: NO** — Beget scheduled-task inventory is unavailable; 31/32 surface groups covered. Do not continue B36 WIP or fix B37. B35 runtime/B36 applied schema preserved; Package 5 and Chapter 6 remain incomplete. This instruction supersedes the historical first-new-blocker STOP/resume strategy below.
+
 Canonical report: [B36 schema-applied / B37 STOP](CYCLE-06-BLOCKING-PACKAGE-5-B36-SCHEMA-APPLIED-B37-STOP-REPORT.md).
 Current Stage 1 continuation: [B37 owner/contract/schema proposal](package5-b37-owner-contract-schema-proposal.md).
 Checkpoint `7201f7bd` was accepted. B37-A reminder and B37-B financial mutation

@@ -1,0 +1,364 @@
+{
+  "counts": {
+    "knownRemainingBlockers": 24,
+    "blockersRequiringNewBusinessDecision": 9,
+    "blockersRequiringSchemaConfirmed": 2,
+    "blockersSchemaUndetermined": 7,
+    "blockersRequiringRuntimeOnlyFix": 15,
+    "productionSurfacesInventoried": 31,
+    "productionSurfacesTotal": 32,
+    "secondPassNewFindings": 7,
+    "estimatedRemediationPackages": 14,
+    "inventoryComplete": false
+  },
+  "surfaces": [
+    {
+      "id": "S01",
+      "name": "Backend HTTP routes",
+      "coverage": "226 registered Nest routes; source-matched controllers, guards, canonical cutovers",
+      "findings": "B36 B43 B49 B50",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S02",
+      "name": "Active salon PWA",
+      "coverage": "app/index.html + retained reachable PWA variants; PHP callers",
+      "findings": "B38 B41 B42 B43 B54 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S03",
+      "name": "Maya platform PWA / VPS static",
+      "coverage": "VPS app.html and mayaos/app/index.html, OAuth callbacks, service workers",
+      "findings": "B38 B54",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S04",
+      "name": "Public site / Next / shop",
+      "coverage": "All acquired public HTML/JS; checkout/account, public booking, community routes",
+      "findings": "B38 B52",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S05",
+      "name": "Proxy / compatibility routes",
+      "coverage": "11 PHP files; archive-named proxy not denied by inspected .htaccess",
+      "findings": "B38 B41 B54 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S06",
+      "name": "Chat / stream / history",
+      "coverage": "Nest AI + Python chat/stream/history, native shared conversation state",
+      "findings": "B39 B41 B42 B50 B51 B53 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S07",
+      "name": "Realtime / voice",
+      "coverage": "realtime_bridge, voice, stream tool routing; STT/TTS as protocol transport",
+      "findings": "B39 B41 B50 B51 B56",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S08",
+      "name": "AI tools",
+      "coverage": "TypeScript handlers/runtime and Python role/confirmation dispatch",
+      "findings": "B39 B42 B50 B51 B56",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S09",
+      "name": "Journal",
+      "coverage": "Canonical staff journal, legacy read guards and retired mutations",
+      "findings": "B41 B42",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S10",
+      "name": "Python services / importers",
+      "coverage": "71 acquired current root sources, 72 root metadata entries including config example; imports/callers; 24 archived copies separated",
+      "findings": "B37 B39 B40 B41 B42 B43 B44 B45 B46 B47 B48 B51 B52 B53 B55 B56 B57 B58 B59",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S11",
+      "name": "Schedulers",
+      "coverage": "Nest scheduler registrations/flags and live bot APScheduler registrations",
+      "findings": "B36 B37 B42 B43 B44 B45 B46 B47 B57",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S12",
+      "name": "VPS cron / timers",
+      "coverage": "root/botadmin no-crontab proved; system tables, cron directories and timers inspected",
+      "findings": "NONE additional",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S13",
+      "name": "Beget cron / hosting scheduled tasks",
+      "coverage": "crontab read denied (PermissionError); no substitute source provided",
+      "findings": "COVERAGE GAP",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "S14",
+      "name": "Background workers / installed operator CLIs",
+      "coverage": "Live units/processes, observer, 15 dist/scripts plus seed CLI; manual versus automatic distinguished",
+      "findings": "B42 B43 B44 B46 B48 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S15",
+      "name": "Telegram handlers / commands / replies",
+      "coverage": "Active bot.py, command/callback/message handlers, global send observation patch",
+      "findings": "B37 B39 B40 B41 B43 B44 B45 B46 B47 B53 B55 B56 B57 B59",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S16",
+      "name": "Inbox",
+      "coverage": "Ingest, publish, consumption/projection, default versus canonical single delivery",
+      "findings": "B36 B43 B49",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S17",
+      "name": "APNS",
+      "coverage": "Exact transport callers and default direct branch; token protocol registration",
+      "findings": "B36 B43 B49",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S18",
+      "name": "Web Push",
+      "coverage": "Canonical endpoint binding/transport; disabled legacy no-op helpers; public push service workers",
+      "findings": "B44 B57 B58 upstream delivery paths; no new active direct legacy Web Push sender",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S19",
+      "name": "Communication Delivery",
+      "coverage": "Single/bulk admissions, attempts, reconciliation, UNKNOWN and direct callers",
+      "findings": "B36 B43 B44 B45 B46 B47 B48 B49 B57 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S20",
+      "name": "Panel / GOD / admin",
+      "coverage": "Canonical platform APIs; legacy role resolver, readers, controls, PDF, job dispatch",
+      "findings": "B37 B41 B42 B43 B44 B46 B51 B55 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S21",
+      "name": "Internal calendar",
+      "coverage": "Canonical create and Wave4 configuration executor; unused bootstrap helpers distinguished",
+      "findings": "NONE additional",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S22",
+      "name": "CRM / YClients adapters / helpers",
+      "coverage": "Approved fact/recheck/mirror flows; every Python and TS provider write helper traced",
+      "findings": "B38 B39 B48 B56",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S23",
+      "name": "Marketing / bulk",
+      "coverage": "B35 canonical owner and remaining native scheduled/manual consumers",
+      "findings": "B46 B57",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S24",
+      "name": "Finance / expense",
+      "coverage": "P407/P408 canonical paths, raw weekly intake, cash declaration; deferred payment tombstones",
+      "findings": "B37 B55",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S25",
+      "name": "Loyalty / value / certificates",
+      "coverage": "P403–P410 executors; Python lower guards, renewal branch and blocked mint call chains",
+      "findings": "B37 B57; native value mint/provider purchase bypass not proved",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S26",
+      "name": "Reviews",
+      "coverage": "B34 external import preserved; native pending feedback callbacks and community moderation",
+      "findings": "B47 B52",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S27",
+      "name": "Onboarding",
+      "coverage": "Canonical trial admission/AI receipt/bootstrap; legacy disabled trial setters",
+      "findings": "NONE additional",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S28",
+      "name": "Auth / identity",
+      "coverage": "Canonical AC3 protocols, verified Client/staff links; legacy raw owner and staff gates",
+      "findings": "B39 B40 B41 B59",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S29",
+      "name": "Maintenance",
+      "coverage": "Wave6 allowlist/coordinator; retired AI/PII execute; persistent media versus speech scratch",
+      "findings": "B53 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S30",
+      "name": "All direct database writer candidates",
+      "coverage": "106 SQL candidate functions + all TS candidate callsites, raw SQL and explicit exclusions",
+      "findings": "B37 B39 B40 B41 B42 B47 B49 B51 B52 B53 B55 B57 B58 B59",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S31",
+      "name": "All direct provider / delivery candidates",
+      "coverage": "Reverse sink scan to every acquired route, command, scheduler and helper caller",
+      "findings": "B36 B38 B43 B44 B45 B46 B47 B48 B49 B56 B57 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S32",
+      "name": "Legacy identity / projection fallbacks",
+      "coverage": "Phone, raw Telegram, legacy web session, User/Client distinction; no source fact elevated to authority",
+      "findings": "B37 B38 B39 B40 B41 B44 B47 B51 B52 B55 B56 B57 B58 B59",
+      "status": "INVENTORIED"
+    }
+  ],
+  "remediationPackages": [
+    {
+      "id": "R01",
+      "canonicalOwner": "Canonical Client appointment owner + booking identity transport",
+      "blockers": [
+        "B38",
+        "B39",
+        "B54"
+      ],
+      "scope": "Existing B31/B32/B33 and lifecycle actions; proxy/native initiators share exact Client binding."
+    },
+    {
+      "id": "R02",
+      "canonicalOwner": "Canonical staff / platform principal and access owner",
+      "blockers": [
+        "B40",
+        "B41"
+      ],
+      "scope": "A16/A25; close raw founder/admin/session authority across all initiators."
+    },
+    {
+      "id": "R03",
+      "canonicalOwner": "Staff schedule action owner",
+      "blockers": [
+        "B56"
+      ],
+      "scope": "Existing A15 schedule action; keep distinct from granting staff access."
+    },
+    {
+      "id": "R04",
+      "canonicalOwner": "OperationalWorkItem owner",
+      "blockers": [
+        "B42"
+      ],
+      "scope": "A23 operational commands plus read/projection boundaries."
+    },
+    {
+      "id": "R05",
+      "canonicalOwner": "Owner report plan owner",
+      "blockers": [
+        "B36",
+        "B43"
+      ],
+      "scope": "Repair approved daily contract later; explicitly decide non-daily report kinds before expansion."
+    },
+    {
+      "id": "R06",
+      "canonicalOwner": "Communication Delivery / notification admission owner",
+      "blockers": [
+        "B44",
+        "B45",
+        "B48",
+        "B49"
+      ],
+      "scope": "Shared delivery ingress/kernel convergence; each producer must retain its own canonical occurrence authority. No generic permit for all alerts."
+    },
+    {
+      "id": "R07",
+      "canonicalOwner": "Canonical bulk marketing owner",
+      "blockers": [
+        "B46",
+        "B57"
+      ],
+      "scope": "B35 audience, consent, immutable route/recipient plan; P405 remains subscription eligibility authority."
+    },
+    {
+      "id": "R08",
+      "canonicalOwner": "Native review / feedback owner — mapping pending",
+      "blockers": [
+        "B47"
+      ],
+      "scope": "Separate from B34 external-source review facts."
+    },
+    {
+      "id": "R09",
+      "canonicalOwner": "Public community / moderation owner — mapping pending",
+      "blockers": [
+        "B52"
+      ],
+      "scope": "Anonymous community source facts and canonical moderation; do not merge with external review authority."
+    },
+    {
+      "id": "R10",
+      "canonicalOwner": "AI invocation / approval receipt owner",
+      "blockers": [
+        "B50"
+      ],
+      "scope": "Expose and resume the same canonical execution; preserve UNKNOWN."
+    },
+    {
+      "id": "R11",
+      "canonicalOwner": "Canonical business / notification configuration owner",
+      "blockers": [
+        "B51",
+        "B59"
+      ],
+      "scope": "Explicit scope/version mapping for tenant rules and personal staff suppression; not a blanket settings approval."
+    },
+    {
+      "id": "R12",
+      "canonicalOwner": "Conversation / message / attachment lifecycle owner — mapping pending",
+      "blockers": [
+        "B53",
+        "B58"
+      ],
+      "scope": "Existing client-history erasure retirement; separate explicit team lifecycle/retention decision."
+    },
+    {
+      "id": "R13",
+      "canonicalOwner": "Expense declaration + reminder/reply intent owner",
+      "blockers": [
+        "B37"
+      ],
+      "scope": "P407 expense executor plus separately decided reminder and reply binding."
+    },
+    {
+      "id": "R14",
+      "canonicalOwner": "Cash declaration / reconciliation owner — mapping pending",
+      "blockers": [
+        "B55"
+      ],
+      "scope": "Cash is not an Expense create; preserve separate accounting meaning."
+    }
+  ]
+}
