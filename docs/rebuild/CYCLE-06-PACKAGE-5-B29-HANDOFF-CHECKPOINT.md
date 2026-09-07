@@ -1,6 +1,6 @@
 # Cycle 06 — Package 5 B29 handoff checkpoint
 
-> Current continuation: [B36 Stage 1 contract/schema STOP](CYCLE-06-BLOCKING-PACKAGE-5-B36-CONTRACT-STOP-REMAINDER-CHECKPOINT.md) → [owner/contract/schema proposal](package5-b36-owner-report-contract-schema-proposal.md). B35 production PASS is preserved. Existing owner is OwnerReportsService / A12; immutable report content/plan, whole-report identity and enforced staff route contract require approval before implementation. Package 5 is not complete. No B36 implementation/deployment, Wave 7 or Chapter 7; Chapter 6 completion is not declared.
+> Current continuation: [B36 Channel Order Decision Sheet](package5-b36-channel-order-decision-sheet.md) → [current remainder](CYCLE-06-BLOCKING-PACKAGE-5-B36-CONTRACT-STOP-REMAINDER-CHECKPOINT.md). At accepted `3aaaeb23`, the user approved OwnerReportsService / A12, OwnerReportRun and 14 persisted fields, with gated migration/runtime/deployment. Only exact channel order awaits approval under the user's explicit STOP boundary. B35 production PASS is preserved. Package 5 is not complete. No B36 implementation/deployment, Wave 7 or Chapter 7; Chapter 6 completion is not declared.
 > The original checkpoint/proposal below is historical; its old pending/STOP status is superseded.
 
 Status: **HANDOFF READY — STOP AT B29 / A18**

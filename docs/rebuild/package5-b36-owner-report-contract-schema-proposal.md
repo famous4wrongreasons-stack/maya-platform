@@ -1,6 +1,14 @@
 # B36 — daily report owner / contract / schema proposal
 
-**STAGE 1 STOP — approval required; no runtime or migration implemented.**
+**CONTRACT + SCHEMA SCOPE APPROVED at `3aaaeb23`; STOP at channel order.**
+
+The user approved the owner, immutable plan, 12 + 2 persisted fields, constraints,
+recipient/routes, retention/cutover and gated migration/runtime/deployment path
+below. Technical Prisma/SQL mapping may follow existing project conventions.
+The remaining explicit business boundary is exact channel order; see the
+[Channel Order Decision Sheet](package5-b36-channel-order-decision-sheet.md).
+No runtime or migration has been implemented. The original diagnostic evidence
+is retained below; the current contract/schema approval must not be requested again.
 
 Accepted baseline: `48557868`, B35 production PASS. Inspected worktree
 `/tmp/maya-b29-contour`, branch `contour/b29-remediation`; after fetch, HEAD
@@ -112,7 +120,7 @@ synthetic sends across first/repeat/concurrent/response-lost/retry cases, before
 canonical admission. [Fresh replay](evidence/package5-b36-stage1-direct-replay.json).
 No live DB, real recipient, provider SDK or business endpoint was used.
 
-## 4. Minimal recommended contract — proposed, not approved
+## 4. Approved owner/report contract — channel order pending
 
 **Keep `OwnerReportsService` as canonical owner. Add one durable daily-report
 admission record owned by that service; reuse A12 ActionExecution and Communication
@@ -135,7 +143,7 @@ marketing owner, Client binding or transport implementation.
    applicable policy references and sorted canonical recipient/route slots.
    Keep current permission checks at dispatch; a snapshot is evidence, not a
    grant that survives revocation.
-4. **Routes requiring approval.** Proposed operational plan: canonical Inbox;
+4. **Approved routes; order pending.** Operational plan: canonical Inbox;
    Telegram only through an exact-tenant verified AuthIdentity of that User;
    APNS only through that User's existing registered tokens captured at admission.
    Apply the existing `daily_brief` preference to the report as a whole. Freeze
@@ -175,17 +183,19 @@ timestamps, request metadata and random root IDs. Do not hash raw JSON without
 the existing stable normalization. Planned expiry is stored once, not extended
 by a retry; routing secrets/content remain encrypted.
 
-**Business tradeoff to approve:** raw legacy admins without an active canonical
+**Approved business tradeoff:** raw legacy admins without an active canonical
 staff account/verified route stop receiving the report on that route. A newly
 linked device/recipient does not join an admitted report. Facts that arrive after
 admission do not silently rewrite it. UNKNOWN may require manual resolution and
 does not trigger delivery on an alternate channel. The authoritative business
 content remains the existing canonical report, including unavailable-data notices.
 
-## 5. Minimal schema direction for approval
+## 5. Approved schema scope; technical mapping authorized
 
-This is a proposed mapping, not schema code or authorization to migrate it.
-Recommended persisted shape: **one `OwnerReportRun` model**, owned exclusively by
+The user authorized schema implementation and gated additive migration within
+this scope. Exact technical mapping may follow project conventions. The explicit
+channel-order STOP still applies before implementation in this cycle.
+Approved persisted shape: **one `OwnerReportRun` model**, owned exclusively by
 `OwnerReportsService`, with the following 12 scalar columns:
 
 | Columns | Purpose |
@@ -207,17 +217,18 @@ Existing historical executions remain null. Add root unique
 Root identity/manifest and execution root/slot bindings must be immutable after
 commit; retention may clear ciphertext, never repurpose an identity.
 
-Proposed delta: **1 model, 14 persisted scalar columns (12 new-model + 2 existing
+Approved delta: **1 model, 14 persisted scalar columns (12 new-model + 2 existing
 ActionExecution), 0 new action classes; migration YES, historical backfill NO.**
 Prisma relation-only fields, SQL constraint/index names and final guard mapping
-must be explicit in the approved schema sheet; they are not included in the
-14-column count. Existing A12 ingress/dispatch needs a trusted root/slot check,
+must be explicitly recorded before migration and may follow existing project
+conventions; they are not included in the 14-column count. Existing A12
+ingress/dispatch needs a trusted root/slot check,
 not a new transport or a parallel idempotency engine.
 
-Before implementing this direction, approve the complete schema/contract mapping,
-including the proposed channel plan and cutover/lifecycle below. If final mapping
-requires another persisted field/model or different semantics, return the exact
-delta for approval rather than silently extending this proposal.
+Only channel order remains a business approval boundary. The route eligibility,
+cutover/lifecycle and 14-field scope are approved. If final mapping requires
+another business field/model/action or different semantics, report the exact new
+gap rather than silently extending the approved contract.
 
 ## 6. Prospective cutover, expiry and historical data
 
@@ -225,7 +236,7 @@ No reconstruction of old report manifests from Inbox rows, legacy settings,
 Telegram logs, ActionExecution payloads or B35 campaigns. They cannot establish
 the original common intended audience/content. **FAKE HISTORICAL BACKFILL: NO.**
 
-Proposed cutover is a fixed, reviewed deployment timestamp/configuration, with
+Approved cutover is a fixed, reviewed deployment timestamp/configuration, with
 the first eligible report being a full tenant-local report day beginning after
 that boundary. Both triggers use the same owner and identity. Do not replay the
 partly elapsed cutover day or a legacy UNKNOWN as a “new canonical” report.
@@ -235,7 +246,7 @@ evidence across restart/rollback and may not move backward automatically.
 
 First admission is permitted only for the current canonical scheduled period
 after that boundary; older periods can only resume an existing admitted root.
-Proposed expiry is fixed from the report period end using the A12 seven-day
+Approved expiry is fixed from the report period end using the A12 seven-day
 horizon, rather than refreshed at retry time. After expiry or payload purge,
 no new effect/recomputation is permitted; unresolved work remains terminal/manual
 according to existing outcome evidence. Keep the identity/hash tombstone for the
@@ -260,7 +271,7 @@ background delivery, pre-admission effects, raw staff route authority, missing
 deterministic identity, UNKNOWN retries and confirmed duplicates. Repository
 source and actual deployed source/launcher parity both need verification.
 
-Only after contract/schema approval: authorization negatives; missing/revoked
+After channel-order approval: authorization negatives; missing/revoked
 route; wrong tenant; repeat/concurrent admission; same-key changed plan; both
 crash boundaries; partial recipients/devices; success rerun; deterministic failure;
 UNKNOWN/reconciliation/no alternate channel; exact owner and effect ordering.
@@ -279,7 +290,8 @@ the first B37+; no new blocker is fixed in that Gate.
 B35 PRODUCTION BASELINE: PRESERVED — PASS
 ACTIVE BLOCKER: B36
 B36 FOUNDATION SUFFICIENT: NO
-B36 OWNER/CONTRACT/SCHEMA APPROVAL: PENDING
+B36 OWNER/CONTRACT/SCHEMA APPROVAL: APPROVED
+B36 CHANNEL ORDER APPROVAL: PENDING — EXPLICIT STOP BOUNDARY
 B36 IMPLEMENTATION: NOT STARTED
 B36 DEPLOYMENT: NOT STARTED
 PACKAGE 5 COMPLETE: NO
