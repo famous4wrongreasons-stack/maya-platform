@@ -2,7 +2,7 @@
 
 **Business direction A: APPROVED** by the owner after checkpoint `1e524c2a`.
 **This exact schema delta: APPROVED by the owner after checkpoint `c3641411`.**
-Implementation status: [local schema foundation checkpoint](CYCLE-06-BLOCKING-PACKAGE-5-B35-LOCAL-SCHEMA-FOUNDATION-REPORT.md).
+Implementation status: [production schema foundation PASS; runtime continues](CYCLE-06-BLOCKING-PACKAGE-5-B35-PRODUCTION-MIGRATION-REPORT.md).
 The assessment and proposed wording below are retained as the approved decision record.
 Assessment date: 2026-09-07. Only documentation and read-only inspection are
 performed in this stage. B34 production PASS remains the accepted baseline.
