@@ -1,6 +1,6 @@
 # Cycle 06 — Package 5 B29 handoff checkpoint
 
-> Current continuation: [B35 Stage 1 owner/contract proposal](package5-b35-canonical-bulk-owner-contract-v1-proposal.md) → [current B35 contract STOP remainder](CYCLE-06-BLOCKING-PACKAGE-5-B35-CONTRACT-STOP-REMAINDER-CHECKPOINT.md). Existing end-to-end bulk foundation is insufficient; runtime/schema/deployment have not started. B34 production PASS and B29–B33 remain preserved. Package 5 is not complete.
+> Current continuation: [B35 exact schema mapping](package5-b35-exact-schema-mapping-v1-proposal.md) → [current B35 schema STOP remainder](CYCLE-06-BLOCKING-PACKAGE-5-B35-SCHEMA-STOP-REMAINDER-CHECKPOINT.md). Option A business direction is approved; schema delta awaits approval. Proposed: 0 models, 12 new columns, 2 existing nullability changes, 0 action classes; no backfill. Runtime/schema/deployment have not started. B34 production PASS and B29–B33 remain preserved. Package 5 is not complete.
 > The original checkpoint/proposal below is historical; its old pending/STOP status is superseded.
 
 Status: **HANDOFF READY — STOP AT B29 / A18**

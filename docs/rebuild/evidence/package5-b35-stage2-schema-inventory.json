@@ -1,0 +1,248 @@
+{
+  "contract": "maya.package5-b35-schema-proposal-inventory/1",
+  "baseline": "1e524c2aec2c252ae0691468e1eb31fc63a5d569",
+  "recordedAt": "2026-09-07T09:06:59.001986+00:00",
+  "businessDirection": "A APPROVED",
+  "schemaDelta": "PROPOSED \u2014 not approved or applied",
+  "preflight": {
+    "fetchOrigin": "PASS",
+    "branch": "contour/b29-remediation",
+    "headEqualCanonicalOrigin": true,
+    "aheadBehind": [
+      0,
+      0
+    ],
+    "dirtyBeforeAssessment": 0
+  },
+  "requirementsMapped": 25,
+  "newModels": 0,
+  "newPersistedFields": [
+    {
+      "model": "MarketingCampaign",
+      "column": "bulkIntentContract",
+      "prismaType": "String?",
+      "postgresType": "TEXT",
+      "purpose": "Root-only version/discriminator; NULL for historical rows and delivery envelopes."
+    },
+    {
+      "model": "MarketingCampaign",
+      "column": "bulkIntentHash",
+      "prismaType": "String?",
+      "postgresType": "TEXT",
+      "purpose": "Canonical full approved-intent HMAC, 64 lower-case hex; immutable after confirmation."
+    },
+    {
+      "model": "MarketingCampaign",
+      "column": "parentRecipientId",
+      "prismaType": "String?",
+      "postgresType": "TEXT",
+      "purpose": "Delivery envelope \u2192 same-tenant logical Client recipient."
+    },
+    {
+      "model": "MarketingCampaign",
+      "column": "bulkSlotKey",
+      "prismaType": "String?",
+      "postgresType": "TEXT",
+      "purpose": "One fixed planned transport portion under that Client."
+    },
+    {
+      "model": "MarketingAudience",
+      "column": "snapshotContract",
+      "prismaType": "String?",
+      "postgresType": "TEXT",
+      "purpose": "`maya.bulk-client-audience/1`; explicit canonical Client snapshot semantics."
+    },
+    {
+      "model": "MarketingAudienceRecipient",
+      "column": "clientId",
+      "prismaType": "String?",
+      "postgresType": "TEXT",
+      "purpose": "Canonical Client FK, not account/provider identity."
+    },
+    {
+      "model": "MarketingCampaignRecipient",
+      "column": "clientId",
+      "prismaType": "String?",
+      "postgresType": "TEXT",
+      "purpose": "Canonical Client FK for lifecycle-2 logical recipients only."
+    },
+    {
+      "model": "MarketingCampaignRecipient",
+      "column": "routePlanJson",
+      "prismaType": "Json?",
+      "postgresType": "JSONB",
+      "purpose": "Typed immutable safe route/link/device references and evidence hashes."
+    },
+    {
+      "model": "MarketingCampaignRecipient",
+      "column": "contentEncrypted",
+      "prismaType": "String?",
+      "postgresType": "TEXT",
+      "purpose": "Frozen normalized per-Client content, encrypted by existing payload primitives."
+    },
+    {
+      "model": "MarketingCampaignRecipient",
+      "column": "aggregateState",
+      "prismaType": "CommunicationCampaignState?",
+      "postgresType": "existing enum",
+      "purpose": "Aggregate of planned transport portions; distinguishes PARTIAL/UNRESOLVED from leaf delivery state."
+    },
+    {
+      "model": "MarketingDeliveryAttempt",
+      "column": "dispatchEligibilityJson",
+      "prismaType": "Json?",
+      "postgresType": "JSONB",
+      "purpose": "Exact safe dispatch-time policy/consent/route evidence; sealed before the provider boundary and immutable afterwards."
+    },
+    {
+      "model": "MarketingPolicy",
+      "column": "canonicalHistoryStartedAt",
+      "prismaType": "DateTime?",
+      "postgresType": "TIMESTAMP(3), UTC",
+      "purpose": "Prospective, write-once coverage epoch for canonical marketing history; neither consent nor last-send time."
+    }
+  ],
+  "alteredExistingFields": [
+    {
+      "model": "MarketingCampaign",
+      "column": "channel",
+      "change": "nullable for B35 root only; old default/values preserved; non-root NOT NULL CHECK"
+    },
+    {
+      "model": "MarketingCampaign",
+      "column": "provider",
+      "change": "nullable for B35 root only; old default/values preserved; non-root NOT NULL CHECK"
+    }
+  ],
+  "newVirtualPrismaRelations": 6,
+  "newUniqueConstraints": [
+    {
+      "name": "B35_audience_client_key",
+      "model": "MarketingAudienceRecipient",
+      "columns": [
+        "tenantId",
+        "audienceId",
+        "clientId"
+      ]
+    },
+    {
+      "name": "B35_bulk_client_key",
+      "model": "MarketingCampaignRecipient",
+      "columns": [
+        "tenantId",
+        "campaignId",
+        "clientId"
+      ]
+    },
+    {
+      "name": "B35_recipient_slot_key",
+      "model": "MarketingCampaign",
+      "columns": [
+        "tenantId",
+        "parentRecipientId",
+        "bulkSlotKey"
+      ]
+    }
+  ],
+  "newNonUniqueIndexes": [
+    {
+      "name": "B35_audience_client_idx",
+      "model": "MarketingAudienceRecipient",
+      "columns": [
+        "tenantId",
+        "clientId"
+      ]
+    },
+    {
+      "name": "B35_recipient_client_history_idx",
+      "model": "MarketingCampaignRecipient",
+      "columns": [
+        "tenantId",
+        "clientId",
+        "createdAt",
+        "id"
+      ]
+    }
+  ],
+  "newPhysicalIndexesIncludingUniqueBacking": 5,
+  "newForeignKeys": [
+    {
+      "name": "B35_audience_client_fkey",
+      "model": "MarketingAudienceRecipient",
+      "columns": [
+        "clientId",
+        "tenantId"
+      ],
+      "target": "Client",
+      "targetColumns": [
+        "id",
+        "tenantId"
+      ]
+    },
+    {
+      "name": "B35_recipient_client_fkey",
+      "model": "MarketingCampaignRecipient",
+      "columns": [
+        "clientId",
+        "tenantId"
+      ],
+      "target": "Client",
+      "targetColumns": [
+        "id",
+        "tenantId"
+      ]
+    },
+    {
+      "name": "B35_transport_parent_fkey",
+      "model": "MarketingCampaign",
+      "columns": [
+        "parentRecipientId",
+        "tenantId"
+      ],
+      "target": "MarketingCampaignRecipient",
+      "targetColumns": [
+        "id",
+        "tenantId"
+      ]
+    }
+  ],
+  "newEnumTypes": 0,
+  "newEnumValues": 0,
+  "newActionClasses": 0,
+  "migrationRequired": true,
+  "backfillRequired": false,
+  "validation": {
+    "productionSchemaFileMatchesRepository": true,
+    "allNewColumnsAbsentFromProduction": true,
+    "allReferencedColumnsExistOrAreExplicitDelta": true,
+    "foreignKeyTargetsHaveExistingUniqueKeys": true,
+    "requirementRowsComplete": true,
+    "proposalInventory": "PASS"
+  },
+  "postgresBehaviorProof": "PLAN ONLY \u2014 no proposed DDL/migration replay/race test run",
+  "runtimeSchemaMigrationEdits": 0,
+  "productionDeployment": false,
+  "productionMessages": 0,
+  "productionBusinessDataAccess": 0,
+  "protectedMain": {
+    "dirtyEntries": 24,
+    "recordedFileHashes": 22,
+    "allPreserved": true
+  },
+  "oldDatabasesTouched": 0,
+  "preExistingDatabaseCount": 17,
+  "ownedDatabasesCreated": 0,
+  "ownedResourcesRemaining": 0,
+  "processHygiene": 0,
+  "package5Complete": false,
+  "chapter7Started": false,
+  "b34Reopened": false,
+  "documentationValidation": {
+    "scope": "docs/rebuild only",
+    "changedFiles": 11,
+    "relativeLinksVerified": 116,
+    "pythonJsonShellSyntax": "PASS",
+    "gitDiffCheck": "PASS",
+    "runtimePrismaMigrationChanges": 0
+  }
+}

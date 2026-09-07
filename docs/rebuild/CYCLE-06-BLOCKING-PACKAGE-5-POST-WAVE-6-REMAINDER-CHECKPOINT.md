@@ -1,10 +1,11 @@
-# Package 5 post-Wave-6 remainder — B34 production PASS; B35 contract STOP
+# Package 5 post-Wave-6 remainder — B34 production PASS; B35 schema STOP
 
-Current continuation: [B35 Stage 1 contract STOP remainder](CYCLE-06-BLOCKING-PACKAGE-5-B35-CONTRACT-STOP-REMAINDER-CHECKPOINT.md)
-and [common canonical marketing bulk proposal](package5-b35-canonical-bulk-owner-contract-v1-proposal.md).
-Existing end-to-end foundation is insufficient. Required decisions concern
-tenant/staff approval, immutable bulk intent, canonical Client audience,
-marketing routes and partial resume. No runtime/schema/deployment started.
+Current continuation: [B35 schema STOP remainder](CYCLE-06-BLOCKING-PACKAGE-5-B35-SCHEMA-STOP-REMAINDER-CHECKPOINT.md)
+and [exact schema mapping](package5-b35-exact-schema-mapping-v1-proposal.md).
+Option A business direction is approved. All 25 requirements are mapped; proposed
+delta is 0 models, 12 new fields, 2 existing nullability changes, 3 uniques,
+2 non-unique indexes and 0 action classes. Migration required; no backfill.
+Schema approval is pending. No runtime/schema/deployment started.
 
 Accepted production/final-gate baseline: [post-B34 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B34-REMAINDER-CHECKPOINT.md)
 and [B34 production / B35 Final Gate report](CYCLE-06-BLOCKING-PACKAGE-5-B34-DEPLOYED-FINAL-GATE-STOP-REPORT.md).

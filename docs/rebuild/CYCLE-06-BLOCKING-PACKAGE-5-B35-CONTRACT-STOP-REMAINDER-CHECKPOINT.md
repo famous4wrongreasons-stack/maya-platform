@@ -1,5 +1,10 @@
 # Package 5 remainder — B35 Stage 1 owner/contract STOP
 
+> Superseded continuation: Option A business direction is now approved. See
+> [Stage 2 exact schema mapping](package5-b35-exact-schema-mapping-v1-proposal.md)
+> and [current schema STOP remainder](CYCLE-06-BLOCKING-PACKAGE-5-B35-SCHEMA-STOP-REMAINDER-CHECKPOINT.md).
+> The Stage 1 pending decision below is historical; runtime remains unapproved.
+
 Accepted baseline: `1a45ed09962aa85ee9188093797f73a006e27826`.
 Current decision/report: [B35 canonical marketing bulk proposal](package5-b35-canonical-bulk-owner-contract-v1-proposal.md).
 Evidence: [Stage 1 assessment](evidence/package5-b35-stage1-assessment.json),

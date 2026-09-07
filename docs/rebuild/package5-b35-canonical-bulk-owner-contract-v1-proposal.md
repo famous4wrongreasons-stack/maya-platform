@@ -1,6 +1,10 @@
 # B35 — Canonical marketing bulk: Stage 1 contract decision
 
-Status: **OWNER/CONTRACT STOP — proposed, not approved or implemented.**
+Status: **OPTION A BUSINESS DIRECTION APPROVED** after checkpoint `1e524c2a`.
+Runtime remains unapproved. Current continuation is the [exact schema mapping
+proposal](package5-b35-exact-schema-mapping-v1-proposal.md) and [schema STOP remainder](CYCLE-06-BLOCKING-PACKAGE-5-B35-SCHEMA-STOP-REMAINDER-CHECKPOINT.md).
+The original Stage 1 assessment/approval boundary below is historical; Stage 2
+now provides exact counts and a concrete schema proposal awaiting approval.
 Assessment baseline: accepted checkpoint `1a45ed09962aa85ee9188093797f73a006e27826`.
 Date: 2026-09-07. B34 production PASS and B29–B33 remain preserved.
 
