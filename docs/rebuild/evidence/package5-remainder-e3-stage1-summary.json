@@ -361,5 +361,11 @@
     "Per-sheet summary counts",
     "Pinned sheet/assessment hashes",
     "No schema placeholders"
-  ]
+  ],
+  "laterBaselineHold": {
+    "status": "STOP",
+    "evidence": "package5-wave-rb-late-baseline-stop.json",
+    "reason": "Independent upstream PHP relay commit now matches a changed known production alias",
+    "priorProofAndAssessmentPreserved": true
+  }
 }

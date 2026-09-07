@@ -59,5 +59,11 @@
     "package5-wave-rb-vps-staging-cleanup.json",
     "package5-wave-rb-edge-staging-cleanup.json",
     "package5-wave-rb-production-process-hygiene.json"
-  ]
+  ],
+  "laterBaselineHold": {
+    "status": "STOP",
+    "evidence": "package5-wave-rb-late-baseline-stop.json",
+    "reason": "Independent upstream PHP relay commit now matches a changed known production alias",
+    "priorProofAndAssessmentPreserved": true
+  }
 }

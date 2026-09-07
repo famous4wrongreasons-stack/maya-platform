@@ -48,9 +48,15 @@
     "candidateRestoreFilesRemaining": 0,
     "productionWrites": 0
   },
-  "postGateChanges": "docs/rebuild ONLY",
+  "postGateChanges": "Owned changes docs/rebuild only; independent upstream7ee1e670 preserved by Git merge, not deployed or retested by this wave",
   "newMigrations": 0,
   "productionBusinessProviderMessagesForProof": 0,
   "package5FinalGateRun": false,
-  "processHygiene": 0
+  "processHygiene": 0,
+  "laterBaselineHold": {
+    "status": "STOP",
+    "evidence": "package5-wave-rb-late-baseline-stop.json",
+    "reason": "Independent upstream PHP relay commit now matches a changed known production alias",
+    "priorProofAndAssessmentPreserved": true
+  }
 }

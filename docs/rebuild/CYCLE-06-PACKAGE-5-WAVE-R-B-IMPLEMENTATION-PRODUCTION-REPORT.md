@@ -1,5 +1,7 @@
 # Package 5 remainder — Wave R-B production completion
 
+**Later checkpoint: [baseline divergence STOP](CYCLE-06-PACKAGE-5-WAVE-R-B-LATE-BASELINE-STOP.md).** An independent R01 PHP hotfix changed one production alias after the successful verification below. The cutover PASS evidence is preserved; it is not a claim that the later combined baseline was tested by this wave.
+
 **R03, R04 and R07: local acceptance and production remediation PASS.** The coordinated cutover closes **B56, B42, B46 and B57**. Cumulative progress is **10/24 blockers and 6/14 remediation packages**, with eight packages remaining. The completed 32/32 inventory is unchanged. Package 5 Final Gate was not run.
 
 Authorization: accepted checkpoint `cb4fb27c`; exact scope and acceptance remain the [E2 assessment](CYCLE-06-PACKAGE-5-REMAINDER-E2-STAGE-1-ASSESSMENT.md) and [historical master inventory](CYCLE-06-BLOCKING-PACKAGE-5-EXHAUSTIVE-REMAINDER-INVENTORY-COMPLETE.md). Production was changed only through the approved [coordinated cutover plan](CYCLE-06-PACKAGE-5-WAVE-R-B-CUTOVER-PLAN.md).

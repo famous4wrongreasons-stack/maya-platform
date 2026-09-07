@@ -1,5 +1,7 @@
 # Package 5 remainder — E3 consolidated Stage 1 assessment
 
+**Post-assessment hold: [independent production edge baseline change](CYCLE-06-PACKAGE-5-WAVE-R-B-LATE-BASELINE-STOP.md).** The eight proposals below are complete, but subsequent execution must first acknowledge that changed baseline. No new Bxx or inventory reopening is implied.
+
 **Wave R-B is production PASS; the next dependency-eligible group is R05, R06, R08, R09, R11, R12, R13, R14.** Eight package Decision Sheets are prepared. Their recommendations are **proposals, not approvals**. No E3 runtime, schema, migration, tests, database proof or deployment was performed.
 
 The [R-B production report](CYCLE-06-PACKAGE-5-WAVE-R-B-IMPLEMENTATION-PRODUCTION-REPORT.md), committed at `e2279392`, records R03/R04/R07 PASS and cumulative **10/24 blockers, 6/14 packages**. Verified production is release `/opt/maya-saas/releases/20260907-p5-rb-cb4fb27c`, clean release view `6ad559c3`, based on canonical runtime source `42962475` with the documented B36 WIP exclusion. The assessment reads repository contracts and the already captured, hash-matched production variants; it does not equate all canonical B36 WIP with deployed code.

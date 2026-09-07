@@ -1,0 +1,104 @@
+{
+  "status": "STOP — PRODUCTION BASELINE DIVERGENCE",
+  "recordedAt": "2026-09-07T21:31:49.273938+00:00",
+  "verifiedWaveCutover": {
+    "R03": "PASS",
+    "R04": "PASS",
+    "R07": "PASS",
+    "proof": "package5-wave-rb-production-proof.json",
+    "release": "/opt/maya-saas/releases/20260907-p5-rb-cb4fb27c"
+  },
+  "independentUpstreamCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
+  "upstreamSubject": "fix(edge): restore PHP 5.6 API relay compatibility",
+  "upstreamPaths": [
+    "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+    "maya-saas-backend/deploy/platform/beget-edge/r01/mayaos__maya-platform-api.php.patch",
+    "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__maya-native-api.php.patch",
+    "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+    "\"\\321\\201\\320\\260\\320\\271\\321\\202 \\320\\270 \\320\\277\\321\\200\\320\\270\\320\\273\\320\\276\\320\\266\\320\\265\\320\\275\\320\\270\\320\\265/maya-native-api.php\""
+  ],
+  "preservingMergeCommit": "246a32e822678613858be7e829ad78badfd73ab8",
+  "gitMergeConflicts": 0,
+  "forcePush": false,
+  "upstreamChangeImplementedOrDeployedByThisWave": false,
+  "readOnlyProductionEvidence": {
+    "productionWrites": 0,
+    "rows": [
+      {
+        "target": "salon/app/index.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html",
+        "sha256": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "observedSha256": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "matchesPostcutover": true
+      },
+      {
+        "target": "mayaos/app/index.html",
+        "path": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html",
+        "sha256": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "observedSha256": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "matchesPostcutover": true
+      },
+      {
+        "target": "salon/app/index.codex-loyalty-20260721.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.codex-loyalty-20260721.html",
+        "sha256": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "observedSha256": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "matchesPostcutover": true
+      },
+      {
+        "target": "salon/app/index.backup-20260731-anton-analytics.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.backup-20260731-anton-analytics.html",
+        "sha256": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "observedSha256": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "matchesPostcutover": true
+      },
+      {
+        "target": "salon/app/tenant-test.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-test.html",
+        "sha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "observedSha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "matchesPostcutover": true
+      },
+      {
+        "target": "salon/app/api-proxy.php",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+        "sha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+        "observedSha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+        "matchesPostcutover": true
+      },
+      {
+        "target": "salon/app/api-proxy.codex-loyalty-20260721.php",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.codex-loyalty-20260721.php",
+        "sha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+        "observedSha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+        "matchesPostcutover": true
+      },
+      {
+        "target": "salon/app/maya-native-api.php",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php",
+        "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "observedSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "matchesPostcutover": true
+      },
+      {
+        "target": "mayaos/maya-platform-api.php",
+        "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php",
+        "sha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+        "observedSha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+        "matchesPostcutover": false
+      }
+    ]
+  },
+  "matchesUpstreamFullFileSha256": true,
+  "laterAliasesMatchingCutover": 8,
+  "aliasesChecked": 9,
+  "newInventorySurface": false,
+  "newBlockerIds": [],
+  "fullMandatoryOnMergedHead": "NOT RUN — STOP; prior pinned canonical/release gate results preserved",
+  "furtherImplementationDeployment": false,
+  "productionBusinessProviderMessagesForProof": 0,
+  "package5FinalGateRun": false,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "processHygiene": 0
+}

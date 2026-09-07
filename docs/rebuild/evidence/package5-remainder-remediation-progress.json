@@ -2,7 +2,7 @@
   "inventorySource": "docs/rebuild/evidence/package5-remainder-inventory-final.json",
   "inventorySha256": "f0d29c9f60c4699c1458b383b86decf0fb26aef5ee56e89a2d9a89b6b62df425",
   "wave": "R-B",
-  "state": "PRODUCTION VERIFIED",
+  "state": "R-B CUTOVER VERIFIED; LATER PRODUCTION BASELINE DIVERGENCE — STOP",
   "packages": [
     {
       "id": "R01",
@@ -60,7 +60,7 @@
         "B36 proof PASS before any extension acceptance"
       ],
       "status": "NOT REMEDIATED",
-      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
       "assessmentEvidence": "package5-remainder-e3-r05-assessment.json",
       "ownerDecisionRequired": true,
       "schemaApprovalRequiredForRecommendedOption": true,
@@ -81,7 +81,7 @@
         "B44 contract/schema decision"
       ],
       "status": "NOT REMEDIATED",
-      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
       "assessmentEvidence": "package5-remainder-e3-r06-assessment.json",
       "ownerDecisionRequired": true,
       "schemaApprovalRequiredForRecommendedOption": true,
@@ -104,14 +104,14 @@
       "blockers": [
         "B47"
       ],
-      "owner": "Native feedback/request owner \u2014 exact mapping pending",
+      "owner": "Native feedback/request owner — exact mapping pending",
       "dependencies": [
         "R01",
         "R02",
         "B47 owner/schema decision"
       ],
       "status": "NOT REMEDIATED",
-      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
       "assessmentEvidence": "package5-remainder-e3-r08-assessment.json",
       "ownerDecisionRequired": true,
       "schemaApprovalRequiredForRecommendedOption": true,
@@ -122,13 +122,13 @@
       "blockers": [
         "B52"
       ],
-      "owner": "Anonymous community source facts and canonical moderation owner \u2014 mapping pending",
+      "owner": "Anonymous community source facts and canonical moderation owner — mapping pending",
       "dependencies": [
         "R02",
         "B52 owner/schema decision"
       ],
       "status": "NOT REMEDIATED",
-      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
       "assessmentEvidence": "package5-remainder-e3-r09-assessment.json",
       "ownerDecisionRequired": true,
       "schemaApprovalRequiredForRecommendedOption": true,
@@ -155,7 +155,7 @@
         "B51/B59 owner/schema decisions"
       ],
       "status": "NOT REMEDIATED",
-      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
       "assessmentEvidence": "package5-remainder-e3-r11-assessment.json",
       "ownerDecisionRequired": true,
       "schemaApprovalRequiredForRecommendedOption": true,
@@ -173,7 +173,7 @@
         "B58 owner/schema decision"
       ],
       "status": "NOT REMEDIATED",
-      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
       "assessmentEvidence": "package5-remainder-e3-r12-assessment.json",
       "ownerDecisionRequired": true,
       "schemaApprovalRequiredForRecommendedOption": true,
@@ -190,7 +190,7 @@
         "B37 owner/schema approval"
       ],
       "status": "NOT REMEDIATED",
-      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
       "assessmentEvidence": "package5-remainder-e3-r13-assessment.json",
       "ownerDecisionRequired": true,
       "schemaApprovalRequiredForRecommendedOption": true,
@@ -201,13 +201,13 @@
       "blockers": [
         "B55"
       ],
-      "owner": "Cash declaration/reconciliation owner \u2014 mapping pending",
+      "owner": "Cash declaration/reconciliation owner — mapping pending",
       "dependencies": [
         "R02",
         "B55 owner/schema decision"
       ],
       "status": "NOT REMEDIATED",
-      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
       "assessmentEvidence": "package5-remainder-e3-r14-assessment.json",
       "ownerDecisionRequired": true,
       "schemaApprovalRequiredForRecommendedOption": true,
@@ -267,7 +267,7 @@
           "idempotency key",
           "concurrent write conflict"
         ],
-        "approvedOrder": "INBOX \u2192 TELEGRAM \u2192 APNS",
+        "approvedOrder": "INBOX → TELEGRAM → APNS",
         "newDecisionRequired": false
       }
     },
@@ -504,5 +504,11 @@
     "B49",
     "B53"
   ],
-  "assessedPackageCount": 14
+  "assessedPackageCount": 14,
+  "laterBaselineHold": {
+    "evidence": "package5-wave-rb-late-baseline-stop.json",
+    "upstreamCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
+    "currentExecutionHold": true,
+    "remediationCountsPreserveVerifiedCutover": true
+  }
 }
