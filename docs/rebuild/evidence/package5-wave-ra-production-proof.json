@@ -1,0 +1,1073 @@
+{
+  "wave": "R-A",
+  "status": "PASS",
+  "canonicalRuntimeSource": "ef091875b1734188c05a51032cb4babd31e943b8",
+  "publicationMappingSource": "b1a937fe4cb1a179cec315c0b49ec4e384e52161",
+  "releaseView": {
+    "canonicalSource": "ef091875b1734188c05a51032cb4babd31e943b8",
+    "releaseCommit": "4891f5e758a51bf7f680d0ba27aee490b413dc93",
+    "releaseTree": "791ae533cf9929841bc4622bb3a3ed8f655d0628",
+    "excludedWip": "7201f7bdfc3ed8784994536d86522031ca87b16c",
+    "excludedRuntimePaths": [
+      "ai администратор/bot.py",
+      "ai администратор/maya_inbox_bridge.py",
+      "ai администратор/test_package2_communication_ratchet.py",
+      "maya-saas-backend/scripts/package5-b36-runtime-proof.ts",
+      "maya-saas-backend/scripts/package5-b36-schema-proof.ts",
+      "maya-saas-backend/src/action-engine/action-engine.contract.ts",
+      "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "maya-saas-backend/src/communication-delivery/communication-delivery.module.ts",
+      "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts",
+      "maya-saas-backend/src/dashboard-preferences/assistant-preferences.read.ts",
+      "maya-saas-backend/src/dashboard-preferences/dashboard-preferences.service.ts",
+      "maya-saas-backend/src/inbox/inbox.service.spec.ts",
+      "maya-saas-backend/src/inbox/inbox.service.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-foundation.module.ts",
+      "maya-saas-backend/src/owner-reports/owner-report.runtime.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report.store.ts",
+      "maya-saas-backend/src/owner-reports/owner-reports.controller.ts",
+      "maya-saas-backend/src/owner-reports/owner-reports.module.ts",
+      "maya-saas-backend/src/owner-reports/owner-reports.regression.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-reports.scheduler.ts",
+      "maya-saas-backend/src/owner-reports/owner-reports.service.ts"
+    ],
+    "excludedDeltaSha256": "faacae756551d2d80bfa436ec6c1b04d1b8bd345f56c4c3a7338d8b7154c6b47",
+    "schemaDifference": "NONE",
+    "schemaProofRetained": true,
+    "schemaProofCompatibilityRevision": "d7794b3101020d42fca16afd25f0972255a2a498",
+    "canonicalCheckoutModified": false,
+    "directory": "/tmp/maya-wave-ra-release-ef091875",
+    "branch": "release/wave-ra-20260907-ef091875",
+    "clean": true
+  },
+  "productionRelease": "/opt/maya-saas/releases/20260907-p5-ra-d8049d47",
+  "packages": {
+    "R01": {
+      "blockers": [
+        "B38",
+        "B39",
+        "B54"
+      ],
+      "localAcceptance": "PASS",
+      "productionRemediation": "PASS"
+    },
+    "R02": {
+      "blockers": [
+        "B40",
+        "B41"
+      ],
+      "localAcceptance": "PASS",
+      "productionRemediation": "PASS"
+    },
+    "R10": {
+      "blockers": [
+        "B50"
+      ],
+      "localAcceptance": "PASS",
+      "productionRemediation": "PASS"
+    }
+  },
+  "newModels": 0,
+  "newFields": 0,
+  "newActionClasses": 0,
+  "newMigrations": 0,
+  "artifacts": {
+    "status": "PASS",
+    "checkedAt": "2026-09-07T19:23:19.792064+00:00",
+    "release": "/opt/maya-saas/releases/20260907-p5-ra-d8049d47",
+    "pythonFiles": 95,
+    "compiledFiles": 593,
+    "exactPythonOverlay": true,
+    "exactBackendBuild": true,
+    "runtimeFlagsPreserved": true,
+    "unrelatedServicesPreserved": true,
+    "productionProofMessages": 0,
+    "productionProofBusinessMutations": 0
+  },
+  "structural": {
+    "status": "PASS",
+    "release": "/opt/maya-saas/releases/20260907-p5-ra-d8049d47",
+    "independentNodeModules": true,
+    "services": {
+      "maya-saas": {
+        "MainPID": "1593946",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "barbershop-bot": {
+        "MainPID": "1594065",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "serviceListenersPresent": true,
+    "smoke3199Listener": false,
+    "smokeLogRemaining": false,
+    "vpsAppOwnerPreserved": true,
+    "wrongBotRootAppCreated": false,
+    "publicationTemporaryFiles": 0,
+    "vpsPublicHashes": {
+      "app.html": "b37abcd277156e5e6a67505768ea2b5686898cd4512ea860fa57b45ff81b5ee1",
+      "oauth-callback.html": "9bdb1dbfb83386ebd3555302c263cb4875316439fb6b0a225d48fad43fe572d6",
+      "service-worker.js": "8e5cbb806ecacad22337e442e5e01a3b37a7e07b3462fc0f98f9e895ee0a2f75"
+    },
+    "productionProofMessages": 0,
+    "productionProofBusinessMutations": 0
+  },
+  "schema": {
+    "gate": "PASS",
+    "pending": 0,
+    "postApplyDrift": "NONE",
+    "migration": "20260907180000_b36_owner_report_run",
+    "migrationChecksum": "3572d6327a1f24f055370d44004c6ddfdebdfcc6746d3a2fbb33a14955a676f0",
+    "newColumns": 14,
+    "newForeignKeys": 2,
+    "newPhysicalIndexes": 7,
+    "guards": 2,
+    "checkConstraints": 2,
+    "ownerReportRuns": 0,
+    "populatedNewFields": 0,
+    "fakeHistoricalBackfill": 0,
+    "release": "/opt/maya-saas/releases/20260907-p5-ra-d8049d47",
+    "health": 200,
+    "readiness": 200,
+    "waveRuntimeSwitched": true,
+    "b36RuntimeSwitched": false,
+    "ownerReportRunDurableInProduction": true,
+    "productionMessages": 0,
+    "productionBusinessProofMutations": 0
+  },
+  "existingB36SchemaColumns": 14,
+  "b36": {
+    "status": "PASS",
+    "b35ReportCompiledArtifactsIdentical": {
+      "dist/src/owner-reports/owner-reports.service.js": {
+        "baseline": "784d9d710a27ad10dc8fcccd86951b6e72bf095356d8be64fefa17bb1ccec174",
+        "release": "784d9d710a27ad10dc8fcccd86951b6e72bf095356d8be64fefa17bb1ccec174"
+      },
+      "dist/src/owner-reports/owner-reports.scheduler.js": {
+        "baseline": "76f870ffcbea10591e4f052864ffd7ea10c9bef989f4fcec41d639d0ea5d7020",
+        "release": "76f870ffcbea10591e4f052864ffd7ea10c9bef989f4fcec41d639d0ea5d7020"
+      },
+      "dist/src/owner-reports/owner-reports.module.js": {
+        "baseline": "e86e0c1f3558144308edfe5586b860df7ac49f5c90c310731ca4ed1ac67b8fb0",
+        "release": "e86e0c1f3558144308edfe5586b860df7ac49f5c90c310731ca4ed1ac67b8fb0"
+      }
+    },
+    "productionPythonDailyReportPreserved": {
+      "before": "5e766aee78327384e10fff34a72bcd35f9675cbd7376c417e6a1b3f1aab98622",
+      "candidate": "5e766aee78327384e10fff34a72bcd35f9675cbd7376c417e6a1b3f1aab98622"
+    },
+    "b36Schema": "APPLIED",
+    "b36Runtime": "NOT DEPLOYED",
+    "knownProofDefects": [
+      "IDEMPOTENCY KEY",
+      "CONCURRENT WRITE CONFLICT"
+    ],
+    "newSchema": 0
+  },
+  "r02ProductionPrerequisites": {
+    "secretConfiguredBoth": true,
+    "secretMatches": true,
+    "providerConfigured": true,
+    "companyBindingMatchesPython": true,
+    "businessMutations": 0,
+    "messages": 0,
+    "uniqueIntegration": true,
+    "eligibleTenant": true,
+    "resolvedBy": "integration",
+    "status": "PASS"
+  },
+  "publication": {
+    "edge-php-publication.json": {
+      "phase": "php",
+      "status": "PASS",
+      "filesChecked": 9,
+      "filesPublished": 4,
+      "productionProofMessages": 0,
+      "productionProofBusinessMutations": 0
+    },
+    "python-publication.json": {
+      "phase": "publish",
+      "status": "PASS",
+      "filesChecked": 13,
+      "filesPublished": 12,
+      "guards": 4,
+      "productionProofMessages": 0,
+      "productionProofBusinessMutations": 0
+    },
+    "edge-pwa-publication.json": {
+      "phase": "pwa",
+      "status": "PASS",
+      "filesChecked": 9,
+      "filesPublished": 5,
+      "productionProofMessages": 0,
+      "productionProofBusinessMutations": 0
+    },
+    "edge-production-verify.json": {
+      "phase": "verify",
+      "status": "PASS",
+      "filesChecked": 9,
+      "filesPublished": 0,
+      "productionProofMessages": 0,
+      "productionProofBusinessMutations": 0
+    },
+    "python-production-verify.json": {
+      "phase": "verify",
+      "status": "PASS",
+      "filesChecked": 13,
+      "filesPublished": 0,
+      "guards": 4,
+      "productionProofMessages": 0,
+      "productionProofBusinessMutations": 0
+    }
+  },
+  "r10ActualReleaseProof": {
+    "contract": "package5.wave-ra.r10.release-projection-proof/1",
+    "status": "PASS",
+    "sourceCheckpoint": "ef091875",
+    "releaseHead": "4891f5e758a51bf7f680d0ba27aee490b413dc93",
+    "releaseView": "/tmp/maya-wave-ra-release-ef091875",
+    "resolvedSource": "/private/tmp/maya-wave-ra-release-ef091875",
+    "nodeVersion": "v24.19.0",
+    "database": "postgresql://maya_ra@127.0.0.1:55507/maya_ra_r10",
+    "freshFixtureTenantId": "cmtrlxkgf0000i2c9xygesd7t",
+    "reusedPriorFixture": false,
+    "sourceHashesBefore": {
+      "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+      "docs/rebuild/evidence/package5-wave-ra-r10-postgres-attestation.cjs": "b0ee5c25525187d7d1c7f3c200a25c4ed61c172774fb6f833ef041123ab0446c",
+      "maya-saas-backend/src/action-engine/action-engine.kernel.ts": "1cd565243675214107e5aa085bd82f69deaec07104135d0e2a7f5e644c5fadb6",
+      "maya-saas-backend/src/action-engine/action-engine.runtime.ts": "37e4175c0cc21ef4270e4a36763ca189cf36d097f744dd17a77de39ef95da6b8",
+      "maya-saas-backend/src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3",
+      "maya-saas-backend/src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+      "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+      "maya-saas-backend/src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+      "maya-saas-backend/prisma/schema.prisma": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8"
+    },
+    "sourceHashesAfter": {
+      "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+      "docs/rebuild/evidence/package5-wave-ra-r10-postgres-attestation.cjs": "b0ee5c25525187d7d1c7f3c200a25c4ed61c172774fb6f833ef041123ab0446c",
+      "maya-saas-backend/src/action-engine/action-engine.kernel.ts": "1cd565243675214107e5aa085bd82f69deaec07104135d0e2a7f5e644c5fadb6",
+      "maya-saas-backend/src/action-engine/action-engine.runtime.ts": "37e4175c0cc21ef4270e4a36763ca189cf36d097f744dd17a77de39ef95da6b8",
+      "maya-saas-backend/src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3",
+      "maya-saas-backend/src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+      "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+      "maya-saas-backend/src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+      "maya-saas-backend/prisma/schema.prisma": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8"
+    },
+    "sourceStable": true,
+    "phaseCount": 9,
+    "distinctPhaseProcesses": 9,
+    "commandResults": [
+      {
+        "phase": "baseline",
+        "args": {
+          "cmd": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs baseline /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/release-acceptance",
+          "workdir": "/tmp/maya-wave-ra-release-ef091875",
+          "yield_time_ms": 10000,
+          "max_output_tokens": 2000
+        },
+        "startedAt": "2026-09-07T19:02:01.187Z",
+        "finishedAt": "2026-09-07T19:02:03.133Z",
+        "chunk_id": "dbb853",
+        "wall_time_seconds": 1.778809291,
+        "exit_code": 0,
+        "original_token_count": 20,
+        "output": "{\"phase\":\"baseline\",\"status\":\"PASS\",\"productionEffects\":0,\"providerCalls\":0}\n"
+      },
+      {
+        "phase": "crash-ready",
+        "args": {
+          "cmd": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs crash-ready /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/release-acceptance",
+          "workdir": "/tmp/maya-wave-ra-release-ef091875",
+          "yield_time_ms": 10000,
+          "max_output_tokens": 2000
+        },
+        "startedAt": "2026-09-07T19:02:03.133Z",
+        "finishedAt": "2026-09-07T19:02:04.702Z",
+        "chunk_id": "9990b6",
+        "wall_time_seconds": 1.403117459,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      },
+      {
+        "phase": "resume-ready",
+        "args": {
+          "cmd": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs resume-ready /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/release-acceptance",
+          "workdir": "/tmp/maya-wave-ra-release-ef091875",
+          "yield_time_ms": 10000,
+          "max_output_tokens": 2000
+        },
+        "startedAt": "2026-09-07T19:02:04.702Z",
+        "finishedAt": "2026-09-07T19:02:06.280Z",
+        "chunk_id": "c3fc6f",
+        "wall_time_seconds": 1.411527083,
+        "exit_code": 0,
+        "original_token_count": 21,
+        "output": "{\"phase\":\"resume-ready\",\"status\":\"PASS\",\"productionEffects\":0,\"providerCalls\":0}\n"
+      },
+      {
+        "phase": "crash-prefix",
+        "args": {
+          "cmd": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs crash-prefix /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/release-acceptance",
+          "workdir": "/tmp/maya-wave-ra-release-ef091875",
+          "yield_time_ms": 10000,
+          "max_output_tokens": 2000
+        },
+        "startedAt": "2026-09-07T19:02:06.280Z",
+        "finishedAt": "2026-09-07T19:02:07.850Z",
+        "chunk_id": "d5f0ff",
+        "wall_time_seconds": 1.405912125,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      },
+      {
+        "phase": "resume-prefix",
+        "args": {
+          "cmd": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs resume-prefix /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/release-acceptance",
+          "workdir": "/tmp/maya-wave-ra-release-ef091875",
+          "yield_time_ms": 10000,
+          "max_output_tokens": 2000
+        },
+        "startedAt": "2026-09-07T19:02:07.850Z",
+        "finishedAt": "2026-09-07T19:02:09.417Z",
+        "chunk_id": "28a0ea",
+        "wall_time_seconds": 1.401829959,
+        "exit_code": 0,
+        "original_token_count": 21,
+        "output": "{\"phase\":\"resume-prefix\",\"status\":\"PASS\",\"productionEffects\":0,\"providerCalls\":0}\n"
+      },
+      {
+        "phase": "crash-unknown",
+        "args": {
+          "cmd": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs crash-unknown /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/release-acceptance",
+          "workdir": "/tmp/maya-wave-ra-release-ef091875",
+          "yield_time_ms": 10000,
+          "max_output_tokens": 2000
+        },
+        "startedAt": "2026-09-07T19:02:09.417Z",
+        "finishedAt": "2026-09-07T19:02:10.965Z",
+        "chunk_id": "966843",
+        "wall_time_seconds": 1.3850226669999999,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      },
+      {
+        "phase": "resume-unknown",
+        "args": {
+          "cmd": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs resume-unknown /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/release-acceptance",
+          "workdir": "/tmp/maya-wave-ra-release-ef091875",
+          "yield_time_ms": 10000,
+          "max_output_tokens": 2000
+        },
+        "startedAt": "2026-09-07T19:02:10.965Z",
+        "finishedAt": "2026-09-07T19:02:12.525Z",
+        "chunk_id": "99d1c0",
+        "wall_time_seconds": 1.3947255,
+        "exit_code": 0,
+        "original_token_count": 21,
+        "output": "{\"phase\":\"resume-unknown\",\"status\":\"PASS\",\"productionEffects\":0,\"providerCalls\":0}\n"
+      },
+      {
+        "phase": "crash-unknown-ready",
+        "args": {
+          "cmd": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs crash-unknown-ready /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/release-acceptance",
+          "workdir": "/tmp/maya-wave-ra-release-ef091875",
+          "yield_time_ms": 10000,
+          "max_output_tokens": 2000
+        },
+        "startedAt": "2026-09-07T19:02:12.525Z",
+        "finishedAt": "2026-09-07T19:02:14.105Z",
+        "chunk_id": "0f417a",
+        "wall_time_seconds": 1.414003375,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      },
+      {
+        "phase": "resume-unknown-ready",
+        "args": {
+          "cmd": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs resume-unknown-ready /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/release-acceptance",
+          "workdir": "/tmp/maya-wave-ra-release-ef091875",
+          "yield_time_ms": 10000,
+          "max_output_tokens": 2000
+        },
+        "startedAt": "2026-09-07T19:02:14.105Z",
+        "finishedAt": "2026-09-07T19:02:15.688Z",
+        "chunk_id": "f9f629",
+        "wall_time_seconds": 1.417223042,
+        "exit_code": 0,
+        "original_token_count": 23,
+        "output": "{\"phase\":\"resume-unknown-ready\",\"status\":\"PASS\",\"productionEffects\":0,\"providerCalls\":0}\n"
+      },
+      {
+        "phase": "read-only-attestation",
+        "args": {
+          "cmd": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node docs/rebuild/evidence/package5-wave-ra-r10-postgres-attestation.cjs /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/release-acceptance",
+          "workdir": "/tmp/maya-wave-ra-release-ef091875",
+          "yield_time_ms": 10000,
+          "max_output_tokens": 1500
+        },
+        "startedAt": "2026-09-07T19:02:21.784Z",
+        "finishedAt": "2026-09-07T19:02:22.081Z",
+        "chunk_id": "68c2be",
+        "wall_time_seconds": 0.129898209,
+        "exit_code": 0,
+        "original_token_count": 16,
+        "output": "{\"status\":\"PASS\",\"executions\":8,\"invocations\":9,\"effects\":8}\n"
+      }
+    ],
+    "phases": {
+      "baseline": {
+        "phase": "baseline",
+        "result": [
+          {
+            "case": "concurrent_same_key",
+            "callers": 6,
+            "effects": 1,
+            "status": "PASS"
+          },
+          {
+            "case": "receipt_failure_rolls_back_canonical_admission",
+            "effects": 0,
+            "executions": 0,
+            "status": "PASS"
+          },
+          {
+            "case": "timeout_late_success",
+            "effects": 1,
+            "status": "PASS"
+          },
+          {
+            "case": "audit_failure_preserves_canonical_success",
+            "status": "PASS"
+          },
+          {
+            "case": "lost_presentation_does_not_claim_whole_tool_completion",
+            "effects": 1,
+            "status": "PASS"
+          }
+        ],
+        "processId": 93962,
+        "productionEffects": 0,
+        "providerCalls": 0,
+        "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+        "runtimeHashes": {
+          "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+          "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+          "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+          "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+        },
+        "observedAt": "2026-09-07T19:02:03.116Z"
+      },
+      "crash-ready": {
+        "phase": "crash-ready",
+        "executionId": "96551c0c-39df-4b2f-b937-2838530c0c22",
+        "effects": 0,
+        "state": "READY",
+        "processId": 93988,
+        "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+        "runtimeHashes": {
+          "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+          "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+          "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+          "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+        },
+        "observedAt": "2026-09-07T19:02:04.615Z"
+      },
+      "resume-ready": {
+        "phase": "resume-ready",
+        "status": "PASS",
+        "result": {
+          "status": "completed",
+          "execution_id": "cmtrlxlwi0000isc96264pfzz",
+          "tool_name": "settings.update",
+          "result": {
+            "accepted": true
+          },
+          "canonical_actions": [
+            {
+              "contract": "maya.action-execution-result/1",
+              "executionId": "96551c0c-39df-4b2f-b937-2838530c0c22",
+              "state": "SUCCEEDED",
+              "outcomeCode": "provider_applied",
+              "reconciliationState": "NOT_REQUIRED",
+              "safeResult": {
+                "accepted": true
+              }
+            }
+          ],
+          "replayed": true
+        },
+        "effects": 1,
+        "processId": 94006,
+        "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+        "runtimeHashes": {
+          "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+          "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+          "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+          "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+        },
+        "observedAt": "2026-09-07T19:02:06.237Z"
+      },
+      "crash-prefix": {
+        "phase": "crash-prefix",
+        "executionId": "043b9d34-0f76-4a2f-841f-861d08a9bf26",
+        "effects": 1,
+        "state": "SUCCEEDED",
+        "nextSlotNotAdmitted": true,
+        "processId": 94040,
+        "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+        "runtimeHashes": {
+          "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+          "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+          "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+          "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+        },
+        "observedAt": "2026-09-07T19:02:07.807Z"
+      },
+      "resume-prefix": {
+        "phase": "resume-prefix",
+        "status": "PASS",
+        "result": {
+          "status": "unknown",
+          "execution_id": "cmtrlxoc80000k8c9oecbwh0c",
+          "tool_name": "settings.update",
+          "canonical_actions": [
+            {
+              "contract": "maya.action-execution-result/1",
+              "executionId": "043b9d34-0f76-4a2f-841f-861d08a9bf26",
+              "state": "SUCCEEDED",
+              "outcomeCode": "provider_applied",
+              "reconciliationState": "NOT_REQUIRED",
+              "safeResult": {
+                "accepted": true
+              }
+            }
+          ],
+          "continuation": "manual_required",
+          "invocation_completed": false,
+          "error": {
+            "code": "ai_tool_continuation_unconfirmed"
+          },
+          "replayed": true
+        },
+        "effects": 1,
+        "newSlots": 0,
+        "processId": 94055,
+        "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+        "runtimeHashes": {
+          "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+          "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+          "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+          "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+        },
+        "observedAt": "2026-09-07T19:02:09.325Z"
+      },
+      "crash-unknown": {
+        "phase": "crash-unknown",
+        "executionId": "e5165322-2734-4a66-b96a-e7c92056b997",
+        "effects": 1,
+        "status": "UNKNOWN_RECONCILIATION_CLAIMED",
+        "processId": 94069,
+        "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+        "runtimeHashes": {
+          "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+          "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+          "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+          "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+        },
+        "observedAt": "2026-09-07T19:02:10.920Z"
+      },
+      "resume-unknown": {
+        "phase": "resume-unknown",
+        "status": "PASS",
+        "result": {
+          "status": "unknown",
+          "execution_id": "cmtrlxqql0000l1c9nr2sm6eh",
+          "tool_name": "settings.update",
+          "canonical_actions": [
+            {
+              "contract": "maya.action-execution-result/1",
+              "executionId": "e5165322-2734-4a66-b96a-e7c92056b997",
+              "state": "UNKNOWN",
+              "outcomeCode": null,
+              "reconciliationState": "MANUAL_REQUIRED",
+              "safeResult": null
+            }
+          ],
+          "error": {
+            "code": "ai_tool_outcome_unknown"
+          },
+          "replayed": true
+        },
+        "effects": 1,
+        "attempts": [
+          {
+            "kind": "RECONCILIATION",
+            "state": "UNKNOWN"
+          },
+          {
+            "kind": "EXECUTION",
+            "state": "UNKNOWN"
+          },
+          {
+            "kind": "RECONCILIATION",
+            "state": "UNKNOWN"
+          }
+        ],
+        "newProviderAttempts": 0,
+        "processId": 94085,
+        "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+        "runtimeHashes": {
+          "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+          "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+          "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+          "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+        },
+        "observedAt": "2026-09-07T19:02:12.478Z"
+      },
+      "crash-unknown-ready": {
+        "phase": "crash-unknown-ready",
+        "executionId": "28d1cad3-6a79-482a-b77e-230d4e57136c",
+        "state": "UNKNOWN",
+        "attempts": [
+          {
+            "kind": "EXECUTION",
+            "state": "UNKNOWN"
+          }
+        ],
+        "processId": 94098,
+        "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+        "runtimeHashes": {
+          "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+          "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+          "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+          "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+        },
+        "observedAt": "2026-09-07T19:02:14.047Z"
+      },
+      "resume-unknown-ready": {
+        "phase": "resume-unknown-ready",
+        "status": "PASS",
+        "result": {
+          "status": "completed",
+          "execution_id": "cmtrlxt5t0000luc9v5bdm7sv",
+          "tool_name": "settings.update",
+          "result": {
+            "accepted": true
+          },
+          "canonical_actions": [
+            {
+              "contract": "maya.action-execution-result/1",
+              "executionId": "28d1cad3-6a79-482a-b77e-230d4e57136c",
+              "state": "SUCCEEDED",
+              "outcomeCode": "reconciled_succeeded",
+              "reconciliationState": "RESOLVED",
+              "safeResult": {
+                "accepted": true
+              }
+            }
+          ],
+          "replayed": true
+        },
+        "effects": 1,
+        "attempts": [
+          {
+            "kind": "EXECUTION",
+            "state": "UNKNOWN"
+          },
+          {
+            "kind": "RECONCILIATION",
+            "state": "SUCCEEDED"
+          }
+        ],
+        "newProviderAttempts": 0,
+        "processId": 94113,
+        "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+        "runtimeHashes": {
+          "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+          "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+          "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+          "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+        },
+        "observedAt": "2026-09-07T19:02:15.625Z"
+      }
+    },
+    "crashResumePairs": [
+      {
+        "case": "ready",
+        "executionId": "96551c0c-39df-4b2f-b937-2838530c0c22",
+        "crashPid": 93988,
+        "resumePid": 94006,
+        "result": {
+          "status": "completed",
+          "execution_id": "cmtrlxlwi0000isc96264pfzz",
+          "tool_name": "settings.update",
+          "result": {
+            "accepted": true
+          },
+          "canonical_actions": [
+            {
+              "contract": "maya.action-execution-result/1",
+              "executionId": "96551c0c-39df-4b2f-b937-2838530c0c22",
+              "state": "SUCCEEDED",
+              "outcomeCode": "provider_applied",
+              "reconciliationState": "NOT_REQUIRED",
+              "safeResult": {
+                "accepted": true
+              }
+            }
+          ],
+          "replayed": true
+        },
+        "effects": 1,
+        "newSlots": null,
+        "newProviderAttempts": null
+      },
+      {
+        "case": "prefix",
+        "executionId": "043b9d34-0f76-4a2f-841f-861d08a9bf26",
+        "crashPid": 94040,
+        "resumePid": 94055,
+        "result": {
+          "status": "unknown",
+          "execution_id": "cmtrlxoc80000k8c9oecbwh0c",
+          "tool_name": "settings.update",
+          "canonical_actions": [
+            {
+              "contract": "maya.action-execution-result/1",
+              "executionId": "043b9d34-0f76-4a2f-841f-861d08a9bf26",
+              "state": "SUCCEEDED",
+              "outcomeCode": "provider_applied",
+              "reconciliationState": "NOT_REQUIRED",
+              "safeResult": {
+                "accepted": true
+              }
+            }
+          ],
+          "continuation": "manual_required",
+          "invocation_completed": false,
+          "error": {
+            "code": "ai_tool_continuation_unconfirmed"
+          },
+          "replayed": true
+        },
+        "effects": 1,
+        "newSlots": 0,
+        "newProviderAttempts": null
+      },
+      {
+        "case": "unknown",
+        "executionId": "e5165322-2734-4a66-b96a-e7c92056b997",
+        "crashPid": 94069,
+        "resumePid": 94085,
+        "result": {
+          "status": "unknown",
+          "execution_id": "cmtrlxqql0000l1c9nr2sm6eh",
+          "tool_name": "settings.update",
+          "canonical_actions": [
+            {
+              "contract": "maya.action-execution-result/1",
+              "executionId": "e5165322-2734-4a66-b96a-e7c92056b997",
+              "state": "UNKNOWN",
+              "outcomeCode": null,
+              "reconciliationState": "MANUAL_REQUIRED",
+              "safeResult": null
+            }
+          ],
+          "error": {
+            "code": "ai_tool_outcome_unknown"
+          },
+          "replayed": true
+        },
+        "effects": 1,
+        "newSlots": null,
+        "newProviderAttempts": 0
+      },
+      {
+        "case": "unknown-ready",
+        "executionId": "28d1cad3-6a79-482a-b77e-230d4e57136c",
+        "crashPid": 94098,
+        "resumePid": 94113,
+        "result": {
+          "status": "completed",
+          "execution_id": "cmtrlxt5t0000luc9v5bdm7sv",
+          "tool_name": "settings.update",
+          "result": {
+            "accepted": true
+          },
+          "canonical_actions": [
+            {
+              "contract": "maya.action-execution-result/1",
+              "executionId": "28d1cad3-6a79-482a-b77e-230d4e57136c",
+              "state": "SUCCEEDED",
+              "outcomeCode": "reconciled_succeeded",
+              "reconciliationState": "RESOLVED",
+              "safeResult": {
+                "accepted": true
+              }
+            }
+          ],
+          "replayed": true
+        },
+        "effects": 1,
+        "newSlots": null,
+        "newProviderAttempts": 0
+      }
+    ],
+    "readOnlyAttestation": {
+      "status": "PASS",
+      "tenantId": "cmtrlxkgf0000i2c9xygesd7t",
+      "cases": [
+        {
+          "name": "concurrent",
+          "executions": [
+            {
+              "id": "576c3d7b-a27b-4763-b7ff-7210337c2ed8",
+              "sourceRef": "r10-fixture:c3041813-f86f-47a9-9d3f-591d1a524970:first",
+              "state": "SUCCEEDED",
+              "reconciliationState": "NOT_REQUIRED",
+              "executionAttemptCount": 1,
+              "attempts": [
+                {
+                  "kind": "EXECUTION",
+                  "state": "SUCCEEDED",
+                  "outcomeCode": "provider_applied"
+                }
+              ]
+            }
+          ],
+          "effects": 1,
+          "invocationCount": 1
+        },
+        {
+          "name": "save-failure",
+          "executions": [],
+          "effects": 0,
+          "invocationCount": 1
+        },
+        {
+          "name": "late",
+          "executions": [
+            {
+              "id": "68d31fc3-0665-40df-98d0-1d2be710ff03",
+              "sourceRef": "r10-fixture:6575b8dc-297e-4a27-bf5a-7f2842f12b19:first",
+              "state": "SUCCEEDED",
+              "reconciliationState": "NOT_REQUIRED",
+              "executionAttemptCount": 1,
+              "attempts": [
+                {
+                  "kind": "EXECUTION",
+                  "state": "SUCCEEDED",
+                  "outcomeCode": "provider_applied"
+                }
+              ]
+            }
+          ],
+          "effects": 1,
+          "invocationCount": 1
+        },
+        {
+          "name": "audit",
+          "executions": [
+            {
+              "id": "07af5738-ce54-45c1-81a6-052d82ee909a",
+              "sourceRef": "r10-fixture:73ad2c7b-c2a0-474b-af68-e49e2872ea64:first",
+              "state": "SUCCEEDED",
+              "reconciliationState": "NOT_REQUIRED",
+              "executionAttemptCount": 1,
+              "attempts": [
+                {
+                  "kind": "EXECUTION",
+                  "state": "SUCCEEDED",
+                  "outcomeCode": "provider_applied"
+                }
+              ]
+            }
+          ],
+          "effects": 1,
+          "invocationCount": 1
+        },
+        {
+          "name": "lost-presentation",
+          "executions": [
+            {
+              "id": "2d84c9a1-1634-4e9e-85e6-44c7ea6e01cf",
+              "sourceRef": "r10-fixture:bb4c5184-9df0-4356-937d-d86ac7924630:first",
+              "state": "SUCCEEDED",
+              "reconciliationState": "NOT_REQUIRED",
+              "executionAttemptCount": 1,
+              "attempts": [
+                {
+                  "kind": "EXECUTION",
+                  "state": "SUCCEEDED",
+                  "outcomeCode": "provider_applied"
+                }
+              ]
+            }
+          ],
+          "effects": 1,
+          "invocationCount": 1
+        },
+        {
+          "name": "ready",
+          "executions": [
+            {
+              "id": "96551c0c-39df-4b2f-b937-2838530c0c22",
+              "sourceRef": "r10-fixture:39bdcad1-1d36-41e2-9f76-f4bf8b3c90ed:first",
+              "state": "SUCCEEDED",
+              "reconciliationState": "NOT_REQUIRED",
+              "executionAttemptCount": 1,
+              "attempts": [
+                {
+                  "kind": "EXECUTION",
+                  "state": "SUCCEEDED",
+                  "outcomeCode": "provider_applied"
+                }
+              ]
+            }
+          ],
+          "effects": 1,
+          "invocationCount": 1
+        },
+        {
+          "name": "prefix",
+          "executions": [
+            {
+              "id": "043b9d34-0f76-4a2f-841f-861d08a9bf26",
+              "sourceRef": "r10-fixture:68fcd7d3-1dfd-46be-a773-8e1492fc96a9:first",
+              "state": "SUCCEEDED",
+              "reconciliationState": "NOT_REQUIRED",
+              "executionAttemptCount": 1,
+              "attempts": [
+                {
+                  "kind": "EXECUTION",
+                  "state": "SUCCEEDED",
+                  "outcomeCode": "provider_applied"
+                }
+              ]
+            }
+          ],
+          "effects": 1,
+          "invocationCount": 1
+        },
+        {
+          "name": "unknown",
+          "executions": [
+            {
+              "id": "e5165322-2734-4a66-b96a-e7c92056b997",
+              "sourceRef": "r10-fixture:ad8d9cf5-f1e7-4e1e-9e24-d150cab51dcb:first",
+              "state": "UNKNOWN",
+              "reconciliationState": "MANUAL_REQUIRED",
+              "executionAttemptCount": 1,
+              "attempts": [
+                {
+                  "kind": "RECONCILIATION",
+                  "state": "UNKNOWN",
+                  "outcomeCode": "STILL_UNKNOWN"
+                },
+                {
+                  "kind": "EXECUTION",
+                  "state": "UNKNOWN",
+                  "outcomeCode": "synthetic_provider_unknown"
+                },
+                {
+                  "kind": "RECONCILIATION",
+                  "state": "UNKNOWN",
+                  "outcomeCode": "reconciliation_worker_lost"
+                }
+              ]
+            }
+          ],
+          "effects": 1,
+          "invocationCount": 1
+        },
+        {
+          "name": "unknown-ready",
+          "executions": [
+            {
+              "id": "28d1cad3-6a79-482a-b77e-230d4e57136c",
+              "sourceRef": "r10-fixture:37e7a01d-abb5-44b5-961d-b2d5421c5d40:first",
+              "state": "SUCCEEDED",
+              "reconciliationState": "RESOLVED",
+              "executionAttemptCount": 1,
+              "attempts": [
+                {
+                  "kind": "EXECUTION",
+                  "state": "UNKNOWN",
+                  "outcomeCode": "synthetic_provider_unknown"
+                },
+                {
+                  "kind": "RECONCILIATION",
+                  "state": "SUCCEEDED",
+                  "outcomeCode": "PROVEN_SUCCEEDED"
+                }
+              ]
+            }
+          ],
+          "effects": 1,
+          "invocationCount": 1
+        }
+      ],
+      "executionCount": 8,
+      "invocationCount": 9,
+      "syntheticEffects": 8,
+      "providerCalls": 0,
+      "productionEffects": 0,
+      "processId": 94144,
+      "fixtureSha256": "b0ee5c25525187d7d1c7f3c200a25c4ed61c172774fb6f833ef041123ab0446c"
+    },
+    "artifactHashes": {
+      "baseline.json": "efc8e9c2f066950ecc2402be641d0f595a71d51ea514e93690ca4d8dea3d4f36",
+      "command-results.json": "a059767f98052e45a38204cc23641b86a977de40f29aa4f066413a290c5b6bd2",
+      "crash-prefix.json": "ee94e5a105018daff5447eb33fe96d836862221d7950b979f8ad0a93f67225bf",
+      "crash-ready.json": "8af0ccc7584ce2d2aa951321381937abab3fc23a61a3282efbe6940c2cab637e",
+      "crash-unknown-ready.json": "1fd20d823bc43ca262d1d96a18f9f6854be89365a54b15c0ab99ec5f2589841d",
+      "crash-unknown.json": "b54bcace33524eeef062f6927b80d577a324cb1617eca5bdab9c674d602c2f97",
+      "manifest.json": "0229539cef24f7186a687dc252a41dc7d2b727900cf2d2ef934830b3abaecc89",
+      "read-only-attestation.json": "374e87c1f2b6cc6e959cecc0e845d06e6b7d8c6575a239a7738052ff8ac6a9b6",
+      "release-source-before.json": "497a983fca7cc99a3e4c6827d7eb4ee83b296b50cc23ffaf199c775a19c5f051",
+      "resume-prefix.json": "3041cca06484752c7763d9454c0dd322980a44ccc80f52c974b4a5d0e7d7024a",
+      "resume-ready.json": "61116f2199fdb4650b913a7b56968bab9730eff4ef1a1e96ec8fa881b48fc00f",
+      "resume-unknown-ready.json": "0488478a67bc42e1e4d87b5659fc7704d3848a72740eed5e917b69189ad4d1fb",
+      "resume-unknown.json": "3cdf029e922c4dfdb0a4ca57f32f560178ccef3aedeba7384f087b6bc324eeb0"
+    },
+    "hygiene": {
+      "sourceEdits": 0,
+      "runtimeEdits": 0,
+      "testEdits": 0,
+      "documentationEdits": 0,
+      "schemaMigrationChanges": 0,
+      "productionReads": 0,
+      "productionMutations": 0,
+      "productionMessages": 0,
+      "providerCalls": 0,
+      "oldDatabasesTouched": 0,
+      "mainWorktreeTouched": false,
+      "ownedProcessesLeft": 0,
+      "processHygiene": 0
+    },
+    "limits": [
+      "Registered synthetic kernel executor with real owned PostgreSQL; no real provider dispatch",
+      "Full mandatory release/source gates remain parent-owned",
+      "This proves R10 on the B36-WIP-excluded release projection; it does not declare Package5 or Chapter6 complete"
+    ]
+  },
+  "ignoredStaticTestFixture": {
+    "purpose": "Existing mandatory B13/B14/B16/B17 static regression dependency; not a publication artifact",
+    "path": "сайт и приложение/pwa-assets/tg-auth/api-proxy.php",
+    "sha256": "92699e64844091d1925f62328534928768d75a0f20e44d901046974e12f97a41",
+    "source": "existing isolated worktree ignored fixture",
+    "canonicalSourceModified": false,
+    "runtimeDeploymentTarget": false,
+    "productionMutations": 0
+  },
+  "productionProofMessages": 0,
+  "productionProofBusinessMutations": 0,
+  "package5FinalGateRun": false,
+  "supersededStagingFailure": "Initial Python staging check referenced the wrong directory for known vps/app.html; corrected to exact S13 /var/www/maya-platform/app.html before any runtime publication; hashes unchanged and offline rollback proof repeated."
+}
