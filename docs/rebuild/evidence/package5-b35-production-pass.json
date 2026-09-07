@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "runtimeCommit": "c8c7a8eb",
+  "guardCommit": "be4fe563",
+  "release": "20260907-p5-b35-c8c7a8eb",
+  "verifiedAt": "2026-09-07T12:25:07.915500+00:00",
+  "messagesForProof": 0,
+  "providerBusinessMutationsForProof": 0,
+  "next": "fresh full 13-family Package 5 Final Gate"
+}

@@ -1,5 +1,6 @@
 # Historical B35 schema decision STOP — superseded by owner approval
 
+> Superseded: exact schema was approved at `c3641411` and B35 is now production PASS. Current state is [post-B35 / B36 STOP](CYCLE-06-BLOCKING-PACKAGE-5-POST-B35-REMAINDER-CHECKPOINT.md); the schema STOP below is historical.
 The owner approved `c3641411` and authorized schema/runtime implementation.
 Current continuation: [B35 local schema foundation](CYCLE-06-BLOCKING-PACKAGE-5-B35-LOCAL-SCHEMA-FOUNDATION-REPORT.md).
 The Stage 2 record below describes the earlier approval boundary, not the current authorization.

@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "migrationChecksum": "973bf4797fcc50d13365cca1c088c342a25bbee2d37e0c20428529348a06206c",
+  "pending": 0,
+  "drift": "NONE",
+  "guards": 11,
+  "epoch": {
+    "eligible": 2,
+    "established": 2,
+    "earliest": "2026-09-07T12:23:47.223Z",
+    "latest": "2026-09-07T12:23:47.298Z"
+  },
+  "audits": 2,
+  "observedCanonicalB35Rows": {
+    "campaigns": 0,
+    "attempts": 0,
+    "inbox": 0
+  },
+  "fakeHistoricalBackfill": 0,
+  "productionMessagesForProof": 0
+}

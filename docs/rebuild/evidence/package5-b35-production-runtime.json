@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "release": "/opt/maya-saas/releases/20260907-p5-b35-c8c7a8eb",
+  "compiledArtifacts": 587,
+  "pythonArtifacts": 5,
+  "health": 200,
+  "readiness": 200,
+  "services": {
+    "backend": "active",
+    "python": "active"
+  },
+  "started": {
+    "backend": "Mon 2026-09-07 15:10:32 MSK",
+    "python": "Mon 2026-09-07 15:22:14 MSK"
+  },
+  "errorCounts": {
+    "backend": 0,
+    "python": 0
+  },
+  "sparePortListening": false,
+  "structural": {
+    "b31ImmutableBinding": true,
+    "b32Principal": true,
+    "b33Receipt": true,
+    "b35Root": true,
+    "b35SoleOwner": true,
+    "b35CurrentPolicy": true
+  },
+  "productionMessages": 0,
+  "productionBusinessProofMutations": 0,
+  "productionProviderProofMutations": 0
+}

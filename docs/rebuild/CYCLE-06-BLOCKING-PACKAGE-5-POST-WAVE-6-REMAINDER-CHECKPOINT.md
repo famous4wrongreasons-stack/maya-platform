@@ -1,31 +1,22 @@
-# Package 5 post-Wave-6 remainder — B34 production PASS; B35 implementation
+# Package 5 post-Wave-6 remainder — B35 production PASS; B36 STOP
 
-Current continuation: [B35 production schema foundation / runtime continuation](CYCLE-06-BLOCKING-PACKAGE-5-B35-PRODUCTION-MIGRATION-REPORT.md)
-and [exact schema mapping](package5-b35-exact-schema-mapping-v1-proposal.md).
-Option A business direction is approved. All 25 requirements are mapped; proposed
-delta is 0 models, 12 new fields, 2 existing nullability changes, 3 uniques,
-2 non-unique indexes and 0 action classes. Migration required; no backfill.
-Exact schema approval was granted at `c3641411`. Production migration PASS is
-checkpoint `4b13b9f1`; [runtime local gate PASS](CYCLE-06-BLOCKING-PACKAGE-5-B35-RUNTIME-LOCAL-GATE.md).
-Runtime production publication and the fresh all-family Final Gate remain pending.
+Current continuation: [post-B35 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B35-REMAINDER-CHECKPOINT.md) and
+[B35 deployed full-gate report](CYCLE-06-BLOCKING-PACKAGE-5-B35-DEPLOYED-FINAL-GATE-STOP-REPORT.md).
 
-Accepted production/final-gate baseline: [post-B34 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B34-REMAINDER-CHECKPOINT.md)
-and [B34 production / B35 Final Gate report](CYCLE-06-BLOCKING-PACKAGE-5-B34-DEPLOYED-FINAL-GATE-STOP-REPORT.md).
+B35 exact approved schema and runtime are deployed. Canonical Client bulk,
+immutable approval/audience, Action Engine admission, Communication Delivery
+ownership and durable partial resume are enforced. The prospective history
+epoch is established; no historical backfill. B29–B34 remain preserved.
 
-B34 Option A is implemented and deployed: legacy review import/sync is retired,
-canonical AC4 ingress/immutable evidence preserved, zero new schema/backfill.
-Runtime `d2dd1e5d`; published checkpoint `6f6745f2`, release
-`20260906-p5-b34-6f6745f2`. Historical 312 review rows unchanged.
-B29–B33 production PASS remains preserved. Pending migrations 0; drift NONE.
+Fresh Final Gate inventoried 13/13 families and passed all six new PostgreSQL
+wave proofs. First new blocker B36: the active Python daily-report job sends
+Telegram before canonical A12 admission. Exact-source offline reproduction,
+production hashes and the existing ratchet failure are recorded in the report.
+Remaining fresh aggregate stages were not run under the STOP rule.
 
-Fresh full gate inventoried 13/13 families and reran six PostgreSQL wave proofs
-plus 111 suites / 762 cross-boundary tests. It stopped at B35: published panel
-broadcast calls direct Telegram send outside canonical A14 bulk execution and
-durable Communication Delivery. Exact production hashes/local lost-response
-proof are committed. B35 schema foundation is durable in production; runtime remediation and final aggregate certification are
-not complete. No production business/provider proof mutations.
-
-PACKAGE 4 COMPLETE: YES. PACKAGE 5 WAVES: 6/6. PACKAGE 5 COMPLETE: NO.
-ACTIVE BLOCKER: B35. CHAPTER 6 COMPLETE: NO. No Wave 7 or Chapter 7.
+PACKAGE 4 COMPLETE: YES. PACKAGE 5 WAVES COMPLETE: 6/6.
+PACKAGE 5 COMPLETE: NO. ACTIVE BLOCKER: B36.
+B36 IMPLEMENTATION: NOT STARTED. No Wave 7 or Chapter 7.
+Chapter 6 completion is not declared.
 Main 24 dirty entries/hashes and all 17 old DBs preserved. Owned hygiene 0.
 Report/evidence/remainder → commit/push → STOP.
