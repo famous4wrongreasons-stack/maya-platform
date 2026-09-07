@@ -1,0 +1,109 @@
+{
+  "assessment": "EXISTING CANONICAL BULK COMMUNICATION FOUNDATION SUFFICIENT: NO",
+  "probeResult": "PASS — gaps reproduced",
+  "limitations": [
+    "Selected actual source contracts/methods only; synthetic authority and persistence fixtures",
+    "No full Action Engine, kernel dispatch, concurrency, restart or live Client resolution proof",
+    "Not the B35 mandatory remediation matrix or Package 5 Final Gate"
+  ],
+  "results": [
+    {
+      "case": "registered-bulk-contract",
+      "baselineAccepted": true,
+      "rejectedExtensions": [
+        "channel",
+        "clientId",
+        "routePlan"
+      ],
+      "actionClass": "deliver_bulk_campaign",
+      "executorKey": "communication.package2.bulk"
+    },
+    {
+      "case": "web-push-classification",
+      "existingReminderAccepted": true,
+      "marketingRejected": true
+    },
+    {
+      "case": "actual-bulk-prepare",
+      "clientWithoutUser": "bulk_internal_recipient_missing",
+      "noEnvelopeForUserFreeClient": true,
+      "userBoundEnvelopeChannel": "inbox",
+      "recipientKind": "internal_user",
+      "dispatchExecuted": false
+    },
+    {
+      "case": "replay-sending-campaign",
+      "outcome": "marketing_campaign_busy",
+      "communicationDeliveryCalls": 0,
+      "persistence": "in-memory read/claim doubles only"
+    },
+    {
+      "case": "registered-production-transports",
+      "capabilities": [
+        {
+          "key": "communication.production.web-push.client-single",
+          "channel": "web_push",
+          "maxExecutionAttempts": 1,
+          "reconciliationSupported": false,
+          "acceptedIsTerminal": true
+        },
+        {
+          "key": "communication.production.inbox.new-appointment",
+          "channel": "inbox",
+          "maxExecutionAttempts": 1,
+          "reconciliationSupported": true,
+          "acceptedIsTerminal": true
+        },
+        {
+          "key": "communication.production.telegram.privacy",
+          "channel": "telegram",
+          "maxExecutionAttempts": 1,
+          "reconciliationSupported": false,
+          "acceptedIsTerminal": true
+        },
+        {
+          "key": "communication.production.inbox.package2-single",
+          "channel": "inbox",
+          "maxExecutionAttempts": 1,
+          "reconciliationSupported": true,
+          "acceptedIsTerminal": true
+        },
+        {
+          "key": "communication.production.apns.package2-single",
+          "channel": "apns",
+          "maxExecutionAttempts": 1,
+          "reconciliationSupported": false,
+          "acceptedIsTerminal": true
+        },
+        {
+          "key": "communication.production.telegram.package2-single",
+          "channel": "telegram",
+          "maxExecutionAttempts": 1,
+          "reconciliationSupported": false,
+          "acceptedIsTerminal": true
+        },
+        {
+          "key": "communication.production.inbox.package2-bulk",
+          "channel": "inbox",
+          "maxExecutionAttempts": 1,
+          "reconciliationSupported": true,
+          "acceptedIsTerminal": true
+        }
+      ]
+    }
+  ],
+  "sourceSha256": {
+    "src/action-engine/action-engine.registry.ts": "bae42f6923d547636004017bb4e0390467bcf3cf2e5b539cd2384e437ebda0c6",
+    "src/communication-delivery/communication-delivery.capabilities.ts": "338ebf3f98e73453a7f79cf4de0667a4b1ee4388ce580ee2f7764523a39e4718",
+    "src/communication-delivery/communication-web-push.contract.ts": "9e64c818da3d4eb3608741e9f54f56ba88bb3d24f7e2d2ca884dbb3c61e4db4b",
+    "src/communication-delivery/communication-delivery.service.ts": "f8c542f8b6d5f311e9f0c98ff5536c8979cbc9fcc8b7de4587ea3ceb8b115383",
+    "src/marketing/marketing.service.ts": "ddb05af0f01af64897b2c357a9466fc8406c8206435e07649f0bfb0ac0bfc9ef",
+    "src/marketing/marketing.module.ts": "1bfef53ed2a8089a49cae050d9c180a18830aa9a5798fe4c0cb41ce9b5ac62b4",
+    "src/app.module.ts": "1332a860801067eebf9471be88a597a5a6128ff9fd5f83b69d23b8cbf2b73d37",
+    "src/communication-delivery/communication-delivery.kernel.ts": "230e85c9432fe4ae027fddb76140a3c5dad5bd4aa07474841e771d43d527ce04",
+    "prisma/schema.prisma": "ff311c9f19c1bd27c931604a27e695e6120caad1f6045c662c98fd46d58c0aaa"
+  },
+  "databasesOpened": 0,
+  "providerCalls": 0,
+  "productionMessages": 0
+}

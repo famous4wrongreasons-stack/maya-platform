@@ -1,7 +1,13 @@
-# Package 5 post-Wave-6 remainder — B34 production PASS; B35 STOP
+# Package 5 post-Wave-6 remainder — B34 production PASS; B35 contract STOP
 
-Current continuation: [post-B34 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B34-REMAINDER-CHECKPOINT.md) and
-[B34 production / B35 Final Gate report](CYCLE-06-BLOCKING-PACKAGE-5-B34-DEPLOYED-FINAL-GATE-STOP-REPORT.md).
+Current continuation: [B35 Stage 1 contract STOP remainder](CYCLE-06-BLOCKING-PACKAGE-5-B35-CONTRACT-STOP-REMAINDER-CHECKPOINT.md)
+and [common canonical marketing bulk proposal](package5-b35-canonical-bulk-owner-contract-v1-proposal.md).
+Existing end-to-end foundation is insufficient. Required decisions concern
+tenant/staff approval, immutable bulk intent, canonical Client audience,
+marketing routes and partial resume. No runtime/schema/deployment started.
+
+Accepted production/final-gate baseline: [post-B34 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B34-REMAINDER-CHECKPOINT.md)
+and [B34 production / B35 Final Gate report](CYCLE-06-BLOCKING-PACKAGE-5-B34-DEPLOYED-FINAL-GATE-STOP-REPORT.md).
 
 B34 Option A is implemented and deployed: legacy review import/sync is retired,
 canonical AC4 ingress/immutable evidence preserved, zero new schema/backfill.

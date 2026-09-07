@@ -1,0 +1,158 @@
+{
+  "contract": "maya.package5-b35-stage1-assessment/1",
+  "recordedAt": "2026-09-07T06:54:47.879271+00:00",
+  "assessmentBaseline": "1a45ed09962aa85ee9188093797f73a006e27826",
+  "preflight": {
+    "fetchOrigin": "PASS",
+    "branch": "contour/b29-remediation",
+    "headEqualCanonicalOrigin": true,
+    "aheadBehind": [
+      0,
+      0
+    ],
+    "unpushedCommits": 0,
+    "isolatedDirtyBeforeAssessment": 0
+  },
+  "foundationSufficient": false,
+  "existingContractGaps": [
+    "tenant staff broadcast approval",
+    "canonical Client audience and current policy",
+    "stable immutable bulk approval identity",
+    "marketing multichannel contract",
+    "User-free bulk recipient mapping",
+    "partial child resume across UNKNOWN/restart"
+  ],
+  "pythonFunctionHashesMatched": 22,
+  "acceptedPythonHashEvidence": "package5-b35-production-function-hashes.json",
+  "backend": {
+    "inspection": "read-only current release and compiled artifacts; no runtime invocation",
+    "release": "/opt/maya-saas/releases/20260906-p5-b34-6f6745f2",
+    "compiledSha256": {
+      "src/action-engine/action-engine.registry.js": "6c87168a50da27d02d19d8d6b7d78676a3aed7057c5eb1e6764a5555dec6167c",
+      "src/marketing/marketing.service.js": "f219e0888fb9ff0662daaef706debcde78a9ba7bd455f2bb8e096382a85fc164",
+      "src/marketing/marketing.module.js": "c67144f3f327a36c5723083459ca59c739adf8c8925e3ea4a9405b0cc1c6cf8e",
+      "src/app.module.js": "eea47b4bdcc725e8f42469e4e5fba60c6b2e3f22ef128b2c149221ca3c86964f",
+      "src/communication-delivery/communication-delivery.service.js": "ec42f84877300d8aed5e04e8722878b747670ae8c31d9dfcf555eea8bda6cb81",
+      "src/communication-delivery/communication-web-push.contract.js": "9bd9ecc309804cfa690ff4d9d17341f4136c206927f17dd8343142419340132a",
+      "src/communication-delivery/communication-delivery.capabilities.js": "a1988758ba766268e11e1f8f53794b7c3873e5533a6f20d83102bbb6bcff2e05"
+    },
+    "productionMessages": 0
+  },
+  "backendCompiledArtifactsMatchLocalBuild": true,
+  "publishedPanel": {
+    "inspection": "read-only static deployed files; no business request",
+    "ui": {
+      "muzhskayaestetika.rf": {
+        "sha256": "4e6ec6930dd379c8d61b844c7754782232914060103b382ad94b541e4fd1c488",
+        "panelBroadcastRequestFields": [
+          [
+            "mode"
+          ],
+          [
+            "mode",
+            "text"
+          ],
+          [
+            "mode",
+            "text"
+          ]
+        ],
+        "explicitIntentIdentityInRequests": false
+      },
+      "mayaos.ru": {
+        "sha256": "cb73695d73803e9589a8980df4a5586b2566b58f484f9642b0828536c363d84e",
+        "panelBroadcastRequestFields": [
+          [
+            "mode"
+          ],
+          [
+            "mode",
+            "text"
+          ],
+          [
+            "mode",
+            "text"
+          ]
+        ],
+        "explicitIntentIdentityInRequests": false
+      }
+    },
+    "proxy": {
+      "sha256": "7db4a8f3f9f3b5ba77ca009beb1547cdcc988c94fa8421b707b513c0f94e06a6",
+      "caseSha256": "4d1fe7a9bd7a87fbca716e275b88ee077d32d40350e02888c305de62e1688f9c",
+      "caseLine": 1819,
+      "targetPaths": [
+        "/api/panel/broadcast"
+      ],
+      "inputKeys": [
+        "auth_data",
+        "code",
+        "mode",
+        "session_token",
+        "text"
+      ],
+      "mentionsAuthData": true,
+      "mentionsInitData": true,
+      "mentionsLegacySession": true,
+      "mentionsCanonicalExecution": false
+    },
+    "productionMessages": 0
+  },
+  "reachability": {
+    "inspection": "read-only active source and nginx configuration; no business endpoint invoked",
+    "routes": [
+      {
+        "line": 12078,
+        "register": "web_app.router.add_post",
+        "route": "/api/panel/broadcast",
+        "handler": "panel_broadcast_handler"
+      },
+      {
+        "line": 12079,
+        "register": "web_app.router.add_options",
+        "route": "/api/panel/broadcast",
+        "handler": "panel_options_handler"
+      }
+    ],
+    "rtHostnameConfigured": true,
+    "pwaUpstream8080Configured": true,
+    "requestOnlyLauncher": true,
+    "launcherBuildsTelegramBot": true,
+    "productionBroadcastRequests": 0,
+    "productionMessages": 0
+  },
+  "boundedContractProbe": {
+    "result": "PASS \u2014 gaps reproduced",
+    "evidence": "package5-b35-stage1-foundation.proof.json",
+    "limitations": "Actual selected methods/normalizers with in-memory persistence/authority boundary doubles. Not full engine/kernel/provider/concurrency/restart proof."
+  },
+  "runtimeEdits": 0,
+  "schemaEdits": 0,
+  "migrations": 0,
+  "backfill": 0,
+  "productionDeployment": "NOT STARTED",
+  "productionMessages": 0,
+  "productionBusinessMutations": 0,
+  "mandatoryRemediationGates": "NOT RUN \u2014 owner/contract STOP before implementation",
+  "freshPackage5FinalGate": "NOT RUN \u2014 requires later B35 production PASS",
+  "protectedMain": {
+    "statusEntries": 24,
+    "recordedFileHashes": 22,
+    "allMatched": true
+  },
+  "databaseAccess": "No database was opened in Stage 1; no owned database created; all 17 pre-existing databases untouched",
+  "ownedProcessesWatchersBrowsersDatabasesRemaining": 0,
+  "processHygiene": 0,
+  "b34Reopened": false,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "documentationVerification": {
+    "committedProbeRerun": "PASS \u2014 exact result matches",
+    "changedFilesInDocsRebuildOnly": 9,
+    "relativeLinksVerified": 104,
+    "jsonAndPythonParsing": "PASS",
+    "gitDiffCheck": "PASS"
+  }
+}
