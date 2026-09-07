@@ -1,0 +1,1561 @@
+{
+  "entryCheckpoint": "1d41765bd570996eec43bd36e2a1e98104824a1d",
+  "counts": {
+    "knownRemainingBlockers": 24,
+    "newBlockersStage3": 0,
+    "businessDecisionRequired": 9,
+    "schemaRequired": 2,
+    "schemaImpactUndetermined": 7,
+    "runtimeOnly": 15,
+    "surfacesInventoried": 31,
+    "surfaceTotal": 32,
+    "secondPassNewFindings": 7,
+    "thirdPassNewFindings": 0,
+    "estimatedRemediationPackages": 14,
+    "packagesParallelizableInitialTranche": 3
+  },
+  "violationClassLegend": {
+    "V01": "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+    "V02": "DIRECT PROVIDER MUTATION OUTSIDE ACTION ENGINE",
+    "V03": "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+    "V04": "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+    "V05": "PHONE/raw chat_id/legacy session AS AUTHORITY",
+    "V06": "READ SURFACE BUSINESS MUTATION",
+    "V07": "LEGACY FALLBACK",
+    "V08": "UNKNOWN TREATED AS FAILED",
+    "V09": "BLIND RETRY AFTER UNKNOWN",
+    "V10": "NON-DURABLE IDEMPOTENCY",
+    "V11": "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP",
+    "V12": "PACKAGE 4 VALUE OWNER BYPASS",
+    "V13": "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+  },
+  "findings": [
+    {
+      "id": "B36",
+      "family": "A12",
+      "title": "Approved daily report runtime proof defects",
+      "productionPaths": [
+        "OwnerReportsService.runDailyReport",
+        "bot._daily_report_job",
+        "committed B36 OwnerReportRun WIP"
+      ],
+      "violation": "Production daily path still sends before admission; approved candidate fails real PostgreSQL runtime proof: campaignIdempotencyKey opaque-code rejection and TransactionWriteConflict (2/8 effects in first case). No runtime deployment accepted.",
+      "existingCanonicalFoundation": "APPROVED OwnerReportRun schema and INBOX → TELEGRAM → APNS contract; existing A12 / Communication Delivery; sufficient for defect repair.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "M",
+      "evidence": [
+        "CYCLE-06-BLOCKING-PACKAGE-5-B36-SCHEMA-APPLIED-B37-STOP-REPORT.md",
+        "evidence/package5-b36-runtime-wip-verification.json",
+        "PY:bot.py:6761",
+        "TS:owner-reports/owner-reports.service.ts:292"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "NON-DURABLE IDEMPOTENCY",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V03",
+        "V04",
+        "V10",
+        "V13"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R05",
+      "preservedStatus": {
+        "schema": "APPLIED",
+        "runtime": "NOT DEPLOYED",
+        "knownProofDefects": [
+          "idempotency key",
+          "concurrent write conflict"
+        ],
+        "approvedOrder": "INBOX → TELEGRAM → APNS",
+        "newDecisionRequired": false
+      }
+    },
+    {
+      "id": "B37",
+      "family": "P4-07 + A13",
+      "title": "Weekly expense reminder and expense reply authority",
+      "productionPaths": [
+        "bot._anton_expense_reminder_job",
+        "bot.handle_message",
+        "bot.cmd_rashod",
+        "bot._save_anton_expenses",
+        "database.add_salon_expense/clear_salon_expenses",
+        "owner financial reports reading salon_expenses"
+      ],
+      "violation": "Raw ANTON_CHAT_ID + process-local awaiting flag; direct Telegram; unrelated reply can become expense; date-wide replacement deletes before validated immutable admission. Parallel SQLite financial owner.",
+      "existingCanonicalFoundation": "P407 canonical create/delete/period-declare + Action Engine + A13 transport exist; durable reminder/reply identity and confirmation binding missing. Existing Stage1 proposal is not approval.",
+      "businessDecisionRequired": "YES",
+      "schemaRequired": "YES",
+      "remediationSize": "L",
+      "evidence": [
+        "package5-b37-owner-contract-schema-proposal.md",
+        "evidence/package5-b37-production-source.json",
+        "evidence/package5-b37-expense-background.proof.json",
+        "PY:bot.py:6412",
+        "PY:bot.py:6437",
+        "PY:bot.py:6496"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "NON-DURABLE IDEMPOTENCY",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP",
+        "PACKAGE 4 VALUE OWNER BYPASS",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V03",
+        "V04",
+        "V05",
+        "V10",
+        "V11",
+        "V12",
+        "V13"
+      ],
+      "runtimeOnly": "NO",
+      "dependencyOnAnotherBlocker": [
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R13"
+    },
+    {
+      "id": "B38",
+      "family": "A01 / appointment create",
+      "title": "Public PHP booking bypass",
+      "productionPaths": [
+        "salon app/api-proxy.php?action=create_record",
+        "salon app/api-proxy.codex-loyalty-20260721.php?action=create_record",
+        "salon and VPS PWA BookingFlow / repeat-booking fallback",
+        "public Next booking bundles",
+        "mayaos/app/index.html",
+        "salon/app/index.codex-loyalty-20260721.html",
+        "salon/app/index.backup-20260731-anton-analytics.html",
+        "salon/app/tenant-test.html"
+      ],
+      "violation": "Phone/fullname/company_id selects provider booking; direct yc_post → file_get_contents POST records/book_record without canonical Client, Appointment owner or Action Engine. Network ambiguity becomes request_failed; UI offers retry, no durable execution identity. POST is not automatically retried inside PHP, but a later user retry is unbound.",
+      "existingCanonicalFoundation": "B31 canonical Client create + B32 principal + immutable booking binding + existing provider executor. Reuse or fail closed under approved authority; guest phone is not authority.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "M",
+      "evidence": [
+        "EDGE:salon/app/api-proxy.php:823",
+        "EDGE:salon/app/api-proxy.php:2836",
+        "EDGE:salon/app/api-proxy.codex-loyalty-20260721.php:839",
+        "EDGE:salon/app/api-proxy.codex-loyalty-20260721.php:2958",
+        "PUBLIC:salon/app/index.html:11052",
+        "PUBLIC:salon/app/index.html:12741",
+        "PUBLIC:vps/app.html:10935",
+        "package5-exhaustive-public-index.json; package5-exhaustive-edge-access.json"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT PROVIDER MUTATION OUTSIDE ACTION ENGINE",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "LEGACY FALLBACK",
+        "UNKNOWN TREATED AS FAILED",
+        "NON-DURABLE IDEMPOTENCY",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP"
+      ],
+      "violationClassCodes": [
+        "V02",
+        "V04",
+        "V05",
+        "V07",
+        "V08",
+        "V10",
+        "V11"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [
+        "B54"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R01"
+    },
+    {
+      "id": "B39",
+      "family": "A18 + appointment ownership",
+      "title": "Native Telegram Client authority and projection fallbacks",
+      "productionPaths": [
+        "bot.handle_contact",
+        "bot._start_contact_flow/_finalize_booking",
+        "bot._handle_cancel_record_confirm",
+        "bot.process_message → claude_ai/memory",
+        "native Telegram own-history/dossier/contact flows",
+        "bot._handle_freed_slot_accept",
+        "bot._handle_freed_slot_decline"
+      ],
+      "violation": "Raw sender/local Client and supplied or legacy phone select profile/history/booking target; SQLite clients updated as a parallel profile; booking bridge runs as integration system and carries phone-derived legacy-client reference instead of verified canonical Client ownership. Canonical Action Engine transport alone does not prove end-user authority. Contact with missing contact.user_id is accepted.",
+      "existingCanonicalFoundation": "Verified ClientChannelLink/Client principal, B31 create, canonical cancel/reschedule/read, A18 profile commands already exist. Native Telegram initiator must meet these contracts; no automatic linking by phone.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "L",
+      "evidence": [
+        "PY:bot.py:2855",
+        "PY:bot.py:3862",
+        "PY:bot.py:4018",
+        "PY:bot.py:4655",
+        "PY:database.py:730",
+        "PY:database.py:747",
+        "PY:legacy_appointment_bridge.py:56",
+        "TS:crm/legacy-appointment-bridge.service.ts:404",
+        "PY:bot.py:4770; PY:bot.py:4834; PY:database.py:2818"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "LEGACY FALLBACK",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V05",
+        "V07",
+        "V11"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R01"
+    },
+    {
+      "id": "B40",
+      "family": "A16",
+      "title": "Telegram direct staff binding remains executable",
+      "productionPaths": [
+        "bot.process_message → _handle_master_self_intro",
+        "bot.handle_callback empauth_yes_*",
+        "bot._bind_master_chat_direct",
+        "bot.post_init → database.add_admin"
+      ],
+      "violation": "Existing masters_telegram row can be rebound with direct UPDATE, skipping disabled reset_master_bind_code branch. Raw legacy admin authorizes grant; startup also repopulates raw admin authority. No canonical CrmStaffAccess command/execution.",
+      "existingCanonicalFoundation": "A16 configure_crm_staff_access, canonical Membership/User/AuthIdentity and approved retirement of legacy bind codes; existing owner sufficient.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "M",
+      "evidence": [
+        "PY:bot.py:2510",
+        "PY:bot.py:3095",
+        "PY:bot.py:3159",
+        "PY:bot.py:6031",
+        "PY:database.py:1529"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V05",
+        "V11",
+        "V13"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R02"
+    },
+    {
+      "id": "B41",
+      "family": "A16/A25 + all legacy owner surfaces",
+      "title": "Legacy owner/session authority remains a parallel gate",
+      "productionPaths": [
+        "webhook_server._panel_auth/_panel_resolve_role",
+        "panel/GOD financial and control routes",
+        "staff chat/stream/history",
+        "team_chat send/fetch/delete/upload_auth",
+        "Telegram admin commands",
+        "legacy Yandex/VK session issuer and /start web-session branch"
+      ],
+      "violation": "Signed channel identity or legacy web_session is promoted through FOUNDER_IDS/admins to business owner without exact active canonical User/Membership/tenant; staff-specific retirement does not remove owner branch. Phone/social-map fallback can issue a legacy staff session; revocation of canonical authority need not revoke this gate.",
+      "existingCanonicalFoundation": "Canonical JWT/auth session, exact Membership and CrmStaffAccess resolvers; B13/B20/B32 approved boundaries; AC3 auth facts may remain only within their exact canonical scope.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "L",
+      "evidence": [
+        "PY:webhook_server.py:1978",
+        "PY:webhook_server.py:2007",
+        "PY:webhook_server.py:6617",
+        "PY:webhook_server.py:8148",
+        "PY:webhook_server.py:8230",
+        "PY:web_auth.py:382",
+        "PY:bot.py:573"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "LEGACY FALLBACK",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP"
+      ],
+      "violationClassCodes": [
+        "V05",
+        "V07",
+        "V11"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R02"
+    },
+    {
+      "id": "B42",
+      "family": "A23 + A29/A31 read boundaries",
+      "title": "Parallel operational work journal and read-time mutation",
+      "productionPaths": [
+        "panel control/create,control/update,staff_task/update,action/evaluate",
+        "panel autonomy/tick,autopilot/supervise,execution/loop,job/run",
+        "chat __runjob and Python AI owner tools",
+        "maya_operating_rhythm_loop",
+        "owner_ai.command_center/daily_briefing → evaluate_due_owner_actions",
+        "owner assignment team-chat projection"
+      ],
+      "violation": "Direct mutable owner_action_journal outside OperationalWorkItem/Action Engine; scheduler and model create/update work; nominal read surfaces evaluate and write impact facts. Cooldown/settings timestamp and process tasks do not provide durable command identity or partial resume.",
+      "existingCanonicalFoundation": "A23 OperationalWorkItem / Wave1 governed commands; A29/A31 fact/projection separation. Existing supported actions can converge; do not invent extra autonomous business permissions.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "L",
+      "evidence": [
+        "PY:webhook_server.py:2479",
+        "PY:webhook_server.py:2529",
+        "PY:webhook_server.py:3395",
+        "PY:webhook_server.py:10522",
+        "PY:owner_ai.py:1418",
+        "PY:owner_ai.py:5768",
+        "PY:owner_ai.py:6599",
+        "PY:database.py:3966",
+        "PY:database.py:4543"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "READ SURFACE BUSINESS MUTATION",
+        "NON-DURABLE IDEMPOTENCY",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V06",
+        "V10",
+        "V13"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R04"
+    },
+    {
+      "id": "B43",
+      "family": "A12",
+      "title": "Non-daily reports have no immutable durable recipient plan",
+      "productionPaths": [
+        "Nest OwnerReportsService.runMorningBrief/publishMasterMorningBriefs",
+        "bot._director_briefing_job → notify_owner",
+        "webhook_server._send_growth_role_briefs_once",
+        "_send_master_day_briefs_once",
+        "panel_report_pdf_handler",
+        "bot.cmd_admin_pdf"
+      ],
+      "violation": "Morning/master reports use Inbox existence as completion and recalculate recipients/content/devices; Python briefs/PDF send directly to raw identities, settings marker written before effects. A partial run/restart lacks fixed report plan and same executions.",
+      "existingCanonicalFoundation": "A12/CD transport exists; approved OwnerReportRun schema constrains daily_report/version1. Other report kinds/recipient authority/content and PDF delivery are not implicitly approved by B36.",
+      "businessDecisionRequired": "YES",
+      "schemaRequired": "YES",
+      "remediationSize": "L",
+      "evidence": [
+        "TS:owner-reports/owner-reports.service.ts:107",
+        "TS:owner-reports/owner-reports.service.ts:191",
+        "PY:bot.py:6557",
+        "PY:bot.py:6724",
+        "PY:webhook_server.py:5284",
+        "PY:webhook_server.py:9801",
+        "PY:webhook_server.py:10032",
+        "package5-b36-owner-report-contract-schema-proposal.md",
+        "PY:bot.py:5872"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "NON-DURABLE IDEMPOTENCY",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V03",
+        "V04",
+        "V05",
+        "V10",
+        "V13"
+      ],
+      "runtimeOnly": "NO",
+      "dependencyOnAnotherBlocker": [
+        "B36",
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R05"
+    },
+    {
+      "id": "B44",
+      "family": "A13",
+      "title": "Scheduled operational alerts bypass canonical owner/delivery",
+      "productionPaths": [
+        "bot._god_watch_job",
+        "bot._dual_role_guard_job",
+        "lead_alerts.scan_and_alert",
+        "freed_slot.alert_admins_new_waitlist",
+        "webhook_server._send_shift_reminders_once",
+        "site_community.notify_owner",
+        "new staff approval notices"
+      ],
+      "violation": "Raw founder/admin/master lists, direct Telegram before any admission; settings or in-memory sent set either suppress after failure or permit repeated effects; no durable parent/recipient plan. Legacy Web Push helpers return zero, which does not repair the Telegram path.",
+      "existingCanonicalFoundation": "A13 and Communication Delivery recipient/attempt lifecycle exist. Exact alert occurrence owner, audience/recipient authority and durable partial-plan contract are not established for every listed producer.",
+      "businessDecisionRequired": "YES",
+      "schemaRequired": "UNKNOWN",
+      "remediationSize": "L",
+      "evidence": [
+        "PY:bot.py:6906",
+        "PY:bot.py:6975",
+        "PY:lead_alerts.py:145",
+        "PY:freed_slot.py:103",
+        "PY:webhook_server.py:10332",
+        "PY:site_community.py:185"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "NON-DURABLE IDEMPOTENCY",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V03",
+        "V04",
+        "V05",
+        "V10",
+        "V13"
+      ],
+      "runtimeOnly": "NO",
+      "dependencyOnAnotherBlocker": [
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R06"
+    },
+    {
+      "id": "B45",
+      "family": "A11",
+      "title": "Native Telegram dynamic appointment reminder duplicates canonical owner",
+      "productionPaths": [
+        "bot._finalize_booking → scheduler.add_job(_send_reminder)",
+        "bot._send_reminder"
+      ],
+      "violation": "Process-local scheduled reminder owns direct Telegram by user_id/record_id; no canonical Appointment/Client occurrence, durable admitted plan or UNKNOWN reconciliation. Preference errors fall through to send.",
+      "existingCanonicalFoundation": "B25 canonical reminder orchestration and existing A11/CD are available; reuse exact admitted occurrence and verified Client.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "M",
+      "evidence": [
+        "PY:bot.py:4148",
+        "PY:bot.py:5962",
+        "TS:appointment-notifications/appointment-notifications.service.ts"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "LEGACY FALLBACK",
+        "NON-DURABLE IDEMPOTENCY",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V03",
+        "V04",
+        "V05",
+        "V07",
+        "V10",
+        "V13"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [
+        "B39"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R06"
+    },
+    {
+      "id": "B46",
+      "family": "A14/A18",
+      "title": "Scheduled/manual retention marketing still bypasses B35 bulk owner",
+      "productionPaths": [
+        "reactivation.run_reactivation_job via scheduler,commands,panel job,chat confirmation",
+        "cycle_reminder.run_cycle_reminder_job via manual commands,panel job,chat confirmation"
+      ],
+      "violation": "Canonical consent read is followed by local raw Telegram audience and direct send. No immutable audience/route manifest, canonical bulk confirmation, per-recipient ActionExecution or durable partial resume; generic errors recorded as error/blocked. Birthday mint/send is excluded only by the exact current composed return contract: get_client_bookings emits flat client_id, but _client_yclients_id reads nested client.id. This is not an explicit retirement guard.",
+      "existingCanonicalFoundation": "B35 canonical bulk owner and consent/preferences exist. Existing approval is owner-confirmed bulk; unapproved automatic sends must not gain invented authority.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "L",
+      "evidence": [
+        "PY:reactivation.py:171",
+        "PY:cycle_reminder.py:465",
+        "PY:webhook_server.py:3395",
+        "PY:webhook_server.py:3508",
+        "PY:bot.py:6272",
+        "PY:bot.py:6300",
+        "PY:birthday.py:34",
+        "PY:yclients.py:1167"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "UNKNOWN TREATED AS FAILED",
+        "NON-DURABLE IDEMPOTENCY",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V03",
+        "V04",
+        "V05",
+        "V08",
+        "V10",
+        "V13"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R07"
+    },
+    {
+      "id": "B47",
+      "family": "reduced A27 + A13/A14",
+      "title": "First-party review request/rating/comment authority",
+      "productionPaths": [
+        "Existing pending review_requests → reviews scheduler and /reviews_now (schedule_after_close producer is behind retired pay_visit and not counted as a reachable new-row path)",
+        "Telegram rev_<rating>_<review_id>",
+        "handle_negative_comment",
+        "admin follow-up delivery"
+      ],
+      "violation": "Separate mutable review_requests owner; callback saves caller-supplied review_id before checking recipient ownership; comment updates similarly rely on transient user_data. Requests/admin notices directly send; ambiguous send_error becomes failed. This is a different table/path from retired B34 external_reviews.",
+      "existingCanonicalFoundation": "A27 immutable external review AC4 owner and CD exist, but verified native feedback/request identity, correction semantics and lifecycle mapping require a decision; do not force native feedback into external source authority.",
+      "businessDecisionRequired": "YES",
+      "schemaRequired": "UNKNOWN",
+      "remediationSize": "L",
+      "evidence": [
+        "PY:reviews.py:34",
+        "PY:reviews.py:114",
+        "PY:reviews.py:227",
+        "PY:reviews.py:288",
+        "PY:database.py:2507",
+        "PY:database.py:2565"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "UNKNOWN TREATED AS FAILED",
+        "NON-DURABLE IDEMPOTENCY",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V03",
+        "V05",
+        "V08",
+        "V10",
+        "V11",
+        "V13"
+      ],
+      "runtimeOnly": "NO",
+      "dependencyOnAnotherBlocker": [
+        "B39",
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R08"
+    },
+    {
+      "id": "B48",
+      "family": "A13/A31 appointment events",
+      "title": "Webhook appointment notifications execute before canonical delivery",
+      "productionPaths": [
+        "POST /yclients-webhook → _process_record_create/update/delete",
+        "YClients edge webhook relay",
+        "native staff appointment cards"
+      ],
+      "violation": "record_state/processed_records local dedupe precedes effect; raw legacy master binding selects direct Telegram recipients; later Inbox bridge is an observation/admission after Telegram. Crash/update/reassignment can drop or repeat deliveries; no immutable per-recipient execution before effect.",
+      "existingCanonicalFoundation": "Canonical appointment event/mirror AC4/AC5 and existing notification/CD ingress; exact current staff recipient resolver available. Preserve fact ingestion, move all business delivery under existing owner.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "L",
+      "evidence": [
+        "PY:webhook_server.py:770",
+        "PY:webhook_server.py:960",
+        "PY:webhook_server.py:1242",
+        "PY:webhook_server.py:8090",
+        "EDGE:salon/yclients-webhook.php:126"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "NON-DURABLE IDEMPOTENCY",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V03",
+        "V04",
+        "V05",
+        "V10",
+        "V13"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [
+        "B40",
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R06"
+    },
+    {
+      "id": "B49",
+      "family": "A11/A13/A23/A14 + Inbox/APNS",
+      "title": "Generic Inbox/default APNS branch remains outside delivery owner",
+      "productionPaths": [
+        "InboxService.ingest",
+        "publishForTenant default types",
+        "appointment create/cancel/reschedule lifecycle",
+        "Wave1 operational work projection",
+        "client_support_request",
+        "generic marketing_campaign ingest",
+        "announcePush → sendInboxApns → sendOne"
+      ],
+      "violation": "Types outside PACKAGE2_SINGLE_TYPES directly upsert Inbox then fire-and-forget APNS; planSingleSafely is shadow planning, not admission. sendOne maps provider errors/missing success to false, no durable UNKNOWN. Generic maya_task ingest lacks canonical work-item binding; generic marketing type can bypass B35 root.",
+      "existingCanonicalFoundation": "Existing A23 owner, appointment owners, B35 bulk and Communication Delivery kernel/transport. Approved exceptions do not authorize default direct delivery.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "L",
+      "evidence": [
+        "TS:inbox/inbox.service.ts:44",
+        "TS:inbox/inbox.service.ts:89",
+        "TS:inbox/inbox.service.ts:394",
+        "TS:inbox/inbox.service.ts:441",
+        "TS:inbox/inbox.service.ts:751",
+        "TS:inbox/apns-push.ts:74",
+        "TS:inbox/dto/inbox.dto.ts:14"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "UNKNOWN TREATED AS FAILED",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V03",
+        "V04",
+        "V08",
+        "V13"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R06"
+    },
+    {
+      "id": "B50",
+      "family": "cross-family AI execution",
+      "title": "AI tool wrapper collapses unresolved canonical outcome into failed",
+      "productionPaths": [
+        "POST AI tool execute/approval → AiToolRuntimeService.executeNow",
+        "canonical appointment/value/provider tool handlers",
+        "withTimeout around non-cancelled handler"
+      ],
+      "violation": "Any rejection/timeout writes AiToolExecution and approval failed; same key then receives previous_execution_failed rather than continuing/reconciling the original execution. Lower Action Engine may remain UNKNOWN or still finish; outer layer loses truthful outcome. No claim that lower provider guard itself blindly retries.",
+      "existingCanonicalFoundation": "Existing AE receipts/status/reconciliation and encrypted AI result/input fields; preserve and expose same durable receipt, keep UNKNOWN distinct. No new business action class needed.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "M",
+      "evidence": [
+        "TS:ai-tools/ai-tool-runtime.service.ts:488",
+        "TS:ai-tools/ai-tool-runtime.service.ts:582",
+        "TS:ai-tools/ai-tool-runtime.service.ts:640",
+        "TS:appointments/client-appointment-create.service.ts:339"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "UNKNOWN TREATED AS FAILED"
+      ],
+      "violationClassCodes": [
+        "V08"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R10"
+    },
+    {
+      "id": "B51",
+      "family": "A22/A25 business configuration",
+      "title": "Global legacy business rules/capability/AI provider settings",
+      "productionPaths": [
+        "chat/stream _founder_learning_reply/_founder_permission_reply",
+        "Telegram /ai_provider",
+        "maya_capabilities.set_enabled"
+      ],
+      "violation": "Direct global salon_rules/settings changes under raw founder/admin; capabilities affect other Clients and procedural rules feed business AI without canonical tenant/config owner, version or action receipt. Canonical per-user explicit AI notes are not an authority for tenant-wide rules. The named remember/forget model tools are excluded from role tool sets; the reachable writer is the deterministic founder command, not those disabled tool definitions.",
+      "existingCanonicalFoundation": "A22 governed settings and canonical per-user AiMemoryFact exist; scope/version/owner and mapping of general business rules/global switches are not approved. Schema impact requires exact mapping decision.",
+      "businessDecisionRequired": "YES",
+      "schemaRequired": "UNKNOWN",
+      "remediationSize": "L",
+      "evidence": [
+        "PY:webhook_server.py:7056",
+        "PY:claude_ai.py:2629",
+        "PY:maya_capabilities.py:76",
+        "PY:bot.py:1734",
+        "PY:masters_ai.py:58",
+        "PY:database.py:4642"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V05",
+        "V11"
+      ],
+      "runtimeOnly": "NO",
+      "dependencyOnAnotherBlocker": [
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R11"
+    },
+    {
+      "id": "B52",
+      "family": "public content/reviews + A25",
+      "title": "Public community moderation has a separate authority/lifecycle",
+      "productionPaths": [
+        "POST /api/site/community/{action}",
+        "site-community-proxy",
+        "reserve_comment/process_comment/resolve_comment",
+        "guest comments/likes and moderation queue"
+      ],
+      "violation": "Moderation decisions use legacy database.is_admin and mutate site_event_comments directly; no canonical tenant/operator owner. Visitor/rate/form tokens are transport/anti-abuse evidence, not Client or staff authority. Anonymous source facts must not be converted to Client facts by inference.",
+      "existingCanonicalFoundation": "Canonical auth and A27 source-fact/CD building blocks exist; anonymous community fact/moderation owner and scope are unclassified, so preserving this business behavior needs explicit mapping. Draft site publication writers have no active caller found and are not counted as active writes.",
+      "businessDecisionRequired": "YES",
+      "schemaRequired": "UNKNOWN",
+      "remediationSize": "L",
+      "evidence": [
+        "PY:site_community.py:137",
+        "PY:site_community.py:171",
+        "PY:site_community.py:257",
+        "PY:site_engagement.py:244",
+        "EDGE:salon/app/site-community-proxy.php:52"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V05",
+        "V11"
+      ],
+      "runtimeOnly": "NO",
+      "dependencyOnAnotherBlocker": [
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R09"
+    },
+    {
+      "id": "B53",
+      "family": "A23/A30 conversation lifecycle",
+      "title": "Telegram /clear still erases shared history",
+      "productionPaths": [
+        "Telegram CommandHandler(clear) → bot.cmd_clear → memory.save_conversations"
+      ],
+      "violation": "Raw channel key replaces persisted common conversation history with [] despite B23 server-erasure retirement. No approved durable conversation lifecycle/claim; disk JSON rewrite is independent of canonical owner.",
+      "existingCanonicalFoundation": "Approved B23 fail-closed retirement already exists for HTTP chat/delete; reuse the same decision for this initiator. Reopening actual erasure would require separate lifecycle approval.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "S",
+      "evidence": [
+        "PY:bot.py:797",
+        "PY:bot.py:7251",
+        "PY:memory.py:565",
+        "PY:webhook_server.py:8202"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V05"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R12"
+    },
+    {
+      "id": "B54",
+      "family": "cross-family idempotency / proxy",
+      "title": "Canonical HTTP idempotency key is dropped at relays",
+      "productionPaths": [
+        "maya-native-api.php/*",
+        "maya-platform-api.php/*",
+        "SaaS/native PWA requests through those relays"
+      ],
+      "violation": "Explicit forward-header allowlist excludes Idempotency-Key. Same logical caller key never reaches canonical ingress; fallback server-derived booking key changes with meaningful inputs. Transport erases the immutable logical identity even though backend binding is correct.",
+      "existingCanonicalFoundation": "Existing callerIdempotency and B31 immutable binding; propagate approved opaque header unchanged and keep tenant/Client authority in backend. No new contract/schema.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "S",
+      "evidence": [
+        "EDGE:salon/app/maya-native-api.php:71",
+        "EDGE:mayaos/maya-platform-api.php:71",
+        "TS:appointments/client-appointment-create.service.ts:195"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "NON-DURABLE IDEMPOTENCY"
+      ],
+      "violationClassCodes": [
+        "V10"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R01"
+    },
+    {
+      "id": "B55",
+      "family": "finance/P4-07-adjacent",
+      "title": "Cash drawer declaration is a separate mutable financial owner",
+      "productionPaths": [
+        "Telegram /kassa → database.set_cash_log",
+        "daily/owner reports reading cash_log"
+      ],
+      "violation": "Raw ANTON_CHAT_ID or legacy admin overwrites daily cash total through SQLite upsert without canonical tenant, explicit declaration identity or immutable correction. Cash drawer declaration is not an Expense create and must not be silently mapped to it.",
+      "existingCanonicalFoundation": "Canonical expense/value owners and authorization exist; exact cash declaration/reconciliation/correction owner is missing. Separate business mapping required; schema cannot be determined without that choice.",
+      "businessDecisionRequired": "YES",
+      "schemaRequired": "UNKNOWN",
+      "remediationSize": "M",
+      "evidence": [
+        "PY:bot.py:6459",
+        "PY:database.py:2224",
+        "PY:webhook_server.py:4885"
+      ],
+      "passFound": 1,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "NON-DURABLE IDEMPOTENCY",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V05",
+        "V10",
+        "V11"
+      ],
+      "runtimeOnly": "NO",
+      "dependencyOnAnotherBlocker": [
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R14"
+    },
+    {
+      "id": "B56",
+      "family": "A15",
+      "title": "Native Python AI schedule PUT bypass",
+      "productionPaths": [
+        "native Telegram owner chat → claude_ai.execute_tool(manage_staff_schedule)",
+        "claude_ai._schedule_confirmation_verified → yclients.change_staff_day_schedule(apply=True)"
+      ],
+      "violation": "History prose confirmation permits direct provider PUT company/{company}/staff/schedule; no canonical actor/tenant schedule command, immutable target/intent confirmation or ActionExecution. Any transport exception becomes schedule_update_failed, so ambiguity is not retained as UNKNOWN. The provider helper is NOT unconditionally guarded.",
+      "existingCanonicalFoundation": "Wave3 A15 canonical staff schedule command and provider executor; reuse existing admission/confirmation/UNKNOWN semantics. Native initiator must prove canonical principal.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "M",
+      "evidence": [
+        "PY:claude_ai.py:1868",
+        "PY:claude_ai.py:4599",
+        "PY:claude_ai.py:4826",
+        "PY:yclients.py:419",
+        "PY:yclients.py:591",
+        "TS:ai-tools/staff-schedule-command.service.ts"
+      ],
+      "passFound": 2,
+      "violationClasses": [
+        "DIRECT PROVIDER MUTATION OUTSIDE ACTION ENGINE",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "UNKNOWN TREATED AS FAILED",
+        "NON-DURABLE IDEMPOTENCY",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP"
+      ],
+      "violationClassCodes": [
+        "V02",
+        "V04",
+        "V05",
+        "V08",
+        "V10",
+        "V11"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R03"
+    },
+    {
+      "id": "B57",
+      "family": "A14 / P4-05 projection",
+      "title": "Legacy subscription renewal notification can bypass value tombstones",
+      "productionPaths": [
+        "subscriptions scheduler / bot.cmd_subscriptions_now / panel job subscriptions → run_subscriptions_job → sync_subscription_usage → _send_renew_push"
+      ],
+      "violation": "For an existing active unexpired legacy subscription with unchanged usage (or early return from read resolution), disabled update_subscription_usage is never called. Renewal notification sends to raw legacy Client chat_id, then directly updates subscriptions.renew_reminder_sent_at. Send ambiguity can repeat; no canonical subscription/Client eligibility or B35 admitted recipient execution. No historical data row existence is asserted.",
+      "existingCanonicalFoundation": "P405 canonical subscription is the value owner; B35 canonical marketing owner/CD can admit permitted offers. Enforce existing owners, do not resume old SQLite terms or invent permission for automatic campaigns.",
+      "businessDecisionRequired": "NO",
+      "schemaRequired": "NO",
+      "remediationSize": "M",
+      "evidence": [
+        "PY:subscriptions.py:240",
+        "PY:subscriptions.py:269",
+        "PY:subscriptions.py:330",
+        "PY:database.py:2905",
+        "PY:database.py:2924",
+        "PY:bot.py:6322"
+      ],
+      "passFound": 2,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "UNKNOWN TREATED AS FAILED",
+        "NON-DURABLE IDEMPOTENCY",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V03",
+        "V04",
+        "V05",
+        "V08",
+        "V10",
+        "V13"
+      ],
+      "runtimeOnly": "YES",
+      "dependencyOnAnotherBlocker": [
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R07"
+    },
+    {
+      "id": "B58",
+      "family": "A23/A30 + A13",
+      "title": "Team conversation/message/media lifecycle is unowned",
+      "productionPaths": [
+        "panel team_chat/send,delete,fetch,upload_auth",
+        "_push_team_message",
+        "PHP team_chat_media,upload_finish,team_chat_send/fetch",
+        "both public PHP proxy variants"
+      ],
+      "violation": "Local staff_messages add/delete under legacy raw staff principal; no tenant-qualified conversation owner or durable message identity. Background fan-out selects legacy staff/admin Telegram IDs and sends outside CD. Public media read performs persistent attachment TTL unlink, not temporary speech scratch cleanup. Upload/send timeout unlinks a final attachment even if backend already committed its message (UNKNOWN treated as failure). Same retry can insert another message; no durable partial fan-out resume.",
+      "existingCanonicalFoundation": "Canonical staff auth/CD and bounded AC6 coordinator exist; durable team conversation, attachment retention/deletion policy and message idempotency are not mapped. A30 initial allowlist does not include persistent team messages/media. Do not silently choose a new lifecycle.",
+      "businessDecisionRequired": "YES",
+      "schemaRequired": "UNKNOWN",
+      "remediationSize": "L",
+      "evidence": [
+        "PY:webhook_server.py:11354",
+        "PY:webhook_server.py:11404",
+        "PY:webhook_server.py:11524",
+        "PY:database.py:1700",
+        "PY:database.py:1753",
+        "EDGE:salon/app/api-proxy.php:133",
+        "EDGE:salon/app/api-proxy.php:348",
+        "EDGE:salon/app/api-proxy.php:537",
+        "EDGE:salon/app/api-proxy.php:2277"
+      ],
+      "passFound": 2,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "DIRECT DELIVERY OUTSIDE COMMUNICATION DELIVERY",
+        "EXTERNAL EFFECT BEFORE CANONICAL ADMISSION",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "READ SURFACE BUSINESS MUTATION",
+        "UNKNOWN TREATED AS FAILED",
+        "NON-DURABLE IDEMPOTENCY",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP",
+        "BACKGROUND/SCHEDULED EFFECT WITHOUT CANONICAL OWNER"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V03",
+        "V04",
+        "V05",
+        "V06",
+        "V08",
+        "V10",
+        "V11",
+        "V13"
+      ],
+      "runtimeOnly": "NO",
+      "dependencyOnAnotherBlocker": [
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R12"
+    },
+    {
+      "id": "B59",
+      "family": "A22/A16 staff notification preferences",
+      "title": "Native /mute writes legacy staff preference authority",
+      "productionPaths": [
+        "Telegram /mute N or /mute off → get_master_by_chat_id → mute_master/unmute_master",
+        "webhook notification eligibility reads is_master_muted"
+      ],
+      "violation": "Raw sender→masters_telegram controls persistent staff notification suppression directly; no exact active canonical User/tenant authority or canonical preference receipt. Staff mute is not the approved Client preference contract and must not be automatically interpreted as tenant-wide notification configuration.",
+      "existingCanonicalFoundation": "A16 verified staff principal, A22 governed settings and CD eligibility exist; mapping personal staff mute scope/duration/revocation to a canonical preference owner needs an explicit contract decision. Schema impact pending exact mapping.",
+      "businessDecisionRequired": "YES",
+      "schemaRequired": "UNKNOWN",
+      "remediationSize": "M",
+      "evidence": [
+        "PY:bot.py:1982",
+        "PY:database.py:1632",
+        "PY:database.py:1773",
+        "PY:database.py:1784",
+        "PY:database.py:1795"
+      ],
+      "passFound": 2,
+      "violationClasses": [
+        "DIRECT BUSINESS MUTATION OUTSIDE CANONICAL OWNER",
+        "PHONE/raw chat_id/legacy session AS AUTHORITY",
+        "CROSS-TENANT/CROSS-CLIENT AUTHORITY GAP"
+      ],
+      "violationClassCodes": [
+        "V01",
+        "V05",
+        "V11"
+      ],
+      "runtimeOnly": "NO",
+      "dependencyOnAnotherBlocker": [
+        "B40",
+        "B41"
+      ],
+      "dependencyMeaning": "End-to-end legacy initiator acceptance dependency; existing canonical auth/CD/AE components are already available, not missing new foundations",
+      "recommendedRemediationPackage": "R11"
+    }
+  ],
+  "packages": [
+    {
+      "id": "R01",
+      "blockers": [
+        "B38",
+        "B39",
+        "B54"
+      ],
+      "owner": "Canonical Client/profile and Appointment owners; B31/B32/B33 identity/intent ingress",
+      "businessDecisionsRequired": "NO; existing approved Client binding/create/lifecycle contracts",
+      "schemaDelta": "NONE",
+      "runtimeScope": "PHP/PWA identity-key transport + native Telegram Client admission, own profile/read/booking initiators; canonical execution unchanged",
+      "dependencies": [],
+      "canRunInParallel": "YES",
+      "parallelCondition": "Independent initial tranche; B38 depends internally on B54 header propagation"
+    },
+    {
+      "id": "R02",
+      "blockers": [
+        "B40",
+        "B41"
+      ],
+      "owner": "Canonical User/Membership/CrmStaffAccess/platform access owner",
+      "businessDecisionsRequired": "NO; use existing A16/A25 and auth/session contracts",
+      "schemaDelta": "NONE",
+      "runtimeScope": "Native staff grants, owner/admin/session gates across panel/GOD/chat/team/native commands",
+      "dependencies": [],
+      "canRunInParallel": "YES",
+      "parallelCondition": "Independent initial tranche; publishes common exact-principal boundary for dependent integrations"
+    },
+    {
+      "id": "R03",
+      "blockers": [
+        "B56"
+      ],
+      "owner": "A15 canonical StaffSchedule action owner",
+      "businessDecisionsRequired": "NO",
+      "schemaDelta": "NONE",
+      "runtimeScope": "Native Python AI schedule initiator → verified principal → existing confirmation/admission/executor",
+      "dependencies": [
+        "R02"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "Wait for R02 principal integration; then can share later tranche with unrelated owners"
+    },
+    {
+      "id": "R04",
+      "blockers": [
+        "B42"
+      ],
+      "owner": "A23 OperationalWorkItem owner; A29/A31 projection boundary",
+      "businessDecisionsRequired": "NO; enforce supported existing commands, no added autonomous permission",
+      "schemaDelta": "NONE",
+      "runtimeScope": "Legacy work journal/control/job/model writers, read-time evaluation, operating-rhythm loop",
+      "dependencies": [
+        "R02"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "R02 for legacy caller authority; independent work owner after that integration"
+    },
+    {
+      "id": "R05",
+      "blockers": [
+        "B36",
+        "B43"
+      ],
+      "owner": "Owner report immutable run/recipient-slot plan owner",
+      "businessDecisionsRequired": "B36 NO new decision; B43 YES: non-daily report kinds, recipients/content/version/PDF/channel plan",
+      "schemaDelta": "B36 already applied, no new delta; B43 extension required, exact schema mapping pending decision",
+      "runtimeScope": "Repair approved daily idempotency/concurrent-write defects later; converge morning/master/growth/director/PDF into approved non-daily mapping",
+      "dependencies": [
+        "R02",
+        "B43 contract/schema approval",
+        "B36 proof PASS before any extension acceptance"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "Daily B36 can be repaired independently later, but this whole package includes unapproved B43; do not reopen approved B36 order"
+    },
+    {
+      "id": "R06",
+      "blockers": [
+        "B44",
+        "B45",
+        "B48",
+        "B49"
+      ],
+      "owner": "Communication Delivery admission/execution owner; producer occurrence authority remains explicit",
+      "businessDecisionsRequired": "B44 YES: exact operational alert occurrences/recipient authority/partial plan; B45/B48/B49 NO",
+      "schemaDelta": "B44 UNKNOWN pending owner mapping; remaining rows NONE",
+      "runtimeScope": "Native reminder/event/alert producers + generic Inbox/APNS branch → existing CD; do not make an alert a universal send permit",
+      "dependencies": [
+        "R01",
+        "R02",
+        "B44 contract/schema decision"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "Shared CD integration follows exact Client/staff authority; other approved callers may develop independently but package acceptance is gated"
+    },
+    {
+      "id": "R07",
+      "blockers": [
+        "B46",
+        "B57"
+      ],
+      "owner": "B35 canonical bulk marketing owner; P405 retains subscription eligibility",
+      "businessDecisionsRequired": "NO; unapproved automatic marketing must fail closed under existing owner-confirmed contract",
+      "schemaDelta": "NONE",
+      "runtimeScope": "Native reactivation/manual cycle/renewal initiators converge to B35 manifest/consent/attempts; no renewed legacy value owner",
+      "dependencies": [
+        "R02"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "Manual owner initiators depend on R02; can share later tranche after principal contract integration"
+    },
+    {
+      "id": "R08",
+      "blockers": [
+        "B47"
+      ],
+      "owner": "Native feedback/request owner — exact mapping pending",
+      "businessDecisionsRequired": "YES: request/recipient binding, rating/comment correction and lifecycle",
+      "schemaDelta": "UNKNOWN",
+      "runtimeScope": "Pending native review request delivery, callbacks/comments, admin follow-up; preserve B34 external-import owner",
+      "dependencies": [
+        "R01",
+        "R02",
+        "B47 owner/schema decision"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "Exact native Client + staff principal and separate feedback contract first"
+    },
+    {
+      "id": "R09",
+      "blockers": [
+        "B52"
+      ],
+      "owner": "Anonymous community source facts and canonical moderation owner — mapping pending",
+      "businessDecisionsRequired": "YES: anonymous fact/moderation authority and lifecycle scope",
+      "schemaDelta": "UNKNOWN",
+      "runtimeScope": "Site community proxy, guest comment/like facts and moderation decisions; keep anonymous facts distinct from Client facts",
+      "dependencies": [
+        "R02",
+        "B52 owner/schema decision"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "Moderation principal + community contract first; not dependent on native feedback schema"
+    },
+    {
+      "id": "R10",
+      "blockers": [
+        "B50"
+      ],
+      "owner": "AI invocation/approval receipt owner over existing ActionExecution",
+      "businessDecisionsRequired": "NO",
+      "schemaDelta": "NONE",
+      "runtimeScope": "AI timeout/error/status/resume wrapper preserves UNKNOWN and same lower execution",
+      "dependencies": [],
+      "canRunInParallel": "YES",
+      "parallelCondition": "Independent initial tranche; lower Action Engine owners already exist"
+    },
+    {
+      "id": "R11",
+      "blockers": [
+        "B51",
+        "B59"
+      ],
+      "owner": "A22 governed configuration owner with distinct tenant-rule and personal staff-preference scopes",
+      "businessDecisionsRequired": "YES: B51 tenant/global rule and capability scope/version; B59 staff mute duration/revocation/eligibility semantics",
+      "schemaDelta": "UNKNOWN for both; no schema-free claim",
+      "runtimeScope": "Deterministic founder learning/capability/provider switches and native mute; separate exact scope receipts within common config family",
+      "dependencies": [
+        "R02",
+        "B51/B59 owner/schema decisions"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "Canonical staff authority first; one package must not collapse personal preference into tenant-wide rules"
+    },
+    {
+      "id": "R12",
+      "blockers": [
+        "B53",
+        "B58"
+      ],
+      "owner": "Conversation/message and persistent attachment lifecycle owner",
+      "businessDecisionsRequired": "B53 NO: preserve existing erasure retirement; B58 YES: team message/attachment retention, deletion, durable delivery lifecycle",
+      "schemaDelta": "B53 NONE; B58 UNKNOWN",
+      "runtimeScope": "Native clear retirement + team send/delete/fan-out/media read cleanup and upload UNKNOWN; no general A30 deletion allowlist expansion",
+      "dependencies": [
+        "R02",
+        "B58 owner/schema decision"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "B53 retirement can be isolated; whole package requires explicit team lifecycle mapping"
+    },
+    {
+      "id": "R13",
+      "blockers": [
+        "B37"
+      ],
+      "owner": "P407 expense declaration owner plus durable reminder/reply intent owner",
+      "businessDecisionsRequired": "YES: reminder owner/recipient, immutable reply binding, corrected/replace-period semantics",
+      "schemaDelta": "REQUIRED; proposal not approved, no automatic implementation",
+      "runtimeScope": "Weekly reminder, /rashod, unrelated replies/date-wide deletion and financial report projection",
+      "dependencies": [
+        "R02",
+        "B37 owner/schema approval"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "Separate reminder and accepted expense boundaries; do not convert raw chat authority into P407 action"
+    },
+    {
+      "id": "R14",
+      "blockers": [
+        "B55"
+      ],
+      "owner": "Cash declaration/reconciliation owner — mapping pending",
+      "businessDecisionsRequired": "YES: declaration/correction/reconciliation semantics; cash is not Expense.create",
+      "schemaDelta": "UNKNOWN",
+      "runtimeScope": "/kassa, legacy cash_log upsert and report inputs",
+      "dependencies": [
+        "R02",
+        "B55 owner/schema decision"
+      ],
+      "canRunInParallel": "NO",
+      "parallelCondition": "Accounting meaning must be chosen explicitly; may share later tranche with expense but not its schema by assumption"
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "S01",
+      "name": "Backend HTTP routes",
+      "coverage": "226 registered Nest routes; source-matched controllers, guards, canonical cutovers",
+      "findings": "B36 B43 B49 B50",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S02",
+      "name": "Active salon PWA",
+      "coverage": "app/index.html + retained reachable PWA variants; PHP callers",
+      "findings": "B38 B41 B42 B43 B54 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S03",
+      "name": "Maya platform PWA / VPS static",
+      "coverage": "VPS app.html and mayaos/app/index.html, OAuth callbacks, service workers",
+      "findings": "B38 B54",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S04",
+      "name": "Public site / Next / shop",
+      "coverage": "All acquired public HTML/JS; checkout/account, public booking, community routes",
+      "findings": "B38 B52",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S05",
+      "name": "Proxy / compatibility routes",
+      "coverage": "11 PHP files; archive-named proxy not denied by inspected .htaccess",
+      "findings": "B38 B41 B54 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S06",
+      "name": "Chat / stream / history",
+      "coverage": "Nest AI + Python chat/stream/history, native shared conversation state",
+      "findings": "B39 B41 B42 B50 B51 B53 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S07",
+      "name": "Realtime / voice",
+      "coverage": "realtime_bridge, voice, stream tool routing; STT/TTS as protocol transport",
+      "findings": "B39 B41 B50 B51 B56",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S08",
+      "name": "AI tools",
+      "coverage": "TypeScript handlers/runtime and Python role/confirmation dispatch",
+      "findings": "B39 B42 B50 B51 B56",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S09",
+      "name": "Journal",
+      "coverage": "Canonical staff journal, legacy read guards and retired mutations",
+      "findings": "B41 B42",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S10",
+      "name": "Python services / importers",
+      "coverage": "71 acquired current root sources, 72 root metadata entries including config example; imports/callers; 24 archived copies separated",
+      "findings": "B37 B39 B40 B41 B42 B43 B44 B45 B46 B47 B48 B51 B52 B53 B55 B56 B57 B58 B59",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S11",
+      "name": "Schedulers",
+      "coverage": "Nest scheduler registrations/flags and live bot APScheduler registrations",
+      "findings": "B36 B37 B42 B43 B44 B45 B46 B47 B57",
+      "status": "INVENTORIED",
+      "stage3Evidence": "package5-stage3-scheduled-jobs.json; package5-stage3-runtime-metadata.json; package5-stage3-mechanic-dispositions.json"
+    },
+    {
+      "id": "S12",
+      "name": "VPS cron / timers",
+      "coverage": "root/botadmin no-crontab proved; system tables, cron directories and timers inspected",
+      "findings": "NONE additional",
+      "status": "INVENTORIED",
+      "stage3Evidence": "package5-stage3-scheduled-jobs.json; package5-stage3-runtime-metadata.json; package5-stage3-mechanic-dispositions.json"
+    },
+    {
+      "id": "S13",
+      "name": "Beget cron / hosting scheduled tasks",
+      "coverage": "Beget account cron/hosting scheduler command list: SSH cron denied; alternate allowed configs/logs insufficient; authorized panel UI inaccessible to tool. Unknown command possible, not merely cadence.",
+      "findings": "COVERAGE GAP",
+      "status": "BLOCKED",
+      "stage3Evidence": "package5-stage3-beget-scheduling.json; package5-stage3-beget-control-plane.json; package5-stage3-scheduled-jobs.json:J42"
+    },
+    {
+      "id": "S14",
+      "name": "Background workers / installed operator CLIs",
+      "coverage": "Live units/processes, observer, 15 dist/scripts plus seed CLI; manual versus automatic distinguished",
+      "findings": "B42 B43 B44 B46 B48 B58",
+      "status": "INVENTORIED",
+      "stage3Evidence": "package5-stage3-scheduled-jobs.json; package5-stage3-runtime-metadata.json; package5-stage3-mechanic-dispositions.json"
+    },
+    {
+      "id": "S15",
+      "name": "Telegram handlers / commands / replies",
+      "coverage": "Active bot.py, command/callback/message handlers, global send observation patch",
+      "findings": "B37 B39 B40 B41 B43 B44 B45 B46 B47 B53 B55 B56 B57 B59",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S16",
+      "name": "Inbox",
+      "coverage": "Ingest, publish, consumption/projection, default versus canonical single delivery",
+      "findings": "B36 B43 B49",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S17",
+      "name": "APNS",
+      "coverage": "Exact transport callers and default direct branch; token protocol registration",
+      "findings": "B36 B43 B49",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S18",
+      "name": "Web Push",
+      "coverage": "Canonical endpoint binding/transport; disabled legacy no-op helpers; public push service workers",
+      "findings": "B44 B57 B58 upstream delivery paths; no new active direct legacy Web Push sender",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S19",
+      "name": "Communication Delivery",
+      "coverage": "Single/bulk admissions, attempts, reconciliation, UNKNOWN and direct callers",
+      "findings": "B36 B43 B44 B45 B46 B47 B48 B49 B57 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S20",
+      "name": "Panel / GOD / admin",
+      "coverage": "Canonical platform APIs; legacy role resolver, readers, controls, PDF, job dispatch",
+      "findings": "B37 B41 B42 B43 B44 B46 B51 B55 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S21",
+      "name": "Internal calendar",
+      "coverage": "Canonical create and Wave4 configuration executor; unused bootstrap helpers distinguished",
+      "findings": "NONE additional",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S22",
+      "name": "CRM / YClients adapters / helpers",
+      "coverage": "Approved fact/recheck/mirror flows; every Python and TS provider write helper traced",
+      "findings": "B38 B39 B48 B56",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S23",
+      "name": "Marketing / bulk",
+      "coverage": "B35 canonical owner and remaining native scheduled/manual consumers",
+      "findings": "B46 B57",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S24",
+      "name": "Finance / expense",
+      "coverage": "P407/P408 canonical paths, raw weekly intake, cash declaration; deferred payment tombstones",
+      "findings": "B37 B55",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S25",
+      "name": "Loyalty / value / certificates",
+      "coverage": "P403–P410 executors; Python lower guards, renewal branch and blocked mint call chains",
+      "findings": "B37 B57; native value mint/provider purchase bypass not proved",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S26",
+      "name": "Reviews",
+      "coverage": "B34 external import preserved; native pending feedback callbacks and community moderation",
+      "findings": "B47 B52",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S27",
+      "name": "Onboarding",
+      "coverage": "Canonical trial admission/AI receipt/bootstrap; legacy disabled trial setters",
+      "findings": "NONE additional",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S28",
+      "name": "Auth / identity",
+      "coverage": "Canonical AC3 protocols, verified Client/staff links; legacy raw owner and staff gates",
+      "findings": "B39 B40 B41 B59",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S29",
+      "name": "Maintenance",
+      "coverage": "Wave6 allowlist/coordinator; retired AI/PII execute; persistent media versus speech scratch",
+      "findings": "B53 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S30",
+      "name": "All direct database writer candidates",
+      "coverage": "106 SQL candidate functions + all TS candidate callsites, raw SQL and explicit exclusions",
+      "findings": "B37 B39 B40 B41 B42 B47 B49 B51 B52 B53 B55 B57 B58 B59",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S31",
+      "name": "All direct provider / delivery candidates",
+      "coverage": "Reverse sink scan to every acquired route, command, scheduler and helper caller",
+      "findings": "B36 B38 B43 B44 B45 B46 B47 B48 B49 B56 B57 B58",
+      "status": "INVENTORIED"
+    },
+    {
+      "id": "S32",
+      "name": "Legacy identity / projection fallbacks",
+      "coverage": "Phone, raw Telegram, legacy web session, User/Client distinction; no source fact elevated to authority",
+      "findings": "B37 B38 B39 B40 B41 B44 B47 B51 B52 B55 B56 B57 B58 B59",
+      "status": "INVENTORIED"
+    }
+  ],
+  "productionJobTargetInventory": "INCOMPLETE",
+  "begetControlPlaneScheduleMetadata": "UNVERIFIED",
+  "inventoryComplete": false,
+  "thirdPassNewBlockerIds": [],
+  "thirdPassNewViolationPaths": [],
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "productionMutations": 0,
+  "parallelMeaning": "YES means dependency-free initial remediation tranche over already approved contracts; R01/R02/R10. NO means owner decision or listed integration prerequisite remains; it does not require every later package to run serially. This is planning only, no implementation authorization."
+}

@@ -1,0 +1,200 @@
+{
+  "sourceCommit": "1d41765bd570996eec43bd36e2a1e98104824a1d",
+  "files": [
+    {
+      "file": "maya-saas-backend/deploy/organic-shadow/install.sh",
+      "sha256": "5f64e2c5a64d3f67d4b7776158f7c9b96dbb41571b1f0e5a673e1bc24e469aa4",
+      "schedulingRefs": []
+    },
+    {
+      "file": "maya-saas-backend/deploy/platform/configure-staging-env.sh",
+      "sha256": "3d78837e22c46b60544c297c49ece3a725d591756c5fc2abd9a2b995b7629b24",
+      "schedulingRefs": []
+    },
+    {
+      "file": "maya-saas-backend/deploy/platform/build-mayaos-edge.sh",
+      "sha256": "13fc75a65588001588c5e8c6b5221b555b325770789299936c3048a6cfd6b953",
+      "schedulingRefs": []
+    },
+    {
+      "file": "maya-saas-backend/deploy/vps/deploy.sh",
+      "sha256": "857a305783a131302cbc7105e82d8fd10c4573e6af996985af2bfbfd780fb0fe",
+      "schedulingRefs": []
+    },
+    {
+      "file": "maya-saas-backend/deploy/vps/ssh-jump.sh",
+      "sha256": "3c26c4534295fd90401e5b357a36a7f053fb1deac2bb065998c3e07cbabe9173",
+      "schedulingRefs": []
+    },
+    {
+      "file": "maya-saas-backend/deploy/telegram-egress/maya-telegram-egress.service",
+      "sha256": "eba95edb7abdb7c0629c82619a7456726d6f6a7f07009cc09c6628985c1aa61a",
+      "schedulingRefs": [
+        {
+          "line": 10,
+          "text": "ExecStart=/usr/bin/ssh -NT -D 127.0.0.1:1081 -i /home/botadmin/.ssh/maya_telegram_egress -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=yes mocine3388@prime.beget.com"
+        }
+      ]
+    },
+    {
+      "file": "maya-saas-backend/deploy/organic-shadow/maya-organic-appointment-shadow-observer.service",
+      "sha256": "1bcf3766053bcc7ce3861fe8e18c61284f0872e21ba0b60e8be6db72725ec474",
+      "schedulingRefs": [
+        {
+          "line": 11,
+          "text": "ExecStart=/usr/bin/python3 /opt/maya-shadow-observer/legacy_appointment_shadow_observer.py --database /var/lib/maya-shadow-observer/observer.sqlite3 --summary /var/lib/maya-shadow-observer/summary.json --unit maya-saas.service"
+        }
+      ]
+    },
+    {
+      "file": "maya-saas-backend/deploy/live-widgets/maya-saas.service",
+      "sha256": "77194ab8ae06c6af82ff34b97fb243ead188b03c35655aeb43367b038bbdcd0b",
+      "schedulingRefs": [
+        {
+          "line": 13,
+          "text": "ExecStart=/opt/node-v24/bin/node --enable-source-maps dist/src/main.js"
+        }
+      ]
+    },
+    {
+      "file": "maya-saas-backend/scripts/staging-backup.sh",
+      "sha256": "569e42974db839f8d41132da96c3248d34b94244138e2601a239bfc2fcd2839c",
+      "schedulingRefs": []
+    },
+    {
+      "file": "maya-saas-backend/scripts/staging-restore.sh",
+      "sha256": "303af60d2573b53dbd7f526e9e25d72a4c2eabab5eb58a2cb17eed39ab4603c7",
+      "schedulingRefs": []
+    },
+    {
+      "file": "maya-saas-backend/scripts/staging-up.sh",
+      "sha256": "35eb8208f0d20f989e3e32a0fcdf19b069aca42c5892d2e79a27f3eb977b18cd",
+      "schedulingRefs": []
+    },
+    {
+      "file": "maya-saas-backend/scripts/backup-postgres.sh",
+      "sha256": "98d27f009130e29af20b26ec7bdf17a9f9a650b9a3083f86c49a2ab3c4945401",
+      "schedulingRefs": []
+    },
+    {
+      "file": "maya-saas-backend/scripts/bootstrap-staging-env.sh",
+      "sha256": "c053d5b57bcfefdf9b150890bc29dd6e1c33c00c697ee763b35ad2c004f9b564",
+      "schedulingRefs": []
+    },
+    {
+      "file": ".github/workflows/platform-ci.yml",
+      "sha256": "6ba203d32bc3628015f3243573cc435a38869ee12ef40587fcef9c2d6d2ee826",
+      "schedulingRefs": [
+        {
+          "line": 7,
+          "text": "on:"
+        },
+        {
+          "line": 8,
+          "text": "pull_request:"
+        },
+        {
+          "line": 9,
+          "text": "push:"
+        }
+      ]
+    },
+    {
+      "file": "maya-saas-backend/Dockerfile",
+      "sha256": "4d2f11c82f1db54b6a3f22ee58bd44eb304f3a32bddbd1e6aad95e66d83fe867",
+      "schedulingRefs": []
+    },
+    {
+      "file": "maya-saas-backend/docker-compose.yml",
+      "sha256": "b06f3626ee4d532280bab3a8b30025214961f736e43e6690b605cf853e9d64d0",
+      "schedulingRefs": []
+    },
+    {
+      "file": "smm_bot/publer_analytics.py",
+      "sha256": "e63dcf7a9e7f7110279b39cf06de30ed0334f582741709076150285c4605df53",
+      "schedulingRefs": []
+    },
+    {
+      "file": "smm_bot/schedule_db.py",
+      "sha256": "d269f045be34c194d6075f39c92e9328d4d2d24a47d17b9aefa6a6e95a022346",
+      "schedulingRefs": []
+    },
+    {
+      "file": "smm_bot/ai_caption.py",
+      "sha256": "3b0adacb645455a9c828ee999fb5c30e9d450670b322a093dd0291039bd430e4",
+      "schedulingRefs": []
+    },
+    {
+      "file": "smm_bot/bot.py",
+      "sha256": "b46c38bc2a3db5053f4f7c2c94ac95fffd41bae4518670db82e317cc66149232",
+      "schedulingRefs": [
+        {
+          "line": 777,
+          "text": "await asyncio.sleep(1.5)"
+        },
+        {
+          "line": 1018,
+          "text": "while True:"
+        },
+        {
+          "line": 1072,
+          "text": "await asyncio.sleep(30)"
+        },
+        {
+          "line": 1080,
+          "text": "await asyncio.sleep(60)  # стартовая задержка"
+        },
+        {
+          "line": 1081,
+          "text": "while True:"
+        },
+        {
+          "line": 1123,
+          "text": "await asyncio.sleep(6 * 3600)"
+        },
+        {
+          "line": 1129,
+          "text": "while True:"
+        },
+        {
+          "line": 1136,
+          "text": "await asyncio.sleep(wait_sec)"
+        },
+        {
+          "line": 1173,
+          "text": "await asyncio.sleep(3600)"
+        },
+        {
+          "line": 1182,
+          "text": "asyncio.create_task(scheduler_loop())"
+        },
+        {
+          "line": 1183,
+          "text": "asyncio.create_task(queue_health_loop())"
+        },
+        {
+          "line": 1184,
+          "text": "asyncio.create_task(holiday_loop())"
+        }
+      ]
+    },
+    {
+      "file": "smm_bot/settings.py",
+      "sha256": "97e88d900337c4b0a566350dd42892e2b572fde6c639e84eefa63e4286ea1e01",
+      "schedulingRefs": []
+    },
+    {
+      "file": "smm_bot/publishers.py",
+      "sha256": "07b80059cb724a326e919b3e6c72d0b3f523da4367998a58a043582606933e75",
+      "schedulingRefs": []
+    },
+    {
+      "file": "smm_bot/holidays.py",
+      "sha256": "d959cf252855f0d322efeae6662b1e6f9eb647bac1b08975b140acf6e57b738e",
+      "schedulingRefs": []
+    }
+  ],
+  "begetScheduleDefinitionsFound": [],
+  "documentSearch": "case-insensitive Beget within 60 characters of cron/schedule/task-planner wording, docs/**/*.md; hits only existing inventory/handoff/remainder limitation, no account task export",
+  "nonProductionCandidate": "smm_bot has source loops but no observed VPS service/process/import deployment; Beget unknown-command risk is retained, not silently excluded"
+}

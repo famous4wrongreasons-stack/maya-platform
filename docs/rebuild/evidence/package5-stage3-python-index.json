@@ -1,0 +1,1034 @@
+{
+  "method": "AST only; no application imports or function evaluation",
+  "files": [
+    {
+      "file": "admin_nlu.py",
+      "redactedSourceSha256": "394a37cc1cd272c20e915731e0bf4d9fcb44c3039c4e107bafe17466ca01153c",
+      "parseError": null
+    },
+    {
+      "file": "ai_billing.py",
+      "redactedSourceSha256": "167c97fe839f50bca86e6120ed7a40d218b9fdb04207d2ebf3b1cbcb64ff2010",
+      "parseError": null
+    },
+    {
+      "file": "analytics.py",
+      "redactedSourceSha256": "f04c0316849dfec3fd2403225e2ad6c9c35ae18d95933f286bf6589861da3e23",
+      "parseError": null
+    },
+    {
+      "file": "anonymizer.py",
+      "redactedSourceSha256": "435e3fbe46d484ef479e5ca9c3ea502b9faf0ea1e6f5ffa830c392612ec141e2",
+      "parseError": null
+    },
+    {
+      "file": "barber_knowledge.py",
+      "redactedSourceSha256": "54cf59b2ae7e0d21a91433214197bccfe2599410ddac3a81c0b57b352d4b300c",
+      "parseError": null
+    },
+    {
+      "file": "birthday.py",
+      "redactedSourceSha256": "539e4daf8b612da31b62d18c7906c0f97a97f9cdb52c24dc7bece24017cbb3ba",
+      "parseError": null
+    },
+    {
+      "file": "bot.py",
+      "redactedSourceSha256": "e846ef9dcdf22112985e6e6463bb0680ba5df4f2cfb011f1f2e49c6700f32a7a",
+      "parseError": null
+    },
+    {
+      "file": "broadcast_templates.py",
+      "redactedSourceSha256": "240f1cdf1b7f350b7679c93831c8ef6a3b8057ca0db5f9140b44fa087e6dca2d",
+      "parseError": null
+    },
+    {
+      "file": "business_rules.py",
+      "redactedSourceSha256": "2a6b6246e7aad21800b34ba79df595386624fb52a65f798fd64fa680299cf2f4",
+      "parseError": null
+    },
+    {
+      "file": "cert_pdf.py",
+      "redactedSourceSha256": "2b27531ee7b20453ce9275ef11b522cc12f75bb5abe70ba28fdb7b157d56f411",
+      "parseError": null
+    },
+    {
+      "file": "chat_widgets.py",
+      "redactedSourceSha256": "b8cad7a4c4fe7a5ee2bf17786f24e3273c7342b023927e7729298eea3e7e0c62",
+      "parseError": null
+    },
+    {
+      "file": "claude_ai.py",
+      "redactedSourceSha256": "438f71a930cdef3a1c3c43777d6d15e2f66e19b5fd7ae289330f7e295f52ced5",
+      "parseError": null
+    },
+    {
+      "file": "client_record_actions.py",
+      "redactedSourceSha256": "fbab221191169fdd0e6ec4615f699ce6041a99407a30445d62358481c7f84048",
+      "parseError": null
+    },
+    {
+      "file": "cutmatch.py",
+      "redactedSourceSha256": "2d394832cc296f8f8d90417b04c787574aee8f32f1e89efea0b44b0692912612",
+      "parseError": null
+    },
+    {
+      "file": "cycle_reminder.py",
+      "redactedSourceSha256": "188039aae341fa102ac1a01d51f604d143d227d444f556b338f8675cbe44c41b",
+      "parseError": null
+    },
+    {
+      "file": "database.py",
+      "redactedSourceSha256": "eb1658fee4dadec041e4efe91ee367340782ded5bbb0e6e742ae519e156ec352",
+      "parseError": null
+    },
+    {
+      "file": "freed_slot.py",
+      "redactedSourceSha256": "e0fa7df0cca9c80d159720c564bbd4bcf5c6869b2035a21408884fe59d4ec3c3",
+      "parseError": null
+    },
+    {
+      "file": "generate_admin_pdf.py",
+      "redactedSourceSha256": "2c52aef9e2cdc9b1872c25fe2e0ab618afe00202e3cc52c0da8446b38297c832",
+      "parseError": null
+    },
+    {
+      "file": "generate_bind_codes.py",
+      "redactedSourceSha256": "32a20af2254fea27419351426137f9f73c42a048b226f4e0a5277d1eaf974aee",
+      "parseError": null
+    },
+    {
+      "file": "growth_planner.py",
+      "redactedSourceSha256": "529ecf522677c8e141615ba8469a4a358a2cbc78f1908c3219b32294862e1bda",
+      "parseError": null
+    },
+    {
+      "file": "identity_utils.py",
+      "redactedSourceSha256": "74375c8d75d68e76d3fefc44a9808ce677c2b2a9cee9a1a463fac74fd6f2342b",
+      "parseError": null
+    },
+    {
+      "file": "import_gift_certs.py",
+      "redactedSourceSha256": "c1207d74f84e427c52e0593b7249f094729ec061a0990584a1b5821480b3e23e",
+      "parseError": null
+    },
+    {
+      "file": "lead_alerts.py",
+      "redactedSourceSha256": "00c16768a92c334e3aaaeed15863069b664808667cd222f7279de18c883d5542",
+      "parseError": null
+    },
+    {
+      "file": "legacy_appointment_bridge.py",
+      "redactedSourceSha256": "068db16d654c0303e8399789fab6f6f017dfaa6e1c5076fff109637b756dd5ae",
+      "parseError": null
+    },
+    {
+      "file": "legacy_client_command_bridge.py",
+      "redactedSourceSha256": "7c3e14d2a860233996eb416a862ba0bbec20b891348ea5b60b3e48c0e1f5ea64",
+      "parseError": null
+    },
+    {
+      "file": "legacy_client_habits_bridge.py",
+      "redactedSourceSha256": "da048864a466a33d366ed64fc17b3fd2aa78be0c2bf2f10fc395d8010517bef1",
+      "parseError": null
+    },
+    {
+      "file": "legacy_client_preferences_bridge.py",
+      "redactedSourceSha256": "e5b380291685d2a4c467f94560035a5e65f40d26b2ca22c15f78ef8a87b2b720",
+      "parseError": null
+    },
+    {
+      "file": "legacy_marketing_bulk_bridge.py",
+      "redactedSourceSha256": "86f82322906451958ef5dc7a8f29c76f745c4ca53438ad9d65b2087f8e910aad",
+      "parseError": null
+    },
+    {
+      "file": "legacy_wanted_slot_bridge.py",
+      "redactedSourceSha256": "9f331c19525093bf61e07ca08f382b0dc65c85308b9d76e3a058b50b641944cc",
+      "parseError": null
+    },
+    {
+      "file": "local_stt.py",
+      "redactedSourceSha256": "76d583c4758e7b8ee96e4189a35059adb724952657b2d52cfeed80ec83ca6b32",
+      "parseError": null
+    },
+    {
+      "file": "loyalty.py",
+      "redactedSourceSha256": "a73d0c0db7a00d908518188a8f8e394218959c73a1b84b40cfcc88e62339dc17",
+      "parseError": null
+    },
+    {
+      "file": "market_intelligence.py",
+      "redactedSourceSha256": "fff91f11e6b43c2137afc3926ca0d85d80aa99879c665d0ebaaca9d950fd11be",
+      "parseError": null
+    },
+    {
+      "file": "master_briefing.py",
+      "redactedSourceSha256": "24522ae9a1842c5628007934b65456f9253ebbfcce8b10dadfeba9babdce947f",
+      "parseError": null
+    },
+    {
+      "file": "masters_ai.py",
+      "redactedSourceSha256": "f6256a7d41cce777dc82ee21a28f5c21a60b641e576ccded4c1f841c84a44ad8",
+      "parseError": null
+    },
+    {
+      "file": "maya_capabilities.py",
+      "redactedSourceSha256": "5b5a06eb5124faf6a48428c14cadf61cbb1c7d62e84c609007403f953b8d747c",
+      "parseError": null
+    },
+    {
+      "file": "maya_identity.py",
+      "redactedSourceSha256": "99ece7c70319713e2f32ade3417af9990603f54aee31b42d55589f74a8ddd054",
+      "parseError": null
+    },
+    {
+      "file": "maya_inbox_bridge.py",
+      "redactedSourceSha256": "ebdd29b4f46f4c9a48be0af8bd1603f963b7819f5530523ff0306c98fa48dc9f",
+      "parseError": null
+    },
+    {
+      "file": "maya_recovery_bridge.py",
+      "redactedSourceSha256": "54c574a3140ca0eed97a4a39e608a0c986fe405708626552a3fac11a24cadfef",
+      "parseError": null
+    },
+    {
+      "file": "maya_roles.py",
+      "redactedSourceSha256": "523eaf200fc8a7b1f433913982cd85f5b84e0680f570df726e701454abf7195a",
+      "parseError": null
+    },
+    {
+      "file": "maya_shadow_bridge.py",
+      "redactedSourceSha256": "fae47049dccb1c9b2120100b622718be969ec4d9c217eec02b5c057cc444ff5f",
+      "parseError": null
+    },
+    {
+      "file": "maya_subscription_purchase_bridge.py",
+      "redactedSourceSha256": "f6aece7fae433699b18b4287e994577ab24513a00abbb6c665df827b74d25af8",
+      "parseError": null
+    },
+    {
+      "file": "memory.py",
+      "redactedSourceSha256": "b286f39327adcc3e82c544ad4409d2e5c75a28e0b8367ceb9e16e320850c1b41",
+      "parseError": null
+    },
+    {
+      "file": "migration.py",
+      "redactedSourceSha256": "3c6b5eea263026e9a70353ebb461e7caef64c7daf0ec932afffd50a9dfa19791",
+      "parseError": null
+    },
+    {
+      "file": "owner_ai.py",
+      "redactedSourceSha256": "811b007301ea65526175d9ef791834143d8c9eece250e530604d63ec293e9555",
+      "parseError": null
+    },
+    {
+      "file": "package4_value_runtime_guard.py",
+      "redactedSourceSha256": "8fa94249d1aa42d2eff14260c30fccf0949a263a9ce8c3d0dd893ebf3b7e3a51",
+      "parseError": null
+    },
+    {
+      "file": "package5_bulk_runtime_guard.py",
+      "redactedSourceSha256": "f52fb182dab9f975a67fc57962ae36477ee7ee7fee669ab154107034bb0a9d5b",
+      "parseError": null
+    },
+    {
+      "file": "package5_control_plane_runtime_guard.py",
+      "redactedSourceSha256": "3f08cf3be6d91b471e65e0051c073f52039a3a916402d41dc4bcc2f385cbd648",
+      "parseError": null
+    },
+    {
+      "file": "package5_loyalty_read_guard.py",
+      "redactedSourceSha256": "09df868144ae2c5d828a4a55a4efdb769fa84663c365e4b6d79669426f2c4fd9",
+      "parseError": null
+    },
+    {
+      "file": "package5_review_source_guard.py",
+      "redactedSourceSha256": "0474ba059d967a6cbf3f0b070b050c0c5d2b0c20aa44edd0ae40974fd09cc397",
+      "parseError": null
+    },
+    {
+      "file": "pii_crypto.py",
+      "redactedSourceSha256": "4b3ebf61cfd0db3b8e13879aabccd46ff570d1da85492b10438f9669bbbdd9b0",
+      "parseError": null
+    },
+    {
+      "file": "privacy_policy.py",
+      "redactedSourceSha256": "66f8a003dcb3eab27138acebc2cd7daffefa1afcc2487599e55d773008cd0701",
+      "parseError": null
+    },
+    {
+      "file": "prompts.py",
+      "redactedSourceSha256": "02c29e8717d1394770351f05378f3557d8bb1ffe0c4fcfa26ab6f6bf464bf0f5",
+      "parseError": null
+    },
+    {
+      "file": "pwa_api.py",
+      "redactedSourceSha256": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "parseError": null
+    },
+    {
+      "file": "reactivation.py",
+      "redactedSourceSha256": "c2417c9884437ab08ae059f5f8a0a9757c95beb50d808b6be97b67eb2caa70d6",
+      "parseError": null
+    },
+    {
+      "file": "realtime_bridge.py",
+      "redactedSourceSha256": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+      "parseError": null
+    },
+    {
+      "file": "referral.py",
+      "redactedSourceSha256": "6a6b6a769dc140237b7bfd0d2da6de9940ca8c7e44876efda479295035d153b1",
+      "parseError": null
+    },
+    {
+      "file": "reputation.py",
+      "redactedSourceSha256": "20b4522fe412c88e1a0f8d5f230c10644f1b9774efa5e99cd0257ca49bd9fc4b",
+      "parseError": null
+    },
+    {
+      "file": "reviews.py",
+      "redactedSourceSha256": "16654d2a3f087c92a5dab8ce6941156ba29c371a840c336b906120afdb0a92df",
+      "parseError": null
+    },
+    {
+      "file": "site_community.py",
+      "redactedSourceSha256": "f631935b676ac26614206b91d8448e415b1db6883e11fcea445e103d731fba65",
+      "parseError": null
+    },
+    {
+      "file": "site_engagement.py",
+      "redactedSourceSha256": "96bc5a18df899670746ea2dcc3055c6cd7a5feb21885ebc2b5da26a5327ea6ac",
+      "parseError": null
+    },
+    {
+      "file": "site_guest_chat.py",
+      "redactedSourceSha256": "035541c84fbefa4f38af9ca30c86fca1f21ac2acbd023accc4195544b1af981a",
+      "parseError": null
+    },
+    {
+      "file": "site_publications.py",
+      "redactedSourceSha256": "846b04430d2f81abc62bb1f0ff37384e27631ce7c23b286f1dadb86344ff4bb5",
+      "parseError": null
+    },
+    {
+      "file": "sources.py",
+      "redactedSourceSha256": "b5f64a7ec451125d48a8e4b599ecfc7feab5bab431dd11c2b835a09602ba0c1f",
+      "parseError": null
+    },
+    {
+      "file": "subscriptions.py",
+      "redactedSourceSha256": "335d0e8400d3d457676fafc6bf168109be908645c35a349d5249f9c47f03ae24",
+      "parseError": null
+    },
+    {
+      "file": "tenant_config_api.py",
+      "redactedSourceSha256": "8bbfdab34c610b93cacb732aea6db00f6500e135f1e78b0664fe1154d81208e2",
+      "parseError": null
+    },
+    {
+      "file": "voice.py",
+      "redactedSourceSha256": "9482b4f221fe9e309e9b8edc472b091b7ca48b64fbb5dd55d76d7794d1a83459",
+      "parseError": null
+    },
+    {
+      "file": "voice_guard.py",
+      "redactedSourceSha256": "e0f0446fa6f4e94720daed9a1a4861b5b3ebcb56cbe8b514af3da135af796b0d",
+      "parseError": null
+    },
+    {
+      "file": "web_auth.py",
+      "redactedSourceSha256": "50ea71b778b631962cfe35892a8ac1657d0d84043032c4e051435fa5851fc858",
+      "parseError": null
+    },
+    {
+      "file": "webhook_server.py",
+      "redactedSourceSha256": "5425ddbb820c85feea7eb645d49c37c47c0e88896e1d86d145714f4bd0e97e7c",
+      "parseError": null
+    },
+    {
+      "file": "yclients.py",
+      "redactedSourceSha256": "55cf23f02d6e81c91f1f79ae2ef21bda1307f07f6206212b14dd426395617b5a",
+      "parseError": null
+    },
+    {
+      "file": "yukassa_api.py",
+      "redactedSourceSha256": "8b4655c8591762a21a9481da6a986b07b8f3a5b5dda2ae0a0dadedff6d703e7d",
+      "parseError": null
+    }
+  ],
+  "sites": [
+    {
+      "file": "analytics.py",
+      "line": 187,
+      "owner": "business_summary",
+      "kind": "loop",
+      "expression": "while cursor <= end_day and len(daily) < 370"
+    },
+    {
+      "file": "bot.py",
+      "line": 134,
+      "owner": "<module>",
+      "kind": "call",
+      "expression": "AsyncIOScheduler(timezone='Europe/Moscow')"
+    },
+    {
+      "file": "bot.py",
+      "line": 1291,
+      "owner": "cmd_month",
+      "kind": "loop",
+      "expression": "while cur <= end"
+    },
+    {
+      "file": "bot.py",
+      "line": 3022,
+      "owner": "_match_masters_by_spoken_name",
+      "kind": "loop",
+      "expression": "while n < len(first) and n < len(s) and (first[n] == s[n])"
+    },
+    {
+      "file": "bot.py",
+      "line": 4389,
+      "owner": "_send_cert_invoice",
+      "kind": "call",
+      "expression": "asyncio.create_task(_poll_payment(context.application, code, payment['id']))"
+    },
+    {
+      "file": "bot.py",
+      "line": 4406,
+      "owner": "_poll_payment",
+      "kind": "loop",
+      "expression": "while datetime.now() < deadline"
+    },
+    {
+      "file": "bot.py",
+      "line": 4407,
+      "owner": "_poll_payment",
+      "kind": "call",
+      "expression": "asyncio.sleep(interval)"
+    },
+    {
+      "file": "bot.py",
+      "line": 4953,
+      "owner": "_start_subscription_purchase",
+      "kind": "call",
+      "expression": "asyncio.create_task(_poll_subscription_payment(context.application, sub_id, payment['id']))"
+    },
+    {
+      "file": "bot.py",
+      "line": 4967,
+      "owner": "_poll_subscription_payment",
+      "kind": "loop",
+      "expression": "while datetime.now() < deadline"
+    },
+    {
+      "file": "bot.py",
+      "line": 4968,
+      "owner": "_poll_subscription_payment",
+      "kind": "call",
+      "expression": "asyncio.sleep(interval)"
+    },
+    {
+      "file": "bot.py",
+      "line": 5944,
+      "owner": "_schedule_reminder",
+      "kind": "call",
+      "expression": "scheduler.add_job(_send_reminder, 'date', run_date=remind_at, args=[app, user_id, visit_dt, _mins, booking_data.get('record_id'), booking_data.get('master_name') or ''], id=job_id, replace_existing=True)"
+    },
+    {
+      "file": "bot.py",
+      "line": 6059,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "asyncio.create_task(_poll_payment(app, cert['code'], pid))"
+    },
+    {
+      "file": "bot.py",
+      "line": 6071,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "asyncio.create_task(_poll_subscription_payment(app, sub['id'], sub['yukassa_payment_id']))"
+    },
+    {
+      "file": "bot.py",
+      "line": 6084,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "webhook_server.start_webhook_server(app)"
+    },
+    {
+      "file": "bot.py",
+      "line": 6087,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "asyncio.create_task(_dual_role_guard_job(app))"
+    },
+    {
+      "file": "bot.py",
+      "line": 6091,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_pii_rotation_job, trigger='cron', hour=3, minute=0, id='pii_rotation', replace_existing=True)"
+    },
+    {
+      "file": "bot.py",
+      "line": 6102,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_reactivation_job, trigger='cron', hour=10, minute=0, id='reactivation', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6114,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_birthday_job, trigger='cron', hour=10, minute=30, id='birthday', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6127,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_cycle_reminder_job, trigger='cron', hour=11, minute=0, id='cycle_reminder', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6139,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_referral_resolver_job, trigger='cron', hour=11, minute=30, id='referral_resolver', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6151,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_subscriptions_job, trigger='cron', hour=12, minute=0, id='subscriptions', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6162,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_loyalty_job, trigger='cron', hour=12, minute=30, id='loyalty', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6175,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_reviews_job, trigger='cron', minute='*/5', id='reviews', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6186,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_lead_alerts_job, trigger='cron', minute='*/5', id='lead_alerts', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6197,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_dual_role_guard_job, trigger='cron', hour='*/3', minute=17, id='dual_role_guard', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6208,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_daily_report_job, trigger='cron', hour=21, minute=0, id='daily_report', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6219,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_anton_expense_reminder_job, trigger='cron', day_of_week='sun', hour=20, minute=0, id='anton_expense_reminder', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6231,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_god_watch_job, trigger='cron', hour=9, minute=0, id='god_watch', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 6243,
+      "owner": "post_init",
+      "kind": "call",
+      "expression": "scheduler.add_job(_director_briefing_job, trigger='cron', hour=10, minute=0, id='director_briefing', replace_existing=True, args=[app])"
+    },
+    {
+      "file": "bot.py",
+      "line": 7100,
+      "owner": "_telegram_reachable",
+      "kind": "call",
+      "expression": "_t.sleep(3)"
+    },
+    {
+      "file": "bot.py",
+      "line": 7148,
+      "owner": "_initialize_bot_with_retry",
+      "kind": "call",
+      "expression": "asyncio.sleep(delay)"
+    },
+    {
+      "file": "bot.py",
+      "line": 7168,
+      "owner": "_run_polling_resilient",
+      "kind": "call",
+      "expression": "webhook_server.start_webhook_server(app)"
+    },
+    {
+      "file": "bot.py",
+      "line": 7174,
+      "owner": "_run_polling_resilient.error_callback",
+      "kind": "call",
+      "expression": "app.create_task(app.process_error(error=exc, update=None))"
+    },
+    {
+      "file": "bot.py",
+      "line": 7208,
+      "owner": "_serve_webhook_only_until_telegram_back",
+      "kind": "call",
+      "expression": "webhook_server.start_webhook_server(app)"
+    },
+    {
+      "file": "bot.py",
+      "line": 7210,
+      "owner": "_serve_webhook_only_until_telegram_back",
+      "kind": "loop",
+      "expression": "while not await asyncio.to_thread(_telegram_reachable, 8.0, 1)"
+    },
+    {
+      "file": "bot.py",
+      "line": 7211,
+      "owner": "_serve_webhook_only_until_telegram_back",
+      "kind": "call",
+      "expression": "asyncio.sleep(30)"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 4964,
+      "owner": "get_ai_response",
+      "kind": "loop",
+      "expression": "while rounds < _MAX_AI_TOOL_ROUNDS"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 5206,
+      "owner": "get_ai_response_stream",
+      "kind": "loop",
+      "expression": "while rounds < _MAX_AI_TOOL_ROUNDS"
+    },
+    {
+      "file": "cutmatch.py",
+      "line": 416,
+      "owner": "_run_edit",
+      "kind": "call",
+      "expression": "loop.run_in_executor(None, _blocking_edit, photo_b64, haircut_name)"
+    },
+    {
+      "file": "cutmatch.py",
+      "line": 436,
+      "owner": "submit_haircut",
+      "kind": "call",
+      "expression": "asyncio.create_task(_run_edit(job_id, photo_b64, haircut_name))"
+    },
+    {
+      "file": "growth_planner.py",
+      "line": 415,
+      "owner": "_weekly_milestones",
+      "kind": "loop",
+      "expression": "while cursor <= end"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 569,
+      "owner": "_weighted_month_target",
+      "kind": "loop",
+      "expression": "while cursor < next_month"
+    },
+    {
+      "file": "pwa_api.py",
+      "line": 35,
+      "owner": "serve",
+      "kind": "call",
+      "expression": "webhook_server.start_webhook_server(app, start_background_tasks=False)"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 506,
+      "owner": "run_session.think_and_reply",
+      "kind": "call",
+      "expression": "loop.run_in_executor(None, lambda: staff_ai_turn(client_channel_proof, llm_history, 'rt_' + intent[:48] + '_' + str(turn_number)))"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 519,
+      "owner": "run_session.think_and_reply",
+      "kind": "call",
+      "expression": "loop.run_in_executor(None, lambda: get_ai_response(llm_history, _client_command_context=client_context, user_id=None, model=VOICE_CLAUDE_MODEL, disabled_tools=disabled, mode='client'))"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 556,
+      "owner": "run_session.think_and_reply",
+      "kind": "call",
+      "expression": "asyncio.create_task(think_and_reply(pend))"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 639,
+      "owner": "run_session.pump_openai",
+      "kind": "call",
+      "expression": "asyncio.create_task(think_and_reply(tr))"
+    },
+    {
+      "file": "reputation.py",
+      "line": 103,
+      "owner": "_json_parse_assignment",
+      "kind": "loop",
+      "expression": "while start < len(html) and html[start].isspace()"
+    },
+    {
+      "file": "reputation.py",
+      "line": 110,
+      "owner": "_json_parse_assignment",
+      "kind": "loop",
+      "expression": "while index < len(html)"
+    },
+    {
+      "file": "site_community.py",
+      "line": 323,
+      "owner": "register_routes.handler",
+      "kind": "call",
+      "expression": "asyncio.create_task(process_comment(app, comment_id, slug, text))"
+    },
+    {
+      "file": "site_guest_chat.py",
+      "line": 79,
+      "owner": "send",
+      "kind": "loop",
+      "expression": "while self.calls and self.calls[0] <= now - 60"
+    },
+    {
+      "file": "site_guest_chat.py",
+      "line": 95,
+      "owner": "send",
+      "kind": "loop",
+      "expression": "while session.calls and session.calls[0] <= now - 60"
+    },
+    {
+      "file": "site_guest_chat.py",
+      "line": 110,
+      "owner": "send",
+      "kind": "call",
+      "expression": "asyncio.create_task(asyncio.to_thread(self.reply, history))"
+    },
+    {
+      "file": "voice.py",
+      "line": 287,
+      "owner": "_split_for_tts.split_long",
+      "kind": "loop",
+      "expression": "while len(piece) > max_chars"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3473,
+      "owner": "panel_job_run_handler",
+      "kind": "call",
+      "expression": "asyncio.create_task(fn(app))"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3569,
+      "owner": "_run_owner_job_from_chat",
+      "kind": "call",
+      "expression": "asyncio.create_task(fn(app))"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 4049,
+      "owner": "panel_salary_handler",
+      "kind": "call",
+      "expression": "asyncio.create_task(_yearly_gross_refresh())"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 4177,
+      "owner": "_gross_month_for",
+      "kind": "call",
+      "expression": "asyncio.create_task(_calc())"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 4242,
+      "owner": "_month_bounds",
+      "kind": "loop",
+      "expression": "while m <= 0"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8113,
+      "owner": "install_staff_telegram_chat_mirror._send_message_with_app_mirror",
+      "kind": "call",
+      "expression": "asyncio.create_task(maya_inbox_bridge.observe_legacy_telegram_send(telegram_chat_id=chat_id, message_id=message_id, body_text=str(text)))"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8759,
+      "owner": "_pop_sentence",
+      "kind": "loop",
+      "expression": "while i < n"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8763,
+      "owner": "_pop_sentence",
+      "kind": "loop",
+      "expression": "while j < n and buf[j] in '.!?…'"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8765,
+      "owner": "_pop_sentence",
+      "kind": "loop",
+      "expression": "while j < n and buf[j] in '\"»)]'"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9235,
+      "owner": "chat_stream_handler",
+      "kind": "call",
+      "expression": "loop.run_in_executor(None, _producer)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9265,
+      "owner": "chat_stream_handler._queue_sentences",
+      "kind": "loop",
+      "expression": "while True"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9270,
+      "owner": "chat_stream_handler._queue_sentences",
+      "kind": "call",
+      "expression": "loop.create_task(_voicemod.synthesize(enforce_maya_feminine(sent), fmt='mp3'))"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9277,
+      "owner": "chat_stream_handler._drain_ready",
+      "kind": "loop",
+      "expression": "while _aud_tasks and _aud_tasks[0].done()"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9292,
+      "owner": "chat_stream_handler",
+      "kind": "loop",
+      "expression": "while True"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9361,
+      "owner": "chat_stream_handler",
+      "kind": "call",
+      "expression": "loop.run_in_executor(None, _finalize_booking_for_chat, _client_command_context, contact_request)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10399,
+      "owner": "master_shift_reminder_loop",
+      "kind": "loop",
+      "expression": "while True"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10404,
+      "owner": "master_shift_reminder_loop",
+      "kind": "call",
+      "expression": "asyncio.sleep(300)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10409,
+      "owner": "master_day_brief_loop",
+      "kind": "call",
+      "expression": "asyncio.sleep(75)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10410,
+      "owner": "master_day_brief_loop",
+      "kind": "loop",
+      "expression": "while True"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10433,
+      "owner": "master_day_brief_loop",
+      "kind": "call",
+      "expression": "asyncio.sleep(600)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10438,
+      "owner": "client_retention_refresh_loop",
+      "kind": "call",
+      "expression": "asyncio.sleep(120)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10439,
+      "owner": "client_retention_refresh_loop",
+      "kind": "loop",
+      "expression": "while True"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10461,
+      "owner": "client_retention_refresh_loop",
+      "kind": "call",
+      "expression": "asyncio.sleep(21600)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10514,
+      "owner": "waitlist_admin_alert_loop",
+      "kind": "loop",
+      "expression": "while True"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10519,
+      "owner": "waitlist_admin_alert_loop",
+      "kind": "call",
+      "expression": "asyncio.sleep(120)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10524,
+      "owner": "maya_operating_rhythm_loop",
+      "kind": "call",
+      "expression": "asyncio.sleep(60)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10525,
+      "owner": "maya_operating_rhythm_loop",
+      "kind": "loop",
+      "expression": "while True"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10542,
+      "owner": "maya_operating_rhythm_loop",
+      "kind": "call",
+      "expression": "asyncio.sleep(900)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10689,
+      "owner": "_fetch_tg_photo",
+      "kind": "call",
+      "expression": "time.sleep(1.0 + attempt * 0.5)"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11491,
+      "owner": "team_chat_send_handler",
+      "kind": "call",
+      "expression": "asyncio.create_task(_maya_bg(maya_query))"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11503,
+      "owner": "team_chat_send_handler",
+      "kind": "call",
+      "expression": "asyncio.create_task(_push_bg())"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12071,
+      "owner": "start_webhook_server",
+      "kind": "call",
+      "expression": "asyncio.create_task(master_day_brief_loop(bot_app))"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12072,
+      "owner": "start_webhook_server",
+      "kind": "call",
+      "expression": "asyncio.create_task(client_retention_refresh_loop(bot_app))"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12073,
+      "owner": "start_webhook_server",
+      "kind": "call",
+      "expression": "asyncio.create_task(master_shift_reminder_loop(bot_app))"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12074,
+      "owner": "start_webhook_server",
+      "kind": "call",
+      "expression": "asyncio.create_task(waitlist_admin_alert_loop(bot_app))"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12075,
+      "owner": "start_webhook_server",
+      "kind": "call",
+      "expression": "asyncio.create_task(maya_operating_rhythm_loop(bot_app))"
+    },
+    {
+      "file": "yclients.py",
+      "line": 359,
+      "owner": "_records_for_schedule_change",
+      "kind": "loop",
+      "expression": "while page <= 25"
+    },
+    {
+      "file": "yclients.py",
+      "line": 1196,
+      "owner": "get_client_bookings",
+      "kind": "loop",
+      "expression": "while page <= 25"
+    },
+    {
+      "file": "yclients.py",
+      "line": 1394,
+      "owner": "get_client_registry_snapshot",
+      "kind": "loop",
+      "expression": "while True"
+    },
+    {
+      "file": "yclients.py",
+      "line": 1508,
+      "owner": "get_records_for_master",
+      "kind": "loop",
+      "expression": "while page <= max_pages"
+    },
+    {
+      "file": "yclients.py",
+      "line": 1622,
+      "owner": "get_company_records_snapshot",
+      "kind": "loop",
+      "expression": "while page <= max_pages"
+    },
+    {
+      "file": "yclients.py",
+      "line": 1694,
+      "owner": "get_company_transactions",
+      "kind": "loop",
+      "expression": "while page <= max_pages"
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 # Package 5 — Exhaustive remainder inventory checkpoint
 
+> Current user-directed cycle: [Stage 3 scheduler remainder inventory](CYCLE-06-BLOCKING-PACKAGE-5-STAGE-3-SCHEDULER-REMAINDER-INVENTORY.md), accepted entry checkpoint `1d41765b`. **24 blockers B36–B59 / 14 owner packages**, with explicit business/schema/runtime-only fields and dependencies in the [consolidated master](evidence/package5-stage3-master-inventory.json). Third focused scheduler pass: **0 new blockers / paths / classes**; historical second pass: 7 findings. **Inventory COMPLETE: NO; 31/32** — S13 Beget account command list remains unavailable, so job targets are INCOMPLETE and control-plane metadata UNVERIFIED (unknown command possible, not merely cadence). Initial independent package tranche: R01/R02/R10; planning only. Do not continue B36 WIP or fix any B37+. B35 runtime/B36 applied schema preserved; Package 5 and Chapter 6 incomplete. This supersedes the historical first-new-blocker STOP/resume strategy below.
+
+The following two-pass evidence is preserved as the `1d41765b` baseline; current detailed scheduler coverage and consolidated dependency fields are in the Stage 3 report linked above.
+
 Status: **24 known blockers; exhaustive completion NOT CLAIMED**. This is an inventory and grouping decision aid, not remediation, a new schema proposal, a deployment gate or Package 5 acceptance.
 
 The user replaced the first-new-blocker STOP strategy with an exhaustive two-pass inventory. B36 WIP and B37 remain untouched. All acquired production surfaces were scanned through the end; findings continued through **B59**. The independent reverse pass added **4 blocker IDs + 3 additional path groups = 7 findings**. A final cross-check of acquired source added no further paths/classes. This does not turn the second pass into a zero-finding pass.

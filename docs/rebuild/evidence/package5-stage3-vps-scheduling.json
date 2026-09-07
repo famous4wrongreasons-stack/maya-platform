@@ -1,0 +1,460 @@
+{
+  "checkedAt": "2026-09-07T16:17:39.003027+00:00",
+  "host": "vps",
+  "permissionBypass": false,
+  "serverWrites": 0,
+  "jobTriggers": 0,
+  "definitions": [
+    {
+      "path": "/etc/systemd/system/barbershop-pwa.service",
+      "sha256": "d04f3d6efb6a52bf061495f014d79658aa50048213a5cae4cf017c3d6066c049",
+      "scheduleRefs": [
+        {
+          "line": 9,
+          "text": "WorkingDirectory=/home/botadmin/barbershop-bot"
+        },
+        {
+          "line": 10,
+          "text": "EnvironmentFile=-/home/botadmin/barbershop-bot/.env"
+        },
+        {
+          "line": 11,
+          "text": "ExecStart=/home/botadmin/barbershop-bot/venv/bin/python /home/botadmin/barbershop-bot/pwa_api.py"
+        },
+        {
+          "line": 12,
+          "text": "Restart=on-failure"
+        },
+        {
+          "line": 13,
+          "text": "RestartSec=5"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/barbershop-bot.service",
+      "sha256": "186c9aa1b01408f4c9fcfe50de35eea157d7b15029bbd540e2a5777de8460fdc",
+      "scheduleRefs": [
+        {
+          "line": 9,
+          "text": "WorkingDirectory=/home/botadmin/barbershop-bot"
+        },
+        {
+          "line": 10,
+          "text": "ExecStart=/home/botadmin/barbershop-bot/venv/bin/python bot.py"
+        },
+        {
+          "line": 11,
+          "text": "Restart=always"
+        },
+        {
+          "line": 12,
+          "text": "RestartSec=10"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/maya-saas.service",
+      "sha256": "77194ab8ae06c6af82ff34b97fb243ead188b03c35655aeb43367b038bbdcd0b",
+      "scheduleRefs": [
+        {
+          "line": 11,
+          "text": "WorkingDirectory=/opt/maya-saas/current"
+        },
+        {
+          "line": 13,
+          "text": "ExecStart=/opt/node-v24/bin/node --enable-source-maps dist/src/main.js"
+        },
+        {
+          "line": 14,
+          "text": "Restart=on-failure"
+        },
+        {
+          "line": 15,
+          "text": "RestartSec=5"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/maya-telegram-egress.service",
+      "sha256": "eba95edb7abdb7c0629c82619a7456726d6f6a7f07009cc09c6628985c1aa61a",
+      "scheduleRefs": [
+        {
+          "line": 10,
+          "text": "ExecStart=/usr/bin/ssh -NT -D 127.0.0.1:1081 -i /home/botadmin/.ssh/maya_telegram_egress -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=yes mocine3388@prime.beget.com"
+        },
+        {
+          "line": 11,
+          "text": "Restart=always"
+        },
+        {
+          "line": 12,
+          "text": "RestartSec=5"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/crond.service",
+      "sha256": "cb16493193f2340eb19705251c90de3b6574b18b77c90a63b0f6326353bbc416",
+      "scheduleRefs": [
+        {
+          "line": 3,
+          "text": "Documentation=man:cron(8)"
+        },
+        {
+          "line": 7,
+          "text": "EnvironmentFile=-/etc/default/cron"
+        },
+        {
+          "line": 8,
+          "text": "ExecStart=/usr/sbin/cron -f -P $EXTRA_OPTS"
+        },
+        {
+          "line": 11,
+          "text": "Restart=on-failure"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/maya-organic-appointment-shadow-observer.service",
+      "sha256": "1bcf3766053bcc7ce3861fe8e18c61284f0872e21ba0b60e8be6db72725ec474",
+      "scheduleRefs": [
+        {
+          "line": 11,
+          "text": "ExecStart=/usr/bin/python3 /opt/maya-shadow-observer/legacy_appointment_shadow_observer.py --database /var/lib/maya-shadow-observer/observer.sqlite3 --summary /var/lib/maya-shadow-observer/summary.json --unit maya-saas.service"
+        },
+        {
+          "line": 12,
+          "text": "Restart=always"
+        },
+        {
+          "line": 13,
+          "text": "RestartSec=3"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/barbershop-bot.service",
+      "sha256": "186c9aa1b01408f4c9fcfe50de35eea157d7b15029bbd540e2a5777de8460fdc",
+      "scheduleRefs": [
+        {
+          "line": 9,
+          "text": "WorkingDirectory=/home/botadmin/barbershop-bot"
+        },
+        {
+          "line": 10,
+          "text": "ExecStart=/home/botadmin/barbershop-bot/venv/bin/python bot.py"
+        },
+        {
+          "line": 11,
+          "text": "Restart=always"
+        },
+        {
+          "line": 12,
+          "text": "RestartSec=10"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/maya-saas.service",
+      "sha256": "77194ab8ae06c6af82ff34b97fb243ead188b03c35655aeb43367b038bbdcd0b",
+      "scheduleRefs": [
+        {
+          "line": 11,
+          "text": "WorkingDirectory=/opt/maya-saas/current"
+        },
+        {
+          "line": 13,
+          "text": "ExecStart=/opt/node-v24/bin/node --enable-source-maps dist/src/main.js"
+        },
+        {
+          "line": 14,
+          "text": "Restart=on-failure"
+        },
+        {
+          "line": 15,
+          "text": "RestartSec=5"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/maya-telegram-egress.service",
+      "sha256": "eba95edb7abdb7c0629c82619a7456726d6f6a7f07009cc09c6628985c1aa61a",
+      "scheduleRefs": [
+        {
+          "line": 10,
+          "text": "ExecStart=/usr/bin/ssh -NT -D 127.0.0.1:1081 -i /home/botadmin/.ssh/maya_telegram_egress -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=yes mocine3388@prime.beget.com"
+        },
+        {
+          "line": 11,
+          "text": "Restart=always"
+        },
+        {
+          "line": 12,
+          "text": "RestartSec=5"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/cron.service",
+      "sha256": "cb16493193f2340eb19705251c90de3b6574b18b77c90a63b0f6326353bbc416",
+      "scheduleRefs": [
+        {
+          "line": 3,
+          "text": "Documentation=man:cron(8)"
+        },
+        {
+          "line": 7,
+          "text": "EnvironmentFile=-/etc/default/cron"
+        },
+        {
+          "line": 8,
+          "text": "ExecStart=/usr/sbin/cron -f -P $EXTRA_OPTS"
+        },
+        {
+          "line": 11,
+          "text": "Restart=on-failure"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/maya-organic-appointment-shadow-observer.service",
+      "sha256": "1bcf3766053bcc7ce3861fe8e18c61284f0872e21ba0b60e8be6db72725ec474",
+      "scheduleRefs": [
+        {
+          "line": 11,
+          "text": "ExecStart=/usr/bin/python3 /opt/maya-shadow-observer/legacy_appointment_shadow_observer.py --database /var/lib/maya-shadow-observer/observer.sqlite3 --summary /var/lib/maya-shadow-observer/summary.json --unit maya-saas.service"
+        },
+        {
+          "line": 12,
+          "text": "Restart=always"
+        },
+        {
+          "line": 13,
+          "text": "RestartSec=3"
+        }
+      ]
+    },
+    {
+      "path": "/etc/crontab",
+      "sha256": "3494e2d3ce0fb77633d00b247cad543cca29c7673da802a23bd5fe0364eb2c13",
+      "scheduleRefs": [
+        {
+          "line": 19,
+          "text": "17 *\t* * *\troot    cd / && run-parts --report /etc/cron.hourly"
+        },
+        {
+          "line": 20,
+          "text": "25 6\t* * *\troot\ttest -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )"
+        },
+        {
+          "line": 21,
+          "text": "47 6\t* * 7\troot\ttest -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )"
+        },
+        {
+          "line": 22,
+          "text": "52 6\t1 * *\troot\ttest -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )"
+        }
+      ]
+    },
+    {
+      "path": "/etc/cron.d/sysstat",
+      "sha256": "47a67deba0d029d43209e6e512399543a945172f2a640021a6c21422a66adb1a",
+      "scheduleRefs": []
+    },
+    {
+      "path": "/etc/cron.d/certbot",
+      "sha256": "23d9f4bc60a8611ce682d9a7ae9a343a217bcb51552c7ce396a284a479756e60",
+      "scheduleRefs": []
+    },
+    {
+      "path": "/etc/cron.d/.placeholder",
+      "sha256": "49674d9b1bd433cdb58f30497f6c441dc823de549160eef5c1acec4c20786810",
+      "scheduleRefs": []
+    },
+    {
+      "path": "/etc/cron.d/e2scrub_all",
+      "sha256": "d4df081b982b23e66cac7102f9d91032f296caf13031991d90af44ee6cbf6e3b",
+      "scheduleRefs": [
+        {
+          "line": 1,
+          "text": "30 3 * * 0 root test -e /run/systemd/system || SERVICE_MODE=1 /usr/lib/x86_64-linux-gnu/e2fsprogs/e2scrub_all_cron"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "command": "systemctl list-timers --all --no-legend --plain",
+      "exit": 0,
+      "lines": [
+        "Tue 2026-09-08 00:00:00 MSK 4h 42min left Mon 2026-09-07 00:00:40 MSK 19h ago       dpkg-db-backup.timer           dpkg-db-backup.service",
+        "Tue 2026-09-08 00:00:00 MSK 4h 42min left Mon 2026-09-07 00:00:40 MSK 19h ago       logrotate.timer                logrotate.service",
+        "Tue 2026-09-08 00:30:32 MSK 5h 12min left Mon 2026-09-07 16:50:22 MSK 2h 27min ago  motd-news.timer                motd-news.service",
+        "Tue 2026-09-08 04:02:19 MSK 8h left       Mon 2026-09-07 01:15:56 MSK 18h ago       man-db.timer                   man-db.service",
+        "Tue 2026-09-08 05:30:35 MSK 10h left      Mon 2026-09-07 13:17:37 MSK 6h ago        apt-daily.timer                apt-daily.service",
+        "Tue 2026-09-08 06:57:26 MSK 11h left      Mon 2026-09-07 06:54:56 MSK 12h ago       apt-daily-upgrade.timer        apt-daily-upgrade.service",
+        "Tue 2026-09-08 10:03:07 MSK 14h left      Mon 2026-09-07 16:15:40 MSK 3h 1min ago   certbot.timer                  certbot.service",
+        "Tue 2026-09-08 18:13:40 MSK 22h left      Mon 2026-09-07 18:13:40 MSK 1h 3min ago   update-notifier-download.timer update-notifier-download.service",
+        "Tue 2026-09-08 18:25:46 MSK 23h left      Mon 2026-09-07 18:25:46 MSK 51min ago     systemd-tmpfiles-clean.timer   systemd-tmpfiles-clean.service",
+        "Thu 2026-09-10 10:00:02 MSK 2 days left   Tue 2026-09-01 14:44:34 MSK 6 days ago    update-notifier-motd.timer     update-notifier-motd.service",
+        "Sun 2026-09-13 03:10:03 MSK 5 days left   Sun 2026-09-06 03:10:40 MSK 1 day 16h ago e2scrub_all.timer              e2scrub_all.service",
+        "Mon 2026-09-14 00:35:01 MSK 6 days left   Mon 2026-09-07 01:22:31 MSK 17h ago       fstrim.timer                   fstrim.service",
+        "n/a                         n/a           n/a                         n/a           apport-autoreport.timer        apport-autoreport.service",
+        "n/a                         n/a           n/a                         n/a           ua-timer.timer                 ua-timer.service"
+      ]
+    },
+    {
+      "command": "systemctl list-unit-files --type=service,timer --no-legend",
+      "exit": 0,
+      "lines": [
+        "barbershop-bot.service                           enabled         enabled",
+        "barbershop-pwa.service                           disabled        enabled",
+        "cron.service                                     enabled         enabled",
+        "crond.service                                    alias           -",
+        "maya-organic-appointment-shadow-observer.service enabled         enabled",
+        "maya-saas.service                                enabled         enabled",
+        "maya-telegram-egress.service                     enabled         enabled"
+      ]
+    },
+    {
+      "command": "crontab read botadmin",
+      "exit": 1,
+      "noCrontab": true,
+      "lines": []
+    },
+    {
+      "command": "crontab read root",
+      "exit": 1,
+      "noCrontab": true,
+      "lines": []
+    }
+  ],
+  "logs": {
+    "barbershop-bot": {
+      "exit": 0,
+      "recordsRead": 3228,
+      "limit": 25000,
+      "boundedWindowNotAbsenceProof": true,
+      "permissionDenied": false,
+      "scheduledCounts": {
+        "apscheduler:_lead_alerts_job (trigger: cron[minute=": 104,
+        "apscheduler:_reviews_job (trigger: cron[minute=": 104,
+        "apscheduler:_dual_role_guard_job (trigger: cron[hour=": 4,
+        "registered_job:_pii_rotation_job": 1,
+        "registered_job:_reactivation_job": 1,
+        "registered_job:_birthday_job": 1,
+        "registered_job:_cycle_reminder_job": 1,
+        "registered_job:_referral_resolver_job": 1,
+        "registered_job:_subscriptions_job": 1,
+        "registered_job:_loyalty_job": 1,
+        "registered_job:_reviews_job": 1,
+        "registered_job:_lead_alerts_job": 1,
+        "registered_job:_dual_role_guard_job": 1,
+        "registered_job:_daily_report_job": 1,
+        "registered_job:_anton_expense_reminder_job": 1,
+        "registered_job:_god_watch_job": 1,
+        "registered_job:_director_briefing_job": 1
+      },
+      "firstEvidence": {
+        "apscheduler:_lead_alerts_job (trigger: cron[minute=": {
+          "timestampMicros": "1788782400004454",
+          "messageSha256": "9cf430f4d1a76125dfb111a89b2ab0ba68bdf4b66e8384d22131c2796d4e23ee"
+        },
+        "apscheduler:_reviews_job (trigger: cron[minute=": {
+          "timestampMicros": "1788782400006076",
+          "messageSha256": "4e3b197de29f02cc3eed9815da96e2d46afdedb69b35470f215c582180e352d4"
+        },
+        "apscheduler:_dual_role_guard_job (trigger: cron[hour=": {
+          "timestampMicros": "1788783420005145",
+          "messageSha256": "5775cbfcf45422c74e042fb1513d82acb1f419820f1de5924de7dfdfd4d2e2df"
+        },
+        "registered_job:_pii_rotation_job": {
+          "timestampMicros": "1788783740220708",
+          "messageSha256": "1bed71bb151d073b79defcae42eb3ecdf79fb28d0d924f339895fbcb52cae213"
+        },
+        "registered_job:_reactivation_job": {
+          "timestampMicros": "1788783740221095",
+          "messageSha256": "989aef8acb68e4a366f8667652eb5cd6919a68184b99f7321615ef2cab651aad"
+        },
+        "registered_job:_birthday_job": {
+          "timestampMicros": "1788783740221449",
+          "messageSha256": "c20b06570243f76195187768b79fd86cc1e17808c38032e1d67dd86071bb1a9c"
+        },
+        "registered_job:_cycle_reminder_job": {
+          "timestampMicros": "1788783740221789",
+          "messageSha256": "3a3478c2b70e09c05fb99d63bc879f2bfe8aad7a32a07e99886827bc061446cb"
+        },
+        "registered_job:_referral_resolver_job": {
+          "timestampMicros": "1788783740223233",
+          "messageSha256": "289ce74756aff184b4000ca73ad53793cae310f5cee591992cc00a622ad29047"
+        },
+        "registered_job:_subscriptions_job": {
+          "timestampMicros": "1788783740223233",
+          "messageSha256": "b654710776ce9099e36e950140fc87cbb4c61c9225e8475fa9f2e142b247b492"
+        },
+        "registered_job:_loyalty_job": {
+          "timestampMicros": "1788783740223233",
+          "messageSha256": "2d289d3bc6c3fa8a3daffb1d337725d70ec7f97bc29d2c76cacc21809c452246"
+        },
+        "registered_job:_reviews_job": {
+          "timestampMicros": "1788783740223233",
+          "messageSha256": "c8657ceb133d89199c4721ac92d5d7358ebd56500aef17b555eabafed1684b83"
+        },
+        "registered_job:_lead_alerts_job": {
+          "timestampMicros": "1788783740223233",
+          "messageSha256": "7f99f77d50f8bc7355331e67f43711f7038e4a55411cb6ee98688e44be1d4638"
+        },
+        "registered_job:_dual_role_guard_job": {
+          "timestampMicros": "1788783740223496",
+          "messageSha256": "6d4666cc1ec6e58316dacc140c08d84e0583474197fb5c4dbfd534c24f855ed6"
+        },
+        "registered_job:_daily_report_job": {
+          "timestampMicros": "1788783740223683",
+          "messageSha256": "8fd26d435d9cc52e379ea4ffe81c7a8706fd87d5b9e42fd3af39181587e4f0f0"
+        },
+        "registered_job:_anton_expense_reminder_job": {
+          "timestampMicros": "1788783740224086",
+          "messageSha256": "12440bd7ce2cbfd65c6727ff2f34b34373457d155ce5c24e753317843c499e06"
+        },
+        "registered_job:_god_watch_job": {
+          "timestampMicros": "1788783740224382",
+          "messageSha256": "82b0f1231eafdbe677d8973a588bb6a6e874586bad5ead84d7aaef3f01482956"
+        },
+        "registered_job:_director_briefing_job": {
+          "timestampMicros": "1788783740224666",
+          "messageSha256": "a642d5fe32d6b94c353b41fef0cf4cfcf924f0525cf1d8d7a9f1b415a272478a"
+        }
+      }
+    },
+    "maya-saas": {
+      "exit": 0,
+      "recordsRead": 0,
+      "limit": 25000,
+      "boundedWindowNotAbsenceProof": true,
+      "permissionDenied": false,
+      "scheduledCounts": {},
+      "firstEvidence": {}
+    },
+    "maya-organic-appointment-shadow-observer": {
+      "exit": 0,
+      "recordsRead": 0,
+      "limit": 25000,
+      "boundedWindowNotAbsenceProof": true,
+      "permissionDenied": false,
+      "scheduledCounts": {},
+      "firstEvidence": {}
+    },
+    "cron": {
+      "exit": 0,
+      "recordsRead": 0,
+      "limit": 25000,
+      "boundedWindowNotAbsenceProof": true,
+      "permissionDenied": false,
+      "scheduledCounts": {},
+      "firstEvidence": {}
+    }
+  },
+  "managerConfigs": [],
+  "release": "/opt/maya-saas/releases/20260907-p5-b35-c8c7a8eb"
+}

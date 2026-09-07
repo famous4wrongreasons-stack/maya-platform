@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-09-07T16:38:07.029337+00:00",
+  "inspection": "read-only service/process metadata, no app import, no database connection",
+  "release": "/opt/maya-saas/releases/20260907-p5-b35-c8c7a8eb",
+  "services": {
+    "maya-saas": {
+      "MainPID": "1585094",
+      "ActiveState": "active"
+    },
+    "barbershop-bot": {
+      "MainPID": "1585542",
+      "ActiveState": "active"
+    },
+    "maya-organic-appointment-shadow-observer": {
+      "MainPID": "1272892",
+      "ActiveState": "active"
+    }
+  },
+  "otherStdinPythonProcesses": [],
+  "productionEffectsForProof": 0,
+  "serviceChanges": 0
+}
