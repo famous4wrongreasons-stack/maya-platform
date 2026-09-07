@@ -91,7 +91,7 @@
       "artifact": "package5_bulk_runtime_guard.py",
       "destination": "/home/botadmin/barbershop-bot/package5_bulk_runtime_guard.py",
       "before": "f52fb182dab9f975a67fc57962ae36477ee7ee7fee669ab154107034bb0a9d5b",
-      "after": "2b85ba5d7084cdaaff4596da8e777b90a028b5b3d6e9e568e5b74c571e57f74f",
+      "after": "f11aa571bb2e562fa359742f4e6549d83541cef4f8da5528c7c5c46d6b632b50",
       "packages": [
         "R07"
       ]
@@ -192,7 +192,7 @@
     {
       "file": "package5_bulk_runtime_guard.py",
       "function": "scan_bulk_sources",
-      "sha256": "2b85ba5d7084cdaaff4596da8e777b90a028b5b3d6e9e568e5b74c571e57f74f"
+      "sha256": "f11aa571bb2e562fa359742f4e6549d83541cef4f8da5528c7c5c46d6b632b50"
     },
     {
       "file": "package5_staff_authority_guard.py",

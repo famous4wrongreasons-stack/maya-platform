@@ -7,7 +7,7 @@
     "edgeTargets": 5,
     "guards": 7,
     "b36DailyReportPreserved": true,
-    "pythonManifestSha256": "4be3e928a2680d67e036519a777703c1162cc8341c087478765dc342154d9bb0",
+    "pythonManifestSha256": "beccbd4d4064ef2393cc12cb03f1014900008bd01abff9a8054162c959bece27",
     "edgeManifestSha256": "4af24b899841726694fc9cdb8c557e31b1876fdfe93cee53676fb58f62dfadf3",
     "productionMutationsMessages": 0
   },
@@ -15,17 +15,19 @@
     "R03": {
       "tests": 6,
       "status": "PASS",
-      "logSha256": "0e0fe6830f8ee7508ee168da99b61a63cfff08c02ce18bcce023f1691dbf6d1b"
+      "logSha256": "0e0fe6830f8ee7508ee168da99b61a63cfff08c02ce18bcce023f1691dbf6d1b",
+      "carriedForward": "Exact six tested sources unchanged from composed-v3"
     },
     "R04": {
       "tests": 10,
       "status": "PASS",
-      "logSha256": "bcea29bc87e97cbb492db886e44164696e8986e3db38c39463cf35c681ce82ab"
+      "logSha256": "bcea29bc87e97cbb492db886e44164696e8986e3db38c39463cf35c681ce82ab",
+      "carriedForward": "Exact ten tested sources unchanged from composed-v3"
     },
     "R07": {
-      "tests": 40,
+      "tests": 41,
       "status": "PASS",
-      "logSha256": "2bfa6e3edf8a8c27cdd33410dc4c3cf3c6465e41a6afc32e3fc23976bd5de51a"
+      "logSha256": "4d7b47e1e5b4e7f70977b6e1866be3f3be8a972c82378ca2889cbf8e2b783697"
     }
   },
   "supersededR04HarnessFailure": {
@@ -33,5 +35,18 @@
     "logSha256": "a2b4ed6560024b8d02154e6969d691b09aa344f05488466d04c2d1e5ee983c82"
   },
   "package5FinalGateRun": false,
-  "productionMutationsMessages": 0
+  "productionMutationsMessages": 0,
+  "previousComposition": {
+    "status": "PASS",
+    "pythonTargets": 17,
+    "edgeTargets": 5,
+    "guards": 7,
+    "b36DailyReportPreserved": true,
+    "pythonManifestSha256": "4be3e928a2680d67e036519a777703c1162cc8341c087478765dc342154d9bb0",
+    "edgeManifestSha256": "4af24b899841726694fc9cdb8c557e31b1876fdfe93cee53676fb58f62dfadf3",
+    "productionMutationsMessages": 0
+  },
+  "compositionDelta": [
+    "package5_bulk_runtime_guard.py sibling guard loading only"
+  ]
 }
