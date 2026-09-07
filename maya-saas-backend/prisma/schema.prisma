@@ -281,6 +281,19 @@ model Tenant {
   maintenanceRuns                MaintenanceRun[]
 
   @@index([status, graceEndsAt])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  nativeFeedbackRequests NativeFeedbackRequest[] @relation("R08_NativeFeedbackRequest_tenant")
+  nativeFeedbackRevisions NativeFeedbackRevision[] @relation("R08_NativeFeedbackRevision_tenant")
+  publicCommunityComments PublicCommunityComment[] @relation("R09_PublicCommunityComment_tenant")
+  publicCommunityInteractions PublicCommunityInteraction[] @relation("R09_PublicCommunityInteraction_tenant")
+  teamMessages TeamMessage[] @relation("R12_TeamMessage_tenant")
+  teamAttachments TeamAttachment[] @relation("R12_TeamAttachment_tenant")
+  businessConfigurationRevisions TenantBusinessConfigurationRevision[] @relation("R11_TenantBusinessConfigurationRevision_tenant")
+  cashDeclarations CashDeclaration[] @relation("R14_CashDeclaration_tenant")
+  expenseReminderRuns ExpenseReminderRun[] @relation("R13_ExpenseReminderRun_tenant")
+  expenseIntakeBindings ExpenseIntakeBinding[] @relation("R13_ExpenseIntakeBinding_tenant")
+  operationalAlertRuns OperationalAlertRun[] @relation("R06_OperationalAlertRun_tenant")
 }
 
 /// Durable Chapter 5 interpretation of current canonical evidence. This row
@@ -490,6 +503,37 @@ model ActionExecution {
   @@index([tenantId, reconciliationState, leaseExpiresAt])
   @@index([tenantId, agentTaskId])
   @@index([tenantId, createdAt])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  operationalAlertRunId String?
+  operationalAlertSlotKey String?
+  nativeFeedbackRequestId String?
+  nativeFeedbackRevisionId String?
+  nativeFeedbackSlotKey String?
+  teamMessageId String?
+  teamMessageSlotKey String?
+  expenseReminderRunId String?
+  expenseReminderSlotKey String?
+  @@unique([tenantId, operationalAlertRunId, operationalAlertSlotKey], map: "R06_execution_slot_uq")
+  operationalAlertRun OperationalAlertRun? @relation("R06_execution_run", fields: [operationalAlertRunId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R06_execution_run_fk")
+  ownedNativeFeedbackRequests NativeFeedbackRequest[] @relation("R08_request_execution")
+  ownedNativeFeedbackRevisions NativeFeedbackRevision[] @relation("R08_revision_execution")
+  @@unique([tenantId, nativeFeedbackRequestId, nativeFeedbackSlotKey], map: "R08_execution_slot_uq")
+  nativeFeedbackRequest NativeFeedbackRequest? @relation("R08_execution_request", fields: [nativeFeedbackRequestId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_execution_request_fk")
+  nativeFeedbackRevision NativeFeedbackRevision? @relation("R08_execution_revision", fields: [nativeFeedbackRevisionId, tenantId, nativeFeedbackRequestId], references: [id, tenantId, requestId], onDelete: Restrict, onUpdate: Restrict, map: "R08_execution_revision_fk")
+  communityReplies PublicCommunityComment[] @relation("R09_comment_creation")
+  moderatedCommunityComments PublicCommunityComment[] @relation("R09_comment_moderation")
+  businessConfigurationRevision TenantBusinessConfigurationRevision[] @relation("R11_config_execution")
+  reservedTeamAttachments TeamAttachment[] @relation("R12_attachment_reserve")
+  finalizedTeamAttachments TeamAttachment[] @relation("R12_attachment_finalize")
+  sentTeamMessage TeamMessage[] @relation("R12_message_send")
+  withdrawnTeamMessage TeamMessage[] @relation("R12_message_withdraw")
+  @@unique([tenantId, teamMessageId, teamMessageSlotKey], map: "R12_execution_slot_uq")
+  teamMessage TeamMessage? @relation("R12_execution_message", fields: [teamMessageId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_execution_message_fk")
+  @@unique([tenantId, expenseReminderRunId, expenseReminderSlotKey], map: "R13_execution_slot_uq")
+  expenseReminderRun ExpenseReminderRun? @relation("R13_execution_reminder", fields: [expenseReminderRunId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R13_execution_reminder_fk")
+  expenseIntakeBindings ExpenseIntakeBinding[] @relation("R13_intake_slot")
+  cashDeclaration CashDeclaration[] @relation("R14_cash_execution")
 }
 
 /// B31: every accepted caller alias is immutable and tenant/Client qualified.
@@ -646,6 +690,9 @@ model Branch {
 
   @@unique([id, tenantId])
   @@index([tenantId])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  cashDeclarations CashDeclaration[] @relation("R14_cash_branch")
 }
 
 model User {
@@ -761,6 +808,16 @@ model Membership {
   @@index([tenantId, status])
   @@index([userId, status])
   @@index([tenantId, branchId])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  @@unique([id, tenantId], map: "Membership_id_tenantId_key")
+  nativeFeedbackRequests NativeFeedbackRequest[] @relation("R08_request_member")
+  businessConfigurationRevisions TenantBusinessConfigurationRevision[] @relation("R11_config_member")
+  teamAttachments TeamAttachment[] @relation("R12_attachment_member")
+  sentTeamMessages TeamMessage[] @relation("R12_message_sender")
+  withdrawnTeamMessages TeamMessage[] @relation("R12_message_withdrawer")
+  expenseIntakeBindings ExpenseIntakeBinding[] @relation("R13_intake_member")
+  cashDeclarations CashDeclaration[] @relation("R14_cash_member")
 }
 
 /// Personal dashboard layout and targets for one membership. Preferences are
@@ -830,6 +887,9 @@ model AuthIdentity {
   @@unique([tenantId, provider, providerUserId])
   @@index([userId])
   @@index([tenantId, provider])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  expenseIntakeBindings ExpenseIntakeBinding[] @relation("R13_intake_identity")
 }
 
 model AuthFlowState {
@@ -1793,6 +1853,9 @@ model AiApprovalRequest {
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, status, expiresAt])
   @@index([tenantId, requestedByUserId, createdAt])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  expenseIntakeBinding ExpenseIntakeBinding[] @relation("R13_intake_approval")
 }
 
 model AiToolExecution {
@@ -2120,6 +2183,10 @@ model Client {
   @@unique([id, tenantId])
   @@index([tenantId, phoneHash])
   @@index([tenantId, userId])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  nativeFeedbackRequests NativeFeedbackRequest[] @relation("R08_request_client")
+  nativeFeedbackRevisions NativeFeedbackRevision[] @relation("R08_revision_client")
 }
 
 /// Привязка карточки внешней CRM к идентичности Maya.
@@ -2675,6 +2742,10 @@ model Appointment {
   /// (staffExternalId — вторая колонка), а GiST построен по blockedStartAt.
   /// Без этого читались все записи арендатора за всю историю.
   @@index([tenantId, startAt])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  @@unique([id, tenantId, mayaClientId], map: "Appointment_id_tenantId_mayaClientId_key")
+  nativeFeedbackRequests NativeFeedbackRequest[] @relation("R08_request_appointment")
 }
 
 /// Канонический факт бизнеса, замеченный Maya.
@@ -3212,4 +3283,333 @@ model OwnerReportRun {
   @@index([tenantId, expiresAt], map: "B36_report_resume_idx")
   @@index([payloadRetentionUntil], map: "B36_report_payload_retention_idx")
   @@index([auditRetentionUntil], map: "B36_report_audit_retention_idx")
+}
+
+/// R08 Option A. Prospective canonical owner; no historical backfill.
+model NativeFeedbackRequest {
+  id String @id @default(uuid())
+  tenantId String
+  clientId String
+  appointmentId String
+  requestedByUserId String
+  requestExecutionId String
+  requestIdentityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  contractVersion Int
+  eligibleAt DateTime @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  contentHash String @db.Char(64)
+  contentEncrypted String?
+  planHash String @db.Char(64)
+  planEncrypted String?
+  state String
+  revision Int
+  latestResponseVersion Int
+  createdAt DateTime @db.Timestamptz(3)
+  closedAt DateTime? @db.Timestamptz(3)
+  payloadErasedAt DateTime? @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R08_NativeFeedbackRequest_tenant_uq")
+  tenant Tenant @relation("R08_NativeFeedbackRequest_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R08_NativeFeedbackRequest_tenant_fk")
+  @@unique([tenantId, requestIdentityHash], map: "R08_request_identity_uq")
+  @@unique([tenantId, appointmentId, clientId], map: "R08_request_appointment_uq")
+  @@unique([id, tenantId, clientId], map: "R08_request_client_uq")
+  client Client @relation("R08_request_client", fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_request_client_fk")
+  appointment Appointment @relation("R08_request_appointment", fields: [appointmentId, tenantId, clientId], references: [id, tenantId, mayaClientId], onDelete: Restrict, onUpdate: Restrict, map: "R08_request_appointment_fk")
+  requesterMembership Membership @relation("R08_request_member", fields: [requestedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_request_member_fk")
+  requestExecution ActionExecution @relation("R08_request_execution", fields: [requestExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_request_execution_fk")
+  @@index([tenantId, retentionUntil], map: "R08_request_retention_idx")
+  revisions NativeFeedbackRevision[] @relation("R08_revision_request")
+  deliveries ActionExecution[] @relation("R08_execution_request")
+}
+
+/// R08 Option A. Prospective canonical owner; no historical backfill.
+model NativeFeedbackRevision {
+  id String @id @default(uuid())
+  tenantId String
+  requestId String
+  clientId String
+  executionId String
+  identityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  version Int
+  kind String
+  rating Int?
+  commentEncrypted String?
+  contentHash String @db.Char(64)
+  planHash String @db.Char(64)
+  planEncrypted String?
+  createdAt DateTime @db.Timestamptz(3)
+  payloadErasedAt DateTime? @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R08_NativeFeedbackRevision_tenant_uq")
+  tenant Tenant @relation("R08_NativeFeedbackRevision_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R08_NativeFeedbackRevision_tenant_fk")
+  @@unique([tenantId, requestId, version], map: "R08_revision_version_uq")
+  @@unique([tenantId, requestId, identityHash], map: "R08_revision_identity_uq")
+  @@unique([id, tenantId, requestId], map: "R08_revision_request_uq")
+  request NativeFeedbackRequest @relation("R08_revision_request", fields: [requestId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict, map: "R08_revision_request_fk")
+  client Client @relation("R08_revision_client", fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_revision_client_fk")
+  execution ActionExecution @relation("R08_revision_execution", fields: [executionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_revision_execution_fk")
+  deliveries ActionExecution[] @relation("R08_execution_revision")
+}
+
+/// R09 Option A. Prospective canonical owner; no historical backfill.
+model PublicCommunityComment {
+  id String @id @default(uuid())
+  tenantId String
+  publicationKey String
+  parentCommentId String?
+  sourceKind String
+  visitorSubjectHash String? @db.Char(64)
+  identityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  authorEncrypted String?
+  textEncrypted String?
+  contentHash String @db.Char(64)
+  consentPolicyVersion String?
+  consentAcceptedAt DateTime? @db.Timestamptz(3)
+  status String
+  revision Int
+  createdAt DateTime @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  payloadErasedAt DateTime? @db.Timestamptz(3)
+  creationExecutionId String?
+  sourceGatewayId String
+  lastModerationExecutionId String?
+  @@unique([id, tenantId], map: "R09_PublicCommunityComment_tenant_uq")
+  tenant Tenant @relation("R09_PublicCommunityComment_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R09_PublicCommunityComment_tenant_fk")
+  @@unique([tenantId, sourceGatewayId, identityHash], map: "R09_comment_identity_uq")
+  parent PublicCommunityComment? @relation("R09_comment_parent", fields: [parentCommentId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R09_comment_parent_fk")
+  children PublicCommunityComment[] @relation("R09_comment_parent")
+  creationExecution ActionExecution? @relation("R09_comment_creation", fields: [creationExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R09_comment_creation_fk")
+  lastModerationExecution ActionExecution? @relation("R09_comment_moderation", fields: [lastModerationExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R09_comment_moderation_fk")
+  @@index([tenantId, publicationKey, status, createdAt], map: "R09_comment_feed_idx")
+  @@index([retentionUntil], map: "R09_comment_retention_idx")
+}
+
+/// R09 Option A. Prospective canonical owner; no historical backfill.
+model PublicCommunityInteraction {
+  id String @id @default(uuid())
+  tenantId String
+  publicationKey String
+  kind String
+  visitorSubjectHash String @db.Char(64)
+  identityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  expectedVersion Int
+  version Int
+  desiredValue Boolean?
+  viewDay DateTime? @db.Date
+  receivedAt DateTime @db.Timestamptz(3)
+  sourceGatewayId String
+  contractVersion Int
+  payloadHash String @db.Char(64)
+  @@unique([id, tenantId], map: "R09_PublicCommunityInteraction_tenant_uq")
+  tenant Tenant @relation("R09_PublicCommunityInteraction_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R09_PublicCommunityInteraction_tenant_fk")
+  @@unique([tenantId, sourceGatewayId, identityHash], map: "R09_interaction_identity_uq")
+  @@unique([tenantId, sourceGatewayId, publicationKey, visitorSubjectHash, kind, version], map: "R09_interaction_version_uq")
+}
+
+/// R12 Option A. Prospective canonical owner; no historical backfill.
+model TeamMessage {
+  id String @id @default(uuid())
+  tenantId String
+  conversationKey String
+  senderUserId String
+  sendExecutionId String
+  identityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  payloadEncrypted String?
+  payloadHash String @db.Char(64)
+  attachmentId String?
+  createdAt DateTime @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  withdrawnAt DateTime? @db.Timestamptz(3)
+  withdrawnByUserId String?
+  withdrawalExecutionId String?
+  withdrawalIdentityHash String? @db.Char(64)
+  withdrawalIntentHash String? @db.Char(64)
+  revision Int
+  planHash String @db.Char(64)
+  planEncrypted String?
+  payloadErasedAt DateTime? @db.Timestamptz(3)
+  status String
+  @@unique([id, tenantId], map: "R12_TeamMessage_tenant_uq")
+  tenant Tenant @relation("R12_TeamMessage_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R12_TeamMessage_tenant_fk")
+  @@unique([tenantId, conversationKey, senderUserId, identityHash], map: "R12_message_identity_uq")
+  @@unique([attachmentId, tenantId, senderUserId], map: "R12_message_attachment_uq")
+  @@unique([tenantId, sendExecutionId], map: "R12_message_send_uq")
+  @@unique([tenantId, withdrawalExecutionId], map: "R12_message_withdraw_uq")
+  senderMembership Membership @relation("R12_message_sender", fields: [senderUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_message_sender_fk")
+  withdrawerMembership Membership? @relation("R12_message_withdrawer", fields: [withdrawnByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_message_withdrawer_fk")
+  sendExecution ActionExecution @relation("R12_message_send", fields: [sendExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_message_send_fk")
+  withdrawalExecution ActionExecution? @relation("R12_message_withdraw", fields: [withdrawalExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_message_withdraw_fk")
+  attachment TeamAttachment? @relation("R12_message_attachment", fields: [attachmentId, tenantId, senderUserId], references: [id, tenantId, ownerUserId], onDelete: Restrict, onUpdate: Restrict, map: "R12_message_attachment_fk")
+  @@index([tenantId, conversationKey, createdAt], map: "R12_message_feed_idx")
+  @@index([expiresAt], map: "R12_message_retention_idx")
+  deliveries ActionExecution[] @relation("R12_execution_message")
+}
+
+/// R12 Option A. Prospective canonical owner; no historical backfill.
+model TeamAttachment {
+  id String @id @default(uuid())
+  tenantId String
+  ownerUserId String
+  reserveExecutionId String
+  finalizeExecutionId String?
+  uploadIdentityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  objectStoreKey String
+  contentSha256 String @db.Char(64)
+  declaredSize BigInt
+  actualSize BigInt?
+  mime String
+  kind String
+  filenameEncrypted String?
+  state String
+  revision Int
+  createdAt DateTime @db.Timestamptz(3)
+  uploadExpiresAt DateTime @db.Timestamptz(3)
+  mediaExpiresAt DateTime? @db.Timestamptz(3)
+  storageReceiptHash String? @db.Char(64)
+  payloadErasedAt DateTime? @db.Timestamptz(3)
+  lastObservedAt DateTime? @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R12_TeamAttachment_tenant_uq")
+  tenant Tenant @relation("R12_TeamAttachment_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R12_TeamAttachment_tenant_fk")
+  @@unique([tenantId, ownerUserId, uploadIdentityHash], map: "R12_attachment_identity_uq")
+  @@unique([objectStoreKey], map: "R12_attachment_object_uq")
+  @@unique([id, tenantId, ownerUserId], map: "R12_attachment_owner_uq")
+  ownerMembership Membership @relation("R12_attachment_member", fields: [ownerUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_attachment_member_fk")
+  reserveExecution ActionExecution @relation("R12_attachment_reserve", fields: [reserveExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_attachment_reserve_fk")
+  finalizeExecution ActionExecution? @relation("R12_attachment_finalize", fields: [finalizeExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_attachment_finalize_fk")
+  @@index([tenantId, uploadExpiresAt], map: "R12_attachment_upload_idx")
+  @@index([mediaExpiresAt], map: "R12_attachment_retention_idx")
+  message TeamMessage? @relation("R12_message_attachment")
+}
+
+/// R11 Option A. Prospective canonical owner; no historical backfill.
+model TenantBusinessConfigurationRevision {
+  id String @id @default(uuid())
+  tenantId String
+  namespace String
+  revision Int
+  previousRevisionId String?
+  actionExecutionId String
+  actorUserId String
+  actorMembershipId String
+  contractVersion Int
+  contentHash String @db.Char(64)
+  encryptedContent String?
+  createdAt DateTime @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R11_TenantBusinessConfigurationRevision_tenant_uq")
+  tenant Tenant @relation("R11_TenantBusinessConfigurationRevision_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R11_TenantBusinessConfigurationRevision_tenant_fk")
+  @@unique([tenantId, namespace, revision], map: "R11_config_version_uq")
+  @@unique([tenantId, actionExecutionId], map: "R11_config_execution_uq")
+  actorMembership Membership @relation("R11_config_member", fields: [actorMembershipId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R11_config_member_fk")
+  execution ActionExecution @relation("R11_config_execution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R11_config_execution_fk")
+  previousRevision TenantBusinessConfigurationRevision? @relation("R11_config_previous", fields: [previousRevisionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R11_config_previous_fk")
+  nextRevisions TenantBusinessConfigurationRevision[] @relation("R11_config_previous")
+}
+
+/// R14 Option A. Prospective canonical owner; no historical backfill.
+model CashDeclaration {
+  id String @id @default(uuid())
+  tenantId String
+  branchId String
+  businessDay String @db.Char(10)
+  timezone String
+  countedAt DateTime @db.Timestamptz(3)
+  currency String @db.Char(3)
+  countedCashKopecks Int?
+  declarationKind String
+  revision Int
+  previousDeclarationId String?
+  actionExecutionId String
+  declaredByUserId String
+  declaredByMembershipId String
+  contractVersion Int
+  intentHash String @db.Char(64)
+  encryptedReason String?
+  createdAt DateTime @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R14_CashDeclaration_tenant_uq")
+  tenant Tenant @relation("R14_CashDeclaration_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R14_CashDeclaration_tenant_fk")
+  @@unique([tenantId, branchId, businessDay, revision], map: "R14_cash_version_uq")
+  @@unique([tenantId, actionExecutionId], map: "R14_cash_execution_uq")
+  branch Branch @relation("R14_cash_branch", fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R14_cash_branch_fk")
+  declarerMembership Membership @relation("R14_cash_member", fields: [declaredByMembershipId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R14_cash_member_fk")
+  execution ActionExecution @relation("R14_cash_execution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R14_cash_execution_fk")
+  previousDeclaration CashDeclaration? @relation("R14_cash_previous", fields: [previousDeclarationId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R14_cash_previous_fk")
+  nextDeclarations CashDeclaration[] @relation("R14_cash_previous")
+}
+
+/// R13 Option A. Prospective canonical owner; no historical backfill.
+model ExpenseReminderRun {
+  id String @id @default(uuid())
+  tenantId String
+  reminderType String
+  periodStartLocalDate String @db.Char(10)
+  periodEndLocalDate String @db.Char(10)
+  contractVersion Int
+  timezone String
+  intentHash String @db.Char(64)
+  intentEncrypted String?
+  admittedAt DateTime @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  payloadRetentionUntil DateTime @db.Timestamptz(3)
+  auditRetentionUntil DateTime @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R13_ExpenseReminderRun_tenant_uq")
+  tenant Tenant @relation("R13_ExpenseReminderRun_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R13_ExpenseReminderRun_tenant_fk")
+  @@unique([tenantId, reminderType, periodStartLocalDate, periodEndLocalDate], map: "R13_reminder_identity_uq")
+  @@index([tenantId, expiresAt], map: "R13_reminder_resume_idx")
+  @@index([payloadRetentionUntil], map: "R13_reminder_retention_idx")
+  executions ActionExecution[] @relation("R13_execution_reminder")
+}
+
+/// R13 Option A. Prospective canonical owner; no historical backfill.
+model ExpenseIntakeBinding {
+  id String @id @default(uuid())
+  tenantId String
+  actorUserId String
+  actorMembershipId String
+  authIdentityId String
+  sourceNamespace String
+  sourceEventHash String @db.Char(64)
+  itemIndex Int
+  sourceItemCount Int
+  sourceContentHash String @db.Char(64)
+  reminderRunId String?
+  reminderSlotKey String?
+  approvalRequestId String
+  createdAt DateTime @db.Timestamptz(3)
+  auditRetentionUntil DateTime @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R13_ExpenseIntakeBinding_tenant_uq")
+  tenant Tenant @relation("R13_ExpenseIntakeBinding_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R13_ExpenseIntakeBinding_tenant_fk")
+  @@unique([tenantId, sourceNamespace, sourceEventHash, itemIndex], map: "R13_intake_source_uq")
+  @@unique([tenantId, approvalRequestId], map: "R13_intake_approval_uq")
+  actorMembership Membership @relation("R13_intake_member", fields: [actorMembershipId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R13_intake_member_fk")
+  authIdentity AuthIdentity @relation("R13_intake_identity", fields: [authIdentityId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R13_intake_identity_fk")
+  approval AiApprovalRequest @relation("R13_intake_approval", fields: [approvalRequestId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R13_intake_approval_fk")
+  reminderExecution ActionExecution? @relation("R13_intake_slot", fields: [tenantId, reminderRunId, reminderSlotKey], references: [tenantId, expenseReminderRunId, expenseReminderSlotKey], onDelete: Restrict, onUpdate: Restrict, map: "R13_intake_slot_fk")
+}
+
+/// R06 Option A. Prospective canonical owner; no historical backfill.
+model OperationalAlertRun {
+  id String @id @default(uuid())
+  tenantId String
+  alertType String
+  occurrenceRef String
+  contractVersion Int
+  occurredAt DateTime
+  intentHash String
+  intentEncrypted String?
+  admittedAt DateTime
+  expiresAt DateTime
+  payloadRetentionUntil DateTime
+  auditRetentionUntil DateTime
+  @@unique([id, tenantId], map: "R06_OperationalAlertRun_tenant_uq")
+  tenant Tenant @relation("R06_OperationalAlertRun_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R06_OperationalAlertRun_tenant_fk")
+  @@unique([tenantId, alertType, occurrenceRef, contractVersion], map: "R06_alert_identity_uq")
+  @@index([tenantId, expiresAt], map: "R06_alert_resume_idx")
+  @@index([payloadRetentionUntil], map: "R06_alert_payload_idx")
+  @@index([auditRetentionUntil], map: "R06_alert_audit_idx")
+  executions ActionExecution[] @relation("R06_execution_run")
 }
