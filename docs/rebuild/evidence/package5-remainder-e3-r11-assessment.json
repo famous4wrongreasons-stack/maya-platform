@@ -1,0 +1,241 @@
+{
+  "package": "R11",
+  "blockers": [
+    "B51",
+    "B59"
+  ],
+  "stage": "E3 Stage 1 / unapproved proposal only",
+  "baseline": "60e8266473882fac12fca7fe4181b6e5344b29ce",
+  "productionRuntime": "42962475",
+  "recommendedOption": "A",
+  "canonicalOwner": "A22 governed configuration owner with distinct tenant-rule and personal staff-preference scopes",
+  "existingFoundationSufficient": false,
+  "businessDecisionRequired": true,
+  "schemaRequired": true,
+  "newModels": 1,
+  "newFields": 12,
+  "newFieldCountConvention": "persisted DB columns including new models; virtual Prisma relations excluded",
+  "newActionClasses": 3,
+  "newAeActionClasses": 2,
+  "newAc6RetentionClasses": 1,
+  "actionClasses": {
+    "AE": [
+      "update_tenant_business_configuration",
+      "update_staff_notification_preferences"
+    ],
+    "AC6": [
+      "purge_superseded_business_configuration_payloads"
+    ]
+  },
+  "models": {
+    "TenantBusinessConfigurationRevision": [
+      {
+        "name": "id",
+        "type": "String / text",
+        "meaning": "UUID primary key"
+      },
+      {
+        "name": "tenantId",
+        "type": "String / text",
+        "meaning": "Exact canonical tenant"
+      },
+      {
+        "name": "namespace",
+        "type": "String / text",
+        "meaning": "business_rules | client_capabilities | staff_ai_provider"
+      },
+      {
+        "name": "revision",
+        "type": "Int / integer",
+        "meaning": "Starts at 1; exact predecessor +1"
+      },
+      {
+        "name": "previousRevisionId",
+        "type": "String? / text",
+        "meaning": "Null only at revision 1"
+      },
+      {
+        "name": "actionExecutionId",
+        "type": "String / text",
+        "meaning": "Exact successful A22 execution"
+      },
+      {
+        "name": "actorUserId",
+        "type": "String / text",
+        "meaning": "Canonical actor snapshot, checked against membership and execution"
+      },
+      {
+        "name": "actorMembershipId",
+        "type": "String / text",
+        "meaning": "Exact membership ID at admission"
+      },
+      {
+        "name": "contractVersion",
+        "type": "Int / integer",
+        "meaning": "1; immutable normalization/policy schema"
+      },
+      {
+        "name": "contentHash",
+        "type": "String / char(64)",
+        "meaning": "SHA-256 of typed canonical namespace content"
+      },
+      {
+        "name": "encryptedContent",
+        "type": "String? / text",
+        "meaning": "Whole bounded configuration snapshot; null only after governed retention"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime / timestamptz",
+        "meaning": "Server commit time"
+      }
+    ]
+  },
+  "existingModelFields": {},
+  "newPrismaVirtualRelations": [
+    "TenantBusinessConfigurationRevision.tenant",
+    "Tenant.businessConfigurationRevisions",
+    "TenantBusinessConfigurationRevision.actorMembership",
+    "Membership.businessConfigurationRevisions",
+    "TenantBusinessConfigurationRevision.execution",
+    "ActionExecution.businessConfigurationRevision",
+    "TenantBusinessConfigurationRevision.previousRevision",
+    "TenantBusinessConfigurationRevision.nextRevisions"
+  ],
+  "newPrismaVirtualRelationCount": 8,
+  "sharedConstraint": "Membership @@unique([id,tenantId]); constraint only, apply once across approved packages",
+  "migrationRequired": true,
+  "backfillRequired": false,
+  "fakeHistoricalBackfill": false,
+  "runtimeOnly": false,
+  "technicalPrerequisitesSatisfied": true,
+  "dependenciesSatisfied": false,
+  "pendingDependency": "Package owner/contract/schema approval, explicitly included in master definition",
+  "implementationReadyAfterApproval": true,
+  "implementationStarted": false,
+  "productionReady": false,
+  "alternateOptionB": {
+    "semantics": "retire inventoried legacy behavior; preserve unrelated existing canonical owner",
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "businessDecisionRequired": true
+  },
+  "evidence": [
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/webhook_server.py",
+      "line": 6509,
+      "sha256": "69bb3fcfa02f93004805de7610d3f9c8eb0d556174a7090d1f465328274a045b",
+      "claim": "_founder_learning_reply: direct global rule add/deactivate/list"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/webhook_server.py",
+      "line": 6608,
+      "sha256": "69bb3fcfa02f93004805de7610d3f9c8eb0d556174a7090d1f465328274a045b",
+      "claim": "_founder_permission_reply: global capability setter"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/bot.py",
+      "line": 1385,
+      "sha256": "c7f5b79011315732e8ffedb41f3ff6705a5bf7829cdffedd4164baeb9b9a121b",
+      "claim": "R02 guarded /ai_provider still calls global provider setter"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/bot.py",
+      "line": 1633,
+      "sha256": "c7f5b79011315732e8ffedb41f3ff6705a5bf7829cdffedd4164baeb9b9a121b",
+      "claim": "R02 master projection still writes legacy mute"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/database.py",
+      "line": 1744,
+      "sha256": "faa8b205072b114518884a1a137abf4b59611522d4bb9ce04c82f09812ab6d69",
+      "claim": "mute_master/unmute_master/is_master_muted legacy persistent authority"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/database.py",
+      "line": 4085,
+      "sha256": "faa8b205072b114518884a1a137abf4b59611522d4bb9ce04c82f09812ab6d69",
+      "claim": "salon_rules writer and unscoped readers"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/masters_ai.py",
+      "line": 47,
+      "sha256": "a3d0b1a8f6cedcdc37ebc3dcd92caef96f94523d110a4bbd1769f3177dd43d08",
+      "claim": "global provider setting read/write"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/maya_capabilities.py",
+      "line": 76,
+      "sha256": "5b5a06eb5124faf6a48428c14cadf61cbb1c7d62e84c609007403f953b8d747c",
+      "claim": "global capability setting writer"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "ai администратор/webhook_server.py",
+      "line": 823,
+      "sha256": "44587eb1341699d2d09b41f1f684b7e0eb1a8bd5b018c1f3ca86a41f2d178645",
+      "claim": "Existing mute scope is Telegram; Web Push remains independent"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 235,
+      "sha256": "84b561bb1f0f5df8e67ce5c69c4a45aa3a0cb5410db9f6b27274336923d574ba",
+      "claim": "Existing assistant preference planner; no generic approved business-rule contract"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "line": 946,
+      "sha256": "84b561bb1f0f5df8e67ce5c69c4a45aa3a0cb5410db9f6b27274336923d574ba",
+      "claim": "Canonical setting executor and state/generation checks"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "line": 553,
+      "sha256": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8",
+      "claim": "ActionTargetMutation generations"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "line": 768,
+      "sha256": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8",
+      "claim": "Personal tenant/User DashboardPreference"
+    }
+  ],
+  "sourceProofLimit": "Accepted local source capture and source analysis only; no new production access, executable tests or database proof",
+  "inventoryReopened": false,
+  "newBlockerIds": [],
+  "productionMutationsMessages": 0,
+  "databaseConnections": 0,
+  "runtimeSchemaTestEdits": 0,
+  "ownedProcessesRemaining": 0,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "masterCanonicalOwner": "A22 governed configuration owner with distinct tenant-rule and personal staff-preference scopes",
+  "proposedCanonicalOwner": "A22 governed configuration owner with distinct tenant-rule and personal staff-preference scopes",
+  "dependencies": [
+    "R02",
+    "B51/B59 owner/schema decisions"
+  ],
+  "blockerMembershipMatchesMaster": true,
+  "documentationValidation": {
+    "newColumnCountMatchesFieldLists": true,
+    "newActionTotalMatchesAePlusAc6": true,
+    "allRecordedSourceHashesVerifiedLocally": true,
+    "runtimeProofPerformed": false
+  }
+}

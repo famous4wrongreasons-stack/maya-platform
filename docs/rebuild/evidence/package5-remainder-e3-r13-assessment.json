@@ -1,0 +1,345 @@
+{
+  "package": "R13",
+  "blockers": [
+    "B37"
+  ],
+  "stage": "E3 Stage 1 / unapproved proposal only",
+  "baseline": "60e8266473882fac12fca7fe4181b6e5344b29ce",
+  "productionRuntime": "42962475",
+  "recommendedOption": "A",
+  "canonicalOwner": "P407 expense declaration owner plus durable reminder/reply intent owner; A13/CD and R10 own existing execution lifecycles",
+  "existingFoundationSufficient": false,
+  "businessDecisionRequired": true,
+  "schemaRequired": true,
+  "newModels": 2,
+  "newFields": 30,
+  "newFieldCountConvention": "persisted DB columns including new models; virtual Prisma relations excluded",
+  "newActionClasses": 1,
+  "newAeActionClasses": 0,
+  "newAc6RetentionClasses": 1,
+  "actionClasses": {
+    "AE": [],
+    "AC6": [
+      "purge_expense_reminder_payloads"
+    ]
+  },
+  "models": {
+    "ExpenseReminderRun": [
+      {
+        "name": "id",
+        "type": "String / text",
+        "meaning": "UUID primary key"
+      },
+      {
+        "name": "tenantId",
+        "type": "String / text",
+        "meaning": "Exact canonical tenant"
+      },
+      {
+        "name": "reminderType",
+        "type": "String / text",
+        "meaning": "weekly_expense_reminder only"
+      },
+      {
+        "name": "periodStartLocalDate",
+        "type": "String / char(10)",
+        "meaning": "Monday YYYY-MM-DD"
+      },
+      {
+        "name": "periodEndLocalDate",
+        "type": "String / char(10)",
+        "meaning": "Sunday YYYY-MM-DD"
+      },
+      {
+        "name": "contractVersion",
+        "type": "Int / integer",
+        "meaning": "1; includes content/policy normalization version"
+      },
+      {
+        "name": "timezone",
+        "type": "String / text",
+        "meaning": "Frozen canonical IANA tenant timezone"
+      },
+      {
+        "name": "intentHash",
+        "type": "String / char(64)",
+        "meaning": "Canonical complete immutable manifest hash"
+      },
+      {
+        "name": "intentEncrypted",
+        "type": "String? / text",
+        "meaning": "Complete immutable recoverable manifest; purge-only nullable"
+      },
+      {
+        "name": "admittedAt",
+        "type": "DateTime / timestamptz",
+        "meaning": "Server admission time"
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime / timestamptz",
+        "meaning": "Monday following period end +7 local days, converted once to UTC"
+      },
+      {
+        "name": "payloadRetentionUntil",
+        "type": "DateTime / timestamptz",
+        "meaning": "Same as expiresAt; holds for live execution/reconciliation apply"
+      },
+      {
+        "name": "auditRetentionUntil",
+        "type": "DateTime / timestamptz",
+        "meaning": "Admission +7 calendar years; minimum audit horizon, not deletion permission"
+      }
+    ],
+    "ExpenseIntakeBinding": [
+      {
+        "name": "id",
+        "type": "String / text",
+        "meaning": "UUID primary key"
+      },
+      {
+        "name": "tenantId",
+        "type": "String / text",
+        "meaning": "Exact canonical tenant"
+      },
+      {
+        "name": "actorUserId",
+        "type": "String / text",
+        "meaning": "Current authenticated sender, not raw Telegram ID"
+      },
+      {
+        "name": "actorMembershipId",
+        "type": "String / text",
+        "meaning": "Exact canonical membership"
+      },
+      {
+        "name": "authIdentityId",
+        "type": "String / text",
+        "meaning": "Exact verified Telegram identity for that User/tenant"
+      },
+      {
+        "name": "sourceNamespace",
+        "type": "String / text",
+        "meaning": "Non-secret server-bound bot/integration namespace"
+      },
+      {
+        "name": "sourceEventHash",
+        "type": "String / char(64)",
+        "meaning": "Keyed digest of authenticated source message identity"
+      },
+      {
+        "name": "itemIndex",
+        "type": "Int / integer",
+        "meaning": "Stable zero-based accepted card position"
+      },
+      {
+        "name": "sourceItemCount",
+        "type": "Int / integer",
+        "meaning": "1..10, identical across one atomic source-event bundle"
+      },
+      {
+        "name": "sourceContentHash",
+        "type": "String / char(64)",
+        "meaning": "Keyed digest of normalized source text, never raw text"
+      },
+      {
+        "name": "reminderRunId",
+        "type": "String? / text",
+        "meaning": "Null for explicit standalone command; otherwise immutable reminder context"
+      },
+      {
+        "name": "reminderSlotKey",
+        "type": "String? / text",
+        "meaning": "Paired with run; exact admitted A13 slot"
+      },
+      {
+        "name": "approvalRequestId",
+        "type": "String / text",
+        "meaning": "Existing AiApprovalRequest owns normalized arguments, hash and approval"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime / timestamptz",
+        "meaning": "Server admission time"
+      },
+      {
+        "name": "auditRetentionUntil",
+        "type": "DateTime / timestamptz",
+        "meaning": "Admission +7 calendar years; no automatic deletion"
+      }
+    ]
+  },
+  "existingModelFields": {
+    "ActionExecution": [
+      {
+        "name": "expenseReminderRunId",
+        "type": "String? / text",
+        "meaning": "FK to ExpenseReminderRun(id,tenantId); immutable after admission"
+      },
+      {
+        "name": "expenseReminderSlotKey",
+        "type": "String? / text",
+        "meaning": "Stable slot key, paired with run ID; no second delivery lifecycle"
+      }
+    ]
+  },
+  "newPrismaVirtualRelations": [
+    "ExpenseReminderRun.tenant",
+    "Tenant.expenseReminderRuns",
+    "ExpenseReminderRun.executions",
+    "ActionExecution.expenseReminderRun",
+    "ExpenseIntakeBinding.tenant",
+    "Tenant.expenseIntakeBindings",
+    "ExpenseIntakeBinding.actorMembership",
+    "Membership.expenseIntakeBindings",
+    "ExpenseIntakeBinding.authIdentity",
+    "AuthIdentity.expenseIntakeBindings",
+    "ExpenseIntakeBinding.approval",
+    "AiApprovalRequest.expenseIntakeBinding",
+    "ExpenseIntakeBinding.reminderExecution",
+    "ActionExecution.expenseIntakeBindings"
+  ],
+  "newPrismaVirtualRelationCount": 14,
+  "sharedConstraint": "Membership @@unique([id,tenantId]); constraint only, apply once across approved packages",
+  "migrationRequired": true,
+  "backfillRequired": false,
+  "fakeHistoricalBackfill": false,
+  "runtimeOnly": false,
+  "technicalPrerequisitesSatisfied": true,
+  "dependenciesSatisfied": false,
+  "pendingDependency": "Package owner/contract/schema approval, explicitly included in master definition",
+  "implementationReadyAfterApproval": true,
+  "implementationStarted": false,
+  "productionReady": false,
+  "alternateOptionB": {
+    "semantics": "retire inventoried legacy behavior; preserve unrelated existing canonical owner",
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "businessDecisionRequired": true
+  },
+  "evidence": [
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/bot.py",
+      "line": 4806,
+      "sha256": "c7f5b79011315732e8ffedb41f3ff6705a5bf7829cdffedd4164baeb9b9a121b",
+      "claim": "Direct per-item legacy expense insert and server-today stamping"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/bot.py",
+      "line": 4831,
+      "sha256": "c7f5b79011315732e8ffedb41f3ff6705a5bf7829cdffedd4164baeb9b9a121b",
+      "claim": "Current R02 admin check but date-wide deletion remains"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/bot.py",
+      "line": 4890,
+      "sha256": "c7f5b79011315732e8ffedb41f3ff6705a5bf7829cdffedd4164baeb9b9a121b",
+      "claim": "Direct weekly Telegram reminder and process-local awaiting flag"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/bot.py",
+      "line": 2420,
+      "sha256": "c7f5b79011315732e8ffedb41f3ff6705a5bf7829cdffedd4164baeb9b9a121b",
+      "claim": "handle_message consumes awaiting input without durable reply context"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/database.py",
+      "line": 2155,
+      "sha256": "faa8b205072b114518884a1a137abf4b59611522d4bb9ce04c82f09812ab6d69",
+      "claim": "Legacy expense insert and date-wide clear"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "docs/rebuild/package5-b37-owner-contract-schema-proposal.md",
+      "line": 1,
+      "sha256": "62127c681b142846f94b0fb1c9b7419090286c7050740b2bf95b287ecbef0e87",
+      "claim": "Earlier unapproved business proposal; no exact schema allocation"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/src/expenses/expense-canonical-shadow.service.ts",
+      "line": 166,
+      "sha256": "0cba259b0cf48c08428827529c3c8c8e75d02a1c3bd6bf69dcdad78fd8de1477",
+      "claim": "Existing normalized P407 create identity includes business input"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts",
+      "line": 152,
+      "sha256": "5a193f512fc4b271db2d28d8545bbda3bdae472f42c3c70ef4afa13d6e62b7c4",
+      "claim": "Existing P407 canonical create execution"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+      "line": 909,
+      "sha256": "64294fb16c8cf9159726d781168351844a9f409d7b615e17910bfbecc20b2311",
+      "claim": "Existing owner/business-owner AI expense tool and confirmation policy"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "line": 366,
+      "sha256": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+      "claim": "Existing approval idempotency/argument ownership"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-receipt.service.ts",
+      "line": 196,
+      "sha256": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+      "claim": "R10 settled versus partial receipt truth"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "line": 1764,
+      "sha256": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8",
+      "claim": "Existing AiApprovalRequest encrypted intent and unique key"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "line": 3194,
+      "sha256": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8",
+      "claim": "B36 exact daily report foundation, excluded from reuse"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/webhook_server.py",
+      "line": 4466,
+      "sha256": "69bb3fcfa02f93004805de7610d3f9c8eb0d556174a7090d1f465328274a045b",
+      "claim": "Existing financial report consumes legacy salon_expenses as profit input"
+    }
+  ],
+  "sourceProofLimit": "Accepted local source capture and source analysis only; no new production access, executable tests or database proof",
+  "inventoryReopened": false,
+  "newBlockerIds": [],
+  "productionMutationsMessages": 0,
+  "databaseConnections": 0,
+  "runtimeSchemaTestEdits": 0,
+  "ownedProcessesRemaining": 0,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "masterCanonicalOwner": "P407 expense declaration owner plus durable reminder/reply intent owner",
+  "proposedCanonicalOwner": "P407 expense declaration owner plus durable reminder/reply intent owner; A13/CD and R10 own existing execution lifecycles",
+  "dependencies": [
+    "R02",
+    "B37 owner/schema approval"
+  ],
+  "blockerMembershipMatchesMaster": true,
+  "documentationValidation": {
+    "newColumnCountMatchesFieldLists": true,
+    "newActionTotalMatchesAePlusAc6": true,
+    "allRecordedSourceHashesVerifiedLocally": true,
+    "runtimeProofPerformed": false
+  }
+}

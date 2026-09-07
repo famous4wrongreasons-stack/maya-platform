@@ -59,7 +59,12 @@
         "B43 contract/schema approval",
         "B36 proof PASS before any extension acceptance"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "NOT REMEDIATED",
+      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentEvidence": "package5-remainder-e3-r05-assessment.json",
+      "ownerDecisionRequired": true,
+      "schemaApprovalRequiredForRecommendedOption": true,
+      "wholePackageReadyForImplementation": false
     },
     {
       "id": "R06",
@@ -75,7 +80,12 @@
         "R02",
         "B44 contract/schema decision"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "NOT REMEDIATED",
+      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentEvidence": "package5-remainder-e3-r06-assessment.json",
+      "ownerDecisionRequired": true,
+      "schemaApprovalRequiredForRecommendedOption": true,
+      "wholePackageReadyForImplementation": false
     },
     {
       "id": "R07",
@@ -100,7 +110,12 @@
         "R02",
         "B47 owner/schema decision"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "NOT REMEDIATED",
+      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentEvidence": "package5-remainder-e3-r08-assessment.json",
+      "ownerDecisionRequired": true,
+      "schemaApprovalRequiredForRecommendedOption": true,
+      "wholePackageReadyForImplementation": false
     },
     {
       "id": "R09",
@@ -112,7 +127,12 @@
         "R02",
         "B52 owner/schema decision"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "NOT REMEDIATED",
+      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentEvidence": "package5-remainder-e3-r09-assessment.json",
+      "ownerDecisionRequired": true,
+      "schemaApprovalRequiredForRecommendedOption": true,
+      "wholePackageReadyForImplementation": false
     },
     {
       "id": "R10",
@@ -134,7 +154,12 @@
         "R02",
         "B51/B59 owner/schema decisions"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "NOT REMEDIATED",
+      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentEvidence": "package5-remainder-e3-r11-assessment.json",
+      "ownerDecisionRequired": true,
+      "schemaApprovalRequiredForRecommendedOption": true,
+      "wholePackageReadyForImplementation": false
     },
     {
       "id": "R12",
@@ -147,7 +172,12 @@
         "R02",
         "B58 owner/schema decision"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "NOT REMEDIATED",
+      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentEvidence": "package5-remainder-e3-r12-assessment.json",
+      "ownerDecisionRequired": true,
+      "schemaApprovalRequiredForRecommendedOption": true,
+      "wholePackageReadyForImplementation": false
     },
     {
       "id": "R13",
@@ -159,7 +189,12 @@
         "R02",
         "B37 owner/schema approval"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "NOT REMEDIATED",
+      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentEvidence": "package5-remainder-e3-r13-assessment.json",
+      "ownerDecisionRequired": true,
+      "schemaApprovalRequiredForRecommendedOption": true,
+      "wholePackageReadyForImplementation": false
     },
     {
       "id": "R14",
@@ -171,7 +206,12 @@
         "R02",
         "B55 owner/schema decision"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "NOT REMEDIATED",
+      "assessmentStatus": "COMPLETE \u2014 PROPOSAL NOT APPROVED",
+      "assessmentEvidence": "package5-remainder-e3-r14-assessment.json",
+      "ownerDecisionRequired": true,
+      "schemaApprovalRequiredForRecommendedOption": true,
+      "wholePackageReadyForImplementation": false
     }
   ],
   "package5Complete": false,
@@ -435,5 +475,34 @@
       ],
       "evidence": "package5-wave-rb-production-proof.json"
     }
-  ]
+  ],
+  "nextAssessmentEvidence": "package5-remainder-e3-stage1-summary.json",
+  "nextOwnerDecisionPackages": [
+    "R05",
+    "R06",
+    "R08",
+    "R09",
+    "R11",
+    "R12",
+    "R13",
+    "R14"
+  ],
+  "nextSchemaApprovalPackages": [
+    "R05",
+    "R06",
+    "R08",
+    "R09",
+    "R11",
+    "R12",
+    "R13",
+    "R14"
+  ],
+  "approvedRemainingRuntimeSubscopesReady": [
+    "B36",
+    "B45",
+    "B48",
+    "B49",
+    "B53"
+  ],
+  "assessedPackageCount": 14
 }

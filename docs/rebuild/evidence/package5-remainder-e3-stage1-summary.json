@@ -1,0 +1,365 @@
+{
+  "stage": "E3_STAGE_1",
+  "status": "COMPLETE — PROPOSALS NOT APPROVED",
+  "productionReportCommit": "e22793929976f53f050409223a170b2be6c6b394",
+  "productionRelease": "/opt/maya-saas/releases/20260907-p5-rb-cb4fb27c",
+  "masterInventorySha256": "f0d29c9f60c4699c1458b383b86decf0fb26aef5ee56e89a2d9a89b6b62df425",
+  "packages": [
+    {
+      "package": "R05",
+      "blockers": [
+        "B36",
+        "B43"
+      ],
+      "masterOwner": "Owner report immutable run/recipient-slot plan owner",
+      "proposedOwner": "OwnerReportsService / OwnerReportRun / existing A12 / Communication Delivery",
+      "recommendedOption": "A",
+      "approvalStatus": "NOT APPROVED",
+      "integrationDependenciesSatisfied": true,
+      "wholePackageDependenciesSatisfied": false,
+      "newModels": 0,
+      "newFields": 0,
+      "newModelColumns": 0,
+      "existingModelColumns": 0,
+      "newAeClasses": 0,
+      "newAc6Classes": 0,
+      "newActionClasses": 0,
+      "schemaRequired": true,
+      "migrationRequired": true,
+      "backfillRequired": false,
+      "sheet": "docs/rebuild/package5-remainder-e3-r05-decision-sheet.md",
+      "sheetSha256": "0c13798d3f27862e0195ae7c26ba040dd3d47988350764ffd2396da85d8722b2",
+      "assessment": "docs/rebuild/evidence/package5-remainder-e3-r05-assessment.json",
+      "assessmentSha256": "c2b3b8bc9504dabfebd13bfa926f432345a6cfafe22e5bb22cbd3964fe8332c1"
+    },
+    {
+      "package": "R06",
+      "blockers": [
+        "B44",
+        "B45",
+        "B48",
+        "B49"
+      ],
+      "masterOwner": "Communication Delivery admission/execution owner; producer occurrence authority remains explicit",
+      "proposedOwner": "Communication Delivery; exact producer owner; OperationalAlertRun proposed only for finite B44",
+      "recommendedOption": "A",
+      "approvalStatus": "NOT APPROVED",
+      "integrationDependenciesSatisfied": true,
+      "wholePackageDependenciesSatisfied": false,
+      "newModels": 1,
+      "newFields": 14,
+      "newModelColumns": 12,
+      "existingModelColumns": 2,
+      "newAeClasses": 0,
+      "newAc6Classes": 1,
+      "newActionClasses": 1,
+      "schemaRequired": true,
+      "migrationRequired": true,
+      "backfillRequired": false,
+      "sheet": "docs/rebuild/package5-remainder-e3-r06-decision-sheet.md",
+      "sheetSha256": "d09eb3988ce5b0264cac97c5f35527979f135e5e8835e82dae408ac81b9e1f1e",
+      "assessment": "docs/rebuild/evidence/package5-remainder-e3-r06-assessment.json",
+      "assessmentSha256": "3f90b85aa7ea96569d34570c812be7c1bcd6c06723244f5bc679e6e63757b9bc"
+    },
+    {
+      "package": "R08",
+      "blockers": [
+        "B47"
+      ],
+      "masterOwner": "Native feedback/request owner — exact mapping pending",
+      "proposedOwner": "Native feedback request/revision owner; existing A12/A13 Communication Delivery",
+      "recommendedOption": "A",
+      "approvalStatus": "NOT APPROVED",
+      "integrationDependenciesSatisfied": true,
+      "wholePackageDependenciesSatisfied": false,
+      "newModels": 2,
+      "newFields": 41,
+      "newModelColumns": 38,
+      "existingModelColumns": 3,
+      "newAeClasses": 3,
+      "newAc6Classes": 1,
+      "newActionClasses": 4,
+      "schemaRequired": true,
+      "migrationRequired": true,
+      "backfillRequired": false,
+      "sheet": "docs/rebuild/package5-remainder-e3-r08-decision-sheet.md",
+      "sheetSha256": "53a97c1b6b19c43b1e1128bf200e07920641615530238ab9cde547d1f719e594",
+      "assessment": "docs/rebuild/evidence/package5-remainder-e3-r08-assessment.json",
+      "assessmentSha256": "76550cf30ebb8e2f7f6139c203e95a6949a5be657ccee6ae2ec4296c198bfbf6"
+    },
+    {
+      "package": "R09",
+      "blockers": [
+        "B52"
+      ],
+      "masterOwner": "Anonymous community source facts and canonical moderation owner — mapping pending",
+      "proposedOwner": "Anonymous public source-fact acceptance and tenant moderation owner, distinct from Client and external review",
+      "recommendedOption": "A",
+      "approvalStatus": "NOT APPROVED",
+      "integrationDependenciesSatisfied": true,
+      "wholePackageDependenciesSatisfied": false,
+      "newModels": 2,
+      "newFields": 36,
+      "newModelColumns": 36,
+      "existingModelColumns": 0,
+      "newAeClasses": 2,
+      "newAc6Classes": 1,
+      "newActionClasses": 3,
+      "schemaRequired": true,
+      "migrationRequired": true,
+      "backfillRequired": false,
+      "sheet": "docs/rebuild/package5-remainder-e3-r09-decision-sheet.md",
+      "sheetSha256": "7b7e76bff69ac021203d7418793248c331530d1c53a7b139a7b988e7d9329420",
+      "assessment": "docs/rebuild/evidence/package5-remainder-e3-r09-assessment.json",
+      "assessmentSha256": "a70cff98fec518fd977bbd83c3f24bf659a5556479f10f623e1df66abf333e1c"
+    },
+    {
+      "package": "R11",
+      "blockers": [
+        "B51",
+        "B59"
+      ],
+      "masterOwner": "A22 governed configuration owner with distinct tenant-rule and personal staff-preference scopes",
+      "proposedOwner": "A22 governed configuration owner with distinct tenant-rule and personal staff-preference scopes",
+      "recommendedOption": "A",
+      "approvalStatus": "NOT APPROVED",
+      "integrationDependenciesSatisfied": true,
+      "wholePackageDependenciesSatisfied": false,
+      "newModels": 1,
+      "newFields": 12,
+      "newModelColumns": 12,
+      "existingModelColumns": 0,
+      "newAeClasses": 2,
+      "newAc6Classes": 1,
+      "newActionClasses": 3,
+      "schemaRequired": true,
+      "migrationRequired": true,
+      "backfillRequired": false,
+      "sheet": "docs/rebuild/package5-remainder-e3-r11-decision-sheet.md",
+      "sheetSha256": "668c83366b011ad473b1dcdf6b5c7588adddb6551ed7bd1ccfe0c94eef8f5c10",
+      "assessment": "docs/rebuild/evidence/package5-remainder-e3-r11-assessment.json",
+      "assessmentSha256": "6ff7f9a631b93d4f9d4a924deee90761fa9027a2443c260674804430fe557873"
+    },
+    {
+      "package": "R12",
+      "blockers": [
+        "B53",
+        "B58"
+      ],
+      "masterOwner": "Conversation/message and persistent attachment lifecycle owner",
+      "proposedOwner": "Tenant team-message/attachment lifecycle owner; B53 existing erasure retirement",
+      "recommendedOption": "A",
+      "approvalStatus": "NOT APPROVED",
+      "integrationDependenciesSatisfied": true,
+      "wholePackageDependenciesSatisfied": false,
+      "newModels": 2,
+      "newFields": 46,
+      "newModelColumns": 44,
+      "existingModelColumns": 2,
+      "newAeClasses": 4,
+      "newAc6Classes": 2,
+      "newActionClasses": 6,
+      "schemaRequired": true,
+      "migrationRequired": true,
+      "backfillRequired": false,
+      "sheet": "docs/rebuild/package5-remainder-e3-r12-decision-sheet.md",
+      "sheetSha256": "bfea264d8f20b871e2b717dd995fd36896e9a03643b2e3b08633fb981b1a07be",
+      "assessment": "docs/rebuild/evidence/package5-remainder-e3-r12-assessment.json",
+      "assessmentSha256": "cf8d6cfb3789afea786e120afcb74163bcb5d76ee35634995a289af5063f7581"
+    },
+    {
+      "package": "R13",
+      "blockers": [
+        "B37"
+      ],
+      "masterOwner": "P407 expense declaration owner plus durable reminder/reply intent owner",
+      "proposedOwner": "P407 expense declaration owner plus durable reminder/reply intent owner; A13/CD and R10 own existing execution lifecycles",
+      "recommendedOption": "A",
+      "approvalStatus": "NOT APPROVED",
+      "integrationDependenciesSatisfied": true,
+      "wholePackageDependenciesSatisfied": false,
+      "newModels": 2,
+      "newFields": 30,
+      "newModelColumns": 28,
+      "existingModelColumns": 2,
+      "newAeClasses": 0,
+      "newAc6Classes": 1,
+      "newActionClasses": 1,
+      "schemaRequired": true,
+      "migrationRequired": true,
+      "backfillRequired": false,
+      "sheet": "docs/rebuild/package5-remainder-e3-r13-decision-sheet.md",
+      "sheetSha256": "186f25f3a7c61002d2ebc950a3512726fc1a86b97dad9fb6eb98a39161a2d598",
+      "assessment": "docs/rebuild/evidence/package5-remainder-e3-r13-assessment.json",
+      "assessmentSha256": "0fe59b825f155b642ae034aec47924df4b1cdd9c96645139812679ee36ba5a97"
+    },
+    {
+      "package": "R14",
+      "blockers": [
+        "B55"
+      ],
+      "masterOwner": "Cash declaration/reconciliation owner — mapping pending",
+      "proposedOwner": "Proposed Cash Declaration owner over human observations; existing AE, separate from Expense/provider accounting",
+      "recommendedOption": "A",
+      "approvalStatus": "NOT APPROVED",
+      "integrationDependenciesSatisfied": true,
+      "wholePackageDependenciesSatisfied": false,
+      "newModels": 1,
+      "newFields": 18,
+      "newModelColumns": 18,
+      "existingModelColumns": 0,
+      "newAeClasses": 2,
+      "newAc6Classes": 1,
+      "newActionClasses": 3,
+      "schemaRequired": true,
+      "migrationRequired": true,
+      "backfillRequired": false,
+      "sheet": "docs/rebuild/package5-remainder-e3-r14-decision-sheet.md",
+      "sheetSha256": "6f6d9d915fe61534225ac16be874625515055bdf11587b86b9544ac1aa57bedb",
+      "assessment": "docs/rebuild/evidence/package5-remainder-e3-r14-assessment.json",
+      "assessmentSha256": "a69f38b48b07bc253322d02ed769f2eed3531d1c62e0a450cb59c8a93af0477b"
+    }
+  ],
+  "counts": {
+    "packageDecisionSheets": 8,
+    "ownerDecisions": 8,
+    "decisionRequiringBlockerRows": 9,
+    "schemaProposalsRecommendedA": 8,
+    "newModelsProposed": 11,
+    "newFieldsProposed": 197,
+    "newModelColumnsProposed": 188,
+    "existingModelColumnsProposed": 9,
+    "newAeClassesProposed": 13,
+    "newAc6ClassesProposed": 8,
+    "newActionClassesProposed": 21,
+    "packagesRemediated": 6,
+    "packagesTotal": 14,
+    "blockersRemediated": 10,
+    "blockersTotal": 24,
+    "remainingBlockers": 14
+  },
+  "nextEligiblePackages": [
+    "R05",
+    "R06",
+    "R08",
+    "R09",
+    "R11",
+    "R12",
+    "R13",
+    "R14"
+  ],
+  "ownerDecisionPackages": [
+    "R05",
+    "R06",
+    "R08",
+    "R09",
+    "R11",
+    "R12",
+    "R13",
+    "R14"
+  ],
+  "schemaApprovalPackages": [
+    "R05",
+    "R06",
+    "R08",
+    "R09",
+    "R11",
+    "R12",
+    "R13",
+    "R14"
+  ],
+  "wholePackagesReadyForImplementation": [],
+  "approvedRuntimeSubscopesReady": [
+    "B36",
+    "B45",
+    "B48",
+    "B49",
+    "B53"
+  ],
+  "readyForProduction": [],
+  "newModelNames": [
+    "OperationalAlertRun",
+    "NativeFeedbackRequest",
+    "NativeFeedbackRevision",
+    "PublicCommunityComment",
+    "PublicCommunityInteraction",
+    "TenantBusinessConfigurationRevision",
+    "TeamMessage",
+    "TeamAttachment",
+    "ExpenseReminderRun",
+    "ExpenseIntakeBinding",
+    "CashDeclaration"
+  ],
+  "existingModelFieldAdditions": [
+    [
+      "ActionExecution",
+      "operationalAlertRunId"
+    ],
+    [
+      "ActionExecution",
+      "operationalAlertSlotKey"
+    ],
+    [
+      "ActionExecution",
+      "nativeFeedbackRequestId"
+    ],
+    [
+      "ActionExecution",
+      "nativeFeedbackRevisionId"
+    ],
+    [
+      "ActionExecution",
+      "nativeFeedbackSlotKey"
+    ],
+    [
+      "ActionExecution",
+      "teamMessageId"
+    ],
+    [
+      "ActionExecution",
+      "teamMessageSlotKey"
+    ],
+    [
+      "ActionExecution",
+      "expenseReminderRunId"
+    ],
+    [
+      "ActionExecution",
+      "expenseReminderSlotKey"
+    ]
+  ],
+  "B36": {
+    "schema": "APPLIED",
+    "runtime": "NOT DEPLOYED",
+    "proofDefects": [
+      "IDEMPOTENCY KEY",
+      "CONCURRENT WRITE CONFLICT"
+    ],
+    "approvalReopened": false
+  },
+  "integrationCheckpoints": [
+    "Unique Membership(id,tenantId) constraint applied once",
+    "Disjoint ActionExecution immutable parent-slot binding fields",
+    "A22 personal preference namespaces and R11 Telegram eligibility with no plan expansion",
+    "Explicit finite AC6 retention classes with UNKNOWN/active-evidence holds",
+    "Bounded composition of known Python/PHP production variants"
+  ],
+  "implementationChanges": 0,
+  "runtimeSchemaMigrationTestsDatabaseProductionActionsInStage": 0,
+  "productionBusinessProviderMessagesForProof": 0,
+  "inventoryReopened": false,
+  "newBlockerIds": [],
+  "package5FinalGateRun": false,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "processHygiene": 0,
+  "documentationChecks": [
+    "Exact master membership",
+    "All proposed model/physical-column counts",
+    "Unique model and existing-column names",
+    "AE/AC6 class arithmetic",
+    "Per-sheet summary counts",
+    "Pinned sheet/assessment hashes",
+    "No schema placeholders"
+  ]
+}
