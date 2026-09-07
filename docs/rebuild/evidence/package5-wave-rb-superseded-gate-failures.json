@@ -44,5 +44,28 @@
     }
   ],
   "diagnosticCause": "R04 existing appointment_notifications config branch lacked local config declaration after A23 null-config retry correction",
-  "productionMutationsMessages": 0
+  "productionMutationsMessages": 0,
+  "secondAttemptFailures": [
+    {
+      "gate": "aggregate-canonical-v2",
+      "stage": "mandatory-backend",
+      "passedSuites": 389,
+      "passedTests": 3222,
+      "failedSuites": 1,
+      "failedTests": 1,
+      "cause": "Existing P405 ratchet demanded removed unreachable run_subscriptions_job mutation text; R07 replaced entire body with pure B35-required retirement",
+      "proofHash": "5e2469c7b0e759b03cc9b5e3a4490ed8efdc9ca43d6bd36a6d6859e6d6b7ca4e"
+    },
+    {
+      "gate": "aggregate-release-v2",
+      "stage": "mandatory-backend",
+      "passedSuites": 388,
+      "passedTests": 3215,
+      "failedSuites": 1,
+      "failedTests": 1,
+      "cause": "Existing P405 ratchet demanded removed unreachable run_subscriptions_job mutation text; R07 replaced entire body with pure B35-required retirement",
+      "proofHash": "18aba184f2b9b0728b0e7ce973e2fc69281c118f8daf89e68b4512fb75c837b0"
+    }
+  ],
+  "secondAttemptEarlierEightStages": "PASS on both canonical and release"
 }

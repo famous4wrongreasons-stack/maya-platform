@@ -1,0 +1,115 @@
+{
+  "package": "R07",
+  "blockers": [
+    "B46",
+    "B57"
+  ],
+  "correction": "Existing P405 cutover ratchet accepts the actual pure B35 retirement closure rather than requiring a historical marker and unreachable mutation",
+  "status": "TARGETED_PASS_FULL_MANDATORY_RERUN_REQUIRED",
+  "initialMandatoryFailure": {
+    "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/aggregate-canonical-v2/mandatory-jest.json",
+    "sourceSha256": "63650ee7a74ef755444255358643533a0258cd425c0e513cf7fd368592039e1d",
+    "passedSuites": 389,
+    "failedSuites": 1,
+    "passedTests": 3222,
+    "failedTests": 1,
+    "failures": [
+      {
+        "name": "/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/p4-05-all8-cutover-ratchet.spec.ts",
+        "message": "  \u25cf P4-05 all-8 production cutover ratchet \u203a reduces the one legacy family bypass group and all four mutation subgroups to zero\n\n    expect(received).toEqual(expected) // deep equality\n\n    - Expected  - 1\n    + Received  + 3\n\n    - Array []\n    + Array [\n    +   \"terminal_lifecycle\",\n    + ]\n\n      211 |   it('reduces the one legacy family bypass group and all four mutation subgroups to zero', () => {\n      212 |     expect(Object.keys(SUBGROUP_GUARDS)).toHaveLength(4);\n    > 213 |     expect(currentLegacyBypasses()).toEqual([]);\n          |                                     ^\n      214 |   });\n      215 |\n      216 |   it('still detects a genuine direct mutation owner if a fail-closed guard is removed', () => {\n\n      at Object.<anonymous> (action-engine/p4-05-all8-cutover-ratchet.spec.ts:213:37)\n",
+        "status": "failed"
+      }
+    ]
+  },
+  "changedTest": "maya-saas-backend/src/action-engine/p4-05-all8-cutover-ratchet.spec.ts",
+  "changedTestSha256": "0e4c5d5a7a98072aa20abd5e1aea098e4b38e9e5170db844465d2a49a42a38c8",
+  "retentionGuardSha256": "83d3453fb62b646c48c1d29d97f787977ce9423011ea978fb4a3748dbebed4d1",
+  "targeted": {
+    "suites": 3,
+    "tests": 27,
+    "nestedR07NativeTests": 14,
+    "jestJsonSha256": "c847cb26b113a76a663a0b9a11c499291926b0c7e3860ae0e120f8bd7b0215d9"
+  },
+  "commands": [
+    {
+      "label": "targeted",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/action-engine/p4-05-all8-cutover-ratchet.spec.ts",
+        "src/action-engine/p4-05-customer-subscription-executable.contract.spec.ts",
+        "src/marketing/canonical-bulk.architecture.spec.ts",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07/p405-ratchet-fix/targeted-jest.json"
+      ],
+      "cwd": "/tmp/maya-b29-contour/maya-saas-backend",
+      "exitCode": 0,
+      "elapsedSeconds": 23.708462953567505,
+      "rawLogSha256": "e08858793f276ccea8d309d8eab7ad501f8001792f4167d2f9b97be1ae5ee0d3"
+    },
+    {
+      "label": "lint",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/eslint/bin/eslint.js",
+        "src/action-engine/p4-05-all8-cutover-ratchet.spec.ts"
+      ],
+      "cwd": "/tmp/maya-b29-contour/maya-saas-backend",
+      "exitCode": 0,
+      "elapsedSeconds": 2.3431107997894287,
+      "rawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "typecheck",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/tmp/maya-b29-contour/maya-saas-backend",
+      "exitCode": 0,
+      "elapsedSeconds": 4.889549970626831,
+      "rawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "typecheck-scripts",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.scripts.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/tmp/maya-b29-contour/maya-saas-backend",
+      "exitCode": 0,
+      "elapsedSeconds": 10.820726871490479,
+      "rawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "newNegativeCases": [
+    "Real run_subscriptions_job body with direct database.update_subscription_status before refusal",
+    "Real run_subscriptions_job body with getattr alias of send_message and awaited delivery before refusal"
+  ],
+  "preservedNegativeCases": [
+    "Removed usage-consumption retirement marker remains detected",
+    "Direct checkout mutation next to canonical purchase initiator remains detected"
+  ],
+  "acceptanceMechanism": "Only exact LEGACY_JOB/run_subscriptions_job may use the R07 closure flag. Isolated Python imports the actual AST guard by absolute path, scans all source/overrides, including pure helper and sinks. Nonempty findings remain a terminal_lifecycle bypass. No marker-only acceptance.",
+  "runtimeChanges": 0,
+  "schemaChanges": 0,
+  "modelsFieldsActionClassesAdded": 0,
+  "productionMutationsMessages": 0,
+  "oldDatabasesTouched": 0,
+  "mainDirtyEntriesTouched": 0,
+  "ownedRunningProcesses": 0,
+  "processHygiene": 0,
+  "scratch": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07/p405-ratchet-fix"
+}

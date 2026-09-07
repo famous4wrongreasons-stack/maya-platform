@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 import { ActionCapabilityRegistry } from './action-engine.registry';
 import {
@@ -32,6 +33,7 @@ interface Guard {
   marker: string;
   mutation: string;
   canonical?: readonly string[];
+  retentionClosure?: true;
 }
 
 const SUBGROUP_GUARDS: Readonly<
@@ -110,8 +112,9 @@ const SUBGROUP_GUARDS: Readonly<
     {
       file: LEGACY_JOB,
       entrypoint: 'async def run_subscriptions_job',
-      marker: 'p4_05_legacy_mutation_disabled:subscription_scheduler',
+      marker: 'retention_owner_required',
       mutation: 'database.update_subscription_status(',
+      retentionClosure: true,
     },
     {
       file: LEGACY_DB,
@@ -138,6 +141,48 @@ function functionBody(contents: string, entrypoint: string): string {
 }
 
 function isFailClosed(guard: Guard, overrides?: SourceOverrides): boolean {
+  if (guard.retentionClosure) {
+    if (
+      guard.file !== LEGACY_JOB ||
+      guard.entrypoint !== 'async def run_subscriptions_job'
+    )
+      return false;
+    // R07 removed the legacy body completely. Prove the real producer/helper
+    // closure rather than requiring an old marker plus an unreachable writer.
+    const pythonRoot = join(ROOT, 'ai администратор');
+    const files = Object.fromEntries(
+      [...(overrides ?? [])]
+        .filter(([path]) => path.startsWith('ai администратор/'))
+        .map(([path, contents]) => [
+          path.slice('ai администратор/'.length),
+          contents,
+        ]),
+    );
+    const result = execFileSync(
+      'python3',
+      [
+        '-I',
+        '-B',
+        '-c',
+        `import importlib.util
+import json
+import pathlib
+import sys
+request = json.load(sys.stdin)
+root = pathlib.Path(request['root'])
+spec = importlib.util.spec_from_file_location('retention_guard', root / 'package5_retention_runtime_guard.py')
+guard = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(guard)
+print(json.dumps(guard.scan_retention_sources(root, request['overrides'])))
+`,
+      ],
+      {
+        encoding: 'utf8',
+        input: JSON.stringify({ root: pythonRoot, overrides: files }),
+      },
+    );
+    return (JSON.parse(result) as string[]).length === 0;
+  }
   const body = functionBody(source(guard.file, overrides), guard.entrypoint);
   const marker = body.indexOf(guard.marker);
   const mutation = body.indexOf(guard.mutation);
@@ -231,6 +276,29 @@ describe('P4-05 all-8 production cutover ratchet', () => {
     expect(currentLegacyBypasses(new Map([[LEGACY_WEB, directWeb]]))).toContain(
       'checkout_and_provider_correlation',
     );
+  });
+
+  it.each([
+    [
+      'direct terminal write',
+      "database.update_subscription_status(1, 'expired')",
+    ],
+    [
+      'aliased delivery',
+      "send = getattr(app.bot, 'send_message')\nawait send(chat_id=7, text='unsafe')",
+    ],
+  ])('rejects %s inserted into the real R07 retired scheduler', (_, effect) => {
+    const original = source(LEGACY_JOB);
+    const start = original.indexOf('async def run_subscriptions_job');
+    expect(start).toBeGreaterThanOrEqual(0);
+    const bodyStart = original.indexOf('\n', start) + 1;
+    const mutated =
+      original.slice(0, bodyStart) +
+      `    ${effect.replace(/\n/g, '\n    ')}\n` +
+      original.slice(bodyStart);
+    expect(currentLegacyBypasses(new Map([[LEGACY_JOB, mutated]]))).toEqual([
+      'terminal_lifecycle',
+    ]);
   });
 
   it('keeps all eight completed Shadow paths non-executable', () => {
