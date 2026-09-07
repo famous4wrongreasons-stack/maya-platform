@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 import { PACKAGE5_WAVE3_REGISTRATIONS } from './package5-wave3-executable.contract';
 import { PACKAGE5_WAVE3_MAX_CRM_TEAM_CHILDREN } from '../package5-wave3/package5-wave3.service';
@@ -18,6 +19,23 @@ describe('Package 5 Wave 3 ownership/bypass ratchet', () => {
     'package5-wave3/package5-wave3-canonical-cutover.service.ts',
   );
   const module = read('crm/crm.module.ts');
+
+  it('executes the actual R03 native schedule boundary and adversarial writer ratchet', () => {
+    const proof = spawnSync(
+      'python3',
+      [join(process.cwd(), '../ai администратор/test_package5_wave_rb_r03.py')],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
+      },
+    );
+    expect({ status: proof.status, error: proof.error?.message }).toEqual({
+      status: 0,
+      error: undefined,
+    });
+    expect(proof.stderr).toContain('Ran 6 tests');
+  });
 
   it('pins exact action inventory and the only external write', () => {
     expect(PACKAGE5_WAVE3_REGISTRATIONS).toHaveLength(8);

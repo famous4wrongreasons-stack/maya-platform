@@ -283,7 +283,7 @@ class ScheduleRegressionTests(unittest.TestCase):
 
         self.assertEqual([slot["time"] for slot in got], ["14:00"])
 
-    def test_schedule_change_closes_day_with_new_yclients_endpoint(self):
+    def test_schedule_preview_is_read_only_and_native_apply_is_retired(self):
         yclients = _load_yclients_module()
         api = yclients.YClientsAPI(company_id=1, user_token="user", partner_token="partner")
         applied = {"value": False}
@@ -311,13 +311,10 @@ class ScheduleRegressionTests(unittest.TestCase):
         self.assertEqual(writes, [])
 
         result = api.change_staff_day_schedule(7, "2099-07-20", "close_day", apply=True)
-        self.assertTrue(result["success"])
-        self.assertFalse(result["is_working"])
-        self.assertEqual(writes[0][0], "company/1/staff/schedule")
-        self.assertEqual(writes[0][1], {
-            "schedules_to_set": [],
-            "schedules_to_delete": [{"staff_id": 7, "dates": ["2099-07-20"]}],
-        })
+        self.assertFalse(result["accepted"])
+        self.assertFalse(result["retry_allowed"])
+        self.assertEqual(result["error"], "canonical_staff_schedule_required")
+        self.assertEqual(writes, [])
 
     def test_schedule_change_adds_break_as_two_work_intervals(self):
         yclients = _load_yclients_module()
@@ -366,7 +363,7 @@ class ScheduleRegressionTests(unittest.TestCase):
             "set_hours",
             work_start="10:00",
             work_end="18:00",
-            apply=True,
+            apply=False,
         )
 
         self.assertFalse(result["success"])

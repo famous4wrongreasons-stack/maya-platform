@@ -1,0 +1,51 @@
+{
+  "package": "R03",
+  "baseline": "cb4fb27c",
+  "exclusiveFiles": [
+    "ai администратор/yclients.py",
+    "ai администратор/canonical_staff_schedule_entry.py",
+    "ai администратор/package5_staff_schedule_guard.py",
+    "ai администратор/test_package5_wave_rb_r03.py",
+    "ai администратор/test_schedule_regressions.py",
+    "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+    "maya-saas-backend/scripts/package5-wave-rb-r03-proof.cjs",
+    "docs/rebuild/evidence/package5-wave-rb-r03-overlay.py",
+    "docs/rebuild/evidence/package5-wave-rb-r03-overlay-manifest.json",
+    "docs/rebuild/evidence/package5-wave-rb-r03-claude_ai.py.patch",
+    "docs/rebuild/evidence/package5-wave-rb-r03-yclients.py.patch",
+    "docs/rebuild/evidence/package5-wave-rb-r03-local-proof.json",
+    "docs/rebuild/evidence/package5-wave-rb-r03-hunk-ownership.json",
+    "docs/rebuild/package5-wave-rb-r03-local-acceptance.md"
+  ],
+  "sharedFiles": {
+    "ai администратор/claude_ai.py": {
+      "canonicalR03OnlySource": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r03/canonical-only/claude_ai.py",
+      "sha256": "95b197e3fbb7e6875c99e3540c8832389a2660e4221d450fd2777ecaa564e53a",
+      "ownedHunks": [
+        "canonical_staff_schedule_entry import",
+        "manage_staff_schedule tool description and obsolete apply description",
+        "УПРАВЛЕНИЕ ГРАФИКОМ prompt paragraph",
+        "_execute_tool manage_staff_schedule branch",
+        "remove _SCHEDULE_CONFIRM_RE and _schedule_confirmation_verified",
+        "_run_tool_uses remove history flag injection",
+        "_schedule_terminal_text handoff and remove stale preview/applied/error claims"
+      ],
+      "r04HunksExcluded": true
+    },
+    "ai администратор/test_claude_ai_rbac.py": {
+      "canonicalR03OnlySource": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r03/canonical-only/test_claude_ai_rbac.py",
+      "sha256": "6d35b92c8bf71846782f967823850b379f0c7c378593614fb963ace8b0521b86",
+      "ownedHunks": [
+        "test_founder_schedule_request_hands_off_to_canonical_approval",
+        "test_schedule_apply_does_not_replace_canonical_approval",
+        "test_schedule_history_confirmation_is_not_an_authority",
+        "test_manager_cannot_change_staff_schedule",
+        "test_director_prompt_requires_existing_canonical_schedule_entry"
+      ],
+      "unchangedScheduleTestAlsoExecuted": "test_schedule_change_tool_only_appears_in_owner_staff_surface",
+      "r04HunksExcluded": true
+    }
+  },
+  "testsOwnership": "Only schedule-related methods changed in existing Python tests; no R02/R04 fixtures or business tests redefined",
+  "noAgentCommit": true
+}

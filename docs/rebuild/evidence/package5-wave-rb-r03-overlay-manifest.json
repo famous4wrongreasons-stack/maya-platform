@@ -1,0 +1,55 @@
+{
+  "package": "R03",
+  "blockers": [
+    "B56"
+  ],
+  "acceptedBaseline": "cb4fb27c",
+  "productionBaseline": "R-A postcutover hash-matched source supplied by coordinator",
+  "transform": "docs/rebuild/evidence/package5-wave-rb-r03-overlay.py",
+  "files": [
+    {
+      "file": "claude_ai.py",
+      "destination": "/home/botadmin/barbershop-bot/claude_ai.py",
+      "beforeSha256": "59be8cb8d431b11afd211445e8fdb3fda592d04d05c07dd2bc6a0a8872c993cb",
+      "candidateSha256": "95b197e3fbb7e6875c99e3540c8832389a2660e4221d450fd2777ecaa564e53a",
+      "patch": "docs/rebuild/evidence/package5-wave-rb-r03-claude_ai.py.patch",
+      "changedFunctions": [
+        "_execute_tool",
+        "_schedule_terminal_text",
+        "_run_tool_uses"
+      ],
+      "removedFunctions": [
+        "_schedule_confirmation_verified"
+      ],
+      "canonicalR03OnlySha256": "95b197e3fbb7e6875c99e3540c8832389a2660e4221d450fd2777ecaa564e53a",
+      "unrelatedProductionFunctionsPreserved": 93
+    },
+    {
+      "file": "yclients.py",
+      "destination": "/home/botadmin/barbershop-bot/yclients.py",
+      "beforeSha256": "55cf23f02d6e81c91f1f79ae2ef21bda1307f07f6206212b14dd426395617b5a",
+      "candidateSha256": "5a2263a72029589acdac1d9347c42ccb1f05a3d4dcf678c0462a4012e606103b",
+      "patch": "docs/rebuild/evidence/package5-wave-rb-r03-yclients.py.patch",
+      "changedFunctions": [
+        "change_staff_day_schedule"
+      ],
+      "removedFunctions": [],
+      "canonicalR03OnlySha256": "5a2263a72029589acdac1d9347c42ccb1f05a3d4dcf678c0462a4012e606103b",
+      "unrelatedProductionFunctionsPreserved": 73
+    },
+    {
+      "file": "canonical_staff_schedule_entry.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_staff_schedule_entry.py",
+      "newFile": true,
+      "candidateSha256": "2c8cfbb4a5ff08fc53861e2b029afea23620ceb509f6485a545c1e599f0c7bca"
+    },
+    {
+      "file": "package5_staff_schedule_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_staff_schedule_guard.py",
+      "newFile": true,
+      "candidateSha256": "46c2c940cbb5202e65d263bdf3e4ab31c46ac765afffeb224bc2ead39884eb7a"
+    }
+  ],
+  "noWholesaleExistingSourcePublication": true,
+  "noProductionOperations": true
+}

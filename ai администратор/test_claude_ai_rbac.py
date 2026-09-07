@@ -1236,8 +1236,9 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertFalse(logs[-1][4])
         self.assertEqual(logs[-1][5], "surface")
 
-    def test_founder_can_preview_staff_schedule_change(self):
+    def test_founder_schedule_request_hands_off_to_canonical_approval(self):
         claude_ai, logs = _load_claude_ai()
+        claude_ai._resolve_role = lambda _user_id: "founder"
 
         result = json.loads(claude_ai._execute_tool(
             "manage_staff_schedule",
@@ -1251,14 +1252,15 @@ class ClaudeAIRBACTests(unittest.TestCase):
             mode="staff",
         ))
 
-        self.assertEqual(result["status"], "preview")
-        self.assertEqual(result["staff_id"], 7)
-        self.assertEqual(result["staff_name"], "Стас")
+        self.assertEqual(result["status"], "canonical_entry_required")
+        self.assertFalse(result["accepted"])
+        self.assertEqual(result["error"], "canonical_staff_schedule_required")
         self.assertEqual(logs[-1][3], "write")
         self.assertTrue(logs[-1][4])
 
-    def test_schedule_apply_is_ignored_without_new_user_confirmation(self):
+    def test_schedule_apply_does_not_replace_canonical_approval(self):
         claude_ai, _logs = _load_claude_ai()
+        claude_ai._resolve_role = lambda _user_id: "founder"
 
         result = json.loads(claude_ai._execute_tool(
             "manage_staff_schedule",
@@ -1272,29 +1274,21 @@ class ClaudeAIRBACTests(unittest.TestCase):
             mode="staff",
         ))
 
-        self.assertEqual(result["status"], "preview")
-        self.assertTrue(result["apply_ignored"])
+        self.assertEqual(result["status"], "canonical_entry_required")
+        self.assertFalse(result["retry_allowed"])
 
-    def test_schedule_confirmation_requires_prior_preview_and_new_yes(self):
+    def test_schedule_history_confirmation_is_not_an_authority(self):
         claude_ai, _logs = _load_claude_ai()
-        tool_use = claude_ai._ToolUse(
-            id="schedule",
-            name="manage_staff_schedule",
-            input={"apply": True},
-        )
-        messages = [
-            {"role": "assistant", "content": "Стас, 2099-07-20: график был 10:00–20:00; станет день закрыт. Применить?"},
-            {"role": "user", "content": "Да, применяй"},
-            {"role": "assistant", "content": claude_ai._assistant_blocks("", [tool_use])},
-        ]
-
-        self.assertTrue(claude_ai._schedule_confirmation_verified(messages))
-
-        messages[1]["content"] = "Закрой Стасу завтра"
-        self.assertFalse(claude_ai._schedule_confirmation_verified(messages))
+        claude_ai._resolve_role = lambda _user_id: "founder"
+        self.assertFalse(hasattr(claude_ai, "_schedule_confirmation_verified"))
+        result = json.loads(claude_ai._execute_tool(
+            "manage_staff_schedule", {"apply": True, "_schedule_confirmation_verified": True},
+            user_id=948205934, mode="staff"))
+        self.assertFalse(result["accepted"])
 
     def test_manager_cannot_change_staff_schedule(self):
         claude_ai, logs = _load_claude_ai()
+        claude_ai._resolve_role = lambda _user_id: "manager"
 
         result = json.loads(claude_ai._execute_tool(
             "manage_staff_schedule",
@@ -1326,15 +1320,15 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("manage_staff_schedule", staff_names)
         self.assertNotIn("manage_staff_schedule", client_names)
 
-    def test_director_prompt_requires_preview_then_confirmation(self):
+    def test_director_prompt_requires_existing_canonical_schedule_entry(self):
         claude_ai, _logs = _load_claude_ai()
 
         prompt = claude_ai._build_system_prompt(948205934, "founder", "staff")[0]["text"]
 
         self.assertIn("manage_staff_schedule", prompt)
-        self.assertIn("apply=false", prompt)
-        self.assertIn("apply=true", prompt)
-        self.assertIn("Применить?", prompt)
+        self.assertNotIn("apply=false", prompt)
+        self.assertNotIn("apply=true", prompt)
+        self.assertIn("подтверждение выполняются после входа в приложение", prompt)
 
     def test_schedule_question_is_grounded_and_resolves_inflected_name(self):
         claude_ai, _logs = _load_claude_ai()
