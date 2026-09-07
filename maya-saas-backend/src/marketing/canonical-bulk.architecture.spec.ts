@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve, join } from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 const backend = resolve(__dirname, '../..'),
   repo = resolve(backend, '..');
@@ -15,6 +16,22 @@ const method = (text: string, name: string, next: string) =>
   );
 
 describe('B35 permanent canonical bulk boundaries', () => {
+  it('executes R07 native retirement, authority and mutated real-body AST closure proof', () => {
+    const result = execFileSync(
+      'python3',
+      ['-m', 'unittest', 'test_package5_wave_rb_r07'],
+      {
+        cwd: resolve(repo, 'ai администратор'),
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          PYTHONDONTWRITEBYTECODE: '1',
+          R07_SOURCE_ROOT: resolve(repo, 'ai администратор'),
+        },
+      },
+    );
+    expect(result).toBe('');
+  }, 60000);
   it('panel and retired bot sender cannot perform direct Telegram, Web Push or legacy audience writes', () => {
     const block = method(
       python,

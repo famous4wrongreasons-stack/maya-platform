@@ -2874,11 +2874,7 @@ def update_subscription_usage(subscription_id: int, visits_used: int):
 
 
 def mark_subscription_renew_pushed(subscription_id: int):
-    with _db() as conn:
-        conn.execute(
-            "UPDATE subscriptions SET renew_reminder_sent_at = ? WHERE id = ?",
-            (_now(), subscription_id),
-        )
+    raise RuntimeError('B35_CANONICAL_OWNER_REQUIRED')
 
 
 def get_active_subscription_for_client(client_id: int) -> dict | None:

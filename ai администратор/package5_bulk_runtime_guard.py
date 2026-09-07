@@ -38,4 +38,9 @@ def scan_bulk_sources(root, overrides=None):
             findings.append('legacy chat-id audience selector restored')
         if isinstance(node, ast.Call) and ((isinstance(node.func, ast.Name) and node.func.id == 'broadcast_send_to_base') or (isinstance(node.func, ast.Attribute) and node.func.attr == 'broadcast_send_to_base')):
             findings.append('retired raw chat-id bulk producer is reachable')
+    # R07 closes native retention/renewal entries under this same B35 owner.
+    # The nested guard inspects the real AST closure, including refusal purity,
+    # scheduler/HTTP/chat registration and the lower legacy renewal marker.
+    from package5_retention_runtime_guard import scan_retention_sources
+    findings.extend(scan_retention_sources(root, overrides))
     return findings

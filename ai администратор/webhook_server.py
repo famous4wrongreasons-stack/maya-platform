@@ -3051,6 +3051,7 @@ def _owner_job_chat_response(chat_id: int, user_text: str, reply: str) -> web.Re
 async def panel_job_run_handler(request: web.Request) -> web.Response:
     import canonical_staff_access
     import canonical_work_entry
+    from canonical_retention_entry import retention_owner_required
     if not canonical_staff_access.current():
         return _cabinet_response({'error': 'canonical_staff_session_required'}, status=403)
     try:
@@ -3058,16 +3059,17 @@ async def panel_job_run_handler(request: web.Request) -> web.Response:
     except Exception:
         body = {}
     job = body.get('job') if isinstance(body, dict) else None
-    value = canonical_work_entry.owner_required()
+    value = retention_owner_required(job) if job in {'reactivation', 'cycle', 'subscriptions'} else canonical_work_entry.owner_required()
     return _cabinet_response(value, status=410)
 
 
 async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str) -> web.Response:
     import canonical_staff_access
     import canonical_work_entry
+    from canonical_retention_entry import retention_owner_required
     if not canonical_staff_access.current(chat_id):
         return _cabinet_response({'error': 'canonical_staff_session_required'}, status=403)
-    value = canonical_work_entry.owner_required()
+    value = retention_owner_required(job) if job in {'reactivation', 'cycle', 'subscriptions'} else canonical_work_entry.owner_required()
     return _cabinet_response(value, status=410)
 
 

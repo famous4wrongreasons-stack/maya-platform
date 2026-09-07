@@ -1010,23 +1010,13 @@ async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_cycle_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/cycle_now — ручной запуск цикл-напоминания. Только для админов."""
+    """Explain the existing canonical review requirement; never launch a job."""
     user_id = update.effective_user.id
     if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
-    await update.message.reply_text("🔁 Запускаю цикл-напоминание…")
-    try:
-        summary = await cycle_reminder.run_cycle_reminder_job(context.application)
-        await update.message.reply_text(
-            f"Готово.\n\n"
-            f"Кандидатов: {summary['candidates']}\n"
-            f"Отправлено: {summary['sent']}\n"
-            f"Заблокировали: {summary['blocked']}\n"
-            f"Ошибок: {summary['errors']}"
-        )
-    except Exception as e:
-        await update.message.reply_text(f"Ошибка: {e}")
+    from canonical_retention_entry import retention_owner_required
+    await update.message.reply_text(retention_owner_required('cycle')["message"])
 
 
 async def cmd_birthday_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1050,23 +1040,13 @@ async def cmd_birthday_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_subscriptions_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/subscriptions_now — ручной запуск job (sync + expire + renew push)."""
+    """Explain the existing canonical review requirement; never launch a job."""
     user_id = update.effective_user.id
     if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
-    await update.message.reply_text("🎟 Запускаю обновление абонементов…")
-    try:
-        summary = await subscriptions.run_subscriptions_job(context.application)
-        await update.message.reply_text(
-            f"Готово.\n\n"
-            f"Sync обновлений: {summary['synced']}\n"
-            f"Истекло: {summary['expired']}\n"
-            f"Напоминания о продлении: {summary['renew_pushed']}\n"
-            f"Ошибок: {summary['errors']}"
-        )
-    except Exception as e:
-        await update.message.reply_text(f"Ошибка: {e}")
+    from canonical_retention_entry import retention_owner_required
+    await update.message.reply_text(retention_owner_required('subscriptions')["message"])
 
 
 async def cmd_subscriptions_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1393,27 +1373,13 @@ async def cmd_export_consents(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 async def cmd_reactivation_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    /reactivation_now — запустить реактивацию вручную (только для админов).
-    Используется для теста или внеплановой кампании.
-    """
+    """Explain the existing canonical review requirement; never launch a job."""
     user_id = update.effective_user.id
     if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
-    await update.message.reply_text("🔄 Запускаю реактивацию вручную, секунду…")
-    try:
-        summary = await reactivation.run_reactivation_job(context.application)
-        await update.message.reply_text(
-            f"Готово.\n\n"
-            f"Кандидатов найдено: {summary['candidates']}\n"
-            f"Отправлено сообщений: {summary['sent']}\n"
-            f"Заблокировали бот: {summary['blocked']}\n"
-            f"Ошибок: {summary['errors']}"
-        )
-    except Exception as e:
-        logger.error(f"Ручная реактивация: {e}")
-        await update.message.reply_text(f"Ошибка: {e}")
+    from canonical_retention_entry import retention_owner_required
+    await update.message.reply_text(retention_owner_required('reactivation')["message"])
 
 
 async def cmd_ai_provider(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -4731,11 +4697,8 @@ def _pii_rotation_job():
 
 
 async def _reactivation_job(app: Application):
-    """Ежедневная реактивация уснувших клиентов."""
-    try:
-        await reactivation.run_reactivation_job(app)
-    except Exception as e:
-        logger.error(f"Ошибка реактивации: {e}")
+    """Scheduled compatibility entry; no campaign was admitted."""
+    return await reactivation.run_reactivation_job(app)
 
 
 async def _birthday_job(app: Application):
@@ -4776,13 +4739,8 @@ async def _referral_resolver_job(app: Application):
 
 
 async def _subscriptions_job(app: Application):
-    """
-    Ежедневный таск по абонементам: sync visits_used, expire, push «продлить?».
-    """
-    try:
-        await subscriptions.run_subscriptions_job(app)
-    except Exception as e:
-        logger.error(f"Ошибка subscriptions job: {e}")
+    """Scheduled compatibility entry; no campaign was admitted."""
+    return await subscriptions.run_subscriptions_job(app)
 
 
 def _fmt_rub(n) -> str:

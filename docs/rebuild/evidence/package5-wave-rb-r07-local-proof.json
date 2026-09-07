@@ -1,0 +1,274 @@
+{
+  "package": "R07",
+  "blockers": [
+    "B46",
+    "B57"
+  ],
+  "baseline": "cb4fb27c48ca036bdb77b1f9ee480edcb43fdad6",
+  "localStatus": "PASS",
+  "productionStatus": "COORDINATED_WAVE_PENDING",
+  "canonicalOwner": "B35 canonical bulk; P405 subscription eligibility/value owner",
+  "businessDecisionRequired": false,
+  "schemaRequired": false,
+  "newModels": 0,
+  "newFields": 0,
+  "newActionClasses": 0,
+  "migrationRequired": false,
+  "backfillRequired": false,
+  "runtimeOnly": true,
+  "dependenciesSatisfied": [
+    "R02 production PASS"
+  ],
+  "canonicalNative": {
+    "tests": 42,
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "-v",
+      "test_package5_wave_rb_r07",
+      "test_package5_b35_bulk",
+      "test_package5_wave_ra_r02",
+      "test_package5_b13_control_plane_boundaries",
+      "test_maya_subscription_renewal_shadow_bridge"
+    ],
+    "cwd": "/tmp/maya-b29-contour/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440",
+    "exitCode": 0,
+    "elapsedSeconds": 23.594518184661865,
+    "logSha256": "e7227f87e21076139971a356989b764b356fd227d48be7751ae4131c83d3e43f"
+  },
+  "composedNative": {
+    "tests": 40,
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "-v",
+      "test_package5_wave_rb_r07",
+      "test_package5_b35_bulk",
+      "test_package5_wave_ra_r02",
+      "test_package5_b13_control_plane_boundaries"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07/python-candidate",
+    "R07_SOURCE_ROOT": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07/python-candidate",
+    "exitCode": 0,
+    "elapsedSeconds": 24.945612907409668,
+    "logSha256": "ceb300fd4eef59e223cc48dc28b9f9f2642babff2bc977c509c4075dc05053c0",
+    "testScope": "All deployed R07/B35/R02/B13 native cases; two nondeployed shadow-bridge tests are canonical-only and already passed."
+  },
+  "preservedCycleProjection": [
+    {
+      "label": "canonical",
+      "command": [
+        "python3",
+        "/tmp/maya-b29-contour/docs/rebuild/evidence/package5-wave-rb-r07-cycle-projection-proof.py",
+        "/tmp/maya-b29-contour/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440",
+        "/tmp/maya-b29-contour/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_cycle_reminder.py"
+      ],
+      "cwd": "/tmp/maya-b29-contour",
+      "exitCode": 0,
+      "logSha256": "b75e8b2dd7b14834696873373b0e33c4e123e109da4f3549006f7c935d32faf1",
+      "tests": 6
+    },
+    {
+      "label": "composed",
+      "command": [
+        "python3",
+        "/tmp/maya-b29-contour/docs/rebuild/evidence/package5-wave-rb-r07-cycle-projection-proof.py",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07/python-candidate",
+        "/tmp/maya-b29-contour/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_cycle_reminder.py"
+      ],
+      "cwd": "/tmp/maya-b29-contour",
+      "exitCode": 0,
+      "logSha256": "b75e8b2dd7b14834696873373b0e33c4e123e109da4f3549006f7c935d32faf1",
+      "tests": 6
+    }
+  ],
+  "backendTargeted": {
+    "suites": 10,
+    "tests": 80,
+    "command": [
+      "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/marketing/canonical-bulk.architecture.spec.ts",
+      "src/marketing/canonical-bulk.contract.spec.ts",
+      "src/marketing/canonical-bulk.controller.spec.ts",
+      "src/marketing/canonical-bulk-panel.spec.ts",
+      "src/communication-delivery/communication-bulk-policy.service.spec.ts",
+      "src/communication-delivery/communication-bulk-delivery.service.spec.ts",
+      "src/customer-subscriptions/customer-subscription-renewal-shadow.service.spec.ts",
+      "src/action-engine/customer-subscription-renewal-shadow.contract.spec.ts",
+      "src/action-engine/p4-05-customer-subscription-executable.contract.spec.ts",
+      "src/auth/legacy-staff-principal.architecture.spec.ts",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07/backend-targeted-jest.json"
+    ],
+    "cwd": "/tmp/maya-b29-contour/maya-saas-backend",
+    "exitCode": 0,
+    "elapsedSeconds": 22.595672130584717,
+    "logSha256": "8320b11245443970da6a87fc8370db0ec3714318c7313e09c8f9d6b22ddfeb8d",
+    "jestJsonSha256": "946b53c97dd286d5c92e0554876cedb7e92c09d1ef886c272d1dad05391a9687"
+  },
+  "durableFoundation": {
+    "status": "PASS",
+    "proofs": {
+      "b35": {
+        "provenance": {
+          "foundation": "package5-b35-runtime-proof.ts",
+          "originalSourceSha256": "b842b50d1aeb345e95edac840018034c184c2ef56ba7257dd5cf41a02731f95f",
+          "adaptation": "exact owned disposable DB only; original assertions/runtime unchanged",
+          "processId": 4769,
+          "productionMutationsMessages": 0
+        },
+        "report": {
+          "status": "PASS",
+          "checks": [
+            "canonical Client deduplication",
+            "same identity immutable content",
+            "same identity changed audience conflicts before a second admission",
+            "User-free verified Client via canonical approval, AE admission and delivery",
+            "repeat skips terminal delivery",
+            "unauthorized and foreign Client rejected before business admission",
+            "preference/no endpoint/frequency history/quiet-hour denials produce no provider attempts",
+            "concurrent confirmation converges; UNKNOWN preserves one attempt and independent sibling succeeds",
+            "deterministic provider failure is terminal, no automatic resend or fallback",
+            "consent withdrawal after approval/claim but before durable boundary prevents effect",
+            "different campaign cannot bypass unresolved Client provider operation",
+            "Inbox commit/crash recovers through original attempt reconciliation without another Inbox write",
+            "resolved UNKNOWN releases its lane; no implicit weekly cap",
+            "User-free Web Push-only, five devices/one logical Client; UNKNOWN device does not block pending devices; no sixth endpoint or resend",
+            "partial graph persisted for actual restart verification"
+          ],
+          "providerCallsSynthetic": 5,
+          "productionMessages": 0
+        },
+        "logSha256": "f1cc225dc9417ef923cbd20eefa4f084e67dbe282f4b9d6f1bc1c99ac14d2c69"
+      },
+      "b35-resume": {
+        "provenance": {
+          "foundation": "package5-b35-runtime-proof.ts",
+          "originalSourceSha256": "b842b50d1aeb345e95edac840018034c184c2ef56ba7257dd5cf41a02731f95f",
+          "adaptation": "exact owned disposable DB only; original assertions/runtime unchanged",
+          "processId": 4784,
+          "productionMutationsMessages": 0
+        },
+        "report": {
+          "status": "PASS",
+          "checks": [
+            "actual restart resumes original pending sibling",
+            "original UNKNOWN never resent",
+            "same approved graph and exact terminal outcomes"
+          ],
+          "productionMessages": 0
+        },
+        "logSha256": "63916f59cb06fce66780ecfb6e0cd78fb93fd34a94dc8f4bff9d55c54dcb1ece"
+      },
+      "p405": {
+        "provenance": {
+          "foundation": "p4-05-all8-executable-proof.ts",
+          "originalSourceSha256": "8e29f932ba1ce3d3eee6b4c6c1fa27dea31296ac6de7a2581141efb1866df4eb",
+          "adaptation": "exact owned DB; four fixture builders include required immutable offer refs; original assertions/runtime unchanged",
+          "processId": 5434,
+          "productionMutationsMessages": 0
+        },
+        "report": {
+          "contract": "maya.p4-05-all8-executable-proof/1",
+          "actionClassesProven": 8,
+          "matrix": {
+            "checkoutDeterministicAndPendingNonValue": true,
+            "providerReferenceDurableWithoutRawPersistence": true,
+            "pendingCannotActivate": true,
+            "initialActivationAtomicRestartSafeAndOneTime": true,
+            "renewalCreatesOneNewTermAndPredecessorImmutable": true,
+            "usageExactOneTimeConcurrentAndCapacitySafe": true,
+            "allTerminalClassesExecutableAndIdempotent": true,
+            "expireCancelRevokeRaceHasOneWinner": true,
+            "unknownBlocksActivationAndBlindRedispatch": true,
+            "providerUnknownReconcilesCanonicalOutcome": true,
+            "tenantHoldAndForgedValueFailClosed": true,
+            "schedulerBoundedDeterministicAndRestartable": true,
+            "p403LoyaltyStateUntouched": true,
+            "a08PaymentWriteDisabled": true,
+            "realProductionMutationsZero": true,
+            "realProviderWritesZero": true
+          },
+          "counts": {
+            "subscriptions": 6,
+            "usages": 2,
+            "providerDispatchesAgainstProofDouble": 4,
+            "providerReadsAgainstProofDouble": 4,
+            "providerReconciliationsAgainstProofDouble": 3
+          },
+          "productionPayments": 0,
+          "productionSubscriptionMutations": 0,
+          "realProviderWrites": 0
+        },
+        "logSha256": "41659977742d3b3ca3e98ed588ead2a8d643a82c1dae1dfc8196790d9ee41db1"
+      }
+    },
+    "supersededFailure": {
+      "proof": "historical P405 all8 fixture",
+      "runtimeFailure": false,
+      "cause": "Original fixture predates required canonicalOfferId/offerValueVersionId/offerValueSnapshotHash; four fixture builders updated in memory; existing runtime and assertions unchanged",
+      "logSha256": "c036729667f3cdc5612015dd9bbad40198787fd09e33a2f0d80c508ad5d679de"
+    },
+    "productionMutationsMessages": 0,
+    "oldDatabasesTouched": 0
+  },
+  "supersededComposedHarnessFailure": {
+    "result": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v",
+        "test_package5_wave_rb_r07",
+        "test_package5_b35_bulk",
+        "test_package5_wave_ra_r02",
+        "test_package5_b13_control_plane_boundaries",
+        "test_maya_subscription_renewal_shadow_bridge"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07/python-candidate",
+      "R07_SOURCE_ROOT": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07/python-candidate",
+      "exitCode": 1,
+      "elapsedSeconds": 24.854506015777588,
+      "logSha256": "4c4efa63a479edd9683288c74c9d21b19bd565b23efdb25838aa842a22bb9ce9"
+    },
+    "cause": "Two canonical-only shadow-bridge tests were requested against the actual production capture, where that nondeployed module does not exist. All40 deployed tests passed; rerun40 excludes only those canonical-only tests, alreadyPASS in canonical42. No runtime/source deployment addition."
+  },
+  "canonicalSourceHashes": {
+    "reactivation.py": "cafaa578c7dbcacc0c882aa272da2f9d7c26c2946b60c13ea27edcc15c8f1fa8",
+    "cycle_reminder.py": "67cfbb33fd1ef6fca2b5e9bd96efa6cdbcaa2c6300a1e8ccce0d654ada4f5e75",
+    "subscriptions.py": "ec2d1e71671e4f0f0291d4b18402c5ee8316e6a8cc112c4450c21230ef1d41e9",
+    "bot.py": "83c51b3c7df42632aa078b92606d46b43aa8d8911f45cb01a57e96d94d1e6d42",
+    "database.py": "6394aeaefae0b1189ce7796ad93669467d93f7c6887819072625d9febf242a98",
+    "webhook_server.py": "44587eb1341699d2d09b41f1f684b7e0eb1a8bd5b018c1f3ca86a41f2d178645",
+    "canonical_retention_entry.py": "ede7382c5b1ce941e905384a3408b6eed85f31dd54d9c03fc8645d91aff2c379",
+    "package5_retention_runtime_guard.py": "83d3453fb62b646c48c1d29d97f787977ce9423011ea978fb4a3748dbebed4d1",
+    "package5_bulk_runtime_guard.py": "2b85ba5d7084cdaaff4596da8e777b90a028b5b3d6e9e568e5b74c571e57f74f",
+    "test_package5_wave_rb_r07.py": "f3c06ea2cd32356c3269ff3742968348c07dff86f485f865e80c85f08e0b6459"
+  },
+  "architectureTestSha256": "3cecd6c584796cad2b5dcf2501db438e13f068d1fa9eb99cbe4b8fbdb62a0204",
+  "overlayRecipeSha256": "55de7664f15be6e9bd90f4f05abfa654e5603f83f69d53573432ceaf03322e80",
+  "overlayManifestSha256": "03687bee0c04506727da3c6f0cf5b778942ac4f091df1a9b8c7094c88c07313d",
+  "ratchet": {
+    "mutatedRealBodiesRejected": 45,
+    "mechanism": "AST exact full effect-free bodies; recursive pure/truthful helper validation; scheduler/HTTP/command registration; import/store rebinding; pinned existing birthday exclusion",
+    "mandatoryEntry": "src/marketing/canonical-bulk.architecture.spec.ts -> test_package5_wave_rb_r07; existing scan_bulk_sources -> scan_retention_sources"
+  },
+  "B36CanonicalDailyReportUnchanged": true,
+  "B36CanonicalDailyReportSha256": "d67d4ba8380ba7bb5a7aa1fafd4e4d67a9949c90fb4f633bbc4d915933530b29",
+  "B36ProductionDailyReportUnchanged": true,
+  "B36ProductionDailyReportSha256": "0d39b5fa6730e1d8a18d045e56584bdc86c13a15d14b8e02fbb1253fdbadc533",
+  "productionMutationsMessages": 0,
+  "newProductionPathFound": false,
+  "mainDirtyEntriesTouched": 0,
+  "oldDatabasesTouched": 0,
+  "ownedRunningProcesses": 0,
+  "processHygiene": 0,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "scratch": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07"
+}
