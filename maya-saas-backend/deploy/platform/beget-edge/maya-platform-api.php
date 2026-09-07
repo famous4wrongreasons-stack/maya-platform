@@ -68,13 +68,15 @@ if ($authorization === null && isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
 }
 
 // R01: transport preserves one opaque logical identity; it never normalizes or replaces it.
-function maya_forwarded_idempotency_key(array $headers, array $server): ?string {
+function maya_forwarded_idempotency_key(array $headers, array $server) {
     $values = [];
     foreach ($headers as $name => $value) {
         if (strcasecmp((string)$name, 'Idempotency-Key') === 0) $values[] = $value;
     }
     if (count($values) > 1) throw new InvalidArgumentException('ambiguous_idempotency_key');
-    $value = $values[0] ?? ($server['HTTP_IDEMPOTENCY_KEY'] ?? null);
+    $value = isset($values[0])
+        ? $values[0]
+        : (isset($server['HTTP_IDEMPOTENCY_KEY']) ? $server['HTTP_IDEMPOTENCY_KEY'] : null);
     if ($value !== null && (!is_string($value) || $value === '' || strpbrk($value, "\r\n") !== false))
         throw new InvalidArgumentException('invalid_idempotency_key');
     if ($values && isset($server['HTTP_IDEMPOTENCY_KEY']) && $server['HTTP_IDEMPOTENCY_KEY'] !== $value)
