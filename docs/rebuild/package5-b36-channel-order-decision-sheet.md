@@ -1,5 +1,7 @@
 # B36 — Channel Order Decision Sheet
 
+> Current continuation after accepted `2ba294d5`: **B36 owner/contract/schema/channel order APPROVED**. Order is **INBOX → TELEGRAM → APNS**, sequential per recipient; UNKNOWN or deterministic failure blocks its later slots, while other recipients continue independently. [Exact schema mapping](package5-b36-schema-mapping-v1.md). B36 implementation is in progress; production migration/runtime deployment is still pending. B35 production PASS is preserved; Package 5 is not complete. The prior channel-order STOP below is historical and superseded.
+
 **STOP at the explicit channel-order boundary. Contract/schema scope approved;
 only channel order remains a business decision. No implementation or deployment.**
 

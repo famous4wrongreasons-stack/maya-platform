@@ -54,6 +54,8 @@ export interface TrustedActionExecutionRequestV1 {
   intentExpiresAt?: Date;
   callerIdempotency?: CallerIdempotencyV1;
   bookingIntent?: ClientBookingIntentContext;
+  /** Server-owned B36 immutable report/slot binding; never HTTP/model authority. */
+  ownerReportSlot?: { runId: string; slotKey: string };
 }
 
 export interface Chapter5IntentContextV1 {

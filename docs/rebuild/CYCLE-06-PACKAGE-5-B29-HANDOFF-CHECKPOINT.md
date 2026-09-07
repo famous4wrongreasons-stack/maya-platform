@@ -1,7 +1,6 @@
 # Cycle 06 — Package 5 B29 handoff checkpoint
 
-> Current continuation: [B36 Channel Order Decision Sheet](package5-b36-channel-order-decision-sheet.md) → [current remainder](CYCLE-06-BLOCKING-PACKAGE-5-B36-CONTRACT-STOP-REMAINDER-CHECKPOINT.md). At accepted `3aaaeb23`, the user approved OwnerReportsService / A12, OwnerReportRun and 14 persisted fields, with gated migration/runtime/deployment. Only exact channel order awaits approval under the user's explicit STOP boundary. B35 production PASS is preserved. Package 5 is not complete. No B36 implementation/deployment, Wave 7 or Chapter 7; Chapter 6 completion is not declared.
-> The original checkpoint/proposal below is historical; its old pending/STOP status is superseded.
+> Current continuation after accepted `2ba294d5`: **B36 owner/contract/schema/channel order APPROVED**. Order is **INBOX → TELEGRAM → APNS**, sequential per recipient; UNKNOWN or deterministic failure blocks its later slots, while other recipients continue independently. [Exact schema mapping](package5-b36-schema-mapping-v1.md). B36 implementation is in progress; production migration/runtime deployment is still pending. B35 production PASS is preserved; Package 5 is not complete. The prior channel-order STOP below is historical and superseded.
 
 Status: **HANDOFF READY — STOP AT B29 / A18**
 

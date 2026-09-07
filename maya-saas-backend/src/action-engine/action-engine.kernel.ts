@@ -336,6 +336,12 @@ export class ActionEngineKernel {
               identityFingerprint: normalized.identityFingerprint,
               idempotencyScope: normalized.idempotencyScope,
               requestIdempotencyKeyHash: normalized.requestIdempotencyKeyHash,
+              ...(request.ownerReportSlot
+                ? {
+                    ownerReportRunId: request.ownerReportSlot.runId,
+                    ownerReportSlotKey: request.ownerReportSlot.slotKey,
+                  }
+                : {}),
               ...(normalized.bookingIntent
                 ? {
                     bookingIntentContract: CLIENT_BOOKING_INTENT_CONTRACT,
@@ -1443,6 +1449,18 @@ export class ActionEngineKernel {
       capability.normalizeInput(request.input),
     );
     const normalizedInputCanonical = stableActionJson(normalizedInput);
+    if (request.ownerReportSlot) {
+      if (
+        capability.capability !==
+          'communication.reports-briefings.execute.v1' ||
+        normalizedInput.messageType !== 'daily_report' ||
+        Object.keys(request.ownerReportSlot).sort().join(',') !==
+          'runId,slotKey' ||
+        !/^[A-Za-z0-9_.:-]{1,160}$/.test(request.ownerReportSlot.runId) ||
+        !/^[a-f0-9]{64}$/.test(request.ownerReportSlot.slotKey)
+      )
+        throw new ActionContractError('Invalid owner report execution binding');
+    }
     const normalizedInputHash = this.identity.normalizedInputHash(
       capability.normalizedInputContract,
       normalizedInput,

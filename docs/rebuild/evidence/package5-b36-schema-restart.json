@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checks": [
+    "actual PostgreSQL restart preserves root/manifest/order/executions",
+    "UNKNOWN blocks same-recipient APNS; other recipient remains eligible"
+  ],
+  "productionMessages": 0,
+  "historicalBackfill": 0
+}

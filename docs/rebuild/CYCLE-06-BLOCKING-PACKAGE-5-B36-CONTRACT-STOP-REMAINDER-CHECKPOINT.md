@@ -1,5 +1,7 @@
 # Package 5 B36 — contract/schema approved; channel-order STOP
 
+> Current continuation after accepted `2ba294d5`: **B36 owner/contract/schema/channel order APPROVED**. Order is **INBOX → TELEGRAM → APNS**, sequential per recipient; UNKNOWN or deterministic failure blocks its later slots, while other recipients continue independently. [Exact schema mapping](package5-b36-schema-mapping-v1.md). B36 implementation is in progress; production migration/runtime deployment is still pending. B35 production PASS is preserved; Package 5 is not complete. The prior channel-order STOP below is historical and superseded.
+
 Accepted source checkpoint: `3aaaeb23`. B35 production PASS is preserved;
 the active release remains `20260907-p5-b35-c8c7a8eb`. No B35 remediation was
 reopened and no production runtime/configuration/schema was changed.

@@ -168,6 +168,7 @@ enum CommunicationCampaignState {
 }
 
 model Tenant {
+  ownerReportRuns OwnerReportRun[]
   bookingConfirmations ClientBookingConfirmation[]
   id                             String                          @id @default(cuid())
   name                           String
@@ -364,6 +365,9 @@ model AgentTask {
 /// normalized contract and durable outcome state, never raw model output or
 /// unrestricted provider payloads.
 model ActionExecution {
+  ownerReportRunId String?
+  ownerReportSlotKey String?
+  ownerReportRun OwnerReportRun? @relation(fields: [ownerReportRunId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "B36_execution_run_fkey")
   id                        String  @id @default(uuid())
   tenantId                  String
   identityVersion           Int
@@ -481,6 +485,7 @@ model ActionExecution {
   @@unique([id, tenantId])
   @@unique([tenantId, identityFingerprint])
   @@unique([tenantId, idempotencyScope, requestIdempotencyKeyHash], map: "ActionExecution_tenant_idempotency_key")
+  @@unique([tenantId, ownerReportRunId, ownerReportSlotKey], map: "B36_execution_slot_key")
   @@index([tenantId, state, nextExecutionAttemptAt])
   @@index([tenantId, reconciliationState, leaseExpiresAt])
   @@index([tenantId, agentTaskId])
@@ -3183,4 +3188,28 @@ model ClientBookingConfirmation {
   clientChannelLink ClientChannelLink @relation(fields: [clientChannelLinkId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict, map: "ClientBookingConfirmation_link_fkey")
 
   @@index([tenantId, clientId])
+}
+
+/// B36 immutable staff/business report. Delivery state belongs to existing A12 executions.
+model OwnerReportRun {
+  id String @id @default(uuid())
+  tenantId String
+  reportType String
+  periodLocalDate String
+  reportVersion Int
+  timezone String
+  intentHash String
+  intentEncrypted String?
+  admittedAt DateTime
+  expiresAt DateTime
+  payloadRetentionUntil DateTime
+  auditRetentionUntil DateTime
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "B36_report_tenant_fkey")
+  executions ActionExecution[]
+
+  @@unique([tenantId, reportType, periodLocalDate, reportVersion], map: "B36_report_identity_key")
+  @@unique([id, tenantId], map: "B36_report_tenant_key")
+  @@index([tenantId, expiresAt], map: "B36_report_resume_idx")
+  @@index([payloadRetentionUntil], map: "B36_report_payload_retention_idx")
+  @@index([auditRetentionUntil], map: "B36_report_audit_retention_idx")
 }

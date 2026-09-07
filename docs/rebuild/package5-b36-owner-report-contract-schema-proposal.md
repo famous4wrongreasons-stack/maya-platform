@@ -1,5 +1,7 @@
 # B36 — daily report owner / contract / schema proposal
 
+> Current continuation after accepted `2ba294d5`: **B36 owner/contract/schema/channel order APPROVED**. Order is **INBOX → TELEGRAM → APNS**, sequential per recipient; UNKNOWN or deterministic failure blocks its later slots, while other recipients continue independently. [Exact schema mapping](package5-b36-schema-mapping-v1.md). B36 implementation is in progress; production migration/runtime deployment is still pending. B35 production PASS is preserved; Package 5 is not complete. The prior channel-order STOP below is historical and superseded.
+
 **CONTRACT + SCHEMA SCOPE APPROVED at `3aaaeb23`; STOP at channel order.**
 
 The user approved the owner, immutable plan, 12 + 2 persisted fields, constraints,

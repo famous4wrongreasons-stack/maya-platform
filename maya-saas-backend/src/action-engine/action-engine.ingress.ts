@@ -32,6 +32,7 @@ const ALLOWED_REQUEST_KEYS = new Set([
   'intentExpiresAt',
   'callerIdempotency',
   'bookingIntent',
+  'ownerReportSlot',
 ]);
 const ALLOWED_SOURCE_KEYS = new Set([
   'type',

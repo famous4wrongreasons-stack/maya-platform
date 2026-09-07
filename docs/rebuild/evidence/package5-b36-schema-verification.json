@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "base": "2ba294d5",
+  "node": "24.19.0",
+  "migration": "20260907180000_b36_owner_report_run",
+  "migrationSha256": "3572d6327a1f24f055370d44004c6ddfdebdfcc6746d3a2fbb33a14955a676f0",
+  "newModels": 1,
+  "newPersistedFields": 14,
+  "newActionClasses": 0,
+  "cleanReplayMigrations": 83,
+  "pendingMigrations": 0,
+  "drift": "NONE",
+  "fullMandatory": {
+    "suites": 383,
+    "tests": 3139,
+    "status": "PASS"
+  },
+  "initialRuns": [
+    {
+      "status": "NO PASS",
+      "cause": "fixture secret length; corrected before successful 9-test unit rerun"
+    },
+    {
+      "status": "NO VERDICT",
+      "cause": "native Node process SIGSEGV (-11); full mandatory rerun passed unchanged checks"
+    },
+    {
+      "status": "FAIL RESOLVED",
+      "cause": "two unused variables in new files; full lint rerun passed"
+    }
+  ],
+  "mainDirtyEntriesPreserved": 24,
+  "oldDatabasesTouched": 0,
+  "ownedDatabases": 3,
+  "productionMessages": 0,
+  "productionMigrationApplied": false,
+  "runtimeWired": false
+}
