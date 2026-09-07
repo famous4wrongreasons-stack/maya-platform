@@ -2,7 +2,7 @@
   "inventorySource": "docs/rebuild/evidence/package5-remainder-inventory-final.json",
   "inventorySha256": "f0d29c9f60c4699c1458b383b86decf0fb26aef5ee56e89a2d9a89b6b62df425",
   "wave": "R-B",
-  "state": "R-B CUTOVER VERIFIED; LATER PRODUCTION BASELINE DIVERGENCE — STOP",
+  "state": "R-B CUTOVER VERIFIED; LATE RELAY RUNTIME COMPATIBLE; ARCHIVED R01 OVERLAY REPLAY CONFLICT — STOP",
   "packages": [
     {
       "id": "R01",
@@ -509,6 +509,10 @@
     "evidence": "package5-wave-rb-late-baseline-stop.json",
     "upstreamCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
     "currentExecutionHold": true,
-    "remediationCountsPreserveVerifiedCutover": true
+    "remediationCountsPreserveVerifiedCutover": true,
+    "reconciliationEvidence": "package5-late-baseline-reconciliation.json",
+    "runtimeCompatibility": "PASS",
+    "combinedBaselineCertified": false,
+    "reason": "Upstream modified two documented R01 replay patches without updating hunk sizes; current patches fail git apply parsing. No automatic fix authorized by reconciliation task."
   }
 }

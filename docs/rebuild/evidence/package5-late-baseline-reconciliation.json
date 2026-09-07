@@ -1,0 +1,491 @@
+{
+  "status": "STOP — R01 ARCHIVED OVERLAY REPLAY CONTRACT CONFLICT",
+  "checkedAt": "2026-09-07T21:45:06.071768+00:00",
+  "acceptedCheckpoint": "38010d6037ae8fa41410b73de9a82e94e5e92cf4",
+  "certifiedRBPrecutover": "60e8266473882fac12fca7fe4181b6e5344b29ce",
+  "independentUpstream": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
+  "preflight": {
+    "worktree": "/tmp/maya-b29-contour",
+    "branch": "contour/b29-remediation",
+    "fetch": "PASS",
+    "headEqualOrigin": true,
+    "unpushedCommits": 0,
+    "dirtyFiles": 0
+  },
+  "changedFiles": [
+    "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+    "maya-saas-backend/deploy/platform/beget-edge/r01/mayaos__maya-platform-api.php.patch",
+    "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__maya-native-api.php.patch",
+    "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+    "сайт и приложение/maya-native-api.php"
+  ],
+  "mergedFilesEqualUpstream": true,
+  "runtimeCompatibility": "PASS",
+  "combinedBaselineCertified": false,
+  "conflictScope": "Two pre-existing R01/B54 relay overlay artifacts: malformed zero-context hunks and no coherent replay of the recorded candidate contract. No new runtime violation or surface.",
+  "phpAndPatchProof": {
+    "checkedAt": "2026-09-07T21:41:34.625668+00:00",
+    "runtimeCompatibility": "PASS",
+    "phpCasesPerRelay": 631,
+    "totalContractComparisons": 3786,
+    "relayChecks": [
+      {
+        "file": "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+        "cases": 631,
+        "sameOld84New84New56": true,
+        "expectedContractCasesPass": true,
+        "newLint56And84": "PASS",
+        "oldLint56NegativeControl": "EXPECTED_PARSE_FAILURE"
+      },
+      {
+        "file": "сайт и приложение/maya-native-api.php",
+        "cases": 631,
+        "sameOld84New84New56": true,
+        "expectedContractCasesPass": true,
+        "newLint56And84": "PASS",
+        "oldLint56NegativeControl": "EXPECTED_PARSE_FAILURE"
+      }
+    ],
+    "sources": [
+      {
+        "file": "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+        "version": "old",
+        "sourceSha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+        "helperSha256": "2d1d6eb3fcdf469676f1a24079ec8e18440f3643525afe18e39c7d1c7507ac9d"
+      },
+      {
+        "file": "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+        "version": "new",
+        "sourceSha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+        "helperSha256": "7d68a394270518418ea6bc3e9fac4d664e5cd70f459a009917123e2f5f0d7700"
+      },
+      {
+        "file": "сайт и приложение/maya-native-api.php",
+        "version": "old",
+        "sourceSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "helperSha256": "2d1d6eb3fcdf469676f1a24079ec8e18440f3643525afe18e39c7d1c7507ac9d"
+      },
+      {
+        "file": "сайт и приложение/maya-native-api.php",
+        "version": "new",
+        "sourceSha256": "7c46765b03dd82f86e11c4018c76481db7c3b8e4584f8b2cb2378279f8d89b60",
+        "helperSha256": "7d68a394270518418ea6bc3e9fac4d664e5cd70f459a009917123e2f5f0d7700"
+      }
+    ],
+    "archivedOverlayReplay": "FAIL",
+    "patches": [
+      {
+        "file": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__maya-native-api.php.patch",
+        "target": "salon/app/maya-native-api.php",
+        "parser": {
+          "old": {
+            "exit": 0,
+            "stdout": "31\t1\tsalon/app/maya-native-api.php\n",
+            "stderr": "",
+            "sha256": "3e958462cd505684d13a04cfe3ba1901ea61529693bf97163614f3a643896a1e"
+          },
+          "new": {
+            "exit": 128,
+            "stdout": "",
+            "stderr": "error: patch fragment without header at line 38: @@ -75,0 +105 @@\n",
+            "sha256": "8e8a3bf00174d9ac6a7008bc51c14a5bf22417ffccd14f38b9d82a964c1e91cf"
+          }
+        },
+        "manifestCandidateSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "currentSourceSha256": "7c46765b03dd82f86e11c4018c76481db7c3b8e4584f8b2cb2378279f8d89b60",
+        "documentedCommand": "Zero-context unified diff; apply with git apply --unidiff-zero. Candidate bytes unchanged.",
+        "documentedApplyCheck": {
+          "exit": 128,
+          "stderr": "error: patch fragment without header at line 38: @@ -75,0 +105 @@\n",
+          "writes": 0
+        }
+      },
+      {
+        "file": "maya-saas-backend/deploy/platform/beget-edge/r01/mayaos__maya-platform-api.php.patch",
+        "target": "mayaos/maya-platform-api.php",
+        "parser": {
+          "old": {
+            "exit": 0,
+            "stdout": "31\t2\tmayaos/maya-platform-api.php\n",
+            "stderr": "",
+            "sha256": "6cdda172ead20f059724fe8257c4500a56177ef0a59c69927a6573eea6a87d43"
+          },
+          "new": {
+            "exit": 128,
+            "stdout": "",
+            "stderr": "error: patch fragment without header at line 38: @@ -71 +100 @@\n",
+            "sha256": "7bc9c29e65af953a4ed05beeab70c895cf5cbca058ac8f983048b2d8c5ee2c1b"
+          }
+        },
+        "manifestCandidateSha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+        "currentSourceSha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+        "documentedCommand": "Zero-context unified diff; apply with git apply --unidiff-zero. Candidate bytes unchanged.",
+        "documentedApplyCheck": {
+          "exit": 128,
+          "stderr": "error: patch fragment without header at line 38: @@ -71 +100 @@\n",
+          "writes": 0
+        }
+      }
+    ],
+    "newSurface": false,
+    "productionWrites": 0,
+    "productionMessages": 0,
+    "productionBusinessProviderCalls": 0,
+    "applicationImports": 0,
+    "remoteFilesWritten": 0,
+    "databaseConnections": 0
+  },
+  "aliasRatchet": {
+    "status": "PASS",
+    "aliases": [
+      {
+        "target": "salon/app/index.html",
+        "sha256": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "result": {
+          "submitCount": 1,
+          "legacyCount": 1
+        }
+      },
+      {
+        "target": "mayaos/app/index.html",
+        "sha256": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "result": {
+          "submitCount": 1,
+          "legacyCount": 1
+        }
+      },
+      {
+        "target": "salon/app/index.codex-loyalty-20260721.html",
+        "sha256": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "result": {
+          "submitCount": 1,
+          "legacyCount": 1
+        }
+      },
+      {
+        "target": "salon/app/index.backup-20260731-anton-analytics.html",
+        "sha256": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "result": {
+          "submitCount": 1,
+          "legacyCount": 1
+        }
+      },
+      {
+        "target": "salon/app/tenant-test.html",
+        "sha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "result": {
+          "submitCount": 1,
+          "legacyCount": 0
+        }
+      },
+      {
+        "target": "salon/app/api-proxy.php",
+        "sha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+        "result": true
+      },
+      {
+        "target": "salon/app/api-proxy.codex-loyalty-20260721.php",
+        "sha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+        "result": true
+      },
+      {
+        "target": "salon/app/maya-native-api.php",
+        "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "result": "exact relay bytes; helper equivalence/parser proof recorded separately"
+      },
+      {
+        "target": "mayaos/maya-platform-api.php",
+        "sha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+        "result": "exact relay bytes; helper equivalence/parser proof recorded separately"
+      }
+    ],
+    "applicationImports": 0,
+    "networkCalls": 0,
+    "providerCalls": 0,
+    "databaseConnections": 0
+  },
+  "productionEdgeReadback": {
+    "checkedAt": "2026-09-07T21:39:32.045789+00:00",
+    "rows": [
+      {
+        "target": "salon/app/index.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html",
+        "sha256": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "observedSha256": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "matchesPostcutover": true,
+        "currentSha256": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "mayaos/app/index.html",
+        "path": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html",
+        "sha256": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "observedSha256": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "matchesPostcutover": true,
+        "currentSha256": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/index.codex-loyalty-20260721.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.codex-loyalty-20260721.html",
+        "sha256": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "observedSha256": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "matchesPostcutover": true,
+        "currentSha256": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/index.backup-20260731-anton-analytics.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.backup-20260731-anton-analytics.html",
+        "sha256": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "observedSha256": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "matchesPostcutover": true,
+        "currentSha256": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/tenant-test.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-test.html",
+        "sha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "observedSha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "matchesPostcutover": true,
+        "currentSha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/api-proxy.php",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+        "sha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+        "observedSha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+        "matchesPostcutover": true,
+        "currentSha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/api-proxy.codex-loyalty-20260721.php",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.codex-loyalty-20260721.php",
+        "sha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+        "observedSha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+        "matchesPostcutover": true,
+        "currentSha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/maya-native-api.php",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php",
+        "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "observedSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "matchesPostcutover": true,
+        "currentSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "mayaos/maya-platform-api.php",
+        "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php",
+        "sha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+        "observedSha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+        "matchesPostcutover": false,
+        "currentSha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": false
+      }
+    ],
+    "phpVersions": {
+      "/usr/bin/php": {
+        "exit": 0,
+        "version": "5.6.40"
+      },
+      "/usr/local/bin/php5.6": {
+        "exit": 0,
+        "version": "5.6.40"
+      },
+      "/usr/local/bin/php8.4": {
+        "exit": 0,
+        "version": "8.4.6"
+      }
+    },
+    "productionWrites": 0
+  },
+  "productionRuntimeReadback": {
+    "checkedAt": "2026-09-07T21:39:33.734925+00:00",
+    "release": "/opt/maya-saas/releases/20260907-p5-rb-cb4fb27c",
+    "pythonFilesUnchanged": 101,
+    "compiledFilesUnchanged": 594,
+    "runtimeFlagsUnchanged": true,
+    "environmentFlagsUnchanged": true,
+    "serviceMetadataAndPidsUnchanged": true,
+    "otherStdinPythonProcesses": [],
+    "vpsPwa": {
+      "status": "PASS",
+      "path": "/var/www/maya-platform/app.html",
+      "sha256": "87f10c2e8505ef7fac76685d07965f5e4a271d1117d8c413a01c02cbf476498f",
+      "owner": [
+        0,
+        0
+      ],
+      "writes": 0
+    }
+  },
+  "productionSchemaReadback": {
+    "gate": "PASS",
+    "pending": 0,
+    "postApplyDrift": "NONE",
+    "migration": "20260907180000_b36_owner_report_run",
+    "migrationChecksum": "3572d6327a1f24f055370d44004c6ddfdebdfcc6746d3a2fbb33a14955a676f0",
+    "newColumns": 14,
+    "newForeignKeys": 2,
+    "newPhysicalIndexes": 7,
+    "guards": 2,
+    "checkConstraints": 2,
+    "ownerReportRuns": 0,
+    "populatedNewFields": 0,
+    "fakeHistoricalBackfill": 0,
+    "release": "/opt/maya-saas/releases/20260907-p5-rb-cb4fb27c",
+    "health": 200,
+    "readiness": 200,
+    "waveRuntimeSwitched": true,
+    "b36RuntimeSwitched": false,
+    "ownerReportRunDurableInProduction": true,
+    "productionMessages": 0,
+    "productionBusinessProofMutations": 0
+  },
+  "targetedRegression": {
+    "status": "PASS",
+    "suites": 5,
+    "tests": 32,
+    "results": [
+      {
+        "file": "src/auth/legacy-staff-principal.architecture.spec.ts",
+        "sha256": "28da0cb42b9d0741f82fd8adcbd66e4b317e8e2de8d687672685c501e888e44d",
+        "status": "passed",
+        "passedTests": 4,
+        "tests": [
+          "R02 permanent canonical staff authority boundaries executes native/session/middleware ratchets and negative authorization proof",
+          "R02 permanent canonical staff authority boundaries keeps the canonical adapter protected and read-only under existing AC3/A16",
+          "R02 permanent canonical staff authority boundaries carries the same canonical account through PWA panel and staff chat even inside Telegram",
+          "R02 permanent canonical staff authority boundaries ratchets every internal PHP target and forbids provider credential forwarding"
+        ]
+      },
+      {
+        "file": "src/crm/client-initiator-boundary.architecture.spec.ts",
+        "sha256": "01cad778cb60bb82b5fd508945e326f39dc1cac12114a568ba3409adc6cf8827",
+        "status": "passed",
+        "passedTests": 11,
+        "tests": [
+          "R01 permanent Client initiator boundary executes every retired native entry and callback with business dependencies trapped",
+          "R01 permanent Client initiator boundary has no direct guest-create fetch left in the canonical PWA source and parses every script",
+          "R01 permanent Client initiator boundary fails the actual legacy booking card before contact/projection lookup or HTTP",
+          "R01 permanent Client initiator boundary fails the actual guest booking submit without starting a provider request",
+          "R01 permanent Client initiator boundary preserves the actual authenticated PWA route and exact caller key to the existing transport",
+          "R01 permanent Client initiator boundary pins every inventoried PWA variant and both PHP targets with bounded deploy patches",
+          "R01 permanent Client initiator boundary rejects injected provider/profile/authority calls before a real retired PWA refusal",
+          "R01 permanent Client initiator boundary rejects a writer before PHP denial, altered delegation, and unregistered backup aliases",
+          "R01 permanent Client initiator boundary requires PHP 5.6-compatible single-key forwarding and browser CORS in сайт и приложение/maya-native-api.php",
+          "R01 permanent Client initiator boundary requires PHP 5.6-compatible single-key forwarding and browser CORS in maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+          "R01 permanent Client initiator boundary refuses unknown overlay structure rather than silently patching a partial target"
+        ]
+      },
+      {
+        "file": "src/crm/client-channel-appointment-create.service.spec.ts",
+        "sha256": "007d24879438887f97390b889d0038e08e15557b71e387461dd59a0deeea861f",
+        "status": "passed",
+        "passedTests": 7,
+        "tests": [
+          "B19 verified Client chat appointment creation uses the verified Client and existing canonical Action Engine executor",
+          "B19 verified Client chat appointment creation passes a verified Client without a Maya User to the common contact/intent resolver",
+          "B19 verified Client chat appointment creation fails closed for missing link",
+          "B19 verified Client chat appointment creation fails closed for ambiguous link",
+          "B19 verified Client chat appointment creation rejects caller Client, phone, tenant, and legacy chat authority fields",
+          "B19 verified Client chat appointment creation preserves UNKNOWN and stable retry identity without a second owner",
+          "B19 verified Client chat appointment creation fails before the shared creator when canonical privacy consent is unavailable"
+        ]
+      },
+      {
+        "file": "src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "sha256": "da4017b5c040557acd5aefbdaebdfdf5090d57c8dd3a38f37e4efce16321ff44",
+        "status": "passed",
+        "passedTests": 7,
+        "tests": [
+          "R10 permanent canonical AI receipt ratchet separates mutation receipt projection from read-only timeout and stale snapshot fallback",
+          "R10 permanent canonical AI receipt ratchet rejects mutated real write methods with early/detached execution, tombstones, or fresh replay keys",
+          "R10 permanent canonical AI receipt ratchet rejects a timeout tombstone or direct domain/provider regression fixture",
+          "R10 permanent canonical AI receipt ratchet attaches through canonical admission before returning to every existing executor family",
+          "R10 permanent canonical AI receipt ratchet rejects mutated canonical ingress with detached persistence, missing policy await or lost transaction",
+          "R10 permanent canonical AI receipt ratchet rejects mutated real admission methods that return/dispatch before durable attachment",
+          "R10 permanent canonical AI receipt ratchet keeps immutable correlation encrypted and reads current canonical outcome rather than owning a new lifecycle"
+        ]
+      },
+      {
+        "file": "src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "sha256": "17bc92e892e6e0b658de96743e0e0affd35dc751c085dbae01d4c652e0361860",
+        "status": "passed",
+        "passedTests": 3,
+        "tests": [
+          "B31 immutable booking ingress permanent ratchet allows binding writes only in the canonical Action Engine kernel",
+          "B31 immutable booking ingress permanent ratchet requires the shared booking context/authorization before either calendar can execute a Client create",
+          "B31 immutable booking ingress permanent ratchet hashes the normalized versioned descriptor and preserves the existing UNKNOWN path"
+        ]
+      }
+    ]
+  },
+  "ratchetCoverageGap": "The existing R01 Jest suite checks overlay registration, textual additions and source boundaries; it does not parse/apply the archived patch hunks. New PHP syntax assertions pass while malformed patches escape it.",
+  "archivedPatchesAreLiveRuntime": false,
+  "currentPublisherAppliesPatches": false,
+  "currentPublisherEvidence": "package5-wave-ra-publish-edge.py validates and publishes staged whole-file hashes; package5-wave-ra-r01-overlay-manifest.json still explicitly documents git apply --unidiff-zero replay.",
+  "newProductionSurface": false,
+  "inventoryDefect": false,
+  "newBlockerIds": [],
+  "existingPackage": "R01",
+  "existingBlocker": "B54",
+  "historicalProductionPassPreserved": [
+    "R01",
+    "R02",
+    "R03",
+    "R04",
+    "R07",
+    "R10"
+  ],
+  "packagesComplete": 6,
+  "packagesRemaining": 8,
+  "blockersRemediated": 10,
+  "blockersRemaining": 14,
+  "stage2": "NOT STARTED — prerequisite COMBINED BASELINE CERTIFIED not satisfied",
+  "ownerDecisionsPresentedThisCheckpoint": 0,
+  "ownerDecisionsExpected": 8,
+  "ownerDecisionApprovals": 0,
+  "futureWaves": "NOT PROPOSED IN BLOCKED STAGE 1; existing dependency graph unchanged",
+  "b36": {
+    "schema": "ALREADY APPLIED",
+    "runtime": "NOT DEPLOYED",
+    "defect1": "IDEMPOTENCY KEY",
+    "defect2": "CONCURRENT WRITE CONFLICT",
+    "newSchemaMigration": false
+  },
+  "package5FinalGateRun": false,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "runtimeFilesChanged": 0,
+  "schemaFilesChanged": 0,
+  "migrationsChanged": 0,
+  "deployment": false,
+  "productionMutationsMessagesForProof": 0,
+  "productionProviderEffectsForProof": 0,
+  "protectedScope": {
+    "mainEntries": 24,
+    "protectedFileHashes": 22,
+    "mainUnchanged": true,
+    "inventoryAndSchemaHashesUnchanged": 86,
+    "newMigrations": 0,
+    "oldDatabasesTouched": 0
+  },
+  "processHygiene": 0,
+  "knownNonBusinessLimit": "PHP CLI parser/fixture proof does not infer the per-site web SAPI version; no live booking/message endpoint was invoked."
+}
