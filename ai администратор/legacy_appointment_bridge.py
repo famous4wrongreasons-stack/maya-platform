@@ -266,6 +266,11 @@ def dispatch_appointment_action(
     payload: dict[str, Any],
 ) -> dict[str, Any]:
     """Dispatch one appointment mutation through the sole canonical executor."""
+    if origin == "telegram.bot" and action_class in {
+        "create_appointment", "cancel_appointment", "reschedule_appointment",
+    }:
+        # R01: an integration credential never substitutes for the native Client.
+        return _rejected_result("verified_client_channel_required")
     mode = bridge_mode()
     if mode == INVALID_MODE:
         return _rejected_result("legacy_appointment_bridge_mode_invalid")

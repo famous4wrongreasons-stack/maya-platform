@@ -1,0 +1,293 @@
+{
+  "package": "R01",
+  "blockers": [
+    "B38",
+    "B39",
+    "B54"
+  ],
+  "baseline": "45688886",
+  "status": "LOCAL ACCEPTANCE PASS; production approval/gates owned by wave coordinator",
+  "capturedAt": "2026-09-07T18:39:19.061771+00:00",
+  "schema": {
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migrationRequired": false,
+    "backfillRequired": false
+  },
+  "jest": {
+    "passedSuites": 10,
+    "passedTests": 130,
+    "failedTests": 0,
+    "command": "node node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/crm/client-initiator-boundary.architecture.spec.ts src/crm/legacy-appointment-bridge.service.spec.ts src/crm/client-channel-appointment-create.service.spec.ts src/action-engine/client-action-principal.spec.ts src/appointments/client-appointment-create.service.spec.ts src/crm/client-channel-appointment-authority.service.spec.ts src/action-engine/client-booking-idempotency.kernel.spec.ts src/action-engine/client-booking-idempotency.architecture.spec.ts src/action-engine/client-booking-intent.contract.spec.ts src/action-engine/client-booking-confirmation.architecture.spec.ts",
+    "nativeExecutableTestsNested": 6,
+    "noLiveBusinessDependencies": true
+  },
+  "independentR01StagingProof": {
+    "nativeTests": 6,
+    "result": "PASS",
+    "base": "45688886",
+    "r02Required": false,
+    "botSha256": "b8eac1051fb20aeafcb83e9da8248524dd121483cf1c25200a1abbb948560814",
+    "pwaSha256": "34193f8da4201846729001ce13959a058759914e70188c06e0b816817fbf5157",
+    "fixtureAllowsOnlyPreR02IsAdminFalse": "All Client/profile/provider dependencies remain traps"
+  },
+  "php": {
+    "verdict": "PASS",
+    "checks": 48,
+    "liveHttp": 0,
+    "providerCalls": 0,
+    "appImports": 0,
+    "databaseConnections": 0,
+    "filesWrittenByFixture": 0
+  },
+  "phpProvenance": {
+    "fixtureSha256": "c02e6bdcb10e93ec7a98b052d6eab45b7a2afdfdecef456fb0a78a6989436141",
+    "sources": [
+      {
+        "file": "сайт и приложение/maya-native-api.php",
+        "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "proofSliceSha256": "bf72659b66e9861ec7508e22f3f2bf1435726cd7a2da367a30ee04f39635dd87"
+      },
+      {
+        "file": "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+        "sha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+        "proofSliceSha256": "a916b08e16097d3b90d676f60a64e95c4f5c2b372665553b08008edbaeae9fb5"
+      },
+      {
+        "file": "salon/app/api-proxy.php",
+        "sha256": "c292c64b094c40d18a713db7620baa54573f41e6842151f88b3038606ea42c5f",
+        "proofSliceSha256": "e574708f29d23e01e4e4b0c9fd9fad4b6690e754af68ed89db874646aefe23ba"
+      },
+      {
+        "file": "salon/app/api-proxy.codex-loyalty-20260721.php",
+        "sha256": "9971e7da796c0bb10d54e1fc47d52c2583e3ce8ebb0e63600f94aadfe1d5738b",
+        "proofSliceSha256": "e574708f29d23e01e4e4b0c9fd9fad4b6690e754af68ed89db874646aefe23ba"
+      }
+    ]
+  },
+  "phpPriorAttempt": "v1 fixture parameter collided with PHP superglobal; corrected fixture v2 passes. Actual exact-source fixture and four source slices are byte-identical to passing v2.",
+  "postgresql": {
+    "database": "fresh owned maya_ra_r01 on 127.0.0.1:55507",
+    "cleanReplayMigrations": 83,
+    "b31": {
+      "verdict": "PASS",
+      "compiledHttpAiAndCanonicalExecutor": true,
+      "realActionEngine": true,
+      "realPostgresql": true,
+      "syntheticOnly": true,
+      "realProductionMutations": 0,
+      "results": {
+        "missing": "denied; appointments=0; executions=0",
+        "revoked": "denied; appointments=0; executions=0",
+        "concurrentHttpAndAi": {
+          "requests": 14,
+          "immediateAccepted": 12,
+          "transientFailures": 0,
+          "appointments": 1,
+          "executions": 1,
+          "actionClass": "create_appointment",
+          "exactCanonicalClient": true
+        },
+        "clientWithoutMayaUser": "PASS — HTTP contact and AI exact CRM binding",
+        "wrongContext": "denied before ingress; caller ownership ignored",
+        "internalProviderWrites": 0,
+        "crmUnknownReconciled": "one provider dispatch; one canonical Appointment; SUCCEEDED",
+        "crmUnknownNoBlindRetry": "UNKNOWN; provider calls=1; appointments=0",
+        "httpAiSameKey": "same binding / same execution / same Appointment",
+        "secondaryAliasGap": "K1+A / K2+A => same E1; K2+B => IDEMPOTENCY_CONFLICT",
+        "changedBusinessTerms": "time/service/staff/branch/duration/contact/notes: conflict, no new execution/outcome",
+        "changedCanonicalClient": "verified Client B cannot reuse Client A key; conflict and zero new outcomes",
+        "tenantIsolation": "forged context denied before ingress; authorized different tenant owns an independent scoped identity",
+        "concurrentSameKey": {
+          "sameIntent": "12 requests / 1 binding / 1 execution / 1 Appointment",
+          "differentIntent": "1 accepted / 1 conflict / 1 binding / 1 execution / 1 Appointment"
+        },
+        "crashRestart": "new Node process resumed the committed binding/execution and produced its sole Appointment",
+        "crossProcessConcurrency": "two independent Node runtimes; concurrent first requests; one binding/execution/Appointment",
+        "immutableDefaults": "bound replay uses accepted contact/timezone; unavailable catalog labels do not change durable outcome",
+        "unknownImmutableIntent": "same key => same UNKNOWN execution/reconciliation; changed key intent => conflict; no new provider operation",
+        "succeededReplay": "same execution/outcome; no provider dispatch",
+        "changedCalendarTarget": "changed company or calendar source => conflict; zero provider writes"
+      }
+    },
+    "b32": {
+      "verdict": "PASS",
+      "realPostgresql": true,
+      "actualCompiledController": true,
+      "actualSignedAuthenticator": true,
+      "actualClientResolver": true,
+      "actualPolicyAndActionEngine": true,
+      "productionMutations": 0,
+      "results": {
+        "internal_verified": {
+          "principal": "client_channel",
+          "clientHasMayaUser": true,
+          "signedTelegram": "PASS",
+          "HTTP_AI_channelParity": "PASS",
+          "providerReplyLostReconciled": false,
+          "concurrentRequests": 8,
+          "primaryIntentExecutions": 1,
+          "primaryIntentAppointments": 1,
+          "changedIntent": "IDEMPOTENCY_CONFLICT",
+          "missingAndRevoked": "DENIED",
+          "historicalEvidenceImmutable": true,
+          "rawCredentialInEvidence": false,
+          "runtimeUsersCreated": 0,
+          "cancelReschedule": "covered by account/policy regression",
+          "businessTargetAuthority": "PASS"
+        },
+        "internal_no_user": {
+          "principal": "client_channel",
+          "clientHasMayaUser": false,
+          "signedTelegram": "PASS",
+          "HTTP_AI_channelParity": "PASS",
+          "providerReplyLostReconciled": false,
+          "concurrentRequests": 8,
+          "primaryIntentExecutions": 1,
+          "primaryIntentAppointments": 1,
+          "changedIntent": "IDEMPOTENCY_CONFLICT",
+          "missingAndRevoked": "DENIED",
+          "historicalEvidenceImmutable": true,
+          "rawCredentialInEvidence": false,
+          "runtimeUsersCreated": 0,
+          "cancelReschedule": "covered by account/policy regression",
+          "businessTargetAuthority": "PASS"
+        },
+        "external_verified": {
+          "principal": "client_channel",
+          "clientHasMayaUser": true,
+          "signedTelegram": "PASS",
+          "HTTP_AI_channelParity": "PASS",
+          "providerReplyLostReconciled": false,
+          "concurrentRequests": 8,
+          "primaryIntentExecutions": 1,
+          "primaryIntentAppointments": 1,
+          "changedIntent": "IDEMPOTENCY_CONFLICT",
+          "missingAndRevoked": "DENIED",
+          "historicalEvidenceImmutable": true,
+          "rawCredentialInEvidence": false,
+          "runtimeUsersCreated": 0,
+          "cancelReschedule": "PASS",
+          "businessTargetAuthority": "PASS"
+        },
+        "external_no_user": {
+          "principal": "client_channel",
+          "clientHasMayaUser": false,
+          "signedTelegram": "PASS",
+          "HTTP_AI_channelParity": "PASS",
+          "providerReplyLostReconciled": true,
+          "concurrentRequests": 8,
+          "primaryIntentExecutions": 1,
+          "primaryIntentAppointments": 1,
+          "changedIntent": "IDEMPOTENCY_CONFLICT",
+          "missingAndRevoked": "DENIED",
+          "historicalEvidenceImmutable": true,
+          "rawCredentialInEvidence": false,
+          "runtimeUsersCreated": 0,
+          "cancelReschedule": "PASS",
+          "businessTargetAuthority": "PASS",
+          "unknownScenario": {
+            "sameExecution": true,
+            "contactAndCatalogOutage": "frozen accepted defaults reused",
+            "changedIntent": "CONFLICT",
+            "providerDispatches": 1,
+            "unresolvedOutcome": "UNKNOWN / MANUAL_REQUIRED preserved after read recovery; no automatic retry"
+          }
+        }
+      }
+    },
+    "providerAdapters": "Synthetic stubs only; actual compiled controllers/resolvers/policy/Action Engine and PostgreSQL used",
+    "oldDatabasesAccessed": 0
+  },
+  "overlays": {
+    "verdict": "PASS",
+    "registeredTargets": 10,
+    "unregisteredTargets": 0,
+    "boundedTransitions": 8,
+    "relayExactRepositoryCandidates": 2,
+    "rows": [
+      {
+        "target": "salon/app/index.html",
+        "kind": "pwa",
+        "sha256": "36f2001a38215c93210b7afc0e92198a2896c506b7a0a0f106dc30c6f9b6c697",
+        "verdict": "PASS"
+      },
+      {
+        "target": "mayaos/app/index.html",
+        "kind": "pwa",
+        "sha256": "0e1cd347f305f4fa49bce5fe22a824d57bf93641aa26a6a231ba07c54489e6a6",
+        "verdict": "PASS"
+      },
+      {
+        "target": "salon/app/index.codex-loyalty-20260721.html",
+        "kind": "pwa",
+        "sha256": "b96ffea40237f8d90113ffb21c571f3cccfce0be120c7404d043c5f17b053dc2",
+        "verdict": "PASS"
+      },
+      {
+        "target": "salon/app/index.backup-20260731-anton-analytics.html",
+        "kind": "pwa",
+        "sha256": "bd2fa2b6635b1a54cce331b6f5aad436cdb4fd3fadab6d2362c41bc1e6932ee2",
+        "verdict": "PASS"
+      },
+      {
+        "target": "salon/app/tenant-test.html",
+        "kind": "pwa",
+        "sha256": "9c322c8d3ce0e13c3dfd43cd87d1e9a4fd344447947af26f182f5e8d4865c8dd",
+        "verdict": "PASS"
+      },
+      {
+        "target": "vps/app.html",
+        "kind": "pwa",
+        "sha256": "284ea2217e702ea282b9d3e45d1ae80eacaa69839f043f16ecea2c6643ebc3d7",
+        "verdict": "PASS"
+      },
+      {
+        "target": "salon/app/api-proxy.php",
+        "kind": "php",
+        "sha256": "c292c64b094c40d18a713db7620baa54573f41e6842151f88b3038606ea42c5f",
+        "verdict": "PASS"
+      },
+      {
+        "target": "salon/app/api-proxy.codex-loyalty-20260721.php",
+        "kind": "php",
+        "sha256": "9971e7da796c0bb10d54e1fc47d52c2583e3ce8ebb0e63600f94aadfe1d5738b",
+        "verdict": "PASS"
+      },
+      {
+        "target": "salon/app/maya-native-api.php",
+        "kind": "relay",
+        "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "verdict": "PASS"
+      },
+      {
+        "target": "mayaos/maya-platform-api.php",
+        "kind": "relay",
+        "sha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+        "verdict": "PASS"
+      }
+    ],
+    "appImports": 0,
+    "providerCalls": 0,
+    "businessEffects": 0
+  },
+  "additionalChecks": {
+    "targetedEslint": "PASS",
+    "gitDiffCheck": "PASS",
+    "patchWhitespace": "Blank context lines normalized by generating zero-context review patches; deployment candidate bytes unchanged"
+  },
+  "preservedContracts": {
+    "suppliedCallerKey": "Forwarded exactly once and unchanged; rejected if malformed or ambiguous",
+    "omittedCallerKey": "Existing approved B31 canonical-intent fallback remains unchanged; no new browser identity system",
+    "clientWithoutMayaUser": "Existing verified B32 channel binding remains supported",
+    "unknown": "Same execution; immutable intent conflict; no provider redispatch",
+    "b36": "No runtime/schema changes; release projection handled by root"
+  },
+  "productionMutations": 0,
+  "productionMessages": 0,
+  "productionDeploymentByThisAgent": 0,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "processHygiene": 0
+}

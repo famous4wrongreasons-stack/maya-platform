@@ -1,0 +1,180 @@
+{
+  "package": "R01",
+  "blockers": [
+    "B38",
+    "B39",
+    "B54"
+  ],
+  "sourceInventory": "package5-exhaustive-public-index.json",
+  "overlayGenerator": "maya-saas-backend/deploy/platform/beget-edge/retire-legacy-client-create.cjs",
+  "overlays": [
+    {
+      "kind": "pwa",
+      "target": "salon/app/index.html",
+      "baselineSha256": "2c733573d727b33932107454fc2fd31782e9dddc794c69e5a475b1d67ffefe72",
+      "candidateSha256": "36f2001a38215c93210b7afc0e92198a2896c506b7a0a0f106dc30c6f9b6c697",
+      "retiredCreateCallSites": 2,
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__index.html.patch"
+    },
+    {
+      "kind": "pwa",
+      "target": "mayaos/app/index.html",
+      "baselineSha256": "0eb94816c1d62b30d279f16555c8d189e57bb988f273bff3cd734d74294f8772",
+      "candidateSha256": "0e1cd347f305f4fa49bce5fe22a824d57bf93641aa26a6a231ba07c54489e6a6",
+      "retiredCreateCallSites": 2,
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/mayaos__app__index.html.patch"
+    },
+    {
+      "kind": "pwa",
+      "target": "salon/app/index.codex-loyalty-20260721.html",
+      "baselineSha256": "f2a1ea506b8a3d14196bafd2d7d3b3b02ff55dc8e66167746ea97e569ebfdd6d",
+      "candidateSha256": "b96ffea40237f8d90113ffb21c571f3cccfce0be120c7404d043c5f17b053dc2",
+      "retiredCreateCallSites": 2,
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__index.codex-loyalty-20260721.html.patch"
+    },
+    {
+      "kind": "pwa",
+      "target": "salon/app/index.backup-20260731-anton-analytics.html",
+      "baselineSha256": "7f80e4355f26ac565ca0739a1e39dccd1c7ca5f679248ce5d8cc2df1e23f16c9",
+      "candidateSha256": "bd2fa2b6635b1a54cce331b6f5aad436cdb4fd3fadab6d2362c41bc1e6932ee2",
+      "retiredCreateCallSites": 2,
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__index.backup-20260731-anton-analytics.html.patch"
+    },
+    {
+      "kind": "pwa",
+      "target": "salon/app/tenant-test.html",
+      "baselineSha256": "878ad72f35c4b91d3e9bf2a7a1419969c559bee73b01e720cb1675980ee300c4",
+      "candidateSha256": "9c322c8d3ce0e13c3dfd43cd87d1e9a4fd344447947af26f182f5e8d4865c8dd",
+      "retiredCreateCallSites": 1,
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__tenant-test.html.patch"
+    },
+    {
+      "kind": "pwa",
+      "target": "vps/app.html",
+      "baselineSha256": "08177c652e7c8f0097981c5a8e8163c3f33b70d241e1f001c06931b640296bc3",
+      "candidateSha256": "284ea2217e702ea282b9d3e45d1ae80eacaa69839f043f16ecea2c6643ebc3d7",
+      "retiredCreateCallSites": 2,
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/vps__app.html.patch"
+    },
+    {
+      "kind": "php",
+      "target": "salon/app/api-proxy.php",
+      "baselineSha256": "03fb7ee34dbba151d10a968bcb4160c45b9a16635d42dd5b4adb98dccf9f060c",
+      "candidateSha256": "c292c64b094c40d18a713db7620baa54573f41e6842151f88b3038606ea42c5f",
+      "retiredProviderBranches": 2,
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__api-proxy.php.patch",
+      "baselineEvidence": "Exact live source captured by root; full source kept outside Git; supersedes redacted inventory proof copy"
+    },
+    {
+      "kind": "php",
+      "target": "salon/app/api-proxy.codex-loyalty-20260721.php",
+      "baselineSha256": "2860054722f74d34d93ffdf64a58398ecfa250f5bf29e906959851fd87abbbe0",
+      "candidateSha256": "9971e7da796c0bb10d54e1fc47d52c2583e3ce8ebb0e63600f94aadfe1d5738b",
+      "retiredProviderBranches": 2,
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__api-proxy.codex-loyalty-20260721.php.patch",
+      "baselineEvidence": "Exact live source captured by root; full source kept outside Git; supersedes redacted inventory proof copy"
+    },
+    {
+      "kind": "relay",
+      "target": "salon/app/maya-native-api.php",
+      "repositorySource": "сайт и приложение/maya-native-api.php",
+      "baselineSha256": "ae371c9bfd514f7e8f300f4c9d45fa657ddd4b5d1ba9eb92bf455d8e680b5952",
+      "candidateSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__maya-native-api.php.patch",
+      "baselineEvidence": "Exact live source captured by root; byte-equal to canonical HEAD relay"
+    },
+    {
+      "kind": "relay",
+      "target": "mayaos/maya-platform-api.php",
+      "repositorySource": "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+      "baselineSha256": "cc9c7ca4f3f95428b62877bf5799190277f4fa1f007cdbc0ae21086f1611476f",
+      "candidateSha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/mayaos__maya-platform-api.php.patch",
+      "baselineEvidence": "Exact live source captured by root; byte-equal to canonical HEAD relay"
+    }
+  ],
+  "coveredCallers": [
+    {
+      "file": "vps/app.html",
+      "line": 10935,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "vps/app.html",
+      "line": 12618,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "salon/app/index.codex-loyalty-20260721.html",
+      "line": 9688,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "salon/app/index.codex-loyalty-20260721.html",
+      "line": 11179,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "salon/app/tenant-test.html",
+      "line": 7362,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "salon/app/index.backup-20260731-anton-analytics.html",
+      "line": 9782,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "salon/app/index.backup-20260731-anton-analytics.html",
+      "line": 11273,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "salon/app/index.html",
+      "line": 11052,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "salon/app/index.html",
+      "line": 12741,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "mayaos/app/index.html",
+      "line": 13542,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "mayaos/app/index.html",
+      "line": 15284,
+      "disposition": "caller retired in exact PWA overlay; shared PHP route independently rejects before provider dispatch"
+    },
+    {
+      "file": "salon/_next/static/chunks/app/booking/page-7784f02883d82392.js",
+      "baselineSha256": "95382735651d41c80686b173bcc0f20c4f33787060e8d3f5cbe2e50d2541760d",
+      "disposition": "existing public booking bundle; shared PHP admission denial covers its legacy create route"
+    },
+    {
+      "file": "salon/_next/static/chunks/app/booking/page-d63a7dbe25f932e0.js",
+      "baselineSha256": "c692da9bdc9f9041032779640895de0b8bee8213a674fca66c439035a825b6c1",
+      "disposition": "existing public booking bundle; shared PHP admission denial covers its legacy create route"
+    },
+    {
+      "file": "salon/_next/static/chunks/app/booking/page-bd2b39436ee9bbcd.js",
+      "baselineSha256": "54cfcc92a7302745da0de1e8d20158776019816e98157ab041c6e98626297ffe",
+      "disposition": "existing public booking bundle; shared PHP admission denial covers its legacy create route"
+    }
+  ],
+  "sharedRouteProtection": {
+    "targets": [
+      "salon/app/api-proxy.php?action=create_record",
+      "salon/app/api-proxy.codex-loyalty-20260721.php?action=create_record"
+    ],
+    "knownAdditionalInitiators": [
+      "public Next booking bundles"
+    ],
+    "response": "410 verified_client_channel_required; accepted=false; retry_allowed=false; no data/success outcome",
+    "canonicalVerifiedIngress": "Existing authenticated POST /api/appointments and B32/B33 client-channel/chat ingress preserved"
+  },
+  "patchFormat": "Zero-context unified diff; apply with git apply --unidiff-zero. Candidate bytes unchanged."
+}

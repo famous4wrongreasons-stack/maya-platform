@@ -65,11 +65,9 @@ const ORIGIN_ACTIONS: Record<
     'cancel_appointment',
     'pay_visit',
   ]),
-  'telegram.bot': new Set([
-    'create_appointment',
-    'cancel_appointment',
-    'pay_visit',
-  ]),
+  // R01: raw native Telegram is not a verified Client principal. Payment
+  // retains its separately deferred contract and is rejected before execution.
+  'telegram.bot': new Set(['pay_visit']),
   claude_ai: new Set(['reschedule_appointment', 'cancel_appointment']),
 };
 

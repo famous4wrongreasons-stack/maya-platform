@@ -1,0 +1,34 @@
+--- a/salon/app/tenant-test.html
++++ b/salon/app/tenant-test.html
+@@ -7362,27 +7362,4 @@
+-    fetch(BF_PROXY + '?action=create_record', {
+-      method: 'POST',
+-      headers: {
+-        'Content-Type': 'application/json'
+-      },
+-      body: JSON.stringify({
+-        company_id: BF_COMPANY,
+-        staff_id: master.id,
+-        service_id: svcs.map(function (x) { return x.id; }).join(','),
+-        date: date,
+-        time: time,
+-        user_token: '',
+-        phone: ph,
+-        fullname: nm
+-      })
+-    }).then(r => r.json()).then(j => {
+-      submittingRef.current = false;
+-      setSubmitting(false);
+-      if (j && (j.success || j.data)) {
+-        setDone(true);
+-        saveMood(extractRecordId(j)); // привязать выбранную пилюлю к созданной записи
+-      } else setErr(j && (j.error || j.message) || 'Не удалось создать запись. Попробуйте другое время.');
+-    }).catch(() => {
+-      submittingRef.current = false;
+-      setSubmitting(false);
+-      setErr('Ошибка сети. Повторите.');
+-    });
++    // R01 canonical Client entry: retired raw provider create.
++    submittingRef.current = false;
++    setSubmitting(false);
++    setErr("Для записи откройте MAYA в приложении и подтвердите привязку клиента.");

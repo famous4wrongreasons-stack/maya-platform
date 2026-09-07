@@ -15,7 +15,7 @@ if (in_array($origin, $allowedOrigins, true)) {
     header('Vary: Origin');
 }
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS');
-header('Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, X-Session-Token, X-Telegram-InitData');
+header('Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, X-Session-Token, X-Telegram-InitData, Idempotency-Key');
 header('Access-Control-Expose-Headers: Content-Type, ETag, Last-Modified, Location, Retry-After');
 
 $method = strtoupper(isset($_SERVER['REQUEST_METHOD']) ? (string) $_SERVER['REQUEST_METHOD'] : 'GET');
@@ -67,12 +67,42 @@ if ($authorization === null && isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
     $authorization = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
 }
 
+// R01: transport preserves one opaque logical identity; it never normalizes or replaces it.
+function maya_forwarded_idempotency_key(array $headers, array $server): ?string {
+    $values = [];
+    foreach ($headers as $name => $value) {
+        if (strcasecmp((string)$name, 'Idempotency-Key') === 0) $values[] = $value;
+    }
+    if (count($values) > 1) throw new InvalidArgumentException('ambiguous_idempotency_key');
+    $value = $values[0] ?? ($server['HTTP_IDEMPOTENCY_KEY'] ?? null);
+    if ($value !== null && (!is_string($value) || $value === '' || strpbrk($value, "\r\n") !== false))
+        throw new InvalidArgumentException('invalid_idempotency_key');
+    if ($values && isset($server['HTTP_IDEMPOTENCY_KEY']) && $server['HTTP_IDEMPOTENCY_KEY'] !== $value)
+        throw new InvalidArgumentException('ambiguous_idempotency_key');
+    return $value;
+}
+try {
+    $idempotencyKey = maya_forwarded_idempotency_key($requestHeaders, $_SERVER);
+} catch (InvalidArgumentException $e) {
+    http_response_code(400);
+    header('Content-Type: application/json; charset=utf-8');
+    echo '{"error":{"code":"invalid_idempotency_key"}}';
+    exit;
+}
+if ($idempotencyKey !== null) {
+    foreach (array_keys($requestHeaders) as $name) {
+        if (strcasecmp((string)$name, 'Idempotency-Key') === 0) unset($requestHeaders[$name]);
+    }
+    $requestHeaders['Idempotency-Key'] = $idempotencyKey;
+}
+
 $forwardHeaders = ['Accept: application/json'];
 $forwardable = [
     'Content-Type',
     'If-None-Match',
     'X-Session-Token',
     'X-Telegram-InitData',
+    'Idempotency-Key',
 ];
 foreach ($forwardable as $name) {
     $value = $headerValue($requestHeaders, $name);

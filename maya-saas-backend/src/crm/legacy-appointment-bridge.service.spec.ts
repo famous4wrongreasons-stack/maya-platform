@@ -300,6 +300,32 @@ describe('LegacyAppointmentBridgeService', () => {
     expect(crmService.executePayVisitWithReceipt).not.toHaveBeenCalled();
   });
 
+  it.each(['create_appointment', 'cancel_appointment'] as const)(
+    'R01 rejects raw native Client %s before tenant resolution or any ActionExecution',
+    async (action) => {
+      const { bridgeSource, crmService, service } = unitHarness();
+      process.env.MAYA_LEGACY_APPOINTMENT_BRIDGE_EXECUTION_ENABLED = 'true';
+      const request = createDto({
+        origin: 'telegram.bot',
+        action_class: action,
+      });
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        await expect(service.execute(request)).rejects.toMatchObject({
+          response: {
+            error: { code: 'legacy_appointment_origin_action_forbidden' },
+          },
+        });
+      }
+      expect(bridgeSource.resolveTenantByIntegration).not.toHaveBeenCalled();
+      expect(
+        crmService.executeCreateAppointmentWithReceipt,
+      ).not.toHaveBeenCalled();
+      expect(
+        crmService.executeCancelAppointmentWithReceipt,
+      ).not.toHaveBeenCalled();
+    },
+  );
+
   it.each([
     {
       title: 'unsupported payment method',

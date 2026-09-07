@@ -1,0 +1,78 @@
+--- a/salon/app/api-proxy.codex-loyalty-20260721.php
++++ b/salon/app/api-proxy.codex-loyalty-20260721.php
+@@ -840,66 +840,9 @@
+-        $company_id = intval($input['company_id'] ?? COMPANY_ID);
+-        $staff_id   = intval($input['staff_id']   ?? 0);
+-        // service_id может прийти списком через запятую — несколько услуг за один визит
+-        $service_ids = array_values(array_filter(array_map('intval', explode(',', (string)($input['service_id'] ?? '0')))));
+-        $date       = $input['date']       ?? '';
+-        $time       = $input['time']       ?? '';
+-        $user_token = $input['user_token'] ?? '';
+-        $phone      = normalize_phone($input['phone'] ?? '');
+-        $fullname   = trim((string)($input['fullname'] ?? ''));
+-        $datetime   = $date . ' ' . $time . ':00';
+-
+-        if ($staff_id <= 0) {
+-            echo json_encode(['success' => false, 'error' => 'Выберите мастера.', 'message' => 'Выберите мастера.', 'code' => 'bad_staff']);
+-            break;
+-        }
+-        if (!$service_ids) {
+-            echo json_encode(['success' => false, 'error' => 'Выберите услугу.', 'message' => 'Выберите услугу.', 'code' => 'bad_service']);
+-            break;
+-        }
+-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$date) || !preg_match('/^\d{2}:\d{2}$/', (string)$time)) {
+-            echo json_encode(['success' => false, 'error' => 'Выберите дату и время заново.', 'message' => 'Выберите дату и время заново.', 'code' => 'bad_datetime']);
+-            break;
+-        }
+-        if (strlen($phone) !== 11 || $phone[0] !== '7') {
+-            echo json_encode(['success' => false, 'error' => 'Проверьте номер телефона и попробуйте ещё раз.', 'message' => 'Проверьте номер телефона и попробуйте ещё раз.', 'code' => 'bad_phone']);
+-            break;
+-        }
+-        if ($fullname === '') {
+-            echo json_encode(['success' => false, 'error' => 'Введите имя.', 'message' => 'Введите имя.', 'code' => 'bad_name']);
+-            break;
+-        }
+-
+-        $appointments = [[
+-            'id'       => 1,
+-            'services' => $service_ids,
+-            'staff_id' => $staff_id,
+-            'datetime' => $datetime,
+-        ]];
+-
+-        if ($user_token) {
+-            $result = yc_post(YC_API . "/records/{$company_id}", [
+-                'phone'        => $phone,
+-                'fullname'     => $fullname,
+-                'email'        => '',
+-                'appointments' => $appointments,
+-            ], $user_token);
+-        } else {
+-            $result = yc_post(YC_API . "/book_record/{$company_id}", [
+-                'phone'        => $phone,
+-                'fullname'     => $fullname,
+-                'email'        => '',
+-                'appointments' => $appointments,
+-            ]);
+-        }
+-
+-        if (empty($result['success'])) {
+-            $mapped = booking_error_response($result);
+-            @error_log('booking create_record failed code=' . $mapped['code'] .
+-                ' staff_id=' . $staff_id .
+-                ' services=' . implode(',', $service_ids) .
+-                ' date=' . $date . ' time=' . $time);
+-            echo json_encode($mapped);
+-            break;
+-        }
+-
+-        echo json_encode($result);
++        // R01: raw phone/guest/provider-token input is not canonical Client authority.
++        http_response_code(410);
++        echo json_encode([
++            'success' => false, 'accepted' => false, 'retry_allowed' => false,
++            'code' => 'verified_client_channel_required',
++            'error' => 'Для записи откройте MAYA в приложении и подтвердите привязку клиента.',
++            'message' => 'Для записи откройте MAYA в приложении и подтвердите привязку клиента.',
++            'canonical_url' => 'https://malesthetic.pro/app/',
++        ], JSON_UNESCAPED_UNICODE);
