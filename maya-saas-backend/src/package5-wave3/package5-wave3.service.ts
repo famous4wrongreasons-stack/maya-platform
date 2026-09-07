@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { attachExistingInvocationReceipt } from '../action-engine/action-invocation-receipt.context';
 
 import {
   BadRequestException,
@@ -1038,6 +1039,8 @@ export class Package5Wave3ExecutableService {
   private async executeExternal(
     prepared: Package5Wave3Prepared,
   ): Promise<Package5Wave3ExecutionValue> {
+    if (prepared.existingExecution)
+      await attachExistingInvocationReceipt(prepared.existingExecution);
     if (prepared.existingExecution?.state === ActionExecutionState.SUCCEEDED)
       return this.restore(prepared.existingExecution);
     if (prepared.command.operation !== 'update_staff_schedule_day')

@@ -18,6 +18,10 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
+import {
+  AiToolReceiptService,
+  type AiReceiptInvocation,
+} from './ai-tool-receipt.service';
 import type {
   AiToolDefinition,
   AiToolPrincipal,
@@ -77,6 +81,10 @@ export class AiToolRuntimeService {
     private readonly handler: AiToolHandlerService,
     private readonly encryption: EncryptionService,
     private readonly auditLog: AuditLogService,
+    private readonly receipts: AiToolReceiptService = new AiToolReceiptService(
+      prisma,
+      encryption,
+    ),
   ) {}
 
   async listTools(user: AuthenticatedUser, surface: AiToolSurface) {
@@ -137,7 +145,10 @@ export class AiToolRuntimeService {
       definition,
       args,
       inputHash,
-      idempotencyKey: dto.idempotencyKey ?? randomUUID(),
+      idempotencyKey:
+        definition.idempotency === 'required'
+          ? this.requireIdempotencyKey(dto.idempotencyKey)
+          : (dto.idempotencyKey ?? randomUUID()),
       approval: null,
     });
   }
@@ -200,6 +211,11 @@ export class AiToolRuntimeService {
     if (approval.status === APPROVAL_STATUS.COMPLETED) {
       return this.replayCompletedApproval(approval);
     }
+    if (
+      approval.status === APPROVAL_STATUS.APPROVED ||
+      approval.status === APPROVAL_STATUS.EXECUTING
+    )
+      return this.executeApproved(approval);
     this.assertPendingApproval(approval);
 
     const now = new Date();
@@ -223,6 +239,20 @@ export class AiToolRuntimeService {
       },
     });
     if (transitioned.count !== 1) {
+      const decided = await this.prisma.aiApprovalRequest.findUnique({
+        where: {
+          id_tenantId: { id: approval.id, tenantId: approval.tenantId },
+        },
+      });
+      if (decided && decided.payloadHash === approval.payloadHash) {
+        if (decided.status === APPROVAL_STATUS.COMPLETED)
+          return this.replayCompletedApproval(decided);
+        if (
+          decided.status === APPROVAL_STATUS.APPROVED ||
+          decided.status === APPROVAL_STATUS.EXECUTING
+        )
+          return this.executeApproved(decided);
+      }
       this.approvalConflict('ai_approval_already_decided');
     }
 
@@ -348,6 +378,11 @@ export class AiToolRuntimeService {
       if (existing.status === APPROVAL_STATUS.COMPLETED) {
         return this.replayCompletedApproval(existing);
       }
+      if (
+        existing.status === APPROVAL_STATUS.APPROVED ||
+        existing.status === APPROVAL_STATUS.EXECUTING
+      )
+        return this.executeApproved(existing);
       return {
         status: 'approval_required',
         approval: this.serializeApproval(existing),
@@ -446,7 +481,6 @@ export class AiToolRuntimeService {
       requester.user.status !== 'active' ||
       !this.isUserRole(requester.role)
     ) {
-      await this.failApproval(approval, 'ai_approval_requester_unavailable');
       this.approvalConflict('ai_approval_requester_unavailable');
     }
 
@@ -465,7 +499,6 @@ export class AiToolRuntimeService {
     await this.policy.assertCanExecute(principal, definition);
     const inputHash = this.inputHash(definition.name, args, principal);
     if (inputHash !== approval.payloadHash) {
-      await this.failApproval(approval, 'ai_approval_payload_mismatch');
       this.approvalConflict('ai_approval_payload_mismatch');
     }
 
@@ -487,6 +520,8 @@ export class AiToolRuntimeService {
     idempotencyKey: string;
     approval: ApprovalRecord | null;
   }) {
+    if (params.definition.riskTier !== 'read')
+      return this.executeCanonicalTool(params);
     const existing = await this.prisma.aiToolExecution.findUnique({
       where: {
         tenantId_idempotencyKey: {
@@ -706,6 +741,168 @@ export class AiToolRuntimeService {
     }
   }
 
+  /** Mutation handlers are initiators. Their compatibility receipt is attached
+   * by canonical admission before any effect; only ActionExecution owns state. */
+  private async executeCanonicalTool(params: {
+    principal: AiToolPrincipal;
+    definition: AiToolDefinition;
+    args: ValidatedAiToolArguments;
+    inputHash: string;
+    idempotencyKey: string;
+    approval: ApprovalRecord | null;
+  }) {
+    const key = {
+      tenantId: params.principal.tenantId,
+      idempotencyKey: params.idempotencyKey,
+    };
+    let execution = await this.prisma.aiToolExecution.findUnique({
+      where: { tenantId_idempotencyKey: key },
+    });
+    const replayed = Boolean(execution);
+    if (!execution) {
+      try {
+        execution = await this.prisma.aiToolExecution.create({
+          data: {
+            tenantId: params.principal.tenantId,
+            actorUserId: params.principal.userId,
+            actorTenantId: params.principal.tenantId,
+            approvalRequestId: params.approval?.id ?? null,
+            approvalTenantId: params.approval?.tenantId ?? null,
+            toolName: params.definition.name,
+            surface: params.principal.surface,
+            riskTier: params.definition.riskTier,
+            status: EXECUTION_STATUS.EXECUTING,
+            inputHash: params.inputHash,
+            idempotencyKey: params.idempotencyKey,
+            encryptedResult: this.receipts.initial(
+              params.inputHash,
+              params.args,
+            ),
+          },
+        });
+      } catch (error) {
+        if (!this.isUniqueConstraintError(error)) throw error;
+        execution = await this.prisma.aiToolExecution.findUnique({
+          where: { tenantId_idempotencyKey: key },
+        });
+        if (!execution) throw error;
+      }
+    }
+    this.assertSameExecution(execution, params);
+    if (!this.receipts.read(execution.encryptedResult)) {
+      // Historical completed output remains readable. An unresolved historic
+      // invocation has no proven receipt and cannot authorize redispatch.
+      if (
+        execution.status === EXECUTION_STATUS.COMPLETED &&
+        execution.encryptedResult
+      )
+        return {
+          status: 'completed',
+          execution_id: execution.id,
+          tool_name: execution.toolName,
+          result: this.parseJson(
+            this.encryption.decrypt(execution.encryptedResult),
+          ),
+          replayed: true,
+        };
+      this.executionConflict('ai_tool_historical_receipt_unavailable');
+    }
+    const invocation: AiReceiptInvocation = {
+      id: execution.id,
+      principal: params.principal,
+      toolName: params.definition.name,
+      inputHash: params.inputHash,
+      idempotencyKey: params.idempotencyKey,
+    };
+    const existing = await this.receipts.inspect(invocation);
+    if (
+      execution.status === EXECUTION_STATUS.FAILED &&
+      existing.executions.length === 0
+    )
+      return {
+        ...(await this.receipts.project(invocation, {
+          handlerSettled: true,
+          errorCode: execution.errorCode ?? undefined,
+        })),
+        replayed: true,
+      };
+    if (
+      existing.executions.length > 0 &&
+      existing.executions.every((item) =>
+        ['SUCCEEDED', 'FAILED', 'NOT_EXECUTED'].includes(item.state),
+      )
+    )
+      return { ...(await this.receipts.project(invocation)), replayed: true };
+    if (params.approval) {
+      const transitioned = await this.prisma.aiApprovalRequest.updateMany({
+        where: {
+          id: params.approval.id,
+          tenantId: params.approval.tenantId,
+          status: { in: [APPROVAL_STATUS.APPROVED, APPROVAL_STATUS.EXECUTING] },
+        },
+        data: { status: APPROVAL_STATUS.EXECUTING },
+      });
+      if (transitioned.count !== 1)
+        this.approvalConflict('ai_approval_transition_conflict');
+    }
+    const operation = this.receipts
+      .run(invocation, (args) =>
+        this.handler.execute(
+          params.definition.name,
+          params.principal,
+          args,
+          params.idempotencyKey,
+        ),
+      )
+      .then(
+        (result) =>
+          this.receipts.project(invocation, {
+            result,
+            hasResult: true,
+            handlerSettled: true,
+          }),
+        (error: unknown) =>
+          this.receipts.project(invocation, {
+            errorCode: this.errorCode(error),
+            handlerSettled: true,
+          }),
+      );
+    let result;
+    try {
+      // A timeout is a transport observation. The non-cancelled operation keeps
+      // projecting its late canonical outcome, and cannot bury its receipt key.
+      result = await this.withTimeout(operation, params.definition.timeoutMs);
+    } catch (error) {
+      try {
+        result = await this.receipts.project(invocation, {
+          errorCode: this.errorCode(error),
+        });
+      } catch {
+        return {
+          status: 'unknown',
+          execution_id: execution.id,
+          tool_name: params.definition.name,
+          error: { code: 'ai_tool_canonical_receipt_temporarily_unavailable' },
+          replayed,
+        };
+      }
+    }
+    await this.auditLog
+      .log({
+        tenantId: params.principal.tenantId,
+        userId: params.principal.userId,
+        action: `ai.tool_execution_${result.status}`,
+        entityType: 'ai_tool_execution',
+        entityId: execution.id,
+        metadata: {
+          tool_name: params.definition.name,
+          surface: params.principal.surface,
+        },
+      })
+      .catch(() => undefined);
+    return { ...result, replayed };
+  }
+
   private async lastVerifiedSnapshot(
     params: {
       principal: AiToolPrincipal;
@@ -779,6 +976,25 @@ export class AiToolRuntimeService {
     });
     if (!execution?.encryptedResult) {
       this.executionConflict('ai_tool_result_unavailable');
+    }
+    if (this.receipts.read(execution.encryptedResult)) {
+      if (!execution.actorUserId)
+        this.executionConflict('ai_tool_receipt_actor_unavailable');
+      return {
+        ...(await this.receipts.project({
+          id: execution.id,
+          principal: {
+            tenantId: execution.tenantId,
+            userId: execution.actorUserId,
+            role: UserRole.CUSTOMER,
+            surface: this.assertSurface(execution.surface),
+          },
+          toolName: execution.toolName,
+          inputHash: execution.inputHash,
+          idempotencyKey: execution.idempotencyKey,
+        })),
+        replayed: true,
+      };
     }
     return {
       status: EXECUTION_STATUS.COMPLETED,
@@ -870,22 +1086,6 @@ export class AiToolRuntimeService {
         status: APPROVAL_STATUS.EXPIRED,
         errorCode: 'ai_approval_expired',
       },
-    });
-  }
-
-  private async failApproval(
-    approval: ApprovalRecord,
-    errorCode: string,
-  ): Promise<void> {
-    await this.prisma.aiApprovalRequest.updateMany({
-      where: {
-        id: approval.id,
-        tenantId: approval.tenantId,
-        status: {
-          in: [APPROVAL_STATUS.APPROVED, APPROVAL_STATUS.EXECUTING],
-        },
-      },
-      data: { status: APPROVAL_STATUS.FAILED, errorCode },
     });
   }
 

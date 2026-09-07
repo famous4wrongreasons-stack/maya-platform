@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { attachExistingInvocationReceipt } from '../action-engine/action-invocation-receipt.context';
 
 import {
   BadRequestException,
@@ -889,6 +890,7 @@ export class Package5Wave1ExecutableService {
     const execution = await this.prisma.actionExecution.findUniqueOrThrow({
       where: { id_tenantId: { id: executionId, tenantId } },
     });
+    await attachExistingInvocationReceipt(execution);
     const registration = PACKAGE5_WAVE1_REGISTRATIONS.find(
       (candidate) => candidate.executableCapability === execution.capability,
     );

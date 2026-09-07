@@ -1,3 +1,4 @@
+import { canonicalReceiptFixture } from '../../test/fixtures/ai-tool-receipt.fixture';
 /**
  * ПРИЁМКА ЖИВЫМИ ВОПРОСАМИ ВЛАДЕЛЬЦА.
  *
@@ -691,6 +692,7 @@ function createHarness(
     handler,
     encryption,
     auditLog,
+    canonicalReceiptFixture(prisma, encryption),
   );
 
   const decide = jest.fn<

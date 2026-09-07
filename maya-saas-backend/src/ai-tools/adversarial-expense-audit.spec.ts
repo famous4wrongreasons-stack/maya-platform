@@ -1,3 +1,4 @@
+import { canonicalReceiptFixture } from '../../test/fixtures/ai-tool-receipt.fixture';
 /**
  * СОСТЯЗАТЕЛЬНЫЙ ПРОГОН: запись расхода из чата.
  *
@@ -9,6 +10,7 @@ import { CustomersService } from '../customers/customers.service';
 import { StaffService } from '../staff/staff.service';
 import { BusinessStateService } from '../business-state/business-state.service';
 import { ForbiddenException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
@@ -180,7 +182,11 @@ describe('РАСХОД ИЗ ЧАТА — состязательный прого
         h.approve(p),
       ]);
       expect(h.store.expenses).toHaveLength(1);
-      expect(results.filter((r) => r.status === 'fulfilled').length).toBe(1);
+      expect(results.map((result) => result.status)).toEqual([
+        'fulfilled',
+        'fulfilled',
+        'fulfilled',
+      ]);
     });
 
     it('🔴 ПОВТОР ЗАПРОСА: то же намерение новым ключом → ДВА расхода', async () => {
@@ -230,7 +236,7 @@ describe('РАСХОД ИЗ ЧАТА — состязательный прого
       const h = createHarness();
       h.failAuditAction('expense.created.canonical');
       const p = await prepare(h, { category: 'rent', amount_rubles: 60_000 });
-      await expect(h.approve(p)).rejects.toBeDefined();
+      await expect(h.approve(p)).resolves.toMatchObject({ status: 'failed' });
 
       // Канонический локальный owner не оставляет value fact без его audit.
       expect(h.store.expenses).toHaveLength(0);
@@ -253,7 +259,7 @@ describe('РАСХОД ИЗ ЧАТА — состязательный прого
       expect(h.store.expenses).toHaveLength(1);
     });
 
-    it('🔴 ТАЙМАУТ рантайма: вставка доезжает, человеку сказано «не вышло»', async () => {
+    it('R10: timeout preserves the receipt and late expense completion can replay', async () => {
       jest.useFakeTimers();
       try {
         const h = createHarness();
@@ -261,20 +267,17 @@ describe('РАСХОД ИЗ ЧАТА — состязательный прого
         h.delayExpenseInsert(12_000);
         const p = await prepare(h, { category: 'rent', amount_rubles: 60_000 });
         const decision = h.approve(p);
-        const settled = decision.then(
-          () => 'ok',
-          (error: unknown) => error,
-        );
+        const settled = decision;
         await jest.advanceTimersByTimeAsync(12_500);
         const outcome = await settled;
 
-        // Инструмент отчитался таймаутом...
-        expect(outcome).toMatchObject({
-          response: { error: { code: 'ai_tool_timeout_unknown' } },
+        expect(outcome).toMatchObject({ status: 'executing' });
+        expect(h.store.executions[0].status).toBe('completed');
+        expect(h.store.approvals[0].status).toBe('completed');
+        await expect(h.approve(p)).resolves.toMatchObject({
+          status: 'completed',
+          replayed: true,
         });
-        expect(h.store.executions[0].status).toBe('failed');
-        expect(h.store.approvals[0].status).toBe('failed');
-        // ...а расход в БД лежит.
         expect(h.store.expenses).toHaveLength(1);
         expect(h.store.expenses[0].amountKopecks).toBe(6_000_000);
       } finally {
@@ -440,10 +443,9 @@ describe('РАСХОД ИЗ ЧАТА — состязательный прого
       expect(h.store.expenses).toHaveLength(0);
       // Ни failed, ни expired: статус «одобрено», и он больше не изменится.
       expect(h.store.approvals[0].status).toBe('approved');
-      // Повторная попытка уже не 403, а «уже обработано» — карточка мертва,
-      // но в списке ожидающих остаётся (listApprovals берёт и approved).
+      // R10 repeats current authorization instead of manufacturing a decision.
       await expect(h.approve(p)).rejects.toMatchObject({
-        response: { error: { code: 'ai_approval_already_decided' } },
+        response: { error: { code: 'ai_tool_forbidden' } },
       });
       expect(h.store.approvals[0].status).toBe('approved');
       expect(h.store.expenses).toHaveLength(0);
@@ -734,10 +736,12 @@ interface ExpenseRow {
   updatedAt: Date;
 }
 
-class FakeUniqueError extends Error {
-  readonly code = 'P2002';
+class FakeUniqueError extends Prisma.PrismaClientKnownRequestError {
   constructor() {
-    super('Unique constraint failed');
+    super('Unique constraint failed', {
+      code: 'P2002',
+      clientVersion: 'fixture',
+    });
   }
 }
 
@@ -1179,6 +1183,7 @@ function createHarness() {
     handler,
     encryption,
     auditLog,
+    canonicalReceiptFixture(prisma, encryption),
   );
 
   const run = <T>(operation: () => Promise<T>) =>

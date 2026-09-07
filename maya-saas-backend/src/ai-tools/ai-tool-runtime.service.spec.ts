@@ -1,3 +1,4 @@
+import { canonicalReceiptFixture } from '../../test/fixtures/ai-tool-receipt.fixture';
 import { ConflictException, ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -421,6 +422,7 @@ function createHarness() {
       handler,
       encryption,
       auditLog,
+      canonicalReceiptFixture(prisma, encryption),
     ),
     tenantContext,
     approvalFindUnique,

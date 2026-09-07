@@ -1,3 +1,4 @@
+import { canonicalReceiptFixture } from '../../test/fixtures/ai-tool-receipt.fixture';
 import { CustomersService } from '../customers/customers.service';
 import { StaffService } from '../staff/staff.service';
 import { BusinessStateService } from '../business-state/business-state.service';
@@ -572,6 +573,7 @@ function createHarness() {
     handler,
     encryption,
     auditLog,
+    canonicalReceiptFixture(prisma, encryption),
   );
 
   return {

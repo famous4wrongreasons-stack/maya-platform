@@ -14,6 +14,7 @@ import type {
 } from './action-engine.contract';
 import { ActionContractError } from './action-engine.errors';
 import { ActionEngineKernel } from './action-engine.kernel';
+import { admitWithInvocationReceipt } from './action-invocation-receipt.context';
 import {
   ACTION_POLICY_RESOLUTION_REQUEST_CONTRACT,
   CanonicalActionPolicyResolver,
@@ -119,10 +120,16 @@ export class CanonicalActionIngressService {
     request: TrustedActionExecutionRequestV1,
     transaction?: Prisma.TransactionClient,
   ): Promise<ActionExecution> {
-    const prepared = await this.prepare(request);
-    return this.kernel.createCanonicalExecution(
+    return admitWithInvocationReceipt(
       request,
-      prepared.policy,
+      async (admittedRequest, tx) => {
+        const prepared = await this.prepare(admittedRequest);
+        return this.kernel.createCanonicalExecution(
+          admittedRequest,
+          prepared.policy,
+          tx,
+        );
+      },
       transaction,
     );
   }
