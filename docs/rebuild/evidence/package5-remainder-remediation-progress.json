@@ -1,7 +1,7 @@
 {
   "inventorySource": "docs/rebuild/evidence/package5-remainder-inventory-final.json",
   "inventorySha256": "f0d29c9f60c4699c1458b383b86decf0fb26aef5ee56e89a2d9a89b6b62df425",
-  "wave": "R-A",
+  "wave": "R-B",
   "state": "PRODUCTION VERIFIED",
   "packages": [
     {
@@ -34,7 +34,7 @@
       "dependencies": [
         "R02"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "REMEDIATED"
     },
     {
       "id": "R04",
@@ -45,7 +45,7 @@
       "dependencies": [
         "R02"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "REMEDIATED"
     },
     {
       "id": "R05",
@@ -87,14 +87,14 @@
       "dependencies": [
         "R02"
       ],
-      "status": "NOT REMEDIATED"
+      "status": "REMEDIATED"
     },
     {
       "id": "R08",
       "blockers": [
         "B47"
       ],
-      "owner": "Native feedback/request owner — exact mapping pending",
+      "owner": "Native feedback/request owner \u2014 exact mapping pending",
       "dependencies": [
         "R01",
         "R02",
@@ -107,7 +107,7 @@
       "blockers": [
         "B52"
       ],
-      "owner": "Anonymous community source facts and canonical moderation owner — mapping pending",
+      "owner": "Anonymous community source facts and canonical moderation owner \u2014 mapping pending",
       "dependencies": [
         "R02",
         "B52 owner/schema decision"
@@ -166,7 +166,7 @@
       "blockers": [
         "B55"
       ],
-      "owner": "Cash declaration/reconciliation owner — mapping pending",
+      "owner": "Cash declaration/reconciliation owner \u2014 mapping pending",
       "dependencies": [
         "R02",
         "B55 owner/schema decision"
@@ -177,21 +177,29 @@
   "package5Complete": false,
   "chapter6Complete": false,
   "finalGateRun": false,
-  "productionRelease": "/opt/maya-saas/releases/20260907-p5-ra-d8049d47",
-  "completedPackageCount": 3,
+  "productionRelease": "/opt/maya-saas/releases/20260907-p5-rb-cb4fb27c",
+  "completedPackageCount": 6,
   "totalPackageCount": 14,
-  "remediatedBlockerCount": 6,
+  "remediatedBlockerCount": 10,
   "totalBlockerCount": 24,
-  "remainingBlockerCount": 18,
+  "remainingBlockerCount": 14,
   "nextEligiblePackages": [
-    "R03",
-    "R04",
-    "R07"
+    "R05",
+    "R06",
+    "R08",
+    "R09",
+    "R11",
+    "R12",
+    "R13",
+    "R14"
   ],
-  "progressEvidence": "package5-wave-ra-production-proof.json",
+  "progressEvidence": "package5-wave-rb-production-proof.json",
   "remediatedPackages": [
     "R01",
     "R02",
+    "R03",
+    "R04",
+    "R07",
     "R10"
   ],
   "remediatedBlockers": [
@@ -199,8 +207,12 @@
     "B39",
     "B40",
     "B41",
+    "B42",
+    "B46",
     "B50",
-    "B54"
+    "B54",
+    "B56",
+    "B57"
   ],
   "blockers": [
     {
@@ -215,7 +227,7 @@
           "idempotency key",
           "concurrent write conflict"
         ],
-        "approvedOrder": "INBOX → TELEGRAM → APNS",
+        "approvedOrder": "INBOX \u2192 TELEGRAM \u2192 APNS",
         "newDecisionRequired": false
       }
     },
@@ -258,7 +270,7 @@
       "id": "B42",
       "family": "A23 + A29/A31 read boundaries",
       "package": "R04",
-      "status": "NOT REMEDIATED",
+      "status": "REMEDIATED",
       "historicalPreservedStatus": null
     },
     {
@@ -286,7 +298,7 @@
       "id": "B46",
       "family": "A14/A18",
       "package": "R07",
-      "status": "NOT REMEDIATED",
+      "status": "REMEDIATED",
       "historicalPreservedStatus": null
     },
     {
@@ -356,14 +368,14 @@
       "id": "B56",
       "family": "A15",
       "package": "R03",
-      "status": "NOT REMEDIATED",
+      "status": "REMEDIATED",
       "historicalPreservedStatus": null
     },
     {
       "id": "B57",
       "family": "A14 / P4-05 projection",
       "package": "R07",
-      "status": "NOT REMEDIATED",
+      "status": "REMEDIATED",
       "historicalPreservedStatus": null
     },
     {
@@ -388,5 +400,40 @@
       "IDEMPOTENCY KEY",
       "CONCURRENT WRITE CONFLICT"
     ]
-  }
+  },
+  "remainingPackageCount": 8,
+  "waveHistory": [
+    {
+      "wave": "R-A",
+      "packages": [
+        "R01",
+        "R02",
+        "R10"
+      ],
+      "blockers": [
+        "B38",
+        "B39",
+        "B40",
+        "B41",
+        "B50",
+        "B54"
+      ],
+      "evidence": "package5-wave-ra-production-proof.json"
+    },
+    {
+      "wave": "R-B",
+      "packages": [
+        "R03",
+        "R04",
+        "R07"
+      ],
+      "blockers": [
+        "B42",
+        "B46",
+        "B56",
+        "B57"
+      ],
+      "evidence": "package5-wave-rb-production-proof.json"
+    }
+  ]
 }

@@ -1,5 +1,7 @@
 # Wave R-B — R07 / B46 + B57 local completion
 
+Historical package-local stage. The coordinated wave subsequently reached [production PASS](../CYCLE-06-PACKAGE-5-WAVE-R-B-IMPLEMENTATION-PRODUCTION-REPORT.md); the stage-specific pending statements below are retained as historical evidence.
+
 Authorized baseline: `cb4fb27c48ca036bdb77b1f9ee480edcb43fdad6`. Scope and owner remain exactly the accepted [R07 assessment](package5-remainder-e2-r07-assessment.md) and master inventory. This is package-local acceptance; coordinated wave verification/cutover remains separate.
 
 ```text

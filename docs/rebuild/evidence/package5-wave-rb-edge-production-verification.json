@@ -1,0 +1,11 @@
+{
+  "wave": "R-B",
+  "kind": "edge",
+  "phase": "verify",
+  "status": "PASS",
+  "filesChecked": 5,
+  "filesPublished": 0,
+  "guards": 0,
+  "productionProofMessages": 0,
+  "productionProofBusinessMutations": 0
+}

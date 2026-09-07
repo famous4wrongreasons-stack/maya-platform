@@ -1,5 +1,7 @@
 # Wave R-B — R04 / B42 local acceptance
 
+Historical package-local stage. The coordinated wave subsequently reached [production PASS](../CYCLE-06-PACKAGE-5-WAVE-R-B-IMPLEMENTATION-PRODUCTION-REPORT.md); the stage-specific pending statements below are retained as historical evidence.
+
 R04 local implementation and package proof: **PASS**. Production status: **coordinated wave pending**. Scope is exactly B42 from the closed master inventory; R02 current-principal dependency is production PASS. No inventory expansion or new business/schema decision.
 
 | Contract | Result |

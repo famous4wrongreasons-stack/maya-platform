@@ -1,0 +1,11 @@
+{
+  "wave": "R-B",
+  "kind": "python",
+  "phase": "verify",
+  "status": "PASS",
+  "filesChecked": 17,
+  "filesPublished": 0,
+  "guards": 7,
+  "productionProofMessages": 0,
+  "productionProofBusinessMutations": 0
+}

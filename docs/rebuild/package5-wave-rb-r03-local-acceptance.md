@@ -1,5 +1,7 @@
 # Wave R-B — R03 / B56 local acceptance
 
+Historical package-local stage. The coordinated wave subsequently reached [production PASS](CYCLE-06-PACKAGE-5-WAVE-R-B-IMPLEMENTATION-PRODUCTION-REPORT.md); the stage-specific pending statements below are retained as historical evidence.
+
 `R03 LOCAL ACCEPTANCE: PASS`
 
 Exact scope: **B56**, existing A15 StaffSchedule owner, from the approved E2 assessment at `cb4fb27c`. R02 remains the canonical account authority dependency. No new business decision, model, field, action class, migration or backfill is introduced.
