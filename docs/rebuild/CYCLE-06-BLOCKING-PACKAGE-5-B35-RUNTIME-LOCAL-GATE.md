@@ -120,6 +120,20 @@ corrected. None is waived or treated as PASS. The final source must pass the ful
 mandatory gate before publication. PHP is validated with installed PHP 8.4; the
 host's unrelated default PHP 5.6 CLI is not the published runtime verification.
 
+## Cutover guard portability follow-up
+
+The backend release `20260907-p5-b35-c8c7a8eb` passed the documented deploy
+including all 382 suites / 3130 tests. Before replacing any Python file, the
+candidate guard rejected its five pins because Python 3.14 and production
+Python 3.10 serialize an AST differently. No Python/PWA file was replaced on
+that failed attempt. The guard now pins the exact stripped source segment
+located by the AST, rather than interpreter-specific `ast.dump` output.
+All five candidate boundaries match on both interpreters; restoring a direct
+sender still fails. This changes no business runtime, schema or approved scope.
+The full local gate was repeated: targeted 12/101, architecture 83/469,
+lint, both typechecks, build, schema checks and mandatory 382/3130 PASS.
+[Portable guard proof](evidence/package5-b35-portable-guard-proof.json).
+
 ## Authorized cutover and next gate
 
 After local PASS: commit/push, then the existing `deploy/vps/deploy.sh` process

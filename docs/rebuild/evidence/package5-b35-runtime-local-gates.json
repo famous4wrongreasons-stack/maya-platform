@@ -4,37 +4,37 @@
     {
       "name": "targeted",
       "exitCode": 0,
-      "seconds": 1.16
+      "seconds": 1.25
     },
     {
       "name": "architecture",
       "exitCode": 0,
-      "seconds": 235.35
+      "seconds": 248.7
     },
     {
       "name": "lint",
       "exitCode": 0,
-      "seconds": 29.17
+      "seconds": 29.46
     },
     {
       "name": "typecheck",
       "exitCode": 0,
-      "seconds": 4.76
+      "seconds": 4.93
     },
     {
       "name": "typecheck-scripts",
       "exitCode": 0,
-      "seconds": 10.57
+      "seconds": 10.85
     },
     {
       "name": "build",
       "exitCode": 0,
-      "seconds": 13.96
+      "seconds": 14.15
     },
     {
       "name": "schema-validate",
       "exitCode": 0,
-      "seconds": 0.46
+      "seconds": 0.45
     },
     {
       "name": "schema-status",
@@ -49,7 +49,7 @@
     {
       "name": "mandatory",
       "exitCode": 0,
-      "seconds": 262.15
+      "seconds": 267.8
     }
   ],
   "status": "PASS"

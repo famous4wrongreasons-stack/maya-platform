@@ -3,12 +3,13 @@ import ast
 import hashlib
 from pathlib import Path
 
+# Source segments are pinned rather than Python-version-specific ast.dump output.
 BOUNDARIES = {
-    ('webhook_server.py', 'internal_package2_telegram_handler'): '5da8d4b28b9cadca235709cbe77475cd3d759b4adc871d03770ed1cecb97b47a',
-    ('webhook_server.py', 'broadcast_send_to_base'): '08a70428b0506a3c174a7fc0a3fb722c38a2945a0002fafe35345490ece3c305',
-    ('webhook_server.py', 'panel_broadcast_handler'): 'b00f7c3e06bd5147ee1a58a8dae96db24973cc851a337fe597bfded6caa48ce0',
-    ('bot.py', '_broadcast_execute'): '50008bb3ab224cd01fbec45ba416df3f3363d55d28cc4798f27ed175a13dc0b5',
-    ('legacy_marketing_bulk_bridge.py', 'command'): 'a2a33cadb993bded24574b5868a4a0ffd9b768d4d60cd26c05ebec8b5f0d039c',
+    ('webhook_server.py', 'internal_package2_telegram_handler'): '0f984342ad4b2c1ba3b42164cae500b5780db9b6a1cf77600d9a292b63dd3b82',
+    ('webhook_server.py', 'broadcast_send_to_base'): '69aaecb322ccf1ca02fdade03bcd333731ee12947689acba81dacaaaa77ab823',
+    ('webhook_server.py', 'panel_broadcast_handler'): '4ee8b8e1dde2aaa7173bf97b335361f30fe48d5dc228217b9217711bc7baa8ab',
+    ('bot.py', '_broadcast_execute'): '9373a78273e8be10ac33c76c13097f8c6127b006266d6e1b675131d6af9f4f83',
+    ('legacy_marketing_bulk_bridge.py', 'command'): '009e26e2f4ca210cd2674606fd5cb7155a7f030c0b895afe41a24fc73d6a910b',
 }
 
 
@@ -17,12 +18,13 @@ def scan_bulk_sources(root, overrides=None):
     findings = []
     for (filename, name), expected in BOUNDARIES.items():
         try:
-            tree = ast.parse(overrides[filename] if filename in overrides else (root / filename).read_text())
+            source = overrides[filename] if filename in overrides else (root / filename).read_text()
+            tree = ast.parse(source)
         except (OSError, SyntaxError):
             findings.append(f'{filename}: canonical bulk boundary unavailable')
             continue
         functions = [n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name]
-        if len(functions) != 1 or hashlib.sha256(ast.dump(functions[0], include_attributes=False).encode()).hexdigest() != expected:
+        if len(functions) != 1 or hashlib.sha256(ast.get_source_segment(source, functions[0]).strip().encode()).hexdigest() != expected:
             findings.append(f'{filename}:{name}: reviewed bulk initiator/retirement contract changed')
     source = overrides.get('webhook_server.py')
     if source is None:
