@@ -282,7 +282,7 @@ describe('R01 permanent Client initiator boundary', () => {
     'сайт и приложение/maya-native-api.php',
     'maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php',
   ])(
-    'requires unchanged single-key forwarding and browser CORS in %s',
+    'requires PHP 5.6-compatible single-key forwarding and browser CORS in %s',
     (file) => {
       const text = source(file);
       expect(text.match(/Access-Control-Allow-Headers:[^\n]+/)?.[0]).toContain(
@@ -305,6 +305,10 @@ describe('R01 permanent Client initiator boundary', () => {
       );
       expect(helper).toContain('count($values) > 1');
       expect(helper).toContain('return $value;');
+      expect(helper).not.toMatch(
+        /function\s+maya_forwarded_idempotency_key\([^\n]+\)\s*:\s*\?string/,
+      );
+      expect(helper).not.toContain('??');
       expect(helper).not.toMatch(/trim\(|hash\(|random|uniqid|strtolower\(/);
       expect(
         text.indexOf('maya_forwarded_idempotency_key($requestHeaders'),
