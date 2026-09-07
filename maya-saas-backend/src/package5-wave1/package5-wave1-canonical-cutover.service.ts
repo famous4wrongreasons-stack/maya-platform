@@ -395,6 +395,7 @@ export class Package5Wave1CanonicalCutoverService {
       };
     }
     if (operation === 'appointment_notifications') {
+      const config = this.record(input.configJson);
       return {
         enabled: config.enabled === true,
         leadTimesMinutes: this.numberArray(config.lead_times_minutes),

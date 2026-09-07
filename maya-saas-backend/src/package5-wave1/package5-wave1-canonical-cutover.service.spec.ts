@@ -15,6 +15,8 @@ describe('Package5Wave1CanonicalCutoverService', () => {
     existing?: { id: string; actorUserId: string } | null;
     normalized?: Record<string, unknown>;
   }) {
+    const readAppointmentNotificationSetting = jest.fn();
+    const buildAppointmentNotifications = jest.fn();
     const prisma = {
       actionExecution: {
         findFirst: jest.fn().mockResolvedValue(input?.existing ?? null),
@@ -28,7 +30,9 @@ describe('Package5Wave1CanonicalCutoverService', () => {
           updatedAt: new Date('2026-09-03T12:00:00.000Z'),
         }),
       },
-      appointmentNotificationSetting: { findUnique: jest.fn() },
+      appointmentNotificationSetting: {
+        findUnique: readAppointmentNotificationSetting,
+      },
       inboxItem: { findFirst: jest.fn() },
       membership: { findMany: jest.fn() },
     } as unknown as PrismaService;
@@ -43,7 +47,7 @@ describe('Package5Wave1CanonicalCutoverService', () => {
     const planner = {
       buildAssistant,
       buildFinance: jest.fn(),
-      buildAppointmentNotifications: jest.fn(),
+      buildAppointmentNotifications,
       buildTaskCreate: jest.fn().mockResolvedValue({ capability: 'task' }),
       buildTaskComplete: jest.fn(),
       buildAdministratorContact: jest.fn(),
@@ -84,6 +88,8 @@ describe('Package5Wave1CanonicalCutoverService', () => {
       execute,
       resume,
       publishForTenant,
+      readAppointmentNotificationSetting,
+      buildAppointmentNotifications,
     };
   }
 
@@ -144,6 +150,48 @@ describe('Package5Wave1CanonicalCutoverService', () => {
         'request-a',
       ),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('resumes exact appointment notification settings and rejects changed intent before another outcome', async () => {
+    const context = setup({
+      existing: { id: 'execution-notifications', actorUserId: 'user-a' },
+      normalized: {
+        configJson: {
+          schema_version: 1,
+          enabled: true,
+          lead_times_minutes: [1440, 120],
+        },
+      },
+    });
+    await context.service.updateAppointmentNotifications(
+      'tenant-a',
+      'user-a',
+      { enabled: true, leadTimesMinutes: [120, 1440, 120] },
+      'notifications-intent',
+    );
+    expect(context.resume).toHaveBeenCalledWith(
+      'tenant-a',
+      'execution-notifications',
+    );
+    expect(context.execute).not.toHaveBeenCalled();
+    expect(context.buildAppointmentNotifications).not.toHaveBeenCalled();
+
+    for (const command of [
+      { enabled: false, leadTimesMinutes: [1440, 120] },
+      { enabled: true, leadTimesMinutes: [1440] },
+    ]) {
+      await expect(
+        context.service.updateAppointmentNotifications(
+          'tenant-a',
+          'user-a',
+          command,
+          'notifications-intent',
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+    }
+    expect(context.resume).toHaveBeenCalledTimes(1);
+    expect(context.execute).not.toHaveBeenCalled();
+    expect(context.readAppointmentNotificationSetting).toHaveBeenCalledTimes(1);
   });
 
   it('projects a task only after the canonical work item succeeds', async () => {
