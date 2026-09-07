@@ -19,6 +19,10 @@ assert len(items) == 13 and {i['file'] for i in items} == {
     'memory.py', 'web_auth.py', 'legacy_appointment_bridge.py',
     'package5_control_plane_runtime_guard.py', 'canonical_staff_access.py',
     'package5_staff_authority_guard.py', 'legacy_client_entry.py', 'pwa_api.py'}
+destinations = {item['file']: root / item['file'] for item in items}
+destinations['app.html'] = Path('/var/www/maya-platform/app.html')
+for item in items:
+    assert Path(item['destination']) == destinations[item['file']]
 sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
 support = manifest['supportFiles']
 assert len(support) == 3 and {i['file'] for i in support} == {
@@ -33,7 +37,7 @@ overrides = {}
 for item in items:
     name = item['file']
     assert Path(name).name == name and Path(name).suffix in {'.py', '.html'}
-    target = root / name
+    target = destinations[name]
     candidate = stage / name
     assert sha(candidate) == item['after']
     if candidate.suffix == '.py':
@@ -68,8 +72,10 @@ if phase == 'publish':
         for item in sorted(items, key=lambda x: (x['before'] is not None, x['file'])):
             if item['before'] == item['after']:
                 continue
-            target = root / item['file']
-            mode = target.stat().st_mode & 0o777 if target.exists() else 0o644
+            target = destinations[item['file']]
+            previous_stat = target.stat() if target.exists() else None
+            mode = previous_stat.st_mode & 0o777 if previous_stat else 0o644
+            owner = (previous_stat.st_uid, previous_stat.st_gid) if previous_stat else (os.getuid(), os.getgid())
             if target.exists():
                 shutil.copyfile(target, backup / item['file'])
                 os.chmod(backup / item['file'], 0o600)
@@ -78,17 +84,19 @@ if phase == 'publish':
             temporary_owned.add(temporary)
             shutil.copyfile(stage / item['file'], temporary)
             os.chmod(temporary, mode)
+            if owner != (os.getuid(), os.getgid()):
+                subprocess.run(['sudo', '-n', 'chown', str(owner[0]) + ':' + str(owner[1]), str(temporary)], check=True)
             os.replace(temporary, target)
             temporary_owned.discard(temporary)
-            changed.append((item, mode))
+            changed.append((item, mode, owner))
             assert sha(target) == item['after']
         subprocess.run(['sudo', '-n', 'systemctl', 'restart', 'barbershop-bot'], check=True)
         assert subprocess.check_output(['systemctl', 'is-active', 'barbershop-bot'], text=True).strip() == 'active'
     except BaseException:
         for temporary in temporary_owned:
             temporary.unlink(missing_ok=True)
-        for item, mode in reversed(changed):
-            target = root / item['file']
+        for item, mode, owner in reversed(changed):
+            target = destinations[item['file']]
             if item['before'] is None:
                 # Only a file created by this exact failed publication is removed.
                 assert sha(target) == item['after']
@@ -98,6 +106,8 @@ if phase == 'publish':
                 assert not temporary.exists()
                 shutil.copyfile(backup / item['file'], temporary)
                 os.chmod(temporary, mode)
+                if owner != (os.getuid(), os.getgid()):
+                    subprocess.run(['sudo', '-n', 'chown', str(owner[0]) + ':' + str(owner[1]), str(temporary)], check=True)
                 os.replace(temporary, target)
         subprocess.run(['sudo', '-n', 'systemctl', 'restart', 'barbershop-bot'], check=True)
         raise

@@ -1,0 +1,80 @@
+{
+  "publisherSourceHashes": {
+    "publish-edge.py": "6f61500d178d2a98ad03eaaf1a82c8115baac24a54c2b5e4e84df394d19419f8",
+    "publish-python.py": "d95ba8578c217b1a0b94bf492de17b5579128a27108844c1301dea790deb81d3"
+  },
+  "pythonManifestSha256": "0fb50eeac6ea53387b239e0021a5f0c0163d57720749ba7fe40b55be06d6bad8",
+  "destinationEvidence": [
+    "docs/rebuild/evidence/package5-s13-public-hashes.probe.py",
+    "docs/rebuild/evidence/package5-s13-vps-public-hashes.json"
+  ],
+  "pwaDestination": "/var/www/maya-platform/app.html",
+  "pwaBaselineMatchesS13": true,
+  "other12Destinations": "exact botroot/<file>",
+  "cases": [
+    {
+      "publisher": "edge",
+      "phase": "php",
+      "failedCandidateCopy": 2,
+      "failedFirstRestart": false,
+      "result": "PASS",
+      "exactBeforeStateRestored": true,
+      "ownedTemporaryFiles": 0,
+      "rootOwnedPwaChownCallsIntercepted": 0,
+      "wrongBotrootPwaTouched": false,
+      "externalCommandsExecuted": 0
+    },
+    {
+      "publisher": "edge",
+      "phase": "pwa",
+      "failedCandidateCopy": 3,
+      "failedFirstRestart": false,
+      "result": "PASS",
+      "exactBeforeStateRestored": true,
+      "ownedTemporaryFiles": 0,
+      "rootOwnedPwaChownCallsIntercepted": 0,
+      "wrongBotrootPwaTouched": false,
+      "externalCommandsExecuted": 0
+    },
+    {
+      "publisher": "python",
+      "phase": "publish",
+      "failedCandidateCopy": 2,
+      "failedFirstRestart": false,
+      "result": "PASS",
+      "exactBeforeStateRestored": true,
+      "ownedTemporaryFiles": 0,
+      "rootOwnedPwaChownCallsIntercepted": 0,
+      "wrongBotrootPwaTouched": false,
+      "externalCommandsExecuted": 0
+    },
+    {
+      "publisher": "python",
+      "phase": "publish",
+      "failedCandidateCopy": 6,
+      "failedFirstRestart": false,
+      "result": "PASS",
+      "exactBeforeStateRestored": true,
+      "ownedTemporaryFiles": 0,
+      "rootOwnedPwaChownCallsIntercepted": 2,
+      "wrongBotrootPwaTouched": false,
+      "externalCommandsExecuted": 0
+    },
+    {
+      "publisher": "python",
+      "phase": "publish",
+      "failedCandidateCopy": null,
+      "failedFirstRestart": true,
+      "result": "PASS",
+      "exactBeforeStateRestored": true,
+      "ownedTemporaryFiles": 0,
+      "rootOwnedPwaChownCallsIntercepted": 2,
+      "wrongBotrootPwaTouched": false,
+      "externalCommandsExecuted": 0
+    }
+  ],
+  "guardImports": "stubbed only in relocation harness; actual guards validated separately",
+  "ownership": "root uid/gid metadata simulated; exact scoped chown commands intercepted for candidate and rollback",
+  "productionOperations": 0,
+  "repositoryOrPublisherEdits": 0
+}

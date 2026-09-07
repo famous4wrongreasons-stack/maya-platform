@@ -95,3 +95,10 @@ Gate here, declare Package 5/Chapter 6 complete, or start Chapter 7.
 The final report must include artifact and proof evidence, cleanup of all owned
 processes and temporary staging resources, preserved main 24 dirty entries,
 commit/push confirmation, and the requested STOP.
+
+The VPS PWA alias `vps/app.html` maps exactly to `/var/www/maya-platform/app.html`
+as established by the S13 public-hash probe. It is separate from the Python root
+`/home/botadmin/barbershop-bot`. The first staging-only check caught and corrected
+a publication mapping error before any runtime file was written. The revised
+publisher pins per-file destinations and preserves original ownership and modes;
+five independent offline rollback cases pass against this exact version.
