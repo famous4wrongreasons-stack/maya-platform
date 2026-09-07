@@ -41,6 +41,14 @@ def scan_bulk_sources(root, overrides=None):
     # R07 closes native retention/renewal entries under this same B35 owner.
     # The nested guard inspects the real AST closure, including refusal purity,
     # scheduler/HTTP/chat registration and the lower legacy renewal marker.
-    from package5_retention_runtime_guard import scan_retention_sources
-    findings.extend(scan_retention_sources(root, overrides))
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        'package5_retention_runtime_guard',
+        Path(__file__).with_name('package5_retention_runtime_guard.py'),
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError('R07 retention source guard is required')
+    retention_guard = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(retention_guard)
+    findings.extend(retention_guard.scan_retention_sources(root, overrides))
     return findings

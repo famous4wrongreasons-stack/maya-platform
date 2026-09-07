@@ -3,6 +3,7 @@ import ast
 import asyncio
 import copy
 import os
+import subprocess
 from pathlib import Path
 import sys
 import types
@@ -146,6 +147,34 @@ class RetentionAcceptance(unittest.TestCase):
 
     def test_active_source_closure_guard(self):
         self.assertEqual(scan_retention_sources(ROOT), [])
+
+    def test_bulk_guard_loads_own_sibling_by_path_without_ambient_imports(self):
+        # B13 loads the guard by absolute path from outside the Python directory.
+        # Isolated mode also excludes PYTHONPATH/current-directory conveniences.
+        script = '''import importlib.util
+import pathlib
+import sys
+import types
+root = pathlib.Path(sys.argv[1]).resolve()
+assert all(pathlib.Path(p).resolve() != root for p in sys.path if p)
+spec = importlib.util.spec_from_file_location('bulk_by_path', root / 'package5_bulk_runtime_guard.py')
+bulk = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(bulk)
+assert bulk.scan_bulk_sources(root) == []
+# An ambient module must not replace the sibling guard or hide a real bypass.
+sys.modules['package5_retention_runtime_guard'] = types.SimpleNamespace(scan_retention_sources=lambda *_: [])
+source = (root / 'reactivation.py').read_text()
+anchor = '    from canonical_retention_entry import retention_owner_required'
+assert source.count(anchor) == 1
+mutated = source.replace(anchor, '    await app.bot.send_message(chat_id=7, text="bypass")\\n' + anchor)
+findings = bulk.scan_bulk_sources(root, {'reactivation.py': mutated})
+assert any('reactivation.py:run_reactivation_job' in item for item in findings), findings
+'''
+        result = subprocess.run(
+            [sys.executable, '-I', '-B', '-c', script, str(ROOT)],
+            cwd=ROOT.parent, capture_output=True, text=True, timeout=20,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_guard_rejects_mutated_real_producer_effects_and_false_refusal(self):
         snippets = ["await app.bot.send_message(chat_id=7,text='x')", "await _send_client_push(7, 'x')",

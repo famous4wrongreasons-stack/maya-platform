@@ -270,5 +270,9 @@
   "processHygiene": 0,
   "package5Complete": false,
   "chapter6Complete": false,
-  "scratch": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07"
+  "scratch": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r07",
+  "aggregateCorrection": {
+    "report": "package5-wave-rb-r07-guard-import-fix-proof.json",
+    "note": "Initial counts/source hashes above remain historical. A mandatory aggregate import-mode failure was corrected; native14 and actual B13 suite6 including31 native tests pass on the corrected guard. Root must regenerate the combined candidate and rerun the full aggregate."
+  }
 }

@@ -65,3 +65,11 @@ PROCESS HYGIENE: 0
 PACKAGE 5 COMPLETE: NO
 CHAPTER 6 COMPLETE: NO
 ```
+
+## Aggregate guard import correction
+
+The first mandatory architecture aggregate found an R07-owned guard-loading defect: B13 imports the bulk scanner by absolute path with the repository as its working directory, so an ambient `from package5_retention_runtime_guard import ...` could not resolve the sibling. The bulk scanner now loads that exact sibling with `importlib` relative to its own `__file__`, consistent with the existing B13 loader. No business runtime/schema was changed.
+
+A new isolated-process regression proves absolute-path loading without the Python source directory in `sys.path`, and proves that an ambient fake module cannot hide an injected real producer send. Corrected R07 native proof: **14/14 PASS**, now **46** rejected real-source mutation cases across the suite. The actual previously failing B13 architecture suite is **6/6 PASS**, including its **31** native source-guard tests and unchanged cwd/import chain. One preliminary direct-unittest attempt used the backend cwd from the caller description; it could not resolve the absolute test module. This harness-only attempt is retained separately from the passing actual Jest invocation.
+
+[Correction proof and exact commands](package5-wave-rb-r07-guard-import-fix-proof.json) preserve the initial mandatory failure and targeted results. The existing bounded overlay recipe is unchanged; its baseline-derived corrected bytes equal canonical. [Revised target hashes](package5-wave-rb-r07-overlay-manifest-v2.json) supersede the initial overlay target hashes. Earlier 42/40/80 results above remain evidence for the initial local checkpoint. Full combined-candidate regeneration and mandatory aggregate rerun remain required before publication.
