@@ -17,6 +17,8 @@ import {
   FEATURE_REQUIREMENT_DECISION_CONTRACT,
   type EntitlementsService,
 } from '../src/entitlements/entitlements.service';
+import { DashboardPreferencesService } from '../src/dashboard-preferences/dashboard-preferences.service';
+import type { Package5Wave1CanonicalCutoverService } from '../src/package5-wave1/package5-wave1-canonical-cutover.service';
 import { OwnerReportStore } from '../src/owner-reports/owner-report.store';
 import {
   normalizeOwnerReportPlan,
@@ -75,7 +77,12 @@ const engine = new ActionEngineKernel(
   resolver,
 );
 const ingress = new CanonicalActionIngressService(engine, resolver);
-const store = new OwnerReportStore(db, context, ingress, config);
+const preferences = new DashboardPreferencesService(
+  db,
+  context,
+  undefined as unknown as Package5Wave1CanonicalCutoverService,
+);
+const store = new OwnerReportStore(db, context, ingress, preferences, config);
 const checks: string[] = [];
 
 async function fixture(): Promise<OwnerReportPlan> {

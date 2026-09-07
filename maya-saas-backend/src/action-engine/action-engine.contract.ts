@@ -186,7 +186,6 @@ export interface RegisteredActionCapabilityV1 {
 }
 
 export interface NormalizedActionExecutionV1 {
-  ownerReportSlot?: { runId: string; slotKey: string };
   bookingIntent?: {
     snapshot: ClientBookingSnapshot;
     hash: string;

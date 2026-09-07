@@ -1449,11 +1449,6 @@ export class ActionEngineKernel {
       capability.normalizeInput(request.input),
     );
     const normalizedInputCanonical = stableActionJson(normalizedInput);
-    if (
-      normalizedInput.messageType === 'daily_report' &&
-      !request.ownerReportSlot
-    )
-      throw new ActionContractError('B36_OWNER_REPORT_RUN_REQUIRED');
     if (request.ownerReportSlot) {
       if (
         capability.capability !==
@@ -1528,7 +1523,6 @@ export class ActionEngineKernel {
       );
     }
     return {
-      ownerReportSlot: request.ownerReportSlot,
       bookingIntent,
       capability,
       targetRef,
@@ -2054,11 +2048,7 @@ export class ActionEngineKernel {
       execution.normalizedInputHash !== normalized.normalizedInputHash ||
       execution.capability !== normalized.capability.capability ||
       execution.actionClass !== normalized.capability.actionClass ||
-      execution.targetRef !== normalized.targetRef ||
-      (execution.ownerReportRunId ?? null) !==
-        (normalized.ownerReportSlot?.runId ?? null) ||
-      (execution.ownerReportSlotKey ?? null) !==
-        (normalized.ownerReportSlot?.slotKey ?? null)
+      execution.targetRef !== normalized.targetRef
     ) {
       throw new ActionConflictError(
         'Caller idempotency key was reused with a changed normalized action',

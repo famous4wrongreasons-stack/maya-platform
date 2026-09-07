@@ -41,7 +41,7 @@ PACKAGE2_PRODUCERS = {
     "bot.py": {
         "notify_owner": "publish_owner_message",
         "_director_briefing_job": "notify_owner",
-        "_daily_report_job": "trigger_owner_daily_report",
+        "_daily_report_job": "publish_inbox_item",
         "_god_watch_job": "publish_inbox_item",
         "_dual_role_guard_job": "publish_inbox_item",
     },
