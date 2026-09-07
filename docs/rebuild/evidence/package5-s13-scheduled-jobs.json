@@ -1,0 +1,617 @@
+{
+  "sourceCommit": "0b95395dce2d9a7a4ddf908a8e4a89641cb1022b",
+  "jobs": [
+    {
+      "id": "J01",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_pii_rotation_job",
+      "frequency": "daily 03:00 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "AC6 Maintenance",
+      "mutationDeliveryCapability": "legacy PII cleanup raises before mutation",
+      "status": "REGISTERED; retired effect; no new blocker",
+      "evidence": [
+        "PY:bot.py:6091",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J02",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_reactivation_job",
+      "frequency": "daily 10:00 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "B35 bulk / Client consent",
+      "mutationDeliveryCapability": "direct native marketing delivery",
+      "status": "REGISTERED; B46",
+      "evidence": [
+        "PY:bot.py:6102",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J03",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_birthday_job",
+      "frequency": "daily 10:30 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "P4 value owner + B35 bulk",
+      "mutationDeliveryCapability": "legacy promo/send leaf unreachable through current flat/nested Client projection mismatch",
+      "status": "REGISTERED; no confirmed active value bypass; not an explicit retirement guard",
+      "evidence": [
+        "PY:bot.py:6114",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J04",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_cycle_reminder_job",
+      "frequency": "daily 11:00 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "derived cycle projection; B35 owns any admitted send",
+      "mutationDeliveryCapability": "candidate cache refresh; owner Web Push helper returns zero; manual recipient send separate B46",
+      "status": "REGISTERED; no scheduled Client send; exact manual job J31",
+      "evidence": [
+        "PY:bot.py:6127",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J05",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_referral_resolver_job",
+      "frequency": "daily 11:30 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "P404 referral owner",
+      "mutationDeliveryCapability": "legacy resolver/value setters raise before issuance/delivery",
+      "status": "REGISTERED; retired value effects",
+      "evidence": [
+        "PY:bot.py:6139",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J06",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_subscriptions_job",
+      "frequency": "daily 12:00 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "P405 eligibility + B35 bulk/CD",
+      "mutationDeliveryCapability": "unchanged-usage early return can reach raw renewal Telegram then legacy reminder marker",
+      "status": "REGISTERED; B57",
+      "evidence": [
+        "PY:bot.py:6151",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J07",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_loyalty_job",
+      "frequency": "daily 12:30 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "P403 value owner",
+      "mutationDeliveryCapability": "legacy loyalty runner disabled before balance mutation",
+      "status": "REGISTERED; retired value effects",
+      "evidence": [
+        "PY:bot.py:6162",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J08",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_reviews_job",
+      "frequency": "every 5 min Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "native feedback owner pending; CD",
+      "mutationDeliveryCapability": "existing pending request sends/rating lifecycle; new-row producer behind retired pay_visit",
+      "status": "REGISTERED; B47",
+      "evidence": [
+        "PY:bot.py:6175",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J09",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_lead_alerts_job",
+      "frequency": "every 5 min Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "alert occurrence owner pending; CD",
+      "mutationDeliveryCapability": "direct owner alert / process-local dedupe",
+      "status": "REGISTERED; B44",
+      "evidence": [
+        "PY:bot.py:6186",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J10",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_dual_role_guard_job",
+      "frequency": "every 3 hours at minute 17; also startup once Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "Client read authority / operational alert occurrence; CD",
+      "mutationDeliveryCapability": "phone-derived history cache refresh + raw founder Telegram; cache already classified under B39/B41",
+      "status": "REGISTERED; B44; existing B39/B41 cache authority boundary",
+      "evidence": [
+        "PY:bot.py:6197",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J11",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_daily_report_job",
+      "frequency": "daily 21:00 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "approved OwnerReportRun daily v1 + A12/CD",
+      "mutationDeliveryCapability": "Telegram before admission, then Inbox bridge",
+      "status": "REGISTERED; B36; WIP not deployed",
+      "evidence": [
+        "PY:bot.py:6208",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J12",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_anton_expense_reminder_job",
+      "frequency": "Sunday 20:00 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "expense reminder/reply owner pending + P407/CD",
+      "mutationDeliveryCapability": "raw Telegram reminder/process-local awaited reply; direct expense mutation from reply",
+      "status": "REGISTERED; B37",
+      "evidence": [
+        "PY:bot.py:6219",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J13",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_god_watch_job",
+      "frequency": "daily 09:00 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "operational alert occurrence owner pending; CD",
+      "mutationDeliveryCapability": "direct raw founder alerts / settings dedupe",
+      "status": "REGISTERED; B44",
+      "evidence": [
+        "PY:bot.py:6231",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J14",
+      "scheduleSource": "bot.post_init / APScheduler",
+      "commandOrJob": "_director_briefing_job",
+      "frequency": "daily 10:00 Europe/Moscow (source literal)",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "non-daily report plan owner pending + A23 work/CD",
+      "mutationDeliveryCapability": "read-time work evaluation plus report delivery/settings marker",
+      "status": "REGISTERED; B43/B42",
+      "evidence": [
+        "PY:bot.py:6243",
+        "PY:bot.py:134",
+        "package5-stage3-vps-scheduling.json:logs.barbershop-bot"
+      ]
+    },
+    {
+      "id": "J15",
+      "scheduleSource": "booking completion / APScheduler date job",
+      "commandOrJob": "_schedule_reminder → _send_reminder",
+      "frequency": "visit datetime minus legacy preference/default lead; one-shot, process memory",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "B25 canonical Appointment reminder + A11/CD",
+      "mutationDeliveryCapability": "raw Telegram after preference read; no durable admission",
+      "status": "REACHABLE conditional booking; B45",
+      "evidence": [
+        "PY:bot.py:5944",
+        "PY:bot.py:5962"
+      ]
+    },
+    {
+      "id": "J16",
+      "scheduleSource": "webhook start_background_tasks=True",
+      "commandOrJob": "master_day_brief_loop → master and growth role briefs",
+      "frequency": "startup +75s, then 600s after previous iteration; eligibility limits delivery window",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "non-daily report plan owner pending",
+      "mutationDeliveryCapability": "direct raw staff/owner delivery + settings markers",
+      "status": "ACTIVE startup registration; B43",
+      "evidence": [
+        "PY:webhook_server.py:10406",
+        "PY:webhook_server.py:12071"
+      ]
+    },
+    {
+      "id": "J17",
+      "scheduleSource": "webhook start_background_tasks=True",
+      "commandOrJob": "client_retention_refresh_loop",
+      "frequency": "startup +120s, then 21600s after previous iteration",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "derived CRM analytics/source projection",
+      "mutationDeliveryCapability": "CRM reads and derived cache refresh; no admitted business action",
+      "status": "ACTIVE startup registration; permitted projection, no new blocker",
+      "evidence": [
+        "PY:webhook_server.py:10436",
+        "PY:webhook_server.py:12072"
+      ]
+    },
+    {
+      "id": "J18",
+      "scheduleSource": "webhook start_background_tasks=True",
+      "commandOrJob": "master_shift_reminder_loop",
+      "frequency": "immediate, then 300s after iteration; reminders at 60/30 min before shift",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "operational alert occurrence + CD",
+      "mutationDeliveryCapability": "raw staff Telegram before Inbox bridge; mute uses legacy authority",
+      "status": "ACTIVE startup registration; B44/B59",
+      "evidence": [
+        "PY:webhook_server.py:10397",
+        "PY:webhook_server.py:12073"
+      ]
+    },
+    {
+      "id": "J19",
+      "scheduleSource": "webhook start_background_tasks=True",
+      "commandOrJob": "waitlist_admin_alert_loop",
+      "frequency": "immediate, then 120s after iteration",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "waitlist alert occurrence + CD",
+      "mutationDeliveryCapability": "raw admin Telegram",
+      "status": "ACTIVE startup registration; B44",
+      "evidence": [
+        "PY:webhook_server.py:10511",
+        "PY:webhook_server.py:12074"
+      ]
+    },
+    {
+      "id": "J20",
+      "scheduleSource": "webhook start_background_tasks=True",
+      "commandOrJob": "maya_operating_rhythm_loop",
+      "frequency": "startup +60s, then 900s after iteration",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "A23 OperationalWorkItem",
+      "mutationDeliveryCapability": "legacy owner_action_journal create/update/evaluation",
+      "status": "ACTIVE startup registration; B42",
+      "evidence": [
+        "PY:webhook_server.py:10522",
+        "PY:webhook_server.py:12075"
+      ]
+    },
+    {
+      "id": "J21",
+      "scheduleSource": "post_init pending certificate recovery / request",
+      "commandOrJob": "_poll_payment",
+      "frequency": "7s until 30-minute deadline; recovered pending rows only",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "P406 certificate/payment owner",
+      "mutationDeliveryCapability": "provider status GET; both paid/canceled setters raise before value/delivery",
+      "status": "REGISTERED recovery; no new active issuance path proved",
+      "evidence": [
+        "PY:bot.py:4392",
+        "PY:bot.py:6059",
+        "PY:database.py:1443",
+        "PY:database.py:1486"
+      ]
+    },
+    {
+      "id": "J22",
+      "scheduleSource": "post_init pending subscription recovery / request",
+      "commandOrJob": "_poll_subscription_payment",
+      "frequency": "7s until 30-minute deadline; recovered pending rows only",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "P405 subscription/payment owner",
+      "mutationDeliveryCapability": "provider status GET; activation/refund setters raise before business effect",
+      "status": "REGISTERED recovery; distinct from B57 renewal early-return branch",
+      "evidence": [
+        "PY:bot.py:4958",
+        "PY:bot.py:6071",
+        "PY:database.py:2875",
+        "PY:database.py:2886"
+      ]
+    },
+    {
+      "id": "J23",
+      "scheduleSource": "bot post_init",
+      "commandOrJob": "database.init_db / add_admin / cache warm / Telegram menu setup",
+      "frequency": "once per bot initialization/restart",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "AC3/bootstrap technical state; A16 owns actual access grants",
+      "mutationDeliveryCapability": "schema bootstrap/cache reads/menu protocol; raw add_admin still business authority bypass",
+      "status": "ACTIVE startup; B40 for authority; no new separate blocker",
+      "evidence": [
+        "PY:bot.py:6025",
+        "PY:bot.py:6031"
+      ]
+    },
+    {
+      "id": "J24",
+      "scheduleSource": "bot main / resilient startup / fallback",
+      "commandOrJob": "Telegram initialize/getUpdates; webhook-only fallback",
+      "frequency": "connection retries/backoff; fallback checks Telegram reachability every 30s",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "transport lifecycle; inherited webhook job owners",
+      "mutationDeliveryCapability": "protocol retry itself not booking retry; fallback starts same J16-J20 loops",
+      "status": "CONDITIONAL startup; deduplicated existing background targets",
+      "evidence": [
+        "PY:bot.py:7136",
+        "PY:bot.py:7158",
+        "PY:bot.py:7197"
+      ]
+    },
+    {
+      "id": "J25",
+      "scheduleSource": "Nest onModuleInit",
+      "commandOrJob": "OwnerReportsSchedulerService.tick",
+      "frequency": "startup +90s; 5 min interval, environment verified",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "daily OwnerReportRun approved; other report plans pending",
+      "mutationDeliveryCapability": "daily/morning/master Inbox + external delivery",
+      "status": "ENABLED; B36/B43",
+      "evidence": [
+        "TS:owner-reports/owner-reports.scheduler.ts:34",
+        "package5-stage3-runtime-metadata.json:flags"
+      ]
+    },
+    {
+      "id": "J26",
+      "scheduleSource": "Nest onModuleInit",
+      "commandOrJob": "AppointmentNotificationsScheduler.tick",
+      "frequency": "startup +90s; 5 min default; overrides absent in process and both dotenv locations",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "B25 AppointmentNotificationRun + A11/CD",
+      "mutationDeliveryCapability": "canonical admitted reminder deliveries",
+      "status": "ENABLED by default; no new bypass",
+      "evidence": [
+        "TS:appointment-notifications/appointment-notifications.scheduler.ts:28",
+        "package5-stage3-runtime-metadata.json:flags"
+      ]
+    },
+    {
+      "id": "J27",
+      "scheduleSource": "Nest onModuleInit",
+      "commandOrJob": "BillingSchedulerService.tick",
+      "frequency": "startup +60s; hourly default; overrides absent",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "P408 TenantBilling envelope + Action Engine",
+      "mutationDeliveryCapability": "pending payment reconciliation then bounded due billing",
+      "status": "ENABLED scheduler; recurring provider charges disabled by verified YOOKASSA_RECURRING_ENABLED=false; preserve canonical gates",
+      "evidence": [
+        "TS:billing/billing-scheduler.service.ts:42",
+        "package5-stage3-runtime-metadata.json:flags"
+      ]
+    },
+    {
+      "id": "J28",
+      "scheduleSource": "Nest onModuleInit",
+      "commandOrJob": "AppointmentReconciliationScheduler near",
+      "frequency": "startup +2 min; every 30 min; date range ±7 days",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "AC4/AC5 CRM facts + opportunity lifecycle",
+      "mutationDeliveryCapability": "provider GETs, canonical mirror/event/projection writes; no provider operation",
+      "status": "ENABLED; no new bypass",
+      "evidence": [
+        "TS:crm/appointment-reconciliation.scheduler.ts:63",
+        "TS:crm/appointment-reconciliation.scheduler.ts:108"
+      ]
+    },
+    {
+      "id": "J29",
+      "scheduleSource": "Nest onModuleInit",
+      "commandOrJob": "AppointmentReconciliationScheduler medium",
+      "frequency": "startup +7 min; every 24 h; date range ±31 days",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "AC4/AC5 CRM facts + opportunity lifecycle",
+      "mutationDeliveryCapability": "same owner as near contour",
+      "status": "ENABLED; same canonical execution/lease boundary, not duplicate blocker",
+      "evidence": [
+        "TS:crm/appointment-reconciliation.scheduler.ts:63"
+      ]
+    },
+    {
+      "id": "J30",
+      "scheduleSource": "Nest onModuleInit",
+      "commandOrJob": "IngestionRetentionScheduler.tick",
+      "frequency": "startup +3 min; every 24 h; default enabled, overrides absent",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "AC6 MaintenanceRun / ItemClaim / exact Policy V1",
+      "mutationDeliveryCapability": "bounded canonical diagnostic quarantine deletion",
+      "status": "ENABLED; approved maintenance exception, no generic deletion authority",
+      "evidence": [
+        "TS:events/ingestion-retention.scheduler.ts:46",
+        "CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-A30-COMPLETION-REPORT.md"
+      ]
+    },
+    {
+      "id": "J31",
+      "scheduleSource": "authenticated legacy request/command dispatch",
+      "commandOrJob": "panel_job_run_handler / _run_owner_job_from_chat / bot manual job commands",
+      "frequency": "ON DEMAND; no independent periodic frequency",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "each target owner: B35 bulk / reviews / value / operational work",
+      "mutationDeliveryCapability": "dynamic lookup from fixed JOBS registry, asynchronous fn(app); same named producers as cron",
+      "status": "REACHABLE; B41/B42/B46/B47/B57; no extra job ID or owner",
+      "evidence": [
+        "PY:webhook_server.py:3185",
+        "PY:webhook_server.py:3473",
+        "PY:webhook_server.py:3569"
+      ]
+    },
+    {
+      "id": "J32",
+      "scheduleSource": "salary/analytics read request",
+      "commandOrJob": "_yearly_gross_refresh / _gross_month_for._calc",
+      "frequency": "ON DEMAND/cache expiry; no independent cron",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "derived CRM analytics projection",
+      "mutationDeliveryCapability": "provider financial reads and cache updates only",
+      "status": "REACHABLE read work; B37/B55 report inputs separately inventoried",
+      "evidence": [
+        "PY:webhook_server.py:4049",
+        "PY:webhook_server.py:4177"
+      ]
+    },
+    {
+      "id": "J33",
+      "scheduleSource": "Telegram send observation patch",
+      "commandOrJob": "observe_legacy_telegram_send",
+      "frequency": "after existing send, ON DEMAND",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "canonical delivery observation / Inbox bridge",
+      "mutationDeliveryCapability": "observation cannot retroactively admit original effect",
+      "status": "REACHABLE; upstream B36/B43/B44/B48, default Inbox B49",
+      "evidence": [
+        "PY:webhook_server.py:8113"
+      ]
+    },
+    {
+      "id": "J34",
+      "scheduleSource": "team_chat_send handler",
+      "commandOrJob": "_maya_bg / _push_bg → _push_team_message",
+      "frequency": "ON DEMAND asynchronous tasks, no durable repeat queue",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "team conversation lifecycle pending + CD",
+      "mutationDeliveryCapability": "legacy message update and direct recipient fan-out",
+      "status": "REACHABLE; B58, no new scheduled owner",
+      "evidence": [
+        "PY:webhook_server.py:11491",
+        "PY:webhook_server.py:11503"
+      ]
+    },
+    {
+      "id": "J35",
+      "scheduleSource": "site community comment handler",
+      "commandOrJob": "process_comment / notify_owner",
+      "frequency": "ON DEMAND asynchronous task",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "anonymous community/moderation owner pending + CD",
+      "mutationDeliveryCapability": "comment/moderation state and direct owner notification",
+      "status": "REACHABLE; B52/B44",
+      "evidence": [
+        "PY:site_community.py:323"
+      ]
+    },
+    {
+      "id": "J36",
+      "scheduleSource": "request-driven voice/AI/media",
+      "commandOrJob": "stream tasks / site_guest_chat reply / cutmatch _run_edit",
+      "frequency": "request-scoped; no cron/repeat registration",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "AC3 transport; downstream business tools retain their canonical owner",
+      "mutationDeliveryCapability": "voice/STT/TTS/model/media work, existing downstream tool calls",
+      "status": "S06-S08 already cover B39/B41/B50/B56; no new scheduled action owner",
+      "evidence": [
+        "package5-stage3-mechanic-dispositions.json"
+      ]
+    },
+    {
+      "id": "J37",
+      "scheduleSource": "systemd application units",
+      "commandOrJob": "barbershop-bot / maya-saas / barbershop-pwa",
+      "frequency": "boot/restart, not business cadence; bot restart 10s; Nest restart 5s",
+      "productionTarget": "VPS B35 release / barbershop-bot",
+      "canonicalOwner": "each app scheduler delegates to owner above",
+      "mutationDeliveryCapability": "starts J01-J36 for active units; pwa_api serve sets background=False",
+      "status": "bot/Nest ACTIVE; pwa compatibility unit DISABLED/INACTIVE, PID 0",
+      "evidence": [
+        "package5-stage3-vps-scheduling.json",
+        "package5-stage3-runtime-metadata.json:services"
+      ]
+    },
+    {
+      "id": "J38",
+      "scheduleSource": "VPS system cron/timers/process managers",
+      "commandOrJob": "root and botadmin crontabs; system cron; 14 OS timers",
+      "frequency": "root/botadmin no crontab; system hourly/daily/weekly/monthly and OS-specific cadence",
+      "productionTarget": "VPS OS cron/timers",
+      "canonicalOwner": "OS maintenance only; no Maya scheduled command identified",
+      "mutationDeliveryCapability": "OS package/cert/log/filesystem maintenance; no Maya provider/delivery command",
+      "status": "VERIFIED readable cron/unit definitions; no PM2/supervisor/user-unit config found",
+      "evidence": [
+        "package5-stage3-vps-scheduling.json",
+        "package5-stage3-additional-launchers.json",
+        "package5-exhaustive-launchers.json"
+      ]
+    },
+    {
+      "id": "J39",
+      "scheduleSource": "installed observer/egress units / operator CLIs",
+      "commandOrJob": "shadow journal follower / SSH SOCKS / 15 dist/scripts + seed",
+      "frequency": "observer continuous; egress persistent; CLIs manual, no scheduled launcher found",
+      "productionTarget": "VPS diagnostic/transport units and installed B35 CLIs",
+      "canonicalOwner": "diagnostic observer / transport / each CLI canonical owner",
+      "mutationDeliveryCapability": "observer diagnostic SQLite only; CLIs include proof/maintenance/backfill/bootstrap, never invoked here",
+      "status": "ACTIVE observer/egress; scripts installed does not imply automatic scheduling; failed transient units inactive",
+      "evidence": [
+        "package5-stage3-runtime-metadata.json",
+        "package5-exhaustive-extra-surfaces.json",
+        "package5-stage3-additional-launchers.json"
+      ]
+    },
+    {
+      "id": "J40",
+      "scheduleSource": "repository deployment/CI/backup definitions",
+      "commandOrJob": "deploy/install shell; backup/staging scripts; platform-ci workflow",
+      "frequency": "manual deployment or push/PR CI; no cron trigger in tracked workflow",
+      "productionTarget": "Repository / CI / manual deployment targets",
+      "canonicalOwner": "release operations / backup, not business job owner",
+      "mutationDeliveryCapability": "manual scripts can change deployment/DB; no live periodic reference found",
+      "status": "SOURCE reviewed only; NOT executed; no Beget task export/definition in documentation",
+      "evidence": [
+        "package5-stage3-repository-scheduling.json"
+      ]
+    },
+    {
+      "id": "J41",
+      "scheduleSource": "repository-only SMM scheduler candidate",
+      "commandOrJob": "smm_bot.scheduler_loop / queue_health_loop / holiday_loop",
+      "frequency": "source: 30s / initial60s then6h / daily09:00 local process clock; no proven production cadence",
+      "productionTarget": "Repository only; no deployed VPS launcher proved",
+      "canonicalOwner": "separate social publication/queue owner, NOT approved here",
+      "mutationDeliveryCapability": "source can publish across providers and send direct admin notifications",
+      "status": "NO deployed launcher/process/import found on inspected VPS; not asserted active or repaired; unknown Beget command remains unresolved",
+      "evidence": [
+        "REPO:smm_bot/bot.py:1016",
+        "REPO:smm_bot/bot.py:1077",
+        "REPO:smm_bot/bot.py:1126",
+        "REPO:smm_bot/bot.py:1182",
+        "package5-stage3-additional-launchers.json"
+      ]
+    },
+    {
+      "id": "J42",
+      "scheduleSource": "Beget account cron / hosting scheduler UI",
+      "commandOrJob": "NONE — empty configured-command table",
+      "frequency": "NOT APPLICABLE — zero enabled and zero disabled jobs",
+      "productionTarget": "Beget account mocine3388; no configured target",
+      "canonicalOwner": "NOT APPLICABLE — no admitted or legacy scheduled job exists in this table",
+      "mutationDeliveryCapability": "0 configured cron targets; no command/URL/interpreter/env/launch parameters to map",
+      "status": "VERIFIED EMPTY; enabled 0 / disabled 0; S13 INVENTORIED",
+      "evidence": [
+        "package5-s13-owner-evidence.json"
+      ]
+    }
+  ],
+  "jobRows": 42,
+  "rowCounting": "42 normalized target/launcher groups, not active cron count. J42 is now a verified empty Beget surface; J01-J41 unchanged from Stage 3.",
+  "productionJobTargetInventory": "COMPLETE",
+  "begetControlPlaneScheduleMetadata": "VERIFIED",
+  "ownerEvidence": "package5-s13-owner-evidence.json"
+}

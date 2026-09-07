@@ -1,5 +1,7 @@
 # Package 5 — Stage 3 scheduler gap / consolidated remainder inventory
 
+> Historical Stage 3 checkpoint `0b95395d`, preserved below. The owner has now supplied Beget Cron evidence: **0 enabled / 0 disabled jobs**. Current result: [S13 closure / final exhaustive inventory](CYCLE-06-BLOCKING-PACKAGE-5-EXHAUSTIVE-REMAINDER-INVENTORY-COMPLETE.md), **32/32; inventory COMPLETE: YES**. The 24 blockers and 14 packages remain; Package 5 and Chapter 6 remain incomplete. The missing-evidence statements below describe the earlier checkpoint.
+
 **24 known blockers remain; Stage 3 found 0 new blocker IDs and 0 new production violation paths/classes. Inventory completion remains NO: S13 Beget account scheduled commands are unverified.** This is documentation/evidence only, not B36 continuation, remediation authorization or Package 5 acceptance.
 
 Accepted entry checkpoint: `1d41765bd570996eec43bd36e2a1e98104824a1d`. `git fetch origin` succeeded; isolated `/tmp/maya-b29-contour` on `contour/b29-remediation` was clean, HEAD equalled `origin/codex/maya-brain-systemic-release-20260815`, no unpushed commits. Main 24 dirty entries and 17 old databases remain protected. No application function, database query, job, provider operation, message or deployment was invoked for this inventory.
