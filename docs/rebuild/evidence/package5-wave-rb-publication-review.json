@@ -1,0 +1,20 @@
+{
+  "review": "independent bounded publication review",
+  "status": "PASS",
+  "concreteBlockers": 0,
+  "reviewedFileHashes": {
+    "package5-wave-rb-publish.py": "acb9caea6f7029857cc3de9074b715f2c396eb23add1ceed3b956ed567a2cee6",
+    "package5-wave-rb-compose.py": "9a46a0f9384ffacc5540d838de9c80c5c6405a087ad21ef4d9a16deec43d28b2",
+    "package5-wave-rb-publication-proof.py": "6a5024d8bdaf10604613fa47fd6a17a21cc7fd8b2c2028ffdc4cb02f92711534",
+    "package5-wave-rb-release-view.py": "25faaec20507625c9850f062001f0814fa82155008b450185daefd444861da38"
+  },
+  "checks": [
+    "caller-pinned manifest and candidate/baseline hashes",
+    "exact destinations and new-helper-first publication",
+    "scoped rollback including mode/ownership and service recovery",
+    "R03/R04/R07 composition over production snapshots",
+    "seven active-source guards",
+    "B36 exact runtime exclusion with zero schema delta"
+  ],
+  "runtimeOrProductionWrites": 0
+}
