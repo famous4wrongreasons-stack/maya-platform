@@ -1,0 +1,65 @@
+[
+  {
+    "target": "salon/app/index.html",
+    "artifact": "salon__app__index.html",
+    "destination": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html",
+    "before": "2c733573d727b33932107454fc2fd31782e9dddc794c69e5a475b1d67ffefe72",
+    "after": "6cf673b29cab1903f84d0be45ee5e3105c8287b48a8b7cde9badba865a5ec793"
+  },
+  {
+    "target": "mayaos/app/index.html",
+    "artifact": "mayaos__app__index.html",
+    "destination": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html",
+    "before": "0eb94816c1d62b30d279f16555c8d189e57bb988f273bff3cd734d74294f8772",
+    "after": "83dcb25a057f9da59ff5babf8ee7c00e6d29b35bdada57bd9e6be26005816f9d"
+  },
+  {
+    "target": "salon/app/index.codex-loyalty-20260721.html",
+    "artifact": "salon__app__index.codex-loyalty-20260721.html",
+    "destination": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.codex-loyalty-20260721.html",
+    "before": "f2a1ea506b8a3d14196bafd2d7d3b3b02ff55dc8e66167746ea97e569ebfdd6d",
+    "after": "6423de0954e69395bc19fb4182b59aec846f8cef206aadd57f178c3ee7925b48"
+  },
+  {
+    "target": "salon/app/index.backup-20260731-anton-analytics.html",
+    "artifact": "salon__app__index.backup-20260731-anton-analytics.html",
+    "destination": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.backup-20260731-anton-analytics.html",
+    "before": "7f80e4355f26ac565ca0739a1e39dccd1c7ca5f679248ce5d8cc2df1e23f16c9",
+    "after": "5d7db20684fe150d792b1503eab4c2d98f02f0c308981e45be24ed5b946ff77f"
+  },
+  {
+    "target": "salon/app/tenant-test.html",
+    "artifact": "salon__app__tenant-test.html",
+    "destination": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-test.html",
+    "before": "878ad72f35c4b91d3e9bf2a7a1419969c559bee73b01e720cb1675980ee300c4",
+    "after": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98"
+  },
+  {
+    "target": "salon/app/api-proxy.php",
+    "artifact": "salon__app__api-proxy.php",
+    "destination": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+    "before": "03fb7ee34dbba151d10a968bcb4160c45b9a16635d42dd5b4adb98dccf9f060c",
+    "after": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70"
+  },
+  {
+    "target": "salon/app/api-proxy.codex-loyalty-20260721.php",
+    "artifact": "salon__app__api-proxy.codex-loyalty-20260721.php",
+    "destination": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.codex-loyalty-20260721.php",
+    "before": "2860054722f74d34d93ffdf64a58398ecfa250f5bf29e906959851fd87abbbe0",
+    "after": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c"
+  },
+  {
+    "target": "salon/app/maya-native-api.php",
+    "artifact": "salon__app__maya-native-api.php",
+    "destination": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php",
+    "before": "ae371c9bfd514f7e8f300f4c9d45fa657ddd4b5d1ba9eb92bf455d8e680b5952",
+    "after": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391"
+  },
+  {
+    "target": "mayaos/maya-platform-api.php",
+    "artifact": "mayaos__maya-platform-api.php",
+    "destination": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php",
+    "before": "cc9c7ca4f3f95428b62877bf5799190277f4fa1f007cdbc0ae21086f1611476f",
+    "after": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46"
+  }
+]
