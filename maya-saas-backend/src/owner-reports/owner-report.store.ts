@@ -10,10 +10,10 @@ import {
   stableActionJson,
 } from '../action-engine/action-engine.identity';
 import { CanonicalActionIngressService } from '../action-engine/action-engine.ingress';
-import { filterAssistantCapability } from '../dashboard-preferences/assistant-preferences.read';
+import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import { localCalendarDate, dayIsoRange } from './owner-reports.time';
+import { localCalendarDate } from './owner-reports.time';
 import {
   normalizeOwnerReportPlan,
   ownerReportFingerprint,
@@ -35,6 +35,7 @@ export class OwnerReportStore {
     private readonly prisma: PrismaService,
     private readonly context: TenantContextService,
     private readonly ingress: CanonicalActionIngressService,
+    private readonly preferences: DashboardPreferencesService,
     config: ConfigService,
   ) {
     this.cutoverAt = Date.parse(
@@ -249,8 +250,7 @@ export class OwnerReportStore {
     });
     const enabled =
       member &&
-      (await filterAssistantCapability(
-        db,
+      (await this.preferences.filterUsersWithAssistantCapability(
         plan.tenantId,
         [recipient.userId],
         'daily_brief',
@@ -314,21 +314,6 @@ export class OwnerReportStore {
       current.intentHash !== run.intentHash
     )
       throw new ForbiddenException('B36_REPORT_EXPIRED');
-    const immutable = this.readPlan(current);
-    const canonicalRecipient = immutable.recipients.find(
-      (r) => r.userId === recipient.userId,
-    );
-    const canonicalSlot = canonicalRecipient?.slots.find(
-      (s) => s.key === slot.key,
-    );
-    if (
-      stableActionJson(immutable) !== stableActionJson(plan) ||
-      !canonicalRecipient ||
-      !canonicalSlot ||
-      stableActionJson(canonicalRecipient) !== stableActionJson(recipient) ||
-      stableActionJson(canonicalSlot) !== stableActionJson(slot)
-    )
-      throw new ForbiddenException('B36_REPORT_DISPATCH_MANIFEST_MISMATCH');
     const executions = await this.executions(current, plan);
     for (const predecessor of recipient.slots.slice(
       0,
@@ -346,32 +331,6 @@ export class OwnerReportStore {
     );
     if (preview.policyDecision !== 'ALLOW')
       throw new ForbiddenException('B36_CURRENT_POLICY_DENIED');
-  }
-  /** Resolve an admitted slot from durable evidence, never from caller route/content. */
-  async dispatch(tenantId: string, runId: string, slotKey: string) {
-    this.context.assertTenantId(tenantId);
-    const run = await this.prisma.ownerReportRun.findUniqueOrThrow({
-      where: { id_tenantId: { id: runId, tenantId } },
-    });
-    const plan = this.readPlan(run);
-    const recipient = plan.recipients.find((r) =>
-      r.slots.some((s) => s.key === slotKey),
-    );
-    const slot = recipient?.slots.find((s) => s.key === slotKey);
-    if (!recipient || !slot)
-      throw new ActionContractError('B36_SLOT_NOT_IN_ADMITTED_PLAN');
-    await this.executions(run, plan);
-    return {
-      request: ownerReportRequest(run.id, this.identity, plan, recipient, slot),
-      authorize: () => this.assertDispatchAllowed(run, plan, recipient, slot),
-    };
-  }
-  canAdmitPeriod(timezone: string, localDate: string, now: Date) {
-    return (
-      Number.isFinite(this.cutoverAt) &&
-      localDate === localCalendarDate(timezone, now) &&
-      Date.parse(dayIsoRange(timezone, localDate).from) > this.cutoverAt
-    );
   }
   async purgeExpiredPayloads(tenantId: string, now = new Date()) {
     this.context.assertTenantId(tenantId);

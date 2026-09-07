@@ -15,7 +15,7 @@ const FIRST_RUN_DELAY_MS = 90 * 1000;
  * Multi-tenant owner morning/evening reports → persistent Nest inbox.
  * No Telegram bot required per subscriber.
  *
- * B36 daily reports resume their durable admitted plans across instances/restarts.
+ * Single-instance only (same constraint as billing scheduler).
  */
 @Injectable()
 export class OwnerReportsSchedulerService

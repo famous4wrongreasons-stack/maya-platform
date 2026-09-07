@@ -376,7 +376,7 @@ describe('InboxService recipients', () => {
 
     await expect(
       service.publishForTenant('tenant-1', {
-        type: 'morning_brief',
+        type: 'daily_report',
         sourceEventId: 'daily:delivery-unavailable',
         title: 'Daily report',
         bodyText: 'Report body',
@@ -403,7 +403,7 @@ describe('InboxService recipients', () => {
 
     await expect(
       service.publishForTenant('tenant-1', {
-        type: 'morning_brief',
+        type: 'daily_report',
         sourceEventId: 'daily:canonical-unknown',
         title: 'Daily report',
         bodyText: 'Report body',
