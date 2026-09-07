@@ -185,6 +185,11 @@ async def middleware(request, handler):
         if not request.path.startswith('/api/god/') and (not principal.get('authIdentityId')
                 or not re.fullmatch(r'[1-9][0-9]{0,19}', str(principal.get('telegramId') or ''))):
             return web.json_response({'error': 'canonical_staff_channel_required', 'business_mutations': 0}, status=403)
+        # The account is canonical, but this legacy staff-only view needs an
+        # exact active CRM projection. Never substitute a historical access ID.
+        if principal.get('role') == 'staff' and (not principal.get('staffId')
+                or not principal.get('externalStaffId')):
+            return web.json_response({'error': 'canonical_staff_projection_required', 'business_mutations': 0}, status=403)
         scope = {'principal': principal, 'active': True, 'owner_task': asyncio.current_task()}
         _principal.set(scope)
         return await handler(request)

@@ -70,6 +70,7 @@ describe('R02 canonical principal through actual Nest JWT/tenant/role guards', (
         externalStaffId: string;
       },
       identities: [{ id: 'identity-a', providerUserId: '100' }],
+      staffLinks: [{ externalId: 'external-a' }],
     };
   }
   const prisma = {
@@ -84,6 +85,9 @@ describe('R02 canonical principal through actual Nest JWT/tenant/role guards', (
     },
     authIdentity: {
       findMany: jest.fn(() => Promise.resolve(state.identities)),
+    },
+    staffProviderLink: {
+      findMany: jest.fn(() => Promise.resolve(state.staffLinks)),
     },
     crmIntegration: {
       findMany: jest.fn(() =>
@@ -297,6 +301,61 @@ describe('R02 canonical principal through actual Nest JWT/tenant/role guards', (
       authIdentityId: null,
     });
   });
+  it('uses only the exact live provider link for legacy presentation after canonical access admission', async () => {
+    state.membership.role = 'staff';
+    state.access = {
+      id: 'access-a',
+      role: 'staff',
+      status: 'active',
+      staffId: 'staff-a',
+      externalStaffId: 'stale-or-untrusted-reference',
+    };
+    const result = await read(token()).expect(201);
+    expect(result.body).toMatchObject({
+      role: 'staff',
+      staffId: 'staff-a',
+      externalStaffId: 'external-a',
+    });
+    expect(prisma.staffProviderLink.findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-a',
+        staffId: 'staff-a',
+        provider: 'yclients',
+        unlinkedAt: null,
+        staff: { is: { tenantId: 'tenant-a', active: true } },
+      },
+      select: { externalId: true },
+      take: 2,
+    });
+    expect(prisma.crmStaffAccess.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: { id: true, role: true, status: true, staffId: true },
+      }),
+    );
+  });
+  it.each(['revoked', 'ambiguous'])(
+    'does not fall back to a stale access reference for a %s provider binding',
+    async (kind) => {
+      state.membership.role = 'staff';
+      state.access = {
+        id: 'access-a',
+        role: 'staff',
+        status: 'active',
+        staffId: 'staff-a',
+        externalStaffId: 'stale-reference',
+      };
+      state.staffLinks =
+        kind === 'revoked'
+          ? []
+          : [{ externalId: 'one' }, { externalId: 'two' }];
+      const result = await read(token()).expect(201);
+      expect(result.body).toMatchObject({
+        role: 'staff',
+        staffId: 'staff-a',
+        externalStaffId: null,
+      });
+    },
+  );
   it('accepts canonical tenantless platform role without requiring a fake membership', async () => {
     state.user.role = 'platform_owner';
     state.user.tenantId = null as unknown as string;

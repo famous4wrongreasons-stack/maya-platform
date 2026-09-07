@@ -89,6 +89,28 @@ class AuthorityTest(unittest.IsolatedAsyncioTestCase):
             result = await access.middleware(Request('/api/god/health', headers={'Authorization': 'Bearer jwt'}), Mock())
             self.assertEqual(403, result.status)
 
+    async def test_unresolved_or_revoked_staff_projection_denies_before_legacy_handler(self):
+        for path in ['/api/panel/master/overview', '/api/chat', '/api/chat/stream', '/api/chat/history']:
+            handler = Mock()
+            with patch.object(access, 'read_principal', return_value=principal(role='staff', staffId='staff-a', externalStaffId=None)):
+                result = await access.middleware(Request(path, {'mode': 'staff'}, {'Authorization': 'Bearer jwt'}), handler)
+                self.assertEqual(403, result.status)
+                self.assertEqual('canonical_staff_projection_required', result.body['error'])
+            handler.assert_not_called()
+
+    async def test_live_canonical_staff_projection_preserves_exact_self_view(self):
+        async def handler(request):
+            role = access.panel_role(100)
+            self.assertEqual('master', role['role'])
+            self.assertEqual('777', role['staff_id'])
+            self.assertEqual('staff-a', role['canonical_staff_id'])
+            self.assertFalse(access.is_admin(100))
+            self.assertEqual('777', access.master_projection(100)['yclients_staff_id'])
+            return Response({'ok': True})
+        with patch.object(access, 'read_principal', return_value=principal(role='staff', staffId='staff-a', externalStaffId='777')):
+            result = await access.middleware(Request(headers={'Authorization': 'Bearer jwt'}), handler)
+            self.assertEqual(200, result.status)
+
     async def test_platform_can_enter_god_without_fake_telegram_identity(self):
         p = principal(); p.update(role='platform_owner', platform=True, membershipId=None, telegramId=None, authIdentityId=None)
         async def handler(request):

@@ -187,7 +187,7 @@
       "file": "canonical_staff_access.py",
       "owner": "R02",
       "newFile": true,
-      "candidateSha256": "a93df5096edef62b7795d3c25d583be9961abb9e3519ca1d7ee3c1cb884a1628"
+      "candidateSha256": "e94ba25cadb9a1775c60d66ff3ad74cdda61e3d31f57df1941a65ea59f0adf2c"
     },
     {
       "file": "package5_staff_authority_guard.py",

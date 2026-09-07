@@ -40,6 +40,15 @@ describe('R02 permanent canonical staff authority boundaries', () => {
     expect(source).toContain('tx.membership.findUnique');
     expect(source).toContain('tx.crmStaffAccess.findUnique');
     expect(source).toContain('tx.authIdentity.findMany');
+    expect(source).not.toMatch(/\bexternalStaffId\b/);
+    expect(source).toContain('projectLegacyStaffReference');
+    const projection = read(
+      'maya-saas-backend/src/crm/legacy-staff-reference.projection.ts',
+    );
+    expect(projection).toContain('tx.staffProviderLink.findMany');
+    expect(projection).not.toMatch(
+      /crmStaffAccess|\.\s*(?:create|update|upsert|delete)\s*\(/,
+    );
     const module = read('maya-saas-backend/src/auth/auth.module.ts');
     expect(module).toContain(
       'controllers: [AuthController, LegacyStaffPrincipalController]',

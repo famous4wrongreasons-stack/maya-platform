@@ -12,6 +12,12 @@ The Python HTTP middleware protects every `/api/panel/*`, `/api/god/*` and reque
 
 Panel/AI/tool-selection helpers consume only that scoped principal. An account without an exact Telegram identity uses the existing canonical app; legacy Telegram-keyed projections return `canonical_staff_channel_required`, without a synthetic identifier. These boundaries supply access authority to dependent packages; they do not claim to fix their finance, background-delivery, journal or media business owners.
 
+## Scoped correction after the first wave architectural gate
+
+The first aggregate gate correctly rejected the adapter's selection of the legacy access reference in `auth/`. That failure was fixed without changing `src/domain/boundary.spec.ts` or adding an allowlist exception. Authorization now reads only canonical `staffId`. A read-only CRM-boundary projection resolves that admitted `StaffId` through the exact tenant/provider-qualified, linked `StaffProviderLink` and active canonical Staff. The legacy `CrmStaffAccess` provider reference is never selected, trusted or used as a fallback.
+
+Missing/revoked/ambiguous projection links produce no provider reference. The canonical role remains independent of that presentation data, while projection-dependent legacy staff routes reject before entering a handler. New HTTP cases prove a stale legacy access reference cannot choose the emitted provider reference; Python cases prove missing projection denial and an accepted exact canonical self-view. The unchanged domain boundary and updated R02 proof pass together (7 suites/53 tests, including 22 Python cases); lint and build typecheck pass. The composed Python candidate and staging manifest were refreshed for this helper only; B35 report/launcher bytes remain unchanged.
+
 ## Transport and deployment composition
 
 Both current PWA helpers send the canonical JWT before channel metadata. `authReq` and `authPayload` preserve the same opaque proof in `Authorization` and `maya_token`. The six inventoried PWA candidates were parsed and tested: the current salon, MayaOS and VPS bundles preserve their existing canonical token; the three old public backup variants have no canonical authentication implementation and invent none. Their privileged requests fail closed and require current canonical sign-in.
@@ -24,8 +30,8 @@ The [Python overlay builder](package5-wave-ra-python-overlay.py) applies only no
 
 ## Proof and permanent ratchets
 
-- **6 Jest suites / 45 tests PASS**, using the actual Nest HTTP JWT/AuthSession/TenantAccess/Roles stack for the new adapter, existing JWT/session/membership/A16 tests, and normal-backend architectural tests.
-- **20 Python cases PASS** inside that normal backend test path: absent/raw/legacy proof; exact current owner and platform; wrong channel; revoked next request; missing identity; tenant-to-platform escalation; concurrent isolation; child-task/thread denial; single-use SSE transfer and expiry; direct grant tombstones; no phone/social-map promotion; and negative class-ratchet mutations.
+- **7 Jest suites / 53 tests PASS**, using the actual Nest HTTP JWT/AuthSession/TenantAccess/Roles stack for the new adapter, existing JWT/session/membership/A16 tests, and normal-backend architectural tests.
+- **22 Python cases PASS** inside that normal backend test path: absent/raw/legacy proof; exact current owner and platform; wrong channel; revoked next request; missing identity; tenant-to-platform escalation; concurrent isolation; child-task/thread denial; single-use SSE transfer and expiry; direct grant tombstones; no phone/social-map promotion; and negative class-ratchet mutations.
 - Existing control-plane architectural guard: **PASS, zero findings**, retaining B13–B24/B34/B35 boundaries.
 - Owned TypeScript lint: **PASS, zero warnings/errors**. Build TypeScript check: **PASS**. Full wave mandatory checks remain owned by the parent.
 - **6 PWA candidates / 24 transport checks PASS**; exact existing helper availability is recorded in [PWA proof](package5-wave-ra-r02-pwa-proof.json).

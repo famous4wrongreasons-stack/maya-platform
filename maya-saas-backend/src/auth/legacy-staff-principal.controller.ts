@@ -9,8 +9,10 @@ import {
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
+import { projectLegacyStaffReference } from '../crm/legacy-staff-reference.projection';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Roles } from '../decorators/roles.decorator';
+import { asStaffIdOrNull } from '../domain/staff-identity';
 import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -140,7 +142,6 @@ export class LegacyStaffPrincipalController {
             role: true,
             status: true,
             staffId: true,
-            externalStaffId: true,
           },
         });
         if (
@@ -151,6 +152,11 @@ export class LegacyStaffPrincipalController {
           throw new ForbiddenException('Canonical staff access changed');
         if (actor.role === UserRole.STAFF && (!access || !access.staffId))
           throw new ForbiddenException('Exact canonical staff access required');
+        const staffPresentation = await projectLegacyStaffReference(tx, {
+          tenantId: installation.tenantId,
+          provider: source.provider,
+          staffId: asStaffIdOrNull(access?.staffId),
+        });
         const identities = await tx.authIdentity.findMany({
           where: {
             tenantId: installation.tenantId,
@@ -175,7 +181,7 @@ export class LegacyStaffPrincipalController {
           telegramId,
           authIdentityId: telegramId ? identities[0].id : null,
           staffId: access?.staffId ?? null,
-          externalStaffId: access?.externalStaffId ?? null,
+          ...staffPresentation,
           businessMutations: 0,
         };
       }),
