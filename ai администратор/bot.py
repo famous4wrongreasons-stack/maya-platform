@@ -5185,11 +5185,132 @@ async def _director_briefing_job(app: Application):
 
 
 async def _daily_report_job(app: Application):
-    """Trigger the existing tenant-qualified owner; it owns facts, plan and delivery."""
-    import maya_inbox_bridge
-    accepted = await maya_inbox_bridge.trigger_owner_daily_report()
-    if not accepted:
-        logger.warning("daily_report trigger unresolved; canonical owner resumes the same report")
+    """21:00 МСК — собираем дневной отчёт и уведомляем владельца: Telegram + PWA-пуш.
+    Зарплаты барберов смены (выручка × реальный %) + сколько визитов нал/карта."""
+    try:
+        import webhook_server
+        from datetime import date as _date
+        d = _date.today().isoformat()
+        rep = await asyncio.to_thread(webhook_server._daily_report, d)
+    except Exception as e:
+        logger.error(f"daily_report job build: {e}")
+        return
+    # Отметка для самодиагностики GOD-режима: дневной отчёт сегодня отработал.
+    try:
+        from datetime import datetime as _dtnow
+        database.set_setting("last_daily_report_at", _dtnow.now().isoformat())
+    except Exception:
+        pass
+
+    dd = (d[8:10] + "." + d[5:7]) if len(d) >= 10 else d
+    masters = rep.get("masters") or []
+    cash = rep.get("cash") or {}
+    card = rep.get("card") or {}
+
+    lines = [f"📊 Отчёт за {dd} готов", ""]
+    barber_lines = []
+    for m in masters:
+        if m.get("is_owner"):
+            continue
+        barber_lines.append(
+            f"• {m.get('name')}: {_fmt_rub(m.get('gross', 0))} ₽ × {m.get('percent', 0)}% = "
+            f"{_fmt_rub(m.get('salary', 0))} ₽"
+        )
+    if barber_lines:
+        lines.append("Зарплаты барберов (смена):")
+        lines.extend(barber_lines)
+        lines.append(f"Итого к выплате: {_fmt_rub(rep.get('salary_total', 0))} ₽")
+    else:
+        lines.append("Сегодня барберов в смене с выручкой нет.")
+
+    # Антон (ассистент)
+    anton = rep.get("anton") or {}
+    if anton:
+        lines.append("")
+        if anton.get("day_off"):
+            lines.append(f"Антон (выходной): {_fmt_rub(anton.get('total', 0))} ₽")
+        else:
+            lines.append(
+                f"Антон: {_fmt_rub(anton.get('base', 0))} ₽ + {anton.get('pct', 0)}% выручки "
+                f"({_fmt_rub(anton.get('pct_amount', 0))} ₽) = {_fmt_rub(anton.get('total', 0))} ₽"
+            )
+
+    # Дополнительные расходы (каждый день)
+    extra = rep.get("extra_expenses") or {}
+    eitems = extra.get("items") or []
+    if eitems:
+        lines.append(
+            "Доп. расходы: "
+            + " + ".join(f"{_fmt_rub(x.get('amount', 0))} ₽" for x in eitems)
+            + f" = {_fmt_rub(extra.get('total', 0))} ₽"
+        )
+    # Расходы по салону от Антона (кофе, уборщица, лента…)
+    salon = rep.get("salon_expenses") or {}
+    sitems = salon.get("items") or []
+    if sitems:
+        lines.append("Расходы по салону (Антон): "
+                     + " + ".join(f"{_fmt_rub(x.get('amount', 0))} ₽" for x in sitems)
+                     + f" = {_fmt_rub(salon.get('total', 0))} ₽")
+    if rep.get("expenses_total") is not None:
+        lines.append(f"Расходы за день всего: {_fmt_rub(rep.get('expenses_total', 0))} ₽")
+
+    # Предварительная выплата за неделю (Чт→Ср до сегодня) — все, кроме Стаса (#11)
+    prelim = rep.get("prelim_payout") or {}
+    if prelim and (prelim.get("masters") or (prelim.get("anton") or {}).get("salary")):
+        wk = prelim.get("week") or {}
+        ws = wk.get("start") or ""
+        ws_d = (ws[8:10] + "." + ws[5:7]) if len(ws) >= 10 else ws
+        lines.append("")
+        lines.append(f"💸 Предв. выплата за неделю (с {ws_d} по сегодня), кроме Стаса:")
+        for m in (prelim.get("masters") or []):
+            lines.append(f"• {m.get('name')}: {_fmt_rub(m.get('salary', 0))} ₽")
+        an = prelim.get("anton") or {}
+        if an.get("salary"):
+            lines.append(f"• Антон: {_fmt_rub(an.get('salary', 0))} ₽")
+        lines.append(f"Итого к выплате: {_fmt_rub(prelim.get('total', 0))} ₽")
+
+    lines.append("")
+    lines.append("Оплаты за день:")
+    lines.append(f"💵 Наличные: {cash.get('count', 0)} виз. — {_fmt_rub(cash.get('sum', 0))} ₽")
+    lines.append(f"💳 Карта: {card.get('count', 0)} виз. — {_fmt_rub(card.get('sum', 0))} ₽")
+    lines.append(f"Выручка за день: {_fmt_rub(rep.get('total_gross', 0))} ₽")
+    if rep.get("note"):
+        lines.append("")
+        lines.append(f"⚠️ {rep.get('note')}")
+    text = "\n".join(lines)
+
+    # Тело PWA-пуша владельцу — компактная выжимка отчёта (а не «откройте»):
+    _visits = (cash.get("count", 0) or 0) + (card.get("count", 0) or 0)
+    _push_lines = [
+        f"Выручка {_fmt_rub(rep.get('total_gross', 0))} ₽ · {_visits} виз.",
+        f"💵 {_fmt_rub(cash.get('sum', 0))} нал · 💳 {_fmt_rub(card.get('sum', 0))} карта",
+    ]
+    if rep.get("salary_total"):
+        _push_lines.append(f"Барберам к выплате: {_fmt_rub(rep.get('salary_total', 0))} ₽")
+    if rep.get("expenses_total") is not None:
+        _push_lines.append(f"Расходы за день: {_fmt_rub(rep.get('expenses_total', 0))} ₽")
+    push_body = "\n".join(_push_lines)
+
+    try:
+        import maya_inbox_bridge
+        accepted = await maya_inbox_bridge.publish_inbox_item(
+            type="daily_report",
+            title=f"Отчёт за {dd}",
+            body_text=text,
+            source_seed=f"daily_report|{d}",
+            telegram_chat_ids=list(database.list_admins() or []),
+            deep_link="/app/?panel=report",
+            payload={"date": d},
+            fanout_owners=True,
+            telegram_buttons=[{
+                "text": "📊 Открыть отчёт",
+                "url": "https://malesthetic.pro/app/?panel=report",
+            }],
+        )
+        if not accepted:
+            logger.warning("daily_report rejected by Action Engine")
+    except Exception as e:
+        logger.warning(f"daily_report Action Engine: {e}")
 
 
 async def _god_watch_job(app: Application):

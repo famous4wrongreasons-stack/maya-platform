@@ -1,4 +1,3 @@
-import { OwnerReportFoundationModule } from '../owner-reports/owner-report-foundation.module';
 import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { CommunicationBulkDeliveryService } from './communication-bulk-delivery.service';
 import { CommunicationBulkPolicyService } from './communication-bulk-policy.service';
@@ -13,7 +12,6 @@ import { CommunicationWebPushTransport } from './communication-web-push.transpor
 
 @Module({
   imports: [
-    OwnerReportFoundationModule,
     EntitlementsModule,
     PrismaModule,
     ActionEngineModule,
