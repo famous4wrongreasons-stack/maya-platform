@@ -1527,14 +1527,9 @@ def list_certs_by_phone(phone: str) -> list[dict]:
 # ─── Админы (могут гасить сертификаты) ─────────────────────────────────
 
 def add_admin(telegram_user_id: int, added_by: int = None) -> bool:
-    """Добавляет админа (идемпотентно). True если добавлен сейчас, False если уже был."""
-    with _db() as conn:
-        cur = conn.execute(
-            "INSERT OR IGNORE INTO admins (telegram_user_id, added_at, added_by_user_id) "
-            "VALUES (?, ?, ?)",
-            (telegram_user_id, _now(), added_by),
-        )
-        return cur.rowcount > 0
+    """R02: retired raw staff authority; use canonical A16/A25."""
+    raise RuntimeError("canonical_crm_staff_access_required")
+
 
 
 def is_admin(telegram_user_id: int) -> bool:
@@ -1625,9 +1620,9 @@ def bind_master(bind_code: str, telegram_chat_id: int) -> dict | None:
 
 
 def unbind_master(telegram_chat_id: int) -> bool:
-    """Legacy Telegram staff bindings are immutable compatibility history."""
-    del telegram_chat_id
+    """R02: retired raw staff authority; use canonical A16/A25."""
     raise RuntimeError("canonical_crm_staff_access_required")
+
 
 
 def get_master_by_chat_id(telegram_chat_id: int) -> dict | None:

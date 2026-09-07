@@ -19355,6 +19355,12 @@ function AChat() {
       }
     } catch (e) {}
 	    try {
+          const canonical = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
+          if (canonical && canonical.token) {
+            headers.Authorization = 'Bearer ' + canonical.token;
+            payload.maya_token = canonical.token;
+            return { headers: headers, payload: payload };
+          }
 	      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) headers['X-Telegram-InitData'] = window.Telegram.WebApp.initData;else if (window.__tgAuthData) payload.auth_data = window.__tgAuthData;else {
 	        const tok = localStorage.getItem('web_session_token');
         if (tok) payload.session_token = tok;else {
@@ -40926,10 +40932,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   function authReq(extra) {
     var headers = { 'Content-Type': 'application/json' };
     var body = extra || {};
+    var mayaTok = typeof canonicalMayaTok === 'function' ? canonicalMayaTok() : (typeof meSaasCurrentBundle === 'function' ? (meSaasCurrentBundle() || {}).token : '');
+    if (mayaTok) { headers.Authorization = 'Bearer ' + mayaTok; body.maya_token = mayaTok; return { headers: headers, body: JSON.stringify(body) }; }
     var initData = tgInitData();
     if (initData) { headers['X-Telegram-InitData'] = initData; return { headers: headers, body: JSON.stringify(body) }; }
-    var mayaTok = canonicalMayaTok();
-    if (mayaTok) { headers.Authorization = 'Bearer ' + mayaTok; return { headers: headers, body: JSON.stringify(body) }; }
     var auth = tgAuth();
     if (auth) { body.auth_data = auth; return { headers: headers, body: JSON.stringify(body) }; }
     var tok = webTok();

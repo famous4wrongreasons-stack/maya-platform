@@ -1,0 +1,103 @@
+{
+  "productionEffects": 0,
+  "chain": "exact active source \u2192 R01 \u2192 bounded R02 canonical token transport",
+  "overlays": [
+    {
+      "target": "salon/app/index.html",
+      "kind": "pwa",
+      "r01Sha256": "36f2001a38215c93210b7afc0e92198a2896c506b7a0a0f106dc30c6f9b6c697",
+      "candidateSha256": "6cf673b29cab1903f84d0be45ee5e3105c8287b48a8b7cde9badba865a5ec793",
+      "r02Replacements": 2,
+      "patchPath": "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__index.html.patch",
+      "patchSha256": "27124b97be5166e1c93392f5c2b00df3a228dce340707d9cbd7ca7a0e44a717e",
+      "productionBeforeSha256": "2c733573d727b33932107454fc2fd31782e9dddc794c69e5a475b1d67ffefe72"
+    },
+    {
+      "target": "mayaos/app/index.html",
+      "kind": "pwa",
+      "r01Sha256": "0e1cd347f305f4fa49bce5fe22a824d57bf93641aa26a6a231ba07c54489e6a6",
+      "candidateSha256": "83dcb25a057f9da59ff5babf8ee7c00e6d29b35bdada57bd9e6be26005816f9d",
+      "r02Replacements": 2,
+      "patchPath": "maya-saas-backend/deploy/platform/beget-edge/r02/mayaos__app__index.html.patch",
+      "patchSha256": "890a8c82df287ff1744b1cbd3330a0444f73adcc50d3777808e9921d46a257a4",
+      "productionBeforeSha256": "0eb94816c1d62b30d279f16555c8d189e57bb988f273bff3cd734d74294f8772"
+    },
+    {
+      "target": "salon/app/index.codex-loyalty-20260721.html",
+      "kind": "pwa",
+      "r01Sha256": "b96ffea40237f8d90113ffb21c571f3cccfce0be120c7404d043c5f17b053dc2",
+      "candidateSha256": "6423de0954e69395bc19fb4182b59aec846f8cef206aadd57f178c3ee7925b48",
+      "r02Replacements": 2,
+      "patchPath": "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__index.codex-loyalty-20260721.html.patch",
+      "patchSha256": "e28142b23dfb80d384e04bf1344f4000ca251e38f94410c07ecf1e16b2daae51",
+      "productionBeforeSha256": "f2a1ea506b8a3d14196bafd2d7d3b3b02ff55dc8e66167746ea97e569ebfdd6d"
+    },
+    {
+      "target": "salon/app/index.backup-20260731-anton-analytics.html",
+      "kind": "pwa",
+      "r01Sha256": "bd2fa2b6635b1a54cce331b6f5aad436cdb4fd3fadab6d2362c41bc1e6932ee2",
+      "candidateSha256": "5d7db20684fe150d792b1503eab4c2d98f02f0c308981e45be24ed5b946ff77f",
+      "r02Replacements": 2,
+      "patchPath": "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__index.backup-20260731-anton-analytics.html.patch",
+      "patchSha256": "9e9add081ba73d8059c4c60d40fe8e70a627f96984735137f469a49d479ad5cc",
+      "productionBeforeSha256": "7f80e4355f26ac565ca0739a1e39dccd1c7ca5f679248ce5d8cc2df1e23f16c9"
+    },
+    {
+      "target": "salon/app/tenant-test.html",
+      "kind": "pwa",
+      "r01Sha256": "9c322c8d3ce0e13c3dfd43cd87d1e9a4fd344447947af26f182f5e8d4865c8dd",
+      "candidateSha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+      "r02Replacements": 2,
+      "patchPath": "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__tenant-test.html.patch",
+      "patchSha256": "9da2e2298f3fc7191acc3084bdb03fa49b10df9df65b6f4d52bd92dbc759eb56",
+      "productionBeforeSha256": "878ad72f35c4b91d3e9bf2a7a1419969c559bee73b01e720cb1675980ee300c4"
+    },
+    {
+      "target": "vps/app.html",
+      "kind": "pwa",
+      "r01Sha256": "284ea2217e702ea282b9d3e45d1ae80eacaa69839f043f16ecea2c6643ebc3d7",
+      "candidateSha256": "b37abcd277156e5e6a67505768ea2b5686898cd4512ea860fa57b45ff81b5ee1",
+      "r02Replacements": 2,
+      "patchPath": "maya-saas-backend/deploy/platform/beget-edge/r02/vps__app.html.patch",
+      "patchSha256": "f85b94b83c0c0d54fcbf693d212b39430b75d54759303e21f922c466f288eca5",
+      "productionBeforeSha256": "08177c652e7c8f0097981c5a8e8163c3f33b70d241e1f001c06931b640296bc3"
+    },
+    {
+      "target": "salon/app/api-proxy.php",
+      "kind": "php",
+      "r01Sha256": "c292c64b094c40d18a713db7620baa54573f41e6842151f88b3038606ea42c5f",
+      "candidateSha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+      "r02Replacements": 41,
+      "patchPath": "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__api-proxy.php.patch",
+      "patchSha256": "c9249a9025be94816f2d0f926331edb47475eab670bfc60d547c79cd0e4c7821",
+      "productionBeforeSha256": "03fb7ee34dbba151d10a968bcb4160c45b9a16635d42dd5b4adb98dccf9f060c"
+    },
+    {
+      "target": "salon/app/api-proxy.codex-loyalty-20260721.php",
+      "kind": "php",
+      "r01Sha256": "9971e7da796c0bb10d54e1fc47d52c2583e3ce8ebb0e63600f94aadfe1d5738b",
+      "candidateSha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+      "r02Replacements": 43,
+      "patchPath": "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__api-proxy.codex-loyalty-20260721.php.patch",
+      "patchSha256": "48253fd5610dc506b94dc95626a45180db3b2163d2ee3e8efde5200ca79b37cd",
+      "productionBeforeSha256": "2860054722f74d34d93ffdf64a58398ecfa250f5bf29e906959851fd87abbbe0"
+    },
+    {
+      "target": "salon/app/maya-native-api.php",
+      "kind": "relay",
+      "r01Sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "candidateSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "r02Replacements": 0,
+      "productionBeforeSha256": "ae371c9bfd514f7e8f300f4c9d45fa657ddd4b5d1ba9eb92bf455d8e680b5952"
+    },
+    {
+      "target": "mayaos/maya-platform-api.php",
+      "kind": "relay",
+      "r01Sha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+      "candidateSha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+      "r02Replacements": 0,
+      "productionBeforeSha256": "cc9c7ca4f3f95428b62877bf5799190277f4fa1f007cdbc0ae21086f1611476f"
+    }
+  ],
+  "patchFormat": "Zero-context unified diff; verify input hash and apply with git apply --unidiff-zero; R01 candidate is the exact parent"
+}

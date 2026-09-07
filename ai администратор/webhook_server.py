@@ -48,6 +48,7 @@ import config
 import cutmatch
 import cycle_reminder
 import database
+import canonical_staff_access
 import growth_planner
 import lead_alerts
 import master_briefing
@@ -1980,40 +1981,16 @@ async def _build_full_cabinet(request: web.Request, body: dict) -> web.Response:
 
 
 def _panel_resolve_role(tg_id: int) -> dict:
-    """Resolve only legacy owner access; staff/manager authority is canonical A16."""
-    # p5_b13_raw_telegram_staff_manager_authority_disabled
-    try:
-        from config import FOUNDER_IDS as _FIDS
-        founders = {int(x) for x in _FIDS}
-    except Exception:
-        founders = set()
-    is_founder = int(tg_id) in founders
-    is_admin = bool(database.is_admin(int(tg_id)))
-    role = resolve_panel_role(
-        tg_id=int(tg_id),
-        is_founder=is_founder,
-        is_admin=is_admin,
-        is_master=False,
-        manager_ids=set(),
-    )
-    perms = panel_permissions(role, is_master=False, is_cashier=False)
-    return {
-        "role": role,
-        "is_cashier": False,
-        "is_master": False,
-        "staff_id": None,
-        "master_name": "",
-        "permissions": perms,
-        "is_founder": is_founder,
-        "is_admin": is_admin,
-        "staff_authority": "CrmStaffAccess",
-    }
+    """R02: exact current canonical principal; no raw-role fallback."""
+    return canonical_staff_access.panel_role(tg_id)
+
 
 
 def _panel_auth(body: dict, init_data_header: str):
-    """tg_user из initData (Mini App) ИЛИ auth_data (Login Widget) ИЛИ веб-сессии
-    (вход через ВК/телефон без Telegram: body.session_token → resolve → chat_id).
-    Иначе None."""
+    """Canonical staff context first; remaining channel proof is Client-only."""
+    current = canonical_staff_access.panel_user()
+    if current:
+        return current
     if init_data_header:
         u = _verify_telegram_init_data(init_data_header, TELEGRAM_TOKEN)
         if u:
@@ -2023,7 +2000,7 @@ def _panel_auth(body: dict, init_data_header: str):
         u = _verify_telegram_login_widget(auth_data, TELEGRAM_TOKEN)
         if u:
             return u
-    # Веб-сессия (ВК/телефон-вход без VPN): токен → chat_id известного сотрудника.
+    # Historical compatibility session is never a staff authority source.
     tok = (body or {}).get("session_token")
     if tok:
         try:
@@ -4451,19 +4428,12 @@ async def panel_master_clients_handler(request: web.Request) -> web.Response:
 #  GOD-режим: закрытый founder-кабинет MAYA (только основатель, FOUNDER_IDS)
 # ════════════════════════════════════════════════════════════════════════════
 def _god_gate(request: web.Request, body: dict):
-    """(tg_id, None) если запрос от основателя; иначе (None, error_response)."""
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return None, _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    if not tg_id:
-        return None, _cabinet_response({"error": "no_user_id"}, status=400)
-    info = _panel_resolve_role(int(tg_id))
-    if not info.get("is_founder"):
-        return None, _cabinet_response(
-            {"error": "forbidden", "message": "Раздел доступен только основателю MAYA."},
-            status=403)
-    return int(tg_id), None
+    """Canonical platform access is distinct from tenant ownership."""
+    principal = canonical_staff_access.current()
+    if not principal or not canonical_staff_access.is_platform():
+        return None, _cabinet_response({"error": "canonical_platform_authority_required"}, status=403)
+    return principal["userId"], None
+
 
 
 
@@ -5214,11 +5184,7 @@ async def panel_daily_report_handler(request: web.Request) -> web.Response:
         logger.error(f"panel_daily_report: {e}")
         return _cabinet_response({"error": "report_failed", "message": "Не удалось собрать отчёт."}, status=502)
     # «Чистая прибыль Стаса» и касса — ТОЛЬКО основателю (не другим owner, не Антону).
-    try:
-        from config import FOUNDER_IDS as _FIDS
-    except Exception:
-        _FIDS = {948205934}
-    if isinstance(rep, dict) and int(tg_id) not in _FIDS:
+    if isinstance(rep, dict) and not canonical_staff_access.is_platform(tg_id):
         rep.pop("owner_net", None)
         rep.pop("cash_reported", None)
     return _cabinet_response(rep)
@@ -6247,7 +6213,7 @@ def _master_chat_shortcut(chat_id: int, message: str) -> str | None:
     text = (message or "").lower()
     master = None
     try:
-        master = database.get_master_by_chat_id(int(chat_id))
+        master = canonical_staff_access.master_projection(int(chat_id))
     except Exception:
         master = None
     master_name = info.get("master_name") or (master or {}).get("full_name") or "мастер"
@@ -7840,6 +7806,8 @@ async def knowledge_image_handler(request: web.Request) -> web.Response:
 
 
 def _resolve_chat_tg_user(request: web.Request, body: dict) -> dict | None:
+    if _chat_request_mode(body) == "staff":
+        return canonical_staff_access.panel_user()
     """Resolve the app chat identity from Telegram initData, widget auth, or web session."""
     init_data = request.headers.get("X-Telegram-InitData", "")
     tg_user = _verify_telegram_init_data(init_data, TELEGRAM_TOKEN) if init_data else None
@@ -8078,12 +8046,12 @@ def _chat_has_assistant_dedupe_key(chat_id: int, mode: str, dedupe_key: str) -> 
 
 def _is_staff_chat_recipient(chat_id: int) -> bool:
     try:
-        if database.get_master_by_chat_id(int(chat_id)):
+        if canonical_staff_access.master_projection(int(chat_id)):
             return True
     except Exception:
         pass
     try:
-        return bool(database.is_admin(int(chat_id)))
+        return bool(canonical_staff_access.is_admin(int(chat_id)))
     except Exception:
         return False
 
@@ -8242,6 +8210,8 @@ async def chat_handler(request: web.Request) -> web.Response:
             tg_user = session_tg_user(web_auth.resolve_session(body.get("session_token")))
         except Exception:
             pass
+    if chat_mode == "staff":
+        tg_user = canonical_staff_access.panel_user()
     if not tg_user:
         return _cabinet_response(
             {"error": "unauthorized", "message": "Войдите через Telegram, ВКонтакте или по номеру."},
@@ -8828,6 +8798,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             tg_user = session_tg_user(web_auth.resolve_session(body.get("session_token")))
         except Exception:
             pass
+    if chat_mode == "staff":
+        tg_user = canonical_staff_access.panel_user()
     if not tg_user:
         return _cabinet_response(
             {"error": "unauthorized", "message": "Войдите через Telegram, ВКонтакте или по номеру."},
@@ -9235,7 +9207,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         finally:
             loop.call_soon_threadsafe(queue.put_nowait, SENTINEL)
 
-    loop.run_in_executor(None, _producer)
+    loop.run_in_executor(None, canonical_staff_access.synchronous_request_callback(_producer))
 
     streamed_parts: list[str] = []   # что реально настримили (для финального reply)
     contact_request = None
@@ -10485,7 +10457,7 @@ async def analyze_face_handler(request: web.Request) -> web.Response:
     # Сотрудники (владелец/админы) — без лимита: они показывают приложение клиентам.
     is_staff = False
     try:
-        is_staff = bool(database.is_admin(uid))
+        is_staff = bool(canonical_staff_access.is_admin(uid))
     except Exception:
         is_staff = False
 
@@ -11718,7 +11690,7 @@ async def start_webhook_server(bot_app: Application):
     # как base64-data-url; в нативном iOS-WKWebView (нет MediaRecorder) запись идёт
     # несжатым WAV (PCM) — крупнее webm/opus. Поднимаем лимит до 10 МБ, иначе запись
     # голоса с iPhone отбивается 413 ещё до распознавания.
-    web_app = web.Application(client_max_size=10 * 1024 * 1024)
+    web_app = web.Application(client_max_size=10 * 1024 * 1024, middlewares=[canonical_staff_access.middleware])
     web_app["bot_app"] = bot_app
 
     web_app.router.add_post("/yclients-webhook", handle_yclients_webhook)

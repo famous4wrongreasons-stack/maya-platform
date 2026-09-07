@@ -7,6 +7,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import canonical_staff_access
+
 
 ROOT = Path(__file__).parent
 SOURCE = (ROOT / "webhook_server.py").read_text(encoding="utf-8")
@@ -57,6 +59,7 @@ def function(name: str, extra=None):
         "_json": json,
         "logger": SimpleNamespace(error=lambda *args, **kwargs: None),
         "database": database,
+        "canonical_staff_access": canonical_staff_access,
         "_panel_auth": lambda body, header: {"id": 41} if header else None,
         "_cabinet_response": lambda payload, status=200: Response(payload, status),
         "resolve_panel_role": lambda **kw: "owner" if kw["is_admin"] or kw["is_founder"] else "client",
@@ -145,11 +148,11 @@ class Package5B13ControlPlaneBoundaryTest(unittest.IsolatedAsyncioTestCase):
     async def test_panel_role_ignores_legacy_staff_and_manager_data(self):
         resolver, database = function("_panel_resolve_role")
         result = resolver(77)
-        self.assertEqual("client", result["role"])
+        self.assertIsNone(result["role"])
         self.assertFalse(result["is_master"])
         self.assertFalse(result["is_cashier"])
         self.assertEqual("CrmStaffAccess", result["staff_authority"])
-        self.assertEqual([("is_admin", 77)], database.calls)
+        self.assertEqual([], database.calls)
 
 
 if __name__ == "__main__":

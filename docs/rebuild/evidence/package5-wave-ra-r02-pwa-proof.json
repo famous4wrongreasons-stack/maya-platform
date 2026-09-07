@@ -1,0 +1,55 @@
+{
+  "pass": true,
+  "checks": 24,
+  "productionEffects": 0,
+  "targets": [
+    {
+      "target": "salon/app/index.html",
+      "sha256": "6cf673b29cab1903f84d0be45ee5e3105c8287b48a8b7cde9badba865a5ec793",
+      "inlineScriptsParsed": 26,
+      "canonicalAuthenticationExists": true,
+      "behavior": "Existing canonical token preserved before raw channel metadata",
+      "checks": 4
+    },
+    {
+      "target": "mayaos/app/index.html",
+      "sha256": "83dcb25a057f9da59ff5babf8ee7c00e6d29b35bdada57bd9e6be26005816f9d",
+      "inlineScriptsParsed": 28,
+      "canonicalAuthenticationExists": true,
+      "behavior": "Existing canonical token preserved before raw channel metadata",
+      "checks": 4
+    },
+    {
+      "target": "salon/app/index.codex-loyalty-20260721.html",
+      "sha256": "6423de0954e69395bc19fb4182b59aec846f8cef206aadd57f178c3ee7925b48",
+      "inlineScriptsParsed": 24,
+      "canonicalAuthenticationExists": false,
+      "behavior": "No invented staff credential; server requires canonical sign-in",
+      "checks": 4
+    },
+    {
+      "target": "salon/app/index.backup-20260731-anton-analytics.html",
+      "sha256": "5d7db20684fe150d792b1503eab4c2d98f02f0c308981e45be24ed5b946ff77f",
+      "inlineScriptsParsed": 24,
+      "canonicalAuthenticationExists": false,
+      "behavior": "No invented staff credential; server requires canonical sign-in",
+      "checks": 4
+    },
+    {
+      "target": "salon/app/tenant-test.html",
+      "sha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+      "inlineScriptsParsed": 19,
+      "canonicalAuthenticationExists": false,
+      "behavior": "No invented staff credential; server requires canonical sign-in",
+      "checks": 4
+    },
+    {
+      "target": "vps/app.html",
+      "sha256": "b37abcd277156e5e6a67505768ea2b5686898cd4512ea860fa57b45ff81b5ee1",
+      "inlineScriptsParsed": 25,
+      "canonicalAuthenticationExists": true,
+      "behavior": "Existing canonical token preserved before raw channel metadata",
+      "checks": 4
+    }
+  ]
+}

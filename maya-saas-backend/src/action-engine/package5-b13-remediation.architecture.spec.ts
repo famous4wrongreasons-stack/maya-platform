@@ -47,9 +47,7 @@ describe('Package 5 B13 control-plane remediation', () => {
 
   it('removes raw Telegram staff, manager, bind-code and cashier authority', () => {
     const resolver = pythonFunction(webhook, '_panel_resolve_role');
-    expect(resolver).toContain(
-      'p5_b13_raw_telegram_staff_manager_authority_disabled',
-    );
+    expect(resolver).toContain('canonical_staff_access.panel_role');
     expect(resolver).not.toMatch(
       /panel_manager_ids|get_master_by_chat_id|can_redeem|is_master=True|is_cashier=True/,
     );

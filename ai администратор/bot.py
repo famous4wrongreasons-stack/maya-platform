@@ -31,6 +31,7 @@ from telegram.request import HTTPXRequest
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import database
+import canonical_staff_access
 import admin_nlu
 import ai_billing
 import anonymizer
@@ -183,7 +184,7 @@ def _keyboard_for(chat_id: int):
     (всё равно админские команды печатать через слэш в чате).
     """
     try:
-        if database.get_master_by_chat_id(chat_id):
+        if canonical_staff_access.master_projection(chat_id):
             return MASTER_KEYBOARD
     except Exception:
         pass
@@ -355,18 +356,9 @@ _GATE_ALLOWED_CALLBACK_PREFIXES = ("pdn_", "mkt_")
 
 
 def _is_staff_chat_id(chat_id: int) -> bool:
-    """Мастер или админ — для них гейт не применяется."""
-    try:
-        if database.is_admin(chat_id):
-            return True
-    except Exception:
-        pass
-    try:
-        if database.get_master_by_chat_id(chat_id):
-            return True
-    except Exception:
-        pass
-    return False
+    """Only an active canonical request context can establish staff access."""
+    return canonical_staff_access.is_staff(chat_id)
+
 
 
 def _gate_should_skip(update: Update) -> bool:
@@ -573,48 +565,16 @@ async def cmd_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ─── Команды мастеров (уведомления о новых записях) ───────────────────────
 
 async def cmd_bind(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/bind <код> — мастер привязывает свой Telegram к YClients-аккаунту."""
-    chat_id = update.effective_user.id
-    args = context.args or []
-    logger.info(f"/bind from chat_id={chat_id}, args={args!r}, raw_text={update.message.text!r}")
-    if not args:
-        await update.message.reply_text(
-            "Использование: `/bind ME-XXXXXX`\n"
-            "(без угловых скобок и кавычек)\n\n"
-            "Bind-код выдаёт администратор.",
-            parse_mode="Markdown",
-        )
-        return
-    # Чистим всё, кроме букв, цифр и тире — пользователи присылают код в самых
-    # разных обёртках: <ME-...>, "ME-...", `ME-...` и т.п.
-    raw = " ".join(args).upper()
-    code = re.sub(r"[^A-Z0-9-]", "", raw)
-    logger.info(f"/bind нормализованный код: {code!r}")
-    master = database.bind_master(code, chat_id)
-    logger.info(f"/bind результат: master={master}")
-    if not master:
-        await update.message.reply_text(
-            "Код не подошёл — возможно, неверный или уже использован другим аккаунтом. "
-            "Уточни у администратора."
-        )
-        return
-    await update.message.reply_text(
-        f"✅ Привязка прошла, {master['full_name']}!\n\n"
-        f"Теперь сюда будут приходить уведомления о ваших новых записях с подсказкой "
-        f"по апсейлу. Под каждым уведомлением — кнопки оплаты «Наличные» / «Карта», "
-        f"которые сами закроют запись в YClients после визита.\n\n"
-        f"Снизу — твоё рабочее меню: «📅 Записи на сегодня», пауза/возобновление "
-        f"уведомлений и отвязка. Команды также работают вручную (/today, /mute, "
-        f"/unbind), но обычно проще через кнопки.",
-        reply_markup=MASTER_KEYBOARD,
-    )
+    """Use the existing canonical account and A16 access flow."""
+    await update.effective_message.reply_text("Доступ сотрудников настраивается в MAYA. Откройте приложение и войдите в свой аккаунт: " + APP_URL)
+
 
 
 async def _handle_master_menu_button(
     update: Update, context: ContextTypes.DEFAULT_TYPE, chat_id: int, text: str,
 ):
     """Маршрутизация кнопок мастерского меню в соответствующие команды."""
-    master = database.get_master_by_chat_id(chat_id)
+    master = canonical_staff_access.master_projection(chat_id)
     if not master:
         # Не привязан, а нажал на мастерскую кнопку (например, после unbind)
         await update.message.reply_text(
@@ -690,20 +650,9 @@ async def _handle_master_menu_button(
 
 
 async def cmd_unbind(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/unbind — мастер отвязывает свой Telegram."""
-    chat_id = update.effective_user.id
-    if database.unbind_master(chat_id):
-        await update.message.reply_text(
-            "Отвязал. Уведомления больше приходить не будут. "
-            "Чтобы вернуться — попроси у админа новый код и сделай `/bind`.",
-            parse_mode="Markdown",
-            reply_markup=MAIN_KEYBOARD,
-        )
-    else:
-        await update.message.reply_text(
-            "Ты и так не был привязан 🙂",
-            reply_markup=_keyboard_for(chat_id),
-        )
+    """Use the existing canonical account and A16 access flow."""
+    await update.effective_message.reply_text("Доступ сотрудников настраивается в MAYA. Откройте приложение и войдите в свой аккаунт: " + APP_URL)
+
 
 
 # ── Локализация для расписания мастера ──────────────────────────────────
@@ -726,7 +675,7 @@ async def cmd_today(update: Update, context: ContextTypes.DEFAULT_TYPE):
         что это не «сегодня», а ближайший рабочий день — чтобы мастер не спутал.
     """
     chat_id = update.effective_user.id
-    master = database.get_master_by_chat_id(chat_id)
+    master = canonical_staff_access.master_projection(chat_id)
     if not master:
         await update.message.reply_text(
             "Сначала привяжись командой `/bind ME-XXXXXX`",
@@ -951,7 +900,7 @@ async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
     время + имя клиента + услуги. Без телефонов и фамилий — защита базы.
     """
     chat_id = update.effective_user.id
-    master = database.get_master_by_chat_id(chat_id)
+    master = canonical_staff_access.master_projection(chat_id)
     if not master:
         await update.message.reply_text(
             "Сначала привяжись командой `/bind ME-XXXXXX`",
@@ -1063,7 +1012,7 @@ async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_cycle_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/cycle_now — ручной запуск цикл-напоминания. Только для админов."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     await update.message.reply_text("🔁 Запускаю цикл-напоминание…")
@@ -1083,7 +1032,7 @@ async def cmd_cycle_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_birthday_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/birthday_now — ручной запуск ДР-рассылки (для админа). Тест/догон."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     await update.message.reply_text("🎂 Запускаю ДР-рассылку…")
@@ -1103,7 +1052,7 @@ async def cmd_birthday_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_subscriptions_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/subscriptions_now — ручной запуск job (sync + expire + renew push)."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     await update.message.reply_text("🎟 Запускаю обновление абонементов…")
@@ -1123,7 +1072,7 @@ async def cmd_subscriptions_now(update: Update, context: ContextTypes.DEFAULT_TY
 async def cmd_subscriptions_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/subscriptions_stats — сводка по абонементам."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     s = database.subscriptions_summary()
@@ -1151,7 +1100,7 @@ async def cmd_subscriptions_stats(update: Update, context: ContextTypes.DEFAULT_
 async def cmd_referral_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/referral_now — запустить реферал-резолвер вручную (только админ)."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     await update.message.reply_text("🤝 Запускаю резолвер рефералов…")
@@ -1174,7 +1123,7 @@ async def cmd_referral_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_referral_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/referral_stats — общая статистика по реферальной программе (админ)."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     s = database.referral_summary()
@@ -1201,7 +1150,7 @@ async def cmd_freed_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Пример: /freed_test 1234567 2026-05-28T18:00
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     args = context.args or []
@@ -1292,7 +1241,7 @@ class _QueryAsUpdate:
 async def cmd_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/admin — открыть админ-панель с inline-кнопками всех команд."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     await update.message.reply_text(
@@ -1308,7 +1257,7 @@ async def _admin_dispatch(context: ContextTypes.DEFAULT_TYPE, query, data: str):
     существующие cmd_*-функции через адаптер _QueryAsUpdate.
     """
     chat_id = query.from_user.id
-    if not database.is_admin(chat_id):
+    if not canonical_staff_access.is_admin(chat_id):
         await query.edit_message_text("Команда только для администраторов.")
         return
 
@@ -1397,7 +1346,7 @@ async def cmd_ai_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Только для админов.
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     try:
@@ -1418,7 +1367,7 @@ async def cmd_export_consents(update: Update, context: ContextTypes.DEFAULT_TYPE
     согласий за период.
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     try:
@@ -1449,7 +1398,7 @@ async def cmd_reactivation_now(update: Update, context: ContextTypes.DEFAULT_TYP
     Используется для теста или внеплановой кампании.
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     await update.message.reply_text("🔄 Запускаю реактивацию вручную, секунду…")
@@ -1475,7 +1424,7 @@ async def cmd_ai_provider(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Команда доступна только админам (INITIAL_ADMIN_IDS + добавленные).
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text(
             "Команда доступна только администраторам барбершопа."
         )
@@ -1630,7 +1579,7 @@ async def _try_handle_master_payment_text(update: Update, chat_id: int, text: st
     """
     if not text or len(text) > 60:
         return False  # длинные тексты — точно не «наличные», в AI
-    master = database.get_master_by_chat_id(chat_id)
+    master = canonical_staff_access.master_projection(chat_id)
     if not master:
         return False
 
@@ -1677,7 +1626,7 @@ async def _handle_payment_callback(
 ):
     """Мастер тапнул 💵 Наличные / 💳 Карта под уведомлением."""
     chat_id = query.from_user.id
-    master = database.get_master_by_chat_id(chat_id)
+    master = canonical_staff_access.master_projection(chat_id)
     if not master:
         await query.answer("Эта кнопка только для мастеров", show_alert=True)
         return
@@ -1718,7 +1667,7 @@ async def _handle_payment_callback(
 async def cmd_mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/mute 2h — заглушить уведомления на N часов (или /mute off — снять)."""
     chat_id = update.effective_user.id
-    master = database.get_master_by_chat_id(chat_id)
+    master = canonical_staff_access.master_projection(chat_id)
     if not master:
         await update.message.reply_text("Сначала привяжись `/bind ME-XXXXXX`",
                                          parse_mode="Markdown")
@@ -1806,13 +1755,17 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.answer()
     chat_id = query.from_user.id
+    if data.startswith(("empauth_", "bindnew_", "master_unbind_")):
+        await query.edit_message_text("Доступ сотрудников настраивается в MAYA: " + APP_URL)
+        return
+
     if is_retired_client_callback(data):
         await query.edit_message_text(client_handoff_message(APP_URL))
         return
 
     # Досье клиента из лид-алерта (по нашему client_id): резолвим телефон → YClients.
     if data and data.startswith("dossierc_"):
-        if not database.is_admin(chat_id):
+        if not canonical_staff_access.is_admin(chat_id):
             return
         try:
             cid = int(data[len("dossierc_"):])
@@ -1837,7 +1790,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Досье клиента по выбранному совпадению (YClients id) из /client.
     if data and data.startswith("dossier_"):
-        if not database.is_admin(chat_id):
+        if not canonical_staff_access.is_admin(chat_id):
             return
         try:
             ycid = int(data[len("dossier_"):])
@@ -2128,7 +2081,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Админский broadcast — подтверждение/отмена
     if data == "broadcast_send":
-        if not database.is_admin(chat_id):
+        if not canonical_staff_access.is_admin(chat_id):
             await query.edit_message_text("Команда только для администраторов.")
             return
         flow = broadcast_flow.get(chat_id)
@@ -2164,7 +2117,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ── Подтверждение доступа сотрудника («я Стас Мосин») ──────────────
     if data.startswith("empauth_"):
-        if not database.is_admin(chat_id):
+        if not canonical_staff_access.is_admin(chat_id):
             await query.edit_message_text("Только владелец может подтверждать сотрудников.")
             return
         if data.startswith("empauth_no_"):
@@ -2211,7 +2164,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("Окей, привязка не тронута 👌")
         return
     if data.startswith("bindnew_"):
-        if not database.is_admin(chat_id):
+        if not canonical_staff_access.is_admin(chat_id):
             await query.edit_message_text("Только для администраторов.")
             return
         try:
@@ -2246,7 +2199,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if data == "bcast_custom":
         # «Свой текст» — обычный awaiting_text-флоу
-        if not database.is_admin(chat_id):
+        if not canonical_staff_access.is_admin(chat_id):
             await query.edit_message_text("Команда только для администраторов.")
             return
         broadcast_flow[chat_id] = {"stage": "awaiting_text"}
@@ -2258,7 +2211,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if data.startswith("bcast_cat_"):
-        if not database.is_admin(chat_id):
+        if not canonical_staff_access.is_admin(chat_id):
             await query.edit_message_text("Команда только для администраторов.")
             return
         cat_code = data[len("bcast_cat_"):]
@@ -2299,7 +2252,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if data.startswith("bcast_tpl_"):
-        if not database.is_admin(chat_id):
+        if not canonical_staff_access.is_admin(chat_id):
             await query.edit_message_text("Команда только для администраторов.")
             return
         code = data[len("bcast_tpl_"):]
@@ -2506,7 +2459,7 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Антон присылает расходы по салону (после /rashod или еженедельного напоминания)
     uid = update.effective_user.id if update.effective_user else 0
-    if uid == ANTON_CHAT_ID and uid in _anton_expense_awaiting:
+    if canonical_staff_access.is_admin(uid) and uid in _anton_expense_awaiting:
         _anton_expense_awaiting.discard(uid)
         await _save_anton_expenses(update, update.message.text or "")
         return
@@ -2598,197 +2551,32 @@ _RE_SELF_INTRO_HINT = re.compile(
 
 
 def _detect_master_self_intro(text: str) -> dict | None:
-    """
-    Если текст похож на «привет, я <Имя>» и имя совпадает с мастером —
-    возвращает запись мастера YClients {id, name}. Иначе None.
-    Имя НЕ мастера → None (обычный клиент, не трогаем).
-    """
-    if not text or len(text) > 120:
-        return None
-    t = text.strip()
-    if not _RE_SELF_INTRO_HINT.search(t):
-        return None
-    # Кандидат-имя: после «я / это / зовут» — слово(а) С ЗАГЛАВНОЙ.
-    # БЕЗ re.IGNORECASE: [А-ЯЁ] должно быть строго заглавным (это имя собственное),
-    # иначе «я хочу постричься» ложно ловится как имя «хочу».
-    cand = None
-    m = re.search(
-        r"\b(?:[яЯ]|[эЭ]то|[зЗ]овут)\s+([А-ЯЁ][а-яё]+(?:\s+[А-ЯЁ][а-яё]+)?)",
-        t,
-    )
-    if m:
-        cand = m.group(1)
-    if not cand:
-        caps = re.findall(r"[А-ЯЁ][а-яё]{2,}", t)
-        if caps:
-            cand = caps[-1]
-    if not cand:
-        return None
-    try:
-        masters = yc.get_masters()
-    except Exception as e:
-        logger.error(f"_detect_master_self_intro masters: {e}")
-        return None
-    matches = _match_masters_by_spoken_name(cand.split()[0], masters or [])
-    chosen = matches[0] if len(matches) == 1 else None
-    if not chosen:
-        return None
-    # 🔴 НЕ дёргаем владельца «принять сотрудника», если этот мастер УЖЕ привязан к
-    # Telegram (его узнают по chat_id — приветствие выше). Иначе обычный КЛИЕНТ с
-    # именем как у мастера (Александр/Максим/Илья/Алексей — частые имена!) ложно
-    # триггерит запрос доступа сотрудника владельцу. Самопредставление имеет смысл
-    # только для ЕЩЁ НЕ привязанного мастера.
-    try:
-        bound = database.get_master_by_staff_id(int(chosen.get("id")))
-        if bound and bound.get("telegram_chat_id"):
-            return None
-    except Exception:
-        pass
-    return chosen
+    """A spoken name cannot establish staff identity or request access."""
+    return None
+
 
 
 async def _handle_master_self_intro(
     update: Update, context: ContextTypes.DEFAULT_TYPE, chat_id: int, master: dict
 ):
-    """
-    Включает режим сотрудника:
-      • уже привязан к этому мастеру → просто показываем меню мастера
-      • админ (владелец/совладелец) → доверяем по chat_id, привязываем сразу
-      • остальные → запрос подтверждения владельцу одной кнопкой
-    """
-    staff_id = int(master["id"])
-    full_name = master.get("name") or "мастер"
-    first = full_name.split()[0]
+    """Use the existing canonical account and A16 access flow."""
+    await update.effective_message.reply_text("Доступ сотрудников настраивается в MAYA. Откройте приложение и войдите в свой аккаунт: " + APP_URL)
 
-    # Уже привязан как мастер?
-    existing = database.get_master_by_chat_id(chat_id)
-    if existing and int(existing.get("yclients_staff_id") or 0) == staff_id:
-        await update.message.reply_text(
-            f"С возвращением, {first}! 💈 Режим мастера активен.",
-            reply_markup=MASTER_KEYBOARD,
-        )
-        return
-
-    # Админ — доверяем сразу
-    if database.is_admin(chat_id):
-        # Создаём запись мастера, если её ещё нет, затем привязываем chat_id
-        if not database.get_master_by_staff_id(staff_id):
-            database.reset_master_bind_code(staff_id, full_name)
-        _bind_master_chat_direct(staff_id, chat_id)
-        await update.message.reply_text(
-            f"Привет, {first}! 💈 Узнал тебя — включаю режим мастера.\n"
-            f"Снизу твоё рабочее меню.",
-            reply_markup=MASTER_KEYBOARD,
-        )
-        return
-
-    # Остальные — подтверждение владельца
-    kb = InlineKeyboardMarkup([[
-        InlineKeyboardButton("✅ Да, наш сотрудник",
-                             callback_data=f"empauth_yes_{staff_id}_{chat_id}"),
-        InlineKeyboardButton("✖️ Нет", callback_data=f"empauth_no_{chat_id}"),
-    ]])
-    sender_name = (update.effective_user.first_name or "").strip()
-    # 🔎 Диагностика «принять/не принять владельцу»: кого бот принял за мастера.
-    logger.info("[EMPAUTH] approval-request → admins: requester chat_id=%s name=%r matched_master=%r staff_id=%s",
-                chat_id, sender_name, full_name, staff_id)
-    for admin_id in database.list_admins():
-        try:
-            await context.bot.send_message(
-                admin_id,
-                f"👤 *Запрос доступа сотрудника*\n\n"
-                f"Пользователь {('@'+update.effective_user.username) if update.effective_user.username else sender_name} "
-                f"(id `{chat_id}`) представился как мастер *{full_name}*.\n\n"
-                f"Включить ему режим сотрудника?",
-                parse_mode="Markdown",
-                reply_markup=kb,
-            )
-        except Exception as e:
-            logger.error(f"empauth notify admin {admin_id}: {e}")
-    await update.message.reply_text(
-        f"Привет, {first}! Передал владельцу на подтверждение. "
-        f"Как подтвердит — включу тебе режим мастера 💈",
-    )
 
 
 def _bind_master_chat_direct(staff_id: int, chat_id: int):
-    """Привязывает chat_id к мастеру напрямую (без bind-кода)."""
-    with database._db() as conn:
-        row = conn.execute(
-            "SELECT id FROM masters_telegram WHERE yclients_staff_id = ?",
-            (staff_id,),
-        ).fetchone()
-        if row:
-            conn.execute(
-                "UPDATE masters_telegram SET telegram_chat_id = ?, bound_at = ?, "
-                "is_active = 1 WHERE yclients_staff_id = ?",
-                (chat_id, database._now(), staff_id),
-            )
+    """Raw native staff grants are retired; A16 is the sole owner."""
+    raise RuntimeError("canonical_crm_staff_access_required")
+
 
 
 async def _handle_admin_bind_request(
     update: Update, context: ContextTypes.DEFAULT_TYPE, chat_id: int, text: str
 ) -> bool:
-    """
-    Обрабатывает админский запрос «выдай код мастеру X».
-    Возвращает True если запрос распознан и обработан.
-    """
-    name_token = _extract_master_name_token(text)
-    if not name_token:
-        await update.message.reply_text(
-            "Я поняла, что нужен код доступа для мастера, но не разобрала имя. "
-            "Напиши, например: «выдай новый код мастеру Алексею».",
-        )
-        return True
-
-    # Тянем мастеров из YClients (полный список с именами)
-    try:
-        masters = await asyncio.to_thread(yc.get_masters)
-    except Exception as e:
-        logger.error(f"bind-request: yc.get_masters: {e}")
-        await update.message.reply_text("Не получилось получить список мастеров. Попробуй позже.")
-        return True
-
-    matches = _match_masters_by_spoken_name(name_token, masters or [])
-    if not matches:
-        names = ", ".join(sorted({(m.get("name") or "").split()[0] for m in (masters or []) if m.get("name")}))
-        await update.message.reply_text(
-            f"Не нашла мастера «{name_token}». Есть такие: {names}.\n"
-            f"Напиши имя точнее.",
-        )
-        return True
-    if len(matches) > 1:
-        names = ", ".join((m.get("name") or "?") for m in matches)
-        await update.message.reply_text(
-            f"Под «{name_token}» подходят несколько: {names}. Уточни, кого именно.",
-        )
-        return True
-
-    master = matches[0]
-    staff_id = int(master["id"])
-    full_name = master.get("name") or f"staff_{staff_id}"
-
-    # Текущее состояние привязки
-    existing = database.get_master_by_staff_id(staff_id)
-    if existing and existing.get("telegram_chat_id"):
-        # Уже привязан — генерация нового кода сбросит привязку. Спросим.
-        kb = InlineKeyboardMarkup([[
-            InlineKeyboardButton("✅ Да, новый код", callback_data=f"bindnew_{staff_id}"),
-            InlineKeyboardButton("✖️ Отмена",        callback_data="bindnew_cancel"),
-        ]])
-        await update.message.reply_text(
-            f"⚠️ *{full_name}* уже привязан к Telegram.\n\n"
-            f"Если выдать новый код — текущая привязка слетит, и мастеру "
-            f"придётся привязаться заново. Выдать новый код?",
-            parse_mode="Markdown",
-            reply_markup=kb,
-        )
-        return True
-
-    # Не привязан — сразу выдаём свежий код
-    code = database.reset_master_bind_code(staff_id, full_name)
-    await _send_bind_code_card(update.message.reply_text, full_name, code)
+    """Use the existing canonical account and A16 access flow."""
+    await update.effective_message.reply_text("Доступ сотрудников настраивается в MAYA. Откройте приложение и войдите в свой аккаунт: " + APP_URL)
     return True
+
 
 
 async def _send_bind_code_card(reply_func, full_name: str, code: str):
@@ -2983,10 +2771,10 @@ def _is_commands_request(text: str) -> bool:
 async def _show_commands_for_role(update: Update, chat_id: int):
     """Список команд по роли: админ → полный каталог (тот же, что /help_admin),
     мастер → мастерские, клиент → клиентские. Приоритет — у админа."""
-    if database.is_admin(chat_id):
+    if canonical_staff_access.is_admin(chat_id):
         await _show_admin_help(update)
         return
-    if database.get_master_by_chat_id(chat_id):
+    if canonical_staff_access.master_projection(chat_id):
         await update.message.reply_text(
             MASTER_COMMANDS_TEXT, parse_mode="Markdown", reply_markup=MASTER_KEYBOARD
         )
@@ -3021,7 +2809,7 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
     # admin_nlu и кнопок, чтобы фраза распознавалась и у не-админов тоже. Голос
     # тоже идёт сюда. Не перехватываем, если админ в активном флоу (ввод рассылки).
     if _is_commands_request(text) and not (
-        database.is_admin(chat_id) and _admin_busy_in_flow(chat_id)
+        canonical_staff_access.is_admin(chat_id) and _admin_busy_in_flow(chat_id)
     ):
         await _show_commands_for_role(update, chat_id)
         return
@@ -3030,7 +2818,7 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
     # «покажи дашборд за неделю», «сделай рассылку» и т.д. Перехватываем ДО AI.
     # НО не трогаем, если админ в активном флоу (например, вводит текст рассылки),
     # иначе слова из текста рассылки могут случайно сработать как команда.
-    if database.is_admin(chat_id) and not _admin_busy_in_flow(chat_id):
+    if canonical_staff_access.is_admin(chat_id) and not _admin_busy_in_flow(chat_id):
         if _looks_like_bind_request(text):
             if await _handle_admin_bind_request(update, context, chat_id, text):
                 return
@@ -3043,7 +2831,6 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE, te
     if text in MASTER_MENU_BUTTONS:
         await _handle_master_menu_button(update, context, chat_id, text)
         return
-
 
     # R01: own-profile/history/booking is available only in the verified app.
     await update.effective_message.reply_text(client_handoff_message(APP_URL))
@@ -3743,7 +3530,7 @@ async def _handle_loyalty_redeem(update: Update, context: ContextTypes.DEFAULT_T
 async def cmd_loyalty_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/loyalty_now — ручной запуск начисления + сгорания (админ)."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     await update.message.reply_text("🪙 Запускаю обновление лояльности…")
@@ -3766,7 +3553,7 @@ async def cmd_loyalty_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_cashiers(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/cashiers — показать список мастеров с правом гасить коды."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     cashiers = database.list_cashiers()
@@ -3800,7 +3587,7 @@ async def cmd_cashier_revoke(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def _cmd_cashier_toggle(update: Update, context: ContextTypes.DEFAULT_TYPE,
                                 can_redeem: bool):
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     args = context.args or []
@@ -3838,7 +3625,7 @@ async def cmd_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     С аргументом «/broadcast <текст>» сразу идёт в превью.
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
 
@@ -3948,7 +3735,7 @@ async def cmd_stats_ai(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Без аргументов — за всё время. `/stats_ai 30` — за последние 30 дней.
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     args = context.args or []
@@ -4013,7 +3800,7 @@ async def cmd_loyalty_backfill(update: Update, context: ContextTypes.DEFAULT_TYP
     YClients (5% от sold_amount каждого клиента). Идемпотентно.
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     await update.message.reply_text(
@@ -4045,7 +3832,7 @@ async def cmd_loyalty_backfill(update: Update, context: ContextTypes.DEFAULT_TYP
 async def cmd_loyalty_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/loyalty_stats — общая статистика по программе лояльности (админ)."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     s = database.loyalty_summary()
@@ -4084,7 +3871,7 @@ async def cmd_reviews_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     /reviews_stats 7 — за 7 дней.
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     days = 30
@@ -4137,7 +3924,7 @@ async def cmd_reviews_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_reviews_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/reviews_now — ручной тик сбора отзывов (админ)."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     summary = await reviews.send_pending_review_requests(context.application)
@@ -4158,7 +3945,7 @@ async def cmd_leads_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     /leads_stats 7 — за 7 дней.
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     days = 30
@@ -4195,7 +3982,7 @@ async def cmd_leads_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_leads_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/leads_now — ручной тик scan_and_alert (админ, для отладки)."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     summary = await lead_alerts.scan_and_alert(context.application)
@@ -4214,7 +4001,7 @@ async def cmd_sources_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     /sources_stats 90     → 90 дней
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
 
@@ -4293,7 +4080,7 @@ async def cmd_migrate_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     /migrate_help 50     → топ-50 (макс 100)
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
 
@@ -4368,7 +4155,7 @@ async def cmd_migrate_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_migrate_qr(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/migrate_qr — собирает PDF с QR-кодами для шопа и шлёт админу."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
 
@@ -4423,7 +4210,7 @@ async def cmd_dashboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     /dashboard 90    → 90 дней
     """
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
 
@@ -4539,7 +4326,7 @@ async def cmd_dashboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def cmd_help_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/help_admin — список админ-команд с примерами фраз простым языком."""
-    if not database.is_admin(update.effective_user.id):
+    if not canonical_staff_access.is_admin(update.effective_user.id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     await _show_admin_help(update)
@@ -4548,7 +4335,7 @@ async def cmd_help_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_admin_pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/admin_pdf — собрать и прислать PDF-справочник команд."""
     user_id = update.effective_user.id
-    if not database.is_admin(user_id):
+    if not canonical_staff_access.is_admin(user_id):
         await update.message.reply_text("Команда только для администраторов.")
         return
     await update.message.reply_text("Собираю PDF-справочник…")
@@ -4702,9 +4489,7 @@ async def _send_reminder(
 async def post_init(app: Application):
     database.init_db()
     webhook_server.install_staff_telegram_chat_mirror(app.bot)
-    # Заводим первых админов (идемпотентно — повторные запуски не дублируют)
-    for admin_id in INITIAL_ADMIN_IDS:
-        database.add_admin(admin_id)
+    # R02: startup never recreates retired raw admin authority.
     scheduler.start()
     # Прогреваем кэш при старте — первый клиент не будет ждать
     yc.get_masters()
@@ -5113,7 +4898,7 @@ async def _save_anton_expenses(update: Update, text: str) -> bool:
 async def cmd_rashod(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Антон вносит расходы по салону. /rashod [список] — или команда, затем список."""
     uid = update.effective_user.id if update.effective_user else 0
-    if uid != ANTON_CHAT_ID:
+    if not canonical_staff_access.is_admin(uid):
         return  # команда только для Антона
     try:
         database.clear_salon_expenses(date.today().isoformat())  # команда перезаписывает день
@@ -5138,9 +4923,9 @@ async def cmd_kassa(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_user.id if update.effective_user else 0
     # Кассу вносит Антон ИЛИ владелец (Стас сам 2 дня в неделю). is_admin = Стас+Антон.
     try:
-        _allowed = (uid == ANTON_CHAT_ID) or database.is_admin(uid)
+        _allowed = canonical_staff_access.is_admin(uid)
     except Exception:
-        _allowed = (uid == ANTON_CHAT_ID)
+        _allowed = False
     if not _allowed:
         return
     txt = update.message.text or ""

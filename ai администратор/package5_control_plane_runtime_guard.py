@@ -57,7 +57,7 @@ WEB_FUNCTIONS = {
         "forbidden": ("panel_manager_ids", "database.list_admins", "database.get_master_by_chat_id"),
     },
     "_panel_resolve_role": {
-        "markers": ("p5_b13_raw_telegram_staff_manager_authority_disabled",),
+        "markers": ("canonical_staff_access.panel_role",),
         "forbidden": (
             "panel_manager_ids",
             "database.get_master_by_chat_id",
@@ -733,6 +733,12 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
     bulk_guard = importlib.util.module_from_spec(bulk_spec)
     bulk_spec.loader.exec_module(bulk_guard)
     findings.extend(Finding('b35_bulk_authority', detail) for detail in bulk_guard.scan_bulk_sources(root, overrides))
+    staff_spec = importlib.util.spec_from_file_location('package5_staff_authority_guard', Path(__file__).with_name('package5_staff_authority_guard.py'))
+    if staff_spec is None or staff_spec.loader is None:
+        raise RuntimeError('R02 staff authority guard is required')
+    staff_guard = importlib.util.module_from_spec(staff_spec)
+    staff_spec.loader.exec_module(staff_guard)
+    findings.extend(Finding('r02_staff_authority', detail) for detail in staff_guard.scan_staff_authority(root, overrides))
     return findings
 
 

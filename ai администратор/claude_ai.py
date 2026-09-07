@@ -13,6 +13,7 @@ import httpx
 
 import ai_billing
 import database
+import canonical_staff_access
 import config as _cfg
 from identity_utils import resolve_ai_role
 from maya_identity import enforce_maya_feminine
@@ -1061,7 +1062,6 @@ TOOLS_CACHED = TOOLS[:-1] + [{**TOOLS[-1], "cache_control": {"type": "ephemeral"
 # так нельзя случайно потерять клиентский инструмент и сломать запись.
 
 # Основатель (Стас, GOD-режим): любая тема + полный доступ.
-FOUNDER_IDS = {948205934}
 
 # Администратор без owner/GOD-статуса: читает аналитику, но не меняет правила салона.
 _MANAGER_ONLY = {"get_business_report", "get_maya_audience_stats", "get_growth_plan"}
@@ -1341,21 +1341,9 @@ def _allowed_tool_names(role: str, mode: str | None = None) -> set[str]:
 
 
 def _resolve_role(user_id) -> str:
-    """Серверная роль по user_id (из сессии, не из аргументов модели)."""
-    if not user_id:
-        return ROLE_CLIENT
-    try:
-        uid = int(user_id)
-    except (TypeError, ValueError):
-        return ROLE_CLIENT
-    try:
-        return resolve_ai_role(
-            is_founder=uid in FOUNDER_IDS,
-            is_admin=bool(database.is_admin(uid)),
-            is_master=bool(database.get_master_by_chat_id(uid)),
-        )
-    except Exception:
-        return ROLE_CLIENT
+    """Role comes only from the current canonical request principal."""
+    return canonical_staff_access.ai_role(user_id)
+
 
 
 def _tools_for_role(role: str) -> list:
@@ -1800,7 +1788,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
     _risk = _tool_risk(tool_name)
     if tool_name in _FOUNDER_MEMORY_TOOLS:
         try:
-            is_verified_founder = int(user_id) in FOUNDER_IDS
+            is_verified_founder = canonical_staff_access.is_platform(user_id)
         except (TypeError, ValueError):
             is_verified_founder = False
         if not is_verified_founder:
@@ -2167,7 +2155,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     cleaned = [{"message": "Будущих записей нет."}]
                 result = cleaned
         elif tool_name == "get_my_work_records":
-            master = database.get_master_by_chat_id(int(user_id)) if user_id else None
+            master = canonical_staff_access.master_projection(int(user_id)) if user_id else None
             sid = (master or {}).get("yclients_staff_id")
             date = (tool_input.get("date") or "").strip()
             if not sid:
@@ -2217,7 +2205,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     ),
                 }
         elif tool_name == "get_my_tips":
-            master = database.get_master_by_chat_id(int(user_id)) if user_id else None
+            master = canonical_staff_access.master_projection(int(user_id)) if user_id else None
             sid = (master or {}).get("yclients_staff_id")
             if not sid:
                 result = {"error": "Вы не распознаны как мастер — чаевые доступны только сотруднику."}
@@ -2232,7 +2220,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                     "note": "Точные данные из YClients.",
                 }
         elif tool_name == "get_my_stats":
-            master = database.get_master_by_chat_id(int(user_id)) if user_id else None
+            master = canonical_staff_access.master_projection(int(user_id)) if user_id else None
             sid = (master or {}).get("yclients_staff_id")
             if not sid:
                 result = {"error": "Вы не распознаны как мастер — личная аналитика доступна только сотруднику."}
@@ -2425,7 +2413,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
             )
         elif tool_name == "get_business_report":
             # Read-only аналитика для владельца. Ворота: только админ/владелец.
-            if not user_id or not database.is_admin(int(user_id)):
+            if not user_id or not canonical_staff_access.is_admin(int(user_id)):
                 result = {"error": "Эта аналитика доступна только администратору или владельцу."}
             else:
                 import analytics  # ленивый импорт: отсутствие файла не валит весь мозг
@@ -2462,7 +2450,7 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 import growth_planner
                 staff_id = None
                 if _role == "master":
-                    master = database.get_master_by_chat_id(int(user_id)) if user_id else None
+                    master = canonical_staff_access.master_projection(int(user_id)) if user_id else None
                     staff_id = (master or {}).get("yclients_staff_id")
                 result = growth_planner.get_growth_plan(role=_role, staff_id=staff_id)
         elif tool_name == "set_growth_goal":
@@ -2611,8 +2599,8 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
             )
         elif tool_name == "barber_knowledge":
             # База знаний по технике — только сотрудникам (мастер/владелец).
-            is_staff = bool(user_id and (database.get_master_by_chat_id(int(user_id))
-                                         or database.is_admin(int(user_id))))
+            is_staff = bool(user_id and (canonical_staff_access.master_projection(int(user_id))
+                                         or canonical_staff_access.is_admin(int(user_id))))
             if not is_staff:
                 result = {"error": "База знаний по технике доступна только сотрудникам."}
             else:
@@ -2653,8 +2641,8 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                           "note": ("Правило отменено." if ok else "Такого действующего правила нет.")}
         elif tool_name == "get_client_dossier":
             # Досье клиенту мастеру/владельцу. ТОЛЬКО чтение, телефон не отдаём.
-            is_staff = bool(user_id and (database.get_master_by_chat_id(int(user_id))
-                                         or database.is_admin(int(user_id))))
+            is_staff = bool(user_id and (canonical_staff_access.master_projection(int(user_id))
+                                         or canonical_staff_access.is_admin(int(user_id))))
             if not is_staff:
                 result = {"error": "Досье клиента доступно только сотрудникам."}
             else:
@@ -2852,8 +2840,8 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
         if context:
             blocks.append({"type": "text", "text": context})
         try:
-            master = database.get_master_by_chat_id(int(user_id))
-            is_admin = database.is_admin(int(user_id))
+            master = canonical_staff_access.master_projection(int(user_id))
+            is_admin = canonical_staff_access.is_admin(int(user_id))
             if not _client_surface and (master or is_admin):
                 master_name = (master or {}).get("full_name") or "сотрудник"
                 staff_id = (master or {}).get("yclients_staff_id")
@@ -4025,7 +4013,7 @@ def _grounding_requirement(
         linked_master = False
         if user_id:
             try:
-                linked_master = bool(database.get_master_by_chat_id(int(user_id)))
+                linked_master = bool(canonical_staff_access.master_projection(int(user_id)))
             except Exception:
                 linked_master = False
         if explicit_personal or role == ROLE_MASTER or (

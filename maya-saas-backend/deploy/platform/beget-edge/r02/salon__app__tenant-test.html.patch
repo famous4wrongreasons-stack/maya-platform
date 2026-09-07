@@ -1,0 +1,52 @@
+--- a/salon/app/tenant-test.html
++++ b/salon/app/tenant-test.html
+@@ -8354,4 +8354,6 @@
+-    const headers = {
+-      'Content-Type': 'application/json'
+-    };
+-    const payload = Object.assign({}, base);
++	    const headers = {
++	      'Content-Type': 'application/json'
++	    };
++	    const payload = Object.assign({}, base);
++    // Режим кабинета (клиент/сотрудник): рабочий чат не должен падать обратно
++    // в client-flow, даже если глобальный режим успел сбиться при навигации.
+@@ -8359,3 +8361,21 @@
+-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) headers['X-Telegram-InitData'] = window.Telegram.WebApp.initData;else if (window.__tgAuthData) payload.auth_data = window.__tgAuthData;else {
+-        const tok = localStorage.getItem('web_session_token');
+-        if (tok) payload.session_token = tok;
++      if (payload.mode == null) {
++        var staffChat = window.__meCurMode === 'staff' || window.__meChatReturn === 'staff-home';
++        payload.mode = staffChat ? 'staff' : 'client';
++      }
++    } catch (e) {}
++	    try {
++          const canonical = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
++          if (canonical && canonical.token) {
++            headers.Authorization = 'Bearer ' + canonical.token;
++            payload.maya_token = canonical.token;
++            return { headers: headers, payload: payload };
++          }
++	      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) headers['X-Telegram-InitData'] = window.Telegram.WebApp.initData;else if (window.__tgAuthData) payload.auth_data = window.__tgAuthData;else {
++	        const tok = localStorage.getItem('web_session_token');
++        if (tok) payload.session_token = tok;else {
++          const raw = localStorage.getItem('tg_auth_data') || localStorage.getItem('maya_auth');
++          if (raw) {
++            const auth = JSON.parse(raw);
++            if (auth && auth.id) payload.auth_data = auth;
++          }
++        }
+@@ -8364,5 +8384,5 @@
+-    return {
+-      headers: headers,
+-      payload: payload
+-    };
+-  }
++	    return {
++	      headers: headers,
++	      payload: payload
++	    };
++	  }
+@@ -22384,0 +22405,2 @@
++    var mayaTok = typeof canonicalMayaTok === 'function' ? canonicalMayaTok() : (typeof meSaasCurrentBundle === 'function' ? (meSaasCurrentBundle() || {}).token : '');
++    if (mayaTok) { headers.Authorization = 'Bearer ' + mayaTok; body.maya_token = mayaTok; return { headers: headers, body: JSON.stringify(body) }; }
