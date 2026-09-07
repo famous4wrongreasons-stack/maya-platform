@@ -58,11 +58,20 @@ describe('Package 5 B9 production identity and delivery ratchet', () => {
   });
 
   it('requires exact verified delivery identity and never falls back to SQLite', () => {
-    expect(channelRuntime).toContain('deliveryAddressEncrypted');
-    expect(channelRuntime).toContain('clientChannelSubjectHash(');
-    expect(channelRuntime).toContain('!== link.providerSubjectHash');
-    expect(channelRuntime).toContain('identityRef: link.providerSubjectHash');
-    expect(channelRuntime).not.toMatch(/sqlite|chat_id|get_or_create_client/i);
+    expect(channelRuntime).toContain('resolveVerifiedClientDeliveryEndpoint(');
+    const channelResolution = readFileSync(
+      join(__dirname, '../crm/client-delivery-endpoint.ts'),
+      'utf8',
+    );
+    expect(channelResolution).toContain('deliveryAddressEncrypted');
+    expect(channelResolution).toContain('clientChannelSubjectHash(');
+    expect(channelResolution).toContain('!== link.providerSubjectHash');
+    expect(channelResolution).toContain(
+      'identityRef: link.providerSubjectHash',
+    );
+    expect(channelResolution).not.toMatch(
+      /sqlite|chat_id|get_or_create_client/i,
+    );
     expect(service).toContain('recipientIdentityRef: endpoint.identityRef');
     expect(communication).toContain('recipientIdentityRef');
     expect(communication).toContain('durableRecipientRef');

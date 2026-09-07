@@ -5,7 +5,9 @@ and [exact schema mapping](package5-b35-exact-schema-mapping-v1-proposal.md).
 Option A business direction is approved. All 25 requirements are mapped; proposed
 delta is 0 models, 12 new fields, 2 existing nullability changes, 3 uniques,
 2 non-unique indexes and 0 action classes. Migration required; no backfill.
-Schema approval is pending. No runtime/schema/deployment started.
+Exact schema approval was granted at `c3641411`. Production migration PASS is
+checkpoint `4b13b9f1`; [runtime local gate PASS](CYCLE-06-BLOCKING-PACKAGE-5-B35-RUNTIME-LOCAL-GATE.md).
+Runtime production publication and the fresh all-family Final Gate remain pending.
 
 Accepted production/final-gate baseline: [post-B34 remainder](CYCLE-06-BLOCKING-PACKAGE-5-POST-B34-REMAINDER-CHECKPOINT.md)
 and [B34 production / B35 Final Gate report](CYCLE-06-BLOCKING-PACKAGE-5-B34-DEPLOYED-FINAL-GATE-STOP-REPORT.md).

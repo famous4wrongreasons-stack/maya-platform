@@ -727,6 +727,12 @@ def scan_runtime(root: Path | str, overrides: Mapping[str, str] | None = None) -
     review_guard = importlib.util.module_from_spec(review_spec)
     review_spec.loader.exec_module(review_guard)
     findings.extend(Finding('b34_review_authority', detail) for detail in review_guard.scan_review_sources(root, overrides))
+    bulk_spec = importlib.util.spec_from_file_location('package5_bulk_runtime_guard', Path(__file__).with_name('package5_bulk_runtime_guard.py'))
+    if bulk_spec is None or bulk_spec.loader is None:
+        raise RuntimeError('B35 canonical bulk guard is required')
+    bulk_guard = importlib.util.module_from_spec(bulk_spec)
+    bulk_spec.loader.exec_module(bulk_guard)
+    findings.extend(Finding('b35_bulk_authority', detail) for detail in bulk_guard.scan_bulk_sources(root, overrides))
     return findings
 
 
@@ -761,6 +767,7 @@ def main() -> int:
         "b23LegacyHistoryDeleteOwners": 0 if not findings else None,
         "b24LegacyWebPushOwners": 0 if not findings else None,
         "b34LegacyReviewOwners": 0 if not findings else None,
+        "b35LegacyBulkOwners": 0 if not findings else None,
         "activePwaIncluded": True,
         "findings": [asdict(item) for item in findings],
     }

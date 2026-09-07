@@ -51,6 +51,22 @@ describe('B28 shared private CustomerProfile read protection', () => {
       ).length,
     ).toBeGreaterThan(0);
   });
+  it('keeps the bulk internal policy read limited to current consent/preferences', () => {
+    const file = 'communication-delivery/communication-bulk-policy.service.ts';
+    const code = readFileSync(join(root, file), 'utf8');
+    expect(
+      scanClientProfileRead(
+        file,
+        code.replace('privacyConsentAt: true', 'encryptedNotes: true'),
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(
+      scanClientProfileRead(
+        file,
+        code.replaceAll('this.links.assertClientEligible', 'removed'),
+      ).length,
+    ).toBeGreaterThan(0);
+  });
   it('rejects predicate mismatch, stripped verified binding and missing database fence', () => {
     const file = 'crm/client-profile-read.service.ts',
       code = readFileSync(join(root, file), 'utf8');

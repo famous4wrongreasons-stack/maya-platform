@@ -1,0 +1,22 @@
+[
+  {
+    "path": "/tmp/maya-b29-contour/сайт и приложение/app.html",
+    "inlineScriptsParsed": 28,
+    "status": "PASS"
+  },
+  {
+    "path": "/Users/stanislavmosin/Desktop/maya-ios/www/index.html",
+    "inlineScriptsParsed": 28,
+    "status": "PASS"
+  },
+  {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/b35-implementation/production-candidate/salon-index.html",
+    "inlineScriptsParsed": 26,
+    "status": "PASS"
+  },
+  {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/b35-implementation/production-candidate/mayaos-index.html",
+    "inlineScriptsParsed": 28,
+    "status": "PASS"
+  }
+]

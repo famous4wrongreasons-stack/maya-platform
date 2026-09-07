@@ -240,6 +240,7 @@ export class ActionEngineKernel {
   async createCanonicalExecution(
     request: TrustedActionExecutionRequestV1,
     policy: CanonicalActionPolicyResolutionV1,
+    transaction?: Prisma.TransactionClient,
   ): Promise<ActionExecution> {
     if (!this.policyResolver) {
       throw new ActionContractError(
@@ -261,7 +262,7 @@ export class ActionEngineKernel {
       );
     }
     this.assertPolicyMatchesCapability(normalized.capability, policy);
-    return this.createExecution(request, normalized, policy);
+    return this.createExecution(request, normalized, policy, transaction);
   }
 
   createExecutionForControlledFixture(
@@ -275,6 +276,7 @@ export class ActionEngineKernel {
     request: TrustedActionExecutionRequestV1,
     normalized: NormalizedActionExecutionV1,
     policy?: CanonicalActionPolicyResolutionV1,
+    transaction?: Prisma.TransactionClient,
   ): Promise<ActionExecution> {
     const now = this.now();
 
@@ -285,150 +287,145 @@ export class ActionEngineKernel {
       databaseAttempt += 1
     ) {
       try {
-        return await this.prisma.$transaction(
-          async (tx) => {
-            const source = await this.validateSource(
-              tx,
-              request,
-              normalized.capability,
-              now,
-            );
-            const duplicate = await this.findDuplicate(tx, request, normalized);
-            if (duplicate) return duplicate;
+        const persist = async (tx: Prisma.TransactionClient) => {
+          const source = await this.validateSource(
+            tx,
+            request,
+            normalized.capability,
+            now,
+          );
+          const duplicate = await this.findDuplicate(tx, request, normalized);
+          if (duplicate) return duplicate;
 
-            const executionId = randomUUID();
-            const initial = this.initialDecision(
-              normalized.capability,
-              request.intentExpiresAt,
-              source,
-              now,
-              policy,
+          const executionId = randomUUID();
+          const initial = this.initialDecision(
+            normalized.capability,
+            request.intentExpiresAt,
+            source,
+            now,
+            policy,
+          );
+          if (
+            normalized.bookingIntent &&
+            initial.state !== ActionExecutionState.READY
+          )
+            throw new ActionContractError(
+              'Canonical booking intent was not accepted',
             );
-            if (
-              normalized.bookingIntent &&
-              initial.state !== ActionExecutionState.READY
-            )
-              throw new ActionContractError(
-                'Canonical booking intent was not accepted',
-              );
-            const approval = this.initialApproval(
-              normalized.capability,
-              normalized.normalizedInputHash,
-              initial,
-              now,
-              policy,
-            );
-            const finalizedAt =
-              initial.state === ActionExecutionState.NOT_EXECUTED ? now : null;
-            const payloadRetentionUntil = new Date(
-              now.getTime() + normalized.capability.payloadRetentionMs,
-            );
-            const auditRetentionUntil = new Date(
-              now.getTime() + normalized.capability.auditRetentionMs,
-            );
+          const approval = this.initialApproval(
+            normalized.capability,
+            normalized.normalizedInputHash,
+            initial,
+            now,
+            policy,
+          );
+          const finalizedAt =
+            initial.state === ActionExecutionState.NOT_EXECUTED ? now : null;
+          const payloadRetentionUntil = new Date(
+            now.getTime() + normalized.capability.payloadRetentionMs,
+          );
+          const auditRetentionUntil = new Date(
+            now.getTime() + normalized.capability.auditRetentionMs,
+          );
 
-            const execution = await tx.actionExecution.create({
-              data: {
-                id: executionId,
-                tenantId: request.tenantId,
-                identityVersion: normalized.capability.identityVersion,
-                identityFingerprint: normalized.identityFingerprint,
-                idempotencyScope: normalized.idempotencyScope,
-                requestIdempotencyKeyHash: normalized.requestIdempotencyKeyHash,
-                ...(normalized.bookingIntent
-                  ? {
-                      bookingIntentContract: CLIENT_BOOKING_INTENT_CONTRACT,
-                      bookingIntentHash: normalized.bookingIntent.hash,
-                      bookingIntentEncrypted:
-                        normalized.bookingIntent.encrypted,
-                    }
-                  : {}),
-                sourceType: request.source.type,
-                sourceRef:
-                  request.source.type === 'agent_task'
-                    ? request.source.agentTaskId
-                    : request.source.sourceRef,
-                agentTaskId: request.source.agentTaskId,
-                actorUserId: request.source.actorUserId,
-                actionClass: normalized.capability.actionClass,
+          const execution = await tx.actionExecution.create({
+            data: {
+              id: executionId,
+              tenantId: request.tenantId,
+              identityVersion: normalized.capability.identityVersion,
+              identityFingerprint: normalized.identityFingerprint,
+              idempotencyScope: normalized.idempotencyScope,
+              requestIdempotencyKeyHash: normalized.requestIdempotencyKeyHash,
+              ...(normalized.bookingIntent
+                ? {
+                    bookingIntentContract: CLIENT_BOOKING_INTENT_CONTRACT,
+                    bookingIntentHash: normalized.bookingIntent.hash,
+                    bookingIntentEncrypted: normalized.bookingIntent.encrypted,
+                  }
+                : {}),
+              sourceType: request.source.type,
+              sourceRef:
+                request.source.type === 'agent_task'
+                  ? request.source.agentTaskId
+                  : request.source.sourceRef,
+              agentTaskId: request.source.agentTaskId,
+              actorUserId: request.source.actorUserId,
+              actionClass: normalized.capability.actionClass,
+              capability: normalized.capability.capability,
+              capabilityVersion: normalized.capability.capabilityVersion,
+              targetKind: normalized.capability.targetKind,
+              targetRef: normalized.targetRef,
+              normalizedInputContract:
+                normalized.capability.normalizedInputContract,
+              normalizedInputHash: normalized.normalizedInputHash,
+              normalizedInputEncrypted: this.identity.encryptNormalizedPayload(
+                normalized.normalizedInputCanonical,
+              ),
+              evidenceRefsJson: jsonInput(request.evidenceRefs),
+              intentExpiresAt: request.intentExpiresAt,
+              dryRun:
+                (policy?.policyDecision ??
+                  normalized.capability.policyDecision) ===
+                ActionPolicyDecision.SHADOW_ONLY,
+              riskProfileVersion: normalized.capability.riskProfileVersion,
+              riskFacetsJson: jsonInput(normalized.capability.riskFacets),
+              policyKey: policy?.policyKey ?? normalized.capability.policyKey,
+              policyVersion:
+                policy?.policyVersion ?? normalized.capability.policyVersion,
+              policyDecision: initial.policyDecision,
+              autonomyLevel:
+                policy?.autonomyLevel ?? normalized.capability.autonomyLevel,
+              policyDecidedBy:
+                policy?.policyDecidedBy ?? 'controlled_fixture_registry',
+              policyContextContract: policy?.policyContextContract ?? undefined,
+              policyContextHash: policy?.policyContextHash ?? undefined,
+              policyEvidenceJson: policy
+                ? jsonInput(policy.policyEvidenceJson)
+                : undefined,
+              policyEvaluatedAt: policy?.policyEvaluatedAt,
+              policyValidUntil: policy?.policyValidUntil,
+              approvalBindingHash: policy?.approvalBindingHash,
+              approvalRequirement:
+                policy?.approvalRequirement ??
+                normalized.capability.approvalRequirement,
+              ...approval,
+              state: initial.state,
+              notExecutedReasonCode: initial.notExecutedReasonCode,
+              retryPolicyKey: normalized.capability.retry.key,
+              retryPolicyVersion: normalized.capability.retry.version,
+              maxExecutionAttempts:
+                normalized.capability.retry.maxExecutionAttempts,
+              executionAttemptCount: 0,
+              reconciliationPolicyKey: normalized.capability.reconciliation.key,
+              reconciliationPolicyVersion:
+                normalized.capability.reconciliation.version,
+              reconciliationState: ActionReconciliationState.NOT_REQUIRED,
+              revision: 0,
+              transportIdentityVersion:
+                normalized.capability.transportIdentityVersion,
+              transportIdempotencyKey: this.identity.transportIdempotencyKey({
+                executionId,
                 capability: normalized.capability.capability,
-                capabilityVersion: normalized.capability.capabilityVersion,
-                targetKind: normalized.capability.targetKind,
-                targetRef: normalized.targetRef,
-                normalizedInputContract:
-                  normalized.capability.normalizedInputContract,
-                normalizedInputHash: normalized.normalizedInputHash,
-                normalizedInputEncrypted:
-                  this.identity.encryptNormalizedPayload(
-                    normalized.normalizedInputCanonical,
-                  ),
-                evidenceRefsJson: jsonInput(request.evidenceRefs),
-                intentExpiresAt: request.intentExpiresAt,
-                dryRun:
-                  (policy?.policyDecision ??
-                    normalized.capability.policyDecision) ===
-                  ActionPolicyDecision.SHADOW_ONLY,
-                riskProfileVersion: normalized.capability.riskProfileVersion,
-                riskFacetsJson: jsonInput(normalized.capability.riskFacets),
-                policyKey: policy?.policyKey ?? normalized.capability.policyKey,
-                policyVersion:
-                  policy?.policyVersion ?? normalized.capability.policyVersion,
-                policyDecision: initial.policyDecision,
-                autonomyLevel:
-                  policy?.autonomyLevel ?? normalized.capability.autonomyLevel,
-                policyDecidedBy:
-                  policy?.policyDecidedBy ?? 'controlled_fixture_registry',
-                policyContextContract:
-                  policy?.policyContextContract ?? undefined,
-                policyContextHash: policy?.policyContextHash ?? undefined,
-                policyEvidenceJson: policy
-                  ? jsonInput(policy.policyEvidenceJson)
-                  : undefined,
-                policyEvaluatedAt: policy?.policyEvaluatedAt,
-                policyValidUntil: policy?.policyValidUntil,
-                approvalBindingHash: policy?.approvalBindingHash,
-                approvalRequirement:
-                  policy?.approvalRequirement ??
-                  normalized.capability.approvalRequirement,
-                ...approval,
-                state: initial.state,
-                notExecutedReasonCode: initial.notExecutedReasonCode,
-                retryPolicyKey: normalized.capability.retry.key,
-                retryPolicyVersion: normalized.capability.retry.version,
-                maxExecutionAttempts:
-                  normalized.capability.retry.maxExecutionAttempts,
-                executionAttemptCount: 0,
-                reconciliationPolicyKey:
-                  normalized.capability.reconciliation.key,
-                reconciliationPolicyVersion:
-                  normalized.capability.reconciliation.version,
-                reconciliationState: ActionReconciliationState.NOT_REQUIRED,
-                revision: 0,
                 transportIdentityVersion:
                   normalized.capability.transportIdentityVersion,
-                transportIdempotencyKey: this.identity.transportIdempotencyKey({
-                  executionId,
-                  capability: normalized.capability.capability,
-                  transportIdentityVersion:
-                    normalized.capability.transportIdentityVersion,
-                }),
-                finalizedAt,
-                payloadRetentionUntil,
-                auditRetentionUntil,
-              },
+              }),
+              finalizedAt,
+              payloadRetentionUntil,
+              auditRetentionUntil,
+            },
+          });
+          if (normalized.bookingIntent)
+            await this.bindClientBookingKey(tx, request, normalized, execution);
+          return execution;
+        };
+        return transaction
+          ? await persist(transaction)
+          : await this.prisma.$transaction(persist, {
+              isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
             });
-            if (normalized.bookingIntent)
-              await this.bindClientBookingKey(
-                tx,
-                request,
-                normalized,
-                execution,
-              );
-            return execution;
-          },
-          { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-        );
       } catch (error) {
+        // The owner must retry its entire atomic admission transaction.
+        if (transaction) throw error;
         // A B31 unique loser must retry the entire transaction: returning a
         // logical duplicate outside it would lose the newly accepted alias.
         if (normalized.bookingIntent && isUniqueConflict(error)) continue;
@@ -482,14 +479,17 @@ export class ActionEngineKernel {
     };
   }
 
-  async decideApproval(input: {
-    tenantId: string;
-    executionId: string;
-    approverUserId: string;
-    decision: ApprovalResolution;
-  }): Promise<ActionExecution> {
+  async decideApproval(
+    input: {
+      tenantId: string;
+      executionId: string;
+      approverUserId: string;
+      decision: ApprovalResolution;
+    },
+    transaction?: Prisma.TransactionClient,
+  ): Promise<ActionExecution> {
     const now = this.now();
-    return this.prisma.$transaction(async (tx) => {
+    const decide = async (tx: Prisma.TransactionClient) => {
       const execution = await this.lockExecution(
         tx,
         input.tenantId,
@@ -580,17 +580,21 @@ export class ActionEngineKernel {
           revision: { increment: 1 },
         },
       });
-    });
+    };
+    return transaction ? decide(transaction) : this.prisma.$transaction(decide);
   }
 
-  async claimExecution(input: {
-    tenantId: string;
-    executionId: string;
-    workerId: string;
-  }): Promise<ExecutionClaimV1> {
+  async claimExecution(
+    input: {
+      tenantId: string;
+      executionId: string;
+      workerId: string;
+    },
+    transaction?: Prisma.TransactionClient,
+  ): Promise<ExecutionClaimV1> {
     const now = this.now();
     const workerId = assertCode(input.workerId, 'workerId');
-    return this.prisma.$transaction(async (tx) => {
+    const execute = async (tx: Prisma.TransactionClient) => {
       const execution = await this.lockExecution(
         tx,
         input.tenantId,
@@ -666,7 +670,10 @@ export class ActionEngineKernel {
         },
       });
       return { execution: claimed, attempt, leaseToken };
-    });
+    };
+    return transaction
+      ? execute(transaction)
+      : this.prisma.$transaction(execute);
   }
 
   async markDispatchMayHaveCrossed(input: {
@@ -689,10 +696,11 @@ export class ActionEngineKernel {
 
   async finalizeSuccess(
     input: FinalizeExecutionInputV1,
+    transaction?: Prisma.TransactionClient,
   ): Promise<ExecutionResultV1> {
     const now = this.now();
     const outcomeCode = assertCode(input.outcomeCode, 'outcomeCode');
-    return this.prisma.$transaction(async (tx) => {
+    const execute = async (tx: Prisma.TransactionClient) => {
       const { execution, attempt } = await this.lockOwnedAttempt(tx, input);
       const attemptData: Prisma.ActionAttemptUpdateInput = {
         state: ActionAttemptState.SUCCEEDED,
@@ -728,7 +736,10 @@ export class ActionEngineKernel {
         data: executionData,
       });
       return this.result(updated);
-    });
+    };
+    return transaction
+      ? execute(transaction)
+      : this.prisma.$transaction(execute);
   }
 
   async finalizeDefinitiveFailure(

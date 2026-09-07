@@ -1743,6 +1743,7 @@ _PACKAGE2_TELEGRAM_MESSAGE_TYPES = frozenset({
     "owner_alert",
     "birthday_alert",
     "review_alert",
+    "marketing_broadcast",
 })
 _PACKAGE2_TELEGRAM_PARSE_MODES = frozenset({"Markdown", "MarkdownV2", "HTML"})
 
@@ -1780,6 +1781,11 @@ async def internal_package2_telegram_handler(request: web.Request) -> web.Respon
         or len(body_text) > 4096
     ):
         return web.json_response({"error": "invalid_request"}, status=400)
+    if message_type == "marketing_broadcast" and (
+        body.get("contract") != "maya.bulk-telegram-transport/1"
+        or not source_event_id.startswith("b35:") or parse_mode is not None or raw_buttons
+    ):
+        return web.json_response({"error": "invalid_bulk_transport"}, status=400)
     if parse_mode is not None and parse_mode not in _PACKAGE2_TELEGRAM_PARSE_MODES:
         return web.json_response({"error": "invalid_parse_mode"}, status=400)
     if not isinstance(raw_buttons, list) or len(raw_buttons) > 4:
@@ -1818,13 +1824,21 @@ async def internal_package2_telegram_handler(request: web.Request) -> web.Respon
     if bot is None or not callable(original):
         return web.json_response({"error": "executor_unavailable"}, status=503)
 
-    sent_message = await original(
-        bot,
-        chat_id=telegram_chat_id,
-        text=body_text,
-        parse_mode=parse_mode,
-        reply_markup=InlineKeyboardMarkup([[button] for button in buttons]) if buttons else None,
-    )
+    try:
+        sent_message = await original(
+            bot,
+            chat_id=telegram_chat_id,
+            text=body_text,
+            parse_mode=parse_mode,
+            reply_markup=InlineKeyboardMarkup([[button] for button in buttons]) if buttons else None,
+        )
+    except Exception as error:
+        if message_type == "marketing_broadcast":
+            from telegram.error import BadRequest, Forbidden
+            if isinstance(error, (BadRequest, Forbidden)):
+                return web.json_response({"error": "B35_TELEGRAM_REJECTED"}, status=400)
+        # A timeout/lost response never proves that the provider did not send.
+        raise
     message_id = getattr(sent_message, "message_id", None)
     if message_id is None:
         return web.json_response({"error": "provider_reference_missing"}, status=502)
@@ -3658,143 +3672,39 @@ async def panel_reputation_refresh_handler(request: web.Request) -> web.Response
 
 
 async def broadcast_send_to_base(bot, text: str) -> dict:
-    """Единый цикл рассылки по клиентам с маркетинговым согласием (152-ФЗ + ст.18
-    Закона о рекламе). Источник истины и для бота (/broadcast), и для панели.
-    Антиспам: ~30 сообщений/сек. {name} подставляется, если есть в тексте."""
-    from telegram.error import Forbidden, BadRequest
-    import broadcast_templates as _bt
-    sent = blocked = errors = skipped_no_consent = skipped_opt_out = skipped_too_soon = 0
-    has_placeholder = "{name}" in (text or "")
-    for c in database.list_telegram_clients():
-        chat_id = c.get("telegram_chat_id")
-        if not chat_id:
-            continue
-        if not database.has_marketing_consent(c["id"]):
-            skipped_no_consent += 1
-            continue
-        # Персональные настройки клиента: (1) явный opt-out от акций; (2) частотный
-        # троттл — но ТОЛЬКО для тех, кто сам выбрал частоту в настройках, иначе
-        # дефолтный недельный кап молча резал бы рассылку всей ненастроенной базе.
-        _prefs = database.get_notify_prefs(c["id"])
-        if _prefs.get("marketing") is False:
-            skipped_opt_out += 1
-            continue
-        if database.has_saved_notify_prefs(c["id"]):
-            _min_days = database.MARKETING_FREQ_DAYS.get(_prefs.get("marketing_freq", "week"), 7)
-            if database.marketing_sent_within(c["id"], _min_days):
-                skipped_too_soon += 1
-                continue
-        personalized = _bt.render(text, client_name=c.get("name")) if has_placeholder else text
-        push_body = _push_preview_body(personalized) or "Откройте MAYA — внутри новое сообщение."
-        try:
-            await bot.send_message(chat_id, personalized, parse_mode="Markdown")
-            sent += 1
-            database.set_marketing_last_sent(c["id"])
-            await asyncio.sleep(0.035)
-        except Forbidden:
-            blocked += 1
-        except BadRequest:
-            try:
-                await bot.send_message(chat_id, personalized)
-                sent += 1
-                database.set_marketing_last_sent(c["id"])
-                await asyncio.sleep(0.035)
-            except Exception:
-                errors += 1
-        except Exception as e:
-            errors += 1
-            logger.error(f"broadcast → {chat_id}: {e}")
-        try:
-            await _send_client_push(
-                int(chat_id),
-                title="Сообщение от MAYA",
-                body=push_body,
-                url="/app/",
-                tag="marketing-broadcast",
-                data={"event": "marketing.broadcast"},
-                persist_in_chat=True,
-                chat_text=personalized,
-            )
-        except Exception as e:
-            logger.error(f"broadcast push/chat → {chat_id}: {e}")
-    return {"sent": sent, "blocked": blocked, "errors": errors,
-            "skipped_no_consent": skipped_no_consent,
-            "skipped_opt_out": skipped_opt_out, "skipped_too_soon": skipped_too_soon}
-
-
-def _panel_broadcast_recipients():
-    """Сколько клиентов получит рассылку (с согласием) и сколько всего с Telegram."""
-    total = consented = 0
-    try:
-        for c in database.list_telegram_clients():
-            if not c.get("telegram_chat_id"):
-                continue
-            total += 1
-            if database.has_marketing_consent(c["id"]):
-                consented += 1
-    except Exception as e:
-        logger.error(f"panel broadcast recipients: {e}")
-    return consented, total
+    """B35 retired: a legacy chat-id list is never a bulk delivery authority."""
+    raise RuntimeError("B35_CANONICAL_OWNER_APPROVAL_REQUIRED_USE_PANEL")
 
 
 async def panel_broadcast_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/broadcast — конструктор рассылки (owner/manager, право marketing).
-    body: {mode:'templates'|'preview'|'send', text?, code?}."""
+    """B35 initiator only. No recipient enumeration, consent inference or send."""
     try:
         body = await request.json()
+        if not isinstance(body, dict):
+            raise ValueError("B35_INVALID_REQUEST")
+        mode = body.get("mode", "preview")
+        if mode == "templates":
+            import broadcast_templates as templates
+            return _cabinet_response({"categories": [{"code": c, "label": label} for c, label in templates.CATEGORIES],
+                                      "templates": templates.TEMPLATES})
+        from legacy_client_command_bridge import channel_proof
+        from legacy_marketing_bulk_bridge import command
+        proof = channel_proof(request.headers, body)
+        if mode == "preview":
+            payload = {"bulkIdentity": body.get("bulkIdentity"), "text": body.get("text")}
+        elif mode in {"confirm", "resume"}:
+            payload = {"campaignId": body.get("campaignId"), "intentHash": body.get("intentHash")}
+        elif mode == "status":
+            payload = {"campaignId": body.get("campaignId")}
+        else:
+            raise ValueError("B35_OPERATION_UNSUPPORTED")
+        result = await asyncio.to_thread(command, mode, proof, payload)
+        return _cabinet_response({"ok": True, **result})
+    except ValueError as error:
+        code = str(error) if str(error).startswith(("B35_", "IDEMPOTENCY_CONFLICT")) else "B35_AUTHORITY_OR_REQUEST_REJECTED"
+        return _cabinet_response({"ok": False, "error": code}, status=409 if code == "IDEMPOTENCY_CONFLICT" else 403)
     except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
-    if not info.get("permissions", {}).get("marketing"):
-        return _cabinet_response({"error": "forbidden", "message": "Недостаточно прав."}, status=403)
-
-    import broadcast_templates as _bt
-    mode = str(body.get("mode") or "preview")
-
-    if mode == "templates":
-        cats = [{"code": code, "label": label} for code, label in _bt.CATEGORIES]
-        tpls = [{"code": t["code"], "category": t["category"], "title": t["title"],
-                 "emoji": t.get("emoji", ""), "body": t["body"]} for t in _bt.TEMPLATES]
-        return _cabinet_response({"categories": cats, "templates": tpls})
-
-    text = str(body.get("text") or "").strip()
-    if not text and body.get("code"):
-        for t in _bt.TEMPLATES:
-            if t["code"] == body["code"]:
-                text = t["body"]
-                break
-    if not text:
-        return _cabinet_response({"ok": False, "reason": "Пустой текст рассылки."}, status=400)
-
-    consented, total = _panel_broadcast_recipients()
-
-    if mode == "preview":
-        return _cabinet_response({"ok": True, "text": text, "recipients": consented,
-                                  "total": total, "excluded": total - consented})
-
-    if mode == "send":
-        if consented <= 0:
-            return _cabinet_response({"ok": False, "reason": "Нет получателей с согласием на рассылку."})
-        app = request.app["bot_app"]
-        task = asyncio.create_task(broadcast_send_to_base(app.bot, text))
-        _panel_bg_tasks.add(task)
-        task.add_done_callback(_panel_bg_tasks.discard)
-        try:
-            summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
-            return _cabinet_response({"ok": True, "done": True, "recipients": consented,
-                                      "summary": summary if isinstance(summary, dict) else {}})
-        except asyncio.TimeoutError:
-            return _cabinet_response({"ok": True, "started": True, "running": True,
-                                      "recipients": consented})
-        except Exception as e:
-            logger.error(f"panel broadcast send: {e}")
-            return _cabinet_response({"ok": False, "reason": "Ошибка при отправке."}, status=500)
-
-    return _cabinet_response({"ok": False, "reason": "Неизвестный режим."}, status=400)
+        return _cabinet_response({"ok": False, "error": "B35_OUTCOME_UNKNOWN_RESUME_SAME_CAMPAIGN"}, status=503)
 
 
 def _panel_record_seen(tg_id: int, name: str) -> None:

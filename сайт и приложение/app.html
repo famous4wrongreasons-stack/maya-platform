@@ -35458,10 +35458,15 @@ function ALivePanel() {
   const [mschedState, setMschedState] = React.useState('idle');
   const [mschedPeriod, setMschedPeriod] = React.useState('month');
   // broadcast / redeem / jobs
-  const [bcText, setBcText] = React.useState('');
+  function bcStored() {
+    try { const rq = window.__mayaBulkAuthReq && window.__mayaBulkAuthReq({}); return rq ? JSON.parse(localStorage.getItem(rq.bulkStorageKey) || 'null') : null; } catch (_) { return null; }
+  }
+  const bcInitial = React.useRef(bcStored());
+  const bcDraft = React.useRef(bcInitial.current);
+  const [bcText, setBcText] = React.useState(bcInitial.current && bcInitial.current.text || '');
   const [bcTpl, setBcTpl] = React.useState(null);
   const [bcCat, setBcCat] = React.useState('');
-  const [bcResult, setBcResult] = React.useState(null);
+  const [bcResult, setBcResult] = React.useState(bcInitial.current && bcInitial.current.campaignId ? { kind: 'resume', msg: 'Сохранена рассылка. Проверьте её состояние перед продолжением.' } : null);
   const [bcBusy, setBcBusy] = React.useState(false);
   const [rcode, setRcode] = React.useState('');
   const [rRes, setRRes] = React.useState(null);
@@ -35766,7 +35771,8 @@ function ALivePanel() {
 
   // ---- generic authed POST -> {status, body} ----
   function pfetch(action, body) {
-    const rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null;
+    const auth = action === 'panel_broadcast' && body && body.mode !== 'templates' ? window.__mayaBulkAuthReq : window.__meAuthReq;
+    const rq = action === 'panel_broadcast' && body && body.mode === 'templates' ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : auth ? auth(body || {}) : null;
     if (!rq) return Promise.resolve({
       status: 0,
       body: null
@@ -35985,55 +35991,68 @@ function ALivePanel() {
     void m;
     setTeamNotice('Legacy роль кассира выведена из эксплуатации. Value authority принадлежит canonical Package 4 flows.');
   }
+  function bcPersist(value) {
+    const rq = window.__mayaBulkAuthReq && window.__mayaBulkAuthReq({});
+    if (!rq) throw new Error('Нужен вход владельца в Maya.');
+    if (value) localStorage.setItem(rq.bulkStorageKey, JSON.stringify(value));
+    else localStorage.removeItem(rq.bulkStorageKey);
+    bcDraft.current = value;
+  }
+  function bcEdit(text) {
+    if (bcDraft.current && bcDraft.current.confirmed) return;
+    try { bcPersist(null); } catch (_) {}
+    setBcText(text); setBcResult(null);
+  }
   function bcPreview() {
-    if (!bcText.trim()) {
-      setBcResult({
-        kind: 'err',
-        msg: 'Введите текст рассылки.'
-      });
-      return;
-    }
+    if (!bcText.trim()) { setBcResult({ kind: 'err', msg: 'Введите текст рассылки.' }); return; }
+    try {
+      if (!bcDraft.current) bcPersist({ bulkIdentity: crypto.randomUUID(), text: bcText, confirmed: false });
+    } catch (error) { setBcResult({ kind: 'err', msg: error.message || 'Не удалось сохранить рассылку.' }); return; }
     setBcBusy(true);
-    setBcResult(null);
-    pfetch('panel_broadcast', {
-      mode: 'preview',
-      text: bcText
-    }).then(r => {
-      setBcBusy(false);
-      const b = r.body || {};
-      if (b.ok) setBcResult({
-        kind: 'preview',
-        recipients: b.recipients,
-        total: b.total,
-        excluded: b.excluded
-      });else setBcResult({
-        kind: 'err',
-        msg: b.reason || diag(r.status, b)
-      });
+    pfetch('panel_broadcast', { mode: 'preview', bulkIdentity: bcDraft.current.bulkIdentity, text: bcDraft.current.text }).then(r => {
+      setBcBusy(false); const b = r.body || {};
+      if (!b.ok || !b.campaignId || !b.intentHash) { setBcResult({ kind: 'err', msg: b.error === 'IDEMPOTENCY_CONFLICT' ? 'Параметры изменились. Создайте новый черновик.' : 'Предпросмотр не подтверждён. Повторите с сохранённым черновиком.' }); return; }
+      try { bcPersist(Object.assign({}, bcDraft.current, { campaignId: b.campaignId, intentHash: b.intentHash })); }
+      catch (_) { setBcResult({ kind: 'err', msg: 'Не удалось сохранить подтверждение.' }); return; }
+      setBcResult({ kind: 'preview', recipients: b.recipientCount });
     });
   }
   function bcSend() {
+    const draft = bcDraft.current;
+    if (!draft || !draft.campaignId || !draft.intentHash) return;
+    const mode = draft.confirmed ? 'resume' : 'confirm';
+    try { bcPersist(Object.assign({}, draft, { confirmed: true })); }
+    catch (_) { setBcResult({ kind: 'err', msg: 'Не удалось сохранить состояние. Отправка не начата.' }); return; }
     setBcBusy(true);
-    pfetch('panel_broadcast', {
-      mode: 'send',
-      text: bcText
-    }).then(r => {
-      setBcBusy(false);
-      const b = r.body || {};
-      if (b.done) {
-        const sm = b.summary || {};
-        setBcResult({
-          kind: 'ok',
-          msg: 'Разослано ✓ · доставлено ' + (sm.sent != null ? sm.sent : b.recipients) + (sm.blocked ? ' · заблокировали ' + sm.blocked : '')
-        });
-      } else if (b.started) setBcResult({
-        kind: 'ok',
-        msg: 'Запущено ✓ — рассылка идёт в фоне (' + b.recipients + ' получателей)'
-      });else setBcResult({
-        kind: 'err',
-        msg: b.reason || diag(r.status, b)
-      });
+    pfetch('panel_broadcast', { mode, campaignId: draft.campaignId, intentHash: draft.intentHash }).then(r => {
+      setBcBusy(false); const b = r.body || {};
+      if (!b.ok) { setBcResult({ kind: 'resume', msg: 'Ответ не подтверждён. Проверьте сохранённую рассылку; новую отправку создавать не нужно.' }); return; }
+      bcShowState(b);
     });
+  }
+  function bcStatus() {
+    const draft = bcDraft.current;
+    if (!draft || !draft.campaignId) return;
+    setBcBusy(true);
+    pfetch('panel_broadcast', { mode: 'status', campaignId: draft.campaignId }).then(r => {
+      setBcBusy(false); const b = r.body || {};
+      if (b.ok) {
+        if (b.state === 'DRAFT') {
+          try { bcPersist(Object.assign({}, draft, { confirmed: false })); } catch (_) { return; }
+          setBcResult({ kind: 'preview', recipients: b.recipientCount });
+        } else bcShowState(b);
+      } else setBcResult({ kind: 'resume', msg: 'Состояние пока недоступно. Сохранённую рассылку можно проверить повторно.' });
+    });
+  }
+  function bcShowState(b) {
+    const rows = Array.isArray(b.recipients) ? b.recipients : [];
+    const count = state => rows.filter(x => x.state === state).length;
+    const terminal = ['COMPLETED', 'PARTIAL', 'FAILED', 'SKIPPED', 'CANCELLED', 'EXPIRED'].includes(b.state);
+    setBcResult({ kind: terminal ? 'complete' : 'resume', msg: 'Завершено: ' + count('COMPLETED') + ' · частично: ' + count('PARTIAL') + ' · пропущено: ' + count('SKIPPED') + ' · ошибок: ' + count('FAILED') + ' · исход уточняется: ' + count('UNRESOLVED') + (terminal ? '' : '. Продолжение использует ту же рассылку.') });
+  }
+  function bcNewDraft() {
+    try { bcPersist(null); } catch (_) { return; }
+    setBcText(''); setBcResult(null);
   }
   // Извлекает код сертификата/баллов из любого формата: URL подарочного серта
   // (https://malesthetic.pro/g/ME-0001-6VAS), внутренний QR баллов (redeem_<код>),
@@ -37000,9 +37019,10 @@ function ALivePanel() {
     const res = bcResult;
     return e('div', null, Section('Текст рассылки', e('div', null, e('textarea', {
       value: bcText,
-      onChange: ev => setBcText(ev.target.value),
+      onChange: ev => bcEdit(ev.target.value),
+      disabled: bcBusy || Boolean(bcDraft.current && bcDraft.current.confirmed),
       rows: 4,
-      placeholder: 'Сообщение клиентам… {name} заменится на имя',
+      placeholder: 'Текст сообщения клиентам…',
       style: {
         width: '100%',
         boxSizing: 'border-box',
@@ -37026,14 +37046,14 @@ function ALivePanel() {
         margin: '8px 2px 14px',
         lineHeight: 1.5
       }
-    }, '{name} → имя клиента. Уйдёт только согласившимся на рассылку.'), res && res.kind === 'err' ? errEl(res.msg) : null, res && res.kind === 'ok' ? okEl(res.msg) : null, res && res.kind === 'preview' ? Card(e('div', null, e('div', {
+    }, '{name} → имя или «друг», если имя недоступно. Аудитория фиксируется при предпросмотре; согласие и настройки проверяются перед отправкой.'), res && res.kind === 'err' ? errEl(res.msg) : null, res && res.kind === 'ok' ? okEl(res.msg) : null, res && ['resume', 'complete'].includes(res.kind) ? Card(e('div', null, e('p', null, res.msg), res.kind === 'resume' ? e('div', null, btn('Проверить состояние', bcStatus, { busy: bcBusy }), btn('Продолжить рассылку', bcSend, { busy: bcBusy })) : btn('Новый черновик', bcNewDraft))) : null, res && res.kind === 'preview' ? Card(e('div', null, e('div', {
       style: {
         fontFamily: BODY,
         fontSize: 13,
         color: t.ink,
         marginBottom: 12
       }
-    }, 'Получат: ' + num(res.recipients) + ' из ' + num(res.total) + ' (без согласия — ' + num(res.excluded) + ')'), e('div', {
+    }, 'В аудитории: ' + num(res.recipients) + '. Получат только те, кому разрешена отправка по действующим настройкам.'), e('div', {
       style: {
         display: 'flex',
         gap: 8
@@ -37041,7 +37061,7 @@ function ALivePanel() {
     }, btn(bcBusy ? 'Отправляем…' : 'Да, разослать ' + num(res.recipients), bcSend, {
       primary: true,
       busy: bcBusy
-    }), btn('Отмена', () => setBcResult(null))))) : null, !res || res.kind === 'err' ? e('div', {
+    }), btn('Отмена', bcNewDraft)))) : null, !res || res.kind === 'err' ? e('div', {
       style: {
         marginTop: 4
       }
@@ -37072,7 +37092,7 @@ function ALivePanel() {
       }
     }, c.label))) : bcTpl ? null : loaderEl('Загружаем шаблоны…'), tpls.map((tp, i) => e('div', {
       key: i,
-      onClick: () => setBcText(tp.body),
+      onClick: () => bcEdit(tp.body),
       style: {
         cursor: 'pointer',
         padding: '12px 14px',
@@ -40947,6 +40967,18 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   }
   // exposed so staff screens (schedule/panel) can reuse the exact 3-channel auth
   window.__meAuthReq = authReq;
+  // B35 owner initiator uses the canonical account even inside Telegram.
+  window.__mayaBulkAuthReq = function (extra) {
+    var token = canonicalMayaTok();
+    if (!token) return null;
+    try {
+      var part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      var claims = JSON.parse(atob(part));
+      if (!claims.tenant_id || !claims.user_id) return null;
+      return { headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(extra || {}), bulkStorageKey: 'maya.b35.' + claims.tenant_id + '.' + claims.user_id };
+    } catch (_) { return null; }
+  };
+
 
   /* ---- cabinet fetch picks the matching endpoint for the channel ---- */
   function fetchCabinet() {

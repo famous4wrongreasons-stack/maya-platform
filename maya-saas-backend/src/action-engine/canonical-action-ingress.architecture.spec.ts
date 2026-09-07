@@ -134,9 +134,13 @@ describe('canonical ActionExecution ingress ratchet', () => {
     expect(crm).toContain('ActionEngineRuntimeService');
     expect(communication).toContain('ActionEngineRuntimeService');
     expect(shadow).toContain('ActionEngineRuntimeService');
-    expect(communication).toMatch(
-      /sourceRef: 'marketing\.sendCampaign',[\s\S]{0,120}actorUserId: input\.actorUserId/,
+    const bulk = source(
+      join(SRC_ROOT, 'marketing', 'canonical-bulk.service.ts'),
     );
+    expect(bulk).toContain('actorUserId: root.createdByUserId!');
+    expect(bulk).toContain('this.ingress.createExecution');
+    expect(bulk).toContain('this.engine.decideApproval');
+    expect(communication).toContain('B35_CANONICAL_OWNER_REQUIRED');
   });
 
   it('keeps A08 payment write disabled before Action Engine dispatch', () => {

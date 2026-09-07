@@ -13,6 +13,7 @@ const INTERNAL_OWNERS: Record<string, string[]> = {
     'authority',
   ],
   'communication-delivery/communication-web-push.service.ts': ['allowed'],
+  'communication-delivery/communication-bulk-policy.service.ts': ['current'],
   'crm/client-wanted-slot.service.ts': ['deliveryAllowed'],
   'marketing/marketing.service.ts': ['consentCandidates'],
 };
@@ -27,6 +28,7 @@ const VERIFIED_CHANNEL_READS = [
 export function scanClientProfileRead(file: string, source: string): string[] {
   if (file.endsWith('.spec.ts') || file.endsWith('.architecture.ts')) return [];
   const findings: string[] = [];
+  let bulkPolicyBody = '';
   const ast = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
   const dedicated = file === 'crm/client-profile-read.service.ts';
   const visit = (node: ts.Node) => {
@@ -49,6 +51,12 @@ export function scanClientProfileRead(file: string, source: string): string[] {
             findings.push(`Unverified shared channel resolver: ${marker}`);
         }
       }
+      if (
+        file ===
+          'communication-delivery/communication-bulk-policy.service.ts' &&
+        name === 'current'
+      )
+        bulkPolicyBody = body;
       const internal = INTERNAL_OWNERS[file]?.includes(name);
       const related = /customerProfiles?\b|encryptedClientPreferences/.test(
         body,
@@ -115,11 +123,31 @@ export function scanClientProfileRead(file: string, source: string): string[] {
     ts.forEachChild(node, visit);
   };
   visit(ast);
-  const requireMarkers = (markers: string[]) => {
+  const requireMarkers = (markers: string[], text = source) => {
     for (const marker of markers)
-      if (!source.replace(/\s+/g, '').includes(marker.replace(/\s+/g, '')))
+      if (!text.replace(/\s+/g, '').includes(marker.replace(/\s+/g, '')))
         findings.push(`Missing profile guard: ${marker}`);
   };
+  if (file === 'communication-delivery/communication-bulk-policy.service.ts') {
+    requireMarkers(
+      [
+        'tenantId_clientId: { tenantId, clientId }',
+        'select: { privacyConsentAt: true, marketingConsentAt: true, notificationPreferencesJson: true, }',
+        'this.links.assertClientEligible(tx, tenantId, clientId)',
+        'root.confirmedByUserId',
+        'APPROVING_AUTHORITY_REVOKED',
+        'clientConsentFact.findMany',
+        'CONSENT_NOT_GRANTED',
+      ],
+      bulkPolicyBody,
+    );
+    if (
+      /encryptedNotes|encryptedClientPreferences|customerProfiles/.test(source)
+    )
+      findings.push(
+        'Bulk dispatch policy cannot project private Client content',
+      );
+  }
   if (dedicated)
     requireMarkers([
       'SET TRANSACTION READ ONLY',

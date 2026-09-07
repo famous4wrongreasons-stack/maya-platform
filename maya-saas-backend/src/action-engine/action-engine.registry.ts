@@ -1,3 +1,9 @@
+import {
+  BULK_ROOT_CAPABILITY,
+  BULK_SLOT_CAPABILITY,
+  normalizeBulkAdmission,
+  normalizeBulkSlotAdmission,
+} from '../marketing/canonical-bulk.contract';
 import { normalizeReminderPlan } from '../communication-delivery/appointment-reminder.contract';
 import { normalizeClientWebPushDelivery } from '../communication-delivery/communication-web-push.contract';
 import { clientHabitsCapability } from './client-habits.contract';
@@ -3279,6 +3285,30 @@ function provenCommunicationCapability(input: {
 }
 
 const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
+  {
+    ...provenCommunicationCapability({
+      capability: BULK_ROOT_CAPABILITY,
+      actionClass: 'deliver_bulk_campaign',
+      targetKind: 'marketing_campaign',
+      executorKey: 'communication.bulk.admission',
+      allowedSourceTypes: ['authenticated_request'],
+      normalizeInput: normalizeBulkAdmission,
+    }),
+    normalizedInputContract: 'maya.bulk-admission/2',
+    approvalRequirement: 'REQUIRED',
+  },
+  {
+    ...provenCommunicationCapability({
+      capability: BULK_SLOT_CAPABILITY,
+      actionClass: 'deliver_bulk_campaign',
+      targetKind: 'marketing_client_recipient',
+      executorKey: 'communication.bulk.slot-admission',
+      allowedSourceTypes: ['authenticated_request'],
+      normalizeInput: normalizeBulkSlotAdmission,
+    }),
+    normalizedInputContract: 'maya.bulk-slot-admission/2',
+  },
+
   shadowCapability({
     capability: 'client-lifecycle.reactivation-review.prepare',
     actionClass: 'prepare_reactivation_review',

@@ -1,0 +1,17 @@
+--- active/bot.py
++++ b35/bot.py
+@@ -5262,9 +5262 @@
+-    """Шлёт сообщение всем клиентам с привязанным Telegram. Антиспам: 30 сообщений/сек."""
+-    flow = broadcast_flow.get(admin_id) or {}
+-    text = flow.get("text") or ""
+-    if not text:
+-        return {"sent": 0, "blocked": 0, "errors": 0}
+-
+-    # Цикл отправки вынесен в webhook_server.broadcast_send_to_base — единый
+-    # источник истины и для бота, и для панели управления (рассылки).
+-    res = await webhook_server.broadcast_send_to_base(context.bot, text)
++    """B35: legacy callbacks cannot approve or send a canonical bulk."""
+@@ -5272 +5264,2 @@
+-    return res
++    return {"sent": 0, "blocked": 0, "errors": 0,
++            "error": "B35_CANONICAL_OWNER_APPROVAL_REQUIRED_USE_PANEL"}

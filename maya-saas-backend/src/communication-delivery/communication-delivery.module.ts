@@ -1,3 +1,6 @@
+import { EntitlementsModule } from '../entitlements/entitlements.module';
+import { CommunicationBulkDeliveryService } from './communication-bulk-delivery.service';
+import { CommunicationBulkPolicyService } from './communication-bulk-policy.service';
 import { Module } from '@nestjs/common';
 
 import { ActionEngineModule } from '../action-engine';
@@ -8,12 +11,24 @@ import { CommunicationWebPushService } from './communication-web-push.service';
 import { CommunicationWebPushTransport } from './communication-web-push.transport';
 
 @Module({
-  imports: [PrismaModule, ActionEngineModule, ClientWebPushModule],
+  imports: [
+    EntitlementsModule,
+    PrismaModule,
+    ActionEngineModule,
+    ClientWebPushModule,
+  ],
   providers: [
+    CommunicationBulkDeliveryService,
+    CommunicationBulkPolicyService,
     CommunicationDeliveryService,
     CommunicationWebPushService,
     CommunicationWebPushTransport,
   ],
-  exports: [CommunicationDeliveryService, CommunicationWebPushService],
+  exports: [
+    CommunicationDeliveryService,
+    CommunicationWebPushService,
+    CommunicationBulkDeliveryService,
+    CommunicationBulkPolicyService,
+  ],
 })
 export class CommunicationDeliveryModule {}

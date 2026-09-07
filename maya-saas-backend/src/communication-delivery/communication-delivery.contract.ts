@@ -44,6 +44,8 @@ export interface CreateCommunicationEnvelopeV1 {
   recipients: CommunicationRecipientV1[];
   /** Web Push only: one logical canonical Client with at most five devices. */
   clientId?: string;
+  /** B35: only an approved logical Client may own a fixed transport slot. */
+  bulkSlot?: { parentRecipientId: string; key: string };
   audienceId?: string;
   audienceSnapshotHash?: string;
   createdByUserId?: string;

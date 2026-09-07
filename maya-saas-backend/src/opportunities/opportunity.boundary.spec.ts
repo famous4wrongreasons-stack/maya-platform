@@ -202,8 +202,19 @@ describe('Chapter 5 opportunity boundary', () => {
     ].map((file) => readFileSync(file, 'utf8'));
 
     expect(offenders).toEqual([]);
-    expect(rootModules.join('\n')).not.toMatch(
-      /MarketingModule|MarketingService|\.\/marketing\/|\.\.\/marketing\//,
+    // B35 registers only the immutable bulk command owner; it does not restore
+    // the retired marketing Opportunity discovery/decision architecture.
+    expect(rootModules[1]).not.toMatch(
+      /MarketingModule|MarketingService|\.\.\/marketing\//,
     );
+    const marketingModule = readFileSync(
+      join(SRC_DIR, 'marketing', 'marketing.module.ts'),
+      'utf8',
+    );
+    expect(marketingModule).toContain('exports: [CanonicalBulkService]');
+    expect(marketingModule).not.toMatch(
+      /\bMarketingService\b|RecoveryService|OpportunityService|CrmService/,
+    );
+    expect(rootModules[0]).not.toMatch(/\bMarketingService\b/);
   });
 });

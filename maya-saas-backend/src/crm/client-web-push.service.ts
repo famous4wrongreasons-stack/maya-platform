@@ -220,9 +220,10 @@ export class ClientWebPushService {
     tenantId: string,
     clientId: string,
     endpointId: string,
+    db: Prisma.TransactionClient | PrismaService = this.prisma,
   ) {
     if (this.context.requireTenantId() !== tenantId) return null;
-    const row = await this.prisma.clientWebPushEndpoint.findFirst({
+    const row = await db.clientWebPushEndpoint.findFirst({
       where: { id: endpointId, tenantId, clientId, endedAt: null },
       include: { clientChannelLink: true },
     });
@@ -234,8 +235,8 @@ export class ClientWebPushService {
     )
       return null;
     try {
-      await this.assertTenant(this.prisma, tenantId);
-      await this.links.assertClientEligible(this.prisma, tenantId, clientId);
+      await this.assertTenant(db, tenantId);
+      await this.links.assertClientEligible(db, tenantId, clientId);
       const subscription = normalizeWebPushSubscription(
         JSON.parse(this.encryption.decrypt(row.subscriptionEncrypted)),
       );
@@ -279,6 +280,22 @@ export class ClientWebPushService {
         },
         include: { recipient: true, campaign: true },
       });
+      const bulkOwner = attempt?.campaign.parentRecipientId
+        ? await tx.marketingCampaignRecipient.findFirst({
+            where: {
+              id: attempt.campaign.parentRecipientId,
+              tenantId,
+              clientId,
+              lifecycleVersion: 2,
+              recipientKind: 'canonical_client',
+            },
+          })
+        : null;
+      const exactEvidence =
+        attempt?.recipient?.eligibilityEvidenceRef ===
+        (bulkOwner
+          ? `b35:endpoint:${endpointId}`
+          : `web-push-endpoint:${endpointId}`);
       // The recipient's opaque endpoint reference is independently hashed by
       // Communication Delivery; its explicit evidence binds the exact episode.
       if (
@@ -289,8 +306,8 @@ export class ClientWebPushService {
         attempt.campaign.deliveryCapabilityKey !==
           'communication.production.web-push.client-single' ||
         attempt.recipient?.recipientKind !== 'client_web_push_endpoint' ||
-        attempt.recipient?.eligibilityEvidenceRef !==
-          `web-push-endpoint:${endpointId}`
+        !exactEvidence ||
+        (attempt.campaign.parentRecipientId !== null && !bulkOwner)
       )
         throw new ForbiddenException('PERMANENT_WEB_PUSH_OUTCOME_REQUIRED');
       const current = await tx.clientWebPushEndpoint.findUniqueOrThrow({
@@ -341,7 +358,7 @@ export class ClientWebPushService {
       changed,
     };
   }
-  private async assertTenant(tx: Tx, tenantId: string) {
+  private async assertTenant(tx: Tx | PrismaService, tenantId: string) {
     const tenant = await tx.tenant.findUnique({ where: { id: tenantId } });
     if (
       !tenant ||

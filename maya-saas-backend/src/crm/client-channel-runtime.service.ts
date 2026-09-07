@@ -1,3 +1,4 @@
+import { resolveVerifiedClientDeliveryEndpoint } from './client-delivery-endpoint';
 import { ClientBookingConfirmationService } from './client-booking-confirmation.service';
 import {
   BadRequestException,
@@ -165,62 +166,14 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
   /** Server-internal delivery resolution. A caller supplies a canonical Client
    * and exact link reference, never a raw provider recipient. */
   async resolveVerifiedDeliveryEndpoint(clientId: string, linkId: string) {
-    const tenantId = this.context.requireTenantId();
-    const link = await this.prisma.clientChannelLink.findUnique({
-      where: { id_tenantId: { id: linkId, tenantId } },
-    });
-    if (
-      !link ||
-      link.clientId !== clientId ||
-      link.revokedAt ||
-      link.verificationVersion !== 1 ||
-      link.subjectHashVersion !== 1 ||
-      !link.deliveryAddressEncrypted
-    )
-      return null;
-    let address: string;
-    try {
-      address = this.encryption.decrypt(link.deliveryAddressEncrypted);
-    } catch {
-      return null;
-    }
-    if (
-      (link.provider === 'telegram' && !/^[1-9][0-9]{0,19}$/.test(address)) ||
-      (link.provider === 'maya_user' &&
-        !/^[A-Za-z0-9._:-]{1,240}$/.test(address)) ||
-      !['telegram', 'maya_user'].includes(link.provider) ||
-      clientChannelSubjectHash(
-        this.encryption,
-        link.provider as 'telegram' | 'maya_user',
-        address,
-      ) !== link.providerSubjectHash
-    )
-      return null;
-    try {
-      await this.links.assertClientEligible(this.prisma, tenantId, clientId);
-    } catch {
-      return null;
-    }
-    if (link.provider === 'maya_user') {
-      const user = await this.prisma.user.findUnique({
-        where: { id: address },
-        select: {
-          status: true,
-          memberships: {
-            where: { tenantId, status: 'active' },
-            select: { id: true },
-            take: 2,
-          },
-        },
-      });
-      if (!user || user.status !== 'active' || user.memberships.length !== 1)
-        return null;
-    }
-    return {
-      provider: link.provider as 'telegram' | 'maya_user',
-      address,
-      identityRef: link.providerSubjectHash,
-    };
+    return resolveVerifiedClientDeliveryEndpoint(
+      this.prisma,
+      this.encryption,
+      this.links,
+      this.context.requireTenantId(),
+      clientId,
+      linkId,
+    );
   }
 
   async submitConsent(channelProof: string, value: unknown) {

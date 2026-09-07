@@ -5284,17 +5284,10 @@ async def _broadcast_show_preview(update: Update, admin_id: int, text: str):
 
 
 async def _broadcast_execute(context: ContextTypes.DEFAULT_TYPE, admin_id: int) -> dict:
-    """Шлёт сообщение всем клиентам с привязанным Telegram. Антиспам: 30 сообщений/сек."""
-    flow = broadcast_flow.get(admin_id) or {}
-    text = flow.get("text") or ""
-    if not text:
-        return {"sent": 0, "blocked": 0, "errors": 0}
-
-    # Цикл отправки вынесен в webhook_server.broadcast_send_to_base — единый
-    # источник истины и для бота, и для панели управления (рассылки).
-    res = await webhook_server.broadcast_send_to_base(context.bot, text)
+    """B35: legacy callbacks cannot approve or send a canonical bulk."""
     broadcast_flow.pop(admin_id, None)
-    return res
+    return {"sent": 0, "blocked": 0, "errors": 0,
+            "error": "B35_CANONICAL_OWNER_APPROVAL_REQUIRED_USE_PANEL"}
 
 
 async def cmd_stats_ai(update: Update, context: ContextTypes.DEFAULT_TYPE):

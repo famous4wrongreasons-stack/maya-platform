@@ -2,7 +2,11 @@ import { verifiedClientChannelCapability } from './client-preferences.contract';
 import { readClientActionPrincipal } from './client-action-principal.contract';
 import type { ConsentChannelBinding } from '../crm/client-consent-authority';
 import { Injectable } from '@nestjs/common';
-import { ActionPolicyDecision, type ActionExecution } from '@prisma/client';
+import {
+  ActionPolicyDecision,
+  type ActionExecution,
+  type Prisma,
+} from '@prisma/client';
 
 import type {
   ActionExecutionPreviewV1,
@@ -112,9 +116,14 @@ export class CanonicalActionIngressService {
 
   async createExecution(
     request: TrustedActionExecutionRequestV1,
+    transaction?: Prisma.TransactionClient,
   ): Promise<ActionExecution> {
     const prepared = await this.prepare(request);
-    return this.kernel.createCanonicalExecution(request, prepared.policy);
+    return this.kernel.createCanonicalExecution(
+      request,
+      prepared.policy,
+      transaction,
+    );
   }
 
   private assertResolverOwnsDecision(

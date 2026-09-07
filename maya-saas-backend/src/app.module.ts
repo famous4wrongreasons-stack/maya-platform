@@ -1,3 +1,4 @@
+import { MarketingModule } from './marketing/marketing.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
@@ -99,6 +100,7 @@ import { SystemMetricsService } from './system-metrics.service';
     RecoveryModule,
     ReferralsModule,
     AiToolsModule,
+    MarketingModule,
   ],
   controllers: [AppController],
   providers: [

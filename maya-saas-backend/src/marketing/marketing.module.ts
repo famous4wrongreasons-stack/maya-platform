@@ -1,21 +1,18 @@
 import { Module } from '@nestjs/common';
-
-import { BusinessFactsModule } from '../business-facts/business-facts.module';
+import { ActionEngineModule } from '../action-engine';
+import { PrismaModule } from '../prisma/prisma.module';
 import { CommunicationDeliveryModule } from '../communication-delivery/communication-delivery.module';
-import { CommunicationShadowModule } from '../communication-shadow';
-import { CrmModule } from '../crm/crm.module';
-import { RecoveryModule } from '../recovery/recovery.module';
-import { MarketingService } from './marketing.service';
+import { ClientChannelAuthenticatorService } from '../crm/client-channel-authenticator.service';
+import { CanonicalBulkService } from './canonical-bulk.service';
+import {
+  CanonicalBulkController,
+  LegacyCanonicalBulkController,
+} from './canonical-bulk.controller';
 
 @Module({
-  imports: [
-    BusinessFactsModule,
-    CommunicationDeliveryModule,
-    CommunicationShadowModule,
-    CrmModule,
-    RecoveryModule,
-  ],
-  providers: [MarketingService],
-  exports: [MarketingService],
+  imports: [PrismaModule, ActionEngineModule, CommunicationDeliveryModule],
+  controllers: [CanonicalBulkController, LegacyCanonicalBulkController],
+  providers: [CanonicalBulkService, ClientChannelAuthenticatorService],
+  exports: [CanonicalBulkService],
 })
 export class MarketingModule {}

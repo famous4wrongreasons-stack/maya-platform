@@ -222,226 +222,232 @@ export class CommunicationDeliveryKernel {
 
   async createEnvelope(
     input: CreateCommunicationEnvelopeV1,
+    transaction?: Prisma.TransactionClient,
   ): Promise<MarketingCampaign & { recipients: MarketingCampaignRecipient[] }> {
     const normalized = this.normalizeEnvelope(input);
     const now = this.now();
 
     for (let databaseAttempt = 0; databaseAttempt < 3; databaseAttempt += 1) {
       try {
-        return await this.prisma.$transaction(
-          async (tx) => {
-            const execution = await tx.actionExecution.findUnique({
+        const persist = async (tx: Prisma.TransactionClient) => {
+          const execution = await tx.actionExecution.findUnique({
+            where: {
+              id_tenantId: {
+                id: input.actionExecutionId,
+                tenantId: input.tenantId,
+              },
+            },
+          });
+          if (!execution) {
+            throw new CommunicationContractError(
+              'ACTION_EXECUTION_NOT_FOUND',
+              'Tenant-scoped ActionExecution does not exist',
+            );
+          }
+          this.assertExecutionAllowsDelivery(execution);
+
+          if (input.channel === 'web_push') {
+            const endpointIds = input.recipients.map((r) => r.recipientRef);
+            const endpoints = await tx.clientWebPushEndpoint.findMany({
+              where: {
+                id: { in: endpointIds },
+                tenantId: input.tenantId,
+                clientId: input.clientId,
+              },
+              select: { id: true },
+            });
+            if (endpoints.length !== endpointIds.length)
+              throw new CommunicationContractError(
+                'WEB_PUSH_CLIENT_MISMATCH',
+                'All devices must belong to the same canonical Client',
+              );
+          }
+
+          const campaignIdentity = this.identity.campaignIdentity({
+            tenantId: input.tenantId,
+            actionIdentityFingerprint: execution.identityFingerprint,
+            callerKey: normalized.campaignIdempotencyKey,
+            scope: input.scope,
+            channel: normalized.channel,
+            contentIdentityHash: normalized.contentIdentityHash,
+          });
+          const duplicate = await tx.marketingCampaign.findFirst({
+            where: {
+              tenantId: input.tenantId,
+              OR: [
+                { actionExecutionId: execution.id },
+                { idempotencyKey: campaignIdentity },
+              ],
+            },
+            include: { recipients: true },
+          });
+          if (duplicate) {
+            if (duplicate.idempotencyKey !== campaignIdentity) {
+              throw new CommunicationConflictError(
+                'ACTION_EXECUTION_ENVELOPE_CONFLICT',
+                'ActionExecution is already linked to another communication envelope',
+              );
+            }
+            this.duplicateDeliveriesCollapsed += normalized.recipients.length;
+            return duplicate;
+          }
+
+          if (input.scope === 'BULK') {
+            const audience = await tx.marketingAudience.findUnique({
               where: {
                 id_tenantId: {
-                  id: input.actionExecutionId,
+                  id: normalized.audienceId!,
                   tenantId: input.tenantId,
                 },
               },
             });
-            if (!execution) {
+            if (!audience) {
               throw new CommunicationContractError(
-                'ACTION_EXECUTION_NOT_FOUND',
-                'Tenant-scoped ActionExecution does not exist',
+                'AUDIENCE_NOT_FOUND',
+                'Tenant-scoped audience does not exist',
               );
             }
-            this.assertExecutionAllowsDelivery(execution);
-
-            if (input.channel === 'web_push') {
-              const endpointIds = input.recipients.map((r) => r.recipientRef);
-              const endpoints = await tx.clientWebPushEndpoint.findMany({
-                where: {
-                  id: { in: endpointIds },
-                  tenantId: input.tenantId,
-                  clientId: input.clientId,
-                },
-                select: { id: true },
-              });
-              if (endpoints.length !== endpointIds.length)
-                throw new CommunicationContractError(
-                  'WEB_PUSH_CLIENT_MISMATCH',
-                  'All devices must belong to the same canonical Client',
-                );
+            if (audience.snapshotHash !== normalized.audienceSnapshotHash) {
+              throw new CommunicationConflictError(
+                'AUDIENCE_SNAPSHOT_MISMATCH',
+                'Communication envelope does not match the immutable audience snapshot',
+              );
             }
+          }
 
-            const campaignIdentity = this.identity.campaignIdentity({
+          const capability = this.registry.get(input.capabilityKey);
+          const payloadRetentionUntil = new Date(
+            now.getTime() + capability.payloadRetentionMs,
+          );
+          const auditRetentionUntil = new Date(
+            now.getTime() + capability.auditRetentionMs,
+          );
+          const campaignId = randomUUID();
+          const recipientRows = normalized.recipients.map((recipient) => {
+            const recipientRefHash = this.identity.hashOpaqueRef(
+              input.tenantId,
+              recipient.recipientKind,
+              recipient.recipientRef,
+            );
+            const idempotencyKey = this.identity.deliveryIdentity({
+              identityVersion: 1,
               tenantId: input.tenantId,
               actionIdentityFingerprint: execution.identityFingerprint,
-              callerKey: normalized.campaignIdempotencyKey,
-              scope: input.scope,
+              campaignIdempotencyKey: campaignIdentity,
+              recipientKind: recipient.recipientKind,
+              recipientRefHash,
               channel: normalized.channel,
               contentIdentityHash: normalized.contentIdentityHash,
             });
-            const duplicate = await tx.marketingCampaign.findFirst({
-              where: {
-                tenantId: input.tenantId,
-                OR: [
-                  { actionExecutionId: execution.id },
-                  { idempotencyKey: campaignIdentity },
-                ],
-              },
-              include: { recipients: true },
-            });
-            if (duplicate) {
-              if (duplicate.idempotencyKey !== campaignIdentity) {
-                throw new CommunicationConflictError(
-                  'ACTION_EXECUTION_ENVELOPE_CONFLICT',
-                  'ActionExecution is already linked to another communication envelope',
-                );
-              }
-              this.duplicateDeliveriesCollapsed += normalized.recipients.length;
-              return duplicate;
-            }
-
-            if (input.scope === 'BULK') {
-              const audience = await tx.marketingAudience.findUnique({
-                where: {
-                  id_tenantId: {
-                    id: normalized.audienceId!,
-                    tenantId: input.tenantId,
-                  },
-                },
-              });
-              if (!audience) {
-                throw new CommunicationContractError(
-                  'AUDIENCE_NOT_FOUND',
-                  'Tenant-scoped audience does not exist',
-                );
-              }
-              if (audience.snapshotHash !== normalized.audienceSnapshotHash) {
-                throw new CommunicationConflictError(
-                  'AUDIENCE_SNAPSHOT_MISMATCH',
-                  'Communication envelope does not match the immutable audience snapshot',
-                );
-              }
-            }
-
-            const capability = this.registry.get(input.capabilityKey);
-            const payloadRetentionUntil = new Date(
-              now.getTime() + capability.payloadRetentionMs,
-            );
-            const auditRetentionUntil = new Date(
-              now.getTime() + capability.auditRetentionMs,
-            );
-            const campaignId = randomUUID();
-            const recipientRows = normalized.recipients.map((recipient) => {
-              const recipientRefHash = this.identity.hashOpaqueRef(
-                input.tenantId,
-                recipient.recipientKind,
-                recipient.recipientRef,
-              );
-              const idempotencyKey = this.identity.deliveryIdentity({
-                identityVersion: 1,
-                tenantId: input.tenantId,
-                actionIdentityFingerprint: execution.identityFingerprint,
-                campaignIdempotencyKey: campaignIdentity,
-                recipientKind: recipient.recipientKind,
-                recipientRefHash,
-                channel: normalized.channel,
-                contentIdentityHash: normalized.contentIdentityHash,
-              });
-              const skipped = recipient.eligibility.decision !== 'ALLOW';
-              return {
-                id: randomUUID(),
-                tenantId: input.tenantId,
-                campaignId,
-                externalClientId: recipientRefHash,
-                internalUserId: recipient.internalUserId,
-                idempotencyKey,
-                status: deliveryStatus(
-                  skipped
-                    ? CommunicationDeliveryState.SKIPPED
-                    : CommunicationDeliveryState.NOT_SENT,
-                ),
-                updatedAt: now,
-                lifecycleVersion: 1,
-                identityVersion: 1,
-                recipientKind: recipient.recipientKind,
-                recipientRefHash,
-                contentIdentityHash: normalized.contentIdentityHash,
-                deliveryState: skipped
+            const skipped = recipient.eligibility.decision !== 'ALLOW';
+            return {
+              id: randomUUID(),
+              tenantId: input.tenantId,
+              campaignId,
+              externalClientId: recipientRefHash,
+              internalUserId: recipient.internalUserId,
+              idempotencyKey,
+              status: deliveryStatus(
+                skipped
                   ? CommunicationDeliveryState.SKIPPED
                   : CommunicationDeliveryState.NOT_SENT,
-                externalDispatchState: ExternalDispatchState.NOT_CROSSED,
-                reconciliationState: ActionReconciliationState.NOT_REQUIRED,
-                eligibilityBasis: recipient.eligibility.basis,
-                eligibilityDecision: recipient.eligibility.decision,
-                eligibilityPolicyVersion: recipient.eligibility.policyVersion,
-                eligibilityEvidenceRef: recipient.eligibility.evidenceRef,
-                eligibilityEvidenceHash: recipient.eligibility.evidenceHash,
-                eligibilityCheckedAt: recipient.eligibility.checkedAt,
-                consentEvidenceId: recipient.consentEvidenceId,
-                terminalAt: skipped ? now : null,
-                terminalReasonCode: skipped
-                  ? (recipient.eligibility.reasonCode ??
-                    `ELIGIBILITY_${recipient.eligibility.decision}`)
-                  : null,
-                payloadRetentionUntil,
-                auditRetentionUntil,
-              } satisfies Prisma.MarketingCampaignRecipientCreateManyInput;
-            });
-            const initialAggregate = projectCommunicationAggregate(
-              recipientRows.map((row) => ({
-                deliveryState: row.deliveryState,
-                terminalAt: row.terminalAt,
-                terminalReasonCode: row.terminalReasonCode,
-                attemptCount: 0,
-              })),
-            );
+              ),
+              updatedAt: now,
+              lifecycleVersion: 1,
+              identityVersion: 1,
+              recipientKind: recipient.recipientKind,
+              recipientRefHash,
+              contentIdentityHash: normalized.contentIdentityHash,
+              deliveryState: skipped
+                ? CommunicationDeliveryState.SKIPPED
+                : CommunicationDeliveryState.NOT_SENT,
+              externalDispatchState: ExternalDispatchState.NOT_CROSSED,
+              reconciliationState: ActionReconciliationState.NOT_REQUIRED,
+              eligibilityBasis: recipient.eligibility.basis,
+              eligibilityDecision: recipient.eligibility.decision,
+              eligibilityPolicyVersion: recipient.eligibility.policyVersion,
+              eligibilityEvidenceRef: recipient.eligibility.evidenceRef,
+              eligibilityEvidenceHash: recipient.eligibility.evidenceHash,
+              eligibilityCheckedAt: recipient.eligibility.checkedAt,
+              consentEvidenceId: recipient.consentEvidenceId,
+              terminalAt: skipped ? now : null,
+              terminalReasonCode: skipped
+                ? (recipient.eligibility.reasonCode ??
+                  `ELIGIBILITY_${recipient.eligibility.decision}`)
+                : null,
+              payloadRetentionUntil,
+              auditRetentionUntil,
+            } satisfies Prisma.MarketingCampaignRecipientCreateManyInput;
+          });
+          const initialAggregate = projectCommunicationAggregate(
+            recipientRows.map((row) => ({
+              deliveryState: row.deliveryState,
+              terminalAt: row.terminalAt,
+              terminalReasonCode: row.terminalReasonCode,
+              attemptCount: 0,
+            })),
+          );
 
-            await tx.marketingCampaign.create({
-              data: {
-                id: campaignId,
-                tenantId: input.tenantId,
-                createdByUserId: input.createdByUserId,
-                confirmedByUserId: input.confirmedByUserId,
-                audienceId: normalized.audienceId,
-                channel: normalized.channel,
-                status: initialAggregate.state,
-                message: '',
-                recipientUserIdsJson: [],
-                recipientCount: recipientRows.length,
-                sentCount: 0,
-                idempotencyKey: campaignIdentity,
-                expiresAt: input.expiresAt,
-                provider: capability.key,
-                audienceSnapshotHash: normalized.audienceSnapshotHash ?? '',
-                messageSnapshotHash: normalized.contentIdentityHash,
-                queuedAt: now,
-                acceptedCount: initialAggregate.accepted,
-                failedCount: initialAggregate.failed,
-                skippedCount: initialAggregate.skipped,
-                unknownCount: initialAggregate.unknown,
-                lifecycleVersion: 1,
-                scope:
-                  input.scope === 'SINGLE'
-                    ? CommunicationScope.SINGLE
-                    : CommunicationScope.BULK,
-                actionExecutionId: execution.id,
-                aggregateState: initialAggregate.state,
-                contentRef: normalized.contentRef,
-                deliveryCapabilityKey: capability.key,
-                deliveryCapabilityVersion: capability.version,
-                retryPolicyKey: capability.retry.key,
-                retryPolicyVersion: capability.retry.version,
-                reconciliationPolicyKey: capability.reconciliation.key,
-                reconciliationPolicyVersion: capability.reconciliation.version,
-                payloadRetentionUntil,
-                auditRetentionUntil,
-              },
+          await tx.marketingCampaign.create({
+            data: {
+              id: campaignId,
+              tenantId: input.tenantId,
+              parentRecipientId: input.bulkSlot?.parentRecipientId,
+              bulkSlotKey: input.bulkSlot?.key,
+              createdByUserId: input.createdByUserId,
+              confirmedByUserId: input.confirmedByUserId,
+              audienceId: normalized.audienceId,
+              channel: normalized.channel,
+              status: initialAggregate.state,
+              message: '',
+              recipientUserIdsJson: [],
+              recipientCount: recipientRows.length,
+              sentCount: 0,
+              idempotencyKey: campaignIdentity,
+              expiresAt: input.expiresAt,
+              provider: capability.key,
+              audienceSnapshotHash: normalized.audienceSnapshotHash ?? '',
+              messageSnapshotHash: normalized.contentIdentityHash,
+              queuedAt: now,
+              acceptedCount: initialAggregate.accepted,
+              failedCount: initialAggregate.failed,
+              skippedCount: initialAggregate.skipped,
+              unknownCount: initialAggregate.unknown,
+              lifecycleVersion: 1,
+              scope:
+                input.scope === 'SINGLE'
+                  ? CommunicationScope.SINGLE
+                  : CommunicationScope.BULK,
+              actionExecutionId: execution.id,
+              aggregateState: initialAggregate.state,
+              contentRef: normalized.contentRef,
+              deliveryCapabilityKey: capability.key,
+              deliveryCapabilityVersion: capability.version,
+              retryPolicyKey: capability.retry.key,
+              retryPolicyVersion: capability.retry.version,
+              reconciliationPolicyKey: capability.reconciliation.key,
+              reconciliationPolicyVersion: capability.reconciliation.version,
+              payloadRetentionUntil,
+              auditRetentionUntil,
+            },
+          });
+          await tx.marketingCampaignRecipient.createMany({
+            data: recipientRows,
+          });
+          return tx.marketingCampaign.findUniqueOrThrow({
+            where: {
+              id_tenantId: { id: campaignId, tenantId: input.tenantId },
+            },
+            include: { recipients: true },
+          });
+        };
+        return transaction
+          ? await persist(transaction)
+          : await this.prisma.$transaction(persist, {
+              isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
             });
-            await tx.marketingCampaignRecipient.createMany({
-              data: recipientRows,
-            });
-            return tx.marketingCampaign.findUniqueOrThrow({
-              where: {
-                id_tenantId: { id: campaignId, tenantId: input.tenantId },
-              },
-              include: { recipients: true },
-            });
-          },
-          { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-        );
       } catch (error) {
+        if (transaction) throw error;
         if (isSerializationConflict(error) && databaseAttempt < 2) continue;
         if (isUniqueConflict(error)) {
           const execution = await this.prisma.actionExecution.findUnique({
@@ -480,14 +486,17 @@ export class CommunicationDeliveryKernel {
     );
   }
 
-  async claimNext(input: {
-    tenantId: string;
-    workerId: string;
-    campaignId?: string;
-  }): Promise<CommunicationDeliveryClaimV1 | null> {
+  async claimNext(
+    input: {
+      tenantId: string;
+      workerId: string;
+      campaignId?: string;
+    },
+    transaction?: Prisma.TransactionClient,
+  ): Promise<CommunicationDeliveryClaimV1 | null> {
     const now = this.now();
     const workerId = assertCode(input.workerId, 'workerId');
-    return this.prisma.$transaction(async (tx) => {
+    const claim = async (tx: Prisma.TransactionClient) => {
       const campaignFilter = input.campaignId
         ? Prisma.sql`AND r."campaignId" = ${input.campaignId}`
         : Prisma.empty;
@@ -510,11 +519,12 @@ export class CommunicationDeliveryKernel {
           AND (r."leaseExpiresAt" IS NULL OR r."leaseExpiresAt" < ${now})
           AND c."lifecycleVersion" = 1
           AND c."expiresAt" > ${now}
-          AND c."aggregateState" IN ('READY', 'RUNNING')
+          AND (c."aggregateState" IN ('READY', 'RUNNING') OR (c."parentRecipientId" IS NOT NULL AND c."aggregateState" = 'UNRESOLVED'))
           AND e."dryRun" = false
           AND e."policyDecision" = 'ALLOW'
           AND e."approvalDecision" IN ('NOT_REQUIRED', 'APPROVED')
           AND e."state" IN ('READY', 'EXECUTING', 'SUCCEEDED')
+          AND (c."parentRecipientId" IS NULL OR e."state" = 'SUCCEEDED')
         ORDER BY r."createdAt" ASC, r."id" ASC
         FOR UPDATE OF r SKIP LOCKED
         LIMIT 1
@@ -628,7 +638,8 @@ export class CommunicationDeliveryKernel {
         },
       });
       return { campaign, recipient: claimed, attempt, leaseToken };
-    });
+    };
+    return transaction ? claim(transaction) : this.prisma.$transaction(claim);
   }
 
   async markDispatchBoundary(
@@ -658,6 +669,128 @@ export class CommunicationDeliveryKernel {
         dispatchedAt: now,
       });
       return { recipient, attempt };
+    });
+  }
+
+  /** B35 policy proof and the provider boundary commit together. */
+  async markBulkDispatchBoundary(
+    input: OwnedCommunicationAttemptV1,
+    evaluate: (
+      tx: Prisma.TransactionClient,
+      locked: LockedAttempt,
+    ) => Promise<{
+      allowed: boolean;
+      reason: string;
+      proof: Record<string, unknown>;
+    }>,
+  ): Promise<{ allowed: boolean; recipient: MarketingCampaignRecipient }> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const locked = await this.lockOwnedAttempt(tx, input);
+        if (
+          !locked.campaign.parentRecipientId ||
+          locked.attempt.kind !== 'EXECUTION' ||
+          locked.attempt.externalDispatchState !== 'NOT_CROSSED'
+        )
+          throw new CommunicationClaimError(
+            'B35_BOUNDARY_INVALID',
+            'An unstarted approved bulk slot is required',
+          );
+        const decision = await evaluate(tx, locked),
+          now = this.now();
+        await this.updateOwnedAttempt(tx, input, {
+          dispatchEligibilityJson: decision.proof as Prisma.InputJsonObject,
+          ...(decision.allowed
+            ? { externalDispatchState: 'MAY_HAVE_CROSSED', dispatchedAt: now }
+            : {
+                status: 'FAILED',
+                state: 'FAILED',
+                outcomeCode: decision.reason,
+                errorCode: decision.reason,
+                retryDecisionCode: 'POLICY_DENIED_NO_RETRY',
+                completedAt: now,
+              }),
+        });
+        const recipient = await this.updateOwnedRecipient(tx, input, {
+          eligibilityDecision: decision.allowed ? 'ALLOW' : 'DENY',
+          eligibilityCheckedAt: now,
+          eligibilityEvidenceHash: this.identity.safeHash(
+            'maya.bulk-dispatch-eligibility/1',
+            decision.proof,
+          ),
+          ...(decision.allowed
+            ? { externalDispatchState: 'MAY_HAVE_CROSSED', dispatchedAt: now }
+            : {
+                status: 'SKIPPED',
+                deliveryState: 'SKIPPED',
+                terminalAt: now,
+                terminalReasonCode: decision.reason,
+                leaseOwner: null,
+                leaseTokenHash: null,
+                leaseExpiresAt: null,
+              }),
+          updatedAt: now,
+          revision: { increment: 1 },
+        });
+        if (!decision.allowed)
+          await this.refreshAggregate(
+            tx,
+            input.tenantId,
+            input.campaignId,
+            now,
+          );
+        return { allowed: decision.allowed, recipient };
+      },
+      { timeout: 30000 },
+    );
+  }
+
+  /** Suppression is a terminal no-effect outcome, never an alternate route. */
+  async skipBulkUnstarted(
+    tenantId: string,
+    campaignId: string,
+    reason: string,
+  ) {
+    assertCode(reason, 'reason');
+    await this.prisma.$transaction(async (tx) => {
+      const campaign = await tx.marketingCampaign.findUniqueOrThrow({
+        where: { id_tenantId: { id: campaignId, tenantId } },
+      });
+      if (!campaign.parentRecipientId)
+        throw new CommunicationContractError(
+          'B35_SLOT_REQUIRED',
+          'Approved bulk slot required',
+        );
+      const rows = await tx.marketingCampaignRecipient.findMany({
+        where: {
+          tenantId,
+          campaignId,
+          deliveryState: 'NOT_SENT',
+          leaseOwner: null,
+        },
+      });
+      for (const row of rows) {
+        await this.lockRecipient(tx, tenantId, campaignId, row.id);
+        await tx.marketingCampaignRecipient.updateMany({
+          where: {
+            id: row.id,
+            revision: row.revision,
+            deliveryState: 'NOT_SENT',
+            externalDispatchState: 'NOT_CROSSED',
+            leaseOwner: null,
+          },
+          data: {
+            eligibilityDecision: 'SKIP',
+            status: 'SKIPPED',
+            deliveryState: 'SKIPPED',
+            terminalAt: this.now(),
+            terminalReasonCode: reason,
+            updatedAt: this.now(),
+            revision: { increment: 1 },
+          },
+        });
+      }
+      await this.refreshAggregate(tx, tenantId, campaignId, this.now());
     });
   }
 
@@ -1359,7 +1492,8 @@ export class CommunicationDeliveryKernel {
         },
       });
       const retryAllowed =
-        executionAttempts < capability.retry.maxExecutionAttempts &&
+        (campaign.parentRecipientId !== null ||
+          executionAttempts < capability.retry.maxExecutionAttempts) &&
         campaign.expiresAt > now;
       const attemptResult = await tx.marketingDeliveryAttempt.updateMany({
         where: {
@@ -1599,7 +1733,11 @@ export class CommunicationDeliveryKernel {
     }
     if (
       !Number.isFinite(input.expiresAt.getTime()) ||
-      input.expiresAt <= this.now()
+      (input.expiresAt <= this.now() &&
+        !(
+          input.bulkSlot &&
+          input.recipients.every((r) => r.eligibility.decision !== 'ALLOW')
+        ))
     ) {
       throw new CommunicationContractError(
         'INVALID_EXPIRY',
@@ -1625,7 +1763,10 @@ export class CommunicationDeliveryKernel {
         input.recipients.some(
           (r) =>
             r.recipientKind !== 'client_web_push_endpoint' ||
-            r.eligibility.evidenceRef !== `web-push-endpoint:${r.recipientRef}`,
+            r.eligibility.evidenceRef !==
+              (input.bulkSlot
+                ? `b35:endpoint:${r.recipientRef}`
+                : `web-push-endpoint:${r.recipientRef}`),
         ))
     )
       throw new CommunicationContractError(

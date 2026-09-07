@@ -10,6 +10,7 @@
   },
   "include": [
     "scripts/auth-retention-cleanup.ts",
+    "scripts/package5-b35-history-cutover.ts",
     "scripts/ai-runtime-maintenance.ts",
     "scripts/release-preflight.ts",
     "scripts/staff-identity-backfill.ts",

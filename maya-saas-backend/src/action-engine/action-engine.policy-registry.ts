@@ -100,6 +100,13 @@ function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
 
 function allowedActorRoles(capability: string): readonly UserRole[] {
   if (
+    [
+      'communication.bulk-campaign.admit.v2',
+      'communication.bulk-slot.admit.v2',
+    ].includes(capability)
+  )
+    return [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER];
+  if (
     capability.startsWith('package5.wave5.recovery-attribution-correction.')
   ) {
     return RECOVERY_ATTRIBUTION_REQUESTER_ROLES;

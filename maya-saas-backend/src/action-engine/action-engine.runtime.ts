@@ -6,6 +6,7 @@ import {
   ActionPolicyDecision,
   ActionReconciliationState,
   type ActionExecution,
+  type Prisma,
 } from '@prisma/client';
 
 import type {
@@ -121,6 +122,44 @@ export class ActionEngineRuntimeService {
     private readonly kernel: ActionEngineKernel,
     private readonly canonicalIngress: CanonicalActionIngressService,
   ) {}
+
+  /** B35 admissions have only local database effects. The envelope, approval,
+   * attempt and receipt commit together; a lost COMMIT reply re-reads that receipt.
+   * Transport effects must never be passed to this transaction callback. */
+  async completeBulkAdmissionInTransaction(
+    execution: ActionExecution,
+    transaction: Prisma.TransactionClient,
+    safeResult: Record<string, unknown>,
+  ) {
+    if (
+      ![
+        'communication.bulk-campaign.admit.v2',
+        'communication.bulk-slot.admit.v2',
+      ].includes(execution.capability)
+    )
+      throw new ActionContractError(
+        'Only a canonical B35 database admission may use this boundary',
+      );
+    const claim = await this.kernel.claimExecution(
+      {
+        tenantId: execution.tenantId,
+        executionId: execution.id,
+        workerId: this.workerId,
+      },
+      transaction,
+    );
+    return this.kernel.finalizeSuccess(
+      {
+        tenantId: execution.tenantId,
+        executionId: execution.id,
+        attemptId: claim.attempt.id,
+        leaseToken: claim.leaseToken,
+        outcomeCode: 'B35_PLAN_ADMITTED',
+        safeResult,
+      },
+      transaction,
+    );
+  }
 
   async execute<T>(
     request: TrustedActionExecutionRequestV1,

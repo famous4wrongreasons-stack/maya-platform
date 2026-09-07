@@ -1,0 +1,36 @@
+--- active/api-proxy.php
++++ b35/api-proxy.php
+@@ -1820,31 +1820,2 @@
+-        $init_data = $_SERVER['HTTP_X_TELEGRAM_INITDATA'] ?? '';
+-        $payload = json_encode([
+-            'auth_data' => $input['auth_data'] ?? null, 'session_token' => $input['session_token'] ?? null,
+-            'mode'      => $input['mode'] ?? 'preview',
+-            'text'      => $input['text'] ?? '',
+-            'code'      => $input['code'] ?? '',
+-        ]);
+-        $ch = curl_init($TG_CONFIG['bot_api_base'] . '/api/panel/broadcast');
+-        curl_setopt_array($ch, [
+-            CURLOPT_RETURNTRANSFER => true,
+-            CURLOPT_POST           => true,
+-            CURLOPT_POSTFIELDS     => $payload,
+-            CURLOPT_HTTPHEADER     => [
+-                'Content-Type: application/json',
+-                'Accept: application/json',
+-                'X-Telegram-InitData: ' . $init_data,
+-            ],
+-            CURLOPT_TIMEOUT        => 25,
+-            CURLOPT_CONNECTTIMEOUT => 5,
+-        ]);
+-        $body = curl_exec($ch);
+-        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+-        $err = curl_error($ch);
+-        curl_close($ch);
+-        if ($err) {
+-            http_response_code(502);
+-            echo json_encode(['success' => false, 'error' => 'bot_unreachable']);
+-            break;
+-        }
+-        http_response_code($status ?: 502);
+-        echo $body ?: '{"success":false,"error":"empty_response"}';
++        require_once __DIR__ . '/package5-b35-bulk-proxy.php';
++        maya_b35_bulk_proxy($input, $TG_CONFIG);
