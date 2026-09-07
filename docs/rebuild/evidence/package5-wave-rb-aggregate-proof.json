@@ -1,0 +1,212 @@
+{
+  "wave": "R-B",
+  "status": "PASS",
+  "canonicalSource": "42962475",
+  "release": {
+    "canonicalSource": "4296247558b099b9a6d62bab739dc4da3610d3b0",
+    "releaseCommit": "6ad559c3cec1dab7a4fc7fdd438e788b77aaaed8",
+    "releaseTree": "2a32d6f0515b813d431d0283f6e622872c549b41",
+    "excludedWip": "7201f7bdfc3ed8784994536d86522031ca87b16c",
+    "excludedRuntimePaths": [
+      "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/bot.py",
+      "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/maya_inbox_bridge.py",
+      "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package2_communication_ratchet.py",
+      "maya-saas-backend/scripts/package5-b36-runtime-proof.ts",
+      "maya-saas-backend/scripts/package5-b36-schema-proof.ts",
+      "maya-saas-backend/src/action-engine/action-engine.contract.ts",
+      "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+      "maya-saas-backend/src/communication-delivery/communication-delivery.module.ts",
+      "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts",
+      "maya-saas-backend/src/dashboard-preferences/assistant-preferences.read.ts",
+      "maya-saas-backend/src/dashboard-preferences/dashboard-preferences.service.ts",
+      "maya-saas-backend/src/inbox/inbox.service.spec.ts",
+      "maya-saas-backend/src/inbox/inbox.service.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-foundation.module.ts",
+      "maya-saas-backend/src/owner-reports/owner-report.runtime.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report.store.ts",
+      "maya-saas-backend/src/owner-reports/owner-reports.controller.ts",
+      "maya-saas-backend/src/owner-reports/owner-reports.module.ts",
+      "maya-saas-backend/src/owner-reports/owner-reports.regression.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-reports.scheduler.ts",
+      "maya-saas-backend/src/owner-reports/owner-reports.service.ts"
+    ],
+    "excludedDeltaSha256": "faacae756551d2d80bfa436ec6c1b04d1b8bd345f56c4c3a7338d8b7154c6b47",
+    "schemaDifference": "NONE",
+    "schemaProofRetained": true,
+    "schemaProofCompatibilityRevision": "d7794b3101020d42fca16afd25f0972255a2a498",
+    "canonicalCheckoutModified": false,
+    "directory": "/tmp/maya-wave-rb-release-42962475",
+    "branch": "release/wave-rb-20260907-42962475",
+    "clean": true
+  },
+  "packages": {
+    "R03": "PASS",
+    "R04": "PASS",
+    "R07": "PASS"
+  },
+  "gates": {
+    "aggregate-canonical-v3": {
+      "gate": {
+        "wave": "R-B",
+        "status": "PASS",
+        "sourceFingerprint": "325f159be79d2eeaf5f5044d01ea8d5a67e0770a47b57a3bf63e9002f4f9e501",
+        "head": "4296247558b099b9a6d62bab739dc4da3610d3b0",
+        "oldDatabasesTouched": 0,
+        "productionMutationsMessages": 0,
+        "package5FinalGateRun": false,
+        "stages": [
+          {
+            "stage": "architectural-ratchets",
+            "exitCode": 0,
+            "seconds": 332.01
+          },
+          {
+            "stage": "lint",
+            "exitCode": 0,
+            "seconds": 30.74
+          },
+          {
+            "stage": "application-typecheck",
+            "exitCode": 0,
+            "seconds": 5.12
+          },
+          {
+            "stage": "scripts-typecheck",
+            "exitCode": 0,
+            "seconds": 11.33
+          },
+          {
+            "stage": "build",
+            "exitCode": 0,
+            "seconds": 15.16
+          },
+          {
+            "stage": "schema-validate",
+            "exitCode": 0,
+            "seconds": 0.56
+          },
+          {
+            "stage": "migration-status",
+            "exitCode": 0,
+            "seconds": 0.43
+          },
+          {
+            "stage": "schema-diff",
+            "exitCode": 0,
+            "seconds": 0.51
+          },
+          {
+            "stage": "mandatory-backend",
+            "exitCode": 0,
+            "seconds": 362.23
+          }
+        ],
+        "sourceUnchangedDuringGate": true
+      },
+      "testCounts": {
+        "architecture": {
+          "numPassedTestSuites": 86,
+          "numPassedTests": 495,
+          "numFailedTests": 0,
+          "numPendingTests": 0
+        },
+        "mandatory": {
+          "numPassedTestSuites": 390,
+          "numPassedTests": 3225,
+          "numFailedTests": 0,
+          "numPendingTests": 0
+        }
+      },
+      "gateSha256": "8f07a035e7e9199777a3102ff4ed4011a70b96af13985b41321bed5ea1643287"
+    },
+    "aggregate-release-v3": {
+      "gate": {
+        "wave": "R-B",
+        "status": "PASS",
+        "sourceFingerprint": "70da43c4b16d7755e29599b78869bea64b299c46f408242d74c8a71513f88bee",
+        "head": "6ad559c3cec1dab7a4fc7fdd438e788b77aaaed8",
+        "oldDatabasesTouched": 0,
+        "productionMutationsMessages": 0,
+        "package5FinalGateRun": false,
+        "stages": [
+          {
+            "stage": "architectural-ratchets",
+            "exitCode": 0,
+            "seconds": 339.47
+          },
+          {
+            "stage": "lint",
+            "exitCode": 0,
+            "seconds": 31.59
+          },
+          {
+            "stage": "application-typecheck",
+            "exitCode": 0,
+            "seconds": 5.54
+          },
+          {
+            "stage": "scripts-typecheck",
+            "exitCode": 0,
+            "seconds": 11.24
+          },
+          {
+            "stage": "build",
+            "exitCode": 0,
+            "seconds": 14.77
+          },
+          {
+            "stage": "schema-validate",
+            "exitCode": 0,
+            "seconds": 0.46
+          },
+          {
+            "stage": "migration-status",
+            "exitCode": 0,
+            "seconds": 0.78
+          },
+          {
+            "stage": "schema-diff",
+            "exitCode": 0,
+            "seconds": 0.51
+          },
+          {
+            "stage": "mandatory-backend",
+            "exitCode": 0,
+            "seconds": 367.52
+          }
+        ],
+        "sourceUnchangedDuringGate": true
+      },
+      "testCounts": {
+        "architecture": {
+          "numPassedTestSuites": 86,
+          "numPassedTests": 495,
+          "numFailedTests": 0,
+          "numPendingTests": 0
+        },
+        "mandatory": {
+          "numPassedTestSuites": 389,
+          "numPassedTests": 3218,
+          "numFailedTests": 0,
+          "numPendingTests": 0
+        }
+      },
+      "gateSha256": "ae9fb5ee96c72a461070200e0eb233b0bc8b9904f7e178872f9dba211d48d50e"
+    }
+  },
+  "newModels": 0,
+  "newFields": 0,
+  "newActionClasses": 0,
+  "newMigrations": 0,
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "B36Schema": "APPLIED",
+  "B36Runtime": "NOT_DEPLOYED",
+  "B36ProofDefects": [
+    "IDEMPOTENCY KEY",
+    "CONCURRENT WRITE CONFLICT"
+  ],
+  "package5FinalGateRun": false,
+  "productionMutationsMessages": 0,
+  "productionCutover": "AUTHORIZED_PENDING_EXECUTION"
+}

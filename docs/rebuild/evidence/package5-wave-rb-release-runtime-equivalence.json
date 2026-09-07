@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "foundationProvenRelease": "a19e56c549cbe33e4387d134f44ee2fcb3b275e6",
+  "finalRelease": "6ad559c3cec1dab7a4fc7fdd438e788b77aaaed8",
+  "onlyChangedPaths": [
+    "docs/rebuild/evidence/package5-wave-rb-r07-completion.md",
+    "docs/rebuild/evidence/package5-wave-rb-r07-p405-ratchet-fix-proof.json",
+    "docs/rebuild/evidence/package5-wave-rb-superseded-gate-failures.json",
+    "maya-saas-backend/src/action-engine/p4-05-all8-cutover-ratchet.spec.ts"
+  ],
+  "allRuntimeSchemaAndPwaSourcesIdentical": true,
+  "carriedFoundationProof": "release-foundations-v2/results.json",
+  "productionMutationsMessages": 0
+}

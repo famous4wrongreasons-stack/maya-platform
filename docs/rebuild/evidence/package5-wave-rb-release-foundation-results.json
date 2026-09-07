@@ -1,0 +1,31 @@
+{
+  "release": "a19e56c549cbe33e4387d134f44ee2fcb3b275e6",
+  "proofs": [
+    {
+      "proof": "r03",
+      "exitCode": 0,
+      "logSha256": "53aa96297d0b3a05f7646121bf38b790684d4cf781e45db68769f20c1249507c"
+    },
+    {
+      "proof": "r04",
+      "exitCode": 0,
+      "logSha256": "19fa1f592f8033140835757c9c1404bcc56fa10a8c9637e1834fd02632292806"
+    },
+    {
+      "proof": "b35",
+      "exitCode": 0,
+      "logSha256": "664f32340024334bc428088f7ed048cb2e478cc7df0e9439f4551839d555f050"
+    },
+    {
+      "proof": "b35-resume",
+      "exitCode": 0,
+      "logSha256": "9657a572a1662a5e5b1bf96877e6fa4c82c0f9a4f13ee6f968801d6f78fd44a1"
+    },
+    {
+      "proof": "p405",
+      "exitCode": 0,
+      "logSha256": "26008d9c08437ed5b77d0202ee408fe6004d23b5d11267296a34b89749073dc9"
+    }
+  ],
+  "productionEffects": 0
+}
