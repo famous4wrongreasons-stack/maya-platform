@@ -57,6 +57,26 @@ def _source_event_id(kind: str, seed: str) -> str:
     return f"{kind}:{digest}"
 
 
+async def trigger_owner_daily_report() -> bool:
+    """Trigger only: no content, date, recipients, provider delivery or fallback."""
+    token = (os.environ.get("MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN") or "").strip()
+    company = _external_company_id()
+    if len(token) < 24 or not company:
+        return False
+    try:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
+            async with session.post(
+                "http://127.0.0.1:3107/api/internal/legacy/owner-reports/daily-report",
+                json={"provider": _PROVIDER, "externalCompanyId": company},
+                headers={"x-maya-legacy-bridge": token},
+            ) as response:
+                return 200 <= response.status < 300
+    except Exception:
+        # Lost response cannot select a new report/revision/route or direct send.
+        logger.warning("canonical daily report trigger unresolved")
+        return False
+
+
 async def publish_inbox_item(
     *,
     type: str,
@@ -71,6 +91,9 @@ async def publish_inbox_item(
     telegram_buttons: list[dict[str, str]] | None = None,
 ) -> bool:
     """Submit one logical message to its only production execution owner."""
+    if type == "daily_report":
+        logger.warning("daily_report requires canonical owner trigger")
+        return False
     if not _BRIDGE_TOKEN or len(_BRIDGE_TOKEN) < 24:
         return False
     clean = (body_text or "").strip()

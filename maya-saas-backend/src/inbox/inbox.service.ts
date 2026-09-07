@@ -1,4 +1,9 @@
-import { Injectable, Logger, Optional } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  Optional,
+  BadRequestException,
+} from '@nestjs/common';
 import { Prisma, UserRole } from '@prisma/client';
 
 import {
@@ -83,6 +88,8 @@ export class InboxService {
   }
 
   async ingest(dto: IngestInboxItemDto) {
+    if (dto.type === 'daily_report')
+      throw new BadRequestException('B36_OWNER_REPORT_RUN_REQUIRED');
     // 🔴 Арендатор приходит из ТЕЛА запроса под общим платформенным токеном, и
     // статус здесь не проверялся — в отличие от штатного резолвера. Держатель
     // токена мог писать карточки и слать пуши в приостановленного или
@@ -235,6 +242,8 @@ export class InboxService {
         'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge';
     },
   ) {
+    if (input.type === 'daily_report')
+      throw new BadRequestException('B36_OWNER_REPORT_RUN_REQUIRED');
     const dto: IngestInboxItemDto = {
       tenant_slug: '_internal',
       type: input.type,

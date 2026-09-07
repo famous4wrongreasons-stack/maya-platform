@@ -1,3 +1,5 @@
+import { OwnerReportStore } from './owner-report.store';
+import { CommunicationDeliveryService } from '../communication-delivery/communication-delivery.service';
 /**
  * P4 §11 — ОБЯЗАТЕЛЬНАЯ РЕГРЕССИЯ МИГРАЦИИ БРИФОВ И ОТЧЁТОВ.
  *
@@ -38,6 +40,26 @@ function service(options: StackOptions = {}) {
         Promise.resolve(userIds),
       ),
   };
+  const reportStore = {
+    find: jest.fn().mockResolvedValue(null),
+    canAdmitPeriod: () => true,
+    slot: (
+      _tenant: string,
+      userId: string,
+      channel: string,
+      routeId: string,
+      destination: string,
+    ) => ({
+      key: 'a'.repeat(64),
+      routeHash: 'b'.repeat(64),
+      channel,
+      routeId,
+      destination,
+    }),
+    admit: jest
+      .fn()
+      .mockRejectedValue(new Error('synthetic admission boundary')),
+  } as unknown as OwnerReportStore;
   const reports = new OwnerReportsService(
     stack.prisma,
     stack.businessState,
@@ -45,6 +67,8 @@ function service(options: StackOptions = {}) {
     stack.tenantContext,
     { get: jest.fn() } as unknown as ConfigService,
     dashboardPreferences as unknown as DashboardPreferencesService,
+    reportStore,
+    {} as CommunicationDeliveryService,
   );
   return { reports, stack, inbox };
 }
@@ -485,9 +509,20 @@ describe('P4 — находки состязательной проверки', 
       )
       .mockImplementation(() => undefined);
 
-    await stack.tenantContext.runAsSystemTenant(TENANT.id, () =>
-      reports.runDailyReport(TENANT, new Date('2026-08-13T18:05:00.000Z')),
-    );
+    jest
+      .spyOn(stack.prisma.membership, 'findMany')
+      .mockResolvedValue([
+        { id: 'membership', userId: 'owner-user', role: 'tenant_owner' },
+      ] as never);
+    Object.assign(stack.prisma, {
+      authIdentity: { findMany: jest.fn().mockResolvedValue([]) },
+      devicePushToken: { findMany: jest.fn().mockResolvedValue([]) },
+    });
+    await expect(
+      stack.tenantContext.runAsSystemTenant(TENANT.id, () =>
+        reports.runDailyReport(TENANT, new Date('2026-08-13T18:05:00.000Z')),
+      ),
+    ).rejects.toThrow('synthetic admission boundary');
 
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('finance unavailable'),

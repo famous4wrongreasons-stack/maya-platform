@@ -1,6 +1,6 @@
 # B36 — Channel Order Decision Sheet
 
-> Current continuation after accepted `2ba294d5`: **B36 owner/contract/schema/channel order APPROVED**. Order is **INBOX → TELEGRAM → APNS**, sequential per recipient; UNKNOWN or deterministic failure blocks its later slots, while other recipients continue independently. [Exact schema mapping](package5-b36-schema-mapping-v1.md). B36 implementation is in progress; production migration/runtime deployment is still pending. B35 production PASS is preserved; Package 5 is not complete. The prior channel-order STOP below is historical and superseded.
+> Current continuation: [B36 schema applied / B37 STOP report](CYCLE-06-BLOCKING-PACKAGE-5-B36-SCHEMA-APPLIED-B37-STOP-REPORT.md) and [current remainder](CYCLE-06-BLOCKING-PACKAGE-5-B36-B37-REMAINDER-CHECKPOINT.md). All B36 decisions, including INBOX → TELEGRAM → APNS, remain approved. Production B36 schema PASS; B36 runtime is WIP with a failed PostgreSQL runtime proof and has NOT been deployed. A new B37 weekly staff-expense reminder/intake authority bypass was confirmed during required background inventory; STOP before runtime deployment. B35 runtime preserved; Package 5 NOT COMPLETE. Historical pending/STOP statements below are superseded.
 
 **STOP at the explicit channel-order boundary. Contract/schema scope approved;
 only channel order remains a business decision. No implementation or deployment.**

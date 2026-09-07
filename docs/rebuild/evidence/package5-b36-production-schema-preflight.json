@@ -1,0 +1,17 @@
+{
+  "gate": "PASS",
+  "checkpoint": "d7794b31",
+  "migration": "20260907180000_b36_owner_report_run",
+  "migrationSha256": "3572d6327a1f24f055370d44004c6ddfdebdfcc6746d3a2fbb33a14955a676f0",
+  "pending": [
+    "20260907180000_b36_owner_report_run"
+  ],
+  "preApplyDrift": "NONE",
+  "incompatibleRows": 0,
+  "competingMigrations": 0,
+  "health": 200,
+  "readiness": 200,
+  "release": "/opt/maya-saas/releases/20260907-p5-b35-c8c7a8eb",
+  "productionMessages": 0,
+  "businessMutations": 0
+}

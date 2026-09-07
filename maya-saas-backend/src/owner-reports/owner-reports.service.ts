@@ -1,4 +1,22 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { type OwnerReportRun } from '@prisma/client';
+import { OwnerReportStore } from './owner-report.store';
+import { CommunicationDeliveryService } from '../communication-delivery/communication-delivery.service';
+import { ActionConflictError } from '../action-engine/action-engine.errors';
+import {
+  normalizeOwnerReportPlan,
+  OWNER_REPORT_ACTION,
+  OWNER_REPORT_CONTRACT,
+  OWNER_REPORT_DAY,
+  OWNER_REPORT_ORDER,
+  OWNER_REPORT_ROLES,
+  type OwnerReportPlan,
+} from './owner-report.contract';
+import {
+  Injectable,
+  Logger,
+  Optional,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TenantStatus, UserRole, CalendarSource } from '@prisma/client';
 
@@ -65,6 +83,8 @@ export class OwnerReportsService {
     private readonly tenantContext: TenantContextService,
     private readonly configService: ConfigService,
     private readonly dashboardPreferences: DashboardPreferencesService,
+    @Optional() private readonly reportStore?: OwnerReportStore,
+    @Optional() private readonly reportDelivery?: CommunicationDeliveryService,
   ) {}
 
   async tick(now: Date = new Date()): Promise<{
@@ -82,6 +102,7 @@ export class OwnerReportsService {
     for (const tenant of tenants) {
       const hour = localHour(tenant.defaultTimezone, now);
       try {
+        await this.resumePendingDailyReports(tenant.id, now);
         if (hour === this.morningHour()) {
           const result = await this.runMorningBrief(tenant, now);
           if (result === 'sent') morning += 1;
@@ -293,70 +314,235 @@ export class OwnerReportsService {
     tenant: EligibleTenant,
     now: Date = new Date(),
   ): Promise<'sent' | 'skipped'> {
-    const localDate = localCalendarDate(tenant.defaultTimezone, now);
-    const sourceEventId = `nest:daily_report:${localDate}`;
-    const [alreadySent, rawRecipients] = await Promise.all([
-      this.inbox.hasSourceEvent(tenant.id, 'daily_report', sourceEventId),
-      this.listOwnerRecipients(tenant.id),
-    ]);
-    if (alreadySent) {
-      return 'skipped';
-    }
-    const recipients = await this.tenantContext.runAsSystemTenant(
-      tenant.id,
-      () =>
-        this.dashboardPreferences.filterUsersWithAssistantCapability(
+    if (!this.reportStore || !this.reportDelivery)
+      throw new Error('B36_OWNER_REPORT_FOUNDATION_REQUIRED');
+    return this.tenantContext.runAsSystemTenant(tenant.id, async () => {
+      const localDate = localCalendarDate(tenant.defaultTimezone, now);
+      const existing = await this.reportStore!.find(tenant.id, localDate);
+      if (existing) return this.resumeDailyReport(existing, now);
+      if (
+        !this.reportStore!.canAdmitPeriod(
+          tenant.defaultTimezone,
+          localDate,
+          now,
+        )
+      )
+        return 'skipped';
+      const memberships = await this.prisma.membership.findMany({
+        where: {
+          tenantId: tenant.id,
+          status: 'active',
+          role: { in: [...OWNER_REPORT_ROLES] },
+          user: { status: 'active' },
+        },
+        select: { id: true, userId: true, role: true },
+      });
+      const enabled = new Set(
+        await this.dashboardPreferences.filterUsersWithAssistantCapability(
           tenant.id,
-          rawRecipients,
+          memberships.map((m) => m.userId),
           'daily_brief',
         ),
-    );
-    if (recipients.length === 0) return 'skipped';
-
-    /**
-     * 🔴 Денежная зависимость сохранена, но она ОДНА.
-     *
-     * Вечерний отчёт по-прежнему показывает деньги только там, где финансовый
-     * контур ответил, — это свойство capability, а не отчёта. Но читает его
-     * теперь канонический владелец: раньше отчёт звал финансы сам, складывал
-     * строки счетов в наличные и безнал и печатал итог рядом с выручкой,
-     * посчитанной другим путём.
-     */
-    const state = await this.readState(tenant, localDate, {
-      financeAllowed: true,
-    });
-
-    const facts = businessBriefFacts(state, localDate);
-    /**
-     * 🔴 Отказ денежного контура обязан остаться ВИДИМЫМ В ЖУРНАЛЕ.
-     *
-     * До миграции отчёт звал финансы сам и писал `warn` при отказе. Теперь
-     * читает канон, и молчание провайдера доезжает только фразой внутри
-     * письма владельцу — на сервере вечер выглядел бы полностью успешным, и
-     * массовый отказ YClients прошёл бы незамеченным до звонка в поддержку.
-     */
-    if (facts.revenue.basis === 'unavailable') {
-      this.logger.warn(
-        `daily_report finance unavailable tenant=${tenant.slug} date=${localDate}`,
       );
-    }
-
-    const composed = composeDailyReport({ facts });
-    const published = await this.inbox.publishForTenant(tenant.id, {
-      type: 'daily_report',
-      sourceEventId,
-      title: composed.title,
-      bodyText: composed.bodyText,
-      payload: composed.payload,
-      deepLink: '/app/?panel=chat',
-      userIds: recipients,
-      fanoutOwners: false,
+      const recipients: OwnerReportPlan['recipients'] = [];
+      for (const member of memberships.filter((m) => enabled.has(m.userId))) {
+        const [identities, devices] = await Promise.all([
+          this.prisma.authIdentity.findMany({
+            where: {
+              tenantId: tenant.id,
+              userId: member.userId,
+              provider: 'telegram',
+            },
+            select: { id: true, providerUserId: true },
+          }),
+          this.prisma.devicePushToken.findMany({
+            where: {
+              tenantId: tenant.id,
+              userId: member.userId,
+              platform: 'ios',
+            },
+            select: { id: true, token: true },
+          }),
+        ]);
+        recipients.push({
+          userId: member.userId,
+          membershipId: member.id,
+          role: member.role as OwnerReportPlan['recipients'][number]['role'],
+          slots: [
+            this.reportStore!.slot(
+              tenant.id,
+              member.userId,
+              'inbox',
+              member.id,
+              member.userId,
+            ),
+            ...identities.map((route) =>
+              this.reportStore!.slot(
+                tenant.id,
+                member.userId,
+                'telegram',
+                route.id,
+                route.providerUserId,
+              ),
+            ),
+            ...devices.map((route) =>
+              this.reportStore!.slot(
+                tenant.id,
+                member.userId,
+                'apns',
+                route.id,
+                route.token,
+              ),
+            ),
+          ],
+        });
+      }
+      if (!recipients.length) return 'skipped';
+      // Preserve the existing canonical financial/business facts and composition.
+      const state = await this.readState(tenant, localDate, {
+        financeAllowed: true,
+      });
+      const facts = businessBriefFacts(state, localDate);
+      if (facts.revenue.basis === 'unavailable')
+        this.logger.warn(
+          `daily_report finance unavailable tenant=${tenant.slug} date=${localDate}`,
+        );
+      const composed = composeDailyReport({ facts });
+      const period = dayIsoRange(tenant.defaultTimezone, localDate);
+      const periodEnd = new Date(Date.parse(period.to) + 1).toISOString();
+      const plan = normalizeOwnerReportPlan({
+        contract: OWNER_REPORT_CONTRACT,
+        tenantId: tenant.id,
+        reportType: 'daily_report',
+        periodLocalDate: localDate,
+        reportVersion: 1,
+        timezone: tenant.defaultTimezone,
+        periodStart: period.from,
+        periodEnd,
+        expiresAt: new Date(
+          Date.parse(periodEnd) + 7 * OWNER_REPORT_DAY,
+        ).toISOString(),
+        classification: 'operational_single',
+        channelOrder: OWNER_REPORT_ORDER,
+        policy: {
+          action: OWNER_REPORT_ACTION,
+          key: 'production.deliver_report_briefing.proven-cutover',
+          version: 1,
+          preference: 'daily_brief',
+        },
+        content: { ...composed, deepLink: '/app/?panel=chat' },
+        recipients,
+      });
+      let run: OwnerReportRun;
+      try {
+        run = await this.reportStore!.admit(plan, now);
+      } catch (error) {
+        if (!(error instanceof ActionConflictError)) throw error;
+        // A losing scheduler discards its candidate and resumes the committed winner.
+        const winner = await this.reportStore!.find(tenant.id, localDate);
+        if (!winner) throw error;
+        run = winner;
+      }
+      return this.resumeDailyReport(run, now);
     });
-    if (published.stored === 0) return 'skipped';
-    this.logger.log(
-      `daily_report sent tenant=${tenant.slug} recipients=${published.stored}`,
+  }
+
+  /** The authenticated integration trigger cannot supply report content, dates or recipients. */
+  async triggerDailyReport(tenantId: string, now = new Date()) {
+    const tenant = (await this.listEligibleTenants()).find(
+      (t) => t.id === tenantId,
     );
-    return 'sent';
+    if (!tenant || !this.reportStore)
+      throw new ForbiddenException('B36_REPORT_TENANT_NOT_ELIGIBLE');
+    return this.tenantContext.runAsSystemTenant(tenant.id, async () => {
+      const existing = await this.reportStore!.find(
+        tenant.id,
+        localCalendarDate(tenant.defaultTimezone, now),
+      );
+      if (
+        !existing &&
+        localHour(tenant.defaultTimezone, now) !== this.eveningHour()
+      )
+        return { status: 'skipped' };
+      return { status: await this.runDailyReport(tenant, now) };
+    });
+  }
+
+  private async resumePendingDailyReports(tenantId: string, now: Date) {
+    if (!this.reportStore || !this.reportDelivery)
+      throw new Error('B36_OWNER_REPORT_FOUNDATION_REQUIRED');
+    await this.tenantContext.runAsSystemTenant(tenantId, async () => {
+      await this.reportStore!.purgeExpiredPayloads(tenantId, now);
+      const runs = await this.prisma.ownerReportRun.findMany({
+        where: {
+          tenantId,
+          expiresAt: { gt: now },
+          payloadRetentionUntil: { gt: now },
+          intentEncrypted: { not: null },
+          executions: {
+            some: { state: { in: ['READY', 'EXECUTING', 'UNKNOWN'] } },
+          },
+        },
+        orderBy: [{ periodLocalDate: 'asc' }, { id: 'asc' }],
+      });
+      for (const run of runs) await this.resumeDailyReport(run, now);
+    });
+  }
+
+  private async resumeDailyReport(
+    run: OwnerReportRun,
+    now: Date,
+  ): Promise<'sent' | 'skipped'> {
+    if (
+      run.expiresAt <= now ||
+      run.payloadRetentionUntil <= now ||
+      !run.intentEncrypted
+    )
+      return 'skipped';
+    const plan = this.reportStore!.readPlan(run, now);
+    const initial = await this.reportStore!.executions(run, plan);
+    if (initial.every((e) => e.state === 'SUCCEEDED')) return 'skipped';
+    // Each recipient progresses independently; its immutable slots are strictly sequential.
+    await Promise.all(
+      plan.recipients.map(async (recipient) => {
+        for (const slot of recipient.slots) {
+          const executions = await this.reportStore!.executions(run, plan);
+          const execution = executions.find(
+            (e) => e.ownerReportSlotKey === slot.key,
+          )!;
+          if (execution.state === 'SUCCEEDED') continue;
+          if (
+            execution.state === 'FAILED' ||
+            execution.state === 'NOT_EXECUTED'
+          )
+            break;
+          try {
+            await this.reportDelivery!.deliverOwnerReportSlot(
+              run.tenantId,
+              run.id,
+              slot.key,
+            );
+          } catch {
+            // Preserve the engine's UNKNOWN/terminal evidence; never choose another route.
+            this.logger.warn(
+              `daily_report slot unresolved run=${run.id} slot=${slot.key}`,
+            );
+            break;
+          }
+          const after = await this.prisma.actionExecution.findUniqueOrThrow({
+            where: {
+              id_tenantId: { id: execution.id, tenantId: run.tenantId },
+            },
+            select: { state: true },
+          });
+          if (after.state !== 'SUCCEEDED') break;
+        }
+      }),
+    );
+    const complete = (await this.reportStore!.executions(run, plan)).every(
+      (e) => e.state === 'SUCCEEDED',
+    );
+    return complete ? 'sent' : 'skipped';
   }
 
   /**

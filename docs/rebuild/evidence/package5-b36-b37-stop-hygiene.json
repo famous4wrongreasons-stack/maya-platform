@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "mainDirtyEntriesPreserved": 24,
+  "mainStatusSha256": "c28307f97e02975799f0cd9fcbe854d97285a5c344e25af50c67f60fbfca2c25",
+  "mainContentHashesPreserved": 22,
+  "oldDatabasesProtected": 17,
+  "oldDatabasesTouched": 0,
+  "ownedDatabasesCreated": [
+    "maya_b36_schema",
+    "maya_b36_replay",
+    "maya_b36_runtime"
+  ],
+  "ownedDatabasesRemaining": 0,
+  "ownedPostgresProcessesRemaining": 0,
+  "ownedPostgresPortListening": false,
+  "ownedProductionStagingRemaining": 0,
+  "productionMessages": 0,
+  "productionBusinessProviderMutations": 0,
+  "processHygiene": 0
+}

@@ -1,3 +1,4 @@
+import { OwnerReportStore } from '../owner-reports/owner-report.store';
 import { type ReminderDispatch } from './appointment-reminder.contract';
 import { CommunicationWebPushService } from './communication-web-push.service';
 import { createHash } from 'node:crypto';
@@ -14,7 +15,10 @@ import {
 } from '../action-engine';
 import { prepareInboxApnsCanonical } from '../inbox/apns-push';
 import { PrismaService } from '../prisma/prisma.service';
-import { COMMUNICATION_ENVELOPE_CONTRACT } from './communication-delivery.contract';
+import {
+  COMMUNICATION_ENVELOPE_CONTRACT,
+  type OwnedCommunicationAttemptV1,
+} from './communication-delivery.contract';
 import { CommunicationDeliveryKernel } from './communication-delivery.kernel';
 
 const NEW_APPOINTMENT_CAPABILITY =
@@ -200,6 +204,7 @@ export class CommunicationDeliveryService {
     private readonly actionEngine: ActionEngineRuntimeService,
     config: ConfigService,
     @Optional() private readonly webPush?: CommunicationWebPushService,
+    @Optional() private readonly ownerReports?: OwnerReportStore,
   ) {
     const compatibilitySecret = config.get<string>('CRM_ENCRYPTION_KEY');
     const identitySecret =
@@ -444,6 +449,67 @@ export class CommunicationDeliveryService {
     };
   }
 
+  /** Only the durable owner root selects report content, principal and route. */
+  async deliverOwnerReportSlot(
+    tenantId: string,
+    runId: string,
+    slotKey: string,
+  ) {
+    if (!this.ownerReports)
+      throw new Error('B36_OWNER_REPORT_FOUNDATION_REQUIRED');
+    const dispatch = await this.ownerReports.dispatch(tenantId, runId, slotKey);
+    const n = dispatch.request.input as Record<string, unknown>;
+    const common = {
+      tenantId,
+      messageType: 'daily_report' as const,
+      sourceType: 'scheduler' as const,
+      sourceEventId: String(n.sourceEventId),
+      title: String(n.title),
+      bodyText: String(n.bodyText),
+      recipientIdentityRef: String(n.recipientIdentityRef),
+    };
+    if (n.channel === 'telegram')
+      return this.deliverPackage2TelegramAccepted(
+        { ...common, telegramChatId: String(n.telegramChatId) },
+        dispatch,
+      );
+    if (n.channel !== 'inbox' && n.channel !== 'apns')
+      throw new Error('B36_REPORT_ROUTE_INVALID');
+    return this.deliverPackage2Single(
+      {
+        ...common,
+        userId: String(n.userId),
+        deepLink: String(n.deepLink),
+        payload: n.payload as Record<string, unknown>,
+        ...(n.channel === 'apns' ? { deviceToken: String(n.deviceToken) } : {}),
+      },
+      n.channel,
+      dispatch,
+    );
+  }
+  private async authorizeSingle(
+    dispatch?: ReminderDispatch,
+    owned?: OwnedCommunicationAttemptV1,
+  ) {
+    try {
+      await dispatch?.authorize();
+    } catch (error) {
+      if (!dispatch?.request.ownerReportSlot) throw error;
+      if (owned)
+        await this.kernel.finalizePreDispatchFailure({
+          ...owned,
+          outcomeCode: 'owner_report_authority_denied',
+          errorCode: 'owner_report_authority_denied',
+        });
+      throw new CommunicationDispatchError(
+        'definitive',
+        'owner_report_authority_denied',
+        'canonical_report_authority',
+        'Report authority/policy could not be verified before delivery',
+      );
+    }
+  }
+
   async deliverAppointmentReminder(dispatch: ReminderDispatch) {
     await dispatch.authorize();
     const n = dispatch.request.input as Record<string, unknown>;
@@ -542,16 +608,29 @@ export class CommunicationDeliveryService {
   }
 
   deliverPackage2Inbox(input: Package2SingleInput): Promise<DeliveryResult> {
+    if (input.messageType === 'daily_report')
+      throw new Error('B36_OWNER_REPORT_RUN_REQUIRED');
     return this.deliverPackage2Single(input, 'inbox');
   }
 
   deliverPackage2Apns(
     input: Package2SingleInput & { deviceToken: string },
   ): Promise<DeliveryResult> {
+    if (input.messageType === 'daily_report')
+      throw new Error('B36_OWNER_REPORT_RUN_REQUIRED');
     return this.deliverPackage2Single(input, 'apns');
   }
 
   async deliverPackage2Telegram(
+    input: Package2TelegramInput,
+    reminder?: ReminderDispatch,
+  ): Promise<DeliveryResult> {
+    if (input.messageType === 'daily_report')
+      throw new Error('B36_OWNER_REPORT_RUN_REQUIRED');
+    return this.deliverPackage2TelegramAccepted(input, reminder);
+  }
+
+  private async deliverPackage2TelegramAccepted(
     input: Package2TelegramInput,
     reminder?: ReminderDispatch,
   ): Promise<DeliveryResult> {
@@ -593,7 +672,7 @@ export class CommunicationDeliveryService {
       },
       {
         prepare: async (normalized, context) => {
-          await reminder?.authorize();
+          await this.authorizeSingle(reminder);
           if (!this.bridgeToken || this.bridgeToken.length < 24) {
             throw new CommunicationDispatchError(
               'definitive',
@@ -717,7 +796,7 @@ export class CommunicationDeliveryService {
             leaseToken: claim.leaseToken,
             recipientRevision: claim.recipient.revision,
           };
-          await reminder?.authorize();
+          await this.authorizeSingle(reminder, owned);
           await this.kernel.markDispatchBoundary(owned);
           let response: Response;
           try {
@@ -910,7 +989,7 @@ export class CommunicationDeliveryService {
       },
       {
         prepare: async (normalized, context) => {
-          await reminder?.authorize();
+          await this.authorizeSingle(reminder);
           const normalizedChannel = requiredString(normalized, 'channel');
           const messageType = requiredString(normalized, 'messageType');
           const userId = requiredString(normalized, 'userId');
@@ -1035,7 +1114,7 @@ export class CommunicationDeliveryService {
             leaseToken: claim.leaseToken,
             recipientRevision: claim.recipient.revision,
           };
-          await reminder?.authorize();
+          await this.authorizeSingle(reminder, owned);
           await this.kernel.markDispatchBoundary(owned);
           if (channel === 'inbox') {
             try {

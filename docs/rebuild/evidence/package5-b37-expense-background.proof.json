@@ -1,0 +1,31 @@
+{
+  "status": "CONFIRMED_BLOCKER",
+  "executedFunctionHashes": {
+    "database.py:add_salon_expense": "e59c70041f2457a2f3dcfafd17516129125466b58303312b0db2dc25dedae967",
+    "database.py:clear_salon_expenses": "f0cad5de4d5d8b53c20a11849c705d974d86add55eab01d7b82e858572c548a5",
+    "bot.py:_save_anton_expenses": "12a5764ba85d60e969462e660ec3d5b59360fbfaf13af480caa158c843d00d4b",
+    "bot.py:_anton_expense_reminder_job": "7a4835f123d48a273232106b82d0d26f58fe490a069bc9fcdfb2d6429024b6ed",
+    "bot.py:handle_message": "3a09374d2dd5feb60f9aefeccc051114b3dbd428fa30b885b037dfa900982301",
+    "bot.py:cmd_rashod": "97fa24c91263984b673a031b773906017d35b5952b14eb178f9b8980d50a8a8e"
+  },
+  "cases": {
+    "firstAndRepeatedAndConcurrentAndLostResponseRetry": {
+      "syntheticTelegramEffects": 6,
+      "canonicalAdmissionCalls": 0,
+      "canonicalUserMembershipAuthIdentityBindings": 0,
+      "durableUnknownReceipt": false
+    },
+    "replyAfterReminder": {
+      "legacyExpenseRowsAfterRepeatedInput": 2,
+      "canonicalExpenseActions": 0,
+      "tenantQualification": false
+    },
+    "rashodWithoutCanonicalAuthority": {
+      "deletedSyntheticPeriodRows": 2
+    }
+  },
+  "newDatabase": "SQLite :memory: only; closed after proof",
+  "oldDatabasesTouched": 0,
+  "productionMessages": 0,
+  "productionBusinessProviderMutations": 0
+}

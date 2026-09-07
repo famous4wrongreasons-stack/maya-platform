@@ -1,0 +1,45 @@
+{
+  "status": "INCOMPLETE_NOT_DEPLOYABLE",
+  "schemaSourceCommit": "d7794b31",
+  "approvedB36Semantics": "preserved; INBOX -> TELEGRAM -> APNS",
+  "targeted": {
+    "suites": 11,
+    "tests": 96,
+    "status": "PASS"
+  },
+  "typecheck": "PASS",
+  "typecheckScripts": "PASS",
+  "postgresqlRuntimeProof": {
+    "status": "FAIL",
+    "expectedSyntheticEffectsFirstCase": 8,
+    "observedSyntheticEffectsFirstCase": 2,
+    "errors": [
+      "DriverAdapterError undefined TransactionWriteConflict",
+      "CommunicationContractError INVALID_STABLE_CODE campaignIdempotencyKey must be a stable opaque code"
+    ],
+    "actualRestartPhase": "NOT RUN",
+    "script": "maya-saas-backend/scripts/package5-b36-runtime-proof.ts",
+    "scriptSha256": "23b4df9a26637cb3431fa6110d8250464651fc748fd9a9b6d3c65b0f67bd4ca2"
+  },
+  "fullRuntimeMandatoryRegression": "NOT RUN",
+  "runtimeBuildAndDeployedParity": "NOT RUN",
+  "backgroundRatchetInventory": "STOP AT B37",
+  "productionRuntimeDeployment": "NOT STARTED",
+  "productionSchema": "PASS, additive migration applied",
+  "fullPackage5FinalGate": "NOT RUN; B37 found before B36 runtime deployment",
+  "productionMessages": 0,
+  "productionBusinessProviderMutations": 0,
+  "lint": {
+    "status": "PASS",
+    "scope": "full backend eslint src/apps/libs/test/scripts",
+    "exitCode": 0
+  },
+  "finalOwnerReportRegression": {
+    "status": "PASS",
+    "suites": 1,
+    "tests": 25,
+    "exitCode": 0,
+    "reason": "rerun after test fixture lint-only correction"
+  },
+  "note": "Final lint and fixture correction do not complete or supersede failed runtime PostgreSQL proof. No runtime deployment authorized by these partial results."
+}

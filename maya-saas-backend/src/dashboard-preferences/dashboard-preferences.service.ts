@@ -1,3 +1,9 @@
+import {
+  filterAssistantCapability,
+  normalizeAssistantConfig,
+  normalizeAssistantCapabilities,
+  type AssistantConfig,
+} from './assistant-preferences.read';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 
@@ -5,9 +11,7 @@ import { Package5Wave1CanonicalCutoverService } from '../package5-wave1/package5
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import {
-  ASSISTANT_CAPABILITIES,
   ASSISTANT_CAPABILITY_CATALOG,
-  DEFAULT_ASSISTANT_CAPABILITIES,
   type AssistantCapability,
 } from './assistant-capabilities.constants';
 import { UpdateAssistantPreferencesDto } from './dto/update-assistant-preferences.dto';
@@ -28,11 +32,6 @@ type FinanceDashboardConfig = {
 const FINANCE_SECTION = 'finance';
 const ASSISTANT_SECTION = 'assistant';
 const EXTERNAL_STAFF_ID = /^[A-Za-z0-9_.:-]{1,128}$/;
-
-type AssistantConfig = {
-  schema_version: 1;
-  enabled_capabilities: AssistantCapability[];
-};
 
 @Injectable()
 export class DashboardPreferencesService {
@@ -208,28 +207,11 @@ export class DashboardPreferencesService {
     capability: AssistantCapability,
   ): Promise<string[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const uniqueUserIds = [...new Set(userIds.filter(Boolean))];
-    if (uniqueUserIds.length === 0) return [];
-
-    const preferences = await this.prisma.dashboardPreference.findMany({
-      where: {
-        tenantId: scopedTenantId,
-        userId: { in: uniqueUserIds },
-        section: ASSISTANT_SECTION,
-      },
-      select: { userId: true, configJson: true },
-    });
-    const configs = new Map(
-      preferences.map((preference) => [
-        preference.userId,
-        this.normalizeAssistantConfig(preference.configJson),
-      ]),
-    );
-
-    return uniqueUserIds.filter((userId) =>
-      (
-        configs.get(userId) ?? this.normalizeAssistantConfig(undefined)
-      ).enabled_capabilities.includes(capability),
+    return filterAssistantCapability(
+      this.prisma,
+      scopedTenantId,
+      userIds,
+      capability,
     );
   }
 
@@ -269,28 +251,13 @@ export class DashboardPreferencesService {
   private normalizeAssistantConfig(
     value: Prisma.JsonValue | undefined,
   ): AssistantConfig {
-    const source =
-      value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-    return {
-      schema_version: 1,
-      enabled_capabilities:
-        source.enabled_capabilities === undefined
-          ? [...DEFAULT_ASSISTANT_CAPABILITIES]
-          : this.normalizeAssistantCapabilities(source.enabled_capabilities),
-    };
+    return normalizeAssistantConfig(value);
   }
 
   private normalizeAssistantCapabilities(
     value: unknown,
   ): AssistantCapability[] {
-    if (!Array.isArray(value)) return [...DEFAULT_ASSISTANT_CAPABILITIES];
-    const allowed = new Set<string>(ASSISTANT_CAPABILITIES);
-    return value.filter(
-      (capability, index, capabilities): capability is AssistantCapability =>
-        typeof capability === 'string' &&
-        allowed.has(capability) &&
-        capabilities.indexOf(capability) === index,
-    );
+    return normalizeAssistantCapabilities(value);
   }
 
   private serializeAssistant(
