@@ -1,5 +1,7 @@
 # Cycle 06 — Package 5 B29 handoff checkpoint
 
+> Latest Stage 1: [B37 owner/contract/schema proposal](package5-b37-owner-contract-schema-proposal.md), based on accepted `7201f7bd`. B37-A scheduled reminder and B37-B expense mutation are separate. B37 remains STOP pending contract/schema decisions; no runtime/schema/migration change. The B36 idempotency-key and concurrent-write-conflict failures remain mandatory runtime blockers.
+
 > Current continuation: [B36 schema applied / B37 STOP report](CYCLE-06-BLOCKING-PACKAGE-5-B36-SCHEMA-APPLIED-B37-STOP-REPORT.md) and [current remainder](CYCLE-06-BLOCKING-PACKAGE-5-B36-B37-REMAINDER-CHECKPOINT.md). All B36 decisions, including INBOX → TELEGRAM → APNS, remain approved. Production B36 schema PASS; B36 runtime is WIP with a failed PostgreSQL runtime proof and has NOT been deployed. A new B37 weekly staff-expense reminder/intake authority bypass was confirmed during required background inventory; STOP before runtime deployment. B35 runtime preserved; Package 5 NOT COMPLETE. Historical pending/STOP statements below are superseded.
 
 Status: **HANDOFF READY — STOP AT B29 / A18**

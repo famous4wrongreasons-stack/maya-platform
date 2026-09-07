@@ -1,6 +1,11 @@
 # Package 5 current remainder — B36 schema PASS, runtime WIP, B37 STOP
 
 Canonical report: [B36 schema-applied / B37 STOP](CYCLE-06-BLOCKING-PACKAGE-5-B36-SCHEMA-APPLIED-B37-STOP-REPORT.md).
+Current Stage 1 continuation: [B37 owner/contract/schema proposal](package5-b37-owner-contract-schema-proposal.md).
+Checkpoint `7201f7bd` was accepted. B37-A reminder and B37-B financial mutation
+are reconstructed separately; existing Expense owner is P4-07, but the complete
+Telegram authority, reply context and source-intent binding are insufficient.
+The proposal is NOT APPROVED; runtime/schema/migration remain unchanged.
 This supersedes the earlier B36 channel-order STOP. Owner/contract/schema and
 **INBOX → TELEGRAM → APNS** are fully approved; do not request them again.
 
@@ -18,6 +23,13 @@ generic campaign idempotency keys and concurrent write-conflict observations.
 Actual runtime restart proof and remaining runtime/deployment gates are
 outstanding. The earlier schema-only full regression 383/3139 PASS does not
 approve this WIP for deployment.
+
+Both B36 runtime failures remain mandatory blockers after the B37 decision:
+`campaignIdempotencyKey must be a stable opaque code` and
+`TransactionWriteConflict` during concurrent continuation. The failed first
+PostgreSQL case observed 2/8 expected synthetic effects. Fix both and repeat
+PostgreSQL/order/restart proof; neither partial unit PASS nor this Stage 1
+diagnostic permits B36 runtime deployment.
 
 **New STOP boundary B37:** active weekly staff expense reminder directly sends
 Telegram to a legacy raw ID and arms process-local expense intake. The reply and
