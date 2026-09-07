@@ -8,6 +8,7 @@ import {
 import { InboxModule } from '../inbox/inbox.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { Package5Wave1CanonicalCutoverService } from './package5-wave1-canonical-cutover.service';
+import { OperationalWorkController } from './operational-work.controller';
 import {
   Package5Wave1ExecutableService,
   Package5Wave1ShadowService,
@@ -15,6 +16,7 @@ import {
 
 @Module({
   imports: [ActionEngineModule, InboxModule],
+  controllers: [OperationalWorkController],
   providers: [
     Package5Wave1ShadowService,
     Package5Wave1CanonicalCutoverService,

@@ -1,0 +1,268 @@
+{
+  "package": "R04",
+  "blockers": [
+    "B42"
+  ],
+  "baseline": "cb4fb27c",
+  "localStatus": "PASS",
+  "productionStatus": "COORDINATED_WAVE_PENDING",
+  "canonicalOwner": "A23 OperationalWorkItem via existing planner, ingress, Action Engine and exact canonical User/Membership; A29/A31 read boundary",
+  "existingFoundationSufficient": true,
+  "businessDecisionRequired": false,
+  "schemaRequired": false,
+  "newModels": 0,
+  "newFields": 0,
+  "newActionClasses": 0,
+  "migrationRequired": false,
+  "backfillRequired": false,
+  "runtimeOnly": true,
+  "dependenciesSatisfied": [
+    "R02 production PASS"
+  ],
+  "backendTargeted": {
+    "status": "PASS",
+    "suites": 9,
+    "tests": 113,
+    "command": [
+      "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/package5-wave1/operational-work.http.spec.ts",
+      "src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts",
+      "src/action-engine/package5-wave1-executable.contract.spec.ts",
+      "src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "src/auth/legacy-staff-principal.http.spec.ts",
+      "src/auth/legacy-staff-principal.architecture.spec.ts",
+      "src/ai-tools/ai-tool-handler.service.spec.ts",
+      "src/ai-tools/ai-tool-canonical-receipt.spec.ts",
+      "src/domain/boundary.spec.ts"
+    ],
+    "cwd": "/tmp/maya-b29-contour/maya-saas-backend",
+    "exitCode": 0,
+    "logSha256": "7f421977bc8259d08b652d377e91fb82cee7c2689328c10be61124134e0fc8a7",
+    "scope": "Actual Nest global authentication/current-session/tenant/role gates, canonical A23/R02/domain ratchets and regressions; mandatory native/PWA proof is invoked by the architecture suite."
+  },
+  "native": {
+    "canonical": {
+      "status": "PASS",
+      "tests": 10,
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v",
+        "test_package5_operational_work"
+      ],
+      "logSha256": "0cc8199a843d4aca6eaf2dc4384292503f3bef0d75a40446f5eceb7ecfd2d5d3"
+    },
+    "composedV3": {
+      "status": "PASS",
+      "tests": 10,
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "test_package5_operational_work",
+        "-v"
+      ],
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "MAYA_R04_PROOF_ROOT": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v3/python"
+      },
+      "logSha256": "a2b4ed6560024b8d02154e6969d691b09aa344f05488466d04c2d1e5ee983c82",
+      "scope": "Guard scans and extracted DB/owner/scheduler leaves use final composed-v3 sources; adapter is identical to canonical new file. No production imports or effects."
+    },
+    "ownerRegression": {
+      "status": "PASS",
+      "tests": 28,
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "test_owner_ai"
+      ],
+      "logSha256": "3d42dd68541d3542692bfb2a0cd358130d332b81ff3e68ae6ed1a72fa416b29f"
+    },
+    "retiredToolRbac": {
+      "status": "PASS",
+      "tests": 6,
+      "selection": "ClaudeAIRBACTests.test_founder_cannot_* (exactly six cases)",
+      "transport": "requests module stub; post raises and is asserted never called",
+      "expectedOutcome": "Removed tool rejected by existing authorization before implementation branch; denied log entry",
+      "logSha256": "a4a905da5ddfa1b7b569cbf32237c3193a1c88b40628d6d5d552bc38758e9d50"
+    }
+  },
+  "postgres": {
+    "package": "R04",
+    "status": "PASS",
+    "checks": 29,
+    "database": "maya_rb_r04",
+    "concurrentSameIntent": [
+      "fulfilled",
+      "fulfilled",
+      "fulfilled",
+      "fulfilled"
+    ],
+    "concurrentChangedIntent": [
+      "fulfilled",
+      "rejected"
+    ],
+    "syntheticProjection": true,
+    "providerWrites": 0,
+    "productionMutations": 0,
+    "command": [
+      "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "-r",
+      "ts-node/register/transpile-only",
+      "-r",
+      "tsconfig-paths/register",
+      "../docs/rebuild/evidence/package5-wave-rb-r04-postgres.proof.cjs"
+    ],
+    "cwd": "/tmp/maya-b29-contour/maya-saas-backend",
+    "environment": {
+      "DATABASE_URL": "postgresql://maya_rb@127.0.0.1:55508/maya_rb_r04",
+      "TS_NODE_PROJECT": "tsconfig.scripts.json"
+    },
+    "restartScope": "Reconstructs controller/service/Action Engine in the SAME process and resumes the persisted execution. This is not a distinct OS-process restart proof.",
+    "logSha256": "19fa1f592f8033140835757c9c1404bcc56fa10a8c9637e1834fd02632292806"
+  },
+  "pwa": {
+    "package": "R04",
+    "status": "PASS",
+    "checks": 26,
+    "targets": [
+      {
+        "target": "salon/app/index.html",
+        "before": "6cf673b29cab1903f84d0be45ee5e3105c8287b48a8b7cde9badba865a5ec793",
+        "after": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "inlineScripts": 26,
+        "canonicalAuthentication": true,
+        "changed": true
+      },
+      {
+        "target": "mayaos/app/index.html",
+        "before": "83dcb25a057f9da59ff5babf8ee7c00e6d29b35bdada57bd9e6be26005816f9d",
+        "after": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "inlineScripts": 28,
+        "canonicalAuthentication": true,
+        "changed": true
+      },
+      {
+        "target": "salon/app/index.codex-loyalty-20260721.html",
+        "before": "6423de0954e69395bc19fb4182b59aec846f8cef206aadd57f178c3ee7925b48",
+        "after": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "inlineScripts": 24,
+        "canonicalAuthentication": false,
+        "changed": true
+      },
+      {
+        "target": "salon/app/index.backup-20260731-anton-analytics.html",
+        "before": "5d7db20684fe150d792b1503eab4c2d98f02f0c308981e45be24ed5b946ff77f",
+        "after": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "inlineScripts": 24,
+        "canonicalAuthentication": false,
+        "changed": true
+      },
+      {
+        "target": "salon/app/tenant-test.html",
+        "before": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "after": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "inlineScripts": 19,
+        "canonicalAuthentication": false,
+        "changed": false
+      },
+      {
+        "target": "vps/app.html",
+        "before": "b37abcd277156e5e6a67505768ea2b5686898cd4512ea860fa57b45ff81b5ee1",
+        "after": "87f10c2e8505ef7fac76685d07965f5e4a271d1117d8c413a01c02cbf476498f",
+        "inlineScripts": 25,
+        "canonicalAuthentication": true,
+        "changed": true
+      }
+    ],
+    "productionEffects": 0,
+    "command": [
+      "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "docs/rebuild/evidence/package5-wave-rb-r04-pwa.proof.cjs",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/production-pwa-baseline-manifest.json"
+    ],
+    "logSha256": "241e6474e58f133b78a7e6eb9fa36556482e40cb57d5efbe2ba073ae0ca22b0d",
+    "idempotency": "Stable SHA256 transport identity from canonical app API/namespace, current User, operation and logicalIdentity; business body excluded to preserve changed-intent conflict; no localStorage race or random retry key."
+  },
+  "resolvedDuringLocalProof": [
+    "A23 stored configJson is null; move parsing into only action branches which need config to allow persisted A23 retry.",
+    "Post-commit Inbox projection exception preserves accepted create/complete receipt with projectionPending; no fabricated failed business result.",
+    "Use deterministic PWA logical identity instead of cross-tab localStorage random allocator.",
+    "Guard checks pure refusal helper closure; negative effectful helper mutant rejected.",
+    "Actual-source scheduler mutation targets AST body so production comments are not assumed."
+  ],
+  "proofLimits": [
+    "No production business/provider/message effects; Inbox projection is synthetic in local PG proof.",
+    "No distinct OS-process restart claim for R04.",
+    "Full aggregate lint/typechecks/build/schema/backend verification is the coordinated wave owner responsibility and is not asserted by this local report.",
+    "Only six R04 retired-tool RBAC cases are claimed; exploratory legacy whole-module run encountered missing requests fixture and obsolete unrelated raw-role assumptions.",
+    "Historical journal data is retained but is not current canonical task authority. B49/R06 delivery and B58/R12 team lifecycle remain separate blockers."
+  ],
+  "ownedSourceHashes": {
+    "ai администратор/database.py": "6394aeaefae0b1189ce7796ad93669467d93f7c6887819072625d9febf242a98",
+    "ai администратор/webhook_server.py": "44587eb1341699d2d09b41f1f684b7e0eb1a8bd5b018c1f3ca86a41f2d178645",
+    "ai администратор/owner_ai.py": "14ac33e9e2dbb4737760264bafed1cae16080938a1a3f427a0311c128b1d3098",
+    "ai администратор/claude_ai.py": "6d8dabf3ae8959866ddbc5bea4ca68e99bf6888af21af1e9c1c272227c4b78ea",
+    "ai администратор/canonical_work_entry.py": "a4504a7ac3e9bafee4d6d911748d6fc5e764322ab9a128b44b7d29e7b4c45560",
+    "ai администратор/package5_operational_work_runtime_guard.py": "bb4ffde09588d6ca99c572e9a9859c235bfdc6785681ae60c4b8dc8eba266348",
+    "сайт и приложение/app.html": "3d711594c74693ee28c54694454cbcc20c781a8af76f5e4b7d0b0c474b78442a",
+    "maya-saas-backend/src/package5-wave1/operational-work.controller.ts": "c75afa65ff43f100b12ef6457446419f479a10a092acf47e87d39a56b5017b29",
+    "maya-saas-backend/src/package5-wave1/package5-wave1.module.ts": "176a6cb47a9d17488ba5d32c69f79c21a3a01d83f106f3a3838ef3a40beb050b",
+    "maya-saas-backend/src/package5-wave1/package5-wave1-canonical-cutover.service.ts": "8dea2be0dae21b0e7f9d805c0f4d2fcfdfc55533a75fe2287a19fe24d7caab59",
+    "ai администратор/test_owner_ai.py": "fd6860382683ca237c5c4c6a408afa47cd28fcf16d99378fb9aab8de4213bec8",
+    "ai администратор/test_claude_ai_rbac.py": "867e204646322a076df81ed62ea28c28c1f94c8acfee80fb2ca3bd4c775afb09",
+    "ai администратор/test_package5_operational_work.py": "98619dce5d453f664ec449bcd5dc836cd4607887163d6db707f49a6f806ffeef",
+    "maya-saas-backend/src/package5-wave1/operational-work.http.spec.ts": "e3c0f6e4855dbfedf8e7b7bc630fe50b8d8ff186ccb343d37c2e2780ffdea9d2",
+    "maya-saas-backend/src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts": "8fb46e2e333f1dde6ab505c6d90299f473f8efe63bd4c90fcf3779e60ba6b6a3",
+    "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts": "57bf3a1bb74c564cc87b0b7640f34d2a10a0cd156bd0dedf999a1900e626baaa",
+    "docs/rebuild/evidence/package5-wave-rb-r04-overlay.py": "5552e0b0db210e39203d2200a90776a589da9d448b41b3cb93ba511f33222d56",
+    "docs/rebuild/evidence/package5-wave-rb-r04-pwa-overlay.cjs": "9e5783ff95dea32254c1cb01ccd85c8ac8619048c547809ab5814d1374e86a8f",
+    "docs/rebuild/evidence/package5-wave-rb-r04-pwa.proof.cjs": "949f5abe4b46d04fb631b714de1431a451fbf90dc89fdd9e77a9bbc90a958e53",
+    "docs/rebuild/evidence/package5-wave-rb-r04-postgres.proof.cjs": "fc4141035211f77edcea88af08194001adeba14b13e7ddc31cd27905d3ebcfd1",
+    "docs/rebuild/evidence/package5-wave-rb-r04-hunk-ownership.json": "c617bb5c83d73d5dc647e4ef27077b2584fd8d6996d0f494495b6dd23f2b7e18"
+  },
+  "commitOwnership": {
+    "package": "R04",
+    "files": {
+      "ai администратор/database.py": {
+        "r04OnlySource": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r04/canonical-only/database.py",
+        "r04OnlySha256": "3ac03d5decbabfa174e139e001686c8dde581900c2e5de3ad0cfe75bfb9f3dc0",
+        "composedSha256": "6394aeaefae0b1189ce7796ad93669467d93f7c6887819072625d9febf242a98",
+        "r07Delta": "mark_subscription_renew_pushed fail-closed body"
+      },
+      "ai администратор/webhook_server.py": {
+        "r04OnlySource": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r04/canonical-only/webhook_server.py",
+        "r04OnlySha256": "3990c4b19df60010fca34789f110660fdb41d0a4794e9dfffee9445ce8b0278d",
+        "composedSha256": "44587eb1341699d2d09b41f1f684b7e0eb1a8bd5b018c1f3ca86a41f2d178645",
+        "r07Delta": "retention_owner_required import and refusal dispatch for reactivation/cycle/subscriptions only"
+      }
+    },
+    "otherOwnedRuntime": [
+      "ai администратор/owner_ai.py",
+      "ai администратор/claude_ai.py",
+      "ai администратор/canonical_work_entry.py",
+      "ai администратор/package5_operational_work_runtime_guard.py",
+      "сайт и приложение/app.html",
+      "maya-saas-backend/src/package5-wave1/operational-work.controller.ts",
+      "maya-saas-backend/src/package5-wave1/package5-wave1.module.ts",
+      "maya-saas-backend/src/package5-wave1/package5-wave1-canonical-cutover.service.ts"
+    ],
+    "claudeOwnership": "R03 already committed ab807264; remaining claude runtime/test deltas are R04",
+    "runtimeFrozen": true
+  },
+  "productionMutationsMessages": 0,
+  "oldDatabasesTouched": 0,
+  "mainWorktreeEntriesTouched": 0,
+  "ownedProcessesRemaining": 0,
+  "processHygiene": 0,
+  "runtimeFrozen": true,
+  "testsFrozen": true,
+  "package5Complete": false,
+  "chapter6Complete": false
+}

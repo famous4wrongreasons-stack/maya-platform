@@ -407,121 +407,65 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(logs[-1][2], "get_owner_command_center")
         self.assertTrue(logs[-1][4])
 
-    def test_founder_can_create_owner_control_task(self):
+    def test_founder_cannot_create_owner_control_task(self):
         claude_ai, logs = _load_claude_ai()
+        self.assertNotIn('create_owner_control_task', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('create_owner_control_task', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
-        result = json.loads(
-            claude_ai._execute_tool(
-                "create_owner_control_task",
-                {"title": "Проверить план-факт", "priority": "high", "due_in_days": 1},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["task_id"], 7)
-        self.assertEqual(result["control_item"]["title"], "Проверить план-факт")
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "create_owner_control_task")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
-
-    def test_founder_can_update_owner_control_task(self):
+    def test_founder_cannot_update_owner_control_task(self):
         claude_ai, logs = _load_claude_ai()
+        self.assertNotIn('update_owner_control_task', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('update_owner_control_task', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
-        result = json.loads(
-            claude_ai._execute_tool(
-                "update_owner_control_task",
-                {"task_id": 7, "action": "complete", "note": "Проверено"},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["task"]["id"], 7)
-        self.assertEqual(result["task"]["status"], "done")
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "update_owner_control_task")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
-
-    def test_founder_can_run_autonomous_director_tick(self):
+    def test_founder_cannot_run_autonomous_director_tick(self):
         claude_ai, logs = _load_claude_ai()
+        self.assertNotIn('run_autonomous_director_tick', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('run_autonomous_director_tick', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
-        result = json.loads(
-            claude_ai._execute_tool(
-                "run_autonomous_director_tick",
-                {"limit": 2},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "supervised_autopilot")
-        self.assertEqual(result["created_count"], 2)
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "run_autonomous_director_tick")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
-
-    def test_founder_can_run_autopilot_supervision_tick(self):
+    def test_founder_cannot_run_autopilot_supervision_tick(self):
         claude_ai, logs = _load_claude_ai()
+        self.assertNotIn('run_autopilot_supervision_tick', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('run_autopilot_supervision_tick', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
-        result = json.loads(
-            claude_ai._execute_tool(
-                "run_autopilot_supervision_tick",
-                {"limit": 3},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "internal_supervision")
-        self.assertEqual(result["applied_count"], 3)
-        self.assertEqual(result["created_count"], 1)
-        self.assertEqual(result["updated_count"], 2)
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "run_autopilot_supervision_tick")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
-
-    def test_founder_can_run_execution_loop_tick(self):
+    def test_founder_cannot_run_execution_loop_tick(self):
         claude_ai, logs = _load_claude_ai()
+        self.assertNotIn('run_execution_loop_tick', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('run_execution_loop_tick', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
-        result = json.loads(
-            claude_ai._execute_tool(
-                "run_execution_loop_tick",
-                {"limit": 2},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "closed_loop_control")
-        self.assertEqual(result["created_count"], 2)
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "run_execution_loop_tick")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
-
-    def test_founder_can_run_operating_rhythm_tick(self):
+    def test_founder_cannot_run_operating_rhythm_tick(self):
         claude_ai, logs = _load_claude_ai()
-
-        result = json.loads(
-            claude_ai._execute_tool(
-                "run_operating_rhythm_tick",
-                {"force": True},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "safe_scheduler")
-        self.assertFalse(result["skipped"])
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "run_operating_rhythm_tick")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
+        self.assertNotIn('run_operating_rhythm_tick', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('run_operating_rhythm_tick', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
     def test_pro_model_uses_responses_api_route(self):
         claude_ai, _logs = _load_claude_ai()

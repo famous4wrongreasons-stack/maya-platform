@@ -1,0 +1,42 @@
+{
+  "package": "R04",
+  "stageFromWorkingTree": [
+    "ai администратор/owner_ai.py",
+    "ai администратор/claude_ai.py",
+    "ai администратор/canonical_work_entry.py",
+    "ai администратор/package5_operational_work_runtime_guard.py",
+    "сайт и приложение/app.html",
+    "maya-saas-backend/src/package5-wave1/operational-work.controller.ts",
+    "maya-saas-backend/src/package5-wave1/package5-wave1.module.ts",
+    "maya-saas-backend/src/package5-wave1/package5-wave1-canonical-cutover.service.ts",
+    "ai администратор/test_owner_ai.py",
+    "ai администратор/test_claude_ai_rbac.py",
+    "ai администратор/test_package5_operational_work.py",
+    "maya-saas-backend/src/package5-wave1/operational-work.http.spec.ts",
+    "maya-saas-backend/src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts",
+    "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+    "docs/rebuild/evidence/package5-wave-rb-r04-overlay.py",
+    "docs/rebuild/evidence/package5-wave-rb-r04-pwa-overlay.cjs",
+    "docs/rebuild/evidence/package5-wave-rb-r04-pwa.proof.cjs",
+    "docs/rebuild/evidence/package5-wave-rb-r04-postgres.proof.cjs",
+    "docs/rebuild/evidence/package5-wave-rb-r04-hunk-ownership.json",
+    "docs/rebuild/evidence/package5-wave-rb-r04-local-proof.json",
+    "docs/rebuild/evidence/package5-wave-rb-r04-completion.md",
+    "docs/rebuild/evidence/package5-wave-rb-r04-file-manifest.json"
+  ],
+  "stageFromExactBlob": {
+    "ai администратор/database.py": {
+      "r04OnlySource": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r04/canonical-only/database.py",
+      "r04OnlySha256": "3ac03d5decbabfa174e139e001686c8dde581900c2e5de3ad0cfe75bfb9f3dc0",
+      "composedSha256": "6394aeaefae0b1189ce7796ad93669467d93f7c6887819072625d9febf242a98",
+      "r07Delta": "mark_subscription_renew_pushed fail-closed body"
+    },
+    "ai администратор/webhook_server.py": {
+      "r04OnlySource": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/r04/canonical-only/webhook_server.py",
+      "r04OnlySha256": "3990c4b19df60010fca34789f110660fdb41d0a4794e9dfffee9445ce8b0278d",
+      "composedSha256": "44587eb1341699d2d09b41f1f684b7e0eb1a8bd5b018c1f3ca86a41f2d178645",
+      "r07Delta": "retention_owner_required import and refusal dispatch for reactivation/cycle/subscriptions only"
+    }
+  },
+  "instruction": "Root stages exact R04-only shared blobs; do not overwrite composed working files. Remaining R07 shared deltas are committed separately. No commit/push by package agent."
+}

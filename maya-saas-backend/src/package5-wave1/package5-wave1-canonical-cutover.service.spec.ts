@@ -186,4 +186,61 @@ describe('Package5Wave1CanonicalCutoverService', () => {
       context.publishForTenant.mock.invocationCallOrder[0],
     );
   });
+
+  it('R04 resumes an A23 intent whose settings config is null and rejects changed input', async () => {
+    const context = setup({
+      existing: { id: 'execution-task', actorUserId: 'user-a' },
+      normalized: {
+        configJson: null,
+        assigneeUserId: 'user-b',
+        title: 'Count stock',
+        bodyText: 'Count sealed stock',
+        dueAt: null,
+      },
+    });
+    const command = {
+      assigneeUserId: 'user-b',
+      title: 'Count stock',
+      bodyText: 'Count sealed stock',
+    };
+    await context.service.createTask(
+      'tenant-a',
+      'user-a',
+      command,
+      'task-intent',
+    );
+    expect(context.resume).toHaveBeenCalledWith('tenant-a', 'execution-task');
+    expect(context.execute).not.toHaveBeenCalled();
+    await expect(
+      context.service.createTask(
+        'tenant-a',
+        'user-a',
+        { ...command, title: 'Changed' },
+        'task-intent',
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(context.resume).toHaveBeenCalledTimes(1);
+  });
+
+  it('R04 preserves the committed task receipt when its projection fails', async () => {
+    const context = setup();
+    context.publishForTenant.mockRejectedValue(
+      new Error('projection unavailable'),
+    );
+    const receipt = await context.service.createTask(
+      'tenant-a',
+      'user-a',
+      {
+        assigneeUserId: 'user-b',
+        title: 'Count stock',
+        bodyText: 'Count sealed stock',
+      },
+      'task-intent',
+    );
+    expect(receipt.projectionPending).toBe(true);
+    expect(receipt.result).toMatchObject({
+      targetRef: 'dashboard-preference:user-a:assistant',
+    });
+    expect(context.execute).toHaveBeenCalledTimes(1);
+  });
 });

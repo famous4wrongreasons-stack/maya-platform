@@ -2303,6 +2303,11 @@ async def panel_command_center_handler(request: web.Request) -> web.Response:
             "error": "server_error",
             "message": "Не удалось собрать Owner Command Center.",
         }, status=500)
+    import canonical_work_entry
+    tasks = await canonical_work_entry.canonical_request(request, 'list')
+    payload['canonical_tasks'] = tasks.get('tasks', [])
+    payload['current_user_id'] = tasks.get('current_user_id')
+    payload['canonical_task_error'] = tasks.get('error')
     return _cabinet_response({"role": info["role"], **payload})
 
 
@@ -2329,39 +2334,8 @@ async def panel_plan_target_handler(request: web.Request) -> web.Response:
 
 
 async def panel_action_evaluate_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/action/evaluate — проверить результат owner action."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Проверка результата доступна только владельцу.",
-        }, status=403)
-    try:
-        action_id = int(body.get("action_id") or 0)
-    except Exception:
-        action_id = 0
-    if not action_id:
-        return _cabinet_response({"error": "bad_request", "message": "action_id обязателен."}, status=400)
-    try:
-        item = await asyncio.to_thread(
-            database.evaluate_owner_action,
-            action_id,
-            force=bool(body.get("force")),
-        )
-    except Exception as e:
-        logger.error(f"panel_action_evaluate error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось проверить результат."}, status=500)
-    if not item:
-        return _cabinet_response({"error": "not_found"}, status=404)
-    return _cabinet_response({"ok": True, "action": item})
+    import canonical_work_entry
+    return _cabinet_response(canonical_work_entry.owner_required(), status=410)
 
 
 def _owner_assignment_due_label(raw: str | None = "") -> str:
@@ -2411,342 +2385,43 @@ def _owner_assignment_message(task: dict | None) -> str:
 
 
 async def _deliver_owner_control_assignment(request: web.Request, task: dict | None) -> dict:
-    """Доставляет назначенную owner_control задачу в рабочий контур без лишней аналитики."""
-    if not isinstance(task, dict):
-        return {"ok": False, "skipped": True, "reason": "empty_task"}
-    payload = task.get("payload") if isinstance(task.get("payload"), dict) else {}
-    assigned_to = str(payload.get("assigned_to") or "owner").strip().lower()
-    if assigned_to not in ("admin", "master", "team"):
-        return {"ok": True, "skipped": True, "reason": "internal_assignment"}
-    state = str(payload.get("assignment_delivery_state") or "").strip().lower()
-    if state == "delivered" and int(payload.get("assignment_delivery_message_id") or 0):
-        return {"ok": True, "skipped": True, "reason": "already_delivered"}
-    try:
-        action_id = int(task.get("id") or 0)
-    except Exception:
-        action_id = 0
-    if not action_id:
-        return {"ok": False, "skipped": True, "reason": "no_action_id"}
-    text = _owner_assignment_message(task)
-    try:
-        msg_id = await asyncio.to_thread(
-            database.add_staff_message,
-            0,
-            "MAYA · задачи",
-            text,
-            "", "", "", "", 0, 0,
-        )
-    except Exception as e:
-        logger.error(f"owner assignment team chat save: {e}")
-        marked = await asyncio.to_thread(
-            database.mark_owner_control_task_delivery,
-            action_id,
-            state="failed",
-            channel="team_chat",
-            error="team_chat_save_failed",
-        )
-        return {"ok": False, "state": "failed", "task": marked}
-    try:
-        await _push_team_message(request.app["bot_app"], 0, "MAYA · задачи", text, "")
-    except Exception as e:
-        logger.error(f"owner assignment team chat push: {e}")
-    marked = await asyncio.to_thread(
-        database.mark_owner_control_task_delivery,
-        action_id,
-        state="delivered",
-        channel="team_chat",
-        message_id=msg_id,
-    )
-    return {"ok": True, "state": "delivered", "message_id": msg_id, "task": marked}
+    import canonical_work_entry
+    return canonical_work_entry.owner_required()
 
 
 async def panel_control_update_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/control/update — lifecycle ручной контрольной задачи."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Контрольные задачи доступны только владельцу.",
-        }, status=403)
-    try:
-        task_id = int(body.get("task_id") or body.get("action_id") or 0)
-    except Exception:
-        task_id = 0
-    action = str(body.get("action") or "").strip().lower()
-    if not task_id or action not in ("complete", "cancel", "postpone", "reopen", "assign", "revision"):
-        return _cabinet_response({"error": "bad_request", "message": "Нужны task_id и action."}, status=400)
-    try:
-        updated = await asyncio.to_thread(
-            owner_ai.update_control_task,
-            task_id=task_id,
-            action=action,
-            note=body.get("note") or "",
-            due_at=body.get("due_at"),
-            due_in_days=body.get("due_in_days"),
-            assigned_to=body.get("assigned_to") or "",
-            assignee_name=body.get("assignee_name") or "",
-        )
-        if not updated.get("ok"):
-            status = 404 if updated.get("error") == "not_found" else 400
-            return _cabinet_response(updated, status=status)
-        delivery = await _deliver_owner_control_assignment(request, updated.get("task"))
-        if isinstance(delivery, dict) and isinstance(delivery.get("task"), dict):
-            updated["task"] = delivery["task"]
-        updated["assignment_delivery"] = delivery
-        center = await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_control_update error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось обновить задачу."}, status=500)
-    return _cabinet_response({"ok": True, "role": info["role"], "updated": updated.get("task"), **center})
+    import canonical_work_entry
+    return await canonical_work_entry.handle(request, 'complete')
 
 
 async def panel_control_create_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/control/create — создать ручной контроль из owner-сигнала."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Контрольные задачи доступны только владельцу.",
-        }, status=403)
-    title = str(body.get("title") or "").strip()
-    if not title:
-        return _cabinet_response({"error": "bad_request", "message": "title обязателен."}, status=400)
-    try:
-        created = await asyncio.to_thread(
-            owner_ai.create_control_task,
-            title=title,
-            detail=body.get("detail") or "",
-            priority=body.get("priority") or "medium",
-            due_at=body.get("due_at"),
-            due_in_days=body.get("due_in_days"),
-            potential_rub=body.get("potential_rub"),
-            owner_next_step=body.get("owner_next_step") or "",
-            signal_key=body.get("signal_key") or "",
-            signal_kind=body.get("signal_kind") or "",
-            signal_source=body.get("signal_source") or "",
-            action_job=body.get("action_job") or "",
-            assigned_to=body.get("assigned_to") or "owner",
-            assignee_name=body.get("assignee_name") or "",
-            created_by=tg_id,
-        )
-        if not created.get("ok"):
-            return _cabinet_response(created, status=400)
-        delivery = await _deliver_owner_control_assignment(request, created.get("task"))
-        if isinstance(delivery, dict) and isinstance(delivery.get("task"), dict):
-            created["task"] = delivery["task"]
-        created["assignment_delivery"] = delivery
-        center = await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_control_create error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось создать задачу."}, status=500)
-    return _cabinet_response({"ok": True, "role": info["role"], "created": created, **center})
+    import canonical_work_entry
+    return await canonical_work_entry.handle(request, 'create')
 
 
 async def panel_autonomy_tick_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/autonomy/tick — безопасный автопилот Maya OS v2."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Автопилот Maya OS доступен только владельцу.",
-        }, status=403)
-    try:
-        limit = int(body.get("limit") or 5)
-    except Exception:
-        limit = 5
-    try:
-        result = await asyncio.to_thread(
-            owner_ai.run_autonomous_director_tick,
-            created_by=tg_id,
-            limit=limit,
-        )
-        deliveries = []
-        for item in result.get("created") or []:
-            task = item.get("task")
-            if isinstance(task, dict):
-                deliveries.append(await _deliver_owner_control_assignment(request, task))
-        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_autonomy_tick error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось запустить автопилот."}, status=500)
-    return _cabinet_response({
-        "ok": True,
-        "role": info["role"],
-        "autopilot": result,
-        "deliveries": deliveries,
-        **center,
-    })
+    import canonical_work_entry
+    return _cabinet_response(canonical_work_entry.owner_required(), status=410)
 
 
 async def panel_autopilot_supervision_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/autopilot/supervise — контроль исполнения Autopilot 2.1."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Контроль исполнения Maya OS доступен только владельцу.",
-        }, status=403)
-    try:
-        limit = int(body.get("limit") or 8)
-    except Exception:
-        limit = 8
-    try:
-        result = await asyncio.to_thread(
-            owner_ai.run_autopilot_supervision_tick,
-            created_by=tg_id,
-            limit=limit,
-        )
-        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_autopilot_supervision error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось провести контроль исполнения."}, status=500)
-    return _cabinet_response({
-        "ok": True,
-        "role": info["role"],
-        "supervision": result,
-        **center,
-    })
+    import canonical_work_entry
+    return _cabinet_response(canonical_work_entry.owner_required(), status=410)
 
 
 async def panel_execution_loop_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/execution/loop — замкнутый цикл исполнения Maya OS v3."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Замкнутый цикл Maya OS доступен только владельцу.",
-        }, status=403)
-    try:
-        limit = int(body.get("limit") or 6)
-    except Exception:
-        limit = 6
-    try:
-        result = await asyncio.to_thread(
-            owner_ai.run_execution_loop_tick,
-            created_by=tg_id,
-            limit=limit,
-        )
-        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_execution_loop error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось замкнуть цикл исполнения."}, status=500)
-    return _cabinet_response({
-        "ok": True,
-        "role": info["role"],
-        "execution_loop_tick": result,
-        **center,
-    })
+    import canonical_work_entry
+    return _cabinet_response(canonical_work_entry.owner_required(), status=410)
 
 
 async def panel_staff_tasks_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/staff_tasks — безопасная очередь поручений для рабочих кабинетов."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = int(tg_user["id"])
-    info = _panel_resolve_role(tg_id)
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        payload = await asyncio.to_thread(
-            owner_ai.staff_task_inbox,
-            viewer_role=info.get("role") or "",
-            limit=int(body.get("limit") or 12),
-        )
-    except Exception as e:
-        logger.error(f"panel_staff_tasks error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось загрузить задачи."}, status=500)
-    return _cabinet_response({"ok": True, "role": info.get("role"), **payload})
+    import canonical_work_entry
+    return await canonical_work_entry.handle(request, 'list')
 
 
 async def panel_staff_task_update_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/staff_task/update — исполнитель отмечает ход поручения."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = int(tg_user["id"])
-    info = _panel_resolve_role(tg_id)
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        task_id = int(body.get("task_id") or body.get("action_id") or 0)
-    except Exception:
-        task_id = 0
-    action = str(body.get("action") or "").strip().lower()
-    if not task_id or action not in ("accept", "accepted", "start", "run", "running", "done", "complete", "finish", "blocked"):
-        return _cabinet_response({"error": "bad_request", "message": "Нужны task_id и action."}, status=400)
-    actor_name = (
-        info.get("master_name")
-        or tg_user.get("full_name")
-        or " ".join([str(tg_user.get("first_name") or ""), str(tg_user.get("last_name") or "")]).strip()
-        or tg_user.get("username")
-        or "Сотрудник"
-    )
-    try:
-        updated = await asyncio.to_thread(
-            owner_ai.update_staff_task,
-            task_id=task_id,
-            viewer_role=info.get("role") or "",
-            actor_name=actor_name,
-            actor_chat_id=tg_id,
-            action=action,
-            note=body.get("note") or "",
-        )
-    except Exception as e:
-        logger.error(f"panel_staff_task_update error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось обновить задачу."}, status=500)
-    if not updated.get("ok"):
-        status = 403 if updated.get("error") == "forbidden" else (404 if updated.get("error") == "not_found" else 400)
-        return _cabinet_response(updated, status=status)
-    return _cabinet_response({"ok": True, "role": info.get("role"), **updated})
+    import canonical_work_entry
+    return await canonical_work_entry.handle(request, 'complete')
 
 
 def _build_master_overview(staff_id: int, pp: dict, master_name: str) -> web.Response:
@@ -3374,216 +3049,26 @@ def _owner_job_chat_response(chat_id: int, user_text: str, reply: str) -> web.Re
 
 
 async def panel_job_run_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/job/run — ручной запуск фоновой задачи (owner/manager)."""
+    import canonical_staff_access
+    import canonical_work_entry
+    if not canonical_staff_access.current():
+        return _cabinet_response({'error': 'canonical_staff_session_required'}, status=403)
     try:
         body = await request.json()
     except Exception:
         body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
-    if not info.get("permissions", {}).get("jobs"):
-        return _cabinet_response({"error": "forbidden", "message": "Недостаточно прав."}, status=403)
-
-    job = str(body.get("job") or "")
-    spec = _PANEL_JOBS.get(job)
-    if not spec:
-        return _cabinet_response({"ok": False, "reason": "Неизвестная задача."}, status=400)
-    mod_name, fn_name, label, kind = spec
-    dedupe_key = f"panel_job_last:{int(tg_id) if tg_id else 0}:{job}"
-    try:
-        last = float(database.get_setting(dedupe_key) or 0)
-    except Exception:
-        last = 0.0
-    now = time.time()
-    if last and now - last < 60:
-        return _cabinet_response({
-            "ok": False,
-            "duplicate": True,
-            "job": job,
-            "label": label,
-            "cooldown_seconds_left": int(max(1, 60 - (now - last))),
-            "reason": f"«{label}» уже запускалась меньше минуты назад. Подождите, чтобы не отправить дубли.",
-        })
-    try:
-        mod = __import__(mod_name)
-        fn = getattr(mod, fn_name)
-    except Exception as e:
-        logger.error(f"panel job import {job}: {e}")
-        return _cabinet_response({"ok": False, "reason": "Задача недоступна."}, status=500)
-    try:
-        database.set_setting(dedupe_key, str(now))
-    except Exception:
-        pass
-
-    action_id = None
-    source_control_id = 0
-    source_signal_key = ""
-    try:
-        journal_payload = {"label": label, "kind": kind}
-        try:
-            source_control_id = int(body.get("source_control_id") or 0)
-        except Exception:
-            source_control_id = 0
-        if source_control_id:
-            journal_payload["source_control_id"] = source_control_id
-        source_signal_key = str(body.get("source_signal_key") or "").strip()[:180]
-        if source_signal_key:
-            journal_payload["source_signal_key"] = source_signal_key
-        action_id = database.create_owner_action(
-            job,
-            title=str(body.get("title") or label),
-            source=str(body.get("source") or "panel_jobs"),
-            created_by=int(tg_id) if tg_id else None,
-            payload=journal_payload,
-        )
-        if action_id and source_control_id:
-            database.link_owner_control_task_action(
-                source_control_id,
-                action_id,
-                job,
-                action_status="running",
-                note="Действие запущено из очереди контроля.",
-            )
-    except Exception as e:
-        logger.warning(f"panel job journal create {job}: {e}")
-
-    app = request.app["bot_app"]
-    task = asyncio.create_task(fn(app))
-    _panel_bg_tasks.add(task)
-    task.add_done_callback(_panel_bg_tasks.discard)
-
-    def _finish_journal(t: asyncio.Task) -> None:
-        if not action_id:
-            return
-        try:
-            summary = t.result()
-            database.finish_owner_action(
-                action_id,
-                "done",
-                summary=summary if isinstance(summary, dict) else {},
-            )
-        except Exception as e:
-            database.finish_owner_action(action_id, "failed", error=str(e)[:200])
-
-    task.add_done_callback(_finish_journal)
-
-    # Быстрые задачи вернут результат сразу; долгие (массовые отправки) продолжат в фоне.
-    try:
-        summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
-        return _cabinet_response({"ok": True, "done": True, "job": job, "label": label,
-                                  "action_id": action_id,
-                                  "summary": summary if isinstance(summary, dict) else {}})
-    except asyncio.TimeoutError:
-        return _cabinet_response({"ok": True, "started": True, "running": True,
-                                  "job": job, "label": label, "action_id": action_id})
-    except Exception as e:
-        logger.error(f"panel job run {job}: {e}")
-        if action_id:
-            database.finish_owner_action(action_id, "failed", error=str(e)[:200])
-        return _cabinet_response({"ok": False, "job": job, "reason": "Ошибка при выполнении."}, status=500)
+    job = body.get('job') if isinstance(body, dict) else None
+    value = canonical_work_entry.owner_required()
+    return _cabinet_response(value, status=410)
 
 
 async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str) -> web.Response:
-    """Запуск салонной задачи по подтверждению из чата AI-директора (нажата кнопка
-    карточки → фронт прислал __runjob:<job>). Детерминированно, БЕЗ LLM. Только
-    владелец/founder; те же задачи и исполнитель, что в /api/panel/job/run."""
-    job = (job or "").strip().lower()
-    _clear_pending_owner_job(chat_id)
-    spec = _PANEL_JOBS.get(job)
-    info = _panel_resolve_role(int(chat_id)) if chat_id else {"permissions": {}}
-    role = info.get("role") or ""
-
-    def audit(allowed: bool, reason: str = "") -> None:
-        try:
-            database.log_tool_call(chat_id, role, f"run_job:{job or '?'}", "write", allowed, reason)
-        except Exception:
-            pass
-
-    if not spec:
-        audit(False, "unknown_job")
-        return _owner_job_chat_response(
-            chat_id, job, "Не нашла такую задачу. Откройте Панель и запустите вручную."
-        )
-    if role != "owner":
-        audit(False, "owner_only")
-        return _owner_job_chat_response(
-            chat_id, job, "Эта задача доступна только владельцу."
-        )
-    mod_name, fn_name, label, _kind = spec
-    # Защита от двойного тапа/повторной отправки action-card: тот же job не
-    # запускается повторно из чата чаще одного раза в минуту.
-    dedupe_key = f"owner_chat_job_last:{int(chat_id)}:{job}"
-    try:
-        last = float(database.get_setting(dedupe_key) or 0)
-    except Exception:
-        last = 0.0
-    now = time.time()
-    if last and now - last < 60:
-        audit(False, "duplicate_60s")
-        return _owner_job_chat_response(
-            chat_id,
-            label,
-            f"«{label}» уже запущена. Дайте ей минуту, чтобы не отправить дубли.",
-        )
-    try:
-        database.set_setting(dedupe_key, str(now))
-    except Exception:
-        pass
-    action_id = None
-    try:
-        mod = __import__(mod_name)
-        fn = getattr(mod, fn_name)
-        app = request.app["bot_app"]
-        try:
-            action_id = database.create_owner_action(
-                job,
-                title=label,
-                source="chat_action_card",
-                created_by=int(chat_id) if chat_id else None,
-                payload={"label": label},
-            )
-        except Exception as e:
-            logger.warning(f"chat run_job journal create {job}: {e}")
-        task = asyncio.create_task(fn(app))
-        _panel_bg_tasks.add(task)
-        task.add_done_callback(_panel_bg_tasks.discard)
-
-        def _finish_chat_journal(t: asyncio.Task) -> None:
-            if not action_id:
-                return
-            try:
-                summary = t.result()
-                database.finish_owner_action(
-                    action_id,
-                    "done",
-                    summary=summary if isinstance(summary, dict) else {},
-                )
-            except Exception as exc:
-                database.finish_owner_action(action_id, "failed", error=str(exc)[:200])
-
-        task.add_done_callback(_finish_chat_journal)
-        audit(True, "started")
-        try:
-            summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
-            reply = _owner_job_result_reply(job, label, summary)
-        except asyncio.TimeoutError:
-            reply = (
-                f"Запустила «{label}». Задача ещё выполняется; "
-                "точное число отправок будет в журнале после завершения."
-            )
-    except Exception as e:
-        logger.error(f"chat run_job {job}: {e}")
-        audit(False, "run_error")
-        try:
-            if action_id:
-                database.finish_owner_action(action_id, "failed", error=str(e)[:200])
-        except Exception:
-            pass
-        reply = "Не получилось запустить задачу — попробуйте из Панели."
-    return _owner_job_chat_response(chat_id, label, reply)
+    import canonical_staff_access
+    import canonical_work_entry
+    if not canonical_staff_access.current(chat_id):
+        return _cabinet_response({'error': 'canonical_staff_session_required'}, status=403)
+    value = canonical_work_entry.owner_required()
+    return _cabinet_response(value, status=410)
 
 
 async def panel_reviews_handler(request: web.Request) -> web.Response:
@@ -10381,26 +9866,8 @@ async def waitlist_admin_alert_loop(app: Application):
 
 
 async def maya_operating_rhythm_loop(app: Application):
-    """Безопасный rhythm-loop Maya OS: внутренние задачи, контроль и замыкание циклов."""
-    await asyncio.sleep(60)
-    while True:
-        try:
-            result = await asyncio.to_thread(
-                owner_ai.run_operating_rhythm_tick,
-                created_by="maya_os_scheduler",
-                force=False,
-            )
-            if result and not result.get("skipped"):
-                summary = result.get("summary") or {}
-                logger.info(
-                    "maya operating rhythm tick: created=%s updated=%s skipped=%s",
-                    summary.get("created_count"),
-                    summary.get("updated_count"),
-                    summary.get("skipped_count"),
-                )
-        except Exception as e:
-            logger.error(f"maya operating rhythm loop: {e}")
-        await asyncio.sleep(900)
+    # R04: scheduling does not supply a canonical command or actor.
+    return None
 
 
 async def usage_fal_handler(request: web.Request) -> web.Response:

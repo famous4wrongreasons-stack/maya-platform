@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 
 import { PACKAGE5_WAVE1_REGISTRATIONS } from './package5-wave1-executable.contract';
@@ -25,6 +26,44 @@ function productionSources(directory = SRC): string[] {
 }
 
 describe('Package 5 Wave 1 production-bypass ratchet', () => {
+  it('R04 task transport preserves identity across tabs/restart and changed input', () => {
+    const run = spawnSync(
+      process.execPath,
+      [
+        join(
+          process.cwd(),
+          '..',
+          'docs/rebuild/evidence/package5-wave-rb-r04-pwa.proof.cjs',
+        ),
+      ],
+      {
+        encoding: 'utf8',
+        timeout: 20000,
+      },
+    );
+    expect({
+      status: run.status,
+      error: run.error?.message,
+      output: run.status ? `${run.stdout}\n${run.stderr}` : '',
+    }).toEqual({ status: 0, error: undefined, output: '' });
+  }, 25000);
+  it('R04 permanently rejects native parallel owners and read/background effects', () => {
+    const run = spawnSync(
+      'python3',
+      ['-m', 'unittest', 'test_package5_operational_work'],
+      {
+        cwd: join(process.cwd(), '..', 'ai администратор'),
+        env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
+        encoding: 'utf8',
+        timeout: 60000,
+      },
+    );
+    expect({
+      status: run.status,
+      error: run.error?.message,
+      output: run.status ? `${run.stdout}\n${run.stderr}` : '',
+    }).toEqual({ status: 0, error: undefined, output: '' });
+  }, 65000);
   const dashboard = source(
     'dashboard-preferences/dashboard-preferences.service.ts',
   );

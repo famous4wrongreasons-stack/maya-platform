@@ -596,31 +596,7 @@ def init_db():
         """)
         # Журнал действий AI-директора: что MAYA предложила владельцу и что было
         # запущено вручную. Без ПД: только тип задачи, заголовок, статус и агрегаты.
-        conn.executescript("""
-            CREATE TABLE IF NOT EXISTS owner_action_journal (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                source        TEXT    NOT NULL DEFAULT 'owner_os',
-                job           TEXT    NOT NULL,
-                title         TEXT,
-                status        TEXT    NOT NULL DEFAULT 'running',
-                created_by    INTEGER,
-                created_at    TEXT    NOT NULL,
-                started_at    TEXT,
-                completed_at  TEXT,
-                payload_json  TEXT,
-                summary_json  TEXT,
-                baseline_json TEXT,
-                result_due_at TEXT,
-                evaluated_at  TEXT,
-                impact_status TEXT,
-                impact_json   TEXT,
-                error         TEXT
-            );
-            CREATE INDEX IF NOT EXISTS idx_owner_action_journal_created
-                ON owner_action_journal (created_at);
-            CREATE INDEX IF NOT EXISTS idx_owner_action_journal_job
-                ON owner_action_journal (job, created_at);
-        """)
+        # R04: historical journal remains untouched; no parallel owner schema.
         # Миграция: добавляем зашифрованные колонки в clients и gift_certificates
         _migrate_add_encrypted_columns(conn)
         _backfill_encryption(conn)
@@ -3916,89 +3892,13 @@ def _json_loads_safe(value: str | None):
 
 
 def _ensure_owner_action_journal(conn) -> None:
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS owner_action_journal (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            source        TEXT    NOT NULL DEFAULT 'owner_os',
-            job           TEXT    NOT NULL,
-            title         TEXT,
-            status        TEXT    NOT NULL DEFAULT 'running',
-            created_by    INTEGER,
-            created_at    TEXT    NOT NULL,
-            started_at    TEXT,
-            completed_at  TEXT,
-            payload_json  TEXT,
-            summary_json  TEXT,
-            baseline_json TEXT,
-            result_due_at TEXT,
-            evaluated_at  TEXT,
-            impact_status TEXT,
-            impact_json   TEXT,
-            error         TEXT
-        );
-    """)
-    conn.execute("""
-        CREATE INDEX IF NOT EXISTS idx_owner_action_journal_created
-            ON owner_action_journal (created_at);
-    """)
-    conn.execute("""
-        CREATE INDEX IF NOT EXISTS idx_owner_action_journal_job
-            ON owner_action_journal (job, created_at);
-    """)
-    for col in (
-        ("baseline_json", "TEXT"),
-        ("result_due_at", "TEXT"),
-        ("evaluated_at", "TEXT"),
-        ("impact_status", "TEXT"),
-        ("impact_json", "TEXT"),
-    ):
-        try:
-            conn.execute(f"ALTER TABLE owner_action_journal ADD COLUMN {col[0]} {col[1]}")
-        except sqlite3.OperationalError:
-            pass
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def create_owner_action(job: str, title: str = "", *, source: str = "owner_os",
                         created_by=None, payload=None, status: str = "running",
                         baseline=None, result_due_at: str | None = None) -> int:
-    """Создаёт запись в журнале AI-директора. ПД не сохраняем."""
-    try:
-        uid = int(created_by) if created_by else None
-    except Exception:
-        uid = None
-    job = (job or "").strip().lower()[:80]
-    title = (title or job or "Действие")[:180]
-    status = (status or "running").strip().lower()[:40]
-    now = _now()
-    if baseline is None:
-        baseline = _owner_action_baseline(job)
-    if result_due_at is None:
-        result_due_at = _owner_action_due_at(job, now)
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        cur = conn.execute(
-            "INSERT INTO owner_action_journal "
-            "(source, job, title, status, created_by, created_at, started_at, "
-            "payload_json, summary_json, baseline_json, result_due_at, impact_status, "
-            "impact_json, error) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                (source or "owner_os")[:60],
-                job,
-                title,
-                status,
-                uid,
-                now,
-                now if status in ("running", "done", "failed") else None,
-                _json_dumps_safe(payload),
-                "{}",
-                _json_dumps_safe(baseline),
-                result_due_at,
-                "pending",
-                "{}",
-                "",
-            ),
-        )
-        return int(cur.lastrowid)
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def _compact_owner_action_summary(summary) -> dict:
@@ -4019,425 +3919,35 @@ def _compact_owner_action_summary(summary) -> dict:
 def link_owner_control_task_action(control_action_id, linked_action_id, linked_job: str = "",
                                    *, action_status: str = "running", note: str = "",
                                    summary=None, error: str = "") -> dict | None:
-    """Связывает контрольную задачу owner_control с запущенным действием.
-
-    Контроль не закрывается автоматически: MAYA фиксирует, что действие уже
-    запущено/выполнено, а владелец позже отмечает фактический результат.
-    """
-    try:
-        control_id = int(control_action_id)
-        action_id = int(linked_action_id)
-    except Exception:
-        return None
-    if not control_id or not action_id:
-        return None
-    action_status = (action_status or "running").strip().lower()[:40]
-    if action_status not in ("running", "done", "failed"):
-        action_status = "running"
-    now = _now()
-    linked_job = (linked_job or "").strip().lower()[:80]
-    note = (note or "")[:420]
-    error = (error or "")[:240]
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        control_row = conn.execute(
-            "SELECT * FROM owner_action_journal WHERE id = ?",
-            (control_id,),
-        ).fetchone()
-        if not control_row:
-            return None
-        control = dict(control_row)
-        if control.get("source") != "owner_control" or control.get("job") != "control_task":
-            return None
-        action_row = conn.execute(
-            "SELECT job, result_due_at FROM owner_action_journal WHERE id = ?",
-            (action_id,),
-        ).fetchone()
-        if action_row:
-            linked_job = linked_job or str(action_row["job"] or "")[:80]
-
-        payload = _json_loads_safe(control.get("payload_json"))
-        control_summary = _json_loads_safe(control.get("summary_json"))
-        if not payload.get("linked_action_started_at"):
-            payload["linked_action_started_at"] = now
-        payload.update({
-            "linked_action_id": action_id,
-            "linked_action_job": linked_job,
-            "linked_action_status": action_status,
-            "linked_action_updated_at": now,
-        })
-        if action_status in ("done", "failed"):
-            payload["linked_action_completed_at"] = now
-        if action_row and action_row["result_due_at"]:
-            payload["linked_action_due_at"] = action_row["result_due_at"]
-            if not payload.get("due_at") and not control.get("result_due_at"):
-                payload["due_at"] = action_row["result_due_at"]
-
-        control_summary.update({
-            "manual": False,
-            "last_action": "linked_action_" + action_status,
-            "linked_action_id": action_id,
-            "linked_action_job": linked_job,
-            "linked_action_status": action_status,
-            "updated_at": now,
-        })
-        compact_summary = _compact_owner_action_summary(summary)
-        if compact_summary:
-            control_summary["linked_action_summary"] = compact_summary
-        if note:
-            control_summary["note"] = note
-        if error:
-            control_summary["linked_action_error"] = error
-
-        current_status = str(control.get("status") or "").lower()
-        if current_status in ("done", "canceled"):
-            next_status = current_status
-            completed_at = control.get("completed_at")
-        elif action_status == "failed":
-            next_status = "pending"
-            completed_at = None
-        else:
-            next_status = "running"
-            completed_at = None
-        result_due_at = control.get("result_due_at") or payload.get("due_at")
-
-        conn.execute(
-            "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
-            "result_due_at = ?, payload_json = ?, summary_json = ?, error = ? "
-            "WHERE id = ?",
-            (
-                next_status,
-                completed_at,
-                result_due_at,
-                _json_dumps_safe(payload),
-                _json_dumps_safe(control_summary),
-                "",
-                control_id,
-            ),
-        )
-
-    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == control_id]
-    return actions[0] if actions else None
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def finish_owner_action(action_id, status: str, *, summary=None, error: str = "") -> bool:
-    """Завершает запись журнала AI-директора статусом done/failed/running."""
-    try:
-        aid = int(action_id)
-    except Exception:
-        return False
-    status = (status or "").strip().lower()[:40] or "done"
-    completed_at = _now() if status in ("done", "failed") else None
-    source_control_id = 0
-    linked_job = ""
-    try:
-        with _db() as conn:
-            _ensure_owner_action_journal(conn)
-            row = conn.execute(
-                "SELECT job, payload_json FROM owner_action_journal WHERE id = ?",
-                (aid,),
-            ).fetchone()
-            if row:
-                linked_job = str(row["job"] or "")[:80]
-                payload = _json_loads_safe(row["payload_json"])
-                try:
-                    source_control_id = int(payload.get("source_control_id") or 0)
-                except Exception:
-                    source_control_id = 0
-            conn.execute(
-                "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
-                "summary_json = ?, error = ? WHERE id = ?",
-                (status, completed_at, _json_dumps_safe(summary), (error or "")[:240], aid),
-            )
-    except Exception:
-        return False
-    if source_control_id:
-        try:
-            link_owner_control_task_action(
-                source_control_id,
-                aid,
-                linked_job,
-                action_status=status,
-                summary=summary,
-                error=error,
-            )
-        except Exception:
-            pass
-    return True
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def update_owner_control_task(action_id, action: str, *, note: str = "",
                               due_at: str | None = None,
                               assigned_to: str | None = None,
                               assignee_name: str = "") -> dict | None:
-    """Меняет состояние ручной контрольной задачи owner_control."""
-    try:
-        aid = int(action_id)
-    except Exception:
-        return None
-    action = (action or "").strip().lower()
-    if action in ("complete", "done", "finish"):
-        next_status = "done"
-    elif action in ("cancel", "canceled", "cancelled"):
-        next_status = "canceled"
-    elif action in ("postpone", "snooze", "delay"):
-        next_status = "pending"
-    elif action in ("reopen", "open"):
-        next_status = "pending"
-    elif action in ("revision", "return", "redo", "rework"):
-        next_status = "running"
-    elif action in ("assign", "reassign"):
-        next_status = None
-    else:
-        return None
-
-    now = _now()
-    note = (note or "")[:420]
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        row = conn.execute(
-            "SELECT * FROM owner_action_journal WHERE id = ?",
-            (aid,),
-        ).fetchone()
-        if not row:
-            return None
-        item = dict(row)
-        if item.get("source") != "owner_control" or item.get("job") != "control_task":
-            return None
-
-        payload = _json_loads_safe(item.get("payload_json"))
-        summary = _json_loads_safe(item.get("summary_json"))
-        if next_status is None:
-            next_status = str(item.get("status") or "pending")
-        summary.update({
-            "manual": True,
-            "last_action": action,
-            "note": note,
-            "updated_at": now,
-        })
-        completed_at = None
-        result_due_at = item.get("result_due_at")
-        if action in ("assign", "reassign"):
-            raw_assigned = (assigned_to or payload.get("assigned_to") or "owner")
-            assigned = str(raw_assigned or "owner").strip().lower()[:40]
-            if assigned not in ("owner", "maya", "admin", "master", "team"):
-                assigned = "owner"
-            name = (assignee_name or "")[:80]
-            payload["assigned_to"] = assigned
-            payload["assignee_name"] = name
-            if assigned in ("admin", "master", "team"):
-                delivery_channel = "team_chat"
-                delivery_state = "queued"
-            elif assigned == "maya":
-                delivery_channel = "maya_queue"
-                delivery_state = "internal"
-            else:
-                delivery_channel = "owner_control"
-                delivery_state = "owner_only"
-            payload["assignment_delivery_channel"] = delivery_channel
-            payload["assignment_delivery_state"] = delivery_state
-            payload["assignment_delivery_updated_at"] = now
-            payload["assignment_delivery_error"] = ""
-            payload["assignment_delivery_message_id"] = 0
-            payload["assignment_delivery_key"] = "%s:%s:%s:%s" % (aid, assigned, name, now)
-            summary["assigned_to"] = assigned
-            summary["assignee_name"] = name
-            summary["assigned_at"] = now
-            summary["assignment_delivery_channel"] = delivery_channel
-            summary["assignment_delivery_state"] = delivery_state
-        if next_status in ("done", "canceled"):
-            completed_at = now
-            summary["result"] = next_status
-        elif action in ("postpone", "snooze", "delay") and due_at:
-            result_due_at = str(due_at)[:19]
-            payload["due_at"] = result_due_at
-            summary["postponed_to"] = result_due_at
-        elif action in ("revision", "return", "redo", "rework"):
-            payload["assignment_work_state"] = "revision"
-            payload["assignment_work_updated_at"] = now
-            payload["assignment_work_actor_role"] = "owner"
-            payload["assignment_work_actor_name"] = "Владелец"
-            payload["assignment_work_note"] = note
-            summary["assignment_work_state"] = "revision"
-            summary["assignment_work_updated_at"] = now
-            summary["assignment_work_actor_role"] = "owner"
-            summary["assignment_work_actor_name"] = "Владелец"
-            summary["owner_revision_requested_at"] = now
-            if note:
-                summary["owner_revision_note"] = note
-
-        conn.execute(
-            "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
-            "result_due_at = ?, payload_json = ?, summary_json = ?, error = ? "
-            "WHERE id = ?",
-            (
-                next_status,
-                completed_at,
-                result_due_at,
-                _json_dumps_safe(payload),
-                _json_dumps_safe(summary),
-                "",
-                aid,
-            ),
-        )
-
-    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
-    return actions[0] if actions else None
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def mark_owner_control_task_delivery(action_id, *, state: str = "delivered",
                                      channel: str = "team_chat", message_id: int = 0,
                                      error: str = "") -> dict | None:
-    """Фиксирует, что назначенная контрольная задача доставлена исполнителю."""
-    try:
-        aid = int(action_id)
-    except Exception:
-        return None
-    if not aid:
-        return None
-    state = (state or "delivered").strip().lower()[:40]
-    if state not in ("queued", "delivered", "failed", "internal", "owner_only"):
-        state = "delivered"
-    channel = (channel or "team_chat").strip().lower()[:40]
-    now = _now()
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        row = conn.execute(
-            "SELECT * FROM owner_action_journal WHERE id = ?",
-            (aid,),
-        ).fetchone()
-        if not row:
-            return None
-        item = dict(row)
-        if item.get("source") != "owner_control" or item.get("job") != "control_task":
-            return None
-        payload = _json_loads_safe(item.get("payload_json"))
-        summary = _json_loads_safe(item.get("summary_json"))
-        payload["assignment_delivery_state"] = state
-        payload["assignment_delivery_channel"] = channel
-        payload["assignment_delivery_updated_at"] = now
-        payload["assignment_delivery_error"] = (error or "")[:240]
-        if message_id:
-            payload["assignment_delivery_message_id"] = int(message_id)
-            payload["assignment_delivered_at"] = now
-        elif state != "delivered":
-            payload["assignment_delivery_message_id"] = int(payload.get("assignment_delivery_message_id") or 0)
-        summary["assignment_delivery_state"] = state
-        summary["assignment_delivery_channel"] = channel
-        summary["assignment_delivery_updated_at"] = now
-        if message_id:
-            summary["assignment_delivery_message_id"] = int(message_id)
-        if error:
-            summary["assignment_delivery_error"] = (error or "")[:180]
-        conn.execute(
-            "UPDATE owner_action_journal SET payload_json = ?, summary_json = ?, error = ? "
-            "WHERE id = ?",
-            (_json_dumps_safe(payload), _json_dumps_safe(summary), "", aid),
-        )
-    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
-    return actions[0] if actions else None
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def update_owner_assignment_work_state(action_id, state: str, *, actor_role: str = "",
                                        actor_name: str = "", actor_chat_id: int = 0,
                                        note: str = "") -> dict | None:
-    """Фиксирует работу исполнителя по назначенной owner_control задаче.
-
-    Это не закрывает контроль владельца: исполнитель может отметить «готово»,
-    а владелец всё равно проверяет результат и закрывает задачу вручную.
-    """
-    try:
-        aid = int(action_id)
-    except Exception:
-        return None
-    if not aid:
-        return None
-    state = (state or "").strip().lower()[:40]
-    aliases = {
-        "accept": "accepted",
-        "accepted": "accepted",
-        "start": "running",
-        "run": "running",
-        "running": "running",
-        "done": "done",
-        "complete": "done",
-        "finish": "done",
-        "blocked": "blocked",
-    }
-    state = aliases.get(state)
-    if not state:
-        return None
-    now = _now()
-    actor_role = (actor_role or "")[:40]
-    actor_name = (actor_name or "")[:80]
-    note = (note or "")[:300]
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        row = conn.execute(
-            "SELECT * FROM owner_action_journal WHERE id = ?",
-            (aid,),
-        ).fetchone()
-        if not row:
-            return None
-        item = dict(row)
-        if item.get("source") != "owner_control" or item.get("job") != "control_task":
-            return None
-        current_status = str(item.get("status") or "pending").lower()
-        if current_status in ("done", "canceled"):
-            return None
-        payload = _json_loads_safe(item.get("payload_json"))
-        summary = _json_loads_safe(item.get("summary_json"))
-        payload["assignment_work_state"] = state
-        payload["assignment_work_updated_at"] = now
-        payload["assignment_work_actor_role"] = actor_role
-        payload["assignment_work_actor_name"] = actor_name
-        payload["assignment_work_actor_chat_id"] = int(actor_chat_id or 0)
-        payload["assignment_work_note"] = note
-        summary["assignment_work_state"] = state
-        summary["assignment_work_updated_at"] = now
-        summary["assignment_work_actor_role"] = actor_role
-        summary["assignment_work_actor_name"] = actor_name
-        if note:
-            summary["assignment_work_note"] = note
-        next_status = "running" if current_status == "pending" else current_status
-        conn.execute(
-            "UPDATE owner_action_journal SET status = ?, payload_json = ?, summary_json = ?, error = ? "
-            "WHERE id = ?",
-            (
-                next_status,
-                _json_dumps_safe(payload),
-                _json_dumps_safe(summary),
-                "",
-                aid,
-            ),
-        )
-    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
-    return actions[0] if actions else None
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def list_owner_actions(limit: int = 12) -> list[dict]:
-    """Последние действия AI-директора, новые первыми."""
-    try:
-        with _db() as conn:
-            _ensure_owner_action_journal(conn)
-            rows = conn.execute(
-                "SELECT id, source, job, title, status, created_by, created_at, "
-                "started_at, completed_at, payload_json, summary_json, baseline_json, "
-                "result_due_at, evaluated_at, impact_status, impact_json, error "
-                "FROM owner_action_journal ORDER BY id DESC LIMIT ?",
-                (max(1, min(int(limit or 12), 50)),),
-            ).fetchall()
-    except Exception:
-        return []
-    out = []
-    for row in rows:
-        item = dict(row)
-        item["payload"] = _json_loads_safe(item.pop("payload_json", None))
-        item["summary"] = _json_loads_safe(item.pop("summary_json", None))
-        item["baseline"] = _json_loads_safe(item.pop("baseline_json", None))
-        item["impact"] = _json_loads_safe(item.pop("impact_json", None))
-        out.append(item)
-    return out
+    # Retired history is not a canonical work projection; do not open/migrate SQLite.
+    return []
 
 
 def _owner_action_due_at(job: str, created_at: str | None = None) -> str:
@@ -4536,68 +4046,12 @@ def _owner_action_impact(job: str, summary: dict, baseline: dict) -> dict:
 
 
 def evaluate_owner_action(action_id, *, force: bool = False) -> dict | None:
-    """Оценивает результат owner action. Возвращает обновлённую запись."""
-    try:
-        aid = int(action_id)
-    except Exception:
-        return None
-    now_iso = _now()
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        row = conn.execute(
-            "SELECT * FROM owner_action_journal WHERE id = ?",
-            (aid,),
-        ).fetchone()
-        if not row:
-            return None
-        item = dict(row)
-        due_at = item.get("result_due_at") or ""
-        if not force and due_at and due_at > now_iso:
-            return {
-                **item,
-                "payload": _json_loads_safe(item.get("payload_json")),
-                "summary": _json_loads_safe(item.get("summary_json")),
-                "baseline": _json_loads_safe(item.get("baseline_json")),
-                "impact": _json_loads_safe(item.get("impact_json")),
-                "not_due": True,
-            }
-        summary = _json_loads_safe(item.get("summary_json"))
-        baseline = _json_loads_safe(item.get("baseline_json"))
-        impact = _owner_action_impact(item.get("job") or "", summary, baseline)
-        conn.execute(
-            "UPDATE owner_action_journal SET evaluated_at = ?, impact_status = ?, "
-            "impact_json = ? WHERE id = ?",
-            (
-                impact.get("evaluated_at") or now_iso,
-                impact.get("status") or "unknown",
-                _json_dumps_safe(impact),
-                aid,
-            ),
-        )
-    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
-    return actions[0] if actions else None
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def evaluate_due_owner_actions(limit: int = 5) -> int:
-    """Автоматически оценивает просроченные проверки. Возвращает число оценок."""
-    now_iso = _now()
-    try:
-        with _db() as conn:
-            _ensure_owner_action_journal(conn)
-            rows = conn.execute(
-                "SELECT id FROM owner_action_journal "
-                "WHERE status = 'done' AND evaluated_at IS NULL "
-                "AND result_due_at IS NOT NULL AND result_due_at <= ? "
-                "ORDER BY result_due_at ASC LIMIT ?",
-                (now_iso, max(1, min(int(limit or 5), 20))),
-            ).fetchall()
-    except Exception:
-        return 0
-    done = 0
-    for row in rows:
-        if evaluate_owner_action(row["id"], force=True):
-            done += 1
-    return done
+    # Reads and scheduled evaluation never manufacture mutable impact facts.
+    return 0
 
 
 # ─── Durable-идемпотентность оплаты визита ───────────────────────────────────

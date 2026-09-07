@@ -757,135 +757,6 @@ TOOLS = [
         },
     },
     {
-        "name": "run_autonomous_director_tick",
-        "description": (
-            "ТОЛЬКО для владельца. Запустить безопасный автопилот Maya OS v2: "
-            "создать внутренние контрольные задачи из autonomous_director.task_candidates. "
-            "Не отправляет рассылки, не меняет цены, записи, зарплаты или доступы. "
-            "Внешние/денежные действия остаются через подтверждение владельца. "
-            "Вызывай на «запусти автопилот / пусть Майя сама поставит задачи / "
-            "создай задачи по OS / включи автономного директора»."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "limit": {"type": "integer", "description": "Максимум задач создать за один запуск, по умолчанию 5."},
-            },
-            "required": [],
-        },
-    },
-    {
-        "name": "run_autopilot_supervision_tick",
-        "description": (
-            "ТОЛЬКО для владельца. Провести безопасный контроль исполнения Autopilot 2.1: "
-            "MAYA отмечает свои внутренние задачи как взятые в работу и создаёт owner-эскалации "
-            "по просроченным, заблокированным или не принятым задачам. Не отправляет клиентские "
-            "рассылки, не меняет цены, записи, зарплаты или доступы. "
-            "Вызывай на «проведи контроль / доведи задачи / проверь исполнение / "
-            "кто просрочил / пусть Майя проконтролирует задачи»."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "limit": {"type": "integer", "description": "Максимум внутренних контрольных действий за один запуск, по умолчанию 8."},
-            },
-            "required": [],
-        },
-    },
-    {
-        "name": "run_execution_loop_tick",
-        "description": (
-            "ТОЛЬКО для владельца. Замкнуть цикл исполнения Maya OS v3: "
-            "создать безопасные owner-followup задачи по местам, где задача застряла "
-            "между постановкой, принятием, выполнением, приёмкой владельца и проверкой эффекта. "
-            "Не отправляет клиентские рассылки, не меняет цены, записи, зарплаты или доступы. "
-            "Вызывай на «замкни цикл / доведи до результата / что зависло между задачей и результатом / "
-            "пусть MAYA закроет разрывы / сделай самоуправляемый контур»."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "limit": {"type": "integer", "description": "Максимум owner-followup задач за один запуск, по умолчанию 6."},
-            },
-            "required": [],
-        },
-    },
-    {
-        "name": "run_operating_rhythm_tick",
-        "description": (
-            "ТОЛЬКО для владельца. Запустить безопасный операционный ритм Maya OS v6: "
-            "одним тиком создать внутренние автозадачи, провести контроль исполнения "
-            "и замкнуть разрывы циклов. Не отправляет клиентские рассылки, не меняет "
-            "цены, записи, зарплаты или доступы. Вызывай на «запусти ритм MAYA OS / "
-            "пусть MAYA сама пройдёт цикл / проведи полный безопасный тик / самоуправление сейчас»."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "force": {"type": "boolean", "description": "Игнорировать cooldown scheduler и выполнить тик сразу."},
-            },
-            "required": [],
-        },
-    },
-    {
-        "name": "create_owner_control_task",
-        "description": (
-            "ТОЛЬКО для владельца. Создать ручную контрольную задачу AI-директора "
-            "в Owner Command Center: проверить риск, проконтролировать сотрудника, "
-            "вернуться к план-факту, разобрать просадку или зафиксировать следующее "
-            "управленческое действие. Используй только когда владелец явно просит "
-            "«поставь задачу / зафиксируй / добавь в контроль / проверь завтра / "
-            "напомни проконтролировать». Не используй для обычного вопроса. "
-            "Задача не запускает рассылки и не меняет записи — только добавляет пункт контроля."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "title": {"type": "string", "description": "Короткий заголовок контрольной задачи."},
-                "detail": {"type": "string", "description": "Что именно нужно проверить или довести до результата."},
-                "priority": {"type": "string", "enum": ["low", "medium", "high"], "description": "Срочность задачи."},
-                "due_at": {"type": "string", "description": "ISO-дата/время дедлайна, если владелец назвал конкретную дату."},
-                "due_in_days": {"type": "integer", "description": "Через сколько дней проверить, если дата относительная."},
-                "potential_rub": {"type": "number", "description": "Оценка возможного эффекта в рублях, если есть."},
-                "owner_next_step": {"type": "string", "description": "Следующий управленческий шаг владельца."},
-                "assigned_to": {
-                    "type": "string",
-                    "enum": ["owner", "maya", "admin", "master", "team"],
-                    "description": "Кому назначить задачу: владелец, MAYA, админ, мастер или команда.",
-                },
-                "assignee_name": {"type": "string", "description": "Уточнение исполнителя без персональных данных, если владелец назвал роль/имя."},
-            },
-            "required": ["title"],
-        },
-    },
-    {
-        "name": "update_owner_control_task",
-        "description": (
-            "ТОЛЬКО для владельца. Обновить ручную контрольную задачу Owner Command Center: "
-            "отметить выполненной, отменить, отложить, назначить исполнителя, вернуть на доработку/в работу. Используй только "
-            "когда владелец явно ссылается на существующую задачу и просит «выполнено / "
-            "закрой / отмени / отложи / перенеси / верни на доработку / верни в работу». Если непонятно, какую "
-            "задачу менять, сначала уточни. Не используй для action-card рассылок."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "task_id": {"type": "integer", "description": "ID задачи из журнала/Command Center."},
-                "action": {"type": "string", "enum": ["complete", "cancel", "postpone", "reopen", "assign", "revision"], "description": "Что сделать с задачей."},
-                "note": {"type": "string", "description": "Короткая заметка владельца без персональных данных."},
-                "due_at": {"type": "string", "description": "Новый ISO-дедлайн при postpone, если есть конкретная дата."},
-                "due_in_days": {"type": "integer", "description": "На сколько дней отложить при postpone."},
-                "assigned_to": {
-                    "type": "string",
-                    "enum": ["owner", "maya", "admin", "master", "team"],
-                    "description": "Новый исполнитель при assign.",
-                },
-                "assignee_name": {"type": "string", "description": "Уточнение исполнителя при assign."},
-            },
-            "required": ["task_id", "action"],
-        },
-    },
-    {
         "name": "get_money_opportunities",
         "description": (
             "ТОЛЬКО для владельца. Приоритизированный ПО ДЕНЬГАМ список возможностей: "
@@ -2470,72 +2341,23 @@ def _execute_tool(tool_name: str, tool_input: dict, user_id: int = None, mode: s
                 else:  # get_risk_signals
                     result = owner_ai.risk_signals()
         elif tool_name == "run_autonomous_director_tick":
-            if _role not in ("owner", "founder"):
-                result = {"error": "Автопилот Maya OS доступен только владельцу."}
-            else:
-                import owner_ai
-                result = owner_ai.run_autonomous_director_tick(
-                    created_by=user_id,
-                    limit=tool_input.get("limit") or 5,
-                )
+            import canonical_work_entry
+            result = canonical_work_entry.owner_required()
         elif tool_name == "run_autopilot_supervision_tick":
-            if _role not in ("owner", "founder"):
-                result = {"error": "Контроль исполнения Maya OS доступен только владельцу."}
-            else:
-                import owner_ai
-                result = owner_ai.run_autopilot_supervision_tick(
-                    created_by=user_id,
-                    limit=tool_input.get("limit") or 8,
-                )
+            import canonical_work_entry
+            result = canonical_work_entry.owner_required()
         elif tool_name == "run_execution_loop_tick":
-            if _role not in ("owner", "founder"):
-                result = {"error": "Замкнутый цикл Maya OS доступен только владельцу."}
-            else:
-                import owner_ai
-                result = owner_ai.run_execution_loop_tick(
-                    created_by=user_id,
-                    limit=tool_input.get("limit") or 6,
-                )
+            import canonical_work_entry
+            result = canonical_work_entry.owner_required()
         elif tool_name == "run_operating_rhythm_tick":
-            if _role not in ("owner", "founder"):
-                result = {"error": "Операционный ритм Maya OS доступен только владельцу."}
-            else:
-                import owner_ai
-                result = owner_ai.run_operating_rhythm_tick(
-                    created_by=user_id,
-                    force=bool(tool_input.get("force")),
-                )
+            import canonical_work_entry
+            result = canonical_work_entry.owner_required()
         elif tool_name == "create_owner_control_task":
-            if _role not in ("owner", "founder"):
-                result = {"error": "Контрольные задачи доступны только владельцу."}
-            else:
-                import owner_ai
-                result = owner_ai.create_control_task(
-                    title=tool_input.get("title") or "",
-                    detail=tool_input.get("detail") or "",
-                    priority=tool_input.get("priority") or "medium",
-                    due_at=tool_input.get("due_at"),
-                    due_in_days=tool_input.get("due_in_days"),
-                    potential_rub=tool_input.get("potential_rub"),
-                    owner_next_step=tool_input.get("owner_next_step") or "",
-                    assigned_to=tool_input.get("assigned_to") or "owner",
-                    assignee_name=tool_input.get("assignee_name") or "",
-                    created_by=user_id,
-                )
+            import canonical_work_entry
+            result = canonical_work_entry.owner_required()
         elif tool_name == "update_owner_control_task":
-            if _role not in ("owner", "founder"):
-                result = {"error": "Контрольные задачи доступны только владельцу."}
-            else:
-                import owner_ai
-                result = owner_ai.update_control_task(
-                    task_id=tool_input.get("task_id"),
-                    action=tool_input.get("action") or "",
-                    note=tool_input.get("note") or "",
-                    due_at=tool_input.get("due_at"),
-                    due_in_days=tool_input.get("due_in_days"),
-                    assigned_to=tool_input.get("assigned_to") or "",
-                    assignee_name=tool_input.get("assignee_name") or "",
-                )
+            import canonical_work_entry
+            result = canonical_work_entry.owner_required()
         elif tool_name == "salon_action":
             # Только ПРЕДЛОЖИТЬ (валидируем задачу) — рассылка НЕ запускается тут.
             if _role not in ("owner", "founder"):
@@ -2951,12 +2773,6 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "• «Maya OS / центр управления / что контролировать / план-факт / цели / план месяца / отклонения / память решений / что сработало / какие выводы / журнал AI-директора / статус OS / что делать дальше / какие задачи / что просрочено» → get_owner_command_center.\n"
                     "• «план роста / как идём к цели / физический максимум / активные и потерянные клиенты / кто отстаёт от плана» → get_growth_plan.\n"
                     "• «поставь цель N рублей / хочу выручку N к дате» → set_growth_goal. Передай фактическое число рабочих мест, если владелец его назвал; не выдумывай. После расчёта прямо скажи, достижима ли цель с 5% резервом, и отдели реалистичный потолок от физического максимума.\n"
-                    "• «запусти автопилот / пусть MAYA сама поставит задачи / включи автономного директора / создай задачи по OS» → run_autonomous_director_tick. Он создаёт только внутренние контрольные задачи; рассылки, деньги, цены, зарплаты и доступы не запускает без владельца.\n"
-                    "• «проведи контроль / доведи задачи / проконтролируй исполнение / кто просрочил / кто молчит / пусть MAYA ведёт задачи» → run_autopilot_supervision_tick. Он только двигает внутренние статусы MAYA и создаёт owner-эскалации; внешние действия не запускает.\n"
-                    "• «замкни цикл / доведи до результата / где застряло между задачей и результатом / пусть MAYA закроет разрывы» → run_execution_loop_tick. Он создаёт только owner-followup задачи по разорванным циклам; внешние действия не запускает.\n"
-                    "• «запусти ритм MAYA OS / полный безопасный тик / пусть MAYA сама пройдёт цикл» → run_operating_rhythm_tick. Он запускает только внутренний безопасный контур: автозадачи, контроль исполнения и замыкание циклов.\n"
-                    "• «поставь задачу / зафиксируй / добавь в контроль / проверь завтра / напомни проконтролировать / назначь админу/мастеру/MAYA» → create_owner_control_task.\n"
-                    "• «выполнено / закрой задачу / отмени / отложи / перенеси / назначь / передай / верни на доработку / верни в работу» по существующей контрольной задаче → update_owner_control_task.\n"
                     "• «где теряем деньги / как заработать больше / приоритеты» → get_money_opportunities.\n"
                     "• «кого вернуть / кому написать или позвонить / уснувшие клиенты» → get_return_candidates. "
                     "Используй готовые cycle_due_count, cycle_overdue_count и decision_options: "
@@ -2995,12 +2811,9 @@ def _build_system_prompt(user_id: int = None, role: str = None, mode: str = None
                     "после процента мастера, не полной чистой прибылью салона. Для "
                     "get_owner_command_center отвечай от briefing, simple_goal и market_intelligence; "
                     "к расширенным блокам обращайся только для уточнения конкретного вопроса. Если блока или цифры нет — "
-                    "не заменяй его догадкой. create_owner_control_task используй только "
-                    "по явной просьбе владельца создать/зафиксировать контроль; после "
-                    "создания коротко скажи, что задача добавлена в очередь контроля. "
-                    "update_owner_control_task используй только если понятно, какую "
-                    "конкретную задачу менять; если ID/контекст неясен — спроси, какую "
-                    "задачу закрыть или отложить."
+                    "не заменяй его догадкой. Поручения создаются в каноническом кабинете MAYA "
+                    "для конкретного исполнителя; там можно отметить выполнение своей задачи. "
+                    "Автономные задачи, отмена, перенос и смена исполнителя здесь недоступны."
                 ),
             })
 

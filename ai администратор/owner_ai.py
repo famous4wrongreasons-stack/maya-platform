@@ -1630,122 +1630,15 @@ def create_control_task(*, title: str, detail: str = "", priority: str = "medium
                         signal_source: str = "", action_job: str = "",
                         assigned_to: str = "owner", assignee_name: str = "",
                         created_by=None, safe_autocreate: bool = False) -> dict:
-    """Создаёт ручную контрольную задачу AI-директора без ПД и автодействий."""
-    title = _safe_control_text(title, 140)
-    if not title:
-        return {"ok": False, "error": "empty_title"}
-    detail = _safe_control_text(detail, 420)
-    owner_next_step = _safe_control_text(owner_next_step, 300)
-    priority = str(priority or "medium").strip().lower()
-    if priority not in ("low", "medium", "high"):
-        priority = "medium"
-    signal_key = _safe_control_text(signal_key, 180)
-    signal_kind = _safe_control_text(signal_kind, 80)
-    signal_source = _safe_control_text(signal_source, 80)
-    action_job = _safe_control_text(action_job, 80)
-    assigned_to = _normalize_assignee(assigned_to)
-    assignee_name = _safe_control_text(assignee_name, 80)
-    try:
-        potential = _rub(potential_rub) if potential_rub is not None else None
-    except Exception:
-        potential = None
-    normalized_due_at = _normalize_control_due_at(due_at, due_in_days)
-    delivery_channel, delivery_state = _assignment_delivery(assigned_to)
-    payload = {
-        "detail": detail,
-        "priority": priority,
-        "potential_rub": potential,
-        "owner_next_step": owner_next_step,
-        "due_at": normalized_due_at,
-        "signal_key": signal_key,
-        "signal_kind": signal_kind,
-        "signal_source": signal_source,
-        "action_job": action_job,
-        "assigned_to": assigned_to,
-        "assignee_name": assignee_name,
-        "assigned_label": _assignee_label(assigned_to, assignee_name),
-        "assignment_delivery_channel": delivery_channel,
-        "assignment_delivery_state": delivery_state,
-        "assignment_delivery_message_id": 0,
-        "assignment_delivery_error": "",
-        "safe_autocreate": bool(safe_autocreate),
-    }
-    try:
-        import database
-        if signal_key:
-            for existing in database.list_owner_actions(limit=50) or []:
-                existing_payload = existing.get("payload") if isinstance(existing.get("payload"), dict) else {}
-                if (
-                    existing.get("source") == "owner_control"
-                    and existing.get("status") in ("pending", "running")
-                    and existing_payload.get("signal_key") == signal_key
-                ):
-                    return {
-                        "ok": True,
-                        "existing": True,
-                        "task_id": existing.get("id"),
-                        "task": existing,
-                        "control_item": _control_item_from_owner_action(existing),
-                        "note": "Такая задача уже есть в очереди контроля.",
-                    }
-        action_id = database.create_owner_action(
-            "control_task",
-            title,
-            source="owner_control",
-            created_by=created_by,
-            payload=payload,
-            status="pending",
-            baseline={},
-            result_due_at=normalized_due_at,
-        )
-        task = (database.list_owner_actions(limit=1) or [{}])[0]
-    except Exception as e:
-        logger.error("owner_ai create_control_task: %s", e)
-        return {"ok": False, "error": "create_failed"}
-    return {
-        "ok": True,
-        "task_id": action_id,
-        "task": task,
-        "control_item": _control_item_from_owner_action(task),
-        "note": "Задача добавлена в Owner Command Center и появится в очереди контроля.",
-    }
+    import canonical_work_entry
+    return canonical_work_entry.owner_required()
 
 
 def update_control_task(*, task_id, action: str, note: str = "",
                         due_at: str | None = None, due_in_days=None,
                         assigned_to: str = "", assignee_name: str = "") -> dict:
-    """Обновляет ручную контрольную задачу: done/cancel/postpone/reopen."""
-    try:
-        action_id = int(task_id)
-    except Exception:
-        return {"ok": False, "error": "bad_task_id"}
-    action = str(action or "").strip().lower()
-    if action not in ("complete", "done", "finish", "cancel", "canceled", "cancelled", "postpone", "snooze", "delay", "reopen", "open", "assign", "reassign", "revision", "return", "redo", "rework"):
-        return {"ok": False, "error": "bad_action"}
-    safe_note = _safe_control_text(note, 420)
-    normalized_due_at = None
-    if action in ("postpone", "snooze", "delay"):
-        normalized_due_at = _normalize_control_due_at(due_at, due_in_days if due_in_days is not None else 1)
-    try:
-        import database
-        task = database.update_owner_control_task(
-            action_id,
-            action,
-            note=safe_note,
-            due_at=normalized_due_at,
-            assigned_to=_normalize_assignee(assigned_to) if assigned_to else None,
-            assignee_name=_safe_control_text(assignee_name, 80),
-        )
-    except Exception as e:
-        logger.error("owner_ai update_control_task: %s", e)
-        return {"ok": False, "error": "update_failed"}
-    if not task:
-        return {"ok": False, "error": "not_found"}
-    return {
-        "ok": True,
-        "task": task,
-        "note": "Контрольная задача обновлена.",
-    }
+    import canonical_work_entry
+    return canonical_work_entry.owner_required()
 
 
 def _staff_visible_assignment(assigned_to: str | None, viewer_role: str | None) -> bool:
@@ -1817,79 +1710,14 @@ def _staff_assignment_item(task: dict | None, *, viewer_role: str | None = "") -
 
 
 def staff_task_inbox(*, viewer_role: str, limit: int = 12) -> dict:
-    """Безопасная очередь поручений для рабочих кабинетов."""
-    try:
-        import database
-        rows = database.list_owner_actions(limit=50) or []
-    except Exception as e:
-        logger.error("owner_ai staff_task_inbox: %s", e)
-        rows = []
-    tasks = []
-    for row in rows:
-        item = _staff_assignment_item(row, viewer_role=viewer_role)
-        if item:
-            tasks.append(item)
-    rank = {"overdue": 0, "today": 1, "scheduled": 2, "": 3}
-    work_rank = {"": 0, "revision": 0, "accepted": 1, "blocked": 1, "running": 2, "done": 4}
-    tasks.sort(key=lambda it: (
-        work_rank.get(it.get("work_state") or "", 3),
-        rank.get(it.get("due_state") or "", 9),
-        str(it.get("due_at") or "9999-99-99"),
-        int(it.get("task_id") or 0),
-    ))
-    tasks = tasks[:max(1, min(int(limit or 12), 20))]
-    return {
-        "ok": True,
-        "role": viewer_role,
-        "summary": {
-            "tasks_count": len(tasks),
-            "new_count": len([it for it in tasks if not it.get("work_state")]),
-            "running_count": len([it for it in tasks if it.get("work_state") in ("accepted", "running", "blocked", "revision")]),
-            "done_count": len([it for it in tasks if it.get("work_state") == "done"]),
-            "overdue_count": len([it for it in tasks if it.get("due_state") == "overdue"]),
-        },
-        "tasks": tasks,
-    }
+    import canonical_work_entry
+    return {**canonical_work_entry.owner_required(), 'tasks': [], 'summary': {}}
 
 
 def update_staff_task(*, task_id, viewer_role: str, actor_name: str = "",
                       actor_chat_id: int = 0, action: str = "", note: str = "") -> dict:
-    """Исполнитель отмечает ход работы по назначенной задаче."""
-    try:
-        action_id = int(task_id)
-    except Exception:
-        return {"ok": False, "error": "bad_task_id"}
-    action = str(action or "").strip().lower()
-    if action not in ("accept", "accepted", "start", "run", "running", "done", "complete", "finish", "blocked"):
-        return {"ok": False, "error": "bad_action"}
-    try:
-        import database
-        current = None
-        for row in database.list_owner_actions(limit=50) or []:
-            if int(row.get("id") or 0) == action_id:
-                current = row
-                break
-        if not _staff_assignment_item(current, viewer_role=viewer_role):
-            return {"ok": False, "error": "forbidden"}
-        updated = database.update_owner_assignment_work_state(
-            action_id,
-            action,
-            actor_role=_assignment_role_for_panel(viewer_role),
-            actor_name=_safe_control_text(actor_name, 80),
-            actor_chat_id=int(actor_chat_id or 0),
-            note=_safe_control_text(note, 300),
-        )
-    except Exception as e:
-        logger.error("owner_ai update_staff_task: %s", e)
-        return {"ok": False, "error": "update_failed"}
-    if not updated:
-        return {"ok": False, "error": "not_found"}
-    item = _staff_assignment_item(updated, viewer_role=viewer_role)
-    return {
-        "ok": True,
-        "task": item,
-        "inbox": staff_task_inbox(viewer_role=viewer_role),
-    }
+    import canonical_work_entry
+    return canonical_work_entry.owner_required()
 
 
 def _action_from_opportunity(opp: dict | None) -> dict | None:
@@ -4998,89 +4826,8 @@ def _operating_rhythm_status(now_iso: str | None = None) -> dict:
 
 
 def run_operating_rhythm_tick(*, created_by=None, force: bool = False) -> dict:
-    """Безопасный тик самоуправления: автозадачи, контроль, замыкание циклов."""
-    now_iso = datetime.now().isoformat(timespec="seconds")
-    last_at = ""
-    try:
-        import database
-        last_at = database.get_setting("maya_os_rhythm_last_at") or ""
-    except Exception as e:
-        logger.error("owner_ai rhythm read settings: %s", e)
-        database = None
-    last_dt = _parse_iso(last_at)
-    if not force and last_dt:
-        try:
-            age = (datetime.now() - last_dt).total_seconds()
-        except Exception:
-            age = _OPERATING_RHYTHM_INTERVAL_SECONDS
-        if age < _OPERATING_RHYTHM_INTERVAL_SECONDS:
-            return {
-                "ok": True,
-                "skipped": True,
-                "mode": "safe_scheduler",
-                "reason": "cooldown",
-                "next_run_after": (last_dt + timedelta(seconds=_OPERATING_RHYTHM_INTERVAL_SECONDS)).isoformat(timespec="seconds"),
-            }
-    created_by = created_by or "maya_os_scheduler"
-    results = {}
-    created_count = 0
-    updated_count = 0
-    skipped_count = 0
-
-    autonomy = run_autonomous_director_tick(created_by=created_by, limit=3)
-    results["autonomous_director"] = {
-        "ok": autonomy.get("ok"),
-        "created_count": _rub(autonomy.get("created_count")),
-        "skipped_count": _rub(autonomy.get("skipped_count")),
-    }
-    created_count += _rub(autonomy.get("created_count"))
-    skipped_count += _rub(autonomy.get("skipped_count"))
-
-    supervision = run_autopilot_supervision_tick(created_by=created_by, limit=5)
-    results["autopilot_supervision"] = {
-        "ok": supervision.get("ok"),
-        "applied_count": _rub(supervision.get("applied_count")),
-        "created_count": _rub(supervision.get("created_count")),
-        "updated_count": _rub(supervision.get("updated_count")),
-        "skipped_count": _rub(supervision.get("skipped_count")),
-    }
-    created_count += _rub(supervision.get("created_count"))
-    updated_count += _rub(supervision.get("updated_count") or supervision.get("applied_count"))
-    skipped_count += _rub(supervision.get("skipped_count"))
-
-    loop = run_execution_loop_tick(created_by=created_by, limit=4)
-    results["execution_loop"] = {
-        "ok": loop.get("ok"),
-        "created_count": _rub(loop.get("created_count")),
-        "skipped_count": _rub(loop.get("skipped_count")),
-    }
-    created_count += _rub(loop.get("created_count"))
-    skipped_count += _rub(loop.get("skipped_count"))
-
-    summary = {
-        "created_count": created_count,
-        "updated_count": updated_count,
-        "skipped_count": skipped_count,
-        "ran_at": now_iso,
-        "safe_only": True,
-    }
-    try:
-        import database
-        database.set_setting("maya_os_rhythm_last_at", now_iso)
-        database.set_setting("maya_os_rhythm_last_summary", json.dumps(summary, ensure_ascii=False))
-    except Exception as e:
-        logger.error("owner_ai rhythm write settings: %s", e)
-    return {
-        "ok": True,
-        "skipped": False,
-        "version": "maya_os_v6_operating_rhythm",
-        "mode": "safe_scheduler",
-        "ran_at": now_iso,
-        "summary": summary,
-        "results": results,
-        "center": command_center(),
-        "note": "Выполнены только безопасные внутренние действия MAYA OS.",
-    }
+    import canonical_work_entry
+    return canonical_work_entry.owner_required()
 
 
 def _approval_matrix() -> dict:
@@ -5709,49 +5456,8 @@ def _execution_loop(*, control: list[dict], journal: list[dict],
 
 
 def run_execution_loop_tick(*, created_by=None, limit: int = 6) -> dict:
-    """Maya OS v3: создаёт owner-followup по разорванным циклам исполнения."""
-    center = command_center()
-    loop = center.get("execution_loop") or {}
-    try:
-        max_items = max(1, min(10, int(limit or 6)))
-    except Exception:
-        max_items = 6
-    items = [
-        item for item in (loop.get("items") or [])
-        if item.get("safe_to_execute") and not item.get("in_control")
-    ][:max_items]
-    created, skipped = [], []
-    for item in items:
-        result = create_control_task(
-            title=item.get("action_title") or item.get("title") or "Замкнуть цикл исполнения",
-            detail=item.get("action_detail") or item.get("owner_next_step") or "",
-            priority=item.get("priority") or "medium",
-            due_in_days=1,
-            potential_rub=item.get("potential_rub"),
-            owner_next_step=item.get("owner_next_step") or "",
-            signal_key=item.get("signal_key") or "",
-            signal_kind="closed_loop",
-            signal_source="maya_os_3_0",
-            assigned_to="owner",
-            created_by=created_by,
-            safe_autocreate=True,
-        )
-        row = {"kind": "create_owner_followup", "item": item, "result": result, "task_id": result.get("task_id")}
-        if result.get("ok") and not result.get("existing"):
-            created.append(row)
-        else:
-            skipped.append(row)
-    updated_center = command_center()
-    return {
-        "ok": True,
-        "mode": "closed_loop_control",
-        "created_count": len(created),
-        "skipped_count": len(skipped),
-        "created": created,
-        "skipped": skipped,
-        "center": updated_center,
-        "note": "Maya OS v3 создала только внутренние owner-followup задачи по разорванным циклам.",
-    }
+    import canonical_work_entry
+    return canonical_work_entry.owner_required()
 
 
 def _autonomous_director(*, kpi: dict, finance: dict, approval: dict,
@@ -5796,122 +5502,13 @@ def _autonomous_director(*, kpi: dict, finance: dict, approval: dict,
 
 
 def run_autonomous_director_tick(*, created_by=None, limit: int = 5) -> dict:
-    """Создаёт безопасные внутренние задачи из autonomous_director.task_candidates."""
-    center = command_center()
-    director = center.get("autonomous_director") or {}
-    candidates = [
-        c for c in (director.get("task_candidates") or [])
-        if c.get("safe_autocreate") and not c.get("in_control")
-    ][:max(1, min(10, int(limit or 5)))]
-    created, skipped = [], []
-    for cand in candidates:
-        result = create_control_task(
-            title=cand.get("title") or "Автономная задача",
-            detail=cand.get("detail") or "",
-            priority=cand.get("priority") or "medium",
-            due_in_days=cand.get("due_in_days") or 1,
-            potential_rub=cand.get("potential_rub"),
-            owner_next_step=cand.get("owner_next_step") or "",
-            signal_key=cand.get("signal_key") or "",
-            signal_kind="autonomy",
-            signal_source="maya_os_v2",
-            action_job=cand.get("action_job") or "",
-            assigned_to=cand.get("assigned_to") or "owner",
-            assignee_name=cand.get("assignee_name") or "",
-            created_by=created_by,
-            safe_autocreate=True,
-        )
-        if result.get("ok") and not result.get("existing"):
-            created.append({"candidate": cand, "task": result.get("task"), "task_id": result.get("task_id")})
-        else:
-            skipped.append({"candidate": cand, "result": result})
-    updated_center = command_center()
-    return {
-        "ok": True,
-        "mode": "supervised_autopilot",
-        "created_count": len(created),
-        "skipped_count": len(skipped),
-        "created": created,
-        "skipped": skipped,
-        "center": updated_center,
-        "note": "Созданы только внутренние контрольные задачи. Внешние действия требуют подтверждения владельца.",
-    }
+    import canonical_work_entry
+    return canonical_work_entry.owner_required()
 
 
 def run_autopilot_supervision_tick(*, created_by=None, limit: int = 8) -> dict:
-    """Autopilot 2.1: безопасно продвигает внутренние задачи до следующего контроля."""
-    center = command_center()
-    supervisor = center.get("autopilot_supervisor") or {}
-    try:
-        max_items = max(1, min(12, int(limit or 8)))
-    except Exception:
-        max_items = 8
-    items = [
-        item for item in (supervisor.get("items") or [])
-        if item.get("safe_to_execute") and not item.get("in_control")
-    ][:max_items]
-    applied, created, updated, skipped = [], [], [], []
-    for item in items:
-        action = item.get("safe_action")
-        task_id = item.get("control_action_id")
-        if action == "start_internal" and task_id:
-            try:
-                import database
-                task = database.update_owner_assignment_work_state(
-                    task_id,
-                    "running",
-                    actor_role="maya",
-                    actor_name="MAYA Autopilot",
-                    actor_chat_id=0,
-                    note="Autopilot 2.1 взял внутреннюю задачу MAYA в работу.",
-                )
-            except Exception as e:
-                logger.error("owner_ai run_autopilot_supervision_tick start_internal: %s", e)
-                task = None
-            if task:
-                row = {"kind": action, "item": item, "task": task, "task_id": task_id}
-                applied.append(row)
-                updated.append(row)
-            else:
-                skipped.append({"item": item, "reason": "update_failed"})
-        elif action == "create_escalation":
-            result = create_control_task(
-                title=item.get("action_title") or item.get("title") or "Эскалация задачи",
-                detail=item.get("action_detail") or item.get("detail") or "",
-                priority=item.get("priority") or "high",
-                due_in_days=1,
-                potential_rub=item.get("potential_rub"),
-                owner_next_step=item.get("owner_next_step") or "",
-                signal_key=item.get("signal_key") or "",
-                signal_kind="autopilot_supervision",
-                signal_source="maya_os_2_1",
-                assigned_to="owner",
-                created_by=created_by,
-                safe_autocreate=True,
-            )
-            row = {"kind": action, "item": item, "result": result, "task_id": result.get("task_id")}
-            if result.get("ok") and not result.get("existing"):
-                applied.append(row)
-                created.append(row)
-            else:
-                skipped.append(row)
-        else:
-            skipped.append({"item": item, "reason": "not_safe_or_unknown"})
-    updated_center = command_center()
-    return {
-        "ok": True,
-        "mode": "internal_supervision",
-        "applied_count": len(applied),
-        "created_count": len(created),
-        "updated_count": len(updated),
-        "skipped_count": len(skipped),
-        "applied": applied,
-        "created": created,
-        "updated": updated,
-        "skipped": skipped,
-        "center": updated_center,
-        "note": "Autopilot 2.1 выполнил только внутренний контроль: статусы MAYA и owner-эскалации.",
-    }
+    import canonical_work_entry
+    return canonical_work_entry.owner_required()
 
 
 def command_center(*, include_personal_data: bool = False) -> dict:
@@ -5973,8 +5570,7 @@ def command_center(*, include_personal_data: bool = False) -> dict:
     journal = []
     try:
         import database
-        database.evaluate_due_owner_actions(limit=5)
-        journal = database.list_owner_actions(limit=24)
+        journal = []  # R04: historical journal is not current operational truth
     except Exception as e:
         logger.error("owner_ai command_center owner_journal: %s", e)
         errors.append({
@@ -6804,8 +6400,7 @@ def daily_briefing() -> dict:
         })
     try:
         import database
-        database.evaluate_due_owner_actions(limit=5)
-        journal = database.list_owner_actions(limit=24)
+        journal = []  # R04: historical journal is not current operational truth
     except Exception as e:
         logger.error("owner_ai daily_briefing owner_journal: %s", e)
         journal = []

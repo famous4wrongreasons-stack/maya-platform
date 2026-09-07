@@ -167,26 +167,32 @@ export class Package5Wave1CanonicalCutoverService {
           'execute',
         ),
     );
-    const projected = await this.inbox.publishForTenant(tenantId, {
-      type: 'maya_task',
-      sourceEventId: `maya-task:${result.targetRef}`,
-      title: command.title,
-      bodyText: command.bodyText,
-      payload: {
-        status: 'active',
-        due_date: command.dueAt?.toISOString().slice(0, 10) ?? null,
-        source: 'maya_chat',
-        operational_work_item_id: result.targetRef,
-      },
-      deepLink: '/app/?panel=chat',
-      userIds: [command.assigneeUserId],
-      fanoutOwners: false,
-      operationalWorkItemId: result.targetRef,
-    });
-    return {
-      result,
-      projected: projected.stored,
-    };
+    try {
+      const projected = await this.inbox.publishForTenant(tenantId, {
+        type: 'maya_task',
+        sourceEventId: `maya-task:${result.targetRef}`,
+        title: command.title,
+        bodyText: command.bodyText,
+        payload: {
+          status: 'active',
+          due_date: command.dueAt?.toISOString().slice(0, 10) ?? null,
+          source: 'maya_chat',
+          operational_work_item_id: result.targetRef,
+        },
+        deepLink: '/app/?panel=chat',
+        userIds: [command.assigneeUserId],
+        fanoutOwners: false,
+        operationalWorkItemId: result.targetRef,
+      });
+      return {
+        result,
+        projected: projected.stored,
+        projectionPending: false,
+      };
+    } catch {
+      // A23 already committed. Projection failure cannot rewrite its outcome.
+      return { result, projected: 0, projectionPending: true };
+    }
   }
 
   async completeTask(
@@ -228,12 +234,17 @@ export class Package5Wave1CanonicalCutoverService {
           'execute',
         ),
     );
-    await this.inbox.projectOperationalWorkItemCompletion(
-      tenantId,
-      actorUserId,
-      result.targetRef,
-    );
-    return result;
+    try {
+      await this.inbox.projectOperationalWorkItemCompletion(
+        tenantId,
+        actorUserId,
+        result.targetRef,
+      );
+      return { ...result, projectionPending: false };
+    } catch {
+      // Completion is durable even when its presentation is temporarily stale.
+      return { ...result, projectionPending: true };
+    }
   }
 
   async requestAdministratorContact(
@@ -369,13 +380,14 @@ export class Package5Wave1CanonicalCutoverService {
     operation: (typeof PACKAGE5_WAVE1_REGISTRATIONS)[number]['operation'],
     input: Record<string, unknown>,
   ): Record<string, unknown> {
-    const config = this.record(input.configJson);
     if (operation === 'assistant_preferences') {
+      const config = this.record(input.configJson);
       return {
         enabledCapabilities: this.stringArray(config.enabled_capabilities),
       };
     }
     if (operation === 'finance_preferences') {
+      const config = this.record(input.configJson);
       return {
         enabledWidgets: this.stringArray(config.enabled_widgets),
         monthlyTargetRub: config.monthly_target_rub ?? null,

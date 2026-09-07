@@ -15586,6 +15586,19 @@ function ABookCard(props) {
 window.ABookCard = ABookCard;
 
 // Общий authed-fetch для чат-виджетов (фолбэк по бандлу + refresh-on-401), как в ABookCard.
+function meCanonicalWorkCommand(logicalIdentity, operation, body, userId) {
+  if (!userId || !logicalIdentity || ['create', 'complete'].indexOf(operation) < 0) return Promise.reject(new Error('Войдите в рабочий кабинет MAYA.'));
+  var ctx = window.__ME_SAAS_CTX || {};
+  if (!ctx.ns || !ctx.api || !crypto.subtle) return Promise.reject(new Error('Не удалось определить рабочий кабинет. Ничего не отправлено.'));
+  // Stable transport reference across tabs/restart; business input is excluded.
+  // A23 owns the immutable intent and rejects changed input under this identity.
+  var material = JSON.stringify(['maya-work-transport/1', String(ctx.api).replace(/\/+$/, ''), String(ctx.ns), String(userId), operation, String(logicalIdentity)]);
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(material)).then(function (digest) {
+    var identity = 'r04:v1:' + Array.from(new Uint8Array(digest)).map(function (n) { return n.toString(16).padStart(2, '0'); }).join('');
+    return meWidgetAf('/operational-work/' + operation, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': identity }, body: JSON.stringify(body) });
+  });
+}
+
 function meWidgetAf(path, init) {
   if (window.__meSaasAuthedFetch && window.__meSaasAuthedFetch !== meWidgetAf) return window.__meSaasAuthedFetch(path, init);
   var ctx = window.__ME_SAAS_CTX;
@@ -27149,125 +27162,30 @@ function AGodMode(props) {
   function loadingMsg() { return e('div', { style: { padding: '46px 0', textAlign: 'center', fontFamily: BODY, fontSize: 13, color: t.dim } }, busy ? 'Загружаем…' : 'Нет данных'); }
   function grid2(kids) { return e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 } }, kids); }
   function runAutonomyTick() {
-    setControlS(function (s) { return Object.assign({}, s, { autonomy: { phase: 'running' } }); });
-    gfetch('panel_autonomy_tick', { limit: 5 }).then(function (j) {
-      var ok = !!(j && !j.error && j.ok !== false);
-      var created = j && j.autopilot ? (j.autopilot.created_count || 0) : 0;
-      setControlS(function (s) {
-        return Object.assign({}, s, { autonomy: { phase: 'done', ok: ok, msg: ok ? ('Создано задач: ' + created) : 'Не удалось' } });
-      });
-      if (ok) setCc(j);
-      else loadCommand();
-    }).catch(function () {
-      setControlS(function (s) { return Object.assign({}, s, { autonomy: { phase: 'done', ok: false, msg: 'Не удалось' } }); });
-    });
+    alert('Автономное создание поручений недоступно. Создайте задачу в MAYA для конкретного исполнителя.');
   }
   function runSupervisionTick() {
-    setControlS(function (s) { return Object.assign({}, s, { supervision: { phase: 'running' } }); });
-    gfetch('panel_autopilot_supervise', { limit: 8 }).then(function (j) {
-      var ok = !!(j && !j.error && j.ok !== false);
-      var applied = j && j.supervision ? (j.supervision.applied_count || 0) : 0;
-      setControlS(function (s) {
-        return Object.assign({}, s, { supervision: { phase: 'done', ok: ok, msg: ok ? ('Действий: ' + applied) : 'Не удалось' } });
-      });
-      if (ok) setCc(j);
-      else loadCommand();
-    }).catch(function () {
-      setControlS(function (s) { return Object.assign({}, s, { supervision: { phase: 'done', ok: false, msg: 'Не удалось' } }); });
-    });
+    alert('Автономное изменение поручений недоступно. Исполнитель может отметить выполнение своей задачи.');
   }
   function runExecutionLoopTick() {
-    setControlS(function (s) { return Object.assign({}, s, { executionLoop: { phase: 'running' } }); });
-    gfetch('panel_execution_loop', { limit: 6 }).then(function (j) {
-      var ok = !!(j && !j.error && j.ok !== false);
-      var created = j && j.execution_loop_tick ? (j.execution_loop_tick.created_count || 0) : 0;
-      setControlS(function (s) {
-        return Object.assign({}, s, { executionLoop: { phase: 'done', ok: ok, msg: ok ? ('Создано follow-up: ' + created) : 'Не удалось' } });
-      });
-      if (ok) setCc(j);
-      else loadCommand();
-    }).catch(function () {
-      setControlS(function (s) { return Object.assign({}, s, { executionLoop: { phase: 'done', ok: false, msg: 'Не удалось' } }); });
-    });
+    alert('Автономные follow-up поручения недоступны.');
   }
   function runOwnerAction(a) {
-    var job = a && a.job;
-    if (!job) return;
-    setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'running' }; return n; });
-    var payload = { job: job, title: a.title || a.label || '', source: a.source || 'owner_os' };
-    if (a.source_control_id) payload.source_control_id = a.source_control_id;
-    if (a.source_signal_key) payload.source_signal_key = a.source_signal_key;
-    gfetch('panel_job_run', payload).then(function (j) {
-      var msg = 'Запущено';
-      if (j && j.done) {
-        var sm = j.summary || {}, bits = [];
-        if (sm.sent != null) bits.push('отправлено ' + sm.sent);
-        if (sm.synced != null) bits.push('обновлено ' + sm.synced);
-        if (sm.granted != null) bits.push('наград ' + sm.granted);
-        if (sm.alerts != null) bits.push('алертов ' + sm.alerts);
-        msg = 'Готово' + (bits.length ? ' · ' + bits.join(' · ') : '');
-      } else if (j && j.started) msg = 'Запущено · выполняется в фоне';
-      else if (j && j.error === 403) msg = 'Недостаточно прав';
-      else if (j && j.reason) msg = j.reason;
-      setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'done', ok: !(j && (j.error || j.ok === false)), msg: msg }; return n; });
-      loadCommand();
-      setTimeout(loadCommand, 1200);
-    }).catch(function () {
-      setActionS(function (s) { var n = Object.assign({}, s); n[job] = { phase: 'done', ok: false, msg: 'Не удалось запустить' }; return n; });
-    });
+    alert('Действие требует отдельного канонического сценария MAYA. Из этой карточки запуск недоступен.');
   }
   function evaluateOwnerAction(it) {
-    if (!it || !it.id) return;
-    var id = it.id;
-    setEvalS(function (s) { var n = Object.assign({}, s); n[id] = { phase: 'running' }; return n; });
-    gfetch('panel_action_evaluate', { action_id: id, force: true }).then(function (j) {
-      setEvalS(function (s) {
-        var n = Object.assign({}, s);
-        n[id] = { phase: 'done', ok: !!(j && j.ok), msg: (j && j.ok) ? 'Проверено' : 'Не удалось проверить' };
-        return n;
-      });
-      loadCommand();
-    }).catch(function () {
-      setEvalS(function (s) { var n = Object.assign({}, s); n[id] = { phase: 'done', ok: false, msg: 'Не удалось проверить' }; return n; });
-    });
+    alert('Журнал доступен только для чтения. Автоматическая запись оценки результата отключена.');
   }
   function controlTaskId(it) {
-    if (!it) return null;
-    if (it.action_id) return it.action_id;
-    var m = String(it.key || '').match(/^owner_control:(\d+)/);
-    return m ? parseInt(m[1], 10) : null;
+    return it && it.canonical === true && typeof it.task_id === 'string' && !/^\d+$/.test(it.task_id) ? it.task_id : null;
   }
   function updateControlTask(it, action, extra) {
     var id = controlTaskId(it);
-    if (!id || !action) return;
-    setControlS(function (s) { var n = Object.assign({}, s); n[id] = { phase: action }; return n; });
-    var payload = { task_id: id, action: action };
-    if (action === 'postpone') payload.due_in_days = 1;
-    if (extra) payload = Object.assign(payload, extra);
-    gfetch('panel_control_update', payload).then(function (j) {
-      setControlS(function (s) {
-        var n = Object.assign({}, s);
-        n[id] = { phase: 'done', ok: !!(j && !j.error && j.ok !== false), msg: (j && !j.error && j.ok !== false) ? 'Сохранено' : 'Не удалось' };
-        return n;
-      });
-      if (j && !j.error && j.ok !== false) setCc(j);
-      else loadCommand();
-    }).catch(function () {
-      setControlS(function (s) { var n = Object.assign({}, s); n[id] = { phase: 'done', ok: false, msg: 'Не удалось' }; return n; });
-    });
+    if (!id || ['complete', 'done', 'finish'].indexOf(action) < 0 || extra) { alert('Можно отметить только выполнение своей канонической задачи.'); return; }
+    meCanonicalWorkCommand('complete:' + id, 'complete', { inboxItemId: id }, cc && cc.current_user_id).then(function () { loadCommand(); }).catch(function (err) { alert(err.message || 'Результат уточняется. Повтор сохранит исходное поручение.'); });
   }
   function assignControlTask(it) {
-    var id = controlTaskId(it);
-    if (!id) return;
-    setModal({ title: 'Назначить задачу', fields: [
-      { key: 'assigned_to', label: 'Кому: owner / maya / admin / master / team', value: it.assigned_to || 'admin' },
-      { key: 'assignee_name', label: 'Уточнение: имя или роль', value: it.assignee_name || '' }
-    ], submit: function (v) {
-      updateControlTask({ action_id: id }, 'assign', {
-        assigned_to: String(v.assigned_to || 'owner').trim().toLowerCase(),
-        assignee_name: String(v.assignee_name || '').trim()
-      });
-    } });
+    alert('Изменение исполнителя существующего поручения недоступно.');
   }
   function attentionSignalKey(it) {
     it = it || {};
@@ -27275,32 +27193,10 @@ function AGodMode(props) {
     return 'attention:' + [it.kind || 'notice', it.source || 'maya', it.control_key || it.action_job || it.title || 'signal'].join(':');
   }
   function createControlFromSignal(it) {
-    if (!it || it.source === 'owner_control' || it.in_control) return;
-    var sid = attentionSignalKey(it);
-    setControlS(function (s) { var n = Object.assign({}, s); n[sid] = { phase: 'running' }; return n; });
-    gfetch('panel_control_create', {
-      title: it.title || 'Сигнал Owner OS',
-      detail: it.detail || '',
-      priority: it.severity === 'high' ? 'high' : 'medium',
-      due_in_days: it.severity === 'high' ? 1 : 2,
-      potential_rub: it.potential_rub,
-      owner_next_step: it.action_job ? 'Подтвердить или отклонить действие и закрыть контроль.' : 'Проверить сигнал, назначить действие и закрыть контроль.',
-      signal_key: sid,
-      signal_kind: it.kind || '',
-      signal_source: it.source || '',
-      action_job: it.action_job || ''
-    }).then(function (j) {
-      var ok = !!(j && !j.error && j.ok !== false);
-      setControlS(function (s) {
-        var n = Object.assign({}, s);
-        n[sid] = { phase: 'done', ok: ok, msg: ok ? ((j.created && j.created.existing) ? 'Уже в контроле' : 'Добавлено') : 'Не удалось' };
-        return n;
-      });
-      if (ok) setCc(j);
-      else loadCommand();
-    }).catch(function () {
-      setControlS(function (s) { var n = Object.assign({}, s); n[sid] = { phase: 'done', ok: false, msg: 'Не удалось' }; return n; });
-    });
+    if (!it || !cc || !cc.current_user_id) { alert('Войдите в рабочий кабинет MAYA.'); return; }
+    var identity = attentionSignalKey(it);
+    var command = { assigneeUserId: cc.current_user_id, title: String(it.title || 'Поручение MAYA'), bodyText: String(it.detail || it.title || 'Поручение MAYA'), dueAt: it.due_at || null };
+    meCanonicalWorkCommand(identity, 'create', command, cc.current_user_id).then(function () { loadCommand(); }).catch(function (err) { alert(err.message || 'Результат уточняется. Повтор сохранит исходное поручение.'); });
   }
   function controlDueLabel(it) {
     if (!it || !it.due_at) return '';
@@ -28540,6 +28436,10 @@ function AGodMode(props) {
           'aria-busy': busy,
           style: { minWidth: 88, minHeight: 38, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', WebkitAppearance: 'none', appearance: 'none', outline: 'none', boxShadow: 'none', border: '1px solid ' + (busy ? 'transparent' : t.line), background: 'transparent', color: t.ink, borderRadius: 8, padding: '9px 11px', fontFamily: BODY, fontWeight: 650, fontSize: 12, cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.9 : 1, flexShrink: 0 }
         }, busy ? e(MayaLoadingLogo, { size: 18 }) : 'Обновить')),
+      (cc.canonical_tasks || []).length ? Card(e('div', null, eyebrow('Мои поручения'), (cc.canonical_tasks || []).map(function (task) {
+        return e('div', { key: task.work_item_id, style: { padding: '8px 0' } }, e('div', null, task.title),
+          task.next_actions.length ? btn('Готово', function () { updateControlTask(task, 'complete'); }, {}) : e('span', null, task.work_label));
+      }))) : null,
       renderBriefCarousel(brief),
       renderSimpleGoal(brief.simple_goal, cc.growth_plan),
       renderQuickStats(brief.quick_stats),
@@ -29523,41 +29423,15 @@ function AStaffHome() {
     } catch (e) {}
   }, []);
   function loadStaffTasks() {
-    try {
-      if (saasBusiness) return;
-      if (!window.__meAuthReq) return;
-      var rq = window.__meAuthReq({ limit: 8 });
-      if (!rq) return;
-      fetch(STAFF_TASK_PX + "?action=panel_staff_tasks", {
-        method: "POST",
-        headers: rq.headers,
-        body: rq.body
-      }).then(function (r) { return r.json(); }).then(function (b) {
-        if (b && !b.error && b.tasks) setStaffTasks(b.tasks || []);
-      }).catch(function () {});
-    } catch (e) {}
+    meWidgetAf('/operational-work').then(function (value) { if (value && value.contract === 'maya.operational-work/1') { window.__meWorkActor = value.current_user_id; setStaffTasks(value.tasks || []); } }).catch(function () { setStaffTasks([]); });
   }
   React.useEffect(function () {
     loadStaffTasks();
   }, []);
   function updateStaffTask(task, action) {
-    if (!task || !task.task_id || !action || staffTaskBusy[task.task_id]) return;
-    try {
-      var rq = window.__meAuthReq ? window.__meAuthReq({ task_id: task.task_id, action: action }) : null;
-      if (!rq) return;
-      setStaffTaskBusy(function (s) { var n = Object.assign({}, s); n[task.task_id] = action; return n; });
-      fetch(STAFF_TASK_PX + "?action=panel_staff_task_update", {
-        method: "POST",
-        headers: rq.headers,
-        body: rq.body
-      }).then(function (r) { return r.json(); }).then(function (b) {
-        setStaffTaskBusy(function (s) { var n = Object.assign({}, s); delete n[task.task_id]; return n; });
-        if (b && !b.error && b.inbox && b.inbox.tasks) setStaffTasks(b.inbox.tasks || []);
-        else loadStaffTasks();
-      }).catch(function () {
-        setStaffTaskBusy(function (s) { var n = Object.assign({}, s); delete n[task.task_id]; return n; });
-      });
-    } catch (e) {}
+    if (!task || task.canonical !== true || !task.task_id || action !== 'done' || staffTaskBusy[task.task_id]) return;
+    setStaffTaskBusy(function (s) { var n = Object.assign({}, s); n[task.task_id] = action; return n; });
+    meCanonicalWorkCommand('complete:' + task.task_id, 'complete', { inboxItemId: task.task_id }, window.__meWorkActor).then(loadStaffTasks).catch(function (err) { alert(err.message || 'Результат уточняется.'); }).finally(function () { setStaffTaskBusy(function (s) { var n = Object.assign({}, s); delete n[task.task_id]; return n; }); });
   }
   function staffIsoDate(offsetDays) {
     var d = new Date(Date.now() + (Number(offsetDays) || 0) * 86400000);
