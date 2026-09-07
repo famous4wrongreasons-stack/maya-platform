@@ -79,18 +79,28 @@
       "target": "salon/app/maya-native-api.php",
       "repositorySource": "сайт и приложение/maya-native-api.php",
       "baselineSha256": "ae371c9bfd514f7e8f300f4c9d45fa657ddd4b5d1ba9eb92bf455d8e680b5952",
-      "candidateSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "candidateSha256": "7c46765b03dd82f86e11c4018c76481db7c3b8e4584f8b2cb2378279f8d89b60",
       "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__maya-native-api.php.patch",
-      "baselineEvidence": "Exact live source captured by root; byte-equal to canonical HEAD relay"
+      "baselineEvidence": "Exact live source captured by root; byte-equal to canonical HEAD relay",
+      "historicalR01CandidateSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "expectedBaseCommit": "456888862a037f0866138fe9d69f218bbae52a95",
+      "historicalR01ResultCommit": "654028dd8115450723f466a7c79cbe5bedc50398",
+      "expectedResultCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
+      "artifactReconciliationEvidence": "package5-r01-patch-artifact-repair-proof.json"
     },
     {
       "kind": "relay",
       "target": "mayaos/maya-platform-api.php",
       "repositorySource": "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
       "baselineSha256": "cc9c7ca4f3f95428b62877bf5799190277f4fa1f007cdbc0ae21086f1611476f",
-      "candidateSha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+      "candidateSha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
       "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/mayaos__maya-platform-api.php.patch",
-      "baselineEvidence": "Exact live source captured by root; byte-equal to canonical HEAD relay"
+      "baselineEvidence": "Exact live source captured by root; byte-equal to canonical HEAD relay",
+      "historicalR01CandidateSha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+      "expectedBaseCommit": "456888862a037f0866138fe9d69f218bbae52a95",
+      "historicalR01ResultCommit": "654028dd8115450723f466a7c79cbe5bedc50398",
+      "expectedResultCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
+      "artifactReconciliationEvidence": "package5-r01-patch-artifact-repair-proof.json"
     }
   ],
   "coveredCallers": [
@@ -176,5 +186,11 @@
     "response": "410 verified_client_channel_required; accepted=false; retry_allowed=false; no data/success outcome",
     "canonicalVerifiedIngress": "Existing authenticated POST /api/appointments and B32/B33 client-channel/chat ingress preserved"
   },
-  "patchFormat": "Zero-context unified diff; apply with git apply --unidiff-zero. Candidate bytes unchanged."
+  "patchFormat": "Zero-context unified diff; apply with git apply --unidiff-zero. Candidate bytes unchanged.",
+  "relayArtifactReconciliation": {
+    "scope": "Only the two relay replay artifacts; historical R01 results retained per row. No live file is published or changed.",
+    "expectedResult": "Current upstream-compatible PHP bytes from 7ee1e670; no semantic changes from accepted R01.",
+    "productionEvidence": "package5-late-baseline-reconciliation.json (live salon relay remains certified R01 bytes; live MayaOS relay equals upstream).",
+    "proof": "package5-r01-patch-artifact-repair-proof.json"
+  }
 }

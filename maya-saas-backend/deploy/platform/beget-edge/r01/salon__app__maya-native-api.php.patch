@@ -3,7 +3,7 @@
 @@ -18 +18 @@
 -header('Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, X-Session-Token, X-Telegram-InitData');
 +header('Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, X-Session-Token, X-Telegram-InitData, Idempotency-Key');
-@@ -69,0 +70,29 @@
+@@ -69,0 +70,31 @@
 +// R01: transport preserves one opaque logical identity; it never normalizes or replaces it.
 +function maya_forwarded_idempotency_key(array $headers, array $server) {
 +    $values = [];
@@ -35,5 +35,5 @@
 +    $requestHeaders['Idempotency-Key'] = $idempotencyKey;
 +}
 +
-@@ -75,0 +105 @@
+@@ -75,0 +107 @@
 +    'Idempotency-Key',

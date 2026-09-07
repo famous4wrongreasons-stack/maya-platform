@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-09-07T22:00:29.798467+00:00",
+  "sourceSheetsAndAssessmentsUnchanged": 8,
+  "masterMembershipDependenciesAndHashes": "PASS",
+  "models": 11,
+  "fields": 197,
+  "aeClasses": 13,
+  "ac6Classes": 8,
+  "newClassesTotal": 21,
+  "noUnresolvedInterPackageEdgesAfterApprovals": true,
+  "proposedWaves": 1,
+  "ownerApprovals": 0,
+  "historicalRemediationCountsUnchanged": true,
+  "linksExist": true,
+  "onlyPatchMetadataAndDocumentationChanged": true,
+  "protectedScope": {
+    "mainEntries": 24,
+    "protectedFileHashes": 22,
+    "mainUnchanged": true,
+    "inventoryAndSchemaHashesUnchanged": 86,
+    "newMigrations": 0,
+    "oldDatabasesTouched": 0
+  },
+  "processHygiene": 0
+}

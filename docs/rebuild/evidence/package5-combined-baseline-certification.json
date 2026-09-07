@@ -1,0 +1,300 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-09-07T21:55:09.954184+00:00",
+  "acceptedCheckpoint": "73fdfacf93085f76e801d01555728dd1ac4a9ee5",
+  "r01PatchArtifacts": "VALID",
+  "lateBaselineChange": "COMPATIBLE",
+  "combinedBaselineCertified": true,
+  "runtimeCompatibilityReopened": false,
+  "runtimeCompatibilityAcceptedEvidence": "package5-late-baseline-reconciliation.json",
+  "patchProof": "package5-r01-patch-artifact-repair-proof.json",
+  "patches": [
+    {
+      "target": "salon/app/maya-native-api.php",
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__maya-native-api.php.patch",
+      "expectedBaseCommit": "456888862a037f0866138fe9d69f218bbae52a95",
+      "baseSha256": "ae371c9bfd514f7e8f300f4c9d45fa657ddd4b5d1ba9eb92bf455d8e680b5952",
+      "historicalR01Commit": "654028dd8115450723f466a7c79cbe5bedc50398",
+      "historicalR01Sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "expectedResultCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
+      "expectedResultSha256": "7c46765b03dd82f86e11c4018c76481db7c3b8e4584f8b2cb2378279f8d89b60",
+      "patchSha256": "d092046f00c89b2aad984a1719b8d4943281698a9684b1b6110fecdd33d6040b",
+      "patchParses": true,
+      "applyCheck": "PASS",
+      "apply": "PASS",
+      "resultEqualsExpectedR01Content": true,
+      "unexpectedFileChanges": 0,
+      "patchPayloadUnchangedFromAcceptedUpstream": true,
+      "patchSemanticDeltaFromApprovedR01": 0,
+      "commands": {
+        "parse": {
+          "exit": 0,
+          "stdout": "33\t1\tsalon/app/maya-native-api.php\n",
+          "stderr": ""
+        },
+        "check": {
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        "apply": {
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      "malformedNegativeControl": "REJECTED",
+      "fixtureRemoved": true
+    },
+    {
+      "target": "mayaos/maya-platform-api.php",
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/mayaos__maya-platform-api.php.patch",
+      "expectedBaseCommit": "456888862a037f0866138fe9d69f218bbae52a95",
+      "baseSha256": "cc9c7ca4f3f95428b62877bf5799190277f4fa1f007cdbc0ae21086f1611476f",
+      "historicalR01Commit": "654028dd8115450723f466a7c79cbe5bedc50398",
+      "historicalR01Sha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+      "expectedResultCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
+      "expectedResultSha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+      "patchSha256": "877b999c77f9dc7b10e97fb835a17f1ffed25797d15a8f83f383dffc137aeb35",
+      "patchParses": true,
+      "applyCheck": "PASS",
+      "apply": "PASS",
+      "resultEqualsExpectedR01Content": true,
+      "unexpectedFileChanges": 0,
+      "patchPayloadUnchangedFromAcceptedUpstream": true,
+      "patchSemanticDeltaFromApprovedR01": 0,
+      "commands": {
+        "parse": {
+          "exit": 0,
+          "stdout": "33\t2\tmayaos/maya-platform-api.php\n",
+          "stderr": ""
+        },
+        "check": {
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        "apply": {
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      "malformedNegativeControl": "REJECTED",
+      "fixtureRemoved": true
+    }
+  ],
+  "upstreamComparison": [
+    {
+      "file": "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+      "sha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+      "matchesUpstreamAndAcceptedCompatibilityProof": true
+    },
+    {
+      "file": "сайт и приложение/maya-native-api.php",
+      "sha256": "7c46765b03dd82f86e11c4018c76481db7c3b8e4584f8b2cb2378279f8d89b60",
+      "matchesUpstreamAndAcceptedCompatibilityProof": true
+    }
+  ],
+  "edgeReadback": {
+    "checkedAt": "2026-09-07T21:54:44.513135+00:00",
+    "rows": [
+      {
+        "target": "salon/app/index.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html",
+        "sha256": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "observedSha256": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "matchesPostcutover": true,
+        "currentSha256": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "mayaos/app/index.html",
+        "path": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html",
+        "sha256": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "observedSha256": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "matchesPostcutover": true,
+        "currentSha256": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/index.codex-loyalty-20260721.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.codex-loyalty-20260721.html",
+        "sha256": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "observedSha256": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "matchesPostcutover": true,
+        "currentSha256": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/index.backup-20260731-anton-analytics.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.backup-20260731-anton-analytics.html",
+        "sha256": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "observedSha256": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "matchesPostcutover": true,
+        "currentSha256": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/tenant-test.html",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-test.html",
+        "sha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "observedSha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "matchesPostcutover": true,
+        "currentSha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/api-proxy.php",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+        "sha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+        "observedSha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+        "matchesPostcutover": true,
+        "currentSha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/api-proxy.codex-loyalty-20260721.php",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.codex-loyalty-20260721.php",
+        "sha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+        "observedSha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+        "matchesPostcutover": true,
+        "currentSha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "salon/app/maya-native-api.php",
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php",
+        "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "observedSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "matchesPostcutover": true,
+        "currentSha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": true
+      },
+      {
+        "target": "mayaos/maya-platform-api.php",
+        "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php",
+        "sha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+        "observedSha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+        "matchesPostcutover": false,
+        "currentSha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+        "matchesCombinedBaseline": true,
+        "matchesCertifiedRB": false
+      }
+    ],
+    "productionWrites": 0
+  },
+  "aliasRatchet": {
+    "status": "PASS",
+    "aliases": [
+      {
+        "target": "salon/app/index.html",
+        "sha256": "8802847915522d8fcf4d91e1cce108f36e8acc84d360494a869ccd7d8632d6e8",
+        "result": {
+          "submitCount": 1,
+          "legacyCount": 1
+        }
+      },
+      {
+        "target": "mayaos/app/index.html",
+        "sha256": "60725476b5c660b1376e9a6592776a733156184f9dd02ca41472b1df5d0ee38e",
+        "result": {
+          "submitCount": 1,
+          "legacyCount": 1
+        }
+      },
+      {
+        "target": "salon/app/index.codex-loyalty-20260721.html",
+        "sha256": "a1bb94b6331060d862f113b54601d998a67d5a74a427dced99b52bea5f616022",
+        "result": {
+          "submitCount": 1,
+          "legacyCount": 1
+        }
+      },
+      {
+        "target": "salon/app/index.backup-20260731-anton-analytics.html",
+        "sha256": "22b10b211fbbbc5403a08e269b9162bd9f3f48519c9d5d6c612e7607e760353a",
+        "result": {
+          "submitCount": 1,
+          "legacyCount": 1
+        }
+      },
+      {
+        "target": "salon/app/tenant-test.html",
+        "sha256": "fb65dff693adc717c3356f5a821829a817272ee692573be1c390a2cafecaae98",
+        "result": {
+          "submitCount": 1,
+          "legacyCount": 0
+        }
+      },
+      {
+        "target": "salon/app/api-proxy.php",
+        "sha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+        "result": true
+      },
+      {
+        "target": "salon/app/api-proxy.codex-loyalty-20260721.php",
+        "sha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+        "result": true
+      },
+      {
+        "target": "salon/app/maya-native-api.php",
+        "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "result": "exact relay bytes; helper equivalence/parser proof recorded separately"
+      },
+      {
+        "target": "mayaos/maya-platform-api.php",
+        "sha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+        "result": "exact relay bytes; helper equivalence/parser proof recorded separately"
+      }
+    ],
+    "applicationImports": 0,
+    "networkCalls": 0,
+    "providerCalls": 0,
+    "databaseConnections": 0
+  },
+  "targetedRegression": {
+    "status": "PASS",
+    "suites": 5,
+    "tests": 32,
+    "files": [
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-channel-appointment-create.service.spec.ts",
+      "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts"
+    ]
+  },
+  "runtimePreservation": {
+    "release": "/opt/maya-saas/releases/20260907-p5-rb-cb4fb27c",
+    "pythonFilesUnchanged": 101,
+    "compiledFilesUnchanged": 594,
+    "flagsUnchanged": true,
+    "servicesAndPidsUnchanged": true
+  },
+  "productionRuntimeChanges": 0,
+  "productionDeployment": false,
+  "productionMutationsMessagesForProof": 0,
+  "schemaChanges": 0,
+  "newInventorySurface": false,
+  "inventoryDefect": false,
+  "protectedScope": {
+    "mainEntries": 24,
+    "protectedFileHashes": 22,
+    "mainUnchanged": true,
+    "inventoryAndSchemaHashesUnchanged": 86,
+    "newMigrations": 0,
+    "oldDatabasesTouched": 0
+  },
+  "processHygiene": 0,
+  "historicalStopsPreserved": true,
+  "stage2MayProceed": true
+}

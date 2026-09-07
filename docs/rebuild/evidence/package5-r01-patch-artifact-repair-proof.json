@@ -1,0 +1,85 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-09-07T21:54:23.339856+00:00",
+  "patches": [
+    {
+      "target": "salon/app/maya-native-api.php",
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__maya-native-api.php.patch",
+      "expectedBaseCommit": "456888862a037f0866138fe9d69f218bbae52a95",
+      "baseSha256": "ae371c9bfd514f7e8f300f4c9d45fa657ddd4b5d1ba9eb92bf455d8e680b5952",
+      "historicalR01Commit": "654028dd8115450723f466a7c79cbe5bedc50398",
+      "historicalR01Sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "expectedResultCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
+      "expectedResultSha256": "7c46765b03dd82f86e11c4018c76481db7c3b8e4584f8b2cb2378279f8d89b60",
+      "patchSha256": "d092046f00c89b2aad984a1719b8d4943281698a9684b1b6110fecdd33d6040b",
+      "patchParses": true,
+      "applyCheck": "PASS",
+      "apply": "PASS",
+      "resultEqualsExpectedR01Content": true,
+      "unexpectedFileChanges": 0,
+      "patchPayloadUnchangedFromAcceptedUpstream": true,
+      "patchSemanticDeltaFromApprovedR01": 0,
+      "commands": {
+        "parse": {
+          "exit": 0,
+          "stdout": "33\t1\tsalon/app/maya-native-api.php\n",
+          "stderr": ""
+        },
+        "check": {
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        "apply": {
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      "malformedNegativeControl": "REJECTED",
+      "fixtureRemoved": true
+    },
+    {
+      "target": "mayaos/maya-platform-api.php",
+      "patch": "maya-saas-backend/deploy/platform/beget-edge/r01/mayaos__maya-platform-api.php.patch",
+      "expectedBaseCommit": "456888862a037f0866138fe9d69f218bbae52a95",
+      "baseSha256": "cc9c7ca4f3f95428b62877bf5799190277f4fa1f007cdbc0ae21086f1611476f",
+      "historicalR01Commit": "654028dd8115450723f466a7c79cbe5bedc50398",
+      "historicalR01Sha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+      "expectedResultCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
+      "expectedResultSha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+      "patchSha256": "877b999c77f9dc7b10e97fb835a17f1ffed25797d15a8f83f383dffc137aeb35",
+      "patchParses": true,
+      "applyCheck": "PASS",
+      "apply": "PASS",
+      "resultEqualsExpectedR01Content": true,
+      "unexpectedFileChanges": 0,
+      "patchPayloadUnchangedFromAcceptedUpstream": true,
+      "patchSemanticDeltaFromApprovedR01": 0,
+      "commands": {
+        "parse": {
+          "exit": 0,
+          "stdout": "33\t2\tmayaos/maya-platform-api.php\n",
+          "stderr": ""
+        },
+        "check": {
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        "apply": {
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      "malformedNegativeControl": "REJECTED",
+      "fixtureRemoved": true
+    }
+  ],
+  "runtimeFilesChanged": 0,
+  "productionWrites": 0,
+  "networkCalls": 0,
+  "databaseConnections": 0,
+  "processHygiene": 0
+}

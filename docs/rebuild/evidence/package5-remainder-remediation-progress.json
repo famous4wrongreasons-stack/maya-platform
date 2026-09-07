@@ -2,7 +2,7 @@
   "inventorySource": "docs/rebuild/evidence/package5-remainder-inventory-final.json",
   "inventorySha256": "f0d29c9f60c4699c1458b383b86decf0fb26aef5ee56e89a2d9a89b6b62df425",
   "wave": "R-B",
-  "state": "R-B CUTOVER VERIFIED; LATE RELAY RUNTIME COMPATIBLE; ARCHIVED R01 OVERLAY REPLAY CONFLICT — STOP",
+  "state": "COMBINED BASELINE CERTIFIED; EIGHT-PACKAGE OWNER DECISION PACK PRESENTED — AWAITING OWNER APPROVAL",
   "packages": [
     {
       "id": "R01",
@@ -508,11 +508,31 @@
   "laterBaselineHold": {
     "evidence": "package5-wave-rb-late-baseline-stop.json",
     "upstreamCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
-    "currentExecutionHold": true,
+    "currentExecutionHold": false,
     "remediationCountsPreserveVerifiedCutover": true,
     "reconciliationEvidence": "package5-late-baseline-reconciliation.json",
     "runtimeCompatibility": "PASS",
-    "combinedBaselineCertified": false,
-    "reason": "Upstream modified two documented R01 replay patches without updating hunk sizes; current patches fail git apply parsing. No automatic fix authorized by reconciliation task."
+    "combinedBaselineCertified": true,
+    "reason": "Authorized metadata-only patch regeneration and exact-base replay proof PASS; upstream-compatible combined baseline certified. Remaining package approvals are pending separately.",
+    "status": "RESOLVED BY AUTHORIZED PATCH ARTIFACT REPAIR",
+    "resolutionEvidence": "package5-combined-baseline-certification.json",
+    "historicalReason": "Upstream modified two documented R01 replay patches without updating hunk sizes; current patches fail git apply parsing. No automatic fix authorized by reconciliation task."
+  },
+  "ownerDecisionPack": {
+    "evidence": "package5-owner-decision-pack.json",
+    "presented": 8,
+    "approved": 0,
+    "proposedRemediationWavesRemaining": 1,
+    "proposedWaveRC": [
+      "R05",
+      "R06",
+      "R08",
+      "R09",
+      "R11",
+      "R12",
+      "R13",
+      "R14"
+    ],
+    "implementationStarted": false
   }
 }
