@@ -38757,7 +38757,8 @@ function mayaTeamTransport(scope, request, storage) {
   function clear(kind){storage.removeItem(prefix+kind);}
   async function command(operation,body,key){var r=await request('/team-communications/commands/'+operation,{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':key},body:JSON.stringify(body)});if(!r||r.contract!=='maya.team-communications/1'||!r.actionExecutionId)throw Error('receipt_unknown');return r;}
   function intent(kind,operation,body){var pending=read(kind);if(pending){if(pending.operation!==operation||JSON.stringify(pending.body)!==JSON.stringify(body))throw Error('pending_intent_changed');return pending;}return save(kind,{operation:operation,body:body,key:crypto.randomUUID()});}
-  async function submit(kind,operation,body){var p=intent(kind,operation,body),r=await command(operation,p.body,p.key);if(['FAILED','UNKNOWN','READY','EXECUTING'].includes(r.state))throw Error('receipt_unknown');clear(kind);return r;}
+  function rejectTerminal(kind,r){if(r&&r.contract==='maya.team-communications/1'&&r.actionExecutionId&&['FAILED','NOT_EXECUTED'].includes(r.state)){clear(kind);throw Error('command_rejected');}}
+  async function submit(kind,operation,body){var p=intent(kind,operation,body),r=await command(operation,p.body,p.key);rejectTerminal(kind,r);if(operation==='send'?r.status!=='SENT'||!r.messageId:operation==='withdraw'?r.status!=='WITHDRAWN'||!r.messageId:true)throw Error('receipt_unknown');clear(kind);return r;}
   async function retry(kind){var p=read(kind);if(!p)throw Error('no_pending');return submit(kind,p.operation,p.body);}
   async function upload(file,progress){
     var mime=(file.type||'application/octet-stream').toLowerCase().split(';')[0],kind=mime.startsWith('image/')?'image':mime.startsWith('video/')?'video':mime.startsWith('audio/')?'audio':'file';
@@ -38765,7 +38766,7 @@ function mayaTeamTransport(scope, request, storage) {
     var digest=await mayaTeamFileHash(file),body={contentSha256:digest,declaredSize:file.size,kind:kind,mime:mime,filename:String(file.name||'attachment').normalize('NFC').trim(),retentionPolicyVersion:1};
     var p=read('upload');if(p&&JSON.stringify(p.reserve)!==JSON.stringify(body))throw Error('pending_file_changed');
     if(!p)p=save('upload',{reserve:body,reserveKey:crypto.randomUUID(),finalKey:crypto.randomUUID(),sendKey:crypto.randomUUID(),attachmentId:null,sealed:false});
-    if(!p.attachmentId){var reserved=await command('reserve',p.reserve,p.reserveKey);if(reserved.state!=='RESERVED'||!reserved.attachmentId)throw Error('receipt_unknown');p.attachmentId=reserved.attachmentId;save('upload',p);}
+    if(!p.attachmentId){var reserved=await command('reserve',p.reserve,p.reserveKey);rejectTerminal('upload',reserved);if(reserved.state!=='RESERVED'||!reserved.attachmentId)throw Error('receipt_unknown');p.attachmentId=reserved.attachmentId;save('upload',p);}
     if(!p.finalStarted){
       for(var i=0;i<Math.ceil(file.size/6291456);i++){
         var bytes=new Uint8Array(await file.slice(i*6291456,(i+1)*6291456).arrayBuffer()),binary='';for(var n=0;n<bytes.length;n+=32768)binary+=String.fromCharCode.apply(null,bytes.subarray(n,n+32768));
@@ -38778,8 +38779,8 @@ function mayaTeamTransport(scope, request, storage) {
   }
   async function finishUpload(p,progress){
     if(!p||!p.attachmentId||!p.finalStarted)throw Error('select_original_file');
-    if(!p.sealed){var final=await command('finalize',{attachmentId:p.attachmentId,expectedDigest:p.reserve.contentSha256},p.finalKey);if(final.state!=='SEALED')throw Error('receipt_unknown');p.sealed=true;save('upload',p);}
-    var sent=await command('send',{conversationKey:'team/main',text:'',attachmentId:p.attachmentId},p.sendKey);if(sent.status!=='SENT'||!sent.messageId)throw Error('receipt_unknown');clear('upload');if(progress)progress(100);return sent;
+    if(!p.sealed){var final=await command('finalize',{attachmentId:p.attachmentId,expectedDigest:p.reserve.contentSha256},p.finalKey);rejectTerminal('upload',final);if(final.state!=='SEALED')throw Error('receipt_unknown');p.sealed=true;save('upload',p);}
+    var sent=await command('send',{conversationKey:'team/main',text:'',attachmentId:p.attachmentId},p.sendKey);rejectTerminal('upload',sent);if(sent.status!=='SENT'||!sent.messageId)throw Error('receipt_unknown');clear('upload');if(progress)progress(100);return sent;
   }
   return{read:read,submit:submit,retry:retry,upload:upload,resumeUpload:function(progress){return finishUpload(read('upload'),progress);}};
 }
@@ -38835,7 +38836,7 @@ function ATeamChat(){
     if(scopeRef.current&&scopeRef.current!==current){setText('');setVoice(null);urls.current.forEach(URL.revokeObjectURL);urls.current=[];}scopeRef.current=current;
     setLoaded(function(old){if(before&&old&&old.tenantId===result.tenantId&&old.userId===result.userId)result.messages=old.messages.concat(result.messages.filter(function(m){return!old.messages.some(function(x){return x.id===m.id;});}));return result;});
   }catch(_){setStatus('Не удалось открыть командный чат. Проверьте вход в MAYA.');}}
-  async function perform(work){if(busyRef.current)return;busyRef.current=true;setBusy(true);setStatus('');try{await work();await load();}catch(error){setStatus(error.message==='select_original_file'?'Выберите тот же файл для продолжения загрузки.':error.message==='pending_file_changed'||error.message==='pending_intent_changed'?'Предыдущая отправка ещё не подтверждена. Продолжите её с исходными параметрами.':'Результат не подтверждён. Исходный запрос сохранён; повторите его.');}finally{busyRef.current=false;setBusy(false);}}
+  async function perform(work){if(busyRef.current)return;busyRef.current=true;setBusy(true);setStatus('');try{await work();await load();}catch(error){setStatus(error.message==='command_rejected'?'Запрос отклонён. Можно исправить данные и отправить новый.':error.message==='select_original_file'?'Выберите тот же файл для продолжения загрузки.':error.message==='pending_file_changed'||error.message==='pending_intent_changed'?'Предыдущая отправка ещё не подтверждена. Продолжите её с исходными параметрами.':'Результат не подтверждён. Исходный запрос сохранён; повторите его.');}finally{busyRef.current=false;setBusy(false);}}
   function send(){var value=text.normalize('NFC').replace(/\r\n?/g,'\n').trim();if(!value)return;return perform(async function(){await transport().submit('message','send',{conversationKey:'team/main',text:value,attachmentId:null});setText('');});}
   function withdraw(message){if(!message.own||message.status!=='SENT')return;return perform(async function(){if(!await meConfirmDialog({kind:'team-message',title:'Отозвать сообщение?',message:'Оно исчезнет из будущих просмотров. Уже прочитанные копии отозвать нельзя.',confirmLabel:'Отозвать'}))return;await transport().submit('withdrawal','withdraw',{messageId:message.id,expectedRevision:message.revision});});}
   function upload(file){if(!file)return;uploadRef.current=file;return perform(async function(){await transport().upload(file,setProgress);uploadRef.current=null;setVoice(null);});}

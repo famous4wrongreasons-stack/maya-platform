@@ -20,14 +20,20 @@ export class Package5TeamObjectStore {
   private async directory(path: string) {
     if (path !== this.root && !path.startsWith(this.root + '/')) throw Error('Team private directory scope');
     await mkdir(path, { recursive: true, mode: 0o700 });
+    await this.verifyDirectory(path);
+  }
+  private async verifyDirectory(path: string) {
+    if (path !== this.root && !path.startsWith(this.root + '/')) throw Error('Team private directory scope');
     for (let current = path; current.startsWith(this.root); current = dirname(current)) {
-      const stat = await lstat(current); if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('Private team storage cannot follow links'); if (current === this.root) break;
+      const stat = await lstat(current);
+      if (!stat.isDirectory() || stat.isSymbolicLink() || (stat.mode & 0o077) !== 0) throw Error('Private team storage requires unlinked owner-only directories');
+      if (current === this.root) break;
     }
   }
   private async digest(path: string) {
-    let file; try { file = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW); } catch (error) { if (error && typeof error === 'object' && Reflect.get(error,'code') === 'ENOENT') return null; throw error; }
+    let file; try { await this.verifyDirectory(dirname(path)); file = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW); } catch (error) { if (error && typeof error === 'object' && Reflect.get(error,'code') === 'ENOENT') return null; throw error; }
     try {
-      const stat = await file.stat(); if (!stat.isFile() || stat.size < 1 || stat.size > 1073741824) throw Error('Invalid private team object');
+      const stat = await file.stat(); if (!stat.isFile() || (stat.mode & 0o077) !== 0 || stat.size < 1 || stat.size > 1073741824) throw Error('Invalid private team object');
       const hash = createHash('sha256'); let size = 0;
       for await (const chunk of file.createReadStream({ autoClose: false })) { hash.update(chunk); size += chunk.length; }
       if (size !== stat.size) throw Error('Private team object changed during observation');
@@ -82,12 +88,18 @@ export class Package5TeamObjectStore {
     const { fileTypeFromFile } = await import('file-type');
     const detected = await fileTypeFromFile(assembly);
     let mime = detected?.mime ?? 'application/octet-stream';
-    if(input.kind==='audio'&&['audio/webm','audio/mp4'].includes(equivalentMime(input.mime))&&['video/webm','video/mp4',input.mime].includes(mime)){
-      // The existing ffprobe distinguishes an audio-only container from video.
-      // Inspection is bounded and private; it neither transcodes nor publishes.
-      const result=await promisify(execFile)('ffprobe',['-v','error','-show_entries','stream=codec_type','-of','json',assembly],{timeout:10000,maxBuffer:65536});
-      const info=JSON.parse(result.stdout) as {streams?:Array<{codec_type?:string}>};
-      if(!info.streams?.length||info.streams.some(s=>s.codec_type!=='audio'))throw Error('Team voice must contain audio streams only');mime=input.mime;
+    if (input.kind === 'audio') {
+      const requested = equivalentMime(input.mime);
+      const container = requested === 'audio/webm' ? 'video/webm' : requested === 'audio/mp4' ? 'video/mp4' : requested;
+      if (equivalentMime(mime) !== requested && equivalentMime(mime) !== container) throw Error('Verified team MIME does not match reservation');
+      // A detected container alone does not prove an audio-only recording. Keep
+      // local inspection bounded and prohibit network protocols or conversion.
+      const result = await promisify(execFile)('ffprobe', ['-v', 'error', '-protocol_whitelist', 'file',
+        '-analyzeduration', '1000000', '-probesize', '1048576', '-show_entries', 'stream=codec_type,codec_name', '-of', 'json', assembly],
+      { timeout: 10000, maxBuffer: 65536 });
+      const info = JSON.parse(result.stdout) as { streams?: Array<{ codec_type?: string; codec_name?: string }> };
+      if (!info.streams?.length || info.streams.some(stream => stream.codec_type !== 'audio' || !stream.codec_name || stream.codec_name === 'unknown')) throw Error('Team voice must contain audio streams only');
+      mime = input.mime;
     }
     if (!detected && input.mime === 'text/plain') {
       const file = await open(assembly, constants.O_RDONLY | constants.O_NOFOLLOW);
