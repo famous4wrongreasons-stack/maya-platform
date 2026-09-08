@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-09-08T12:58:00.481551+00:00",
+  "protected": {
+    "mainEntries": 24,
+    "protectedFileHashes": 22,
+    "mainUnchanged": true,
+    "immutableInventoryAndHistoricalMigrations": 85,
+    "oldDatabasesTouched": 0
+  },
+  "ownedProcessesRemaining": [],
+  "ownedTemporaryProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTemporaryDatabases": 0,
+  "ownedClusterDirectories": 0,
+  "ownedDatabaseListeners": {
+    "55509": false,
+    "55486": false
+  },
+  "syntheticDatabaseDumpsPreserved": 12,
+  "productionStageArchived": true,
+  "edgeStageArchived": true,
+  "processHygiene": 0
+}

@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "wave": "R-C",
+  "runtimeRevision": "8bc03454",
+  "validationCommit": "9584da5b",
+  "release": "20260908-p5-rc-8bc03454",
+  "verifiedAt": "2026-09-08T12:34:47.324501+00:00",
+  "verification": "structural/read-only; local executable behavior tied to exact deployed hashes",
+  "packages": {
+    "R05": "PASS",
+    "R06": "PASS",
+    "R08": "PASS",
+    "R09": "PASS",
+    "R11": "PASS",
+    "R12": "PASS",
+    "R13": "PASS",
+    "R14": "PASS"
+  },
+  "blockersThisWave": 14,
+  "totalBlockersRemediated": 24,
+  "packagesComplete": 14,
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "businessMutationsForProof": 0,
+  "messagesForProof": 0,
+  "providerEffectsForProof": 0,
+  "finalGateRun": false,
+  "evidence": [
+    "production-runtime-verify.jsonl",
+    "production-edge-verify.json",
+    "production-config-proof.json",
+    "production-compiled-proof.json",
+    "production-schema-comparison.json",
+    "production-final-schema-preflight.txt",
+    "production-final-security-preservation.json",
+    "production-listeners.txt"
+  ]
+}

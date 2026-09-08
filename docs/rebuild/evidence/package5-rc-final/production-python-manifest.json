@@ -1,0 +1,302 @@
+{
+  "wave": "R-C",
+  "baselineBackendRelease": "20260908-a18-security-consent-0867ecea",
+  "kind": "python",
+  "files": [
+    {
+      "file": "bot.py",
+      "artifact": "bot.py",
+      "destination": "/home/botadmin/barbershop-bot/bot.py",
+      "before": "c7f5b79011315732e8ffedb41f3ff6705a5bf7829cdffedd4164baeb9b9a121b",
+      "after": "752c3dd6110ff86f713dc7705e3988a732e7c20c019e8655c016c7acc4182e79"
+    },
+    {
+      "file": "canonical_cash_declaration.py",
+      "artifact": "canonical_cash_declaration.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_cash_declaration.py",
+      "before": null,
+      "after": "a99d415ae586863d3a5ed6e9f4ed0d48980d137fa1390f7e8ea79a948dd35e13"
+    },
+    {
+      "file": "canonical_expense_intake.py",
+      "artifact": "canonical_expense_intake.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_expense_intake.py",
+      "before": null,
+      "after": "b9a528153df30c76305bf51a84d4d28e1b0f929038feccc5876aa0ca5847d134"
+    },
+    {
+      "file": "canonical_governed_settings.py",
+      "artifact": "canonical_governed_settings.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_governed_settings.py",
+      "before": null,
+      "after": "f4ebeb4c130aaf8deda1233eb56e326d8eba2244a11866f681bd04b37cd4b750"
+    },
+    {
+      "file": "canonical_operational_alerts.py",
+      "artifact": "canonical_operational_alerts.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_operational_alerts.py",
+      "before": null,
+      "after": "559d6027bae5df1d39dc0da388e8ebfd25b2481a8fdb18a5f78accf395499635"
+    },
+    {
+      "file": "canonical_public_community.py",
+      "artifact": "canonical_public_community.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_public_community.py",
+      "before": null,
+      "after": "efd4fe7acef6abf4658ef294646459acb184e86c18ef7c80962d2c3681ace0ed"
+    },
+    {
+      "file": "canonical_report_download.py",
+      "artifact": "canonical_report_download.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_report_download.py",
+      "before": null,
+      "after": "ff1e9b277812b69bf985f652a3fcdd15cf01bf3277d11230d5e906b1732bdf28"
+    },
+    {
+      "file": "canonical_staff_access.py",
+      "artifact": "canonical_staff_access.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_staff_access.py",
+      "before": "e94ba25cadb9a1775c60d66ff3ad74cdda61e3d31f57df1941a65ea59f0adf2c",
+      "after": "9b1a720bb67315994ce288d98f9707e8a4f00e5fcfe156060a19ba2ea292bd4c"
+    },
+    {
+      "file": "canonical_team_communications.py",
+      "artifact": "canonical_team_communications.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_team_communications.py",
+      "before": null,
+      "after": "1d744c8d37aec14138dc7c35ab97fbed80fa74343792265295214537fe6c5af2"
+    },
+    {
+      "file": "database.py",
+      "artifact": "database.py",
+      "destination": "/home/botadmin/barbershop-bot/database.py",
+      "before": "faa8b205072b114518884a1a137abf4b59611522d4bb9ce04c82f09812ab6d69",
+      "after": "edf1a6233ff798b1e24cef49b6d8b21eca6f74e64cb80bcca59297dc3e443029"
+    },
+    {
+      "file": "freed_slot.py",
+      "artifact": "freed_slot.py",
+      "destination": "/home/botadmin/barbershop-bot/freed_slot.py",
+      "before": "e0fa7df0cca9c80d159720c564bbd4bcf5c6869b2035a21408884fe59d4ec3c3",
+      "after": "f6dc581c77db76c74d6b414e5266d928b560138d7b3ac429c9a0cc363c8612e0"
+    },
+    {
+      "file": "lead_alerts.py",
+      "artifact": "lead_alerts.py",
+      "destination": "/home/botadmin/barbershop-bot/lead_alerts.py",
+      "before": "00c16768a92c334e3aaaeed15863069b664808667cd222f7279de18c883d5542",
+      "after": "ddb1dbb529cf919c928e8ac7fc22c15577fdfc50d529d9718f781b7220e5b901"
+    },
+    {
+      "file": "legacy_client_command_bridge.py",
+      "artifact": "legacy_client_command_bridge.py",
+      "destination": "/home/botadmin/barbershop-bot/legacy_client_command_bridge.py",
+      "before": "7c3e14d2a860233996eb416a862ba0bbec20b891348ea5b60b3e48c0e1f5ea64",
+      "after": "666d1930ae9afd157c1492755054a683f7c746508db4786da752f4ab1ef84039"
+    },
+    {
+      "file": "masters_ai.py",
+      "artifact": "masters_ai.py",
+      "destination": "/home/botadmin/barbershop-bot/masters_ai.py",
+      "before": "a3d0b1a8f6cedcdc37ebc3dcd92caef96f94523d110a4bbd1769f3177dd43d08",
+      "after": "f56ed09f92d126059d3f24a97cec132dc12640ef77ccc114e3201d290654ada2"
+    },
+    {
+      "file": "maya_capabilities.py",
+      "artifact": "maya_capabilities.py",
+      "destination": "/home/botadmin/barbershop-bot/maya_capabilities.py",
+      "before": "5b5a06eb5124faf6a48428c14cadf61cbb1c7d62e84c609007403f953b8d747c",
+      "after": "047e22a09c1870fd8a3ebe414ad13d943d7a73f34256ab11041722030f05186a"
+    },
+    {
+      "file": "maya_inbox_bridge.py",
+      "artifact": "maya_inbox_bridge.py",
+      "destination": "/home/botadmin/barbershop-bot/maya_inbox_bridge.py",
+      "before": "ebdd29b4f46f4c9a48be0af8bd1603f963b7819f5530523ff0306c98fa48dc9f",
+      "after": "a88b6dc3d0ea2f6857aa4a3db359397b0470a2f7c4c10c1e598bf4e04b00fbd3"
+    },
+    {
+      "file": "package4_value_runtime_guard.py",
+      "artifact": "package4_value_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package4_value_runtime_guard.py",
+      "before": "8fa94249d1aa42d2eff14260c30fccf0949a263a9ce8c3d0dd893ebf3b7e3a51",
+      "after": "03c8be9b4c8c518f34d2e486b4061baea8659a93ffa1d478fdf7be2c2b462ddc"
+    },
+    {
+      "file": "package5_cash_declaration_runtime_guard.py",
+      "artifact": "package5_cash_declaration_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_cash_declaration_runtime_guard.py",
+      "before": null,
+      "after": "e6c5e8dec76cae4f1cd0be6bf1cb8da99bfd22c32448402982eafcc5ce5df919"
+    },
+    {
+      "file": "package5_expense_intake_runtime_guard.py",
+      "artifact": "package5_expense_intake_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_expense_intake_runtime_guard.py",
+      "before": null,
+      "after": "9926d6e6fa1c96b67217037b404db9f653cdd21f0756b75ef691cc84605ae98c"
+    },
+    {
+      "file": "package5_governed_settings_runtime_guard.py",
+      "artifact": "package5_governed_settings_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_governed_settings_runtime_guard.py",
+      "before": null,
+      "after": "3b81d3c1fd092010b8e13173718b8b91e4194901d0009f5d2c3a14d39abb0b29"
+    },
+    {
+      "file": "package5_native_feedback_runtime_guard.py",
+      "artifact": "package5_native_feedback_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_native_feedback_runtime_guard.py",
+      "before": null,
+      "after": "11d7bd3aa7a099d0256024a8d00e4eb5557eb645a30f771e33fe6fe931c9f525"
+    },
+    {
+      "file": "package5_operational_delivery_runtime_guard.py",
+      "artifact": "package5_operational_delivery_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_operational_delivery_runtime_guard.py",
+      "before": null,
+      "after": "9cb09594d2c9b9fabbc1360c219d6a91310f93cdcc4af38e8032bb5f132cc32f"
+    },
+    {
+      "file": "package5_owner_reports_runtime_guard.py",
+      "artifact": "package5_owner_reports_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_owner_reports_runtime_guard.py",
+      "before": null,
+      "after": "5085b7995822e714b9bd89944731b58d48183f01928ac49ffb76f2486aad3ec8"
+    },
+    {
+      "file": "package5_public_community_runtime_guard.py",
+      "artifact": "package5_public_community_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_public_community_runtime_guard.py",
+      "before": null,
+      "after": "81aea6de9053c3995c490e2308ea1c49a5d1fad282fe444dec02a0183e323d89"
+    },
+    {
+      "file": "package5_team_communications_runtime_guard.py",
+      "artifact": "package5_team_communications_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_team_communications_runtime_guard.py",
+      "before": null,
+      "after": "42e4caac31f3d2fa75e81b2ec6398bb12bfc5012b9b4a92398da46c779d28c60"
+    },
+    {
+      "file": "package5_wave_rc_guard_contracts.py",
+      "artifact": "package5_wave_rc_guard_contracts.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_wave_rc_guard_contracts.py",
+      "before": null,
+      "after": "2f59cabac6871f1d0d99202e2247720be02b56999693ba90431bd91472866d52"
+    },
+    {
+      "file": "reviews.py",
+      "artifact": "reviews.py",
+      "destination": "/home/botadmin/barbershop-bot/reviews.py",
+      "before": "16654d2a3f087c92a5dab8ce6941156ba29c371a840c336b906120afdb0a92df",
+      "after": "9e99213a7a17f798876e1755c9e087314cd1b2bb3f460b6951cf72e85f5d3694"
+    },
+    {
+      "file": "site_community.py",
+      "artifact": "site_community.py",
+      "destination": "/home/botadmin/barbershop-bot/site_community.py",
+      "before": "f631935b676ac26614206b91d8448e415b1db6883e11fcea445e103d731fba65",
+      "after": "23b07f3a7dc15ab71cb0ac71616e85d10075535ea317e48a8e8dfb935b8941f8"
+    },
+    {
+      "file": "site_engagement.py",
+      "artifact": "site_engagement.py",
+      "destination": "/home/botadmin/barbershop-bot/site_engagement.py",
+      "before": "96bc5a18df899670746ea2dcc3055c6cd7a5feb21885ebc2b5da26a5327ea6ac",
+      "after": "b878a5112f4688d3d0e9b07cfd421c3706849cc447143fa7f435b4e7fcab695f"
+    },
+    {
+      "file": "webhook_server.py",
+      "artifact": "webhook_server.py",
+      "destination": "/home/botadmin/barbershop-bot/webhook_server.py",
+      "before": "69bb3fcfa02f93004805de7610d3f9c8eb0d556174a7090d1f465328274a045b",
+      "after": "ad20ebf72861fddc95125ff8f0bca3532e2221d59a7da3ef808c366ee6d97af5"
+    },
+    {
+      "file": "app.html",
+      "artifact": "app.html",
+      "destination": "/var/www/maya-platform/app.html",
+      "before": "87f10c2e8505ef7fac76685d07965f5e4a271d1117d8c413a01c02cbf476498f",
+      "after": "46e713c6cca82817b07697bdede877cd5e85ca940667299bab8db3a819360527"
+    }
+  ],
+  "guards": [
+    {
+      "file": "package4_value_runtime_guard.py",
+      "function": "scan_runtime",
+      "sha256": "03c8be9b4c8c518f34d2e486b4061baea8659a93ffa1d478fdf7be2c2b462ddc"
+    },
+    {
+      "file": "package5_control_plane_runtime_guard.py",
+      "function": "scan_runtime",
+      "sha256": "40bd659751f3b3c9a27650e0a6c34417f5983ba9c4edc60f6686d73960ec5993"
+    },
+    {
+      "file": "package5_bulk_runtime_guard.py",
+      "function": "scan_bulk_sources",
+      "sha256": "f11aa571bb2e562fa359742f4e6549d83541cef4f8da5528c7c5c46d6b632b50"
+    },
+    {
+      "file": "package5_staff_authority_guard.py",
+      "function": "scan_staff_authority",
+      "sha256": "a39cf95945926651667a665599d4d00f67263b68e0cf89277d41c5be4a2809cd"
+    },
+    {
+      "file": "package5_staff_schedule_guard.py",
+      "function": "scan_staff_schedule",
+      "sha256": "46c2c940cbb5202e65d263bdf3e4ab31c46ac765afffeb224bc2ead39884eb7a"
+    },
+    {
+      "file": "package5_operational_work_runtime_guard.py",
+      "function": "scan_operational_work",
+      "sha256": "bb4ffde09588d6ca99c572e9a9859c235bfdc6785681ae60c4b8dc8eba266348"
+    },
+    {
+      "file": "package5_retention_runtime_guard.py",
+      "function": "scan_retention_sources",
+      "sha256": "83d3453fb62b646c48c1d29d97f787977ce9423011ea978fb4a3748dbebed4d1"
+    },
+    {
+      "file": "package5_owner_reports_runtime_guard.py",
+      "function": "scan",
+      "sha256": "5085b7995822e714b9bd89944731b58d48183f01928ac49ffb76f2486aad3ec8"
+    },
+    {
+      "file": "package5_operational_delivery_runtime_guard.py",
+      "function": "scan",
+      "sha256": "9cb09594d2c9b9fabbc1360c219d6a91310f93cdcc4af38e8032bb5f132cc32f"
+    },
+    {
+      "file": "package5_native_feedback_runtime_guard.py",
+      "function": "scan",
+      "sha256": "11d7bd3aa7a099d0256024a8d00e4eb5557eb645a30f771e33fe6fe931c9f525"
+    },
+    {
+      "file": "package5_public_community_runtime_guard.py",
+      "function": "scan",
+      "sha256": "81aea6de9053c3995c490e2308ea1c49a5d1fad282fe444dec02a0183e323d89"
+    },
+    {
+      "file": "package5_governed_settings_runtime_guard.py",
+      "function": "scan",
+      "sha256": "3b81d3c1fd092010b8e13173718b8b91e4194901d0009f5d2c3a14d39abb0b29"
+    },
+    {
+      "file": "package5_team_communications_runtime_guard.py",
+      "function": "scan",
+      "sha256": "42e4caac31f3d2fa75e81b2ec6398bb12bfc5012b9b4a92398da46c779d28c60"
+    },
+    {
+      "file": "package5_expense_intake_runtime_guard.py",
+      "function": "scan",
+      "sha256": "9926d6e6fa1c96b67217037b404db9f653cdd21f0756b75ef691cc84605ae98c"
+    },
+    {
+      "file": "package5_cash_declaration_runtime_guard.py",
+      "function": "scan",
+      "sha256": "e6c5e8dec76cae4f1cd0be6bf1cb8da99bfd22c32448402982eafcc5ce5df919"
+    }
+  ],
+  "requiredBackendRelease": "20260908-p5-rc-8bc03454"
+}

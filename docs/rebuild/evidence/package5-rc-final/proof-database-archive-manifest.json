@@ -1,0 +1,98 @@
+[
+  {
+    "database": "maya_rc_replay",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_rc_replay.dump",
+    "bytes": 898440,
+    "sha256": "456ae23940d2ec38f25f7f20acdbf19df68cf14473ae5a4d2cd4bf4350124015",
+    "readable": true
+  },
+  {
+    "database": "maya_rc_clean_replay",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_rc_clean_replay.dump",
+    "bytes": 2880714,
+    "sha256": "408f6151076b4659fbc8c4b6305f94552a0fd01c8b3f34f52208fd73e814c8fb",
+    "readable": true
+  },
+  {
+    "database": "maya_rc_b36_runtime",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_rc_b36_runtime.dump",
+    "bytes": 1792267,
+    "sha256": "9c566540f522c5121495f0da38a90008a9204dd69ac39ddba0e82eb6ac995d1c",
+    "readable": true
+  },
+  {
+    "database": "maya_rc_policy_replay",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_rc_policy_replay.dump",
+    "bytes": 884067,
+    "sha256": "03a07f82892a8c9625d2fdc6a898346c23a3639eb9bdc59abda962ac7da99468",
+    "readable": true
+  },
+  {
+    "database": "maya_rc_policy_order",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_rc_policy_order.dump",
+    "bytes": 874353,
+    "sha256": "026c6a65aef24993055270edb2d50269fd876342493010de95f0941887ab9051",
+    "readable": true
+  },
+  {
+    "database": "maya_c06_p5_wave1_rc_final_20260908",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_c06_p5_wave1_rc_final_20260908.dump",
+    "bytes": 913865,
+    "sha256": "52646f176f9f7637feaddafe0f7746d698143e2fd9553dbd73af933ed9ba6507",
+    "readable": true
+  },
+  {
+    "database": "maya_c06_p5_wave2_rc_final_20260908",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_c06_p5_wave2_rc_final_20260908.dump",
+    "bytes": 943744,
+    "sha256": "4f73c478d58ff7289fa2fd9f4d69ecd27b9cfc0fb8c14aaf82c80e3c4327bf39",
+    "readable": true
+  },
+  {
+    "database": "maya_c06_p5_wave3_rc_final_20260908",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_c06_p5_wave3_rc_final_20260908.dump",
+    "bytes": 929963,
+    "sha256": "64b19e9d6beace3f179f961ccd119d34d3d9cc778a6123f4ac92550631be1135",
+    "readable": true
+  },
+  {
+    "database": "maya_c06_p5_wave4_rc_final_20260908",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_c06_p5_wave4_rc_final_20260908.dump",
+    "bytes": 938858,
+    "sha256": "f507095d0bd8bef5225e1563f98e1205e42c499c3530fc0724c4c6e697795827",
+    "readable": true
+  },
+  {
+    "database": "maya_c06_p5_wave5_rc_final_20260908",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_c06_p5_wave5_rc_final_20260908.dump",
+    "bytes": 895885,
+    "sha256": "baf3933f91e47bf04d16f29f0b1d3336670079404629999fac18b796c3646af5",
+    "readable": true
+  },
+  {
+    "database": "maya_c06_p5_wave6_rc_final_20260908",
+    "port": 55486,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_c06_p5_wave6_rc_final_20260908.dump",
+    "bytes": 884604,
+    "sha256": "22c28a22f220d0ace9d64e86b04d1722e8b707252a4a0a25a9bab34ace812429",
+    "readable": true
+  },
+  {
+    "database": "maya_c06_p5_wave6_rc_final_fixture2_20260908",
+    "port": 55486,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-policy-approved-20260908/final-proof-database-archive/maya_c06_p5_wave6_rc_final_fixture2_20260908.dump",
+    "bytes": 891861,
+    "sha256": "313aa67230d475ccce037fc550bc633158237b2dbe1132fad3ccbcfeb071760c",
+    "readable": true
+  }
+]

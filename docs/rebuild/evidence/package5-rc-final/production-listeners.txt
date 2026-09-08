@@ -1,0 +1,11 @@
+MainPID=1614484
+Id=maya-saas.service
+ActiveState=active
+SubState=running
+
+MainPID=1614498
+Id=barbershop-bot.service
+ActiveState=active
+SubState=running
+LISTEN 0      128          0.0.0.0:8080      0.0.0.0:*    users:(("python",pid=1614498,fd=6))
+LISTEN 0      511        127.0.0.1:3107      0.0.0.0:*

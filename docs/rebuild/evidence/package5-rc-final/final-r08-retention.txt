@@ -1,0 +1,1 @@
+{"package":"R08","proof":"actual AC6 runtime","result":"PASS","erasedResolvedPayloads":2,"unknownOwnerAndRevisionHeld":true,"immutableTombstonesRetained":true,"expiredReadsHideContent":true,"withdrawalAfterRetention":true,"productionEffects":0}

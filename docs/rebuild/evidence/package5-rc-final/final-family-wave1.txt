@@ -1,0 +1,21 @@
+{
+  "package5Wave1ShadowActionClasses": "6/6",
+  "shadowDivergences": 0,
+  "executableActionClasses": "6/6",
+  "settingMutationOneTime": true,
+  "taskCreateCompleteOneTime": true,
+  "concurrentDuplicateWorkItemPossible": false,
+  "tenantIsolation": true,
+  "serverDerivedAuthority": true,
+  "package2ProjectionPreserved": true,
+  "unknownRequired": false,
+  "providerWrites": 0,
+  "productionMutations": 0,
+  "counts": {
+    "actionClasses": 6,
+    "targetMutations": 7,
+    "workItems": 3,
+    "inboxItems": 0,
+    "unknownExecutions": 0
+  }
+}

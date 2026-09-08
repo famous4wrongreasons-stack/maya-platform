@@ -1,5 +1,10 @@
 # Cycle 06 — Package 5 B29 handoff checkpoint
 
+> **Current checkpoint — Package 5 COMPLETE.** See the [Final Completion Report](CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md), [final coverage](evidence/package5-rc-final/coverage.json) and [remediation progress](evidence/package5-remainder-remediation-progress.json). Production R-C release `20260908-p5-rc-8bc03454`: all 14 packages / 24 blockers remediated; final gate 13/13 families and 32/32 surfaces PASS. B36 runtime, idempotency, concurrency and delayed resume PASS; security invalidation and G1/G2 preserved. **Chapter 6 is not complete.** The next separate cycle is **CHAPTER 6 FINAL COMPLETION / ACCEPTANCE GATE**. Chapter 7 has not started. STOP.
+
+The entries below are preserved historical checkpoints. Their pending, STOP and
+incomplete statuses describe those earlier cycles, not the current Package 5 result.
+
 > Current cycle: [Wave R-A Stage 1 consolidated assessment](CYCLE-06-PACKAGE-5-WAVE-R-A-STAGE-1-ASSESSMENT.md), accepted entry `4a253449`. **R01/B38,B39,B54; R02/B40,B41; R10/B50: existing foundation sufficient; runtime-only; no new business/schema decision.** Local foundation proofs PASS; all three ready for implementation, none ready for production. Runtime remediation was not performed in Stage 1. [Closed inventory](CYCLE-06-BLOCKING-PACKAGE-5-EXHAUSTIVE-REMAINDER-INVENTORY-COMPLETE.md) remains unchanged: 32/32 surfaces, 24 blockers, 14 packages. Package-local proof → wave proof → coordinated cutover; full Package 5 Final Gate only after all 14 packages production PASS. B36 applied schema/undeployed WIP and both proof defects preserved. Package 5 and Chapter 6 remain incomplete. Requested first STOP after Stage 1 report/push; earlier cycle instructions below are historical.
 
 > Latest Stage 1: [B37 owner/contract/schema proposal](package5-b37-owner-contract-schema-proposal.md), based on accepted `7201f7bd`. B37-A scheduled reminder and B37-B expense mutation are separate. B37 remains STOP pending contract/schema decisions; no runtime/schema/migration change. The B36 idempotency-key and concurrent-write-conflict failures remain mandatory runtime blockers.

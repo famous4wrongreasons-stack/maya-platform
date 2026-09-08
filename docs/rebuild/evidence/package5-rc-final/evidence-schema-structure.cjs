@@ -1,0 +1,16 @@
+const fs=require('node:fs'),path=require('node:path'),{createRequire}=require('node:module'),assert=require('node:assert/strict'),{createHash}=require('node:crypto');
+const req=createRequire(path.join(process.cwd(),'package.json')),{Client}=req('pg');const db=new Client({connectionString:process.env.DATABASE_URL});
+const tables=['OperationalAlertRun','NativeFeedbackRequest','NativeFeedbackRevision','PublicCommunityComment','PublicCommunityInteraction','TenantBusinessConfigurationRevision','TeamMessage','TeamAttachment','ExpenseReminderRun','ExpenseIntakeBinding','CashDeclaration'];
+const scoped=[...tables,'OwnerReportRun','ActionExecution'];
+(async()=>{await db.connect();try{await db.query('BEGIN READ ONLY');
+const columns=(await db.query(`SELECT table_name,column_name,ordinal_position,data_type,udt_name,is_nullable,column_default,character_maximum_length,datetime_precision FROM information_schema.columns WHERE table_schema='public' AND table_name=ANY($1) ORDER BY table_name,ordinal_position`,[scoped])).rows;
+assert.equal(new Set(columns.filter(c=>tables.includes(c.table_name)).map(c=>c.table_name)).size,11);assert.equal(columns.filter(c=>tables.includes(c.table_name)).length,188);
+const constraints=(await db.query(`SELECT r.relname AS table_name,c.conname,c.contype,c.condeferrable,c.condeferred,c.convalidated,pg_get_constraintdef(c.oid) AS definition FROM pg_constraint c JOIN pg_class r ON r.oid=c.conrelid JOIN pg_namespace n ON n.oid=r.relnamespace WHERE n.nspname='public' AND r.relname=ANY($1) ORDER BY r.relname,c.conname`,[scoped])).rows;
+assert(constraints.every(c=>c.convalidated));
+const indexes=(await db.query(`SELECT tablename,indexname,indexdef FROM pg_indexes WHERE schemaname='public' AND tablename=ANY($1) ORDER BY tablename,indexname`,[scoped])).rows;
+const triggers=(await db.query(`SELECT r.relname AS table_name,t.tgname,t.tgenabled,pg_get_triggerdef(t.oid) AS definition FROM pg_trigger t JOIN pg_class r ON r.oid=t.tgrelid JOIN pg_namespace n ON n.oid=r.relnamespace WHERE n.nspname='public' AND NOT t.tgisinternal AND r.relname=ANY($1) ORDER BY r.relname,t.tgname`,[scoped])).rows;
+const functions=(await db.query(`SELECT DISTINCT p.proname,pg_get_functiondef(p.oid) AS definition FROM pg_trigger t JOIN pg_class r ON r.oid=t.tgrelid JOIN pg_namespace n ON n.oid=r.relnamespace JOIN pg_proc p ON p.oid=t.tgfoid WHERE n.nspname='public' AND NOT t.tgisinternal AND r.relname=ANY($1) ORDER BY p.proname`,[scoped])).rows;
+const helpers=(await db.query(`SELECT p.proname,pg_get_functiondef(p.oid) AS definition FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname=ANY($1) ORDER BY p.proname`,[['RC_execution_set_resolved','RC_payload_claim']])).rows;assert.equal(helpers.length,2);
+const rowCounts={};for(const table of tables)rowCounts[table]=Number((await db.query(`SELECT count(*) AS count FROM "${table}"`)).rows[0].count);
+const structure={columns,constraints,indexes,triggers,functions,helpers};console.log(JSON.stringify({status:'PASS',rowCounts,newModels:11,newModelColumns:188,newPhysicalFields:197,structure,sha256:createHash('sha256').update(JSON.stringify(structure)).digest('hex'),productionWrites:0}));
+}finally{await db.query('ROLLBACK');await db.end();}})().catch(e=>{console.error(e.name);process.exitCode=1});

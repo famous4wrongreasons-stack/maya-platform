@@ -1,0 +1,38 @@
+[
+  {
+    "wave": 1,
+    "exitCode": 0,
+    "database": "maya_c06_p5_wave1_rc_final_20260908",
+    "port": 55509
+  },
+  {
+    "wave": 2,
+    "exitCode": 0,
+    "database": "maya_c06_p5_wave2_rc_final_20260908",
+    "port": 55509
+  },
+  {
+    "wave": 3,
+    "exitCode": 0,
+    "database": "maya_c06_p5_wave3_rc_final_20260908",
+    "port": 55509
+  },
+  {
+    "wave": 4,
+    "exitCode": 0,
+    "database": "maya_c06_p5_wave4_rc_final_20260908",
+    "port": 55509
+  },
+  {
+    "wave": 5,
+    "exitCode": 0,
+    "database": "maya_c06_p5_wave5_rc_final_20260908",
+    "port": 55509
+  },
+  {
+    "wave": 6,
+    "exitCode": 1,
+    "database": "maya_c06_p5_wave6_rc_final_20260908",
+    "port": 55486
+  }
+]

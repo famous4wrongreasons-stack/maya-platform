@@ -43,6 +43,32 @@ const inTenant = <T>(tenantId: string, run: () => T) =>
   context.runAsSystemTenant(tenantId, run);
 const hash = (text: string) => createHash('sha256').update(text).digest('hex');
 const failures: string[] = [];
+// This fixture creates auth/quarantine rows. The eight approved R-C payload
+// classes have separate owner/retention proofs and must never fall through to
+// this fixture's quarantine case or inherit its one-day golden cutoff.
+const ORIGINAL_WAVE6_CLASSES = [
+  'purge_auth_sessions',
+  'purge_phone_auth_codes',
+  'purge_email_auth_codes',
+  'purge_auth_flow_states',
+  'purge_auth_rate_limit_buckets',
+  'purge_ingestion_quarantine',
+] as const satisfies readonly Wave6Class[];
+const RC_PAYLOAD_PROOF_CLASSES = [
+  'purge_operational_alert_payloads',
+  'purge_native_feedback_payloads',
+  'purge_public_community_payloads',
+  'purge_superseded_business_configuration_payloads',
+  'purge_team_message_payloads',
+  'purge_team_attachment_payloads',
+  'purge_expense_reminder_payloads',
+  'purge_cash_declaration_reason_payloads',
+] as const satisfies readonly Wave6Class[];
+assert.deepEqual(
+  Object.keys(WAVE6_CLASSES).sort(),
+  [...ORIGINAL_WAVE6_CLASSES, ...RC_PAYLOAD_PROOF_CLASSES].sort(),
+  'Every maintenance class must have an explicit original or R-C proof family',
+);
 async function rejects(fn: () => Promise<unknown>, label: string) {
   let failed = false;
   try {
@@ -189,7 +215,7 @@ async function main() {
   let shadowClasses = 0;
   const protectedRows: Array<{ table: string; id: string }> = [];
   const foreignRows: Array<{ table: string; id: string }> = [];
-  for (const action of Object.keys(WAVE6_CLASSES) as Wave6Class[]) {
+  for (const action of ORIGINAL_WAVE6_CLASSES) {
     const rule = WAVE6_CLASSES[action];
     // Independent golden cutoff: no production predicate/selection helper is used.
     const duration =

@@ -1,0 +1,7016 @@
+{
+  "checkedAt": "2026-09-08T12:35:18.378039+00:00",
+  "productionWrites": 0,
+  "sites": {
+    "muzhskayaestetika.rf": {
+      "404/index.html": {
+        "sha256": "7520a20f674296e2c0857bb022b2b3081ccab8d79eb33921f5f57473e71327e1",
+        "bytes": 22803,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "404.html": {
+        "sha256": "7520a20f674296e2c0857bb022b2b3081ccab8d79eb33921f5f57473e71327e1",
+        "bytes": 22803,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/154kEom4KbcJsFUy5Ikw6/_buildManifest.js": {
+        "sha256": "faa742cd0015217c96d1920d0a4825980f1fc6f9af150bded8a440139fb5e299",
+        "bytes": 1044,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/154kEom4KbcJsFUy5Ikw6/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/D2Sy1RXE7VhimeZFHMeGD/_buildManifest.js": {
+        "sha256": "137c3b5b14fc5e480a08d12074ac150bef4358b073454119aeb3d1a85b36a53c",
+        "bytes": 1082,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/D2Sy1RXE7VhimeZFHMeGD/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/Eb0ZU79De0IhkQrufP_kk/_buildManifest.js": {
+        "sha256": "faa742cd0015217c96d1920d0a4825980f1fc6f9af150bded8a440139fb5e299",
+        "bytes": 1044,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/Eb0ZU79De0IhkQrufP_kk/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/MigPf-P7thhek9V4DRH0t/_buildManifest.js": {
+        "sha256": "faa742cd0015217c96d1920d0a4825980f1fc6f9af150bded8a440139fb5e299",
+        "bytes": 1044,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/MigPf-P7thhek9V4DRH0t/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/PWNsCWBdNmKCs3UHPugcV/_buildManifest.js": {
+        "sha256": "137c3b5b14fc5e480a08d12074ac150bef4358b073454119aeb3d1a85b36a53c",
+        "bytes": 1082,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/PWNsCWBdNmKCs3UHPugcV/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/RtXeiAGs84OdSlkqBePOe/_buildManifest.js": {
+        "sha256": "f77732176ab482350297576388587627f0e862d46d645b4e5894a9a40586e540",
+        "bytes": 1433,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/RtXeiAGs84OdSlkqBePOe/_ssgManifest.js": {
+        "sha256": "970ba094acf8eca2414c63a00e0467d4ff1164493f0e03bfe1aad6ea3d357be2",
+        "bytes": 106,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/XK0lvFmtzG4vIyvr-eWoC/_buildManifest.js": {
+        "sha256": "137c3b5b14fc5e480a08d12074ac150bef4358b073454119aeb3d1a85b36a53c",
+        "bytes": 1082,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/XK0lvFmtzG4vIyvr-eWoC/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/Y570e4w46A1sp9MvORsus/_buildManifest.js": {
+        "sha256": "f77732176ab482350297576388587627f0e862d46d645b4e5894a9a40586e540",
+        "bytes": 1433,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/Y570e4w46A1sp9MvORsus/_ssgManifest.js": {
+        "sha256": "970ba094acf8eca2414c63a00e0467d4ff1164493f0e03bfe1aad6ea3d357be2",
+        "bytes": 106,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/1148.fe2507e1b54a5a64.js": {
+        "sha256": "4899a196cb006219f4d1318ae6453476bea2d5078a59825655c427047d8ea5e9",
+        "bytes": 11218,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/1231.d1890f24846efc00.js": {
+        "sha256": "e12fc7681f84f2c2ef644657920be1d7c14f1bb9ea666ed0ec0ce3820769d8aa",
+        "bytes": 22227,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "WebSocket"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/1255-3368e83c228b97ce.js": {
+        "sha256": "38a718583b832685c22e9cfa16f918c45714f3d3fff0bf7695f6c19a28c0af0a",
+        "bytes": 173669,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/130-b040d21a9c40f423.js": {
+        "sha256": "1be12be6b744ab61f45659a7624c674cf8f2d5612e90e61765fee11b13d453e6",
+        "bytes": 16585,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/1741-03b2214644a99219.js": {
+        "sha256": "c7ac639a66f1bbedb968f1bc8c203052ca2c16ff0f1a5969228d6d364c34b431",
+        "bytes": 15893,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/1786.66b8e2e4b0ff807e.js": {
+        "sha256": "25f85b5af4d734e1511153dd39de9a15d28bf08c88ab48094daec69d3db75705",
+        "bytes": 797,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/2536-4208533d14b34ba7.js": {
+        "sha256": "3e1f664cb58949e59ef2e3f60ea6d212f31e4f259cef678811f82c62636b81be",
+        "bytes": 9127,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/2536-fa34d26b62e0c40e.js": {
+        "sha256": "2d66c72858113ee025291d95a181488f65f84e7cec95ed8f86013a390b5fc7f3",
+        "bytes": 9167,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/255-2aa030c9ba2867e3.js": {
+        "sha256": "e95785e76bdac2f10669b0527dece5faa7bf78834836493d9de38ad2a54cbab2",
+        "bytes": 173668,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/2619-3c9e02e22d10480a.js": {
+        "sha256": "7fe044bde88179fcddab68e119ff3f40e55f3a0ecd8cec7fc420b14c9f350f9b",
+        "bytes": 8538,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/2691-88a8b78823f719c2.js": {
+        "sha256": "5ecc975c11ef1963ae0aa64d2589c4cd971ce7f678022b7462b1710b6c41da5b",
+        "bytes": 17657,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/2769.5ea87fab731b4c4d.js": {
+        "sha256": "4869b4cdd4da5ef09201814000b5900e6ef76b568bb46a675a61fbcf79eb253b",
+        "bytes": 23560,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/2839.2ed9653156920be4.js": {
+        "sha256": "cdaf6e7b0aad0cee5f5797aeb310338914ec31313bbe8584bb3c6cfcf92ccf0a",
+        "bytes": 8224,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/3774-797f90c3c4bc9371.js": {
+        "sha256": "71ec53070bd2bb559a11c8ad38b91a0ab99de3197d1ba2a08c313783a6c5e372",
+        "bytes": 8776,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/434-0c71b4526ab91e62.js": {
+        "sha256": "351db41852e3cf8731ca6056104fcab7461b7ccc3083c23e781360a7810f6465",
+        "bytes": 12344,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/434-806a256abe4854e7.js": {
+        "sha256": "2e40ea8ca2e905d68a99d48bdb491b973332f0d67b352e08425db7487fa5d408",
+        "bytes": 12978,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/434-8d5a9dae7834ca96.js": {
+        "sha256": "0b48897f64d5dad102b657d30361f508bd3f8561c308d4327e5f62f319331ef1",
+        "bytes": 13118,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/434-a735f3b1f44d7fc3.js": {
+        "sha256": "1f862b574030f60d5544e171a1e9c689a4a356fb7cd401e84cea4b1ea80dc6d3",
+        "bytes": 12344,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/434-eb1bdd4a0918ae02.js": {
+        "sha256": "fed0015d6d0a7267bf9ffdf2bb24305fd627987cbc55b161b605da0a4c47b561",
+        "bytes": 12195,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/4486-69c24fa408ce8be0.js": {
+        "sha256": "f2f57c1a2f919fedfc891c52c76afc9176a432acd0971bc682f0d1e1a3335d18",
+        "bytes": 109814,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/4674-6e6293a4b533a5fd.js": {
+        "sha256": "c023ec6e0b27acadb1d2b11455cb0f2f2b8bd63241feebce3edf0e7a2305e84a",
+        "bytes": 62274,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/476-3597aec6ec512b47.js": {
+        "sha256": "dd426056ae3ad75f8d5d52c475f7bc194901c54b800733f89c86c8052f408a0b",
+        "bytes": 45966,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/486-4e48d852acd32d64.js": {
+        "sha256": "28e80de0ffc7014b675c0b401ebedb991282ccd11518235550dea818e8ccb05c",
+        "bytes": 109813,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/488-f951dea3c8b0b511.js": {
+        "sha256": "cfae9ac471959170a3c696f18d1a5b6583f588da11aca02e972ad3626264bd4b",
+        "bytes": 20375,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/4bd1b696-c023c6e3521b1417.js": {
+        "sha256": "2c752a401191671d5bbbe7514f5828bbb0a7cc50bfbe77ddaf1b1ccba4412ed2",
+        "bytes": 173019,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/4bd1b696-f785427dddbba9fb.js": {
+        "sha256": "51a7146e32f6a18a96676813fd791cd1b0265c675292acb31196720ca9e79726",
+        "bytes": 173020,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/524-3a91485d83632e2f.js": {
+        "sha256": "84252b9b5e882ddf8cacff5ae7592acab8943e68f859c91c37a1e031d77962b7",
+        "bytes": 10253,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/524-8e55f549a0edb049.js": {
+        "sha256": "dce11ea046a5d3a5db6671ccf655d9cc0b6752299676a6f604037cc566ea189b",
+        "bytes": 10220,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/524-956a15e5f7b1bc5b.js": {
+        "sha256": "21d87e5f0607df871fe9d001317a2eb8b7e68572e2517adcd3b1473a4f23b8d0",
+        "bytes": 10746,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/524-e2ac22f55086a016.js": {
+        "sha256": "e07673561d7663179756fe7f135ad3eb48a87cb8fdf4469feeeff49201332018",
+        "bytes": 10187,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/524-e81ac0ab2ee953ff.js": {
+        "sha256": "9c00d5272a572df866e8b7093925053da2bbdc4b22fdcabc324986490fc9a1e9",
+        "bytes": 9563,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/544-842c5f832fbd717c.js": {
+        "sha256": "55ce0c71a19bf4aa287c7b6f42caf6c72a318d633449feb3a26763217c38982b",
+        "bytes": 26650,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/5483.89696816b287276f.js": {
+        "sha256": "c03e61b0633c7fade0152fff644f0d18d04c6786747eead872fa7dead39e2206",
+        "bytes": 1068,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/584-f13ca9c52a444fdd.js": {
+        "sha256": "9bc6efb47e0e876e2ad742116e2482212b0b66e890bcd1c43e24fa65b911b3d0",
+        "bytes": 79850,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/619-ba102abea3e3d0e4.js": {
+        "sha256": "9541ff3dd96091ca8bebc305fb72eca68e6015a177e1d3b4aa72859dc52fbdd7",
+        "bytes": 8537,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/6434-4f518aa0b3044b08.js": {
+        "sha256": "410fc1e09c1026b59917ed5a043b2b6e4fdd5b510f56893e15a4a2404bbf6ac9",
+        "bytes": 17340,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 47,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/80-07bba35f3035a6f3.js": {
+        "sha256": "19667bbf31a3f908c4ef95e634606df03c253566b28c37573075c71296b8fbcb",
+        "bytes": 7678,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/80-3dc32ebeb11a012d.js": {
+        "sha256": "fc9b181ca34d9f3784d5891eddce545fbd64ee733e984a4a9f718f86ae60cead",
+        "bytes": 7673,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/908-3bf022751764dd10.js": {
+        "sha256": "6fded862efe4f60fc1cc0b3debd5d786ad759a742b724abbbdee414bdb77aba9",
+        "bytes": 16026,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/9915-b668ac8c1b4eeb35.js": {
+        "sha256": "2952342c0dbf02eff377f21aae120c6a10dc7520111725daf2abe79f801f30a9",
+        "bytes": 20684,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/a4634e51.a2ff7e422c8654f4.js": {
+        "sha256": "5a7b90067e9189cd63ae0bf2e9550271c8a8aff5b67d3e162adb939f48199b30",
+        "bytes": 514390,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 11,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 29,
+            "names": [
+              "exec",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/_not-found/page-c14e4e0532316658.js": {
+        "sha256": "9ef3b302192ad217465ad804ad44d6eeba36c06932039344436266153fcfc19f",
+        "bytes": 2668,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/_not-found/page-c4b31e17683a966a.js": {
+        "sha256": "cefe9a74cd3514c92b732886ce49ee998c5a99108d4974f81f6d192778f5df5b",
+        "bytes": 2674,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/account/layout-74fea319bfae0511.js": {
+        "sha256": "e475ce875c1a8546cf66196472e397cc77841f4e4185e8794cbe3688e8339193",
+        "bytes": 183,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/account/layout-f6ee3a7f54ae1f14.js": {
+        "sha256": "3cc758aa56e9184fbd1401acf04f48073b88c116575a9abb6edb8c92d23b8d42",
+        "bytes": 188,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/account/page-74cd921476c6fe4c.js": {
+        "sha256": "c6778a3778741efddf9e1f62252c397a9cba6f1cd49845afe2db1c01e41be24c",
+        "bytes": 14619,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/account/page-7a8bcb6dc87682f4.js": {
+        "sha256": "4e2e666a89b32b99ee13f7f12379dc3153298ccaa235a5513ceff9480522528a",
+        "bytes": 14142,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/account/page-9527f55252c9865f.js": {
+        "sha256": "74dfc34cb1b71a7632040e6bdb57dd43dd478499bb93093368c5b25edc58bc6c",
+        "bytes": 14569,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/account/page-aad236fe2715e62c.js": {
+        "sha256": "b23de528eb5d1bf8ac9ca85419fbf7151fdfbcf11eacf2abb96ea976d3bf9a05",
+        "bytes": 22730,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/account/page-d1151397b5bb0cde.js": {
+        "sha256": "e28ea59eb34d6e910dd44446b3dca6d8fb532afe813f1b6c2b7157c29af08842",
+        "bytes": 14561,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/apple-icon/route-02e766817fc04875.js": {
+        "sha256": "0aa6a77c07ec18279e152ea5c260db3fbd35e81e13b327347ecd519c62f9c7f7",
+        "bytes": 150,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/apple-icon/route-c1f9af37d126e610.js": {
+        "sha256": "7876c94c3669ca905fa421d44344668ddca11f6cb17e93d233d4c9ffcd3b6ad0",
+        "bytes": 162,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/booking/page-7784f02883d82392.js": {
+        "sha256": "95382735651d41c80686b173bcc0f20c4f33787060e8d3f5cbe2e50d2541760d",
+        "bytes": 16848,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/booking/page-bd2b39436ee9bbcd.js": {
+        "sha256": "54cfcc92a7302745da0de1e8d20158776019816e98157ab041c6e98626297ffe",
+        "bytes": 14444,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/booking/page-d63a7dbe25f932e0.js": {
+        "sha256": "c692da9bdc9f9041032779640895de0b8bee8213a674fca66c439035a825b6c1",
+        "bytes": 26438,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/contact/page-3a52b480b835e462.js": {
+        "sha256": "c6aee0383a543607fe79589b8aa0be94463d487b73caf096ce3d51c853f63609",
+        "bytes": 7112,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/designs/layout-c1f9af37d126e610.js": {
+        "sha256": "7876c94c3669ca905fa421d44344668ddca11f6cb17e93d233d4c9ffcd3b6ad0",
+        "bytes": 162,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/designs/page-f64d93ce93bf4182.js": {
+        "sha256": "31426ffd334471d8cb4169b78b2e17d0b1cf4cb18cff2a3ab47647fc966cc8bd",
+        "bytes": 25777,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/events/[slug]/page-8ba7ee70e8690766.js": {
+        "sha256": "3abb6ca116e53b3020a339d61b72d344bf8953dbfe57099c1d2e6a426eeeb583",
+        "bytes": 237,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/events/layout-b17c2dd74d067bca.js": {
+        "sha256": "151c9a5e97dde1c0d3e560686524b7de2e526abc199627d007279bdd3712a9c6",
+        "bytes": 208,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/events/moderation/page-1b79c8592240b05e.js": {
+        "sha256": "b0c2ee6696806492c4345f24d9ca44e82030812cfadbd5524a8dad4481895e98",
+        "bytes": 2187,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/events/moderation/page-cd155da9c5bc355a.js": {
+        "sha256": "3be46e5e941114b9eb4ec9f7c7848ebb4cf158cd4e66d9b38c97c4246a545877",
+        "bytes": 3148,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/events/page-82806ee6449ca9b6.js": {
+        "sha256": "294c644fc3739f3d420bf96e9cd772ee30a24b37bd7116b94459ab16c256bedd",
+        "bytes": 8555,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/events/post/page-d9bcfd4628ab0bea.js": {
+        "sha256": "aed9e35d7fea3af7cbc16ea7f2937479c2d5b42a28a222923ba7f8371ac6cef8",
+        "bytes": 3128,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/lab/hero/page-0c4949768944cdf2.js": {
+        "sha256": "2f48a5e73e5594591f83cc47facea20440ce4e25b46dc534c6297d6d496d15a6",
+        "bytes": 7272,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/lab/hero/page-2660acee0967bbd1.js": {
+        "sha256": "02212ef6e5273cdc0b4a7dffd13fd612a7ecad1d79e7094f2b332e4717e4cc55",
+        "bytes": 410,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/lab/hero/page-2bff86f22ea95b76.js": {
+        "sha256": "0fcbe1ed957c40b4ee7d0485ca88ce46bc84e77120fec62eca93fa4c6075c966",
+        "bytes": 185,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/lab/layout-02e766817fc04875.js": {
+        "sha256": "0aa6a77c07ec18279e152ea5c260db3fbd35e81e13b327347ecd519c62f9c7f7",
+        "bytes": 150,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/lab/layout-c1f9af37d126e610.js": {
+        "sha256": "7876c94c3669ca905fa421d44344668ddca11f6cb17e93d233d4c9ffcd3b6ad0",
+        "bytes": 162,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/lab/maya/page-9957ca8ad54962a3.js": {
+        "sha256": "26c8a0a9f3b0b7dfc9722dc3e1192151f9503aea74d6c81aee10b7e1546f2e58",
+        "bytes": 611,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/lab/maya/page-ed83208fa06f3054.js": {
+        "sha256": "66bbb691b8316f7d1c5df8cdaad6c8fcaae6d563620e7f3882519bd4a2488f79",
+        "bytes": 650,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/lab/reveal/page-67fdd3194e325112.js": {
+        "sha256": "e3b9267399046b84e100a15bb1927ab2c03b1ec50c922013c615db337c46843d",
+        "bytes": 8133,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/lab/team/page-9f68615ccf37d6f5.js": {
+        "sha256": "b2f10e3574b8b68b48ccb468ad68d6e3e42245cd3f883ccf7a5a63f5b69b9928",
+        "bytes": 2890,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/layout-087bea56668de5b5.js": {
+        "sha256": "f5d486a309f7af36d3e28abe673acc9ce59186ccbbecaf039b2602439f654756",
+        "bytes": 28929,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "WebSocket"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/layout-2c78facb9a10149b.js": {
+        "sha256": "fa8253e12dbeb2bfd6bff8fc0c28a819872e90020fb9969944f252931ced21b8",
+        "bytes": 36794,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "WebSocket",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/layout-3284dc4e91f4e3c6.js": {
+        "sha256": "4327c8515847c3fedd5385c84c18a46ea7371b4909ab8a0366a05d838a1f0dac",
+        "bytes": 28937,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "WebSocket"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/layout-41b414b2ae0b9de6.js": {
+        "sha256": "8a5e3895ecbc82ed7af3ae70d0ff1c9b168c8d9cf49c03ace7b35a617d13051d",
+        "bytes": 36761,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "WebSocket",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/layout-46416206ba70947a.js": {
+        "sha256": "956bd43bc0291a14c66995771d707c6511144e96437c2cd671ba4d8ef981bca3",
+        "bytes": 29095,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "WebSocket"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/layout-4e76624e23c93997.js": {
+        "sha256": "e5b7b286277fe6b217cec758859f1958a0df863323f0690d261efd0c609a73e5",
+        "bytes": 36137,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "WebSocket",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/layout-623ea44daae9c1c8.js": {
+        "sha256": "5b285458333e84fa4f3c9370bf5d2581ff24f63dfd813a89552c0c46f45e50bc",
+        "bytes": 4546,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/layout-654597c13bf5a5dc.js": {
+        "sha256": "0ab0fbbc56a2c373afc00d94f76bec674ddcf15fe87a95974793bc21bc17bdfa",
+        "bytes": 36858,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "WebSocket",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/layout-7ed6786dbe4d3a1e.js": {
+        "sha256": "3295b15bb0e4797ca7841cc2ec0318f2abfec0246a3fa3618bf94a05fac9a24c",
+        "bytes": 29055,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "WebSocket"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/layout-a5c64a3e0080c935.js": {
+        "sha256": "bf2b797ccaf9777dd9262a00fe665e9bf3ac4c26131ca78f42e58131c8ae377e",
+        "bytes": 4584,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/layout-b87cd8f36434b0d3.js": {
+        "sha256": "19ed331bdf072a9f1b2b5dfa4d820b44a0e4d827453bac19847bf5442cd4efe8",
+        "bytes": 37392,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "WebSocket",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/opengraph-image/route-02e766817fc04875.js": {
+        "sha256": "0aa6a77c07ec18279e152ea5c260db3fbd35e81e13b327347ecd519c62f9c7f7",
+        "bytes": 150,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/opengraph-image/route-c1f9af37d126e610.js": {
+        "sha256": "7876c94c3669ca905fa421d44344668ddca11f6cb17e93d233d4c9ffcd3b6ad0",
+        "bytes": 162,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/page-2670b15d6d42bad4.js": {
+        "sha256": "fc9ab8f9ce37adae2ddb76db77e958c1add214b76d2d833481b847b752e99f69",
+        "bytes": 56040,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/page-561e4363a737fcc4.js": {
+        "sha256": "d8f8d1e7346cffba656611943842fcd30e9d4815c4ea8d2b69a139f52b02d791",
+        "bytes": 60700,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/page-651cb04758076fb7.js": {
+        "sha256": "7a4768971ce326855ab381a40a55ebae4685452bb38e9fc6afea1eaf30345b8b",
+        "bytes": 60768,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/page-71526544156c29ba.js": {
+        "sha256": "0fa248d0bfc7064854dbad0b225b3439c7f16768f4975757d145ee0ec643bac2",
+        "bytes": 63172,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/page-9bbad5700b012122.js": {
+        "sha256": "4a8cb51127d8168efec539de112f0506c6ecf6c3aafa36bf8b2f969bf6f408da",
+        "bytes": 54447,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/page-d61136e57976e815.js": {
+        "sha256": "bc6747c689fb0ce479b53a5ceed9ba55c67f18ccac6fb7fd9b08d309432566b2",
+        "bytes": 60741,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/page-d9d9a42ba38b24d1.js": {
+        "sha256": "1973418dd9bb8b31db0cb84793657649b374c7743f4dacc9755458e9ca1e66b5",
+        "bytes": 113450,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/personal-data-consent/page-1bbef60946206dde.js": {
+        "sha256": "18ceeb10f93d0a7b23dfb7ccd6800dc87b71777ff75395b0cd3c3421c94ea5dc",
+        "bytes": 191,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/personal-data-consent/page-b17c2dd74d067bca.js": {
+        "sha256": "151c9a5e97dde1c0d3e560686524b7de2e526abc199627d007279bdd3712a9c6",
+        "bytes": 208,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/personal-data-policy/page-1bbef60946206dde.js": {
+        "sha256": "18ceeb10f93d0a7b23dfb7ccd6800dc87b71777ff75395b0cd3c3421c94ea5dc",
+        "bytes": 191,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/personal-data-policy/page-b17c2dd74d067bca.js": {
+        "sha256": "151c9a5e97dde1c0d3e560686524b7de2e526abc199627d007279bdd3712a9c6",
+        "bytes": 208,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/privacy/page-1bbef60946206dde.js": {
+        "sha256": "18ceeb10f93d0a7b23dfb7ccd6800dc87b71777ff75395b0cd3c3421c94ea5dc",
+        "bytes": 191,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/privacy/page-b17c2dd74d067bca.js": {
+        "sha256": "151c9a5e97dde1c0d3e560686524b7de2e526abc199627d007279bdd3712a9c6",
+        "bytes": 208,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/robots.txt/route-02e766817fc04875.js": {
+        "sha256": "0aa6a77c07ec18279e152ea5c260db3fbd35e81e13b327347ecd519c62f9c7f7",
+        "bytes": 150,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/robots.txt/route-c1f9af37d126e610.js": {
+        "sha256": "7876c94c3669ca905fa421d44344668ddca11f6cb17e93d233d4c9ffcd3b6ad0",
+        "bytes": 162,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/services/page-b17c2dd74d067bca.js": {
+        "sha256": "151c9a5e97dde1c0d3e560686524b7de2e526abc199627d007279bdd3712a9c6",
+        "bytes": 208,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/shop/checkout/layout-02e766817fc04875.js": {
+        "sha256": "0aa6a77c07ec18279e152ea5c260db3fbd35e81e13b327347ecd519c62f9c7f7",
+        "bytes": 150,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/shop/checkout/layout-c1f9af37d126e610.js": {
+        "sha256": "7876c94c3669ca905fa421d44344668ddca11f6cb17e93d233d4c9ffcd3b6ad0",
+        "bytes": 162,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/shop/checkout/page-37bc6779e4ad23c0.js": {
+        "sha256": "7fd6176555d6c76da834000490d5bcf15d7c4d391a594e54ecce102ae2bee088",
+        "bytes": 19353,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/shop/checkout/page-4d72d47cde495fe8.js": {
+        "sha256": "1a3826ff082f5e247ba17b6c85c51a0c87d579105e8f0a9b621a6fa788fab16b",
+        "bytes": 18729,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/shop/checkout/page-8927ca335447988c.js": {
+        "sha256": "fb1e209c121d1c3b774baa040fbbe9540ae9142dabd27988443d736ad7f276a5",
+        "bytes": 11595,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/shop/checkout/page-a231439336c1b011.js": {
+        "sha256": "b4cdde8f7453565537e73f2e3e6ee807f7cb9facb26addfaa9e5c7d4eada901a",
+        "bytes": 11575,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/shop/checkout/page-aca76db196b947ed.js": {
+        "sha256": "04f05a36e84f1f57d04e26130f7077d117b8895086932319f22e9f5272180e95",
+        "bytes": 19419,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/shop/checkout/page-cbc41ae71b294fe9.js": {
+        "sha256": "ef8f6ed82c492bc6042dc7015061bc0a8036d92598e596a70c17ba2baa71aef3",
+        "bytes": 19386,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/shop/checkout/page-cbee65d19e68591a.js": {
+        "sha256": "2214693776b6c230fecdbb39220fb0de04d71ae1cf60734de174fd79cfa7204c",
+        "bytes": 11237,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/shop/checkout/page-edcd0bc6176692a7.js": {
+        "sha256": "2830b63aacfaaaf5b77bc1650540015229cd73d62ed65b7a747b257fa722cce0",
+        "bytes": 19912,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/shop/layout-48ef488c6189a880.js": {
+        "sha256": "611fe5e0371705f663e5bb20fbc0a0e53fafc85965afc02191dc3fc62c07b203",
+        "bytes": 9143,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/shop/layout-9bd9bef8ba1b9ae4.js": {
+        "sha256": "38a1b848d599be48352c52daaa574ec6cd7e0e2826ae0db9a0622ed0802382fd",
+        "bytes": 1989,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/shop/layout-af4122403752bb64.js": {
+        "sha256": "668ee57f73dfe578fc57e3702f4f7dfb911b6e5010eff5b8a21abab7f9b345fe",
+        "bytes": 1648,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/shop/layout-cc9db4d9bb328052.js": {
+        "sha256": "9e61fe9db033dcb7228f59ad967893c103ba1acb11edf05beff7417f33cdfd14",
+        "bytes": 9767,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/shop/layout-d1bf3d440badaa18.js": {
+        "sha256": "5f1f44d1441844ffe2b174400a2476b7384996b3c340dbefba8f90dab2921aaf",
+        "bytes": 9800,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/shop/layout-df00a38a3bf6bd79.js": {
+        "sha256": "ba8ae9bfe7dd42eef34f29df8c17a375964c7e289cf8b0c1c468daf6f7a09bb0",
+        "bytes": 9833,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/shop/layout-f7a627746e39458b.js": {
+        "sha256": "df08c02223ece7b88361f82d5b5e220549d781fb5baa27cdcab22667810d5fc4",
+        "bytes": 10326,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/app/shop/page-ccbbc083363212e0.js": {
+        "sha256": "d6fffd1a2997b588fa7afd327c53c7d9782dd64bd212796f052267298a2476d8",
+        "bytes": 10384,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/shop/page-f3d2c761288b772f.js": {
+        "sha256": "6d06ad5b1ece02c31691ae17b50687b54eec30952b084c2ad7277c49800f0989",
+        "bytes": 5500,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/showcase/layout-52cca7076c038897.js": {
+        "sha256": "b9406deb021b745d73374f9897ca6bccb3a4407f70c75b5707b32b6128ff76bd",
+        "bytes": 334,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/showcase/layout-7df153355b102200.js": {
+        "sha256": "177b33a567177c1b5ace922e45bb23ba7ccb2975c03e7227bdd2489a38595aa8",
+        "bytes": 339,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/showcase/page-c84dcd9deaf51162.js": {
+        "sha256": "1d135d8ea74a09b44d506be6b18cbca8a638165ae1e2eeb1a030784b46d4c88c",
+        "bytes": 8094,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/showcase/page-ec8cddf9d4917e13.js": {
+        "sha256": "84de13451292397a572fd6d4a68f54416f18e95f204355011b1ec93a8bc10708",
+        "bytes": 8382,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/sitemap.xml/route-02e766817fc04875.js": {
+        "sha256": "0aa6a77c07ec18279e152ea5c260db3fbd35e81e13b327347ecd519c62f9c7f7",
+        "bytes": 150,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/app/sitemap.xml/route-c1f9af37d126e610.js": {
+        "sha256": "7876c94c3669ca905fa421d44344668ddca11f6cb17e93d233d4c9ffcd3b6ad0",
+        "bytes": 162,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/b536a0f1-6ed2f7d37b5ff52e.js": {
+        "sha256": "dd113c8ec03de6b31a610d8c8d3cd6f4828e6aab8e5b38bf9047042ee5361754",
+        "bytes": 348171,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 336,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 358,
+            "names": [
+              "exec"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/bd904a5c-a5a651d0034fd185.js": {
+        "sha256": "b22c21121f562fcb2e4b235bacd62bf06b708fbcd8c168ea6cfc44fc7064f59e",
+        "bytes": 233582,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/c15bf2b0-52e8419f34af26ab.js": {
+        "sha256": "35b9dfb5bda8cc8b804b556ed6238972f332e3840fca2e0a18d45df149e7f1d9",
+        "bytes": 51544,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/c15bf2b0-bfa95b308e62c6cc.js": {
+        "sha256": "a596394ce5413a0b4891b5431f46811fcf1e9598b314363be5bbf8f78c204614",
+        "bytes": 51545,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/framework-2c534e0e662575a2.js": {
+        "sha256": "66276192870a9c5457ab9dc015e83fe40f7ce32cb1422fd7d7aa783e616b0c98",
+        "bytes": 189765,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/framework-79ec8b086f68767a.js": {
+        "sha256": "bf90b320f5aec051cf21efb3bd8ddbdb7fdc2057c2191421668989e55c4867f1",
+        "bytes": 189766,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/main-842afbc0afd8dd5d.js": {
+        "sha256": "a7e4dc1f517da04acbe7f9f3a70c2d44b9e65e8358cc46ca591b37c959b00a8c",
+        "bytes": 128331,
+        "pathRefs": [
+          "/api",
+          "/api/"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/main-app-22b672d3c571d344.js": {
+        "sha256": "ae6052719cee328ba7b824a59fb8165235fb4f24d442e1a1b70e0bddc9dfb7bf",
+        "bytes": 560,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/main-app-4b0c981f9097eb75.js": {
+        "sha256": "1b3b6a7eb812dac09264978363a18670bb1a5bbee952a1996828318696fa12ae",
+        "bytes": 557,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/main-e49bb64ba83a6e0e.js": {
+        "sha256": "a997447a483cd83f652343bca47e61fa42a9c27a615fb973030bdb6c3a3a763d",
+        "bytes": 128329,
+        "pathRefs": [
+          "/api",
+          "/api/"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/pages/_app-6c8c2371b16a04b8.js": {
+        "sha256": "be778b8928896623978f1768018e204a287148df6f77ada4ff0bba6e4ba88ec4",
+        "bytes": 236,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/pages/_app-7d307437aca18ad4.js": {
+        "sha256": "797ae9e9f9ae364b4152a86f0ab44d686563124477b6cb31a0f0a803243767a3",
+        "bytes": 234,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/pages/_error-94812ad32cad7365.js": {
+        "sha256": "5092166a2a0f513baeedb5b6be955c8060e8f84108a1243a65033def98c82aac",
+        "bytes": 221,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/pages/_error-cb2a52f75f2162e2.js": {
+        "sha256": "caa848d8df48ee6a9872ae21aa7679970d832c8d0aa3611c517214e562f8aadf",
+        "bytes": 218,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/polyfills-42372ed130431b0a.js": {
+        "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683",
+        "bytes": 112594,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec"
+            ]
+          }
+        ]
+      },
+      "_next/static/chunks/webpack-74bfe9e8278117c1.js": {
+        "sha256": "0f7f83c8b692358f03982f63de3bed9cd61a1ddd2abe026a36566dd32ca48754",
+        "bytes": 3456,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/webpack-9ec1bc9e7f4499a7.js": {
+        "sha256": "1f516ec8871352834aa0e5b246734d5bafc970f72fd5475627685e70dcc25b1f",
+        "bytes": 3414,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/chunks/webpack-f6f9393f348e8431.js": {
+        "sha256": "914b281539c65395111dc45d0418b56b3e956f376a6ddaa5967311921a3e6303",
+        "bytes": 3673,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/cxaV7LcYwXhRYJD1AcGor/_buildManifest.js": {
+        "sha256": "137c3b5b14fc5e480a08d12074ac150bef4358b073454119aeb3d1a85b36a53c",
+        "bytes": 1082,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/cxaV7LcYwXhRYJD1AcGor/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/dvuUm3MNEKTXb3yIOZ3H-/_buildManifest.js": {
+        "sha256": "137c3b5b14fc5e480a08d12074ac150bef4358b073454119aeb3d1a85b36a53c",
+        "bytes": 1082,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/dvuUm3MNEKTXb3yIOZ3H-/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/gCUsfK-i3XkE7rxE4LQ7P/_buildManifest.js": {
+        "sha256": "137c3b5b14fc5e480a08d12074ac150bef4358b073454119aeb3d1a85b36a53c",
+        "bytes": 1082,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/gCUsfK-i3XkE7rxE4LQ7P/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/nq3dlzVrH0khTMIBFefTN/_buildManifest.js": {
+        "sha256": "137c3b5b14fc5e480a08d12074ac150bef4358b073454119aeb3d1a85b36a53c",
+        "bytes": 1082,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/nq3dlzVrH0khTMIBFefTN/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/vwDpcJZdoqNHb9L8YZXJ2/_buildManifest.js": {
+        "sha256": "137c3b5b14fc5e480a08d12074ac150bef4358b073454119aeb3d1a85b36a53c",
+        "bytes": 1082,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/vwDpcJZdoqNHb9L8YZXJ2/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/xdMo76SL7CQhhnJ79nb0l/_buildManifest.js": {
+        "sha256": "faa742cd0015217c96d1920d0a4825980f1fc6f9af150bded8a440139fb5e299",
+        "bytes": 1044,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/xdMo76SL7CQhhnJ79nb0l/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/xsxh41q62iTUx_-wNNZOy/_buildManifest.js": {
+        "sha256": "137c3b5b14fc5e480a08d12074ac150bef4358b073454119aeb3d1a85b36a53c",
+        "bytes": 1082,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/xsxh41q62iTUx_-wNNZOy/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/yw-r8ZZ4Si5HekNYkFmzY/_buildManifest.js": {
+        "sha256": "137c3b5b14fc5e480a08d12074ac150bef4358b073454119aeb3d1a85b36a53c",
+        "bytes": 1082,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "_next/static/yw-r8ZZ4Si5HekNYkFmzY/_ssgManifest.js": {
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00",
+        "bytes": 80,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "account/index.html": {
+        "sha256": "2bd503e975e42b5722a16b73f168b924d598df09c9073a352170fd3b7ec79a83",
+        "bytes": 24962,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "app/api-proxy.codex-loyalty-20260721.php": {
+        "sha256": "1460bc8d30b5eea2b8347ed8b3f60fae1c545669d980d58394e77b5b99d40ac6",
+        "bytes": 122317,
+        "pathRefs": [
+          "/api/applogin/poll",
+          "/api/applogin/start",
+          "/api/auth/phone/start",
+          "/api/auth/status",
+          "/api/auth/vk",
+          "/api/auth/vk-sdk",
+          "/api/auth/yandex",
+          "/api/auth/yandex/start",
+          "/api/booking/prefill",
+          "/api/cabinet/link-phone",
+          "/api/cabinet/me",
+          "/api/cabinet/me-via-login",
+          "/api/cabinet/me-via-session",
+          "/api/cabinet/notify-prefs",
+          "/api/cert/create",
+          "/api/chat",
+          "/api/chat/delete",
+          "/api/chat/history",
+          "/api/chat/stream",
+          "/api/client/book-with-loyalty",
+          "/api/client/cancel-record",
+          "/api/client/reschedule-record",
+          "/api/consent/status",
+          "/api/consent/submit",
+          "/api/god/billing",
+          "/api/god/health",
+          "/api/god/overview",
+          "/api/god/subscribers",
+          "/api/me/photo",
+          "/api/nearest-slot",
+          "/api/panel/",
+          "/api/panel/action/evaluate",
+          "/api/panel/autonomy/tick",
+          "/api/panel/autopilot/supervise",
+          "/api/panel/broadcast",
+          "/api/panel/client_search",
+          "/api/panel/command_center",
+          "/api/panel/control/create",
+          "/api/panel/control/update",
+          "/api/panel/daily_report",
+          "/api/panel/dashboard",
+          "/api/panel/execution/loop",
+          "/api/panel/job/run",
+          "/api/panel/journal",
+          "/api/panel/journal_attendance",
+          "/api/panel/journal_cancel",
+          "/api/panel/journal_create",
+          "/api/panel/journal_reschedule",
+          "/api/panel/managers",
+          "/api/panel/master/clients",
+          "/api/panel/master/day",
+          "/api/panel/master/overview",
+          "/api/panel/masters_stats",
+          "/api/panel/me",
+          "/api/panel/my_earnings",
+          "/api/panel/plan_target",
+          "/api/panel/redeem",
+          "/api/panel/report_pdf",
+          "/api/panel/reviews",
+          "/api/panel/salary",
+          "/api/panel/salon_stats",
+          "/api/panel/salon_today",
+          "/api/panel/team",
+          "/api/panel/waitlist",
+          "/api/promo_gift",
+          "/api/push/subscribe",
+          "/api/set-visit-mood",
+          "/api/sub/create",
+          "/api/tips/sent"
+        ],
+        "phpActions": [
+          "analyze_face",
+          "applogin_poll",
+          "applogin_start",
+          "auth_phone_start",
+          "auth_status",
+          "booking_prefill",
+          "cabinet_link_phone",
+          "cabinet_me",
+          "cabinet_me_login",
+          "cabinet_session",
+          "cert_create",
+          "chat",
+          "chat_delete",
+          "chat_history",
+          "chat_stream",
+          "client_book_loyalty",
+          "client_cancel_record",
+          "client_reschedule_record",
+          "consent_status",
+          "consent_submit",
+          "create_record",
+          "get_dates",
+          "get_services",
+          "get_times",
+          "god_billing",
+          "god_health",
+          "god_overview",
+          "god_subscribers",
+          "haircut_status",
+          "me_photo",
+          "native_feedback",
+          "nearest_slot",
+          "notify_prefs",
+          "panel_action_evaluate",
+          "panel_autonomy_tick",
+          "panel_autopilot_supervise",
+          "panel_broadcast",
+          "panel_client_search",
+          "panel_command_center",
+          "panel_control_create",
+          "panel_control_update",
+          "panel_daily_report",
+          "panel_dashboard",
+          "panel_execution_loop",
+          "panel_job_run",
+          "panel_journal",
+          "panel_journal_add_service",
+          "panel_journal_attendance",
+          "panel_journal_cancel",
+          "panel_journal_create",
+          "panel_journal_pay",
+          "panel_journal_record",
+          "panel_journal_reschedule",
+          "panel_journal_set_client_data",
+          "panel_journal_set_client_name",
+          "panel_journal_set_services",
+          "panel_managers",
+          "panel_master_clients",
+          "panel_master_day",
+          "panel_master_overview",
+          "panel_masters_stats",
+          "panel_me",
+          "panel_my_earnings",
+          "panel_plan_target",
+          "panel_redeem",
+          "panel_report_pdf",
+          "panel_reviews",
+          "panel_salary",
+          "panel_salon_stats",
+          "panel_salon_today",
+          "panel_team",
+          "panel_waitlist",
+          "promo_gift",
+          "push_subscribe",
+          "send_sms",
+          "set_visit_mood",
+          "sub_create",
+          "team_chat_fetch",
+          "team_chat_media",
+          "team_chat_send",
+          "team_chat_upload_abort",
+          "team_chat_upload_chunk",
+          "team_chat_upload_finish",
+          "team_chat_upload_init",
+          "tg_login_verify",
+          "tip_sent",
+          "try_haircut",
+          "verify_sms",
+          "version",
+          "vk_auth",
+          "vk_sdk_auth",
+          "yandex_auth",
+          "yandex_start"
+        ],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 86,
+            "names": [
+              "file_put_contents"
+            ]
+          },
+          {
+            "line": 160,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 188,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 209,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 229,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 248,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 269,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 290,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 312,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 332,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 361,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 394,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 474,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 562,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 598,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 640,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 684,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 718,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 755,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 789,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 826,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 864,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 898,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 943,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 979,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1016,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1054,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1101,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1138,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1175,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1212,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1253,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1290,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1330,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1366,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1404,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1444,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1481,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1514,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1544,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1574,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1603,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1633,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1655,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1678,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1704,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1728,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1753,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1781,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1807,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1848,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1885,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1914,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1947,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1980,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2019,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2057,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2092,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2149,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2178,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2218,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2257,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2294,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2332,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2366,
+            "names": [
+              "curl_exec"
+            ]
+          }
+        ]
+      },
+      "app/api-proxy.php": {
+        "sha256": "b1006160a28e66448886bdc4b520a2d94021121748259c2cd1aeefda5f1aaaa0",
+        "bytes": 116748,
+        "pathRefs": [
+          "/api/applogin/poll",
+          "/api/applogin/start",
+          "/api/auth/phone/start",
+          "/api/auth/status",
+          "/api/auth/vk",
+          "/api/auth/vk-sdk",
+          "/api/auth/yandex",
+          "/api/auth/yandex/start",
+          "/api/booking/prefill",
+          "/api/cabinet/me",
+          "/api/cabinet/me-via-login",
+          "/api/cabinet/me-via-session",
+          "/api/cert/create",
+          "/api/chat",
+          "/api/chat/history",
+          "/api/chat/stream",
+          "/api/client/book-with-loyalty",
+          "/api/client/cancel-record",
+          "/api/client/reschedule-record",
+          "/api/god/billing",
+          "/api/god/health",
+          "/api/god/overview",
+          "/api/god/subscribers",
+          "/api/me/photo",
+          "/api/nearest-slot",
+          "/api/panel/",
+          "/api/panel/action/evaluate",
+          "/api/panel/autonomy/tick",
+          "/api/panel/autopilot/supervise",
+          "/api/panel/client_search",
+          "/api/panel/command_center",
+          "/api/panel/control/create",
+          "/api/panel/control/update",
+          "/api/panel/daily_report",
+          "/api/panel/dashboard",
+          "/api/panel/execution/loop",
+          "/api/panel/job/run",
+          "/api/panel/journal",
+          "/api/panel/journal_attendance",
+          "/api/panel/journal_cancel",
+          "/api/panel/journal_create",
+          "/api/panel/journal_reschedule",
+          "/api/panel/managers",
+          "/api/panel/master/clients",
+          "/api/panel/master/day",
+          "/api/panel/master/overview",
+          "/api/panel/masters_stats",
+          "/api/panel/me",
+          "/api/panel/my_earnings",
+          "/api/panel/plan_target",
+          "/api/panel/redeem",
+          "/api/panel/report_pdf",
+          "/api/panel/reviews",
+          "/api/panel/salary",
+          "/api/panel/salon_stats",
+          "/api/panel/salon_today",
+          "/api/panel/team",
+          "/api/panel/waitlist",
+          "/api/promo_gift",
+          "/api/push/subscribe",
+          "/api/push/unsubscribe",
+          "/api/sub/create"
+        ],
+        "phpActions": [
+          "analyze_face",
+          "applogin_poll",
+          "applogin_start",
+          "auth_phone_start",
+          "auth_status",
+          "booking_prefill",
+          "cabinet_link_phone",
+          "cabinet_me",
+          "cabinet_me_login",
+          "cabinet_session",
+          "cert_create",
+          "chat",
+          "chat_delete",
+          "chat_history",
+          "chat_stream",
+          "client_book_loyalty",
+          "client_cancel_record",
+          "client_link_consume",
+          "client_reschedule_record",
+          "consent_status",
+          "consent_submit",
+          "create_record",
+          "get_dates",
+          "get_services",
+          "get_times",
+          "god_billing",
+          "god_health",
+          "god_overview",
+          "god_subscribers",
+          "haircut_status",
+          "me_photo",
+          "native_feedback",
+          "nearest_slot",
+          "notify_prefs",
+          "panel_action_evaluate",
+          "panel_autonomy_tick",
+          "panel_autopilot_supervise",
+          "panel_broadcast",
+          "panel_client_search",
+          "panel_command_center",
+          "panel_control_create",
+          "panel_control_update",
+          "panel_daily_report",
+          "panel_dashboard",
+          "panel_execution_loop",
+          "panel_job_run",
+          "panel_journal",
+          "panel_journal_add_service",
+          "panel_journal_attendance",
+          "panel_journal_cancel",
+          "panel_journal_create",
+          "panel_journal_pay",
+          "panel_journal_record",
+          "panel_journal_reschedule",
+          "panel_journal_set_client_data",
+          "panel_journal_set_client_name",
+          "panel_journal_set_services",
+          "panel_managers",
+          "panel_master_clients",
+          "panel_master_day",
+          "panel_master_overview",
+          "panel_masters_stats",
+          "panel_me",
+          "panel_my_earnings",
+          "panel_plan_target",
+          "panel_redeem",
+          "panel_report_pdf",
+          "panel_reviews",
+          "panel_salary",
+          "panel_salon_stats",
+          "panel_salon_today",
+          "panel_team",
+          "panel_waitlist",
+          "promo_gift",
+          "push_subscribe",
+          "push_unsubscribe",
+          "send_sms",
+          "set_visit_mood",
+          "sub_create",
+          "team_chat_fetch",
+          "team_chat_media",
+          "team_chat_send",
+          "team_chat_upload_abort",
+          "team_chat_upload_chunk",
+          "team_chat_upload_finish",
+          "team_chat_upload_init",
+          "tg_login_verify",
+          "tip_sent",
+          "try_haircut",
+          "verify_sms",
+          "version",
+          "vk_auth",
+          "vk_sdk_auth",
+          "yandex_auth",
+          "yandex_start"
+        ],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 88,
+            "names": [
+              "file_put_contents"
+            ]
+          },
+          {
+            "line": 174,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 202,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 223,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 243,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 262,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 298,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 319,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 341,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 361,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 458,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 546,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 585,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 627,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 674,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 708,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 745,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 779,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 816,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 854,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 888,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 951,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 987,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1024,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1062,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1109,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1146,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1183,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1220,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1261,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1298,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1338,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1374,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1422,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1459,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1492,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1522,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1552,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1581,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1611,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1633,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1664,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1688,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1713,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1741,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1767,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1808,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1845,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1874,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1907,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1940,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 1979,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2021,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2079,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2108,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2159,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2196,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 2234,
+            "names": [
+              "curl_exec"
+            ]
+          }
+        ]
+      },
+      "app/index.backup-20260731-anton-analytics.html": {
+        "sha256": "b2d84aeaf5501e0b417c42fc4bb0473fd216cdfb0e9568caec9b911df353d7ab",
+        "bytes": 2121618,
+        "pathRefs": [
+          "/api",
+          "/api/billing/plans",
+          "/api/mobile/pwa/",
+          "/app",
+          "/app/",
+          "/app/service-worker.js",
+          "/appointments",
+          "/appointments/",
+          "/appointments/my",
+          "/appointments/preview",
+          "/auth/email/start",
+          "/auth/email/verify",
+          "/auth/login",
+          "/auth/logout",
+          "/auth/oauth/",
+          "/auth/phone/",
+          "/auth/phone/start",
+          "/auth/phone/verify",
+          "/auth/refresh",
+          "/auth/sessions",
+          "/auth/sessions/",
+          "/internal-calendar/journal?",
+          "/internal-calendar/providers/",
+          "/internal-calendar/services",
+          "/internal-calendar/services/",
+          "/internal-calendar/setup"
+        ],
+        "phpActions": [],
+        "uiActions": [
+          "panel_broadcast",
+          "panel_daily_report",
+          "panel_dashboard",
+          "panel_job_run",
+          "panel_master_overview",
+          "panel_me",
+          "panel_redeem",
+          "panel_reviews",
+          "panel_team",
+          "panel_waitlist"
+        ],
+        "sinkMarkers": [
+          {
+            "line": 52,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 712,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 728,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 754,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 776,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4443,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 4495,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4689,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4764,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4782,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4821,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4908,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4915,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4963,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4980,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4986,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5073,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5103,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5139,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5168,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5930,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 6521,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8312,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8319,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8334,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8477,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8547,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9527,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9570,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9615,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9810,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11238,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11263,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11268,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11468,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11473,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11631,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11760,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11873,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11899,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12184,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 12191,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 12210,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 12454,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12561,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12567,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12586,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12746,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12781,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12804,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12812,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12992,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12994,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13193,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13457,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13482,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13645,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13737,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13966,
+            "names": [
+              "WebSocket"
+            ]
+          },
+          {
+            "line": 14241,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14289,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14327,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14358,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14796,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15336,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16750,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16803,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16843,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17543,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18146,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18161,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18265,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18317,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18791,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18801,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18889,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18914,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19327,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19770,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19785,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21226,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21639,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21835,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21847,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21863,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21924,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21942,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23310,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23357,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23395,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23483,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23531,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23563,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23574,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23666,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23735,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23955,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 25508,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26986,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29355,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29420,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29494,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29789,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29791,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 30829,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 30887,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31237,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31241,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31247,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31507,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31598,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31629,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31718,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31758,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31784,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31992,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 32038,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 32240,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 32300,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "app/index.codex-loyalty-20260721.html": {
+        "sha256": "23e03edb05a6ff07eaa7d81338092796fe9868a4b061cb47d6a834dcf94bce5c",
+        "bytes": 2123462,
+        "pathRefs": [
+          "/api",
+          "/api/billing/plans",
+          "/api/mobile/pwa/",
+          "/app",
+          "/app/",
+          "/app/service-worker.js",
+          "/appointments",
+          "/appointments/",
+          "/appointments/my",
+          "/appointments/preview",
+          "/auth/email/start",
+          "/auth/email/verify",
+          "/auth/login",
+          "/auth/logout",
+          "/auth/oauth/",
+          "/auth/phone/",
+          "/auth/phone/start",
+          "/auth/phone/verify",
+          "/auth/refresh",
+          "/auth/sessions",
+          "/auth/sessions/",
+          "/internal-calendar/journal?",
+          "/internal-calendar/providers/",
+          "/internal-calendar/services",
+          "/internal-calendar/services/",
+          "/internal-calendar/setup"
+        ],
+        "phpActions": [],
+        "uiActions": [
+          "panel_broadcast",
+          "panel_daily_report",
+          "panel_dashboard",
+          "panel_job_run",
+          "panel_master_overview",
+          "panel_me",
+          "panel_redeem",
+          "panel_reviews",
+          "panel_team",
+          "panel_waitlist"
+        ],
+        "sinkMarkers": [
+          {
+            "line": 52,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 722,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 738,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 764,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 786,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4349,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 4401,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4595,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4670,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4688,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4727,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4814,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4821,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4869,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4886,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4892,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4979,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5009,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5045,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5074,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5836,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 6427,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8218,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8225,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8240,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8383,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8453,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9433,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9476,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9521,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9716,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11144,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11169,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11174,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11474,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11479,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11651,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11781,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11894,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11920,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12205,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 12212,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 12231,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 12476,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12583,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12589,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12608,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12768,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12803,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12826,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12834,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13014,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13016,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13256,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13524,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13549,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13712,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13804,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14033,
+            "names": [
+              "WebSocket"
+            ]
+          },
+          {
+            "line": 14308,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14356,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14394,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14425,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14863,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15523,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16937,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16990,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17030,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17730,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18333,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18348,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18452,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18504,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18978,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18988,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19076,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19101,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19514,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19957,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19972,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21413,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21826,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22022,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22034,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22050,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22111,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22129,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23485,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23532,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23567,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23629,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23677,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23709,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23720,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23766,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23834,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23984,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 25373,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26851,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29220,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29285,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29359,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29654,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29656,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 30672,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 30730,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31080,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31084,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31090,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31350,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31441,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31472,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31561,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31601,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31627,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31835,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31881,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 32083,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 32143,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "app/index.html": {
+        "sha256": "784b68630d659a5aceb9832d84f6ebd5c6519a1ecd0a15adcbe5e5dd029607b6",
+        "bytes": 2444044,
+        "pathRefs": [
+          "/api",
+          "/api/billing/checkout",
+          "/api/billing/plans",
+          "/api/mobile/pwa/",
+          "/app",
+          "/app/",
+          "/app/service-worker.js",
+          "/appointments",
+          "/appointments/",
+          "/appointments/my",
+          "/appointments/preview",
+          "/auth/email/start",
+          "/auth/email/verify",
+          "/auth/login",
+          "/auth/logout",
+          "/auth/oauth/",
+          "/auth/oauth/links",
+          "/auth/phone/",
+          "/auth/phone/start",
+          "/auth/phone/verify",
+          "/auth/refresh",
+          "/auth/sessions",
+          "/auth/sessions/",
+          "/internal-calendar/journal?",
+          "/internal-calendar/providers",
+          "/internal-calendar/providers/",
+          "/internal-calendar/services",
+          "/internal-calendar/services/",
+          "/internal-calendar/setup"
+        ],
+        "phpActions": [],
+        "uiActions": [
+          "panel_broadcast",
+          "panel_daily_report",
+          "panel_dashboard",
+          "panel_job_run",
+          "panel_master_overview",
+          "panel_me",
+          "panel_redeem",
+          "panel_reviews",
+          "panel_team",
+          "panel_waitlist"
+        ],
+        "sinkMarkers": [
+          {
+            "line": 60,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 827,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 838,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 840,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 847,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 867,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 884,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 910,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 945,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1018,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1065,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4625,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 4948,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 5000,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5216,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5328,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5346,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5387,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5450,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5641,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5681,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5738,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5745,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5794,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5811,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5817,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5906,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5936,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5972,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5995,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 6016,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 6863,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7455,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9336,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9343,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9358,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9502,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9572,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 10797,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 10840,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 10885,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12706,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12731,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12736,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13081,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13101,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13323,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13467,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13727,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13753,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14095,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 14102,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 14121,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 14389,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14514,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14520,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14539,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14608,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14653,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14665,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14692,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14694,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14701,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14736,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14740,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14747,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14756,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14933,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14978,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15002,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15022,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15039,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15042,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15046,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15056,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15326,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15328,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15541,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16055,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16147,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16367,
+            "names": [
+              "WebSocket"
+            ]
+          },
+          {
+            "line": 16642,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16690,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16728,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16759,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17197,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19133,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19186,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19226,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19926,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20529,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20547,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20676,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20730,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21296,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21321,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21792,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22302,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22334,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23771,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 24184,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 24463,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 24475,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 24491,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 24552,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 24570,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26006,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26049,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26109,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26236,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26275,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26363,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26412,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26445,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26457,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26555,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26647,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26880,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 28438,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29761,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 30725,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 33117,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 33182,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 33256,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 33551,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 33553,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 34709,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 34767,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35135,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35139,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35145,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35151,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35425,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35513,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35577,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35666,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35706,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35732,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35952,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35998,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 36230,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 36290,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "app/maya-native-api.php": {
+        "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+        "bytes": 6662,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 151,
+            "names": [
+              "curl_exec"
+            ]
+          }
+        ]
+      },
+      "app/package5-b35-bulk-proxy.php": {
+        "sha256": "140b651a2fdf8ea1abb3bb112312ed2ce5c0e54deebb8ed0f6b3a7fdb86d59e9",
+        "bytes": 2027,
+        "pathRefs": [
+          "/api/panel/broadcast"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 24,
+            "names": [
+              "curl_exec"
+            ]
+          }
+        ]
+      },
+      "app/package5-client-consent-proxy.php": {
+        "sha256": "267383a99603957efce1d515346a0c32760847f341e1f85181859384cd883c69",
+        "bytes": 3120,
+        "pathRefs": [
+          "/api/cabinet/link-phone",
+          "/api/cabinet/notify-prefs",
+          "/api/client-link/consume",
+          "/api/client/feedback",
+          "/api/consent/status",
+          "/api/consent/submit",
+          "/api/set-visit-mood"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 35,
+            "names": [
+              "curl_exec"
+            ]
+          }
+        ]
+      },
+      "app/service-worker.js": {
+        "sha256": "8e5cbb806ecacad22337e442e5e01a3b37a7e07b3462fc0f98f9e895ee0a2f75",
+        "bytes": 3060,
+        "pathRefs": [
+          "/app",
+          "/app/",
+          "/app/apple-touch-icon.png"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "app/site-community-proxy.php": {
+        "sha256": "bc2540b99d9b59c6bf09dd9f7f9c56b59c3a5f71c72c44c590182a570aa52a16",
+        "bytes": 3460,
+        "pathRefs": [
+          "/api/site/community/"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 54,
+            "names": [
+              "curl_exec"
+            ]
+          }
+        ]
+      },
+      "app/site-publications-proxy.php": {
+        "sha256": "e0c930b3e4bb6ee35289c075097a5e9b6a5ab179a5e1f10fc00f4fbbd0071f97",
+        "bytes": 3117,
+        "pathRefs": [
+          "/api/site/post-media/",
+          "/api/site/posts"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 58,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 65,
+            "names": [
+              "curl_exec"
+            ]
+          }
+        ]
+      },
+      "app/tenant-config.php": {
+        "sha256": "0a2bb2734d619ed5c5330a057477c6dd017d0b6dc71063b05cb9bff9c8b59c5c",
+        "bytes": 797,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 13,
+            "names": [
+              "curl_exec"
+            ]
+          }
+        ]
+      },
+      "app/tenant-test.html": {
+        "sha256": "4d9fc3528ca88f6ecd43e93594814e8eaa60de4ceec82b17166595927276b4e5",
+        "bytes": 1126060,
+        "pathRefs": [
+          "/api/tenant-config",
+          "/app",
+          "/app/",
+          "/app/service-worker.js",
+          "/appointments/preview",
+          "/auth/login",
+          "/auth/register"
+        ],
+        "phpActions": [],
+        "uiActions": [
+          "panel_broadcast",
+          "panel_daily_report",
+          "panel_dashboard",
+          "panel_job_run",
+          "panel_master_overview",
+          "panel_me",
+          "panel_redeem",
+          "panel_reviews",
+          "panel_team",
+          "panel_waitlist"
+        ],
+        "sinkMarkers": [
+          {
+            "line": 486,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 3794,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5362,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 6997,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7162,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7202,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7244,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7390,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8417,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8499,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8705,
+            "names": [
+              "WebSocket"
+            ]
+          },
+          {
+            "line": 8941,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8984,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9015,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9043,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9564,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 10978,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11031,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11071,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11771,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12237,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12289,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12743,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 12753,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13041,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13424,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13565,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13937,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13948,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13959,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 14005,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15251,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15298,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15333,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15395,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15443,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15475,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15486,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15532,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15600,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15750,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17139,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18582,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20921,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20986,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21060,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21355,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21357,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22250,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22254,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22260,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22512,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22580,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22611,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22699,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22845,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22891,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 22989,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "app/tg-config.php": {
+        "sha256": "dc9f21ddb3fc6afeb2f9bb289bd7add07b25a6260f0d8329e5a0626a6ce21a68",
+        "bytes": 209,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "booking/index.html": {
+        "sha256": "130cd1993ebd1ec2b95f9de19edf5fb6a086ee949f72d6e40f06deb3c8f2b5a2",
+        "bytes": 28189,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "events/moderation/index.html": {
+        "sha256": "746fdf1a3cdefe243e368dfd3aa525f586cda534876854f62eda79e93327a34a",
+        "bytes": 24349,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "g-landing.html": {
+        "sha256": "439b6cb2778a363441f59a02baad7b8a0556bff90c9ab7f7e0f1aba898460a60",
+        "bytes": 3529,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "index.html": {
+        "sha256": "88f21093332e8f445a5342e7b9ac0c6fb56b3ba36a4eba3ff1161412cc0be862",
+        "bytes": 141609,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "lab/hero/index.html": {
+        "sha256": "9d0e07fad58ce166864b556b19cf629537627071d2d33ad1d475ff877c31bd33",
+        "bytes": 26748,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "lab/maya/index.html": {
+        "sha256": "6e78e1848da810deb27555b516b67123236ea050cff0584b5cfe3f0fb3029a2a",
+        "bytes": 22843,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "personal-data-consent/index.html": {
+        "sha256": "d5f9d752a6f3c6e5750975ba289034c3ae0016b2f1ea37d3b9a11c5ebc59ec88",
+        "bytes": 40207,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "personal-data-policy/index.html": {
+        "sha256": "01acdc77c7925948e56a4840942ea771d5e53ab777225a11ae16f6e023d32d1f",
+        "bytes": 61468,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "privacy/index.html": {
+        "sha256": "2c0b24b248bd2e678c7cf936222ca484d329028fd1a4db8bee94fe2a339a33d2",
+        "bytes": 61351,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "shop/checkout/index.html": {
+        "sha256": "01117b906116dbe5b9ad5587268e69ab55df89167c76b13b8ef4bd9f239d6d3a",
+        "bytes": 26905,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "shop/index.html": {
+        "sha256": "2730efd8e49a054f58b7779a571b146dd52045879e64772024c838773ff69e00",
+        "bytes": 28832,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "showcase/index.html": {
+        "sha256": "276cd5b23fb3442655ae125ebccb74aa6f35333e790db7f17d7734438d4f02f1",
+        "bytes": 50931,
+        "pathRefs": [
+          "/apple-icon?afe1501ea090965e"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "yclients-webhook.php": {
+        "sha256": "5081d0d6e7f7f47b272552f793fafcf54bc5b68700428aee8fe58297536f97f8",
+        "bytes": 6261,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 101,
+            "names": [
+              "file_put_contents"
+            ]
+          },
+          {
+            "line": 126,
+            "names": [
+              "curl_exec"
+            ]
+          },
+          {
+            "line": 132,
+            "names": [
+              "file_put_contents"
+            ]
+          }
+        ]
+      }
+    },
+    "mayaos.ru": {
+      "app/index.html": {
+        "sha256": "99fdaf34b57dbff4afbc8d45763ade8b19620a9c793366c19e55005dd601e2f6",
+        "bytes": 2736594,
+        "pathRefs": [
+          "/api",
+          "/api/billing/checkout",
+          "/api/billing/plans",
+          "/api/mobile/pwa/",
+          "/app",
+          "/app/",
+          "/app/icon-192.png",
+          "/app/service-worker.js",
+          "/appointments",
+          "/appointments/",
+          "/appointments/my",
+          "/appointments/preview",
+          "/auth/email/start",
+          "/auth/email/verify",
+          "/auth/login",
+          "/auth/logout",
+          "/auth/oauth/",
+          "/auth/oauth/links",
+          "/auth/phone/",
+          "/auth/phone/start",
+          "/auth/phone/verify",
+          "/auth/refresh",
+          "/auth/sessions",
+          "/auth/sessions/",
+          "/internal-calendar/journal?",
+          "/internal-calendar/providers",
+          "/internal-calendar/providers/",
+          "/internal-calendar/services",
+          "/internal-calendar/services/",
+          "/internal-calendar/setup"
+        ],
+        "phpActions": [],
+        "uiActions": [
+          "panel_broadcast",
+          "panel_daily_report",
+          "panel_dashboard",
+          "panel_job_run",
+          "panel_master_overview",
+          "panel_me",
+          "panel_redeem",
+          "panel_reviews",
+          "panel_team",
+          "panel_waitlist"
+        ],
+        "sinkMarkers": [
+          {
+            "line": 1006,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1017,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1019,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1026,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1047,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1074,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1100,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1135,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1223,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 1270,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5064,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5114,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 5863,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 6036,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 6088,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 6856,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7002,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7020,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7062,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7126,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7320,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7360,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7419,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7426,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7475,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7492,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7498,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7588,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7619,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7665,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7697,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7720,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 7741,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 8009,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 8723,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 9334,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11686,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11693,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11708,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11861,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 11931,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13276,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13330,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 13375,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15241,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15275,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15280,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15632,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 15652,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16287,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16446,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16785,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 16811,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17302,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 17309,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 17328,
+            "names": [
+              "exec"
+            ]
+          },
+          {
+            "line": 17646,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17772,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17778,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17797,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17866,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17915,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17927,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17954,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17956,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17963,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 17998,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18002,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18009,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18018,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18200,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18246,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18270,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18290,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18308,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18311,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18315,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18325,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18597,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 18599,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19100,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 19945,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20037,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20253,
+            "names": [
+              "WebSocket"
+            ]
+          },
+          {
+            "line": 20528,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20576,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20614,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 20671,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 21218,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23741,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23794,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 23834,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 24534,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 25164,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 25182,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 25311,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 25365,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26123,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26148,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 26651,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 27167,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 27210,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 28650,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29063,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29365,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29377,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29393,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29454,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 29472,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 30913,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31012,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31148,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31192,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31281,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31330,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31363,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31375,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31473,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31565,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 31850,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 33591,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 34920,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 35986,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 38378,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 38443,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 38517,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 38812,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 38814,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 40202,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 40260,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 40657,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 40661,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 40667,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 40673,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 41136,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 41224,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 41334,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 41424,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 41464,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 41490,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 41778,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 41824,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 42069,
+            "names": [
+              "fetch"
+            ]
+          },
+          {
+            "line": 42129,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "app/native-enhancements.js": {
+        "sha256": "1f24b12ade05073df2d6d93c3f2bee03fc9b6d7bf5bac1ade0933d6fd4d47ef3",
+        "bytes": 11162,
+        "pathRefs": [
+          "/app/native-enhancements.js"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "app/oauth-callback.html": {
+        "sha256": "0c843bbd32b83a963b22442e08a9d9edad52537caa35059d004f9848163931dc",
+        "bytes": 11692,
+        "pathRefs": [
+          "/app/",
+          "/app/fonts.css",
+          "/auth/oauth/"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 133,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "app/offline.html": {
+        "sha256": "bd7041d03b34aede7fc631fade7f79aee9890f5c9ab2fafe0a66e7124e13ff7a",
+        "bytes": 2669,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "app/service-worker.js": {
+        "sha256": "8e5cbb806ecacad22337e442e5e01a3b37a7e07b3462fc0f98f9e895ee0a2f75",
+        "bytes": 3060,
+        "pathRefs": [
+          "/app",
+          "/app/",
+          "/app/apple-touch-icon.png"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "app/vkid-sdk.js": {
+        "sha256": "b4bf52a4f7765d119acbb9def11be0530a294d81bed0db60c3c4979c472131d0",
+        "bytes": 169847,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 1,
+            "names": [
+              "exec",
+              "fetch"
+            ]
+          }
+        ]
+      },
+      "index.html": {
+        "sha256": "4e3c01cfaabba0853e73b887ed424bedc7515653acca825df931abd526e374ec",
+        "bytes": 89134,
+        "pathRefs": [
+          "/app/icon-192.png"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": []
+      },
+      "maya-platform-api.php": {
+        "sha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+        "bytes": 6580,
+        "pathRefs": [],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 146,
+            "names": [
+              "curl_exec"
+            ]
+          }
+        ]
+      },
+      "oauth-callback.html": {
+        "sha256": "0c843bbd32b83a963b22442e08a9d9edad52537caa35059d004f9848163931dc",
+        "bytes": 11692,
+        "pathRefs": [
+          "/app/",
+          "/app/fonts.css",
+          "/auth/oauth/"
+        ],
+        "phpActions": [],
+        "uiActions": [],
+        "sinkMarkers": [
+          {
+            "line": 133,
+            "names": [
+              "fetch"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "cron": {
+    "readExit": "PERMISSION_DENIED",
+    "entries": null
+  }
+}
