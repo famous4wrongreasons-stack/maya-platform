@@ -1,0 +1,1 @@
+{"package":"R12","proof":"actual browser transport in VM","result":"PASS","hashBoundaries":13,"lostSendStable":true,"lostReserveStable":true,"unknownFinalizeSameKey":true,"lostAttachmentSendStable":true,"otherTenantIsolated":true,"privateDownloadCrossAccountDenied":true,"productionEffects":0}

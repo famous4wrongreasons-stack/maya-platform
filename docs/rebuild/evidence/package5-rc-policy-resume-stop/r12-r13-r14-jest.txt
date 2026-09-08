@@ -1,0 +1,9 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent --testPathPatterns=package5-r(12|13|14)|expense-reminder.contract
+
+
+Test Suites: 4 passed, 4 total
+Tests:       16 passed, 16 total
+Snapshots:   0 total
+Time:        9.289 s

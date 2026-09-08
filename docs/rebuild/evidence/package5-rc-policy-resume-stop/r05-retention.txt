@@ -1,0 +1,12 @@
+{
+  "package": "R05",
+  "status": "PASS",
+  "checks": [
+    "expired resolved payload purged once under concurrent cleanup",
+    "READY UNKNOWN and MANUAL_REQUIRED preserve plan",
+    "original live report unchanged",
+    "all execution/history rows unchanged",
+    "purged snapshot unavailable and retry creates nothing"
+  ],
+  "productionEffects": 0
+}

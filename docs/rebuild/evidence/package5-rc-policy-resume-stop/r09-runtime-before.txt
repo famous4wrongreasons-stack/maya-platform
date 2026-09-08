@@ -1,0 +1,14 @@
+{
+  "package": "R09",
+  "result": "PASS",
+  "checks": [
+    "gateway signature/configuration/tenant/publication; anonymous never Client/User; unsafe/consent/impersonation rejection before owner or AE",
+    "four concurrent guest submissions converge to one immutable pending fact; changed same key conflicts; hidden read and no fabricated Client/AE",
+    "exact current human moderator; four concurrent same-key commands one AE/mutation; invalid/stale rejection creates no execution",
+    "human brand reply only exact approved parent; one reply winner; moderation revision race one winner and parent withdrawal hides reply",
+    "likes bind same/changed identity; noop anonymous observation preserves count; version race one winner; no User/cookie authority",
+    "separate view command; daily uniqueness; original key reuses original UTC day after clock advance; reads never record views",
+    "revoked moderator cannot retry; expired reads hide without erase; no external delivery or delayed model authority"
+  ],
+  "productionEffects": 0
+}

@@ -1,0 +1,16 @@
+[Nest] 3074  - 09/08/2026, 1:44:08 PM    WARN [OwnerReportsService] daily_report slot unresolved run=7c50c105-2bfc-4112-adee-08ed621d77e4 slot=18ddff7e5d23a40aa3062186c346639b16804daf5792a51cbe8eb0bf2132421f
+[Nest] 3074  - 09/08/2026, 1:44:08 PM    WARN [OwnerReportsService] daily_report slot unresolved run=7c50c105-2bfc-4112-adee-08ed621d77e4 slot=1b214c66733dbb17837164e125d3eea240cabd04cba36039b701baa51ae7b8db
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+0 !== 4
+
+    at /private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:355:14
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async main (/private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:336:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 0,
+  expected: 4,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
