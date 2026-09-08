@@ -7417,6 +7417,18 @@ function ALogin() {
     }
   };
   React.useEffect(function () {
+    var previous = window.__meStartSaasSocialLogin;
+    var bridge = function (provider) {
+      if (provider !== 'telegram' && provider !== 'yandex') return false;
+      lgSocialLogin(provider);
+      return true;
+    };
+    window.__meStartSaasSocialLogin = bridge;
+    return function () {
+      if (window.__meStartSaasSocialLogin === bridge) window.__meStartSaasSocialLogin = previous || null;
+    };
+  }, []);
+  React.useEffect(function () {
     if (!lgSaasSocialContext()) return undefined;
     var previous = window.__meSaasOauthComplete;
     window.__meSaasOauthComplete = lgCompleteSocialCallback;
@@ -41872,11 +41884,21 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
 
   // ── 2. Telegram — виджет грузим лениво по клику (telegram.org заблокирован без VPN на старте) ──
   window.__meTgLogin = function(){
-    // 🔴 ВСЕГДА вход через ссылку-бота (deep-link): открывает Telegram-аккаунт ИМЕННО
-    // ЭТОГО устройства. Telegram Login Widget БОЛЬШЕ НЕ используем — он слал «Принять»
-    // на ЗАПОМНЕННЫЙ в браузере номер (часто владельца), поэтому «принять» летело не
-    // тому, и человек входил под ЧУЖИМ именем. Deep-link привязывает того, кто реально
-    // залогинен в Telegram на этом телефоне → каждый входит под собой.
+    // MAYA OS uses tenant-qualified Telegram OAuth. It returns a canonical JWT and
+    // server-owned app_access; the legacy app_<nonce> handshake proves only control
+    // of a Telegram chat and must never be promoted to staff/owner authority.
+    if(window.__ME_SAAS_CTX){
+      __meStopAppLogin();
+      __meResetLocalLoginState();
+      if(typeof window.__meStartSaasSocialLogin === 'function'){
+        window.__meStartSaasSocialLogin('telegram');
+        return;
+      }
+      alert('Вход MAYA ещё загружается. Подождите секунду и попробуйте снова.');
+      return;
+    }
+    // The historical salon web shell keeps its compatibility login until it is
+    // opened with a canonical tenant context.
     __meNativeTgLogin();
   };
 
