@@ -3700,7 +3700,7 @@ model MeasurementRevision {
 
   tenant Tenant @relation("C7TenantMeasurement", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_tenant_fk")
   client Client? @relation("C7ClientMeasurement", fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_client_fk")
-  appointment Appointment? @relation("C7AppointmentMeasurement", fields: [appointmentId, tenantId, clientId], references: [id, tenantId, mayaClientId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_appointment_fk")
+  appointment Appointment? @relation("C7AppointmentMeasurement", fields: [appointmentId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_appointment_fk")
   staff Staff? @relation("C7StaffMeasurement", fields: [staffId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_staff_fk")
   branch Branch? @relation("C7BranchMeasurement", fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_branch_fk")
   configurationOwner Membership? @relation("C7MembershipMeasurement", fields: [configurationUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_config_owner_fk")

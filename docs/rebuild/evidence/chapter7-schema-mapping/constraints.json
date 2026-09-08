@@ -41,14 +41,12 @@
       "name": "C7_measurement_appointment_fk",
       "sourceFields": [
         "appointmentId",
-        "tenantId",
-        "clientId"
+        "tenantId"
       ],
       "targetModel": "Appointment",
       "targetFields": [
         "id",
-        "tenantId",
-        "mayaClientId"
+        "tenantId"
       ],
       "onDelete": "Restrict",
       "onUpdate": "Restrict"

@@ -45,7 +45,7 @@ CREATE TABLE "MeasurementRevision" (
 );
 ALTER TABLE "MeasurementRevision" ADD CONSTRAINT "C7_measurement_tenant_fk" FOREIGN KEY ("tenantId") REFERENCES "Tenant" ("id") ON DELETE RESTRICT ON UPDATE RESTRICT;
 ALTER TABLE "MeasurementRevision" ADD CONSTRAINT "C7_measurement_client_fk" FOREIGN KEY ("clientId", "tenantId") REFERENCES "Client" ("id", "tenantId") ON DELETE RESTRICT ON UPDATE RESTRICT;
-ALTER TABLE "MeasurementRevision" ADD CONSTRAINT "C7_measurement_appointment_fk" FOREIGN KEY ("appointmentId", "tenantId", "clientId") REFERENCES "Appointment" ("id", "tenantId", "mayaClientId") ON DELETE RESTRICT ON UPDATE RESTRICT;
+ALTER TABLE "MeasurementRevision" ADD CONSTRAINT "C7_measurement_appointment_fk" FOREIGN KEY ("appointmentId", "tenantId") REFERENCES "Appointment" ("id", "tenantId") ON DELETE RESTRICT ON UPDATE RESTRICT;
 ALTER TABLE "MeasurementRevision" ADD CONSTRAINT "C7_measurement_staff_fk" FOREIGN KEY ("staffId", "tenantId") REFERENCES "Staff" ("id", "tenantId") ON DELETE RESTRICT ON UPDATE RESTRICT;
 ALTER TABLE "MeasurementRevision" ADD CONSTRAINT "C7_measurement_branch_fk" FOREIGN KEY ("branchId", "tenantId") REFERENCES "Branch" ("id", "tenantId") ON DELETE RESTRICT ON UPDATE RESTRICT;
 ALTER TABLE "MeasurementRevision" ADD CONSTRAINT "C7_measurement_config_owner_fk" FOREIGN KEY ("configurationUserId", "tenantId") REFERENCES "Membership" ("userId", "tenantId") ON DELETE RESTRICT ON UPDATE RESTRICT;
@@ -131,6 +131,12 @@ BEGIN
    PERFORM id FROM "Client" WHERE id=NEW."clientId" AND "tenantId"=NEW."tenantId" AND "mergedIntoClientId" IS NULL FOR SHARE;
    IF NOT FOUND THEN RAISE EXCEPTION 'C7 Client authority revoked' USING ERRCODE='23514'; END IF;
  END IF;
+ -- Option A: prove mutable Client association at admission, not in a lifetime FK.
+ IF NEW."appointmentId" IS NOT NULL THEN
+   PERFORM id FROM "Appointment" WHERE id=NEW."appointmentId" AND "tenantId"=NEW."tenantId"
+     AND "mayaClientId"=NEW."clientId" FOR SHARE;
+   IF NOT FOUND THEN RAISE EXCEPTION 'C7 admission Appointment Client mismatch' USING ERRCODE='23514'; END IF;
+ END IF;
  IF NEW."staffId" IS NOT NULL THEN
    PERFORM id FROM "Staff" WHERE id=NEW."staffId" AND "tenantId"=NEW."tenantId" AND active FOR SHARE;
    IF NOT FOUND THEN RAISE EXCEPTION 'C7 Staff authority revoked' USING ERRCODE='23514'; END IF;
@@ -176,7 +182,7 @@ CREATE TRIGGER "C7_measurement_admission_guard_trg" BEFORE INSERT ON "Measuremen
  FOR EACH ROW EXECUTE FUNCTION "C7_measurement_admission_guard"();
 
 CREATE FUNCTION "C7_measurement_publication_guard"() RETURNS trigger LANGUAGE plpgsql AS $$
-DECLARE allowed text[]; claim text; item jsonb;
+DECLARE allowed text[]; claim text; item jsonb; source_client text;
 BEGIN
  -- Lock current authority through the derived admission/publication transaction.
  PERFORM id FROM "Tenant" WHERE id=NEW."tenantId" AND status='active' FOR SHARE;
@@ -212,6 +218,22 @@ BEGIN
       OR OLD."leaseExpiresAt"<=clock_timestamp() OR NEW."leaseGeneration"<>OLD."leaseGeneration"
       OR NEW."publishedAt"<statement_timestamp()-interval '5 seconds' OR NEW."publishedAt">clock_timestamp() THEN
      RAISE EXCEPTION 'C7 publication fenced' USING ERRCODE='23514';
+   END IF;
+   -- Shares the source owner's row lock: a concurrent correction either follows
+   -- this publication, or the old intent closes unavailable without new Client facts.
+   IF NEW."appointmentId" IS NOT NULL THEN
+     SELECT "mayaClientId" INTO source_client FROM "Appointment"
+       WHERE id=NEW."appointmentId" AND "tenantId"=NEW."tenantId" FOR SHARE;
+     IF NOT FOUND THEN RAISE EXCEPTION 'C7 publication source missing' USING ERRCODE='23514'; END IF;
+     IF source_client IS DISTINCT FROM NEW."clientId" AND NOT coalesce(
+       NEW.completeness='UNAVAILABLE' AND NEW.qualification='UNQUALIFIED'
+       AND NEW."attributionStatus"='UNATTRIBUTED'
+       AND NEW."creditedExecutionId" IS NULL AND NEW."creditedAttemptId" IS NULL
+       AND NEW."evidenceRefsJson"='{"version":1,"sources":[],"dependencies":[]}'::jsonb
+       AND NEW."valuesJson"='{"version":1,"metrics":[]}'::jsonb
+       AND NEW."limitationsJson"='{"version":1,"reasons":["source_subject_changed"]}'::jsonb,false) THEN
+       RAISE EXCEPTION 'C7 changed source requires unavailable outcome' USING ERRCODE='23514';
+     END IF;
    END IF;
    IF NEW."creditedAttemptId" IS NOT NULL AND NOT EXISTS (
      SELECT 1 FROM "ActionAttempt" a JOIN "ActionExecution" e ON e.id=a."actionExecutionId" AND e."tenantId"=a."tenantId"

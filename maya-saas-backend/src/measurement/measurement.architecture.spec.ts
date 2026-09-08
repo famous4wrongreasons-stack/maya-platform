@@ -26,6 +26,84 @@ describe('C7 permanent shared measurement boundaries', () => {
     );
     expect(body.match(/onDelete: Restrict/g)).toHaveLength(8);
   });
+  it('derived FK never pins the mutable Appointment Client association', () => {
+    const schema = read('prisma/schema.prisma');
+    const relation = schema
+      .split('appointment Appointment? @relation("C7AppointmentMeasurement"')[1]
+      .split('\n')[0];
+    expect(relation).toContain(
+      'fields: [appointmentId, tenantId], references: [id, tenantId]',
+    );
+    expect(relation).not.toContain('mayaClientId');
+    const sql = read(
+      'prisma/migrations/20260908153000_chapter7_measurement_foundation/migration.sql',
+    );
+    const fk = sql
+      .split('ADD CONSTRAINT "C7_measurement_appointment_fk"')[1]
+      .split(';')[0];
+    expect(fk).toContain(
+      'FOREIGN KEY ("appointmentId", "tenantId") REFERENCES "Appointment" ("id", "tenantId")',
+    );
+    expect(fk).not.toContain('mayaClientId');
+  });
+  it('admission locks and verifies the exact current canonical Client', () => {
+    const sql = read(
+      'prisma/migrations/20260908153000_chapter7_measurement_foundation/migration.sql',
+    );
+    const admission = sql
+      .split('CREATE FUNCTION "C7_measurement_admission_guard"')[1]
+      .split('CREATE TRIGGER')[0];
+    expect(admission).toContain('AND "mayaClientId"=NEW."clientId" FOR SHARE');
+    expect(admission).toContain('C7 admission Appointment Client mismatch');
+    const service = read('src/measurement/measurement.service.ts');
+    expect(
+      service.split('async admit(')[1].split('async resume(')[0],
+    ).toContain('this.sources.authorize(tenantId, intent)');
+  });
+  it('publication holds source lock through reading and closes changed Client unavailable', () => {
+    const service = read('src/measurement/measurement.service.ts')
+      .split('async compute(')[1]
+      .split('async current(')[0];
+    expect(service).toContain('FOR SHARE');
+    expect(service.indexOf('FOR SHARE')).toBeLessThan(
+      service.indexOf('this.sources.read'),
+    );
+    expect(service).toContain('source.mayaClientId === intent.clientId');
+    expect(service).toContain("reasons: ['source_subject_changed']");
+    expect(service).toContain("completeness: 'UNAVAILABLE'");
+    expect(service).toContain('this.sources.read(tenantId, intent, tx)');
+    expect(service.split('data: {')[1]).not.toMatch(/clientId:|appointmentId:/);
+  });
+  it('SQL forbids stale publication and in-place historical Client rebind', () => {
+    const sql = read(
+      'prisma/migrations/20260908153000_chapter7_measurement_foundation/migration.sql',
+    );
+    expect(sql).toContain('source_client IS DISTINCT FROM NEW."clientId"');
+    expect(sql).toContain('C7 changed source requires unavailable outcome');
+    expect(sql).toContain(
+      `NEW."valuesJson"='{"version":1,"metrics":[]}'::jsonb`,
+    );
+    expect(sql).toContain('C7 admitted intent immutable');
+    expect(sql).toContain(
+      "IF OLD.state='PUBLISHED' THEN RAISE EXCEPTION 'C7 snapshot immutable'",
+    );
+  });
+  it('receipt read does not silently turn the old Client snapshot into current facts', () => {
+    const service = read('src/measurement/measurement.service.ts');
+    expect(service.split('async current(')[1]).toContain(
+      'published?.clientId === intent.clientId',
+    );
+    expect(service.split('async current(')[1]).toContain(
+      'this.sources.authorize(tenantId, intent)',
+    );
+    const proof = read('scripts/chapter7-source-owner-compatibility-proof.ts');
+    expect(proof).toContain('new AppointmentChangeService');
+    expect(proof).toContain('new AppointmentObservationService');
+    expect(proof).toContain('waitForBlocked(2)');
+    expect(proof).toContain(
+      'published historical Client cannot be changed in place',
+    );
+  });
   it('only the canonical measurement service writes revisions', () => {
     const offenders = files(join(root, 'src')).filter(
       (f) =>

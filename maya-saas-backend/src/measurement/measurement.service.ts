@@ -15,6 +15,7 @@ import {
   MEASUREMENT_LEASE_MS,
   MEASUREMENT_RETENTION_MS,
   normalizeMeasurementResult,
+  MeasurementResult,
 } from './measurement.contract';
 
 export type MeasurementLease = {
@@ -182,7 +183,7 @@ export class MeasurementService {
     );
     if (!row || row.expiresAt <= new Date())
       throw new Error('measurement_receipt_expired_or_missing');
-    await this.sources.authorize(tenantId, this.intent(row));
+    await this.sources.authorizeReceipt(tenantId, this.intent(row));
     if (row.state === 'PUBLISHED') return row;
     const lease = await this.claim(id);
     if (!lease) throw new Error('measurement_claim_busy');
@@ -196,7 +197,7 @@ export class MeasurementService {
       }),
     );
     if (!source) throw new Error('measurement_receipt_missing');
-    await this.sources.authorize(tenantId, this.intent(source));
+    await this.sources.authorizeReceipt(tenantId, this.intent(source));
     return this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
       const [row] = await tx.$queryRaw<
@@ -238,7 +239,7 @@ export class MeasurementService {
       }),
     );
     if (!row) throw new Error('measurement_receipt_missing');
-    await this.sources.authorize(tenantId, this.intent(row));
+    await this.sources.authorizeReceipt(tenantId, this.intent(row));
     if (row.state === 'PUBLISHED') return row;
     if (
       row.leaseGeneration !== lease.generation ||
@@ -248,35 +249,60 @@ export class MeasurementService {
     )
       throw new Error('measurement_lease_fenced');
     const intent = this.intent(row);
-    const result = normalizeMeasurementResult(
-      await this.sources.read(tenantId, intent),
-      tenantId,
-    );
-    const evidenceRefsJson = {
-      version: 1,
-      sources: result.sources,
-      dependencies: result.dependencies,
-    };
-    const valuesJson = { version: 1, metrics: result.metrics };
-    const limitationsJson = { version: 1, reasons: result.reasons };
-    const evidenceHash = measurementHash(evidenceRefsJson);
-    const snapshotHash = measurementHash([
-      'c7.measurement.snapshot/1',
-      row.intentHash,
-      row.asOf,
-      evidenceRefsJson,
-      valuesJson,
-      limitationsJson,
-      result.completeness,
-      result.qualification,
-      result.attributionStatus,
-      result.creditedExecutionId,
-      result.creditedAttemptId,
-    ]);
-    await this.sources.authorize(tenantId, intent);
     return this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
       await tx.$queryRaw`SELECT set_config('maya.c7.claim_token',${lease.token},true)`;
+      // Hold the source owner's row lock through read + immutable publication.
+      // The stable FK permits subsequent canonical corrections without rewriting history.
+      let sourceMatches = true;
+      if (intent.appointmentId) {
+        const [source] = await tx.$queryRaw<
+          Array<{ mayaClientId: string | null }>
+        >`
+          SELECT "mayaClientId" FROM "Appointment"
+          WHERE id=${intent.appointmentId} AND "tenantId"=${tenantId} FOR SHARE`;
+        if (!source) throw new Error('measurement_source_missing');
+        sourceMatches = source.mayaClientId === intent.clientId;
+      }
+      await this.sources.authorizeReceipt(tenantId, intent, tx);
+      const unavailable: MeasurementResult = {
+        sources: [],
+        dependencies: [],
+        metrics: [],
+        reasons: ['source_subject_changed'],
+        completeness: 'UNAVAILABLE',
+        qualification: 'UNQUALIFIED',
+        attributionStatus: 'UNATTRIBUTED',
+        creditedExecutionId: null,
+        creditedAttemptId: null,
+      };
+      const result = normalizeMeasurementResult(
+        sourceMatches
+          ? await this.sources.read(tenantId, intent, tx)
+          : unavailable,
+        tenantId,
+      );
+      const evidenceRefsJson = {
+        version: 1,
+        sources: result.sources,
+        dependencies: result.dependencies,
+      };
+      const valuesJson = { version: 1, metrics: result.metrics };
+      const limitationsJson = { version: 1, reasons: result.reasons };
+      const evidenceHash = measurementHash(evidenceRefsJson);
+      const snapshotHash = measurementHash([
+        'c7.measurement.snapshot/1',
+        row.intentHash,
+        row.asOf,
+        evidenceRefsJson,
+        valuesJson,
+        limitationsJson,
+        result.completeness,
+        result.qualification,
+        result.attributionStatus,
+        result.creditedExecutionId,
+        result.creditedAttemptId,
+      ]);
       const now = await this.time(tx);
       const changed = await tx.measurementRevision.updateMany({
         where: {
@@ -330,8 +356,10 @@ export class MeasurementService {
         take: 2,
       }),
     );
+    const published = rows.find((r) => r.state === 'PUBLISHED');
     return {
-      revision: rows.find((r) => r.state === 'PUBLISHED') ?? null,
+      // Never fall back to an older matching Client when the latest result differs.
+      revision: published?.clientId === intent.clientId ? published : null,
       refreshPending: rows[0]?.state === 'PENDING',
     };
   }

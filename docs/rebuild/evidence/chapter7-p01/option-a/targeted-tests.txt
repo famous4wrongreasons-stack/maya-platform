@@ -1,0 +1,9 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent measurement.contract.spec measurement.architecture.spec package5-wave6.policy.spec package5-wave6-bypass-ratchet.architecture.spec
+
+
+Test Suites: 4 passed, 4 total
+Tests:       54 passed, 54 total
+Snapshots:   0 total
+Time:        0.398 s, estimated 1 s

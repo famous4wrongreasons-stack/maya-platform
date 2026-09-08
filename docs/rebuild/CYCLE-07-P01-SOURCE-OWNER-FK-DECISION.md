@@ -1,5 +1,14 @@
 # Chapter 7 P01 — source-owner FK compatibility decision
 
+## Owner approval and superseding implementation
+
+Owner accepted checkpoint `940ddd51` and **approved Option A**. The STOP/proposal below is preserved as historical evidence; it no longer requires a decision. The approved mapping is the stable `(appointmentId,tenantId)` source FK plus separate immutable Client reference. Schema remains **1 model / 37 fields / 1 migration / 0 backfill**. Existing source owner code is unchanged.
+
+[Fresh PostgreSQL acceptance](evidence/chapter7-p01/option-a/source-owner-proof.txt): **18 checks PASS**, including both actual row-lock race orders using canonical CRM observation/change services, pending UNAVAILABLE without source facts/credit, published immutability, new Client next revision, exact admission/tenant checks, SQL bypass rejection, restart and concurrent one-winner claims. [Original 41 checks](evidence/chapter7-p01/option-a/p01-postgres-proof.txt) and [54 targeted tests](evidence/chapter7-p01/option-a/targeted-tests.txt) also PASS. Production status is recorded in the [P01 report](CYCLE-07-P01-MEASUREMENT-FOUNDATION-REPORT.md).
+
+## Historical STOP at 940ddd51
+
+
 **STOP: a proved contradiction in the approved C7 schema mapping. P01 must not deploy.**
 
 This is not a new production surface or a reopening of Chapter 6. The existing S22 CRM observation/reconciliation path remains canonical. The proposed C7 foreign key would introduce a new restriction on that owner. P02–P06 have not started.

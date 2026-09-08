@@ -1,6 +1,6 @@
 # Chapter 7 — P01 measurement foundation
 
-Status: **BLOCKED — source-owner FK compatibility failed before production.** See [exact evidence and narrow decision](CYCLE-07-P01-SOURCE-OWNER-FK-DECISION.md). Positive component proofs below do not constitute overall P01 acceptance. This is a Wave 1 report, not Chapter 7 completion.
+Status: **Option A implemented; P01 component acceptance PASS; final mandatory gate and production cutover pending.** The owner approved the [source-owner FK decision](CYCLE-07-P01-SOURCE-OWNER-FK-DECISION.md) after checkpoint `940ddd51`. Historical failure receipts are retained; fresh superseding evidence is below. This is a Wave 1 report, not Chapter 7 completion.
 
 The owner accepted `7ed07b6c` and approved the exact [combined mapping](CYCLE-07-COMBINED-SCHEMA-ACTION-MAPPING.md). The [approval receipt](evidence/chapter7-p01/approval-receipt.json) records the latest authorization: P01 gated production cutover, then P02/P05, P03/P04 and P06. That latest execution order supersedes the mapping's older final-only cutover wording. No product/schema decision is reopened.
 
@@ -44,3 +44,13 @@ Production verification is structural/read-only: exact migration, 37 columns, ei
 P01 production acceptance is pending until the release receipt is added below. P02–P06 have not started in this report. Q17 remains globally open for P06; later packages must complete their rule/consumer proofs. Chapter 7 Final Gate has not run; Chapter 7 is not complete; Chapter 8 has not started.
 
 Main worktree: 24 entries preserved, protected hashes unchanged. Seventeen old databases untouched. The only temporary database/cluster is owned by this implementation and will be closed and removed at the wave cleanup boundary. No owned browser or watcher was opened.
+
+## Source-owner Option A acceptance (after 940ddd51)
+
+Stable Appointment FK `(appointmentId,tenantId)` preserves the separate immutable Client reference. Admission validates and locks the exact current source Client. Publication reads under the Appointment row lock used by the canonical source correction owner. If correction wins, the same old receipt closes PUBLISHED / UNAVAILABLE with empty facts/evidence, no credit and `source_subject_changed`; its Client never changes. If publication wins, correction may follow and the historical snapshot remains immutable. A new Client occurrence advances the same Appointment measurement identity by one revision. Current reads never skip a newer different-Client result to resurrect an older matching revision. Only historical tenant-authorized receipt reads can return the old as-reported snapshot.
+
+[41 original PostgreSQL checks](evidence/chapter7-p01/option-a/p01-postgres-proof.txt), [18 source-owner/SQL/concurrency checks](evidence/chapter7-p01/option-a/source-owner-proof.txt), and [4 suites / 54 targeted tests](evidence/chapter7-p01/option-a/targeted-tests.txt): PASS. The 54 include all former 49 tests plus five permanent source-owner ratchets wired into the existing mandatory Jest gate. Both real correction/publication lock orders were exercised, with no mock source owner or production effect. The only provider fixture is synthetic qualified CRM source data.
+
+Clean replay, Prisma, lint, both typechecks, build, owned-database pending=0/drift=NONE: PASS. The PostgreSQL server uses Europe/Moscow; derived read/claim/publication transaction boundaries use UTC. No additional model/column/migration/action/AC6 class was added, and no canonical source runtime file was changed.
+
+The fresh read-only production preflight still matches `20260908-p5-rc-8bc03454`: C6 schema pending=0/drift=NONE/health/readiness PASS. C7 candidate delta is exactly one unapplied migration. Final mandatory regression and the documented deployment gate must finish before production acceptance is recorded.

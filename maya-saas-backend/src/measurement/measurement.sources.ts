@@ -22,20 +22,37 @@ export class MeasurementSources {
     tenantId: string,
     i: NormalizedMeasurementIntent,
   ): Promise<void> {
+    await this.authorizeReceipt(tenantId, i);
+    if (
+      i.appointmentId &&
+      !(await this.prisma.appointment.findFirst({
+        where: { id: i.appointmentId, tenantId, mayaClientId: i.clientId },
+        select: { id: true },
+      }))
+    )
+      throw new Error('measurement_appointment_client_mismatch');
+  }
+
+  /** Existing receipt authority is tenant-qualified; its historical Client is not rebound. */
+  async authorizeReceipt(
+    tenantId: string,
+    i: NormalizedMeasurementIntent,
+    db: Prisma.TransactionClient = this.prisma,
+  ): Promise<void> {
     if (
       ['appointment_outcome', 'client_history'].includes(i.kind) &&
       (Object.keys(i.scope.dimensions).length ||
         Object.keys(i.scope.sourceQuery).length)
     )
       throw new Error('measurement_scope_not_supported_by_rule');
-    const tenant = await this.prisma.tenant.findUnique({
+    const tenant = await db.tenant.findUnique({
       where: { id: tenantId },
       select: { status: true },
     });
     if (tenant?.status !== 'active')
       throw new Error('measurement_tenant_inactive');
     if (i.clientId) {
-      const client = await this.prisma.client.findUnique({
+      const client = await db.client.findUnique({
         where: { id_tenantId: { id: i.clientId, tenantId } },
         select: { mergedIntoClientId: true },
       });
@@ -44,8 +61,8 @@ export class MeasurementSources {
     }
     if (
       i.appointmentId &&
-      !(await this.prisma.appointment.findFirst({
-        where: { id: i.appointmentId, tenantId, mayaClientId: i.clientId },
+      !(await db.appointment.findFirst({
+        where: { id: i.appointmentId, tenantId },
       }))
     )
       throw new Error('measurement_appointment_client_mismatch');
@@ -54,14 +71,14 @@ export class MeasurementSources {
     ];
     if (
       branches.length &&
-      (await this.prisma.branch.count({
+      (await db.branch.count({
         where: { tenantId, id: { in: branches } },
       })) !== branches.length
     )
       throw new Error('measurement_branch_mismatch');
     if (
       i.staffId &&
-      !(await this.prisma.staff.findFirst({
+      !(await db.staff.findFirst({
         where: {
           id: i.staffId,
           tenantId,
@@ -73,7 +90,7 @@ export class MeasurementSources {
       throw new Error('measurement_staff_mismatch');
     if (
       i.configurationUserId &&
-      !(await this.prisma.membership.findFirst({
+      !(await db.membership.findFirst({
         where: { userId: i.configurationUserId, tenantId, status: 'active' },
       }))
     )
@@ -83,11 +100,12 @@ export class MeasurementSources {
   async read(
     tenantId: string,
     i: NormalizedMeasurementIntent,
+    db: Prisma.TransactionClient,
   ): Promise<MeasurementResult> {
     if (!this.supports(i.kind)) throw new Error('measurement_rule_not_enabled');
-    await this.authorize(tenantId, i);
-    if (i.kind === 'client_history') return this.history(tenantId, i);
-    const rows = await this.prisma.appointment.findMany({
+    await this.authorizeReceipt(tenantId, i, db);
+    if (i.kind === 'client_history') return this.history(tenantId, i, db);
+    const rows = await db.appointment.findMany({
       where: {
         tenantId,
         mayaClientId: i.clientId,
@@ -207,22 +225,21 @@ export class MeasurementSources {
   private async history(
     tenantId: string,
     i: NormalizedMeasurementIntent,
+    tx: Prisma.TransactionClient,
   ): Promise<MeasurementResult> {
     // One bounded receipt for the aggregate query, not one retained copy per visit.
     // The source owner still owns each appointment and its history.
-    const fact = await this.prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
-      const [value] = await tx.$queryRaw<
-        Array<{
-          bookings: string;
-          arrived: string;
-          noShow: string;
-          cancelled: string;
-          lastVisit: Date | null;
-          updatedAt: Date | null;
-          observedAt: Date;
-        }>
-      >(Prisma.sql`SELECT count(*)::text AS bookings,
+    const [fact] = await tx.$queryRaw<
+      Array<{
+        bookings: string;
+        arrived: string;
+        noShow: string;
+        cancelled: string;
+        lastVisit: Date | null;
+        updatedAt: Date | null;
+        observedAt: Date;
+      }>
+    >(Prisma.sql`SELECT count(*)::text AS bookings,
         count(*) FILTER (WHERE attendance='arrived')::text AS arrived,
         count(*) FILTER (WHERE attendance='no_show')::text AS "noShow",
         count(*) FILTER (WHERE status='cancelled')::text AS cancelled,
@@ -233,8 +250,6 @@ export class MeasurementSources {
         ${i.branchId ? Prisma.sql`AND "branchId"=${i.branchId}` : Prisma.empty}
         ${i.scope.branchIds.length ? Prisma.sql`AND "branchId" IN (${Prisma.join(i.scope.branchIds)})` : Prisma.empty}
         ${i.staffId ? Prisma.sql`AND "staffId"=${i.staffId}` : Prisma.empty}`);
-      return value;
-    });
     const metric = (
       key: string,
       value: string | null,

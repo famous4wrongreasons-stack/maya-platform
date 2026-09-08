@@ -1,0 +1,11 @@
+{
+  "checkpointAccepted": "940ddd51",
+  "option": "A",
+  "approved": true,
+  "mapping": "(appointmentId,tenantId) \u2192 Appointment(id,tenantId)",
+  "pendingSourceChanged": "same receipt PUBLISHED/UNAVAILABLE, original Client, empty evidence and metrics, no credit",
+  "publishedSourceChanged": "immutable historical snapshot; new occurrence admits next revision",
+  "sourceOwnerChanged": false,
+  "envelopeExpansion": 0,
+  "productionProofEffects": 0
+}
