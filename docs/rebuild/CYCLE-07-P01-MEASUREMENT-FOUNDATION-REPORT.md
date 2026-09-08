@@ -1,6 +1,6 @@
 # Chapter 7 — P01 measurement foundation
 
-Status: **Option A implemented; P01 component acceptance PASS; final mandatory gate and production cutover pending.** The owner approved the [source-owner FK decision](CYCLE-07-P01-SOURCE-OWNER-FK-DECISION.md) after checkpoint `940ddd51`. Historical failure receipts are retained; fresh superseding evidence is below. This is a Wave 1 report, not Chapter 7 completion.
+Status: **P01 LOCAL ACCEPTANCE: PASS. Option A implemented; production cutover pending.** The owner approved the [source-owner FK decision](CYCLE-07-P01-SOURCE-OWNER-FK-DECISION.md) after checkpoint `940ddd51`. Historical failure receipts are retained; fresh superseding evidence is below. This is a Wave 1 report, not Chapter 7 completion.
 
 The owner accepted `7ed07b6c` and approved the exact [combined mapping](CYCLE-07-COMBINED-SCHEMA-ACTION-MAPPING.md). The [approval receipt](evidence/chapter7-p01/approval-receipt.json) records the latest authorization: P01 gated production cutover, then P02/P05, P03/P04 and P06. That latest execution order supersedes the mapping's older final-only cutover wording. No product/schema decision is reopened.
 
@@ -54,3 +54,7 @@ Stable Appointment FK `(appointmentId,tenantId)` preserves the separate immutabl
 Clean replay, Prisma, lint, both typechecks, build, owned-database pending=0/drift=NONE: PASS. The PostgreSQL server uses Europe/Moscow; derived read/claim/publication transaction boundaries use UTC. No additional model/column/migration/action/AC6 class was added, and no canonical source runtime file was changed.
 
 The fresh read-only production preflight still matches `20260908-p5-rc-8bc03454`: C6 schema pending=0/drift=NONE/health/readiness PASS. C7 candidate delta is exactly one unapplied migration. Final mandatory regression and the documented deployment gate must finish before production acceptance is recorded.
+
+### Final local mandatory acceptance
+
+[Mandatory backend regression](evidence/chapter7-p01/option-a/mandatory-regression.txt): **413 suites / 3416 tests PASS**. Lint, application/scripts typecheck, build, Prisma validation, clean replay, exact expected schema/constraints and drift: PASS. P01-owned foundation acceptance is **6/6**, with Q17's consumer portion explicitly remaining P06. No Chapter 7 production-completion credit is assigned before cutover. The unchanged deployment script repeats its mandatory gates on the committed candidate before upload/migration/activation.
