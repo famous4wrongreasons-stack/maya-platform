@@ -58,3 +58,11 @@ The fresh read-only production preflight still matches `20260908-p5-rc-8bc03454`
 ### Final local mandatory acceptance
 
 [Mandatory backend regression](evidence/chapter7-p01/option-a/mandatory-regression.txt): **413 suites / 3416 tests PASS**. Lint, application/scripts typecheck, build, Prisma validation, clean replay, exact expected schema/constraints and drift: PASS. P01-owned foundation acceptance is **6/6**, with Q17's consumer portion explicitly remaining P06. No Chapter 7 production-completion credit is assigned before cutover. The unchanged deployment script repeats its mandatory gates on the committed candidate before upload/migration/activation.
+
+### Local runtime and late upstream reconciliation
+
+The first deployment gate hit the previously documented Node 24.19.0 V8 GC native crash, before upload. The identical mandatory command passed under installed Node 24.15.0 (**413 suites / 3416 tests**); gates were not weakened. The deployment runtime override is already supported by the documented process and changes no production code/runtime.
+
+While preparing the inactive release, upstream `33396c16` added PWA login recovery and six executable tests. Cutover was stopped **before migration**, and production read-only preflight still reports the original C6 release, 96 applied history rows / pending=0 / drift=NONE / health/readiness PASS. The uploaded candidate is inactive; no C7 production schema or business effect was applied.
+
+[Exact reconciliation](evidence/chapter7-p01/option-a/upstream-reconciliation.json): compatible. Unlinked Client preview loses access; owner/staff/platform selection uses only existing server-granted descriptors; preview cannot bootstrap consent authority. No backend runtime/schema, C7 source/measurement contract, mutation owner, provider operation or new production surface changes. Upstream is preserved by fast-forward. [7 suites / 40 access/consent/C7 tests](evidence/chapter7-p01/option-a/upstream-targeted.txt) and all 28 inline script parses PASS. P01 PostgreSQL proofs remain valid; the combined deployment gate includes the new suite before cutover. No new owner decision is required.

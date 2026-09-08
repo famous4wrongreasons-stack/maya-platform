@@ -1,0 +1,17 @@
+/opt/maya-saas/releases/20260908-p5-rc-8bc03454
+{
+  "ok": true,
+  "environment": "production",
+  "config": "safe",
+  "local_migrations": 93,
+  "database": {
+    "status": "ready",
+    "applied_migrations": 96,
+    "pending_migrations": 0
+  }
+}
+Loaded Prisma config from prisma.config.ts.
+
+No difference detected.
+
+{"status":"ok","service":"maya-saas-backend","release":"20260908-p5-rc-8bc03454","started_at":"2026-09-08T12:32:46.940Z","timestamp":"2026-09-08T16:25:56.013Z"}{"status":"ready","service":"maya-saas-backend","checks":{"database":"ready"},"timestamp":"2026-09-08T16:25:56.020Z"}
