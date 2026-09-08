@@ -1,0 +1,52 @@
+{
+  "wave": 2,
+  "packages": [
+    "P02",
+    "P05"
+  ],
+  "requirements": [
+    "Q05",
+    "Q06",
+    "Q07",
+    "Q10",
+    "Q11"
+  ],
+  "newRuntimeEntrypoints": [],
+  "newLaunchers": [],
+  "newSchemaChanges": 0,
+  "entrypointDisposition": "P01 trusted MeasurementService producer/claim reused; consumer routing reserved to approved P06. No public mutation route, provider/delivery executor or new launcher.",
+  "runtimeReaders": {
+    "P02": [
+      "MeasurementFinanceReader",
+      "measurementExpenseFacts",
+      "measurementFinancialFacts",
+      "compareMeasurementPeriods",
+      "measurementValueFacts"
+    ],
+    "P05": [
+      "MeasurementReputationReader"
+    ]
+  },
+  "surfaceGroups": [
+    "S01",
+    "S14",
+    "S22",
+    "S24",
+    "S25",
+    "S26"
+  ],
+  "sourceOwnersPreserved": [
+    "CRM financial reader",
+    "P407",
+    "Package 4 value",
+    "AC4 review facts",
+    "R08 native feedback"
+  ],
+  "publicationOwner": "MeasurementService / MeasurementRevision",
+  "newModels": 0,
+  "newFields": 0,
+  "newActions": 0,
+  "newAc6Classes": 0,
+  "backfill": 0,
+  "productionProofEffects": 0
+}

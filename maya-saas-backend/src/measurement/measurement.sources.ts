@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { MeasurementFinanceReader } from './measurement.finance';
+import { MeasurementReputationReader } from './measurement.reputation';
 import {
   measurementHash,
   MeasurementResult,
@@ -12,10 +14,18 @@ import {
 /** Source readers only. No business executor, AI, delivery gateway or source writer. */
 @Injectable()
 export class MeasurementSources {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly finance?: MeasurementFinanceReader,
+    @Optional() private readonly reputation?: MeasurementReputationReader,
+  ) {}
 
   supports(kind: string): boolean {
-    return ['appointment_outcome', 'client_history'].includes(kind);
+    return (
+      ['appointment_outcome', 'client_history'].includes(kind) ||
+      !!this.finance?.supports(kind) ||
+      (kind === 'reputation_period' && !!this.reputation)
+    );
   }
 
   async authorize(
@@ -95,6 +105,34 @@ export class MeasurementSources {
       }))
     )
       throw new Error('measurement_configuration_owner_revoked');
+    if (this.finance?.supports(i.kind))
+      await this.finance.authorize(tenantId, i, db);
+    if (i.kind === 'reputation_period') {
+      if (!this.reputation) throw new Error('measurement_rule_not_enabled');
+      await this.reputation.authorize(tenantId, i, db);
+    }
+  }
+
+  /** Remote reads never hold the publication transaction or source-owner locks. */
+  async prepare(
+    tenantId: string,
+    i: NormalizedMeasurementIntent,
+  ): Promise<MeasurementResult | null> {
+    return this.finance?.supports(i.kind)
+      ? this.finance.read(tenantId, i)
+      : null;
+  }
+
+  /** Bind a prepared read to the same current authority before immutable publication. */
+  async assertPreparedCurrent(
+    tenantId: string,
+    i: NormalizedMeasurementIntent,
+    result: MeasurementResult,
+    tx: Prisma.TransactionClient,
+  ): Promise<void> {
+    if (!this.finance?.supports(i.kind))
+      throw new Error('measurement_prepared_rule_invalid');
+    await this.finance.assertPreparedCurrent(tenantId, i, result, tx);
   }
 
   async read(
@@ -104,6 +142,10 @@ export class MeasurementSources {
   ): Promise<MeasurementResult> {
     if (!this.supports(i.kind)) throw new Error('measurement_rule_not_enabled');
     await this.authorizeReceipt(tenantId, i, db);
+    if (i.kind === 'reputation_period')
+      return this.reputation!.read(tenantId, i, db);
+    if (this.finance?.supports(i.kind))
+      throw new Error('measurement_remote_read_requires_preparation');
     if (i.kind === 'client_history') return this.history(tenantId, i, db);
     const rows = await db.appointment.findMany({
       where: {

@@ -249,6 +249,7 @@ export class MeasurementService {
     )
       throw new Error('measurement_lease_fenced');
     const intent = this.intent(row);
+    const prepared = await this.sources.prepare(tenantId, intent);
     return this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
       await tx.$queryRaw`SELECT set_config('maya.c7.claim_token',${lease.token},true)`;
@@ -276,9 +277,16 @@ export class MeasurementService {
         creditedExecutionId: null,
         creditedAttemptId: null,
       };
+      if (sourceMatches && prepared)
+        await this.sources.assertPreparedCurrent(
+          tenantId,
+          intent,
+          prepared,
+          tx,
+        );
       const result = normalizeMeasurementResult(
         sourceMatches
-          ? await this.sources.read(tenantId, intent, tx)
+          ? (prepared ?? (await this.sources.read(tenantId, intent, tx)))
           : unavailable,
         tenantId,
       );
