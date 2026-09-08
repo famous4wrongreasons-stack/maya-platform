@@ -1,6 +1,6 @@
 # Chapter 7 — Wave 2: P02 finance and P05 reputation
 
-Status: local executable proof complete; combined release gate/cutover pending. P01 remains production PASS at `20260908-c7-p01-7623cac4`. This report is not Chapter 7 completion.
+Status: **P02 PRODUCTION PASS / P05 PRODUCTION PASS**. Active coordinated Wave 2 release: `20260908-c7-wave2-4b03a29c`; P01 remains preserved. This report is not Chapter 7 completion.
 
 ## Approved scope and shared architecture
 
@@ -39,3 +39,13 @@ Before cutover, a normal fetch found `31126aa5` restoring `app_<nonce>` native T
 The active backend remains P01. Read-only production comparison proves `database.py` and `web_auth.py` equal the Chapter 6-certified production hashes; active `bot.py` equals the certified production source plus the exact upstream cmd_start/import at AST level (only blank-line formatting differs). No unaccounted runtime function change, new route/launcher/surface group, schema impact or measurement overlap was found. [Exact receipt](evidence/chapter7-wave2/upstream-31126aa5-reconciliation.json); [canonical auth/provenance regression](evidence/chapter7-wave2/upstream-auth-targeted.txt). No auth request, session, message or business/provider mutation was exercised in production. The combined baseline is compatible, subject to the normal full release gate.
 
 [Post-fix targeted proof](evidence/chapter7-wave2/integration-fix-targeted.txt): **13 suites / 159 tests PASS**. The same production owner allowlists, read locks, closed measurement source families and nine-importer boundary limit remain in force.
+
+## Final coordinated production acceptance
+
+The unchanged [documented deployment gate](evidence/chapter7-wave2/deployment-certified.txt) completed: Prisma validation, lint, application/scripts typecheck, **421 suites / 3509 tests**, build, production preflight, zero pending migrations, schema drift NONE, canary cleanup, activation and health/readiness all PASS. The applied P01 migration is unchanged; no migration was introduced in P02/P05.
+
+[Read-only structural proof](evidence/chapter7-wave2/production-structural.txt) verified 14 compiled artifacts, all 37 fields, 16 CHECKs, eight source FKs, 11 index definitions, four triggers and guard bodies. Measurement rows/backfill/proof business-provider-message effects remain zero. Existing production Python includes the reconciled 31126aa5 auth handshake; this cutover changed only the backend release.
+
+P02 requirements Q05/Q06/Q07/Q11 and P05 Q10: LOCAL + PRODUCTION PASS. Progress is now **10/22 Q, 3/6 packages, 2/4 waves**. P03/P04 are next; P06 and final 22/22/32-surface gate remain. CHAPTER 7 COMPLETE: NO; CHAPTER 8 STARTED: NO.
+
+The exact owned Wave 2 PostgreSQL database was dumped then dropped and its cluster stopped/removed. [Dump receipt](evidence/chapter7-wave2/dump-final-evidence.json), [hygiene](evidence/chapter7-wave2/hygiene.json). Protected main remains 24 unchanged entries; 17 pre-existing DBs untouched. No owned process/watcher/browser/database remains from Wave 2.

@@ -3,6 +3,11 @@
     "Q01",
     "Q02",
     "Q03",
+    "Q05",
+    "Q06",
+    "Q07",
+    "Q10",
+    "Q11",
     "Q18",
     "Q22"
   ],
@@ -10,23 +15,23 @@
     "Q17": "P01 foundation PASS; P06 consumers outstanding"
   },
   "packagesComplete": [
-    "P01"
-  ],
-  "packagesInProgress": [
+    "P01",
     "P02",
     "P05"
   ],
+  "packagesInProgress": [
+    "P03",
+    "P04"
+  ],
   "packagesRemaining": [
-    "P02",
-    "P05",
     "P03",
     "P04",
     "P06"
   ],
-  "wavesComplete": 1,
+  "wavesComplete": 2,
   "wavesTotal": 4,
   "requirementsTotal": 22,
-  "productionRelease": "20260908-c7-p01-7623cac4",
+  "productionRelease": "20260908-c7-wave2-4b03a29c",
   "schemaEnvelope": {
     "models": 1,
     "physicalFields": 37,
