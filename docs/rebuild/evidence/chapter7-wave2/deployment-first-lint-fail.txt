@@ -1,0 +1,24 @@
+
+### 1/10 шлюз: чистое дерево, линт, типизация, тесты, схема
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+The schema at prisma/schema.prisma is valid 🚀
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+/private/tmp/maya-b29-contour/maya-saas-backend/scripts/chapter7-reputation-proof.ts
+    5:10  error  'Prisma' is defined but never used              @typescript-eslint/no-unused-vars
+  462:14  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+/private/tmp/maya-b29-contour/maya-saas-backend/src/measurement/measurement.reputation.spec.ts
+  470:47  error  Unsafe member access [0] on an `any` value  @typescript-eslint/no-unsafe-member-access
+  473:51  error  Unsafe member access [0] on an `any` value  @typescript-eslint/no-unsafe-member-access
+  479:51  error  Unsafe member access [0] on an `any` value  @typescript-eslint/no-unsafe-member-access
+  482:46  error  Unsafe member access [0] on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+✖ 6 problems (6 errors, 0 warnings)
+
+ПРОВАЛ: шлюз не пройден — на сервер ничего не заливалось — боевой релиз не тронут

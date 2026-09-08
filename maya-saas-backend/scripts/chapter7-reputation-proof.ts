@@ -2,7 +2,6 @@ import 'reflect-metadata';
 import assert from 'node:assert/strict';
 import { randomUUID, createHash } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { TenantContextService } from '../src/tenancy/tenant-context.service';
 import { canonicalUtcTransaction } from '../src/prisma/canonical-utc-transaction';
@@ -459,7 +458,7 @@ async function main() {
     firstHash = first.snapshotHash;
   await proof(
     'observed average/count delta uses its same source and exact denominator',
-    async () => {
+    () => {
       const metrics = (
         first.valuesJson as unknown as { metrics: MeasurementMetric[] }
       ).metrics;

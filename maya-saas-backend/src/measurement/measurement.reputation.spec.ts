@@ -364,12 +364,24 @@ describe('C7 P05 exact read authority and query', () => {
       branch: { count: jest.fn().mockResolvedValue(1) },
       staff: { findFirst: jest.fn().mockResolvedValue({ id: 'staff' }) },
       client: {
-        findUnique: jest.fn().mockResolvedValue({ mergedIntoClientId: null }),
+        findUnique: jest
+          .fn<
+            Promise<{ mergedIntoClientId: string | null } | null>,
+            [Prisma.ClientFindUniqueArgs]
+          >()
+          .mockResolvedValue({ mergedIntoClientId: null }),
       },
       appointment: {
-        findFirst: jest.fn().mockResolvedValue({ id: 'appointment' }),
+        findFirst: jest
+          .fn<
+            Promise<{ id: string } | null>,
+            [Prisma.AppointmentFindFirstArgs]
+          >()
+          .mockResolvedValue({ id: 'appointment' }),
       },
-      $queryRaw: jest.fn().mockResolvedValue([facts()]),
+      $queryRaw: jest
+        .fn<Promise<ReputationObservation[]>, [Prisma.Sql]>()
+        .mockResolvedValue([facts()]),
     };
   }
   it('rejects tenant timezone mismatch and inactive or unknown tenant', async () => {
@@ -479,7 +491,7 @@ describe('C7 P05 exact read authority and query', () => {
     expect(tx.appointment.findFirst.mock.calls[0][0].where).not.toHaveProperty(
       'mayaClientId',
     );
-    const query = tx.$queryRaw.mock.calls[0][0] as Prisma.Sql;
+    const query = tx.$queryRaw.mock.calls[0][0];
     expect(query.sql).toContain('latest.version=q."latestResponseVersion"');
     expect(query.sql).toContain('first.version=1');
     expect(query.sql).toContain('a."mayaClientId"=q."clientId"');
