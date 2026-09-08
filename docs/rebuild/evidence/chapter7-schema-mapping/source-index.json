@@ -1,0 +1,138 @@
+[
+  {
+    "path": "docs/rebuild/CYCLE-07-COMBINED-SCHEMA-ACTION-MAPPING.md",
+    "sha256": "516c1f7cd6ca62cc477e561949ea2321fcba150a427c34c842836421797dc904"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-07-OWNER-DECISION-PACK.md",
+    "sha256": "8ed3d1564a64ef84f36e899be67f0ccfaa32b9e86062a5db598db2cfea47bd87"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-07-PREFLIGHT-AND-SCOPE.md",
+    "sha256": "c5dac6667b63873fe8ec8d19b1e101498b93a9141cb78c0a57377d4537ff465d"
+  },
+  {
+    "path": "maya-saas-backend/prisma/migrations/20260903120000_package5_common_authority_foundation/migration.sql",
+    "sha256": "4166dcdaa50d88b715617c6a4018cb22db7e6713c09c76107d1130d60cfb0244"
+  },
+  {
+    "path": "maya-saas-backend/prisma/migrations/20260908010100_shared_approved_foundation/migration.sql",
+    "sha256": "5d1fc2962d1400a959f8ed6d2820b22b76fb0bb4fecb54cb90f9044dafa607f9"
+  },
+  {
+    "path": "maya-saas-backend/prisma/schema.prisma",
+    "sha256": "e47bb11988c2777eb64c8b960ebdf5694898f22071928e25784e9c67e9d08edd"
+  },
+  {
+    "path": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+    "sha256": "f0642a29a05f5c5eb3eaa2ef530d5ea197a78d94dcfb806d3c15ad232c1ef782"
+  },
+  {
+    "path": "maya-saas-backend/src/ai-tools/ai-tool-policy.service.ts",
+    "sha256": "cc18770343151f2b53e7dab35e25db50c5c88fac0f186df0ee842950b2894032"
+  },
+  {
+    "path": "maya-saas-backend/src/ai-tools/client-registry-analysis.ts",
+    "sha256": "4b2430b69a8440a947e12662d50b4f85651ba49d6a7c6a407209c96d52d90612"
+  },
+  {
+    "path": "maya-saas-backend/src/audit-log/audit-log.service.ts",
+    "sha256": "c63662181d76138a67e849362160c205b868bc0e0c6d7fadc4ad78146de64d87"
+  },
+  {
+    "path": "maya-saas-backend/src/business-content/review-authority.architecture.ts",
+    "sha256": "5f151615ff7dfd63e3ef3944a3657a5005b3d59385e542f3c038c1746132d176"
+  },
+  {
+    "path": "maya-saas-backend/src/business-facts/client-recency-facts.service.ts",
+    "sha256": "e94a34783674ea67c662ad07052e1dea2bf71975ba328737288991b538dbfc2a"
+  },
+  {
+    "path": "maya-saas-backend/src/business-state/business-state.service.ts",
+    "sha256": "b3180aaa525eaeef2282c5a0609e3f8605edd29f0beb4f9aaf9384f150ff26e2"
+  },
+  {
+    "path": "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts",
+    "sha256": "9aafef934eb6a632f60465b3bae648ecb358935933b3c40c8cf9016e4d7fb94d"
+  },
+  {
+    "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+    "sha256": "fbf4b172eaef1588f65e5d9050fbe17fdd74be1fe8673a674995ca88d93fc421"
+  },
+  {
+    "path": "maya-saas-backend/src/crm/crm-adapter.interface.ts",
+    "sha256": "53cd00d9341d034a55d6c2b19339cc12ba7d525d6ad25529767cb22a14939ef1"
+  },
+  {
+    "path": "maya-saas-backend/src/crm/crm.service.ts",
+    "sha256": "a03856423aa512cf57652012ee46e635254fb6cabe2e6742a06cb20016f335c7"
+  },
+  {
+    "path": "maya-saas-backend/src/domain/domain-event.ts",
+    "sha256": "27b7d5be2e6e7c0f92bb136c75933e23368370e537890d1362b344ef0e386e8f"
+  },
+  {
+    "path": "maya-saas-backend/src/expenses/expense-period.reader.ts",
+    "sha256": "82aecc24ee1c2207a98d98247c31c7f172caa4f5c9cce5e9a1887fc95e403b8d"
+  },
+  {
+    "path": "maya-saas-backend/src/marketing/canonical-bulk.service.ts",
+    "sha256": "ed2e9f92c0361e31cb104b4ef43e566710ace856e10502c7528ba8d63d23a2ef"
+  },
+  {
+    "path": "maya-saas-backend/src/opportunities/opportunity.contract.ts",
+    "sha256": "722cd396e7d9f394b0cc41cda7e874abdb0f7287ccbd08dfd899b5b88c7460bc"
+  },
+  {
+    "path": "maya-saas-backend/src/opportunities/opportunity.engine.ts",
+    "sha256": "dbf3adf7f84e290fbb6e0d37c7bf0745725a89f56a915f6e775ac33d3a8ef19e"
+  },
+  {
+    "path": "maya-saas-backend/src/opportunities/opportunity.policy.ts",
+    "sha256": "7dd189028bfa9014168ce94130aece587c3cd06c6fc7f19333b91673949eaf9d"
+  },
+  {
+    "path": "maya-saas-backend/src/opportunities/opportunity.shadow.ts",
+    "sha256": "f14ddcba619e8a9e3d3312b413ac29887abd18495a61ae608b94466ac2fc6d51"
+  },
+  {
+    "path": "maya-saas-backend/src/owner-reports/owner-report-snapshots.controller.ts",
+    "sha256": "672403f75273e0a53e61784d118aac3ff642813e7d2c78b4fd8707f842f993fe"
+  },
+  {
+    "path": "maya-saas-backend/src/owner-reports/owner-report.store.ts",
+    "sha256": "75ee64a66e04e065b2c21be9a16b4208b092c56ae45f4489adf51a67c81c6702"
+  },
+  {
+    "path": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+    "sha256": "3917a523b31316b08ef6f1c4184941cb944281b81a043cca83b9c1b6fd20f2d1"
+  },
+  {
+    "path": "maya-saas-backend/src/package5-wave5/package5-wave5.service.ts",
+    "sha256": "c0e76dcffffdbad5931e24d587c8c76957d5475be20283a59f60ecd57b6f47bd"
+  },
+  {
+    "path": "maya-saas-backend/src/package5-wave6/package5-wave-rc-payloads.ts",
+    "sha256": "8aacb327e3bcfa2e13dca6b94bc5fe7ea59b3b7739300a2e4df4ec17aed57cac"
+  },
+  {
+    "path": "maya-saas-backend/src/package5-wave6/package5-wave6.policy.ts",
+    "sha256": "95758c39465295975a6fe7ad1a5dbf0760b8aacb15d3bed217a2d1beeaf04185"
+  },
+  {
+    "path": "maya-saas-backend/src/package5-wave6/package5-wave6.service.ts",
+    "sha256": "4f618cb4ae3029f84ce097df58fe3f28b6c48cf43e121957aa55cb4bb78d3df1"
+  },
+  {
+    "path": "maya-saas-backend/src/recovery/recovery.service.ts",
+    "sha256": "5af59b60f17ecb2b0b02e7d08fac7ad8d92f82a4bae3b51c40f639f05ea85ff9"
+  },
+  {
+    "path": "maya-saas-backend/src/tenancy/bridge-source.service.ts",
+    "sha256": "3cc2ea66f0cd72e7c21c052938d8cb1c7e953685db55023ec79dc2b12abf1f85"
+  },
+  {
+    "path": "maya-saas-backend/src/tenancy/tenant-context.service.ts",
+    "sha256": "c2946856c250a251dd0d89d1ba9972e4dee90297a34155283851033c6034153d"
+  }
+]

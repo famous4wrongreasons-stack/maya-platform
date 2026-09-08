@@ -1,0 +1,160 @@
+{
+  "primaryKeys": [
+    "MeasurementRevision_pkey"
+  ],
+  "uniqueConstraints": [
+    "C7_measurement_id_tenant_uq",
+    "C7_measurement_generation_uq",
+    "C7_measurement_request_uq"
+  ],
+  "partialUniqueIndexes": [
+    "C7_measurement_pending_uq"
+  ],
+  "foreignKeys": [
+    {
+      "name": "C7_measurement_tenant_fk",
+      "sourceFields": [
+        "tenantId"
+      ],
+      "targetModel": "Tenant",
+      "targetFields": [
+        "id"
+      ],
+      "onDelete": "Restrict",
+      "onUpdate": "Restrict"
+    },
+    {
+      "name": "C7_measurement_client_fk",
+      "sourceFields": [
+        "clientId",
+        "tenantId"
+      ],
+      "targetModel": "Client",
+      "targetFields": [
+        "id",
+        "tenantId"
+      ],
+      "onDelete": "Restrict",
+      "onUpdate": "Restrict"
+    },
+    {
+      "name": "C7_measurement_appointment_fk",
+      "sourceFields": [
+        "appointmentId",
+        "tenantId",
+        "clientId"
+      ],
+      "targetModel": "Appointment",
+      "targetFields": [
+        "id",
+        "tenantId",
+        "mayaClientId"
+      ],
+      "onDelete": "Restrict",
+      "onUpdate": "Restrict"
+    },
+    {
+      "name": "C7_measurement_staff_fk",
+      "sourceFields": [
+        "staffId",
+        "tenantId"
+      ],
+      "targetModel": "Staff",
+      "targetFields": [
+        "id",
+        "tenantId"
+      ],
+      "onDelete": "Restrict",
+      "onUpdate": "Restrict"
+    },
+    {
+      "name": "C7_measurement_branch_fk",
+      "sourceFields": [
+        "branchId",
+        "tenantId"
+      ],
+      "targetModel": "Branch",
+      "targetFields": [
+        "id",
+        "tenantId"
+      ],
+      "onDelete": "Restrict",
+      "onUpdate": "Restrict"
+    },
+    {
+      "name": "C7_measurement_config_owner_fk",
+      "sourceFields": [
+        "configurationUserId",
+        "tenantId"
+      ],
+      "targetModel": "Membership",
+      "targetFields": [
+        "userId",
+        "tenantId"
+      ],
+      "onDelete": "Restrict",
+      "onUpdate": "Restrict"
+    },
+    {
+      "name": "C7_measurement_execution_fk",
+      "sourceFields": [
+        "creditedExecutionId",
+        "tenantId"
+      ],
+      "targetModel": "ActionExecution",
+      "targetFields": [
+        "id",
+        "tenantId"
+      ],
+      "onDelete": "Restrict",
+      "onUpdate": "Restrict"
+    },
+    {
+      "name": "C7_measurement_attempt_fk",
+      "sourceFields": [
+        "creditedAttemptId",
+        "tenantId"
+      ],
+      "targetModel": "ActionAttempt",
+      "targetFields": [
+        "id",
+        "tenantId"
+      ],
+      "onDelete": "Restrict",
+      "onUpdate": "Restrict"
+    }
+  ],
+  "checks": [
+    "C7_measurement_kind_ck",
+    "C7_measurement_hashes_ck",
+    "C7_measurement_versions_ck",
+    "C7_measurement_rule_ck",
+    "C7_measurement_period_ck",
+    "C7_measurement_timezone_ck",
+    "C7_measurement_retention_ck",
+    "C7_measurement_state_ck",
+    "C7_measurement_lease_ck",
+    "C7_measurement_publication_ck",
+    "C7_measurement_completeness_ck",
+    "C7_measurement_qualification_ck",
+    "C7_measurement_attribution_ck",
+    "C7_measurement_subject_ck",
+    "C7_measurement_json_ck",
+    "C7_measurement_bounds_ck"
+  ],
+  "secondaryIndexes": [
+    "C7_measurement_period_idx",
+    "C7_measurement_client_idx",
+    "C7_measurement_staff_idx",
+    "C7_measurement_expiry_idx",
+    "C7_measurement_execution_idx",
+    "C7_measurement_attempt_idx"
+  ],
+  "triggerFunctions": [
+    "C7_measurement_admission_guard",
+    "C7_measurement_publication_guard",
+    "C7_measurement_delete_guard",
+    "C7_measurement_truncate_guard"
+  ],
+  "status": "PROPOSED, NOT INSTALLED"
+}

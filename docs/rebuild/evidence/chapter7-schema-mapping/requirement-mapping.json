@@ -1,0 +1,200 @@
+[
+  {
+    "id": "Q01",
+    "requirement": "common measured envelope",
+    "package": "P01",
+    "existingOwnerModelFields": "BusinessState / financial DTO basis, coverage; Appointment amounts",
+    "existingStorageOwnerSufficient": "NO",
+    "exactGap": "No durable rule/evidence/basis/asOf revision",
+    "reuseOrDelta": "Shared `MeasurementRevision`, typed metric envelope"
+  },
+  {
+    "id": "Q02",
+    "requirement": "exact Client/action lineage",
+    "package": "P01",
+    "existingOwnerModelFields": "A18 Client + CrmClientLink; Opportunity; AE input hash / AgentTask; CD recipient",
+    "existingStorageOwnerSufficient": "NO",
+    "exactGap": "No qualified derived chain connecting these refs",
+    "reuseOrDelta": "Shared row Client/Appointment FKs + typed source qualification; no new binding"
+  },
+  {
+    "id": "Q03",
+    "requirement": "attendance vs booking/payment",
+    "package": "P01",
+    "existingOwnerModelFields": "Appointment.status/attendance; attendance/recency reader",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Current consumers conflate states",
+    "reuseOrDelta": "Separate named outcome dimensions in shared values; no Appointment field"
+  },
+  {
+    "id": "Q04",
+    "requirement": "later reversal vs historical report",
+    "package": "P03",
+    "existingOwnerModelFields": "A29 RecoveryConversion; DomainEvent; OwnerReportRun plan",
+    "existingStorageOwnerSufficient": "NO",
+    "exactGap": "Source assignment is not versioned current measured result",
+    "reuseOrDelta": "Append a revision; current selector advances; old report pins old ID/hash"
+  },
+  {
+    "id": "Q05",
+    "requirement": "financial truth / refund support",
+    "package": "P02",
+    "existingOwnerModelFields": "CrmFinancialSummary; BusinessState; normalized DomainEvent payload",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Coverage/discriminator limits lost in output",
+    "reuseOrDelta": "Qualified read receipts and explicit unavailable refund/net; no speculative fiscal writer"
+  },
+  {
+    "id": "Q06",
+    "requirement": "expense overlap/raw labels",
+    "package": "P02",
+    "existingOwnerModelFields": "P407 Expense.source/externalId/category/currency",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Reader drops raw label; overlap not qualified",
+    "reuseOrDelta": "Read exact existing fields; evidence linkage only, separate ambiguous totals"
+  },
+  {
+    "id": "Q07",
+    "requirement": "comparable periods",
+    "package": "P02",
+    "existingOwnerModelFields": "BusinessState ranges/timezone; Branch.timezone",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Comparable bounds/basis/completeness not shared",
+    "reuseOrDelta": "Shared period fields + deterministic comparator; no period model"
+  },
+  {
+    "id": "Q08",
+    "requirement": "actual accrued salary",
+    "package": "P04",
+    "existingOwnerModelFields": "CrmFinancialSummary.payroll; Staff",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Frozen/nested consumer and 0.5 heuristic",
+    "reuseOrDelta": "Read confirmed accrual or NOT_MEASURED; shared monetary metric"
+  },
+  {
+    "id": "Q09",
+    "requirement": "exact personal goal progress",
+    "package": "P04",
+    "existingOwnerModelFields": "A22 DashboardPreference.configJson + ActionTargetMutation",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Need measured plan/fact and configuration generation evidence",
+    "reuseOrDelta": "configurationUserId + Staff + typed A22 refs; no salary/goal writer"
+  },
+  {
+    "id": "Q10",
+    "requirement": "reputation facts",
+    "package": "P05",
+    "existingOwnerModelFields": "BusinessReview; NativeFeedbackRequest/Revision",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Source/scale/local-period denominator aggregation absent",
+    "reuseOrDelta": "Shared reputation kind, source-separated metrics; no reputation score/model"
+  },
+  {
+    "id": "Q11",
+    "requirement": "value discrepancy",
+    "package": "P02",
+    "existingOwnerModelFields": "P4 LoyaltyAccount/Transaction and provider-card read",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Comparable/asOf discrepancy disclosure",
+    "reuseOrDelta": "Shared values with source/basis; no value correction"
+  },
+  {
+    "id": "Q12",
+    "requirement": "attributable outcome",
+    "package": "P03",
+    "existingOwnerModelFields": "A29 assignment; AE/Attempt; Appointment/Client",
+    "existingStorageOwnerSufficient": "NO",
+    "exactGap": "No immutable qualified measurement with single outcome credit",
+    "reuseOrDelta": "Shared appointment outcome identity; exact credited execution/attempt; ambiguity uncredited"
+  },
+  {
+    "id": "Q13",
+    "requirement": "filled capacity",
+    "package": "P03",
+    "existingOwnerModelFields": "Opportunity.evidenceRefsJson; Appointment",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Boolean flag cannot prove original capacity and resulting visit",
+    "reuseOrDelta": "Exact capacity/opportunity + outcome evidence; unavailable when absent"
+  },
+  {
+    "id": "Q14",
+    "requirement": "delivery funnel",
+    "package": "P03",
+    "existingOwnerModelFields": "Campaign/Recipient/DeliveryAttempt states and reconciliation",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Stage evidence and denominators need deterministic read",
+    "reuseOrDelta": "Shared execution_funnel metrics; unsupported read receipt = unknown"
+  },
+  {
+    "id": "Q15",
+    "requirement": "proposal/action funnel",
+    "package": "P03",
+    "existingOwnerModelFields": "Opportunity/AgentTask/ActionExecution/Attempt",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Approval, denial, UNKNOWN, success conflated",
+    "reuseOrDelta": "Distinct per-stage entities/time bounds; no new action"
+  },
+  {
+    "id": "Q16",
+    "requirement": "common HTTP/PWA/AI/report facts",
+    "package": "P06",
+    "existingOwnerModelFields": "BusinessState/AI policy/OwnerReportRun",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Duplicated consumer arithmetic",
+    "reuseOrDelta": "One measurement reader/presenter; pinned admitted report snapshot"
+  },
+  {
+    "id": "Q17",
+    "requirement": "access/retention/privacy",
+    "package": "P01 + P06",
+    "existingOwnerModelFields": "TenantContext/Membership/Staff/A18/AuditLog/AC6",
+    "existingStorageOwnerSufficient": "NO",
+    "exactGap": "New derived rows need exact retention and safe projection",
+    "reuseOrDelta": "Same entitlement resolvers; row scope/FKs; one AC6 class; no export"
+  },
+  {
+    "id": "Q18",
+    "requirement": "durable retry/restart",
+    "package": "P01",
+    "existingOwnerModelFields": "Existing AE principles; source dedup, but no measurement receipt",
+    "existingStorageOwnerSufficient": "NO",
+    "exactGap": "AE booking identity cannot be repurposed for pure measurement",
+    "reuseOrDelta": "Shared PENDING/PUBLISHED row, key/intent, fenced claim, immutable publication"
+  },
+  {
+    "id": "Q19",
+    "requirement": "permanent guards",
+    "package": "P06",
+    "existingOwnerModelFields": "Existing C6 mandatory ratchets / 32-surface manifest",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "C7 owner/consumer rules need wiring and tests",
+    "reuseOrDelta": "Extend existing mandatory gates, no schema"
+  },
+  {
+    "id": "Q20",
+    "requirement": "finite acceptance/cutover",
+    "package": "P06",
+    "existingOwnerModelFields": "Existing release/schema process; Q/package manifests",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "C7 proofs not executed yet",
+    "reuseOrDelta": "22/22 Q, 6/6 packages, inherited 32/32 controls; coordinated cutover"
+  },
+  {
+    "id": "Q21",
+    "requirement": "tenant audit read",
+    "package": "P06",
+    "existingOwnerModelFields": "AuditLog.scope/tenantId + existing indexes",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Safe bounded owner API absent",
+    "reuseOrDelta": "Read only, role/tenant predicate and allowlist; no audit model/field"
+  },
+  {
+    "id": "Q22",
+    "requirement": "bridge qualification",
+    "package": "P01",
+    "existingOwnerModelFields": "BridgeSource integration guard; AE/Client/CRM refs",
+    "existingStorageOwnerSufficient": "YES",
+    "exactGap": "Legacy observation does not prove action lineage",
+    "reuseOrDelta": "Credit only independently bound evidence; raw bridge observations labelled/uncredited"
+  }
+]

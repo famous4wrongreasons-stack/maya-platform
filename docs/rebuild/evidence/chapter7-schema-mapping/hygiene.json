@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-09-08T14:40:26.969366+00:00",
+  "mainDirtyWorktreeTouched": false,
+  "mainPreExistingEntries": 24,
+  "preExistingDatabasesTouched": 0,
+  "ownedTemporaryDatabases": 0,
+  "ownedTemporaryProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "productionMutations": 0,
+  "runtimeChanges": 0,
+  "schemaImplementationChanges": 0,
+  "migrationFilesCreated": 0,
+  "processHygiene": 0,
+  "scope": "Read-only inspection plus repository documentation/evidence; no DB/server/browser connection used in this mapping step"
+}
