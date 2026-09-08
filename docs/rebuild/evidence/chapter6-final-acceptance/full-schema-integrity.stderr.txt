@@ -1,0 +1,4 @@
+Welcome to LTD BeGet SSH Server 'prime'
+AssertionError The expression evaluated to a falsy value:
+
+  assert(constraints.every(c=>c.convalidated))

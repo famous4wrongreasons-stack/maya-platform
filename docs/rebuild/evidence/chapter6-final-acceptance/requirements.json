@@ -1,0 +1,1361 @@
+{
+  "contract": "chapter6.requirements-traceability/1",
+  "status": "PASS",
+  "scope": "12 shared contract obligations + 32 normalized action-class dispositions from canonical Chapter 6 documents; not new action identifiers",
+  "mandatoryActiveRows": 43,
+  "mandatoryActiveRowsVerified": 43,
+  "approvedDeferredDisabledRows": 1,
+  "chapterRequirementsCoveragePercent": 100,
+  "missingRequirementRows": 0,
+  "rows": [
+    {
+      "id": "C01",
+      "requirement": "Durable execution/attempt state machine, exclusive claims and terminal immutability",
+      "canonicalOwner": "Action Engine kernel",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-PHASE-A-ACTION-ENGINE-AUDIT.md",
+        "docs/rebuild/CYCLE-06-ACTION-ENGINE-SCHEMA-GATE.md",
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/action-engine/action-engine.kernel.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/action-engine.canonical-kernel.spec.ts",
+        "maya-saas-backend/src/action-engine/action-engine.runtime-concurrency.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C02",
+      "requirement": "One typed/versioned capability registry and deterministic executor per mutation capability",
+      "canonicalOwner": "Action registry + approved domain executor",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-PHASE-A-ACTION-ENGINE-AUDIT.md",
+        "docs/rebuild/CYCLE-06-ACTION-ENGINE-SCHEMA-GATE.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-3-CANONICAL-INGRESS-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/action-engine/action-engine.registry.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/action-engine.registry.spec.ts",
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C03",
+      "requirement": "Tenant-qualified actor/target, current access/entitlement, canonical Client provenance; no raw identity authority",
+      "canonicalOwner": "Canonical ingress/policy resolver; verified Client binding",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-PHASE-A-ACTION-ENGINE-AUDIT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-3-CANONICAL-INGRESS-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-2-A16-A25-A26-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-3-A15-A17-A18-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/action-engine/action-engine.policy-resolver.ts",
+        "maya-saas-backend/src/crm/client-channel-runtime.service.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/action-engine.policy-resolver.spec.ts",
+        "maya-saas-backend/src/action-engine/client-action-principal.spec.ts",
+        "maya-saas-backend/src/crm/client-channel-appointment-authority.service.spec.ts",
+        "maya-saas-backend/src/crm/maya-user-client-association-issuer.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C04",
+      "requirement": "Exact approval/input binding; durable intent is not permanent policy ALLOW",
+      "canonicalOwner": "Ingress + approval binding + claim-time current policy",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-PHASE-A-ACTION-ENGINE-AUDIT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-3-CANONICAL-INGRESS-COMPLETION-REPORT.md",
+        "docs/rebuild/package5-rc-durable-policy-resume-decision-sheet.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/action-engine/action-engine.approval-binding.ts",
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/action-engine.approval-binding.spec.ts",
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report.runtime.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C05",
+      "requirement": "Immutable intent/idempotency identity, conflict on changed intent, restart/concurrent retry safety",
+      "canonicalOwner": "Action Engine and exact durable owner receipts",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-ACTION-ENGINE-SCHEMA-GATE.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-3-CANONICAL-INGRESS-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+        "maya-saas-backend/src/crm/client-booking-confirmation.service.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.kernel.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-intent.contract.spec.ts",
+        "maya-saas-backend/src/ai-tools/ai-tool-canonical-receipt.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C06",
+      "requirement": "Attempt before external I/O; UNKNOWN differs from FAILED; reconcile before safe same-identity retry",
+      "canonicalOwner": "Kernel + provider-specific reconcilers",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-PHASE-A-ACTION-ENGINE-AUDIT.md",
+        "docs/rebuild/CYCLE-06-ACTION-ENGINE-SCHEMA-GATE.md",
+        "docs/rebuild/CYCLE-06-PHASE-B2-APPOINTMENT-CUTOVER-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+        "maya-saas-backend/src/crm/appointment-reconciliation.service.ts",
+        "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/action-engine.canonical-kernel.spec.ts",
+        "maya-saas-backend/src/communication-delivery/communication-bulk-delivery.service.spec.ts",
+        "maya-saas-backend/src/crm/appointment-reconciliation.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C07",
+      "requirement": "Durable delivery plan/recipient identity, current consent, partial resume, no channel escape after UNKNOWN",
+      "canonicalOwner": "Producer owner → A12/CD; canonical bulk owner",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/owner-reports/owner-reports.service.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.service.ts",
+        "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/communication-delivery/communication-bulk-policy.service.spec.ts",
+        "maya-saas-backend/src/communication-delivery/communication-web-push.service.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.contract.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report.runtime.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C08",
+      "requirement": "Encrypted/redacted audit, immutable original inputs/history; security invalidation is not Client revoke",
+      "canonicalOwner": "Action Engine audit + A18 exact consent invalidation",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-ACTION-ENGINE-SCHEMA-GATE.md",
+        "docs/rebuild/CYCLE-06-NATIVE-CONSENT-SECURITY-INVALIDATION-PRODUCTION.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+        "maya-saas-backend/src/crm/client-channel-runtime.service.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/consent-security-cutover.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/consent-security-invalidation.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-effective-consent.spec.ts",
+        "maya-saas-backend/src/encryption/encryption.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C09",
+      "requirement": "AI/Opportunity/AgentTask/ActionIntent are initiators; untrusted evidence is not permission; L2.5 remains shadow",
+      "canonicalOwner": "AI receipt → canonical ingress; Opportunity evidence owner",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-PHASE-A-ACTION-ENGINE-AUDIT.md",
+        "docs/rebuild/CYCLE-06-ACTION-ENGINE-SCHEMA-GATE.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-3-CANONICAL-INGRESS-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+        "maya-saas-backend/src/action-engine/action-engine.ingress.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/canonical-action-ingress.architecture.spec.ts",
+        "maya-saas-backend/src/ai-tools/ai-surface-boundary.spec.ts",
+        "maya-saas-backend/src/opportunities/opportunity.boundary.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C10",
+      "requirement": "All HTTP/AI/scheduler/legacy initiators converge; read surfaces do not mutate business state",
+      "canonicalOwner": "Canonical domain owners, protected initiator adapters",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-PHASE-A-ACTION-ENGINE-AUDIT.md",
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/ai-tools",
+        "maya-saas-backend/src/crm",
+        "maya-saas-backend/src/package5-wave1",
+        "ai администратор"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-final-remediation.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-loyalty-read.architecture.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C11",
+      "requirement": "Approved additive schema, tenant FK/unique/checks, immutable history and bounded claimed retention",
+      "canonicalOwner": "Canonical domain owners + AC6 maintenance coordinator",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-ACTION-ENGINE-SCHEMA-GATE.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-AC6-OWNER-DECISION.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/prisma/schema.prisma",
+        "maya-saas-backend/src/package5-wave6"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts",
+        "maya-saas-backend/src/package5-wave6/package5-wave6.policy.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/evidence/package5-rc-policy-approved/manifest.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "C12",
+      "requirement": "Permanent guards in mandatory CI/deploy and production artifact/launcher integrity over closed 32-surface manifest",
+      "canonicalOwner": "Release process + architectural ratchets",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-PHASE-A-ACTION-ENGINE-AUDIT.md",
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        ".github/workflows/platform-ci.yml",
+        "maya-saas-backend/deploy/vps/deploy.sh"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-final-remediation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A01",
+      "requirement": "Appointment create",
+      "canonicalOwner": "Action Engine appointment executor",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-PHASE-B2-APPOINTMENT-CUTOVER-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/appointments",
+        "maya-saas-backend/src/crm"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts",
+        "maya-saas-backend/src/crm/client-channel-appointment-create.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B2-APPOINTMENT-CUTOVER-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A02",
+      "requirement": "Appointment reschedule",
+      "canonicalOwner": "Action Engine appointment executor",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-PHASE-B2-APPOINTMENT-CUTOVER-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/crm"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+        "maya-saas-backend/src/crm/client-appointment-reschedule.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B2-APPOINTMENT-CUTOVER-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A03",
+      "requirement": "Appointment cancel",
+      "canonicalOwner": "Action Engine appointment executor",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-PHASE-B2-APPOINTMENT-CUTOVER-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/crm"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/crm/client-appointment-cancel.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-appointment-cancel.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-PHASE-B2-APPOINTMENT-CUTOVER-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A04",
+      "requirement": "Attendance/status; preserve unrelated provider fields",
+      "canonicalOwner": "Approved residual appointment executor",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/crm"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/crm/crm-attendance.spec.ts",
+        "maya-saas-backend/src/crm/crm.visit-operations.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A05",
+      "requirement": "Appointment duration",
+      "canonicalOwner": "Approved residual appointment executor",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/crm"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/crm/crm.visit-operations.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A06",
+      "requirement": "Appointment service composition",
+      "canonicalOwner": "Approved residual appointment executor",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/crm"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/crm/crm.visit-operations.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A07",
+      "requirement": "Appointment comment/client-name/SMS flag",
+      "canonicalOwner": "Approved residual appointment executor",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/crm"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/crm/crm.visit-operations.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A08",
+      "requirement": "Visit payment/close remains disabled until separate correct payment workflow",
+      "canonicalOwner": "Action registry DENY / retired pay_visit",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-A08-FINANCIAL-SEMANTICS-CONTRACT-GATE.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/action-engine/action-engine.registry.ts",
+        "maya-saas-backend/src/crm"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/action-engine.registry.spec.ts",
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+        "maya-saas-backend/src/crm/crm.visit-operations.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-A08-FINANCIAL-SEMANTICS-CONTRACT-GATE.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "APPROVED DEFERRED — DISABLED AND VERIFIED",
+      "mandatoryActiveCapability": false,
+      "approvedDeferral": "A08 execution is explicitly deferred, DENY/retired; Chapter 6 requirement is removal of reachable unsafe owner, not enabling visit settlement. See Package1 closure and Package4 final state."
+    },
+    {
+      "id": "A09",
+      "requirement": "Operational single privacy delivery",
+      "canonicalOwner": "Canonical communication action → CD",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/communication-delivery"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/action-engine.canonical-kernel.spec.ts",
+        "maya-saas-backend/src/communication-delivery/communication-web-push.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A10",
+      "requirement": "Transactional new-appointment Inbox",
+      "canonicalOwner": "Canonical appointment event → CD",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/communication-delivery",
+        "maya-saas-backend/src/operational-alerts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/inbox/inbox.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A11",
+      "requirement": "Appointment reminders",
+      "canonicalOwner": "B25 reminder producer → CD",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/appointment-notifications"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/appointment-notifications/appointment-notifications.service.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/appointment-reminder-policy.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A12",
+      "requirement": "Owner/staff reports and briefings",
+      "canonicalOwner": "OwnerReportRun → A12 → CD",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/owner-reports"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/owner-reports/owner-report.runtime.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-reports.regression.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A13",
+      "requirement": "Operational/review/lead alerts: approved owner or explicit retirement",
+      "canonicalOwner": "OperationalAlertRun / NativeFeedbackRequest / existing producer → CD",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/operational-alerts",
+        "maya-saas-backend/src/native-feedback"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A14",
+      "requirement": "Bulk/reactivation/campaign delivery",
+      "canonicalOwner": "Canonical bulk owner → per-recipient AE/CD",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/marketing/canonical-bulk.service.ts",
+        "maya-saas-backend/src/communication-delivery"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/marketing/bulk-audience-equivalence.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.contract.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A15",
+      "requirement": "Staff schedule mutation",
+      "canonicalOwner": "Wave3 + R03 canonical StaffSchedule → AE",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-3-A15-A17-A18-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave3",
+        "maya-saas-backend/src/ai-tools/staff-schedule-command.service.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/ai-tools/staff-schedule-command.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-3-A15-A17-A18-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A16",
+      "requirement": "Staff access/roles/activation/owner claim",
+      "canonicalOwner": "Wave2 AE; User → Membership → exact staff/platform access",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-2-A16-A25-A26-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave2",
+        "maya-saas-backend/src/auth"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-2-A16-A25-A26-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A17",
+      "requirement": "CRM credentials/connection/import/branch lifecycle",
+      "canonicalOwner": "Wave3 canonical command; bounded fact importer",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-3-A15-A17-A18-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave3",
+        "maya-saas-backend/src/crm"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/crm/crm.disconnect-policy.spec.ts",
+        "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-3-A15-A17-A18-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A18",
+      "requirement": "Client CRM/profile/notes/consent authority",
+      "canonicalOwner": "Wave3/A18; exact Client/channel binding; keyed consent; security invalidation",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-3-A15-A17-A18-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave3",
+        "maya-saas-backend/src/crm/client-channel-runtime.service.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-channel-link.service.spec.ts",
+        "maya-saas-backend/src/crm/legacy-native-consent.service.spec.ts",
+        "maya-saas-backend/src/crm/maya-user-client-association-issuer.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-3-A15-A17-A18-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A19",
+      "requirement": "Loyalty adjustment",
+      "canonicalOwner": "P402 canonical loyalty action",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/loyalty"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+        "maya-saas-backend/src/loyalty/loyalty.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A20",
+      "requirement": "Loyalty/referral/subscription/certificate value lifecycle",
+      "canonicalOwner": "P403–P406 canonical value owners",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/loyalty",
+        "maya-saas-backend/src/referrals",
+        "maya-saas-backend/src/customer-subscriptions",
+        "maya-saas-backend/src/gift-certificates"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/p4-03-all8-cutover-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/p4-04-all4-cutover-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/p4-05-all8-cutover-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/p4-06-all3-cutover-ratchet.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A21",
+      "requirement": "Expense creation/deletion/period completion and reminder intake; cash is observation only",
+      "canonicalOwner": "P407 + R13 receipts; separate R14 CashDeclaration AE",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/expenses",
+        "maya-saas-backend/src/expense-intake"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/expenses/p4-07-expense-architecture.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A22",
+      "requirement": "Tenant settings and separate personal notification preferences",
+      "canonicalOwner": "Wave1/A22 + R11 governed revisions; B6/B25 preferences",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-1-A22-A23-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave1"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/client-preferences.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/package5-wave1/governed-settings.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-1-A22-A23-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A23",
+      "requirement": "Task/support and approved team communication; retired alternative history mutation",
+      "canonicalOwner": "Wave1/R04 operational work; R12 TeamMessage/Attachment → AE/CD",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-1-A22-A23-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave1",
+        "maya-saas-backend/src/team-communications"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/package5-wave1/operational-work.http.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-1-A22-A23-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A24",
+      "requirement": "Billing checkout/charge/reconcile/webhook",
+      "canonicalOwner": "P408 canonical billing owner",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/billing/p4-08-tenant-billing-canonical-cutover.service.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/p4-08-all4-cutover-ratchet.spec.ts",
+        "maya-saas-backend/src/billing/p4-08-yookassa-payment-provider.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A25",
+      "requirement": "Auth/session/social link/revocation with narrow protocol exceptions",
+      "canonicalOwner": "Wave2 AE security commands; approved AC3 auth protocol",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-2-A16-A25-A26-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave2",
+        "maya-saas-backend/src/auth"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/auth-flow-system.gateway.spec.ts",
+        "maya-saas-backend/src/auth/auth-session-system.gateway.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-2-A16-A25-A26-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A26",
+      "requirement": "Tenant/user/branch/branding/onboarding",
+      "canonicalOwner": "Wave2 AE; approved pre-tenant TrialActivation one-time claim",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-2-A16-A25-A26-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave2",
+        "maya-saas-backend/src/onboarding/trial-activation.service.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/onboarding/trial-activation.service.spec.ts",
+        "maya-saas-backend/src/package5-wave2/package5-wave2-canonical-cutover.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-2-A16-A25-A26-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A27",
+      "requirement": "Ordinary catalogue/community content and value configuration",
+      "canonicalOwner": "Wave4 reduced content + R08/R09 moderation; P409 value owner",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-4-A27-A28-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave4",
+        "maya-saas-backend/src/business-content",
+        "maya-saas-backend/src/public-community",
+        "maya-saas-backend/src/native-feedback"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/business-content/p4-09-all7-cutover-ratchet.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-4-A27-A28-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A28",
+      "requirement": "Internal calendar services/providers/schedule/time-off",
+      "canonicalOwner": "Wave4 canonical calendar configuration and AE create",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-4-A27-A28-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave4",
+        "maya-saas-backend/src/internal-calendar"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/internal-calendar/internal-calendar.service.spec.ts",
+        "maya-saas-backend/src/package5-wave4/package5-wave4-canonical-cutover.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-4-A27-A28-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A29",
+      "requirement": "Recovery attribution/touchpoint correction; no historical fact rewrite",
+      "canonicalOwner": "Wave5 canonical correction executor",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-5-A29-A31-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave5",
+        "maya-saas-backend/src/recovery"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/package5-wave5/package5-wave5-canonical-cutover.service.spec.ts",
+        "maya-saas-backend/src/recovery/recovery.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-5-A29-A31-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A30",
+      "requirement": "Approved PII/payload retention only; no unbounded direct cleanup",
+      "canonicalOwner": "AC6 MaintenanceRun/ItemClaim, current versioned policy",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-A30-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-AC6-OWNER-DECISION.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave6"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts",
+        "maya-saas-backend/src/package5-wave6/package5-wave6.policy.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-A30-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-AC6-OWNER-DECISION.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A31",
+      "requirement": "CRM ingestion/reconciliation mirror facts",
+      "canonicalOwner": "Canonical comparator/EventStore + Wave5 boundaries; not fabricated AE",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-5-A29-A31-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/package5-wave5",
+        "maya-saas-backend/src/events",
+        "maya-saas-backend/src/crm"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/crm/shadow-ingestion.service.spec.ts",
+        "maya-saas-backend/src/events/event-store.service.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-5-A29-A31-COMPLETION-REPORT.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    },
+    {
+      "id": "A32",
+      "requirement": "Commerce/payment-provider credential lifecycle",
+      "canonicalOwner": "P410 canonical credential executor",
+      "canonicalSources": [
+        "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md"
+      ],
+      "implementation": [
+        "maya-saas-backend/src/commerce/p4-10-commerce-credential-canonical-cutover.service.ts"
+      ],
+      "executableProof": [
+        "maya-saas-backend/src/commerce/p4-10-all4-cutover-ratchet.spec.ts",
+        "maya-saas-backend/src/commerce/p4-10-yookassa-credential-verifier.spec.ts"
+      ],
+      "priorPostgreSQLOrCutoverProof": [
+        "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md"
+      ],
+      "productionEvidence": [
+        "docs/rebuild/evidence/chapter6-final-acceptance/baseline-certification.json",
+        "docs/rebuild/evidence/chapter6-final-acceptance/build-artifact-comparison.json",
+        "docs/rebuild/evidence/package5-rc-final/manifest.json"
+      ],
+      "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED",
+      "mandatoryActiveCapability": true,
+      "approvedDeferral": null
+    }
+  ]
+}

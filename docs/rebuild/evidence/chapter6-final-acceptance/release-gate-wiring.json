@@ -1,0 +1,544 @@
+{
+  "status": "PASS",
+  "architecturalRatchetsWiredIntoReleaseGates": true,
+  "mandatorySuites": 411,
+  "ratchetSuites": 93,
+  "ratchetTests": 515,
+  "ci": [
+    "all pushes and pull requests",
+    "npm test -- --runInBand",
+    "legacy Python unittest discovery",
+    "frontend parse/prepublication contracts"
+  ],
+  "deployment": "deploy/vps/deploy.sh blocks before release directory/upload if complete Jest gate fails",
+  "ignoredOrStandaloneRatchets": 0,
+  "suiteWiring": [
+    {
+      "test": "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/ai-confirmation-receipt-schema.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/canonical-action-ingress.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-channel-delivery-address.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-channel-link-schema.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-habits-schema.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-habits.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-link-challenge-schema.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-preferences-schema.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-preferences.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-wanted-slot-runtime.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/client-wanted-slot-schema.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/consent-security-cutover.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/consent-security-invalidation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/customer-subscription-activation-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/customer-subscription-cancellation-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/customer-subscription-expiry-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/customer-subscription-purchase-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/customer-subscription-renewal-activation-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/customer-subscription-renewal-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/customer-subscription-revocation-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/customer-subscription-usage-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/gift-certificate-activation-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/gift-certificate-purchase-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/gift-certificate-redemption-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/legacy-loyalty-backfill-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/legacy-loyalty-earn-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/legacy-loyalty-expire-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/legacy-loyalty-grant-consume-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/legacy-loyalty-grant-issue-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/legacy-loyalty-import-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/legacy-loyalty-redeem-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/legacy-loyalty-refund-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/loyalty-account-runtime-nullability.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/p4-03-all8-cutover-ratchet.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/p4-04-all4-cutover-ratchet.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/p4-05-all8-cutover-ratchet.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5_retention_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/p4-06-all3-cutover-ratchet.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/p4-08-all4-cutover-ratchet.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package4-active-pwa-runtime-ratchet.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package4_value_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b10-b11-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b13-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5_control_plane_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b14-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5_control_plane_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b15-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5_control_plane_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b16-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5_control_plane_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b17-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5_control_plane_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b18-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5_control_plane_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b19-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5_control_plane_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b20-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5_control_plane_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b21-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5_control_plane_runtime_guard.py"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b22-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_b22_tip_retirement"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b23-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_b23_history_delete_retirement"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b24-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_b24_web_push"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b29-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b30-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-b34-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_b34_review_retirement"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-final-remediation.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_operational_delivery"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_native_feedback"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "package5-wave-rc-r09-public.proof.cjs",
+        "package5-wave-rc-r09-pwa.proof.cjs",
+        "test_package5_public_community"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_governed_settings"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_team_communications"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_expense_intake"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_cash_declaration"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_operational_work"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/referral-create-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/referral-resolve-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/referral-reward-fulfill-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/action-engine/referral-reward-issue-shadow.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_b13_control_plane_boundaries",
+        "test_package5_wave_ra_r02"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/business-content/p4-09-all7-cutover-ratchet.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/commerce/p4-10-all4-cutover-ratchet.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/crm/client-appointment-cancel.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/crm/client-appointment-read.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/crm/client-identity-registration-guard.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/crm/client-loyalty-read.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/crm/client-profile-read.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/expenses/p4-07-expense-architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    },
+    {
+      "test": "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": [
+        "test_package5_wave_rb_r07"
+      ]
+    },
+    {
+      "test": "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts",
+      "mandatoryExecuted": true,
+      "additionalExecutableProofs": []
+    }
+  ],
+  "productionSurfaceChecks": "coverage.json links closed 32-surface code ratchets and read-only artifact/launcher/config attestation; CI does not claim authenticated access to Beget cron panel",
+  "additionalApprovedPythonRuntimeGuards": {
+    "count": 15,
+    "status": "PASS",
+    "evidence": "python-runtime-guards.json",
+    "r05NegativeSuite": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package5_owner_reports.py",
+    "ciEntry": "legacy-python unittest discover test_*.py",
+    "explicitAcceptanceRun": "r05-python-guard.txt"
+  }
+}

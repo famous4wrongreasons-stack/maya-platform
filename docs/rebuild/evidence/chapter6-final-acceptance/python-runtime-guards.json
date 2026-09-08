@@ -1,0 +1,98 @@
+{
+  "status": "PASS",
+  "guards": [
+    {
+      "guard": "package4_value_runtime_guard.py",
+      "function": "scan_runtime",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_control_plane_runtime_guard.py",
+      "function": "scan_runtime",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_bulk_runtime_guard.py",
+      "function": "scan_bulk_sources",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_staff_authority_guard.py",
+      "function": "scan_staff_authority",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_staff_schedule_guard.py",
+      "function": "scan_staff_schedule",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_operational_work_runtime_guard.py",
+      "function": "scan_operational_work",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_retention_runtime_guard.py",
+      "function": "scan_retention_sources",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_owner_reports_runtime_guard.py",
+      "function": "scan",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_operational_delivery_runtime_guard.py",
+      "function": "scan",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_native_feedback_runtime_guard.py",
+      "function": "scan",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_public_community_runtime_guard.py",
+      "function": "scan",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_governed_settings_runtime_guard.py",
+      "function": "scan",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_team_communications_runtime_guard.py",
+      "function": "scan",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_expense_intake_runtime_guard.py",
+      "function": "scan",
+      "status": "PASS",
+      "approvedHashMatched": true
+    },
+    {
+      "guard": "package5_cash_declaration_runtime_guard.py",
+      "function": "scan",
+      "status": "PASS",
+      "approvedHashMatched": true
+    }
+  ],
+  "r05NegativeRegression": "2 tests PASS",
+  "ciWiring": "platform-ci.yml legacy-python: python -m unittest discover -s ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440 -p test_*.py",
+  "productionEffects": 0
+}

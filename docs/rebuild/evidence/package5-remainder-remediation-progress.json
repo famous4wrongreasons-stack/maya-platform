@@ -2,7 +2,7 @@
   "inventorySource": "docs/rebuild/evidence/package5-remainder-inventory-final.json",
   "inventorySha256": "f0d29c9f60c4699c1458b383b86decf0fb26aef5ee56e89a2d9a89b6b62df425",
   "wave": "R-C",
-  "state": "PACKAGE 5 COMPLETE — SEPARATE CHAPTER 6 ACCEPTANCE REQUIRED",
+  "state": "PACKAGE 5 COMPLETE; CHAPTER 6 FINAL ACCEPTANCE PASS — CHAPTER 7 NOT STARTED",
   "packages": [
     {
       "id": "R01",
@@ -319,7 +319,7 @@
     }
   ],
   "package5Complete": true,
-  "chapter6Complete": false,
+  "chapter6Complete": true,
   "finalGateRun": true,
   "productionRelease": "20260908-p5-rc-8bc03454",
   "completedPackageCount": 14,
@@ -769,7 +769,10 @@
     }
   },
   "finalGateEvidence": "package5-rc-final/coverage.json",
-  "nextCycle": "CHAPTER 6 FINAL COMPLETION / ACCEPTANCE GATE",
+  "nextCycle": "CHAPTER 7 — separate user instruction; NOT STARTED",
   "combinedBaselineCertified": true,
-  "securityRemediationPreserved": "package5-rc-final/production-final-security-preservation.json"
+  "securityRemediationPreserved": "package5-rc-final/production-final-security-preservation.json",
+  "chapter6AcceptanceEvidence": "chapter6-final-acceptance/manifest.json",
+  "chapter6AcceptanceReport": "../CYCLE-06-FINAL-COMPLETION-REPORT.md",
+  "chapter7Started": false
 }

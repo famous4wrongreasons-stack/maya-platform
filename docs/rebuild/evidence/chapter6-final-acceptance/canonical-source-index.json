@@ -1,0 +1,113 @@
+{
+  "sources": [
+    {
+      "path": "docs/rebuild/CARRY-FORWARD-REGISTER.md",
+      "sha256": "69d35277c79e159349f4d6b0df69068c8195cd231fb7b35403d9cc43a94db585"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-05-CHAPTER-5-COMPLETION-REPORT.md",
+      "sha256": "f0bf81c6b58ade7d924c9f402dfaa2b44b58b0f33036a0aa83dab12882a53c0f"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-A08-FINANCIAL-SEMANTICS-CONTRACT-GATE.md",
+      "sha256": "58bd1f77d151dbda31382ad9fe4b446f1b29ee7666178b5c7a40e43cc8940e55"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-ACTION-ENGINE-SCHEMA-GATE.md",
+      "sha256": "62d964e5bce2cf63017f8a27662df520188a94dbe945f2b45c9f252403b3a0c8"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-1-RESIDUAL-APPOINTMENT-CONVERGENCE-REPORT.md",
+      "sha256": "69c5fbebf14985b5a0e2af54487cc7c2e085f32339710901bf4f445b7c3ddb58"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-2-COMMUNICATION-CONVERGENCE-REPORT.md",
+      "sha256": "058596236ae16a6b8e1623aed4bfa96e2ebd35fef8c57556f3a575e2bf19e66b"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-3-CANONICAL-INGRESS-COMPLETION-REPORT.md",
+      "sha256": "dbe7227f36ca5efcdea2c951bc954f136f322bf1ff1d522a3c386737dca6f496"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-FINAL-ADVERSARIAL-VERIFICATION-COMPLETION-REPORT.md",
+      "sha256": "4cc15d02626fbadb8a212e4f21b12f34370d768b800be72cbae421a8ee4a456b"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-FINAL-COMPLETION-REPORT.md",
+      "sha256": "496c8920f90f80256fa78f118425d2735578568adea9b4729cca05a1dc6850bf"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-1-A22-A23-COMPLETION-REPORT.md",
+      "sha256": "93767fb452512dee9029c731b874a828e2455bfc2b97786945ed373bd299b336"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-2-A16-A25-A26-COMPLETION-REPORT.md",
+      "sha256": "f46f194a28ddfdec5241930f4758af061aecc523132b3fd439edcad582fa37f0"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-3-A15-A17-A18-COMPLETION-REPORT.md",
+      "sha256": "8bbea599f10e7c3a4cde3ccb419d34d1c3ee7f9df08a51cb1aec4e91e399dc4c"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-4-A27-A28-COMPLETION-REPORT.md",
+      "sha256": "93011edf281126c5ac14d6736fad31bcb6e951dfef96a95ed5c7cf12b3d82743"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-5-A29-A31-COMPLETION-REPORT.md",
+      "sha256": "641953e4d4ecbe3528912a4487a710d130573b8e69f785a1792390e0b3b8394c"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-A30-COMPLETION-REPORT.md",
+      "sha256": "13388e4cc2dcfc37106fc9f2584e2100acfacaf384a88bb34a581d5450bf7af8"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-AC6-OWNER-DECISION.md",
+      "sha256": "3baa2747023f8a8ba2824fa0966a5a7af1ef286febe322e41942a347f07a3f20"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-NATIVE-CONSENT-SECURITY-INVALIDATION-PRODUCTION.md",
+      "sha256": "b871f7be80b9c27e39aa4529434101f2bb755ef1654dc9299bd41cbeff5c569a"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-PACKAGE-5-OWNER-DECISION-PACK.md",
+      "sha256": "ded73f04b20503aeb5e1d7c82f3b6f8b28d7a175adb6fbf83f3b5a85205c2e06"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-PHASE-A-ACTION-ENGINE-AUDIT.md",
+      "sha256": "48a80454fb6df8609c59320140aa7dad7f5cafd46295f24b4150b51873e982e3"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-PHASE-B1-DURABLE-EXECUTION-KERNEL-REPORT.md",
+      "sha256": "b6f6e98f7a78fad4003fc25f6ab5ec97a45ba1cbf96d9ffb4d26412a9c60c971"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-PHASE-B2-APPOINTMENT-CUTOVER-REPORT.md",
+      "sha256": "6e8dfcc7597f3edb70d82e5d396a467227cae3d087838950aa51ff77986f6366"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+      "sha256": "abf68b115f6569d454f47fe19ea3cf8106a9aa87cc67ac338569abac1fc38a05"
+    },
+    {
+      "path": "docs/rebuild/evidence/package5-rc-final/manifest.json",
+      "sha256": "51b6f30a431ba55a972df351198c16ef073beba36538c1108e06777111a9a2ba"
+    },
+    {
+      "path": "docs/rebuild/evidence/package5-rc-policy-approved/manifest.json",
+      "sha256": "b12337a72ced32f4d188e279eaf009c55020bc3d345b4cfe82e15d21e0d4a534"
+    },
+    {
+      "path": "docs/rebuild/package5-b35-canonical-bulk-owner-contract-v1-proposal.md",
+      "sha256": "06836cf5c2009d565440d60151a8be4b702bd6b3164797a81129864a5ffeb7b3"
+    },
+    {
+      "path": "docs/rebuild/package5-b35-exact-schema-mapping-v1-proposal.md",
+      "sha256": "81102413a6a996ffb35fe79708b4cf9dfbad39907aab65b57bddb7d5ad587249"
+    },
+    {
+      "path": "docs/rebuild/package5-rc-durable-policy-resume-decision-sheet.md",
+      "sha256": "599aa270347c8511fdad1f70f161da7c2abdf2b4bccb3d9c6f4461a42b1a9c86"
+    }
+  ],
+  "interpretation": "Later explicit accepted owner/schema/cutover decisions supersede Phase A proposal details; historical reports are not rewritten as current failures."
+}

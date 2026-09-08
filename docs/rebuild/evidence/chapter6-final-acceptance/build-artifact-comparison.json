@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "compiledScripts": 657,
+  "missing": 0,
+  "different": 0,
+  "currentAcceptanceBuildMatchesProduction": true,
+  "runtimeSource": "8bc03454",
+  "acceptedDocumentationCheckpoint": "43826071"
+}
