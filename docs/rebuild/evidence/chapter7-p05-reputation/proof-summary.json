@@ -87,7 +87,7 @@
     "maya-saas-backend/scripts/chapter7-reputation-proof.ts",
     "docs/rebuild/CYCLE-07-P05-REPUTATION.md",
     "docs/rebuild/evidence/chapter7-p05-reputation/proof-summary.json",
-    "docs/rebuild/evidence/chapter7-p05-reputation/postgresql-proof.log"
+    "docs/rebuild/evidence/chapter7-p05-reputation/postgresql-proof.txt"
   ],
   "remainingIntegration": [
     "Parent-owned combined Wave 2 mandatory gate and logical commits.",

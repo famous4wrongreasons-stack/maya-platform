@@ -14,8 +14,8 @@ P02 preserves currency, source/basis, raw expense category evidence, completenes
 
 - [P01 shared regression](evidence/chapter7-wave2/p01-regression.txt): 41 checks PASS.
 - [Real source-owner correction/concurrency regression](evidence/chapter7-wave2/source-owner-regression.txt): 18 checks PASS.
-- [P02 PostgreSQL proof](evidence/chapter7-wave2/p02-finance-proof.log): 9 checks PASS, including exact Client without User, changed binding during remote read, lease expiry/restart on the same revision, separate currency/raw expenses and no source effects.
-- [P05 final PostgreSQL proof](evidence/chapter7-wave2/p05-reputation-proof.final.log): 9 checks PASS, including real R08 response/correction/withdrawal, 1,005 source reviews with bounded receipts, local calendar boundaries, source correction and published unavailable overflow. The earlier eight-check receipt is retained as history.
+- [P02 PostgreSQL proof](evidence/chapter7-wave2/p02-finance-proof.txt): 9 checks PASS, including exact Client without User, changed binding during remote read, lease expiry/restart on the same revision, separate currency/raw expenses and no source effects.
+- [P05 final PostgreSQL proof](evidence/chapter7-wave2/p05-reputation-proof.final.txt): 9 checks PASS, including real R08 response/correction/withdrawal, 1,005 source reviews with bounded receipts, local calendar boundaries, source correction and published unavailable overflow. The earlier eight-check receipt is retained as history.
 - Shared permanent owner/remote-publication/source-correction ratchets remain part of the standard mandatory Jest command. [Combined targeted tests](evidence/chapter7-wave2/combined-targeted.txt): **9 suites / 122 tests PASS**. Package details: [P02](CYCLE-07-P02-FINANCIAL-TRUTH.md), [P05](CYCLE-07-P05-REPUTATION.md).
 
 All fixtures live in a new isolated owned PostgreSQL cluster on loopback port 55517. The 17 protected databases are untouched. Production proof business/provider/messages are zero.
