@@ -1,0 +1,15 @@
+{
+  "at": "2026-09-08T18:29:32.169506+00:00",
+  "ownedTempProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTempDatabases": 0,
+  "preExistingDatabasesTouched": 0,
+  "productionProofEffects": 0,
+  "dump": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-wave3-recovery-cd157b66/recovery-final-synthetic-proof.dump",
+  "sha256": "f8fcd457e28a71901cb9239b4ab5f56fc7bcf90208cd1ec5ee2485eb3b41faf4",
+  "dumpValidated": true,
+  "ownedPostgresStopped": 17681,
+  "databaseDropped": "maya_c7_replay",
+  "mainDirtyWorktreeTouched": false
+}

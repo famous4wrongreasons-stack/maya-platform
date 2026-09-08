@@ -73,3 +73,7 @@ COMBINED BASELINE CERTIFIED: NO — late PWA compatibility unverified
 CHAPTER 7 FINAL GATE RUN: NO  
 CHAPTER 7 COMPLETE: NO  
 CHAPTER 8 STARTED: NO
+
+## Recovery successor
+
+The owner approved restoration. The new isolated worktree is restored and P03/P04 proofs passed again; the completed full gate exposed an unversioned PHP input required by four inherited ratchets. See [recovery and release-gate STOP](CYCLE-07-WAVE-3-RECOVERY-RELEASE-GATE-STOP.md). The original missing-worktree authorization blocker is resolved.

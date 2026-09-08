@@ -87,7 +87,7 @@ describe('R01 permanent Client initiator boundary', () => {
       status: 0,
       error: undefined,
     });
-    expect(result.stderr).toContain('Ran 8 tests');
+    expect(result.stderr).toContain('Ran 9 tests');
   });
 
   it('has no direct guest-create fetch left in the canonical PWA source and parses every script', () => {

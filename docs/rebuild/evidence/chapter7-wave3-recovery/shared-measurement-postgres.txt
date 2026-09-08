@@ -1,0 +1,20 @@
+PASS no request principal admission
+PASS cross tenant Client denied
+PASS same tenant wrong Client denied
+PASS cross-scope branch/Staff/configuration rejected before admission
+PASS unknown bridge event cannot become admission authority
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+18 !== 0
+
+    at /private/tmp/maya-b29-contour/maya-saas-backend/scripts/chapter7-measurement-proof.ts:138:12
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async proof (/private/tmp/maya-b29-contour/maya-saas-backend/scripts/chapter7-measurement-proof.ts:34:3)
+    at async main (/private/tmp/maya-b29-contour/maya-saas-backend/scripts/chapter7-measurement-proof.ts:137:3) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 18,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}

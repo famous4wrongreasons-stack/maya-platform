@@ -1,0 +1,68 @@
+{
+  "classification": "RELEASE-GATE GAP",
+  "restorationSourceConstraint": "committed repository artifacts only",
+  "missing": [
+    {
+      "path": "сайт и приложение/pwa-assets/tg-auth/api-proxy.php",
+      "exists": false,
+      "tracked": false,
+      "reachablePathHistoryCommits": 0,
+      "ignoreRule": ".gitignore:9:api-proxy.php\t\"\\321\\201\\320\\260\\320\\271\\321\\202 \\320\\270 \\320\\277\\321\\200\\320\\270\\320\\273\\320\\276\\320\\266\\320\\265\\320\\275\\320\\270\\320\\265/pwa-assets/tg-auth/api-proxy.php\"",
+      "directRatchetReaders": [
+        {
+          "path": "maya-saas-backend/src/action-engine/package5-b16-remediation.architecture.spec.ts",
+          "lines": [
+            62
+          ]
+        },
+        {
+          "path": "maya-saas-backend/src/action-engine/package5-b13-remediation.architecture.spec.ts",
+          "lines": [
+            25
+          ]
+        },
+        {
+          "path": "maya-saas-backend/src/action-engine/package5-b17-remediation.architecture.spec.ts",
+          "lines": [
+            98
+          ]
+        },
+        {
+          "path": "maya-saas-backend/src/action-engine/package5-b14-remediation.architecture.spec.ts",
+          "lines": [
+            23
+          ]
+        }
+      ]
+    }
+  ],
+  "relatedPatches": [
+    {
+      "path": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__api-proxy.php.patch",
+      "lines": 78,
+      "format": "partial unified delta requiring external base",
+      "hasFullFileAddition": false
+    },
+    {
+      "path": "maya-saas-backend/deploy/platform/beget-edge/r01/salon__app__api-proxy.codex-loyalty-20260721.php.patch",
+      "lines": 78,
+      "format": "partial unified delta requiring external base",
+      "hasFullFileAddition": false
+    },
+    {
+      "path": "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__api-proxy.php.patch",
+      "lines": 103,
+      "format": "partial unified delta requiring external base",
+      "hasFullFileAddition": false
+    },
+    {
+      "path": "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__api-proxy.codex-loyalty-20260721.php.patch",
+      "lines": 107,
+      "format": "partial unified delta requiring external base",
+      "hasFullFileAddition": false
+    }
+  ],
+  "substituteFixtureCreated": false,
+  "ratchetsWeakened": false,
+  "runtimeChanges": 0
+}

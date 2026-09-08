@@ -1,0 +1,16 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --testPathPatterns=measurement.*spec|native-owner-telegram-login|auth.*(pwa|oauth)|legacy-staff-principal|client-identity|client-channel|client-initiator-boundary|tenant-access.guard|tenant-context|tenant-resolver|package5-wave[1-6]-bypass
+
+......................
+----------------------------------------------------------------------
+Ran 22 tests in 2.070s
+
+OK
+[Nest] 20527  - 09/08/2026, 9:29:04 PM    WARN [ClientIdentityService] shadow client identity registration blocked provider=yclients reason=client_identity_guard_unavailable
+
+Test Suites: 39 passed, 39 total
+Tests:       432 passed, 432 total
+Snapshots:   0 total
+Time:        19.308 s, estimated 23 s
+Ran all test suites matching measurement.*spec|native-owner-telegram-login|auth.*(pwa|oauth)|legacy-staff-principal|client-identity|client-channel|client-initiator-boundary|tenant-access.guard|tenant-context|tenant-resolver|package5-wave[1-6]-bypass.
