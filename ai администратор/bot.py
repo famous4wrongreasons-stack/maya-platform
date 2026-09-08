@@ -52,6 +52,7 @@ import sources
 import subscriptions
 import yukassa_api
 import webhook_server
+import web_auth
 from privacy_policy import PRIVACY_TEXT
 from identity_utils import normalize_tg_user
 from config import (
@@ -481,7 +482,69 @@ async def consent_gate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ─── Команды ──────────────────────────────────────────────────────────────
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Enter through canonical authentication; raw deep links cannot bind identity."""
+    """Confirm native app login, or direct ordinary Telegram entry to MAYA.
+
+    ``app_<nonce>`` is an authentication handshake created by the native app.
+    It proves the Telegram account controlling this chat and creates only a web
+    login session.  It never resolves, creates, or links a canonical Client;
+    private Client access still requires the existing verified
+    ``ClientChannelLink`` boundary.
+    """
+    args = list(getattr(context, "args", None) or [])
+    payload = str(args[0]) if len(args) == 1 else ""
+    if payload.startswith("app_"):
+        nonce = payload[len("app_"):]
+        if not re.fullmatch(r"[A-Za-z0-9_-]{8,80}", nonce):
+            await update.effective_message.reply_text(
+                "Ссылка для входа устарела. Вернитесь в MAYA и нажмите "
+                "«Войти через Telegram» ещё раз."
+            )
+            return
+
+        token = web_auth._new_token()
+        session_created = False
+        try:
+            user = update.effective_user
+            profile = normalize_tg_user({
+                "id": user.id,
+                "first_name": getattr(user, "first_name", "") or "",
+                "last_name": getattr(user, "last_name", "") or "",
+                "username": getattr(user, "username", "") or "",
+            })
+            database.create_web_session(
+                token,
+                chat_id=user.id,
+                display_name=profile.get("display_name") or "",
+                subject_kind="client",
+                tg_first_name=profile.get("first_name") or "",
+                tg_last_name=profile.get("last_name") or "",
+                tg_username=profile.get("username") or "",
+                ttl_days=30,
+            )
+            session_created = True
+            authorized = database.applogin_authorize(nonce, user.id, token)
+        except Exception as exc:
+            authorized = False
+            logger.error("native app login confirmation failed: %s", type(exc).__name__)
+
+        if not authorized:
+            if session_created:
+                try:
+                    database.revoke_web_session(token)
+                except Exception:
+                    logger.error("native app login orphan session revoke failed")
+            await update.effective_message.reply_text(
+                "Ссылка для входа устарела. Вернитесь в MAYA и нажмите "
+                "«Войти через Telegram» ещё раз."
+            )
+            return
+
+        await update.effective_message.reply_text(
+            "✅ Вход подтверждён. Вернитесь в MAYA — приложение завершит вход автоматически."
+        )
+        return
+
+    # A plain /start is not an identity or Client-linking operation.
     await update.effective_message.reply_text(client_handoff_message(APP_URL))
 
 
