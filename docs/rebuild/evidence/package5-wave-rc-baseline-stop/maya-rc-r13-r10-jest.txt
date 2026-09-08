@@ -1,0 +1,6 @@
+
+Test Suites: 3 passed, 3 total
+Tests:       28 passed, 28 total
+Snapshots:   0 total
+Time:        3.496 s
+Ran all test suites within paths "src/action-engine/package5-r13-expense-intake.architecture.spec.ts", "src/ai-tools/ai-tool-canonical-receipt.spec.ts", "src/action-engine/ai-invocation-receipt.architecture.spec.ts".

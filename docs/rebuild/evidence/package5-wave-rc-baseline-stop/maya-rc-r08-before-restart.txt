@@ -1,0 +1,15 @@
+{
+  "package": "R08",
+  "proof": "PostgreSQL + synthetic CD transports",
+  "result": "PASS",
+  "checks": [
+    "verified Telegram first; UNKNOWN preserves original slot/execution; new device cannot enter or bypass UNKNOWN",
+    "frozen ordered Web Push plan: first UNKNOWN blocks later devices and newly registered endpoint",
+    "deterministic Web Push failure is terminal; no later endpoint or fallback",
+    "consent withdrawal between admission and delivery denies effect and preserves plan",
+    "private response succeeds independently of follow-up; Inbox UNKNOWN does not block other recipient; resume reuses original AE/CD and audience"
+  ],
+  "syntheticTelegramCalls": 1,
+  "syntheticWebPushCalls": 2,
+  "productionEffects": 0
+}

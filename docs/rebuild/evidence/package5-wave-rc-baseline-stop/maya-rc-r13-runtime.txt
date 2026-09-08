@@ -1,0 +1,14 @@
+{
+  "package": "R13",
+  "phase": "runtime",
+  "result": "PASS",
+  "checks": [
+    "Sunday exact window; default-off/narrow role; concurrent root and complete A13 slots atomic; changed intent conflicts; UNKNOWN one recipient/other succeeds; no retry expansion/resend",
+    "authenticated bot alone creates zero approvals; existing R02 session and exact identity required; concurrent source complete bundle; edited text conflict; retry never reparses; admission ledger writes zero",
+    "exact per-card confirmation through real AI handler/R10/P407; one canonical Expense; second card remains pending; no period completeness inference",
+    "missing fields no approval; unrelated/other-recipient replies denied; explicit context for UNKNOWN is not delivery proof; expired source denied; revoked session/feature denied; exact confirmed branch preserved",
+    "crash after canonical commit retains one SUCCEEDED P407 outcome with honest unsettled AI wrapper; crash before local effect resumes the same R10-bound execution; no list/period completeness inference"
+  ],
+  "syntheticTelegramCalls": 2,
+  "productionEffects": 0
+}

@@ -1,0 +1,195 @@
+[Nest] 41532  - 09/08/2026, 1:16:50 AM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 41532  - 09/08/2026, 1:16:50 AM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 41532  - 09/08/2026, 1:16:50 AM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 41532  - 09/08/2026, 1:16:50 AM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 41532  - 09/08/2026, 1:16:51 AM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 41532  - 09/08/2026, 1:16:51 AM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+Synthetic slot failure CommunicationDispatchError: Telegram executor rejected the request
+    at Object.dispatch (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:853:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ActionEngineRuntimeService.dispatch (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:432:20)
+    at async ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:334:21)
+    at async ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:276:14)
+    at async CommunicationDeliveryService.deliverPackage2TelegramAccepted (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:654:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:520:13
+    at async Promise.all (index 0)
+    at async OwnerReportsService.resumeDailyReport (/private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:506:5)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:485:9 {
+  classification: 'definitive',
+  outcomeCode: 'telegram_executor_rejected',
+  errorClass: 'provider_rejected'
+}
+[Nest] 41532  - 09/08/2026, 1:16:51 AM    WARN [OwnerReportsService] daily_report slot unresolved run=c2598509-9667-494b-a9e3-e9429e923ff5 slot=fdaf7bba56711e567f73484d4c9684f0cb1bad4a1e15cb584be57fad6d7b2932
+Synthetic slot failure ActionExecutionUncertainError: Canonical reads could not resolve the provider outcome
+    at ActionEngineRuntimeService.reconcile (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:479:13)
+    at ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:324:34)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:276:14)
+    at async CommunicationDeliveryService.deliverPackage2Single (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:970:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:520:13
+    at async Promise.all (index 0)
+    at async OwnerReportsService.resumeDailyReport (/private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:506:5)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:485:9
+    at async main (/private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:473:7) {
+  code: 'ACTION_RECONCILIATION_MANUAL_REQUIRED'
+}
+[Nest] 41532  - 09/08/2026, 1:16:51 AM    WARN [OwnerReportsService] daily_report slot unresolved run=3323c9bf-61af-46a9-940d-9f33e0b5b70f slot=40b495aef454ccd58ebb01284ca762c576c0148f475b454476a2beb0650c78e6
+Synthetic slot failure ActionExecutionUncertainError: Canonical reads could not resolve the provider outcome
+    at ActionEngineRuntimeService.reconcile (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:479:13)
+    at ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:324:34)
+    at ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:273:28)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async CommunicationDeliveryService.deliverPackage2Single (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:970:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:520:13
+    at async Promise.all (index 0)
+    at async OwnerReportsService.resumeDailyReport (/private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:506:5)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:501:9
+    at async main (/private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:473:7) {
+  code: 'ACTION_RECONCILIATION_MANUAL_REQUIRED'
+}
+[Nest] 41532  - 09/08/2026, 1:16:51 AM    WARN [OwnerReportsService] daily_report slot unresolved run=3323c9bf-61af-46a9-940d-9f33e0b5b70f slot=40b495aef454ccd58ebb01284ca762c576c0148f475b454476a2beb0650c78e6
+Synthetic slot failure CommunicationDispatchError: Report authority/policy could not be verified before delivery
+    at CommunicationDeliveryService.authorizeSingle (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:504:13)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Object.prepare (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:994:11)
+    at async ActionEngineRuntimeService.dispatch (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:405:28)
+    at async ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:334:21)
+    at async ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:276:14)
+    at async CommunicationDeliveryService.deliverPackage2Single (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:970:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:520:13
+    at async Promise.all (index 0)
+    at async OwnerReportsService.resumeDailyReport (/private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:506:5) {
+  classification: 'definitive',
+  outcomeCode: 'owner_report_authority_denied',
+  errorClass: 'canonical_report_authority'
+}
+[Nest] 41532  - 09/08/2026, 1:16:52 AM    WARN [OwnerReportsService] daily_report slot unresolved run=77c848de-10bf-4b08-b4c7-7c1c2d30b917 slot=7953e878501a88a44ee61a546bfc4dc9137a1297a9765f78ecb34ae5c83f3796
+Synthetic slot failure CommunicationDispatchError: Report authority/policy could not be verified before delivery
+    at CommunicationDeliveryService.authorizeSingle (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:504:13)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Object.prepare (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:994:11)
+    at async ActionEngineRuntimeService.dispatch (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:405:28)
+    at async ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:334:21)
+    at async ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:276:14)
+    at async CommunicationDeliveryService.deliverPackage2Single (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:970:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:520:13
+    at async Promise.all (index 0)
+    at async OwnerReportsService.resumeDailyReport (/private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:506:5) {
+  classification: 'definitive',
+  outcomeCode: 'owner_report_authority_denied',
+  errorClass: 'canonical_report_authority'
+}
+[Nest] 41532  - 09/08/2026, 1:16:52 AM    WARN [OwnerReportsService] daily_report slot unresolved run=e6ab0a55-3637-4893-a806-d0d16184e9f7 slot=55bb8d2bb780c1f8c3fe30acfa487b0370c6a98ae877006dca46b20146141778
+Synthetic slot failure CommunicationDispatchError: Report authority/policy could not be verified before delivery
+    at CommunicationDeliveryService.authorizeSingle (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:504:13)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Object.prepare (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:994:11)
+    at async ActionEngineRuntimeService.dispatch (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:405:28)
+    at async ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:334:21)
+    at async ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:276:14)
+    at async CommunicationDeliveryService.deliverPackage2Single (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:970:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:520:13
+    at async Promise.all (index 0)
+    at async OwnerReportsService.resumeDailyReport (/private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:506:5) {
+  classification: 'definitive',
+  outcomeCode: 'owner_report_authority_denied',
+  errorClass: 'canonical_report_authority'
+}
+[Nest] 41532  - 09/08/2026, 1:16:52 AM    WARN [OwnerReportsService] daily_report slot unresolved run=0e14c517-924a-47c6-96bc-555b3d24653b slot=657e5bb879a28485ca977970a78db1b8accb2ce25ba821076450e31b81b3fb94
+Synthetic slot failure CommunicationDispatchError: Report authority/policy could not be verified before delivery
+    at CommunicationDeliveryService.authorizeSingle (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:504:13)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Object.prepare (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:675:11)
+    at async ActionEngineRuntimeService.dispatch (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:405:28)
+    at async ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:334:21)
+    at async ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:276:14)
+    at async CommunicationDeliveryService.deliverPackage2TelegramAccepted (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:654:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:520:13
+    at async Promise.all (index 0)
+    at async OwnerReportsService.resumeDailyReport (/private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:506:5) {
+  classification: 'definitive',
+  outcomeCode: 'owner_report_authority_denied',
+  errorClass: 'canonical_report_authority'
+}
+[Nest] 41532  - 09/08/2026, 1:16:52 AM    WARN [OwnerReportsService] daily_report slot unresolved run=6d328c9e-287e-4f98-9a48-2468cd047b16 slot=5c5c46b2fbe3c48a22f25396a090ad36dd75d979d865afb6c4eb67ed5aa32c3b
+Synthetic slot failure ActionClaimError: Canonical claim failed closed: POLICY_NOT_EXTERNALLY_EXECUTABLE
+    at ActionEngineKernel.assertCanonicalClaim (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.kernel.ts:2259:13)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async execute (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.kernel.ts:621:9)
+    at async Proxy._transactionWithCallback (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:810:18)
+    at async ActionEngineRuntimeService.dispatch (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:373:15)
+    at async ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:334:21)
+    at async ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:276:14)
+    at async CommunicationDeliveryService.deliverPackage2Single (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:970:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:520:13
+    at async Promise.all (index 1) {
+  code: 'CANONICAL_POLICY_OR_APPROVAL_INVALID'
+}
+[Nest] 41532  - 09/08/2026, 1:16:52 AM    WARN [OwnerReportsService] daily_report slot unresolved run=77388c91-699f-4885-a9ff-32d06b7ba6b3 slot=91c4e4b445ec32b7527e63cc6cd74312176f8cc424f205b64130414029ae9633
+Synthetic slot failure ActionClaimError: Canonical claim failed closed: POLICY_NOT_EXTERNALLY_EXECUTABLE
+    at ActionEngineKernel.assertCanonicalClaim (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.kernel.ts:2259:13)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async execute (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.kernel.ts:621:9)
+    at async Proxy._transactionWithCallback (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:810:18)
+    at async ActionEngineRuntimeService.dispatch (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:373:15)
+    at async ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:334:21)
+    at async ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:276:14)
+    at async CommunicationDeliveryService.deliverPackage2Single (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:970:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:520:13
+    at async Promise.all (index 0) {
+  code: 'CANONICAL_POLICY_OR_APPROVAL_INVALID'
+}
+[Nest] 41532  - 09/08/2026, 1:16:52 AM    WARN [OwnerReportsService] daily_report slot unresolved run=77388c91-699f-4885-a9ff-32d06b7ba6b3 slot=3c9e74f5dba1f2fb001ebf7fe9816ee1d221ebf438e07ce944d6ae0c7e96531d
+[Nest] 41532  - 09/08/2026, 1:16:52 AM    WARN [OwnerReportsService] daily_report slot unresolved run=6cc95a3b-9293-4cd5-9f90-9b697afdcf14 slot=5579c35de9bf7f295d146a27b0e38a22d243a8a417e2ab5bf82bad235ba93ce6
+Synthetic slot failure ActionExecutionUncertainError: Canonical reads could not resolve the provider outcome
+    at ActionEngineRuntimeService.reconcile (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:479:13)
+    at ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:324:34)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:276:14)
+    at async CommunicationDeliveryService.deliverPackage2TelegramAccepted (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:654:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:520:13
+    at async Promise.all (index 0)
+    at async OwnerReportsService.resumeDailyReport (/private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:506:5)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:601:7
+    at async main (/private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:593:5) {
+  code: 'ACTION_RECONCILIATION_MANUAL_REQUIRED'
+}
+[Nest] 41532  - 09/08/2026, 1:16:52 AM    WARN [OwnerReportsService] daily_report slot unresolved run=6cc95a3b-9293-4cd5-9f90-9b697afdcf14 slot=2ae899d46d08a06bdfb6d7b8a0797cda77a1f8f14a4680877c051dc6d124d782
+Synthetic slot failure ForbiddenException: Cross-tenant access is not allowed
+    at TenantContextService.assertTenantId (/private/tmp/maya-b29-contour/maya-saas-backend/src/tenancy/tenant-context.service.ts:146:13)
+    at OwnerReportStore.dispatch (/private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-report.store.ts:351:18)
+    at CommunicationDeliveryService.deliverOwnerReportSlot (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:460:46)
+    at CommunicationDeliveryService.delivery.deliverOwnerReportSlot (/private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:247:10)
+    at /private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:623:20
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:63:14)
+    at TenantContextService.runAsSystemTenant (/private/tmp/maya-b29-contour/maya-saas-backend/src/tenancy/tenant-context.service.ts:46:25)
+    at /private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:622:17
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async main (/private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:593:5) {
+  response: {
+    message: 'Cross-tenant access is not allowed',
+    error: 'Forbidden',
+    statusCode: 403
+  },
+  status: 403,
+  options: {}
+}
+{
+  "status": "PASS",
+  "checks": [
+    "four concurrent first scheduler calls converge: one root, eight executions/effects",
+    "actual Inbox/Telegram/APNS boundaries observe committed full admission and predecessor success",
+    "confirmed replay sends nothing; explicit changed plan conflicts",
+    "crash before commit rolls back every slot with zero effects",
+    "crash after commit leaves eight READY slots and resumes without rebuilding content",
+    "Telegram deterministic failure blocks APNS without fallback",
+    "one APNS UNKNOWN blocks later device; independent sibling completes; no blind retry",
+    "current membership/User/preferences/verified route/tenant revocation prevents effects",
+    "no authorized recipient: no report, execution, private composition or effect",
+    "Telegram UNKNOWN leaves APNS unstarted and original sibling pending for actual restart",
+    "new device excluded from immutable plan; wrong tenant rejected before effect"
+  ],
+  "syntheticTransportEffects": 48,
+  "productionMessages": 0,
+  "productionProviderMutations": 0
+}

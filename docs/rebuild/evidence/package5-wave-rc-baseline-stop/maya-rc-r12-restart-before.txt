@@ -1,0 +1,12 @@
+{
+  "package": "R12",
+  "phase": "before actual restart",
+  "result": "PASS",
+  "checks": [
+    "User without Telegram; exact active membership; invalid input/auth creates no AE; four same-key sends one message/AE; changed key intent conflicts",
+    "concurrent reserve one owner; exact current reservation/chunk bytes; two chunks >6MiB verified; final publish lost receipt UNKNOWN; changed retry conflicts; no attach or unlink",
+    "message acceptance independent of notification; exact frozen Inbox plan; one UNKNOWN recipient does not block another; no external effect"
+  ],
+  "externalCalls": 0,
+  "productionEffects": 0
+}

@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "checks": [
+    "concurrent same intent: one root and eight READY slots; zero effects/attempts",
+    "changed intent conflicts; all twelve root fields immutable; early payload/root/slot removal rejected",
+    "late slot insert, half-null binding and foreign tenant rejected",
+    "same-transaction duplicate slot rejected by exact SQL unique constraint; historical promotion rejected",
+    "Inbox before Telegram; Telegram UNKNOWN blocks APNS; independent recipient allowed; new device excluded",
+    "concurrent different intent: one accepted immutable plan and one conflict",
+    "expired admission forbidden; expired payload purged without changing audit identity; restoration/early deletion forbidden; tenant context isolated",
+    "revoked authority rejects admission; final required-slot denial rolls back root and seven admitted slots"
+  ],
+  "productionMessages": 0,
+  "historicalBackfill": 0
+}

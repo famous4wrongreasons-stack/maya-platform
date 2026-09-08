@@ -1,0 +1,8 @@
+[Nest] 42397  - 09/08/2026, 1:20:29 AM    WARN [OwnerReportsService] daily_report slot unresolved run=run slot=first-1
+[Nest] 42397  - 09/08/2026, 1:20:29 AM    WARN [OwnerReportsService] daily_report slot unresolved run=run slot=first-1
+
+Test Suites: 3 passed, 3 total
+Tests:       26 passed, 26 total
+Snapshots:   0 total
+Time:        0.647 s, estimated 1 s
+Ran all test suites within paths "src/owner-reports/owner-report.contract.spec.ts", "src/owner-reports/owner-report.runtime.spec.ts", "src/common/postgres-transaction-conflict.spec.ts".
