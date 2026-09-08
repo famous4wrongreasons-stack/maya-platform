@@ -49,7 +49,21 @@ export type NormalizedMeasurementIntent = Omit<
 export const MEASUREMENT_SOURCE_KINDS: Readonly<
   Record<string, readonly string[]>
 > = {
-  Appointment: ['canonical_appointment', 'canonical_history_query'],
+  Appointment: [
+    'canonical_appointment',
+    'canonical_history_query',
+    'canonical_booked_period_query',
+  ],
+  CrmIntegration: ['financial_query_binding', 'value_query_binding'],
+  CrmFinancialSummary: ['canonical_financial_query'],
+  ClientLoyaltySnapshot: ['canonical_value_card_query'],
+  Expense: ['canonical_expense_query'],
+  ExpensePeriodDeclaration: ['canonical_declaration_query'],
+  LoyaltyAccount: ['canonical_value_account'],
+  LoyaltyTransaction: ['canonical_value_ledger_query'],
+  CrmClientLink: ['canonical_value_binding'],
+  BusinessReview: ['reputation_review_query'],
+  NativeFeedbackRequest: ['reputation_native_query'],
 };
 export type MeasurementSource = {
   owner: string;
