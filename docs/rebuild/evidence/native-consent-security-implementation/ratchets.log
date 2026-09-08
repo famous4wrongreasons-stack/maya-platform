@@ -1,0 +1,14 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent --runTestsByPath src/action-engine/consent-security-invalidation.architecture.spec.ts src/action-engine/native-consent-transition.pwa.spec.ts src/action-engine/native-consent-client-link.architecture.spec.ts src/marketing/canonical-bulk.architecture.spec.ts src/communication-delivery/communication-bulk-policy.service.spec.ts src/crm/client-profile-read.architecture.spec.ts
+
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 22.175s
+
+OK
+
+Test Suites: 6 passed, 6 total
+Tests:       59 passed, 59 total
+Snapshots:   0 total
+Time:        23.554 s
