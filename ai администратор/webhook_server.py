@@ -8845,16 +8845,20 @@ async def client_retention_refresh_loop(app: Application):
             )
         except Exception as e:
             logger.error(f"client retention refresh loop: {e}")
-        try:
-            registry = await asyncio.to_thread(owner_ai.client_registry_analysis, force=True)
-            logger.info(
-                "client registry refreshed: complete=%s total=%s loyal=%s",
-                registry.get("complete"),
-                registry.get("total_clients"),
-                registry.get("loyal_clients"),
-            )
-        except Exception as e:
-            logger.error(f"client registry refresh loop: {e}")
+        registry_refresh = getattr(owner_ai, "client_registry_analysis", None)
+        if callable(registry_refresh):
+            try:
+                registry = await asyncio.to_thread(registry_refresh, force=True)
+                logger.info(
+                    "client registry refreshed: complete=%s total=%s loyal=%s",
+                    registry.get("complete"),
+                    registry.get("total_clients"),
+                    registry.get("loyal_clients"),
+                )
+            except Exception as e:
+                logger.error(f"client registry refresh loop: {e}")
+        else:
+            logger.info("client registry refresh skipped: capability unavailable")
         await asyncio.sleep(21600)
 
 
