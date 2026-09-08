@@ -1,58 +1,120 @@
+import { ForbiddenException } from '@nestjs/common';
 import { ClientChannelRuntimeService } from './client-channel-runtime.service';
 
-const CHANNEL = {
+const channel = {
   tenantId: 'tenant-1',
-  provider: 'maya_user' as const,
+  provider: 'telegram',
   providerSubjectHash: 'a'.repeat(64),
+  channelControlProofHash: 'b'.repeat(64),
+  validUntil: new Date('2099-01-01'),
+  userId: null,
 };
-
-function fixture(links: Array<{ id: string }>) {
+const link = {
+  id: 'verified-link',
+  clientId: 'client-without-user',
+  tenantId: channel.tenantId,
+  verificationVersion: 1,
+  subjectHashVersion: 1,
+  verificationEvidenceHash: 'c'.repeat(64),
+};
+function fixture() {
   const tx = {
-    clientChannelLink: {
-      findMany: jest.fn().mockResolvedValue(links),
-    },
+    $queryRaw: jest.fn().mockResolvedValue([]),
+    clientChannelLink: { findMany: jest.fn().mockResolvedValue([link]) },
+    clientLinkChallenge: { create: jest.fn() },
+    clientConsentFact: { create: jest.fn() },
+    client: { create: jest.fn() },
+    actionExecution: { create: jest.fn() },
   };
-  const regularIssue = jest.fn().mockResolvedValue({ path: 'regular' });
-  const initialIssue = jest.fn().mockResolvedValue({ path: 'initial' });
-  const state = {
-    prisma: {
-      $transaction: jest.fn((work: (transaction: typeof tx) => unknown) =>
-        work(tx),
-      ),
-    },
-    channels: { authenticate: jest.fn().mockResolvedValue(CHANNEL) },
-    challenges: { issue: regularIssue },
-    initialMayaChallenges: { issue: initialIssue },
+  const authenticate = jest.fn().mockResolvedValue(channel);
+  const issue = jest.fn().mockResolvedValue({ path: 'canonical' });
+  const context = {
+    assertTenantId: jest.fn((id: string) => {
+      if (id !== channel.tenantId) throw new ForbiddenException();
+    }),
   };
   const service = Object.assign(
     Object.create(ClientChannelRuntimeService.prototype) as object,
-    state,
+    {
+      resolverId: 'a18.active-verified-client-channel.v1',
+      channels: { authenticate },
+      context,
+      challenges: { issue },
+    },
   ) as ClientChannelRuntimeService;
-  return { service, tx, regularIssue, initialIssue };
+  return { service, tx, authenticate, issue };
 }
-
-describe('A18 Client linking challenge routing', () => {
-  it('uses the approved Maya account association issuer for a first link', async () => {
-    const { service, regularIssue, initialIssue } = fixture([]);
-
-    await expect(service.issue('maya-session-proof')).resolves.toEqual({
-      path: 'initial',
+describe('A18 existing canonical Client provenance', () => {
+  it('routes issuance exclusively through the canonical verified resolver', async () => {
+    const { service, issue } = fixture();
+    await expect(service.issue('proof')).resolves.toEqual({
+      path: 'canonical',
     });
-    expect(initialIssue).toHaveBeenCalledWith({
-      resolutionProof: 'maya-session-proof',
-    });
-    expect(regularIssue).not.toHaveBeenCalled();
+    expect(issue).toHaveBeenCalledWith({ resolutionProof: 'proof' });
   });
-
-  it('keeps an existing verified link on the original challenge issuer', async () => {
-    const { service, regularIssue, initialIssue } = fixture([{ id: 'link-1' }]);
-
-    await expect(service.issue('maya-session-proof')).resolves.toEqual({
-      path: 'regular',
+  it('supports a verified Client without Maya User and exact tenant/channel binding', async () => {
+    const { service, tx } = fixture();
+    await expect(service.resolve('proof', tx as never)).resolves.toMatchObject({
+      clientId: link.clientId,
+      tenantId: channel.tenantId,
+      linkId: link.id,
+      resolver: 'a18.active-verified-client-channel.v1',
     });
-    expect(regularIssue).toHaveBeenCalledWith({
-      resolutionProof: 'maya-session-proof',
+    expect(tx.clientChannelLink.findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: channel.tenantId,
+        provider: channel.provider,
+        providerSubjectHash: channel.providerSubjectHash,
+        revokedAt: null,
+      },
+      take: 2,
     });
-    expect(initialIssue).not.toHaveBeenCalled();
   });
+  it.each(['missing link', 'revoked link', 'wrong Client channel'])(
+    'denies %s before any effects',
+    async () => {
+      const { service, tx } = fixture();
+      tx.clientChannelLink.findMany.mockResolvedValue([]);
+      await expect(
+        service.resolve('proof', tx as never),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      for (const model of [
+        tx.clientLinkChallenge,
+        tx.clientConsentFact,
+        tx.client,
+        tx.actionExecution,
+      ])
+        expect(model.create).not.toHaveBeenCalled();
+    },
+  );
+  it('rejects wrong tenant before Client resolution', async () => {
+    const { service, tx, authenticate } = fixture();
+    authenticate.mockResolvedValue({ ...channel, tenantId: 'other' });
+    await expect(service.resolve('proof', tx as never)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect(tx.clientChannelLink.findMany).not.toHaveBeenCalled();
+  });
+  it('rejects a channel changed while acquiring its identity lock', async () => {
+    const { service, tx, authenticate } = fixture();
+    authenticate.mockResolvedValueOnce(channel).mockResolvedValueOnce({
+      ...channel,
+      providerSubjectHash: 'd'.repeat(64),
+    });
+    await expect(service.resolve('proof', tx as never)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+  });
+  it.each(['verificationVersion', 'subjectHashVersion'])(
+    'rejects unapproved %s',
+    async (field) => {
+      const { service, tx } = fixture();
+      tx.clientChannelLink.findMany.mockResolvedValue([
+        { ...link, [field]: 2 },
+      ]);
+      await expect(
+        service.resolve('proof', tx as never),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    },
+  );
 });

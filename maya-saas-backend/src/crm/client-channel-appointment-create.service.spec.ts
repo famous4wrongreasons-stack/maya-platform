@@ -51,6 +51,16 @@ function setup(options: Options = {}) {
     $queryRaw: jest.fn().mockResolvedValue([]),
     clientChannelLink: { findMany: jest.fn().mockResolvedValue(links) },
     client: { findUnique: jest.fn().mockResolvedValue(client) },
+    clientConsentFact: {
+      findMany: jest.fn().mockResolvedValue([
+        {
+          id: 'verified-consent',
+          decision: 'grant',
+          effectiveAt: new Date('2026-01-01T00:00:00.000Z'),
+          invalidation: null,
+        },
+      ]),
+    },
     customerProfile: {
       findUnique: jest.fn().mockResolvedValue({
         privacyConsentAt: options.privacy === false ? null : new Date(),
@@ -94,7 +104,7 @@ function setup(options: Options = {}) {
   };
   const service = new ClientChannelRuntimeService(
     prisma as never,
-    {} as never,
+    { assertTenantId: jest.fn() } as never,
     channels as never,
     encryption as never,
     {} as never,

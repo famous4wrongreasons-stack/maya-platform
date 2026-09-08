@@ -185,6 +185,14 @@ run "set -e
   node -e \"const c=require('@prisma/client'); if(!c.PrismaClient||!c.Prisma) throw new Error('клиент неполный'); console.log('клиент базы сгенерирован и загружается')\"" \
   || fail "генерация клиента"
 
+# Approved incident cutovers may need a canonical correction between schema
+# preparation and public runtime activation. This mode keeps the old unit and
+# symlink unchanged; activation/recovery follows the incident cutover runbook.
+if [ "${MAYA_DEPLOY_PREPARE_ONLY:-0}" = "1" ]; then
+  echo "PREPARED ONLY: $STAMP; schema verified; runtime not activated"
+  exit 0
+fi
+
 step "9/10 смоук на запасном порту 3199"
 # Гейт по /api/health/ready, а не /api/health: ready проверяет соединение с
 # базой. Здоровый процесс без базы — это не готовый релиз.

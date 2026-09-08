@@ -15,11 +15,17 @@ describe('legacy installed native consent compatibility boundary', () => {
     expect(controller).toContain(
       'this.clientChannels.submitLegacyNativeConsent(',
     );
-    expect(method).toContain('await this.issue(channelProof)');
+    expect(controller).toContain("@Headers('idempotency-key')");
     expect(method).toContain(
-      'await this.consume(channelProof, challenge.token)',
+      "new BadRequestException('consent_transition_identity_required')",
     );
     expect(method).toContain('return this.submitConsent(channelProof');
+    expect(method.indexOf('consent_transition_identity_required')).toBeLessThan(
+      method.indexOf('this.submitConsent'),
+    );
+    expect(method).not.toMatch(
+      /this\.(issue|consume|resolve|status)|randomUUID|createHash|Date\.now/,
+    );
     expect(method).not.toMatch(
       /customerProfile\.(create|update|upsert|delete)/,
     );

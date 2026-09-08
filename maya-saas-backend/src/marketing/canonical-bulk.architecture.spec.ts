@@ -138,8 +138,15 @@ describe('B35 permanent canonical bulk boundaries', () => {
     const policy = read(
       'src/communication-delivery/communication-bulk-policy.service.ts',
     );
-    expect(policy).toContain('clientConsentFact.findMany');
-    expect(policy).toContain("latest.decision !== 'grant'");
+    expect(policy).toMatch(
+      /effectiveClientConsent\(\s*tx,\s*tenantId,\s*clientId,/,
+    );
+    const resolver = read('src/crm/client-effective-consent.ts');
+    expect(resolver).toContain('clientConsentFact.findMany');
+    expect(resolver).toContain('!head.invalidation');
+    expect(policy).toContain(
+      "if (!consent.effective) return deny('CONSENT_NOT_GRANTED')",
+    );
     expect(policy).toContain('overrides.marketing === false');
     expect(policy).toContain('canonicalHistoryStartedAt');
     expect(policy).toContain('FREQUENCY_HISTORY_UNAVAILABLE');

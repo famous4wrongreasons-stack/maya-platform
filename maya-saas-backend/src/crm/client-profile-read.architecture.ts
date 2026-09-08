@@ -3,6 +3,10 @@ import ts from 'typescript';
 // Exact internal owner methods, not presentation endpoints. These still undergo
 // their existing action/delivery/retention ratchets and the full final inventory.
 const INTERNAL_OWNERS: Record<string, string[]> = {
+  'package5-wave3/consent-security-invalidation.service.ts': [
+    'execute',
+    'snapshot',
+  ],
   'package5-wave3/package5-wave3.service.ts': [
     'resolveFacts',
     'updateClientProfile',
@@ -136,7 +140,8 @@ export function scanClientProfileRead(file: string, source: string): string[] {
         'this.links.assertClientEligible(tx, tenantId, clientId)',
         'root.confirmedByUserId',
         'APPROVING_AUTHORITY_REVOKED',
-        'clientConsentFact.findMany',
+        'effectiveClientConsent(tx, tenantId, clientId,',
+        'lockClientConsent(tx, tenantId, clientId)',
         'CONSENT_NOT_GRANTED',
       ],
       bulkPolicyBody,
@@ -180,7 +185,8 @@ export function scanClientProfileRead(file: string, source: string): string[] {
         'Retired FK association issuer cannot supply Client authority',
       );
     requireMarkers([
-      "Promise.reject(new ForbiddenException('Trusted verified Client resolution required'))",
+      'Promise.reject(',
+      "new ForbiddenException('Trusted verified Client resolution required')",
     ]);
   }
   if (file === 'customer-portal/customer-portal.service.ts') {

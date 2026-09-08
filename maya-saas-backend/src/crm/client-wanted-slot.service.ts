@@ -1,3 +1,4 @@
+import { effectiveClientConsent } from './client-effective-consent';
 import { randomUUID } from 'node:crypto';
 
 import {
@@ -561,7 +562,19 @@ export class ClientWantedSlotService {
       }),
       this.prisma.tenant.findUnique({ where: { id: row.tenantId } }),
     ]);
-    if (!tenant || !profile?.privacyConsentAt) return false;
+    if (
+      !tenant ||
+      !profile?.privacyConsentAt ||
+      !(
+        await effectiveClientConsent(
+          this.prisma,
+          row.tenantId,
+          row.clientId,
+          'privacy',
+        )
+      ).effective
+    )
+      return false;
     let prefs: Record<string, unknown>;
     try {
       const envelope = preferenceObject(

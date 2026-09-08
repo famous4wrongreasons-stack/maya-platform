@@ -1,3 +1,7 @@
+import {
+  effectiveClientConsent,
+  effectiveClientConsents,
+} from './client-effective-consent';
 import { resolveVerifiedClientDeliveryEndpoint } from './client-delivery-endpoint';
 import { ClientBookingConfirmationService } from './client-booking-confirmation.service';
 import {
@@ -298,23 +302,17 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
           marketing: false,
           client_link_required: true,
         };
-      const profile = await tx.customerProfile.findFirst({
-        where: { clientId: links[0].clientId, tenantId: channel.tenantId },
-      });
+      const consent = await effectiveClientConsents(
+        tx,
+        channel.tenantId,
+        links[0].clientId,
+      );
       return {
         linked: true,
-        privacy: Boolean(profile?.privacyConsentAt),
-        marketing: Boolean(profile?.marketingConsentAt),
-        marketing_decided: Boolean(
-          await tx.clientConsentFact.findFirst({
-            where: {
-              tenantId: channel.tenantId,
-              clientId: links[0].clientId,
-              kind: 'marketing',
-            },
-            select: { id: true },
-          }),
-        ),
+        privacy: consent.privacy.effective,
+        marketing: consent.marketing.effective,
+        marketing_decided:
+          consent.marketing.decided && !consent.marketing.invalidated,
         client_link_required: false,
       };
     });
@@ -373,7 +371,17 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
           },
           select: { privacyConsentAt: true },
         });
-        if (!profile?.privacyConsentAt)
+        if (
+          !profile?.privacyConsentAt ||
+          !(
+            await effectiveClientConsent(
+              tx,
+              channel.tenantId,
+              links[0].clientId,
+              'privacy',
+            )
+          ).effective
+        )
           throw new ForbiddenException('privacy_consent_required');
         return {
           ready: true,
@@ -496,7 +504,16 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       return {
         tenantId: channel.tenantId,
         clientId: client.id,
-        privacy: Boolean(profile?.privacyConsentAt),
+        privacy:
+          Boolean(profile?.privacyConsentAt) &&
+          (
+            await effectiveClientConsent(
+              tx,
+              channel.tenantId,
+              client.id,
+              'privacy',
+            )
+          ).effective,
         user: client.user,
         crmLinks: client.crmLinks,
       };
@@ -642,7 +659,17 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         },
         select: { privacyConsentAt: true },
       });
-      if (!profile?.privacyConsentAt)
+      if (
+        !profile?.privacyConsentAt ||
+        !(
+          await effectiveClientConsent(
+            tx,
+            channel.tenantId,
+            client.id,
+            'privacy',
+          )
+        ).effective
+      )
         return {
           tenantId: channel.tenantId,
           clientId: client.id,
@@ -1044,7 +1071,17 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         },
         select: { privacyConsentAt: true },
       });
-      if (!profile?.privacyConsentAt)
+      if (
+        !profile?.privacyConsentAt ||
+        !(
+          await effectiveClientConsent(
+            tx,
+            verified.tenantId,
+            verified.clientId,
+            'privacy',
+          )
+        ).effective
+      )
         throw new ForbiddenException('Canonical Client consent required');
       return verified;
     });
@@ -1361,17 +1398,16 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     });
     if (links.length !== 1)
       return { privacy: false, marketing: false, marketing_decided: false };
-    const profile = await this.prisma.customerProfile.findFirst({
-      where: { tenantId, clientId: links[0].clientId },
-    });
-    const decision = await this.prisma.clientConsentFact.findFirst({
-      where: { tenantId, clientId: links[0].clientId, kind: 'marketing' },
-      select: { id: true },
-    });
+    const consent = await effectiveClientConsents(
+      this.prisma,
+      tenantId,
+      links[0].clientId,
+    );
     return {
-      privacy: Boolean(profile?.privacyConsentAt),
-      marketing: Boolean(profile?.marketingConsentAt),
-      marketing_decided: Boolean(decision),
+      privacy: consent.privacy.effective,
+      marketing: consent.marketing.effective,
+      marketing_decided:
+        consent.marketing.decided && !consent.marketing.invalidated,
     };
   }
 }

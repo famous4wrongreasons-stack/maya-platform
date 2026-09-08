@@ -96,17 +96,15 @@ describe('B28 shared private CustomerProfile read protection', () => {
       ).length,
     ).toBeGreaterThan(0);
   });
-  it('keeps first-link association proof limited to non-PII durable keys', () => {
-    const file = 'crm/maya-user-client-association-issuer.ts',
-      code = readFileSync(join(root, file), 'utf8');
-    expect(scanClientProfileRead(file, code)).toEqual([]);
+  it('rejects any reintroduced profile authority in the retired issuer', () => {
+    const file = 'crm/maya-user-client-association-issuer.ts';
+    expect(
+      scanClientProfileRead(file, readFileSync(join(root, file), 'utf8')),
+    ).toEqual([]);
     expect(
       scanClientProfileRead(
         file,
-        code.replace(
-          'select: { id: true, userId: true, clientId: true }',
-          'select: { id: true, userId: true, clientId: true, phone: true }',
-        ),
+        'class Issuer { resolve() { return tx.customerProfile.findMany({where:{userId}}); } }',
       ).length,
     ).toBeGreaterThan(0);
   });

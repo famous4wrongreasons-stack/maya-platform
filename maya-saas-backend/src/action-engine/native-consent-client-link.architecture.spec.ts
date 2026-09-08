@@ -15,24 +15,32 @@ describe('native consent verified Client link boundary', () => {
     expect(consent).toContain("authedFetch('/client-channel/challenges'");
     expect(consent).toContain("authedFetch('/client-channel/consume'");
     expect(consent).toContain("authedFetch('/client-channel/consent'");
-    expect(consent).toContain('idempotencyKey: commandRef.current');
+    expect(consent).toContain('meMayaConsentTransition(');
+    expect(consent).toContain('body: JSON.stringify(command)');
     expect(consent).not.toContain('/customers/me/profile');
     expect(consent).not.toMatch(/clientId|client_id|phone|chat_id/);
   });
 
-  it('permits initial issuance only from dual durable Maya account bindings', () => {
+  it('retires legacy association authority and requires existing canonical provenance', () => {
     const issuer = read(
       'maya-saas-backend/src/crm/maya-user-client-association-issuer.ts',
     );
-    expect(issuer).toContain("provider !== 'maya_user'");
-    expect(issuer).toContain('userId: channel.userId');
-    expect(issuer).toContain(
-      'OR: [{ userId: channel.userId }, { clientId: client.id }]',
+    expect(issuer).toContain('Promise.reject(');
+    expect(issuer).not.toMatch(/tx\.|channel\.userId|profiles\[/);
+    const runtime = read(
+      'maya-saas-backend/src/crm/client-channel-runtime.service.ts',
     );
-    expect(issuer).toContain('profiles[0].userId !== channel.userId');
-    expect(issuer).toContain('profiles[0].clientId !== client.id');
-    expect(issuer).not.toMatch(
-      /phoneHash|phone:\s|chat_id|clientId:\s*(?:input|body|request)/,
+    const resolver = runtime.slice(
+      runtime.indexOf('async resolve('),
+      runtime.indexOf('  consume('),
+    );
+    expect(resolver).toContain('lockClientChannelIdentity(');
+    expect(resolver).toContain('revokedAt: null');
+    expect(resolver).toContain(
+      'this.challenges.issue({ resolutionProof: channelProof })',
+    );
+    expect(resolver).not.toMatch(
+      /client\.(find|create)|customerProfile\.|userId|initialMayaChallenges/,
     );
   });
 });

@@ -140,7 +140,7 @@ function setup(options: Options = {}) {
   };
   const service = new ClientChannelRuntimeService(
     prisma as never,
-    {} as never,
+    { assertTenantId: jest.fn() } as never,
     channels as never,
     {} as never,
     {} as never,

@@ -1,3 +1,4 @@
+import { consentSecurityCapability } from './consent-security-invalidation.contract';
 import {
   BULK_ROOT_CAPABILITY,
   BULK_SLOT_CAPABILITY,
@@ -3504,6 +3505,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     package5Wave4Capability(registration, false),
   ),
   ...clientPreferenceCapabilities(),
+  consentSecurityCapability(),
   clientHabitsCapability(),
   ...clientWantedSlotCapabilities(),
   ...PACKAGE5_WAVE5_REGISTRATIONS.map((registration) =>

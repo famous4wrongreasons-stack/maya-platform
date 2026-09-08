@@ -1,3 +1,4 @@
+import { effectiveClientConsents } from './client-effective-consent';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -173,13 +174,14 @@ export class ClientProfileReadService {
           (profile.clientId !== clientId || profile.tenantId !== tenantId)
         )
           throw new ForbiddenException('client_profile_identity_mismatch');
+        const consent = await effectiveClientConsents(tx, tenantId, clientId);
         return {
           clientId,
           profile: {
             profile_id: profile?.id ?? null,
             preferred_locale: profile?.preferredLocale ?? null,
-            privacy_consent_at: profile?.privacyConsentAt ?? null,
-            marketing_consent_at: profile?.marketingConsentAt ?? null,
+            privacy_consent_at: consent.privacy.effectiveAt,
+            marketing_consent_at: consent.marketing.effectiveAt,
             updated_at: profile?.updatedAt ?? null,
             ...(staff
               ? {
