@@ -41,7 +41,9 @@ const db = new Proxy(rawDb, {
       });
     }
     const value: unknown = Reflect.get(target, property, receiver);
-    return typeof value === 'function' ? value.bind(target) : value;
+    return typeof value === 'function'
+      ? (value as (...args: unknown[]) => unknown).bind(target)
+      : value;
   },
 });
 type Tx = Prisma.TransactionClient;

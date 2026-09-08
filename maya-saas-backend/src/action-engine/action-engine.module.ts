@@ -1,3 +1,7 @@
+import { AuditLogModule } from '../audit-log/audit-log.module';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { EncryptionModule } from '../encryption/encryption.module';
+import { EncryptionService } from '../encryption/encryption.service';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -16,7 +20,7 @@ import { ActionCapabilityRegistry } from './action-engine.registry';
 import { ActionEngineRuntimeService } from './action-engine.runtime';
 
 @Module({
-  imports: [EntitlementsModule],
+  imports: [EntitlementsModule, AuditLogModule, EncryptionModule],
   providers: [
     ActionCapabilityRegistry,
     {
@@ -61,6 +65,8 @@ import { ActionEngineRuntimeService } from './action-engine.runtime';
         config: ConfigService,
         capabilities: ActionCapabilityRegistry,
         policyResolver: CanonicalActionPolicyResolver,
+        audit: AuditLogService,
+        encryption: EncryptionService,
       ) =>
         new ActionEngineKernel(
           prisma,
@@ -76,12 +82,15 @@ import { ActionEngineRuntimeService } from './action-engine.runtime';
           },
           capabilities,
           policyResolver,
+          { audit, encryption },
         ),
       inject: [
         PrismaService,
         ConfigService,
         ActionCapabilityRegistry,
         CanonicalActionPolicyResolver,
+        AuditLogService,
+        EncryptionService,
       ],
     },
     CanonicalActionIngressService,

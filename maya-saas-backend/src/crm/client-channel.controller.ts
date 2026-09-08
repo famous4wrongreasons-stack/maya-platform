@@ -65,9 +65,20 @@ export class ClientChannelController {
     return this.feedback.readOwn(mayaProof(authorization));
   }
   @Post('feedback/:operation')
-  feedbackResponse(@Headers('authorization') authorization: string | undefined, @Param('operation') operation: string, @Body() value: unknown, @Headers('idempotency-key') key: string | undefined) {
-    if (!this.feedback || !['response', 'withdraw'].includes(operation)) throw new BadRequestException('Native feedback operation required');
-    return this.feedback.respond(mayaProof(authorization), operation as 'response' | 'withdraw', value, key);
+  feedbackResponse(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('operation') operation: string,
+    @Body() value: unknown,
+    @Headers('idempotency-key') key: string | undefined,
+  ) {
+    if (!this.feedback || !['response', 'withdraw'].includes(operation))
+      throw new BadRequestException('Native feedback operation required');
+    return this.feedback.respond(
+      mayaProof(authorization),
+      operation as 'response' | 'withdraw',
+      value,
+      key,
+    );
   }
   @Get('profile')
   async profileProjection(
@@ -195,10 +206,31 @@ export class LegacyClientChannelController {
         if (!this.feedback) throw new Error('Native feedback owner required');
         return this.feedback.readOwn(input.channelProof);
       }
-      if (operation === 'feedback-response' || operation === 'feedback-withdraw') {
-        if (!this.feedback || !input.payload || typeof input.payload !== 'object' || Array.isArray(input.payload) || Object.keys(input.payload).sort().join(',') !== 'command,idempotencyKey') throw new BadRequestException('Exact feedback command envelope required');
-        const payload = input.payload as { command: unknown; idempotencyKey: unknown };
-        return this.feedback.respond(input.channelProof, operation === 'feedback-response' ? 'response' : 'withdraw', payload.command, payload.idempotencyKey);
+      if (
+        operation === 'feedback-response' ||
+        operation === 'feedback-withdraw'
+      ) {
+        if (
+          !this.feedback ||
+          !input.payload ||
+          typeof input.payload !== 'object' ||
+          Array.isArray(input.payload) ||
+          Object.keys(input.payload).sort().join(',') !==
+            'command,idempotencyKey'
+        )
+          throw new BadRequestException(
+            'Exact feedback command envelope required',
+          );
+        const payload = input.payload as {
+          command: unknown;
+          idempotencyKey: unknown;
+        };
+        return this.feedback.respond(
+          input.channelProof,
+          operation === 'feedback-response' ? 'response' : 'withdraw',
+          payload.command,
+          payload.idempotencyKey,
+        );
       }
       if (operation === 'delivery-consent') {
         const payload = input.payload;

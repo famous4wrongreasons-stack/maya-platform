@@ -1,13 +1,6 @@
-import {
-  Injectable,
-  Optional,
-  BadRequestException,
-} from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Injectable, Optional, BadRequestException } from '@nestjs/common';
 
-import {
-  CommunicationDeliveryService,
-} from '../communication-delivery';
+import { CommunicationDeliveryService } from '../communication-delivery';
 import { CommunicationShadowService } from '../communication-shadow';
 import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
@@ -22,7 +15,6 @@ import type {
 
 @Injectable()
 export class InboxService {
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
@@ -43,9 +35,11 @@ export class InboxService {
     });
   }
 
-  async ingest(dto: IngestInboxItemDto) {
+  ingest(dto: IngestInboxItemDto): Promise<never> {
     void dto;
-    throw new BadRequestException('R06_CANONICAL_PRODUCER_ADMISSION_REQUIRED');
+    return Promise.reject(
+      new BadRequestException('R06_CANONICAL_PRODUCER_ADMISSION_REQUIRED'),
+    );
   }
 
   async observeLegacyTelegram(dto: ObserveLegacyTelegramDto) {
@@ -165,14 +159,37 @@ export class InboxService {
     },
   ) {
     this.tenantContext.assertTenantId(tenantId);
-    if (!this.projections) throw new Error('canonical_inbox_projection_unavailable');
-    if (input.telegramChatIds?.length || input.shadowSourceType==='legacy_bridge') throw new BadRequestException('R06_RAW_DELIVERY_AUTHORITY_FORBIDDEN');
-    if (input.type==='maya_task' || input.type==='client_support_request') {
-      if(!input.operationalWorkItemId)throw new BadRequestException('R06_A23_OWNER_REQUIRED');
-      return this.projections.work(tenantId,input.operationalWorkItemId);
+    if (!this.projections)
+      throw new Error('canonical_inbox_projection_unavailable');
+    if (
+      input.telegramChatIds?.length ||
+      input.shadowSourceType === 'legacy_bridge'
+    )
+      throw new BadRequestException('R06_RAW_DELIVERY_AUTHORITY_FORBIDDEN');
+    if (input.type === 'maya_task' || input.type === 'client_support_request') {
+      if (!input.operationalWorkItemId)
+        throw new BadRequestException('R06_A23_OWNER_REQUIRED');
+      return this.projections.work(tenantId, input.operationalWorkItemId);
     }
-    const appointmentId=input.payload?.appointment_id;
-    if(typeof appointmentId==='string'&&['new_appointment','appointment_cancelled','appointment_deleted','appointment_rescheduled'].includes(input.type))return this.projections.appointmentExecution(tenantId,appointmentId,input.type==='new_appointment'?'create_appointment':input.type==='appointment_rescheduled'?'reschedule_appointment':'cancel_appointment');
+    const appointmentId = input.payload?.appointment_id;
+    if (
+      typeof appointmentId === 'string' &&
+      [
+        'new_appointment',
+        'appointment_cancelled',
+        'appointment_deleted',
+        'appointment_rescheduled',
+      ].includes(input.type)
+    )
+      return this.projections.appointmentExecution(
+        tenantId,
+        appointmentId,
+        input.type === 'new_appointment'
+          ? 'create_appointment'
+          : input.type === 'appointment_rescheduled'
+            ? 'reschedule_appointment'
+            : 'cancel_appointment',
+      );
     throw new BadRequestException('R06_EXACT_CANONICAL_OWNER_REQUIRED');
   }
 
@@ -187,8 +204,21 @@ export class InboxService {
     operationalWorkItemId: string,
   ): Promise<void> {
     this.tenantContext.assertTenantId(tenantId);
-    const owner=await this.prisma.operationalWorkItem.findFirst({where:{id:operationalWorkItemId,tenantId,assigneeUserId:userId,status:'COMPLETED'},include:{completeExecution:true}});
-    if(!owner?.completeExecution || owner.completeExecution.state!=='SUCCEEDED' || owner.completeExecution.dryRun)throw new BadRequestException('R06_COMPLETED_A23_RECEIPT_REQUIRED');
+    const owner = await this.prisma.operationalWorkItem.findFirst({
+      where: {
+        id: operationalWorkItemId,
+        tenantId,
+        assigneeUserId: userId,
+        status: 'COMPLETED',
+      },
+      include: { completeExecution: true },
+    });
+    if (
+      !owner?.completeExecution ||
+      owner.completeExecution.state !== 'SUCCEEDED' ||
+      owner.completeExecution.dryRun
+    )
+      throw new BadRequestException('R06_COMPLETED_A23_RECEIPT_REQUIRED');
     const rows = await this.prisma.inboxItem.findMany({
       where: {
         tenantId,

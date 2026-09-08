@@ -1,3 +1,5 @@
+import { EncryptionService } from '../src/encryption/encryption.service';
+import { AuditLogService } from '../src/audit-log/audit-log.service';
 /** Owned PostgreSQL only. Synthetic identities and engine outcomes; no transport. */
 import 'reflect-metadata';
 import assert from 'node:assert/strict';
@@ -31,15 +33,24 @@ import {
   localCalendarDate,
 } from '../src/owner-reports/owner-reports.time';
 
-function dailyPlan(store:OwnerReportStore,run:Parameters<OwnerReportStore['readPlan']>[0],now?:Date) {
-  const plan=store.readPlan(run,now);
-  if(plan.contract!==OWNER_REPORT_CONTRACT) throw new Error('B36 schema proof requires unchanged daily V1');
+function dailyPlan(
+  store: OwnerReportStore,
+  run: Parameters<OwnerReportStore['readPlan']>[0],
+  now?: Date,
+) {
+  const plan = store.readPlan(run, now);
+  if (plan.contract !== OWNER_REPORT_CONTRACT)
+    throw new Error('B36 schema proof requires unchanged daily V1');
   return plan;
 }
 const url = new URL(process.env.DATABASE_URL ?? '');
 assert.equal(url.hostname, '127.0.0.1');
-assert.ok((url.port==='55506' && /^\/maya_b36_(schema|replay|runtime)$/.test(url.pathname)) ||
-  (url.port==='55509' && url.pathname==='/maya_rc_clean_replay'), 'Exact isolated schema proof database required');
+assert.ok(
+  (url.port === '55506' &&
+    /^\/maya_b36_(schema|replay|runtime)$/.test(url.pathname)) ||
+    (url.port === '55509' && url.pathname === '/maya_rc_clean_replay'),
+  'Exact isolated schema proof database required',
+);
 const secret = 'b36-schema-fixture-secret-not-production';
 const config = new ConfigService({
   DATABASE_URL: url.toString(),
@@ -78,6 +89,10 @@ const engine = new ActionEngineKernel(
   { identitySecret: secret, payloadEncryptionSecret: secret },
   caps,
   resolver,
+  {
+    audit: new AuditLogService(db, context),
+    encryption: new EncryptionService(config),
+  },
 );
 const ingress = new CanonicalActionIngressService(engine, resolver);
 const store = new OwnerReportStore(db, context, ingress, config);

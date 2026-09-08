@@ -125,6 +125,23 @@ describe('Wave 6 exact AC6 owner / final narrowed family coverage', () => {
     ];
     expect(waveFamilies.flat().sort()).toEqual(families);
     expect(new Set(families).size).toBe(13);
-    expect(Object.keys(WAVE6_CLASSES)).toHaveLength(6);
+    expect(Object.keys(WAVE6_CLASSES).sort()).toEqual(
+      [
+        'purge_auth_sessions',
+        'purge_phone_auth_codes',
+        'purge_email_auth_codes',
+        'purge_auth_flow_states',
+        'purge_auth_rate_limit_buckets',
+        'purge_ingestion_quarantine',
+        'purge_operational_alert_payloads',
+        'purge_native_feedback_payloads',
+        'purge_public_community_payloads',
+        'purge_superseded_business_configuration_payloads',
+        'purge_team_message_payloads',
+        'purge_team_attachment_payloads',
+        'purge_expense_reminder_payloads',
+        'purge_cash_declaration_reason_payloads',
+      ].sort(),
+    );
   });
 });

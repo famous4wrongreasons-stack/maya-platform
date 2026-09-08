@@ -70,6 +70,9 @@ export interface CanonicalApprovalBindingRepository {
     executionId: string,
   ): Promise<CanonicalApprovalExecutionRecordV1 | null>;
 
+  /** Kernel-only, verified immutable R-C owner binding; never caller input. */
+  permitsDurablePolicyResume?(): Promise<boolean>;
+
   /**
    * Must atomically consume the READY+APPROVED execution at the claim
    * boundary using every expected field below as compare-and-swap guards.
@@ -105,6 +108,8 @@ export interface CanonicalApprovalAuthorizationResultV1 {
   bindingMatches: boolean;
   approvalConsumed: boolean;
   externalExecutionAllowed: boolean;
+  /** Fresh evidence for the locked attempt; original admission stays immutable. */
+  claimPolicy?: CanonicalActionPolicyResolutionV1;
 }
 
 type PolicyResolver = Pick<
@@ -122,7 +127,10 @@ export class CanonicalApprovalBindingService {
   constructor(
     private readonly policyResolver: PolicyResolver,
     private readonly repository: CanonicalApprovalBindingRepository,
-    options?: { now?: () => Date },
+    private readonly options?: {
+      now?: () => Date;
+      durableExecutionState?: 'READY' | 'EXECUTING';
+    },
   ) {
     this.now = options?.now ?? (() => new Date());
   }
@@ -152,15 +160,22 @@ export class CanonicalApprovalBindingService {
     }
 
     const now = this.now();
+    const durableResume =
+      execution.state ===
+        (this.options?.durableExecutionState ?? ActionExecutionState.READY) &&
+      execution.approvalRequirement === 'NONE' &&
+      execution.approvalDecision === ActionApprovalDecision.NOT_REQUIRED &&
+      policy.approvalRequirement === 'NONE' &&
+      (await this.repository.permitsDurablePolicyResume?.()) === true;
     const bindingExpiresAt =
       policy.approvalRequirement === 'REQUIRED'
         ? execution.approvalExpiresAt
         : execution.policyValidUntil;
     if (
       !bindingExpiresAt ||
-      bindingExpiresAt <= now ||
+      (!durableResume && bindingExpiresAt <= now) ||
       !execution.policyValidUntil ||
-      execution.policyValidUntil <= now ||
+      (!durableResume && execution.policyValidUntil <= now) ||
       policy.policyValidUntil <= now
     ) {
       return this.result(request, policy, {
@@ -182,7 +197,7 @@ export class CanonicalApprovalBindingService {
         approvalBindingHash,
         approvalBindingExpiresAt: bindingExpiresAt,
       }) ||
-      !this.subjectMatches(request, policy, execution)
+      !this.subjectMatches(request, policy, execution, durableResume)
     ) {
       return this.result(request, policy, {
         status: 'REJECTED',
@@ -203,6 +218,7 @@ export class CanonicalApprovalBindingService {
       return this.result(request, policy, {
         status: 'NOT_REQUIRED',
         reason: 'APPROVAL_NOT_REQUIRED',
+        ...(durableResume ? { claimPolicy: policy } : {}),
         bindingMatches: true,
         externalExecutionAllowed: true,
       });
@@ -257,6 +273,7 @@ export class CanonicalApprovalBindingService {
     request: CanonicalApprovalAuthorizationRequestV1,
     policy: CanonicalActionPolicyResolutionV1,
     execution: CanonicalApprovalExecutionRecordV1,
+    durableResume: boolean,
   ): boolean {
     const evidenceCapability = readRecord(policy.policyEvidenceJson.capability);
     return (
@@ -279,8 +296,8 @@ export class CanonicalApprovalBindingService {
       !!execution.policyContextHash &&
       !!execution.policyEvaluatedAt &&
       !!execution.policyEvidenceJson &&
-      materialPolicyEvidence(execution.policyEvidenceJson) ===
-        materialPolicyEvidence(policy.policyEvidenceJson)
+      materialPolicyEvidence(execution.policyEvidenceJson, durableResume) ===
+        materialPolicyEvidence(policy.policyEvidenceJson, durableResume)
     );
   }
 
@@ -300,6 +317,7 @@ export class CanonicalApprovalBindingService {
       bindingMatches: overrides.bindingMatches ?? false,
       approvalConsumed: overrides.approvalConsumed ?? false,
       externalExecutionAllowed: overrides.externalExecutionAllowed ?? false,
+      ...(overrides.claimPolicy ? { claimPolicy: overrides.claimPolicy } : {}),
     };
   }
 
@@ -342,10 +360,17 @@ function readRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
-function materialPolicyEvidence(evidence: Record<string, unknown>): string {
+export function materialPolicyEvidence(
+  evidence: Record<string, unknown>,
+  durableResume = false,
+): string {
+  const entitlement = readRecord(evidence.entitlement);
   const approval = readRecord(evidence.approval);
   return stableActionJson({
     ...evidence,
+    ...(durableResume && entitlement
+      ? { entitlement: { ...entitlement, validUntil: undefined } }
+      : {}),
     evaluatedAt: undefined,
     validUntil: undefined,
     ...(approval

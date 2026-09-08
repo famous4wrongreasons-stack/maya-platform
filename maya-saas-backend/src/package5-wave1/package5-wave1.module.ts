@@ -30,7 +30,14 @@ import {
         ingress: CanonicalActionIngressService,
         kernel: ActionEngineKernel,
         governed: GovernedSettingsReadService,
-      ) => new Package5Wave1ExecutableService(prisma, ingress, kernel, undefined, governed),
+      ) =>
+        new Package5Wave1ExecutableService(
+          prisma,
+          ingress,
+          kernel,
+          undefined,
+          governed,
+        ),
       inject: [
         PrismaService,
         CanonicalActionIngressService,

@@ -34,7 +34,7 @@ describe('Package 4 active PWA runtime protection', () => {
       encoding: 'utf8',
     });
     expect(result.status).toBe(0);
-    expect(result.stderr).toContain('Ran 5 tests');
+    expect(result.stderr).toContain('Ran 6 tests');
     expect(result.stderr).toContain('OK');
   });
 });

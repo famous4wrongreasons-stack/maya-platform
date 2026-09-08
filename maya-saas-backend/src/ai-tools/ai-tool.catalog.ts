@@ -934,7 +934,11 @@ export const MAYA_AI_TOOL_CATALOG = [
           description:
             'Local salon date of the expense. Omit it for today: the server resolves today in the salon timezone.',
         },
-        branch_id: {type: ['string','null'], description: 'Exact canonical branch, or null for an explicitly tenant-wide expense.'},
+        branch_id: {
+          type: ['string', 'null'],
+          description:
+            'Exact canonical branch, or null for an explicitly tenant-wide expense.',
+        },
         note: {
           type: 'string',
           minLength: 2,

@@ -1,50 +1,367 @@
 import assert from 'node:assert/strict';
-import {randomUUID} from 'node:crypto';
-import {ConfigService} from '@nestjs/config';
-import {ActionEngineRuntimeService} from '../src/action-engine';
-import {CommunicationDeliveryService} from '../src/communication-delivery';
-import {ClientWantedSlotService} from '../src/crm/client-wanted-slot.service';
-import {CanonicalAppointmentAlertsService} from '../src/operational-alerts/canonical-appointment-alerts.service';
-import {CanonicalInboxProjectionService} from '../src/inbox/canonical-inbox-projection.service';
-import {OperationalAlertSourceService} from '../src/operational-alerts/operational-alert-source.service';
-import {OperationalAlertStore} from '../src/operational-alerts/operational-alert.store';
-import {OperationalAlertsService} from '../src/operational-alerts/operational-alerts.service';
-import {OwnerReportStore} from '../src/owner-reports/owner-report.store';
-import type {CrmService} from '../src/crm/crm.service';
-import type {InternalCalendarService} from '../src/internal-calendar/internal-calendar.service';
-import {baseFixture,clientFixture,command,wanted,authenticator,channelRuntime,encryption} from './package5-wave-rc-client-proof-support';
-import {config,context,db,engine,ingress,secret,staffFixture} from './package5-wave-rc-proof-support';
-const settings=new ConfigService({DATABASE_URL:config.get('DATABASE_URL'),CRM_ENCRYPTION_KEY:secret,MAYA_INBOX_BRIDGE_TOKEN:'synthetic-rc-bridge-token-not-production',MAYA_PACKAGE2_TELEGRAM_EXECUTOR_URL:'http://127.0.0.1:1/synthetic-only',OPERATIONAL_ALERTS_CANONICAL_CUTOVER_AT:new Date(Date.now()-86400000).toISOString(),CANONICAL_INBOX_PROJECTION_CUTOVER_AT:new Date(Date.now()-86400000).toISOString()});
-const communication=new CommunicationDeliveryService(db,new ActionEngineRuntimeService(engine,ingress),settings),bindings=new OwnerReportStore(db,context,ingress,settings),alerts=new OperationalAlertStore(db,context,ingress,settings);
-const service=()=>new ClientWantedSlotService(db,context,authenticator,channelRuntime,ingress,engine,encryption,communication);
-let calls=0,loseReply=false;const original=globalThis.fetch;
-globalThis.fetch=async(input)=>{assert.equal(String(input),'http://127.0.0.1:1/synthetic-only');calls++;if(loseReply)throw Error('synthetic reply lost after provider boundary');return new Response(JSON.stringify({message_id:'synthetic-'+calls}),{status:200});};
-const checks:string[]=[];
-async function main(){await db.$connect();const base=await baseFixture('r06-events'),start=new Date(Date.now()+2*86400000),end=new Date(start.getTime()+3600000),clients=[];
- for(let i=0;i<5;i++){const client=await clientFixture(base,'client-'+i),receipt=await context.runAsSystemTenant(base.tenantId,()=>wanted().add(client.proof,command(base,start)));clients.push({...client,interestId:receipt.interestId});}
- const ordered=await db.clientWantedSlotInterest.findMany({where:{tenantId:base.tenantId},orderBy:[{createdAt:'asc'},{id:'asc'}]});
- await db.customerProfile.update({where:{tenantId_clientId:{tenantId:base.tenantId,clientId:ordered[0].clientId}},data:{notificationPreferencesJson:{version:1,overrides:{freed_slot:false}}}});
- const appointment=await db.appointment.create({data:{tenantId:base.tenantId,mayaClientId:clients[0].client.id,branchId:base.branch.id,staffId:base.staff.id,staffExternalId:base.externalStaffId,crmProvider:'yclients',crmExternalId:randomUUID(),source:'external',serviceIds:[],startAt:start,endAt:end,blockedStartAt:start,blockedEndAt:end,status:'canceled'}});
- const event=await db.domainEvent.create({data:{tenantId:base.tenantId,type:'appointment.removed',entityType:'appointment',entityId:appointment.id,entitySequence:1,occurredAt:new Date(),source:'yclients',dedupFingerprint:randomUUID(),payload:{previous_status:'confirmed'}}});
- await context.runAsSystemTenant(base.tenantId,async()=>{
-  await assert.rejects(service().matchAvailable({externalStaffId:base.externalStaffId,availableStartAt:start.toISOString(),sourceEventId:'raw-source'}));assert.equal(calls,0);
-  const projection=new CanonicalInboxProjectionService(db,context,ingress,engine,communication,bindings,settings),coordinator=new CanonicalAppointmentAlertsService(db,context,service(),projection,settings);
-  await coordinator.tickTenant(base.tenantId);assert.equal(calls,3);assert.equal(await db.clientWantedSlotInterest.count({where:{tenantId:base.tenantId,status:'NOTIFIED'}}),3);await coordinator.tickTenant(base.tenantId);assert.equal(calls,3);
-  assert.equal((await db.clientWantedSlotInterest.findUniqueOrThrow({where:{id:ordered[0].id}})).status,'ACTIVE');assert.equal(await db.clientConsentFact.count({where:{tenantId:base.tenantId}}),5);
-  checks.push('accepted AC4/AC5 removed event with canonical external Appointment feeds existing B9; opt-out respected; ordered max-three fanout; exact retry zero additional sends');
- });
- const uncertain=await baseFixture('r06-unknown'),client=await clientFixture(uncertain,'unknown'),at=new Date(Date.now()+86400000);
- const receipt=await context.runAsSystemTenant(uncertain.tenantId,()=>wanted().add(client.proof,command(uncertain,at)));
- const removed=await db.appointment.create({data:{tenantId:uncertain.tenantId,mayaClientId:client.client.id,branchId:uncertain.branch.id,staffId:uncertain.staff.id,staffExternalId:uncertain.externalStaffId,source:'external',crmProvider:'yclients',crmExternalId:randomUUID(),serviceIds:[],startAt:at,endAt:new Date(at.getTime()+3600000),blockedStartAt:at,blockedEndAt:new Date(at.getTime()+3600000),status:'canceled'}});
- const fact=await db.domainEvent.create({data:{tenantId:uncertain.tenantId,type:'appointment.removed',entityType:'appointment',entityId:removed.id,entitySequence:1,occurredAt:new Date(),source:'yclients',dedupFingerprint:randomUUID(),payload:{previous_status:'confirmed'}}});
- const input={externalStaffId:uncertain.externalStaffId,availableStartAt:at.toISOString(),sourceEventId:'domain-event:'+fact.id};loseReply=true;
- await context.runAsSystemTenant(uncertain.tenantId,async()=>{const before=calls;await service().matchAvailable(input);assert.equal(calls,before+1);assert.equal((await db.clientWantedSlotInterest.findUniqueOrThrow({where:{id:receipt.interestId}})).status,'MATCHED');const first=await db.actionExecution.findFirstOrThrow({where:{tenantId:uncertain.tenantId,state:'UNKNOWN'}});loseReply=false;await service().matchAvailable(input);assert.equal(calls,before+1);const again=await db.actionExecution.findUniqueOrThrow({where:{id:first.id}});assert.equal(again.state,'UNKNOWN');assert.equal(again.executionAttemptCount,1);});
- checks.push('B9 provider UNKNOWN keeps same match/delivery execution, no notified marker, no blind resend or alternate channel');
- const staffUser=await staffFixture(base.tenantId,'staff');await db.staff.update({where:{id:base.staff.id},data:{userId:staffUser.user.id}});await db.crmStaffAccess.create({data:{tenantId:base.tenantId,userId:staffUser.user.id,staffId:base.staff.id,externalStaffId:base.externalStaffId,encryptedDisplayName:'Synthetic',role:'staff',status:'active'}});await db.crmIntegration.create({data:{tenantId:base.tenantId,provider:'yclients',encryptedApiToken:'synthetic',status:'active',settingsJson:{companyId:'synthetic-company'}}});
- const due=new Date(Math.floor(Date.now()/60000)*60000+3600000),date=due.toISOString().slice(0,10);await db.branch.update({where:{id:base.branch.id},data:{timezone:'UTC'}});let reads=0;
- const crm={getStaffScheduleDay:async()=>{reads++;return {staff_id:base.externalStaffId,date,is_working:true,slots:[{from:due.toISOString().slice(11,16),to:'23:59'}],revision:'synthetic-revision'};}} as unknown as CrmService;
- const sources=new OperationalAlertSourceService(db,context,crm,{} as InternalCalendarService,bindings,alerts);
- await context.runAsSystemTenant(base.tenantId,async()=>{await new OperationalAlertsService(db,context,alerts,sources,communication).shift(base.tenantId,base.staff.id,date,60);assert.ok(reads>=2);assert.equal(await db.inboxItem.count({where:{tenantId:base.tenantId,userId:staffUser.user.id,type:'shift_reminder'}}),1);await db.crmStaffAccess.update({where:{tenantId_userId:{tenantId:base.tenantId,userId:staffUser.user.id}},data:{status:'pending_contact'}});await assert.rejects(sources.shift(base.tenantId,base.staff.id,date,60));});
- checks.push('external schedule is read through existing CRM with exact integration/StaffProviderLink/CrmStaffAccess; revocation prevents admission, provider writes zero');
- console.log(JSON.stringify({package:'R06',result:'PASS',checks,syntheticTransportCalls:calls,productionEffects:0},null,2));}
-main().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>{globalThis.fetch=original;return db.$disconnect();});
+import { randomUUID } from 'node:crypto';
+import { ConfigService } from '@nestjs/config';
+import { ActionEngineRuntimeService } from '../src/action-engine';
+import { CommunicationDeliveryService } from '../src/communication-delivery';
+import { ClientWantedSlotService } from '../src/crm/client-wanted-slot.service';
+import { CanonicalAppointmentAlertsService } from '../src/operational-alerts/canonical-appointment-alerts.service';
+import { CanonicalInboxProjectionService } from '../src/inbox/canonical-inbox-projection.service';
+import { OperationalAlertSourceService } from '../src/operational-alerts/operational-alert-source.service';
+import { OperationalAlertStore } from '../src/operational-alerts/operational-alert.store';
+import { OperationalAlertsService } from '../src/operational-alerts/operational-alerts.service';
+import { OwnerReportStore } from '../src/owner-reports/owner-report.store';
+import type { CrmService } from '../src/crm/crm.service';
+import type { InternalCalendarService } from '../src/internal-calendar/internal-calendar.service';
+import {
+  baseFixture,
+  clientFixture,
+  command,
+  wanted,
+  authenticator,
+  channelRuntime,
+  encryption,
+} from './package5-wave-rc-client-proof-support';
+import {
+  config,
+  context,
+  db,
+  engine,
+  ingress,
+  secret,
+  staffFixture,
+} from './package5-wave-rc-proof-support';
+const settings = new ConfigService({
+  DATABASE_URL: config.get<string>('DATABASE_URL'),
+  CRM_ENCRYPTION_KEY: secret,
+  MAYA_INBOX_BRIDGE_TOKEN: 'synthetic-rc-bridge-token-not-production',
+  MAYA_PACKAGE2_TELEGRAM_EXECUTOR_URL: 'http://127.0.0.1:1/synthetic-only',
+  OPERATIONAL_ALERTS_CANONICAL_CUTOVER_AT: new Date(
+    Date.now() - 86400000,
+  ).toISOString(),
+  CANONICAL_INBOX_PROJECTION_CUTOVER_AT: new Date(
+    Date.now() - 86400000,
+  ).toISOString(),
+});
+const communication = new CommunicationDeliveryService(
+    db,
+    new ActionEngineRuntimeService(engine, ingress),
+    settings,
+  ),
+  bindings = new OwnerReportStore(db, context, ingress, settings),
+  alerts = new OperationalAlertStore(db, context, ingress, settings);
+const service = () =>
+  new ClientWantedSlotService(
+    db,
+    context,
+    authenticator,
+    channelRuntime,
+    ingress,
+    engine,
+    encryption,
+    communication,
+  );
+let calls = 0,
+  loseReply = false;
+const original = globalThis.fetch;
+globalThis.fetch = async (input) => {
+  assert.equal(input, 'http://127.0.0.1:1/synthetic-only');
+  calls++;
+  if (loseReply)
+    return await Promise.reject(
+      Error('synthetic reply lost after provider boundary'),
+    );
+  return await Promise.resolve(
+    new Response(JSON.stringify({ message_id: 'synthetic-' + calls }), {
+      status: 200,
+    }),
+  );
+};
+const checks: string[] = [];
+async function main() {
+  await db.$connect();
+  const base = await baseFixture('r06-events'),
+    start = new Date(Date.now() + 2 * 86400000),
+    end = new Date(start.getTime() + 3600000),
+    clients = [];
+  for (let i = 0; i < 5; i++) {
+    const client = await clientFixture(base, 'client-' + i),
+      receipt = await context.runAsSystemTenant(base.tenantId, () =>
+        wanted().add(client.proof, command(base, start)),
+      );
+    clients.push({ ...client, interestId: receipt.interestId });
+  }
+  const ordered = await db.clientWantedSlotInterest.findMany({
+    where: { tenantId: base.tenantId },
+    orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+  });
+  await db.customerProfile.update({
+    where: {
+      tenantId_clientId: {
+        tenantId: base.tenantId,
+        clientId: ordered[0].clientId,
+      },
+    },
+    data: {
+      notificationPreferencesJson: {
+        version: 1,
+        overrides: { freed_slot: false },
+      },
+    },
+  });
+  const appointment = await db.appointment.create({
+    data: {
+      tenantId: base.tenantId,
+      mayaClientId: clients[0].client.id,
+      branchId: base.branch.id,
+      staffId: base.staff.id,
+      staffExternalId: base.externalStaffId,
+      crmProvider: 'yclients',
+      crmExternalId: randomUUID(),
+      source: 'external',
+      serviceIds: [],
+      startAt: start,
+      endAt: end,
+      blockedStartAt: start,
+      blockedEndAt: end,
+      status: 'canceled',
+    },
+  });
+  await db.domainEvent.create({
+    data: {
+      tenantId: base.tenantId,
+      type: 'appointment.removed',
+      entityType: 'appointment',
+      entityId: appointment.id,
+      entitySequence: 1,
+      occurredAt: new Date(),
+      source: 'yclients',
+      dedupFingerprint: randomUUID(),
+      payload: { previous_status: 'confirmed' },
+    },
+  });
+  await context.runAsSystemTenant(base.tenantId, async () => {
+    await assert.rejects(
+      service().matchAvailable({
+        externalStaffId: base.externalStaffId,
+        availableStartAt: start.toISOString(),
+        sourceEventId: 'raw-source',
+      }),
+    );
+    assert.equal(calls, 0);
+    const projection = new CanonicalInboxProjectionService(
+        db,
+        context,
+        ingress,
+        engine,
+        communication,
+        bindings,
+        settings,
+      ),
+      coordinator = new CanonicalAppointmentAlertsService(
+        db,
+        context,
+        service(),
+        projection,
+        settings,
+      );
+    await coordinator.tickTenant(base.tenantId);
+    assert.equal(calls, 3);
+    assert.equal(
+      await db.clientWantedSlotInterest.count({
+        where: { tenantId: base.tenantId, status: 'NOTIFIED' },
+      }),
+      3,
+    );
+    await coordinator.tickTenant(base.tenantId);
+    assert.equal(calls, 3);
+    assert.equal(
+      (
+        await db.clientWantedSlotInterest.findUniqueOrThrow({
+          where: { id: ordered[0].id },
+        })
+      ).status,
+      'ACTIVE',
+    );
+    assert.equal(
+      await db.clientConsentFact.count({ where: { tenantId: base.tenantId } }),
+      5,
+    );
+    checks.push(
+      'accepted AC4/AC5 removed event with canonical external Appointment feeds existing B9; opt-out respected; ordered max-three fanout; exact retry zero additional sends',
+    );
+  });
+  const uncertain = await baseFixture('r06-unknown'),
+    client = await clientFixture(uncertain, 'unknown'),
+    at = new Date(Date.now() + 86400000);
+  const receipt = await context.runAsSystemTenant(uncertain.tenantId, () =>
+    wanted().add(client.proof, command(uncertain, at)),
+  );
+  const removed = await db.appointment.create({
+    data: {
+      tenantId: uncertain.tenantId,
+      mayaClientId: client.client.id,
+      branchId: uncertain.branch.id,
+      staffId: uncertain.staff.id,
+      staffExternalId: uncertain.externalStaffId,
+      source: 'external',
+      crmProvider: 'yclients',
+      crmExternalId: randomUUID(),
+      serviceIds: [],
+      startAt: at,
+      endAt: new Date(at.getTime() + 3600000),
+      blockedStartAt: at,
+      blockedEndAt: new Date(at.getTime() + 3600000),
+      status: 'canceled',
+    },
+  });
+  const fact = await db.domainEvent.create({
+    data: {
+      tenantId: uncertain.tenantId,
+      type: 'appointment.removed',
+      entityType: 'appointment',
+      entityId: removed.id,
+      entitySequence: 1,
+      occurredAt: new Date(),
+      source: 'yclients',
+      dedupFingerprint: randomUUID(),
+      payload: { previous_status: 'confirmed' },
+    },
+  });
+  const input = {
+    externalStaffId: uncertain.externalStaffId,
+    availableStartAt: at.toISOString(),
+    sourceEventId: 'domain-event:' + fact.id,
+  };
+  loseReply = true;
+  await context.runAsSystemTenant(uncertain.tenantId, async () => {
+    const before = calls;
+    await service().matchAvailable(input);
+    assert.equal(calls, before + 1);
+    assert.equal(
+      (
+        await db.clientWantedSlotInterest.findUniqueOrThrow({
+          where: { id: receipt.interestId },
+        })
+      ).status,
+      'MATCHED',
+    );
+    const first = await db.actionExecution.findFirstOrThrow({
+      where: { tenantId: uncertain.tenantId, state: 'UNKNOWN' },
+    });
+    loseReply = false;
+    await service().matchAvailable(input);
+    assert.equal(calls, before + 1);
+    const again = await db.actionExecution.findUniqueOrThrow({
+      where: { id: first.id },
+    });
+    assert.equal(again.state, 'UNKNOWN');
+    assert.equal(again.executionAttemptCount, 1);
+  });
+  checks.push(
+    'B9 provider UNKNOWN keeps same match/delivery execution, no notified marker, no blind resend or alternate channel',
+  );
+  const staffUser = await staffFixture(base.tenantId, 'staff');
+  await db.staff.update({
+    where: { id: base.staff.id },
+    data: { userId: staffUser.user.id },
+  });
+  await db.crmStaffAccess.create({
+    data: {
+      tenantId: base.tenantId,
+      userId: staffUser.user.id,
+      staffId: base.staff.id,
+      externalStaffId: base.externalStaffId,
+      encryptedDisplayName: 'Synthetic',
+      role: 'staff',
+      status: 'active',
+    },
+  });
+  await db.crmIntegration.create({
+    data: {
+      tenantId: base.tenantId,
+      provider: 'yclients',
+      encryptedApiToken: 'synthetic',
+      status: 'active',
+      settingsJson: { companyId: 'synthetic-company' },
+    },
+  });
+  const due = new Date(Math.floor(Date.now() / 60000) * 60000 + 3600000),
+    date = due.toISOString().slice(0, 10);
+  await db.branch.update({
+    where: { id: base.branch.id },
+    data: { timezone: 'UTC' },
+  });
+  let reads = 0;
+  const crm = {
+    getStaffScheduleDay: () => {
+      reads++;
+      return Promise.resolve({
+        staff_id: base.externalStaffId,
+        date,
+        is_working: true,
+        slots: [{ from: due.toISOString().slice(11, 16), to: '23:59' }],
+        revision: 'synthetic-revision',
+      });
+    },
+  } as unknown as CrmService;
+  const sources = new OperationalAlertSourceService(
+    db,
+    context,
+    crm,
+    {} as InternalCalendarService,
+    bindings,
+    alerts,
+  );
+  await context.runAsSystemTenant(base.tenantId, async () => {
+    await new OperationalAlertsService(
+      db,
+      context,
+      alerts,
+      sources,
+      communication,
+    ).shift(base.tenantId, base.staff.id, date, 60);
+    assert.ok(reads >= 2);
+    assert.equal(
+      await db.inboxItem.count({
+        where: {
+          tenantId: base.tenantId,
+          userId: staffUser.user.id,
+          type: 'shift_reminder',
+        },
+      }),
+      1,
+    );
+    await db.crmStaffAccess.update({
+      where: {
+        tenantId_userId: { tenantId: base.tenantId, userId: staffUser.user.id },
+      },
+      data: { status: 'pending_contact' },
+    });
+    await assert.rejects(sources.shift(base.tenantId, base.staff.id, date, 60));
+  });
+  checks.push(
+    'external schedule is read through existing CRM with exact integration/StaffProviderLink/CrmStaffAccess; revocation prevents admission, provider writes zero',
+  );
+  console.log(
+    JSON.stringify(
+      {
+        package: 'R06',
+        result: 'PASS',
+        checks,
+        syntheticTransportCalls: calls,
+        productionEffects: 0,
+      },
+      null,
+      2,
+    ),
+  );
+}
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exitCode = 1;
+  })
+  .finally(() => {
+    globalThis.fetch = original;
+    return db.$disconnect();
+  });

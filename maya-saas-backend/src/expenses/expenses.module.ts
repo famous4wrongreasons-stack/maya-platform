@@ -27,7 +27,11 @@ import { P407ExpenseExecutableService } from './p4-07-expense-executable.service
     EncryptionModule,
     TenantsModule,
   ],
-  controllers: [ExpensesController, ExpenseCanonicalShadowController, CashDeclarationController],
+  controllers: [
+    ExpensesController,
+    ExpenseCanonicalShadowController,
+    CashDeclarationController,
+  ],
   providers: [
     CashDeclarationService,
     ExpensesService,

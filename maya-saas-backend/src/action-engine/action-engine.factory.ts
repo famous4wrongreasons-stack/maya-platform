@@ -1,3 +1,7 @@
+import { ConfigService } from '@nestjs/config';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { EncryptionService } from '../encryption/encryption.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
 import type { EntitlementsService } from '../entitlements/entitlements.service';
 import type { PrismaService } from '../prisma/prisma.service';
 import { CanonicalActionIngressService } from './action-engine.ingress';
@@ -49,6 +53,8 @@ export function createStandaloneCanonicalActionEngine(
     createCanonicalProductionPolicyRegistry(capabilities),
     capabilities,
   );
+  const context = new TenantContextService();
+  const audit = new AuditLogService(prisma, context);
   const kernel = new ActionEngineKernel(
     prisma,
     {
@@ -58,6 +64,19 @@ export function createStandaloneCanonicalActionEngine(
     },
     capabilities,
     policyResolver,
+    {
+      audit: {
+        log: (params, tx) =>
+          context.runAsSystemTenant(params.tenantId, () =>
+            audit.log(params, tx),
+          ),
+      },
+      encryption: new EncryptionService(
+        new ConfigService({
+          CRM_ENCRYPTION_KEY: options.payloadEncryptionSecret,
+        }),
+      ),
+    },
   );
   const ingress = new CanonicalActionIngressService(kernel, policyResolver);
   const runtime = new ActionEngineRuntimeService(kernel, ingress);

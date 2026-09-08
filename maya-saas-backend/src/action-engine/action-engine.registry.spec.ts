@@ -493,7 +493,7 @@ describe('ActionCapabilityRegistry', () => {
 
     expect(transactional).toMatchObject({
       actionClass: 'deliver_new_appointment_inbox',
-      allowedSourceTypes: ['legacy_bridge'],
+      allowedSourceTypes: ['legacy_bridge', 'scheduler'],
       policyDecision: ActionPolicyDecision.ALLOW,
       executorKey: 'communication.inbox.new-appointment',
       approvalRequirement: 'NONE',

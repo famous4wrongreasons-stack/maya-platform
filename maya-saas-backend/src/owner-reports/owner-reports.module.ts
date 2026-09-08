@@ -23,8 +23,12 @@ import { OwnerReportsService } from './owner-reports.service';
     DashboardPreferencesModule,
     InboxModule,
   ],
-  controllers: [OwnerReportsController,OwnerReportSnapshotsController],
-  providers: [OwnerReportsService, OwnerReportsSchedulerService,OwnerReportDownloadService],
+  controllers: [OwnerReportsController, OwnerReportSnapshotsController],
+  providers: [
+    OwnerReportsService,
+    OwnerReportsSchedulerService,
+    OwnerReportDownloadService,
+  ],
   exports: [OwnerReportsService],
 })
 export class OwnerReportsModule {}

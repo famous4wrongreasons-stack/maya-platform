@@ -461,7 +461,14 @@ export class AiToolHandlerService {
       principal.userId,
     );
     return {
-      appointments: (await this.governedSettings?.ownHistoryEnabled(principal.tenantId) ? appointments : appointments.filter(item=>Date.parse(String(item.start_at))>=Date.now())).map((item) => this.safeAppointment(item)),
+      appointments: ((await this.governedSettings?.ownHistoryEnabled(
+        principal.tenantId,
+      ))
+        ? appointments
+        : appointments.filter(
+            (item) => Date.parse(String(item.start_at)) >= Date.now(),
+          )
+      ).map((item) => this.safeAppointment(item)),
     };
   }
 
@@ -2175,7 +2182,9 @@ export class AiToolHandlerService {
         category,
         amountKopecks,
         currency: 'RUB',
-        ...(typeof args.branch_id === 'string' ? {branchId: args.branch_id} : {}),
+        ...(typeof args.branch_id === 'string'
+          ? { branchId: args.branch_id }
+          : {}),
         occurredAt: occurredAt.toISOString(),
         ...(note ? { note } : {}),
       },

@@ -13,5 +13,25 @@ import { OwnerReportFoundationModule } from '../owner-reports/owner-report-found
 import { OperationalAlertStore } from './operational-alert.store';
 import { OperationalAlertSourceService } from './operational-alert-source.service';
 import { OperationalAlertsService } from './operational-alerts.service';
-@Module({imports:[InboxModule,PrismaModule,TenancyModule,ActionEngineModule,CrmModule,InternalCalendarModule,OwnerReportFoundationModule,CommunicationDeliveryModule],controllers:[OperationalAlertsController],providers:[OperationalAlertStore,OperationalAlertSourceService,OperationalAlertsService,OperationalAlertsScheduler,CanonicalAppointmentAlertsService],exports:[OperationalAlertsService]})
+@Module({
+  imports: [
+    InboxModule,
+    PrismaModule,
+    TenancyModule,
+    ActionEngineModule,
+    CrmModule,
+    InternalCalendarModule,
+    OwnerReportFoundationModule,
+    CommunicationDeliveryModule,
+  ],
+  controllers: [OperationalAlertsController],
+  providers: [
+    OperationalAlertStore,
+    OperationalAlertSourceService,
+    OperationalAlertsService,
+    OperationalAlertsScheduler,
+    CanonicalAppointmentAlertsService,
+  ],
+  exports: [OperationalAlertsService],
+})
 export class OperationalAlertsModule {}

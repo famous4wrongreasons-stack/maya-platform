@@ -25,14 +25,17 @@ export class AuditLogService {
   ) {}
 
   /** Действие внутри арендатора. Принадлежность сверяется с контекстом. */
-  async log(params: {
-    tenantId: string;
-    userId?: string | null;
-    action: string;
-    entityType: string;
-    entityId: string;
-    metadata?: Record<string, unknown>;
-  }, tx: Prisma.TransactionClient = this.prisma) {
+  async log(
+    params: {
+      tenantId: string;
+      userId?: string | null;
+      action: string;
+      entityType: string;
+      entityId: string;
+      metadata?: Record<string, unknown>;
+    },
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
     const tenantId = this.tenantContext.assertTenantId(params.tenantId);
 
     return tx.auditLog.create({

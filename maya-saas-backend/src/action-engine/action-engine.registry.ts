@@ -1,7 +1,18 @@
 import { nativeFeedbackCapabilities } from '../native-feedback/native-feedback.contract';
-import { teamCapabilities, TEAM_DELIVERY, teamObject, teamId, teamDigest } from '../team-communications/team-communications.contract';
+import {
+  teamCapabilities,
+  TEAM_DELIVERY,
+  teamObject,
+  teamId,
+  teamDigest,
+} from '../team-communications/team-communications.contract';
 import { publicCommunityCapabilities } from '../public-community/public-community.contract';
-import { CASH_CAPABILITIES, CASH_DECLARATION_CONTRACT, normalizeCashIntent, type CashOperation } from './cash-declaration.contract';
+import {
+  CASH_CAPABILITIES,
+  CASH_DECLARATION_CONTRACT,
+  normalizeCashIntent,
+  type CashOperation,
+} from './cash-declaration.contract';
 import { consentSecurityCapability } from './consent-security-invalidation.contract';
 import {
   BULK_ROOT_CAPABILITY,
@@ -347,7 +358,9 @@ function newAppointmentDeliveryNormalizer(
   // their admitted producer evidence through the existing single-delivery flow.
   if (source.producerPlan !== undefined) {
     if (source.channel !== 'inbox' || source.messageType !== 'new_appointment')
-      throw new ActionContractError('A10 canonical projection must be new appointment Inbox');
+      throw new ActionContractError(
+        'A10 canonical projection must be new appointment Inbox',
+      );
     return package2SingleDeliveryNormalizer(source);
   }
 
@@ -382,12 +395,39 @@ function privacyTelegramDeliveryNormalizer(
   };
 }
 
-function expenseAwareBusinessAlertNormalizer(value:unknown):Record<string,unknown>{
-  const source=recordInput(value);if(source.messageType!=='weekly_expense_reminder'&&source.expenseReminder===undefined)return package2SingleDeliveryNormalizer(source);
-  const meta=boundedJsonObject(source,'expenseReminder');
-  if(source.messageType!=='weekly_expense_reminder'||source.channel!=='telegram'||!meta||Object.keys(meta).sort().join(',')!=='planHash,runId,slotKey'||typeof meta.runId!=='string'||!/^[A-Za-z0-9_.:-]{1,160}$/.test(meta.runId)||typeof meta.slotKey!=='string'||!/^[a-f0-9]{64}$/.test(meta.slotKey)||typeof meta.planHash!=='string'||!/^[a-f0-9]{64}$/.test(meta.planHash)||source.producerPlan||source.reminderPlan)throw new ActionContractError('R13 typed immutable expense reminder required');
-  const {expenseReminder:ignored,...delivery}=source;void ignored;
-  return {...package2SingleDeliveryNormalizer(delivery),expenseReminder:meta};
+function expenseAwareBusinessAlertNormalizer(
+  value: unknown,
+): Record<string, unknown> {
+  const source = recordInput(value);
+  if (
+    source.messageType !== 'weekly_expense_reminder' &&
+    source.expenseReminder === undefined
+  )
+    return package2SingleDeliveryNormalizer(source);
+  const meta = boundedJsonObject(source, 'expenseReminder');
+  if (
+    source.messageType !== 'weekly_expense_reminder' ||
+    source.channel !== 'telegram' ||
+    !meta ||
+    Object.keys(meta).sort().join(',') !== 'planHash,runId,slotKey' ||
+    typeof meta.runId !== 'string' ||
+    !/^[A-Za-z0-9_.:-]{1,160}$/.test(meta.runId) ||
+    typeof meta.slotKey !== 'string' ||
+    !/^[a-f0-9]{64}$/.test(meta.slotKey) ||
+    typeof meta.planHash !== 'string' ||
+    !/^[a-f0-9]{64}$/.test(meta.planHash) ||
+    source.producerPlan ||
+    source.reminderPlan
+  )
+    throw new ActionContractError(
+      'R13 typed immutable expense reminder required',
+    );
+  const { expenseReminder: ignored, ...delivery } = source;
+  void ignored;
+  return {
+    ...package2SingleDeliveryNormalizer(delivery),
+    expenseReminder: meta,
+  };
 }
 
 function package2SingleDeliveryNormalizer(
@@ -484,9 +524,17 @@ function package2SingleDeliveryNormalizer(
   const deepLink = optionalText(source, 'deepLink', 400);
   const payload = boundedJsonObject(source, 'payload');
   const producerPlan = boundedJsonObject(source, 'producerPlan');
-  if(producerPlan && (producerPlan.contract!=='maya.canonical-inbox-projection/1'||!['inbox','apns'].includes(channel)||producerPlan.userId!==userId))throw new ActionContractError('R06 exact canonical projection plan required');
+  if (
+    producerPlan &&
+    (producerPlan.contract !== 'maya.canonical-inbox-projection/1' ||
+      !['inbox', 'apns'].includes(channel) ||
+      producerPlan.userId !== userId)
+  )
+    throw new ActionContractError(
+      'R06 exact canonical projection plan required',
+    );
   return {
-    ...(producerPlan ? {producerPlan} : {}),
+    ...(producerPlan ? { producerPlan } : {}),
     channel,
     messageType: normalizeOpaqueRef(source.messageType, 'messageType'),
     ...(userId ? { userId: normalizeOpaqueRef(userId, 'userId') } : {}),
@@ -510,13 +558,39 @@ function package2SingleDeliveryNormalizer(
   };
 }
 
-function nativeFeedbackDeliveryNormalizer(phase: 'request' | 'response', value: unknown): Record<string, unknown> {
-  const source = recordInput(value), meta = recordInput(source.nativeFeedback);
+function nativeFeedbackDeliveryNormalizer(
+  phase: 'request' | 'response',
+  value: unknown,
+): Record<string, unknown> {
+  const source = recordInput(value),
+    meta = recordInput(source.nativeFeedback);
   assertOnlyKeys(meta, ['requestId', 'revisionId', 'slotKey', 'planHash']);
-  if (Object.keys(meta).length !== 4 || !/^[A-Za-z0-9_.:-]{1,160}$/.test(String(meta.requestId)) || !/^[a-f0-9]{64}$/.test(String(meta.slotKey)) || !/^[a-f0-9]{64}$/.test(String(meta.planHash)) || (phase === 'request' ? meta.revisionId !== null : !/^[A-Za-z0-9_.:-]{1,160}$/.test(String(meta.revisionId)))) throw new ActionContractError('R08 exact feedback delivery owner required');
-  if (source.messageType !== (phase === 'request' ? 'native_feedback_invitation' : 'native_feedback_response') || (phase === 'request' ? !['telegram', 'web_push'].includes(String(source.channel)) : source.channel !== 'inbox')) throw new ActionContractError('R08 scoped feedback route/content required');
-  const { nativeFeedback, ...content } = source; void nativeFeedback;
-  const normalized = content.channel === 'web_push' ? normalizeClientWebPushDelivery(content, true) : package2SingleDeliveryNormalizer(content);
+  if (
+    Object.keys(meta).length !== 4 ||
+    !/^[A-Za-z0-9_.:-]{1,160}$/.test(String(meta.requestId)) ||
+    !/^[a-f0-9]{64}$/.test(String(meta.slotKey)) ||
+    !/^[a-f0-9]{64}$/.test(String(meta.planHash)) ||
+    (phase === 'request'
+      ? meta.revisionId !== null
+      : !/^[A-Za-z0-9_.:-]{1,160}$/.test(String(meta.revisionId)))
+  )
+    throw new ActionContractError('R08 exact feedback delivery owner required');
+  if (
+    source.messageType !==
+      (phase === 'request'
+        ? 'native_feedback_invitation'
+        : 'native_feedback_response') ||
+    (phase === 'request'
+      ? !['telegram', 'web_push'].includes(String(source.channel))
+      : source.channel !== 'inbox')
+  )
+    throw new ActionContractError('R08 scoped feedback route/content required');
+  const { nativeFeedback, ...content } = source;
+  void nativeFeedback;
+  const normalized =
+    content.channel === 'web_push'
+      ? normalizeClientWebPushDelivery(content, true)
+      : package2SingleDeliveryNormalizer(content);
   return { ...normalized, nativeFeedback: { ...meta } };
 }
 
@@ -1517,17 +1591,51 @@ function p410Capability(
   };
 }
 
-function cashDeclarationCapability(operation:CashOperation):RegisteredActionCapabilityV1 {
+function cashDeclarationCapability(
+  operation: CashOperation,
+): RegisteredActionCapabilityV1 {
   return {
-    capability:CASH_CAPABILITIES[operation],capabilityVersion:1,actionClass:operation==='declare'?'declare_cash_position':'correct_cash_position',
-    normalizedInputContract:CASH_DECLARATION_CONTRACT,targetKind:'cash_declaration',allowedSourceTypes:['authenticated_request'],
-    identityVersion:1,riskProfileVersion:1,riskFacets:['local','one_target','confirmed_observation','immutable_history'],
-    policyKey:`chapter6.package5.r14.${operation}`,policyVersion:1,policyDecision:ActionPolicyDecision.ALLOW,
-    autonomyLevel:'L2_SERVER_POLICY',approvalRequirement:'NONE',
-    retry:{key:'cash-declaration.local-transaction',version:1,maxExecutionAttempts:1,retryablePreDispatchErrors:new Set<string>(),backoffMs:[]},
-    reconciliation:{key:'cash-declaration.local-readback',version:1,maxInconclusiveAttempts:1,retryAfterProvenNonExecution:false},
-    transportIdentityVersion:1,executorKey:'cash-declaration.local',executorVersion:1,payloadRetentionMs:30*DAY,auditRetentionMs:7*365*DAY,
-    normalizeInput:value=>({...normalizeCashIntent(operation,value)}),
+    capability: CASH_CAPABILITIES[operation],
+    capabilityVersion: 1,
+    actionClass:
+      operation === 'declare'
+        ? 'declare_cash_position'
+        : 'correct_cash_position',
+    normalizedInputContract: CASH_DECLARATION_CONTRACT,
+    targetKind: 'cash_declaration',
+    allowedSourceTypes: ['authenticated_request'],
+    identityVersion: 1,
+    riskProfileVersion: 1,
+    riskFacets: [
+      'local',
+      'one_target',
+      'confirmed_observation',
+      'immutable_history',
+    ],
+    policyKey: `chapter6.package5.r14.${operation}`,
+    policyVersion: 1,
+    policyDecision: ActionPolicyDecision.ALLOW,
+    autonomyLevel: 'L2_SERVER_POLICY',
+    approvalRequirement: 'NONE',
+    retry: {
+      key: 'cash-declaration.local-transaction',
+      version: 1,
+      maxExecutionAttempts: 1,
+      retryablePreDispatchErrors: new Set<string>(),
+      backoffMs: [],
+    },
+    reconciliation: {
+      key: 'cash-declaration.local-readback',
+      version: 1,
+      maxInconclusiveAttempts: 1,
+      retryAfterProvenNonExecution: false,
+    },
+    transportIdentityVersion: 1,
+    executorKey: 'cash-declaration.local',
+    executorVersion: 1,
+    payloadRetentionMs: 30 * DAY,
+    auditRetentionMs: 7 * 365 * DAY,
+    normalizeInput: (value) => ({ ...normalizeCashIntent(operation, value) }),
   };
 }
 
@@ -3559,17 +3667,48 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   ...nativeFeedbackCapabilities(),
   ...publicCommunityCapabilities(),
   ...teamCapabilities(),
-  provenCommunicationCapability({capability:TEAM_DELIVERY,actionClass:'deliver_report_briefing',targetKind:'communication_recipient',executorKey:'communication.package2.single',allowedSourceTypes:['scheduler'],normalizeInput:value=>{
-    const source=recordInput(value),meta=teamObject(source.teamMessage,['messageId','slotKey','planHash']);teamId(meta.messageId);teamDigest(meta.slotKey);teamDigest(meta.planHash);
-    if(source.channel!=='inbox'||source.messageType!=='team_message')throw new ActionContractError('R12 fixed team Inbox route required');
-    const {teamMessage,...content}=source;void teamMessage;return{...package2SingleDeliveryNormalizer(content),teamMessage:meta};
-  }}),
-  ...(['request', 'response'] as const).map(phase => provenCommunicationCapability({
-    capability: phase === 'request' ? 'communication.native-feedback.invitation.execute.v1' : 'communication.native-feedback.response.execute.v1',
-    actionClass: phase === 'request' ? 'deliver_report_briefing' : 'deliver_business_alert',
-    targetKind: 'communication_recipient', executorKey: 'communication.package2.single', allowedSourceTypes: ['scheduler'],
-    normalizeInput: value => nativeFeedbackDeliveryNormalizer(phase, value),
-  })),
+  provenCommunicationCapability({
+    capability: TEAM_DELIVERY,
+    actionClass: 'deliver_report_briefing',
+    targetKind: 'communication_recipient',
+    executorKey: 'communication.package2.single',
+    allowedSourceTypes: ['scheduler'],
+    normalizeInput: (value) => {
+      const source = recordInput(value),
+        meta = teamObject(source.teamMessage, [
+          'messageId',
+          'slotKey',
+          'planHash',
+        ]);
+      teamId(meta.messageId);
+      teamDigest(meta.slotKey);
+      teamDigest(meta.planHash);
+      if (source.channel !== 'inbox' || source.messageType !== 'team_message')
+        throw new ActionContractError('R12 fixed team Inbox route required');
+      const { teamMessage, ...content } = source;
+      void teamMessage;
+      return {
+        ...package2SingleDeliveryNormalizer(content),
+        teamMessage: meta,
+      };
+    },
+  }),
+  ...(['request', 'response'] as const).map((phase) =>
+    provenCommunicationCapability({
+      capability:
+        phase === 'request'
+          ? 'communication.native-feedback.invitation.execute.v1'
+          : 'communication.native-feedback.response.execute.v1',
+      actionClass:
+        phase === 'request'
+          ? 'deliver_report_briefing'
+          : 'deliver_business_alert',
+      targetKind: 'communication_recipient',
+      executorKey: 'communication.package2.single',
+      allowedSourceTypes: ['scheduler'],
+      normalizeInput: (value) => nativeFeedbackDeliveryNormalizer(phase, value),
+    }),
+  ),
   consentSecurityCapability(),
   clientHabitsCapability(),
   ...clientWantedSlotCapabilities(),

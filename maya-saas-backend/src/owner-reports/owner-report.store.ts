@@ -16,7 +16,11 @@ import { filterAssistantCapability } from '../dashboard-preferences/assistant-pr
 import { PrismaService } from '../prisma/prisma.service';
 import { retryableBulkTransaction } from '../marketing/canonical-bulk.contract';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import { localCalendarDate, dayIsoRange, localHour } from './owner-reports.time';
+import {
+  localCalendarDate,
+  dayIsoRange,
+  localHour,
+} from './owner-reports.time';
 import {
   normalizeCanonicalOwnerReportPlan,
   MORNING_STAFF_ROLES,
@@ -44,9 +48,12 @@ export class OwnerReportStore {
     private readonly ingress: CanonicalActionIngressService,
     config: ConfigService,
   ) {
-    this.morningCutoverAt = Date.parse(config.get<string>('OWNER_REPORTS_MORNING_CANONICAL_CUTOVER_AT') ?? '');
+    this.morningCutoverAt = Date.parse(
+      config.get<string>('OWNER_REPORTS_MORNING_CANONICAL_CUTOVER_AT') ?? '',
+    );
     const hour = Number(config.get<string>('OWNER_REPORTS_MORNING_HOUR'));
-    this.morningHour = Number.isFinite(hour) && hour >= 0 && hour <= 23 ? Math.trunc(hour) : 8;
+    this.morningHour =
+      Number.isFinite(hour) && hour >= 0 && hour <= 23 ? Math.trunc(hour) : 8;
     this.cutoverAt = Date.parse(
       config.get<string>('OWNER_REPORTS_CANONICAL_CUTOVER_AT') ?? '',
     );
@@ -85,7 +92,11 @@ export class OwnerReportStore {
       }),
     };
   }
-  find(tenantId: string, periodLocalDate: string, reportType: CanonicalOwnerReportPlan['reportType'] = 'daily_report') {
+  find(
+    tenantId: string,
+    periodLocalDate: string,
+    reportType: CanonicalOwnerReportPlan['reportType'] = 'daily_report',
+  ) {
     this.context.assertTenantId(tenantId);
     return this.prisma.ownerReportRun.findUnique({
       where: {
@@ -166,7 +177,12 @@ export class OwnerReportStore {
             });
             if (previous) return equivalent(previous);
             if (
-              !this.canAdmitPeriod(plan.timezone, plan.periodLocalDate, now, plan.reportType)
+              !this.canAdmitPeriod(
+                plan.timezone,
+                plan.periodLocalDate,
+                now,
+                plan.reportType,
+              )
             )
               throw new ActionContractError(
                 'B36_PROSPECTIVE_CURRENT_PERIOD_REQUIRED',
@@ -229,7 +245,11 @@ export class OwnerReportStore {
       } catch (error) {
         const retry = retryableBulkTransaction(error);
         if (!retry || attempt === 4) throw error;
-        const existing = await this.find(plan.tenantId, plan.periodLocalDate, plan.reportType);
+        const existing = await this.find(
+          plan.tenantId,
+          plan.periodLocalDate,
+          plan.reportType,
+        );
         if (existing) return equivalent(existing);
       }
     }
@@ -240,7 +260,7 @@ export class OwnerReportStore {
     recipient: CanonicalOwnerReportRecipient,
     slot?: OwnerReportSlot,
     db: Prisma.TransactionClient = this.prisma,
-    purpose: 'delivery'|'snapshot' = 'delivery',
+    purpose: 'delivery' | 'snapshot' = 'delivery',
   ) {
     this.context.assertTenantId(plan.tenantId);
     const member = await db.membership.findFirst({
@@ -249,29 +269,57 @@ export class OwnerReportStore {
         tenantId: plan.tenantId,
         userId: recipient.userId,
         status: 'active',
-        role: { in: [...(plan.reportType === 'morning_staff' ? MORNING_STAFF_ROLES : OWNER_REPORT_ROLES)] },
+        role: {
+          in: [
+            ...(plan.reportType === 'morning_staff'
+              ? MORNING_STAFF_ROLES
+              : OWNER_REPORT_ROLES),
+          ],
+        },
         user: { status: 'active' },
       },
       select: { id: true },
     });
     const enabled =
-      member && purpose === 'delivery' &&
+      member &&
+      purpose === 'delivery' &&
       (await filterAssistantCapability(
         db,
         plan.tenantId,
         [recipient.userId],
         'daily_brief',
       ));
-    if (!member || (purpose === 'delivery' && (!enabled || !enabled.includes(recipient.userId))))
+    if (
+      !member ||
+      (purpose === 'delivery' &&
+        (!enabled || !enabled.includes(recipient.userId)))
+    )
       throw new ForbiddenException('B36_REPORT_RECIPIENT_NOT_AUTHORIZED');
     if (plan.reportType === 'morning_staff') {
       const frozen = recipient as MorningReportRecipient;
-      const binding = await this.staffBinding(plan.tenantId, recipient.userId, db);
-      if (!binding || binding.staffId !== frozen.staffId || binding.evidenceHash !== frozen.staffBindingEvidenceHash)
+      const binding = await this.staffBinding(
+        plan.tenantId,
+        recipient.userId,
+        db,
+      );
+      if (
+        !binding ||
+        binding.staffId !== frozen.staffId ||
+        binding.evidenceHash !== frozen.staffBindingEvidenceHash
+      )
         throw new ForbiddenException('R05_CANONICAL_STAFF_BINDING_REVOKED');
     }
     if (!slot || slot.channel === 'inbox') return;
-    if (slot.channel === 'telegram' && !(await staffTelegramEligible(db,plan.tenantId,recipient.userId,recipient.membershipId))) throw new ForbiddenException('R11_STAFF_TELEGRAM_NOT_ELIGIBLE');
+    if (
+      slot.channel === 'telegram' &&
+      !(await staffTelegramEligible(
+        db,
+        plan.tenantId,
+        recipient.userId,
+        recipient.membershipId,
+      ))
+    )
+      throw new ForbiddenException('R11_STAFF_TELEGRAM_NOT_ELIGIBLE');
     const binding =
       slot.channel === 'telegram'
         ? await db.authIdentity.findFirst({
@@ -380,79 +428,192 @@ export class OwnerReportStore {
       authorize: () => this.assertDispatchAllowed(run, plan, recipient, slot),
     };
   }
-  canAdmitPeriod(timezone: string, localDate: string, now: Date, reportType: CanonicalOwnerReportPlan['reportType'] = 'daily_report') {
+  canAdmitPeriod(
+    timezone: string,
+    localDate: string,
+    now: Date,
+    reportType: CanonicalOwnerReportPlan['reportType'] = 'daily_report',
+  ) {
     const morning = reportType !== 'daily_report';
     const cutover = morning ? this.morningCutoverAt : this.cutoverAt;
-    return Number.isFinite(cutover) && localDate === localCalendarDate(timezone, now) &&
+    return (
+      Number.isFinite(cutover) &&
+      localDate === localCalendarDate(timezone, now) &&
       Date.parse(dayIsoRange(timezone, localDate).from) > cutover &&
-      (!morning || localHour(timezone,now) >= this.morningHour);
+      (!morning || localHour(timezone, now) >= this.morningHour)
+    );
   }
   /** Staff is the authority; legacy calendar projections only qualify the already-bound fact slice. */
-  async staffBinding(tenantId: string, userId: string, db: Prisma.TransactionClient = this.prisma) {
+  async staffBinding(
+    tenantId: string,
+    userId: string,
+    db: Prisma.TransactionClient = this.prisma,
+  ) {
     this.context.assertTenantId(tenantId);
     const [staff, tenant] = await Promise.all([
-      db.staff.findFirst({where:{tenantId,userId,active:true,user:{status:'active'}},select:{id:true,branchId:true}}),
-      db.tenant.findUnique({where:{id:tenantId},select:{calendarSource:true}}),
+      db.staff.findFirst({
+        where: { tenantId, userId, active: true, user: { status: 'active' } },
+        select: { id: true, branchId: true },
+      }),
+      db.tenant.findUnique({
+        where: { id: tenantId },
+        select: { calendarSource: true },
+      }),
     ]);
     if (!staff || !tenant) return null;
     let evidence: Record<string, unknown>, externalRef: string;
     if (tenant.calendarSource === 'internal') {
-      const projection = await db.internalProvider.findFirst({where:{id:staff.id,tenantId,userId,active:true},select:{id:true,branchId:true}});
+      const projection = await db.internalProvider.findFirst({
+        where: { id: staff.id, tenantId, userId, active: true },
+        select: { id: true, branchId: true },
+      });
       if (!projection || projection.branchId !== staff.branchId) return null;
       externalRef = projection.id;
-      evidence = {calendar:'internal',projectionId:projection.id};
+      evidence = { calendar: 'internal', projectionId: projection.id };
     } else {
-      const integration = await db.crmIntegration.findFirst({where:{tenantId,status:'active'},select:{id:true,provider:true,settingsJson:true}});
+      const integration = await db.crmIntegration.findFirst({
+        where: { tenantId, status: 'active' },
+        select: { id: true, provider: true, settingsJson: true },
+      });
       if (!integration) return null;
-      const settings = integration.settingsJson as Record<string,unknown> | null;
+      const settings = integration.settingsJson as Record<
+        string,
+        unknown
+      > | null;
       const company = settings?.companyId;
-      if ((typeof company !== 'string' && typeof company !== 'number') || !String(company).trim()) return null;
+      if (
+        (typeof company !== 'string' && typeof company !== 'number') ||
+        !String(company).trim()
+      )
+        return null;
       const [access, links] = await Promise.all([
-        db.crmStaffAccess.findFirst({where:{tenantId,userId,staffId:staff.id,status:'active',role:{in:[...MORNING_STAFF_ROLES]}},select:{id:true,externalStaffId:true}}),
-        db.staffProviderLink.findMany({where:{tenantId,staffId:staff.id,provider:integration.provider,unlinkedAt:null},select:{id:true,externalId:true}}),
+        db.crmStaffAccess.findFirst({
+          where: {
+            tenantId,
+            userId,
+            staffId: staff.id,
+            status: 'active',
+            role: { in: [...MORNING_STAFF_ROLES] },
+          },
+          select: { id: true, externalStaffId: true },
+        }),
+        db.staffProviderLink.findMany({
+          where: {
+            tenantId,
+            staffId: staff.id,
+            provider: integration.provider,
+            unlinkedAt: null,
+          },
+          select: { id: true, externalId: true },
+        }),
       ]);
-      if (!access || links.length !== 1 || links[0].externalId !== access.externalStaffId) return null;
+      if (
+        !access ||
+        links.length !== 1 ||
+        links[0].externalId !== access.externalStaffId
+      )
+        return null;
       externalRef = links[0].externalId;
-      evidence = {calendar:'external',integrationId:integration.id,provider:integration.provider,
-        company:String(company).trim(),accessId:access.id,linkId:links[0].id,externalRef};
+      evidence = {
+        calendar: 'external',
+        integrationId: integration.id,
+        provider: integration.provider,
+        company: String(company).trim(),
+        accessId: access.id,
+        linkId: links[0].id,
+        externalRef,
+      };
     }
-    return {staffId:staff.id, externalRef,
-      evidenceHash:this.identity.hmac('maya.owner-report-staff-binding/1',{tenantId,userId,staffId:staff.id,branchId:staff.branchId,...evidence})};
+    return {
+      staffId: staff.id,
+      externalRef,
+      evidenceHash: this.identity.hmac('maya.owner-report-staff-binding/1', {
+        tenantId,
+        userId,
+        staffId: staff.id,
+        branchId: staff.branchId,
+        ...evidence,
+      }),
+    };
   }
-  async snapshot(tenantId: string,userId: string,runId: string) {
+  async snapshot(tenantId: string, userId: string, runId: string) {
     this.context.assertTenantId(tenantId);
-    const run=await this.prisma.ownerReportRun.findUniqueOrThrow({where:{id_tenantId:{id:runId,tenantId}}});
-    const plan=this.readPlan(run);
-    const recipient=plan.recipients.find(r=>r.userId===userId);
-    if(!recipient) throw new ForbiddenException('R05_SNAPSHOT_NOT_OWNED');
-    await this.authorize(plan,recipient,undefined,this.prisma,'snapshot');
-    const content=plan.reportType==='daily_report' ? plan.content : (recipient as MorningReportRecipient).content;
-    return {contract:'maya.owner-report-snapshot/1',runId:run.id,reportType:run.reportType,
-      periodLocalDate:run.periodLocalDate,timezone:run.timezone,content};
+    const run = await this.prisma.ownerReportRun.findUniqueOrThrow({
+      where: { id_tenantId: { id: runId, tenantId } },
+    });
+    const plan = this.readPlan(run);
+    const recipient = plan.recipients.find((r) => r.userId === userId);
+    if (!recipient) throw new ForbiddenException('R05_SNAPSHOT_NOT_OWNED');
+    await this.authorize(plan, recipient, undefined, this.prisma, 'snapshot');
+    const content =
+      plan.reportType === 'daily_report'
+        ? plan.content
+        : (recipient as MorningReportRecipient).content;
+    return {
+      contract: 'maya.owner-report-snapshot/1',
+      runId: run.id,
+      reportType: run.reportType,
+      periodLocalDate: run.periodLocalDate,
+      timezone: run.timezone,
+      content,
+    };
   }
-  async snapshots(tenantId:string,userId:string) {
+  async snapshots(tenantId: string, userId: string) {
     this.context.assertTenantId(tenantId);
-    const runs=await this.prisma.ownerReportRun.findMany({where:{tenantId,intentEncrypted:{not:null},payloadRetentionUntil:{gt:new Date()}},
-      orderBy:[{periodLocalDate:'desc'},{id:'desc'}],take:100});
-    const visible:Array<{runId:string;reportType:string;periodLocalDate:string;title:string}>=[];
-    for(const run of runs) {
-      const plan=this.readPlan(run);
-      const recipient=plan.recipients.find(r=>r.userId===userId);
-      if(!recipient) continue;
-      try {await this.authorize(plan,recipient,undefined,this.prisma,'snapshot');}
-      catch(error) {if(error instanceof ForbiddenException) continue;throw error;}
-      const content=plan.reportType==='daily_report' ? plan.content : (recipient as MorningReportRecipient).content;
-      visible.push({runId:run.id,reportType:run.reportType,periodLocalDate:run.periodLocalDate,title:content.title});
+    const runs = await this.prisma.ownerReportRun.findMany({
+      where: {
+        tenantId,
+        intentEncrypted: { not: null },
+        payloadRetentionUntil: { gt: new Date() },
+      },
+      orderBy: [{ periodLocalDate: 'desc' }, { id: 'desc' }],
+      take: 100,
+    });
+    const visible: Array<{
+      runId: string;
+      reportType: string;
+      periodLocalDate: string;
+      title: string;
+    }> = [];
+    for (const run of runs) {
+      const plan = this.readPlan(run);
+      const recipient = plan.recipients.find((r) => r.userId === userId);
+      if (!recipient) continue;
+      try {
+        await this.authorize(
+          plan,
+          recipient,
+          undefined,
+          this.prisma,
+          'snapshot',
+        );
+      } catch (error) {
+        if (error instanceof ForbiddenException) continue;
+        throw error;
+      }
+      const content =
+        plan.reportType === 'daily_report'
+          ? plan.content
+          : (recipient as MorningReportRecipient).content;
+      visible.push({
+        runId: run.id,
+        reportType: run.reportType,
+        periodLocalDate: run.periodLocalDate,
+        title: content.title,
+      });
     }
-    return {reports:visible};
+    return { reports: visible };
   }
   async purgeExpiredPayloads(tenantId: string, now = new Date()) {
     this.context.assertTenantId(tenantId);
     // Existing R05/B36 lifecycle owner; shared predicate is a read-only
     // AE/CD resolution rule, not a new AC6 class or purge authority.
     for (let attempt = 0; attempt < 5; attempt++) {
-      try { return await canonicalUtcTransaction(this.prisma, async tx => {
-      const candidates = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+      try {
+        return await canonicalUtcTransaction(this.prisma, async (tx) => {
+          const candidates = await tx.$queryRaw<
+            Array<{ id: string }>
+          >(Prisma.sql`
         SELECT r.id FROM "OwnerReportRun" r
         WHERE r."tenantId"=${tenantId} AND r."intentEncrypted" IS NOT NULL
           AND r."payloadRetentionUntil"<=${now} AND r."expiresAt"<=${now}
@@ -460,15 +621,20 @@ export class OwnerReportStore {
             SELECT e.id FROM "ActionExecution" e
             WHERE e."tenantId"=r."tenantId" AND e."ownerReportRunId"=r.id))
         ORDER BY r.id LIMIT 200 FOR UPDATE OF r SKIP LOCKED`);
-      return tx.ownerReportRun.updateMany({
-        where: { tenantId, id: { in: candidates.map(row => row.id) },
-          payloadRetentionUntil: { lte: now }, expiresAt: { lte: now },
-          intentEncrypted: { not: null } },
-        data: { intentEncrypted: null },
-      });
-    }); } catch (error) {
-      if (!retryableBulkTransaction(error) || attempt === 4) throw error;
-    }
+          return tx.ownerReportRun.updateMany({
+            where: {
+              tenantId,
+              id: { in: candidates.map((row) => row.id) },
+              payloadRetentionUntil: { lte: now },
+              expiresAt: { lte: now },
+              intentEncrypted: { not: null },
+            },
+            data: { intentEncrypted: null },
+          });
+        });
+      } catch (error) {
+        if (!retryableBulkTransaction(error) || attempt === 4) throw error;
+      }
     }
     throw new ActionConflictError('B36 retention could not serialize');
   }

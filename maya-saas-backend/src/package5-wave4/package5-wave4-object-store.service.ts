@@ -25,7 +25,10 @@ export class Package5Wave4FileObjectStore implements Package5Wave4ObjectStore {
 
   /** R12 uses this same local storage surface, outside public upload roots. */
   privateTeam() {
-    return new Package5TeamObjectStore(this.config.get<string>('UPLOAD_ROOT')?.trim() || join(process.cwd(), 'uploads'));
+    return new Package5TeamObjectStore(
+      this.config.get<string>('UPLOAD_ROOT')?.trim() ||
+        join(process.cwd(), 'uploads'),
+    );
   }
 
   async put(input: {

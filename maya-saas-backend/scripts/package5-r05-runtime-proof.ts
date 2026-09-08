@@ -1,3 +1,5 @@
+import { EncryptionService } from '../src/encryption/encryption.service';
+import { AuditLogService } from '../src/audit-log/audit-log.service';
 import { Prisma } from '@prisma/client';
 import { ActionEngineRuntimeService } from '../src/action-engine';
 import { CommunicationDeliveryService } from '../src/communication-delivery/communication-delivery.service';
@@ -48,14 +50,16 @@ import {
 
 const url = new URL(process.env.DATABASE_URL ?? '');
 assert.equal(url.hostname, '127.0.0.1');
-assert.equal(url.port,'55509');
-assert.equal(url.pathname,'/maya_rc_clean_replay');
+assert.equal(url.port, '55509');
+assert.equal(url.pathname, '/maya_rc_clean_replay');
 const secret = 'b36-schema-fixture-secret-not-production';
 const config = new ConfigService({
   DATABASE_URL: url.toString(),
   CRM_ENCRYPTION_KEY: secret,
-  OWNER_REPORTS_MORNING_HOUR:'0',
-  OWNER_REPORTS_MORNING_CANONICAL_CUTOVER_AT:new Date(Date.now()-2*OWNER_REPORT_DAY).toISOString(),
+  OWNER_REPORTS_MORNING_HOUR: '0',
+  OWNER_REPORTS_MORNING_CANONICAL_CUTOVER_AT: new Date(
+    Date.now() - 2 * OWNER_REPORT_DAY,
+  ).toISOString(),
   MAYA_INBOX_BRIDGE_TOKEN: secret,
   MAYA_PACKAGE2_TELEGRAM_EXECUTOR_URL: 'http://b36.invalid/synthetic',
   OWNER_REPORTS_CANONICAL_CUTOVER_AT: new Date(
@@ -92,6 +96,10 @@ const engine = new ActionEngineKernel(
   { identitySecret: secret, payloadEncryptionSecret: secret },
   caps,
   resolver,
+  {
+    audit: new AuditLogService(db, context),
+    encryption: new EncryptionService(config),
+  },
 );
 const ingress = new CanonicalActionIngressService(engine, resolver);
 const store = new OwnerReportStore(db, context, ingress, config);
@@ -250,20 +258,32 @@ delivery.deliverOwnerReportSlot = (tenant, run, slot) => {
 };
 async function record(channel: string, destination: string) {
   const tenantId = context.requireTenantId();
-  const runs = await db.ownerReportRun.findMany({where:{tenantId}});
-  const matches=[];
-  for(const run of runs) {
-    const plan=store.readPlan(run);
-    const executions=await store.executions(run,plan);
-    for(const recipient of plan.recipients) for(const slot of recipient.slots) {
-      const own=executions.find(e=>e.ownerReportSlotKey===slot.key);
-      if(slot.channel===channel && slot.destination===destination && own?.state==='EXECUTING')
-        matches.push({run,plan,executions,recipient,slot,own});
-    }
+  const runs = await db.ownerReportRun.findMany({ where: { tenantId } });
+  const matches = [];
+  for (const run of runs) {
+    const plan = store.readPlan(run);
+    const executions = await store.executions(run, plan);
+    for (const recipient of plan.recipients)
+      for (const slot of recipient.slots) {
+        const own = executions.find((e) => e.ownerReportSlotKey === slot.key);
+        if (
+          slot.channel === channel &&
+          slot.destination === destination &&
+          own?.state === 'EXECUTING'
+        )
+          matches.push({ run, plan, executions, recipient, slot, own });
+      }
   }
-  assert.equal(matches.length,1,'Exactly one already admitted/claimed matching slot before effect');
-  const {run,plan,executions,recipient,slot,own}=matches[0];
-  assert.equal(executions.length,plan.recipients.flatMap(r=>r.slots).length);
+  assert.equal(
+    matches.length,
+    1,
+    'Exactly one already admitted/claimed matching slot before effect',
+  );
+  const { run, plan, executions, recipient, slot, own } = matches[0];
+  assert.equal(
+    executions.length,
+    plan.recipients.flatMap((r) => r.slots).length,
+  );
   assert.equal(own.state, 'EXECUTING');
   assert.equal(own.ownerReportRunId, run.id);
   for (const previous of recipient.slots.slice(
@@ -318,95 +338,256 @@ const tenantFor = (plan: CanonicalOwnerReportPlan) => ({
 const countCalls = (tenantId: string) =>
   calls.filter((c) => c.tenantId === tenantId);
 
-async function morningFixture(kind:MorningReportPlan['reportType'],calendar:'internal'|'external'='internal') {
-  const v1=await fixture();
-  await db.tenant.update({where:{id:v1.tenantId},data:{calendarSource:calendar}});
-  const {content,...common}=v1;
-  if(calendar==='external') await db.crmIntegration.create({data:{tenantId:v1.tenantId,provider:'yclients',encryptedApiToken:'synthetic-only',settingsJson:{companyId:'synthetic-company'}}});
-  const recipients:MorningReportPlan['recipients']=[];
-  for(const [index,recipient] of v1.recipients.entries()) {
-    let staffId:string|null=null,staffBindingEvidenceHash:string|null=null;
-    if(kind==='morning_staff') {
-      const staff=await db.staff.create({data:{tenantId:v1.tenantId,userId:recipient.userId}});
-      staffId=staff.id;
-      if(calendar==='internal') await db.internalProvider.create({data:{id:staff.id,tenantId:v1.tenantId,userId:recipient.userId,displayName:'synthetic'}});
+async function morningFixture(
+  kind: MorningReportPlan['reportType'],
+  calendar: 'internal' | 'external' = 'internal',
+) {
+  const v1 = await fixture();
+  await db.tenant.update({
+    where: { id: v1.tenantId },
+    data: { calendarSource: calendar },
+  });
+  const { content, ...common } = v1;
+  if (calendar === 'external')
+    await db.crmIntegration.create({
+      data: {
+        tenantId: v1.tenantId,
+        provider: 'yclients',
+        encryptedApiToken: 'synthetic-only',
+        settingsJson: { companyId: 'synthetic-company' },
+      },
+    });
+  const recipients: MorningReportPlan['recipients'] = [];
+  for (const [index, recipient] of v1.recipients.entries()) {
+    let staffId: string | null = null,
+      staffBindingEvidenceHash: string | null = null;
+    if (kind === 'morning_staff') {
+      const staff = await db.staff.create({
+        data: { tenantId: v1.tenantId, userId: recipient.userId },
+      });
+      staffId = staff.id;
+      if (calendar === 'internal')
+        await db.internalProvider.create({
+          data: {
+            id: staff.id,
+            tenantId: v1.tenantId,
+            userId: recipient.userId,
+            displayName: 'synthetic',
+          },
+        });
       else {
-        await db.staffProviderLink.create({data:{tenantId:v1.tenantId,staffId:staff.id,provider:'yclients',externalId:'synthetic-'+index}});
-        await db.crmStaffAccess.create({data:{tenantId:v1.tenantId,staffId:staff.id,userId:recipient.userId,externalStaffId:'synthetic-'+index,
-          encryptedDisplayName:'synthetic',role:'tenant_owner',status:'active'}});
+        await db.staffProviderLink.create({
+          data: {
+            tenantId: v1.tenantId,
+            staffId: staff.id,
+            provider: 'yclients',
+            externalId: 'synthetic-' + index,
+          },
+        });
+        await db.crmStaffAccess.create({
+          data: {
+            tenantId: v1.tenantId,
+            staffId: staff.id,
+            userId: recipient.userId,
+            externalStaffId: 'synthetic-' + index,
+            encryptedDisplayName: 'synthetic',
+            role: 'tenant_owner',
+            status: 'active',
+          },
+        });
       }
-      const binding=await context.runAsSystemTenant(v1.tenantId,()=>store.staffBinding(v1.tenantId,recipient.userId));assert.ok(binding);
-      staffBindingEvidenceHash=binding.evidenceHash;
+      const binding = await context.runAsSystemTenant(v1.tenantId, () =>
+        store.staffBinding(v1.tenantId, recipient.userId),
+      );
+      assert.ok(binding);
+      staffBindingEvidenceHash = binding.evidenceHash;
     }
-    recipients.push({...recipient,staffId,staffBindingEvidenceHash,content:{...content,bodyText:'ONLY RECIPIENT '+index,payload:{recipient:index}}});
+    recipients.push({
+      ...recipient,
+      staffId,
+      staffBindingEvidenceHash,
+      content: {
+        ...content,
+        bodyText: 'ONLY RECIPIENT ' + index,
+        payload: { recipient: index },
+      },
+    });
   }
-  const plan=normalizeCanonicalOwnerReportPlan({...common,contract:MORNING_REPORT_CONTRACT,reportType:kind,recipients});
-  assert.equal(plan.contract,MORNING_REPORT_CONTRACT);
-  return plan as MorningReportPlan;
+  const plan = normalizeCanonicalOwnerReportPlan({
+    ...common,
+    contract: MORNING_REPORT_CONTRACT,
+    reportType: kind,
+    recipients,
+  });
+  assert.equal(plan.contract, MORNING_REPORT_CONTRACT);
+  return plan;
 }
 async function main() {
- for(const kind of ['morning_owner','morning_staff'] as const) {
-  const plan=await morningFixture(kind);
-  await context.runAsSystemTenant(plan.tenantId,async()=>{
-    const roots=await Promise.all(Array.from({length:4},()=>store.admit(plan)));
-    assert.equal(new Set(roots.map(r=>r.id)).size,1);
-    const run=roots[0];
-    assert.equal((await store.executions(run,plan)).length,8);
-    assert.equal(countCalls(plan.tenantId).length,0);
-    const changed=structuredClone(plan);changed.recipients[0].content.bodyText+=' changed';
-    await assert.rejects(store.admit(changed),/different immutable plan/);
-    await reports.runMorningBrief(tenantFor(plan));
-    const rows=await store.executions(run,plan);assert.ok(rows.every(e=>e.state==='SUCCEEDED'));
-    for(const recipient of plan.recipients) {
-      const snapshot=await store.snapshot(plan.tenantId,recipient.userId,run.id);
-      assert.deepEqual(snapshot.content,recipient.content);
-      const stored=await db.inboxItem.findMany({where:{tenantId:plan.tenantId,userId:recipient.userId,type:'morning_brief'}});
-      assert.ok(stored.some(row=>row.bodyText===recipient.content.bodyText));
-    }
-    await assert.rejects(store.snapshot(plan.tenantId,'wrong-user',run.id),/SNAPSHOT_NOT_OWNED/);
-    const before=countCalls(plan.tenantId).length;
-    await makeReports().runMorningBrief(tenantFor(plan));
-    assert.equal(countCalls(plan.tenantId).length,before);
-    assert.equal(builds.get(plan.tenantId)??0,kind==='morning_owner'?0:1);
-  });
-  checks.push(kind+': atomic four-way admission, changed intent conflict, scoped snapshot and unchanged restart outcome');
- }
- for(const calendar of ['internal','external'] as const) {
-  const plan=await morningFixture('morning_staff',calendar);
-  await context.runAsSystemTenant(plan.tenantId,async()=>{
-    const first=plan.recipients[0];
-    await db.staff.update({where:{id:first.staffId!},data:{active:false}});
-    await assert.rejects(store.admit(plan),/STAFF_BINDING_REVOKED/);
-    assert.equal(await db.ownerReportRun.count({where:{tenantId:plan.tenantId}}),0);
-    assert.equal(await db.actionExecution.count({where:{tenantId:plan.tenantId}}),0);
-    await db.staff.update({where:{id:first.staffId!},data:{active:true}});
-    const run=await store.admit(plan);
-    if(calendar==='external') await db.staffProviderLink.updateMany({where:{tenantId:plan.tenantId,staffId:first.staffId!},data:{unlinkedAt:new Date()}});
-    else await db.internalProvider.update({where:{id:first.staffId!},data:{userId:null}});
-    await assert.rejects(store.snapshot(plan.tenantId,first.userId,run.id),/STAFF_BINDING_REVOKED/);
-    await assert.rejects(delivery.deliverOwnerReportSlot(plan.tenantId,run.id,first.slots[0].key));
-    assert.equal(countCalls(plan.tenantId).length,0);
-  });
-  checks.push(calendar+': current exact Staff/calendar binding is required before admission/read/dispatch');
- }
- for(const failure of ['unknown','rejected'] as const) {
-  const plan=await morningFixture('morning_owner');
-  await context.runAsSystemTenant(plan.tenantId,async()=>{
-    const run=await store.admit(plan),first=plan.recipients[0];
-    const tg=first.slots.find(s=>s.channel==='telegram')!;outcomes.set(tg.key,failure);
-    await reports.runMorningBrief(tenantFor(plan));
-    const firstCalls=countCalls(plan.tenantId).filter(c=>c.userId===first.userId);
-    assert.deepEqual(firstCalls.map(c=>c.channel),['inbox','telegram']);
-    assert.equal(countCalls(plan.tenantId).filter(c=>c.userId===plan.recipients[1].userId).length,4);
-    const ids=(await store.executions(run,plan)).map(e=>e.id).sort();
-    await db.devicePushToken.create({data:{tenantId:plan.tenantId,userId:first.userId,platform:'ios',token:randomUUID().replaceAll('-','').repeat(2)}});
-    await makeReports().runMorningBrief(tenantFor(plan));
-    assert.deepEqual((await store.executions(run,plan)).map(e=>e.id).sort(),ids);
-    assert.equal(countCalls(plan.tenantId).filter(c=>c.userId===first.userId).length,2);
-    assert.deepEqual(store.readPlan(run),plan);
-  });
-  checks.push(failure+': Telegram stops own APNS, other recipients continue, new device/restart cannot expand plan');
- }
- console.log(JSON.stringify({status:'PASS',checks,syntheticTransportEffects:calls.length,productionMessages:0,productionMutations:0},null,2));
+  for (const kind of ['morning_owner', 'morning_staff'] as const) {
+    const plan = await morningFixture(kind);
+    await context.runAsSystemTenant(plan.tenantId, async () => {
+      const roots = await Promise.all(
+        Array.from({ length: 4 }, () => store.admit(plan)),
+      );
+      assert.equal(new Set(roots.map((r) => r.id)).size, 1);
+      const run = roots[0];
+      assert.equal((await store.executions(run, plan)).length, 8);
+      assert.equal(countCalls(plan.tenantId).length, 0);
+      const changed = structuredClone(plan);
+      changed.recipients[0].content.bodyText += ' changed';
+      await assert.rejects(store.admit(changed), /different immutable plan/);
+      await reports.runMorningBrief(tenantFor(plan));
+      const rows = await store.executions(run, plan);
+      assert.ok(rows.every((e) => e.state === 'SUCCEEDED'));
+      for (const recipient of plan.recipients) {
+        const snapshot = await store.snapshot(
+          plan.tenantId,
+          recipient.userId,
+          run.id,
+        );
+        assert.deepEqual(snapshot.content, recipient.content);
+        const stored = await db.inboxItem.findMany({
+          where: {
+            tenantId: plan.tenantId,
+            userId: recipient.userId,
+            type: 'morning_brief',
+          },
+        });
+        assert.ok(
+          stored.some((row) => row.bodyText === recipient.content.bodyText),
+        );
+      }
+      await assert.rejects(
+        store.snapshot(plan.tenantId, 'wrong-user', run.id),
+        /SNAPSHOT_NOT_OWNED/,
+      );
+      const before = countCalls(plan.tenantId).length;
+      await makeReports().runMorningBrief(tenantFor(plan));
+      assert.equal(countCalls(plan.tenantId).length, before);
+      assert.equal(
+        builds.get(plan.tenantId) ?? 0,
+        kind === 'morning_owner' ? 0 : 1,
+      );
+    });
+    checks.push(
+      kind +
+        ': atomic four-way admission, changed intent conflict, scoped snapshot and unchanged restart outcome',
+    );
+  }
+  for (const calendar of ['internal', 'external'] as const) {
+    const plan = await morningFixture('morning_staff', calendar);
+    await context.runAsSystemTenant(plan.tenantId, async () => {
+      const first = plan.recipients[0];
+      await db.staff.update({
+        where: { id: first.staffId! },
+        data: { active: false },
+      });
+      await assert.rejects(store.admit(plan), /STAFF_BINDING_REVOKED/);
+      assert.equal(
+        await db.ownerReportRun.count({ where: { tenantId: plan.tenantId } }),
+        0,
+      );
+      assert.equal(
+        await db.actionExecution.count({ where: { tenantId: plan.tenantId } }),
+        0,
+      );
+      await db.staff.update({
+        where: { id: first.staffId! },
+        data: { active: true },
+      });
+      const run = await store.admit(plan);
+      if (calendar === 'external')
+        await db.staffProviderLink.updateMany({
+          where: { tenantId: plan.tenantId, staffId: first.staffId! },
+          data: { unlinkedAt: new Date() },
+        });
+      else
+        await db.internalProvider.update({
+          where: { id: first.staffId! },
+          data: { userId: null },
+        });
+      await assert.rejects(
+        store.snapshot(plan.tenantId, first.userId, run.id),
+        /STAFF_BINDING_REVOKED/,
+      );
+      await assert.rejects(
+        delivery.deliverOwnerReportSlot(
+          plan.tenantId,
+          run.id,
+          first.slots[0].key,
+        ),
+      );
+      assert.equal(countCalls(plan.tenantId).length, 0);
+    });
+    checks.push(
+      calendar +
+        ': current exact Staff/calendar binding is required before admission/read/dispatch',
+    );
+  }
+  for (const failure of ['unknown', 'rejected'] as const) {
+    const plan = await morningFixture('morning_owner');
+    await context.runAsSystemTenant(plan.tenantId, async () => {
+      const run = await store.admit(plan),
+        first = plan.recipients[0];
+      const tg = first.slots.find((s) => s.channel === 'telegram')!;
+      outcomes.set(tg.key, failure);
+      await reports.runMorningBrief(tenantFor(plan));
+      const firstCalls = countCalls(plan.tenantId).filter(
+        (c) => c.userId === first.userId,
+      );
+      assert.deepEqual(
+        firstCalls.map((c) => c.channel),
+        ['inbox', 'telegram'],
+      );
+      assert.equal(
+        countCalls(plan.tenantId).filter(
+          (c) => c.userId === plan.recipients[1].userId,
+        ).length,
+        4,
+      );
+      const ids = (await store.executions(run, plan)).map((e) => e.id).sort();
+      await db.devicePushToken.create({
+        data: {
+          tenantId: plan.tenantId,
+          userId: first.userId,
+          platform: 'ios',
+          token: randomUUID().replaceAll('-', '').repeat(2),
+        },
+      });
+      await makeReports().runMorningBrief(tenantFor(plan));
+      assert.deepEqual(
+        (await store.executions(run, plan)).map((e) => e.id).sort(),
+        ids,
+      );
+      assert.equal(
+        countCalls(plan.tenantId).filter((c) => c.userId === first.userId)
+          .length,
+        2,
+      );
+      assert.deepEqual(store.readPlan(run), plan);
+    });
+    checks.push(
+      failure +
+        ': Telegram stops own APNS, other recipients continue, new device/restart cannot expand plan',
+    );
+  }
+  console.log(
+    JSON.stringify(
+      {
+        status: 'PASS',
+        checks,
+        syntheticTransportEffects: calls.length,
+        productionMessages: 0,
+        productionMutations: 0,
+      },
+      null,
+      2,
+    ),
+  );
 }
-main().catch((error:unknown)=>{console.error(error);process.exitCode=1;}).finally(()=>db.$disconnect());
+main()
+  .catch((error: unknown) => {
+    console.error(error);
+    process.exitCode = 1;
+  })
+  .finally(() => db.$disconnect());

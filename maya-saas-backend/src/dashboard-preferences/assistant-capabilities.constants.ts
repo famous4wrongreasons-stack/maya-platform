@@ -22,7 +22,8 @@ export const ASSISTANT_CAPABILITY_CATALOG: ReadonlyArray<{
   {
     key: 'weekly_expense_reminders',
     title: 'Напоминания о расходах',
-    description: 'По воскресеньям в Telegram. Каждый расход записывается только после подтверждения отдельной карточки.',
+    description:
+      'По воскресеньям в Telegram. Каждый расход записывается только после подтверждения отдельной карточки.',
   },
   {
     key: 'daily_brief',

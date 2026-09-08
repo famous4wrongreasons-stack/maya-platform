@@ -9,20 +9,61 @@ import { Package5Wave1CanonicalCutoverService } from './package5-wave1-canonical
 
 @Controller('governed-settings')
 @TenantScoped()
-@Roles(UserRole.TENANT_OWNER,UserRole.BUSINESS_OWNER,UserRole.TENANT_ADMIN,UserRole.ADMINISTRATOR,UserRole.MANAGER,UserRole.BRANCH_MANAGER,UserRole.ACCOUNTANT,UserRole.PROVIDER,UserRole.EMPLOYEE,UserRole.STAFF)
+@Roles(
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
+  UserRole.ACCOUNTANT,
+  UserRole.PROVIDER,
+  UserRole.EMPLOYEE,
+  UserRole.STAFF,
+)
 export class GovernedSettingsController {
-  constructor(private readonly read:GovernedSettingsReadService,private readonly canonical:Package5Wave1CanonicalCutoverService) {}
+  constructor(
+    private readonly read: GovernedSettingsReadService,
+    private readonly canonical: Package5Wave1CanonicalCutoverService,
+  ) {}
   @Get('personal')
-  personal(@CurrentUser() actor:AuthenticatedUser) {return this.read.readPersonal(actor.tenantId!,actor.userId);}
+  personal(@CurrentUser() actor: AuthenticatedUser) {
+    return this.read.readPersonal(actor.tenantId!, actor.userId);
+  }
   @Get('tenant/:namespace')
-  configuration(@CurrentUser() actor:AuthenticatedUser,@Param('namespace') namespace:string) {return this.read.read(actor.tenantId!,actor.userId,namespace);}
+  configuration(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Param('namespace') namespace: string,
+  ) {
+    return this.read.read(actor.tenantId!, actor.userId, namespace);
+  }
   @Post('personal')
-  mute(@CurrentUser() actor:AuthenticatedUser,@Body() command:unknown,@Headers('idempotency-key') identity:string|undefined) {
-    return this.canonical.updateGoverned(actor.tenantId!,actor.userId,'staff_notification_preferences',command,identity);
+  mute(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Body() command: unknown,
+    @Headers('idempotency-key') identity: string | undefined,
+  ) {
+    return this.canonical.updateGoverned(
+      actor.tenantId!,
+      actor.userId,
+      'staff_notification_preferences',
+      command,
+      identity,
+    );
   }
   @Post('tenant')
-  @Roles(UserRole.TENANT_OWNER,UserRole.BUSINESS_OWNER)
-  tenant(@CurrentUser() actor:AuthenticatedUser,@Body() command:unknown,@Headers('idempotency-key') identity:string|undefined) {
-    return this.canonical.updateGoverned(actor.tenantId!,actor.userId,'tenant_business_configuration',command,identity);
+  @Roles(UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER)
+  tenant(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Body() command: unknown,
+    @Headers('idempotency-key') identity: string | undefined,
+  ) {
+    return this.canonical.updateGoverned(
+      actor.tenantId!,
+      actor.userId,
+      'tenant_business_configuration',
+      command,
+      identity,
+    );
   }
 }

@@ -5,5 +5,9 @@ import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 
 /** Shared read-only catalog/policy; importing it never installs an AI executor. */
-@Module({imports:[EntitlementsModule,TenancyModule],providers:[AiToolPolicyService,AiToolRegistryService],exports:[AiToolPolicyService,AiToolRegistryService]})
+@Module({
+  imports: [EntitlementsModule, TenancyModule],
+  providers: [AiToolPolicyService, AiToolRegistryService],
+  exports: [AiToolPolicyService, AiToolRegistryService],
+})
 export class AiToolPolicyModule {}

@@ -1,31 +1,134 @@
-import { Package5Wave3ExecutableService, Package5Wave3ShadowService, type Package5Wave3ProviderGateway } from '../src/package5-wave3/package5-wave3.service';
-import {createHash,randomUUID} from 'node:crypto';
-import {ActionEngineRuntimeService} from '../src/action-engine';
-import {CommunicationDeliveryService} from '../src/communication-delivery';
-import {ClientChannelRuntimeService} from '../src/crm/client-channel-runtime.service';
-import type {ClientChannelAuthenticatorService,CurrentClientChannel} from '../src/crm/client-channel-authenticator.service';
-import {clientChannelSubjectHash} from '../src/crm/client-channel-subject';
-import {ClientWantedSlotService} from '../src/crm/client-wanted-slot.service';
-import {EncryptionService} from '../src/encryption/encryption.service';
-import type {CrmService} from '../src/crm/crm.service';
-import type {Package5Wave3CanonicalCutoverService} from '../src/package5-wave3/package5-wave3-canonical-cutover.service';
-import {config,context,db,engine,ingress} from './package5-wave-rc-proof-support';
-export const encryption=new EncryptionService(config);
-const digest=(v:unknown)=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
-export const channelProofs=new Map<string,CurrentClientChannel>();
-export const authenticator={authenticate:(proof:string)=>channelProofs.has(proof)?Promise.resolve(channelProofs.get(proof)!):Promise.reject(Error('Verified synthetic channel required'))} as unknown as ClientChannelAuthenticatorService;
-export const channelRuntime=new ClientChannelRuntimeService(db,context,authenticator,encryption,{} as Package5Wave3CanonicalCutoverService,{} as CrmService);
-const communication=new CommunicationDeliveryService(db,new ActionEngineRuntimeService(engine,ingress),config);
-const consentRuntime=new ActionEngineRuntimeService(engine,ingress);
-const noProvider=new Proxy({},{get(){throw Error('No provider in canonical consent fixture');}}) as Package5Wave3ProviderGateway;
-const consentPlanner=new Package5Wave3ShadowService(consentRuntime,db,context,engine,noProvider);
-const consentOwner=new Package5Wave3ExecutableService(db,ingress,engine,consentRuntime,consentPlanner,noProvider);
-export async function consentFixture(link:{id:string;tenantId:string;clientId:string;providerSubjectHash:string;verificationEvidenceHash:string},kind:'privacy'|'marketing',decision:'grant'|'revoke'='grant') {
- const event=randomUUID(),now=new Date();
- return context.runAsSystemTenant(link.tenantId,async()=>consentOwner.execute(await consentPlanner.build(link.tenantId,{userId:null,consentChannel:{linkId:link.id,provider:'telegram',providerSubjectHash:link.providerSubjectHash,verificationEvidenceHash:link.verificationEvidenceHash}},{operation:'record_client_consent',sourceIntentRef:event,clientId:link.clientId,kind,decision,occurredAt:now,effectiveAt:now,sourceIdentityHash:digest([link.tenantId,link.clientId,kind,event])},'execute')));
+import {
+  Package5Wave3ExecutableService,
+  Package5Wave3ShadowService,
+  type Package5Wave3ProviderGateway,
+} from '../src/package5-wave3/package5-wave3.service';
+import { createHash, randomUUID } from 'node:crypto';
+import { ActionEngineRuntimeService } from '../src/action-engine';
+import { CommunicationDeliveryService } from '../src/communication-delivery';
+import { ClientChannelRuntimeService } from '../src/crm/client-channel-runtime.service';
+import type {
+  ClientChannelAuthenticatorService,
+  CurrentClientChannel,
+} from '../src/crm/client-channel-authenticator.service';
+import { clientChannelSubjectHash } from '../src/crm/client-channel-subject';
+import { ClientWantedSlotService } from '../src/crm/client-wanted-slot.service';
+import { EncryptionService } from '../src/encryption/encryption.service';
+import type { CrmService } from '../src/crm/crm.service';
+import type { Package5Wave3CanonicalCutoverService } from '../src/package5-wave3/package5-wave3-canonical-cutover.service';
+import {
+  config,
+  context,
+  db,
+  engine,
+  ingress,
+} from './package5-wave-rc-proof-support';
+export const encryption = new EncryptionService(config);
+const digest = (v: unknown) =>
+  createHash('sha256').update(JSON.stringify(v)).digest('hex');
+export const channelProofs = new Map<string, CurrentClientChannel>();
+export const authenticator = {
+  authenticate: (proof: string) =>
+    channelProofs.has(proof)
+      ? Promise.resolve(channelProofs.get(proof)!)
+      : Promise.reject(Error('Verified synthetic channel required')),
+} as unknown as ClientChannelAuthenticatorService;
+export const channelRuntime = new ClientChannelRuntimeService(
+  db,
+  context,
+  authenticator,
+  encryption,
+  {} as Package5Wave3CanonicalCutoverService,
+  {} as CrmService,
+);
+const communication = new CommunicationDeliveryService(
+  db,
+  new ActionEngineRuntimeService(engine, ingress),
+  config,
+);
+const consentRuntime = new ActionEngineRuntimeService(engine, ingress);
+const noProvider = new Proxy(
+  {},
+  {
+    get() {
+      throw Error('No provider in canonical consent fixture');
+    },
+  },
+) as Package5Wave3ProviderGateway;
+const consentPlanner = new Package5Wave3ShadowService(
+  consentRuntime,
+  db,
+  context,
+  engine,
+  noProvider,
+);
+const consentOwner = new Package5Wave3ExecutableService(
+  db,
+  ingress,
+  engine,
+  consentRuntime,
+  consentPlanner,
+  noProvider,
+);
+export async function consentFixture(
+  link: {
+    id: string;
+    tenantId: string;
+    clientId: string;
+    providerSubjectHash: string;
+    verificationEvidenceHash: string;
+  },
+  kind: 'privacy' | 'marketing',
+  decision: 'grant' | 'revoke' = 'grant',
+) {
+  const event = randomUUID(),
+    now = new Date();
+  return context.runAsSystemTenant(link.tenantId, async () =>
+    consentOwner.execute(
+      await consentPlanner.build(
+        link.tenantId,
+        {
+          userId: null,
+          consentChannel: {
+            linkId: link.id,
+            provider: 'telegram',
+            providerSubjectHash: link.providerSubjectHash,
+            verificationEvidenceHash: link.verificationEvidenceHash,
+          },
+        },
+        {
+          operation: 'record_client_consent',
+          sourceIntentRef: event,
+          clientId: link.clientId,
+          kind,
+          decision,
+          occurredAt: now,
+          effectiveAt: now,
+          sourceIdentityHash: digest([
+            link.tenantId,
+            link.clientId,
+            kind,
+            event,
+          ]),
+        },
+        'execute',
+      ),
+    ),
+  );
 }
-export const wanted=()=>new ClientWantedSlotService(db,context,authenticator,channelRuntime,ingress,engine,encryption,communication);
-const scope=<T>(tenantId:string,work:()=>T)=>context.runAsSystemTenant(tenantId,work);
+export const wanted = () =>
+  new ClientWantedSlotService(
+    db,
+    context,
+    authenticator,
+    channelRuntime,
+    ingress,
+    engine,
+    encryption,
+    communication,
+  );
+const scope = <T>(tenantId: string, work: () => T) =>
+  context.runAsSystemTenant(tenantId, work);
 type Base = Awaited<ReturnType<typeof baseFixture>>;
 
 export async function baseFixture(label: string) {
@@ -60,7 +163,11 @@ export async function baseFixture(label: string) {
   return { tenantId, branch, staff, externalStaffId: `staff-${label}` };
 }
 
-export async function clientFixture(base: Base, label: string, withEndpoint = true) {
+export async function clientFixture(
+  base: Base,
+  label: string,
+  withEndpoint = true,
+) {
   const client = await db.client.create({ data: { tenantId: base.tenantId } });
   const address = String(7_000_000_000 + channelProofs.size + 1);
   const providerSubjectHash = clientChannelSubjectHash(
@@ -116,9 +223,12 @@ export async function clientFixture(base: Base, label: string, withEndpoint = tr
   return { client, link, proof, address, providerSubjectHash };
 }
 
-export const command = (base: Base, start: Date, key: string = randomUUID()) => ({
+export const command = (
+  base: Base,
+  start: Date,
+  key: string = randomUUID(),
+) => ({
   desiredStartAt: start.toISOString(),
   externalStaffId: base.externalStaffId,
   idempotencyKey: `b9-proof:${key}`,
 });
-

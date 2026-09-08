@@ -131,72 +131,201 @@ export class OwnerReportsService {
     return { morning, evening, skipped, failed };
   }
 
-  async runMorningBrief(tenant: EligibleTenant, now: Date = new Date()): Promise<'sent'|'skipped'> {
-    if (!this.reportStore || !this.reportDelivery) throw new Error('B36_OWNER_REPORT_FOUNDATION_REQUIRED');
+  async runMorningBrief(
+    tenant: EligibleTenant,
+    now: Date = new Date(),
+  ): Promise<'sent' | 'skipped'> {
+    if (!this.reportStore || !this.reportDelivery)
+      throw new Error('B36_OWNER_REPORT_FOUNDATION_REQUIRED');
     return this.tenantContext.runAsSystemTenant(tenant.id, async () => {
       let facts: Promise<BusinessState> | undefined;
-      const read = () => facts ??= this.readState(tenant,localCalendarDate(tenant.defaultTimezone,now),{financeAllowed:false});
-      const owner = await this.runMorningKind(tenant,'morning_owner',now,read);
-      const staff = await this.runMorningKind(tenant,'morning_staff',now,read);
+      const read = () =>
+        (facts ??= this.readState(
+          tenant,
+          localCalendarDate(tenant.defaultTimezone, now),
+          { financeAllowed: false },
+        ));
+      const owner = await this.runMorningKind(
+        tenant,
+        'morning_owner',
+        now,
+        read,
+      );
+      const staff = await this.runMorningKind(
+        tenant,
+        'morning_staff',
+        now,
+        read,
+      );
       return owner === 'sent' || staff === 'sent' ? 'sent' : 'skipped';
     });
   }
 
-  private async frozenSlots(tenantId: string, userId: string, membershipId: string): Promise<OwnerReportSlot[]> {
+  private async frozenSlots(
+    tenantId: string,
+    userId: string,
+    membershipId: string,
+  ): Promise<OwnerReportSlot[]> {
     const [identities, devices] = await Promise.all([
-      this.prisma.authIdentity.findMany({where:{tenantId,userId,provider:'telegram'},select:{id:true,providerUserId:true}}),
-      this.prisma.devicePushToken.findMany({where:{tenantId,userId,platform:'ios'},select:{id:true,token:true}}),
+      this.prisma.authIdentity.findMany({
+        where: { tenantId, userId, provider: 'telegram' },
+        select: { id: true, providerUserId: true },
+      }),
+      this.prisma.devicePushToken.findMany({
+        where: { tenantId, userId, platform: 'ios' },
+        select: { id: true, token: true },
+      }),
     ]);
-    return [this.reportStore!.slot(tenantId,userId,'inbox',membershipId,userId),
-      ...(await staffTelegramEligible(this.prisma,tenantId,userId,membershipId) ? identities : []).map(route=>this.reportStore!.slot(tenantId,userId,'telegram',route.id,route.providerUserId)),
-      ...devices.map(route=>this.reportStore!.slot(tenantId,userId,'apns',route.id,route.token))];
+    return [
+      this.reportStore!.slot(tenantId, userId, 'inbox', membershipId, userId),
+      ...((await staffTelegramEligible(
+        this.prisma,
+        tenantId,
+        userId,
+        membershipId,
+      ))
+        ? identities
+        : []
+      ).map((route) =>
+        this.reportStore!.slot(
+          tenantId,
+          userId,
+          'telegram',
+          route.id,
+          route.providerUserId,
+        ),
+      ),
+      ...devices.map((route) =>
+        this.reportStore!.slot(tenantId, userId, 'apns', route.id, route.token),
+      ),
+    ];
   }
 
-  private async runMorningKind(tenant: EligibleTenant, reportType: MorningReportPlan['reportType'], now: Date,
-    read: () => Promise<BusinessState>): Promise<'sent'|'skipped'> {
-    const localDate = localCalendarDate(tenant.defaultTimezone,now);
-    const existing = await this.reportStore!.find(tenant.id,localDate,reportType);
-    if (existing) return this.resumeDailyReport(existing,now);
-    if (!this.reportStore!.canAdmitPeriod(tenant.defaultTimezone,localDate,now,reportType)) return 'skipped';
+  private async runMorningKind(
+    tenant: EligibleTenant,
+    reportType: MorningReportPlan['reportType'],
+    now: Date,
+    read: () => Promise<BusinessState>,
+  ): Promise<'sent' | 'skipped'> {
+    const localDate = localCalendarDate(tenant.defaultTimezone, now);
+    const existing = await this.reportStore!.find(
+      tenant.id,
+      localDate,
+      reportType,
+    );
+    if (existing) return this.resumeDailyReport(existing, now);
+    if (
+      !this.reportStore!.canAdmitPeriod(
+        tenant.defaultTimezone,
+        localDate,
+        now,
+        reportType,
+      )
+    )
+      return 'skipped';
     const staffReport = reportType === 'morning_staff';
-    const memberships = await this.prisma.membership.findMany({where:{tenantId:tenant.id,status:'active',user:{status:'active'},
-      role:{in:[...(staffReport ? MORNING_STAFF_ROLES : OWNER_REPORT_ROLES)]}},select:{id:true,userId:true,role:true}});
-    const enabled = new Set(await this.dashboardPreferences.filterUsersWithAssistantCapability(tenant.id,memberships.map(m=>m.userId),'daily_brief'));
+    const memberships = await this.prisma.membership.findMany({
+      where: {
+        tenantId: tenant.id,
+        status: 'active',
+        user: { status: 'active' },
+        role: {
+          in: [...(staffReport ? MORNING_STAFF_ROLES : OWNER_REPORT_ROLES)],
+        },
+      },
+      select: { id: true, userId: true, role: true },
+    });
+    const enabled = new Set(
+      await this.dashboardPreferences.filterUsersWithAssistantCapability(
+        tenant.id,
+        memberships.map((m) => m.userId),
+        'daily_brief',
+      ),
+    );
     const recipients: MorningReportPlan['recipients'] = [];
-    for (const member of memberships.filter(m=>enabled.has(m.userId))) {
-      const binding = staffReport ? await this.reportStore!.staffBinding(tenant.id,member.userId) : null;
+    for (const member of memberships.filter((m) => enabled.has(m.userId))) {
+      const binding = staffReport
+        ? await this.reportStore!.staffBinding(tenant.id, member.userId)
+        : null;
       if (staffReport && !binding) continue;
       const state = await read();
-      const composed = binding ? composeMasterMorningBrief({facts:masterBriefFacts(state,binding.externalRef,localDate)}) :
-        composeMorningBrief({facts:businessBriefFacts(state,localDate)});
-      recipients.push({userId:member.userId,membershipId:member.id,role:member.role as MorningReportPlan['recipients'][number]['role'],
-        staffId:binding?.staffId ?? null,staffBindingEvidenceHash:binding?.evidenceHash ?? null,
-        content:{...composed,deepLink:'/app/?panel=chat'},slots:await this.frozenSlots(tenant.id,member.userId,member.id)});
+      const composed = binding
+        ? composeMasterMorningBrief({
+            facts: masterBriefFacts(state, binding.externalRef, localDate),
+          })
+        : composeMorningBrief({ facts: businessBriefFacts(state, localDate) });
+      recipients.push({
+        userId: member.userId,
+        membershipId: member.id,
+        role: member.role as MorningReportPlan['recipients'][number]['role'],
+        staffId: binding?.staffId ?? null,
+        staffBindingEvidenceHash: binding?.evidenceHash ?? null,
+        content: { ...composed, deepLink: '/app/?panel=chat' },
+        slots: await this.frozenSlots(tenant.id, member.userId, member.id),
+      });
     }
     if (!recipients.length) return 'skipped';
-    const period = dayIsoRange(tenant.defaultTimezone,localDate);
-    const periodEnd = new Date(Date.parse(period.to)+1).toISOString();
-    const plan = normalizeCanonicalOwnerReportPlan({contract:MORNING_REPORT_CONTRACT,tenantId:tenant.id,reportType,
-      periodLocalDate:localDate,reportVersion:1,timezone:tenant.defaultTimezone,periodStart:period.from,periodEnd,
-      expiresAt:new Date(Date.parse(periodEnd)+7*OWNER_REPORT_DAY).toISOString(),classification:'operational_single',
-      channelOrder:OWNER_REPORT_ORDER,policy:{action:OWNER_REPORT_ACTION,key:'production.deliver_report_briefing.proven-cutover',version:1,preference:'daily_brief'},recipients});
+    const period = dayIsoRange(tenant.defaultTimezone, localDate);
+    const periodEnd = new Date(Date.parse(period.to) + 1).toISOString();
+    const plan = normalizeCanonicalOwnerReportPlan({
+      contract: MORNING_REPORT_CONTRACT,
+      tenantId: tenant.id,
+      reportType,
+      periodLocalDate: localDate,
+      reportVersion: 1,
+      timezone: tenant.defaultTimezone,
+      periodStart: period.from,
+      periodEnd,
+      expiresAt: new Date(
+        Date.parse(periodEnd) + 7 * OWNER_REPORT_DAY,
+      ).toISOString(),
+      classification: 'operational_single',
+      channelOrder: OWNER_REPORT_ORDER,
+      policy: {
+        action: OWNER_REPORT_ACTION,
+        key: 'production.deliver_report_briefing.proven-cutover',
+        version: 1,
+        preference: 'daily_brief',
+      },
+      recipients,
+    });
     let run: OwnerReportRun;
-    try {run = await this.reportStore!.admit(plan,now);} catch(error) {
+    try {
+      run = await this.reportStore!.admit(plan, now);
+    } catch (error) {
       if (!(error instanceof ActionConflictError)) throw error;
-      const winner = await this.reportStore!.find(tenant.id,localDate,reportType);
+      const winner = await this.reportStore!.find(
+        tenant.id,
+        localDate,
+        reportType,
+      );
       if (!winner) throw error;
-      run=winner;
+      run = winner;
     }
-    return this.resumeDailyReport(run,now);
+    return this.resumeDailyReport(run, now);
   }
 
-  private async listMasterMorningRecipients(tenantId: string): Promise<Map<string,string>> {
-    if (!this.reportStore) throw new Error('B36_OWNER_REPORT_FOUNDATION_REQUIRED');
-    const members=await this.prisma.membership.findMany({where:{tenantId,status:'active',user:{status:'active'},role:{in:MASTER_ROLES}},select:{userId:true}});
-    const recipients=new Map<string,string>();
+  private async listMasterMorningRecipients(
+    tenantId: string,
+  ): Promise<Map<string, string>> {
+    if (!this.reportStore)
+      throw new Error('B36_OWNER_REPORT_FOUNDATION_REQUIRED');
+    const members = await this.prisma.membership.findMany({
+      where: {
+        tenantId,
+        status: 'active',
+        user: { status: 'active' },
+        role: { in: MASTER_ROLES },
+      },
+      select: { userId: true },
+    });
+    const recipients = new Map<string, string>();
     for (const member of members) {
-      const binding=await this.reportStore.staffBinding(tenantId,member.userId);
-      if(binding) recipients.set(member.userId,binding.externalRef);
+      const binding = await this.reportStore.staffBinding(
+        tenantId,
+        member.userId,
+      );
+      if (binding) recipients.set(member.userId, binding.externalRef);
     }
     return recipients;
   }
@@ -241,7 +370,7 @@ export class OwnerReportsService {
           userId: member.userId,
           membershipId: member.id,
           role: member.role as OwnerReportPlan['recipients'][number]['role'],
-          slots: await this.frozenSlots(tenant.id,member.userId,member.id),
+          slots: await this.frozenSlots(tenant.id, member.userId, member.id),
         });
       }
       if (!recipients.length) return 'skipped';
@@ -316,11 +445,23 @@ export class OwnerReportsService {
   }
 
   /** The qualified legacy producer selects only a finite kind, never recipients/content/dates. */
-  async triggerMorningReport(tenantId: string, reportType: MorningReportPlan['reportType'], now=new Date()) {
-    const tenant=(await this.listEligibleTenants()).find(t=>t.id===tenantId);
-    if(!tenant || !this.reportStore) throw new ForbiddenException('R05_REPORT_TENANT_NOT_ELIGIBLE');
-    return this.tenantContext.runAsSystemTenant(tenantId,async()=>({status:await this.runMorningKind(tenant,reportType,now,
-      ()=>this.readState(tenant,localCalendarDate(tenant.defaultTimezone,now),{financeAllowed:false}))}));
+  async triggerMorningReport(
+    tenantId: string,
+    reportType: MorningReportPlan['reportType'],
+    now = new Date(),
+  ) {
+    const tenant = (await this.listEligibleTenants()).find(
+      (t) => t.id === tenantId,
+    );
+    if (!tenant || !this.reportStore)
+      throw new ForbiddenException('R05_REPORT_TENANT_NOT_ELIGIBLE');
+    return this.tenantContext.runAsSystemTenant(tenantId, async () => ({
+      status: await this.runMorningKind(tenant, reportType, now, () =>
+        this.readState(tenant, localCalendarDate(tenant.defaultTimezone, now), {
+          financeAllowed: false,
+        }),
+      ),
+    }));
   }
 
   private async resumePendingDailyReports(tenantId: string, now: Date) {

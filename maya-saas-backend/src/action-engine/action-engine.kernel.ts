@@ -1,3 +1,11 @@
+import {
+  DURABLE_CLAIM_POLICY_CONTRACT,
+  RC_DURABLE_COMMANDS,
+  DURABLE_CLAIM_POLICY_AUDIT,
+  rcPolicyResumeCandidate,
+  verifyRCDurableBinding,
+  type ActionClaimEvidenceServices,
+} from './action-engine.durable-policy';
 import { isPostgresSerializationConflict as isSerializationConflict } from '../common/postgres-transaction-conflict';
 import { verifiedClientChannelCapability } from './client-preferences.contract';
 import { readClientActionPrincipal } from './client-action-principal.contract';
@@ -165,6 +173,7 @@ export class ActionEngineKernel {
     options: ActionEngineKernelOptions,
     registry = new ActionCapabilityRegistry(),
     private readonly policyResolver?: CanonicalActionPolicyResolver,
+    private readonly claimEvidence?: ActionClaimEvidenceServices,
   ) {
     this.identity = new ActionIdentityService(
       options.identitySecret,
@@ -332,10 +341,34 @@ export class ActionEngineKernel {
               identityFingerprint: normalized.identityFingerprint,
               idempotencyScope: normalized.idempotencyScope,
               requestIdempotencyKeyHash: normalized.requestIdempotencyKeyHash,
-              ...(request.nativeFeedbackSlot ? { nativeFeedbackRequestId: request.nativeFeedbackSlot.requestId, nativeFeedbackRevisionId: request.nativeFeedbackSlot.revisionId, nativeFeedbackSlotKey: request.nativeFeedbackSlot.slotKey } : {}),
-              ...(request.expenseReminderSlot ? { expenseReminderRunId: request.expenseReminderSlot.runId, expenseReminderSlotKey: request.expenseReminderSlot.slotKey } : {}),
-              ...(request.teamMessageSlot ? { teamMessageId: request.teamMessageSlot.messageId, teamMessageSlotKey: request.teamMessageSlot.slotKey } : {}),
-              ...(request.operationalAlertSlot ? { operationalAlertRunId: request.operationalAlertSlot.runId, operationalAlertSlotKey: request.operationalAlertSlot.slotKey } : {}),
+              ...(request.nativeFeedbackSlot
+                ? {
+                    nativeFeedbackRequestId:
+                      request.nativeFeedbackSlot.requestId,
+                    nativeFeedbackRevisionId:
+                      request.nativeFeedbackSlot.revisionId,
+                    nativeFeedbackSlotKey: request.nativeFeedbackSlot.slotKey,
+                  }
+                : {}),
+              ...(request.expenseReminderSlot
+                ? {
+                    expenseReminderRunId: request.expenseReminderSlot.runId,
+                    expenseReminderSlotKey: request.expenseReminderSlot.slotKey,
+                  }
+                : {}),
+              ...(request.teamMessageSlot
+                ? {
+                    teamMessageId: request.teamMessageSlot.messageId,
+                    teamMessageSlotKey: request.teamMessageSlot.slotKey,
+                  }
+                : {}),
+              ...(request.operationalAlertSlot
+                ? {
+                    operationalAlertRunId: request.operationalAlertSlot.runId,
+                    operationalAlertSlotKey:
+                      request.operationalAlertSlot.slotKey,
+                  }
+                : {}),
               ...(request.ownerReportSlot
                 ? {
                     ownerReportRunId: request.ownerReportSlot.runId,
@@ -621,9 +654,9 @@ export class ActionEngineKernel {
           'Trusted policy does not allow execution',
         );
       }
-      if (!this.controlledFixtureMode) {
-        await this.assertCanonicalClaim(tx, execution, now);
-      }
+      const claimPolicy = !this.controlledFixtureMode
+        ? await this.assertCanonicalClaim(tx, execution, now)
+        : undefined;
       await this.assertExecutionCurrent(tx, execution, capability, now);
       if (
         execution.nextExecutionAttemptAt &&
@@ -661,6 +694,14 @@ export class ActionEngineKernel {
           providerRequestIdentityHash: execution.transportIdempotencyKey,
         },
       });
+      if (claimPolicy)
+        await this.recordClaimPolicy(
+          tx,
+          execution,
+          attempt,
+          claimPolicy,
+          'claim',
+        );
       const claimed = await tx.actionExecution.update({
         where: { id_tenantId: { id: execution.id, tenantId: input.tenantId } },
         data: {
@@ -813,7 +854,9 @@ export class ActionEngineKernel {
       });
       return this.result(failed);
     };
-    return transaction ? execute(transaction) : this.prisma.$transaction(execute);
+    return transaction
+      ? execute(transaction)
+      : this.prisma.$transaction(execute);
   }
 
   async finalizeUnknown(
@@ -1246,7 +1289,9 @@ export class ActionEngineKernel {
     executionId: string,
     transaction?: Prisma.TransactionClient,
   ): Promise<Record<string, unknown>> {
-    const execution = await (transaction ?? this.prisma).actionExecution.findUnique({
+    const execution = await (
+      transaction ?? this.prisma
+    ).actionExecution.findUnique({
       where: { id_tenantId: { id: executionId, tenantId } },
     });
     if (!execution) {
@@ -1453,7 +1498,9 @@ export class ActionEngineKernel {
     );
     const normalizedInputCanonical = stableActionJson(normalizedInput);
     if (
-      ['daily_report','morning_brief'].includes(String(normalizedInput.messageType)) &&
+      ['daily_report', 'morning_brief'].includes(
+        String(normalizedInput.messageType),
+      ) &&
       !request.ownerReportSlot
     )
       throw new ActionContractError('B36_OWNER_REPORT_RUN_REQUIRED');
@@ -1461,7 +1508,9 @@ export class ActionEngineKernel {
       if (
         capability.capability !==
           'communication.reports-briefings.execute.v1' ||
-        !['daily_report','morning_brief'].includes(String(normalizedInput.messageType)) ||
+        !['daily_report', 'morning_brief'].includes(
+          String(normalizedInput.messageType),
+        ) ||
         Object.keys(request.ownerReportSlot).sort().join(',') !==
           'runId,slotKey' ||
         !/^[A-Za-z0-9_.:-]{1,160}$/.test(request.ownerReportSlot.runId) ||
@@ -1469,23 +1518,108 @@ export class ActionEngineKernel {
       )
         throw new ActionContractError('Invalid owner report execution binding');
     }
-    if (capability.capability==='communication.team-message-notification.execute.v1'||request.teamMessageSlot) {
-      const b=request.teamMessageSlot,meta=normalizedInput.teamMessage as Record<string,unknown>|undefined;
-      if(!b||!meta||request.ownerReportSlot||request.operationalAlertSlot||request.nativeFeedbackSlot||capability.capability!=='communication.team-message-notification.execute.v1'||normalizedInput.channel!=='inbox'||Object.keys(b).sort().join(',')!=='messageId,slotKey'||!/^[A-Za-z0-9_.:-]{1,160}$/.test(b.messageId)||!/^[a-f0-9]{64}$/.test(b.slotKey)||meta.messageId!==b.messageId||meta.slotKey!==b.slotKey)throw new ActionContractError('R12 exact team message/slot binding required');
+    if (
+      capability.capability ===
+        'communication.team-message-notification.execute.v1' ||
+      request.teamMessageSlot
+    ) {
+      const b = request.teamMessageSlot,
+        meta = normalizedInput.teamMessage as
+          Record<string, unknown> | undefined;
+      if (
+        !b ||
+        !meta ||
+        request.ownerReportSlot ||
+        request.operationalAlertSlot ||
+        request.nativeFeedbackSlot ||
+        capability.capability !==
+          'communication.team-message-notification.execute.v1' ||
+        normalizedInput.channel !== 'inbox' ||
+        Object.keys(b).sort().join(',') !== 'messageId,slotKey' ||
+        !/^[A-Za-z0-9_.:-]{1,160}$/.test(b.messageId) ||
+        !/^[a-f0-9]{64}$/.test(b.slotKey) ||
+        meta.messageId !== b.messageId ||
+        meta.slotKey !== b.slotKey
+      )
+        throw new ActionContractError(
+          'R12 exact team message/slot binding required',
+        );
     }
-    if (capability.capability.startsWith('communication.native-feedback.') || request.nativeFeedbackSlot) {
+    if (
+      capability.capability.startsWith('communication.native-feedback.') ||
+      request.nativeFeedbackSlot
+    ) {
       const b = request.nativeFeedbackSlot;
-      const meta = normalizedInput.nativeFeedback as Record<string, unknown> | undefined;
-      if (!b || !meta || request.ownerReportSlot || request.operationalAlertSlot || Object.keys(b).sort().join(',') !== 'requestId,revisionId,slotKey' || !/^[A-Za-z0-9_.:-]{1,160}$/.test(b.requestId) || !/^[a-f0-9]{64}$/.test(b.slotKey) || (b.revisionId !== null && !/^[A-Za-z0-9_.:-]{1,160}$/.test(b.revisionId)) || meta.requestId !== b.requestId || meta.revisionId !== b.revisionId || meta.slotKey !== b.slotKey || capability.capability !== (b.revisionId === null ? 'communication.native-feedback.invitation.execute.v1' : 'communication.native-feedback.response.execute.v1')) throw new ActionContractError('R08 exact native feedback parent/slot binding required');
+      const meta = normalizedInput.nativeFeedback as
+        Record<string, unknown> | undefined;
+      if (
+        !b ||
+        !meta ||
+        request.ownerReportSlot ||
+        request.operationalAlertSlot ||
+        Object.keys(b).sort().join(',') !== 'requestId,revisionId,slotKey' ||
+        !/^[A-Za-z0-9_.:-]{1,160}$/.test(b.requestId) ||
+        !/^[a-f0-9]{64}$/.test(b.slotKey) ||
+        (b.revisionId !== null &&
+          !/^[A-Za-z0-9_.:-]{1,160}$/.test(b.revisionId)) ||
+        meta.requestId !== b.requestId ||
+        meta.revisionId !== b.revisionId ||
+        meta.slotKey !== b.slotKey ||
+        capability.capability !==
+          (b.revisionId === null
+            ? 'communication.native-feedback.invitation.execute.v1'
+            : 'communication.native-feedback.response.execute.v1')
+      )
+        throw new ActionContractError(
+          'R08 exact native feedback parent/slot binding required',
+        );
     }
     if (request.operationalAlertSlot) {
       const binding = request.operationalAlertSlot;
-      const expected = normalizedInput.messageType === 'shift_reminder' ? 'communication.appointment-reminders.execute.v1' : normalizedInput.messageType === 'owner_alert' ? 'communication.business-alerts.execute.v1' : null;
-      if (request.ownerReportSlot || capability.capability !== expected || normalizedInput.channel !== 'inbox' || Object.keys(binding).sort().join(',') !== 'runId,slotKey' || !/^[A-Za-z0-9_.:-]{1,160}$/.test(binding.runId) || !/^[a-f0-9]{64}$/.test(binding.slotKey)) throw new ActionContractError('R06 exact Inbox operational alert binding required');
+      const expected =
+        normalizedInput.messageType === 'shift_reminder'
+          ? 'communication.appointment-reminders.execute.v1'
+          : normalizedInput.messageType === 'owner_alert'
+            ? 'communication.business-alerts.execute.v1'
+            : null;
+      if (
+        request.ownerReportSlot ||
+        capability.capability !== expected ||
+        normalizedInput.channel !== 'inbox' ||
+        Object.keys(binding).sort().join(',') !== 'runId,slotKey' ||
+        !/^[A-Za-z0-9_.:-]{1,160}$/.test(binding.runId) ||
+        !/^[a-f0-9]{64}$/.test(binding.slotKey)
+      )
+        throw new ActionContractError(
+          'R06 exact Inbox operational alert binding required',
+        );
     }
-    if (normalizedInput.messageType==='weekly_expense_reminder'||request.expenseReminderSlot) {
-      const b=request.expenseReminderSlot,meta=normalizedInput.expenseReminder as Record<string,unknown>|undefined;
-      if(!b||!meta||request.ownerReportSlot||request.operationalAlertSlot||request.nativeFeedbackSlot||request.teamMessageSlot||capability.capability!=='communication.business-alerts.execute.v1'||normalizedInput.messageType!=='weekly_expense_reminder'||normalizedInput.channel!=='telegram'||Object.keys(b).sort().join(',')!=='runId,slotKey'||!/^[A-Za-z0-9_.:-]{1,160}$/.test(b.runId)||!/^[a-f0-9]{64}$/.test(b.slotKey)||meta.runId!==b.runId||meta.slotKey!==b.slotKey)throw new ActionContractError('R13 exact A13 weekly reminder binding required');
+    if (
+      normalizedInput.messageType === 'weekly_expense_reminder' ||
+      request.expenseReminderSlot
+    ) {
+      const b = request.expenseReminderSlot,
+        meta = normalizedInput.expenseReminder as
+          Record<string, unknown> | undefined;
+      if (
+        !b ||
+        !meta ||
+        request.ownerReportSlot ||
+        request.operationalAlertSlot ||
+        request.nativeFeedbackSlot ||
+        request.teamMessageSlot ||
+        capability.capability !== 'communication.business-alerts.execute.v1' ||
+        normalizedInput.messageType !== 'weekly_expense_reminder' ||
+        normalizedInput.channel !== 'telegram' ||
+        Object.keys(b).sort().join(',') !== 'runId,slotKey' ||
+        !/^[A-Za-z0-9_.:-]{1,160}$/.test(b.runId) ||
+        !/^[a-f0-9]{64}$/.test(b.slotKey) ||
+        meta.runId !== b.runId ||
+        meta.slotKey !== b.slotKey
+      )
+        throw new ActionContractError(
+          'R13 exact A13 weekly reminder binding required',
+        );
     }
     const normalizedInputHash = this.identity.normalizedInputHash(
       capability.normalizedInputContract,
@@ -2076,15 +2210,24 @@ export class ActionEngineKernel {
     normalized: NormalizedActionExecutionV1,
   ): void {
     if (
-      (execution.expenseReminderRunId ?? null) !== (normalized.expenseReminderSlot?.runId ?? null) ||
-      (execution.expenseReminderSlotKey ?? null) !== (normalized.expenseReminderSlot?.slotKey ?? null) ||
-      (execution.nativeFeedbackRequestId ?? null) !== (normalized.nativeFeedbackSlot?.requestId ?? null) ||
-      (execution.teamMessageId ?? null) !== (normalized.teamMessageSlot?.messageId ?? null) ||
-      (execution.teamMessageSlotKey ?? null) !== (normalized.teamMessageSlot?.slotKey ?? null) ||
-      (execution.nativeFeedbackRevisionId ?? null) !== (normalized.nativeFeedbackSlot?.revisionId ?? null) ||
-      (execution.nativeFeedbackSlotKey ?? null) !== (normalized.nativeFeedbackSlot?.slotKey ?? null) ||
-      (execution.operationalAlertRunId ?? null) !== (normalized.operationalAlertSlot?.runId ?? null) ||
-      (execution.operationalAlertSlotKey ?? null) !== (normalized.operationalAlertSlot?.slotKey ?? null) ||
+      (execution.expenseReminderRunId ?? null) !==
+        (normalized.expenseReminderSlot?.runId ?? null) ||
+      (execution.expenseReminderSlotKey ?? null) !==
+        (normalized.expenseReminderSlot?.slotKey ?? null) ||
+      (execution.nativeFeedbackRequestId ?? null) !==
+        (normalized.nativeFeedbackSlot?.requestId ?? null) ||
+      (execution.teamMessageId ?? null) !==
+        (normalized.teamMessageSlot?.messageId ?? null) ||
+      (execution.teamMessageSlotKey ?? null) !==
+        (normalized.teamMessageSlot?.slotKey ?? null) ||
+      (execution.nativeFeedbackRevisionId ?? null) !==
+        (normalized.nativeFeedbackSlot?.revisionId ?? null) ||
+      (execution.nativeFeedbackSlotKey ?? null) !==
+        (normalized.nativeFeedbackSlot?.slotKey ?? null) ||
+      (execution.operationalAlertRunId ?? null) !==
+        (normalized.operationalAlertSlot?.runId ?? null) ||
+      (execution.operationalAlertSlotKey ?? null) !==
+        (normalized.operationalAlertSlot?.slotKey ?? null) ||
       execution.normalizedInputHash !== normalized.normalizedInputHash ||
       execution.capability !== normalized.capability.capability ||
       execution.actionClass !== normalized.capability.actionClass ||
@@ -2175,7 +2318,8 @@ export class ActionEngineKernel {
     tx: Prisma.TransactionClient,
     execution: ActionExecution,
     now: Date,
-  ): Promise<void> {
+    durableExecutionState: 'READY' | 'EXECUTING' = 'READY',
+  ): Promise<CanonicalActionPolicyResolutionV1 | undefined> {
     if (!this.policyResolver || !execution.sourceRef) {
       throw new ActionClaimError(
         'CANONICAL_INGRESS_ATTESTATION_REQUIRED',
@@ -2221,6 +2365,8 @@ export class ActionEngineKernel {
     };
     let consumed = false;
     const repository: CanonicalApprovalBindingRepository = {
+      permitsDurablePolicyResume: () =>
+        this.verifyDurableResumeBinding(tx, execution, now),
       findExecution: (tenantId, executionId) =>
         Promise.resolve(
           tenantId === execution.tenantId && executionId === execution.id
@@ -2244,7 +2390,7 @@ export class ActionEngineKernel {
     const approval = new CanonicalApprovalBindingService(
       this.policyResolver,
       repository,
-      { now: () => now },
+      { now: () => now, durableExecutionState },
     );
     const clientChannelInput =
       verifiedClientChannelCapability(execution.capability) ||
@@ -2300,7 +2446,88 @@ export class ActionEngineKernel {
         `Canonical claim failed closed: ${result.reason}`,
       );
     }
-    void tx;
+    return result.claimPolicy;
+  }
+
+  private async verifyDurableResumeBinding(
+    tx: Prisma.TransactionClient,
+    execution: ActionExecution,
+    now: Date,
+  ): Promise<boolean> {
+    if (!this.claimEvidence || !rcPolicyResumeCandidate(execution))
+      return false;
+    // The existing R-C owner rows use timestamptz. Match their bounded UTC
+    // transaction convention before reading expiry; never change the pool.
+    await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+    const input = await this.readTrustedNormalizedInput(
+      execution.tenantId,
+      execution.id,
+      tx,
+    );
+    const definition = this.definitionForExecution(execution);
+    if (
+      stableActionJson(definition.normalizeInput(input)) !==
+      stableActionJson(input)
+    )
+      return false;
+    return verifyRCDurableBinding(
+      tx,
+      execution,
+      input,
+      this.identity,
+      this.claimEvidence,
+      now,
+      (request) => {
+        const preview = this.previewExecution(request);
+        return (
+          preview.identityFingerprint === execution.identityFingerprint &&
+          preview.normalizedInputHash === execution.normalizedInputHash &&
+          request.source.sourceRef === execution.sourceRef &&
+          request.targetRef === execution.targetRef
+        );
+      },
+    );
+  }
+
+  private async recordClaimPolicy(
+    tx: Prisma.TransactionClient,
+    execution: ActionExecution,
+    attempt: ActionAttempt,
+    policy: CanonicalActionPolicyResolutionV1,
+    phase: 'claim' | 'dispatch',
+  ): Promise<void> {
+    if (!this.claimEvidence)
+      throw new ActionClaimError(
+        'DURABLE_POLICY_AUDIT_REQUIRED',
+        'Claim evidence owner is unavailable',
+      );
+    await this.claimEvidence.audit.log(
+      {
+        tenantId: execution.tenantId,
+        userId: execution.actorUserId,
+        action:
+          phase === 'claim'
+            ? DURABLE_CLAIM_POLICY_AUDIT
+            : 'action.rc_dispatch_policy',
+        entityType: 'ActionExecution',
+        entityId: execution.id,
+        metadata: {
+          contract: DURABLE_CLAIM_POLICY_CONTRACT,
+          phase,
+          attemptId: attempt.id,
+          attemptNumber: attempt.attemptNumber,
+          executionRevision: execution.revision,
+          originalPolicyContextHash: execution.policyContextHash,
+          originalApprovalBindingHash: execution.approvalBindingHash,
+          policyContextHash: policy.policyContextHash,
+          policyEvidenceJson: policy.policyEvidenceJson,
+          approvalBindingHash: policy.approvalBindingHash,
+          policyEvaluatedAt: policy.policyEvaluatedAt.toISOString(),
+          policyValidUntil: policy.policyValidUntil.toISOString(),
+        },
+      },
+      tx,
+    );
   }
 
   private async lockExecution(
@@ -2405,7 +2632,79 @@ export class ActionEngineKernel {
     next: ExternalDispatchState,
   ): Promise<ActionAttempt> {
     return this.prisma.$transaction(async (tx) => {
-      const { attempt } = await this.lockOwnedAttempt(tx, input);
+      const { execution, attempt } = await this.lockOwnedAttempt(tx, input);
+      if (
+        next === ExternalDispatchState.MAY_HAVE_CROSSED &&
+        !this.controlledFixtureMode &&
+        rcPolicyResumeCandidate(execution)
+      ) {
+        const claimAudit = await tx.auditLog.findFirst({
+          where: {
+            tenantId: execution.tenantId,
+            entityType: 'ActionExecution',
+            entityId: execution.id,
+            action: DURABLE_CLAIM_POLICY_AUDIT,
+            metadataJson: { path: ['attemptId'], equals: attempt.id },
+          },
+        });
+        // Only an execution actually admitted to the finite extension uses this evidence.
+        // Unbound A12/A13 and unrelated P407 keep their existing contract.
+        if (
+          !claimAudit &&
+          (RC_DURABLE_COMMANDS.has(execution.capability) ||
+            !!execution.ownerReportRunId ||
+            !!execution.operationalAlertRunId ||
+            !!execution.nativeFeedbackRequestId ||
+            !!execution.teamMessageId ||
+            !!execution.expenseReminderRunId ||
+            (await this.verifyDurableResumeBinding(tx, execution, this.now())))
+        )
+          throw new ActionClaimError(
+            'DURABLE_POLICY_AUDIT_REQUIRED',
+            'Durable claim evidence is missing',
+          );
+        if (claimAudit) {
+          const evidence = jsonRecord(claimAudit.metadataJson);
+          if (
+            attempt.externalDispatchState !==
+              ExternalDispatchState.NOT_CROSSED ||
+            evidence.contract !== DURABLE_CLAIM_POLICY_CONTRACT ||
+            evidence.originalPolicyContextHash !==
+              execution.policyContextHash ||
+            !Number.isFinite(Date.parse(String(evidence.policyValidUntil))) ||
+            Date.parse(String(evidence.policyValidUntil)) <=
+              this.now().getTime()
+          )
+            throw new ActionClaimError(
+              'DURABLE_CLAIM_POLICY_EXPIRED',
+              'Fresh claim evidence is required before effect',
+            );
+          await this.assertExecutionCurrent(
+            tx,
+            execution,
+            this.definitionForExecution(execution),
+            this.now(),
+          );
+          const current = await this.assertCanonicalClaim(
+            tx,
+            execution,
+            this.now(),
+            'EXECUTING',
+          );
+          if (!current)
+            throw new ActionClaimError(
+              'DURABLE_CLAIM_POLICY_INVALID',
+              'Durable owner is no longer eligible',
+            );
+          await this.recordClaimPolicy(
+            tx,
+            execution,
+            attempt,
+            current,
+            'dispatch',
+          );
+        }
+      }
       if (
         next === ExternalDispatchState.ACKNOWLEDGED &&
         attempt.externalDispatchState === ExternalDispatchState.NOT_CROSSED

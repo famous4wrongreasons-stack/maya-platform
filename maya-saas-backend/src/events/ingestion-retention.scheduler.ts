@@ -1,4 +1,4 @@
-import {WaveRcPayloadRetentionService} from '../package5-wave6/package5-wave-rc-retention.service';
+import { WaveRcPayloadRetentionService } from '../package5-wave6/package5-wave-rc-retention.service';
 import {
   Injectable,
   Optional,
@@ -59,9 +59,14 @@ export class IngestionRetentionScheduler
     this.timers.push(first, repeat);
     // Payload deadlines/reads are enforced independently of the daily quarantine
     // policy. An empty AC6 shadow never creates a maintenance run.
-    const payloadFirst=setTimeout(()=>void this.tickPayloads(),FIRST_RUN_DELAY_MS);
-    const payloadRepeat=setInterval(()=>void this.tickPayloads(),60_000);
-    payloadFirst.unref?.();payloadRepeat.unref?.();this.timers.push(payloadFirst,payloadRepeat);
+    const payloadFirst = setTimeout(
+      () => void this.tickPayloads(),
+      FIRST_RUN_DELAY_MS,
+    );
+    const payloadRepeat = setInterval(() => void this.tickPayloads(), 60_000);
+    payloadFirst.unref?.();
+    payloadRepeat.unref?.();
+    this.timers.push(payloadFirst, payloadRepeat);
 
     this.logger.log(
       `Ingestion quarantine retention started: every ${
@@ -96,7 +101,13 @@ export class IngestionRetentionScheduler
     }
   }
 
-  private async tickPayloads(){try{await this.payloads?.tick();}catch{this.logger.warn('AC6 payload retention held for retry');}}
+  private async tickPayloads() {
+    try {
+      await this.payloads?.tick();
+    } catch {
+      this.logger.warn('AC6 payload retention held for retry');
+    }
+  }
 
   private isEnabled(): boolean {
     const raw = String(

@@ -2,7 +2,10 @@ import { normalizeReminderPlan } from './appointment-reminder.contract';
 import { ActionContractError } from '../action-engine/action-engine.errors';
 
 /** Existing single-Client communication authority; device fan-out is transport. */
-export function normalizeClientWebPushDelivery(value: Record<string, unknown>, nativeFeedback = false) {
+export function normalizeClientWebPushDelivery(
+  value: Record<string, unknown>,
+  nativeFeedback = false,
+) {
   const allowed = [
     'channel',
     'messageType',
@@ -20,9 +23,11 @@ export function normalizeClientWebPushDelivery(value: Record<string, unknown>, n
   if (
     Object.keys(value).sort().join(',') !== allowed.sort().join(',') ||
     value.channel !== 'web_push' ||
-    !(nativeFeedback ? ['native_feedback_invitation'] : ['appointment_reminder', 'wanted_slot_available']).includes(
-      String(value.messageType),
-    )
+    !(
+      nativeFeedback
+        ? ['native_feedback_invitation']
+        : ['appointment_reminder', 'wanted_slot_available']
+    ).includes(String(value.messageType))
   )
     throw new ActionContractError('Invalid Client Web Push communication');
   for (const name of ['clientId', 'sourceEventId'])

@@ -136,7 +136,12 @@ export function scanClientProfileRead(file: string, source: string): string[] {
   visit(ast);
   const requireMarkers = (markers: string[], text = source) => {
     for (const marker of markers)
-      if (!text.replace(/\s+/g, '').includes(marker.replace(/\s+/g, '')))
+      if (
+        !text
+          .replace(/\s+/g, '')
+          .replace(/,([})\]])/g, '$1')
+          .includes(marker.replace(/\s+/g, '').replace(/,([})\]])/g, '$1'))
+      )
         findings.push(`Missing profile guard: ${marker}`);
   };
   if (file === 'communication-delivery/communication-bulk-policy.service.ts') {
@@ -161,15 +166,30 @@ export function scanClientProfileRead(file: string, source: string): string[] {
       );
   }
   if (file === 'native-feedback/native-feedback-policy.service.ts') {
-    requireMarkers(['tenantId_clientId: { tenantId, clientId }',
-      'select: { privacyConsentAt: true, marketingConsentAt: true, notificationPreferencesJson: true }',
-      'lockClientConsent(tx, tenantId, clientId)', 'this.client(tx, tenantId, clientId)',
-      'effectiveClientConsents(tx, tenantId, clientId, now)',
-      '!consent.privacy.effective || !consent.marketing.effective'], feedbackPolicyBody);
-    requireMarkers(['this.context.assertTenantId(tenantId)',
-      'this.links.assertClientEligible(tx, tenantId, clientId)'], feedbackClientBody);
-    if (/encryptedNotes|encryptedClientPreferences|customerProfiles/.test(source))
-      findings.push('Feedback invitation policy cannot project private Client content');
+    requireMarkers(
+      [
+        'tenantId_clientId: { tenantId, clientId }',
+        'select: { privacyConsentAt: true, marketingConsentAt: true, notificationPreferencesJson: true }',
+        'lockClientConsent(tx, tenantId, clientId)',
+        'this.client(tx, tenantId, clientId)',
+        'effectiveClientConsents(tx, tenantId, clientId, now)',
+        '!consent.privacy.effective || !consent.marketing.effective',
+      ],
+      feedbackPolicyBody,
+    );
+    requireMarkers(
+      [
+        'this.context.assertTenantId(tenantId)',
+        'this.links.assertClientEligible(tx, tenantId, clientId)',
+      ],
+      feedbackClientBody,
+    );
+    if (
+      /encryptedNotes|encryptedClientPreferences|customerProfiles/.test(source)
+    )
+      findings.push(
+        'Feedback invitation policy cannot project private Client content',
+      );
   }
   if (dedicated)
     requireMarkers([

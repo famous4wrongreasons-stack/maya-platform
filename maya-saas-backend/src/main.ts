@@ -32,7 +32,10 @@ async function bootstrap() {
   app.use('/api/ai/transcribe', json({ limit: SPEECH_JSON_BODY_LIMIT }));
   // Existing 6 MiB team chunks are base64 transport into an admitted private
   // reservation. The owner enforces exact bytes; ordinary endpoints stay small.
-  app.use(/^\/api\/team-communications\/attachments\/[A-Za-z0-9_.:-]+\/chunks\/[0-9]+$/, json({ limit: '9mb' }));
+  app.use(
+    /^\/api\/team-communications\/attachments\/[A-Za-z0-9_.:-]+\/chunks\/[0-9]+$/,
+    json({ limit: '9mb' }),
+  );
   app.use(json({ limit: DEFAULT_JSON_BODY_LIMIT }));
   app.use(urlencoded({ extended: true, limit: DEFAULT_JSON_BODY_LIMIT }));
 

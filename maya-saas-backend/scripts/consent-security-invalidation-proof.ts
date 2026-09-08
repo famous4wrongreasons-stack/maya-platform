@@ -560,19 +560,52 @@ async function main() {
   cases.push(
     'both bad grants ineffective; older independent grant does not resurrect; audit remains',
   );
-  const feedbackPolicy = new NativeFeedbackPolicyService(db as PrismaService, context, encryption, {} as never, entitlements);
-  await scoped(tenantId, () => db.$transaction(async tx => {
-    assert.equal(await feedbackPolicy.marketingAllowed(tx, tenantId, client.id), false);
-    assert.equal(await feedbackPolicy.marketingAllowed(tx, tenantId, unrelated.id), true);
-    // A stale read projection must not turn invalidated canonical grants into
-    // consent. Only the profile reader is a synthetic stale projection here.
-    const staleProfile = new Proxy(tx, {get(target, prop) {
-      if(prop === 'customerProfile') return {findUnique: () => Promise.resolve({privacyConsentAt:new Date(),marketingConsentAt:new Date(),notificationPreferencesJson:null})};
-      return Reflect.get(target, prop) as unknown;
-    }});
-    assert.equal(await feedbackPolicy.marketingAllowed(staleProfile, tenantId, client.id), false);
-  }));
-  cases.push('R08 invitation rejects exact invalidated facts even with stale profile; unrelated verified consent remains allowed');
+  const feedbackPolicy = new NativeFeedbackPolicyService(
+    db as PrismaService,
+    context,
+    encryption,
+    {} as never,
+    entitlements,
+  );
+  await scoped(tenantId, () =>
+    db.$transaction(async (tx) => {
+      assert.equal(
+        await feedbackPolicy.marketingAllowed(tx, tenantId, client.id),
+        false,
+      );
+      assert.equal(
+        await feedbackPolicy.marketingAllowed(tx, tenantId, unrelated.id),
+        true,
+      );
+      // A stale read projection must not turn invalidated canonical grants into
+      // consent. Only the profile reader is a synthetic stale projection here.
+      const staleProfile = new Proxy(tx, {
+        get(target, prop) {
+          if (prop === 'customerProfile')
+            return {
+              findUnique: () =>
+                Promise.resolve({
+                  privacyConsentAt: new Date(),
+                  marketingConsentAt: new Date(),
+                  notificationPreferencesJson: null,
+                }),
+            };
+          return Reflect.get(target, prop) as unknown;
+        },
+      });
+      assert.equal(
+        await feedbackPolicy.marketingAllowed(
+          staleProfile,
+          tenantId,
+          client.id,
+        ),
+        false,
+      );
+    }),
+  );
+  cases.push(
+    'R08 invitation rejects exact invalidated facts even with stale profile; unrelated verified consent remains allowed',
+  );
   // Real B35 policy and PostgreSQL facts/locks; only campaign/owner metadata is
   // a read-only audience fixture. No route/provider is invoked by this denial.
   const policy = new CommunicationBulkPolicyService(
@@ -758,7 +791,14 @@ async function main() {
       .effective,
   );
   assert.equal(await db.clientConsentInvalidation.count(), 2);
-  assert.equal(await scoped(tenantId, () => db.$transaction(tx => feedbackPolicy.marketingAllowed(tx, tenantId, client.id))), true);
+  assert.equal(
+    await scoped(tenantId, () =>
+      db.$transaction((tx) =>
+        feedbackPolicy.marketingAllowed(tx, tenantId, client.id),
+      ),
+    ),
+    true,
+  );
   cases.push(
     'fresh independently verified keyed grants effective; old invalidations do not apply to future facts',
   );

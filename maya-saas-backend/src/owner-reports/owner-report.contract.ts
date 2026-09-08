@@ -62,20 +62,30 @@ export type OwnerReportPlan = {
   recipients: OwnerReportRecipient[];
 };
 export const MORNING_REPORT_CONTRACT = 'maya.owner-report-plan/2';
-export const MORNING_STAFF_ROLES = ['tenant_owner','business_owner','provider','employee','staff'] as const;
-export type MorningReportRecipient = Omit<OwnerReportRecipient,'role'> & {
+export const MORNING_STAFF_ROLES = [
+  'tenant_owner',
+  'business_owner',
+  'provider',
+  'employee',
+  'staff',
+] as const;
+export type MorningReportRecipient = Omit<OwnerReportRecipient, 'role'> & {
   role: OwnerReportRecipient['role'] | (typeof MORNING_STAFF_ROLES)[number];
   staffId: string | null;
   staffBindingEvidenceHash: string | null;
   content: OwnerReportPlan['content'];
 };
-export type MorningReportPlan = Omit<OwnerReportPlan,'contract'|'reportType'|'content'|'recipients'> & {
+export type MorningReportPlan = Omit<
+  OwnerReportPlan,
+  'contract' | 'reportType' | 'content' | 'recipients'
+> & {
   contract: typeof MORNING_REPORT_CONTRACT;
-  reportType: 'morning_owner'|'morning_staff';
+  reportType: 'morning_owner' | 'morning_staff';
   recipients: MorningReportRecipient[];
 };
 export type CanonicalOwnerReportPlan = OwnerReportPlan | MorningReportPlan;
-export type CanonicalOwnerReportRecipient = OwnerReportRecipient | MorningReportRecipient;
+export type CanonicalOwnerReportRecipient =
+  OwnerReportRecipient | MorningReportRecipient;
 const opaque = /^[A-Za-z0-9_.:-]{1,160}$/;
 const hash = /^[a-f0-9]{64}$/;
 const lexical = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
@@ -200,35 +210,96 @@ export function normalizeOwnerReportPlan(
   return plan;
 }
 /** V1 remains unchanged; the approved V2 carries an independently scoped content per recipient. */
-export function normalizeCanonicalOwnerReportPlan(candidate: CanonicalOwnerReportPlan): CanonicalOwnerReportPlan {
-  if (candidate.contract === OWNER_REPORT_CONTRACT) return normalizeOwnerReportPlan(candidate);
-  exact(candidate,['contract','tenantId','reportType','periodLocalDate','reportVersion','timezone','periodStart',
-    'periodEnd','expiresAt','classification','channelOrder','policy','recipients']);
-  if (candidate.contract !== MORNING_REPORT_CONTRACT || !['morning_owner','morning_staff'].includes(candidate.reportType)
-    || !Array.isArray(candidate.recipients) || !candidate.recipients.length)
-    throw new ActionContractError('Invalid finite morning report kind/recipients');
-  const users = new Set<string>(), keys = new Set<string>();
-  const recipients = candidate.recipients.map(recipient => {
-    exact(recipient,['userId','membershipId','role','staffId','staffBindingEvidenceHash','content','slots']);
+export function normalizeCanonicalOwnerReportPlan(
+  candidate: CanonicalOwnerReportPlan,
+): CanonicalOwnerReportPlan {
+  if (candidate.contract === OWNER_REPORT_CONTRACT)
+    return normalizeOwnerReportPlan(candidate);
+  exact(candidate, [
+    'contract',
+    'tenantId',
+    'reportType',
+    'periodLocalDate',
+    'reportVersion',
+    'timezone',
+    'periodStart',
+    'periodEnd',
+    'expiresAt',
+    'classification',
+    'channelOrder',
+    'policy',
+    'recipients',
+  ]);
+  if (
+    candidate.contract !== MORNING_REPORT_CONTRACT ||
+    !['morning_owner', 'morning_staff'].includes(candidate.reportType) ||
+    !Array.isArray(candidate.recipients) ||
+    !candidate.recipients.length
+  )
+    throw new ActionContractError(
+      'Invalid finite morning report kind/recipients',
+    );
+  const users = new Set<string>(),
+    keys = new Set<string>();
+  const recipients = candidate.recipients.map((recipient) => {
+    exact(recipient, [
+      'userId',
+      'membershipId',
+      'role',
+      'staffId',
+      'staffBindingEvidenceHash',
+      'content',
+      'slots',
+    ]);
     const staff = candidate.reportType === 'morning_staff';
-    const roles: readonly string[] = staff ? MORNING_STAFF_ROLES : OWNER_REPORT_ROLES;
-    if (!roles.includes(recipient.role) || users.has(recipient.userId) ||
-      (staff ? (typeof recipient.staffId !== 'string' || !opaque.test(recipient.staffId) ||
-        typeof recipient.staffBindingEvidenceHash !== 'string' || !hash.test(recipient.staffBindingEvidenceHash)) :
-        (recipient.staffId !== null || recipient.staffBindingEvidenceHash !== null)))
-      throw new ActionContractError('Invalid canonical morning report principal');
+    const roles: readonly string[] = staff
+      ? MORNING_STAFF_ROLES
+      : OWNER_REPORT_ROLES;
+    if (
+      !roles.includes(recipient.role) ||
+      users.has(recipient.userId) ||
+      (staff
+        ? typeof recipient.staffId !== 'string' ||
+          !opaque.test(recipient.staffId) ||
+          typeof recipient.staffBindingEvidenceHash !== 'string' ||
+          !hash.test(recipient.staffBindingEvidenceHash)
+        : recipient.staffId !== null ||
+          recipient.staffBindingEvidenceHash !== null)
+    )
+      throw new ActionContractError(
+        'Invalid canonical morning report principal',
+      );
     users.add(recipient.userId);
     // Reuse all established period/content/route/policy validation without weakening the V1 branch.
-    const validated = normalizeOwnerReportPlan({...candidate,contract:OWNER_REPORT_CONTRACT,reportType:'daily_report',
-      content:recipient.content,recipients:[{userId:recipient.userId,membershipId:recipient.membershipId,role:'tenant_owner',slots:recipient.slots}]});
+    const validated = normalizeOwnerReportPlan({
+      ...candidate,
+      contract: OWNER_REPORT_CONTRACT,
+      reportType: 'daily_report',
+      content: recipient.content,
+      recipients: [
+        {
+          userId: recipient.userId,
+          membershipId: recipient.membershipId,
+          role: 'tenant_owner',
+          slots: recipient.slots,
+        },
+      ],
+    });
     for (const slot of validated.recipients[0].slots) {
-      if (keys.has(slot.key)) throw new ActionContractError('Duplicate morning report slot');
+      if (keys.has(slot.key))
+        throw new ActionContractError('Duplicate morning report slot');
       keys.add(slot.key);
     }
-    return {...recipient,content:validated.content,slots:validated.recipients[0].slots};
+    return {
+      ...recipient,
+      content: validated.content,
+      slots: validated.recipients[0].slots,
+    };
   });
-  recipients.sort((a,b)=>lexical(a.userId,b.userId));
-  return JSON.parse(stableActionJson({...candidate,recipients})) as MorningReportPlan;
+  recipients.sort((a, b) => lexical(a.userId, b.userId));
+  return JSON.parse(
+    stableActionJson({ ...candidate, recipients }),
+  ) as MorningReportPlan;
 }
 export function ownerReportFingerprint(
   identity: ActionIdentityService,
@@ -269,7 +340,10 @@ export function ownerReportRequest(
   slot: OwnerReportSlot,
 ): TrustedActionExecutionRequestV1 {
   const logical = ownerReportLogicalIdentity(identity, plan);
-  const content = plan.contract === OWNER_REPORT_CONTRACT ? plan.content : (recipient as MorningReportRecipient).content;
+  const content =
+    plan.contract === OWNER_REPORT_CONTRACT
+      ? plan.content
+      : (recipient as MorningReportRecipient).content;
   return {
     contract: ACTION_EXECUTION_REQUEST_CONTRACT,
     tenantId: plan.tenantId,
@@ -282,7 +356,8 @@ export function ownerReportRequest(
     targetRef: `staff:${slot.routeHash}`,
     input: {
       channel: slot.channel,
-      messageType: plan.reportType === 'daily_report' ? 'daily_report' : 'morning_brief',
+      messageType:
+        plan.reportType === 'daily_report' ? 'daily_report' : 'morning_brief',
       sourceEventId: `owner-report:${logical}`,
       title: content.title,
       bodyText: content.bodyText,

@@ -356,10 +356,38 @@ export class ClientWantedSlotService {
     const staff = await this.prisma.$transaction((tx) =>
       this.staff(tx, tenantId, input.externalStaffId),
     );
-    const eventId=input.sourceEventId.startsWith('domain-event:')?input.sourceEventId.slice('domain-event:'.length):'';
-    const event=eventId?await this.prisma.domainEvent.findFirst({where:{id:eventId,tenantId,entityType:'appointment',type:'appointment.removed',version:1,observation:'after_watch_started'}}):null;
-    const released=event?await this.prisma.appointment.findUnique({where:{id_tenantId:{id:event.entityId,tenantId}}}):null;
-    if(!event||!released||released.staffId!==staff.id||released.branchId!==staff.branchId||released.startAt.getTime()!==input.availableStartAt.getTime()||released.status!=='canceled'||input.availableStartAt<=new Date())throw new ForbiddenException('R06 exact canonical released-capacity event required');
+    const eventId = input.sourceEventId.startsWith('domain-event:')
+      ? input.sourceEventId.slice('domain-event:'.length)
+      : '';
+    const event = eventId
+      ? await this.prisma.domainEvent.findFirst({
+          where: {
+            id: eventId,
+            tenantId,
+            entityType: 'appointment',
+            type: 'appointment.removed',
+            version: 1,
+            observation: 'after_watch_started',
+          },
+        })
+      : null;
+    const released = event
+      ? await this.prisma.appointment.findUnique({
+          where: { id_tenantId: { id: event.entityId, tenantId } },
+        })
+      : null;
+    if (
+      !event ||
+      !released ||
+      released.staffId !== staff.id ||
+      released.branchId !== staff.branchId ||
+      released.startAt.getTime() !== input.availableStartAt.getTime() ||
+      released.status !== 'canceled' ||
+      input.availableStartAt <= new Date()
+    )
+      throw new ForbiddenException(
+        'R06 exact canonical released-capacity event required',
+      );
     const rows = await this.prisma.clientWantedSlotInterest.findMany({
       where: {
         tenantId,
@@ -413,29 +441,36 @@ export class ClientWantedSlotService {
         })}`;
         const delivery =
           endpoint.provider === 'telegram'
-            ? await this.delivery.deliverPackage2Telegram({
-                tenantId,
-                telegramChatId: endpoint.address,
-                recipientIdentityRef: endpoint.identityRef,
-                messageType: 'wanted_slot_available',
-                sourceType: 'legacy_bridge',
-                sourceEventId,
-                title: 'Освободилось время',
-                bodyText:
-                  'Запрошенное вами время освободилось. Откройте запись, чтобы проверить актуальность слота.',
-              },undefined,()=>this.assertPendingDelivery(matched,endpoint))
-            : await this.delivery.deliverPackage2Inbox({
-                tenantId,
-                userId: endpoint.address,
-                recipientIdentityRef: endpoint.identityRef,
-                messageType: 'wanted_slot_available',
-                sourceType: 'legacy_bridge',
-                sourceEventId,
-                title: 'Освободилось время',
-                bodyText:
-                  'Запрошенное вами время освободилось. Проверьте актуальность слота.',
-                deepLink: '/app/?panel=booking',
-              },()=>this.assertPendingDelivery(matched,endpoint));
+            ? await this.delivery.deliverPackage2Telegram(
+                {
+                  tenantId,
+                  telegramChatId: endpoint.address,
+                  recipientIdentityRef: endpoint.identityRef,
+                  messageType: 'wanted_slot_available',
+                  sourceType: 'legacy_bridge',
+                  sourceEventId,
+                  title: 'Освободилось время',
+                  bodyText:
+                    'Запрошенное вами время освободилось. Откройте запись, чтобы проверить актуальность слота.',
+                },
+                undefined,
+                () => this.assertPendingDelivery(matched, endpoint),
+              )
+            : await this.delivery.deliverPackage2Inbox(
+                {
+                  tenantId,
+                  userId: endpoint.address,
+                  recipientIdentityRef: endpoint.identityRef,
+                  messageType: 'wanted_slot_available',
+                  sourceType: 'legacy_bridge',
+                  sourceEventId,
+                  title: 'Освободилось время',
+                  bodyText:
+                    'Запрошенное вами время освободилось. Проверьте актуальность слота.',
+                  deepLink: '/app/?panel=booking',
+                },
+                () => this.assertPendingDelivery(matched, endpoint),
+              );
         await this.markNotified(matched, delivery.actionExecutionId);
         outcomes.push({ interestId: matched.id, status: 'notified' });
       } catch {
@@ -557,10 +592,35 @@ export class ClientWantedSlotService {
     });
   }
 
-  private async assertPendingDelivery(row:ClientWantedSlotInterest,endpoint:{provider:'telegram'|'maya_user';address:string;identityRef:string}){
-    const current=await this.prisma.clientWantedSlotInterest.findUnique({where:{id_tenantId:{id:row.id,tenantId:row.tenantId}}});
-    const route=await this.channelRuntime.resolveVerifiedDeliveryEndpoint(row.clientId,row.sourceChannelLinkId);
-    if(!current||!['MATCHED','NOTIFIED'].includes(current.status)||current.matchedSourceEventId!==row.matchedSourceEventId||current.sourceChannelLinkId!==row.sourceChannelLinkId||!route||route.provider!==endpoint.provider||route.address!==endpoint.address||route.identityRef!==endpoint.identityRef||!(await this.deliveryAllowed(current)))throw new ForbiddenException('R06 exact current wanted-slot owner/route/preferences required');
+  private async assertPendingDelivery(
+    row: ClientWantedSlotInterest,
+    endpoint: {
+      provider: 'telegram' | 'maya_user';
+      address: string;
+      identityRef: string;
+    },
+  ) {
+    const current = await this.prisma.clientWantedSlotInterest.findUnique({
+      where: { id_tenantId: { id: row.id, tenantId: row.tenantId } },
+    });
+    const route = await this.channelRuntime.resolveVerifiedDeliveryEndpoint(
+      row.clientId,
+      row.sourceChannelLinkId,
+    );
+    if (
+      !current ||
+      !['MATCHED', 'NOTIFIED'].includes(current.status) ||
+      current.matchedSourceEventId !== row.matchedSourceEventId ||
+      current.sourceChannelLinkId !== row.sourceChannelLinkId ||
+      !route ||
+      route.provider !== endpoint.provider ||
+      route.address !== endpoint.address ||
+      route.identityRef !== endpoint.identityRef ||
+      !(await this.deliveryAllowed(current))
+    )
+      throw new ForbiddenException(
+        'R06 exact current wanted-slot owner/route/preferences required',
+      );
   }
 
   private async deliveryAllowed(row: ClientWantedSlotInterest) {

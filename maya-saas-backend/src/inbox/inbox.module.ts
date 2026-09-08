@@ -18,7 +18,7 @@ import { InboxService } from './inbox.service';
     CommunicationDeliveryModule,
   ],
   controllers: [InboxController],
-  providers: [InboxService,CanonicalInboxProjectionService],
-  exports: [InboxService,CanonicalInboxProjectionService],
+  providers: [InboxService, CanonicalInboxProjectionService],
+  exports: [InboxService, CanonicalInboxProjectionService],
 })
 export class InboxModule {}

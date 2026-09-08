@@ -100,12 +100,49 @@ function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
 }
 
 function allowedActorRoles(capability: string): readonly UserRole[] {
-  if (capability.startsWith('team.')) return [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER, UserRole.TENANT_ADMIN, UserRole.ADMINISTRATOR, UserRole.STAFF];
-  if (capability.startsWith('public-community.')) return [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER, UserRole.TENANT_ADMIN, UserRole.ADMINISTRATOR];
-  if (capability === 'native-feedback.request.execute.v1') return [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER, UserRole.TENANT_ADMIN, UserRole.ADMINISTRATOR];
-  if(capability.startsWith('cash-declaration.')) return [UserRole.TENANT_OWNER,UserRole.BUSINESS_OWNER,UserRole.ACCOUNTANT];
-  if (capability.startsWith('package5.settings.tenant-business.')) return [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER];
-  if (capability.startsWith('package5.settings.staff-notifications.')) return [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER, UserRole.TENANT_ADMIN, UserRole.ADMINISTRATOR, UserRole.MANAGER, UserRole.BRANCH_MANAGER, UserRole.ACCOUNTANT, UserRole.PROVIDER, UserRole.EMPLOYEE, UserRole.STAFF];
+  if (capability.startsWith('team.'))
+    return [
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+      UserRole.TENANT_ADMIN,
+      UserRole.ADMINISTRATOR,
+      UserRole.STAFF,
+    ];
+  if (capability.startsWith('public-community.'))
+    return [
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+      UserRole.TENANT_ADMIN,
+      UserRole.ADMINISTRATOR,
+    ];
+  if (capability === 'native-feedback.request.execute.v1')
+    return [
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+      UserRole.TENANT_ADMIN,
+      UserRole.ADMINISTRATOR,
+    ];
+  if (capability.startsWith('cash-declaration.'))
+    return [
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+      UserRole.ACCOUNTANT,
+    ];
+  if (capability.startsWith('package5.settings.tenant-business.'))
+    return [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER];
+  if (capability.startsWith('package5.settings.staff-notifications.'))
+    return [
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+      UserRole.TENANT_ADMIN,
+      UserRole.ADMINISTRATOR,
+      UserRole.MANAGER,
+      UserRole.BRANCH_MANAGER,
+      UserRole.ACCOUNTANT,
+      UserRole.PROVIDER,
+      UserRole.EMPLOYEE,
+      UserRole.STAFF,
+    ];
   if (
     [
       'communication.bulk-campaign.admit.v2',

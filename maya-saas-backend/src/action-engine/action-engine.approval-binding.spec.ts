@@ -490,3 +490,100 @@ describe('CanonicalApprovalBindingService', () => {
     expect(repository.consumeCalls).toBe(1);
   });
 });
+
+describe('approved finite durable policy freshness distinction', () => {
+  async function fixture() {
+    const h = buildHarness();
+    const action = { ...baseRequest(), capability: 'kernel.test.safe-retry' };
+    const initial = await h.resolver.resolve(action);
+    const record = approvalRecord(action, initial, {
+      approvalRequirement: 'NONE',
+      approvalDecision: ActionApprovalDecision.NOT_REQUIRED,
+    });
+    const repository = new FakeApprovalRepository(record);
+    const permits = jest.fn(() => Promise.resolve(true));
+    const service = new CanonicalApprovalBindingService(
+      h.resolver,
+      {
+        findExecution: repository.findExecution.bind(repository),
+        consumeApprovedExecution:
+          repository.consumeApprovedExecution.bind(repository),
+        permitsDurablePolicyResume: permits,
+      },
+      { now: () => h.state.now },
+    );
+    return {
+      ...h,
+      action,
+      initial,
+      record,
+      repository,
+      permits,
+      service,
+      request: {
+        contract: ACTION_APPROVAL_AUTHORIZATION_REQUEST_CONTRACT,
+        executionId: record.id,
+        action,
+      },
+    };
+  }
+  it('refreshes expired policy on the same verified intent without rewriting admission', async () => {
+    const h = await fixture(),
+      snapshot = structuredClone(h.record);
+    h.state.now = new Date(NOW.getTime() + 6 * 60000);
+    const result = await h.service.authorizeForClaim(h.request);
+    expect(result.externalExecutionAllowed).toBe(true);
+    expect(result.executionId).toBe(h.record.id);
+    expect(result.claimPolicy?.policyEvaluatedAt).toEqual(h.state.now);
+    expect(result.claimPolicy?.policyContextHash).not.toBe(
+      h.initial.policyContextHash,
+    );
+    expect(h.record).toEqual(snapshot);
+    expect(h.repository.consumeCalls).toBe(0);
+  });
+  it.each(['FAILED', 'SUCCEEDED', 'UNKNOWN', 'EXECUTING'] as const)(
+    'never refreshes %s at a new claim',
+    async (state) => {
+      const h = await fixture();
+      h.record.state = state;
+      h.state.now = new Date(NOW.getTime() + 6 * 60000);
+      expect(
+        (await h.service.authorizeForClaim(h.request)).externalExecutionAllowed,
+      ).toBe(false);
+      expect(h.permits).not.toHaveBeenCalled();
+    },
+  );
+  it('keeps unbound actions and required human approval on the old expiry contract', async () => {
+    const h = await fixture();
+    h.permits.mockResolvedValue(false);
+    h.state.now = new Date(NOW.getTime() + 6 * 60000);
+    expect((await h.service.authorizeForClaim(h.request)).reason).toBe(
+      'APPROVAL_EXPIRED',
+    );
+    h.permits.mockResolvedValue(true);
+    h.record.approvalRequirement = 'REQUIRED';
+    expect(
+      (await h.service.authorizeForClaim(h.request)).externalExecutionAllowed,
+    ).toBe(false);
+  });
+  it('rejects material policy drift and forged original attestation', async () => {
+    const h = await fixture();
+    h.state.now = new Date(NOW.getTime() + 6 * 60000);
+    h.state.planId = 'changed-plan';
+    expect((await h.service.authorizeForClaim(h.request)).reason).toBe(
+      'APPROVAL_SUBJECT_MISMATCH',
+    );
+    h.state.planId = 'plan-a';
+    h.record.approvalBindingHash = 'f'.repeat(64);
+    expect((await h.service.authorizeForClaim(h.request)).reason).toBe(
+      'APPROVAL_SUBJECT_MISMATCH',
+    );
+  });
+  it('fails closed when fresh policy or owner verification is unavailable', async () => {
+    const h = await fixture();
+    h.permits.mockRejectedValue(new Error('owner unavailable'));
+    await expect(h.service.authorizeForClaim(h.request)).rejects.toThrow(
+      'owner unavailable',
+    );
+  });
+});

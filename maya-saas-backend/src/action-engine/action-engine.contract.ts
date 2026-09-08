@@ -57,7 +57,11 @@ export interface TrustedActionExecutionRequestV1 {
   /** Server-owned B36 immutable report/slot binding; never HTTP/model authority. */
   ownerReportSlot?: { runId: string; slotKey: string };
   operationalAlertSlot?: { runId: string; slotKey: string };
-  nativeFeedbackSlot?: { requestId: string; revisionId: string | null; slotKey: string };
+  nativeFeedbackSlot?: {
+    requestId: string;
+    revisionId: string | null;
+    slotKey: string;
+  };
   teamMessageSlot?: { messageId: string; slotKey: string };
   expenseReminderSlot?: { runId: string; slotKey: string };
 }
@@ -192,7 +196,11 @@ export interface RegisteredActionCapabilityV1 {
 export interface NormalizedActionExecutionV1 {
   ownerReportSlot?: { runId: string; slotKey: string };
   operationalAlertSlot?: { runId: string; slotKey: string };
-  nativeFeedbackSlot?: { requestId: string; revisionId: string | null; slotKey: string };
+  nativeFeedbackSlot?: {
+    requestId: string;
+    revisionId: string | null;
+    slotKey: string;
+  };
   teamMessageSlot?: { messageId: string; slotKey: string };
   expenseReminderSlot?: { runId: string; slotKey: string };
   bookingIntent?: {

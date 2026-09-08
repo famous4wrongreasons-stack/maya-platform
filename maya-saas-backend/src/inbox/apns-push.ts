@@ -180,10 +180,16 @@ export function prepareInboxApnsCanonical(): PreparedCanonicalApnsSender {
 }
 
 /** Legacy fire-and-forget sender retired by R06. CD owns every APNS attempt. */
-export async function sendInboxApns(opts: {
-  tokens: Array<{platform:string;token:string}>;title:string;body:string;
-  deepLink?:string|null;type:string;logger:Logger;
-}): Promise<{sent:number;skipped:number}> {
+export function sendInboxApns(opts: {
+  tokens: Array<{ platform: string; token: string }>;
+  title: string;
+  body: string;
+  deepLink?: string | null;
+  type: string;
+  logger: Logger;
+}): Promise<{ sent: number; skipped: number }> {
   void opts;
-  throw new Error('R06_CANONICAL_COMMUNICATION_DELIVERY_REQUIRED');
+  return Promise.reject(
+    new Error('R06_CANONICAL_COMMUNICATION_DELIVERY_REQUIRED'),
+  );
 }

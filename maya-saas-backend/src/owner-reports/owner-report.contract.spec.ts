@@ -154,45 +154,117 @@ describe('B36 immutable owner report contract', () => {
   });
 });
 
-const morning = (kind: MorningReportPlan['reportType']='morning_staff'): MorningReportPlan => {
-  const {content,...daily}=fixture();
-  return {...daily,contract:MORNING_REPORT_CONTRACT,reportType:kind,recipients:daily.recipients.map(r=>({...r,
-    role:kind==='morning_staff'?'staff':'tenant_owner',staffId:kind==='morning_staff'?'canonical-staff':null,
-    staffBindingEvidenceHash:kind==='morning_staff'?'a'.repeat(64):null,content}))};
+const morning = (
+  kind: MorningReportPlan['reportType'] = 'morning_staff',
+): MorningReportPlan => {
+  const { content, ...daily } = fixture();
+  return {
+    ...daily,
+    contract: MORNING_REPORT_CONTRACT,
+    reportType: kind,
+    recipients: daily.recipients.map((r) => ({
+      ...r,
+      role: kind === 'morning_staff' ? 'staff' : 'tenant_owner',
+      staffId: kind === 'morning_staff' ? 'canonical-staff' : null,
+      staffBindingEvidenceHash:
+        kind === 'morning_staff' ? 'a'.repeat(64) : null,
+      content,
+    })),
+  };
 };
-describe('R05 finite morning V2 plan',()=>{
-  it('keeps daily V1 normalization/fingerprint unchanged',()=>{
-    const v1=fixture();
-    expect(normalizeCanonicalOwnerReportPlan(v1)).toEqual(normalizeOwnerReportPlan(v1));
-    expect(ownerReportFingerprint(identity,normalizeCanonicalOwnerReportPlan(v1))).toBe(ownerReportFingerprint(identity,normalizeOwnerReportPlan(v1)));
-    expect(()=>normalizeOwnerReportPlan(morning() as unknown as OwnerReportPlan)).toThrow();
+describe('R05 finite morning V2 plan', () => {
+  it('keeps daily V1 normalization/fingerprint unchanged', () => {
+    const v1 = fixture();
+    expect(normalizeCanonicalOwnerReportPlan(v1)).toEqual(
+      normalizeOwnerReportPlan(v1),
+    );
+    expect(
+      ownerReportFingerprint(identity, normalizeCanonicalOwnerReportPlan(v1)),
+    ).toBe(ownerReportFingerprint(identity, normalizeOwnerReportPlan(v1)));
+    expect(() =>
+      normalizeOwnerReportPlan(morning() as unknown as OwnerReportPlan),
+    ).toThrow();
   });
-  it.each(['morning_owner','morning_staff'] as const)('admits %s with per-recipient content through the existing A12',kind=>{
-    const plan=normalizeCanonicalOwnerReportPlan(morning(kind));
-    const recipient=plan.recipients[0];
-    const request=ownerReportRequest('run',identity,plan,recipient,recipient.slots[0]);
-    expect(request.capability).toBe(OWNER_REPORT_ACTION);
-    expect(request.ownerReportSlot).toEqual({runId:'run',slotKey:recipient.slots[0].key});
-    expect(request.input).toMatchObject({messageType:'morning_brief',title:'Report',bodyText:'Canonical facts'});
-    expect(recipient.slots.map(s=>s.channel)).toEqual(['inbox','telegram','apns','apns']);
-  });
-  it.each(['content','staffId','staffBindingEvidenceHash'] as const)('binds changed %s under the same occurrence identity',field=>{
-    const original=morning(),changed=structuredClone(original);
-    if(field==='content') changed.recipients[0].content.bodyText='Changed own facts';
-    else if(field==='staffId') changed.recipients[0].staffId='different-staff';
-    else changed.recipients[0].staffBindingEvidenceHash='b'.repeat(64);
-    expect(ownerReportLogicalIdentity(identity,changed)).toBe(ownerReportLogicalIdentity(identity,original));
-    expect(ownerReportFingerprint(identity,normalizeCanonicalOwnerReportPlan(changed))).not.toBe(ownerReportFingerprint(identity,normalizeCanonicalOwnerReportPlan(original)));
-  });
-  it('rejects unqualified Staff, owner/member role confusion and generic report types',()=>{
-    const missing=morning();missing.recipients[0].staffId=null;
-    expect(()=>normalizeCanonicalOwnerReportPlan(missing)).toThrow();
-    const owner=morning('morning_owner');owner.recipients[0].role='staff';
-    expect(()=>normalizeCanonicalOwnerReportPlan(owner)).toThrow();
-    const manager=morning();manager.recipients[0].role='administrator';
-    expect(()=>normalizeCanonicalOwnerReportPlan(manager)).toThrow();
-    expect(()=>normalizeCanonicalOwnerReportPlan(Object.assign(morning(),{reportType:'director_forecast'}))).toThrow();
-    expect(()=>normalizeCanonicalOwnerReportPlan(Object.assign(morning(),{force:true}))).toThrow();
-    expect(()=>normalizeCanonicalOwnerReportPlan(Object.assign(morning(),{content:fixture().content}))).toThrow();
+  it.each(['morning_owner', 'morning_staff'] as const)(
+    'admits %s with per-recipient content through the existing A12',
+    (kind) => {
+      const plan = normalizeCanonicalOwnerReportPlan(morning(kind));
+      const recipient = plan.recipients[0];
+      const request = ownerReportRequest(
+        'run',
+        identity,
+        plan,
+        recipient,
+        recipient.slots[0],
+      );
+      expect(request.capability).toBe(OWNER_REPORT_ACTION);
+      expect(request.ownerReportSlot).toEqual({
+        runId: 'run',
+        slotKey: recipient.slots[0].key,
+      });
+      expect(request.input).toMatchObject({
+        messageType: 'morning_brief',
+        title: 'Report',
+        bodyText: 'Canonical facts',
+      });
+      expect(recipient.slots.map((s) => s.channel)).toEqual([
+        'inbox',
+        'telegram',
+        'apns',
+        'apns',
+      ]);
+    },
+  );
+  it.each(['content', 'staffId', 'staffBindingEvidenceHash'] as const)(
+    'binds changed %s under the same occurrence identity',
+    (field) => {
+      const original = morning(),
+        changed = structuredClone(original);
+      if (field === 'content')
+        changed.recipients[0].content.bodyText = 'Changed own facts';
+      else if (field === 'staffId')
+        changed.recipients[0].staffId = 'different-staff';
+      else changed.recipients[0].staffBindingEvidenceHash = 'b'.repeat(64);
+      expect(ownerReportLogicalIdentity(identity, changed)).toBe(
+        ownerReportLogicalIdentity(identity, original),
+      );
+      expect(
+        ownerReportFingerprint(
+          identity,
+          normalizeCanonicalOwnerReportPlan(changed),
+        ),
+      ).not.toBe(
+        ownerReportFingerprint(
+          identity,
+          normalizeCanonicalOwnerReportPlan(original),
+        ),
+      );
+    },
+  );
+  it('rejects unqualified Staff, owner/member role confusion and generic report types', () => {
+    const missing = morning();
+    missing.recipients[0].staffId = null;
+    expect(() => normalizeCanonicalOwnerReportPlan(missing)).toThrow();
+    const owner = morning('morning_owner');
+    owner.recipients[0].role = 'staff';
+    expect(() => normalizeCanonicalOwnerReportPlan(owner)).toThrow();
+    const manager = morning();
+    manager.recipients[0].role = 'administrator';
+    expect(() => normalizeCanonicalOwnerReportPlan(manager)).toThrow();
+    expect(() =>
+      normalizeCanonicalOwnerReportPlan(
+        Object.assign(morning(), { reportType: 'director_forecast' }),
+      ),
+    ).toThrow();
+    expect(() =>
+      normalizeCanonicalOwnerReportPlan(
+        Object.assign(morning(), { force: true }),
+      ),
+    ).toThrow();
+    expect(() =>
+      normalizeCanonicalOwnerReportPlan(
+        Object.assign(morning(), { content: fixture().content }),
+      ),
+    ).toThrow();
   });
 });

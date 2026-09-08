@@ -89,8 +89,29 @@ describe('Package 5 B10/B11 production bypass protection', () => {
   it('disables cycle-scored outreach while preserving exact B9 delivery', () => {
     const source = pythonFunction(freedSlot, 'offer_freed_slot');
     assertScorerDisabled(source);
-    expect(webhook).toContain(
-      'source_event_id=f"yclients-record-delete:{record_id}"',
+    const alerts = readFileSync(
+      resolve(
+        __dirname,
+        '../operational-alerts/canonical-appointment-alerts.service.ts',
+      ),
+      'utf8',
+    );
+    const wanted = readFileSync(
+      resolve(__dirname, '../crm/client-wanted-slot.service.ts'),
+      'utf8',
+    );
+    expect(alerts).toContain('this.wanted.matchAvailable({');
+    expect(alerts).toContain("sourceEventId: 'domain-event:' + event.id");
+    for (const guard of [
+      "type: 'appointment.removed'",
+      "observation: 'after_watch_started'",
+      'released.staffId !== staff.id',
+      'released.branchId !== staff.branchId',
+      'released.startAt.getTime() !== input.availableStartAt.getTime()',
+    ])
+      expect(wanted).toContain(guard);
+    expect(pythonFunction(webhook, '_process_record_delete')).not.toMatch(
+      /offer_freed_slot|send_message|refund_for_cancelled_record/,
     );
   });
 

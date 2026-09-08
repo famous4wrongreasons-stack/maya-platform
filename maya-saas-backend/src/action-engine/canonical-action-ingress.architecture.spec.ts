@@ -107,7 +107,9 @@ describe('canonical ActionExecution ingress ratchet', () => {
 
   it('wires resolver, ingress and kernel through the Nest module', () => {
     const moduleSource = source(join(__dirname, 'action-engine.module.ts'));
-    expect(moduleSource).toContain('imports: [EntitlementsModule]');
+    expect(moduleSource.replace(/\s+/g, '')).toContain(
+      'imports:[EntitlementsModule,AuditLogModule,EncryptionModule]',
+    );
     expect(moduleSource).toContain('provide: CanonicalActionPolicyResolver');
     expect(moduleSource).toContain('provide: ActionEngineKernel');
     expect(moduleSource).toContain('CanonicalActionIngressService');

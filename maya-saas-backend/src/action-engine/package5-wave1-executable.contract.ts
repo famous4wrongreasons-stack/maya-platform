@@ -39,8 +39,22 @@ export interface Package5Wave1Registration {
 }
 
 export const PACKAGE5_WAVE1_REGISTRATIONS = Object.freeze([
-  { operation: 'tenant_business_configuration', actionClass: 'update_tenant_business_configuration', targetKind: 'setting', shadowCapability: 'package5.settings.tenant-business.shadow.v1', executableCapability: 'package5.settings.tenant-business.execute.v1', allowedSourceTypes: ['authenticated_request'] },
-  { operation: 'staff_notification_preferences', actionClass: 'update_staff_notification_preferences', targetKind: 'setting', shadowCapability: 'package5.settings.staff-notifications.shadow.v1', executableCapability: 'package5.settings.staff-notifications.execute.v1', allowedSourceTypes: ['authenticated_request'] },
+  {
+    operation: 'tenant_business_configuration',
+    actionClass: 'update_tenant_business_configuration',
+    targetKind: 'setting',
+    shadowCapability: 'package5.settings.tenant-business.shadow.v1',
+    executableCapability: 'package5.settings.tenant-business.execute.v1',
+    allowedSourceTypes: ['authenticated_request'],
+  },
+  {
+    operation: 'staff_notification_preferences',
+    actionClass: 'update_staff_notification_preferences',
+    targetKind: 'setting',
+    shadowCapability: 'package5.settings.staff-notifications.shadow.v1',
+    executableCapability: 'package5.settings.staff-notifications.execute.v1',
+    allowedSourceTypes: ['authenticated_request'],
+  },
   {
     operation: 'assistant_preferences',
     actionClass: 'update_assistant_preferences',
@@ -293,12 +307,19 @@ export function normalizePackage5Wave1Input(
         'Setting input contains work-item authority',
       );
     }
-    const governed = operation === 'tenant_business_configuration' || operation === 'staff_notification_preferences';
+    const governed =
+      operation === 'tenant_business_configuration' ||
+      operation === 'staff_notification_preferences';
     if (governed) validateGovernedNormalizedInput(operation, source);
-    else if ('semanticCommand' in source || 'callerId' in source) throw new ActionContractError('Governed command in unrelated settings action');
+    else if ('semanticCommand' in source || 'callerId' in source)
+      throw new ActionContractError(
+        'Governed command in unrelated settings action',
+      );
     return {
       ...common,
-      ...(governed ? {semanticCommand: source.semanticCommand, callerId: source.callerId} : {}),
+      ...(governed
+        ? { semanticCommand: source.semanticCommand, callerId: source.callerId }
+        : {}),
       configJson,
       workItemId: null,
       workItemKind: null,
