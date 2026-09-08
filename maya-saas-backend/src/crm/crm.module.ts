@@ -1,3 +1,7 @@
+import { NativeFeedbackFoundationModule } from '../native-feedback/native-feedback-foundation.module';
+import { NativeFeedbackService } from '../native-feedback/native-feedback.service';
+import { NativeFeedbackController } from '../native-feedback/native-feedback.controller';
+import { NativeFeedbackScheduler } from '../native-feedback/native-feedback.scheduler';
 import { ClientProfileReadModule } from '../crm/client-profile-read.module';
 import { ClientAppointmentCreateService } from '../appointments/client-appointment-create.service';
 import { ClientLoyaltyReadService } from './client-loyalty-read.service';
@@ -63,6 +67,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 
 @Module({
   imports: [
+    NativeFeedbackFoundationModule,
     ClientProfileReadModule,
     ActionEngineModule,
     AuditLogModule,
@@ -72,6 +77,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     UsersModule,
   ],
   controllers: [
+    NativeFeedbackController,
     ClientHabitsController,
     LegacyClientHabitsController,
     LegacyClientWantedSlotController,
@@ -85,6 +91,8 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionController,
   ],
   providers: [
+    NativeFeedbackService,
+    NativeFeedbackScheduler,
     ClientAppointmentCreateService,
     ClientLoyaltyReadService,
     ClientAppointmentReadService,
@@ -168,6 +176,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionService,
   ],
   exports: [
+    ClientWantedSlotService,
     ClientAppointmentCreateService,
     ClientLoyaltyReadService,
     ClientAppointmentReadService,

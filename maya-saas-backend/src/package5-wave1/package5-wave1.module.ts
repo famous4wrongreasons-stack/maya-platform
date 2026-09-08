@@ -1,3 +1,5 @@
+import { GovernedSettingsReadService } from './governed-settings.read';
+import { GovernedSettingsController } from './governed-settings.controller';
 import { Module } from '@nestjs/common';
 
 import {
@@ -16,8 +18,9 @@ import {
 
 @Module({
   imports: [ActionEngineModule, InboxModule],
-  controllers: [OperationalWorkController],
+  controllers: [OperationalWorkController, GovernedSettingsController],
   providers: [
+    GovernedSettingsReadService,
     Package5Wave1ShadowService,
     Package5Wave1CanonicalCutoverService,
     {
@@ -26,14 +29,16 @@ import {
         prisma: PrismaService,
         ingress: CanonicalActionIngressService,
         kernel: ActionEngineKernel,
-      ) => new Package5Wave1ExecutableService(prisma, ingress, kernel),
+        governed: GovernedSettingsReadService,
+      ) => new Package5Wave1ExecutableService(prisma, ingress, kernel, undefined, governed),
       inject: [
         PrismaService,
         CanonicalActionIngressService,
         ActionEngineKernel,
+        GovernedSettingsReadService,
       ],
     },
   ],
-  exports: [Package5Wave1CanonicalCutoverService],
+  exports: [Package5Wave1CanonicalCutoverService, GovernedSettingsReadService],
 })
 export class Package5Wave1Module {}

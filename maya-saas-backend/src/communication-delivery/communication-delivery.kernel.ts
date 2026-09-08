@@ -1,3 +1,4 @@
+import { isPostgresSerializationConflict as isSerializationConflict } from '../common/postgres-transaction-conflict';
 import { randomBytes, randomUUID } from 'node:crypto';
 
 import {
@@ -102,12 +103,7 @@ function isUniqueConflict(error: unknown): boolean {
   );
 }
 
-function isSerializationConflict(error: unknown): boolean {
-  return (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === 'P2034'
-  );
-}
+// Driver adapters also expose SQLSTATE transaction aborts in nested causes.
 
 function deliveryStatus(state: CommunicationDeliveryState): string {
   return state;

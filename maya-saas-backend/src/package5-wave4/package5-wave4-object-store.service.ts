@@ -4,6 +4,7 @@ import { join, resolve } from 'node:path';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Package5TeamObjectStore } from './package5-team-object-store';
 
 import type {
   Package5Wave4ObjectStore,
@@ -21,6 +22,11 @@ const EXTENSIONS = new Map([
 @Injectable()
 export class Package5Wave4FileObjectStore implements Package5Wave4ObjectStore {
   constructor(private readonly config: ConfigService) {}
+
+  /** R12 uses this same local storage surface, outside public upload roots. */
+  privateTeam() {
+    return new Package5TeamObjectStore(this.config.get<string>('UPLOAD_ROOT')?.trim() || join(process.cwd(), 'uploads'));
+  }
 
   async put(input: {
     requestIdentityHash: string;

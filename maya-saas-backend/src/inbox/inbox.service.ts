@@ -1,20 +1,18 @@
 import {
   Injectable,
-  Logger,
   Optional,
   BadRequestException,
 } from '@nestjs/common';
-import { Prisma, UserRole } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 import {
   CommunicationDeliveryService,
-  type Package2InboxType,
 } from '../communication-delivery';
 import { CommunicationShadowService } from '../communication-shadow';
 import { PrismaService } from '../prisma/prisma.service';
 import { BridgeSourceService } from '../tenancy/bridge-source.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import { sendInboxApns } from './apns-push';
+import { CanonicalInboxProjectionService } from './canonical-inbox-projection.service';
 import type {
   DeliverPrivacyTelegramDto,
   IngestInboxItemDto,
@@ -22,51 +20,8 @@ import type {
   RegisterPushTokenDto,
 } from './dto/inbox.dto';
 
-/**
- * Арендаторы, которым мост имеет право писать.
- *
- * Тот же набор, что у штатного резолвера: приостановленный и отменённый салон
- * не должен получать ни карточек, ни пушей.
- */
-const OWNER_ROLES: UserRole[] = [
-  UserRole.tenant_owner,
-  UserRole.business_owner,
-  UserRole.tenant_admin,
-  UserRole.administrator,
-  UserRole.platform_owner,
-];
-
-/** Appointment ops that belong to a specific master chair. */
-const STAFF_SCOPED_INBOX_TYPES = new Set<string>([
-  'new_appointment',
-  'appointment_deleted',
-  'appointment_cancelled',
-  'appointment_rescheduled',
-  'appointment_reassigned',
-  'shift_reminder',
-]);
-
-const PACKAGE2_SINGLE_TYPES = new Set<IngestInboxItemDto['type']>([
-  'appointment_reminder',
-  'shift_reminder',
-  'daily_report',
-  'morning_brief',
-  'growth_plan',
-  'hanging_lead',
-  'owner_alert',
-  'birthday_alert',
-  'review_alert',
-]);
-
-function isPackage2SingleType(
-  type: IngestInboxItemDto['type'],
-): type is Extract<Package2InboxType, IngestInboxItemDto['type']> {
-  return PACKAGE2_SINGLE_TYPES.has(type);
-}
-
 @Injectable()
 export class InboxService {
-  private readonly logger = new Logger(InboxService.name);
 
   constructor(
     private readonly prisma: PrismaService,
@@ -76,6 +31,7 @@ export class InboxService {
     private readonly communicationShadow?: CommunicationShadowService,
     @Optional()
     private readonly communicationDelivery?: CommunicationDeliveryService,
+    @Optional() private readonly projections?: CanonicalInboxProjectionService,
   ) {}
 
   assertBridgeToken(header: string | undefined): void {
@@ -88,42 +44,8 @@ export class InboxService {
   }
 
   async ingest(dto: IngestInboxItemDto) {
-    if (dto.type === 'daily_report')
-      throw new BadRequestException('B36_OWNER_REPORT_RUN_REQUIRED');
-    // 🔴 Арендатор приходит из ТЕЛА запроса под общим платформенным токеном, и
-    // статус здесь не проверялся — в отличие от штатного резолвера. Держатель
-    // токена мог писать карточки и слать пуши в приостановленного или
-    // отменённого арендатора. Пер-арендный токен — это модель самого моста к
-    // старому боту, она относится к главе 2/7; здесь закрываем ровно то, что
-    // отличает этот путь от штатного.
-    const tenant = await this.bridgeSource.resolveTenant(
-      {
-        provider: dto.provider,
-        externalCompanyId: dto.external_company_id,
-        tenantSlug: dto.tenant_slug,
-      },
-      'inbox_tenant_not_found',
-    );
-
-    // Публикация идёт в контексте найденного арендатора: раньше вся ветка
-    // работала вне контекста вообще, и любой сервис, который начнёт сверять
-    // принадлежность, молча получил бы отказ на ночном мосту.
-    return this.tenantContext.runAsSystemTenant(tenant.tenantId, () =>
-      this.publishForTenant(tenant.tenantId, {
-        type: dto.type,
-        sourceEventId: dto.source_event_id,
-        title: dto.title,
-        bodyText: dto.body_text,
-        payload: dto.payload,
-        deepLink: dto.deep_link,
-        userIds: dto.user_ids,
-        telegramChatIds: dto.telegram_chat_ids,
-        telegramParseMode: dto.telegram_parse_mode,
-        telegramButtons: dto.telegram_buttons,
-        fanoutOwners: dto.fanout_owners,
-        shadowSourceType: 'legacy_bridge',
-      }),
-    );
+    void dto;
+    throw new BadRequestException('R06_CANONICAL_PRODUCER_ADMISSION_REQUIRED');
   }
 
   async observeLegacyTelegram(dto: ObserveLegacyTelegramDto) {
@@ -242,223 +164,16 @@ export class InboxService {
         'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge';
     },
   ) {
-    if (input.type === 'daily_report')
-      throw new BadRequestException('B36_OWNER_REPORT_RUN_REQUIRED');
-    const dto: IngestInboxItemDto = {
-      tenant_slug: '_internal',
-      type: input.type,
-      source_event_id: input.sourceEventId,
-      title: input.title,
-      body_text: input.bodyText,
-      payload: input.payload,
-      deep_link: input.deepLink ?? undefined,
-      user_ids: input.userIds,
-      telegram_chat_ids: input.telegramChatIds,
-      telegram_parse_mode: input.telegramParseMode,
-      telegram_buttons: input.telegramButtons,
-      fanout_owners: input.fanoutOwners,
-    };
-
-    const userIds = await this.resolveRecipients(tenantId, dto);
-    const telegramChatIds = [
-      ...new Set(
-        (input.telegramChatIds ?? [])
-          .map((value) => value.trim())
-          .filter(Boolean),
-      ),
-    ];
-    if (userIds.length === 0 && telegramChatIds.length === 0) {
-      this.logger.warn(
-        `inbox publish skipped: no recipients for ${input.type}/${input.sourceEventId} tenant=${tenantId}`,
-      );
-      return { stored: 0, user_ids: [] as string[] };
+    this.tenantContext.assertTenantId(tenantId);
+    if (!this.projections) throw new Error('canonical_inbox_projection_unavailable');
+    if (input.telegramChatIds?.length || input.shadowSourceType==='legacy_bridge') throw new BadRequestException('R06_RAW_DELIVERY_AUTHORITY_FORBIDDEN');
+    if (input.type==='maya_task' || input.type==='client_support_request') {
+      if(!input.operationalWorkItemId)throw new BadRequestException('R06_A23_OWNER_REQUIRED');
+      return this.projections.work(tenantId,input.operationalWorkItemId);
     }
-
-    const provenNewAppointment =
-      input.type === 'new_appointment' &&
-      input.shadowSourceType === 'legacy_bridge';
-    const package2MessageType = isPackage2SingleType(input.type)
-      ? input.type
-      : null;
-    const package2OwnsDelivery = package2MessageType !== null;
-    const actionEngineOwnsInbox = provenNewAppointment || package2OwnsDelivery;
-
-    if (actionEngineOwnsInbox && !this.communicationDelivery) {
-      throw new Error('communication_delivery_unavailable');
-    }
-
-    if (input.type !== 'marketing_campaign' && !actionEngineOwnsInbox) {
-      await Promise.all(
-        userIds.map((userId) =>
-          this.planSingleSafely({
-            tenantId,
-            sourceType:
-              input.shadowSourceType ?? this.shadowSourceForType(input.type),
-            producerRef: `inbox.${input.type}`,
-            logicalRef: `${input.type}:${input.sourceEventId}:inbox:${userId}`,
-            taxonomy: this.shadowTaxonomyForType(input.type),
-            channel: 'inbox',
-            templateRef: `inbox.${input.type}`,
-            contentIdentityParts: [
-              input.type,
-              input.title,
-              input.bodyText,
-              input.deepLink ?? '',
-            ],
-            recipientRef: userId,
-            recipientKind: 'internal_user',
-            internalUserId: userId,
-            eligibilityPolicyRef: 'inbox.server-recipient-resolution.v1',
-            legacyApprovalRequirement:
-              input.type === 'maya_task' ? 'OWNER_CONFIRMED' : 'SYSTEM_POLICY',
-          }),
-        ),
-      );
-    }
-
-    const package2Tokens = package2OwnsDelivery
-      ? await this.prisma.devicePushToken.findMany({
-          where: { tenantId, userId: { in: userIds } },
-          select: { userId: true, token: true },
-        })
-      : [];
-    const tokensByUser = new Map<string, string[]>();
-    for (const token of package2Tokens) {
-      const current = tokensByUser.get(token.userId) ?? [];
-      current.push(token.token);
-      tokensByUser.set(token.userId, current);
-    }
-
-    let telegramDelivered = 0;
-    if (package2OwnsDelivery) {
-      const telegramButtons = (input.telegramButtons ?? []).map((button) => {
-        const callbackData = button.callback_data?.trim();
-        const url = button.url?.trim();
-        if (Boolean(callbackData) === Boolean(url)) {
-          throw new Error('invalid_telegram_button_action');
-        }
-        return {
-          text: button.text.trim(),
-          ...(callbackData ? { callbackData } : {}),
-          ...(url ? { url } : {}),
-        };
-      });
-      for (const telegramChatId of telegramChatIds) {
-        await this.communicationDelivery!.deliverPackage2Telegram({
-          tenantId,
-          telegramChatId,
-          messageType: package2MessageType,
-          sourceType:
-            input.shadowSourceType ?? this.shadowSourceForType(input.type),
-          sourceEventId: input.sourceEventId,
-          title: input.title,
-          bodyText: input.bodyText,
-          ...(input.telegramParseMode
-            ? { parseMode: input.telegramParseMode }
-            : {}),
-          ...(telegramButtons.length ? { buttons: telegramButtons } : {}),
-        });
-        telegramDelivered += 1;
-      }
-    }
-
-    let stored = 0;
-    for (const userId of userIds) {
-      if (provenNewAppointment) {
-        await this.communicationDelivery!.deliverNewAppointmentInbox({
-          tenantId,
-          userId,
-          sourceEventId: input.sourceEventId,
-          title: input.title,
-          bodyText: input.bodyText,
-          deepLink: input.deepLink,
-          payload: input.payload,
-        });
-        stored += 1;
-        continue;
-      }
-      if (package2OwnsDelivery) {
-        const deliveryInput = {
-          tenantId,
-          userId,
-          messageType: package2MessageType,
-          sourceType:
-            input.shadowSourceType ?? this.shadowSourceForType(input.type),
-          sourceEventId: input.sourceEventId,
-          title: input.title,
-          bodyText: input.bodyText,
-          deepLink: input.deepLink,
-          payload: input.payload,
-        };
-        await this.communicationDelivery!.deliverPackage2Inbox(deliveryInput);
-        for (const deviceToken of tokensByUser.get(userId) ?? []) {
-          await this.communicationDelivery!.deliverPackage2Apns({
-            ...deliveryInput,
-            deviceToken,
-          });
-        }
-        stored += 1;
-        continue;
-      }
-      const row = await this.prisma.inboxItem.upsert({
-        where: {
-          tenantId_userId_type_sourceEventId: {
-            tenantId,
-            userId,
-            type: input.type,
-            sourceEventId: input.sourceEventId,
-          },
-        },
-        create: {
-          tenantId,
-          userId,
-          type: input.type,
-          sourceEventId: input.sourceEventId,
-          title: input.title.slice(0, 160),
-          bodyText: input.bodyText.slice(0, 12000),
-          payloadJson:
-            input.payload === undefined
-              ? undefined
-              : (input.payload as Prisma.InputJsonValue),
-          deepLink: input.deepLink?.slice(0, 400) || null,
-          operationalWorkItemId: input.operationalWorkItemId ?? null,
-        },
-        update: {
-          title: input.title.slice(0, 160),
-          bodyText: input.bodyText.slice(0, 12000),
-          payloadJson:
-            input.payload === undefined
-              ? undefined
-              : (input.payload as Prisma.InputJsonValue),
-          deepLink: input.deepLink?.slice(0, 400) || null,
-          operationalWorkItemId: input.operationalWorkItemId ?? undefined,
-          deletedAt: null,
-        },
-        select: { id: true },
-      });
-      if (row.id) stored += 1;
-    }
-
-    if (
-      input.type === 'appointment_cancelled' ||
-      input.type === 'appointment_deleted'
-    ) {
-      await this.softDeleteRelatedAppointmentCards(tenantId, input.payload);
-    }
-
-    if (!package2OwnsDelivery) {
-      void this.announcePush(tenantId, userIds, dto).catch((error) => {
-        this.logger.warn(
-          `inbox push announce failed: ${error instanceof Error ? error.message : 'unknown'}`,
-        );
-      });
-    }
-
-    return {
-      stored,
-      user_ids: userIds,
-      telegram_delivered: telegramDelivered,
-    };
+    const appointmentId=input.payload?.appointment_id;
+    if(typeof appointmentId==='string'&&['new_appointment','appointment_cancelled','appointment_deleted','appointment_rescheduled'].includes(input.type))return this.projections.appointmentExecution(tenantId,appointmentId,input.type==='new_appointment'?'create_appointment':input.type==='appointment_rescheduled'?'reschedule_appointment':'cancel_appointment');
+    throw new BadRequestException('R06_EXACT_CANONICAL_OWNER_REQUIRED');
   }
 
   /**
@@ -471,6 +186,9 @@ export class InboxService {
     userId: string,
     operationalWorkItemId: string,
   ): Promise<void> {
+    this.tenantContext.assertTenantId(tenantId);
+    const owner=await this.prisma.operationalWorkItem.findFirst({where:{id:operationalWorkItemId,tenantId,assigneeUserId:userId,status:'COMPLETED'},include:{completeExecution:true}});
+    if(!owner?.completeExecution || owner.completeExecution.state!=='SUCCEEDED' || owner.completeExecution.dryRun)throw new BadRequestException('R06_COMPLETED_A23_RECEIPT_REQUIRED');
     const rows = await this.prisma.inboxItem.findMany({
       where: {
         tenantId,
@@ -504,56 +222,6 @@ export class InboxService {
           },
         });
       }),
-    );
-  }
-
-  /**
-   * When a booking is cancelled, hide the earlier «Новая запись» card for the
-   * same YClients/Nest record so the chat does not keep a live booking ghost.
-   */
-  private async softDeleteRelatedAppointmentCards(
-    tenantId: string,
-    payload: Record<string, unknown> | undefined,
-  ): Promise<void> {
-    const recordId = payload?.record_id ?? payload?.appointment_id;
-    const recordKey = this.scalarIdentifier(recordId);
-    if (!recordKey) return;
-    const related = await this.prisma.inboxItem.findMany({
-      where: {
-        tenantId,
-        deletedAt: null,
-        type: {
-          in: [
-            'new_appointment',
-            'appointment_rescheduled',
-            'appointment_reassigned',
-          ],
-        },
-      },
-      select: { id: true, payloadJson: true },
-      take: 200,
-    });
-    const ids = related
-      .filter((row) => {
-        const data =
-          row.payloadJson &&
-          typeof row.payloadJson === 'object' &&
-          !Array.isArray(row.payloadJson)
-            ? (row.payloadJson as Record<string, unknown>)
-            : {};
-        const candidates = [data.record_id, data.appointment_id];
-        return candidates.some(
-          (value) => this.scalarIdentifier(value) === recordKey,
-        );
-      })
-      .map((row) => row.id);
-    if (!ids.length) return;
-    await this.prisma.inboxItem.updateMany({
-      where: { id: { in: ids } },
-      data: { deletedAt: new Date() },
-    });
-    this.logger.log(
-      `inbox soft-deleted ${ids.length} related card(s) for cancelled record=${recordKey}`,
     );
   }
 
@@ -627,285 +295,5 @@ export class InboxService {
       },
     });
     return { ok: true };
-  }
-
-  private eventStaffIds(payload?: Record<string, unknown>): string[] {
-    if (!payload) return [];
-    const ids = new Set<string>();
-    for (const key of [
-      'staff_id',
-      'staff_external_id',
-      'new_staff_id',
-      'old_staff_id',
-    ]) {
-      const value = this.scalarIdentifier(payload[key]);
-      if (value) ids.add(value);
-    }
-    return [...ids].filter(Boolean);
-  }
-
-  private scalarIdentifier(value: unknown): string | null {
-    if (typeof value === 'string') {
-      return value.trim() || null;
-    }
-    if (typeof value === 'number' && Number.isFinite(value)) {
-      return String(value);
-    }
-    if (typeof value === 'bigint') {
-      return value.toString();
-    }
-    return null;
-  }
-
-  private isStaffScopedType(
-    type: string,
-    payload?: Record<string, unknown>,
-  ): boolean {
-    if (STAFF_SCOPED_INBOX_TYPES.has(type)) return true;
-    // Service-change alerts carry staff_id and should not spam owner-masters
-    // on other chairs.
-    return type === 'owner_alert' && this.eventStaffIds(payload).length > 0;
-  }
-
-  private async resolveRecipients(
-    tenantId: string,
-    dto: IngestInboxItemDto,
-  ): Promise<string[]> {
-    const ids = new Set<string>();
-    for (const raw of dto.user_ids || []) {
-      if (typeof raw === 'string' && raw.trim()) ids.add(raw.trim());
-    }
-
-    const telegramIds = (dto.telegram_chat_ids || [])
-      .map((value) => String(value || '').trim())
-      .filter(Boolean);
-    if (telegramIds.length > 0) {
-      const identities = await this.prisma.authIdentity.findMany({
-        where: {
-          tenantId,
-          provider: 'telegram',
-          providerUserId: { in: telegramIds },
-        },
-        select: { userId: true },
-      });
-      for (const identity of identities) ids.add(identity.userId);
-    }
-
-    const staffIds = this.eventStaffIds(dto.payload);
-    const staffScoped = this.isStaffScopedType(dto.type, dto.payload);
-
-    // Always deliver to the linked Nest user for the event's CRM staff chair(s).
-    // This is how owner-master gets «мои записи» without salon-wide spam.
-    if (staffScoped && staffIds.length > 0) {
-      const staffLinks = await this.prisma.crmStaffAccess.findMany({
-        where: {
-          tenantId,
-          externalStaffId: { in: staffIds },
-          userId: { not: null },
-          status: 'active',
-        },
-        select: { userId: true },
-      });
-      for (const link of staffLinks) {
-        if (link.userId) ids.add(link.userId);
-      }
-    }
-
-    // fanout_owners !== false (default): include owners/admins.
-    // Owner who is also a CRM master only gets staff-scoped events for THEIR chair.
-    // Pure owners (no CrmStaffAccess) still see salon-wide ops.
-    const fanout = dto.fanout_owners !== false;
-    if (fanout) {
-      const owners = await this.prisma.membership.findMany({
-        where: {
-          tenantId,
-          status: 'active',
-          role: { in: OWNER_ROLES },
-        },
-        select: { userId: true },
-      });
-
-      if (staffScoped && staffIds.length > 0) {
-        const ownerIds = owners.map((owner) => owner.userId);
-        const ownerStaff = ownerIds.length
-          ? await this.prisma.crmStaffAccess.findMany({
-              where: {
-                tenantId,
-                userId: { in: ownerIds },
-                status: 'active',
-              },
-              select: { userId: true, externalStaffId: true },
-            })
-          : [];
-        const staffByUser = new Map(
-          ownerStaff
-            .filter((row) => row.userId)
-            .map((row) => [row.userId!, String(row.externalStaffId)]),
-        );
-        const staffSet = new Set(staffIds);
-        for (const owner of owners) {
-          const linkedStaffId = staffByUser.get(owner.userId);
-          if (!linkedStaffId || staffSet.has(linkedStaffId)) {
-            ids.add(owner.userId);
-          }
-        }
-      } else {
-        for (const owner of owners) ids.add(owner.userId);
-      }
-    }
-
-    return [...ids];
-  }
-
-  private async announcePush(
-    tenantId: string,
-    userIds: string[],
-    dto: IngestInboxItemDto,
-  ): Promise<void> {
-    const tokens = await this.prisma.devicePushToken.findMany({
-      where: { tenantId, userId: { in: userIds } },
-      select: { userId: true, platform: true, token: true },
-    });
-    if (tokens.length === 0) {
-      this.logger.log(
-        `inbox stored type=${dto.type} but no device tokens yet title=${dto.title.slice(0, 40)}`,
-      );
-      return;
-    }
-    if (dto.type !== 'marketing_campaign') {
-      await Promise.all(
-        tokens.map((token) =>
-          this.planSingleSafely({
-            tenantId,
-            sourceType: this.shadowSourceForType(dto.type),
-            producerRef: `apns.${dto.type}`,
-            logicalRef: `${dto.type}:${dto.source_event_id}:apns:${token.userId}:${token.token}`,
-            taxonomy: this.shadowTaxonomyForType(dto.type),
-            channel: 'apns',
-            templateRef: `apns.${dto.type}`,
-            contentIdentityParts: [
-              dto.type,
-              dto.title,
-              dto.body_text,
-              dto.deep_link ?? '',
-            ],
-            recipientRef: token.token,
-            recipientKind: 'apns_device_token',
-            internalUserId: token.userId,
-            eligibilityPolicyRef: 'apns.active-device-token.v1',
-            legacyApprovalRequirement:
-              dto.type === 'maya_task' ? 'OWNER_CONFIRMED' : 'SYSTEM_POLICY',
-          }),
-        ),
-      );
-    }
-    await sendInboxApns({
-      tokens,
-      title: dto.title,
-      body: dto.body_text,
-      deepLink: dto.deep_link,
-      type: dto.type,
-      logger: this.logger,
-    });
-  }
-
-  private shadowTaxonomyForType(
-    type: IngestInboxItemDto['type'],
-  ): 'transactional_single' | 'operational_single' {
-    return new Set<IngestInboxItemDto['type']>([
-      'new_appointment',
-      'appointment_cancelled',
-      'appointment_deleted',
-      'appointment_rescheduled',
-      'appointment_reassigned',
-      'client_support_request',
-    ]).has(type)
-      ? 'transactional_single'
-      : 'operational_single';
-  }
-
-  private shadowSourceForType(
-    type: IngestInboxItemDto['type'],
-  ): 'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge' {
-    if (
-      new Set<IngestInboxItemDto['type']>([
-        'appointment_reminder',
-        'shift_reminder',
-        'daily_report',
-        'morning_brief',
-        'growth_plan',
-        'hanging_lead',
-      ]).has(type)
-    ) {
-      return 'scheduler';
-    }
-    if (
-      new Set<IngestInboxItemDto['type']>([
-        'new_appointment',
-        'appointment_cancelled',
-        'appointment_deleted',
-        'appointment_rescheduled',
-        'appointment_reassigned',
-      ]).has(type)
-    ) {
-      return 'webhook';
-    }
-    return 'authenticated_request';
-  }
-
-  private async planSingleSafely(input: {
-    tenantId: string;
-    sourceType:
-      'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge';
-    producerRef: string;
-    logicalRef: string;
-    taxonomy: 'transactional_single' | 'operational_single';
-    channel: 'inbox' | 'apns';
-    templateRef: string;
-    contentIdentityParts: readonly string[];
-    recipientRef: string;
-    recipientKind: string;
-    internalUserId: string;
-    eligibilityPolicyRef: string;
-    legacyApprovalRequirement: 'NONE' | 'OWNER_CONFIRMED' | 'SYSTEM_POLICY';
-  }): Promise<void> {
-    if (!this.communicationShadow) return;
-    try {
-      await this.communicationShadow.plan({
-        tenantId: input.tenantId,
-        sourceType: input.sourceType,
-        producerRef: input.producerRef,
-        logicalRef: input.logicalRef,
-        taxonomy: input.taxonomy,
-        channel: input.channel,
-        templateRef: input.templateRef,
-        contentIdentityParts: input.contentIdentityParts,
-        recipients: [
-          {
-            recipientRef: input.recipientRef,
-            recipientKind: input.recipientKind,
-            internalUserId: input.internalUserId,
-            eligibility: {
-              basis: 'server_authorized_recipient',
-              decision: 'ALLOW',
-              policyVersion: 1,
-              evidenceRef: `recipient:${input.internalUserId}`,
-              evidenceIdentityParts: [
-                input.tenantId,
-                input.internalUserId,
-                input.channel,
-              ],
-            },
-          },
-        ],
-        eligibilityPolicyRef: input.eligibilityPolicyRef,
-        legacyApprovalRequirement: input.legacyApprovalRequirement,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1_000),
-      });
-    } catch (error) {
-      this.logger.warn(
-        `communication shadow planning failed without affecting legacy delivery: ${error instanceof Error ? error.message : 'unknown'}`,
-      );
-    }
   }
 }

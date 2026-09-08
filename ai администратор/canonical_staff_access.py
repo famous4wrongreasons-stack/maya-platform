@@ -87,7 +87,7 @@ def synchronous_request_callback(callback):
             if claimed:
                 raise ValueError('canonical_principal_callback_already_used')
             claimed = True
-        scope = ({'principal': p, 'active': True, 'parent': parent,
+        scope = ({'principal': p, 'credential': parent.get('credential'), 'active': True, 'parent': parent,
                   'owner_task': None, 'owner_thread': threading.get_ident()}
                  if p and parent['active'] else None)
         token = _principal.set(scope)
@@ -190,7 +190,7 @@ async def middleware(request, handler):
         if principal.get('role') == 'staff' and (not principal.get('staffId')
                 or not principal.get('externalStaffId')):
             return web.json_response({'error': 'canonical_staff_projection_required', 'business_mutations': 0}, status=403)
-        scope = {'principal': principal, 'active': True, 'owner_task': asyncio.current_task()}
+        scope = {'principal': principal, 'credential': credential, 'active': True, 'owner_task': asyncio.current_task()}
         _principal.set(scope)
         return await handler(request)
     finally:
@@ -200,3 +200,7 @@ async def middleware(request, handler):
 
 
 middleware.__middleware_version__ = 1
+
+
+def current_credential():
+    return _principal.get().get('credential') if current() else None

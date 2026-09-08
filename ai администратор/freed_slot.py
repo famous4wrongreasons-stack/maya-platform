@@ -98,48 +98,9 @@ def _client_name_phone(chat_id, client_id) -> tuple[str, str]:
 
 
 async def alert_admins_new_waitlist(app: Application) -> dict:
-    """Точка A: как только клиент попал в лист ожидания на занятое время —
-    пингуем админа (Антона), чтобы он знал и мог прозвонить/предложить альтернативу.
-    Идемпотентно: помечаем admin_notified_at, дважды по одной записи не шлём."""
-    try:
-        pending = database.get_waitlist_pending_admin_alert(limit=20)
-    except Exception as e:
-        logger.error(f"freed_slot: pending admin alert lookup: {e}")
-        return {"pending": 0, "alerted": 0}
-    if not pending:
-        return {"pending": 0, "alerted": 0}
-
-    done_ids: list[int] = []
-    alerted = 0
-    for w in pending:
-        name, phone = _client_name_phone(w.get("chat_id"), w.get("client_id"))
-        staff_name = _master_name(int(w.get("staff_id") or 0))
-        master_first = staff_name.split()[0] if staff_name else "мастеру"
-        try:
-            when = _format_slot(datetime.fromisoformat(str(w["slot_datetime"])[:16]))
-        except Exception:
-            when = str(w.get("slot_datetime") or "")
-        text = (
-            f"⏳ *Новый в листе ожидания*\n\n"
-            f"👤 {name} — `{phone}`\n"
-            f"🗓 хочет *{when}* · {master_first} (сейчас занято)\n\n"
-            f"Как освободится — Майя оповестит и клиента, и тебя. "
-            f"Можешь прозвонить и предложить альтернативу."
-        )
-        if await _notify_admins(app, text):
-            done_ids.append(int(w["id"]))
-            alerted += 1
-        else:
-            # админов нет/не доставилось — всё равно не долбим по кругу
-            done_ids.append(int(w["id"]))
-    if done_ids:
-        try:
-            database.mark_waitlist_admin_alerted(done_ids)
-        except Exception as e:
-            logger.error(f"freed_slot: mark_waitlist_admin_alerted: {e}")
-    if alerted:
-        logger.info(f"freed_slot: ⏳📣 админам о новых в листе ожидания: {alerted}")
-    return {"pending": len(pending), "alerted": alerted}
+    from canonical_operational_alerts import trigger
+    triggered = await trigger()
+    return {'triggered':triggered,'pending':0,'alerted':0,'authority':'canonical_wanted_interest_only'}
 
 
 async def offer_freed_slot(

@@ -358,6 +358,38 @@ export class AiToolRuntimeService {
     return result.count;
   }
 
+  private async approvalData(principal:AiToolPrincipal,definition:AiToolDefinition,args:ValidatedAiToolArguments,inputHash:string,idempotencyKey:string,now:Date):Promise<Prisma.AiApprovalRequestUncheckedCreateInput> {
+    const preview = this.registry.buildApprovalPreview(definition.name, args);
+    const previewPayload = await this.handler.enrichApprovalPreview(
+      definition.name,
+      principal,
+      args,
+      preview.payload,
+    );
+    return {tenantId:principal.tenantId,requestedByUserId:principal.userId,requestedByTenantId:principal.tenantId,toolName:definition.name,surface:principal.surface,riskTier:definition.riskTier,approvalPolicy:definition.approvalPolicy,status:APPROVAL_STATUS.PENDING,summary:preview.summary,payloadHash:inputHash,payloadPreviewJson:asJson(previewPayload),encryptedArguments:this.encryption.encrypt(JSON.stringify(args)),idempotencyKey,createdAt:now,expiresAt:new Date(now.getTime()+APPROVAL_TTL_MS)};
+  }
+
+  /** Internal R13 atomic admission adapter. Existing registry/policy/approval
+   * owns the card. This method cannot execute, approve or regenerate a bundle. */
+  async admitExpenseIntakeApproval(tx:Prisma.TransactionClient,user:AuthenticatedUser,value:unknown,id:string,idempotencyKey:string,now:Date){
+    const principal=this.principal(user,'telegram'),definition=this.registry.get('expenses.create');
+    const args=this.registry.validateArguments(definition.name,value);
+    if(typeof args.occurred_on!=='string'||!Object.prototype.hasOwnProperty.call(args,'branch_id'))throw new ConflictException('Explicit expense day and branch/null required');
+    await this.policy.assertCanExecute(principal,definition);
+    if(typeof args.branch_id==='string'&&!await tx.branch.findFirst({where:{id:args.branch_id,tenantId:principal.tenantId}}))throw new ForbiddenException('Exact canonical expense branch required');
+    const inputHash=this.inputHash(definition.name,args,principal);
+    const approval=await tx.aiApprovalRequest.create({data:{...await this.approvalData(principal,definition,args,inputHash,idempotencyKey,now),id}});
+    await this.auditLog.log({tenantId:principal.tenantId,userId:principal.userId,action:'ai.approval_requested',entityType:'ai_approval',entityId:id,metadata:{tool_name:definition.name,risk_tier:definition.riskTier,approval_policy:definition.approvalPolicy,surface:principal.surface}},tx);
+    return this.serializeApproval(approval);
+  }
+
+  async readExpenseIntakeApprovals(tx:Prisma.TransactionClient,user:AuthenticatedUser,ids:string[]){
+    const principal=this.principal(user,'telegram');await this.policy.assertCanExecute(principal,this.registry.get('expenses.create'));
+    const rows=await tx.aiApprovalRequest.findMany({where:{tenantId:principal.tenantId,requestedByUserId:principal.userId,id:{in:ids},toolName:'expenses.create',surface:'telegram'}});
+    if(rows.length!==ids.length)throw new ForbiddenException('Exact expense approval bundle required');
+    return Promise.all(ids.map(async id=>{const approval=rows.find(row=>row.id===id)!,invocation=await tx.aiToolExecution.findFirst({where:{tenantId:principal.tenantId,approvalRequestId:id,actorUserId:principal.userId,toolName:'expenses.create'}});if(!invocation)return{...this.serializeApproval(approval),canonical_actions:[]};const observed=await this.receipts.inspect({id:invocation.id,principal,toolName:'expenses.create',inputHash:approval.payloadHash,idempotencyKey:invocation.idempotencyKey});return{...this.serializeApproval(approval),canonical_actions:observed.executions.map(e=>({execution_id:e.id,state:e.state,action_class:e.actionClass,outcome:e.finalOutcomeCode}))};}));
+  }
+
   private async requestApproval(
     principal: AiToolPrincipal,
     definition: AiToolDefinition,
@@ -390,33 +422,11 @@ export class AiToolRuntimeService {
       };
     }
 
-    const preview = this.registry.buildApprovalPreview(definition.name, args);
-    const previewPayload = await this.handler.enrichApprovalPreview(
-      definition.name,
-      principal,
-      args,
-      preview.payload,
-    );
     const now = new Date();
     let approval: ApprovalRecord;
     try {
       approval = await this.prisma.aiApprovalRequest.create({
-        data: {
-          tenantId: principal.tenantId,
-          requestedByUserId: principal.userId,
-          requestedByTenantId: principal.tenantId,
-          toolName: definition.name,
-          surface: principal.surface,
-          riskTier: definition.riskTier,
-          approvalPolicy: definition.approvalPolicy,
-          status: APPROVAL_STATUS.PENDING,
-          summary: preview.summary,
-          payloadHash: inputHash,
-          payloadPreviewJson: asJson(previewPayload),
-          encryptedArguments: this.encryption.encrypt(JSON.stringify(args)),
-          idempotencyKey,
-          expiresAt: new Date(now.getTime() + APPROVAL_TTL_MS),
-        },
+        data: await this.approvalData(principal,definition,args,inputHash,idempotencyKey,now),
       });
     } catch (error) {
       if (!this.isUniqueConstraintError(error)) {

@@ -34,6 +34,10 @@ const ALLOWED_REQUEST_KEYS = new Set([
   'callerIdempotency',
   'bookingIntent',
   'ownerReportSlot',
+  'operationalAlertSlot',
+  'nativeFeedbackSlot',
+  'teamMessageSlot',
+  'expenseReminderSlot',
 ]);
 const ALLOWED_SOURCE_KEYS = new Set([
   'type',

@@ -57,8 +57,11 @@ def _source_event_id(kind: str, seed: str) -> str:
     return f"{kind}:{digest}"
 
 
-async def trigger_owner_daily_report() -> bool:
+async def trigger_owner_report(kind: str) -> bool:
     """Trigger only: no content, date, recipients, provider delivery or fallback."""
+    paths = {"daily_report": "daily-report", "morning_owner": "morning-owner", "morning_staff": "morning-staff"}
+    if kind not in paths:
+        raise ValueError("canonical_report_kind_required")
     token = (os.environ.get("MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN") or "").strip()
     company = _external_company_id()
     if len(token) < 24 or not company:
@@ -66,7 +69,7 @@ async def trigger_owner_daily_report() -> bool:
     try:
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
             async with session.post(
-                "http://127.0.0.1:3107/api/internal/legacy/owner-reports/daily-report",
+                "http://127.0.0.1:3107/api/internal/legacy/owner-reports/" + paths[kind],
                 json={"provider": _PROVIDER, "externalCompanyId": company},
                 headers={"x-maya-legacy-bridge": token},
             ) as response:
@@ -75,6 +78,10 @@ async def trigger_owner_daily_report() -> bool:
         # Lost response cannot select a new report/revision/route or direct send.
         logger.warning("canonical daily report trigger unresolved")
         return False
+
+
+async def trigger_owner_daily_report() -> bool:
+    return await trigger_owner_report("daily_report")
 
 
 async def publish_inbox_item(
@@ -90,57 +97,8 @@ async def publish_inbox_item(
     telegram_parse_mode: str | None = None,
     telegram_buttons: list[dict[str, str]] | None = None,
 ) -> bool:
-    """Submit one logical message to its only production execution owner."""
-    if type == "daily_report":
-        logger.warning("daily_report requires canonical owner trigger")
-        return False
-    if not _BRIDGE_TOKEN or len(_BRIDGE_TOKEN) < 24:
-        return False
-    clean = (body_text or "").strip()
-    if not clean:
-        return False
-    body = {
-        "tenant_slug": _TENANT_SLUG,
-        "provider": _PROVIDER,
-        "external_company_id": _external_company_id(),
-        "type": type,
-        "source_event_id": _source_event_id(type, source_seed or clean[:200]),
-        "title": (title or "MAYA")[:160],
-        "body_text": clean[:12000],
-        "fanout_owners": bool(fanout_owners),
-    }
-    if deep_link:
-        body["deep_link"] = str(deep_link)[:400]
-    if payload:
-        body["payload"] = payload
-    if telegram_chat_ids:
-        body["telegram_chat_ids"] = [str(int(x)) for x in telegram_chat_ids if x]
-    if telegram_parse_mode:
-        body["telegram_parse_mode"] = str(telegram_parse_mode)
-    if telegram_buttons:
-        body["telegram_buttons"] = telegram_buttons
-
-    try:
-        timeout = aiohttp.ClientTimeout(total=4)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.post(
-                _INGEST_URL,
-                json=body,
-                headers={
-                    "Content-Type": "application/json",
-                    "X-Maya-Inbox-Bridge": _BRIDGE_TOKEN,
-                },
-            ) as resp:
-                if resp.status >= 400:
-                    text = await resp.text()
-                    logger.warning(
-                        "inbox ingest HTTP %s: %s", resp.status, text[:300]
-                    )
-                    return False
-                return True
-    except Exception as exc:
-        logger.warning("inbox ingest failed: %s", exc)
-        return False
+    # A generic payload cannot prove its business owner or delivery authority.
+    return False
 
 
 async def observe_legacy_telegram_send(
@@ -248,21 +206,4 @@ async def publish_owner_message(
     owner_ids: list[int] | None = None,
     telegram_buttons: list[dict[str, str]] | None = None,
 ) -> bool:
-    kind = "owner_alert"
-    if "утренний план" in (title or "").lower() or "growth" in (tag or ""):
-        kind = "growth_plan"
-    elif "отчёт" in (title or "").lower() or tag == "daily_report":
-        kind = "daily_report"
-    elif "бриф" in (title or "").lower() or tag.startswith("director"):
-        kind = "morning_brief"
-    return await publish_inbox_item(
-        type=kind,
-        title=title,
-        body_text=text,
-        source_seed=f"{tag}|{text[:240]}",
-        telegram_chat_ids=owner_ids,
-        deep_link=url,
-        payload={"tag": tag},
-        fanout_owners=True,
-        telegram_buttons=telegram_buttons,
-    )
+    return False

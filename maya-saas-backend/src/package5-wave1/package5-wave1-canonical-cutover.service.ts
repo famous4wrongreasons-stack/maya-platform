@@ -1,8 +1,11 @@
+import { GovernedSettingsReadService } from './governed-settings.read';
+import { GOVERNED_OWNER_ROLES, governedCallerId, governedCommand, governedHash, type GovernedOperation } from './governed-settings.contract';
 import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
+  Optional,
   NotFoundException,
 } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
@@ -41,7 +44,39 @@ export class Package5Wave1CanonicalCutoverService {
     private readonly planner: Package5Wave1ShadowService,
     private readonly executor: Package5Wave1ExecutableService,
     private readonly kernel: ActionEngineKernel,
+    @Optional() private readonly governed?: GovernedSettingsReadService,
   ) {}
+
+  async updateGoverned(tenantId:string,actorUserId:string,operation:GovernedOperation,value:unknown,idempotencyKey:unknown) {
+    this.tenantContext.assertTenantId(tenantId);
+    const callerId=governedCallerId(idempotencyKey);
+    const command=governedCommand(operation,value);
+    if(!this.governed)throw new BadRequestException('Governed A22 support unavailable');
+    // Current authority precedes both new admission and receipt disclosure.
+    await this.governed.readPersonal(tenantId,actorUserId);
+    if(operation==='tenant_business_configuration') {
+      const actor=await this.prisma.membership.findUnique({where:{userId_tenantId:{tenantId,userId:actorUserId}}});
+      if(!actor || !GOVERNED_OWNER_ROLES.has(actor.role))throw new ForbiddenException('Current tenant owner required');
+    }
+    const sourceIntentRef=governedHash('maya.governed-caller/1',{tenantId,actorUserId,operation,callerId});
+    const execute=()=>this.executeOrResume(tenantId,actorUserId,sourceIntentRef,operation,command,
+      ()=>this.planner.buildGoverned(tenantId,actorUserId,operation,sourceIntentRef,callerId,command));
+    try { return await execute(); }
+    catch(error) {
+      // Concurrent first requests may resolve different clock instants. The
+      // existing unique AE wins; compare its semantic command before replay.
+      const registration=PACKAGE5_WAVE1_REGISTRATIONS.find(row=>row.operation===operation)!;
+      const winner=await this.prisma.actionExecution.findFirst({where:{tenantId,capability:registration.executableCapability,sourceRef:`p5w1:${package5Wave1Hash({sourceIntentRef})}`,actorUserId},select:{id:true,state:true,safeResultSummaryJson:true}});
+      if(!winner)throw error;
+      if(winner.state==='SUCCEEDED') {
+        if(this.record(winner.safeResultSummaryJson).governedCommandHash!==governedHash('maya.governed-command/1',command))throw new ConflictException('IDEMPOTENCY_CONFLICT');
+        return this.executor.resume(tenantId,winner.id);
+      }
+      const input=await this.kernel.readTrustedNormalizedInput(tenantId,winner.id);
+      if(governedHash('maya.governed-command/1',input.semanticCommand)!==governedHash('maya.governed-command/1',command))throw new ConflictException('IDEMPOTENCY_CONFLICT');
+      return this.executor.resume(tenantId,winner.id);
+    }
+  }
 
   async updateAssistant(
     tenantId: string,
@@ -320,13 +355,18 @@ export class Package5Wave1CanonicalCutoverService {
         capability: registration.executableCapability,
       },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, actorUserId: true },
+      select: { id: true, actorUserId: true, state:true, safeResultSummaryJson:true },
     });
     if (existing) {
       if (existing.actorUserId !== actorUserId) {
         throw new ForbiddenException(
           'The idempotency identity belongs to another actor',
         );
+      }
+      if(existing.state==='SUCCEEDED' && (operation==='tenant_business_configuration' || operation==='staff_notification_preferences')) {
+        const receipt=this.record(existing.safeResultSummaryJson);
+        if(receipt.governedCommandHash!==governedHash('maya.governed-command/1',intendedInput))throw new ConflictException('IDEMPOTENCY_CONFLICT');
+        return this.executor.resume(tenantId,existing.id);
       }
       const normalized = await this.kernel.readTrustedNormalizedInput(
         tenantId,
@@ -337,7 +377,7 @@ export class Package5Wave1CanonicalCutoverService {
         package5Wave1Hash(intendedInput)
       ) {
         throw new ConflictException(
-          'Idempotency identity was already used for another Wave 1 intent',
+          'IDEMPOTENCY_CONFLICT',
         );
       }
       return this.executor.resume(tenantId, existing.id);
@@ -380,6 +420,7 @@ export class Package5Wave1CanonicalCutoverService {
     operation: (typeof PACKAGE5_WAVE1_REGISTRATIONS)[number]['operation'],
     input: Record<string, unknown>,
   ): Record<string, unknown> {
+    if(operation==='tenant_business_configuration' || operation==='staff_notification_preferences') return this.record(input.semanticCommand);
     if (operation === 'assistant_preferences') {
       const config = this.record(input.configJson);
       return {

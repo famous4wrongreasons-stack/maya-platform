@@ -110,7 +110,7 @@ describe('Package 5 Wave 1 production-bypass ratchet', () => {
 
   it('allows only explicit inbox projection after the canonical outcome', () => {
     expect(cutover).toContain('Package5Wave1ExecutableService');
-    expect(count(cutover, /executor\.(execute|resume)\(/g)).toBe(2);
+    expect(count(cutover, /executor\.(execute|resume)\(/g)).toBe(5);
     expect(count(cutover, /publishForTenant\(/g)).toBe(2);
     expect(count(cutover, /projectOperationalWorkItemCompletion\(/g)).toBe(1);
     expect(cutover).not.toMatch(
@@ -140,7 +140,7 @@ describe('Package 5 Wave 1 production-bypass ratchet', () => {
   });
 
   it('registers every Shadow/executable pair through the narrow Wave 1 registry', () => {
-    expect(PACKAGE5_WAVE1_REGISTRATIONS).toHaveLength(6);
+    expect(PACKAGE5_WAVE1_REGISTRATIONS).toHaveLength(8);
     expect(registry).toContain('package5Wave1Capability');
     for (const registration of PACKAGE5_WAVE1_REGISTRATIONS) {
       expect(registration.shadowCapability.endsWith('.shadow.v1')).toBe(true);

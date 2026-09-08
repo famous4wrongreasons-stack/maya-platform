@@ -2,7 +2,7 @@ import { normalizeReminderPlan } from './appointment-reminder.contract';
 import { ActionContractError } from '../action-engine/action-engine.errors';
 
 /** Existing single-Client communication authority; device fan-out is transport. */
-export function normalizeClientWebPushDelivery(value: Record<string, unknown>) {
+export function normalizeClientWebPushDelivery(value: Record<string, unknown>, nativeFeedback = false) {
   const allowed = [
     'channel',
     'messageType',
@@ -20,7 +20,7 @@ export function normalizeClientWebPushDelivery(value: Record<string, unknown>) {
   if (
     Object.keys(value).sort().join(',') !== allowed.sort().join(',') ||
     value.channel !== 'web_push' ||
-    !['appointment_reminder', 'wanted_slot_available'].includes(
+    !(nativeFeedback ? ['native_feedback_invitation'] : ['appointment_reminder', 'wanted_slot_available']).includes(
       String(value.messageType),
     )
   )
@@ -41,7 +41,7 @@ export function normalizeClientWebPushDelivery(value: Record<string, unknown>) {
   if (
     !Array.isArray(value.endpointIds) ||
     value.endpointIds.length < 1 ||
-    value.endpointIds.length > 5 ||
+    value.endpointIds.length > (nativeFeedback ? 1 : 5) ||
     new Set(value.endpointIds).size !== value.endpointIds.length ||
     value.endpointIds.some(
       (id: unknown) =>

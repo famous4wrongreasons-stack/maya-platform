@@ -29,7 +29,7 @@ def channel_proof(headers, body: dict) -> str:
 
 def command(operation: str, proof: str, payload: dict) -> dict:
     if operation not in {
-        "consent", "status", "issue", "consume", "delivery-consent", "push-subscribe", "push-unsubscribe",
+        "feedback-projection", "feedback-response", "feedback-withdraw", "consent", "status", "issue", "consume", "delivery-consent", "push-subscribe", "push-unsubscribe",
         "booking-prefill", "booking-confirmation", "chat-appointment-create", "appointment-create", "appointment-cancel", "appointment-reschedule",
         "appointment-services", "cabinet-projection", "realtime-authority", "loyalty-projection",
     }:
@@ -52,10 +52,10 @@ def command(operation: str, proof: str, payload: dict) -> dict:
     except (requests.Timeout, requests.ConnectionError):
         # A lost response after create dispatch cannot prove failure. The
         # caller must not retry outside the durable ActionExecution identity.
-        if operation in {"appointment-create", "chat-appointment-create"}:
+        if operation in {"appointment-create", "chat-appointment-create", "feedback-response", "feedback-withdraw"}:
             raise RuntimeError("client_command_outcome_unknown")
         raise
-    if response.status_code >= 500 and operation in {"appointment-create", "chat-appointment-create"}:
+    if response.status_code >= 500 and operation in {"appointment-create", "chat-appointment-create", "feedback-response", "feedback-withdraw"}:
         raise RuntimeError("client_command_outcome_unknown")
     if operation == "push-subscribe" and response.status_code == 409:
         try:
@@ -63,7 +63,7 @@ def command(operation: str, proof: str, payload: dict) -> dict:
                 raise ValueError("CLIENT_WEB_PUSH_LIMIT_EXCEEDED")
         except (AttributeError, requests.exceptions.JSONDecodeError):
             pass
-    if response.status_code == 409 and operation in {"booking-confirmation", "chat-appointment-create"}:
+    if response.status_code == 409 and operation in {"booking-confirmation", "chat-appointment-create", "feedback-response", "feedback-withdraw"}:
         try:
             error = response.json()
             if (isinstance(error, dict) and (error.get("message") == "IDEMPOTENCY_CONFLICT"

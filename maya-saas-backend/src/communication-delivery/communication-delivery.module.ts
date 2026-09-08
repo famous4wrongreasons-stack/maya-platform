@@ -1,3 +1,6 @@
+import { ExpenseReminderFoundationModule } from '../expense-intake/expense-reminder-foundation.module';
+import { NativeFeedbackFoundationModule } from '../native-feedback/native-feedback-foundation.module';
+import { TeamCommunicationsFoundationModule } from '../team-communications/team-communications-foundation.module';
 import { OwnerReportFoundationModule } from '../owner-reports/owner-report-foundation.module';
 import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { CommunicationBulkDeliveryService } from './communication-bulk-delivery.service';
@@ -13,6 +16,9 @@ import { CommunicationWebPushTransport } from './communication-web-push.transpor
 
 @Module({
   imports: [
+    NativeFeedbackFoundationModule,
+    ExpenseReminderFoundationModule,
+    TeamCommunicationsFoundationModule,
     OwnerReportFoundationModule,
     EntitlementsModule,
     PrismaModule,

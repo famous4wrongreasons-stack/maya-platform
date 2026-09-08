@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AiToolPolicyModule } from './ai-tool-policy.module';
 import { ActionEngineModule } from '../action-engine/action-engine.module';
 
 import { BusinessStateModule } from '../business-state/business-state.module';
@@ -25,8 +26,6 @@ import { AiMemoryService } from './ai-memory.service';
 import { AiSpeechService } from './ai-speech.service';
 import { BusinessFactsModule } from '../business-facts/business-facts.module';
 import { AiToolHandlerService } from './ai-tool-handler.service';
-import { AiToolPolicyService } from './ai-tool-policy.service';
-import { AiToolRegistryService } from './ai-tool-registry.service';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { AiToolReceiptService } from './ai-tool-receipt.service';
 import { AiToolsController } from './ai-tools.controller';
@@ -38,6 +37,7 @@ import { ConversationIntelligenceService } from '../conversation-intelligence/co
 
 @Module({
   imports: [
+    AiToolPolicyModule,
     ActionEngineModule,
     BusinessStateModule,
     // 🔴 Cycle 04 P6. Единственный читатель записей за бизнес-период.
@@ -68,12 +68,10 @@ import { ConversationIntelligenceService } from '../conversation-intelligence/co
     AiMemoryService,
     AiSpeechService,
     AiToolHandlerService,
-    AiToolPolicyService,
-    AiToolRegistryService,
     AiToolRuntimeService,
     AiToolReceiptService,
     StaffScheduleCommandService,
   ],
-  exports: [AiCoreService, AiToolRegistryService, AiToolRuntimeService],
+  exports: [AiCoreService, AiToolPolicyModule, AiToolRuntimeService],
 })
 export class AiToolsModule {}

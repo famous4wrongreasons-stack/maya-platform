@@ -1,3 +1,6 @@
+import { ExpenseReminderStore } from '../expense-intake/expense-reminder.store';
+import { NativeFeedbackStore } from '../native-feedback/native-feedback.store';
+import { TeamMessageStore } from '../team-communications/team-message.store';
 import { OwnerReportStore } from '../owner-reports/owner-report.store';
 import { type ReminderDispatch } from './appointment-reminder.contract';
 import { CommunicationWebPushService } from './communication-web-push.service';
@@ -46,12 +49,27 @@ export type Package2InboxType =
   | 'owner_alert'
   | 'birthday_alert'
   | 'review_alert'
-  | 'wanted_slot_available';
+  | 'native_feedback_invitation' | 'native_feedback_response'
+  | 'team_message'
+  | 'weekly_expense_reminder'
+  | 'wanted_slot_available'
+  | 'new_appointment' | 'appointment_deleted' | 'appointment_cancelled' | 'appointment_rescheduled' | 'appointment_reassigned' | 'maya_task' | 'client_support_request';
 
 type Package2SourceType =
   'authenticated_request' | 'scheduler' | 'webhook' | 'legacy_bridge';
 
 const PACKAGE2_CAPABILITY_BY_TYPE: Record<Package2InboxType, string> = {
+  native_feedback_invitation: 'communication.native-feedback.invitation.execute.v1',
+  native_feedback_response: 'communication.native-feedback.response.execute.v1',
+  team_message: 'communication.team-message-notification.execute.v1',
+  weekly_expense_reminder: 'communication.business-alerts.execute.v1',
+  'new_appointment': 'communication.business-alerts.execute.v1',
+  'appointment_deleted': 'communication.business-alerts.execute.v1',
+  'appointment_cancelled': 'communication.business-alerts.execute.v1',
+  'appointment_rescheduled': 'communication.business-alerts.execute.v1',
+  'appointment_reassigned': 'communication.business-alerts.execute.v1',
+  'maya_task': 'communication.business-alerts.execute.v1',
+  'client_support_request': 'communication.business-alerts.execute.v1',
   appointment_reminder: 'communication.appointment-reminders.execute.v1',
   shift_reminder: 'communication.appointment-reminders.execute.v1',
   daily_report: 'communication.reports-briefings.execute.v1',
@@ -205,6 +223,9 @@ export class CommunicationDeliveryService {
     config: ConfigService,
     @Optional() private readonly webPush?: CommunicationWebPushService,
     @Optional() private readonly ownerReports?: OwnerReportStore,
+    @Optional() private readonly nativeFeedback?: NativeFeedbackStore,
+    @Optional() private readonly teamMessages?: TeamMessageStore,
+    @Optional() private readonly expenseReminders?: ExpenseReminderStore,
   ) {
     const compatibilitySecret = config.get<string>('CRM_ENCRYPTION_KEY');
     const identitySecret =
@@ -241,8 +262,7 @@ export class CommunicationDeliveryService {
       ...(input.deepLink ? { deepLink: input.deepLink } : {}),
       ...(input.payload ? { payload: input.payload } : {}),
     };
-    const receipt = await this.actionEngine.executeWithReceipt(
-      {
+    const request: Parameters<ActionEngineRuntimeService['preview']>[0] = {
         contract: ACTION_EXECUTION_REQUEST_CONTRACT,
         tenantId: input.tenantId,
         capability: NEW_APPOINTMENT_CAPABILITY,
@@ -259,167 +279,13 @@ export class CommunicationDeliveryService {
           scope: 'communication:new-appointment:inbox',
           key: `${input.sourceEventId}:${input.userId}`,
         },
-      },
-      {
-        prepare: async (normalized, context) => {
-          const userId = requiredString(normalized, 'userId');
-          const sourceEventId = requiredString(normalized, 'sourceEventId');
-          const envelope = await this.kernel.createEnvelope({
-            contract: COMMUNICATION_ENVELOPE_CONTRACT,
-            tenantId: context.tenantId,
-            actionExecutionId: context.executionId,
-            scope: 'SINGLE',
-            channel: 'inbox',
-            capabilityKey: INBOX_DELIVERY_CAPABILITY,
-            campaignIdempotencyKey: `new-appointment:${sourceEventId}:${userId}`,
-            contentRef: 'template:inbox.new-appointment.v1',
-            contentIdentityHash: sha256(
-              'inbox.new-appointment.v1',
-              requiredString(normalized, 'title'),
-              requiredString(normalized, 'bodyText'),
-              typeof normalized.deepLink === 'string'
-                ? normalized.deepLink
-                : '',
-            ),
-            expiresAt: new Date(Date.now() + 7 * DAY),
-            recipients: [
-              {
-                recipientRef: userId,
-                recipientKind: 'internal_user',
-                internalUserId: userId,
-                eligibility: {
-                  basis: 'server_recipient_resolution',
-                  decision: 'ALLOW',
-                  policyVersion: 1,
-                  evidenceRef: `legacy:${sourceEventId}`,
-                  evidenceHash: sha256(context.tenantId, sourceEventId, userId),
-                  checkedAt: new Date(),
-                },
-              },
-            ],
-          });
-          return { campaignId: envelope.id };
-        },
-        dispatch: async (normalized, _transportKey, context) => {
-          const userId = requiredString(normalized, 'userId');
-          const sourceEventId = requiredString(normalized, 'sourceEventId');
-          const existing = await this.findInboxItem(
-            context.tenantId,
-            userId,
-            'new_appointment',
-            sourceEventId,
-          );
-          const campaign = await this.requireCampaign(
-            context.tenantId,
-            context.executionId,
-          );
-          if (existing) {
-            return {
-              value: {
-                actionExecutionId: context.executionId,
-                deliveryId: existing.id,
-                status: 'delivered' as const,
-              },
-              safeResult: {
-                deliveryId: existing.id,
-                status: 'delivered',
-              },
-            };
-          }
-          const claim = await this.kernel.claimNext({
-            tenantId: context.tenantId,
-            workerId: `inbox:${context.executionId}`,
-            campaignId: campaign.id,
-          });
-          if (!claim) {
-            throw new CommunicationDispatchError(
-              'unknown',
-              'delivery_claim_unavailable',
-              'communication_state_unknown',
-              'Communication recipient could not be claimed',
-            );
-          }
-          const owned = {
-            tenantId: context.tenantId,
-            campaignId: claim.campaign.id,
-            recipientId: claim.recipient.id,
-            attemptId: claim.attempt.id,
-            leaseToken: claim.leaseToken,
-            recipientRevision: claim.recipient.revision,
-          };
-          await this.kernel.markDispatchBoundary(owned);
-          try {
-            const payload =
-              normalized.payload &&
-              typeof normalized.payload === 'object' &&
-              !Array.isArray(normalized.payload)
-                ? (normalized.payload as Record<string, unknown>)
-                : undefined;
-            const row = await this.prisma.inboxItem.upsert({
-              where: {
-                tenantId_userId_type_sourceEventId: {
-                  tenantId: context.tenantId,
-                  userId,
-                  type: 'new_appointment',
-                  sourceEventId,
-                },
-              },
-              create: {
-                tenantId: context.tenantId,
-                userId,
-                type: 'new_appointment',
-                sourceEventId,
-                title: requiredString(normalized, 'title').slice(0, 160),
-                bodyText: requiredString(normalized, 'bodyText').slice(
-                  0,
-                  12000,
-                ),
-                payloadJson: payload as Prisma.InputJsonValue | undefined,
-                deepLink:
-                  typeof normalized.deepLink === 'string'
-                    ? normalized.deepLink.slice(0, 400)
-                    : null,
-              },
-              update: {
-                title: requiredString(normalized, 'title').slice(0, 160),
-                bodyText: requiredString(normalized, 'bodyText').slice(
-                  0,
-                  12000,
-                ),
-                payloadJson: payload as Prisma.InputJsonValue | undefined,
-                deepLink:
-                  typeof normalized.deepLink === 'string'
-                    ? normalized.deepLink.slice(0, 400)
-                    : null,
-                deletedAt: null,
-              },
-              select: { id: true },
-            });
-            await this.kernel.finalizeDelivered({
-              ...owned,
-              recipientRevision: owned.recipientRevision + 1,
-              outcomeCode: 'inbox_item_persisted',
-              providerReference: row.id,
-            });
-            return {
-              value: {
-                actionExecutionId: context.executionId,
-                deliveryId: row.id,
-                status: 'delivered' as const,
-              },
-              safeResult: { deliveryId: row.id, status: 'delivered' },
-            };
-          } catch (error) {
-            await this.markUnknownSafely(owned, 'inbox_persistence_uncertain');
-            if (error instanceof CommunicationDispatchError) throw error;
-            throw new CommunicationDispatchError(
-              'unknown',
-              'inbox_persistence_uncertain',
-              'communication_outcome_unknown',
-              'Inbox delivery outcome is unknown',
-            );
-          }
-        },
+      };
+    const preview=await this.actionEngine.preview(request);
+    const historical=await this.prisma.actionExecution.findFirst({where:{tenantId:input.tenantId,identityFingerprint:preview.identityFingerprint,capability:NEW_APPOINTMENT_CAPABILITY}});
+    if(!historical||!['SUCCEEDED','UNKNOWN'].includes(historical.state))throw new Error('R06_LEGACY_NEW_APPOINTMENT_ADMISSION_RETIRED');
+    const receipt=await this.actionEngine.executeWithReceipt(request, {
+        prepare: async () => {throw new CommunicationDispatchError('definitive','legacy_admission_retired','canonical_owner_required','R06 legacy new delivery disabled');},
+        dispatch: async () => {throw new CommunicationDispatchError('definitive','legacy_admission_retired','canonical_owner_required','R06 legacy new delivery disabled');},
         reconcile: async (normalized, _preDispatch, context) => {
           if (!context) return { outcome: 'STILL_UNKNOWN' as const };
           const row = await this.findInboxItem(
@@ -428,12 +294,10 @@ export class CommunicationDeliveryService {
             'new_appointment',
             requiredString(normalized, 'sourceEventId'),
           );
-          return row
-            ? {
-                outcome: 'PROVEN_SUCCEEDED' as const,
-                safeResult: { deliveryId: row.id, status: 'delivered' },
-              }
-            : { outcome: 'PROVEN_NOT_EXECUTED' as const };
+          const resolved = await this.reconcileInboxReceipt(context.tenantId,context.executionId,row?.id);
+          return resolved && row
+            ? { outcome: 'PROVEN_SUCCEEDED' as const, safeResult: {deliveryId:row.id,status:'delivered'} }
+            : { outcome: 'STILL_UNKNOWN' as const };
         },
         restore: (safeResult) => ({
           actionExecutionId: '',
@@ -461,7 +325,7 @@ export class CommunicationDeliveryService {
     const n = dispatch.request.input as Record<string, unknown>;
     const common = {
       tenantId,
-      messageType: 'daily_report' as const,
+      messageType: n.messageType === 'morning_brief' ? 'morning_brief' as const : 'daily_report' as const,
       sourceType: 'scheduler' as const,
       sourceEventId: String(n.sourceEventId),
       title: String(n.title),
@@ -487,14 +351,52 @@ export class CommunicationDeliveryService {
       dispatch,
     );
   }
+  async deliverNativeFeedbackSlot(tenantId: string, requestId: string, revisionId: string | null, slotKey: string) {
+    if (!this.nativeFeedback) throw new Error('R08_NATIVE_FEEDBACK_OWNER_REQUIRED');
+    const dispatch = await this.nativeFeedback.dispatch(tenantId, requestId, revisionId, slotKey);
+    const n = dispatch.request.input as Record<string, unknown>;
+    if (n.channel === 'web_push') {
+      if (!this.webPush) throw new Error('Canonical Web Push unavailable');
+      return this.webPush.deliverNativeFeedback(dispatch);
+    }
+    const common = { tenantId, sourceType: 'scheduler' as const, sourceEventId: String(n.sourceEventId), title: String(n.title), bodyText: String(n.bodyText), recipientIdentityRef: String(n.recipientIdentityRef) };
+    if (n.channel === 'telegram') return this.deliverPackage2TelegramAccepted({ ...common, messageType: 'native_feedback_invitation', telegramChatId: String(n.telegramChatId), buttons: telegramButtons(n.buttons) }, dispatch);
+    if (n.channel !== 'inbox') throw new Error('R08_FIXED_ROUTE_REQUIRED');
+    return this.deliverPackage2Single({ ...common, messageType: 'native_feedback_response', userId: String(n.userId), deepLink: String(n.deepLink), payload: n.payload as Record<string, unknown> }, 'inbox', dispatch);
+  }
+  async deliverTeamMessageSlot(tenantId:string,messageId:string,slotKey:string){
+    if(!this.teamMessages)throw new Error('R12_TEAM_MESSAGE_OWNER_REQUIRED');
+    const dispatch=await this.teamMessages.dispatch(tenantId,messageId,slotKey),n=dispatch.request.input as Record<string,unknown>;
+    if(n.channel!=='inbox'||!dispatch.request.teamMessageSlot)throw new Error('R12_FIXED_INBOX_SLOT_REQUIRED');
+    return this.deliverPackage2Single({tenantId,sourceType:'scheduler',sourceEventId:String(n.sourceEventId),messageType:'team_message',userId:String(n.userId),title:String(n.title),bodyText:String(n.bodyText),deepLink:String(n.deepLink),payload:n.payload as Record<string,unknown>,recipientIdentityRef:String(n.recipientIdentityRef)},'inbox',dispatch);
+  }
+  /** R06 finite root already owns occurrence, audience and atomic A11/A13 slots. */
+  async deliverOperationalAlert(dispatch: ReminderDispatch) {
+    const request=dispatch.request,n=request.input as Record<string,unknown>;
+    const binding=request.operationalAlertSlot;
+    if(!binding || n.channel!=='inbox' || !['shift_reminder','owner_alert'].includes(String(n.messageType)))throw new Error('R06_OPERATIONAL_ALERT_RUN_REQUIRED');
+    const existing=await this.prisma.actionExecution.findFirst({where:{tenantId:request.tenantId,operationalAlertRunId:binding.runId,operationalAlertSlotKey:binding.slotKey,capability:request.capability}});
+    if(!existing)throw new Error('R06_DELIVERY_BEFORE_ADMISSION');
+    return this.deliverPackage2Single({tenantId:request.tenantId,userId:String(n.userId),messageType:n.messageType as 'shift_reminder'|'owner_alert',sourceType:'scheduler',sourceEventId:String(n.sourceEventId),title:String(n.title),bodyText:String(n.bodyText),deepLink:String(n.deepLink),payload:n.payload as Record<string,unknown>,recipientIdentityRef:String(n.recipientIdentityRef)},'inbox',dispatch);
+  }
+  async deliverCanonicalProjection(dispatch: ReminderDispatch) {
+    const request=dispatch.request,n=request.input as Record<string,unknown>,plan=n.producerPlan as Record<string,unknown>|undefined;
+    if(plan?.contract!=='maya.canonical-inbox-projection/1'||!['communication.business-alerts.execute.v1',NEW_APPOINTMENT_CAPABILITY].includes(request.capability)||!['inbox','apns'].includes(String(n.channel)))throw new Error('R06_CANONICAL_PRODUCER_REQUIRED');
+    const primarySource=request.source.sourceRef?.replace(/:apns:[a-f0-9]{64}$/,':inbox');
+    const primary=await this.prisma.actionExecution.findFirst({where:{tenantId:request.tenantId,capability:n.messageType==='new_appointment'?NEW_APPOINTMENT_CAPABILITY:'communication.business-alerts.execute.v1',sourceRef:primarySource}});
+    if(!primary||(n.channel==='apns'&&primary.state!=='SUCCEEDED'))throw new Error('R06_CANONICAL_PRIMARY_ADMISSION_REQUIRED');
+    return this.deliverPackage2Single({tenantId:request.tenantId,userId:String(n.userId),messageType:n.messageType as Package2InboxType,sourceType:'scheduler',sourceEventId:String(n.sourceEventId),title:String(n.title),bodyText:String(n.bodyText),deepLink:String(n.deepLink),payload:n.payload as Record<string,unknown>,...(n.channel==='apns'?{deviceToken:String(n.deviceToken)}:{})},n.channel as 'inbox'|'apns',dispatch);
+  }
   private async authorizeSingle(
     dispatch?: ReminderDispatch,
     owned?: OwnedCommunicationAttemptV1,
+    authorizeOwner?:()=>Promise<void>,
   ) {
     try {
+      await authorizeOwner?.();
       await dispatch?.authorize();
     } catch (error) {
-      if (!dispatch?.request.ownerReportSlot) throw error;
+      if (!dispatch?.request.ownerReportSlot && !dispatch?.request.operationalAlertSlot && !dispatch?.request.nativeFeedbackSlot && !dispatch?.request.teamMessageSlot && !dispatch?.request.expenseReminderSlot && !(dispatch?.request.input as Record<string,unknown>|undefined)?.producerPlan && !authorizeOwner) throw error;
       if (owned)
         await this.kernel.finalizePreDispatchFailure({
           ...owned,
@@ -508,6 +410,12 @@ export class CommunicationDeliveryService {
         'Report authority/policy could not be verified before delivery',
       );
     }
+  }
+
+  async deliverExpenseReminderSlot(tenantId:string,runId:string,slotKey:string) {
+    if(!this.expenseReminders)throw new Error('R13_CANONICAL_REMINDER_OWNER_REQUIRED');
+    const dispatch=await this.expenseReminders.dispatch(tenantId,runId,slotKey),n=dispatch.request.input as Record<string,unknown>;
+    return this.deliverPackage2TelegramAccepted({tenantId,sourceType:'scheduler',sourceEventId:String(n.sourceEventId),messageType:'weekly_expense_reminder',telegramChatId:String(n.telegramChatId),title:String(n.title),bodyText:String(n.bodyText),buttons:telegramButtons(n.buttons),recipientIdentityRef:String(n.recipientIdentityRef)},dispatch);
   }
 
   async deliverAppointmentReminder(dispatch: ReminderDispatch) {
@@ -607,32 +515,22 @@ export class CommunicationDeliveryService {
     );
   }
 
-  deliverPackage2Inbox(input: Package2SingleInput): Promise<DeliveryResult> {
-    if (input.messageType === 'daily_report')
-      throw new Error('B36_OWNER_REPORT_RUN_REQUIRED');
-    return this.deliverPackage2Single(input, 'inbox');
+  deliverPackage2Inbox(input: Package2SingleInput, authorizeOwner?:()=>Promise<void>): Promise<DeliveryResult> {
+    if(input.messageType!=='wanted_slot_available'||!authorizeOwner||!input.sourceEventId.startsWith('wanted-slot-delivery:'))throw new Error('R06_CANONICAL_PRODUCER_REQUIRED');
+    return this.deliverPackage2Single(input,'inbox',undefined,authorizeOwner);
   }
-
-  deliverPackage2Apns(
-    input: Package2SingleInput & { deviceToken: string },
-  ): Promise<DeliveryResult> {
-    if (input.messageType === 'daily_report')
-      throw new Error('B36_OWNER_REPORT_RUN_REQUIRED');
-    return this.deliverPackage2Single(input, 'apns');
+  deliverPackage2Apns(_input: Package2SingleInput & {deviceToken:string}): Promise<DeliveryResult> {
+    void _input;return Promise.reject(new Error('R06_CANONICAL_PRODUCER_REQUIRED'));
   }
-
-  async deliverPackage2Telegram(
-    input: Package2TelegramInput,
-    reminder?: ReminderDispatch,
-  ): Promise<DeliveryResult> {
-    if (input.messageType === 'daily_report')
-      throw new Error('B36_OWNER_REPORT_RUN_REQUIRED');
-    return this.deliverPackage2TelegramAccepted(input, reminder);
+  async deliverPackage2Telegram(input:Package2TelegramInput,reminder?:ReminderDispatch,authorizeOwner?:()=>Promise<void>):Promise<DeliveryResult>{
+    if(!reminder&&(input.messageType!=='wanted_slot_available'||!authorizeOwner||!input.sourceEventId.startsWith('wanted-slot-delivery:')))throw new Error('R06_CANONICAL_PRODUCER_REQUIRED');
+    return this.deliverPackage2TelegramAccepted(input,reminder,authorizeOwner);
   }
 
   private async deliverPackage2TelegramAccepted(
     input: Package2TelegramInput,
     reminder?: ReminderDispatch,
+    authorizeOwner?:()=>Promise<void>,
   ): Promise<DeliveryResult> {
     const recipientRef = this.recipientIdentity(
       input.recipientIdentityRef,
@@ -672,7 +570,7 @@ export class CommunicationDeliveryService {
       },
       {
         prepare: async (normalized, context) => {
-          await this.authorizeSingle(reminder);
+          await this.authorizeSingle(reminder,undefined,authorizeOwner);
           if (!this.bridgeToken || this.bridgeToken.length < 24) {
             throw new CommunicationDispatchError(
               'definitive',
@@ -710,7 +608,15 @@ export class CommunicationDeliveryService {
             scope: 'SINGLE',
             channel: 'telegram',
             capabilityKey: PACKAGE2_TELEGRAM_DELIVERY_CAPABILITY,
-            campaignIdempotencyKey: `package2:${input.messageType}:telegram:${sourceEventId}:${durableRecipientRef}`,
+            campaignIdempotencyKey: reminder?.request.expenseReminderSlot
+              ? `expense-reminder:${sha256(context.tenantId, reminder.request.expenseReminderSlot.runId, reminder.request.expenseReminderSlot.slotKey)}`
+              : reminder?.request.teamMessageSlot
+              ? `team-message:${sha256(context.tenantId, reminder.request.teamMessageSlot.messageId, reminder.request.teamMessageSlot.slotKey)}`
+              : reminder?.request.nativeFeedbackSlot
+              ? `native-feedback:${sha256(context.tenantId, reminder.request.nativeFeedbackSlot.requestId, reminder.request.nativeFeedbackSlot.slotKey)}`
+              : reminder?.request.ownerReportSlot
+              ? `owner-report:${sha256(context.tenantId, reminder.request.ownerReportSlot.runId, reminder.request.ownerReportSlot.slotKey)}`
+              : `package2:${input.messageType}:telegram:${sourceEventId}:${durableRecipientRef}`,
             contentRef: `template:telegram.${input.messageType}.v1`,
             contentIdentityHash: sha256(
               `telegram.${input.messageType}.v1`,
@@ -796,7 +702,7 @@ export class CommunicationDeliveryService {
             leaseToken: claim.leaseToken,
             recipientRevision: claim.recipient.revision,
           };
-          await this.authorizeSingle(reminder, owned);
+          await this.authorizeSingle(reminder, owned,authorizeOwner);
           await this.kernel.markDispatchBoundary(owned);
           let response: Response;
           try {
@@ -939,6 +845,7 @@ export class CommunicationDeliveryService {
     input: Package2SingleInput,
     channel: 'inbox' | 'apns',
     reminder?: ReminderDispatch,
+    authorizeOwner?:()=>Promise<void>,
   ): Promise<DeliveryResult> {
     const deviceToken = channel === 'apns' ? input.deviceToken?.trim() : '';
     const deviceIdentity = deviceToken
@@ -989,7 +896,7 @@ export class CommunicationDeliveryService {
       },
       {
         prepare: async (normalized, context) => {
-          await this.authorizeSingle(reminder);
+          await this.authorizeSingle(reminder,undefined,authorizeOwner);
           const normalizedChannel = requiredString(normalized, 'channel');
           const messageType = requiredString(normalized, 'messageType');
           const userId = requiredString(normalized, 'userId');
@@ -1023,7 +930,15 @@ export class CommunicationDeliveryService {
               channel === 'inbox'
                 ? PACKAGE2_INBOX_DELIVERY_CAPABILITY
                 : PACKAGE2_APNS_DELIVERY_CAPABILITY,
-            campaignIdempotencyKey: `package2:${messageType}:${channel}:${sourceEventId}:${durableRecipientRef}${deviceIdentity ? `:${deviceIdentity}` : ''}`,
+            campaignIdempotencyKey: reminder?.request.expenseReminderSlot
+              ? `expense-reminder:${sha256(context.tenantId, reminder.request.expenseReminderSlot.runId, reminder.request.expenseReminderSlot.slotKey)}`
+              : reminder?.request.teamMessageSlot
+              ? `team-message:${sha256(context.tenantId, reminder.request.teamMessageSlot.messageId, reminder.request.teamMessageSlot.slotKey)}`
+              : reminder?.request.nativeFeedbackSlot
+              ? `native-feedback:${sha256(context.tenantId, reminder.request.nativeFeedbackSlot.requestId, reminder.request.nativeFeedbackSlot.slotKey)}`
+              : reminder?.request.ownerReportSlot
+              ? `owner-report:${sha256(context.tenantId, reminder.request.ownerReportSlot.runId, reminder.request.ownerReportSlot.slotKey)}`
+              : (reminder?.request.input as Record<string,unknown>|undefined)?.producerPlan ? `projection:${sha256(context.tenantId,context.executionId)}` : reminder?.request.operationalAlertSlot ? `operational-alert:${sha256(context.tenantId, reminder.request.operationalAlertSlot.runId, reminder.request.operationalAlertSlot.slotKey)}` : `package2:${messageType}:${channel}:${sourceEventId}:${durableRecipientRef}${deviceIdentity ? `:${deviceIdentity}` : ''}`,
             contentRef: `template:inbox.${messageType}.v1`,
             contentIdentityHash: sha256(
               `inbox.${messageType}.v1`,
@@ -1114,7 +1029,7 @@ export class CommunicationDeliveryService {
             leaseToken: claim.leaseToken,
             recipientRevision: claim.recipient.revision,
           };
-          await this.authorizeSingle(reminder, owned);
+          await this.authorizeSingle(reminder, owned,authorizeOwner);
           await this.kernel.markDispatchBoundary(owned);
           if (channel === 'inbox') {
             try {
@@ -1138,6 +1053,7 @@ export class CommunicationDeliveryService {
                   userId,
                   type: messageType,
                   sourceEventId,
+                  ...(['maya_task','client_support_request'].includes(messageType) && normalized.producerPlan ? {operationalWorkItemId:String(payload?.operational_work_item_id)} : {}),
                   title: requiredString(normalized, 'title').slice(0, 160),
                   bodyText: requiredString(normalized, 'bodyText').slice(
                     0,
@@ -1274,12 +1190,10 @@ export class CommunicationDeliveryService {
             requiredString(normalized, 'messageType'),
             requiredString(normalized, 'sourceEventId'),
           );
-          return row
-            ? {
-                outcome: 'PROVEN_SUCCEEDED' as const,
-                safeResult: { deliveryId: row.id, status: 'delivered' },
-              }
-            : { outcome: 'PROVEN_NOT_EXECUTED' as const };
+          const resolved = await this.reconcileInboxReceipt(context.tenantId,context.executionId,row?.id);
+          return resolved && row
+            ? { outcome: 'PROVEN_SUCCEEDED' as const, safeResult: {deliveryId:row.id,status:'delivered'} }
+            : { outcome: 'STILL_UNKNOWN' as const };
         },
         restore: (safeResult) => ({
           actionExecutionId: '',
@@ -1309,6 +1223,19 @@ export class CommunicationDeliveryService {
       ...receipt.value,
       actionExecutionId: receipt.execution.executionId,
     };
+  }
+
+  /** A local row proves its exact delivery; absence alone cannot prove that an
+   * earlier worker did not commit late. Resolve CD and AE from the same receipt. */
+  private async reconcileInboxReceipt(tenantId:string,executionId:string,deliveryId?:string){
+    const campaign=await this.prisma.marketingCampaign.findFirst({where:{tenantId,actionExecutionId:executionId,channel:'inbox'},include:{recipients:true}});
+    if(!campaign||campaign.recipients.length!==1)return false;
+    const recipient=campaign.recipients[0];
+    if(recipient.deliveryState==='DELIVERED')return !!deliveryId;
+    if(recipient.deliveryState!=='UNKNOWN'||recipient.reconciliationState!=='REQUIRED')return false;
+    const claim=await this.kernel.claimReconciliation({tenantId,campaignId:campaign.id,recipientId:recipient.id,workerId:'canonical-inbox-reconciliation'});
+    await this.kernel.finalizeReconciliation({tenantId,campaignId:campaign.id,recipientId:recipient.id,attemptId:claim.attempt.id,leaseToken:claim.leaseToken,recipientRevision:claim.recipient.revision,outcome:deliveryId?'PROVEN_DELIVERED':'STILL_UNKNOWN',...(deliveryId?{providerReference:deliveryId}:{}),outcomeCode:deliveryId?'canonical_inbox_receipt_found':'canonical_inbox_receipt_unresolved'});
+    return !!deliveryId;
   }
 
   private recipientIdentity(candidate: string | undefined, fallback: string) {

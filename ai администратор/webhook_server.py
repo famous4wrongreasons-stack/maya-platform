@@ -770,648 +770,21 @@ def _booking_failure_reply(result: dict) -> str:
 
 
 async def _process_record_create(app: Application, record_id: int) -> dict:
-    """
-    Главная бизнес-логика обработки события «новая запись».
-    Возвращает dict с результатом для логов.
-    """
-    # 1. Дедупликация — если событие уже обработано, выходим тихо
-    if not database.mark_record_processed(record_id, "record.create"):
-        return {"status": "duplicate", "record_id": record_id}
-
-    # 2. Получаем детали записи через YClients API
-    record = _yc.get_record(record_id)
-    if not record:
-        logger.error(f"Webhook: запись {record_id} не найдена в YClients")
-        return {"status": "record_not_found", "record_id": record_id}
-
-    # 2.1 Пропускаем продажу сертификатов/абонементов
-    if _is_gift_cert_record(record):
-        logger.info(f"Webhook: запись {record_id} — сертификат/абонемент, пропускаем")
-        return {"status": "skipped_gift_cert", "record_id": record_id}
-
-    # 2.2 Сохраняем снимок состояния — нужен для детекции изменений на update,
-    # даже если мастер не привязан (запись может позже к нему переехать).
-    _save_record_state(record, record_id)
-
-    # 2.3 Уважаем выбор клиента «Напоминание перед визитом» из настроек приложения.
-    # ДО проверки мастера — чтобы сработало для ЛЮБОЙ записи (в т.ч. когда мастер
-    # не привязан у нас или запись создана админом/виджетом, а не приложением).
-    try:
-        await _apply_client_reminder_pref(record, record_id)
-    except Exception as e:
-        logger.error(f"Webhook: notify-pref к записи {record_id}: {e}")
-
-    # 3. Кто мастер?
-    staff = record.get("staff") or {}
-    staff_id = staff.get("id") or record.get("staff_id")
-    if not staff_id:
-        logger.error(f"Webhook: у записи {record_id} нет staff_id")
-        return {"status": "no_staff", "record_id": record_id}
-
-    master = database.get_master_by_staff_id(int(staff_id))
-    if not master:
-        logger.info(f"Webhook: мастер {staff_id} не в системе — пропускаем")
-        return {"status": "master_not_bound", "staff_id": staff_id}
-
-    # Telegram-канал есть не у всех: мастер может быть зарегистрирован ТОЛЬКО в
-    # приложении (web-push), без запуска бота. Тогда Telegram пропускаем, но
-    # пуш в приложение всё равно шлём (это и есть «пуши членам команды»).
-    has_tg = bool(master.get("telegram_chat_id"))
-
-    # 4. Mute — про Telegram-уведомления. Замьютивший мастер не получит Telegram,
-    # но запись в приложении (web-push) всё равно увидит.
-    if has_tg and database.is_master_muted(master["telegram_chat_id"]):
-        logger.info(f"Webhook: мастер {staff_id} в mute — Telegram пропускаем (web-push идёт)")
-        has_tg = False
-
-    # 5. В record.client от webhook'а только id/имя/телефон — без visits/birth_date.
-    # Догружаем полный профиль клиента, чтобы корректно показать «N-й визит»
-    # и дать AI его историю предпочтений.
-    advice, ai_provider = None, "fallback"
-    money_full, money_short = "", ""     # денежная мотивация мастеру (цифры)
-    client = record.get("client") or {}
-    client_id = client.get("id")
-    if client_id:
-        try:
-            full_client = await asyncio.to_thread(_yc.get_client, int(client_id))
-            if full_client:
-                # Мерджим — приоритет полному профилю, имя/телефон оставляем
-                # как пришло в webhook (на случай если только что обновили в YClients)
-                merged = {**full_client, **{k: v for k, v in client.items() if v}}
-                record["client"] = merged
-                client = merged
-        except Exception as e:
-            logger.error(f"Webhook: не получили full client {client_id}: {e}")
-
-        try:
-            history = await _fetch_client_history(int(client_id))
-            advice, ai_provider = await masters_ai.generate_upsell_advice(
-                history=history, current_record=record
-            )
-            logger.info(
-                f"Webhook: AI ({ai_provider}) сгенерировал совет "
-                f"({len(advice) if advice else 0} символов) для записи {record_id}"
-            )
-            try:
-                money_full, money_short = masters_ai.money_pitch(int(staff_id), history, record)
-            except Exception as e:
-                logger.error(f"Webhook: money_pitch для записи {record_id}: {e}")
-        except Exception as e:
-            logger.error(f"Webhook: ошибка получения совета AI: {e}")
-
-    _close_local_booking_intent(record, record_id)
-
-    # 6. Лог в БД — будет нужен для статистики «зашёл / не зашёл совет»
-    try:
-        initial_services = [
-            (s.get("title") or "").strip()
-            for s in (record.get("services") or [])
-            if isinstance(s, dict) and s.get("title")
-        ]
-        database.log_ai_advice(
-            record_id=record_id,
-            client_id=int(client_id) if client_id else None,
-            staff_id=int(staff_id),
-            ai_provider=ai_provider,
-            advice_text=advice,
-            initial_services=initial_services,
-        )
-    except Exception as e:
-        logger.error(f"Webhook: не записали в ai_advice_log: {e}")
-
-    # 7. Готовим текст уведомления (с советом, если AI вернул что-то)
-    text = _build_notification_text(record, advice=advice)
-    # Денежная мотивация мастеру: конкретные цифры (обычно/можешь, в мес, в год).
-    if money_full:
-        text = f"{text}\n\n{money_full}"
-
-    # Inline-кнопки оплаты: 💵 Наличные / 💳 Карта.
-    # callback_data: pay_<method>_<record_id> — record_id даёт идемпотентность.
-    keyboard = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("💵 Наличные", callback_data=f"pay_cash_{record_id}"),
-            InlineKeyboardButton("💳 Карта",    callback_data=f"pay_card_{record_id}"),
-        ]
-    ])
-
-    # 8. Telegram мастеру (если запустил бота и не в mute) — в своём try.
-    tg_sent = False
-    if has_tg:
-        try:
-            await app.bot.send_message(
-                chat_id=master["telegram_chat_id"], text=text,
-                parse_mode="Markdown", reply_markup=keyboard,
-            )
-            tg_sent = True
-        except Exception as e:
-            logger.error(f"Webhook: Telegram мастеру {staff_id} не ушёл: {e}")
-
-    # 9. Web-push мастеру В ПРИЛОЖЕНИЕ — НЕЗАВИСИМО от Telegram (мастер мог не
-    #    запускать бота, или Telegram не ушёл). Включает AI-совет по апселлу.
-    try:
-        _push_body = _record_push_body(record)
-        if advice and isinstance(advice, str) and advice.strip():
-            _adv = advice.strip()
-            if len(_adv) > 220:
-                _adv = _adv[:219].rstrip() + "…"
-            _push_body = f"{_push_body}\n💡 {_adv}"
-        if money_short:                       # короткая денежная строка в пуш
-            _push_body = f"{_push_body}\n{money_short}"
-        await _send_master_push(
-            master, title="Новая запись", body=_push_body,
-            url="/app/?panel=schedule", tag=f"record-create-{record_id}",
-            data={"record_id": record_id, "event": "record.create", "advice": (advice or "")},
-        )
-    except Exception as e:
-        logger.error(f"Webhook: web-push мастеру {staff_id} не ушёл: {e}")
-
-    try:
-        import maya_inbox_bridge
-        tg_ids = []
-        if master.get("telegram_chat_id"):
-            tg_ids.append(int(master["telegram_chat_id"]))
-        await maya_inbox_bridge.publish_inbox_item(
-            type="new_appointment",
-            title="Новая запись",
-            body_text=text.replace("*", ""),
-            source_seed=f"record.create|{record_id}",
-            telegram_chat_ids=tg_ids or None,
-            deep_link="/app/?panel=schedule",
-            payload={"record_id": record_id, "staff_id": int(staff_id)},
-            # Owners must see this in Maya OS chat even if master's TG
-            # is not linked as Nest AuthIdentity.
-            fanout_owners=True,
-        )
-    except Exception as inbox_exc:
-        logger.warning(f"Webhook: nest inbox new appointment: {inbox_exc}")
-
-    # 10. Пуш клиенту «вы записаны» — тоже независимо.
-    try:
-        await _notify_client_record(record, record_id, "create")
-    except Exception as e:
-        logger.error(f"Webhook: пуш клиенту записи {record_id} не ушёл: {e}")
-
-    logger.info(f"Webhook: запись {record_id} → мастер {master.get('full_name')} "
-                f"(telegram={tg_sent}, web-push отправлен)")
-    return {
-        "status": "sent" if tg_sent else "push_only",
-        "record_id": record_id, "staff_id": staff_id, "ai_provider": ai_provider,
-    }
+    from canonical_operational_alerts import trigger
+    await trigger()
+    return {'status':'canonical_event_owner_pending','record_id':record_id}
 
 
 async def _process_record_update(app: Application, record_id: int) -> dict:
-    """
-    Обработка webhook'а record.update.
-
-    YClients шлёт update на ЛЮБОЕ касание записи: перенос времени, смену
-    мастера, изменение услуг, а ТАКЖЕ на закрытие оплаты (attendance=1) и
-    финансовые операции. Чтобы не спамить мастера, сравниваем свежее
-    состояние со снимком в record_state и уведомляем ТОЛЬКО при значимом
-    изменении:
-      • сменился мастер  → старому «запись ушла», новому «вам передали»
-      • сменилось время  → текущему мастеру «запись перенесена»
-      • сменились услуги → текущему мастеру «состав услуг изменён»
-      • только attendance/финансы → молча обновляем снимок, не шлём
-    """
-    record = _yc.get_record(record_id)
-    if not record:
-        logger.info(
-            f"Webhook update: запись {record_id} не найдена — "
-            f"возможно удалена сразу после изменения"
-        )
-        return {"status": "record_not_found", "record_id": record_id}
-
-    if _is_gift_cert_record(record):
-        return {"status": "skipped_gift_cert", "record_id": record_id}
-
-    # Новое состояние
-    staff = record.get("staff") or {}
-    new_staff_id_raw = staff.get("id") or record.get("staff_id")
-    if not new_staff_id_raw:
-        logger.error(f"Webhook update: у записи {record_id} нет staff_id")
-        return {"status": "no_staff", "record_id": record_id}
-    new_staff_id = int(new_staff_id_raw)
-    new_dt = _record_datetime(record)
-    new_sig = _services_signature(record)
-
-    # Старое состояние из снимка
-    old_state = database.get_record_state(record_id)
-
-    # Всегда обновляем снимок в конце — делаем это через try/finally-стиль:
-    # сохраним прямо сейчас новое состояние, чтобы повторные дубль-вебхуки
-    # уже видели «ничего не изменилось».
-    def _persist():
-        _save_record_state(record, record_id)
-
-    # Нет снимка (запись создана до фичи или мимо нас) — не можем понять, что
-    # изменилось. Молча фиксируем снимок и выходим, чтобы не слать ложное.
-    if not old_state:
-        _persist()
-        logger.info(
-            f"Webhook update: запись {record_id} без снимка — "
-            f"зафиксировал состояние, уведомление не шлём"
-        )
-        return {"status": "snapshot_initialized", "record_id": record_id}
-
-    old_staff_id = old_state.get("staff_id")
-    old_dt = old_state.get("datetime")
-    old_sig = old_state.get("services_sig")
-
-    transferred = bool(old_staff_id and old_staff_id != new_staff_id)
-    time_changed = bool(old_dt and new_dt and old_dt != new_dt)
-    services_changed = (old_sig or "") != (new_sig or "")
-
-    if _visit_just_completed(record, old_state):
-        try:
-            await _offer_tip_to_client(record, record_id)
-        except Exception as e:
-            logger.error(f"tip-offer trigger {record_id}: {e}")
-
-    # Если значимых изменений нет (только attendance/финансы) — тихо обновляем.
-    if not (transferred or time_changed or services_changed):
-        _persist()
-        return {"status": "no_meaningful_change", "record_id": record_id}
-
-    # Обогащаем клиента для карточки
-    client = record.get("client") or {}
-    client_id = client.get("id")
-    if client_id:
-        try:
-            full_client = await asyncio.to_thread(_yc.get_client, int(client_id))
-            if full_client:
-                merged = {**full_client, **{k: v for k, v in client.items() if v}}
-                record["client"] = merged
-                client = merged
-        except Exception as e:
-            logger.error(f"Webhook update: full client {client_id}: {e}")
-
-    # AI-совет из кэша (не перегенерируем — экономия)
-    prev_advice = database.get_ai_advice_for_record(record_id) or {}
-    advice_to_show = prev_advice.get("advice_text")
-
-    new_master = database.get_master_by_staff_id(new_staff_id)
-    old_master = (
-        database.get_master_by_staff_id(int(old_staff_id))
-        if transferred and old_staff_id else None
-    )
-
-    results = {
-        "status": "updated", "record_id": record_id,
-        "transferred": transferred, "time_changed": time_changed,
-        "services_changed": services_changed,
-        "sent_to_new": False, "sent_to_old": False,
-    }
-
-    # Заголовок (Telegram) + заголовок web-push для текущего/нового мастера.
-    if transferred:
-        header = "📨 *Тебе передали запись от другого мастера*"
-        push_title = "Запись передана"
-    elif time_changed:
-        # Кто перенёс: метку ставит НАШ код. Клиент через бота MAYA → 'client';
-        # владелец/мастер (бот-админ или панель) либо правка прямо в YClients →
-        # 'staff'/нет метки → «администратором».
-        if database.pop_recent_reschedule_actor(record_id) == "client":
-            header = "🔁 *Клиент перенёс свою запись сам*"
-            push_title = "Клиент перенёс запись"
-        else:
-            header = "🔁 *Запись перенесена администратором*"
-            push_title = "Запись перенесена"
-    else:
-        header = "✏️ *Изменён состав услуг записи*"
-        push_title = "Изменены услуги"
-
-    # ── Уведомление новому/текущему мастеру ────────────────────────────
-    if new_master:
-        _new_tg = bool(new_master.get("telegram_chat_id"))
-        _new_muted = _new_tg and database.is_master_muted(new_master["telegram_chat_id"])
-        # Telegram новому мастеру (если есть канал и не в mute) — в своём try
-        if _new_tg and not _new_muted:
-            try:
-                body = _build_notification_text(record, advice=advice_to_show)
-                text = f"{header}\n\n{body}"
-                # Закрыта по оплате — без кнопок
-                if prev_advice.get("button_pressed"):
-                    method = prev_advice.get("payment_method") or prev_advice.get("button_pressed")
-                    emoji = "💵" if method == "cash" else "💳"
-                    label = "наличными" if method == "cash" else "картой"
-                    text += f"\n\n✅ {emoji} Закрыто {label}"
-                    reply_markup = None
-                else:
-                    reply_markup = InlineKeyboardMarkup([[
-                        InlineKeyboardButton("💵 Наличные", callback_data=f"pay_cash_{record_id}"),
-                        InlineKeyboardButton("💳 Карта",    callback_data=f"pay_card_{record_id}"),
-                    ]])
-                await app.bot.send_message(
-                    chat_id=new_master["telegram_chat_id"],
-                    text=text, parse_mode="Markdown", reply_markup=reply_markup,
-                )
-                results["sent_to_new"] = True
-            except Exception as e:
-                logger.error(f"Webhook update: Telegram мастеру {new_staff_id} не ушёл: {e}")
-        elif _new_muted:
-            logger.info(f"Webhook update: мастер {new_staff_id} в mute — Telegram пропускаем (web-push идёт)")
-        # Web-push новому мастеру В ПРИЛОЖЕНИЕ — независимо от Telegram
-        try:
-            await _send_master_push(
-                new_master,
-                title=push_title,
-                body=_record_push_body(record),
-                url="/app/?panel=schedule",
-                tag=f"record-update-{record_id}",
-                data={"record_id": record_id, "event": "record.update"},
-            )
-        except Exception as e:
-            logger.error(f"Webhook update: web-push мастеру {new_staff_id} не ушёл: {e}")
-        logger.info(f"Webhook update: запись {record_id} → {new_master.get('full_name')} "
-                    f"(transfer={transferred}, time={time_changed}, svc={services_changed})")
-    else:
-        logger.info(f"Webhook update: мастер {new_staff_id} не в системе — пропускаем")
-
-    # ── Nest inbox (Maya OS): перенос / передача / услуги → владельцу + мастерам ──
-    # Раньше в inbox уходил только «у старого мастера забрали», и то без fanout
-    # владельцу. Отмена — отдельно в delete. Перенос времени вообще не писался.
-    try:
-        import maya_inbox_bridge
-        client_name = _truncate_name((record.get("client") or {}).get("name"))
-        when = _format_datetime(record.get("date") or record.get("datetime"))
-        tg_ids = []
-        if new_master and new_master.get("telegram_chat_id"):
-            tg_ids.append(int(new_master["telegram_chat_id"]))
-        if transferred and old_master and old_master.get("telegram_chat_id"):
-            tg_ids.append(int(old_master["telegram_chat_id"]))
-        if transferred:
-            inbox_type = "appointment_reassigned"
-            inbox_title = "Запись передана другому мастеру"
-            old_name = (old_master or {}).get("full_name") or "другому мастеру"
-            new_name = (new_master or {}).get("full_name") or "новому мастеру"
-            inbox_body = (
-                f"{inbox_title}\n\n"
-                f"Клиент: {client_name}\n"
-                f"Время: {when}\n"
-                f"Было: {old_name}\n"
-                f"Стало: {new_name}"
-            )
-            seed = f"record.transfer|{record_id}|{old_staff_id}->{new_staff_id}"
-        elif time_changed:
-            inbox_type = "appointment_rescheduled"
-            inbox_title = push_title
-            old_when = _format_datetime(old_dt) if old_dt else "—"
-            inbox_body = (
-                f"{inbox_title}\n\n"
-                f"Клиент: {client_name}\n"
-                f"Было: {old_when}\n"
-                f"Стало: {when}"
-            )
-            seed = f"record.reschedule|{record_id}|{old_dt}->{new_dt}"
-        else:
-            inbox_type = "owner_alert"
-            inbox_title = push_title
-            inbox_body = (
-                f"{inbox_title}\n\n"
-                f"Клиент: {client_name}\n"
-                f"Время: {when}"
-            )
-            seed = f"record.services|{record_id}|{new_sig}"
-        await maya_inbox_bridge.publish_inbox_item(
-            type=inbox_type,
-            title=inbox_title,
-            body_text=inbox_body,
-            source_seed=seed,
-            telegram_chat_ids=tg_ids or None,
-            deep_link="/app/?panel=schedule",
-            payload={
-                "record_id": record_id,
-                "event": (
-                    "record.transfer"
-                    if transferred
-                    else ("record.reschedule" if time_changed else "record.services")
-                ),
-                "staff_id": int(new_staff_id) if new_staff_id else None,
-                "new_staff_id": int(new_staff_id) if new_staff_id else None,
-                "old_staff_id": int(old_staff_id) if (transferred and old_staff_id) else None,
-            },
-            fanout_owners=True,
-        )
-    except Exception as inbox_exc:
-        logger.warning(f"Webhook: nest inbox record.update: {inbox_exc}")
-
-    # ── Уведомление старому мастеру (только при передаче) ──────────────
-    if transferred and old_master:
-        client_name = _truncate_name(client.get("name"))
-        when = _format_datetime(record.get("date") or record.get("datetime"))
-        _old_tg = bool(old_master.get("telegram_chat_id"))
-        _old_muted = _old_tg and database.is_master_muted(old_master["telegram_chat_id"])
-        # Telegram старому мастеру — best-effort, в своём try
-        if _old_tg and not _old_muted:
-            try:
-                await app.bot.send_message(
-                    chat_id=old_master["telegram_chat_id"],
-                    text=(
-                        f"❌ *Запись передана другому мастеру*\n\n"
-                        f"Клиент: {client_name}\n"
-                        f"Было время: {when}\n\n"
-                        f"_Администратор переназначил эту запись._"
-                    ),
-                    parse_mode="Markdown",
-                )
-                results["sent_to_old"] = True
-            except Exception as e:
-                logger.error(f"Webhook update: Telegram старому мастеру {old_staff_id} не ушёл: {e}")
-        elif _old_muted:
-            logger.info(f"Webhook update: старый мастер {old_staff_id} в mute — Telegram пропускаем (web-push идёт)")
-        # Web-push старому мастеру В ПРИЛОЖЕНИЕ — независимо от Telegram
-        try:
-            await _send_master_push(
-                old_master,
-                title="Запись передана другому мастеру",
-                body=f"{when} · {client_name}",
-                url="/app/?panel=schedule",
-                tag=f"record-transfer-old-{record_id}",
-                data={"record_id": record_id, "event": "record.transfer"},
-            )
-        except Exception as e:
-            logger.error(f"Webhook update: web-push старому мастеру {old_staff_id} не ушёл: {e}")
-
-    # Пуш клиенту о переносе времени его записи (если зарегистрирован + подписан)
-    if time_changed:
-        await _notify_client_record(record, record_id, "reschedule")
-
-    # Фиксируем новое состояние (после уведомлений)
-    _persist()
-    return results
+    from canonical_operational_alerts import trigger
+    await trigger()
+    return {'status':'canonical_event_owner_pending','record_id':record_id}
 
 
 async def _process_record_delete(app: Application, record_id: int, payload: dict) -> dict:
-    """
-    Обработка отмены записи. Пытаемся вытащить из payload (или из YClients)
-    мастера и время освободившегося слота, и предлагаем его кандидатам.
-    """
-    import freed_slot
-
-    # YClients в webhook delete обычно кладёт снимок удалённой записи в data.
-    # Если не нашли — пробуем дёрнуть API (может ещё отдаст), потом сдаёмся.
-    data = payload.get("data") or {}
-    if not data and "resource_id" in payload:
-        # Variant 1: пытаемся получить из API
-        try:
-            data = _yc.get_record(record_id) or {}
-        except Exception as e:
-            logger.warning(f"freed_slot: не дотянули запись {record_id}: {e}")
-            data = {}
-
-    # staff_id: либо в data.staff.id, либо в data.staff_id
-    staff = data.get("staff") or {}
-    staff_id = staff.get("id") or data.get("staff_id")
-    dt_str = data.get("date") or data.get("datetime")
-
-    if not staff_id or not dt_str:
-        logger.info(
-            f"freed_slot: для отменённой записи {record_id} нет staff/date "
-            f"(staff_id={staff_id}, dt={dt_str}) — пропускаем"
-        )
-        return {"status": "no_slot_data", "record_id": record_id}
-
-    try:
-        # YClients шлёт время с таймзоной типа '+03:00' или 'Z', и иногда с пробелом
-        # вместо 'T' ('2026-05-31 15:00:00'). Нормализуем устойчиво.
-        clean = dt_str.replace("Z", "+00:00").split("+")[0].split(".")[0].strip()
-        clean = clean.replace(" ", "T")
-        slot_dt = datetime.strptime(clean[:19], "%Y-%m-%dT%H:%M:%S")
-    except Exception as e:
-        logger.error(f"freed_slot: не распарсили дату '{dt_str}': {e}")
-        slot_dt = None
-
-    # ── Уведомляем мастера, чью запись отменили ────────────────────────
-    # Только если запись была В БУДУЩЕМ (отмена прошедшего визита мастеру
-    # не интересна) и мастер привязан + не в mute.
-    master_notified = False
-    try:
-        notify = slot_dt is None or slot_dt > datetime.now()
-        master = database.get_master_by_staff_id(int(staff_id))
-        if notify and master:
-            client = data.get("client") or {}
-            client_name = _truncate_name(client.get("name")) if client else "клиент"
-            when = _format_datetime(dt_str)
-            # Кто отменил: метку ставит наш код при КЛИЕНТСКОЙ отмене (бот/MAYA);
-            # нет метки (отмена админом/в YClients) → обезличенное «Запись отменена».
-            _cancel_by_client = False
-            try:
-                _cancel_by_client = database.pop_recent_cancel_actor(record_id) == "client"
-            except Exception:
-                pass
-            # «Отменена» — только если отменил клиент. Удаление админом/в YClients —
-            # это «Запись удалена» (как в операционке салона).
-            _cancel_word = (
-                "Запись отменена клиентом"
-                if _cancel_by_client
-                else "Запись удалена"
-            )
-            _inbox_type = (
-                "appointment_cancelled"
-                if _cancel_by_client
-                else "appointment_deleted"
-            )
-            _del_tg = bool(master.get("telegram_chat_id"))
-            _del_muted = _del_tg and database.is_master_muted(master["telegram_chat_id"])
-            # Telegram (если есть канал и не в mute) — в своём try
-            if _del_tg and not _del_muted:
-                try:
-                    await app.bot.send_message(
-                        chat_id=master["telegram_chat_id"],
-                        text=(
-                            f"❌ *{_cancel_word}*\n\n"
-                            f"Клиент: {client_name}\n"
-                            f"Было время: {when}\n\n"
-                            f"_Слот освободился. Если кто-то ждал — самое время "
-                            f"предложить._"
-                        ),
-                        parse_mode="Markdown",
-                    )
-                    master_notified = True
-                except Exception as e:
-                    logger.error(f"Webhook delete: Telegram мастеру {staff_id} не ушёл: {e}")
-            elif _del_muted:
-                logger.info(f"Webhook delete: мастер {staff_id} в mute — Telegram пропускаем (web-push идёт)")
-            # Web-push мастеру В ПРИЛОЖЕНИЕ — независимо от Telegram
-            try:
-                await _send_master_push(
-                    master,
-                    title=_cancel_word,
-                    body=f"{when} · {client_name}",
-                    url="/app/?panel=schedule",
-                    tag=f"record-delete-{record_id}",
-                    data={"record_id": record_id, "event": "record.delete"},
-                )
-            except Exception as e:
-                logger.error(f"Webhook delete: web-push мастеру {staff_id} не ушёл: {e}")
-            try:
-                import maya_inbox_bridge
-                tg = master.get("telegram_chat_id")
-                cancel_body = (
-                    f"{_cancel_word}\n\n"
-                    f"Клиент: {client_name}\n"
-                    f"Было время: {when}\n\n"
-                    f"Слот освободился."
-                )
-                await maya_inbox_bridge.publish_inbox_item(
-                    type=_inbox_type,
-                    title=_cancel_word,
-                    body_text=cancel_body,
-                    source_seed=f"record.delete|{record_id}",
-                    telegram_chat_ids=[int(tg)] if tg else None,
-                    deep_link="/app/?panel=schedule",
-                    payload={
-                        "record_id": record_id,
-                        "event": "record.delete",
-                        "staff_id": int(staff_id),
-                        "by_client": bool(_cancel_by_client),
-                    },
-                    fanout_owners=True,
-                )
-            except Exception as inbox_exc:
-                logger.warning(f"Webhook: nest inbox cancel: {inbox_exc}")
-            logger.info(f"Webhook delete: отмена записи {record_id} → мастер {master.get('full_name')}")
-    except Exception as e:
-        logger.error(f"Webhook delete: уведомление мастеру по {record_id}: {e}")
-
-    # Пуш клиенту об отмене его записи (если зарегистрирован + подписан)
-    try:
-        if isinstance(data, dict) and data.get("client"):
-            await _notify_client_record(data, record_id, "cancel")
-    except Exception as e:
-        logger.error(f"Webhook delete: пуш клиенту по {record_id}: {e}")
-
-    # Чистим снимок состояния — записи больше нет
-    try:
-        database.delete_record_state(record_id)
-    except Exception:
-        pass
-
-    # P4-03: record-delete is evidence only. A canonical refund action owns
-    # any compensating ledger outcome; this PWA surface performs no value write.
-    logger.info(
-        "p4_03_canonical_refund_required record_id=%s; legacy refund skipped",
-        record_id,
-    )
-
-    # Если дату не распарсили — оффер слота другим невозможен, но мастера
-    # мы уже уведомили; выходим.
-    if slot_dt is None:
-        return {
-            "status": "master_notified_no_slot",
-            "record_id": record_id,
-            "master_notified": master_notified,
-        }
-
-    freed_result = await freed_slot.offer_freed_slot(
-        app,
-        int(staff_id),
-        slot_dt,
-        source_event_id=f"yclients-record-delete:{record_id}",
-    )
-    if isinstance(freed_result, dict):
-        freed_result["master_notified"] = master_notified
-    return freed_result
+    from canonical_operational_alerts import trigger
+    await trigger()
+    return {'status':'canonical_event_owner_pending','record_id':record_id}
 
 
 def _webhook_secret_ok(request: web.Request) -> bool:
@@ -1735,6 +1108,8 @@ async def internal_privacy_telegram_handler(request: web.Request) -> web.Respons
 
 
 _PACKAGE2_TELEGRAM_MESSAGE_TYPES = frozenset({
+    "native_feedback_invitation",
+    "weekly_expense_reminder",
     "appointment_reminder",
     "shift_reminder",
     "daily_report",
@@ -3389,11 +2764,7 @@ def _anton_chat_id() -> int:
         pass
     return 339683535
 ANTON_CHAT_ID = _anton_chat_id()
-# Дополнительные расходы — учитываем КАЖДЫЙ день (включая выходные Антона).
-DAILY_EXTRA_EXPENSES = [
-    {"label": "Доп. расход 1", "amount": 1800},
-    {"label": "Доп. расход 2", "amount": 600},
-]
+# R13: unconfirmed fixed daily expense constants retired.
 
 _SALARY_YEAR_CACHE = {"date": None, "rev": {}}   # {staff_id: выручка за год}, кеш на день
 
@@ -4459,22 +3830,13 @@ def _daily_report(date_iso: str) -> dict:
     anton = _anton_payroll(date_iso, date_iso)
     anton_total = anton.get("total")
 
-    # ── Дополнительные расходы (каждый день) ──
-    extra_items = [{"label": e["label"], "amount": e["amount"]} for e in DAILY_EXTRA_EXPENSES]
-    extra_total = sum(e["amount"] for e in DAILY_EXTRA_EXPENSES)
-
-    # ── Расходы по салону от Антона за этот день (кофе, уборщица, лента…) ──
-    try:
-        salon_exp_items = database.get_salon_expenses(date_iso)
-    except Exception as e:
-        logger.error(f"_daily_report salon_expenses: {e}")
-        salon_exp_items = []
-    salon_exp_total = sum(int(x.get("amount") or 0) for x in salon_exp_items)
-
-    expenses_total = (
-        salary_total_val + anton_total + extra_total + salon_exp_total
-        if anton_total is not None else None
-    )
+    # R13: canonical recorded Expense totals and explicit period declaration.
+    from canonical_expense_intake import expense_report
+    expense_projection = expense_report(date_iso)
+    salon_exp_items = expense_projection['items']
+    salon_exp_total = expense_projection['total']
+    expenses_total = (salary_total_val + anton_total + salon_exp_total
+                      if salon_exp_total is not None and anton_total is not None else None)
 
     # Предварительная выплата за неделю (Чт→Ср до сегодня) — все, кроме Стаса (#11)
     try:
@@ -4496,52 +3858,14 @@ def _daily_report(date_iso: str) -> dict:
         "employees_margin": employees_margin,     # = доля с сотрудников
         "anton": anton_total,                     # − ЗП Антона
         "purchases": salon_exp_total,             # − покупки (внёс Антон)
-        "extra": extra_total,                     # − фикс. доп.расходы
         "net": total_gross_val - expenses_total,  # = чистыми
     } if expenses_total is not None else None)
 
     # ── Касса со слов Антона + сверка с расчётной наличкой YClients ──
-    try:
-        _cl = database.get_cash_log(date_iso)
-    except Exception:
-        _cl = None
+    # R14: this legacy report has no confirmed canonical branch scope.
     cash_reported = None
-    if _cl:
-        # 🔴 Ожидаемая наличка за день = пришло налом − наличные расходы за день
-        # (закупки, которые Антон вносит и оплачивает ИЗ КАССЫ). Без вычета расходов
-        # сверка показывала ложную «недостачу» ровно на сумму дневных закупок.
-        _cash_rev = round(cash_sum)                 # пришло налом по YClients
-        # Наличные расходы за день = закупки Антона + фикс. доп.расходы (Стас: доп.расходы
-        # тоже идут наличкой из кассы каждый день).
-        _cash_exp = salon_exp_total + extra_total
-        _computed = _cash_rev - _cash_exp            # сколько НАЛИЧКИ должно остаться за день
-        # кто вносил кассу: Антон / Стас / иной админ
-        _eb = _cl.get("entered_by")
-        try:
-            from config import FOUNDER_IDS as _FIDS
-        except Exception:
-            _FIDS = {948205934}
-        if _eb == ANTON_CHAT_ID:
-            _by = "Антон"
-        elif _eb and int(_eb) in _FIDS:
-            _by = "Стас"
-        elif _eb:
-            try:
-                _m = database.get_master_by_chat_id(int(_eb)) or {}
-                _by = _m.get("full_name") or "администратор"
-            except Exception:
-                _by = "администратор"
-        else:
-            _by = ""
-        cash_reported = {
-            "total_till": _cl["total_till"],
-            "day_cash": _cl["day_cash"],
-            "cash_revenue": _cash_rev,                 # пришло налом (YClients)
-            "day_expenses": _cash_exp,                 # − наличные расходы за день (закупки)
-            "computed_day_cash": _computed,            # = ожидаемая наличка (выручка − расходы)
-            "diff": _cl["day_cash"] - _computed,       # >0 излишек, <0 недостача
-            "by": _by,                                  # кто внёс кассу
-        }
+    from canonical_cash_declaration import report_unavailable
+    cash_declaration = report_unavailable()
 
     return {
         "date": date_iso,
@@ -4551,11 +3875,12 @@ def _daily_report(date_iso: str) -> dict:
         "total_gross": total_gross_val,
         "salary_total": salary_total_val,
         "anton": anton,
-        "extra_expenses": {"items": extra_items, "total": extra_total},
-        "salon_expenses": {"items": salon_exp_items, "total": salon_exp_total},
+        "extra_expenses": {"items": [], "total": None, "source": "retired_fixed_constants"},
+        "salon_expenses": expense_projection,
         "expenses_total": expenses_total,
         "owner_net": owner_net,           # owner-only окно «чистая прибыль Стаса»
-        "cash_reported": cash_reported,   # касса со слов Антона + сверка
+        "cash_reported": cash_reported,
+        "cash_declaration": cash_declaration,   # касса со слов Антона + сверка
         "prelim_payout": prelim,
         "note": ("" if txs else "Пока нет проведённых оплат за день — касса появится "
                  "после первых закрытых визитов в YClients."),
@@ -4666,7 +3991,7 @@ async def panel_daily_report_handler(request: web.Request) -> web.Response:
             f_iso, _, t_iso = d.partition("..")
             rep = await asyncio.to_thread(_period_report, f_iso.strip(), t_iso.strip())
         else:
-            rep = await asyncio.to_thread(_daily_report, d)
+            rep = await asyncio.to_thread(canonical_staff_access.synchronous_request_callback(lambda: _daily_report(d)))
     except Exception as e:
         logger.error(f"panel_daily_report: {e}")
         return _cabinet_response({"error": "report_failed", "message": "Не удалось собрать отчёт."}, status=502)
@@ -4737,34 +4062,29 @@ def _build_analytics_pdf(metrics: dict, period_label: str) -> bytes:
 
 
 async def panel_report_pdf_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/report_pdf — PDF-отчёт за период, отправляется владельцу в Telegram."""
+    """R05 authenticated download: one admitted own snapshot, never a provider document."""
+    import canonical_report_download
     try:
         body = await request.json()
+        credential = canonical_staff_access.bearer(request.headers, body)
+        if not canonical_staff_access.current():
+            raise ValueError("canonical_staff_session_required")
+        if not isinstance(body, dict) or set(body) - {"maya_token", "run_id", "kind"}:
+            raise ValueError("canonical_report_snapshot_required")
+        if body.get("kind") == "admin-help" and "run_id" not in body:
+            if canonical_staff_access.current().get("role") not in {
+                "tenant_owner", "business_owner", "tenant_admin", "administrator", "platform_owner"}:
+                raise ValueError("canonical_help_authority_required")
+            result = await asyncio.to_thread(canonical_report_download.static_help)
+        elif "kind" not in body and isinstance(body.get("run_id"), str):
+            result = await canonical_report_download.report_snapshot(credential, body["run_id"])
+        else:
+            raise ValueError("canonical_report_snapshot_required")
+        return _cabinet_response(result)
+    except ValueError as error:
+        return _cabinet_response({"error": str(error), "business_mutations": 0}, status=403)
     except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
-    if not info.get("permissions", {}).get("analytics"):
-        return _cabinet_response({"error": "forbidden", "message": "Недостаточно прав."}, status=403)
-    pp = _panel_period(body)
-    try:
-        from telegram import InputFile
-        import io as _io
-        metrics = database.dashboard_metrics(from_iso=pp["from_iso"], to_iso=pp["to_iso"])
-        pdf_bytes = await asyncio.to_thread(_build_analytics_pdf, metrics, pp["label"])
-        bot = request.app["bot_app"].bot
-        await bot.send_document(
-            chat_id=int(tg_id),
-            document=InputFile(_io.BytesIO(pdf_bytes), filename=f"analytics_{pp['period']}.pdf"),
-            caption=f"📊 Аналитика · {pp['label']} ({pp['start']} – {pp['end']})",
-        )
-    except Exception as e:
-        logger.error(f"panel report_pdf: {e}")
-        return _cabinet_response({"ok": False, "reason": "Не удалось сформировать отчёт."}, status=500)
-    return _cabinet_response({"ok": True, "sent": True})
+        return _cabinet_response({"error": "canonical_report_download_unavailable", "business_mutations": 0}, status=503)
 
 
 async def panel_salon_stats_handler(request: web.Request) -> web.Response:
@@ -5261,6 +4581,32 @@ def _client_appointment_command_response(result: dict, record_id: int, **extra) 
         "message": str(result.get("safe_explanation") or "Операция не выполнена."),
         **({"execution_id": execution_id} if execution_id else {}),
     }, status=409)
+
+
+async def client_native_feedback_handler(request: web.Request) -> web.Response:
+    """R08 verified-channel initiator. No local request/revision/send owner."""
+    import legacy_client_command_bridge as client_commands
+    try:
+        body = await request.json()
+        if not isinstance(body, dict) or set(body) - {'operation', 'command', 'idempotencyKey', 'auth_data', 'maya_token'}:
+            raise ValueError('invalid_feedback_envelope')
+        operation = body.get('operation')
+        if operation not in {'projection', 'response', 'withdraw'}:
+            raise ValueError('invalid_feedback_operation')
+        proof = client_commands.channel_proof(request.headers, body)
+        if operation == 'projection':
+            if 'command' in body or 'idempotencyKey' in body:
+                raise ValueError('feedback_read_has_no_command')
+            payload = {}
+        else:
+            payload = {'command': body.get('command'), 'idempotencyKey': body.get('idempotencyKey')}
+        result = await asyncio.to_thread(client_commands.command, 'feedback-' + operation, proof, payload)
+        return _cabinet_response(result)
+    except ValueError as error:
+        code = str(error)
+        return _cabinet_response({'error': 'IDEMPOTENCY_CONFLICT' if code == 'IDEMPOTENCY_CONFLICT' else 'feedback_identity_or_command_rejected'}, status=409 if code == 'IDEMPOTENCY_CONFLICT' else 403)
+    except Exception:
+        return _cabinet_response({'error':'feedback_outcome_unconfirmed','retry':'same_command_identity'}, status=503)
 
 
 async def client_cancel_record_handler(request: web.Request) -> web.Response:
@@ -6509,67 +5855,10 @@ def _founder_rule_command(message: str) -> tuple[str, str | int | None] | None:
     return None
 
 
-def _founder_learning_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
-    """Founder-only procedural memory available without an LLM round-trip."""
-    command = _founder_rule_command(message)
-    if not command:
-        return None
-    try:
-        info = _panel_resolve_role(int(chat_id))
-    except Exception:
-        info = {}
-    if not info.get("is_founder"):
-        logger.warning("Founder memory command denied for chat_id=%s", chat_id)
-        return "Постоянные правила MAYA может менять только основатель."
-    if str(mode or "").strip().lower() != "staff":
-        return "Чтобы изменить постоянные правила MAYA, откройте рабочий чат."
+def _founder_learning_reply(chat_id: int, message: str, mode: str = 'staff') -> str | None:
+    from canonical_governed_settings import owner_command_reply
+    return owner_command_reply('rules', _founder_rule_command(message)) if mode == 'staff' else None
 
-    action, value = command
-    if action == "usage":
-        return "Напишите правило полностью: «Майя, запомни правило: …»."
-    if action == "list":
-        rules = database.list_salon_rules(active_only=True, limit=40)
-        if not rules:
-            return "Постоянных правил пока нет."
-        lines = [f"{row['id']}. {row['rule_text']}" for row in rules]
-        return "Постоянные правила MAYA:\n" + "\n".join(lines)
-    if action == "delete":
-        deleted = database.deactivate_salon_rule(int(value))
-        if deleted:
-            return f"Удалила правило [{int(value)}]. Со следующего сообщения оно не действует."
-        return f"Действующего правила [{int(value)}] нет."
-
-    rule = str(value or "").strip()
-    if len(rule) < 8:
-        return "Правило слишком короткое. Уточните, что именно MAYA должна делать."
-    if len(rule) > 500:
-        return "Правило длиннее 500 символов. Сформулируйте его короче и конкретнее."
-    redacted = anonymizer.redact_pii(rule)
-    if redacted != rule:
-        return "Не сохранила правило: постоянная память не должна содержать персональные данные."
-    if _FOUNDER_RULE_UNSAFE_RE.search(rule):
-        return "Не сохранила правило: оно пытается отменить серверные ограничения безопасности."
-    if _FOUNDER_RULE_PERMISSION_RE.search(rule):
-        return (
-            "Не сохранила правило: разрешения меняются только прямой "
-            "командой из безопасного каталога. Например: «Майя, разреши всем "
-            "клиентам видеть свою историю посещений»."
-        )
-
-    rules = database.list_salon_rules(active_only=True, limit=100)
-    normalized = re.sub(r"\s+", " ", rule).strip().lower().replace("ё", "е")
-    for row in rules:
-        current = re.sub(r"\s+", " ", str(row.get("rule_text") or "")).strip().lower().replace("ё", "е")
-        if current == normalized:
-            return f"Это правило уже сохранено под номером [{row['id']}]."
-    if len(rules) >= 40:
-        return "Активных правил уже 40. Сначала удалите ненужное командой «Майя, удали правило N»."
-
-    rule_id = database.add_salon_rule(rule, created_by=int(chat_id))
-    return (
-        f"Запомнила правило [{rule_id}]: {rule}\n"
-        "Оно начнёт действовать со следующего сообщения во всех чатах MAYA."
-    )
 
 
 def _founder_permission_command(message: str) -> tuple[str, bool | None] | None:
@@ -6608,50 +5897,10 @@ def _founder_permission_command(message: str) -> tuple[str, bool | None] | None:
     return None
 
 
-def _founder_permission_reply(
-    chat_id: int,
-    message: str,
-    mode: str = "staff",
-) -> str | None:
-    command = _founder_permission_command(message)
-    if not command:
-        return None
-    try:
-        info = _panel_resolve_role(int(chat_id))
-    except Exception:
-        info = {}
-    if not info.get("is_founder"):
-        logger.warning("Founder capability command denied for chat_id=%s", chat_id)
-        return "Глобальные разрешения MAYA может менять только основатель."
-    if str(mode or "").strip().lower() != "staff":
-        return "Чтобы изменить разрешения MAYA, откройте рабочий чат."
+def _founder_permission_reply(chat_id: int, message: str, mode: str = 'staff') -> str | None:
+    from canonical_governed_settings import owner_command_reply
+    return owner_command_reply('capability', _founder_permission_command(message)) if mode == 'staff' else None
 
-    capability, enabled = command
-    if capability == "list":
-        rows = maya_capabilities.list_capabilities()
-        lines = ["Разрешения MAYA для клиентов:"]
-        for row in rows:
-            status = "включено" if row["enabled"] else "отключено"
-            lines.append(f"• {row['label']}: {status}")
-        return "\n".join(lines)
-
-    try:
-        result = maya_capabilities.set_enabled(
-            capability,
-            bool(enabled),
-            actor_id=int(chat_id),
-        )
-    except (KeyError, PermissionError):
-        return "Такого безопасного разрешения нет в каталоге MAYA."
-    if result["enabled"]:
-        return (
-            "Разрешила всем авторизованным клиентам видеть в чате только свою "
-            "историю посещений. Доступ к чужим карточкам остаётся закрыт."
-        )
-    return (
-        "Отключила клиентам просмотр истории посещений через чат. "
-        "Данные в YClients не изменены."
-    )
 
 
 _OWN_VISIT_HISTORY_RE = re.compile(
@@ -9261,75 +8510,14 @@ def _growth_role_recipients() -> dict[str, set[int]]:
     return {"owner": founders, "manager": set()}
 
 
-async def _send_growth_role_briefs_once(
-    app: Application,
-    *,
-    now: datetime | None = None,
-    target_date: str | None = None,
-    force: bool = False,
-) -> dict:
-    """Deliver one aggregate morning brief to owner and manager roles."""
-    now = now or datetime.now()
-    date_s = target_date or master_briefing.scheduled_brief_date(
-        now,
-        send_hour=_master_day_brief_send_hour(),
-    )
-    if not date_s:
-        return {"ok": True, "skipped": True, "reason": "outside_send_window", "sent": 0}
-    owner_plan = await asyncio.to_thread(growth_planner.get_growth_plan, role="owner")
-    manager_plan = growth_planner.manager_view(owner_plan)
-    payloads = {
-        "owner": {
-            "message": growth_planner.render_owner_morning_message(owner_plan),
-            "url": "https://malesthetic.pro/app/?panel=os",
-            "button": "Открыть план MAYA",
-        },
-        "manager": {
-            "message": growth_planner.render_manager_morning_message(manager_plan),
-            "url": "https://malesthetic.pro/app/?panel=analytics",
-            "button": "Открыть план мастеров",
-        },
-    }
-    sent = 0
-    skipped = 0
-    deliveries = []
-    for role, chat_ids in _growth_role_recipients().items():
-        payload = payloads[role]
-        for chat_id in sorted(chat_ids):
-            delivery_key = f"growth_role_brief_sent:{date_s}:{role}:{chat_id}"
-            if not force and database.get_setting(delivery_key):
-                skipped += 1
-                deliveries.append({"role": role, "state": "skipped", "reason": "already_sent"})
-                continue
-            try:
-                import maya_inbox_bridge
-
-                accepted = await maya_inbox_bridge.publish_inbox_item(
-                    type="growth_plan" if role == "owner" else "morning_brief",
-                    title="MAYA · утренний план" + (" владельца" if role == "owner" else " менеджера"),
-                    body_text=payload["message"],
-                    source_seed=delivery_key,
-                    telegram_chat_ids=[int(chat_id)],
-                    deep_link=payload["url"].replace("https://malesthetic.pro", "") or "/app/?panel=os",
-                    fanout_owners=(role == "owner"),
-                    telegram_buttons=[{"text": payload["button"], "url": payload["url"]}],
-                )
-                if not accepted:
-                    deliveries.append({"role": role, "state": "failed", "reason": "action_engine_rejected"})
-                    continue
-                database.set_setting(delivery_key, now.isoformat(timespec="seconds"))
-                sent += 1
-                deliveries.append({"role": role, "state": "accepted"})
-            except Exception as e:
-                logger.error(f"growth role brief {role}: {e}")
-                deliveries.append({"role": role, "state": "failed"})
-    return {
-        "ok": True,
-        "date": date_s,
-        "sent": sent,
-        "skipped_count": skipped,
-        "deliveries": deliveries,
-    }
+async def _send_growth_role_briefs_once(app: Application, *, now: datetime | None = None,
+    target_date: str | None = None,  force: bool = False) -> dict:
+    """R05: initiator of the immutable canonical tenant-day report."""
+    if target_date is not None or force:
+        return {"ok": False, "reason": "canonical_report_controls_forbidden", "sent": 0}
+    import maya_inbox_bridge
+    accepted = await maya_inbox_bridge.trigger_owner_report("morning_owner")
+    return {"ok": accepted, "status": "trigger_accepted" if accepted else "unresolved", "sent": 0}
 
 
 async def _collect_master_day_forecasts(
@@ -9486,101 +8674,14 @@ async def _collect_master_day_forecasts(
     return forecasts
 
 
-async def _send_master_day_briefs_once(
-    app: Application,
-    *,
-    now: datetime | None = None,
-    target_date: str | None = None,
-    only_staff_id: int | None = None,
-    force: bool = False,
-) -> dict:
-    """Send each scheduled master one role-safe plan for the target workday."""
-    now = now or datetime.now()
-    date_s = target_date or master_briefing.scheduled_brief_date(
-        now,
-        send_hour=_master_day_brief_send_hour(),
-    )
-    if not date_s:
-        return {"ok": True, "skipped": True, "reason": "outside_send_window", "sent": 0}
-    forecasts = await _collect_master_day_forecasts(
-        date_s,
-        only_staff_id=only_staff_id,
-    )
-    sent = 0
-    skipped = 0
-    deliveries = []
-    for forecast in forecasts:
-        staff_id = int(forecast.get("staff_id") or 0)
-        master = forecast.pop("delivery_master", {})
-        if forecast.get("schedule_known") and not forecast.get("is_working"):
-            skipped += 1
-            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "day_off"})
-            continue
-        compact_forecast = master_briefing.compact_forecast_snapshot(forecast)
-        try:
-            database.set_setting(
-                f"master_growth_day_plan:{date_s}:{staff_id}",
-                _json.dumps(compact_forecast, ensure_ascii=False),
-            )
-        except Exception as e:
-            logger.error(f"master day brief snapshot staff={staff_id}: {e}")
-        delivery_key = f"master_day_brief_delivery:{date_s}:{staff_id}"
-        if not force and database.get_setting(delivery_key):
-            skipped += 1
-            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "already_accepted"})
-            continue
-        chat_id = master.get("telegram_chat_id")
-        message = master_briefing.render_master_day_message(forecast)
-        try:
-            import maya_inbox_bridge
-
-            telegram_ids = None
-            if chat_id and not database.is_master_muted(int(chat_id)):
-                telegram_ids = [int(chat_id)]
-            target_label = "сегодня" if date_s == now.date().isoformat() else "завтра"
-            accepted = await maya_inbox_bridge.publish_inbox_item(
-                type="morning_brief",
-                title=f"MAYA · план на {target_label}",
-                body_text=message,
-                source_seed=f"master-day-brief|{date_s}|{staff_id}",
-                telegram_chat_ids=telegram_ids,
-                deep_link="/app/?panel=schedule",
-                payload={"staff_id": staff_id, "date": date_s},
-                fanout_owners=False,
-            )
-        except Exception as e:
-            logger.error(f"master day brief Action Engine staff={staff_id}: {e}")
-            accepted = False
-        if not accepted:
-            deliveries.append({"staff_id": staff_id, "state": "failed", "reason": "action_engine_rejected"})
-            continue
-        accepted_at = now.isoformat(timespec="seconds")
-        database.set_setting(delivery_key, accepted_at)
-        database.set_setting(f"master_day_brief_sent:{date_s}:{staff_id}", accepted_at)
-        database.set_setting(
-            f"master_day_brief_last:{staff_id}",
-            _json.dumps({
-                "date": date_s,
-                "accepted_at": accepted_at,
-                "records_count": forecast.get("records_count"),
-                "booked_revenue_rub": forecast.get("booked_revenue_rub"),
-                "potential_total_revenue_rub": forecast.get("potential_total_revenue_rub"),
-                "primary_daily_target_rub": forecast.get("primary_daily_target_rub"),
-                "primary_target_progress_pct": forecast.get("primary_target_progress_pct"),
-                "potential_target_progress_pct": forecast.get("potential_target_progress_pct"),
-                "opportunities_count": forecast.get("opportunities_count"),
-            }, ensure_ascii=False),
-        )
-        sent += 1
-        deliveries.append({"staff_id": staff_id, "state": "accepted"})
-    return {
-        "ok": True,
-        "date": date_s,
-        "sent": sent,
-        "skipped_count": skipped,
-        "forecast_count": len(forecasts),
-        "deliveries": deliveries,
-    }
+async def _send_master_day_briefs_once(app: Application, *, now: datetime | None = None,
+    target_date: str | None = None, only_staff_id: int | None = None, force: bool = False) -> dict:
+    """R05: initiator of the immutable canonical tenant-day report."""
+    if target_date is not None or force or only_staff_id is not None:
+        return {"ok": False, "reason": "canonical_report_controls_forbidden", "sent": 0}
+    import maya_inbox_bridge
+    accepted = await maya_inbox_bridge.trigger_owner_report("morning_staff")
+    return {"ok": accepted, "status": "trigger_accepted" if accepted else "unresolved", "sent": 0}
 
 
 async def panel_master_day_brief_handler(request: web.Request) -> web.Response:
@@ -9685,58 +8786,9 @@ def _master_work_start(master: dict, day: date) -> datetime | None:
 
 
 async def _send_shift_reminders_once(app: Application) -> int:
-    try:
-        masters = list(database.list_masters())
-    except Exception as e:
-        logger.error(f"shift reminders: list_masters failed: {e}")
-        return 0
-
-    now = datetime.now()
-    sent = 0
-    for master in masters:
-        staff_id = _master_staff_id(master)
-        if not staff_id:
-            continue
-        start = await asyncio.to_thread(_master_work_start, master, now.date())
-        if not start:
-            continue
-        minutes_left = int((start - now).total_seconds() // 60)
-        for offset in _SHIFT_REMINDER_OFFSETS:
-            if minutes_left < offset or minutes_left > offset + 4:
-                continue
-            key = (staff_id, now.date().isoformat(), offset)
-            if key in _SHIFT_REMINDERS_SENT:
-                continue
-            label = "1 час" if offset == 60 else "30 минут"
-            text = (
-                f"⏰ *До начала рабочего дня осталось {label}*\n\n"
-                f"Старт смены: {start.strftime('%H:%M')}\n"
-                "Открой приложение, чтобы проверить расписание."
-            )
-            try:
-                import maya_inbox_bridge
-                tg = master.get("telegram_chat_id")
-                telegram_ids = None
-                if tg and not database.is_master_muted(int(tg)):
-                    telegram_ids = [int(tg)]
-                accepted = await maya_inbox_bridge.publish_inbox_item(
-                    type="shift_reminder",
-                    title=f"До рабочего дня {label}",
-                    body_text=text.replace("*", ""),
-                    source_seed=f"shift|{staff_id}|{now.date().isoformat()}|{offset}",
-                    telegram_chat_ids=telegram_ids,
-                    deep_link="/app/?panel=schedule",
-                    payload={"staff_id": staff_id, "date": now.date().isoformat(), "minutes": offset},
-                    fanout_owners=False,
-                    telegram_parse_mode="Markdown",
-                )
-            except Exception as inbox_exc:
-                logger.warning(f"shift reminder Action Engine: {inbox_exc}")
-                accepted = False
-            if accepted:
-                _SHIFT_REMINDERS_SENT.add(key)
-                sent += 1
-    return sent
+    from canonical_operational_alerts import trigger
+    await trigger()
+    return 0
 
 
 async def master_shift_reminder_loop(app: Application):
@@ -10533,21 +9585,9 @@ TEAM_MEDIA_URL_PREFIX = "https://malesthetic.pro/app/media/team/"
 TEAM_MEDIA_TTL_SECONDS = 2 * 24 * 60 * 60
 
 
-def _team_chat_mark_media_expiry(messages: list[dict]) -> list[dict]:
-    for msg in messages:
-        if not (msg.get("media_kind") and msg.get("media_url")):
-            continue
-        created_raw = str(msg.get("created_at") or "")
-        try:
-            created_at = datetime.fromisoformat(created_raw)
-        except Exception:
-            continue
-        now = datetime.now(created_at.tzinfo) if created_at.tzinfo else datetime.now()
-        expires_at = created_at + timedelta(seconds=TEAM_MEDIA_TTL_SECONDS)
-        msg["media_expires_at"] = expires_at.isoformat(timespec="seconds")
-        if (now - created_at).total_seconds() >= TEAM_MEDIA_TTL_SECONDS:
-            msg["media_expired"] = True
-    return messages
+def _team_chat_mark_media_expiry(messages):
+    raise PermissionError('canonical_private_team_media_required')
+
 
 # ── Присутствие в чате команды (эфемерно, в памяти процесса) ──────────────
 # Кто онлайн (держит чат открытым) и кто печатает. Обновляется на каждом
@@ -10642,293 +9682,38 @@ def _normalize_team_voice_bytes(raw: bytes) -> tuple[bytes, float]:
 
 
 async def team_chat_normalize_voice_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team_chat/normalize_voice — prepare voice media for iOS-safe playback."""
-    import base64 as _b64
-
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if not _is_staff_info(info):
-        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
-    b64 = str(body.get("media_b64") or "")
-    if "," in b64 and b64[:64].lower().startswith("data:"):
-        b64 = b64.split(",", 1)[1]
-    if not b64:
-        return _cabinet_response({"error": "empty", "message": "Пустое голосовое."}, status=400)
-    if len(b64) > 11 * 1024 * 1024:
-        return _cabinet_response({"error": "too_large", "message": "Голосовое слишком большое."}, status=413)
-    try:
-        raw = _b64.b64decode(b64, validate=True)
-    except Exception:
-        return _cabinet_response({"error": "bad_base64", "message": "Не удалось прочитать голосовое."}, status=400)
-    try:
-        out, dur = await asyncio.to_thread(_normalize_team_voice_bytes, raw)
-    except Exception as e:
-        logger.warning("team voice normalize failed: %s", e)
-        return _cabinet_response({"error": "normalize_failed", "message": "Не удалось подготовить голосовое."}, status=422)
-    return _cabinet_response({
-        "ok": True,
-        "media_b64": _b64.b64encode(out).decode("ascii"),
-        "media_name": "voice.m4a",
-        "media_mime": "audio/mp4",
-        "media_ext": "m4a",
-        "media_size": len(out),
-        "media_dur": dur,
-    })
+    from canonical_team_communications import retired
+    return _cabinet_response(retired(), status=410)
 
 
-async def _push_team_message(app, sender_chat_id: int, sender_name: str, text: str,
-                             media_kind: str = "") -> None:
-    """Новое сообщение команды → всем сотрудникам, кроме отправителя:
-    Telegram (у каждого привязан chat_id — доходит всегда) + Web Push (best-effort)."""
-    # Текст уведомления: если есть подпись — её (с эмодзи-префиксом вложения),
-    # иначе человекочитаемый ярлык вложения («Голосовое сообщение» и т.п.).
-    label = (text or "").strip()
-    if not label:
-        label = _TEAM_MEDIA_LABEL.get(media_kind, "Вложение")
-    elif media_kind:
-        label = _TEAM_MEDIA_PREFIX.get(media_kind, "") + label
-    recips: dict = {}  # chat_id -> master_dict | None
-    try:
-        for m in database.list_masters():
-            cid = m.get("telegram_chat_id")
-            if cid:
-                recips[int(cid)] = m
-    except Exception as e:
-        logger.error(f"team_chat recips masters: {e}")
-    try:
-        for aid in database.list_admins():
-            if int(aid) not in recips:
-                recips[int(aid)] = None
-    except Exception as e:
-        logger.error(f"team_chat recips admins: {e}")
-    recips.pop(int(sender_chat_id), None)
-    snippet = label if len(label) <= 140 else label[:139] + "…"
-    for cid, m in recips.items():
-        try:
-            await app.bot.send_message(
-                chat_id=cid,
-                text=(f"💬 *{sender_name}* — команда:\n{label}\n\n"
-                      f"_Ответить — в приложении, вкладка «Чат»._"),
-                parse_mode="Markdown",
-            )
-        except Exception as e:
-            logger.info(f"team_chat tg → {cid}: {e}")
-        try:
-            if m is not None:
-                await _send_master_push(m, title=f"💬 {sender_name}", body=snippet,
-                                        url="/app/?team=1", tag="team-chat",
-                                        data={"event": "team_chat"})
-            else:
-                await _send_client_push(cid, title=f"💬 {sender_name}", body=snippet,
-                                        url="/app/?team=1", tag="team-chat",
-                                        data={"event": "team_chat"})
-        except Exception:
-            pass
+
+async def _push_team_message(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_Communication_Delivery_required')
+
 
 
 async def team_chat_send_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team_chat/send — отправить сообщение во внутренний чат команды."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = int(tg_user["id"])
-    info = _panel_resolve_role(tg_id)
-    if not _is_staff_info(info):
-        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
-    text = (body.get("text") or "").strip()[:2000]
-    # Вложение (фото/видео/голос/файл). Байты сюда НЕ приходят — прокси на Beget
-    # уже записал файл и прислал только готовый media_url + метаданные.
-    media_kind = (body.get("media_kind") or "").strip()[:16]
-    media_url = (body.get("media_url") or "").strip()[:512]
-    media_name = (body.get("media_name") or "").strip()[:200]
-    media_mime = (body.get("media_mime") or "").strip()[:80]
-    try:
-        media_size = int(body.get("media_size") or 0)
-    except Exception:
-        media_size = 0
-    try:
-        media_dur = float(body.get("media_dur") or 0)
-    except Exception:
-        media_dur = 0
-    # Анти-инъекция: ссылка обязана быть из нашего media-каталога (защита от
-    # прямого POST в обход прокси с произвольным внешним URL).
-    if media_url and not media_url.startswith(TEAM_MEDIA_URL_PREFIX):
-        return _cabinet_response({"error": "bad_media", "message": "Недопустимое вложение."}, status=400)
-    has_media = bool(media_kind and media_url)
-    if not has_media:
-        media_kind = media_url = media_name = media_mime = ""
-        media_size = 0
-        media_dur = 0
-    if not text and not has_media:
-        return _cabinet_response({"error": "empty", "message": "Пустое сообщение."}, status=400)
-    sender_name = (info.get("master_name") or info.get("name")
-                   or tg_user.get("first_name") or "Сотрудник")
-    _presence_touch(tg_id, sender_name, sending=True)
-    msg_id = await asyncio.to_thread(
-        database.add_staff_message, tg_id, sender_name, text,
-        media_kind, media_url, media_name, media_mime, media_size, media_dur)
-    maya_query = ""
-    if text and not has_media:
-        try:
-            import barber_knowledge
-            maya_query = barber_knowledge.extract_team_query(text)
-        except Exception as e:
-            logger.error(f"team_chat maya extract: {e}")
+    from canonical_team_communications import handle
+    return await handle(request, 'send')
 
-    async def _maya_bg(query: str):
-        try:
-            import barber_knowledge
-            payload = await asyncio.to_thread(barber_knowledge.answer_payload, query)
-            reply = (payload.get("text") or "").strip()
-            images = payload.get("images") or []
-            if reply:
-                await asyncio.to_thread(
-                    database.add_staff_message,
-                    0,
-                    "MAYA · наставник",
-                    reply,
-                    "", "", "", "", 0, 0,
-                )
-            for img in images[:2]:
-                url = (img.get("url") or "").strip()
-                if not url:
-                    continue
-                await asyncio.to_thread(
-                    database.add_staff_message,
-                    0,
-                    "MAYA · наставник",
-                    img.get("title") or "Схема из базы знаний",
-                    "image",
-                    url,
-                    img.get("name") or "",
-                    "image/jpeg",
-                    0,
-                    0,
-                )
-        except Exception as e:
-            logger.error(f"team_chat maya reply: {e}")
-
-    if maya_query:
-        _mt = asyncio.create_task(_maya_bg(maya_query))
-        _panel_bg_tasks.add(_mt)
-        _mt.add_done_callback(_panel_bg_tasks.discard)
-    # Пуши шлём в фоне (fire-and-forget). Telegram идёт через единый прокси и может
-    # тормозить × N получателей — нельзя держать ответ синхронно: Beget-прокси ждёт
-    # max 25с, по таймауту считает медиафайл «осиротевшим» и удаляет его (@unlink),
-    # хотя сообщение уже сохранено выше → потом голосовое отдаёт 404. Отвечаем сразу.
-    async def _push_bg():
-        try:
-            await _push_team_message(request.app["bot_app"], tg_id, sender_name, text, media_kind)
-        except Exception as e:
-            logger.error(f"team_chat push: {e}")
-    _pt = asyncio.create_task(_push_bg())
-    _panel_bg_tasks.add(_pt)
-    _pt.add_done_callback(_panel_bg_tasks.discard)
-    return _cabinet_response({"ok": True, "id": msg_id})
 
 
 async def team_chat_upload_auth_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team_chat/upload_auth — lightweight staff auth before large media upload."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if not _is_staff_info(info):
-        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
-    return _cabinet_response({"ok": True})
+    from canonical_team_communications import handle
+    return await handle(request, 'reserve')
+
 
 
 async def team_chat_delete_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team_chat/delete — удалить своё сообщение из чата команды."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = int(tg_user["id"])
-    info = _panel_resolve_role(tg_id)
-    if not _is_staff_info(info):
-        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
-    try:
-        msg_id = int(body.get("id") or body.get("message_id") or 0)
-    except Exception:
-        msg_id = 0
-    if msg_id <= 0:
-        return _cabinet_response({"error": "bad_id", "message": "Не найдено сообщение."}, status=400)
+    from canonical_team_communications import handle
+    return await handle(request, 'withdraw')
 
-    result = await asyncio.to_thread(database.delete_staff_message, msg_id, tg_id)
-    if not result.get("ok"):
-        reason = result.get("reason")
-        if reason == "forbidden":
-            return _cabinet_response({"error": "forbidden", "message": "Можно удалить только своё сообщение."}, status=403)
-        return _cabinet_response({"error": "not_found", "message": "Сообщение уже удалено."}, status=404)
-    msg = result.get("message") or {}
-    return _cabinet_response({
-        "ok": True,
-        "id": msg_id,
-        "media_url": msg.get("media_url") or "",
-    })
 
 
 async def team_chat_fetch_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team_chat/fetch — забрать сообщения. Тело: {since_id?}.
-    since_id=0 → последние 50, если не передан session_only=1.
-    session_only=1 → начать новую пустую сессию и читать только новые сообщения."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = int(tg_user["id"])
-    info = _panel_resolve_role(tg_id)
-    if not _is_staff_info(info):
-        return _cabinet_response({"error": "forbidden"}, status=403)
-    try:
-        since_id = int(body.get("since_id") or 0)
-    except Exception:
-        since_id = 0
-    session_only = bool(body.get("session_only"))
-    sender_name = (info.get("master_name") or info.get("name")
-                   or tg_user.get("first_name") or "Сотрудник")
-    if since_id <= 0 and session_only:
-        latest_id = await asyncio.to_thread(database.get_staff_latest_message_id)
-        _presence_touch(tg_id, sender_name, typing=bool(body.get("typing")))
-        online, typing = _presence_snapshot(tg_id)
-        return _cabinet_response({
-            "messages": [],
-            "me": tg_id,
-            "online": online,
-            "typing": typing,
-            "latest_id": latest_id,
-            "session_only": True,
-        })
-    if since_id > 0:
-        msgs = await asyncio.to_thread(database.get_staff_messages_since, since_id, 100)
-    else:
-        msgs = await asyncio.to_thread(database.get_staff_messages_recent, 50)
-    msgs = _team_chat_mark_media_expiry(msgs)
-    # присутствие: сам факт поллинга = «я онлайн»; флаг typing — что сейчас набираю
-    _presence_touch(tg_id, sender_name, typing=bool(body.get("typing")))
-    online, typing = _presence_snapshot(tg_id)
-    return _cabinet_response({"messages": msgs, "me": tg_id, "online": online, "typing": typing})
+    from canonical_team_communications import handle
+    return await handle(request, 'feed')
+
 
 
 async def panel_journal_attendance_handler(request: web.Request) -> web.Response:
@@ -11203,6 +9988,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/cabinet/link-phone", cabinet_options_handler)
     web_app.router.add_post("/api/booking/prefill", booking_prefill_handler)
     web_app.router.add_options("/api/booking/prefill", cabinet_options_handler)
+    web_app.router.add_post("/api/client/feedback", client_native_feedback_handler)
+    web_app.router.add_options("/api/client/feedback", cabinet_options_handler)
     web_app.router.add_post("/api/client/cancel-record", client_cancel_record_handler)
     web_app.router.add_options("/api/client/cancel-record", cabinet_options_handler)
     web_app.router.add_post("/api/client/reschedule-record", client_reschedule_record_handler)

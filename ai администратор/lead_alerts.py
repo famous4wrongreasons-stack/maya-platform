@@ -142,64 +142,7 @@ def on_booking_confirmed(client_id: int):
 # ─── Главный scheduler-job ──────────────────────────────────────────────
 
 async def scan_and_alert(app: Application) -> dict:
-    """Тик scheduler'а. Ищет зависшие эпизоды и шлёт админам."""
-    candidates = database.find_pending_lead_alerts(
-        min_idle_minutes=IDLE_MINUTES_TO_ALERT,
-        max_idle_minutes=MAX_IDLE_MINUTES,
-    )
-    if not candidates:
-        return {"checked": 0, "alerted": 0}
-
-    admins = database.list_admins()
-    if not admins:
-        logger.warning("lead_alerts: нет админов для рассылки")
-        return {"checked": len(candidates), "alerted": 0}
-
-    alerted = 0
-    for state in candidates:
-        client_id = state["client_id"]
-        client = database.get_client_by_id(client_id)
-        if not client:
-            continue
-
-        # Только клиенты с привязанным Telegram считаются «заявкой» — иначе
-        # это случайный человек, не наша зона ответственности.
-        if not client.get("telegram_chat_id"):
-            continue
-
-        text = _build_alert_text(state, client)
-        try:
-            import maya_inbox_bridge
-
-            accepted = await maya_inbox_bridge.publish_inbox_item(
-                type="hanging_lead",
-                title="Зависшая заявка",
-                body_text=text,
-                source_seed=f"hanging_lead|{client_id}|{state.get('updated_at')}",
-                telegram_chat_ids=list(admins),
-                deep_link="/app/?panel=customers",
-                payload={"client_id": client_id},
-                fanout_owners=True,
-                telegram_parse_mode="Markdown",
-                telegram_buttons=[{
-                    "text": "📋 Кто это? (визиты + переписка)",
-                    "callback_data": "dossierc_" + str(client_id),
-                }],
-            )
-        except Exception as exc:
-            logger.warning("lead_alerts Action Engine client_id=%s: %s", client_id, exc)
-            accepted = False
-        if accepted:
-            database.mark_lead_alerted(client_id)
-            alerted += 1
-            logger.info(
-                f"lead_alerts: ⚠️ пинг по client_id={client_id} "
-                f"({client.get('name', '?')})"
-            )
-
-    summary = {"checked": len(candidates), "alerted": alerted}
-    logger.info(f"lead_alerts: scheduler tick {summary}")
-    return summary
+    return {'checked':0,'alerted':0,'status':'retired_unverified_lead_occurrence'}
 
 
 def _build_alert_text(state: dict, client: dict) -> str:

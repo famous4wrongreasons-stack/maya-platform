@@ -19,7 +19,7 @@ function input(
   return {
     operation,
     targetKind: registration.targetKind,
-    targetRef: work ? 'work-item-1' : 'setting-1',
+    targetRef: operation==='tenant_business_configuration' ? 'tenant-config:business_rules' : work ? 'work-item-1' : 'setting-1',
     mutationKey: `g0:${operation}`,
     targetGeneration: 0,
     beforeStateHash: work ? null : hash,
@@ -34,7 +34,8 @@ function input(
     bulkMutation: false,
     intendedMutation: operation,
     mutationPerformed: false,
-    configJson: work ? null : { schema_version: 1 },
+    configJson: operation==='tenant_business_configuration' ? {namespace:'business_rules',revision:1,previousRevisionId:null,content:{rules:[]}} : operation==='staff_notification_preferences' ? {schema_version:1,membershipId:'membership-1',telegramMutedUntil:null} : work ? null : { schema_version: 1 },
+    ...(operation==='tenant_business_configuration' ? {callerId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',semanticCommand:{confirmed:true,namespace:'business_rules',expectedRevision:0,previousRevisionId:null,content:{rules:[]}}} : operation==='staff_notification_preferences' ? {callerId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',semanticCommand:{confirmed:true,durationMinutes:null,expectedGeneration:0}} : {}),
     workItemId: work ? 'work-item-1' : null,
     workItemKind: work ? 'task' : null,
     assigneeUserId: work ? 'user-1' : null,
@@ -48,9 +49,9 @@ function input(
 }
 
 describe('Package 5 Wave 1 canonical contracts', () => {
-  it('registers six paired Shadow/executable capabilities', () => {
+  it('registers six existing and two approved R11 paired capabilities', () => {
     const registry = new ActionCapabilityRegistry();
-    expect(PACKAGE5_WAVE1_REGISTRATIONS).toHaveLength(6);
+    expect(PACKAGE5_WAVE1_REGISTRATIONS).toHaveLength(8);
     for (const registration of PACKAGE5_WAVE1_REGISTRATIONS) {
       const shadow = registry.get(registration.shadowCapability);
       const executable = registry.get(registration.executableCapability);

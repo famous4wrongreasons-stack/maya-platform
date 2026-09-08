@@ -4,6 +4,7 @@ export const ASSISTANT_CAPABILITIES = [
   'finance_analytics',
   'staff_performance',
   'client_return',
+  'weekly_expense_reminders',
 ] as const;
 
 export type AssistantCapability = (typeof ASSISTANT_CAPABILITIES)[number];
@@ -18,6 +19,11 @@ export const ASSISTANT_CAPABILITY_CATALOG: ReadonlyArray<{
   title: string;
   description: string;
 }> = [
+  {
+    key: 'weekly_expense_reminders',
+    title: 'Напоминания о расходах',
+    description: 'По воскресеньям в Telegram. Каждый расход записывается только после подтверждения отдельной карточки.',
+  },
   {
     key: 'daily_brief',
     title: 'План и сводка дня',

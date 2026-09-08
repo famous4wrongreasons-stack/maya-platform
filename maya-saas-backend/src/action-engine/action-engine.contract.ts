@@ -56,6 +56,10 @@ export interface TrustedActionExecutionRequestV1 {
   bookingIntent?: ClientBookingIntentContext;
   /** Server-owned B36 immutable report/slot binding; never HTTP/model authority. */
   ownerReportSlot?: { runId: string; slotKey: string };
+  operationalAlertSlot?: { runId: string; slotKey: string };
+  nativeFeedbackSlot?: { requestId: string; revisionId: string | null; slotKey: string };
+  teamMessageSlot?: { messageId: string; slotKey: string };
+  expenseReminderSlot?: { runId: string; slotKey: string };
 }
 
 export interface Chapter5IntentContextV1 {
@@ -187,6 +191,10 @@ export interface RegisteredActionCapabilityV1 {
 
 export interface NormalizedActionExecutionV1 {
   ownerReportSlot?: { runId: string; slotKey: string };
+  operationalAlertSlot?: { runId: string; slotKey: string };
+  nativeFeedbackSlot?: { requestId: string; revisionId: string | null; slotKey: string };
+  teamMessageSlot?: { messageId: string; slotKey: string };
+  expenseReminderSlot?: { runId: string; slotKey: string };
   bookingIntent?: {
     snapshot: ClientBookingSnapshot;
     hash: string;

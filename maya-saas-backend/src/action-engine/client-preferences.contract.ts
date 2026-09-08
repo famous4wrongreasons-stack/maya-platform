@@ -76,6 +76,7 @@ export function notificationOverrides(
 
 export function verifiedClientChannelCapability(capability: string) {
   return (
+    ['native-feedback.response.execute.v1', 'native-feedback.withdraw.execute.v1'].includes(capability) ||
     capability === 'package5.client-habits.add.execute.v1' ||
     capability === 'package5.client-wanted-slot.add.execute.v1' ||
     /^package5\.wave3\.record-client-consent\.(?:execute|shadow)\.v1$/.test(

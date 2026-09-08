@@ -1,8 +1,14 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { GovernedSettingsReadService } from './governed-settings.read';
+import { GOVERNED_OWNER_ROLES, GOVERNED_STAFF_ROLES, governedConfigurationContent, governedHash, governedNamespace, validateGovernedNormalizedInput, type GovernedOperation } from './governed-settings.contract';
+import { canonicalUtcTransaction } from '../prisma/canonical-utc-transaction';
+import { isPostgresSerializationConflict } from '../common/postgres-transaction-conflict';
 import { attachExistingInvocationReceipt } from '../action-engine/action-invocation-receipt.context';
 
 import {
   BadRequestException,
+  ConflictException,
+  Optional,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -86,6 +92,7 @@ export interface Package5Wave1ShadowResult {
 }
 
 export interface Package5Wave1ExecutionValue {
+  governedCommandHash?: string;
   actionClass: Package5Wave1ActionClass;
   actionExecutionId: string;
   targetRef: string;
@@ -160,7 +167,48 @@ export class Package5Wave1ShadowService {
     private readonly actionEngine: ActionEngineRuntimeService,
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
+    @Optional() private readonly governed?: GovernedSettingsReadService,
   ) {}
+
+  async buildGoverned(tenantId: string, actorUserId: string, operation: GovernedOperation,
+    sourceIntentRef: string, callerId: string, semanticCommand: Record<string,unknown>, now = new Date()) {
+    this.tenantContext.assertTenantId(tenantId);
+    const governed = this.governed;
+    if (!governed) throw new Package5Wave1Error('Governed A22 support unavailable');
+    return canonicalUtcTransaction(this.prisma, async tx => {
+      const actor = await governed.actor(tx, tenantId, actorUserId);
+      let current: Record<string,unknown>, desired: Record<string,unknown>, targetRef: string, generation: number;
+      if (operation === 'tenant_business_configuration') {
+        if (!GOVERNED_OWNER_ROLES.has(actor.role)) throw new ForbiddenException('Current tenant owner required');
+        const namespace=governedNamespace(semanticCommand.namespace);
+        current=await governed.configuration(tx,tenantId,namespace);
+        if(current.revision!==semanticCommand.expectedRevision || current.previousRevisionId!==semanticCommand.previousRevisionId) throw new ConflictException('STALE_CONFIGURATION_REVISION');
+        const content=governedConfigurationContent(namespace,semanticCommand.content,{tenantId,actorUserId,callerId});
+        if(namespace==='business_rules') {
+          const submitted=this.governedRules(semanticCommand.content);
+          const previous=this.governedRules(current.content);
+          if(submitted.some(rule=>rule.id!==null && !previous.some(old=>old.id===rule.id))) throw new BadRequestException('Existing rule identity was not issued in the current tenant revision');
+        }
+        if(namespace==='staff_ai_provider') governed.providerAvailable(content.provider);
+        desired={namespace,revision:Number(current.revision)+1,previousRevisionId:current.previousRevisionId,content};
+        targetRef=`tenant-config:${namespace}`;
+        generation=Number(current.revision);
+      } else {
+        current=await governed.personal(tx,tenantId,actorUserId);
+        targetRef=`staff-notifications:${actorUserId}`;
+        const latest=await tx.actionTargetMutation.findFirst({where:{tenantId,targetKind:'setting',targetRef},orderBy:{targetGeneration:'desc'}});
+        generation=(latest?.targetGeneration??-1)+1;
+        if(generation!==semanticCommand.expectedGeneration)throw new ConflictException('STALE_PREFERENCE_GENERATION');
+        desired={schema_version:1,membershipId:actor.id,telegramMutedUntil:semanticCommand.durationMinutes===null?null:new Date(now.getTime()+Number(semanticCommand.durationMinutes)*60000).toISOString()};
+      }
+      return this.request(tenantId,actorUserId,actor,sourceIntentRef,operation,targetRef,generation,current,desired,{
+        configJson:desired,semanticCommand,callerId,workItemId:null,workItemKind:null,assigneeUserId:null,createdByUserId:null,title:null,bodyText:null,dueAt:null,expectedStatus:null,deliveryProjectionRequired:false,
+      },'execute');
+    },{readOnly:true});
+  }
+  private governedRules(value: unknown): Array<{id:unknown; text:unknown}> {
+    return value && typeof value==='object' && 'rules' in value && Array.isArray(value.rules) ? value.rules as Array<{id:unknown;text:unknown}> : [];
+  }
 
   async planAssistant(
     tenantId: string,
@@ -869,6 +917,7 @@ export class Package5Wave1ExecutableService {
     private readonly ingress: CanonicalActionIngressService,
     private readonly kernel: ActionEngineKernel,
     private readonly now: () => Date = () => new Date(),
+    private readonly governed?: GovernedSettingsReadService,
   ) {}
 
   async execute(
@@ -918,6 +967,7 @@ export class Package5Wave1ExecutableService {
     const lockTargetKind = this.text(input.targetKind);
     const lockTargetRef = this.text(input.targetRef);
     return this.serializable(async (tx) => {
+      if (input.operation === 'tenant_business_configuration' || input.operation === 'staff_notification_preferences') await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
       await tx.$executeRaw(
         Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${execution.tenantId}:p5-wave1:${lockTargetKind}:${lockTargetRef}`}, 0))`,
       );
@@ -955,14 +1005,39 @@ export class Package5Wave1ExecutableService {
       execution.tenantId,
       execution.actorUserId!,
       operation,
+      input,
     );
     if (package5Wave1Hash(current) !== input.beforeStateHash) {
-      throw new Package5Wave1Error(
-        'Setting state changed after canonical planning',
-      );
+      if (operation==='tenant_business_configuration' || operation==='staff_notification_preferences') throw new ConflictException('STALE_CONFIGURATION_REVISION');
+      throw new Package5Wave1Error('Setting state changed after canonical planning');
+    }
+    const isGoverned = operation==='tenant_business_configuration' || operation==='staff_notification_preferences';
+    if(isGoverned) {
+      validateGovernedNormalizedInput(operation,input);
+      const support=this.governed;
+      if(!support)throw new Package5Wave1Error('Governed A22 support unavailable');
+      const member=await support.actor(tx,execution.tenantId,execution.actorUserId!);
+      if(member.id!==input.actorMembershipId)throw new ForbiddenException('Admitted membership was replaced');
+      if(operation==='tenant_business_configuration') {
+        if(!GOVERNED_OWNER_ROLES.has(member.role))throw new ForbiddenException('Current owner required');
+        if(config.namespace==='staff_ai_provider')support.providerAvailable(this.record(config.content).provider);
+      } else if(!GOVERNED_STAFF_ROLES.has(member.role) || input.targetRef!==`staff-notifications:${execution.actorUserId}` || config.membershipId!==member.id)throw new ForbiddenException('Personal preference target mismatch');
+      const latest=await tx.actionTargetMutation.findFirst({where:{tenantId:execution.tenantId,targetKind:'setting',targetRef:this.text(input.targetRef)},orderBy:{targetGeneration:'desc'}});
+      if((latest?.targetGeneration??-1)+1!==input.targetGeneration)throw new ConflictException('STALE_CONFIGURATION_GENERATION');
     }
     const noOp = input.noOp === true;
     if (!noOp) {
+      if(operation==='tenant_business_configuration') {
+        const namespace=governedNamespace(config.namespace);
+        const content=governedConfigurationContent(namespace,config.content);
+        await tx.tenantBusinessConfigurationRevision.create({data:{id:randomUUID(),tenantId:execution.tenantId,namespace,
+          revision:Number(config.revision),previousRevisionId:config.previousRevisionId===null?null:this.text(config.previousRevisionId),actionExecutionId:execution.id,
+          actorUserId:execution.actorUserId!,actorMembershipId:this.text(input.actorMembershipId),contractVersion:1,
+          contentHash:governedHash(`maya.tenant-configuration-content/1/${namespace}`,content),encryptedContent:this.governed!.encrypt(content),createdAt:this.now()}});
+      } else if(operation==='staff_notification_preferences') {
+        await tx.dashboardPreference.upsert({where:{userId_tenantId_section:{tenantId:execution.tenantId,userId:execution.actorUserId!,section:'staff_notifications'}},
+          create:{tenantId:execution.tenantId,userId:execution.actorUserId!,section:'staff_notifications',configJson:config as Prisma.InputJsonValue},update:{configJson:config as Prisma.InputJsonValue}});
+      } else
       if (
         operation === 'assistant_preferences' ||
         operation === 'finance_preferences'
@@ -1082,7 +1157,12 @@ export class Package5Wave1ExecutableService {
     tenantId: string,
     userId: string,
     operation: Package5Wave1Operation,
+    input?: Record<string,unknown>,
   ): Promise<Record<string, unknown>> {
+    if(operation==='tenant_business_configuration' || operation==='staff_notification_preferences') {
+      if(!this.governed)throw new Package5Wave1Error('Governed A22 support unavailable');
+      return operation==='tenant_business_configuration' ? this.governed.configuration(tx,tenantId,governedNamespace(this.record(input?.configJson).namespace)) : this.governed.personal(tx,tenantId,userId);
+    }
     if (
       operation === 'assistant_preferences' ||
       operation === 'finance_preferences'
@@ -1275,6 +1355,7 @@ export class Package5Wave1ExecutableService {
     deliveryProjectionRequired: boolean,
   ): Package5Wave1ExecutionValue {
     return {
+      ...(['tenant_business_configuration','staff_notification_preferences'].includes(String(input.operation)) ? {governedCommandHash:governedHash('maya.governed-command/1',input.semanticCommand)} : {}),
       actionClass: execution.actionClass as Package5Wave1ActionClass,
       actionExecutionId: execution.id,
       targetRef: this.text(input.targetRef),
@@ -1301,24 +1382,7 @@ export class Package5Wave1ExecutableService {
           isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
         });
       } catch (error) {
-        const code =
-          error instanceof Prisma.PrismaClientKnownRequestError
-            ? error.code
-            : '';
-        const dbCode =
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          typeof error.meta?.code === 'string'
-            ? error.meta.code
-            : '';
-        const message = error instanceof Error ? error.message : '';
-        if (
-          (code === 'P2034' ||
-            dbCode === '40001' ||
-            (code === 'P2010' &&
-              /40001|serializ|write conflict/i.test(message))) &&
-          attempt < 3
-        )
-          continue;
+        if (isPostgresSerializationConflict(error) && attempt < 3) continue;
         throw error;
       }
     }

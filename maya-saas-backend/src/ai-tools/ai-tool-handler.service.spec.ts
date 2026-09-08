@@ -336,7 +336,7 @@ describe('AiToolHandlerService output minimization', () => {
         {
           id: 'appointment-a',
           status: 'confirmed',
-          start_at: '2026-07-20T10:00:00.000Z',
+          start_at: '2099-07-20T10:00:00.000Z',
           branch: { id: 'branch-a', name: 'Филиал', secret: 'hidden' },
           staff: { id: 'staff-a', name: 'Анна', phone: '+70000000000' },
           services: [

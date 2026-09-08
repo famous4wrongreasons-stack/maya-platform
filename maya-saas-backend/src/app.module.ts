@@ -1,4 +1,7 @@
+import { ExpenseIntakeModule } from './expense-intake/expense-intake.module';
 import { MarketingModule } from './marketing/marketing.module';
+import { PublicCommunityModule } from './public-community/public-community.module';
+import { TeamCommunicationsModule } from './team-communications/team-communications.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
@@ -34,6 +37,7 @@ import { EventsModule } from './events/events.module';
 import { InboxModule } from './inbox/inbox.module';
 import { LoyaltyModule } from './loyalty/loyalty.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
+import { OperationalAlertsModule } from './operational-alerts/operational-alerts.module';
 import { OwnerReportsModule } from './owner-reports/owner-reports.module';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -57,6 +61,9 @@ import { SystemMetricsService } from './system-metrics.service';
 
 @Module({
   imports: [
+    ExpenseIntakeModule,
+    PublicCommunityModule,
+    TeamCommunicationsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
@@ -88,6 +95,7 @@ import { SystemMetricsService } from './system-metrics.service';
     InboxModule,
     LoyaltyModule,
     OwnerReportsModule,
+    OperationalAlertsModule,
     ServicesModule,
     StaffModule,
     AppointmentsModule,

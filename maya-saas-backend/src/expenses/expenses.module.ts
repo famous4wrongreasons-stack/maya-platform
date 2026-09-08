@@ -1,3 +1,6 @@
+import { CashDeclarationService } from './cash-declaration.service';
+import { CashDeclarationController } from './cash-declaration.controller';
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { Module } from '@nestjs/common';
 
 import { AuditLogModule } from '../audit-log/audit-log.module';
@@ -18,13 +21,15 @@ import { P407ExpenseExecutableService } from './p4-07-expense-executable.service
 
 @Module({
   imports: [
+    EntitlementsModule,
     ActionEngineModule,
     AuditLogModule,
     EncryptionModule,
     TenantsModule,
   ],
-  controllers: [ExpensesController, ExpenseCanonicalShadowController],
+  controllers: [ExpensesController, ExpenseCanonicalShadowController, CashDeclarationController],
   providers: [
+    CashDeclarationService,
     ExpensesService,
     ExpenseCanonicalShadowService,
     P407ExpenseCanonicalCutoverService,

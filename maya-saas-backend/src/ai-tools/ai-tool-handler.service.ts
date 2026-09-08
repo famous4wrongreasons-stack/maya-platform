@@ -1,3 +1,4 @@
+import { GovernedSettingsReadService } from '../package5-wave1/governed-settings.read';
 import {
   BadRequestException,
   ForbiddenException,
@@ -216,6 +217,7 @@ export class AiToolHandlerService {
     private readonly businessContentService?: BusinessContentService,
     private readonly canonicalWave1?: Package5Wave1CanonicalCutoverService,
     private readonly canonicalWave3?: Package5Wave3CanonicalCutoverService,
+    private readonly governedSettings?: GovernedSettingsReadService,
   ) {}
 
   async execute(
@@ -459,7 +461,7 @@ export class AiToolHandlerService {
       principal.userId,
     );
     return {
-      appointments: appointments.map((item) => this.safeAppointment(item)),
+      appointments: (await this.governedSettings?.ownHistoryEnabled(principal.tenantId) ? appointments : appointments.filter(item=>Date.parse(String(item.start_at))>=Date.now())).map((item) => this.safeAppointment(item)),
     };
   }
 
@@ -2173,6 +2175,7 @@ export class AiToolHandlerService {
         category,
         amountKopecks,
         currency: 'RUB',
+        ...(typeof args.branch_id === 'string' ? {branchId: args.branch_id} : {}),
         occurredAt: occurredAt.toISOString(),
         ...(note ? { note } : {}),
       },

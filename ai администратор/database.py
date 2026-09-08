@@ -495,18 +495,7 @@ def init_db():
                 PRIMARY KEY (user_id, day)
             );
 
-            -- Расходы по салону, которые присылает ассистент Антон (кофе, уборщица,
-            -- касс. лента и т.п.). Попадают в дневной отчёт владельцу за свою дату.
-            CREATE TABLE IF NOT EXISTS salon_expenses (
-                id         INTEGER PRIMARY KEY AUTOINCREMENT,
-                date       TEXT    NOT NULL,   -- YYYY-MM-DD (день, к которому относится расход)
-                item       TEXT    NOT NULL,   -- что куплено/оплачено
-                amount     INTEGER NOT NULL,   -- рубли
-                source     TEXT    NOT NULL DEFAULT 'anton',
-                created_at TEXT    NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_salon_expenses_date
-                ON salon_expenses (date);
+            -- R13: legacy expense DDL retired; historical rows are never migrated.
 
             -- Касса со слов Антона: сколько всего налички в кассе и сколько получено
             -- наличкой за конкретный день. Для сверки с расчётной наличкой YClients
@@ -1641,140 +1630,50 @@ _STAFF_MSG_SELECT = ("id, sender_chat_id, sender_name, text, created_at, "
                      "media_kind, media_url, media_name, media_mime, media_size, media_dur")
 
 
-def _staff_messages_ensure(conn) -> None:
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS staff_messages ("
-        "  id          INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "  sender_chat_id INTEGER NOT NULL,"
-        "  sender_name TEXT,"
-        "  text        TEXT NOT NULL,"
-        "  created_at  TEXT NOT NULL,"
-        "  media_kind  TEXT,"      # '' | 'image' | 'video' | 'voice' | 'file'
-        "  media_url   TEXT,"      # публичная ссылка на файл (на Beget)
-        "  media_name  TEXT,"      # исходное имя файла
-        "  media_mime  TEXT,"
-        "  media_size  INTEGER,"   # размер файла в байтах
-        "  media_dur   REAL"       # длительность (сек) для голоса/видео
-        ")"
-    )
-    # Идемпотентная миграция: в проде таблица уже создана (старая 5-колоночная),
-    # а CREATE IF NOT EXISTS колонок не добавляет — дописываем по одной.
-    for _col, _typ in (("media_kind", "TEXT"), ("media_url", "TEXT"),
-                       ("media_name", "TEXT"), ("media_mime", "TEXT"),
-                       ("media_size", "INTEGER"), ("media_dur", "REAL")):
-        try:
-            conn.execute(f"ALTER TABLE staff_messages ADD COLUMN {_col} {_typ}")
-        except Exception:
-            pass  # колонка уже есть
+def _staff_messages_ensure(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def add_staff_message(sender_chat_id: int, sender_name: str, text: str,
-                      media_kind: str = "", media_url: str = "", media_name: str = "",
-                      media_mime: str = "", media_size: int = 0,
-                      media_dur: float = 0) -> int:
-    """Сохраняет сообщение команды (текст и/или вложение), возвращает его id."""
-    with _db() as conn:
-        _staff_messages_ensure(conn)
-        cur = conn.execute(
-            "INSERT INTO staff_messages "
-            "(sender_chat_id, sender_name, text, created_at, "
-            " media_kind, media_url, media_name, media_mime, media_size, media_dur) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (int(sender_chat_id), str(sender_name or "")[:80], str(text or "")[:2000],
-             datetime.now().isoformat(timespec="seconds"),
-             str(media_kind or "")[:16], str(media_url or "")[:512],
-             str(media_name or "")[:200], str(media_mime or "")[:80],
-             int(media_size or 0), float(media_dur or 0)),
-        )
-        return int(cur.lastrowid)
+
+def add_staff_message(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def get_staff_messages_since(since_id: int = 0, limit: int = 100) -> list[dict]:
-    """Сообщения новее since_id (для поллинга открытого чата)."""
-    with _db() as conn:
-        _staff_messages_ensure(conn)
-        rows = conn.execute(
-            f"SELECT {_STAFF_MSG_SELECT} FROM staff_messages "
-            "WHERE id > ? ORDER BY id ASC LIMIT ?",
-            (int(since_id or 0), int(limit)),
-        ).fetchall()
-        return [dict(r) for r in rows]
+
+def get_staff_messages_since(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def get_staff_messages_recent(limit: int = 50) -> list[dict]:
-    """Последние N сообщений в хронологическом порядке (первая загрузка чата)."""
-    with _db() as conn:
-        _staff_messages_ensure(conn)
-        rows = conn.execute(
-            f"SELECT {_STAFF_MSG_SELECT} FROM staff_messages "
-            "ORDER BY id DESC LIMIT ?",
-            (int(limit),),
-        ).fetchall()
-        return list(reversed([dict(r) for r in rows]))
+
+def get_staff_messages_recent(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def get_staff_latest_message_id() -> int:
-    """Последний id сообщения команды. Нужен для новой пустой сессии чата."""
-    with _db() as conn:
-        _staff_messages_ensure(conn)
-        row = conn.execute("SELECT COALESCE(MAX(id), 0) AS id FROM staff_messages").fetchone()
-        return int((row or {}).get("id") or 0)
+
+def get_staff_latest_message_id(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def delete_staff_message(message_id: int, sender_chat_id: int) -> dict:
-    """Удаляет своё сообщение команды. Чужие сообщения не трогает."""
-    with _db() as conn:
-        _staff_messages_ensure(conn)
-        row = conn.execute(
-            f"SELECT {_STAFF_MSG_SELECT} FROM staff_messages WHERE id = ?",
-            (int(message_id or 0),),
-        ).fetchone()
-        if not row:
-            return {"ok": False, "reason": "not_found"}
-        msg = dict(row)
-        if int(msg.get("sender_chat_id") or 0) != int(sender_chat_id or 0):
-            return {"ok": False, "reason": "forbidden"}
-        conn.execute(
-            "DELETE FROM staff_messages WHERE id = ? AND sender_chat_id = ?",
-            (int(message_id), int(sender_chat_id)),
-        )
-        return {"ok": True, "message": msg}
+
+def delete_staff_message(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def mute_master(telegram_chat_id: int, hours: float) -> bool:
-    """Заглушает уведомления для мастера на N часов. False если мастер не найден."""
-    until = (datetime.now() + timedelta(hours=hours)).isoformat(timespec="seconds")
-    with _db() as conn:
-        cur = conn.execute(
-            "UPDATE masters_telegram SET mute_until = ? WHERE telegram_chat_id = ?",
-            (until, telegram_chat_id),
-        )
-        return cur.rowcount > 0
+
+def mute_master(telegram_chat_id: int, hours: float):
+    raise PermissionError('canonical_A22_confirmed_configuration_required')
 
 
-def unmute_master(telegram_chat_id: int) -> bool:
-    """Снимает mute с мастера."""
-    with _db() as conn:
-        cur = conn.execute(
-            "UPDATE masters_telegram SET mute_until = NULL WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        )
-        return cur.rowcount > 0
+
+def unmute_master(telegram_chat_id: int):
+    raise PermissionError('canonical_A22_confirmed_configuration_required')
+
 
 
 def is_master_muted(telegram_chat_id: int) -> bool:
-    """True, если у мастера сейчас активен mute."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT mute_until FROM masters_telegram WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        ).fetchone()
-        if not row or not row["mute_until"]:
-            return False
-        try:
-            return datetime.fromisoformat(row["mute_until"]) > datetime.now()
-        except Exception:
-            return False
+    from canonical_governed_settings import telegram_muted
+    return telegram_muted(telegram_chat_id)
+
 
 
 # ─── Кто инициировал перенос записи (эфемерно, для webhook-уведомления мастеру) ──
@@ -2109,6 +2008,8 @@ def get_ai_advice_for_record(record_id: int) -> dict | None:
 
 def get_setting(key: str, default: str | None = None) -> str | None:
     """Возвращает значение настройки или default, если не задана."""
+    from canonical_governed_settings import reject_legacy_setting_key
+    reject_legacy_setting_key(key)
     with _db() as conn:
         row = conn.execute(
             "SELECT value FROM settings WHERE key = ?", (key,)
@@ -2118,6 +2019,8 @@ def get_setting(key: str, default: str | None = None) -> str | None:
 
 def set_setting(key: str, value: str):
     """Сохраняет настройку (UPSERT)."""
+    from canonical_governed_settings import reject_legacy_setting_key
+    reject_legacy_setting_key(key)
     with _db() as conn:
         conn.execute(
             "INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?) "
@@ -2152,73 +2055,37 @@ def set_maya_tenant_status(tenant_id: int, status: str) -> bool:
 
 # ─── Расходы по салону (от ассистента Антона) ─────────────────────────────
 
-def add_salon_expense(date: str, item: str, amount: int, source: str = "anton") -> int:
-    """Добавляет один расход по салону за дату. amount — рубли (int)."""
-    with _db() as conn:
-        cur = conn.execute(
-            "INSERT INTO salon_expenses (date, item, amount, source, created_at) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (date, (item or "").strip()[:120], int(round(amount or 0)), source, _now()),
-        )
-        return cur.lastrowid
+def add_salon_expense(*args, **kwargs):
+    raise PermissionError('canonical_P407_expense_owner_required')
 
 
-def get_salon_expenses(date: str) -> list[dict]:
-    """Список расходов по салону за дату: [{id, item, amount}]."""
-    with _db() as conn:
-        rows = conn.execute(
-            "SELECT id, item, amount FROM salon_expenses WHERE date = ? ORDER BY id",
-            (date,),
-        ).fetchall()
-        return [{"id": r["id"], "item": r["item"], "amount": r["amount"]} for r in rows]
+
+def get_salon_expenses(*args, **kwargs):
+    raise PermissionError('canonical_P407_expense_owner_required')
 
 
-def sum_salon_expenses(date: str) -> int:
-    """Сумма расходов по салону за дату."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT COALESCE(SUM(amount), 0) AS s FROM salon_expenses WHERE date = ?",
-            (date,),
-        ).fetchone()
-        return int(row["s"] or 0)
+
+def sum_salon_expenses(*args, **kwargs):
+    raise PermissionError('canonical_P407_expense_owner_required')
 
 
-def clear_salon_expenses(date: str) -> int:
-    """Удаляет все расходы за дату (для повторного ввода). Возвращает кол-во удалённых."""
-    with _db() as conn:
-        cur = conn.execute("DELETE FROM salon_expenses WHERE date = ?", (date,))
-        return cur.rowcount or 0
+
+def clear_salon_expenses(*args, **kwargs):
+    raise PermissionError('canonical_P407_expense_owner_required')
+
 
 
 # ─── Касса со слов Антона (для сверки в дневном отчёте) ──────────────────────
 
 def set_cash_log(date: str, total_till: int, day_cash: int, entered_by=None) -> None:
-    """Сохраняет/перезаписывает кассу за день: всего налички + наличка за день."""
-    try:
-        by = int(entered_by) if entered_by else None
-    except Exception:
-        by = None
-    with _db() as conn:
-        conn.execute(
-            "INSERT INTO cash_log (date, total_till, day_cash, entered_by, ts) "
-            "VALUES (?, ?, ?, ?, ?) "
-            "ON CONFLICT(date) DO UPDATE SET total_till=excluded.total_till, "
-            "day_cash=excluded.day_cash, entered_by=excluded.entered_by, ts=excluded.ts",
-            (date, int(total_till), int(day_cash), by, _now()),
-        )
+    raise PermissionError('canonical_cash_declaration_confirmation_required')
+
 
 
 def get_cash_log(date: str) -> dict | None:
-    """Касса со слов Антона за дату или None."""
-    try:
-        with _db() as conn:
-            row = conn.execute(
-                "SELECT date, total_till, day_cash, entered_by, ts FROM cash_log WHERE date = ?",
-                (date,),
-            ).fetchone()
-            return dict(row) if row else None
-    except Exception:
-        return None
+    # Legacy history remains an archive, never a current verified observation.
+    return None
+
 
 
 # ─── Лист ожидания на занятое время ───────────────────────────────────────
@@ -2481,56 +2348,19 @@ def schedule_review_request(
     staff_id: int | None,
     delay_hours: int = 3,
 ) -> bool:
-    """
-    Планирует запрос на отзыв через delay_hours после закрытия визита.
-    Возвращает True если запланировали, False если уже было запланировано
-    для этой пары (client_id, record_id) — защита от двойного запроса.
-    """
-    visit_closed_at = _now()
-    send_after = (datetime.now() + timedelta(hours=delay_hours)).isoformat(
-        timespec="seconds"
-    )
-    with _db() as conn:
-        try:
-            conn.execute(
-                "INSERT INTO review_requests "
-                "(client_id, record_id, staff_id, visit_closed_at, send_after, status) "
-                "VALUES (?, ?, ?, ?, ?, 'pending')",
-                (client_id, record_id, staff_id, visit_closed_at, send_after),
-            )
-            return True
-        except sqlite3.IntegrityError:
-            return False
+    raise PermissionError('canonical_native_feedback_executor_required')
 
 
 def pending_review_requests_to_send(now_iso: str | None = None) -> list[dict]:
-    """Запросы, у которых статус 'pending' и send_after уже наступил."""
-    now_iso = now_iso or _now()
-    with _db() as conn:
-        rows = conn.execute(
-            "SELECT * FROM review_requests "
-            "WHERE status = 'pending' AND send_after <= ? "
-            "ORDER BY send_after",
-            (now_iso,),
-        ).fetchall()
-        return [dict(r) for r in rows]
+    return []
 
 
 def mark_review_request_sent(review_id: int):
-    with _db() as conn:
-        conn.execute(
-            "UPDATE review_requests SET status = 'sent', sent_at = ? WHERE id = ?",
-            (_now(), review_id),
-        )
+    raise PermissionError('canonical_native_feedback_executor_required')
 
 
 def mark_review_request_failed(review_id: int, reason: str = "send_failed"):
-    """Когда клиент заблокировал бот или ошибка отправки."""
-    with _db() as conn:
-        conn.execute(
-            "UPDATE review_requests SET status = ? WHERE id = ?",
-            (reason, review_id),
-        )
+    raise PermissionError('canonical_native_feedback_executor_required')
 
 
 def record_review_response(
@@ -2538,77 +2368,23 @@ def record_review_response(
     rating: int,
     comment: str | None = None,
 ):
-    """Сохраняет ответ клиента на запрос отзыва."""
-    with _db() as conn:
-        conn.execute(
-            "UPDATE review_requests SET rating = ?, comment = ?, "
-            "responded_at = ?, status = 'responded' WHERE id = ?",
-            (rating, comment, _now(), review_id),
-        )
+    raise PermissionError('canonical_native_feedback_executor_required')
 
 
 def get_review_request_by_id(review_id: int) -> dict | None:
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT * FROM review_requests WHERE id = ?", (review_id,)
-        ).fetchone()
-        return dict(row) if row else None
+    return None
 
 
 def expire_stale_review_requests(stale_days: int = 7) -> int:
-    """Помечает 'sent', на которые клиент не ответил за N дней, как expired."""
-    cutoff = (datetime.now() - timedelta(days=stale_days)).isoformat(timespec="seconds")
-    with _db() as conn:
-        cur = conn.execute(
-            "UPDATE review_requests SET status = 'expired' "
-            "WHERE status = 'sent' AND sent_at < ?",
-            (cutoff,),
-        )
-        return cur.rowcount
+    raise PermissionError('canonical_native_feedback_executor_required')
 
 
 def review_stats(days: int = 30) -> dict:
-    """Сводка по отзывам за N дней (для команды /reviews_stats)."""
-    cutoff = (datetime.now() - timedelta(days=days)).isoformat(timespec="seconds")
-    with _db() as conn:
-        rows = conn.execute(
-            "SELECT status, COUNT(*) AS n FROM review_requests "
-            "WHERE visit_closed_at >= ? GROUP BY status",
-            (cutoff,),
-        ).fetchall()
-        by_status = {r["status"]: r["n"] for r in rows}
-        # Средний рейтинг и распределение
-        rating_rows = conn.execute(
-            "SELECT rating, COUNT(*) AS n FROM review_requests "
-            "WHERE visit_closed_at >= ? AND rating IS NOT NULL GROUP BY rating",
-            (cutoff,),
-        ).fetchall()
-        by_rating = {r["rating"]: r["n"] for r in rating_rows}
-        total_rated = sum(by_rating.values())
-        avg = (
-            sum(r * n for r, n in by_rating.items()) / total_rated
-            if total_rated else None
-        )
-    return {
-        "by_status": by_status,
-        "by_rating": by_rating,
-        "total_requested": sum(by_status.values()),
-        "total_rated": total_rated,
-        "avg_rating": avg,
-    }
+    return {'available':False,'source':'quarantined_legacy_feedback','avg_rating':None,'total_rated':None,'requested':None,'responded':None}
 
 
 def list_recent_reviews(limit: int = 40, days: int = 180) -> list[dict]:
-    """Последние отзывы с оценкой (для модерации в панели управления)."""
-    cutoff = (datetime.now() - timedelta(days=days)).isoformat(timespec="seconds")
-    with _db() as conn:
-        rows = conn.execute(
-            "SELECT rating, comment, staff_id, visit_closed_at, responded_at "
-            "FROM review_requests WHERE rating IS NOT NULL AND visit_closed_at >= ? "
-            "ORDER BY COALESCE(responded_at, visit_closed_at) DESC LIMIT ?",
-            (cutoff, int(limit)),
-        ).fetchall()
-        return [dict(r) for r in rows]
+    return []
 
 
 def _external_reviews_ensure(conn):
@@ -3500,15 +3276,7 @@ def dashboard_timeseries(days: int = 30, start: str = None, end: str = None) -> 
 
 
 def reviews_by_master(days: int = 90) -> dict:
-    """Средний рейтинг и число оценок по каждому мастеру (staff_id) за период."""
-    cutoff = (datetime.now() - timedelta(days=days)).isoformat(timespec="seconds")
-    out = {}
-    with _db() as conn:
-        for r in conn.execute(
-            "SELECT staff_id, AVG(rating) AS a, COUNT(*) AS n FROM review_requests "
-            "WHERE rating IS NOT NULL AND visit_closed_at >= ? GROUP BY staff_id", (cutoff,)):
-            out[r["staff_id"]] = {"avg": float(r["a"]) if r["a"] is not None else None, "n": int(r["n"])}
-    return out
+    return {}
 
 
 def loyalty_summary() -> dict:
@@ -4084,41 +3852,17 @@ def mark_payment_done(record_id, method: str, amount=None) -> None:
 
 # ─── Procedural-память: операционные правила салона ──────────────────────────
 
-def add_salon_rule(rule_text: str, created_by=None) -> int:
-    """Сохраняет правило салона (заданное владельцем). Возвращает id."""
-    try:
-        uid = int(created_by) if created_by else None
-    except Exception:
-        uid = None
-    with _db() as conn:
-        cur = conn.execute(
-            "INSERT INTO salon_rules (rule_text, created_by, created_at, active) "
-            "VALUES (?, ?, ?, 1)",
-            ((rule_text or "").strip()[:500], uid, _now()),
-        )
-        return int(cur.lastrowid)
+def add_salon_rule(rule_text: str, created_by=None):
+    raise PermissionError('canonical_A22_confirmed_configuration_required')
+
 
 
 def list_salon_rules(active_only: bool = True, limit: int = 40) -> list:
-    """Активные правила салона (для системного промпта MAYA / показа владельцу)."""
-    try:
-        with _db() as conn:
-            sql = ("SELECT id, rule_text, created_at FROM salon_rules "
-                   + ("WHERE active = 1 " if active_only else "")
-                   + "ORDER BY id ASC LIMIT ?")
-            return [dict(r) for r in conn.execute(sql, (int(limit),)).fetchall()]
-    except Exception:
-        return []
+    from canonical_governed_settings import rules
+    return rules(limit)
 
 
-def deactivate_salon_rule(rule_id) -> bool:
-    """Деактивирует (мягко удаляет) правило по id. True — если что-то изменилось."""
-    try:
-        with _db() as conn:
-            cur = conn.execute(
-                "UPDATE salon_rules SET active = 0 WHERE id = ? AND active = 1",
-                (int(rule_id),),
-            )
-            return cur.rowcount > 0
-    except Exception:
-        return False
+
+def deactivate_salon_rule(rule_id: int):
+    raise PermissionError('canonical_A22_confirmed_configuration_required')
+

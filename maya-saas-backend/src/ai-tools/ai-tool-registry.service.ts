@@ -432,9 +432,11 @@ export class AiToolRegistryService {
           'amount_rubles',
           'occurred_on',
           'note',
+          'branch_id',
         ]);
         return {
           category: this.assertManualExpenseCategory(args.category),
+          ...(args.branch_id === undefined ? {} : {branch_id: args.branch_id === null ? null : this.assertEntityId(args.branch_id,'branch_id')}),
           // Сумма остаётся В РУБЛЯХ: карточку подтверждения человек читает в
           // рублях, а в копейки её переводит сервер уже при исполнении.
           // Переводить здесь нельзя — валидатор прогоняется второй раз по
@@ -552,6 +554,7 @@ export class AiToolRegistryService {
         // карточка выглядела одинаково и в тестах, и на проде.
         payload: {
           sum: money,
+          ...(args.branch_id === undefined ? {} : {branch: args.branch_id === null ? 'Весь бизнес' : args.branch_id}),
           date: day,
           type: category?.label ?? null,
           action: 'create_expense',

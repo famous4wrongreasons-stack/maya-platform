@@ -1,3 +1,4 @@
+import { RC_PAYLOAD_CLASSES } from './package5-wave-rc-payloads';
 import { createHash } from 'node:crypto';
 
 const DAY = 86_400_000;
@@ -8,7 +9,9 @@ export const WAVE6_LEASE_MS = 60_000;
 
 // Approved at checkpoint 178b39f2 + the explicit Policy V1 approval.
 // Changing a duration or predicate requires a new reviewed policy version.
+const RC_RULES = Object.fromEntries(Object.entries(RC_PAYLOAD_CLASSES).map(([key,rule])=>[key,{...rule,stamp:'createdAt',expiry:'createdAt',terminal:null,retentionMs:0}])) as { [K in keyof typeof RC_PAYLOAD_CLASSES]: {table:(typeof RC_PAYLOAD_CLASSES)[K]['table'];policyKey:(typeof RC_PAYLOAD_CLASSES)[K]['policyKey'];stamp:'createdAt';expiry:'createdAt';terminal:null;retentionMs:0} };
 export const WAVE6_CLASSES = {
+  ...RC_RULES,
   purge_auth_sessions: {
     table: 'AuthSession',
     stamp: 'createdAt',

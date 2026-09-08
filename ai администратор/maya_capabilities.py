@@ -56,9 +56,10 @@ def _decode_enabled(raw, default: bool) -> bool:
 
 
 def is_enabled(code: str) -> bool:
-    definition = _definition(code)
-    raw = database.get_setting(definition["setting_key"])
-    return _decode_enabled(raw, definition["default_enabled"])
+    from canonical_governed_settings import client_history_enabled
+    _definition(code)
+    return client_history_enabled()
+
 
 
 def list_capabilities() -> list[dict]:
@@ -74,26 +75,5 @@ def list_capabilities() -> list[dict]:
 
 
 def set_enabled(code: str, enabled: bool, actor_id: int) -> dict:
-    try:
-        actor = int(actor_id)
-    except (TypeError, ValueError):
-        actor = 0
-    if actor not in _founder_ids():
-        raise PermissionError("founder_only")
+    raise PermissionError('canonical_A22_confirmed_configuration_required')
 
-    definition = _definition(code)
-    payload = {
-        "enabled": bool(enabled),
-        "changed_by": actor,
-        "changed_at": datetime.now().isoformat(timespec="seconds"),
-    }
-    database.set_setting(
-        definition["setting_key"],
-        json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
-    )
-    return {
-        "code": code,
-        "label": definition["label"],
-        "scope": definition["scope"],
-        "enabled": bool(enabled),
-    }

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 
 import { asJson } from '../common/json.util';
 import { PrismaService } from '../prisma/prisma.service';
@@ -31,10 +32,10 @@ export class AuditLogService {
     entityType: string;
     entityId: string;
     metadata?: Record<string, unknown>;
-  }) {
+  }, tx: Prisma.TransactionClient = this.prisma) {
     const tenantId = this.tenantContext.assertTenantId(params.tenantId);
 
-    return this.prisma.auditLog.create({
+    return tx.auditLog.create({
       data: {
         scope: 'tenant',
         tenantId,

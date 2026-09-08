@@ -1,3 +1,4 @@
+import { RC_PAYLOAD_CLASSES } from './package5-wave-rc-payloads';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import {
@@ -8,8 +9,8 @@ import {
 import { Package5Wave6MaintenanceService } from './package5-wave6.service';
 
 describe('approved Wave 6 policy boundary', () => {
-  it('pins all six exact policy predicates and V1 durations', () => {
-    expect(Object.keys(WAVE6_CLASSES)).toHaveLength(6);
+  it('pins six unchanged auth policies and eight approved R-C payload classes', () => {
+    expect(Object.keys(WAVE6_CLASSES)).toHaveLength(14);
     expect(WAVE6_CLASSES.purge_auth_sessions.retentionMs).toBe(30 * 86_400_000);
     for (const key of [
       'purge_phone_auth_codes',
@@ -20,7 +21,7 @@ describe('approved Wave 6 policy boundary', () => {
       expect(WAVE6_CLASSES[key].retentionMs).toBe(86_400_000);
     }
     expect(WAVE6_CLASSES.purge_ingestion_quarantine.retentionMs).toBe(0);
-    expect(wave6Hash(JSON.stringify(WAVE6_CLASSES))).toBe(
+    expect(wave6Hash(JSON.stringify(Object.fromEntries(Object.entries(WAVE6_CLASSES).filter(([key])=>!Object.hasOwn(RC_PAYLOAD_CLASSES,key)))))).toBe(
       '9fc9734d27a82ce042ec46eb26b454329749ea877811733dbc70c06bf799f9e7',
     );
   });

@@ -27,7 +27,7 @@ type Input = {
   tenantId: string;
   clientId: string;
   sourceEventId: string;
-  messageType: 'appointment_reminder' | 'wanted_slot_available';
+  messageType: 'appointment_reminder' | 'wanted_slot_available' | 'native_feedback_invitation';
   title: string;
   bodyText: string;
   expiresAt: Date;
@@ -185,6 +185,12 @@ export class CommunicationWebPushService {
     );
   }
 
+  async deliverNativeFeedback(dispatch: ReminderDispatch) {
+    const n = dispatch.request.input as Record<string, unknown>;
+    if (!dispatch.request.nativeFeedbackSlot || dispatch.request.capability !== 'communication.native-feedback.invitation.execute.v1' || n.channel !== 'web_push' || n.messageType !== 'native_feedback_invitation' || !Array.isArray(n.endpointIds) || n.endpointIds.length !== 1) throw new ForbiddenException('R08_ONE_FROZEN_WEB_PUSH_SLOT_REQUIRED');
+    return this.deliver({ tenantId: dispatch.request.tenantId, clientId: String(n.clientId), sourceEventId: String(n.sourceEventId), messageType: 'native_feedback_invitation', title: String(n.title), bodyText: String(n.bodyText), expiresAt: new Date(String(n.expiresAt)), issuedAt: new Date() }, dispatch, true);
+  }
+
   private async deliver(
     input: Input,
     reminder?: ReminderDispatch,
@@ -192,14 +198,15 @@ export class CommunicationWebPushService {
   ) {
     if (this.context.requireTenantId() !== input.tenantId)
       throw new ForbiddenException('Tenant mismatch');
-    const identity = this.hash([
+    const native = Boolean(reminder?.request.nativeFeedbackSlot);
+    const identity = native ? reminder!.request.nativeFeedbackSlot!.slotKey : this.hash([
       input.tenantId,
       input.clientId,
       input.messageType,
       input.sourceEventId,
     ]);
     const sourceRef = `b24.web-push:${identity}`;
-    const prior = await this.prisma.actionExecution.findMany({
+    const prior = native ? [] : await this.prisma.actionExecution.findMany({
       where: { tenantId: input.tenantId, capability: ACTION, sourceRef },
       take: 2,
     });
@@ -211,11 +218,11 @@ export class CommunicationWebPushService {
           prior[0].id,
         )
       : null;
-    const endpointIds = reminder
+    const endpointIds = reminder && !native
       ? ((reminder.request.input as Record<string, unknown>)
           .reminderPlan as ReminderPlan)
       : null;
-    const deviceIds = endpointIds
+    const deviceIds = native ? (reminder!.request.input as Record<string, unknown>).endpointIds as string[] : endpointIds
       ? endpointIds.endpointIds
       : persisted
         ? (persisted.endpointIds as string[])
@@ -256,7 +263,7 @@ export class CommunicationWebPushService {
       {
         prepare: async (value, ctx) => {
           await reminder?.authorize();
-          const allow = await this.allowed(
+          const allow = native || await this.allowed(
             ctx.tenantId,
             String(value.clientId),
             String(value.messageType),
@@ -329,20 +336,25 @@ export class CommunicationWebPushService {
               !material ||
               !this.transport.ready() ||
               !this.transport.accepts(material) ||
-              !(await this.allowed(
+              (!native && !(await this.allowed(
                 ctx.tenantId,
                 String(value.clientId),
                 String(value.messageType),
-              ))
+              )))
             ) {
               await this.kernel.finalizePreDispatchFailure({
                 ...owned,
                 outcomeCode: 'web_push_ineligible',
                 errorCode: 'web_push_not_authorized_or_available',
               });
+              if (native) throw new Error('R08_WEB_PUSH_DETERMINISTIC_FAILURE');
               continue;
             }
-            await reminder?.authorize();
+            try { await reminder?.authorize(); } catch (error) {
+              if (!native) throw error;
+              await this.kernel.finalizePreDispatchFailure({ ...owned, outcomeCode: 'native_feedback_authority_denied', errorCode: 'native_feedback_authority_denied' });
+              throw new Error('R08_WEB_PUSH_DETERMINISTIC_FAILURE');
+            }
             await this.kernel.markDispatchBoundary(owned);
             const after = {
               ...owned,
@@ -394,6 +406,7 @@ export class CommunicationWebPushService {
                   id,
                   claim.attempt.id,
                 );
+              if (native) throw new Error('R08_WEB_PUSH_DETERMINISTIC_FAILURE');
             }
           }
           const audit = await this.kernel.audit({
@@ -425,8 +438,8 @@ export class CommunicationWebPushService {
           accepted: Number(safe.accepted),
           failed: Number(safe.failed),
         }),
-        classifyError: (_error, phase) => ({
-          kind: phase === 'prepare' ? 'definitive' : 'unknown',
+        classifyError: (error, phase) => ({
+          kind: phase === 'prepare' || (native && error instanceof Error && error.message === 'R08_WEB_PUSH_DETERMINISTIC_FAILURE') ? 'definitive' : 'unknown',
           outcomeCode:
             phase === 'prepare'
               ? 'web_push_prepare_rejected'

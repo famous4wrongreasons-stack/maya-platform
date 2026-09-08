@@ -1,3 +1,4 @@
+import { isRCPayloadClass, rcPayloadItem, rcPayloadKinds, selectRCPayloads, purgeRCPayload, type RCPayloadStorage, type RCPayloadVerifier } from './package5-wave-rc-payloads';
 import { randomUUID } from 'node:crypto';
 
 import { MaintenanceRun, Prisma } from '@prisma/client';
@@ -45,6 +46,8 @@ export class Package5Wave6MaintenanceService {
     private readonly prisma: PrismaService,
     private readonly context?: TenantContextService,
     private readonly clock: () => Date = () => new Date(),
+    private readonly payloadStorage?: RCPayloadStorage,
+    private readonly payloadVerifier?: RCPayloadVerifier,
   ) {}
 
   private authority(): {
@@ -69,6 +72,7 @@ export class Package5Wave6MaintenanceService {
   private plan(request: unknown): Plan {
     const { actionClass, batchSize } = wave6Request(request);
     const authority = this.authority();
+    if(isRCPayloadClass(actionClass) && authority.scope!=='tenant')throw new Error('maintenance_payload_requires_exact_system_tenant');
     // One deterministic server minute window; retries resume the frozen run id.
     const evaluatedAt = new Date(
       Math.floor(this.now().getTime() / 60_000) * 60_000,
@@ -195,6 +199,10 @@ export class Package5Wave6MaintenanceService {
   }
 
   private async selection(tx: Tx, plan: Plan, lock: boolean): Promise<Item[]> {
+    if(isRCPayloadClass(plan.actionClass)) {
+      await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+      return (await selectRCPayloads(tx,plan,lock,undefined,this.payloadVerifier)).map(target=>rcPayloadItem(plan,target));
+    }
     const rows = await tx.$queryRaw<Target[]>(Prisma.sql`
       SELECT t."id", ${Prisma.raw(`t."${plan.rule.stamp}"`)} AS stamp
       FROM ${this.table(plan.rule.table)} t
@@ -415,7 +423,9 @@ export class Package5Wave6MaintenanceService {
         const claims = await tx.maintenanceItemClaim.findMany({
           where: { maintenanceRunId: run.id },
         });
-        const allowedKinds: string[] = [plan.rule.table];
+        const payload = isRCPayloadClass(plan.actionClass);
+        if(payload) await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+        const allowedKinds: string[] = payload ? rcPayloadKinds(plan.actionClass) : [plan.rule.table];
         if (plan.rule.table === 'AuthSession')
           allowedKinds.push('AuthRefreshToken');
         if (
@@ -426,6 +436,11 @@ export class Package5Wave6MaintenanceService {
           this.manifestHash(claims) !== run.cursorHash
         )
           throw new Error('maintenance_manifest_mismatch');
+        const deleted = new Set<string>();
+        if(payload) {
+          const targets=await selectRCPayloads(tx,plan,true,run.id,this.payloadVerifier);
+          for(const target of targets)if(await purgeRCPayload(tx,plan,target,this.payloadStorage))deleted.add(rcPayloadItem(plan,target).itemRefHash);
+        } else {
         const stamp = Prisma.raw(`t."${plan.rule.stamp}"`);
         const prefix = `${plan.fingerprint}/${plan.rule.table}/`;
         const targets = await tx.$queryRaw<Target[]>(Prisma.sql`
@@ -438,7 +453,6 @@ export class Package5Wave6MaintenanceService {
         ORDER BY t."id" LIMIT ${run.maxItems} FOR UPDATE OF t
       `);
         const claimed = new Set(claims.map((c) => c.itemRefHash));
-        const deleted = new Set<string>();
         for (const target of targets) {
           const cascade: Item[] = [];
           if (plan.rule.table === 'AuthSession') {
@@ -465,6 +479,7 @@ export class Package5Wave6MaintenanceService {
             for (const item of cascade) deleted.add(item.itemRefHash);
           }
         }
+        }
         for (const claim of claims) {
           const success = deleted.has(claim.itemRefHash);
           await tx.maintenanceItemClaim.update({
@@ -472,7 +487,7 @@ export class Package5Wave6MaintenanceService {
             data: {
               state: success ? 'SUCCEEDED' : 'SKIPPED',
               outcomeCode: success
-                ? 'approved_retention_deleted'
+                ? (payload ? 'approved_payload_purged' : 'approved_retention_deleted')
                 : 'absent_or_no_longer_eligible',
               finishedAt: now,
             },

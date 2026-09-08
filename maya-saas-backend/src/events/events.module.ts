@@ -1,3 +1,5 @@
+import {ActionEngineModule} from '../action-engine';
+import {WaveRcPayloadRetentionService} from '../package5-wave6/package5-wave-rc-retention.service';
 import { Module } from '@nestjs/common';
 
 import { PrismaModule } from '../prisma/prisma.module';
@@ -10,8 +12,8 @@ import { IngestionRetentionScheduler } from './ingestion-retention.scheduler';
  * побочных действий не получает вовсе.
  */
 @Module({
-  imports: [PrismaModule],
-  providers: [EventStoreService, IngestionRetentionScheduler],
+  imports: [PrismaModule,ActionEngineModule],
+  providers: [EventStoreService, IngestionRetentionScheduler,WaveRcPayloadRetentionService],
   exports: [EventStoreService],
 })
 export class EventsModule {}

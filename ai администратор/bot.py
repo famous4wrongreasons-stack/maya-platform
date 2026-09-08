@@ -523,13 +523,8 @@ async def cmd_subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_clear(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    conversations[user_id] = []
-    booking_flow.pop(user_id, None)
-    gift_cert_flow.pop(user_id, None)
-    digital_cert_flow.pop(user_id, None)
-    save_conversations(conversations)
-    await update.message.reply_text("История очищена. Начнём сначала!", reply_markup=MAIN_KEYBOARD)
+    await update.effective_message.reply_text("Серверная история сохранена. Удаление общей истории через /clear недоступно.")
+
 
 
 async def cmd_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1383,60 +1378,13 @@ async def cmd_reactivation_now(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 async def cmd_ai_provider(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    /ai_provider — показать текущий AI-провайдер для уведомлений мастерам.
-    /ai_provider claude — переключить на Claude Haiku.
-    /ai_provider openai — переключить на GPT-4o-mini.
-    Команда доступна только админам (INITIAL_ADMIN_IDS + добавленные).
-    """
-    user_id = update.effective_user.id
-    if not canonical_staff_access.is_admin(user_id):
-        await update.message.reply_text(
-            "Команда доступна только администраторам барбершопа."
-        )
+    from canonical_governed_settings import confirmation_link
+    selected = str((context.args or [''])[0]).strip().lower()
+    if selected and selected not in {'claude', 'openai'}:
+        await update.effective_message.reply_text('Допустимые варианты: claude, openai.')
         return
+    await update.effective_message.reply_text(confirmation_link('staff_ai_provider', selected or None))
 
-    current = masters_ai.get_current_provider()
-    args = context.args or []
-
-    if not args:
-        # Просто показать текущее состояние
-        await update.message.reply_text(
-            f"🤖 Текущий AI для советов мастерам: *{current}*\n\n"
-            f"Переключить:\n"
-            f"`/ai_provider claude` — Claude Haiku\n"
-            f"`/ai_provider openai` — GPT-4o-mini",
-            parse_mode="Markdown",
-        )
-        return
-
-    new_provider = args[0].lower().strip()
-    if new_provider not in masters_ai.SUPPORTED_PROVIDERS:
-        await update.message.reply_text(
-            f"Неизвестный провайдер: `{new_provider}`\n"
-            f"Допустимые: {', '.join(masters_ai.SUPPORTED_PROVIDERS)}",
-            parse_mode="Markdown",
-        )
-        return
-
-    if new_provider == current:
-        await update.message.reply_text(
-            f"AI уже работает через *{current}* — менять нечего.",
-            parse_mode="Markdown",
-        )
-        return
-
-    ok = masters_ai.set_current_provider(new_provider)
-    if ok:
-        logger.info(f"AI-провайдер изменён админом {user_id}: {current} → {new_provider}")
-        await update.message.reply_text(
-            f"✅ AI переключён на *{new_provider}*.\n"
-            f"Следующие уведомления мастерам пойдут уже через него. "
-            f"Рестарт бота не нужен.",
-            parse_mode="Markdown",
-        )
-    else:
-        await update.message.reply_text("Не получилось сохранить настройку.")
 
 
 async def _close_master_booking(
@@ -1631,45 +1579,9 @@ async def _handle_payment_callback(
 
 
 async def cmd_mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/mute 2h — заглушить уведомления на N часов (или /mute off — снять)."""
-    chat_id = update.effective_user.id
-    master = canonical_staff_access.master_projection(chat_id)
-    if not master:
-        await update.message.reply_text("Сначала привяжись `/bind ME-XXXXXX`",
-                                         parse_mode="Markdown")
-        return
+    from canonical_governed_settings import mute_link
+    await update.effective_message.reply_text(mute_link(context.args))
 
-    args = context.args or []
-    if args and args[0].lower() in ("off", "выкл", "снять"):
-        database.unmute_master(chat_id)
-        await update.message.reply_text("Mute снят, уведомления снова приходят.")
-        return
-
-    # Парсим длительность: "2h" / "30m" / просто число (часы)
-    raw = (args[0] if args else "2h").strip().lower()
-    try:
-        if raw.endswith("m") or raw.endswith("м"):
-            hours = float(raw[:-1]) / 60
-        elif raw.endswith("h") or raw.endswith("ч"):
-            hours = float(raw[:-1])
-        else:
-            hours = float(raw)
-    except ValueError:
-        await update.message.reply_text(
-            "Формат: `/mute 2h` или `/mute 30m`. `/mute off` — снять.",
-            parse_mode="Markdown",
-        )
-        return
-
-    if hours <= 0 or hours > 24:
-        await update.message.reply_text("От 1 минуты до 24 часов.")
-        return
-    database.mute_master(chat_id, hours)
-    if hours >= 1:
-        msg = f"🔕 Уведомления молчат {hours:g} ч. `/mute off` — снять раньше."
-    else:
-        msg = f"🔕 Уведомления молчат {int(hours*60)} мин. `/mute off` — снять раньше."
-    await update.message.reply_text(msg, parse_mode="Markdown")
 
 
 # ─── Кнопки (согласие и подтверждение записи) ──────────────────────────────
@@ -2423,13 +2335,12 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Антон присылает расходы по салону (после /rashod или еженедельного напоминания)
-    uid = update.effective_user.id if update.effective_user else 0
-    if canonical_staff_access.is_admin(uid) and uid in _anton_expense_awaiting:
-        _anton_expense_awaiting.discard(uid)
-        await _save_anton_expenses(update, update.message.text or "")
+    from canonical_expense_intake import expense_reply, initiate
+    if expense_reply(update.effective_message):
+        await initiate(update)
         return
     await process_message(update, context, update.message.text)
+
 
 
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -3832,77 +3743,11 @@ async def cmd_loyalty_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_reviews_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/reviews_stats — сводка по сбору отзывов за 30 дней (админ).
-
-    /reviews_stats 7 — за 7 дней.
-    """
-    user_id = update.effective_user.id
-    if not canonical_staff_access.is_admin(user_id):
-        await update.message.reply_text("Команда только для администраторов.")
-        return
-    days = 30
-    args = context.args or []
-    if args:
-        try:
-            days = max(1, min(365, int(args[0])))
-        except ValueError:
-            pass
-
-    s = database.review_stats(days=days)
-    by_status = s["by_status"]
-    by_rating = s["by_rating"]
-
-    lines = [
-        f"⭐ *Сбор отзывов — последние {days} дн.*",
-        "",
-        f"Всего запросов: *{s['total_requested']}*",
-        f"Отвечено: *{s['total_rated']}*",
-    ]
-    if s["avg_rating"] is not None:
-        lines.append(f"Средняя оценка: *{s['avg_rating']:.2f} ⭐*")
-
-    if by_rating:
-        lines.append("")
-        lines.append("Распределение:")
-        for r in (5, 4, 3, 2, 1):
-            n = by_rating.get(r, 0)
-            if n:
-                bar = "█" * min(n, 20)
-                lines.append(f"  {r}⭐ {bar} {n}")
-
-    if by_status:
-        lines.append("")
-        lines.append("По статусам:")
-        for k in ("pending", "sent", "responded", "expired",
-                  "blocked", "no_marketing_consent", "no_chat_id",
-                  "send_error"):
-            if by_status.get(k):
-                lines.append(f"  {k}: {by_status[k]}")
-
-    if s["total_requested"] == 0:
-        lines.append("")
-        lines.append("_Пока нет данных — функция включается после "
-                     "закрытых визитов клиентов с привязкой Telegram._")
-
-    await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+    await update.effective_message.reply_text('Проверенные ответы клиентов доступны в MAYA: https://malesthetic.pro/app/?native_feedback=management')
 
 
 async def cmd_reviews_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/reviews_now — ручной тик сбора отзывов (админ)."""
-    user_id = update.effective_user.id
-    if not canonical_staff_access.is_admin(user_id):
-        await update.message.reply_text("Команда только для администраторов.")
-        return
-    summary = await reviews.send_pending_review_requests(context.application)
-    await update.message.reply_text(
-        f"⭐ Тик сбора отзывов завершён:\n"
-        f"проверено: {summary['checked']}\n"
-        f"отправлено: {summary['sent']}\n"
-        f"заблокировали бот: {summary['blocked']}\n"
-        f"без согласия: {summary['skipped_no_consent']}\n"
-        f"просрочено: {summary['expired']}\n"
-        f"ошибок: {summary['errors']}",
-    )
+    await update.effective_message.reply_text('Запрос отзыва доступен для отмеченного визита в MAYA: https://malesthetic.pro/app/?native_feedback=management')
 
 
 async def cmd_leads_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -4299,36 +4144,10 @@ async def cmd_help_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_admin_pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/admin_pdf — собрать и прислать PDF-справочник команд."""
-    user_id = update.effective_user.id
-    if not canonical_staff_access.is_admin(user_id):
-        await update.message.reply_text("Команда только для администраторов.")
-        return
-    await update.message.reply_text("Собираю PDF-справочник…")
-    try:
-        import generate_admin_pdf, tempfile, os as _os
-        tmp = tempfile.NamedTemporaryFile(mode="wb", suffix=".pdf", delete=False)
-        tmp.close()
-        out = await asyncio.to_thread(generate_admin_pdf.build_pdf, tmp.name)
-        with open(out, "rb") as f:
-            await context.bot.send_document(
-                chat_id=user_id,
-                document=f,
-                filename="malesthetic_admin_commands.pdf",
-                caption=(
-                    "📄 *Команды админа и владельца*\n\n"
-                    "Каждую можно вызвать слэшем или простым текстом. "
-                    "Примеры фраз — в справочнике."
-                ),
-                parse_mode="Markdown",
-            )
-        try:
-            _os.unlink(out)
-        except Exception:
-            pass
-    except Exception as e:
-        logger.error(f"cmd_admin_pdf: {e}")
-        await update.message.reply_text(f"Не получилось собрать PDF: {e}")
+    """Static help handoff only. Authenticated download owns the document response."""
+    await update.message.reply_text(
+        "Справочник можно скачать после входа в Maya: https://malesthetic.pro/app/?panel=analytics&download=admin-help"
+    )
 
 
 def _format_dt(iso_str: str) -> str:
@@ -4343,49 +4162,8 @@ def _format_dt(iso_str: str) -> str:
 # ─── Напоминания ──────────────────────────────────────────────────────────
 
 def _schedule_reminder(app: Application, user_id: int, booking_data: dict):
-    try:
-        dt_str = booking_data["datetime"]
-        visit_dt = None
-        for fmt in ("%Y-%m-%dT%H:%M:%S+03:00", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"):
-            try:
-                visit_dt = datetime.strptime(dt_str[:19], fmt[:19])
-                break
-            except ValueError:
-                continue
-        if not visit_dt:
-            return
-
-        # Персональная настройка: user_id = Telegram chat_id. Клиент мог выключить
-        # напоминания (тогда job не ставим вовсе) или выбрать своё время (reminder_hours).
-        try:
-            _p = database.get_notify_prefs_by_chat_id(user_id)
-            if _p.get("reminder") is False:
-                return
-            _hrs = _p.get("reminder_hours")
-            _mins = int(_hrs) * 60 if _hrs not in (None, "", 0) else REMINDER_MINUTES_BEFORE
-        except Exception:
-            _mins = REMINDER_MINUTES_BEFORE
-        remind_at = visit_dt - timedelta(minutes=_mins)
-        if remind_at <= datetime.now():
-            return
-
-        job_id = f"reminder_{user_id}_{booking_data.get('record_id', '')}"
-        scheduler.add_job(
-            _send_reminder, "date",
-            run_date=remind_at,
-            args=[
-                app,
-                user_id,
-                visit_dt,
-                _mins,
-                booking_data.get("record_id"),
-                booking_data.get("master_name") or "",
-            ],
-            id=job_id, replace_existing=True,
-        )
-        logger.info(f"Напоминание запланировано: {remind_at} для user {user_id}")
-    except Exception as e:
-        logger.error(f"Ошибка планирования напоминания: {e}")
+    # Existing B25 scheduler owns canonical Appointment reminder plans.
+    return None
 
 
 async def _send_reminder(
@@ -4397,57 +4175,7 @@ async def _send_reminder(
     master_name="",
 ):
     # Защита: клиент мог выключить напоминания уже ПОСЛЕ постановки job.
-    try:
-        if database.get_notify_prefs_by_chat_id(user_id).get("reminder") is False:
-            return
-    except Exception:
-        pass
-    # Динамический «через сколько» — по фактическому времени до записи (не хардкод «2 часа»).
-    _lead = ""
-    try:
-        _m = int(lead_mins)
-        if _m >= 1440 and _m % 1440 == 0:
-            _lead = " — завтра" if _m == 1440 else ""
-        elif _m >= 60 and _m % 60 == 0:
-            _lead = f" — через {_m // 60} ч"
-        elif _m > 0:
-            _lead = f" — через {_m} мин"
-    except Exception:
-        pass
-    reminder_text = (
-        f"⏰ Напоминаем о записи{_lead}!\n\n"
-        f"📅 {visit_dt.strftime('%d.%m')} в {visit_dt.strftime('%H:%M')}\n"
-        f"Барбершоп «{BARBERSHOP_NAME}»\n\n"
-        f"Если нужно перенести — откройте ваши записи 👇"
-    )
-    try:
-        await app.bot.send_message(
-            chat_id=user_id,
-            text=reminder_text,
-        )
-    except Exception as e:
-        logger.error(f"Ошибка отправки напоминания: {e}")
-    try:
-        master_suffix = f" у {master_name}" if master_name else ""
-        await webhook_server._send_client_push(
-            user_id,
-            "Напоминание о записи",
-            f"{visit_dt.strftime('%d.%m в %H:%M')}{master_suffix}",
-            url="/app/?chat=1&widget=mybookings",
-            tag=f"appointment-reminder-{record_id or user_id}",
-            data={"event": "appointment_reminder", "record_id": record_id},
-            persist_in_chat=True,
-            chat_text=reminder_text,
-            chat_action={
-                "type": "open_cabinet",
-                "label": "Мои записи",
-                "screen": "cabinet",
-            },
-            chat_widget="mybookings",
-            chat_dedupe_key=f"appointment-reminder:{record_id or visit_dt.isoformat()}",
-        )
-    except Exception as e:
-        logger.error(f"Ошибка PWA-напоминания: {e}")
+    return {'status':'canonical_B25_owner_required','messages':0}
 
 
 # ─── Запуск ───────────────────────────────────────────────────────────────
@@ -4643,16 +4371,6 @@ async def post_init(app: Application):
     )
 
     # Напоминание Антону прислать расходы по салону — раз в неделю, вс 20:00 МСК.
-    scheduler.add_job(
-        _anton_expense_reminder_job,
-        trigger="cron",
-        day_of_week="sun",
-        hour=20,
-        minute=0,
-        id="anton_expense_reminder",
-        replace_existing=True,
-        args=[app],
-    )
 
     # GOD-режим: MAYA сама проверяет систему и оплаты — каждый день 09:00 МСК.
     scheduler.add_job(
@@ -4762,63 +4480,11 @@ def _bot_anton_chat_id() -> int:
     return 339683535
 
 ANTON_CHAT_ID = _bot_anton_chat_id()
-_anton_expense_awaiting: set = set()   # chat_id Антона, от кого ждём список расходов
 
 
-def _parse_anton_expenses(text: str) -> list:
-    """Извлекает расходы [{item, amount}] из свободного текста (ИИ + регэксп-фолбэк)."""
-    text = (text or "").strip()
-    if not text:
-        return []
-    # 1) ИИ-разбор — надёжно для естественного языка
-    try:
-        import claude_ai
-        import json as _json
-        prompt = (
-            "Извлеки расходы салона из сообщения администратора. Верни СТРОГО JSON-массив "
-            "объектов {\"item\": краткое название, \"amount\": целое число рублей}. Бери только то, "
-            "что явно названо как расход с суммой. Никакого текста кроме JSON.\n\nСообщение:\n"
-            + text[:1500]
-        )
-        raw = claude_ai.complete_text(prompt, model=claude_ai.OPENAI_FAST_MODEL, max_tokens=600)
-        m = re.search(r"\[.*\]", raw, re.S)
-        if m:
-            arr = _json.loads(m.group(0))
-            out = []
-            for x in arr:
-                if not isinstance(x, dict):
-                    continue
-                it = str(x.get("item") or "").strip()
-                try:
-                    amt = int(round(float(x.get("amount"))))
-                except Exception:
-                    continue
-                if it and amt > 0:
-                    out.append({"item": it[:120], "amount": amt})
-            if out:
-                return out
-    except Exception as e:
-        logger.error(f"anton expense AI parse: {e}")
-    # 2) фолбэк — простой разбор «… <число>» по строкам/пунктам
-    out = []
-    for chunk in re.split(r"[\n;•]+|,(?=\s*\D)", text):
-        chunk = chunk.strip(" -—\t")
-        if not chunk:
-            continue
-        nums = re.findall(r"\d[\d  .]*\d|\d", chunk)
-        if not nums:
-            continue
-        amt_raw = re.sub(r"[  .]", "", nums[-1])
-        try:
-            amount = int(amt_raw)
-        except Exception:
-            continue
-        if amount <= 0:
-            continue
-        idx = chunk.rfind(nums[-1])
-        item = re.sub(r"(руб(лей|ля|\.)?|₽|р\.)\s*$", "", chunk[:idx], flags=re.I).strip(" -—:,.")
-        out.append({"item": (item or "Расход")[:120], "amount": amount})
-    return out
+def _parse_anton_expenses(*args, **kwargs):
+    raise PermissionError('canonical_expense_card_validation_required')
+
 
 
 def _fmt_rub_spaces(n) -> str:
@@ -4828,102 +4494,26 @@ def _fmt_rub_spaces(n) -> str:
         return str(n)
 
 
-async def _save_anton_expenses(update: Update, text: str) -> bool:
-    """Парсит и сохраняет расходы Антона за СЕГОДНЯ. True, если что-то сохранили."""
-    items = await asyncio.to_thread(_parse_anton_expenses, text)
-    if not items:
-        await update.message.reply_text(
-            "Не разобрала суммы 🤔 Напишите списком, например:\n"
-            "• кофе — 500\n• уборщица — 2000\n• касс. лента и средства — 800"
-        )
-        return False
-    today = date.today().isoformat()
-    total = 0
-    for it in items:
-        try:
-            database.add_salon_expense(today, it["item"], it["amount"], source="anton")
-            total += it["amount"]
-        except Exception as e:
-            logger.error(f"add_salon_expense: {e}")
-    lines = "\n".join(f"• {it['item']} — {_fmt_rub_spaces(it['amount'])} ₽" for it in items)
-    await update.message.reply_text(
-        f"Записала расходы за сегодня ✓\n{lines}\nИтого: {_fmt_rub_spaces(total)} ₽"
-        "\n\nОни уже в отчёте владельца. Если ошибся — пришли /rashod и список заново (перезапишу день)."
-    )
-    return True
+async def _save_anton_expenses(*args, **kwargs):
+    raise PermissionError('confirmed_P407_expense_owner_required')
+
 
 
 async def cmd_rashod(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Антон вносит расходы по салону. /rashod [список] — или команда, затем список."""
-    uid = update.effective_user.id if update.effective_user else 0
-    if not canonical_staff_access.is_admin(uid):
-        return  # команда только для Антона
-    try:
-        database.clear_salon_expenses(date.today().isoformat())  # команда перезаписывает день
-    except Exception:
-        pass
-    parts = (update.message.text or "").split(maxsplit=1)
-    if len(parts) > 1 and parts[1].strip():
-        _anton_expense_awaiting.discard(uid)
-        await _save_anton_expenses(update, parts[1])
-        return
-    _anton_expense_awaiting.add(uid)
-    await update.message.reply_text(
-        "Пришли расходы по салону за сегодня списком (кофе, уборщица, касс. лента и т.п.) "
-        "с суммами — добавлю их в отчёт владельцу. Например:\n"
-        "• кофе — 500\n• уборщица — 2000\n• касс. лента и средства — 800"
-    )
+    from canonical_expense_intake import initiate
+    await initiate(update)
+
 
 
 async def cmd_kassa(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Антон вносит кассу за день: /kassa <всего налички> <наличкой за день>.
-    Пишется в cash_log → в отчёте владельца сверяется с расчётной наличкой YClients."""
-    uid = update.effective_user.id if update.effective_user else 0
-    # Кассу вносит Антон ИЛИ владелец (Стас сам 2 дня в неделю). is_admin = Стас+Антон.
-    try:
-        _allowed = canonical_staff_access.is_admin(uid)
-    except Exception:
-        _allowed = False
-    if not _allowed:
-        return
-    txt = update.message.text or ""
-    arg = txt.split(maxsplit=1)[1] if len(txt.split(maxsplit=1)) > 1 else ""
-    toks = [int(x) for x in arg.replace(",", " ").split() if x.isdigit()]
-    if len(toks) < 2:
-        await update.message.reply_text(
-            "Пришли кассу за сегодня ДВУМЯ числами (без пробелов внутри числа):\n"
-            "сколько ВСЕГО налички в кассе и сколько налички получено ЗА СЕГОДНЯ.\n"
-            "Например: /kassa 45000 18500\n"
-            "(первое — вся наличка в кассе сейчас, второе — наличка за этот день)"
-        )
-        return
-    total_till, day_cash = toks[0], toks[1]
-    try:
-        database.set_cash_log(date.today().isoformat(), total_till, day_cash, entered_by=uid)
-    except Exception as e:
-        logger.error(f"cmd_kassa: {e}")
-        await update.message.reply_text("Не удалось сохранить кассу — попробуй ещё раз.")
-        return
-    fmt = lambda n: f"{n:,}".replace(",", " ")
-    await update.message.reply_text(
-        f"Записала кассу за сегодня:\n• Всего налички в кассе: {fmt(total_till)} ₽\n"
-        f"• Наличкой за день: {fmt(day_cash)} ₽\n"
-        "Это уйдёт в отчёт владельцу со сверкой. Ошибся — пришли /kassa заново (перезапишу день)."
-    )
+    from canonical_cash_declaration import confirmation_handoff
+    await update.effective_message.reply_text(confirmation_handoff())
 
 
-async def _anton_expense_reminder_job(app: Application):
-    """Раз в неделю (вс вечером) — напоминаем Антону прислать расходы по салону."""
-    try:
-        await app.bot.send_message(
-            chat_id=ANTON_CHAT_ID,
-            text=("Привет! 👋 Напиши, какие расходы по салону были на этой неделе — кофе, "
-                  "уборщица, касс. лента, средства и т.п. Просто списком с суммами, я добавлю "
-                  "их в отчёт владельцу.\n\nМожно прямо ответить на это сообщение."),
-        )
-        _anton_expense_awaiting.add(ANTON_CHAT_ID)
-    except Exception as e:
-        logger.error(f"anton expense reminder: {e}")
+
+async def _anton_expense_reminder_job(*args, **kwargs):
+    raise PermissionError('ExpenseReminderRun_A13_owner_required')
+
 
 
 # ── AI-директор: Майя сама пишет владельцу + пуш ────────────────────────────
@@ -5105,41 +4695,9 @@ def _format_director_briefing(brief: dict) -> tuple[str, str, str]:
 
 
 async def _director_briefing_job(app: Application):
-    """Утренний брифинг AI-директора владельцу: деньги-возможности + приоритет + пуш.
-    Майя сама пишет владельцу раз в день (проактивный директор)."""
-    try:
-        import owner_ai
-        brief = await asyncio.to_thread(owner_ai.daily_briefing)
-        text, push_title, push_body = _format_director_briefing(brief)
-        top_action = brief.get("top_action")
-    except Exception as e:
-        logger.error(f"director_briefing build: {e}")
-        return
-    if not text:
-        return
-    # Анти-дубль: один брифинг в день.
-    try:
-        import hashlib as _hl
-        from datetime import date as _d
-        sig = _d.today().isoformat() + ":" + _hl.md5(text.encode("utf-8")).hexdigest()[:10]
-        if database.get_setting("director_briefing_last") == sig:
-            logger.info("director_briefing: уже отправлен сегодня")
-            return
-    except Exception:
-        sig = ""
-    if isinstance(top_action, dict):
-        try:
-            pretty = _owner_action_text(top_action)
-            if pretty:
-                text = text + "\n\n" + pretty
-        except Exception:
-            pass
-    n = await notify_owner(app, text, push_title=push_title, push_body=push_body,
-                           tag="director_briefing", url="/app/?panel=report",
-                           chat_action=top_action if isinstance(top_action, dict) else None)
-    if n and sig:
-        database.set_setting("director_briefing_last", sig)
-    logger.info(f"📊 Брифинг AI-директора отправлен: {n} адресат(ов)")
+    """R05: same canonical owner morning occurrence; no legacy forecast/delivery owner."""
+    import maya_inbox_bridge
+    return await maya_inbox_bridge.trigger_owner_report("morning_owner")
 
 
 async def _daily_report_job(app: Application):
@@ -5151,166 +4709,11 @@ async def _daily_report_job(app: Application):
 
 
 async def _god_watch_job(app: Application):
-    """09:00 МСК — MAYA сама проверяет систему и оплаты и шлёт ОСНОВАТЕЛЮ дайджест,
-    если есть проблемы или подходят оплаты (Telegram + PWA-пуш). Если всё хорошо —
-    молчит. Это часть GOD-режима: «MAYA предупреждает сама»."""
-    try:
-        import webhook_server
-        from config import FOUNDER_IDS
-    except Exception as e:
-        logger.error(f"god_watch import: {e}")
-        return
-    try:
-        health = await asyncio.to_thread(webhook_server._god_health_checks)
-        renewals = webhook_server._god_renewals_view()
-    except Exception as e:
-        logger.error(f"god_watch build: {e}")
-        return
-
-    problems = [c for c in health.get("checks", []) if c.get("status") in ("warn", "fail")]
-    due = [r for r in renewals if r.get("status") in ("soon", "overdue")]
-    if not problems and not due:
-        return  # всё спокойно — не беспокоим
-
-    lines = ["🛡️ MAYA · проверка системы", ""]
-    if due:
-        lines.append("💳 Оплаты на подходе:")
-        for r in due:
-            when = "просрочено" if r["status"] == "overdue" else f"через {r['days_left']} дн."
-            amt = f" · {_fmt_rub(r['amount'])} ₽" if r.get("amount") else ""
-            lines.append(f"• {r['label']}: {when}{amt}")
-        lines.append("")
-    fails = [c for c in problems if c["status"] == "fail"]
-    warns = [c for c in problems if c["status"] == "warn"]
-    if fails:
-        lines.append("🔴 Проблемы:")
-        for c in fails:
-            lines.append(f"• {c['label']}: {c.get('detail') or 'ошибка'}")
-        lines.append("")
-    if warns:
-        lines.append("🟡 Внимание:")
-        for c in warns:
-            lines.append(f"• {c['label']}: {c.get('detail') or ''}".rstrip(": "))
-    text = "\n".join(lines).strip()
-
-    # Анти-спам: один и тот же дайджест принимаем в durable delivery не чаще раза в день.
-    sig = None
-    try:
-        import hashlib
-        from datetime import date as _d
-        sig = _d.today().isoformat() + ":" + hashlib.md5(text.encode("utf-8")).hexdigest()[:12]
-        if (database.get_setting("god_last_alert") or "") == sig:
-            return
-    except Exception:
-        pass
-
-    try:
-        import maya_inbox_bridge
-
-        accepted = await maya_inbox_bridge.publish_inbox_item(
-            type="owner_alert",
-            title="MAYA: нужно внимание",
-            body_text=text,
-            source_seed=f"god-watch|{sig or text}",
-            telegram_chat_ids=[int(fid) for fid in FOUNDER_IDS],
-            deep_link="/app/?god=1",
-            payload={"event": "god.watch"},
-            fanout_owners=True,
-            telegram_buttons=[{
-                "text": "Открыть Центр управления",
-                "url": "https://malesthetic.pro/app/?god=1",
-            }],
-        )
-    except Exception as e:
-        logger.error(f"god_watch Action Engine: {e}")
-        accepted = False
-    if accepted and sig:
-        database.set_setting("god_last_alert", sig)
+    return {'status':'retired_no_canonical_operational_occurrence','messages':0}
 
 
 async def _dual_role_guard_job(app: Application):
-    """Тихий guard для аккаунтов «мастер + клиент»: сам чинит кеш истории,
-    а если не удалось — шлёт основателю сигнал."""
-    try:
-        import hashlib
-        import webhook_server
-        from config import FOUNDER_IDS
-        from memory import audit_dual_role_client_context
-    except Exception as e:
-        logger.error(f"dual_role_guard import: {e}")
-        return
-
-    try:
-        audit = await asyncio.to_thread(audit_dual_role_client_context, yc, True, 20)
-    except Exception as e:
-        logger.error(f"dual_role_guard run: {e}")
-        return
-
-    repaired = audit.get("repaired") or []
-    issues = audit.get("issues") or []
-    if repaired:
-        logger.warning(
-            "dual_role_guard auto-repaired %s account(s): %s",
-            len(repaired),
-            ", ".join(it.get("name") or str(it.get("chat_id")) for it in repaired),
-        )
-    if not issues:
-        return
-
-    fails = [it for it in issues if it.get("severity") == "fail"]
-    warns = [it for it in issues if it.get("severity") != "fail"]
-    lines = ["🛡️ MAYA · dual-role guard", ""]
-    if repaired:
-        lines.append(
-            "Автопочинка сработала: "
-            + ", ".join(
-                f"{it.get('name') or it.get('chat_id')} ({it.get('visits', 0)} виз.)"
-                for it in repaired
-            )
-        )
-        lines.append("")
-    if fails:
-        lines.append("🔴 Не удалось восстановить:")
-        for it in fails:
-            lines.append(f"• {it['name']}: {it.get('detail') or it.get('reason') or 'ошибка'}")
-        lines.append("")
-    if warns:
-        lines.append("🟡 Требует внимания:")
-        for it in warns:
-            lines.append(f"• {it['name']}: {it.get('detail') or it.get('reason') or 'проверьте'}")
-    text = "\n".join(lines).strip()
-
-    sig = None
-    try:
-        sig_base = "|".join(f"{it.get('chat_id')}:{it.get('reason')}" for it in issues)
-        sig = date.today().isoformat() + ":" + hashlib.md5(sig_base.encode("utf-8")).hexdigest()[:12]
-        if (database.get_setting("dual_role_guard_last_alert") or "") == sig:
-            return
-    except Exception:
-        pass
-
-    try:
-        import maya_inbox_bridge
-
-        accepted = await maya_inbox_bridge.publish_inbox_item(
-            type="owner_alert",
-            title="MAYA: dual-role guard",
-            body_text=text,
-            source_seed=f"dual-role-guard|{sig or text}",
-            telegram_chat_ids=[int(fid) for fid in FOUNDER_IDS],
-            deep_link="/app/?god=1",
-            payload={"event": "god.dual_role_guard"},
-            fanout_owners=True,
-            telegram_buttons=[{
-                "text": "Открыть Центр управления",
-                "url": "https://malesthetic.pro/app/?god=1",
-            }],
-        )
-    except Exception as e:
-        logger.error(f"dual_role_guard Action Engine: {e}")
-        accepted = False
-    if accepted and sig:
-        database.set_setting("dual_role_guard_last_alert", sig)
+    return {'status':'retired_identity_alert_not_authority','messages':0}
 
 
 async def _loyalty_job(app: Application):
@@ -5322,11 +4725,7 @@ async def _loyalty_job(app: Application):
 
 
 async def _reviews_job(app: Application):
-    """Тик сбора отзывов — раз в 5 мин шлёт «созревшие» запросы."""
-    try:
-        await reviews.send_pending_review_requests(app)
-    except Exception as e:
-        logger.error(f"Ошибка reviews job: {e}")
+    return {'status':'canonical_admitted_request_scheduler','messages':0}
 
 
 async def _lead_alerts_job(app: Application):
