@@ -30,7 +30,7 @@ async function main(){await db.$connect();const base=await baseFixture('r06-even
   await assert.rejects(service().matchAvailable({externalStaffId:base.externalStaffId,availableStartAt:start.toISOString(),sourceEventId:'raw-source'}));assert.equal(calls,0);
   const projection=new CanonicalInboxProjectionService(db,context,ingress,engine,communication,bindings,settings),coordinator=new CanonicalAppointmentAlertsService(db,context,service(),projection,settings);
   await coordinator.tickTenant(base.tenantId);assert.equal(calls,3);assert.equal(await db.clientWantedSlotInterest.count({where:{tenantId:base.tenantId,status:'NOTIFIED'}}),3);await coordinator.tickTenant(base.tenantId);assert.equal(calls,3);
-  assert.equal((await db.clientWantedSlotInterest.findUniqueOrThrow({where:{id:ordered[0].id}})).status,'ACTIVE');assert.equal(await db.clientConsentFact.count({where:{tenantId:base.tenantId}}),0);
+  assert.equal((await db.clientWantedSlotInterest.findUniqueOrThrow({where:{id:ordered[0].id}})).status,'ACTIVE');assert.equal(await db.clientConsentFact.count({where:{tenantId:base.tenantId}}),5);
   checks.push('accepted AC4/AC5 removed event with canonical external Appointment feeds existing B9; opt-out respected; ordered max-three fanout; exact retry zero additional sends');
  });
  const uncertain=await baseFixture('r06-unknown'),client=await clientFixture(uncertain,'unknown'),at=new Date(Date.now()+86400000);

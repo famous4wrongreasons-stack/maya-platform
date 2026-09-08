@@ -67,6 +67,13 @@ describe('B28 shared private CustomerProfile read protection', () => {
       ).length,
     ).toBeGreaterThan(0);
   });
+  it('limits R08 internal invitation policy to qualified effective consent/preferences', () => {
+    const file = 'native-feedback/native-feedback-policy.service.ts';
+    const source = readFileSync(join(root, file), 'utf8');
+    for (const marker of ['privacyConsentAt: true', 'this.links.assertClientEligible',
+      'effectiveClientConsents(tx, tenantId, clientId, now)', 'lockClientConsent(tx, tenantId, clientId)'])
+      expect(scanClientProfileRead(file, source.replaceAll(marker, 'removed')).length).toBeGreaterThan(0);
+  });
   it('rejects predicate mismatch, stripped verified binding and missing database fence', () => {
     const file = 'crm/client-profile-read.service.ts',
       code = readFileSync(join(root, file), 'utf8');

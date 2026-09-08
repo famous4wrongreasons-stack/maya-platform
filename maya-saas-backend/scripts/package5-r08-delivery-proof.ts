@@ -12,12 +12,11 @@ import { NativeFeedbackService } from '../src/native-feedback/native-feedback.se
 import { NativeFeedbackPolicyService } from '../src/native-feedback/native-feedback-policy.service';
 import { NativeFeedbackStore } from '../src/native-feedback/native-feedback.store';
 import { NativeFeedbackScheduler } from '../src/native-feedback/native-feedback.scheduler';
-import { feedbackHash } from '../src/native-feedback/native-feedback.contract';
 import { ClientWebPushService } from '../src/crm/client-web-push.service';
 import type { EntitlementsService } from '../src/entitlements/entitlements.service';
 import { canonicalUtcTransaction } from '../src/prisma/canonical-utc-transaction';
 import { asActor, config, context, db, engine, ingress, staffFixture, entitlements, secret } from './package5-wave-rc-proof-support';
-import { authenticator, baseFixture, channelRuntime, clientFixture, encryption } from './package5-wave-rc-client-proof-support';
+import { authenticator, baseFixture, channelRuntime, clientFixture, consentFixture, encryption } from './package5-wave-rc-client-proof-support';
 
 const settings = new ConfigService({ DATABASE_URL: config.get('DATABASE_URL'), CRM_ENCRYPTION_KEY: secret, MAYA_INBOX_BRIDGE_TOKEN: 'synthetic-r08-bridge-credential-only', MAYA_PACKAGE2_TELEGRAM_EXECUTOR_URL: 'http://127.0.0.1:1/synthetic-r08' });
 const endpoints = new ClientWebPushService(db, context, authenticator, encryption);
@@ -36,8 +35,7 @@ const originalFetch = global.fetch;
 global.fetch = (async (url: string | URL | Request) => { assert.equal(String(url), 'http://127.0.0.1:1/synthetic-r08'); telegramCalls++; if (telegramUnknown) throw Error('Synthetic UNKNOWN'); return new Response(JSON.stringify({ message_id: 'synthetic-r08-accepted' }), { status: 200 }); }) as typeof fetch;
 async function setup(label: string, withTelegram = true) {
   const base = await baseFixture('r08-' + label), client = await clientFixture(base, label, withTelegram), actor = await staffFixture(base.tenantId), other = await staffFixture(base.tenantId, 'administrator');
-  await db.customerProfile.update({ where: { tenantId_clientId: { tenantId: base.tenantId, clientId: client.client.id } }, data: { marketingConsentAt: new Date() } });
-  for (const kind of ['privacy', 'marketing']) await db.clientConsentFact.create({ data: { tenantId: base.tenantId, clientId: client.client.id, kind, decision: 'grant', occurredAt: new Date(), effectiveAt: new Date(), sourceType: 'client_command', sourceIdentityHash: feedbackHash('synthetic-consent', [base.tenantId, client.client.id, kind]) } });
+  await consentFixture(client.link, 'marketing');
   const startAt = new Date(Date.now() - 5 * 3600000), endAt = new Date(Date.now() - 4 * 3600000);
   const appointment = await db.appointment.create({ data: { tenantId: base.tenantId, mayaClientId: client.client.id, clientId: null, branchId: base.branch.id, staffId: base.staff.id, staffExternalId: base.externalStaffId, serviceIds: [], startAt, endAt, blockedStartAt: startAt, blockedEndAt: endAt, attendance: 'arrived', status: 'confirmed', source: 'internal' } });
   const admit = () => asActor(base.tenantId, actor.user.id, actor.member.role, () => owner.request(base.tenantId, actor.user.id, { appointmentId: appointment.id }, randomUUID()));

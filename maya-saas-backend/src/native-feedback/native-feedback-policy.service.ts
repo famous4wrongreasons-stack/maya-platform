@@ -1,3 +1,4 @@
+import { effectiveClientConsents, lockClientConsent } from '../crm/client-effective-consent';
 import { ForbiddenException, Injectable, Optional } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -37,15 +38,14 @@ export class NativeFeedbackPolicyService {
   /** The canonical consent facts and preferences remain the authority. This
    * reader creates neither consent, delivery history nor a separate policy. */
   async marketingAllowed(tx: Tx, tenantId: string, clientId: string, requestId?: string) {
+    await lockClientConsent(tx, tenantId, clientId);
     const tenant = await this.client(tx, tenantId, clientId);
     if (!(await this.entitlements.resolveFeatureRequirements(tenantId, ['notifications.core'])).allowed) return false;
     const now = this.clock();
-    const profile = await tx.customerProfile.findUnique({ where: { tenantId_clientId: { tenantId, clientId } } });
+    const profile = await tx.customerProfile.findUnique({ where: { tenantId_clientId: { tenantId, clientId } }, select: { privacyConsentAt: true, marketingConsentAt: true, notificationPreferencesJson: true } });
     if (!profile?.privacyConsentAt || !profile.marketingConsentAt) return false;
-    for (const kind of ['privacy', 'marketing']) {
-      const facts = await tx.clientConsentFact.findMany({ where: { tenantId, clientId, kind, effectiveAt: { lte: now } }, orderBy: [{ effectiveAt: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }], take: 2 });
-      if (!facts[0] || facts[0].decision !== 'grant' || (facts[1]?.effectiveAt.getTime() === facts[0].effectiveAt.getTime() && facts[1].decision !== facts[0].decision)) return false;
-    }
+    const consent = await effectiveClientConsents(tx, tenantId, clientId, now);
+    if (!consent.privacy.effective || !consent.marketing.effective) return false;
     try {
       const prefs = profile.notificationPreferencesJson === null ? {} : (() => { const p = preferenceObject(profile.notificationPreferencesJson); exactPreferenceKeys(p, ['version', 'overrides']); if (p.version !== 1) throw new Error('Unsupported preference version'); return notificationOverrides(p.overrides); })();
       if (prefs.marketing === false) return false;

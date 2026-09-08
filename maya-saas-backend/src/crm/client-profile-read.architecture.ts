@@ -3,6 +3,7 @@ import ts from 'typescript';
 // Exact internal owner methods, not presentation endpoints. These still undergo
 // their existing action/delivery/retention ratchets and the full final inventory.
 const INTERNAL_OWNERS: Record<string, string[]> = {
+  'native-feedback/native-feedback-policy.service.ts': ['marketingAllowed'],
   'package5-wave3/consent-security-invalidation.service.ts': [
     'execute',
     'snapshot',
@@ -33,6 +34,8 @@ export function scanClientProfileRead(file: string, source: string): string[] {
   if (file.endsWith('.spec.ts') || file.endsWith('.architecture.ts')) return [];
   const findings: string[] = [];
   let bulkPolicyBody = '';
+  let feedbackPolicyBody = '';
+  let feedbackClientBody = '';
   const ast = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
   const dedicated = file === 'crm/client-profile-read.service.ts';
   const visit = (node: ts.Node) => {
@@ -61,6 +64,10 @@ export function scanClientProfileRead(file: string, source: string): string[] {
         name === 'current'
       )
         bulkPolicyBody = body;
+      if (file === 'native-feedback/native-feedback-policy.service.ts') {
+        if (name === 'marketingAllowed') feedbackPolicyBody = body;
+        if (name === 'client') feedbackClientBody = body;
+      }
       const internal = INTERNAL_OWNERS[file]?.includes(name);
       const related = /customerProfiles?\b|encryptedClientPreferences/.test(
         body,
@@ -152,6 +159,17 @@ export function scanClientProfileRead(file: string, source: string): string[] {
       findings.push(
         'Bulk dispatch policy cannot project private Client content',
       );
+  }
+  if (file === 'native-feedback/native-feedback-policy.service.ts') {
+    requireMarkers(['tenantId_clientId: { tenantId, clientId }',
+      'select: { privacyConsentAt: true, marketingConsentAt: true, notificationPreferencesJson: true }',
+      'lockClientConsent(tx, tenantId, clientId)', 'this.client(tx, tenantId, clientId)',
+      'effectiveClientConsents(tx, tenantId, clientId, now)',
+      '!consent.privacy.effective || !consent.marketing.effective'], feedbackPolicyBody);
+    requireMarkers(['this.context.assertTenantId(tenantId)',
+      'this.links.assertClientEligible(tx, tenantId, clientId)'], feedbackClientBody);
+    if (/encryptedNotes|encryptedClientPreferences|customerProfiles/.test(source))
+      findings.push('Feedback invitation policy cannot project private Client content');
   }
   if (dedicated)
     requireMarkers([

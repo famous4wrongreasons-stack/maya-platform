@@ -1,6 +1,7 @@
 import ts from 'typescript';
 const owner = 'package5-wave3/consent-security-invalidation.service.ts';
 const consumers = new Set([
+  'native-feedback/native-feedback-policy.service.ts',
   'communication-delivery/communication-bulk-policy.service.ts',
   'communication-delivery/communication-web-push.service.ts',
   'appointment-notifications/appointment-reminder-orchestrator.service.ts',
