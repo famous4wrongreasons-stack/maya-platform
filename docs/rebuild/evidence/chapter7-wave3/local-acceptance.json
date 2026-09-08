@@ -1,0 +1,40 @@
+{
+  "P03": {
+    "local": "PASS",
+    "requirements": [
+      "Q04",
+      "Q12",
+      "Q13",
+      "Q14",
+      "Q15"
+    ],
+    "packageTests": 38,
+    "postgresScenarios": 10,
+    "proof": "../chapter7-p03-outcomes/proof-summary.json"
+  },
+  "P04": {
+    "local": "PASS",
+    "requirements": [
+      "Q08",
+      "Q09"
+    ],
+    "packageTests": 38,
+    "postgresScenarios": 9,
+    "proof": "../chapter7-staff-goal/package-proof.json"
+  },
+  "combined": {
+    "suites": 14,
+    "tests": 201,
+    "result": "PASS",
+    "adjacentOwnerGuards": {
+      "suites": 4,
+      "tests": 34,
+      "result": "PASS"
+    }
+  },
+  "newSchemaChanges": 0,
+  "cleanReplay": "PASS",
+  "drift": "NONE",
+  "productionCutover": "PENDING_MANDATORY_GATE",
+  "productionProofEffects": 0
+}

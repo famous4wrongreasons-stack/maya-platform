@@ -1,0 +1,29 @@
+{
+  "wave": 3,
+  "packages": [
+    "P03",
+    "P04"
+  ],
+  "requirements": [
+    "Q04",
+    "Q08",
+    "Q09",
+    "Q12",
+    "Q13",
+    "Q14",
+    "Q15"
+  ],
+  "entrypointDisposition": "Reuse deployed trusted MeasurementService; consumer wiring remains P06. No public API/launcher/action mutation.",
+  "publicationOwner": "MeasurementService / MeasurementRevision",
+  "newModels": 0,
+  "newFields": 0,
+  "newMigrations": 0,
+  "newActions": 0,
+  "newAc6Classes": 0,
+  "backfill": 0,
+  "sourceOwnerMutation": false,
+  "productionProofEffects": 0,
+  "baseline": "79842f670827a2699dfaee621d7ee78adc7c7957",
+  "baselineRelease": "20260908-c7-wave2-4b03a29c",
+  "appliedMigrationSha256": "700fa60de6dde7e59ae58e58be25b899f58d1cde4d50322c581c738bf78ad66d"
+}

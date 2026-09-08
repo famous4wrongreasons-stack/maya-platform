@@ -56,8 +56,18 @@ export const MEASUREMENT_SOURCE_KINDS: ReadonlyMap<string, readonly string[]> =
         'canonical_booked_period_query',
       ],
     ],
-    ['CrmIntegration', ['financial_query_binding', 'value_query_binding']],
-    ['CrmFinancialSummary', ['canonical_financial_query']],
+    [
+      'CrmIntegration',
+      [
+        'financial_query_binding',
+        'value_query_binding',
+        'staff_finance_query_binding',
+      ],
+    ],
+    [
+      'CrmFinancialSummary',
+      ['canonical_financial_query', 'canonical_staff_financial_query'],
+    ],
     ['ClientLoyaltySnapshot', ['canonical_value_card_query']],
     ['Expense', ['canonical_expense_query']],
     ['ExpensePeriodDeclaration', ['canonical_declaration_query']],
@@ -66,6 +76,36 @@ export const MEASUREMENT_SOURCE_KINDS: ReadonlyMap<string, readonly string[]> =
     ['CrmClientLink', ['canonical_value_binding']],
     ['BusinessReview', ['reputation_review_query']],
     ['NativeFeedbackRequest', ['reputation_native_query']],
+    ['Staff', ['canonical_staff_goal_subject']],
+    ['Membership', ['staff_goal_configuration_membership']],
+    ['StaffProviderLink', ['staff_goal_provider_binding']],
+    ['CrmStaffAccess', ['staff_goal_own_access']],
+    ['DashboardPreference', ['a22_private_finance_preference']],
+    [
+      'ActionTargetMutation',
+      ['a22_finance_generation', 'canonical_target_mutation'],
+    ],
+    ['DomainEvent', ['canonical_outcome_event_query']],
+    ['ActionAttempt', ['canonical_effect_attempt', 'canonical_attempt_query']],
+    ['ActionExecutionIdempotencyBinding', ['canonical_booking_binding']],
+    [
+      'Opportunity',
+      ['canonical_opportunity_query', 'canonical_capacity_evidence'],
+    ],
+    ['AgentTask', ['canonical_task_query']],
+    ['RecoveryConversion', ['canonical_recovery_assignment_query']],
+    ['RecoveryTouchpoint', ['canonical_recovery_touchpoint']],
+    ['MarketingCampaign', ['canonical_campaign_query']],
+    ['MarketingCampaignRecipient', ['canonical_recipient_query']],
+    ['MarketingDeliveryAttempt', ['canonical_delivery_attempt_query']],
+    [
+      'ActionExecution',
+      [
+        'a22_finance_configuration_execution',
+        'canonical_appointment_execution',
+        'canonical_execution_query',
+      ],
+    ],
   ]);
 export type MeasurementSource = {
   owner: string;

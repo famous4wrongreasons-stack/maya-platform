@@ -134,8 +134,17 @@ describe('C7 permanent shared measurement boundaries', () => {
       /(?:createAppointment|cancelAppointment|rescheduleAppointment|sendMessage|sendDocument|sendPush|executeAction|claimExecution)\s*\(/,
     );
     expect(source).not.toMatch(
-      /from ['"].*(?:openai|anthropic|ai-tools|communication-delivery|action-engine|yclients)[^'"]*['"]/,
+      /from ['"].*(?:openai|anthropic|ai-tools|communication-delivery|yclients)[^'"]*['"]/,
     );
+    for (const file of files(join(root, 'src/measurement'))) {
+      if (relative(root, file) === 'src/measurement/measurement.module.ts')
+        continue;
+      expect(readFileSync(file, 'utf8')).not.toMatch(
+        /from ['"].*action-engine[^'"]*['"]/,
+      );
+    }
+    // P03's sole module exception is the verified read capability, proved by
+    // measurement.wave3.architecture.spec.ts; no executor enters a reader.
     expect(source).not.toMatch(
       /(?:client|appointment|clientConsentFact|recoveryConversion)\.(?:create|update|upsert|delete)\s*\(/,
     );

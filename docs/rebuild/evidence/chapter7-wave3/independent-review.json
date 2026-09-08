@@ -1,0 +1,28 @@
+{
+  "P04": {
+    "reviewer": "root",
+    "result": "NO_CONCRETE_DEFECTS_AFTER_MANAGER_ROLE_FIX",
+    "checks": [
+      "private A22 generation/actor/hash",
+      "staff without User",
+      "no company payroll completeness upgrade",
+      "exact StaffProviderLink and CrmStaffAccess",
+      "shared A22 lock and source revalidation",
+      "no remote I/O inside publication",
+      "no source mutation or salary heuristic"
+    ]
+  },
+  "P03": {
+    "reviewer": "c7_p02_finance",
+    "mode": "read-only",
+    "result": "NO_CONCRETE_DEFECTS_FOUND",
+    "checks": [
+      "exact Client/effect receipt attribution",
+      "ambiguous vs cancelled",
+      "original capacity evidence",
+      "per-owner cohort clocks",
+      "UNKNOWN and transport recipient denominator",
+      "source effects absent"
+    ]
+  }
+}

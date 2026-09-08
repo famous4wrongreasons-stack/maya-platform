@@ -1,0 +1,8 @@
+{
+  "p01MigrationSha256": "700fa60de6dde7e59ae58e58be25b899f58d1cde4d50322c581c738bf78ad66d",
+  "migrationUnchanged": true,
+  "newMigrations": 0,
+  "cleanReplay": true,
+  "drift": "NONE",
+  "oldDatabasesTouched": 0
+}
