@@ -1,0 +1,6 @@
+
+Test Suites: 8 passed, 8 total
+Tests:       98 passed, 98 total
+Snapshots:   0 total
+Time:        1.122 s
+Ran all test suites within paths "src/communication-delivery/communication-bulk-policy.service.spec.ts", "src/communication-delivery/communication-bulk-delivery.service.spec.ts", "src/crm/client-channel-link.service.spec.ts", "src/action-engine/client-channel-link-schema.architecture.spec.ts", "src/crm/client-channel-appointment-authority.service.spec.ts", "src/crm/client-channel-appointment-create.service.spec.ts", "src/crm/client-channel-realtime-authority.service.spec.ts", "src/action-engine/action-engine.approval-binding.spec.ts".

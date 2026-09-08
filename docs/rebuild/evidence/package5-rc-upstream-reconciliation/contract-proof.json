@@ -1,0 +1,53 @@
+{
+  "reviewedRevision": "b6c53ff9ee31bb43d0419f5ce32aa6b0e4999ae0",
+  "sourceHashes": {
+    "src/crm/maya-user-client-association-issuer.ts": "61598a2243ab7e033ab38a0af74e1a10523d6a5d1b02fb8fdef6856c02971605",
+    "src/crm/client-channel-runtime.service.ts": "b4b9368edb0bcd92b6bc877f4636f1a1eae75c141784ff38b55e0aac929abbbb",
+    "src/crm/client-profile-read.architecture.ts": "096c7b600be3de5a19bf7d975fa6badeff83ec2dfaf8867e1c58e4d4d273964a",
+    "src/customers/customers.controller.ts": "59a703b6d7276b3a36c012e226b1d8e0aa92f7f19bf979521209c4f903bc3d98"
+  },
+  "result": "CONTRACT_CONFLICT_REPRODUCED",
+  "checks": [
+    {
+      "id": "U1_NULL_CLIENT_PROFILE",
+      "observation": "CHALLENGE_ISSUED",
+      "expectedApprovedContract": "DENY_WITHOUT_PROVEN_CLIENT_AUTHORITY",
+      "clientUserFk": true,
+      "profileUserFk": true,
+      "profileClientFk": null,
+      "provenClientAuthorityEvidenceSupplied": false,
+      "syntheticChallengeWrites": 1
+    },
+    {
+      "id": "U1_MATCHING_FKS_NO_PROVENANCE",
+      "observation": "CHALLENGE_ISSUED",
+      "independentProvenanceSupplied": false
+    },
+    {
+      "id": "EXISTING_NEGATIVE_CHECKS",
+      "missingProfileDenied": true,
+      "conflictingProfileDenied": true,
+      "telegramBootstrapDenied": true
+    },
+    {
+      "id": "U2_LEGACY_DECISION_CYCLE",
+      "inputSequence": [
+        "grant",
+        "revoke",
+        "new grant"
+      ],
+      "firstAndThirdKeyEqual": true,
+      "distinctLogicalIntentAvailable": false,
+      "note": "Key collision reproduced; actual ledger was not invoked in this check. Existing canonical Wave3 planner treats the same source key as replay."
+    },
+    {
+      "id": "UPSTREAM_RATCHET_BLIND_SPOT",
+      "upstreamProfileReadGuardAcceptsIssuer": true,
+      "guardProvesProvenance": false
+    }
+  ],
+  "databaseConnections": 0,
+  "networkCalls": 0,
+  "productionEffects": 0,
+  "runtimeFilesChanged": 0
+}

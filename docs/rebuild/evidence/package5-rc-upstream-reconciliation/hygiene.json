@@ -1,0 +1,13 @@
+{
+  "mainEntries": 24,
+  "protectedFileHashes": 22,
+  "mainUnchanged": true,
+  "immutableInventoryAndHistoricalMigrations": 85,
+  "oldDatabasesTouched": 0,
+  "ownedTemporaryProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTemporaryDatabases": 0,
+  "databaseConnectionsThisReview": 0,
+  "productionMutationsMessagesProviderEffects": 0
+}

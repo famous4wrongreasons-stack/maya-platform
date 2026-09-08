@@ -1,0 +1,580 @@
+commit e5ec27fdfac54db8ac5a5cfc123e4854d5be8f3c
+Author:     Codex <codex@local>
+AuthorDate: Tue Sep 8 09:45:06 2026 +0300
+Commit:     Codex <codex@local>
+CommitDate: Tue Sep 8 09:45:06 2026 +0300
+
+    fix(client): restore verified native consent linking
+
+diff --git a/maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts b/maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts
+new file mode 100644
+index 00000000..261c8fd2
+--- /dev/null
++++ b/maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts
+@@ -0,0 +1,38 @@
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++
++const root = resolve(__dirname, '../../..');
++const read = (file: string) => readFileSync(resolve(root, file), 'utf8');
++
++describe('native consent verified Client link boundary', () => {
++  it('links the authenticated Maya channel before canonical Client consent', () => {
++    const pwa = read('сайт и приложение/app.html');
++    const start = pwa.indexOf('function AMayaConsent()');
++    const end = pwa.indexOf('\nwindow.AMayaConsent = AMayaConsent;', start);
++    const consent = pwa.slice(start, end);
++
++    expect(consent).toContain("authedFetch('/client-channel/status')");
++    expect(consent).toContain("authedFetch('/client-channel/challenges'");
++    expect(consent).toContain("authedFetch('/client-channel/consume'");
++    expect(consent).toContain("authedFetch('/client-channel/consent'");
++    expect(consent).toContain('idempotencyKey: commandRef.current');
++    expect(consent).not.toContain('/customers/me/profile');
++    expect(consent).not.toMatch(/clientId|client_id|phone|chat_id/);
++  });
++
++  it('permits initial issuance only from dual durable Maya account bindings', () => {
++    const issuer = read(
++      'maya-saas-backend/src/crm/maya-user-client-association-issuer.ts',
++    );
++    expect(issuer).toContain("provider !== 'maya_user'");
++    expect(issuer).toContain('userId: channel.userId');
++    expect(issuer).toContain(
++      'OR: [{ userId: channel.userId }, { clientId: client.id }]',
++    );
++    expect(issuer).toContain('profiles[0].userId !== channel.userId');
++    expect(issuer).toContain('profiles[0].clientId !== client.id');
++    expect(issuer).not.toMatch(
++      /phoneHash|phone:\s|chat_id|clientId:\s*(?:input|body|request)/,
++    );
++  });
++});
+diff --git a/maya-saas-backend/src/crm/client-channel-challenge-routing.service.spec.ts b/maya-saas-backend/src/crm/client-channel-challenge-routing.service.spec.ts
+new file mode 100644
+index 00000000..a8b1242b
+--- /dev/null
++++ b/maya-saas-backend/src/crm/client-channel-challenge-routing.service.spec.ts
+@@ -0,0 +1,58 @@
++import { ClientChannelRuntimeService } from './client-channel-runtime.service';
++
++const CHANNEL = {
++  tenantId: 'tenant-1',
++  provider: 'maya_user' as const,
++  providerSubjectHash: 'a'.repeat(64),
++};
++
++function fixture(links: Array<{ id: string }>) {
++  const tx = {
++    clientChannelLink: {
++      findMany: jest.fn().mockResolvedValue(links),
++    },
++  };
++  const regularIssue = jest.fn().mockResolvedValue({ path: 'regular' });
++  const initialIssue = jest.fn().mockResolvedValue({ path: 'initial' });
++  const state = {
++    prisma: {
++      $transaction: jest.fn((work: (transaction: typeof tx) => unknown) =>
++        work(tx),
++      ),
++    },
++    channels: { authenticate: jest.fn().mockResolvedValue(CHANNEL) },
++    challenges: { issue: regularIssue },
++    initialMayaChallenges: { issue: initialIssue },
++  };
++  const service = Object.assign(
++    Object.create(ClientChannelRuntimeService.prototype) as object,
++    state,
++  ) as ClientChannelRuntimeService;
++  return { service, tx, regularIssue, initialIssue };
++}
++
++describe('A18 Client linking challenge routing', () => {
++  it('uses the approved Maya account association issuer for a first link', async () => {
++    const { service, regularIssue, initialIssue } = fixture([]);
++
++    await expect(service.issue('maya-session-proof')).resolves.toEqual({
++      path: 'initial',
++    });
++    expect(initialIssue).toHaveBeenCalledWith({
++      resolutionProof: 'maya-session-proof',
++    });
++    expect(regularIssue).not.toHaveBeenCalled();
++  });
++
++  it('keeps an existing verified link on the original challenge issuer', async () => {
++    const { service, regularIssue, initialIssue } = fixture([{ id: 'link-1' }]);
++
++    await expect(service.issue('maya-session-proof')).resolves.toEqual({
++      path: 'regular',
++    });
++    expect(regularIssue).toHaveBeenCalledWith({
++      resolutionProof: 'maya-session-proof',
++    });
++    expect(initialIssue).not.toHaveBeenCalled();
++  });
++});
+diff --git a/maya-saas-backend/src/crm/client-channel-runtime.service.ts b/maya-saas-backend/src/crm/client-channel-runtime.service.ts
+index ee478621..2274f974 100644
+--- a/maya-saas-backend/src/crm/client-channel-runtime.service.ts
++++ b/maya-saas-backend/src/crm/client-channel-runtime.service.ts
+@@ -28,14 +28,17 @@ import { EncryptionService } from '../encryption/encryption.service';
+ import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
+ import { clientChannelSubjectHash } from './client-channel-subject';
+ import { CrmService } from './crm.service';
++import { MayaUserClientAssociationIssuer } from './maya-user-client-association-issuer';
+ 
+-/** Only already verified provenance can issue another channel's challenge.
+- * A cold-start Client with no trusted resolution fails closed; no heuristic enrollment.
++/** Only verified provenance can issue a channel challenge. An existing link is
++ * reused; first-link Maya sessions require the exact dual durable association.
++ * Missing or ambiguous provenance fails closed, with no heuristic enrollment.
+  */
+ @Injectable()
+ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthority {
+   readonly resolverId = 'a18.active-verified-client-channel.v1';
+   private readonly challenges: ClientLinkChallengeService;
++  private readonly initialMayaChallenges: ClientLinkChallengeService;
+   private readonly links: ClientChannelLinkService;
+   constructor(
+     private readonly prisma: PrismaService,
+@@ -70,6 +73,14 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
+       this,
+       channels,
+     );
++    this.initialMayaChallenges = new ClientLinkChallengeService(
++      prisma,
++      context,
++      encryption,
++      this.links,
++      new MayaUserClientAssociationIssuer(context, channels),
++      channels,
++    );
+   }
+ 
+   async resolve(proof: string, tx: Prisma.TransactionClient) {
+@@ -112,8 +123,26 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
+     };
+   }
+ 
+-  issue(channelProof: string) {
+-    return this.challenges.issue({ resolutionProof: channelProof });
++  async issue(channelProof: string) {
++    const existingLink = await this.prisma.$transaction(async (tx) => {
++      const channel = await this.channels.authenticate(channelProof, tx);
++      const links = await tx.clientChannelLink.findMany({
++        where: {
++          tenantId: channel.tenantId,
++          provider: channel.provider,
++          providerSubjectHash: channel.providerSubjectHash,
++          revokedAt: null,
++        },
++        take: 2,
++        select: { id: true },
++      });
++      if (links.length > 1)
++        throw new ForbiddenException('Client channel identity is ambiguous');
++      return links[0] ?? null;
++    });
++    return (existingLink ? this.challenges : this.initialMayaChallenges).issue({
++      resolutionProof: channelProof,
++    });
+   }
+   consume(channelProof: string, token: string) {
+     return this.challenges.consume({ channelProof, token });
+diff --git a/maya-saas-backend/src/crm/client-profile-read.architecture.spec.ts b/maya-saas-backend/src/crm/client-profile-read.architecture.spec.ts
+index d30dd8fb..6571a03c 100644
+--- a/maya-saas-backend/src/crm/client-profile-read.architecture.spec.ts
++++ b/maya-saas-backend/src/crm/client-profile-read.architecture.spec.ts
+@@ -96,4 +96,18 @@ describe('B28 shared private CustomerProfile read protection', () => {
+       ).length,
+     ).toBeGreaterThan(0);
+   });
++  it('keeps first-link association proof limited to non-PII durable keys', () => {
++    const file = 'crm/maya-user-client-association-issuer.ts',
++      code = readFileSync(join(root, file), 'utf8');
++    expect(scanClientProfileRead(file, code)).toEqual([]);
++    expect(
++      scanClientProfileRead(
++        file,
++        code.replace(
++          'select: { id: true, userId: true, clientId: true }',
++          'select: { id: true, userId: true, clientId: true, phone: true }',
++        ),
++      ).length,
++    ).toBeGreaterThan(0);
++  });
+ });
+diff --git a/maya-saas-backend/src/crm/client-profile-read.architecture.ts b/maya-saas-backend/src/crm/client-profile-read.architecture.ts
+index bdb13b57..87260e9c 100644
+--- a/maya-saas-backend/src/crm/client-profile-read.architecture.ts
++++ b/maya-saas-backend/src/crm/client-profile-read.architecture.ts
+@@ -16,6 +16,10 @@ const INTERNAL_OWNERS: Record<string, string[]> = {
+   'communication-delivery/communication-bulk-policy.service.ts': ['current'],
+   'crm/client-wanted-slot.service.ts': ['deliveryAllowed'],
+   'marketing/marketing.service.ts': ['consentCandidates'],
++  // First-link issuance may inspect only the durable association keys from the
++  // legacy user-owned profile. It cannot project Client PII/preferences and the
++  // exact shape is pinned below.
++  'crm/maya-user-client-association-issuer.ts': ['resolve'],
+ };
+ const VERIFIED_CHANNEL_READS = [
+   'status',
+@@ -170,6 +174,25 @@ export function scanClientProfileRead(file: string, source: string): string[] {
+     if (/\.customerProfiles?\./.test(source))
+       findings.push('CustomersService bypasses shared profile reader');
+   }
++  if (file === 'crm/maya-user-client-association-issuer.ts') {
++    requireMarkers([
++      "channel.provider !== 'maya_user'",
++      'userId: channel.userId',
++      'mergedIntoClientId: null',
++      'OR: [{ userId: channel.userId }, { clientId: client.id }]',
++      'select: { id: true, userId: true, clientId: true }',
++      'profiles.length !== 1',
++      'profiles[0].userId !== channel.userId',
++      'profiles[0].clientId !== null',
++      'profiles[0].clientId !== client.id',
++    ]);
++    if (
++      /\b(phone|name|encryptedNotes|encryptedClientPreferences|notificationPreferencesJson|defaultVisitMood|privacyConsentAt|marketingConsentAt)\s*:\s*true/.test(
++        source,
++      )
++    )
++      findings.push('First-link issuer projects private Client profile data');
++  }
+   if (file === 'customer-portal/customer-portal.service.ts') {
+     requireMarkers([
+       'this.customersService.getOwnProfile(scopedTenantId, userId)',
+diff --git a/maya-saas-backend/src/crm/maya-user-client-association-issuer.spec.ts b/maya-saas-backend/src/crm/maya-user-client-association-issuer.spec.ts
+new file mode 100644
+index 00000000..9e0f8f80
+--- /dev/null
++++ b/maya-saas-backend/src/crm/maya-user-client-association-issuer.spec.ts
+@@ -0,0 +1,142 @@
++import { ForbiddenException } from '@nestjs/common';
++
++import { MayaUserClientAssociationIssuer } from './maya-user-client-association-issuer';
++
++const TENANT_ID = 'tenant-1';
++const USER_ID = 'user-1';
++const CLIENT_ID = 'client-1';
++const PROFILE_ID = 'profile-1';
++const SUBJECT_HASH = 'a'.repeat(64);
++const CONTROL_HASH = 'b'.repeat(64);
++const VALID_UNTIL = new Date('2026-09-08T12:00:00.000Z');
++
++function fixture() {
++  const channel = {
++    tenantId: TENANT_ID,
++    provider: 'maya_user' as const,
++    providerSubjectHash: SUBJECT_HASH,
++    deliveryAddress: USER_ID,
++    userId: USER_ID,
++    channelControlProofHash: CONTROL_HASH,
++    validUntil: VALID_UNTIL,
++  };
++  const authenticate = jest.fn().mockResolvedValue(channel);
++  const tx = {
++    $queryRaw: jest.fn().mockResolvedValue([]),
++    clientChannelLink: { findMany: jest.fn().mockResolvedValue([]) },
++    client: {
++      findMany: jest
++        .fn()
++        .mockResolvedValue([{ id: CLIENT_ID, userId: USER_ID }]),
++    },
++    customerProfile: {
++      findMany: jest
++        .fn()
++        .mockResolvedValue([
++          { id: PROFILE_ID, userId: USER_ID, clientId: null },
++        ]),
++    },
++  };
++  const context = { assertTenantId: jest.fn((value: string) => value) };
++  const issuer = new MayaUserClientAssociationIssuer(
++    context as never,
++    { authenticate } as never,
++  );
++  return { issuer, tx, authenticate, channel };
++}
++
++describe('A18 Maya account first-link challenge authority', () => {
++  it('resolves one dual-bound Client without phone or caller Client input', async () => {
++    const { issuer, tx } = fixture();
++
++    await expect(
++      issuer.resolve('maya-session-proof', tx as never),
++    ).resolves.toEqual(
++      expect.objectContaining({
++        tenantId: TENANT_ID,
++        clientId: CLIENT_ID,
++        resolver: 'a18.maya-user-client-association.v1',
++        issuerAuthorityHash: CONTROL_HASH,
++        validUntil: VALID_UNTIL,
++      }),
++    );
++    expect(tx.client.findMany).toHaveBeenCalledWith(
++      expect.objectContaining({
++        where: {
++          tenantId: TENANT_ID,
++          userId: USER_ID,
++          mergedIntoClientId: null,
++        },
++      }),
++    );
++    expect(tx.customerProfile.findMany).toHaveBeenCalledWith(
++      expect.objectContaining({
++        where: {
++          tenantId: TENANT_ID,
++          OR: [{ userId: USER_ID }, { clientId: CLIENT_ID }],
++        },
++      }),
++    );
++  });
++
++  it('fails closed when the independent profile binding is absent', async () => {
++    const { issuer, tx } = fixture();
++    tx.customerProfile.findMany.mockResolvedValue([]);
++
++    await expect(
++      issuer.resolve('maya-session-proof', tx as never),
++    ).rejects.toBeInstanceOf(ForbiddenException);
++  });
++
++  it('fails closed for a conflicting or ambiguous Client association', async () => {
++    const { issuer, tx } = fixture();
++    tx.customerProfile.findMany.mockResolvedValue([
++      { id: PROFILE_ID, userId: USER_ID, clientId: 'client-other' },
++    ]);
++
++    await expect(
++      issuer.resolve('maya-session-proof', tx as never),
++    ).rejects.toBeInstanceOf(ForbiddenException);
++
++    tx.customerProfile.findMany.mockResolvedValue([
++      { id: PROFILE_ID, userId: USER_ID, clientId: null },
++    ]);
++    tx.client.findMany.mockResolvedValue([
++      { id: CLIENT_ID, userId: USER_ID },
++      { id: 'client-2', userId: USER_ID },
++    ]);
++    await expect(
++      issuer.resolve('maya-session-proof', tx as never),
++    ).rejects.toBeInstanceOf(ForbiddenException);
++  });
++
++  it('does not bootstrap Telegram or overwrite an existing active link', async () => {
++    const { issuer, tx, authenticate, channel } = fixture();
++    authenticate.mockResolvedValue({
++      ...channel,
++      provider: 'telegram',
++      userId: null,
++    });
++    await expect(
++      issuer.resolve('telegram-proof', tx as never),
++    ).rejects.toBeInstanceOf(ForbiddenException);
++
++    authenticate.mockResolvedValue(channel);
++    tx.clientChannelLink.findMany.mockResolvedValue([{ id: 'link-1' }]);
++    await expect(
++      issuer.resolve('maya-session-proof', tx as never),
++    ).rejects.toBeInstanceOf(ForbiddenException);
++  });
++
++  it('rejects a channel identity change during resolution', async () => {
++    const { issuer, tx, authenticate, channel } = fixture();
++    authenticate.mockResolvedValueOnce(channel).mockResolvedValueOnce({
++      ...channel,
++      providerSubjectHash: 'c'.repeat(64),
++    });
++
++    await expect(
++      issuer.resolve('maya-session-proof', tx as never),
++    ).rejects.toBeInstanceOf(ForbiddenException);
++  });
++});
+diff --git a/maya-saas-backend/src/crm/maya-user-client-association-issuer.ts b/maya-saas-backend/src/crm/maya-user-client-association-issuer.ts
+new file mode 100644
+index 00000000..225b0ccf
+--- /dev/null
++++ b/maya-saas-backend/src/crm/maya-user-client-association-issuer.ts
+@@ -0,0 +1,117 @@
++import { ForbiddenException } from '@nestjs/common';
++import { createHash } from 'node:crypto';
++import { Prisma } from '@prisma/client';
++
++import { TenantContextService } from '../tenancy/tenant-context.service';
++import { ClientChannelAuthenticatorService } from './client-channel-authenticator.service';
++import type {
++  ClientChallengeIssuerAuthority,
++  TrustedClientResolution,
++} from './client-link-challenge.service';
++import { lockClientChannelIdentity } from './client-channel-link.service';
++
++/**
++ * First-link authority for an authenticated Maya account whose existing
++ * tenant-qualified Client and CustomerProfile independently point to that
++ * account. Neither a phone nor a caller-supplied Client identifier participates
++ * in this resolution.
++ */
++export class MayaUserClientAssociationIssuer implements ClientChallengeIssuerAuthority {
++  readonly resolverId = 'a18.maya-user-client-association.v1';
++
++  constructor(
++    private readonly context: TenantContextService,
++    private readonly channels: ClientChannelAuthenticatorService,
++  ) {}
++
++  async resolve(
++    proof: string,
++    tx: Prisma.TransactionClient,
++  ): Promise<TrustedClientResolution> {
++    const channel = await this.channels.authenticate(proof, tx);
++    this.context.assertTenantId(channel.tenantId);
++    if (channel.provider !== 'maya_user' || !channel.userId)
++      throw new ForbiddenException(
++        'Verified Maya account and Client association required',
++      );
++
++    await lockClientChannelIdentity(
++      tx,
++      channel.tenantId,
++      channel.provider,
++      channel.providerSubjectHash,
++    );
++    const current = await this.channels.authenticate(proof, tx);
++    if (
++      current.tenantId !== channel.tenantId ||
++      current.provider !== channel.provider ||
++      current.providerSubjectHash !== channel.providerSubjectHash ||
++      current.userId !== channel.userId
++    )
++      throw new ForbiddenException('Authenticated Maya account changed');
++
++    const activeLinks = await tx.clientChannelLink.findMany({
++      where: {
++        tenantId: channel.tenantId,
++        provider: channel.provider,
++        providerSubjectHash: channel.providerSubjectHash,
++        revokedAt: null,
++      },
++      take: 2,
++      select: { id: true },
++    });
++    if (activeLinks.length)
++      throw new ForbiddenException('Client channel is already linked');
++
++    const clients = await tx.client.findMany({
++      where: {
++        tenantId: channel.tenantId,
++        userId: channel.userId,
++        mergedIntoClientId: null,
++      },
++      take: 2,
++      select: { id: true, userId: true },
++    });
++    if (clients.length !== 1)
++      throw new ForbiddenException('Exact Maya account Client is unresolved');
++    const client = clients[0];
++
++    const profiles = await tx.customerProfile.findMany({
++      where: {
++        tenantId: channel.tenantId,
++        OR: [{ userId: channel.userId }, { clientId: client.id }],
++      },
++      take: 2,
++      select: { id: true, userId: true, clientId: true },
++    });
++    if (
++      profiles.length !== 1 ||
++      profiles[0].userId !== channel.userId ||
++      (profiles[0].clientId !== null && profiles[0].clientId !== client.id)
++    )
++      throw new ForbiddenException(
++        'Durable Maya account and Client association is unresolved',
++      );
++
++    const evidence = {
++      contract: this.resolverId,
++      tenantId: channel.tenantId,
++      userId: channel.userId,
++      clientId: client.id,
++      customerProfileId: profiles[0].id,
++      clientUserBinding: true,
++      profileUserBinding: true,
++    };
++    return {
++      tenantId: channel.tenantId,
++      clientId: client.id,
++      resolver: this.resolverId,
++      resolutionEvidenceRef: `maya-user-client-association:${client.id}:${profiles[0].id}`,
++      resolutionEvidenceHash: createHash('sha256')
++        .update(JSON.stringify(evidence))
++        .digest('hex'),
++      issuerAuthorityHash: current.channelControlProofHash,
++      validUntil: current.validUntil,
++    };
++  }
++}
+diff --git "a/\321\201\320\260\320\271\321\202 \320\270 \320\277\321\200\320\270\320\273\320\276\320\266\320\265\320\275\320\270\320\265/app.html" "b/\321\201\320\260\320\271\321\202 \320\270 \320\277\321\200\320\270\320\273\320\276\320\266\320\265\320\275\320\270\320\265/app.html"
+index 65fb37f1..88d3c1ee 100644
+--- "a/\321\201\320\260\320\271\321\202 \320\270 \320\277\321\200\320\270\320\273\320\276\320\266\320\265\320\275\320\270\320\265/app.html"	
++++ "b/\321\201\320\260\320\271\321\202 \320\270 \320\277\321\200\320\270\320\273\320\276\320\266\320\265\320\275\320\270\320\265/app.html"	
+@@ -25598,6 +25598,7 @@ function AMayaConsent() {
+   var sm = React.useState(false), mkt = sm[0], setMkt = sm[1];
+   var sb = React.useState(false), busy = sb[0], setBusy = sb[1];
+   var se = React.useState(''), err = se[0], setErr = se[1];
++  var commandRef = React.useRef('');
+ 
+   React.useEffect(function () {
+     function check() {
+@@ -25620,19 +25621,43 @@ function AMayaConsent() {
+     if (!pdn) { setErr('Поставьте галочку согласия на обработку персональных данных.'); return; }
+     var authedFetch = window.__meSaasAuthedFetch;
+     if (typeof authedFetch !== 'function') { setErr('Сессия не найдена — войдите снова.'); return; }
++    if (!commandRef.current) {
++      var bytes = new Uint8Array(18);
++      window.crypto.getRandomValues(bytes);
++      commandRef.current = 'native-consent:' + Array.prototype.map.call(bytes, function (value) {
++        return ('0' + value.toString(16)).slice(-2);
++      }).join('');
++    }
+     setErr(''); setBusy(true);
+-    Promise.resolve(authedFetch('/customers/me/profile', {
+-      method: 'PATCH',
++    Promise.resolve(authedFetch('/client-channel/status')).then(function (status) {
++      if (status && status.linked === true) return null;
++      return authedFetch('/client-channel/challenges', {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: '{}'
++      }).then(function (challenge) {
++        if (!challenge || !challenge.token) throw new Error('Не удалось подтвердить связь с профилем клиента.');
++        return authedFetch('/client-channel/consume', {
++          method: 'POST',
++          headers: { 'Content-Type': 'application/json' },
++          body: JSON.stringify({ token: challenge.token })
++        });
++      });
++    }).then(function () { return authedFetch('/client-channel/consent', {
++      method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+-      body: JSON.stringify({ privacyConsent: true, marketingConsent: !!mkt })
+-    })).then(function () {
++      body: JSON.stringify({ privacy: true, marketing: !!mkt, idempotencyKey: commandRef.current })
++    }); }).then(function () {
++      commandRef.current = '';
+       setBusy(false); setShow(false);
+       try { if (window.tactile) window.tactile('SUCCESS'); } catch (x) {}
+       // Перетянуть /me: profile_linked станет true, режим — полным.
+       try { if (window.__meRefresh) window.__meRefresh(); } catch (x) {}
+     }).catch(function (error) {
+       setBusy(false);
+-      setErr((error && error.message) || 'Не удалось сохранить. Попробуйте ещё раз.');
++      setErr(error && error.status === 403
++        ? 'Профиль клиента ещё не привязан. Войдите тем же способом и повторите.'
++        : ((error && error.message) || 'Не удалось сохранить. Попробуйте ещё раз.'));
+     });
+   }
+ 
