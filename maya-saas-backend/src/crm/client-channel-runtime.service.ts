@@ -28,14 +28,17 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { clientChannelSubjectHash } from './client-channel-subject';
 import { CrmService } from './crm.service';
+import { MayaUserClientAssociationIssuer } from './maya-user-client-association-issuer';
 
-/** Only already verified provenance can issue another channel's challenge.
- * A cold-start Client with no trusted resolution fails closed; no heuristic enrollment.
+/** Only verified provenance can issue a channel challenge. An existing link is
+ * reused; first-link Maya sessions require the exact dual durable association.
+ * Missing or ambiguous provenance fails closed, with no heuristic enrollment.
  */
 @Injectable()
 export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthority {
   readonly resolverId = 'a18.active-verified-client-channel.v1';
   private readonly challenges: ClientLinkChallengeService;
+  private readonly initialMayaChallenges: ClientLinkChallengeService;
   private readonly links: ClientChannelLinkService;
   constructor(
     private readonly prisma: PrismaService,
@@ -68,6 +71,14 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       encryption,
       this.links,
       this,
+      channels,
+    );
+    this.initialMayaChallenges = new ClientLinkChallengeService(
+      prisma,
+      context,
+      encryption,
+      this.links,
+      new MayaUserClientAssociationIssuer(context, channels),
       channels,
     );
   }
@@ -112,8 +123,26 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     };
   }
 
-  issue(channelProof: string) {
-    return this.challenges.issue({ resolutionProof: channelProof });
+  async issue(channelProof: string) {
+    const existingLink = await this.prisma.$transaction(async (tx) => {
+      const channel = await this.channels.authenticate(channelProof, tx);
+      const links = await tx.clientChannelLink.findMany({
+        where: {
+          tenantId: channel.tenantId,
+          provider: channel.provider,
+          providerSubjectHash: channel.providerSubjectHash,
+          revokedAt: null,
+        },
+        take: 2,
+        select: { id: true },
+      });
+      if (links.length > 1)
+        throw new ForbiddenException('Client channel identity is ambiguous');
+      return links[0] ?? null;
+    });
+    return (existingLink ? this.challenges : this.initialMayaChallenges).issue({
+      resolutionProof: channelProof,
+    });
   }
   consume(channelProof: string, token: string) {
     return this.challenges.consume({ channelProof, token });

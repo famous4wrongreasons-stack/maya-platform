@@ -25598,6 +25598,7 @@ function AMayaConsent() {
   var sm = React.useState(false), mkt = sm[0], setMkt = sm[1];
   var sb = React.useState(false), busy = sb[0], setBusy = sb[1];
   var se = React.useState(''), err = se[0], setErr = se[1];
+  var commandRef = React.useRef('');
 
   React.useEffect(function () {
     function check() {
@@ -25620,19 +25621,43 @@ function AMayaConsent() {
     if (!pdn) { setErr('Поставьте галочку согласия на обработку персональных данных.'); return; }
     var authedFetch = window.__meSaasAuthedFetch;
     if (typeof authedFetch !== 'function') { setErr('Сессия не найдена — войдите снова.'); return; }
+    if (!commandRef.current) {
+      var bytes = new Uint8Array(18);
+      window.crypto.getRandomValues(bytes);
+      commandRef.current = 'native-consent:' + Array.prototype.map.call(bytes, function (value) {
+        return ('0' + value.toString(16)).slice(-2);
+      }).join('');
+    }
     setErr(''); setBusy(true);
-    Promise.resolve(authedFetch('/customers/me/profile', {
-      method: 'PATCH',
+    Promise.resolve(authedFetch('/client-channel/status')).then(function (status) {
+      if (status && status.linked === true) return null;
+      return authedFetch('/client-channel/challenges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}'
+      }).then(function (challenge) {
+        if (!challenge || !challenge.token) throw new Error('Не удалось подтвердить связь с профилем клиента.');
+        return authedFetch('/client-channel/consume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: challenge.token })
+        });
+      });
+    }).then(function () { return authedFetch('/client-channel/consent', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ privacyConsent: true, marketingConsent: !!mkt })
-    })).then(function () {
+      body: JSON.stringify({ privacy: true, marketing: !!mkt, idempotencyKey: commandRef.current })
+    }); }).then(function () {
+      commandRef.current = '';
       setBusy(false); setShow(false);
       try { if (window.tactile) window.tactile('SUCCESS'); } catch (x) {}
       // Перетянуть /me: profile_linked станет true, режим — полным.
       try { if (window.__meRefresh) window.__meRefresh(); } catch (x) {}
     }).catch(function (error) {
       setBusy(false);
-      setErr((error && error.message) || 'Не удалось сохранить. Попробуйте ещё раз.');
+      setErr(error && error.status === 403
+        ? 'Профиль клиента ещё не привязан. Войдите тем же способом и повторите.'
+        : ((error && error.message) || 'Не удалось сохранить. Попробуйте ещё раз.'));
     });
   }
 

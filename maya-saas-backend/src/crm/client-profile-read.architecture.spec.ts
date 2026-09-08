@@ -96,4 +96,18 @@ describe('B28 shared private CustomerProfile read protection', () => {
       ).length,
     ).toBeGreaterThan(0);
   });
+  it('keeps first-link association proof limited to non-PII durable keys', () => {
+    const file = 'crm/maya-user-client-association-issuer.ts',
+      code = readFileSync(join(root, file), 'utf8');
+    expect(scanClientProfileRead(file, code)).toEqual([]);
+    expect(
+      scanClientProfileRead(
+        file,
+        code.replace(
+          'select: { id: true, userId: true, clientId: true }',
+          'select: { id: true, userId: true, clientId: true, phone: true }',
+        ),
+      ).length,
+    ).toBeGreaterThan(0);
+  });
 });
