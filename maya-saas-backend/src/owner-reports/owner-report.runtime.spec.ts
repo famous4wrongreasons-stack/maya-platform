@@ -213,14 +213,14 @@ describe('B36 durable daily report orchestration', () => {
       sourceType: 'scheduler' as const,
     };
     expect(() => delivery.deliverPackage2Inbox(input)).toThrow(
-      'B36_OWNER_REPORT_RUN_REQUIRED',
+      'R06_CANONICAL_PRODUCER_REQUIRED',
     );
-    expect(() =>
+    await expect(
       delivery.deliverPackage2Apns({ ...input, deviceToken: 'device' }),
-    ).toThrow('B36_OWNER_REPORT_RUN_REQUIRED');
+    ).rejects.toThrow('R06_CANONICAL_PRODUCER_REQUIRED');
     await expect(
       delivery.deliverPackage2Telegram({ ...input, telegramChatId: '1000' }),
-    ).rejects.toThrow('B36_OWNER_REPORT_RUN_REQUIRED');
+    ).rejects.toThrow('R06_CANONICAL_PRODUCER_REQUIRED');
     await expect(
       delivery.deliverOwnerReportSlot('tenant', 'fake', 'fake'),
     ).rejects.toThrow('B36_OWNER_REPORT_FOUNDATION_REQUIRED');

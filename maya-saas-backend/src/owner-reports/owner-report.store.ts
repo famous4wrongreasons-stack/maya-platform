@@ -1,3 +1,4 @@
+import { canonicalUtcTransaction } from '../prisma/canonical-utc-transaction';
 import { staffTelegramEligible } from '../package5-wave1/governed-settings.read';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -447,13 +448,28 @@ export class OwnerReportStore {
   }
   async purgeExpiredPayloads(tenantId: string, now = new Date()) {
     this.context.assertTenantId(tenantId);
-    return this.prisma.ownerReportRun.updateMany({
-      where: {
-        tenantId,
-        payloadRetentionUntil: { lte: now },
-        intentEncrypted: { not: null },
-      },
-      data: { intentEncrypted: null },
-    });
+    // Existing R05/B36 lifecycle owner; shared predicate is a read-only
+    // AE/CD resolution rule, not a new AC6 class or purge authority.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try { return await canonicalUtcTransaction(this.prisma, async tx => {
+      const candidates = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+        SELECT r.id FROM "OwnerReportRun" r
+        WHERE r."tenantId"=${tenantId} AND r."intentEncrypted" IS NOT NULL
+          AND r."payloadRetentionUntil"<=${now} AND r."expiresAt"<=${now}
+          AND "RC_execution_set_resolved"(r."tenantId", ARRAY(
+            SELECT e.id FROM "ActionExecution" e
+            WHERE e."tenantId"=r."tenantId" AND e."ownerReportRunId"=r.id))
+        ORDER BY r.id LIMIT 200 FOR UPDATE OF r SKIP LOCKED`);
+      return tx.ownerReportRun.updateMany({
+        where: { tenantId, id: { in: candidates.map(row => row.id) },
+          payloadRetentionUntil: { lte: now }, expiresAt: { lte: now },
+          intentEncrypted: { not: null } },
+        data: { intentEncrypted: null },
+      });
+    }); } catch (error) {
+      if (!retryableBulkTransaction(error) || attempt === 4) throw error;
+    }
+    }
+    throw new ActionConflictError('B36 retention could not serialize');
   }
 }
