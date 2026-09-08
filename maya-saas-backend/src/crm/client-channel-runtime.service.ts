@@ -264,6 +264,60 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     return { privacy, marketing };
   }
 
+  /** Compatibility ingress for native bundles released before e5ec27fd.
+   * The legacy HTTP route remains an initiator only: it cannot select a Client
+   * or mutate a profile, and the canonical challenge/link/consent owners keep
+   * every durable effect.
+   */
+  async submitLegacyNativeConsent(channelProof: string, value: unknown) {
+    if (
+      !value ||
+      typeof value !== 'object' ||
+      Array.isArray(value) ||
+      Object.keys(value).sort().join(',') !== 'marketingConsent,privacyConsent'
+    )
+      throw new BadRequestException('Exact legacy consent decision required');
+    const input = value as {
+      privacyConsent: unknown;
+      marketingConsent: unknown;
+    };
+    if (
+      typeof input.privacyConsent !== 'boolean' ||
+      typeof input.marketingConsent !== 'boolean'
+    )
+      throw new BadRequestException('Exact legacy consent decision required');
+
+    if (!(await this.status(channelProof)).linked) {
+      const challenge = await this.issue(channelProof);
+      try {
+        await this.consume(channelProof, challenge.token);
+      } catch (error) {
+        // Concurrent requests for the same authenticated subject may race after
+        // issuing separate tokens. Continue only when the canonical active link
+        // now proves that another request completed the same identity step.
+        if (!(await this.status(channelProof)).linked) throw error;
+      }
+    }
+    const authority = await this.prisma.$transaction((tx) =>
+      this.resolve(channelProof, tx),
+    );
+    const decisionIdentity = createHash('sha256')
+      .update(
+        JSON.stringify([
+          authority.tenantId,
+          authority.linkId,
+          input.privacyConsent,
+          input.marketingConsent,
+        ]),
+      )
+      .digest('hex');
+    return this.submitConsent(channelProof, {
+      privacy: input.privacyConsent,
+      marketing: input.marketingConsent,
+      idempotencyKey: `legacy-native-consent:${decisionIdentity}`,
+    });
+  }
+
   async status(channelProof: string) {
     return this.prisma.$transaction(async (tx) => {
       const channel = await this.channels.authenticate(channelProof, tx);

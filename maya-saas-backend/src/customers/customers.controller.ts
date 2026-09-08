@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -18,6 +19,16 @@ import { RequiresFeature } from '../entitlements/requires-feature.decorator';
 import { CustomersService } from './customers.service';
 import { UpdateCustomerNotesDto } from './dto/update-customer-notes.dto';
 import { UpdateCustomerProfileDto } from './dto/update-customer-profile.dto';
+import { ClientChannelRuntimeService } from '../crm/client-channel-runtime.service';
+
+function mayaSessionProof(authorization: string | undefined) {
+  if (!authorization?.startsWith('Bearer '))
+    throw new BadRequestException('Maya session required');
+  return JSON.stringify({
+    type: 'maya_jwt',
+    credential: authorization.slice(7),
+  });
+}
 
 const CUSTOMER_MANAGER_ROLES = [
   UserRole.TENANT_OWNER,
@@ -33,7 +44,10 @@ const CUSTOMER_MANAGER_ROLES = [
 @RequiresFeature('customers.core')
 @Controller('customers')
 export class CustomersController {
-  constructor(private readonly customersService: CustomersService) {}
+  constructor(
+    private readonly customersService: CustomersService,
+    private readonly clientChannels: ClientChannelRuntimeService,
+  ) {}
 
   @Get('me/profile')
   @ApiOperation({ summary: 'Get the current customer consent profile' })
@@ -43,11 +57,29 @@ export class CustomersController {
 
   @Patch('me/profile')
   @ApiOperation({ summary: 'Update the current customer consent profile' })
-  updateOwnProfile(
+  async updateOwnProfile(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateCustomerProfileDto,
     @Headers('idempotency-key') idempotencyKey?: string,
+    @Headers('authorization') authorization?: string,
   ) {
+    // Installed native builds before e5ec27fd submit this exact consent-only
+    // shape. Preserve their explicit user decision while routing it through the
+    // same verified challenge/link and canonical Client consent boundary.
+    if (
+      dto.preferredLocale === undefined &&
+      typeof dto.privacyConsent === 'boolean' &&
+      typeof dto.marketingConsent === 'boolean'
+    ) {
+      await this.clientChannels.submitLegacyNativeConsent(
+        mayaSessionProof(authorization),
+        {
+          privacyConsent: dto.privacyConsent,
+          marketingConsent: dto.marketingConsent,
+        },
+      );
+      return this.customersService.getOwnProfile(user.tenantId!, user.userId);
+    }
     return this.customersService.updateOwnProfile(
       user.tenantId!,
       user.userId,
