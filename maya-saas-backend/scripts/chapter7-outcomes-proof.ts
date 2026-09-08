@@ -83,7 +83,7 @@ const measurements = new MeasurementService(
 const hash = (value: unknown) =>
   createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const checks: string[] = [];
-async function proof(name: string, work: () => Promise<unknown>) {
+async function proof(name: string, work: () => unknown) {
   await work();
   checks.push(name);
   console.log('PASS ' + name);
@@ -276,7 +276,7 @@ async function main() {
   const first = await materialize();
   await proof(
     'Q12 real B31 direct receipt credits exact internal Appointment and Client without User',
-    async () => {
+    () => {
       assert.equal(client.userId, null);
       assert.equal(first.state, 'PUBLISHED');
       assert.equal(first.attributionStatus, 'ATTRIBUTED');

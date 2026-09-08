@@ -27,3 +27,5 @@ Production acceptance is not assigned by this initial report. P06 and the one fi
 Q13 positive exact-capacity calculation is covered by deterministic fixtures; current real B31 admission has no AgentTask/Opportunity lineage, so its PostgreSQL outcome correctly remains NOT_MEASURED. External CRM credit also remains uncredited without frozen provider namespace evidence. These are the approved source-gap semantics, not fabricated links or new schema requests.
 
 All seven Wave 3 requirement rules are locally covered. Production accounting remains unchanged until the coordinated gate and read-only verification pass.
+
+The first mandatory gate stopped at one proof-only lint error (a synchronous assertion callback marked async), before upload. The helper now accepts synchronous or asynchronous assertions without an unnecessary async callback. Runtime/schema and gate configuration are unchanged; the full gate is rerun on the corrected candidate. [Original receipt](evidence/chapter7-wave3/deployment-first-lint-fail.txt).
