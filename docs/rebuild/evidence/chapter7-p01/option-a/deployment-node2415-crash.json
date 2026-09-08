@@ -1,0 +1,27 @@
+{
+  "runtime": "Node 24.15.0",
+  "pid": 85198,
+  "exception": {
+    "codes": "0x0000000000000001, 0x0000000000000006",
+    "rawCodes": [
+      1,
+      6
+    ],
+    "type": "EXC_BAD_ACCESS",
+    "signal": "SIGSEGV",
+    "subtype": "KERN_INVALID_ADDRESS at 0x0000000000000006"
+  },
+  "frames": [
+    "v8::internal::ClearStaleLeftTrimmedPointerVisitor::VisitRootPointers(v8::internal::Root, char const*, v8::internal::FullObjectSlot, v8::internal::FullObjectSlot)",
+    "v8::internal::InternalFrame::Iterate(v8::internal::RootVisitor*) const",
+    "v8::internal::Isolate::Iterate(v8::internal::RootVisitor*, v8::internal::ThreadLocalTop*)",
+    "v8::internal::Heap::IterateRoots(v8::internal::RootVisitor*, v8::base::EnumSet<v8::internal::SkipRoot, int>, v8::internal::Heap::IterateRootsMode)",
+    "v8::internal::MarkCompactCollector::MarkRoots(v8::internal::RootVisitor*)",
+    "v8::internal::MarkCompactCollector::MarkLiveObjects()",
+    "v8::internal::MarkCompactCollector::CollectGarbage()",
+    "v8::internal::Heap::MarkCompact()"
+  ],
+  "productionReached": false,
+  "nextLocalRuntime": "verified official Node 22.23.2, supported by installed Prisma engines",
+  "gatesWeakened": false
+}

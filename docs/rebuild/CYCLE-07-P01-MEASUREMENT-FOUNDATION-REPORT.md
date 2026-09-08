@@ -1,6 +1,6 @@
 # Chapter 7 — P01 measurement foundation
 
-Status: **P01 LOCAL ACCEPTANCE: PASS. Option A implemented; production cutover pending.** The owner approved the [source-owner FK decision](CYCLE-07-P01-SOURCE-OWNER-FK-DECISION.md) after checkpoint `940ddd51`. Historical failure receipts are retained; fresh superseding evidence is below. This is a Wave 1 report, not Chapter 7 completion.
+Status: **P01 PRODUCTION: PASS — `20260908-c7-p01-7623cac4`. Wave 1 complete.** The owner approved the [source-owner FK decision](CYCLE-07-P01-SOURCE-OWNER-FK-DECISION.md) after checkpoint `940ddd51`. Historical failure receipts are retained; fresh superseding evidence is below. This is a Wave 1 report, not Chapter 7 completion.
 
 The owner accepted `7ed07b6c` and approved the exact [combined mapping](CYCLE-07-COMBINED-SCHEMA-ACTION-MAPPING.md). The [approval receipt](evidence/chapter7-p01/approval-receipt.json) records the latest authorization: P01 gated production cutover, then P02/P05, P03/P04 and P06. That latest execution order supersedes the mapping's older final-only cutover wording. No product/schema decision is reopened.
 
@@ -41,7 +41,7 @@ Production verification is structural/read-only: exact migration, 37 columns, ei
 
 ## Progress and protected state
 
-P01 production acceptance is pending until the release receipt is added below. P02–P06 have not started in this report. Q17 remains globally open for P06; later packages must complete their rule/consumer proofs. Chapter 7 Final Gate has not run; Chapter 7 is not complete; Chapter 8 has not started.
+P01 production acceptance is confirmed in the final receipt below. P02/P05 may proceed in parallel; P03/P04/P06 remain dependency-gated. Q17 remains globally open for P06; later packages must complete their rule/consumer proofs. Chapter 7 Final Gate has not run; Chapter 7 is not complete; Chapter 8 has not started.
 
 Main worktree: 24 entries preserved, protected hashes unchanged. Seventeen old databases untouched. The only temporary database/cluster is owned by this implementation and will be closed and removed at the wave cleanup boundary. No owned browser or watcher was opened.
 
@@ -66,3 +66,33 @@ The first deployment gate hit the previously documented Node 24.19.0 V8 GC nativ
 While preparing the inactive release, upstream `33396c16` added PWA login recovery and six executable tests. Cutover was stopped **before migration**, and production read-only preflight still reports the original C6 release, 96 applied history rows / pending=0 / drift=NONE / health/readiness PASS. The uploaded candidate is inactive; no C7 production schema or business effect was applied.
 
 [Exact reconciliation](evidence/chapter7-p01/option-a/upstream-reconciliation.json): compatible. Unlinked Client preview loses access; owner/staff/platform selection uses only existing server-granted descriptors; preview cannot bootstrap consent authority. No backend runtime/schema, C7 source/measurement contract, mutation owner, provider operation or new production surface changes. Upstream is preserved by fast-forward. [7 suites / 40 access/consent/C7 tests](evidence/chapter7-p01/option-a/upstream-targeted.txt) and all 28 inline script parses PASS. P01 PostgreSQL proofs remain valid; the combined deployment gate includes the new suite before cutover. No new owner decision is required.
+
+## Final P01 production acceptance
+
+**P01 LOCAL / SCHEMA / RUNTIME / RATCHETS / PRODUCTION: PASS.** Source-owner Option A is enforced without expanding the approved envelope. C7 migration is now **APPLIED** and must not be rewritten.
+
+The combined upstream release gate passed **414 suites / 3422 tests**, lint, both typechecks, Prisma and build. Local Node 24.15.0 also exhibited the native V8 crash on a later run, so the final unchanged gate used a checksum-verified official Node 22.23.2 archive, supported by installed Prisma's `^22.12` engine range. [Runtime receipt](evidence/chapter7-p01/option-a/node22-runtime.json) and [successful complete deployment](evidence/chapter7-p01/option-a/deployment-node22.txt) retain the evidence. No test flags, assertions, configuration or production Node runtime were weakened/changed. Compiled artifact hashes are identical across the builds. The source-owner PostgreSQL proof also passed under Node 22.
+
+Production release: **`20260908-c7-p01-7623cac4`**. The single additive migration applied before runtime activation; post-apply preflight reports **94 repository migrations / 97 applied entries including 3 recognized historical entries / pending=0 / drift=NONE**. Canary passed, stopped and was reaped. Health/readiness PASS; no error entries in the deployment interval.
+
+[Read-only structural proof](evidence/chapter7-p01/option-a/production-structural.txt) with [exact verifier](evidence/chapter7-p01/option-a/production-structural.sh): all 37 columns, 25 constraint definitions (16 CHECKs, 8 FKs, primary key), 11 indexes, 4 trigger definitions, 4 guard bodies and 9 runtime artifact hashes match the owned clean-replay candidate. The Appointment FK uses stable `(appointmentId,tenantId)` only. The prospective table has **0 rows**, so no historical rows or business proof measurements were fabricated. Real business/provider/message proof effects: **0**. PWA/Python/edge runtime was not deployed by P01; the compatible PWA upstream was preserved.
+
+[Hygiene](evidence/chapter7-p01/option-a/p01-hygiene.json): P01-owned synthetic dump preserved; its temporary database/cluster/socket removed; owned P01 processes/watchers/browsers/databases=0. [Protected state](evidence/chapter7-p01/option-a/protected-state-final.json): main 24 entries and hashes unchanged, 17 pre-existing databases untouched.
+
+```text
+P01 REQUIREMENTS (OWNED FOUNDATION SCOPE): 6/6 PASS
+P01 SCHEMA PROOF: PASS
+P01 RUNTIME PROOF: PASS
+P01 SOURCE OWNER COMPATIBILITY: PASS
+P01 RATCHETS: PASS
+P01 PRODUCTION: PASS
+CHAPTER 7 REQUIREMENTS COMPLETE: 5/22
+CHAPTER 7 PACKAGES COMPLETE: 1/6
+CHAPTER 7 WAVES COMPLETE: 1/4
+KNOWN CHAPTER 7 REMAINDER: P02/P05 → P03/P04 → P06; Q17 consumer portion remains P06
+CHAPTER 7 FINAL GATE RUN: NO
+CHAPTER 7 COMPLETE: NO
+CHAPTER 8 STARTED: NO
+```
+
+Q01/Q02/Q03/Q18/Q22 are complete in P01's frozen scope; Q17 has only foundation/retention acceptance and receives no global completion credit yet. Under existing owner authorization, continue Wave 2 **P02 + P05 in parallel**, then the remaining approved waves. No new decision/STOP cycle is required.

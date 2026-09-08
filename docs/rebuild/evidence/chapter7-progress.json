@@ -1,0 +1,42 @@
+{
+  "requirementsComplete": [
+    "Q01",
+    "Q02",
+    "Q03",
+    "Q18",
+    "Q22"
+  ],
+  "requirementsPartial": {
+    "Q17": "P01 foundation PASS; P06 consumers outstanding"
+  },
+  "packagesComplete": [
+    "P01"
+  ],
+  "packagesInProgress": [
+    "P02",
+    "P05"
+  ],
+  "packagesRemaining": [
+    "P02",
+    "P05",
+    "P03",
+    "P04",
+    "P06"
+  ],
+  "wavesComplete": 1,
+  "wavesTotal": 4,
+  "requirementsTotal": 22,
+  "productionRelease": "20260908-c7-p01-7623cac4",
+  "schemaEnvelope": {
+    "models": 1,
+    "physicalFields": 37,
+    "migrations": 1,
+    "backfill": 0,
+    "applied": true
+  },
+  "pendingMigrations": 0,
+  "drift": "NONE",
+  "productionProofEffects": 0,
+  "chapter7Complete": false,
+  "chapter8Started": false
+}
