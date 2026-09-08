@@ -30,7 +30,7 @@ import type { AuthenticatedUser } from '../src/common/authenticated-user.interfa
 import { UserRole } from '../src/common/domain.enums';
 import { asActor,config,context,db,engine,ingress,secret,staffFixture,tenantFixture } from './package5-wave-rc-proof-support';
 
-let clock=new Date(),enabled=true,telegramCalls=0,unknownChat='';
+let clock=new Date(),enabled=true,telegramCalls=0,unknownChat='',failedChat='';
 const settings=new ConfigService({DATABASE_URL:config.get('DATABASE_URL'),CRM_ENCRYPTION_KEY:secret,MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN:secret,MAYA_INBOX_BRIDGE_TOKEN:secret,MAYA_PACKAGE2_TELEGRAM_EXECUTOR_URL:'http://127.0.0.1:1/r13-synthetic'}),encryption=new EncryptionService(settings),registry=new AiToolRegistryService();
 const feature={assertFeature:async()=>{if(!enabled)throw new (await import('@nestjs/common')).ForbiddenException('synthetic_feature_denied');}} as unknown as EntitlementsService;
 const policy=new AiToolPolicyService(context,feature,registry),store=new ExpenseReminderStore(db,context,encryption,ingress,engine,policy,registry,()=>clock),runtime=new ActionEngineRuntimeService(engine,ingress),audit=new AuditLogService(db,context);
@@ -43,7 +43,8 @@ const source=new ExpenseIntakeSourceService(db,new BridgeSourceService(db),conte
 const delivery=new CommunicationDeliveryService(db,runtime,settings,undefined,undefined,undefined,undefined,store),scheduler=new ExpenseReminderScheduler(db,context,store,delivery,settings);
 const dispatch=delivery.deliverExpenseReminderSlot.bind(delivery);delivery.deliverExpenseReminderSlot=async(...args)=>{try{return await dispatch(...args);}catch(e){if(process.env.MAYA_RC_DEBUG==='1')console.error(e);throw e;}};
 const checkpoint=resolve(process.env.MAYA_RC_PROOF_DIRECTORY??'/tmp/maya-rc-proof-artifacts','r13-restart.json'),checks:string[]=[];
-const originalFetch=global.fetch;global.fetch=(async(url:unknown,init?:RequestInit)=>{assert.equal(String(url),'http://127.0.0.1:1/r13-synthetic');telegramCalls++;const payload=JSON.parse(String(init?.body)) as {telegram_chat_id?:string;chat_id?:string};if(JSON.stringify(payload).includes(unknownChat)&&unknownChat)throw Error('Synthetic lost Telegram receipt');return new Response(JSON.stringify({message_id:String(700000+telegramCalls)}),{status:200});}) as typeof fetch;
+const providerRefs=new Map<string,string>();
+const originalFetch=global.fetch;global.fetch=(async(url:unknown,init?:RequestInit)=>{assert.equal(String(url),'http://127.0.0.1:1/r13-synthetic');telegramCalls++;const payload=JSON.parse(String(init?.body)) as {telegram_chat_id?:string;chat_id?:string};if(JSON.stringify(payload).includes(unknownChat)&&unknownChat)throw Error('Synthetic lost Telegram receipt');if(failedChat&&JSON.stringify(payload).includes(failedChat))return new Response(JSON.stringify({error:'synthetic_permission_denied'}),{status:403});const reference=String(700000+telegramCalls);providerRefs.set(String(payload.telegram_chat_id??payload.chat_id),reference);return new Response(JSON.stringify({message_id:reference}),{status:200});}) as typeof fetch;
 async function principal(tenantId:string,staff:Awaited<ReturnType<typeof staffFixture>>,telegramId:string){const identity=await db.authIdentity.create({data:{tenantId,userId:staff.user.id,provider:'telegram',providerUserId:telegramId}}),session=await db.authSession.create({data:{tenantId,userId:staff.user.id,deviceLabel:'R13 synthetic',expiresAt:new Date(Date.now()+86400000)}});return{identity,actor:{tenantId,userId:staff.user.id,role:staff.member.role as UserRole,membershipId:staff.member.id,membershipStatus:'active',branchId:null,email:staff.user.email,sessionId:session.id} as AuthenticatedUser};}
 const run=<T>(actor:AuthenticatedUser,fn:()=>T)=>asActor(actor.tenantId!,actor.userId,actor.role,fn);
 async function main(){await db.$connect();
@@ -79,6 +80,14 @@ async function main(){await db.$connect();
   await assert.rejects(admitBody({...sourceBody,messageId:'103',mode:'reply',replyToMessageId:'999999'}));
   const explicit=await admitBody({...sourceBody,messageId:'104',mode:'reply',reminderRunId:runId,reminderSlotKey:mySlot.slotKey});assert.equal(explicit.cards.length,2);assert.equal(await db.expense.count({where:{tenantId:tenant.id}}),1);
   await assert.rejects(admitBody({...sourceBody,messageId:'105',mode:'reply',reminderRunId:runId,reminderSlotKey:plan.slots.find(s=>s.userId!==first.actor.userId)!.slotKey}));
+  // Correlate only the exact canonical slot's successful provider receipt.
+  const secondRef=providerRefs.get('8130002');assert.ok(secondRef);
+  const secondBody={...sourceBody,senderId:'8130002',chatId:'8130002',messageId:'201',mode:'reply',replyToMessageId:secondRef};
+  const secondCapsule=(await source.capsule(secret,secondBody,clock)).capsule;
+  const correlated=await run(second.actor,async()=>intake.admit(await source.verify(second.actor,secondCapsule,text)));assert.equal(correlated.cards.length,2);
+  await assert.rejects(admitBody({...sourceBody,messageId:'202',mode:'reply',replyToMessageId:secondRef}));
+  assert.equal(await db.expense.count({where:{tenantId:tenant.id}}),1);
+  checks.push('exact successful provider message correlates to its own frozen recipient only; foreign reply cannot authorize intake; no automatic Expense');
   const expired=(await source.capsule(secret,{...sourceBody,messageId:'106'},clock)).capsule;clock=new Date(clock.getTime()+11*60000);await assert.rejects(run(first.actor,async()=>intake.admit(await source.verify(first.actor,expired,text))),/window expired/);clock=new Date();
   const proof=await run(first.actor,()=>source.verify(first.actor,capsule,text));await db.authSession.update({where:{id:first.actor.sessionId},data:{revokedAt:new Date()}});await assert.rejects(run(first.actor,()=>intake.admit(proof)),/session required/);first.actor.sessionId=(await db.authSession.create({data:{tenantId:tenant.id,userId:first.actor.userId,deviceLabel:'R13 fresh synthetic session',expiresAt:new Date(Date.now()+86400000)}})).id;
   enabled=false;await assert.rejects(admitBody({...sourceBody,messageId:'107'}));enabled=true;
@@ -95,6 +104,20 @@ async function main(){await db.$connect();
   assert.equal(await db.expense.count({where:{tenantId:tenant.id,amountKopecks:2800}}),0);const invocation=await db.aiToolExecution.findFirstOrThrow({where:{approvalRequestId:beforeCard.id}}),bound=receipts.read(invocation.encryptedResult)!.bindings[0].executionId;
   await run(first.actor,()=>approvals.approve(first.actor,beforeCard.id,{payloadHash:beforeCard.payload_hash}));assert.equal((await db.expense.findFirstOrThrow({where:{tenantId:tenant.id,amountKopecks:2800}})).actionExecutionId,bound);assert.equal(await db.expensePeriodDeclaration.count({where:{tenantId:tenant.id}}),0);
   checks.push('crash after canonical commit retains one SUCCEEDED P407 outcome with honest unsettled AI wrapper; crash before local effect resumes the same R10-bound execution; no list/period completeness inference');
+  const dispatchTenant=await tenantFixture(),targets:Array<{staff:Awaited<ReturnType<typeof staffFixture>>;human:Awaited<ReturnType<typeof principal>>}>=[];
+  for(let i=0;i<4;i++){const staff=await staffFixture(dispatchTenant.id),human=await principal(dispatchTenant.id,staff,'813009'+i);targets.push({staff,human});await db.dashboardPreference.create({data:{tenantId:dispatchTenant.id,userId:staff.user.id,section:'assistant',configJson:{schema_version:1,enabled_capabilities:['weekly_expense_reminders']}}});}
+  clock=localDateMinuteToUtc(end,20*60+10,'Europe/Moscow');
+  await context.runAsSystemTenant(dispatchTenant.id,async()=>{
+   const root=await store.admit(dispatchTenant.id,start,end),plan=store.read(root);assert.equal(plan.slots.length,4);
+   await db.dashboardPreference.create({data:{tenantId:dispatchTenant.id,userId:targets[0].staff.user.id,section:'staff_notifications',configJson:{schema_version:1,membershipId:targets[0].staff.member.id,telegramMutedUntil:new Date(clock.getTime()+3600000).toISOString()}}});
+   await db.membership.update({where:{id:targets[1].staff.member.id},data:{status:'suspended'}});
+   failedChat='8130092';const beforeCalls=telegramCalls;await scheduler.resume(root.id,dispatchTenant.id);failedChat='';
+   assert.equal(telegramCalls-beforeCalls,2);const rows=await store.executions(root,plan),byUser=(userId:string)=>rows.find(e=>e.expenseReminderSlotKey===plan.slots.find(s=>s.userId===userId)!.slotKey)!;
+   assert.equal(byUser(targets[2].staff.user.id).state,'FAILED');assert.equal(byUser(targets[3].staff.user.id).state,'SUCCEEDED');
+   assert.ok(['FAILED','NOT_EXECUTED'].includes(byUser(targets[0].staff.user.id).state));assert.ok(['FAILED','NOT_EXECUTED'].includes(byUser(targets[1].staff.user.id).state));
+   await scheduler.resume(root.id,dispatchTenant.id);assert.equal(telegramCalls-beforeCalls,2);assert.equal((await store.executions(root,plan)).length,4);
+  });clock=new Date();checks.push('post-admission mute/revoked Member prevent dispatch; deterministic Telegram failure terminal without fallback; independent recipient succeeds; no route or slot expansion');
+
  }
  if(process.argv.includes('--before-restart'))writeFileSync(checkpoint,JSON.stringify({tenantId:tenant.id,runId,executions,actor:first.actor,capsule,cardIds:bundle.cards.map(c=>c.id),company}));
  console.log(JSON.stringify({package:'R13',phase:process.argv.includes('--before-restart')?'before actual restart':'runtime',result:'PASS',checks,syntheticTelegramCalls:telegramCalls,productionEffects:0},null,2));
