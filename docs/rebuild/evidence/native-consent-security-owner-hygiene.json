@@ -1,0 +1,23 @@
+{
+  "mainEntriesUnchanged": 24,
+  "mainFileHashesUnchanged": 22,
+  "rcWorktreeCleanAndUnchanged": true,
+  "rcCheckpoint": "ed13d57f46bc3bc49f91b59b57f040c85589c4c8",
+  "wipCommitTreesUnchanged": 11,
+  "preservedDumps": [
+    "maya_rc_replay.dump",
+    "maya_rc_b36_runtime.dump",
+    "maya_rc_clean_replay.dump"
+  ],
+  "prospectiveG1G2WipUnchanged": true,
+  "runtimeSchemaMigrationChanges": 0,
+  "ownedPersistentProcesses": 0,
+  "ownedDatabases": 0,
+  "ownedBrowsers": 0,
+  "ownedWatchers": 0,
+  "preExistingDatabasesTouched": 0,
+  "productionWrites": 0,
+  "productionMessages": 0,
+  "productionProviderEffects": 0,
+  "scope": "this foundation assessment only; files/dumps inspected without database connections"
+}
