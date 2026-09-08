@@ -1,0 +1,11 @@
+{
+  "mainEntries": 24,
+  "protectedFileHashes": 22,
+  "mainUnchanged": true,
+  "historicalChecks": 85,
+  "historicalCheckMethod": "Git objects at 2e7de86db0871bbd30e35cbfda710f674d0c7457 because execution worktree disappeared",
+  "worktreeExists": false,
+  "pushedWipIsAncestorOfUpstream": true,
+  "upstream": "2e7de86db0871bbd30e35cbfda710f674d0c7457",
+  "newRuntimeChangesByThisCheck": 0
+}

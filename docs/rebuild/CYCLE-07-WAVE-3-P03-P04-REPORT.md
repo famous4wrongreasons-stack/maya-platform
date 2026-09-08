@@ -29,3 +29,7 @@ Q13 positive exact-capacity calculation is covered by deterministic fixtures; cu
 All seven Wave 3 requirement rules are locally covered. Production accounting remains unchanged until the coordinated gate and read-only verification pass.
 
 The first mandatory gate stopped at one proof-only lint error (a synchronous assertion callback marked async), before upload. The helper now accepts synchronous or asynchronous assertions without an unnecessary async callback. Runtime/schema and gate configuration are unchanged; the full gate is rerun on the corrected candidate. [Original receipt](evidence/chapter7-wave3/deployment-first-lint-fail.txt).
+
+## Release interruption
+
+The rerun on `0e57f652` passed lint and both typechecks, but mandatory regression was terminated by SIGTERM before its summary. The isolated worktree subsequently disappeared. Wave 3 was not uploaded or activated. All commits remain preserved under upstream `2e7de86d`; its new PWA login change needs targeted certification. See the [interruption and preservation report](CYCLE-07-WAVE-3-INTERRUPTION-REPORT.md). P03/P04 production acceptance remains NOT DEPLOYED.
