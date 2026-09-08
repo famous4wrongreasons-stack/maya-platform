@@ -95,7 +95,7 @@ export class CashDeclarationService {
     const result={contract:CASH_DECLARATION_CONTRACT,actionExecutionId:execution.id,declarationId:declaration.id,revision:declaration.revision,kind:declaration.declarationKind,commandHash:input.commandHash,intentHash:input.intentHash,providerWrites:0,expenseWrites:0,reconciled:false};
     await this.kernel.finalizeSuccess({tenantId:execution.tenantId,executionId:execution.id,attemptId:claim.attempt.id,leaseToken:claim.leaseToken,outcomeCode:'cash_observation_committed',safeResult:result},tx);
     return result;
-   });if(result.canonicalRejection)throw new ConflictException(result.canonicalRejection);return result;}catch(error){if(isPostgresSerializationConflict(error)&&attempt<3)continue;throw error;}
+   });if('canonicalRejection' in result && result.canonicalRejection)throw new ConflictException(result.canonicalRejection);return result;}catch(error){if(isPostgresSerializationConflict(error)&&attempt<3)continue;throw error;}
   }
   throw new ConflictException('Cash transaction could not serialize');
  }
