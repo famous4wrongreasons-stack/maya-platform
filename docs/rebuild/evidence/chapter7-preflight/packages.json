@@ -1,0 +1,127 @@
+[
+  {
+    "id": "P01",
+    "businessCapability": "Trustworthy measured outcome / evidence foundation",
+    "requirements": [
+      "Q01",
+      "Q02",
+      "Q03",
+      "Q17",
+      "Q18",
+      "Q22"
+    ],
+    "dependencies": [],
+    "canRunInParallelWith": [],
+    "wave": 1,
+    "schemaExpected": "Expected shared durable mapping; exact model/field count deliberately not proposed",
+    "actionsExpected": "No new business action expected; retention/admission mapping needs later exact assessment",
+    "acceptance": "All assigned Q proofs plus cross-tenant, idempotency, no direct business/provider/delivery effect, mandatory package ratchet",
+    "status": "PROPOSED — OWNER DECISIONS PENDING"
+  },
+  {
+    "id": "P02",
+    "businessCapability": "Financial truth / periods / expense and value discrepancy",
+    "requirements": [
+      "Q05",
+      "Q06",
+      "Q07",
+      "Q11"
+    ],
+    "dependencies": [
+      "P01"
+    ],
+    "canRunInParallelWith": [
+      "P05"
+    ],
+    "wave": 2,
+    "schemaExpected": "Assess existing source/evidence reuse; no second ledger",
+    "actionsExpected": "Existing A22/P407/P4 only; no settlement/refund execution",
+    "acceptance": "All assigned Q proofs plus cross-tenant, idempotency, no direct business/provider/delivery effect, mandatory package ratchet",
+    "status": "PROPOSED — OWNER DECISIONS PENDING"
+  },
+  {
+    "id": "P03",
+    "businessCapability": "Measured action outcome / attribution / funnel",
+    "requirements": [
+      "Q04",
+      "Q12",
+      "Q13",
+      "Q14",
+      "Q15"
+    ],
+    "dependencies": [
+      "P01",
+      "P02"
+    ],
+    "canRunInParallelWith": [
+      "P04"
+    ],
+    "wave": 3,
+    "schemaExpected": "Shared P01 evidence/outcome revisions; no second A29 projection owner",
+    "actionsExpected": "Existing A29 corrections; no business sends/bookings",
+    "acceptance": "All assigned Q proofs plus cross-tenant, idempotency, no direct business/provider/delivery effect, mandatory package ratchet",
+    "status": "PROPOSED — OWNER DECISIONS PENDING"
+  },
+  {
+    "id": "P04",
+    "businessCapability": "Actual staff earnings and monthly goals",
+    "requirements": [
+      "Q08",
+      "Q09"
+    ],
+    "dependencies": [
+      "P01",
+      "P02"
+    ],
+    "canRunInParallelWith": [
+      "P03"
+    ],
+    "wave": 3,
+    "schemaExpected": "Assess A22 revision / P01 reuse, no payroll schema authorized",
+    "actionsExpected": "Existing A22 goal configuration owner",
+    "acceptance": "All assigned Q proofs plus cross-tenant, idempotency, no direct business/provider/delivery effect, mandatory package ratchet",
+    "status": "PROPOSED — OWNER DECISIONS PENDING"
+  },
+  {
+    "id": "P05",
+    "businessCapability": "Source-qualified reputation measurements",
+    "requirements": [
+      "Q10"
+    ],
+    "dependencies": [
+      "P01"
+    ],
+    "canRunInParallelWith": [
+      "P02"
+    ],
+    "wave": 2,
+    "schemaExpected": "Assess reuse of Review/NativeFeedback + P01; no new review source model implied",
+    "actionsExpected": "Existing feedback/review owners only",
+    "acceptance": "All assigned Q proofs plus cross-tenant, idempotency, no direct business/provider/delivery effect, mandatory package ratchet",
+    "status": "PROPOSED — OWNER DECISIONS PENDING"
+  },
+  {
+    "id": "P06",
+    "businessCapability": "Consistent authorized reads / release proof",
+    "requirements": [
+      "Q16",
+      "Q17",
+      "Q19",
+      "Q20",
+      "Q21"
+    ],
+    "dependencies": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05"
+    ],
+    "canRunInParallelWith": [],
+    "wave": 4,
+    "schemaExpected": "Combined migration/replay/drift gate for approved mapping only",
+    "actionsExpected": "No new business action; existing OwnerReport snapshot/CD unchanged",
+    "acceptance": "All assigned Q proofs plus cross-tenant, idempotency, no direct business/provider/delivery effect, mandatory package ratchet",
+    "status": "PROPOSED — OWNER DECISIONS PENDING"
+  }
+]

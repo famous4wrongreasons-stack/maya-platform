@@ -1,0 +1,74 @@
+{
+  "mode": "metadata and read-only verification; no production jobs/commands triggered",
+  "rawOutputsRetained": true,
+  "receipts": [
+    {
+      "proof": "production-metadata",
+      "exitCode": 0,
+      "seconds": 11.2,
+      "stdoutSha256": "5e906863ffc4722734fbe40c5a39b57237af42cf411b58b5a672645256ecd32f",
+      "stderrSha256": "158adb935596ed238c1f26d3712dca18c84e866bb6762cd4d8bef2044a5585b7",
+      "rawOutputLocation": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-preflight-20260908/production-metadata.txt"
+    },
+    {
+      "proof": "runtime-launchers",
+      "exitCode": 0,
+      "seconds": 3.7,
+      "stdoutSha256": "73ca6bc0d9d55dd3c675fde50bdf4a8ef17e5a88d7c21ea4c19b49bfb192990e",
+      "stderrSha256": "158adb935596ed238c1f26d3712dca18c84e866bb6762cd4d8bef2044a5585b7",
+      "rawOutputLocation": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-preflight-20260908/runtime-launchers.txt"
+    },
+    {
+      "proof": "extra-surfaces",
+      "exitCode": 0,
+      "seconds": 3.5,
+      "stdoutSha256": "2ea0d3d1bdb5438cd46cc8a8ea36bd4063255bbd204231bbad10d36d96c71a8e",
+      "stderrSha256": "158adb935596ed238c1f26d3712dca18c84e866bb6762cd4d8bef2044a5585b7",
+      "rawOutputLocation": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-preflight-20260908/extra-surfaces.txt"
+    },
+    {
+      "proof": "edge-metadata",
+      "exitCode": 0,
+      "seconds": 4.1,
+      "stdoutSha256": "23a4f65e3d69894715c43be8325b793f422b1c0dde34785326ce4f21b95ae71f",
+      "stderrSha256": "158adb935596ed238c1f26d3712dca18c84e866bb6762cd4d8bef2044a5585b7",
+      "rawOutputLocation": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-preflight-20260908/edge-metadata.txt"
+    },
+    {
+      "proof": "live-config",
+      "exitCode": 0,
+      "seconds": 3.2,
+      "stdoutSha256": "744878cade8799aed107e7bee9705769854813bedc50fcf70973603a0285b034",
+      "stderrSha256": "158adb935596ed238c1f26d3712dca18c84e866bb6762cd4d8bef2044a5585b7",
+      "rawOutputLocation": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-preflight-20260908/live-config.txt"
+    },
+    {
+      "proof": "schema-preflight",
+      "exitCode": 0,
+      "seconds": 5.5,
+      "stdoutSha256": "5779f24e8861b38c1a4e84350f11ab321e882227c7133d7dde1b934faf47e7e2",
+      "stderrSha256": "95eb94cc34f3224da2231e08f4d9958ec0bd75978992605cdf2d2b648332849e",
+      "rawOutputLocation": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-preflight-20260908/schema-preflight.txt"
+    },
+    {
+      "proof": "schema-structure",
+      "exitCode": 0,
+      "seconds": 3.7,
+      "stdoutSha256": "b7a99ab71e2252056cd4529e6b1dc1245d6043e5f2f7596b5f53b6f2d11a71e3",
+      "stderrSha256": "158adb935596ed238c1f26d3712dca18c84e866bb6762cd4d8bef2044a5585b7",
+      "rawOutputLocation": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-preflight-20260908/schema-structure.txt"
+    },
+    {
+      "proof": "health-readiness",
+      "exitCode": 0,
+      "seconds": 3.4,
+      "stdoutSha256": "ac4444e819a551425f911f0b132f655abf105f78d633ed8fa8ad393003b1ec25",
+      "stderrSha256": "158adb935596ed238c1f26d3712dca18c84e866bb6762cd4d8bef2044a5585b7",
+      "rawOutputLocation": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-preflight-20260908/health-readiness.txt"
+    }
+  ],
+  "comparisonBaseline": "../package5-rc-final/",
+  "sameAsChapter6Release": true,
+  "readOnlyRunnerSha256": "049a966c8ae28b892539dca7e4f8d3d5f3d8718dc53013867077de9769d3dae1",
+  "comparatorSha256": "62425ef6f50999dc823a85b9c572a0a45eb2c3afc2b19ff838d8a45ffee7a9f4"
+}

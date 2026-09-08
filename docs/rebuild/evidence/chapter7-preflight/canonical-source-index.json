@@ -1,0 +1,487 @@
+[
+  {
+    "path": "docs/rebuild/CYCLE-01-COMPLETION.md",
+    "sha256": "64ac77d6b28e2d745c28e2d03e606e4ec1b7684c86edb0a0e95524c9c8013fc6",
+    "sections": [
+      {
+        "line": 143,
+        "heading": "## Deferred Findings"
+      }
+    ],
+    "interpretation": "C7 tenant audit read and 2/7 per-tenant bridge token deferred items"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-02-CHAPTER-2-COMPLETION.md",
+    "sha256": "e7ade56f494e59a492bef56263408ae8fbe7e807a6d4f3f796033eaabec4512c",
+    "sections": [
+      {
+        "line": 273,
+        "heading": "## Deferred Findings"
+      }
+    ],
+    "interpretation": "Recovery/financial/history deferred items; later chapter assignment takes precedence"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-02-PHASE-A.md",
+    "sha256": "456c096e412639ab84ab974cb75ea075e33947163912809af7d767fd3679648a",
+    "sections": [
+      {
+        "line": 425,
+        "heading": "## L. Persistence Plan"
+      },
+      {
+        "line": 460,
+        "heading": "## N. Transaction / Revenue Semantics"
+      },
+      {
+        "line": 519,
+        "heading": "## S. DEFER"
+      }
+    ],
+    "interpretation": "Client/history persistence and financial meaning for C7"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-03-CHAPTER-3-COMPLETION.md",
+    "sha256": "7b4f8200c3a34e70c0d84c70ef1434afdb9c825e6c2cc07e40ecedcfce3d9f32",
+    "sections": [
+      {
+        "line": 172,
+        "heading": "## Deferred Findings"
+      }
+    ],
+    "interpretation": "Event/source handoff; no extra unassigned C7 family beyond canonical carry-forward"
+  },
+  {
+    "path": "docs/rebuild/MAYA-ORCHESTRATOR-AGENTS-ARCHITECTURE-GATE.md",
+    "sha256": "3a1cb982f8541f83250b67468579ebac969be26095d7486e4a98a07cc730ecec",
+    "sections": [
+      {
+        "line": 638,
+        "heading": "## 18. Переработка глав 5–10"
+      },
+      {
+        "line": 664,
+        "heading": "### 19.1 Именованные вами строки"
+      },
+      {
+        "line": 680,
+        "heading": "### 19.2 Глава 3 (открытые строки)"
+      },
+      {
+        "line": 693,
+        "heading": "### 19.3 Глава 4 (открытые строки)"
+      },
+      {
+        "line": 723,
+        "heading": "### 19.4 Главы 5–7 и прочее"
+      },
+      {
+        "line": 416,
+        "heading": "### 10.3 Безопасность (§30 задания)"
+      }
+    ],
+    "interpretation": "C7 MEASURE & OUTCOMES, all assigned carry-forward findings; later chapter boundaries"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-05-PHASE-A-OPPORTUNITIES-AGENT-TASKING.md",
+    "sha256": "6cf1f8d9efe43c16bf0ea8ed443d09f2183efd6ebae66836664246d1baa54817",
+    "sections": [
+      {
+        "line": 364,
+        "heading": "### 9.3 Chapter 7 — MEASURE & OUTCOMES"
+      },
+      {
+        "line": 379,
+        "heading": "### 9.4 Chapter 8 — PREDICT"
+      },
+      {
+        "line": 391,
+        "heading": "### 9.5 Chapter 9 — Maya Orchestrator & Conversation"
+      },
+      {
+        "line": 403,
+        "heading": "### 9.6 Chapter 10 — Autopilot & Autonomy Policy"
+      }
+    ],
+    "interpretation": "C7 financial/measurement/reputation scope; C8/9/10 exclusions"
+  },
+  {
+    "path": "docs/rebuild/CARRY-FORWARD-REGISTER.md",
+    "sha256": "69d35277c79e159349f4d6b0df69068c8195cd231fb7b35403d9cc43a94db585",
+    "sections": [
+      {
+        "line": 299,
+        "heading": "### Chapter 7 — Measurement & Attribution"
+      },
+      {
+        "line": 307,
+        "heading": "### Chapter 8 — Prediction & Valuation"
+      },
+      {
+        "line": 315,
+        "heading": "### Chapter 9 — Orchestrator & Agent Runtime"
+      },
+      {
+        "line": 324,
+        "heading": "### Chapter 10 — Autonomy"
+      }
+    ],
+    "interpretation": "Measurement/attribution obligations; historical numbered findings retained"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-05-CHAPTER-5-COMPLETION-REPORT.md",
+    "sha256": "f0bf81c6b58ade7d924c9f402dfaa2b44b58b0f33036a0aa83dab12882a53c0f",
+    "sections": [
+      {
+        "line": 381,
+        "heading": "## 17. Carry-forward audit"
+      },
+      {
+        "line": 441,
+        "heading": "## 19. CYCLE 05 final closure fixes verification"
+      }
+    ],
+    "interpretation": "Opportunity completion/handoff and final closure take precedence over earlier status"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-06-ACTION-ENGINE-SCHEMA-GATE.md",
+    "sha256": "62d964e5bce2cf63017f8a27662df520188a94dbe945f2b45c9f252403b3a0c8",
+    "sections": [
+      {
+        "line": 613,
+        "heading": "## Audit and Retention"
+      },
+      {
+        "line": 637,
+        "heading": "## Chapter 7 Linkage"
+      }
+    ],
+    "interpretation": "Approved execution/attempt evidence linkage; success does not prove business causality"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-06-FINAL-COMPLETION-REPORT.md",
+    "sha256": "8bba55852e82fb788bdfae5ca826f747c5a3bd60869991667a447944de0a6f11",
+    "sections": [
+      {
+        "line": 313,
+        "heading": "## Deferred capabilities and non-blocking debt"
+      },
+      {
+        "line": 345,
+        "heading": "## Final acceptance results"
+      },
+      {
+        "line": 370,
+        "heading": "## Chapter 7 handoff prerequisites"
+      }
+    ],
+    "interpretation": "Final C6 release; future reactivation flow, A08 disabled, no arbitrary exports"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-BUSINESS-DECISION-CLOSURE-SCHEMA-APPROVAL-BRIEF.md",
+    "sha256": "576defeb9e11f9cf175035f854f428e60ee3b40e5c9588fb7b310bcc18274ba7",
+    "sections": [
+      {
+        "line": 342,
+        "heading": "### Option A — immutable facts, revisable projection with evidence (recommended)"
+      }
+    ],
+    "interpretation": "A29/D6 fixed attribution-window semantics preserved"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-04-CHAPTER-4-COMPLETION-REPORT.md",
+    "sha256": "2624329240be2d1816813d2568e8f0bf3a14004908e9038feaa2d4fca2d11d7c",
+    "sections": [
+      {
+        "line": 17,
+        "heading": "## Implemented"
+      },
+      {
+        "line": 25,
+        "heading": "## Canonical Business Facts"
+      },
+      {
+        "line": 39,
+        "heading": "## Business State Architecture"
+      },
+      {
+        "line": 57,
+        "heading": "## Source of Truth Matrix"
+      },
+      {
+        "line": 71,
+        "heading": "## Cross-Surface Consistency"
+      },
+      {
+        "line": 85,
+        "heading": "## Attendance Truth"
+      },
+      {
+        "line": 92,
+        "heading": "## Financial Truth"
+      },
+      {
+        "line": 104,
+        "heading": "## Recency Truth"
+      },
+      {
+        "line": 112,
+        "heading": "## Cache Guarantees"
+      },
+      {
+        "line": 120,
+        "heading": "## Agent-Ready Capabilities"
+      },
+      {
+        "line": 135,
+        "heading": "## Deferred Findings"
+      },
+      {
+        "line": 146,
+        "heading": "## Technical Debt"
+      },
+      {
+        "line": 154,
+        "heading": "## Production Proof"
+      },
+      {
+        "line": 167,
+        "heading": "## Validation"
+      },
+      {
+        "line": 173,
+        "heading": "## Git / Production State"
+      },
+      {
+        "line": 180,
+        "heading": "## Закрытие состязательных находок"
+      },
+      {
+        "line": 198,
+        "heading": "## Final Status"
+      }
+    ],
+    "interpretation": "Historical findings only; superseded where C5/C6 prove closure"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-04-P4-BRIEFINGS-REPORTS-MIGRATION-REPORT.md",
+    "sha256": "59582aaee0ec8c2ea4ed42d51ca6d03ecfba5f6a776486f8df88d2d06982ee61",
+    "sections": [
+      {
+        "line": 272,
+        "heading": "## 11. Чего НЕ делали"
+      }
+    ],
+    "interpretation": "Existing report facts vs explicitly frozen staff motivation"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-04-P8-EXPENSE-CANONICALIZATION-REPORT.md",
+    "sha256": "bb2d8ba490f587283990c94770940efc50a224416f494ea11225fc670d767303",
+    "sections": [
+      {
+        "line": 88,
+        "heading": "## 5. Сумматор"
+      },
+      {
+        "line": 117,
+        "heading": "## 7. Прибыль"
+      },
+      {
+        "line": 150,
+        "heading": "## 9. Что осталось за границей пакета"
+      }
+    ],
+    "interpretation": "Existing expense reader and import/currency limitations"
+  },
+  {
+    "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-EXHAUSTIVE-REMAINDER-INVENTORY-COMPLETE.md",
+    "sha256": "c7f8944c8a98e103658712e1982a494b6024ac616a8c045b12aba01165ab8ff5",
+    "sections": [
+      {
+        "line": 7,
+        "heading": "## 1. Owner evidence and exact S13 conclusion"
+      },
+      {
+        "line": 21,
+        "heading": "## 2. Closure pass and baseline continuity"
+      },
+      {
+        "line": 31,
+        "heading": "## 3. Final consolidated inventory"
+      },
+      {
+        "line": 101,
+        "heading": "## 4. Remediation packages and execution order — NOT STARTED"
+      },
+      {
+        "line": 132,
+        "heading": "## 5. Verification and STOP"
+      }
+    ],
+    "interpretation": "Closed 32-group manifest, not current unresolved blocker statuses"
+  },
+  {
+    "path": "docs/rebuild/package5-b35-canonical-bulk-owner-contract-v1-proposal.md",
+    "sha256": "06836cf5c2009d565440d60151a8be4b702bd6b3164797a81129864a5ffeb7b3",
+    "sections": [
+      {
+        "line": 27,
+        "heading": "## 1. Exact production flow"
+      },
+      {
+        "line": 57,
+        "heading": "## 2. Existing foundations and exact limits"
+      },
+      {
+        "line": 84,
+        "heading": "## 3. Recommended owner decision A — common marketing bulk contract"
+      },
+      {
+        "line": 91,
+        "heading": "### A1. Initiator and owners"
+      },
+      {
+        "line": 109,
+        "heading": "### A2. One immutable bulk intent and deterministic Client children"
+      },
+      {
+        "line": 136,
+        "heading": "### A3. Canonical audience and marketing policy"
+      },
+      {
+        "line": 161,
+        "heading": "### A4. Extend the existing route composition to marketing explicitly"
+      },
+      {
+        "line": 187,
+        "heading": "### A5. Partial results, restart and UNKNOWN"
+      },
+      {
+        "line": 209,
+        "heading": "## 4. Schema boundary — no automatic storage choice"
+      },
+      {
+        "line": 246,
+        "heading": "## 5. Proof and release boundary after decisions"
+      }
+    ],
+    "interpretation": "Reusable admitted audience/CD; not scoring, SMS or arbitrary export authority"
+  },
+  {
+    "path": "docs/rebuild/package5-b35-exact-schema-mapping-v1-proposal.md",
+    "sha256": "81102413a6a996ffb35fe79708b4cf9dfbad39907aab65b57bddb7d5ad587249",
+    "sections": [
+      {
+        "line": 10,
+        "heading": "## Decision and evidence"
+      },
+      {
+        "line": 43,
+        "heading": "## 1. Requirement → exact existing storage"
+      },
+      {
+        "line": 79,
+        "heading": "## 2. One graph using existing models"
+      },
+      {
+        "line": 119,
+        "heading": "## 3. Recommended Schema Delta — exact inventory"
+      },
+      {
+        "line": 191,
+        "heading": "### Required CHECK/trigger changes are part of this delta"
+      },
+      {
+        "line": 244,
+        "heading": "## 4. Immutable approval, content and audience mapping"
+      },
+      {
+        "line": 285,
+        "heading": "## 5. Fixed route contract and transport linkage"
+      },
+      {
+        "line": 326,
+        "heading": "## 6. Current eligibility, frequency and historical boundary"
+      },
+      {
+        "line": 383,
+        "heading": "## 7. Partial resume and state proof"
+      },
+      {
+        "line": 421,
+        "heading": "## 8. PostgreSQL proof plan — after schema approval only"
+      },
+      {
+        "line": 461,
+        "heading": "## 9. Exact decision values and STOP"
+      }
+    ],
+    "interpretation": "Existing durable bulk foundation; no new marketing execution owner"
+  },
+  {
+    "path": "docs/rebuild/BASELINE.md",
+    "sha256": "d0069eca6d07cebd9acfc9f63212649c63edf32d8e0ac658c983bbb5b4d12050",
+    "sections": [
+      {
+        "line": 9,
+        "heading": "## 1. Точка отсчёта"
+      },
+      {
+        "line": 20,
+        "heading": "## 2. Размеры"
+      },
+      {
+        "line": 43,
+        "heading": "## 3. Готовность по главам"
+      },
+      {
+        "line": 58,
+        "heading": "## 4. Легаси-зоны (контекст для будущих глав, не чинить вне scope)"
+      },
+      {
+        "line": 60,
+        "heading": "### 4.1 Чат как источник бизнес-логики"
+      },
+      {
+        "line": 65,
+        "heading": "### 4.2 Живая зависимость от старого бота"
+      },
+      {
+        "line": 71,
+        "heading": "### 4.3 Две системы согласий"
+      },
+      {
+        "line": 76,
+        "heading": "### 4.4 Два разошедшихся фронта"
+      },
+      {
+        "line": 80,
+        "heading": "### 4.5 Отсутствие событийного хребта"
+      },
+      {
+        "line": 84,
+        "heading": "## 5. Производственные риски"
+      },
+      {
+        "line": 97,
+        "heading": "## 6. Что baseline НЕ означает"
+      },
+      {
+        "line": 104,
+        "heading": "## 7. Возврат к baseline"
+      }
+    ],
+    "interpretation": "Historical reconstruction, not current state or a standalone C7 specification"
+  },
+  {
+    "path": "Документация/MAYA_AI_NATIVE_ROADMAP.md",
+    "sha256": "16d16a8409b57a6fc214fea8e5c10c89ccdd9e17722f9c55a2b231b8ae91576b",
+    "sections": [
+      {
+        "line": 927,
+        "heading": "M5 marketing historical product roadmap (read with surrounding section)"
+      }
+    ],
+    "interpretation": "Historical aspiration only. SQLite/phone writes and holdout percentages are not canonical Chapter7 authorization."
+  }
+]

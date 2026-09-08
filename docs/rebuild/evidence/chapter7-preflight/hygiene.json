@@ -1,0 +1,19 @@
+{
+  "mainDirtyWorktreeTouched": false,
+  "preExistingDirtyEntriesPreserved": 24,
+  "preExistingDatabasesTouched": 0,
+  "preExistingDatabaseCount": 17,
+  "ownedTempProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTempDatabases": 0,
+  "productionMutations": 0,
+  "productionMessages": 0,
+  "productionProviderEffects": 0,
+  "deployments": 0,
+  "runtimeChanges": 0,
+  "schemaChanges": 0,
+  "migrations": 0,
+  "processHygiene": 0,
+  "rawProbeEvidencePreserved": true
+}
