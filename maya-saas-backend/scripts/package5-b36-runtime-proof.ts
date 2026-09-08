@@ -249,7 +249,7 @@ const invoke = delivery.deliverOwnerReportSlot.bind(delivery);
 delivery.deliverOwnerReportSlot = (tenant, run, slot) => {
   if (blocked.has(slot))
     return Promise.reject(new Error('synthetic process loss before sibling'));
-  return invoke(tenant, run, slot);
+  return invoke(tenant, run, slot).catch(error => { if(process.env.MAYA_RC_DEBUG === '1') console.error(error); throw error; });
 };
 async function record(channel: string, destination: string) {
   const tenantId = context.requireTenantId();

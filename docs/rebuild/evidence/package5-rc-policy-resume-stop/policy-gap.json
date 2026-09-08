@@ -1,0 +1,22 @@
+{
+  "proof": "confirmed shared policy-resume contradiction",
+  "reproduced": true,
+  "package": "R05",
+  "inventoryPath": "B36 existing OwnerReportRun/A12",
+  "approvalRequirement": "NONE",
+  "state": "READY",
+  "originalPolicyTtlMs": 60000,
+  "policyEvaluatedAt": "2026-09-08T10:24:37.309Z",
+  "policyValidUntil": "2026-09-08T10:25:37.309Z",
+  "observedAt": "2026-09-08T10:47:56.574Z",
+  "reportExpiresAt": "2026-09-15T21:00:00.000Z",
+  "payloadRetentionUntil": "2026-09-15T10:24:37.286Z",
+  "currentPolicy": "ALLOW",
+  "manifestDispatchAuthority": "PASS",
+  "claimOutcome": "Canonical claim failed closed: APPROVAL_EXPIRED",
+  "newAttempts": 0,
+  "executionMutations": 0,
+  "newLogicalSlots": 0,
+  "productionEffects": 0,
+  "R05_LOCAL_ACCEPTANCE": "FAIL"
+}

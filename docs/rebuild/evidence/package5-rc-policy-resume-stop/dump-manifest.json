@@ -1,0 +1,47 @@
+[
+  {
+    "database": "maya_consent_security_replay",
+    "port": 55517,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-resume-20260908/policy-gap-stop/maya_consent_security_replay.dump",
+    "bytes": 903096,
+    "sha256": "0db60da38e246780fd48be1aa0904f6e07035d8cd95968a33479d15587781b50",
+    "catalogueReadable": true,
+    "syntheticOnly": true
+  },
+  {
+    "database": "maya_consent_security_proof",
+    "port": 55517,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-resume-20260908/policy-gap-stop/maya_consent_security_proof.dump",
+    "bytes": 948520,
+    "sha256": "b8942bea5836d9ac99c165bd286c9e278b9760ec7320798569a79c6dac12f4c6",
+    "catalogueReadable": true,
+    "syntheticOnly": true
+  },
+  {
+    "database": "maya_rc_replay",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-resume-20260908/policy-gap-stop/maya_rc_replay.dump",
+    "bytes": 898452,
+    "sha256": "9806d7fff31f2441da57b058b789334468410b2b0533139fce44fd44e2bdaab5",
+    "catalogueReadable": true,
+    "syntheticOnly": true
+  },
+  {
+    "database": "maya_rc_clean_replay",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-resume-20260908/policy-gap-stop/maya_rc_clean_replay.dump",
+    "bytes": 1633378,
+    "sha256": "853ac82aa8dae1f0707120839e659d49b511193a3ee57b986c6c5622b25ffde9",
+    "catalogueReadable": true,
+    "syntheticOnly": true
+  },
+  {
+    "database": "maya_rc_b36_runtime",
+    "port": 55509,
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-resume-20260908/policy-gap-stop/maya_rc_b36_runtime.dump",
+    "bytes": 1064934,
+    "sha256": "7848910e7bf5b5f1c0bfe4f927fa302aa4297222d2d5fe358802071ea04a482f",
+    "catalogueReadable": true,
+    "syntheticOnly": true
+  }
+]
