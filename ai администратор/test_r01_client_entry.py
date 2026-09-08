@@ -6,6 +6,8 @@ dependency is a trap, and the only allowed operation is a synthetic reply.
 import ast
 import asyncio
 import json
+import logging
+import re
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -42,7 +44,8 @@ class LegacyStaffPredicateOnly(Trap):
 def real_functions(*names):
     namespace = {'APP_URL': 'https://app.synthetic.test/', 'database': Trap(),
                  'yc': Trap(), 'get_ai_response': Trap(), 'warm_client_history_cache_for_phone': Trap(),
-                 'asyncio': Trap(), 'conversations': Trap(), 'booking_flow': Trap()}
+                 'asyncio': Trap(), 'conversations': Trap(), 'booking_flow': Trap(),
+                 're': re, 'logger': logging.getLogger(__name__)}
     exec(compile(HELPER, str(ROOT / 'legacy_client_entry.py'), 'exec'), namespace)
     selected = []
     for node in BOT.body:
@@ -62,7 +65,9 @@ def fixture():
     query = SimpleNamespace(edit_message_text=AsyncMock(), answer=AsyncMock(),
                             from_user=SimpleNamespace(id=17), message=message)
     update = SimpleNamespace(effective_message=message, message=message,
-                             effective_user=SimpleNamespace(id=17), callback_query=query)
+                             effective_user=SimpleNamespace(
+                                 id=17, first_name='Test', last_name='', username='tester'
+                             ), callback_query=query)
     context = SimpleNamespace(bot=SimpleNamespace(send_message=AsyncMock()), args=[])
     return update, context, query
 
@@ -110,6 +115,56 @@ class R01NativeClientEntry(unittest.IsolatedAsyncioTestCase):
                 await ns['handle_contact'](update, context)
                 update.message.reply_text.assert_awaited_once_with(ns['client_handoff_message'](ns['APP_URL']))
 
+    async def test_native_app_nonce_creates_login_session_without_client_resolution(self):
+        ns = real_functions('cmd_start')
+        update, context, _ = fixture()
+        context.args = ['app_abcdefgh12345678']
+
+        calls = []
+        ns['web_auth'] = SimpleNamespace(_new_token=lambda: 'session-token')
+        ns['normalize_tg_user'] = lambda value: {
+            'display_name': value['first_name'], 'first_name': value['first_name'],
+            'last_name': value['last_name'], 'username': value['username'],
+        }
+        ns['database'] = SimpleNamespace(
+            create_web_session=lambda *args, **kwargs: calls.append(('session', args, kwargs)),
+            applogin_authorize=lambda *args: calls.append(('authorize', args)) or True,
+            revoke_web_session=lambda token: calls.append(('revoke', token)),
+        )
+
+        await ns['cmd_start'](update, context)
+
+        self.assertEqual([item[0] for item in calls], ['session', 'authorize'])
+        self.assertEqual(calls[0][2]['subject_kind'], 'client')
+        self.assertNotIn('client_id', calls[0][2])
+        self.assertEqual(calls[1][1], ('abcdefgh12345678', 17, 'session-token'))
+        update.message.reply_text.assert_awaited_once_with(
+            '✅ Вход подтверждён. Вернитесь в MAYA — приложение завершит вход автоматически.'
+        )
+
+    async def test_invalid_or_expired_native_app_nonce_never_leaves_live_session(self):
+        ns = real_functions('cmd_start')
+        update, context, _ = fixture()
+        context.args = ['app_invalid!']
+        ns['database'] = Trap()
+        ns['web_auth'] = Trap()
+        await ns['cmd_start'](update, context)
+        self.assertIn('устарела', update.message.reply_text.await_args.args[0])
+
+        update, context, _ = fixture()
+        context.args = ['app_abcdefgh12345678']
+        calls = []
+        ns['web_auth'] = SimpleNamespace(_new_token=lambda: 'orphan-token')
+        ns['normalize_tg_user'] = lambda _: {}
+        ns['database'] = SimpleNamespace(
+            create_web_session=lambda *args, **kwargs: calls.append('session'),
+            applogin_authorize=lambda *args: calls.append('authorize') or False,
+            revoke_web_session=lambda token: calls.append(('revoke', token)),
+        )
+        await ns['cmd_start'](update, context)
+        self.assertEqual(calls, ['session', 'authorize', ('revoke', 'orphan-token')])
+        self.assertIn('устарела', update.message.reply_text.await_args.args[0])
+
     async def test_old_cards_after_restart_stop_before_parsing_or_logging(self):
         ns = real_functions('handle_callback')
         callbacks = ['booking_confirm', 'booking_cancel', 'contact_self', 'contact_other',
@@ -145,11 +200,23 @@ class R01NativeClientEntry(unittest.IsolatedAsyncioTestCase):
         offenders = [ast.unparse(node.func) for node in ast.walk(BOT)
                      if isinstance(node, ast.Call) and ast.unparse(node.func) in forbidden]
         self.assertEqual(offenders, [])
+        allowed_auth_calls = {
+            'database.create_web_session', 'database.applogin_authorize',
+            'database.revoke_web_session', 'web_auth._new_token',
+        }
         for name in LEAVES:
             node = next(n for n in BOT.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name)
             for call in [n for n in ast.walk(node) if isinstance(n, ast.Call)]:
+                if name == 'cmd_start' and ast.unparse(call.func) in allowed_auth_calls:
+                    continue
                 self.assertNotIn(ast.unparse(call.func).split('.')[0],
                                  ['database', 'yc', 'requests', 'get_ai_response', 'save_conversations'])
+
+        cmd_start = next(n for n in BOT.body if isinstance(n, ast.AsyncFunctionDef) and n.name == 'cmd_start')
+        auth_calls = {ast.unparse(n.func) for n in ast.walk(cmd_start) if isinstance(n, ast.Call)
+                      and ast.unparse(n.func).split('.')[0] in {'database', 'web_auth'}}
+        self.assertEqual(auth_calls, allowed_auth_calls)
+        self.assertFalse(any('client' in call.lower() for call in auth_calls))
 
     def test_legacy_transport_rejects_native_client_before_even_resolving_mode(self):
         source = ast.parse((ROOT / 'legacy_appointment_bridge.py').read_text())
