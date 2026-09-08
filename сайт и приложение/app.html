@@ -5489,13 +5489,18 @@ function meAppAccessNormalize(raw) {
     if (level !== 'granted' && level !== 'preview') return null;
     // Preview is a deliberately restricted client surface, never a staff shortcut.
     if (mode !== 'client' && level !== 'granted') return null;
+    var profileLinked = !!item.profile_linked;
+    // A server role can expose the public Client surface, but private Client
+    // authority still requires the durable verified channel link. Downgrading
+    // here only removes access; it never infers or grants a capability locally.
+    if (mode === 'client' && !profileLinked) level = 'preview';
     seen[mode] = true;
     normalizedModes.push({
       mode: mode,
       access: level,
       tenant_id: item.tenant_id == null ? null : String(item.tenant_id),
       role: String(item.role || ''),
-      profile_linked: !!item.profile_linked
+      profile_linked: profileLinked
     });
   }
   var defaultMode = raw.default_mode == null ? null : String(raw.default_mode).toLowerCase();
@@ -5511,6 +5516,26 @@ function meAppAccessNormalize(raw) {
 function meAppAccessFindMode(access, mode) {
   mode = String(mode || '').toLowerCase();
   var list = (access && access.available_modes) || [];
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].mode === mode) return list[i];
+  }
+  return null;
+}
+function meAppAccessSelectableModes(access) {
+  var list = (access && access.available_modes) || [];
+  var hasGrantedBusinessMode = list.some(function (item) {
+    return item.access === 'granted' && (item.mode === 'owner' || item.mode === 'staff' || item.mode === 'platform');
+  });
+  if (!hasGrantedBusinessMode) return list.slice();
+  // An unlinked Client preview is still useful for a Client-only account, but
+  // must not trap an owner/staff account away from its verified business mode.
+  return list.filter(function (item) {
+    return !(item.mode === 'client' && item.profile_linked !== true);
+  });
+}
+function meAppAccessFindSelectableMode(access, mode) {
+  mode = String(mode || '').toLowerCase();
+  var list = meAppAccessSelectableModes(access);
   for (var i = 0; i < list.length; i++) {
     if (list[i].mode === mode) return list[i];
   }
@@ -5707,21 +5732,22 @@ function meAppAccessResolveFromMe(user, opts) {
   window.__meAppAccess = access;
   var tenantId = meAppAccessTenantId(user, access);
   var userId = user && user.id ? String(user.id) : null;
+  var selectableModes = meAppAccessSelectableModes(access);
   var saved = meAppAccessReadSaved(tenantId, userId);
-  if (saved && !meAppAccessFindMode(access, saved)) {
+  if (saved && !meAppAccessFindSelectableMode(access, saved)) {
     meAppAccessClearSaved(tenantId, userId);
     saved = null;
   }
   var forced = opts.forceMode ? String(opts.forceMode).toLowerCase() : null;
-  if (forced && !meAppAccessFindMode(access, forced)) forced = null;
+  if (forced && !meAppAccessFindSelectableMode(access, forced)) forced = null;
   var mode = forced || saved || access.default_mode || access.available_modes[0].mode;
-  if (!meAppAccessFindMode(access, mode)) mode = access.available_modes[0].mode;
+  if (!meAppAccessFindSelectableMode(access, mode)) mode = selectableModes[0].mode;
   var desc = meAppAccessFindMode(access, mode);
   window.__meAppMode = mode;
   window.__meAppModeAccess = desc ? desc.access : null;
   window.__meClientPreview = mode === 'client' && desc && desc.access === 'preview';
   // Chooser after login when required and there is no valid persisted choice.
-  var chooser = !!(!forced && access.chooser_required && (!saved || !!opts.forceChooser) && access.available_modes.length > 1);
+  var chooser = !!(!forced && access.chooser_required && (!saved || !!opts.forceChooser) && selectableModes.length > 1);
   if (opts.skipChooser) chooser = false;
   if (chooser) {
     // No mode is active until the person explicitly chooses one.
@@ -5750,7 +5776,10 @@ function meAppAccessOpenMode(mode, opts) {
     if (window.__meGo) window.__meGo('access-compat');
     return false;
   }
-  var desc = meAppAccessFindMode(resolved.access, mode);
+  // Resolution can safely fall back from an unlinked Client preview to an
+  // already-granted business mode. Persist and open the resolved mode only.
+  mode = resolved.mode;
+  var desc = resolved.descriptor;
   if (!desc) return false;
   meAppAccessSave(resolved.tenantId, resolved.userId, mode);
   window.__meAppMode = mode;
@@ -25646,6 +25675,13 @@ function AMayaConsent() {
         var access = window.__meAppAccess || null;
         var client = access && typeof meAppAccessFindMode === 'function'
           ? meAppAccessFindMode(access, 'client') : null;
+        // Client preview is deliberately public/read-only. It must remain
+        // usable while no verified ClientChannelLink exists; the consent
+        // command cannot bootstrap Client authority from the account/session.
+        if (client && client.access === 'preview') {
+          setShow(false);
+          return;
+        }
         setShow(!!client && client.profile_linked !== true);
         var pending = meMayaConsentPending(meMayaConsentPendingKey());
         if (pending) { setPdn(pending.privacy); setMkt(pending.marketing); }
@@ -38963,7 +38999,9 @@ function ChooseVersion() {
       if (access) window.__meAppAccess = access;
     }
   } catch (e) {}
-  var modes = (access && access.available_modes) || [];
+  var modes = access && typeof meAppAccessSelectableModes === 'function'
+    ? meAppAccessSelectableModes(access)
+    : ((access && access.available_modes) || []);
   var narrow = false;
   var shortH = false;
   try {
