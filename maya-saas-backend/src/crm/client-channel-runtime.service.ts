@@ -28,17 +28,14 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { clientChannelSubjectHash } from './client-channel-subject';
 import { CrmService } from './crm.service';
-import { MayaUserClientAssociationIssuer } from './maya-user-client-association-issuer';
 
-/** Only verified provenance can issue a channel challenge. An existing link is
- * reused; first-link Maya sessions require the exact dual durable association.
- * Missing or ambiguous provenance fails closed, with no heuristic enrollment.
+/** Only an existing verified Client link can authorize this challenge issuer.
+ * Missing provenance fails closed; User/Profile rows cannot bootstrap authority.
  */
 @Injectable()
 export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthority {
   readonly resolverId = 'a18.active-verified-client-channel.v1';
   private readonly challenges: ClientLinkChallengeService;
-  private readonly initialMayaChallenges: ClientLinkChallengeService;
   private readonly links: ClientChannelLinkService;
   constructor(
     private readonly prisma: PrismaService,
@@ -73,18 +70,11 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       this,
       channels,
     );
-    this.initialMayaChallenges = new ClientLinkChallengeService(
-      prisma,
-      context,
-      encryption,
-      this.links,
-      new MayaUserClientAssociationIssuer(context, channels),
-      channels,
-    );
   }
 
   async resolve(proof: string, tx: Prisma.TransactionClient) {
     const channel = await this.channels.authenticate(proof, tx);
+    this.context.assertTenantId(channel.tenantId);
     await lockClientChannelIdentity(
       tx,
       channel.tenantId,
@@ -103,6 +93,8 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     });
     if (
       links.length !== 1 ||
+      current.tenantId !== channel.tenantId ||
+      current.provider !== channel.provider ||
       current.providerSubjectHash !== channel.providerSubjectHash ||
       links[0].verificationVersion !== 1 ||
       links[0].subjectHashVersion !== 1
@@ -123,27 +115,10 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     };
   }
 
-  async issue(channelProof: string) {
-    const existingLink = await this.prisma.$transaction(async (tx) => {
-      const channel = await this.channels.authenticate(channelProof, tx);
-      const links = await tx.clientChannelLink.findMany({
-        where: {
-          tenantId: channel.tenantId,
-          provider: channel.provider,
-          providerSubjectHash: channel.providerSubjectHash,
-          revokedAt: null,
-        },
-        take: 2,
-        select: { id: true },
-      });
-      if (links.length > 1)
-        throw new ForbiddenException('Client channel identity is ambiguous');
-      return links[0] ?? null;
-    });
-    return (existingLink ? this.challenges : this.initialMayaChallenges).issue({
-      resolutionProof: channelProof,
-    });
+  issue(channelProof: string) {
+    return this.challenges.issue({ resolutionProof: channelProof });
   }
+
   consume(channelProof: string, token: string) {
     return this.challenges.consume({ channelProof, token });
   }
@@ -265,11 +240,21 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
   }
 
   /** Compatibility ingress for native bundles released before e5ec27fd.
-   * The legacy HTTP route remains an initiator only: it cannot select a Client
-   * or mutate a profile, and the canonical challenge/link/consent owners keep
-   * every durable effect.
+   * Only keyed transitions are supported. The route cannot select a Client or
+   * bootstrap linkage; existing canonical consent admission owns every effect.
    */
-  async submitLegacyNativeConsent(channelProof: string, value: unknown) {
+  async submitLegacyNativeConsent(
+    channelProof: string,
+    value: unknown,
+    idempotencyKey?: string,
+  ) {
+    // This must precede authentication/link/challenge/execution calls. An old
+    // keyless request cannot identify a retry versus a post-revoke new grant.
+    if (
+      typeof idempotencyKey !== 'string' ||
+      !/^[A-Za-z0-9._:-]{8,180}$/.test(idempotencyKey)
+    )
+      throw new BadRequestException('consent_transition_identity_required');
     if (
       !value ||
       typeof value !== 'object' ||
@@ -287,34 +272,10 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     )
       throw new BadRequestException('Exact legacy consent decision required');
 
-    if (!(await this.status(channelProof)).linked) {
-      const challenge = await this.issue(channelProof);
-      try {
-        await this.consume(channelProof, challenge.token);
-      } catch (error) {
-        // Concurrent requests for the same authenticated subject may race after
-        // issuing separate tokens. Continue only when the canonical active link
-        // now proves that another request completed the same identity step.
-        if (!(await this.status(channelProof)).linked) throw error;
-      }
-    }
-    const authority = await this.prisma.$transaction((tx) =>
-      this.resolve(channelProof, tx),
-    );
-    const decisionIdentity = createHash('sha256')
-      .update(
-        JSON.stringify([
-          authority.tenantId,
-          authority.linkId,
-          input.privacyConsent,
-          input.marketingConsent,
-        ]),
-      )
-      .digest('hex');
     return this.submitConsent(channelProof, {
       privacy: input.privacyConsent,
       marketing: input.marketingConsent,
-      idempotencyKey: `legacy-native-consent:${decisionIdentity}`,
+      idempotencyKey,
     });
   }
 

@@ -77,6 +77,7 @@ export class CustomersController {
           privacyConsent: dto.privacyConsent,
           marketingConsent: dto.marketingConsent,
         },
+        idempotencyKey,
       );
       return this.customersService.getOwnProfile(user.tenantId!, user.userId);
     }

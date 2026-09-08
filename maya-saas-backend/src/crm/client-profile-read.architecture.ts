@@ -16,10 +16,6 @@ const INTERNAL_OWNERS: Record<string, string[]> = {
   'communication-delivery/communication-bulk-policy.service.ts': ['current'],
   'crm/client-wanted-slot.service.ts': ['deliveryAllowed'],
   'marketing/marketing.service.ts': ['consentCandidates'],
-  // First-link issuance may inspect only the durable association keys from the
-  // legacy user-owned profile. It cannot project Client PII/preferences and the
-  // exact shape is pinned below.
-  'crm/maya-user-client-association-issuer.ts': ['resolve'],
 };
 const VERIFIED_CHANNEL_READS = [
   'status',
@@ -175,23 +171,17 @@ export function scanClientProfileRead(file: string, source: string): string[] {
       findings.push('CustomersService bypasses shared profile reader');
   }
   if (file === 'crm/maya-user-client-association-issuer.ts') {
-    requireMarkers([
-      "channel.provider !== 'maya_user'",
-      'userId: channel.userId',
-      'mergedIntoClientId: null',
-      'OR: [{ userId: channel.userId }, { clientId: client.id }]',
-      'select: { id: true, userId: true, clientId: true }',
-      'profiles.length !== 1',
-      'profiles[0].userId !== channel.userId',
-      'profiles[0].clientId !== null',
-      'profiles[0].clientId !== client.id',
-    ]);
     if (
-      /\b(phone|name|encryptedNotes|encryptedClientPreferences|notificationPreferencesJson|defaultVisitMood|privacyConsentAt|marketingConsentAt)\s*:\s*true/.test(
+      /\.(client|customerProfile)\.find|clientUserBinding|profileUserBinding/.test(
         source,
       )
     )
-      findings.push('First-link issuer projects private Client profile data');
+      findings.push(
+        'Retired FK association issuer cannot supply Client authority',
+      );
+    requireMarkers([
+      "Promise.reject(new ForbiddenException('Trusted verified Client resolution required'))",
+    ]);
   }
   if (file === 'customer-portal/customer-portal.service.ts') {
     requireMarkers([
