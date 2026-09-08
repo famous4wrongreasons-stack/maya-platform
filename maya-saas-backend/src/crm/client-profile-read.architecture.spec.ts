@@ -96,4 +96,16 @@ describe('B28 shared private CustomerProfile read protection', () => {
       ).length,
     ).toBeGreaterThan(0);
   });
+  it('rejects any reintroduced profile authority in the retired issuer', () => {
+    const file = 'crm/maya-user-client-association-issuer.ts';
+    expect(
+      scanClientProfileRead(file, readFileSync(join(root, file), 'utf8')),
+    ).toEqual([]);
+    expect(
+      scanClientProfileRead(
+        file,
+        'class Issuer { resolve() { return tx.customerProfile.findMany({where:{userId}}); } }',
+      ).length,
+    ).toBeGreaterThan(0);
+  });
 });

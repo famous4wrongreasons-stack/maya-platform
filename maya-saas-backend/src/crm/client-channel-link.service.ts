@@ -280,6 +280,15 @@ export class ClientChannelLinkService {
     return this.serializable((tx) => this.revokeVerified(tx, proof));
   }
 
+  /** A18 security coordinator owns this transaction; the configured verifier
+   * still derives exact authority. No caller-provided verified proof bypass. */
+  async revokeInTransaction(tx: Tx, request: unknown) {
+    const proof = await this.verifier.verifyRevocation(
+      this.proofToken(request),
+    );
+    return this.revokeVerified(tx, proof);
+  }
+
   private async revokeVerified(tx: Tx, proof: VerifiedClientChannelRevocation) {
     const tenantId = this.context.assertTenantId(proof.tenantId);
     this.assertSubject(proof.provider, proof.providerSubjectHash);

@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "scopedReplacement": "PASS",
+  "injectedPostWriteFailureRestoresExactOwnedFile": "PASS",
+  "ownedFixturesRemoved": true,
+  "productionWrites": 0
+}

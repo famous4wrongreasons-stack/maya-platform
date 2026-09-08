@@ -46,6 +46,16 @@ function setup(options: SetupOptions = {}) {
           : options.client,
       ),
     },
+    clientConsentFact: {
+      findMany: jest.fn().mockResolvedValue([
+        {
+          id: 'verified-consent',
+          decision: 'grant',
+          effectiveAt: new Date('2026-01-01T00:00:00.000Z'),
+          invalidation: null,
+        },
+      ]),
+    },
     customerProfile: {
       findUnique: jest.fn().mockResolvedValue({
         privacyConsentAt:
@@ -120,7 +130,7 @@ function setup(options: SetupOptions = {}) {
   };
   const service = new ClientChannelRuntimeService(
     prisma as never,
-    {} as never,
+    { assertTenantId: jest.fn() } as never,
     channels as never,
     encryption as never,
     {} as never,

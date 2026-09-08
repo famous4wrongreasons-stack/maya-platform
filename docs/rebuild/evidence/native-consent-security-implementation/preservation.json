@@ -1,0 +1,15 @@
+{
+  "mainEntries": 24,
+  "mainStatusSha256": "c28307f97e02975799f0cd9fcbe854d97285a5c344e25af50c67f60fbfca2c25",
+  "mainFilesUnchanged": 22,
+  "rCWipCommitsPreserved": 11,
+  "rCWipDumpsPreserved": 3,
+  "rCWipWorktreeClean": true,
+  "preExistingDatabasesTouched": 0,
+  "ownedPostgresPort": 55517,
+  "ownedDatabases": [
+    "maya_consent_security_replay",
+    "maya_consent_security_proof"
+  ],
+  "productionWritesSoFar": 0
+}

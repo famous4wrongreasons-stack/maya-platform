@@ -55,6 +55,16 @@ function setup(options: SetupOptions = {}) {
     client: {
       findUnique: jest.fn().mockResolvedValue(client),
     },
+    clientConsentFact: {
+      findMany: jest.fn().mockResolvedValue([
+        {
+          id: 'verified-consent',
+          decision: 'grant',
+          effectiveAt: new Date('2026-01-01T00:00:00.000Z'),
+          invalidation: null,
+        },
+      ]),
+    },
     customerProfile: {
       findUnique: jest.fn().mockResolvedValue({
         privacyConsentAt: options.privacy === false ? null : new Date(),
@@ -250,6 +260,7 @@ describe('B16 verified Client booking prefill projection', () => {
     expect(Object.keys(tx)).toEqual([
       'clientChannelLink',
       'client',
+      'clientConsentFact',
       'customerProfile',
     ]);
   });

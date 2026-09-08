@@ -168,6 +168,7 @@ enum CommunicationCampaignState {
 }
 
 model Tenant {
+  consentInvalidations ClientConsentInvalidation[]
   ownerReportRuns OwnerReportRun[]
   bookingConfirmations ClientBookingConfirmation[]
   id                             String                          @id @default(cuid())
@@ -378,6 +379,7 @@ model AgentTask {
 /// normalized contract and durable outcome state, never raw model output or
 /// unrestricted provider payloads.
 model ActionExecution {
+  consentInvalidations ClientConsentInvalidation[]
   ownerReportRunId String?
   ownerReportSlotKey String?
   ownerReportRun OwnerReportRun? @relation(fields: [ownerReportRunId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "B36_execution_run_fkey")
@@ -696,6 +698,7 @@ model Branch {
 }
 
 model User {
+  authorizedConsentInvalidations ClientConsentInvalidation[]
   id                        String                     @id @default(cuid())
   tenantId                  String?
   branchId                  String?
@@ -1591,6 +1594,9 @@ model ClientConsentFact {
   actor       Membership?      @relation("ClientConsentActor", fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)
   execution   ActionExecution? @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
+  invalidation ClientConsentInvalidation?
+
+  @@unique([id, tenantId, clientId], map: "ConsentFact_client_reference_key")
   @@unique([id, tenantId])
   @@unique([tenantId, sourceType, sourceIdentityHash])
   @@index([tenantId, clientId, kind, effectiveAt])
@@ -2140,6 +2146,7 @@ enum AuditScope {
 /// системе. Вторую CRM внутри Maya не строим. Личность существует и для гостя
 /// без аккаунта — таких в салоне большинство.
 model Client {
+  consentInvalidations ClientConsentInvalidation[]
   bulkAudienceMembers MarketingAudienceRecipient[]
   bulkRecipients MarketingCampaignRecipient[]
   bookingConfirmations ClientBookingConfirmation[]
@@ -2221,6 +2228,7 @@ model CrmClientLink {
 /// Active subject uniqueness and immutable verification history are enforced
 /// by the additive PostgreSQL migration, including a partial unique index.
 model ClientChannelLink {
+  consentInvalidations ClientConsentInvalidation[]
   bookingConfirmations ClientBookingConfirmation[]
   id                       String   @id @default(uuid())
   tenantId                 String
@@ -3612,4 +3620,32 @@ model OperationalAlertRun {
   @@index([payloadRetentionUntil], map: "R06_alert_payload_idx")
   @@index([auditRetentionUntil], map: "R06_alert_audit_idx")
   executions ActionExecution[] @relation("R06_execution_run")
+}
+
+/// A18 security fact. Client revoke != security invalidation. No historical backfill.
+model ClientConsentInvalidation {
+  id                    String   @id @default(uuid())
+  tenantId              String
+  clientId              String
+  consentFactId         String
+  invalidatedLinkId     String
+  actionExecutionId     String
+  authorizedByUserId    String
+  reasonCode            String
+  policyVersion         Int
+  evidenceSetHash       String
+  authorityEvidenceJson Json
+  invalidatedAt         DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  client Client @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  fact ClientConsentFact @relation(fields: [consentFactId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict)
+  link ClientChannelLink @relation(fields: [invalidatedLinkId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict)
+  execution ActionExecution @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  authorizedBy User @relation(fields: [authorizedByUserId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([tenantId, consentFactId])
+  @@unique([consentFactId, tenantId, clientId], map: "ConsentInvalidation_fact_reference_key")
+  @@index([tenantId, clientId, invalidatedAt])
+  @@index([tenantId, actionExecutionId])
 }

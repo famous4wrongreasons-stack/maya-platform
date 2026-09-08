@@ -174,6 +174,23 @@ describe('B35 fresh per-Client dispatch policy', () => {
     expect(JSON.stringify(r.proof)).not.toContain('10001');
     expect(f.db.$queryRaw).toHaveBeenCalled();
   });
+  it('denies an invalidated grant despite audience, approval, preferences and stale positive profile timestamps', async () => {
+    const f = fixture();
+    f.db.clientConsentFact.findMany.mockResolvedValue([
+      {
+        id: 'bad-grant',
+        decision: 'grant',
+        effectiveAt: f.now,
+        invalidation: { id: 'security-fact' },
+      },
+    ] as never);
+    const result = await f.run();
+    expect(result).toMatchObject({
+      allowed: false,
+      reason: 'CONSENT_NOT_GRANTED',
+    });
+    expect(f.endpoints.resolveForDelivery).not.toHaveBeenCalled();
+  });
   it.each(['revoke', 'unknown'])(
     'a %s fact cannot be replaced by audience membership or a profile timestamp',
     async (decision) => {

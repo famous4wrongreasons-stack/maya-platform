@@ -1,3 +1,7 @@
+import {
+  effectiveClientConsent,
+  effectiveClientConsents,
+} from './client-effective-consent';
 import { resolveVerifiedClientDeliveryEndpoint } from './client-delivery-endpoint';
 import { ClientBookingConfirmationService } from './client-booking-confirmation.service';
 import {
@@ -29,8 +33,8 @@ import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5
 import { clientChannelSubjectHash } from './client-channel-subject';
 import { CrmService } from './crm.service';
 
-/** Only already verified provenance can issue another channel's challenge.
- * A cold-start Client with no trusted resolution fails closed; no heuristic enrollment.
+/** Only an existing verified Client link can authorize this challenge issuer.
+ * Missing provenance fails closed; User/Profile rows cannot bootstrap authority.
  */
 @Injectable()
 export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthority {
@@ -74,6 +78,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
 
   async resolve(proof: string, tx: Prisma.TransactionClient) {
     const channel = await this.channels.authenticate(proof, tx);
+    this.context.assertTenantId(channel.tenantId);
     await lockClientChannelIdentity(
       tx,
       channel.tenantId,
@@ -92,6 +97,8 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     });
     if (
       links.length !== 1 ||
+      current.tenantId !== channel.tenantId ||
+      current.provider !== channel.provider ||
       current.providerSubjectHash !== channel.providerSubjectHash ||
       links[0].verificationVersion !== 1 ||
       links[0].subjectHashVersion !== 1
@@ -115,6 +122,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
   issue(channelProof: string) {
     return this.challenges.issue({ resolutionProof: channelProof });
   }
+
   consume(channelProof: string, token: string) {
     return this.challenges.consume({ channelProof, token });
   }
@@ -235,6 +243,46 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     return { privacy, marketing };
   }
 
+  /** Compatibility ingress for native bundles released before e5ec27fd.
+   * Only keyed transitions are supported. The route cannot select a Client or
+   * bootstrap linkage; existing canonical consent admission owns every effect.
+   */
+  async submitLegacyNativeConsent(
+    channelProof: string,
+    value: unknown,
+    idempotencyKey?: string,
+  ) {
+    // This must precede authentication/link/challenge/execution calls. An old
+    // keyless request cannot identify a retry versus a post-revoke new grant.
+    if (
+      typeof idempotencyKey !== 'string' ||
+      !/^[A-Za-z0-9._:-]{8,180}$/.test(idempotencyKey)
+    )
+      throw new BadRequestException('consent_transition_identity_required');
+    if (
+      !value ||
+      typeof value !== 'object' ||
+      Array.isArray(value) ||
+      Object.keys(value).sort().join(',') !== 'marketingConsent,privacyConsent'
+    )
+      throw new BadRequestException('Exact legacy consent decision required');
+    const input = value as {
+      privacyConsent: unknown;
+      marketingConsent: unknown;
+    };
+    if (
+      typeof input.privacyConsent !== 'boolean' ||
+      typeof input.marketingConsent !== 'boolean'
+    )
+      throw new BadRequestException('Exact legacy consent decision required');
+
+    return this.submitConsent(channelProof, {
+      privacy: input.privacyConsent,
+      marketing: input.marketingConsent,
+      idempotencyKey,
+    });
+  }
+
   async status(channelProof: string) {
     return this.prisma.$transaction(async (tx) => {
       const channel = await this.channels.authenticate(channelProof, tx);
@@ -254,23 +302,17 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
           marketing: false,
           client_link_required: true,
         };
-      const profile = await tx.customerProfile.findFirst({
-        where: { clientId: links[0].clientId, tenantId: channel.tenantId },
-      });
+      const consent = await effectiveClientConsents(
+        tx,
+        channel.tenantId,
+        links[0].clientId,
+      );
       return {
         linked: true,
-        privacy: Boolean(profile?.privacyConsentAt),
-        marketing: Boolean(profile?.marketingConsentAt),
-        marketing_decided: Boolean(
-          await tx.clientConsentFact.findFirst({
-            where: {
-              tenantId: channel.tenantId,
-              clientId: links[0].clientId,
-              kind: 'marketing',
-            },
-            select: { id: true },
-          }),
-        ),
+        privacy: consent.privacy.effective,
+        marketing: consent.marketing.effective,
+        marketing_decided:
+          consent.marketing.decided && !consent.marketing.invalidated,
         client_link_required: false,
       };
     });
@@ -329,7 +371,17 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
           },
           select: { privacyConsentAt: true },
         });
-        if (!profile?.privacyConsentAt)
+        if (
+          !profile?.privacyConsentAt ||
+          !(
+            await effectiveClientConsent(
+              tx,
+              channel.tenantId,
+              links[0].clientId,
+              'privacy',
+            )
+          ).effective
+        )
           throw new ForbiddenException('privacy_consent_required');
         return {
           ready: true,
@@ -452,7 +504,16 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       return {
         tenantId: channel.tenantId,
         clientId: client.id,
-        privacy: Boolean(profile?.privacyConsentAt),
+        privacy:
+          Boolean(profile?.privacyConsentAt) &&
+          (
+            await effectiveClientConsent(
+              tx,
+              channel.tenantId,
+              client.id,
+              'privacy',
+            )
+          ).effective,
         user: client.user,
         crmLinks: client.crmLinks,
       };
@@ -598,7 +659,17 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         },
         select: { privacyConsentAt: true },
       });
-      if (!profile?.privacyConsentAt)
+      if (
+        !profile?.privacyConsentAt ||
+        !(
+          await effectiveClientConsent(
+            tx,
+            channel.tenantId,
+            client.id,
+            'privacy',
+          )
+        ).effective
+      )
         return {
           tenantId: channel.tenantId,
           clientId: client.id,
@@ -1000,7 +1071,17 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         },
         select: { privacyConsentAt: true },
       });
-      if (!profile?.privacyConsentAt)
+      if (
+        !profile?.privacyConsentAt ||
+        !(
+          await effectiveClientConsent(
+            tx,
+            verified.tenantId,
+            verified.clientId,
+            'privacy',
+          )
+        ).effective
+      )
         throw new ForbiddenException('Canonical Client consent required');
       return verified;
     });
@@ -1317,17 +1398,16 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     });
     if (links.length !== 1)
       return { privacy: false, marketing: false, marketing_decided: false };
-    const profile = await this.prisma.customerProfile.findFirst({
-      where: { tenantId, clientId: links[0].clientId },
-    });
-    const decision = await this.prisma.clientConsentFact.findFirst({
-      where: { tenantId, clientId: links[0].clientId, kind: 'marketing' },
-      select: { id: true },
-    });
+    const consent = await effectiveClientConsents(
+      this.prisma,
+      tenantId,
+      links[0].clientId,
+    );
     return {
-      privacy: Boolean(profile?.privacyConsentAt),
-      marketing: Boolean(profile?.marketingConsentAt),
-      marketing_decided: Boolean(decision),
+      privacy: consent.privacy.effective,
+      marketing: consent.marketing.effective,
+      marketing_decided:
+        consent.marketing.decided && !consent.marketing.invalidated,
     };
   }
 }

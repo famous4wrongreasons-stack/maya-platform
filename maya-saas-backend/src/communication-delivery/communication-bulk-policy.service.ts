@@ -1,3 +1,7 @@
+import {
+  effectiveClientConsent,
+  lockClientConsent,
+} from '../crm/client-effective-consent';
 import { ConfigService } from '@nestjs/config';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { ActionIdentityService } from '../action-engine/action-engine.identity';
@@ -131,6 +135,7 @@ export class CommunicationBulkPolicyService {
   ) {
     const tenantId = this.context.assertTenantId(child.tenantId);
     const clientId = child.clientId!;
+    await lockClientConsent(tx, tenantId, clientId);
     // Same-Client claims and policy writers must commit in a single order.
     await tx.$queryRaw`SELECT id FROM "Client" WHERE id=${clientId} AND "tenantId"=${tenantId} FOR UPDATE`;
     await tx.$queryRaw`SELECT id FROM "CustomerProfile" WHERE "clientId"=${clientId} AND "tenantId"=${tenantId} FOR UPDATE`;
@@ -202,24 +207,15 @@ export class CommunicationBulkPolicyService {
       return deny('CLIENT_INELIGIBLE');
     }
     for (const kind of ['privacy', 'marketing']) {
-      const facts = await tx.clientConsentFact.findMany({
-        where: { tenantId, clientId, kind, effectiveAt: { lte: now } },
-        orderBy: [
-          { effectiveAt: 'desc' },
-          { createdAt: 'desc' },
-          { id: 'desc' },
-        ],
-        take: 2,
-      });
-      const latest = facts[0];
-      if (
-        !latest ||
-        latest.decision !== 'grant' ||
-        (facts[1]?.effectiveAt.getTime() === latest.effectiveAt.getTime() &&
-          facts[1].decision !== latest.decision)
-      )
-        return deny('CONSENT_NOT_GRANTED');
-      proof[`${kind}Fact`] = latest.id;
+      const consent = await effectiveClientConsent(
+        tx,
+        tenantId,
+        clientId,
+        kind as 'privacy' | 'marketing',
+        now,
+      );
+      if (!consent.effective) return deny('CONSENT_NOT_GRANTED');
+      proof[`${kind}Fact`] = consent.factId;
     }
     if (!profile?.privacyConsentAt || !profile.marketingConsentAt)
       return deny('CONSENT_PROJECTION_UNAVAILABLE');

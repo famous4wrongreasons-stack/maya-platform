@@ -1,3 +1,8 @@
+import {
+  lockClientConsent,
+  effectiveClientConsents,
+} from '../crm/client-effective-consent';
+import { retryableBulkTransaction } from '../marketing/canonical-bulk.contract';
 import { createHash, randomUUID } from 'node:crypto';
 import { attachExistingInvocationReceipt } from '../action-engine/action-invocation-receipt.context';
 
@@ -23,6 +28,7 @@ import {
 import {
   ACTION_EXECUTION_REQUEST_CONTRACT,
   ActionEngineKernel,
+  ActionConflictError,
   ActionEngineRuntimeService,
   CanonicalActionIngressService,
   PACKAGE5_WAVE3_POLICY_VERSION,
@@ -971,7 +977,28 @@ export class Package5Wave3ExecutableService {
     prepared: Package5Wave3Prepared,
     registration: (typeof PACKAGE5_WAVE3_REGISTRATIONS)[number],
   ) {
-    const execution = await this.ingress.createExecution(prepared.request);
+    let execution: ActionExecution;
+    try {
+      execution = await this.ingress.createExecution(prepared.request);
+    } catch (error) {
+      if (
+        prepared.command.operation !== 'record_client_consent' ||
+        !(error instanceof ActionConflictError)
+      )
+        throw error;
+      // Concurrent planning can assign different server timestamps to the same
+      // event. Only the existing keyed receipt may resolve that race. Rebuild
+      // validates all business material and authority before reusing its times.
+      const retry = await this.planner.build(
+        prepared.request.tenantId,
+        prepared.actor,
+        prepared.command,
+        'execute',
+      );
+      if (!retry.existingExecution) throw error;
+      execution = await this.ingress.createExecution(retry.request);
+      prepared = retry;
+    }
     if (execution.state === ActionExecutionState.SUCCEEDED)
       return this.restore(execution);
     if (execution.state !== ActionExecutionState.READY)
@@ -982,13 +1009,20 @@ export class Package5Wave3ExecutableService {
       execution.tenantId,
       execution.id,
     );
-    await this.planner.assertStillCurrent(
-      execution.tenantId,
-      prepared.actor,
-      prepared.command,
-      input,
-    );
+    if (prepared.command.operation !== 'record_client_consent')
+      await this.planner.assertStillCurrent(
+        execution.tenantId,
+        prepared.actor,
+        prepared.command,
+        input,
+      );
     return this.serializable(async (tx) => {
+      if (prepared.command.operation === 'record_client_consent')
+        await lockClientConsent(
+          tx,
+          execution.tenantId,
+          prepared.command.clientId,
+        );
       if (prepared.actor.consentChannel) {
         const binding = prepared.actor.consentChannel;
         await lockClientChannelIdentity(
@@ -1353,21 +1387,23 @@ export class Package5Wave3ExecutableService {
             actionExecutionId: execution.id,
           },
         });
-        await this.updateClientProfile(
-          tx,
-          tenantId,
-          command.clientId,
-          execution.actorUserId,
-          command.kind === 'privacy'
-            ? {
-                privacyConsentAt:
-                  command.decision === 'grant' ? command.effectiveAt : null,
-              }
-            : {
-                marketingConsentAt:
-                  command.decision === 'grant' ? command.effectiveAt : null,
-              },
-        );
+        {
+          const effective = await effectiveClientConsents(
+            tx,
+            tenantId,
+            command.clientId,
+          );
+          await this.updateClientProfile(
+            tx,
+            tenantId,
+            command.clientId,
+            execution.actorUserId,
+            {
+              privacyConsentAt: effective.privacy.effectiveAt,
+              marketingConsentAt: effective.marketing.effectiveAt,
+            },
+          );
+        }
         return;
       default:
         throw new Package5Wave3Error('Local mutation operation mismatch');
@@ -1637,12 +1673,7 @@ export class Package5Wave3ExecutableService {
           isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
         });
       } catch (error) {
-        if (
-          attempt === 3 ||
-          !(error instanceof Prisma.PrismaClientKnownRequestError) ||
-          error.code !== 'P2034'
-        )
-          throw error;
+        if (attempt === 3 || !retryableBulkTransaction(error)) throw error;
       }
     }
     throw new Package5Wave3Error('Serializable transaction retry exhausted');

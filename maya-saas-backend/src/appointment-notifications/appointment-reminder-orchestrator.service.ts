@@ -1,3 +1,4 @@
+import { effectiveClientConsent } from '../crm/client-effective-consent';
 import { evaluateTenantAccessState } from '../tenants/tenant-access-state';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import {
@@ -217,6 +218,15 @@ export class AppointmentReminderOrchestratorService {
     });
     if (
       !profile?.privacyConsentAt ||
+      !(
+        await effectiveClientConsent(
+          this.prisma,
+          tenantId,
+          clientId,
+          'privacy',
+          now,
+        )
+      ).effective ||
       !(await this.entitlements.hasFeature(tenantId, 'notifications.core')) ||
       !reminderChannelAllowed(
         profile.notificationPreferencesJson,

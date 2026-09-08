@@ -1,3 +1,4 @@
+import { effectiveClientConsent } from '../crm/client-effective-consent';
 import {
   type ReminderDispatch,
   type ReminderPlan,
@@ -469,7 +470,14 @@ export class CommunicationWebPushService {
       }),
       this.prisma.tenant.findUnique({ where: { id: tenantId } }),
     ]);
-    if (!tenant || !profile?.privacyConsentAt) return false;
+    if (
+      !tenant ||
+      !profile?.privacyConsentAt ||
+      !(
+        await effectiveClientConsent(this.prisma, tenantId, clientId, 'privacy')
+      ).effective
+    )
+      return false;
     try {
       const envelope = preferenceObject(
         profile.notificationPreferencesJson ?? {},

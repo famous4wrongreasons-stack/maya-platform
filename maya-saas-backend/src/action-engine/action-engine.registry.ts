@@ -2,6 +2,7 @@ import { nativeFeedbackCapabilities } from '../native-feedback/native-feedback.c
 import { teamCapabilities, TEAM_DELIVERY, teamObject, teamId, teamDigest } from '../team-communications/team-communications.contract';
 import { publicCommunityCapabilities } from '../public-community/public-community.contract';
 import { CASH_CAPABILITIES, CASH_DECLARATION_CONTRACT, normalizeCashIntent, type CashOperation } from './cash-declaration.contract';
+import { consentSecurityCapability } from './consent-security-invalidation.contract';
 import {
   BULK_ROOT_CAPABILITY,
   BULK_SLOT_CAPABILITY,
@@ -3569,6 +3570,7 @@ const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
     targetKind: 'communication_recipient', executorKey: 'communication.package2.single', allowedSourceTypes: ['scheduler'],
     normalizeInput: value => nativeFeedbackDeliveryNormalizer(phase, value),
   })),
+  consentSecurityCapability(),
   clientHabitsCapability(),
   ...clientWantedSlotCapabilities(),
   ...PACKAGE5_WAVE5_REGISTRATIONS.map((registration) =>

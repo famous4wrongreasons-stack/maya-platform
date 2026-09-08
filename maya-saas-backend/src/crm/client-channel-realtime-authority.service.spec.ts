@@ -7,6 +7,16 @@ describe('B21 realtime canonical authority', () => {
     const tx = {
       clientChannelLink: { findMany: jest.fn() },
       client: { findUnique: jest.fn() },
+      clientConsentFact: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            id: 'verified-consent',
+            decision: 'grant',
+            effectiveAt: new Date('2026-01-01T00:00:00.000Z'),
+            invalidation: null,
+          },
+        ]),
+      },
       customerProfile: { findUnique: jest.fn() },
       authIdentity: { findMany: jest.fn() },
       membership: { findUnique: jest.fn() },

@@ -25577,16 +25577,54 @@ function AConsentGate() {
 window.AConsentGate = AConsentGate;
 
 // ======================================================================
-// AMayaConsent — согласие 152-ФЗ для MAYA OS.
-//
-// 🔴 Зачем отдельный компонент. Рядом живёт AConsentGate, но он намертво
-// прибит к CONSENT_PROXY = malesthetic.pro — бэкенду СТАРОГО салона. В MAYA OS
-// он не срабатывает никогда, поэтому клиентский режим оставался вечным
-// preview: сервер ждёт карточку клиента, а создать её изнутри приложения было
-// нечем. Этот компонент делает то же самое, но против SaaS.
-//
-// Показывается сразу при входе в клиентский режим, пока карточки нет.
-// ======================================================================
+// AMayaConsent: canonical Client consent, independent of profile row existence.
+// A pending transition is persisted before submission and reused after restart.
+// Account storage scopes retry material only; the server verifies Client authority.
+function meMayaConsentPendingKey() {
+  var ctx = window.__ME_SAAS_CTX;
+  var bundle = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
+  if (!ctx || !ctx.ns || !bundle || !bundle.user || !bundle.user.id) throw new Error('Сессия не найдена — войдите снова.');
+  return 'maya-consent-pending-v1:' + ctx.ns + ':' + bundle.user.id;
+}
+function meMayaConsentPending(key) {
+  var raw = localStorage.getItem(key);
+  if (!raw) return null;
+  var value = JSON.parse(raw);
+  if (!value || Object.keys(value).sort().join(',') !== 'idempotencyKey,marketing,privacy' ||
+      typeof value.privacy !== 'boolean' || typeof value.marketing !== 'boolean' ||
+      !/^native-consent:[a-f0-9]{36}$/.test(value.idempotencyKey)) throw new Error('Не удалось прочитать сохранённое согласие.');
+  return value;
+}
+function meMayaConsentTransition(decisions, send) {
+  var key;
+  try { key = meMayaConsentPendingKey(); } catch (error) { return Promise.reject(error); }
+  if (!navigator.locks || !navigator.locks.request) return Promise.reject(new Error('Обновите приложение для сохранения согласия.'));
+  return navigator.locks.request(key, function () {
+    if (meMayaConsentPendingKey() !== key) throw new Error('Сессия изменилась.');
+    var pending = meMayaConsentPending(key);
+    if (pending && (pending.privacy !== decisions.privacy || pending.marketing !== decisions.marketing))
+      throw new Error('Сначала повторите сохранённое согласие с прежним выбором.');
+    if (!pending) {
+      var bytes = new Uint8Array(18);
+      window.crypto.getRandomValues(bytes);
+      pending = { privacy: decisions.privacy, marketing: decisions.marketing, idempotencyKey: 'native-consent:' + Array.prototype.map.call(bytes, function (value) {
+        return ('0' + value.toString(16)).slice(-2);
+      }).join('') };
+      localStorage.setItem(key, JSON.stringify(pending));
+      if (JSON.stringify(meMayaConsentPending(key)) !== JSON.stringify(pending)) throw new Error('Не удалось сохранить запрос.');
+    }
+    return pending;
+  }).then(function (pending) {
+    if (meMayaConsentPendingKey() !== key) throw new Error('Сессия изменилась.');
+    return send(pending).then(function (result) {
+      return navigator.locks.request(key, function () {
+        var stored = meMayaConsentPending(key);
+        if (stored && stored.idempotencyKey === pending.idempotencyKey) localStorage.removeItem(key);
+        return result;
+      });
+    });
+  });
+}
 function AMayaConsent() {
   var e = React.createElement;
   // Тот же Montserrat, что и во всём приложении. Без этого экран уезжал
@@ -25598,6 +25636,7 @@ function AMayaConsent() {
   var sm = React.useState(false), mkt = sm[0], setMkt = sm[1];
   var sb = React.useState(false), busy = sb[0], setBusy = sb[1];
   var se = React.useState(''), err = se[0], setErr = se[1];
+  var commandRef = React.useRef(null);
 
   React.useEffect(function () {
     function check() {
@@ -25607,8 +25646,9 @@ function AMayaConsent() {
         var access = window.__meAppAccess || null;
         var client = access && typeof meAppAccessFindMode === 'function'
           ? meAppAccessFindMode(access, 'client') : null;
-        // Карточки нет — согласие не подписано. profile_linked приходит с сервера.
         setShow(!!client && client.profile_linked !== true);
+        var pending = meMayaConsentPending(meMayaConsentPendingKey());
+        if (pending) { setPdn(pending.privacy); setMkt(pending.marketing); }
       } catch (x) {}
     }
     check();
@@ -25620,19 +25660,39 @@ function AMayaConsent() {
     if (!pdn) { setErr('Поставьте галочку согласия на обработку персональных данных.'); return; }
     var authedFetch = window.__meSaasAuthedFetch;
     if (typeof authedFetch !== 'function') { setErr('Сессия не найдена — войдите снова.'); return; }
+    if (commandRef.current) return;
     setErr(''); setBusy(true);
-    Promise.resolve(authedFetch('/customers/me/profile', {
-      method: 'PATCH',
+    commandRef.current = meMayaConsentTransition({ privacy: true, marketing: !!mkt }, function (command) {
+    return Promise.resolve(authedFetch('/client-channel/status')).then(function (status) {
+      if (status && status.linked === true) return null;
+      return authedFetch('/client-channel/challenges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}'
+      }).then(function (challenge) {
+        if (!challenge || !challenge.token) throw new Error('Не удалось подтвердить связь с профилем клиента.');
+        return authedFetch('/client-channel/consume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: challenge.token })
+        });
+      });
+    }).then(function () { return authedFetch('/client-channel/consent', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ privacyConsent: true, marketingConsent: !!mkt })
-    })).then(function () {
+      body: JSON.stringify(command)
+    }); }); }).then(function () {
+      commandRef.current = null;
       setBusy(false); setShow(false);
       try { if (window.tactile) window.tactile('SUCCESS'); } catch (x) {}
       // Перетянуть /me: profile_linked станет true, режим — полным.
       try { if (window.__meRefresh) window.__meRefresh(); } catch (x) {}
     }).catch(function (error) {
+      commandRef.current = null;
       setBusy(false);
-      setErr((error && error.message) || 'Не удалось сохранить. Попробуйте ещё раз.');
+      setErr(error && error.status === 403
+        ? 'Профиль клиента ещё не привязан. Войдите тем же способом и повторите.'
+        : ((error && error.message) || 'Не удалось сохранить. Попробуйте ещё раз.'));
     });
   }
 

@@ -2,6 +2,9 @@ import { NativeFeedbackFoundationModule } from '../native-feedback/native-feedba
 import { NativeFeedbackService } from '../native-feedback/native-feedback.service';
 import { NativeFeedbackController } from '../native-feedback/native-feedback.controller';
 import { NativeFeedbackScheduler } from '../native-feedback/native-feedback.scheduler';
+import { ConsentSecurityInvalidationController } from '../package5-wave3/consent-security-invalidation.controller';
+import { ConsentSecurityInvalidationService } from '../package5-wave3/consent-security-invalidation.service';
+import { ConsentSecurityApprovalService } from '../package5-wave3/consent-security-approval.service';
 import { ClientProfileReadModule } from '../crm/client-profile-read.module';
 import { ClientAppointmentCreateService } from '../appointments/client-appointment-create.service';
 import { ClientLoyaltyReadService } from './client-loyalty-read.service';
@@ -78,6 +81,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
   ],
   controllers: [
     NativeFeedbackController,
+    ConsentSecurityInvalidationController,
     ClientHabitsController,
     LegacyClientHabitsController,
     LegacyClientWantedSlotController,
@@ -93,6 +97,8 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
   providers: [
     NativeFeedbackService,
     NativeFeedbackScheduler,
+    ConsentSecurityApprovalService,
+    ConsentSecurityInvalidationService,
     ClientAppointmentCreateService,
     ClientLoyaltyReadService,
     ClientAppointmentReadService,
