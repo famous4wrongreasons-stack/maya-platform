@@ -1,0 +1,23 @@
+
+### 1/10 шлюз: чистое дерево, линт, типизация, тесты, схема
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+The schema at prisma/schema.prisma is valid 🚀
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+> maya-saas-backend@0.0.1 typecheck
+> tsc --noEmit --project tsconfig.build.json --incremental false
+
+
+> maya-saas-backend@0.0.1 typecheck:scripts
+> tsc --noEmit --project tsconfig.scripts.json --incremental false
+
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent
+
+deploy/vps/deploy.sh: line 77: 69717 Terminated: 15          ( cd "$BE"; export PATH="${MAYA_DEPLOY_NODE_BIN:+$MAYA_DEPLOY_NODE_BIN:}/opt/homebrew/bin:/usr/local/bin:$PATH"; npx prisma validate || exit 1; npm run lint || exit 1; npm run typecheck || exit 1; npm run typecheck:scripts || exit 1; npm test -- --runInBand --silent || exit 1 )

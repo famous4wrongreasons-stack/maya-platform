@@ -1,6 +1,6 @@
 # Chapter 7 — P01 measurement foundation
 
-Status: **local executable foundation proved; mandatory release rerun and production cutover pending**. This is a Wave 1 report, not Chapter 7 completion.
+Status: **BLOCKED — source-owner FK compatibility failed before production.** See [exact evidence and narrow decision](CYCLE-07-P01-SOURCE-OWNER-FK-DECISION.md). Positive component proofs below do not constitute overall P01 acceptance. This is a Wave 1 report, not Chapter 7 completion.
 
 The owner accepted `7ed07b6c` and approved the exact [combined mapping](CYCLE-07-COMBINED-SCHEMA-ACTION-MAPPING.md). The [approval receipt](evidence/chapter7-p01/approval-receipt.json) records the latest authorization: P01 gated production cutover, then P02/P05, P03/P04 and P06. That latest execution order supersedes the mapping's older final-only cutover wording. No product/schema decision is reopened.
 

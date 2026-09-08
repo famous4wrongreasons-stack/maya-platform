@@ -1,0 +1,12 @@
+{
+  "ownedClusterRemoved": true,
+  "ownedTempDatabases": 0,
+  "ownedTempProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "oldDatabasesTouched": 0,
+  "syntheticDumpPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-implementation-7ed07b6c/p01-source-owner-stop-synthetic.dump",
+  "syntheticDumpSha256": "d2e053254c09958097ef29c73b9fdb6da91b9ee65387d9a74b64c5d6160ffa76",
+  "syntheticDumpBytes": 942568,
+  "processHygiene": 0
+}

@@ -1,0 +1,26 @@
+{
+  "reproduction": "CONFIRMED",
+  "sourceOwnerCompatibility": "FAIL",
+  "canonicalSourceOwner": "AppointmentObservationService → AppointmentChangeService.applyObservation",
+  "controlWithoutMeasurement": "PASS: exact CRM binding A→B correction succeeds",
+  "withMeasurement": [
+    {
+      "state": "PENDING",
+      "prismaCode": "P2003",
+      "constraint": "C7_measurement_appointment_fk"
+    },
+    {
+      "state": "PUBLISHED",
+      "prismaCode": "P2003",
+      "constraint": "C7_measurement_appointment_fk"
+    }
+  ],
+  "sourceCorrectionRolledBackByC7ForeignKey": true,
+  "unrelatedNativeFeedbackRequests": 0,
+  "fakeAuthorityOrPhoneMatch": false,
+  "newSchemaBusinessContractDecisionRequired": true,
+  "manifestDefect": false,
+  "productionMutations": 0,
+  "providerCalls": 0,
+  "oldDatabasesTouched": 0
+}
