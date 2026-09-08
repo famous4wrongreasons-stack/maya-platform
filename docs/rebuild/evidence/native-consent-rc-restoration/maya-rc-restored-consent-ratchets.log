@@ -1,0 +1,9 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent --runTestsByPath src/action-engine/consent-security-invalidation.architecture.spec.ts src/action-engine/consent-security-cutover.architecture.spec.ts src/action-engine/package5-r06-operational-delivery.architecture.spec.ts src/action-engine/package5-r08-native-feedback.architecture.spec.ts
+
+
+Test Suites: 4 passed, 4 total
+Tests:       21 passed, 21 total
+Snapshots:   0 total
+Time:        10.311 s

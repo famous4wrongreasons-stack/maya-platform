@@ -1,0 +1,11 @@
+{
+  "package": "R06",
+  "result": "PASS",
+  "checks": [
+    "accepted AC4/AC5 removed event with canonical external Appointment feeds existing B9; opt-out respected; ordered max-three fanout; exact retry zero additional sends",
+    "B9 provider UNKNOWN keeps same match/delivery execution, no notified marker, no blind resend or alternate channel",
+    "external schedule is read through existing CRM with exact integration/StaffProviderLink/CrmStaffAccess; revocation prevents admission, provider writes zero"
+  ],
+  "syntheticTransportCalls": 4,
+  "productionEffects": 0
+}
