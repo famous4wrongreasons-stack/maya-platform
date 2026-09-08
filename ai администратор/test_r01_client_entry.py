@@ -7,11 +7,13 @@ import ast
 import asyncio
 import json
 import logging
+import os
 import re
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
 from unittest.mock import AsyncMock
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parent
@@ -73,6 +75,14 @@ def fixture():
 
 
 class R01NativeClientEntry(unittest.IsolatedAsyncioTestCase):
+    def test_maintenance_handoff_keeps_client_entry_read_only(self):
+        ns = real_functions()
+        with patch.dict(os.environ, {"MAYA_PWA_MAINTENANCE_MODE": "true"}):
+            message = ns['client_handoff_message'](ns['APP_URL'])
+        self.assertIn('ведутся технические работы', message)
+        self.assertIn('сообщения и отчёты', message)
+        self.assertIn(ns['APP_URL'], message)
+
     async def test_each_old_native_leaf_has_no_business_effect(self):
         ns = real_functions(*LEAVES)
         update, context, query = fixture()

@@ -5,8 +5,25 @@ channel credentials. The existing authenticated PWA and its canonical Client
 link/confirmation flows remain the entry point, including Clients without User.
 """
 
+import os
+
+
+def pwa_maintenance_enabled() -> bool:
+    return (os.environ.get("MAYA_PWA_MAINTENANCE_MODE") or "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
 
 def client_handoff_message(app_url: str) -> str:
+    if pwa_maintenance_enabled():
+        return (
+            "В MAYA сейчас ведутся технические работы. Приложение временно "
+            "недоступно; сообщения и отчёты будут приходить в этот Telegram-чат. "
+            "Страница статуса: " + app_url
+        )
     return (
         "Запись, свои визиты и данные клиента доступны в приложении после "
         "подтверждения привязки. Откройте MAYA и войдите: " + app_url
