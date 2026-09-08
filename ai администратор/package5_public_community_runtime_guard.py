@@ -1,14 +1,12 @@
 """Permanent B52 owner boundary across canonical and inventoried Python variants."""
 import ast
-import importlib.util
+from package5_wave_rc_guard_contracts import contract
 import re
 from pathlib import Path
 
 
 def overlay():
-    path = Path(__file__).resolve().parents[1] / 'docs/rebuild/evidence/package5-wave-rc-r09-python-overlay.py'
-    spec = importlib.util.spec_from_file_location('r09_overlay', path)
-    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module); return module
+    return contract("r09")
 
 
 def scan(root, overrides=None):

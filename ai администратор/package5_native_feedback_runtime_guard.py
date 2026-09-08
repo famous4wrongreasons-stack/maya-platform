@@ -1,6 +1,6 @@
 """Permanent B47 ratchet: known leaves are retired as complete functions."""
 import ast
-import importlib.util
+from package5_wave_rc_guard_contracts import contract
 import re
 from pathlib import Path
 
@@ -10,10 +10,7 @@ def functions(source):
 
 
 def expected():
-    path = Path(__file__).resolve().parents[1] / 'docs/rebuild/evidence/package5-wave-rc-r08-python-overlay.py'
-    spec = importlib.util.spec_from_file_location('r08_overlay', path)
-    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
-    return module
+    return contract("r08")
 
 
 def scan(root, overrides=None):

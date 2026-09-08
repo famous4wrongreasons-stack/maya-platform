@@ -1,13 +1,12 @@
 """Permanent R12 writer/delivery/identity/retention boundary, all known Python."""
 import ast
-import importlib.util
+from package5_wave_rc_guard_contracts import contract
 import re
 from pathlib import Path
 
 
 def overlay():
-    path=Path(__file__).resolve().parents[1]/'docs/rebuild/evidence/package5-wave-rc-r12-python-overlay.py'
-    spec=importlib.util.spec_from_file_location('r12_overlay',path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
+    return contract("r12")
 
 
 def scan(root, overrides=None):

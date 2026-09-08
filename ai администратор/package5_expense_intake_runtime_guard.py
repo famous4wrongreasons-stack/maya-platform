@@ -1,12 +1,12 @@
 """R13 permanent B37 writer/source/reminder/report ratchet."""
 import ast
-import importlib.util
+from package5_wave_rc_guard_contracts import contract
 import re
 from pathlib import Path
 
 def overlay():
-    path=Path(__file__).resolve().parents[1]/'docs/rebuild/evidence/package5-wave-rc-r13-python-overlay.py'
-    spec=importlib.util.spec_from_file_location('r13_overlay',path);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);return module
+    return contract("r13")
+
 
 def scan(root,overrides=None):
     root=Path(root);sources={p.name:p.read_text() for p in root.glob('*.py') if not p.name.startswith(('test_','package5_'))};sources.update(overrides or {});errors=[]

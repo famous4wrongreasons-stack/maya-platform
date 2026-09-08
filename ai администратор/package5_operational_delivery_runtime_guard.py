@@ -1,6 +1,6 @@
 """R06 permanent producer/closure and effect-before-admission ratchet."""
 import ast
-import importlib.util
+from package5_wave_rc_guard_contracts import contract
 from pathlib import Path
 
 
@@ -8,9 +8,7 @@ def functions(source):return {n.name:n for n in ast.parse(source).body if isinst
 def calls(node):return {ast.unparse(n.func) for n in ast.walk(node) if isinstance(n,ast.Call)}
 
 def expected():
-    path=Path(__file__).resolve().parents[1]/'docs/rebuild/evidence/package5-wave-rc-r06-python-overlay.py'
-    spec=importlib.util.spec_from_file_location('r06_overlay',path);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
-    return module.BODIES
+    return contract("r06").BODIES
 
 
 def scan(root,overrides=None):
