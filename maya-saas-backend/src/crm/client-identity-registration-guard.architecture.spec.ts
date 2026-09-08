@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
+import ts from 'typescript';
 
 const SRC_ROOT = resolve(__dirname, '..');
 const BACKEND_ROOT = resolve(SRC_ROOT, '..');
@@ -74,15 +75,50 @@ function productionTypeScriptFiles(root: string): string[] {
   });
 }
 
+function hasRawLinkMutation(code: string): boolean {
+  const ast = ts.createSourceFile(
+    'source.ts',
+    code,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  // Match writes anywhere in a SQL statement, including a writable CTE whose
+  // final statement is SELECT. A SELECT ... FOR SHARE is a read/lock, not registration.
+  const mutation =
+    /\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM|MERGE\s+INTO|TRUNCATE(?:\s+TABLE)?)\s+(?:(?:"?[A-Za-z_][A-Za-z0-9_]*"?)\s*\.\s*)?"?CrmClientLink"?\b/i;
+  const rawBoundary = (name: string) =>
+    /(?:^|\.)\$(?:executeRaw|queryRaw)(?:Unsafe)?$/.test(name) ||
+    /^Prisma\.(?:sql|raw)$/.test(name);
+  let found = false;
+  const walk = (node: ts.Node) => {
+    if (
+      ts.isTaggedTemplateExpression(node) &&
+      rawBoundary(node.tag.getText(ast)) &&
+      mutation.test(node.template.getText(ast))
+    )
+      found = true;
+    if (
+      ts.isCallExpression(node) &&
+      rawBoundary(node.expression.getText(ast)) &&
+      node.arguments.some((arg) => mutation.test(arg.getText(ast)))
+    )
+      found = true;
+    ts.forEachChild(node, walk);
+  };
+  walk(ast);
+  return found;
+}
+
 function isRegistrationMutation(code: string): boolean {
-  return [
-    /\b(?:this\.)?prisma\.client\.(?:create|createMany|upsert)\s*\(/,
-    /\b(?:this\.)?prisma\.crmClientLink\.(?:create|createMany|upsert)\s*\(/,
-    /\btx\.client\.(?:create|createMany|upsert)\s*\(/,
-    /\btx\.crmClientLink\.(?:create|createMany|upsert)\s*\(/,
-    /\bcrmLinks\s*:\s*\{[\s\S]{0,240}\bcreate\s*:/,
-    /\$(?:executeRaw|queryRaw)[\s\S]{0,400}["'`]CrmClientLink["'`]/,
-  ].some((pattern) => pattern.test(code));
+  return (
+    [
+      /\b(?:this\.)?prisma\.client\.(?:create|createMany|upsert)\s*\(/,
+      /\b(?:this\.)?prisma\.crmClientLink\.(?:create|createMany|upsert)\s*\(/,
+      /\btx\.client\.(?:create|createMany|upsert)\s*\(/,
+      /\btx\.crmClientLink\.(?:create|createMany|upsert)\s*\(/,
+      /\bcrmLinks\s*:\s*\{[\s\S]{0,240}\bcreate\s*:/,
+    ].some((pattern) => pattern.test(code)) || hasRawLinkMutation(code)
+  );
 }
 
 function registrationOwners(files: SourceFile[]): string[] {
@@ -178,6 +214,33 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
       'rogue/http-registration.service.ts',
     ]);
   });
+
+  it.each([
+    'await tx.$queryRaw`INSERT INTO "CrmClientLink" (id) VALUES (1)`;',
+    'await tx.$executeRaw`UPDATE "CrmClientLink" SET "clientId"=1`;',
+    'await tx.$executeRaw`DELETE FROM public."CrmClientLink" WHERE id=1`;',
+    'await tx.$queryRaw`WITH changed AS (UPDATE "CrmClientLink" SET "clientId"=1 RETURNING id) SELECT * FROM changed`;',
+    'const query = Prisma.sql`WITH added AS (INSERT INTO "CrmClientLink" (id) VALUES (1) RETURNING id) SELECT * FROM added`; await tx.$queryRaw(query);',
+    'await tx.$executeRawUnsafe(\'TRUNCATE TABLE "CrmClientLink"\');',
+  ])('detects raw identity mutations including writable CTEs: %s', (code) => {
+    expect(
+      productionRegistrationOwners([{ path: 'rogue/raw.ts', code }]),
+    ).toEqual(['rogue/raw.ts']);
+  });
+
+  it.each([
+    'await tx.$queryRaw`SELECT id FROM "CrmClientLink" WHERE "tenantId"=${tenantId} FOR SHARE`;',
+    'await tx.$queryRaw(Prisma.sql`SELECT id FROM "CrmClientLink" WHERE "clientId"=${clientId} FOR SHARE`);',
+    'await tx.$queryRaw`WITH links AS (SELECT id FROM "CrmClientLink" FOR SHARE) SELECT * FROM links`;',
+    'await tx.$queryRaw`SELECT id FROM "Client" FOR SHARE`; const owner = "CrmClientLink";',
+  ])(
+    'permits source reads and publication locks without naming them registration: %s',
+    (code) => {
+      expect(
+        productionRegistrationOwners([{ path: 'reader/read.ts', code }]),
+      ).toEqual([]);
+    },
+  );
 
   it('does not exclude a lookalike proof path or the scripts directory broadly', () => {
     const lookalike: SourceFile = {

@@ -1,7 +1,4 @@
-import type {
-  CrmFinancialSummary,
-  CrmMoneyAmount,
-} from '../crm/crm-adapter.interface';
+import type { CrmService } from '../crm/crm.service';
 import { isEvidencedBasis } from '../domain/revenue-basis';
 import { foldExpenseRows } from '../expenses/expense-period.reader';
 import { resolveExpenseCategory } from '../expenses/expense-category';
@@ -10,6 +7,17 @@ import {
   MeasurementMetric,
   Completeness,
 } from './measurement.contract';
+
+/** Consume the canonical service read contract; do not couple a measurement to an adapter. */
+export type MeasurementFinancialRead = Awaited<
+  ReturnType<CrmService['getFinancialSummary']>
+>;
+export type MeasurementValueRead = NonNullable<
+  Awaited<
+    ReturnType<CrmService['getClientLoyaltyEvidenceByExternalIdReadOnly']>
+  >
+>;
+type FinancialMoney = NonNullable<MeasurementFinancialRead['revenue']['total']>;
 
 export function financeMetric(
   key: string,
@@ -23,7 +31,7 @@ export function financeMetric(
 ): MeasurementMetric {
   return { key, value, unit, basis, state, sourceRefs, currency, dimensions };
 }
-export function financeMoney(value: CrmMoneyAmount | null | undefined) {
+export function financeMoney(value: FinancialMoney | null | undefined) {
   return value &&
     Number.isSafeInteger(value.amount_kopecks) &&
     /^[A-Z]{3}$/.test(value.currency)
@@ -33,7 +41,7 @@ export function financeMoney(value: CrmMoneyAmount | null | undefined) {
 
 /** Existing payroll DTO facts only. No percentage model or revenue-to-salary inference. */
 export function measurementSalaryFacts(
-  summary: CrmFinancialSummary,
+  summary: MeasurementFinancialRead,
   sourceRef: number,
 ) {
   const eligible =
@@ -56,7 +64,7 @@ export function measurementSalaryFacts(
 
 /** Minimize before hashing: staff names, account labels and provider messages never enter C7. */
 export function measurementFinancialFacts(
-  summary: CrmFinancialSummary,
+  summary: MeasurementFinancialRead,
   sourceRef: number,
 ) {
   const revenue = summary.revenue;

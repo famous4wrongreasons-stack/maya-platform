@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { CrmService } from '../crm/crm.service';
-import type {
-  CrmFinancialSummary,
-  ClientLoyaltySnapshot,
-} from '../crm/crm-adapter.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { canonicalUtcTransaction } from '../prisma/canonical-utc-transaction';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -18,6 +14,8 @@ import {
   financeMetric,
   measurementExpenseFacts,
   measurementFinancialFacts,
+  type MeasurementFinancialRead,
+  type MeasurementValueRead,
 } from './measurement.finance.facts';
 import { measurementReadWindow } from './measurement.period';
 import {
@@ -255,7 +253,7 @@ export class MeasurementFinanceReader {
       },
     );
 
-    let summary: CrmFinancialSummary | null = null;
+    let summary: MeasurementFinancialRead | null = null;
     const reasons: string[] = [
       'refund_coverage_not_supported',
       'fiscal_cash_not_proven',
@@ -587,7 +585,7 @@ export class MeasurementFinanceReader {
         isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
       },
     );
-    let card: ClientLoyaltySnapshot | null = null;
+    let card: MeasurementValueRead | null = null;
     try {
       card = await this.crm.getClientLoyaltyEvidenceByExternalIdReadOnly(
         tenantId,

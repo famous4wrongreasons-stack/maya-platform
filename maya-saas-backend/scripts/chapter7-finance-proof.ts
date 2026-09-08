@@ -25,7 +25,11 @@ import { compareMeasurementPeriods } from '../src/measurement/measurement.period
 
 // No production/old database, migrations, cleanup, transport or provider effects.
 const url = new URL(process.env.DATABASE_URL ?? '');
-assert.equal(url.hostname, '127.0.0.1');
+assert.equal(
+  url.hostname,
+  '127.0.0.1',
+  'C7 finance proof requires its exact owned disposable database',
+);
 assert.equal(url.port, '55517');
 assert.equal(url.pathname, '/maya_c7_replay');
 assert.equal(url.username, 'maya_c7');

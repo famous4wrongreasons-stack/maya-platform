@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync } from 'node:fs';
+import { MEASUREMENT_SOURCE_KINDS } from './measurement.contract';
 import { join, resolve } from 'node:path';
 
 const root = resolve(__dirname, '../..');
@@ -67,14 +68,14 @@ describe('C7 Wave 2 shared publication and source-owner ratchets', () => {
   it('safe source kinds are a closed family-specific allowlist', () => {
     const contract = read('src/measurement/measurement.contract.ts');
     expect(contract).toContain(
-      'MEASUREMENT_SOURCE_KINDS[s.owner]?.includes(s.kind)',
+      'MEASUREMENT_SOURCE_KINDS.get(s.owner)?.includes(s.kind)',
     );
-    expect(contract).toContain(
-      "ClientLoyaltySnapshot: ['canonical_value_card_query']",
-    );
-    expect(contract).toContain(
-      "NativeFeedbackRequest: ['reputation_native_query']",
-    );
+    expect(MEASUREMENT_SOURCE_KINDS.get('ClientLoyaltySnapshot')).toEqual([
+      'canonical_value_card_query',
+    ]);
+    expect(MEASUREMENT_SOURCE_KINDS.get('NativeFeedbackRequest')).toEqual([
+      'reputation_native_query',
+    ]);
     expect(contract).not.toMatch(
       /MEASUREMENT_SOURCE_KINDS.*Record<string,\s*any>/,
     );

@@ -9,10 +9,10 @@ const source = readFileSync(
 
 describe('C7 P05 permanent reputation owner boundaries', () => {
   it('retains the existing shared closed evidence contract', () => {
-    expect(MEASUREMENT_SOURCE_KINDS.BusinessReview).toContain(
+    expect(MEASUREMENT_SOURCE_KINDS.get('BusinessReview')).toContain(
       'reputation_review_query',
     );
-    expect(MEASUREMENT_SOURCE_KINDS.NativeFeedbackRequest).toContain(
+    expect(MEASUREMENT_SOURCE_KINDS.get('NativeFeedbackRequest')).toContain(
       'reputation_native_query',
     );
   });

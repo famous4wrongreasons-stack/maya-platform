@@ -1,12 +1,14 @@
 import { Prisma } from '@prisma/client';
-import type { ClientLoyaltySnapshot } from '../crm/crm-adapter.interface';
 import {
   measurementHash,
   MeasurementResult,
   MeasurementSource,
   NormalizedMeasurementIntent,
 } from './measurement.contract';
-import { financeMetric } from './measurement.finance.facts';
+import {
+  financeMetric,
+  type MeasurementValueRead,
+} from './measurement.finance.facts';
 
 /** Exact canonical Client account. There is deliberately no Maya User fallback. */
 export async function readMeasurementValueAccount(
@@ -93,7 +95,7 @@ export function measurementValueFacts(
   tenantId: string,
   i: NormalizedMeasurementIntent,
   local: MeasurementValueAccount,
-  provider: ClientLoyaltySnapshot | null,
+  provider: MeasurementValueRead | null,
   observedAt: string,
   binding: MeasurementSource,
 ): MeasurementResult {

@@ -53,6 +53,12 @@ const CANONICAL_OWNER_FILES = new Set([
 
 const CONTROLLED_VALUE_PROOFS = [
   {
+    path: 'scripts/chapter7-finance-proof.ts',
+    databaseGuard: "assert.equal(url.pathname, '/maya_c7_replay')",
+    refusalMarker:
+      'C7 finance proof requires its exact owned disposable database',
+  },
+  {
     path: 'scripts/package5-b27-loyalty-read-proof.ts',
     databaseGuard: "url.pathname !== '/maya_c06_b27_owned'",
     refusalMarker: 'Owned isolated B27 database required',
@@ -173,7 +179,13 @@ function isControlledProof(file: SourceFile): boolean {
   return Boolean(
     contract &&
     file.code.includes(contract.databaseGuard) &&
-    file.code.includes(contract.refusalMarker),
+    file.code.includes(contract.refusalMarker) &&
+    (file.path !== 'scripts/chapter7-finance-proof.ts' ||
+      (/assert\.equal\(\s*url\.hostname,\s*'127\.0\.0\.1'/.test(file.code) &&
+        file.code.includes("assert.equal(url.port, '55517')") &&
+        file.code.includes("assert.equal(url.username, 'maya_c7')") &&
+        file.code.indexOf("assert.equal(url.username, 'maya_c7')") <
+          file.code.indexOf('new PrismaService('))),
   );
 }
 
@@ -257,6 +269,30 @@ describe('Package 4 final value execution ownership ratchet', () => {
       expect(file).toBeDefined();
       expect(isControlledProof(file!)).toBe(true);
     }
+  });
+
+  it('requires the exact C7 loopback, port, database and user before opening Prisma', () => {
+    const file = files.find(
+      (entry) => entry.path === 'scripts/chapter7-finance-proof.ts',
+    )!;
+    for (const [before, after] of [
+      ["'127.0.0.1'", "'production.example'"],
+      ["'55517'", "'5432'"],
+      ["'/maya_c7_replay'", "'/production'"],
+      ["'maya_c7'", "'postgres'"],
+    ]) {
+      expect(
+        isControlledProof({ ...file, code: file.code.replace(before, after) }),
+      ).toBe(false);
+    }
+    expect(
+      isControlledProof({ ...file, code: 'new PrismaService();' + file.code }),
+    ).toBe(false);
+    expect(
+      productionViolations([
+        { ...file, path: 'src/measurement/finance-proof.ts' },
+      ]),
+    ).not.toHaveLength(0);
   });
 
   it('detects a new production direct value writer', () => {
