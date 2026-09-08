@@ -1,0 +1,36 @@
+[Nest] 17522  - 09/08/2026, 2:42:53 PM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 17522  - 09/08/2026, 2:42:53 PM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 17522  - 09/08/2026, 2:42:53 PM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 17522  - 09/08/2026, 2:42:53 PM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 17522  - 09/08/2026, 2:42:54 PM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 17522  - 09/08/2026, 2:42:54 PM    WARN [OwnerReportsService] daily_report finance unavailable tenant=synthetic date=2026-09-08
+[Nest] 17522  - 09/08/2026, 2:42:54 PM    WARN [OwnerReportsService] daily_report slot unresolved run=255b9be4-6907-47c0-bfc5-6cbfff71001b slot=3e522bca579eafd9925d3360708dd28b580e5e55c6133ac260ff345ad9713e14
+[Nest] 17522  - 09/08/2026, 2:42:55 PM    WARN [OwnerReportsService] daily_report slot unresolved run=868473e1-9c20-401b-abfb-cd5d62dd9c6e slot=bc913a639f7781dceac30c67b83f37f6aa295956209f85183d1df7837361b861
+[Nest] 17522  - 09/08/2026, 2:42:55 PM    WARN [OwnerReportsService] daily_report slot unresolved run=868473e1-9c20-401b-abfb-cd5d62dd9c6e slot=bc913a639f7781dceac30c67b83f37f6aa295956209f85183d1df7837361b861
+[Nest] 17522  - 09/08/2026, 2:42:55 PM    WARN [OwnerReportsService] daily_report slot unresolved run=ea10b695-6687-4533-8763-c0cdd95fe6e1 slot=0e80883a33b291175235ebf5a82fbb53a9cbf9dc691261329b8b3df2c55fc487
+[Nest] 17522  - 09/08/2026, 2:42:55 PM    WARN [OwnerReportsService] daily_report slot unresolved run=ea1ac407-877b-44c5-b75b-639719a82126 slot=c7163d4177d104ffbd8a87b5b07440832bba57dd0dfc9af572db6612bb7b301a
+[Nest] 17522  - 09/08/2026, 2:42:55 PM    WARN [OwnerReportsService] daily_report slot unresolved run=5650b542-9b99-4767-9400-90fce4a82ea8 slot=634e051c425e6905d80fea2cccb55d1f6896921924bf072711bbf58a395df95e
+[Nest] 17522  - 09/08/2026, 2:42:56 PM    WARN [OwnerReportsService] daily_report slot unresolved run=e9414117-95dd-4096-9507-0da19a4ecab5 slot=67b0d10ce7173de04f9dac272d2c5785e2d338470c696b13e7725bdc4b5f681f
+[Nest] 17522  - 09/08/2026, 2:42:56 PM    WARN [OwnerReportsService] daily_report slot unresolved run=e9303f35-63b4-4b4a-88f2-86d05d6d3c53 slot=54af14f6daa848c223cdf4fc8a7ae7115574bd80fe40dc8f204ee8552609cdcb
+[Nest] 17522  - 09/08/2026, 2:42:56 PM    WARN [OwnerReportsService] daily_report slot unresolved run=e9303f35-63b4-4b4a-88f2-86d05d6d3c53 slot=9dc4a9d143f62d3b4c5cea63eefe7d6ccb3de117ac14caf65d046f190a8cedf8
+[Nest] 17522  - 09/08/2026, 2:42:56 PM    WARN [OwnerReportsService] daily_report slot unresolved run=bbe06ff6-dea1-484b-b129-f9096aa70703 slot=628110ffb5ab33fbeee266475c882e2180d0ce0f2e3290c71dfe1335835fb2aa
+[Nest] 17522  - 09/08/2026, 2:42:56 PM    WARN [OwnerReportsService] daily_report slot unresolved run=bbe06ff6-dea1-484b-b129-f9096aa70703 slot=442f0b0a7555e22553a23a18d80639ad21be5afe68c312eb34ec45ab85208ebd
+{
+  "status": "PASS",
+  "checks": [
+    "four concurrent first scheduler calls converge: one root, eight executions/effects",
+    "actual Inbox/Telegram/APNS boundaries observe committed full admission and predecessor success",
+    "confirmed replay sends nothing; explicit changed plan conflicts",
+    "crash before commit rolls back every slot with zero effects",
+    "crash after commit leaves eight READY slots and resumes without rebuilding content",
+    "Telegram deterministic failure blocks APNS without fallback",
+    "one APNS UNKNOWN blocks later device; independent sibling completes; no blind retry",
+    "current membership/User/preferences/verified route/tenant revocation prevents effects",
+    "no authorized recipient: no report, execution, private composition or effect",
+    "Telegram UNKNOWN leaves APNS unstarted and original sibling pending for actual restart",
+    "new device excluded from immutable plan; wrong tenant rejected before effect"
+  ],
+  "syntheticTransportEffects": 48,
+  "productionMessages": 0,
+  "productionProviderMutations": 0
+}

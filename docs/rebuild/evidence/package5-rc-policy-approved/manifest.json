@@ -1,0 +1,144 @@
+{
+  "approvedCheckpoint": "4e63b65c",
+  "implementationCommit": "8ac3c3e4",
+  "option": "A",
+  "policySchemaDelta": {
+    "models": 0,
+    "fields": 0,
+    "actions": 0,
+    "migrations": 0
+  },
+  "packages": {
+    "R05": {
+      "blockers": [
+        "B36",
+        "B43"
+      ],
+      "localAcceptance": "PASS"
+    },
+    "R06": {
+      "blockers": [
+        "B44",
+        "B45",
+        "B48",
+        "B49"
+      ],
+      "localAcceptance": "PASS"
+    },
+    "R08": {
+      "blockers": [
+        "B47"
+      ],
+      "localAcceptance": "PASS"
+    },
+    "R09": {
+      "blockers": [
+        "B52"
+      ],
+      "localAcceptance": "PASS"
+    },
+    "R11": {
+      "blockers": [
+        "B51",
+        "B59"
+      ],
+      "localAcceptance": "PASS"
+    },
+    "R12": {
+      "blockers": [
+        "B53",
+        "B58"
+      ],
+      "localAcceptance": "PASS"
+    },
+    "R13": {
+      "blockers": [
+        "B37"
+      ],
+      "localAcceptance": "PASS"
+    },
+    "R14": {
+      "blockers": [
+        "B55"
+      ],
+      "localAcceptance": "PASS"
+    }
+  },
+  "aggregate": "PASS",
+  "backendSuites": 411,
+  "backendTests": 3370,
+  "schemaMigrationsReplayed": 93,
+  "newRCMigrations": 9,
+  "nativeSecurityPriorToRCReplay": "PASS",
+  "schemaDrift": "NONE",
+  "productionCutover": "NOT_STARTED",
+  "productionBusinessProofWrites": 0,
+  "files": {
+    "r12-runtime-restart.txt": "8c9ae1b5d57bdbafc0d2c85ec3d42f2f65c89532ca3e9a5fd49ca378e9b93ab9",
+    "r12-pwa-proof.txt": "2bc2d69b75d5c03ed57653b67d2931f20637ac956bdfff06e13ac9516b10929e",
+    "wave-rc-schema.txt": "ea2c144d7fef54cdee7659798a84469fe0e2d273585ad7932a3210ebce380974",
+    "production-schema-preflight.json": "17ead68752411d3f0192ff7ec94a53d204b86fdc7bebed61a8d75552e60ace72",
+    "r06-retention.txt": "1192e250c865007766c058dbcdf60d4ba1331eadcebc2d6d60e17b32e1b3a9f3",
+    "r13-runtime-restart.txt": "fb14a959942ad3a7aa560bc1809d48ae6b5f9ee8bd69902aef15a745495ea376",
+    "python-tests.txt": "b991fe1a755d1f8db76e81be90358d0c8d091e5542ee9181f55786b6d36b5e4f",
+    "r14-restart.txt": "71f90e809d66740305154ad9fc619b2e253107570aabdf6feba88125fdffa6c3",
+    "r09-runtime-restart.txt": "c0fefb5c36053a8f9b0cd62e360945c9d2369c85da477b498d15e2506c0b6aaf",
+    "r09-public-proof.txt": "1ae5872591ec99f7aefb980f4100c74f7671d7665082110d085864bc5c0ede50",
+    "r08-delivery.txt": "8ee4070d271a736c230283b4b1d3b99179cadf1b6ceb68c6d8927c346521e727",
+    "r08-php.json": "fd178fe5f4aa14e727a71e2fe0cc7e9c1fc3d7e3c24a25f4b0365bd050941f2e",
+    "schema-production-order-drift.txt": "83a3899d598a301cb810d4a0f8fa71a7f9514cf5009373f46a2e2e115405950c",
+    "r12-runtime.txt": "a5b02ccfd61044fbb0ae74e5a3170aa8d0f294f784ee8ea6cb0e03e1e32b7045",
+    "schema-clean-drift.txt": "83a3899d598a301cb810d4a0f8fa71a7f9514cf5009373f46a2e2e115405950c",
+    "r11-r13-policy.txt": "3152005ed535d8202078ac0033f425de1a751bbbcacd7cc00422438f4580ccbb",
+    "durable-policy.txt": "27b8641019a4d2085e0915ac106372574a260785c1b5167c6b9699987b1b9ca4",
+    "r11-pwa-proof.txt": "8aec46b6e47f1edfc3b941fde638f022e6fcec391e8b8404c7d05f27def27294",
+    "r06-events.txt": "dfbf07d64fb88ae47a9ddcfc04eb1f5d63827674ec323445347096248a51e860",
+    "r12-retention.txt": "cded9402b46960fa30d97c19646be989a76253f705c07b6e21039328915210f5",
+    "r05-retention.txt": "aa5a6cd13d6e331d9b289092b07d44834b5201eda395f004170b2a1995ec7eed",
+    "composed-aliases.txt": "942ff4c0be92e1d2bc2beec484e6ffae5b36dae0731f2380cdfe557b29e83179",
+    "r08-pwa-proof.txt": "492f18a8109e16a55ed436a597f358f91e5693a86d961da7c4e2f99c86727c53",
+    "r06-delayed.txt": "e1756d623a5720cab3c019e5754b9d20731f4c59450b84b11bc1887052d66291",
+    "r08-delivery-delayed.txt": "54a4be0f38ca824d04555c9072f8b1cc78e52c186a02398932b3dc8e61a35a49",
+    "r12-php.json": "02e8bff039e098b094c9a297da9b837e42dcdb739cac68707637124224df0390",
+    "r13-delayed.txt": "1bcb4066d3b908d099f7650ce0e234bba30f3c7af3e4f8878f156ce9a26e5219",
+    "r06-wanted-alert.txt": "fba214a1fb75a7bb6860db7a1e3c07131bf2d1aab5b7e9141bfe452120a64c59",
+    "r09-php.txt": "0d59b8019db97930a92f9414d07f5b1f8c76fa71d81435d963c72cd01cf6b0ac",
+    "r11-runtime.txt": "e68b2a9b6b27fd18381d0138763a08054d518c9ff1bf264200292d5b571dc107",
+    "production-storage-readiness.txt": "8cff466eb2cdbc50b6dc7a0a453af2405e1fd7a7778b7ad05802735f153b1e82",
+    "r14-runtime.txt": "f582db141a4fd81358473ad3020be4c06fdbcd264c2ad0233a27db044a90af6a",
+    "build-aggregate.txt": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+    "r08-runtime.txt": "ff5959116a7f271d6a0e1ad88ec222d365793e2410fdc150c6f79d2e342be0c3",
+    "r06-wanted-alert-restart.txt": "2f7071d1a9ae3de3cf8e6f81c71a9d15589ed087e9d206f99ad1bf39f798174f",
+    "python-manifest.json": "a8f1b95a940b8cc63ac24678e2eecb9503d7787c2d264ff5ed3e87e100c94162",
+    "scripts-typecheck-aggregate.txt": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+    "r06-projection.txt": "d56a562ea1e0a98732babeb8cf474a7765d83ca3e83163b950c8c4c671d4ce3a",
+    "publisher-proof.txt": "300202d3162e5232724166503bf0d6a344a82f800e1a4eb90a0440104d42d323",
+    "r08-retention.txt": "d3e72cddb8a60660fd5fc057e456acee989659cfa787bbe66494797041f41792",
+    "production-storage-authority.txt": "6f635dd1973f4f956764a919b4c7dec0579495c52194a049320d94c35057764a",
+    "schema-pending.txt": "8a185f0045eb3036fb52cbf7be4de763400349e5e5d28e0fb700af9cf7dfcfad",
+    "schema-clean-replay.txt": "11aa75a81c750054ea1bae189a7e524b6b12a34c4c1d745cf524ee69576a53d1",
+    "r06-runtime.txt": "35bc100578cc8d74b3d761e1fd9c92a04bedc0493a8af0eedc459447bfd7e7bb",
+    "r13-runtime.txt": "73364577b05751e02f8de7ac83147f58fdea4174aa0281a0b6e666b5a6cf6ced",
+    "r09-retention.txt": "0a70ff636c891c9490a461b5cdf1638d82daa20ca30732830d26690bd94bc940",
+    "edge-manifest.json": "1fffa06d3f65987cf261550884fb878d474aeb86aa06dc9da3401f6d9ec1dc65",
+    "mandatory-backend.txt": "172f09daa7e9c04d76c40ba132f08f8cbf4dfd611c3117298f4aab19f7da6fa8",
+    "r09-pwa-proof.txt": "9ed9546e80bc75bd005d6b19911a842098cfdc4377b318d6200fe6ab18f1e2d3",
+    "typecheck-aggregate.txt": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+    "b36-runtime.txt": "3f069a71cc428bc22ae95bec636cbca93c174577cee9802367b4a1234e9735c9",
+    "restart.json": "54e40e907fb6c7b8a0d9bef6ff87d10fd3fd715039f58acd9ce8f7758f03d5c7",
+    "application-di.txt": "61590f585fb3131536f8ba6c8f1049cca0145f5b8281d6fe09f3a4821f27d46f",
+    "b36-restart.txt": "8eeffff994511cf59c6386e33cb15c02d84336361eb20f53917cbfc23cd8fdde",
+    "r13-retention.txt": "159dcb9d4f99d453da34d8d984fc072904012b3f415ee04430564524b1a83833",
+    "r09-runtime.txt": "089f1519fda6526136266d088670fe59d9eec4298929f34600c83f72f1f8d629",
+    "composition.json": "e7e89cae88ca98aafa18099f06458f41c9859c1ac39dd80e89124a90a038411f",
+    "r12-media.txt": "8a9cabdfe4bdf8e0bb8330ec14de3a996435a07c31fa84e214a44dd26d44707e",
+    "lint-aggregate.txt": "80f5295fdc4b3e55d92f2aa33e3773ba6f2b9305c454e513f870e95ae3fa198d",
+    "r14-pwa-proof.txt": "922eaa1b8c9698e26de1d59a793a122683823519353f9352f7e526b99dbec018",
+    "schema-production-order.json": "145defc00dd4f714ac28817b34383816443f75c0e18e27d58db77e362a4d3a0b",
+    "r13-pwa-proof.txt": "c70cb4debe8900002b5307ff09454ab96cb5f8e459c2f4d5a4706fcccf29d89e",
+    "r12-delayed.txt": "d593381a466e8d31b18a7d12023f08535d8cb8de76c558806cec85dc2de986e8",
+    "r05-runtime.txt": "4728eb3cc76d718dca5d240e97e755d956bd6000f50808cb6592a3a0a29fb3a3",
+    "prisma-validate-aggregate.txt": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+    "r08-delivery-restart.txt": "3548f71c3b54bbee1c98b914425882960c2517d81d845539b2fac9733337138f"
+  }
+}

@@ -4,18 +4,34 @@ closed helper calls cannot be replaced with a compatibility sender.
 """
 import ast
 import hashlib
+import json
 from pathlib import Path
 
-EXPECTED = {'bot.py': {'_director_briefing_job': 'd0c14c498995d0f416b841fd968d9f68873ab272fbe27ae8eb55b3199e904476',
-            'cmd_admin_pdf': 'b2a98b2666879576d402def60adf85d4732d4052492ccacf523e85866f884236'},
- 'canonical_report_download.py': {'_render': '6194d82235a7c7cb2f6bea3475f56d4ae7f7b2c6f1e6c15d5caefeaf471722ca',
-                                  'report_snapshot': '090aaa6bbb57cd78eb04e0af1cf29f3d7b2fb75af248c3896cb78775ff61026a',
-                                  'static_help': '6468e73035330afa636d754ab39e42fdf1c0f57401b116351dacc44a136598f6'},
- 'maya_inbox_bridge.py': {'trigger_owner_daily_report': '10e9db63924ca62b5099b79e13a9ea900362a13dc592f17dce48b8aa96d49c3a',
-                          'trigger_owner_report': '71798fda42cc723abe0b5090f23e9a3fda3e00981f9c7c19916abe3c270b115b'},
- 'webhook_server.py': {'_send_growth_role_briefs_once': '351f112f2328ba6cfe86f78bae5abeef20e7c89ac198111d3a5f9511c553467f',
-                       '_send_master_day_briefs_once': '225b0f3389994d8bd354aaaef7001ca5b2a418c77b45450d1e462dbb912b1bfa',
-                       'panel_report_pdf_handler': '438434e8308abdbb12c2f3598a1be150fb6a530544f68754e7cd3dad882d3866'}}
+def _ast_digest(node):
+    # Python 3.14 omits empty AST fields by default; the semantic contract is
+    # stable across supported interpreters and never depends on dump formatting.
+    def value(item):
+        if isinstance(item, ast.AST):
+            return [type(item).__name__, {key: value(field) for key, field in ast.iter_fields(item)
+                                         if field is not None and field != []}]
+        if isinstance(item, list):
+            return [value(child) for child in item]
+        return item
+    return hashlib.sha256(json.dumps(value(node), ensure_ascii=False, sort_keys=True,
+                                     separators=(',', ':')).encode()).hexdigest()
+
+
+EXPECTED = {'bot.py': {'_daily_report_job': '893899536d4ac5a40604282d5fa8846e1e1bb6704ab68115fc542ff3f2b8f5d3',
+            '_director_briefing_job': '23fc7de4423ff505d222b35d7ffcfea60653268e31a3c70c3db4e4d416375d9f',
+            'cmd_admin_pdf': '38973c6bf92b5d4bc62a3b78f7027977daabf3e5a792edd1a7d906874358c54f'},
+ 'canonical_report_download.py': {'_render': '1d9ccf2be361b62c8901ffb40fcb7fcd3488952ddedf1d04d06ad45f3d7d4f21',
+                                  'report_snapshot': '9d817c7d58a5050b3f5c87aa8099b78a858fcd1dae12ed353e4c8db1a145d737',
+                                  'static_help': '9ae812adfedcff9e5ad9d6aa7a3d43ddc3c0de6f38a9213b3ad973f3c6f523c4'},
+ 'maya_inbox_bridge.py': {'trigger_owner_daily_report': 'ae404c3082822af541c278131029dd08799997503b15d6386d201fa32d9ea997',
+                          'trigger_owner_report': '6aeee4372c0c907335120ca71600f5a83b4b573250d3db36569ddc2a6d30caa1'},
+ 'webhook_server.py': {'_send_growth_role_briefs_once': 'cf3f9f5aa25065e15af469835a452d3a6978ae09105cdff35555cb107bb8946c',
+                       '_send_master_day_briefs_once': '01fb6ef187f659728a5fdbbe3dd5766c7b7fe26ea5e0f084b84ae40d6254c504',
+                       'panel_report_pdf_handler': 'a929e9394b47786ed52ff7033b23d86aa15385fe20cd7de7ab140a0033ad46c0'}}
 
 def scan(root, overrides=None):
     root = Path(root)
@@ -26,7 +42,7 @@ def scan(root, overrides=None):
         nodes = {n.name:n for n in ast.parse(sources.get(filename, '')).body if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))}
         for name, digest in expected.items():
             node = nodes.get(name)
-            observed = hashlib.sha256(ast.dump(ast.Module(body=node.body,type_ignores=[])).encode()).hexdigest() if node else None
+            observed = _ast_digest(ast.Module(body=node.body,type_ignores=[])) if node else None
             if observed != digest: errors.append(filename+': '+name+' report ownership changed')
     renderer = ast.parse(sources.get('canonical_report_download.py', ''))
     for node in ast.walk(renderer):

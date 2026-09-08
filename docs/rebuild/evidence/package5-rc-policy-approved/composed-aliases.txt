@@ -1,0 +1,1 @@
+{"status":"PASS","pwaAliases":6,"exactCanonicalFunctions":102,"nativeSecurityFunctionsPreserved":4,"unchangedNativePHP":2,"productionWrites":0}

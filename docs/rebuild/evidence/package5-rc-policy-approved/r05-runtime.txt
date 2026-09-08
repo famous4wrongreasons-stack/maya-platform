@@ -1,0 +1,17 @@
+[Nest] 10612  - 09/08/2026, 2:16:34 PM    WARN [OwnerReportsService] daily_report slot unresolved run=a4218f6d-2250-488d-959b-85ae69ca6b2c slot=45d0259f8f11abe797669f8fa955e62d5eb0d7ddaa0dbc9cd1161f0dc88227cb
+[Nest] 10612  - 09/08/2026, 2:16:34 PM    WARN [OwnerReportsService] daily_report slot unresolved run=a4218f6d-2250-488d-959b-85ae69ca6b2c slot=45d0259f8f11abe797669f8fa955e62d5eb0d7ddaa0dbc9cd1161f0dc88227cb
+[Nest] 10612  - 09/08/2026, 2:16:34 PM    WARN [OwnerReportsService] daily_report slot unresolved run=538e0a47-a82a-4663-a75d-38f8a4916fab slot=de6e6195b537f93f76fc05b42510f885bcf189febb57d1ea3f86913e25f6fc90
+{
+  "status": "PASS",
+  "checks": [
+    "morning_owner: atomic four-way admission, changed intent conflict, scoped snapshot and unchanged restart outcome",
+    "morning_staff: atomic four-way admission, changed intent conflict, scoped snapshot and unchanged restart outcome",
+    "internal: current exact Staff/calendar binding is required before admission/read/dispatch",
+    "external: current exact Staff/calendar binding is required before admission/read/dispatch",
+    "unknown: Telegram stops own APNS, other recipients continue, new device/restart cannot expand plan",
+    "rejected: Telegram stops own APNS, other recipients continue, new device/restart cannot expand plan"
+  ],
+  "syntheticTransportEffects": 36,
+  "productionMessages": 0,
+  "productionMutations": 0
+}

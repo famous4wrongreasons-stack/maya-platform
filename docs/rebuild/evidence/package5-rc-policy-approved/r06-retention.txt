@@ -1,0 +1,10 @@
+{
+  "package": "R06",
+  "scope": "actual AC6 runtime retention",
+  "result": "PASS",
+  "checks": [
+    "exact manifest/slot verifier + actual AC6 concurrent claim erases only expired resolved payload; pending/UNKNOWN retained; same-run resume",
+    "ordinary root clear/delete rejected; root/hash/time/AE tombstones retained"
+  ],
+  "productionEffects": 0
+}

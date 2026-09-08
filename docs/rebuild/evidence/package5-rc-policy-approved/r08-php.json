@@ -1,0 +1,42 @@
+{
+  "r08-pure-helper": {
+    "exit": 0,
+    "stdout": "{\"result\":\"PASS\",\"checks\":[\"projection\",\"response\",\"withdraw\",\"reject-clientId\",\"reject-tenantId\",\"reject-telegramChatId\",\"reject-provider\",\"reject-url\",\"reject-session_token\",\"reject-header-injection\"],\"oldRoutePreserved\":true,\"productionEffects\":0}",
+    "stderr": ""
+  },
+  "api-proxy.codex-loyalty-20260721.php:5.6": {
+    "exit": 255,
+    "stdout": "\nParse error: syntax error, unexpected ':', expecting '{' in - on line 3\nErrors parsing -\n",
+    "stderr": ""
+  },
+  "api-proxy.codex-loyalty-20260721.php:8.4": {
+    "exit": 0,
+    "stdout": "No syntax errors detected in Standard input code\n",
+    "stderr": ""
+  },
+  "api-proxy.php:5.6": {
+    "exit": 255,
+    "stdout": "\nParse error: syntax error, unexpected ':', expecting '{' in - on line 3\nErrors parsing -\n",
+    "stderr": ""
+  },
+  "api-proxy.php:8.4": {
+    "exit": 0,
+    "stdout": "No syntax errors detected in Standard input code\n",
+    "stderr": ""
+  },
+  "package5-client-consent-proxy.php:8.4": {
+    "exit": 0,
+    "stdout": "No syntax errors detected in Standard input code\n",
+    "stderr": ""
+  },
+  "base:api-proxy.codex-loyalty-20260721.php:5.6": {
+    "exit": 255,
+    "stdout": "\nParse error: syntax error, unexpected ':', expecting '{' in - on line 3\nErrors parsing -\n",
+    "stderr": ""
+  },
+  "base:api-proxy.php:5.6": {
+    "exit": 255,
+    "stdout": "\nParse error: syntax error, unexpected ':', expecting '{' in - on line 3\nErrors parsing -\n",
+    "stderr": ""
+  }
+}

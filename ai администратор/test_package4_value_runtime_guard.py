@@ -35,6 +35,16 @@ class Package4ValueRuntimeGuardTest(unittest.TestCase):
         symbol = needle.split("(", 1)[0]
         self.assertTrue(any(symbol in item.detail for item in findings), findings)
 
+    def test_rc_whole_handoff_rejects_an_added_aliased_writer(self):
+        source = (ROOT / "webhook_server.py").read_text()
+        import ast
+        node = next(n for n in ast.parse(source).body
+                    if isinstance(n, ast.AsyncFunctionDef) and n.name == "_process_record_delete")
+        lines = source.splitlines(keepends=True)
+        lines.insert(node.body[0].lineno - 1, "    alias_writer(record_id)\n")
+        findings = guard.scan_runtime(ROOT, {"webhook_server.py": ''.join(lines)})
+        self.assertTrue(any(f.check == "pwa_handler" and "_process_record_delete" in f.detail for f in findings))
+
     def test_later_direct_pwa_loyalty_write_fails(self):
         self._assert_synthetic_bypass_fails(
             "webhook_server.py", "database.reserve_loyalty_points(client_id=1, points=1, request_id='x')"

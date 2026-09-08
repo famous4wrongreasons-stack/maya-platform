@@ -1,0 +1,1 @@
+{"status":"PASS","actualApplicationDI":true,"ownersResolved":9,"schedulersSuppressed":9,"syntheticBusinessWrites":0,"productionEffects":0}

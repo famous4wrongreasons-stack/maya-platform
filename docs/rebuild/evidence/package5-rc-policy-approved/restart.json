@@ -1,0 +1,13 @@
+{
+  "postmasterStartedAt": "2026-09-08 14:46:10.938558+03",
+  "beforeRestartCheckpoints": {
+    "b36-final-restart.json": 1788867776.538485,
+    "r14-restart.json": 1788867771.68423
+  },
+  "actualPGRestart": true,
+  "sameExecutionProof": [
+    "b36-restart.txt",
+    "r14-restart.txt"
+  ],
+  "productionWrites": 0
+}

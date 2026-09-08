@@ -1,0 +1,13 @@
+{
+  "package": "R06",
+  "scope": "B48/B49 canonical A23 and Appointment projections",
+  "result": "PASS",
+  "checks": [
+    "generic bridge/raw recipient/marketing/task-without-owner rejected before AE/Inbox",
+    "concurrent A23 task outcome preserved; confirmed owner -> same AE/CD/Inbox with exact work FK",
+    "A23 completion remains committed; old creation retry cannot reopen or rewrite the completed card",
+    "A10 canonical event owner + exact chair/pure manager; APNS UNKNOWN blocks later own devices, independent recipient continues; restart/new device no second slot",
+    "reassignment uses proven old/new canonical Staff facts; unrelated chair excluded"
+  ],
+  "productionEffects": 0
+}

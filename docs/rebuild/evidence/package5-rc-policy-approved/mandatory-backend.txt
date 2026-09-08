@@ -1,0 +1,7 @@
+
+Test Suites: 411 passed, 411 total
+Tests:       3370 passed, 3370 total
+Snapshots:   0 total
+Time:        346.493 s, estimated 351 s
+Ran all test suites.
+FULL_LOCAL_TRANSCRIPT_SHA256=a230ed7f75f54eb3fd8fc7078da25352bbfa8561fa416947524b4bf1a67ef856
