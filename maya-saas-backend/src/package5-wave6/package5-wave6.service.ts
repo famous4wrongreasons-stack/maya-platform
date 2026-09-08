@@ -1,4 +1,10 @@
 import {
+  C7_MEASUREMENT_RETENTION_CLASS,
+  selectMeasurementRetention,
+  measurementRetentionItem,
+  purgeMeasurementRevision,
+} from './chapter7-measurement-retention';
+import {
   isRCPayloadClass,
   rcPayloadItem,
   rcPayloadKinds,
@@ -80,7 +86,11 @@ export class Package5Wave6MaintenanceService {
   private plan(request: unknown): Plan {
     const { actionClass, batchSize } = wave6Request(request);
     const authority = this.authority();
-    if (isRCPayloadClass(actionClass) && authority.scope !== 'tenant')
+    if (
+      (isRCPayloadClass(actionClass) ||
+        actionClass === C7_MEASUREMENT_RETENTION_CLASS) &&
+      authority.scope !== 'tenant'
+    )
       throw new Error('maintenance_payload_requires_exact_system_tenant');
     // One deterministic server minute window; retries resume the frozen run id.
     const evaluatedAt = new Date(
@@ -208,6 +218,12 @@ export class Package5Wave6MaintenanceService {
   }
 
   private async selection(tx: Tx, plan: Plan, lock: boolean): Promise<Item[]> {
+    if (plan.actionClass === C7_MEASUREMENT_RETENTION_CLASS) {
+      await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+      return (await selectMeasurementRetention(tx, plan, lock)).map((row) =>
+        measurementRetentionItem(plan, row),
+      );
+    }
     if (isRCPayloadClass(plan.actionClass)) {
       await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
       return (
@@ -435,7 +451,8 @@ export class Package5Wave6MaintenanceService {
           where: { maintenanceRunId: run.id },
         });
         const payload = isRCPayloadClass(plan.actionClass);
-        if (payload) await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+        if (payload || plan.actionClass === C7_MEASUREMENT_RETENTION_CLASS)
+          await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
         const allowedKinds: string[] = payload
           ? rcPayloadKinds(plan.actionClass)
           : [plan.rule.table];
@@ -450,7 +467,16 @@ export class Package5Wave6MaintenanceService {
         )
           throw new Error('maintenance_manifest_mismatch');
         const deleted = new Set<string>();
-        if (payload) {
+        if (plan.actionClass === C7_MEASUREMENT_RETENTION_CLASS) {
+          for (const target of await selectMeasurementRetention(
+            tx,
+            plan,
+            true,
+            run.id,
+          ))
+            if (await purgeMeasurementRevision(tx, plan, target))
+              deleted.add(measurementRetentionItem(plan, target).itemRefHash);
+        } else if (payload) {
           const targets = await selectRCPayloads(
             tx,
             plan,

@@ -1,3 +1,7 @@
+import {
+  C7_MEASUREMENT_RETENTION_CLASS,
+  C7_MEASUREMENT_RETENTION_RULE,
+} from './chapter7-measurement-retention';
 import { RC_PAYLOAD_CLASSES } from './package5-wave-rc-payloads';
 import { createHash } from 'node:crypto';
 
@@ -31,6 +35,7 @@ const RC_RULES = Object.fromEntries(
   };
 };
 export const WAVE6_CLASSES = {
+  [C7_MEASUREMENT_RETENTION_CLASS]: C7_MEASUREMENT_RETENTION_RULE,
   ...RC_RULES,
   purge_auth_sessions: {
     table: 'AuthSession',

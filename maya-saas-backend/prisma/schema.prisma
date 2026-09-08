@@ -168,6 +168,7 @@ enum CommunicationCampaignState {
 }
 
 model Tenant {
+  measurementRevisions MeasurementRevision[] @relation("C7TenantMeasurement")
   consentInvalidations ClientConsentInvalidation[]
   ownerReportRuns OwnerReportRun[]
   bookingConfirmations ClientBookingConfirmation[]
@@ -379,6 +380,7 @@ model AgentTask {
 /// normalized contract and durable outcome state, never raw model output or
 /// unrestricted provider payloads.
 model ActionExecution {
+  measurementRevisions MeasurementRevision[] @relation("C7ActionExecutionMeasurement")
   consentInvalidations ClientConsentInvalidation[]
   ownerReportRunId String?
   ownerReportSlotKey String?
@@ -560,6 +562,7 @@ model ActionExecutionIdempotencyBinding {
 /// Immutable-after-finish ledger entry for execution and reconciliation work.
 /// A retry remains an attempt under the same logical ActionExecution.
 model ActionAttempt {
+  measurementRevisions MeasurementRevision[] @relation("C7ActionAttemptMeasurement")
   id                          String                @id @default(uuid())
   tenantId                    String
   actionExecutionId           String
@@ -673,6 +676,7 @@ model BrandingSettings {
 }
 
 model Branch {
+  measurementRevisions MeasurementRevision[] @relation("C7BranchMeasurement")
   id                String             @id @default(cuid())
   tenantId          String
   name              String
@@ -777,6 +781,7 @@ model UserMerge {
 }
 
 model Membership {
+  measurementRevisions MeasurementRevision[] @relation("C7MembershipMeasurement")
   id                             String                       @id @default(cuid())
   tenantId                       String
   userId                         String
@@ -2146,6 +2151,7 @@ enum AuditScope {
 /// системе. Вторую CRM внутри Maya не строим. Личность существует и для гостя
 /// без аккаунта — таких в салоне большинство.
 model Client {
+  measurementRevisions MeasurementRevision[] @relation("C7ClientMeasurement")
   consentInvalidations ClientConsentInvalidation[]
   bulkAudienceMembers MarketingAudienceRecipient[]
   bulkRecipients MarketingCampaignRecipient[]
@@ -2340,6 +2346,7 @@ model ClientLinkChallenge {
 /// Различитель источников — не поле, а структура: у внутреннего мастера НЕТ ни
 /// одной StaffProviderLink.
 model Staff {
+  measurementRevisions MeasurementRevision[] @relation("C7StaffMeasurement")
   id                   String   @id @default(cuid())
   tenantId             String
   /// Аккаунт Maya, если человек им обзавёлся.
@@ -2655,6 +2662,7 @@ model AuditLog {
 }
 
 model Appointment {
+  measurementRevisions MeasurementRevision[] @relation("C7AppointmentMeasurement")
   id                String   @id @default(cuid())
   tenantId          String
   /**
@@ -3648,4 +3656,64 @@ model ClientConsentInvalidation {
   @@unique([consentFactId, tenantId, clientId], map: "ConsentInvalidation_fact_reference_key")
   @@index([tenantId, clientId, invalidatedAt])
   @@index([tenantId, actionExecutionId])
+}
+
+/// C7 derived measurements. Source facts and business effects remain with their owners.
+model MeasurementRevision {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String
+  kind String
+  identityHash String @db.Char(64)
+  revision Int
+  requestKeyHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  ruleKey String
+  ruleVersion Int
+  clientId String?
+  appointmentId String?
+  staffId String?
+  branchId String?
+  configurationUserId String?
+  periodFrom DateTime @db.Timestamptz(3)
+  periodTo DateTime @db.Timestamptz(3)
+  timezone String
+  scopeJson Json
+  asOf DateTime @db.Timestamptz(3)
+  admittedAt DateTime @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  state String @default("PENDING")
+  leaseGeneration Int @default(0)
+  leaseTokenHash String? @db.Char(64)
+  leaseExpiresAt DateTime? @db.Timestamptz(3)
+  publishedAt DateTime? @db.Timestamptz(3)
+  contractVersion Int @default(1)
+  evidenceHash String? @db.Char(64)
+  snapshotHash String? @db.Char(64)
+  completeness String?
+  qualification String?
+  evidenceRefsJson Json?
+  valuesJson Json?
+  limitationsJson Json?
+  attributionStatus String?
+  creditedExecutionId String?
+  creditedAttemptId String?
+
+  tenant Tenant @relation("C7TenantMeasurement", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_tenant_fk")
+  client Client? @relation("C7ClientMeasurement", fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_client_fk")
+  appointment Appointment? @relation("C7AppointmentMeasurement", fields: [appointmentId, tenantId, clientId], references: [id, tenantId, mayaClientId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_appointment_fk")
+  staff Staff? @relation("C7StaffMeasurement", fields: [staffId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_staff_fk")
+  branch Branch? @relation("C7BranchMeasurement", fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_branch_fk")
+  configurationOwner Membership? @relation("C7MembershipMeasurement", fields: [configurationUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_config_owner_fk")
+  creditedExecution ActionExecution? @relation("C7ActionExecutionMeasurement", fields: [creditedExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_execution_fk")
+  creditedAttempt ActionAttempt? @relation("C7ActionAttemptMeasurement", fields: [creditedAttemptId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_attempt_fk")
+
+  @@unique([id, tenantId], map: "C7_measurement_id_tenant_uq")
+  @@unique([tenantId, identityHash, revision], map: "C7_measurement_generation_uq")
+  @@unique([tenantId, requestKeyHash], map: "C7_measurement_request_uq")
+  @@index([tenantId, kind, periodFrom, periodTo], map: "C7_measurement_period_idx")
+  @@index([tenantId, clientId, kind, asOf], map: "C7_measurement_client_idx")
+  @@index([tenantId, staffId, kind, asOf], map: "C7_measurement_staff_idx")
+  @@index([expiresAt, id], map: "C7_measurement_expiry_idx")
+  @@index([tenantId, creditedExecutionId], map: "C7_measurement_execution_idx")
+  @@index([tenantId, creditedAttemptId], map: "C7_measurement_attempt_idx")
 }

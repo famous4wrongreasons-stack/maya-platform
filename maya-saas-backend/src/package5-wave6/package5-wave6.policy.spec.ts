@@ -9,8 +9,8 @@ import {
 import { Package5Wave6MaintenanceService } from './package5-wave6.service';
 
 describe('approved Wave 6 policy boundary', () => {
-  it('pins six unchanged auth policies and eight approved R-C payload classes', () => {
-    expect(Object.keys(WAVE6_CLASSES)).toHaveLength(14);
+  it('pins six unchanged auth policies, eight R-C payload classes and the approved C7 derived lifecycle', () => {
+    expect(Object.keys(WAVE6_CLASSES)).toHaveLength(15);
     expect(WAVE6_CLASSES.purge_auth_sessions.retentionMs).toBe(30 * 86_400_000);
     for (const key of [
       'purge_phone_auth_codes',
@@ -21,12 +21,22 @@ describe('approved Wave 6 policy boundary', () => {
       expect(WAVE6_CLASSES[key].retentionMs).toBe(86_400_000);
     }
     expect(WAVE6_CLASSES.purge_ingestion_quarantine.retentionMs).toBe(0);
+    expect(WAVE6_CLASSES.expire_measurement_revisions).toEqual({
+      table: 'MeasurementRevision',
+      stamp: 'admittedAt',
+      expiry: 'expiresAt',
+      terminal: null,
+      retentionMs: 0,
+      policyKey: 'chapter7.measurement-retention',
+    });
     expect(
       wave6Hash(
         JSON.stringify(
           Object.fromEntries(
             Object.entries(WAVE6_CLASSES).filter(
-              ([key]) => !Object.hasOwn(RC_PAYLOAD_CLASSES, key),
+              ([key]) =>
+                !Object.hasOwn(RC_PAYLOAD_CLASSES, key) &&
+                key !== 'expire_measurement_revisions',
             ),
           ),
         ),

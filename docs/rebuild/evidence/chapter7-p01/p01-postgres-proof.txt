@@ -1,0 +1,41 @@
+PASS no request principal admission
+PASS cross tenant Client denied
+PASS same tenant wrong Client denied
+PASS cross-scope branch/Staff/configuration rejected before admission
+PASS unknown bridge event cannot become admission authority
+PASS reject creates no revision / execution
+PASS eight concurrent admissions converge
+PASS UTC roundtrip under a non-UTC PostgreSQL server
+PASS Client without Maya User
+PASS same key changed intent conflicts
+PASS different occurrence cannot bypass pending
+PASS concurrent claims one winner
+PASS forged claim fenced
+PASS revocation after claim forbids publication
+PASS restart after claim preserves execution
+PASS published retry immutable
+PASS qualified source does not invent cash or credit
+PASS 365 days from admission
+PASS snapshot update denied
+PASS expiry extension denied
+PASS Client history records arrived facts without pretending complete coverage
+PASS unknown last visit is not dormant
+PASS SQL publication rejects cross-tenant evidence despite valid fence
+PASS SQL publication refuses invented execution / attempt credit
+PASS SQL dependency must pin exact existing snapshot
+PASS changed evidence / correct current revision
+PASS previous as-reported snapshot unchanged
+PASS wrong tenant receipt denied
+PASS no executions / deliveries / hidden Clients
+PASS direct delete denied
+PASS truncate denied
+PASS expired receipt cannot resume
+PASS expired current unavailable
+PASS AC6 requires exact tenant
+PASS AC6 inactive-tenant exact cleanup and retry
+PASS AC6 source and Client preservation
+PASS expired compute receipt never readmitted
+PASS missing receipt never readmitted
+PASS 37 physical fields
+PASS exact approved constraints and source-safe FK actions
+{"status":"PASS","checks":40,"requirements":["Q01","Q02","Q03","Q17","Q18","Q22"],"productionEffects":0,"oldDatabasesTouched":0}

@@ -1,0 +1,9 @@
+{
+  "maya-saas-backend/src/measurement/measurement.contract.spec.ts": "b1ec340d59864459333e5c591040603407a4f1ceec048f6ccc6c1c431878c059",
+  "maya-saas-backend/src/measurement/measurement.sources.ts": "7fd7846eaba31c465c6d6ea98ecad33b9d97f63b87e13310c25dec6bf4d29de8",
+  "maya-saas-backend/src/measurement/measurement.contract.ts": "4015eb462f4dcf444ab32908d5683d612d957373c11a3f7fa0d1330ee6db6e7e",
+  "maya-saas-backend/src/measurement/measurement.architecture.spec.ts": "bcd83f677ca3cde92c5082b3ec4c979ad606ad93ea58a21a2aa9f1d3e7209af3",
+  "maya-saas-backend/src/measurement/measurement.module.ts": "eeaa43b616ee518587fc2572f8912ee97a22de28f5cb4d7a92336d472b0e74ea",
+  "maya-saas-backend/src/measurement/measurement.service.ts": "76420f669a9f9d37ab9a49ddec033ac71cda5a55839e955aa42dadf7310b9092",
+  "maya-saas-backend/prisma/migrations/20260908153000_chapter7_measurement_foundation/migration.sql": "99af9e902ecdc150385e1e60166226e030747a304772093e74a034a33ca121f3"
+}

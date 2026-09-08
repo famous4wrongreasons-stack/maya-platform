@@ -1,0 +1,10 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --runTestsByPath src/measurement/measurement.contract.spec.ts src/measurement/measurement.architecture.spec.ts src/package5-wave6/package5-wave6.policy.spec.ts src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts
+
+
+Test Suites: 4 passed, 4 total
+Tests:       49 passed, 49 total
+Snapshots:   0 total
+Time:        0.461 s, estimated 1 s
+Ran all test suites within paths "src/measurement/measurement.contract.spec.ts", "src/measurement/measurement.architecture.spec.ts", "src/package5-wave6/package5-wave6.policy.spec.ts", "src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts".

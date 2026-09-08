@@ -1,3 +1,4 @@
+import { MeasurementModule } from './measurement/measurement.module';
 import { ExpenseIntakeModule } from './expense-intake/expense-intake.module';
 import { MarketingModule } from './marketing/marketing.module';
 import { PublicCommunityModule } from './public-community/public-community.module';
@@ -95,6 +96,7 @@ import { SystemMetricsService } from './system-metrics.service';
     InboxModule,
     LoyaltyModule,
     OwnerReportsModule,
+    MeasurementModule,
     OperationalAlertsModule,
     ServicesModule,
     StaffModule,

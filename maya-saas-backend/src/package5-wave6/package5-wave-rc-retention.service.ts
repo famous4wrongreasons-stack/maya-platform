@@ -1,3 +1,4 @@
+import { C7_MEASUREMENT_RETENTION_CLASS } from './chapter7-measurement-retention';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -36,10 +37,9 @@ export class WaveRcPayloadRetentionService {
     try {
       let cursor: string | undefined;
       for (;;) {
-        const tenants: Array<{ id: string }> =
+        const tenants: Array<{ id: string; status: string }> =
           await this.prisma.tenant.findMany({
-            where: { status: 'active' },
-            select: { id: true },
+            select: { id: true, status: true },
             orderBy: { id: 'asc' },
             take: 100,
             ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
@@ -66,10 +66,16 @@ export class WaveRcPayloadRetentionService {
               storage,
               verifier,
             );
-            for (const actionClass of Object.keys(
-              RC_PAYLOAD_CLASSES,
-            ) as RCPayloadClass[])
+            for (const actionClass of [
+              ...(Object.keys(RC_PAYLOAD_CLASSES) as RCPayloadClass[]),
+              C7_MEASUREMENT_RETENTION_CLASS,
+            ])
               try {
+                if (
+                  tenant.status !== 'active' &&
+                  actionClass !== C7_MEASUREMENT_RETENTION_CLASS
+                )
+                  continue;
                 if (!(await coordinator.shadow({ actionClass })).items.length)
                   continue;
                 await coordinator.execute(
