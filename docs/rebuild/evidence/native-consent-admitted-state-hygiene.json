@@ -1,0 +1,21 @@
+{
+  "mainEntriesUnchanged": 24,
+  "mainFileHashesUnchanged": 22,
+  "rcWorktreeCleanAndUnchanged": true,
+  "rcCheckpoint": "ed13d57f",
+  "wipCommitTreesUnchanged": 11,
+  "preservedDumps": [
+    "maya_rc_replay.dump",
+    "maya_rc_b36_runtime.dump",
+    "maya_rc_clean_replay.dump"
+  ],
+  "newBaselineWorktree": "/tmp/maya-native-consent-baseline",
+  "newBaselineWipCommit": "770a268c",
+  "ownedProcesses": 0,
+  "ownedDatabases": 0,
+  "ownedBrowsers": 0,
+  "ownedWatchers": 0,
+  "oldLocalDatabasesTouched": 0,
+  "productionWrites": 0,
+  "productionEffects": 0
+}
