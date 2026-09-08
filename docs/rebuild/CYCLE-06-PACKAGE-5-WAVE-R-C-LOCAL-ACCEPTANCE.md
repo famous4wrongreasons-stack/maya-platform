@@ -91,9 +91,18 @@ executed by those PHP proofs.
    the `maya-saas` service. The observed parent is root:root 0700 and denies service
    traversal; grant only the existing service group traversal (root:maya-saas 0710),
    with the child maya-saas:maya-saas 0700. Existing children/data and public upload
-   permissions remain unchanged. ffprobe is already installed. Persist the R06
-   canonical cutover timestamp and enable the R13 scheduler; this does not opt any
-   User into reminders. The personal preference remains default OFF.
+   permissions remain unchanged. ffprobe is already installed. Persist the R05 daily/morning, R06 operational and canonical Inbox cutover
+   timestamps. Enable the R13 scheduler; this does not opt any User into reminders
+   (the personal preference remains default OFF). Configure the existing public
+   community source through the strict active CRM-integration resolver, its three
+   existing static publication keys and published-post namespace. This grants only
+   source transport scope, never Client or moderator authority. Configure the two
+   actually available staff-AI providers; no tenant configuration is synthesized.
+   The service cannot traverse the private Python-bot home. Keep that restriction:
+   install the three hash-verified pure PDF/catalogue files in a separate service-
+   readable renderer directory, with pinned existing ReportLab 4.5.1, Pillow 12.2.0
+   and charset-normalizer 3.4.7. Synthetic formatting as the service user must pass.
+   Back up both environment files privately and preserve their original metadata.
 6. Switch the prepared backend using the existing symlink/systemd release process,
    then start the Python service. Verify health/readiness, compiled/source hashes,
    pending migrations, drift, exact schema/action/owner wiring, private media denial
@@ -126,3 +135,16 @@ PRE-EXISTING DATABASES TOUCHED: 0
 
 The owned synthetic PostgreSQL cluster is still running for this active wave;
 final zero-process/database hygiene is asserted only after cleanup.
+
+## Deployment-gate follow-up
+
+The first unchanged deployment gate hit a native V8 GC SIGSEGV with installed
+Node 24.19.0, before any release upload/migration. A retry with the existing supported
+Node 24.15.0 completed 410 suites but four sequential-request tests in R04's HTTP
+fixture timed out; the same nine tests passed in isolation. The fixture now owns
+one explicit loopback listener for its suite, closed by the existing `app.close()`;
+Supertest no longer repeatedly opens/closes the same shared server. Assertions,
+guards, timeouts and runtime are unchanged. Five repeated isolated runs on both
+installed Node versions pass with open-handle detection. The complete deployment
+gate must pass again before proceeding. Release runtime/artifact identity remains
+`8bc03454`; this follow-up changes test lifecycle and documentation only.

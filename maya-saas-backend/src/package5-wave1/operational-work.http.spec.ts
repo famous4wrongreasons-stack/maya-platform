@@ -167,7 +167,9 @@ describe('R04 A23 through actual Nest JWT/tenant/role guards', () => {
     app.use((_req: unknown, _res: unknown, next: () => void) =>
       context.run('r02-http-test', next),
     );
-    await app.init();
+    // Keep one loopback listener for the suite. Supertest must not race
+    // close/reopen of Nest's shared server between sequential requests.
+    await app.listen(0, '127.0.0.1');
   });
   afterAll(async () => {
     await app?.close();
