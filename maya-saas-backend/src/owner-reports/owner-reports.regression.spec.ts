@@ -197,9 +197,9 @@ describe('P4 §11 — обязательная регрессия сводок',
       stack.crmService as unknown as { getFinancialSummary: jest.Mock }
     ).getFinancialSummary;
 
-    await stack.tenantContext.runAsSystemTenant(TENANT.id, () =>
+    await expect(stack.tenantContext.runAsSystemTenant(TENANT.id, () =>
       reports.runMorningBrief(TENANT, new Date('2026-08-13T05:05:00.000Z')),
-    );
+    )).rejects.toThrow('synthetic admission boundary');
 
     // Утренний бриф не запрашивал деньги — не запрашивал их и до миграции.
     expect(getFinancialSummary).not.toHaveBeenCalled();

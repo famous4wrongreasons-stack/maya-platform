@@ -31,10 +31,15 @@ import {
   localCalendarDate,
 } from '../src/owner-reports/owner-reports.time';
 
+function dailyPlan(store:OwnerReportStore,run:Parameters<OwnerReportStore['readPlan']>[0],now?:Date) {
+  const plan=store.readPlan(run,now);
+  if(plan.contract!==OWNER_REPORT_CONTRACT) throw new Error('B36 schema proof requires unchanged daily V1');
+  return plan;
+}
 const url = new URL(process.env.DATABASE_URL ?? '');
 assert.equal(url.hostname, '127.0.0.1');
-assert.equal(url.port, '55506');
-assert.match(url.pathname, /^\/maya_b36_(schema|replay|runtime)$/);
+assert.ok((url.port==='55506' && /^\/maya_b36_(schema|replay|runtime)$/.test(url.pathname)) ||
+  (url.port==='55509' && url.pathname==='/maya_rc_clean_replay'), 'Exact isolated schema proof database required');
 const secret = 'b36-schema-fixture-secret-not-production';
 const config = new ConfigService({
   DATABASE_URL: url.toString(),
@@ -209,7 +214,7 @@ async function main() {
       assert.ok(run);
       assert.equal(run.id, saved.id);
       assert.equal(run.intentHash, saved.hash);
-      const plan = store.readPlan(run);
+      const plan = dailyPlan(store, run);
       assert.deepEqual(plan, saved.plan);
       const executions = await store.executions(run, plan);
       assert.deepEqual(executions.map((e) => e.id).sort(), saved.executionIds);
@@ -242,7 +247,7 @@ async function main() {
         await db.actionAttempt.count({ where: { tenantId: plan.tenantId } }),
         0,
       );
-      assert.deepEqual(store.readPlan(run), plan);
+      assert.deepEqual(dailyPlan(store, run), plan);
       checks.push(
         'concurrent same intent: one root and eight READY slots; zero effects/attempts',
       );
@@ -378,7 +383,7 @@ async function main() {
           token: 'c'.repeat(64),
         },
       });
-      assert.deepEqual(store.readPlan(run), plan);
+      assert.deepEqual(dailyPlan(store, run), plan);
       assert.equal((await store.executions(run, plan)).length, 8);
       checks.push(
         'Inbox before Telegram; Telegram UNKNOWN blocks APNS; independent recipient allowed; new device excluded',
@@ -473,7 +478,7 @@ async function main() {
           auditRetentionUntil: new Date(old.getTime() + 365 * OWNER_REPORT_DAY),
         },
       });
-      assert.throws(() => store.readPlan(root), /B36_REPORT_PAYLOAD_EXPIRED/);
+      assert.throws(() => dailyPlan(store, root), /B36_REPORT_PAYLOAD_EXPIRED/);
       await store.purgeExpiredPayloads(lifecycle.tenantId);
       const tombstone = await db.ownerReportRun.findUniqueOrThrow({
         where: { id: root.id },

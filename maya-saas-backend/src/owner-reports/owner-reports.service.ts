@@ -1,9 +1,15 @@
+import { staffTelegramEligible } from '../package5-wave1/governed-settings.read';
 import { type OwnerReportRun } from '@prisma/client';
 import { OwnerReportStore } from './owner-report.store';
 import { CommunicationDeliveryService } from '../communication-delivery/communication-delivery.service';
 import { ActionConflictError } from '../action-engine/action-engine.errors';
 import {
   normalizeOwnerReportPlan,
+  normalizeCanonicalOwnerReportPlan,
+  MORNING_REPORT_CONTRACT,
+  MORNING_STAFF_ROLES,
+  type MorningReportPlan,
+  type OwnerReportSlot,
   OWNER_REPORT_ACTION,
   OWNER_REPORT_CONTRACT,
   OWNER_REPORT_DAY,
@@ -125,189 +131,74 @@ export class OwnerReportsService {
     return { morning, evening, skipped, failed };
   }
 
-  async runMorningBrief(
-    tenant: EligibleTenant,
-    now: Date = new Date(),
-  ): Promise<'sent' | 'skipped'> {
-    const localDate = localCalendarDate(tenant.defaultTimezone, now);
-    const sourceEventId = `nest:morning_brief:${localDate}`;
-    const [ownerAlreadySent, rawOwnerRecipients, rawMasterRecipients] =
-      await Promise.all([
-        this.inbox.hasSourceEvent(tenant.id, 'morning_brief', sourceEventId),
-        this.listOwnerRecipients(tenant.id),
-        this.listMasterMorningRecipients(tenant.id),
-      ]);
-    const enabledUserIds = new Set(
-      await this.tenantContext.runAsSystemTenant(tenant.id, () =>
-        this.dashboardPreferences.filterUsersWithAssistantCapability(
-          tenant.id,
-          [...rawOwnerRecipients, ...rawMasterRecipients.keys()],
-          'daily_brief',
-        ),
-      ),
-    );
-    const ownerRecipients = rawOwnerRecipients.filter((userId) =>
-      enabledUserIds.has(userId),
-    );
-    const masterRecipients = new Map(
-      [...rawMasterRecipients].filter(([userId]) => enabledUserIds.has(userId)),
-    );
-    const masterDeliveryState = await Promise.all(
-      [...masterRecipients].map(async ([userId, externalStaffId]) => ({
-        userId,
-        externalStaffId,
-        alreadySent: await this.inbox.hasSourceEvent(
-          tenant.id,
-          'morning_brief',
-          this.masterMorningSourceEventId(localDate, userId),
-        ),
-      })),
-    );
-    const pendingMasterRecipients = new Map(
-      masterDeliveryState
-        .filter((recipient) => !recipient.alreadySent)
-        .map((recipient) => [recipient.userId, recipient.externalStaffId]),
-    );
-    if (
-      (ownerAlreadySent || ownerRecipients.length === 0) &&
-      pendingMasterRecipients.size === 0
-    ) {
-      return 'skipped';
-    }
-
-    const state = await this.readState(tenant, localDate, {
-      financeAllowed: false,
+  async runMorningBrief(tenant: EligibleTenant, now: Date = new Date()): Promise<'sent'|'skipped'> {
+    if (!this.reportStore || !this.reportDelivery) throw new Error('B36_OWNER_REPORT_FOUNDATION_REQUIRED');
+    return this.tenantContext.runAsSystemTenant(tenant.id, async () => {
+      let facts: Promise<BusinessState> | undefined;
+      const read = () => facts ??= this.readState(tenant,localCalendarDate(tenant.defaultTimezone,now),{financeAllowed:false});
+      const owner = await this.runMorningKind(tenant,'morning_owner',now,read);
+      const staff = await this.runMorningKind(tenant,'morning_staff',now,read);
+      return owner === 'sent' || staff === 'sent' ? 'sent' : 'skipped';
     });
-    let stored = 0;
-    if (!ownerAlreadySent && ownerRecipients.length > 0) {
-      const composed = composeMorningBrief({
-        facts: businessBriefFacts(state, localDate),
-      });
-      const published = await this.inbox.publishForTenant(tenant.id, {
-        type: 'morning_brief',
-        sourceEventId,
-        title: composed.title,
-        bodyText: composed.bodyText,
-        payload: composed.payload,
-        deepLink: '/app/?panel=chat',
-        userIds: ownerRecipients,
-        fanoutOwners: false,
-      });
-      stored += published.stored;
-    }
-
-    stored += await this.publishMasterMorningBriefs(
-      tenant,
-      localDate,
-      state,
-      pendingMasterRecipients,
-    );
-    if (stored === 0) return 'skipped';
-    this.logger.log(
-      `morning_brief sent tenant=${tenant.slug} recipients=${stored}`,
-    );
-    return 'sent';
   }
 
-  private async publishMasterMorningBriefs(
-    tenant: EligibleTenant,
-    localDate: string,
-    state: BusinessState,
-    recipients: Map<string, string>,
-  ): Promise<number> {
-    let stored = 0;
-    for (const [userId, externalId] of recipients) {
-      const sourceEventId = this.masterMorningSourceEventId(localDate, userId);
-      const composed = composeMasterMorningBrief({
-        facts: masterBriefFacts(state, externalId || null, localDate),
-      });
-      try {
-        const published = await this.inbox.publishForTenant(tenant.id, {
-          type: 'morning_brief',
-          sourceEventId,
-          title: composed.title,
-          bodyText: composed.bodyText,
-          payload: composed.payload,
-          deepLink: '/app/?panel=chat',
-          userIds: [userId],
-          fanoutOwners: false,
-        });
-        stored += published.stored;
-      } catch (error) {
-        this.logger.warn(
-          `master morning brief failed tenant=${tenant.slug} user=${userId}: ${
-            error instanceof Error ? error.message : 'unknown'
-          }`,
-        );
-      }
-    }
-    return stored;
-  }
-
-  private async listMasterMorningRecipients(
-    tenantId: string,
-  ): Promise<Map<string, string>> {
-    const [crmLinks, internalLinks] = await Promise.all([
-      this.prisma.crmStaffAccess.findMany({
-        where: {
-          tenantId,
-          status: 'active',
-          userId: { not: null },
-          role: { in: MASTER_ROLES },
-        },
-        select: { userId: true, externalStaffId: true },
-      }),
-      this.prisma.internalProvider.findMany({
-        where: { tenantId, active: true, userId: { not: null } },
-        select: { userId: true, id: true },
-      }),
+  private async frozenSlots(tenantId: string, userId: string, membershipId: string): Promise<OwnerReportSlot[]> {
+    const [identities, devices] = await Promise.all([
+      this.prisma.authIdentity.findMany({where:{tenantId,userId,provider:'telegram'},select:{id:true,providerUserId:true}}),
+      this.prisma.devicePushToken.findMany({where:{tenantId,userId,platform:'ios'},select:{id:true,token:true}}),
     ]);
-    /**
-     * 🔴 Ключ сопоставления — ВНЕШНИЙ идентификатор календаря, тот самый, по
-     * которому канонический слой отдаёт строки мастеров.
-     *
-     * До Cycle 04 P4 здесь лежала идентичность Maya (`staffId`), а строку
-     * искали в срезе по полю `staff_id`. У арендатора на СОБСТВЕННОМ календаре
-     * это поле всегда пустое: оно берётся из `staffProviderLink`, а внутренним
-     * мастерам такую связь никто не создаёт. Совпадения не было никогда, и
-     * каждый внутренний мастер получал бриф с нулями вместо своего дня —
-     * молча, потому что нули выглядят как пустой день.
-     *
-     * У внешней CRM внешний идентификатор лежит прямо в доступе мастера, у
-     * внутреннего календаря им является сам идентификатор провайдера — тот же,
-     * что стоит в записях. Одно пространство, никаких переходов.
-     */
-    const recipients = new Map<string, string>();
-    for (const link of crmLinks) {
-      if (link.userId && link.externalStaffId)
-        recipients.set(link.userId, link.externalStaffId);
-    }
-    for (const link of internalLinks) {
-      if (link.userId && !recipients.has(link.userId)) {
-        recipients.set(link.userId, link.id);
-      }
-    }
+    return [this.reportStore!.slot(tenantId,userId,'inbox',membershipId,userId),
+      ...(await staffTelegramEligible(this.prisma,tenantId,userId,membershipId) ? identities : []).map(route=>this.reportStore!.slot(tenantId,userId,'telegram',route.id,route.providerUserId)),
+      ...devices.map(route=>this.reportStore!.slot(tenantId,userId,'apns',route.id,route.token))];
+  }
 
+  private async runMorningKind(tenant: EligibleTenant, reportType: MorningReportPlan['reportType'], now: Date,
+    read: () => Promise<BusinessState>): Promise<'sent'|'skipped'> {
+    const localDate = localCalendarDate(tenant.defaultTimezone,now);
+    const existing = await this.reportStore!.find(tenant.id,localDate,reportType);
+    if (existing) return this.resumeDailyReport(existing,now);
+    if (!this.reportStore!.canAdmitPeriod(tenant.defaultTimezone,localDate,now,reportType)) return 'skipped';
+    const staffReport = reportType === 'morning_staff';
+    const memberships = await this.prisma.membership.findMany({where:{tenantId:tenant.id,status:'active',user:{status:'active'},
+      role:{in:[...(staffReport ? MORNING_STAFF_ROLES : OWNER_REPORT_ROLES)]}},select:{id:true,userId:true,role:true}});
+    const enabled = new Set(await this.dashboardPreferences.filterUsersWithAssistantCapability(tenant.id,memberships.map(m=>m.userId),'daily_brief'));
+    const recipients: MorningReportPlan['recipients'] = [];
+    for (const member of memberships.filter(m=>enabled.has(m.userId))) {
+      const binding = staffReport ? await this.reportStore!.staffBinding(tenant.id,member.userId) : null;
+      if (staffReport && !binding) continue;
+      const state = await read();
+      const composed = binding ? composeMasterMorningBrief({facts:masterBriefFacts(state,binding.externalRef,localDate)}) :
+        composeMorningBrief({facts:businessBriefFacts(state,localDate)});
+      recipients.push({userId:member.userId,membershipId:member.id,role:member.role as MorningReportPlan['recipients'][number]['role'],
+        staffId:binding?.staffId ?? null,staffBindingEvidenceHash:binding?.evidenceHash ?? null,
+        content:{...composed,deepLink:'/app/?panel=chat'},slots:await this.frozenSlots(tenant.id,member.userId,member.id)});
+    }
+    if (!recipients.length) return 'skipped';
+    const period = dayIsoRange(tenant.defaultTimezone,localDate);
+    const periodEnd = new Date(Date.parse(period.to)+1).toISOString();
+    const plan = normalizeCanonicalOwnerReportPlan({contract:MORNING_REPORT_CONTRACT,tenantId:tenant.id,reportType,
+      periodLocalDate:localDate,reportVersion:1,timezone:tenant.defaultTimezone,periodStart:period.from,periodEnd,
+      expiresAt:new Date(Date.parse(periodEnd)+7*OWNER_REPORT_DAY).toISOString(),classification:'operational_single',
+      channelOrder:OWNER_REPORT_ORDER,policy:{action:OWNER_REPORT_ACTION,key:'production.deliver_report_briefing.proven-cutover',version:1,preference:'daily_brief'},recipients});
+    let run: OwnerReportRun;
+    try {run = await this.reportStore!.admit(plan,now);} catch(error) {
+      if (!(error instanceof ActionConflictError)) throw error;
+      const winner = await this.reportStore!.find(tenant.id,localDate,reportType);
+      if (!winner) throw error;
+      run=winner;
+    }
+    return this.resumeDailyReport(run,now);
+  }
+
+  private async listMasterMorningRecipients(tenantId: string): Promise<Map<string,string>> {
+    if (!this.reportStore) throw new Error('B36_OWNER_REPORT_FOUNDATION_REQUIRED');
+    const members=await this.prisma.membership.findMany({where:{tenantId,status:'active',user:{status:'active'},role:{in:MASTER_ROLES}},select:{userId:true}});
+    const recipients=new Map<string,string>();
+    for (const member of members) {
+      const binding=await this.reportStore.staffBinding(tenantId,member.userId);
+      if(binding) recipients.set(member.userId,binding.externalRef);
+    }
     return recipients;
-  }
-
-  private async listOwnerRecipients(tenantId: string): Promise<string[]> {
-    const memberships = await this.prisma.membership.findMany({
-      where: {
-        tenantId,
-        status: 'active',
-        role: { in: OWNER_ROLES },
-      },
-      select: { userId: true },
-    });
-    return [...new Set(memberships.map((membership) => membership.userId))];
-  }
-
-  private masterMorningSourceEventId(
-    localDate: string,
-    userId: string,
-  ): string {
-    return `nest:master_morning_brief:${localDate}:${userId}`;
   }
 
   async runDailyReport(
@@ -346,55 +237,11 @@ export class OwnerReportsService {
       );
       const recipients: OwnerReportPlan['recipients'] = [];
       for (const member of memberships.filter((m) => enabled.has(m.userId))) {
-        const [identities, devices] = await Promise.all([
-          this.prisma.authIdentity.findMany({
-            where: {
-              tenantId: tenant.id,
-              userId: member.userId,
-              provider: 'telegram',
-            },
-            select: { id: true, providerUserId: true },
-          }),
-          this.prisma.devicePushToken.findMany({
-            where: {
-              tenantId: tenant.id,
-              userId: member.userId,
-              platform: 'ios',
-            },
-            select: { id: true, token: true },
-          }),
-        ]);
         recipients.push({
           userId: member.userId,
           membershipId: member.id,
           role: member.role as OwnerReportPlan['recipients'][number]['role'],
-          slots: [
-            this.reportStore!.slot(
-              tenant.id,
-              member.userId,
-              'inbox',
-              member.id,
-              member.userId,
-            ),
-            ...identities.map((route) =>
-              this.reportStore!.slot(
-                tenant.id,
-                member.userId,
-                'telegram',
-                route.id,
-                route.providerUserId,
-              ),
-            ),
-            ...devices.map((route) =>
-              this.reportStore!.slot(
-                tenant.id,
-                member.userId,
-                'apns',
-                route.id,
-                route.token,
-              ),
-            ),
-          ],
+          slots: await this.frozenSlots(tenant.id,member.userId,member.id),
         });
       }
       if (!recipients.length) return 'skipped';
@@ -466,6 +313,14 @@ export class OwnerReportsService {
         return { status: 'skipped' };
       return { status: await this.runDailyReport(tenant, now) };
     });
+  }
+
+  /** The qualified legacy producer selects only a finite kind, never recipients/content/dates. */
+  async triggerMorningReport(tenantId: string, reportType: MorningReportPlan['reportType'], now=new Date()) {
+    const tenant=(await this.listEligibleTenants()).find(t=>t.id===tenantId);
+    if(!tenant || !this.reportStore) throw new ForbiddenException('R05_REPORT_TENANT_NOT_ELIGIBLE');
+    return this.tenantContext.runAsSystemTenant(tenantId,async()=>({status:await this.runMorningKind(tenant,reportType,now,
+      ()=>this.readState(tenant,localCalendarDate(tenant.defaultTimezone,now),{financeAllowed:false}))}));
   }
 
   private async resumePendingDailyReports(tenantId: string, now: Date) {

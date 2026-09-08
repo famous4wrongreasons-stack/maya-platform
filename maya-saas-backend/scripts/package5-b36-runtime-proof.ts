@@ -43,10 +43,18 @@ import {
   localCalendarDate,
 } from '../src/owner-reports/owner-reports.time';
 
+function dailyPlan(store: OwnerReportStore, run: Parameters<OwnerReportStore['readPlan']>[0], now?: Date) {
+  const plan = store.readPlan(run,now);
+  if (plan.contract !== OWNER_REPORT_CONTRACT) throw new Error('B36 proof requires unchanged daily V1');
+  return plan;
+}
 const url = new URL(process.env.DATABASE_URL ?? '');
 assert.equal(url.hostname, '127.0.0.1');
-assert.equal(url.port, '55506');
-assert.equal(url.pathname, '/maya_b36_runtime');
+assert.ok(
+  (url.port === '55506' && url.pathname === '/maya_b36_runtime') ||
+    (url.port === '55509' && url.pathname === '/maya_rc_b36_runtime'),
+  'Only an isolated B36/Wave R-C proof database is allowed',
+);
 const secret = 'b36-schema-fixture-secret-not-production';
 const config = new ConfigService({
   DATABASE_URL: url.toString(),
@@ -246,7 +254,7 @@ delivery.deliverOwnerReportSlot = (tenant, run, slot) => {
 async function record(channel: string, destination: string) {
   const tenantId = context.requireTenantId();
   const run = await db.ownerReportRun.findFirstOrThrow({ where: { tenantId } });
-  const plan = store.readPlan(run);
+  const plan = dailyPlan(store, run);
   const executions = await store.executions(run, plan);
   assert.equal(
     executions.length,
@@ -330,7 +338,7 @@ async function main() {
       assert.ok(run);
       assert.equal(run.id, saved.id);
       assert.equal(run.intentHash, saved.hash);
-      const plan = store.readPlan(run),
+      const plan = dailyPlan(store, run),
         before = await store.executions(run, plan);
       assert.deepEqual(before.map((e) => e.id).sort(), saved.executionIds);
       const attemptsBefore = await db.actionAttempt.count({
@@ -383,7 +391,7 @@ async function main() {
     await context.runAsSystemTenant(normal.tenantId, async () => {
       const run = await store.find(normal.tenantId, normal.periodLocalDate);
       assert.ok(run);
-      const frozen = store.readPlan(run);
+      const frozen = dailyPlan(store, run);
       assert.equal(countCalls(normal.tenantId).length, 8);
       for (const recipient of frozen.recipients)
         assert.deepEqual(
@@ -466,7 +474,7 @@ async function main() {
       const plan = await fixture();
       await context.runAsSystemTenant(plan.tenantId, async () => {
         const run = await store.admit(plan),
-          frozen = store.readPlan(run),
+          frozen = dailyPlan(store, run),
           recipient = frozen.recipients[0];
         const failed = recipient.slots.find(
           (s) =>
@@ -519,7 +527,7 @@ async function main() {
       const plan = await fixture();
       await context.runAsSystemTenant(plan.tenantId, async () => {
         const run = await store.admit(plan),
-          frozen = store.readPlan(run),
+          frozen = dailyPlan(store, run),
           recipient = frozen.recipients[0];
         if (kind === 'membership')
           await db.membership.update({
@@ -586,7 +594,7 @@ async function main() {
     const partial = await fixture();
     await context.runAsSystemTenant(partial.tenantId, async () => {
       const run = await store.admit(partial),
-        plan = store.readPlan(run),
+        plan = dailyPlan(store, run),
         first = plan.recipients[0],
         other = plan.recipients[1],
         telegram = first.slots.find((s) => s.channel === 'telegram')!;
@@ -605,7 +613,7 @@ async function main() {
           token: 'f'.repeat(64),
         },
       });
-      assert.deepEqual(store.readPlan(run), plan);
+      assert.deepEqual(dailyPlan(store, run), plan);
       const executions = await store.executions(run, plan),
         unknown = executions.find(
           (e) => e.ownerReportSlotKey === telegram.key,

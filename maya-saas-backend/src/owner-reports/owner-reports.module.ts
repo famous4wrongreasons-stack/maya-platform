@@ -1,3 +1,5 @@
+import { OwnerReportDownloadService } from './owner-report-download.service';
+import { OwnerReportSnapshotsController } from './owner-report-snapshots.controller';
 import { OwnerReportFoundationModule } from './owner-report-foundation.module';
 import { CommunicationDeliveryModule } from '../communication-delivery/communication-delivery.module';
 import { OwnerReportsController } from './owner-reports.controller';
@@ -21,8 +23,8 @@ import { OwnerReportsService } from './owner-reports.service';
     DashboardPreferencesModule,
     InboxModule,
   ],
-  controllers: [OwnerReportsController],
-  providers: [OwnerReportsService, OwnerReportsSchedulerService],
+  controllers: [OwnerReportsController,OwnerReportSnapshotsController],
+  providers: [OwnerReportsService, OwnerReportsSchedulerService,OwnerReportDownloadService],
   exports: [OwnerReportsService],
 })
 export class OwnerReportsModule {}

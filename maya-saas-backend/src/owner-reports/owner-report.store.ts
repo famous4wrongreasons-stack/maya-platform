@@ -1,3 +1,4 @@
+import { staffTelegramEligible } from '../package5-wave1/governed-settings.read';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, type OwnerReportRun } from '@prisma/client';
@@ -12,16 +13,19 @@ import {
 import { CanonicalActionIngressService } from '../action-engine/action-engine.ingress';
 import { filterAssistantCapability } from '../dashboard-preferences/assistant-preferences.read';
 import { PrismaService } from '../prisma/prisma.service';
+import { retryableBulkTransaction } from '../marketing/canonical-bulk.contract';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import { localCalendarDate, dayIsoRange } from './owner-reports.time';
+import { localCalendarDate, dayIsoRange, localHour } from './owner-reports.time';
 import {
-  normalizeOwnerReportPlan,
+  normalizeCanonicalOwnerReportPlan,
+  MORNING_STAFF_ROLES,
   ownerReportFingerprint,
   ownerReportRequest,
   OWNER_REPORT_DAY,
   OWNER_REPORT_ROLES,
-  type OwnerReportPlan,
-  type OwnerReportRecipient,
+  type CanonicalOwnerReportPlan,
+  type MorningReportRecipient,
+  type CanonicalOwnerReportRecipient,
   type OwnerReportSlot,
   type OwnerReportChannel,
 } from './owner-report.contract';
@@ -31,12 +35,17 @@ import {
 export class OwnerReportStore {
   readonly identity: ActionIdentityService;
   private readonly cutoverAt: number;
+  private readonly morningCutoverAt: number;
+  private readonly morningHour: number;
   constructor(
     private readonly prisma: PrismaService,
     private readonly context: TenantContextService,
     private readonly ingress: CanonicalActionIngressService,
     config: ConfigService,
   ) {
+    this.morningCutoverAt = Date.parse(config.get<string>('OWNER_REPORTS_MORNING_CANONICAL_CUTOVER_AT') ?? '');
+    const hour = Number(config.get<string>('OWNER_REPORTS_MORNING_HOUR'));
+    this.morningHour = Number.isFinite(hour) && hour >= 0 && hour <= 23 ? Math.trunc(hour) : 8;
     this.cutoverAt = Date.parse(
       config.get<string>('OWNER_REPORTS_CANONICAL_CUTOVER_AT') ?? '',
     );
@@ -75,21 +84,21 @@ export class OwnerReportStore {
       }),
     };
   }
-  find(tenantId: string, periodLocalDate: string) {
+  find(tenantId: string, periodLocalDate: string, reportType: CanonicalOwnerReportPlan['reportType'] = 'daily_report') {
     this.context.assertTenantId(tenantId);
     return this.prisma.ownerReportRun.findUnique({
       where: {
         tenantId_reportType_periodLocalDate_reportVersion: {
           tenantId,
-          reportType: 'daily_report',
+          reportType,
           periodLocalDate,
           reportVersion: 1,
         },
       },
     });
   }
-  private normalize(candidate: OwnerReportPlan) {
-    const plan = normalizeOwnerReportPlan(candidate);
+  private normalize(candidate: CanonicalOwnerReportPlan) {
+    const plan = normalizeCanonicalOwnerReportPlan(candidate);
     for (const recipient of plan.recipients)
       for (const slot of recipient.slots) {
         const expected = this.slot(
@@ -113,7 +122,7 @@ export class OwnerReportStore {
     const plan = this.normalize(
       JSON.parse(
         this.identity.decryptNormalizedPayload(run.intentEncrypted),
-      ) as OwnerReportPlan,
+      ) as CanonicalOwnerReportPlan,
     );
     if (
       ownerReportFingerprint(this.identity, plan) !== run.intentHash ||
@@ -127,7 +136,7 @@ export class OwnerReportStore {
       throw new ActionContractError('B36_REPORT_MANIFEST_MISMATCH');
     return plan;
   }
-  async admit(candidate: OwnerReportPlan, now = new Date()) {
+  async admit(candidate: CanonicalOwnerReportPlan, now = new Date()) {
     this.context.assertTenantId(candidate.tenantId);
     const plan = this.normalize(candidate);
     const intentHash = ownerReportFingerprint(this.identity, plan);
@@ -156,9 +165,7 @@ export class OwnerReportStore {
             });
             if (previous) return equivalent(previous);
             if (
-              !Number.isFinite(this.cutoverAt) ||
-              Date.parse(plan.periodStart) <= this.cutoverAt ||
-              plan.periodLocalDate !== localCalendarDate(plan.timezone, now)
+              !this.canAdmitPeriod(plan.timezone, plan.periodLocalDate, now, plan.reportType)
             )
               throw new ActionContractError(
                 'B36_PROSPECTIVE_CURRENT_PERIOD_REQUIRED',
@@ -219,21 +226,20 @@ export class OwnerReportStore {
           },
         );
       } catch (error) {
-        const retry =
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          ['P2002', 'P2034'].includes(error.code);
+        const retry = retryableBulkTransaction(error);
         if (!retry || attempt === 4) throw error;
-        const existing = await this.find(plan.tenantId, plan.periodLocalDate);
+        const existing = await this.find(plan.tenantId, plan.periodLocalDate, plan.reportType);
         if (existing) return equivalent(existing);
       }
     }
     throw new ActionConflictError('B36 admission did not converge');
   }
   async authorize(
-    plan: OwnerReportPlan,
-    recipient: OwnerReportRecipient,
+    plan: CanonicalOwnerReportPlan,
+    recipient: CanonicalOwnerReportRecipient,
     slot?: OwnerReportSlot,
     db: Prisma.TransactionClient = this.prisma,
+    purpose: 'delivery'|'snapshot' = 'delivery',
   ) {
     this.context.assertTenantId(plan.tenantId);
     const member = await db.membership.findFirst({
@@ -242,22 +248,29 @@ export class OwnerReportStore {
         tenantId: plan.tenantId,
         userId: recipient.userId,
         status: 'active',
-        role: { in: [...OWNER_REPORT_ROLES] },
+        role: { in: [...(plan.reportType === 'morning_staff' ? MORNING_STAFF_ROLES : OWNER_REPORT_ROLES)] },
         user: { status: 'active' },
       },
       select: { id: true },
     });
     const enabled =
-      member &&
+      member && purpose === 'delivery' &&
       (await filterAssistantCapability(
         db,
         plan.tenantId,
         [recipient.userId],
         'daily_brief',
       ));
-    if (!member || !enabled?.includes(recipient.userId))
+    if (!member || (purpose === 'delivery' && (!enabled || !enabled.includes(recipient.userId))))
       throw new ForbiddenException('B36_REPORT_RECIPIENT_NOT_AUTHORIZED');
+    if (plan.reportType === 'morning_staff') {
+      const frozen = recipient as MorningReportRecipient;
+      const binding = await this.staffBinding(plan.tenantId, recipient.userId, db);
+      if (!binding || binding.staffId !== frozen.staffId || binding.evidenceHash !== frozen.staffBindingEvidenceHash)
+        throw new ForbiddenException('R05_CANONICAL_STAFF_BINDING_REVOKED');
+    }
     if (!slot || slot.channel === 'inbox') return;
+    if (slot.channel === 'telegram' && !(await staffTelegramEligible(db,plan.tenantId,recipient.userId,recipient.membershipId))) throw new ForbiddenException('R11_STAFF_TELEGRAM_NOT_ELIGIBLE');
     const binding =
       slot.channel === 'telegram'
         ? await db.authIdentity.findFirst({
@@ -282,7 +295,7 @@ export class OwnerReportStore {
           });
     if (!binding) throw new ForbiddenException('B36_REPORT_ROUTE_REVOKED');
   }
-  async executions(run: OwnerReportRun, plan: OwnerReportPlan) {
+  async executions(run: OwnerReportRun, plan: CanonicalOwnerReportPlan) {
     this.context.assertTenantId(run.tenantId);
     const executions = await this.prisma.actionExecution.findMany({
       where: { tenantId: run.tenantId, ownerReportRunId: run.id },
@@ -299,8 +312,8 @@ export class OwnerReportStore {
   }
   async assertDispatchAllowed(
     run: OwnerReportRun,
-    plan: OwnerReportPlan,
-    recipient: OwnerReportRecipient,
+    plan: CanonicalOwnerReportPlan,
+    recipient: CanonicalOwnerReportRecipient,
     slot: OwnerReportSlot,
   ) {
     const current = await this.prisma.ownerReportRun.findUniqueOrThrow({
@@ -366,12 +379,71 @@ export class OwnerReportStore {
       authorize: () => this.assertDispatchAllowed(run, plan, recipient, slot),
     };
   }
-  canAdmitPeriod(timezone: string, localDate: string, now: Date) {
-    return (
-      Number.isFinite(this.cutoverAt) &&
-      localDate === localCalendarDate(timezone, now) &&
-      Date.parse(dayIsoRange(timezone, localDate).from) > this.cutoverAt
-    );
+  canAdmitPeriod(timezone: string, localDate: string, now: Date, reportType: CanonicalOwnerReportPlan['reportType'] = 'daily_report') {
+    const morning = reportType !== 'daily_report';
+    const cutover = morning ? this.morningCutoverAt : this.cutoverAt;
+    return Number.isFinite(cutover) && localDate === localCalendarDate(timezone, now) &&
+      Date.parse(dayIsoRange(timezone, localDate).from) > cutover &&
+      (!morning || localHour(timezone,now) >= this.morningHour);
+  }
+  /** Staff is the authority; legacy calendar projections only qualify the already-bound fact slice. */
+  async staffBinding(tenantId: string, userId: string, db: Prisma.TransactionClient = this.prisma) {
+    this.context.assertTenantId(tenantId);
+    const [staff, tenant] = await Promise.all([
+      db.staff.findFirst({where:{tenantId,userId,active:true,user:{status:'active'}},select:{id:true,branchId:true}}),
+      db.tenant.findUnique({where:{id:tenantId},select:{calendarSource:true}}),
+    ]);
+    if (!staff || !tenant) return null;
+    let evidence: Record<string, unknown>, externalRef: string;
+    if (tenant.calendarSource === 'internal') {
+      const projection = await db.internalProvider.findFirst({where:{id:staff.id,tenantId,userId,active:true},select:{id:true,branchId:true}});
+      if (!projection || projection.branchId !== staff.branchId) return null;
+      externalRef = projection.id;
+      evidence = {calendar:'internal',projectionId:projection.id};
+    } else {
+      const integration = await db.crmIntegration.findFirst({where:{tenantId,status:'active'},select:{id:true,provider:true,settingsJson:true}});
+      if (!integration) return null;
+      const settings = integration.settingsJson as Record<string,unknown> | null;
+      const company = settings?.companyId;
+      if ((typeof company !== 'string' && typeof company !== 'number') || !String(company).trim()) return null;
+      const [access, links] = await Promise.all([
+        db.crmStaffAccess.findFirst({where:{tenantId,userId,staffId:staff.id,status:'active',role:{in:[...MORNING_STAFF_ROLES]}},select:{id:true,externalStaffId:true}}),
+        db.staffProviderLink.findMany({where:{tenantId,staffId:staff.id,provider:integration.provider,unlinkedAt:null},select:{id:true,externalId:true}}),
+      ]);
+      if (!access || links.length !== 1 || links[0].externalId !== access.externalStaffId) return null;
+      externalRef = links[0].externalId;
+      evidence = {calendar:'external',integrationId:integration.id,provider:integration.provider,
+        company:String(company).trim(),accessId:access.id,linkId:links[0].id,externalRef};
+    }
+    return {staffId:staff.id, externalRef,
+      evidenceHash:this.identity.hmac('maya.owner-report-staff-binding/1',{tenantId,userId,staffId:staff.id,branchId:staff.branchId,...evidence})};
+  }
+  async snapshot(tenantId: string,userId: string,runId: string) {
+    this.context.assertTenantId(tenantId);
+    const run=await this.prisma.ownerReportRun.findUniqueOrThrow({where:{id_tenantId:{id:runId,tenantId}}});
+    const plan=this.readPlan(run);
+    const recipient=plan.recipients.find(r=>r.userId===userId);
+    if(!recipient) throw new ForbiddenException('R05_SNAPSHOT_NOT_OWNED');
+    await this.authorize(plan,recipient,undefined,this.prisma,'snapshot');
+    const content=plan.reportType==='daily_report' ? plan.content : (recipient as MorningReportRecipient).content;
+    return {contract:'maya.owner-report-snapshot/1',runId:run.id,reportType:run.reportType,
+      periodLocalDate:run.periodLocalDate,timezone:run.timezone,content};
+  }
+  async snapshots(tenantId:string,userId:string) {
+    this.context.assertTenantId(tenantId);
+    const runs=await this.prisma.ownerReportRun.findMany({where:{tenantId,intentEncrypted:{not:null},payloadRetentionUntil:{gt:new Date()}},
+      orderBy:[{periodLocalDate:'desc'},{id:'desc'}],take:100});
+    const visible:Array<{runId:string;reportType:string;periodLocalDate:string;title:string}>=[];
+    for(const run of runs) {
+      const plan=this.readPlan(run);
+      const recipient=plan.recipients.find(r=>r.userId===userId);
+      if(!recipient) continue;
+      try {await this.authorize(plan,recipient,undefined,this.prisma,'snapshot');}
+      catch(error) {if(error instanceof ForbiddenException) continue;throw error;}
+      const content=plan.reportType==='daily_report' ? plan.content : (recipient as MorningReportRecipient).content;
+      visible.push({runId:run.id,reportType:run.reportType,periodLocalDate:run.periodLocalDate,title:content.title});
+    }
+    return {reports:visible};
   }
   async purgeExpiredPayloads(tenantId: string, now = new Date()) {
     this.context.assertTenantId(tenantId);

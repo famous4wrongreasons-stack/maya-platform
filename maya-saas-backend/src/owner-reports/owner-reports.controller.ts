@@ -21,6 +21,19 @@ export class OwnerReportsController {
     @Headers('x-maya-legacy-bridge') secret: string | undefined,
     @Body() raw: unknown,
   ) {
+    return this.trigger(secret,raw,'daily_report');
+  }
+  @Public()
+  @Post('morning-owner')
+  morningOwner(@Headers('x-maya-legacy-bridge') secret: string | undefined,@Body() raw: unknown) {
+    return this.trigger(secret,raw,'morning_owner');
+  }
+  @Public()
+  @Post('morning-staff')
+  morningStaff(@Headers('x-maya-legacy-bridge') secret: string | undefined,@Body() raw: unknown) {
+    return this.trigger(secret,raw,'morning_staff');
+  }
+  private async trigger(secret: string | undefined,raw: unknown,kind:'daily_report'|'morning_owner'|'morning_staff') {
     this.bridge.assertBridgeSecret(
       secret,
       'MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN',
@@ -57,6 +70,6 @@ export class OwnerReportsController {
       source,
       'report_bridge_tenant_unresolved',
     );
-    return this.reports.triggerDailyReport(tenant.tenantId);
+    return kind === 'daily_report' ? this.reports.triggerDailyReport(tenant.tenantId) : this.reports.triggerMorningReport(tenant.tenantId,kind);
   }
 }

@@ -233,8 +233,15 @@ export function buildStack(options: StackOptions = {}) {
       findMany: jest.fn().mockResolvedValue(options.masters ?? []),
     },
     membership: {
-      findMany: jest.fn().mockResolvedValue([{ userId: 'owner-user' }]),
+      findUnique:jest.fn().mockImplementation((args:{where:{userId_tenantId:{userId:string}}})=>Promise.resolve({id:args.where.userId_tenantId.userId==='owner-user'?'owner-member':'master-member-'+(options.masters??[]).findIndex(m=>m.userId===args.where.userId_tenantId.userId),role:args.where.userId_tenantId.userId==='owner-user'?'tenant_owner':'staff',status:'active',user:{status:'active'}})),
+      findMany: jest.fn().mockImplementation((args: {where?: {role?: {in?: string[]}}}) => Promise.resolve([
+        {id:'owner-member',userId:'owner-user',role:'tenant_owner'},
+        ...(options.masters ?? []).map((m,index)=>({id:'master-member-'+index,userId:m.userId,role:'staff'})),
+      ].filter(m=>!args?.where?.role?.in || args.where.role.in.includes(m.role)))),
     },
+    dashboardPreference:{findUnique:jest.fn().mockResolvedValue(null)},
+    authIdentity: {findMany: jest.fn().mockResolvedValue([])},
+    devicePushToken: {findMany: jest.fn().mockResolvedValue([])},
     reconciliationRun: {
       findFirst: jest
         .fn()
