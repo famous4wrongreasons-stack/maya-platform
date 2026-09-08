@@ -286,6 +286,55 @@ async function main() {
       assert.equal(snapshot.completeness, 'PARTIAL');
     },
   );
+  await proof(
+    'large history retains bounded query evidence and exact last visit',
+    async () => {
+      await db.appointment.createMany({
+        data: Array.from({ length: 1100 }, (_, n) => {
+          const startAt = new Date(date.getTime() + (n + 1) * 1000),
+            endAt = new Date(startAt.getTime() + 3600000);
+          return {
+            tenantId: tenant.id,
+            mayaClientId: client.id,
+            source: 'internal',
+            staffExternalId: 'c7-bulk-proof-' + n,
+            serviceIds: ['synthetic'],
+            startAt,
+            endAt,
+            blockedStartAt: startAt,
+            blockedEndAt: endAt,
+            attendance: 'arrived',
+            currency: 'RUB',
+          };
+        }),
+      });
+      const receipt = await system(() =>
+        owner.admit(historyIntent, { ...occurrence, id: randomUUID() }),
+      );
+      const snapshot = await system(() => owner.resume(receipt.id));
+      const metrics = (
+        snapshot.valuesJson as {
+          metrics: Array<{ key: string; value: unknown }>;
+        }
+      ).metrics;
+      assert.equal(
+        metrics.find((m) => m.key === 'observed_attended_visits')?.value,
+        '1101',
+      );
+      assert.equal(
+        metrics.find((m) => m.key === 'last_proven_visit')?.value,
+        new Date(date.getTime() + 1100000).toISOString(),
+      );
+      assert.equal(
+        (snapshot.evidenceRefsJson as { sources: unknown[] }).sources.length,
+        1,
+      );
+      assert.ok(
+        Buffer.byteLength(JSON.stringify(snapshot.evidenceRefsJson)) < 2048,
+      );
+      assert.equal(snapshot.completeness, 'PARTIAL');
+    },
+  );
   await proof('unknown last visit is not dormant', async () => {
     const receipt = await system(() =>
       owner.admit(
@@ -455,8 +504,8 @@ async function main() {
   );
   const cleaned = await system(() => maintenance.execute(run));
   await proof('AC6 inactive-tenant exact cleanup and retry', async () => {
-    assert.equal(cleaned.deleted, 4);
-    assert.equal((await system(() => maintenance.execute(run))).deleted, 4);
+    assert.equal(cleaned.deleted, 5);
+    assert.equal((await system(() => maintenance.execute(run))).deleted, 5);
     assert.equal(await db.measurementRevision.count(), 0);
   });
   await proof('AC6 source and Client preservation', async () => {
@@ -469,6 +518,7 @@ async function main() {
       sourceBefore,
     );
     assert.equal(await db.client.count(), 3);
+    assert.equal(await db.appointment.count(), 1101);
     assert.equal(await db.tenant.count(), baselineTenants + 2);
   });
   await proof('expired compute receipt never readmitted', () =>

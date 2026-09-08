@@ -1,4 +1,3 @@
 
 > maya-saas-backend@0.0.1 typecheck
 > tsc --noEmit --project tsconfig.build.json --incremental false
-

@@ -19,6 +19,7 @@ PASS 365 days from admission
 PASS snapshot update denied
 PASS expiry extension denied
 PASS Client history records arrived facts without pretending complete coverage
+PASS large history retains bounded query evidence and exact last visit
 PASS unknown last visit is not dormant
 PASS SQL publication rejects cross-tenant evidence despite valid fence
 PASS SQL publication refuses invented execution / attempt credit
@@ -38,4 +39,4 @@ PASS expired compute receipt never readmitted
 PASS missing receipt never readmitted
 PASS 37 physical fields
 PASS exact approved constraints and source-safe FK actions
-{"status":"PASS","checks":40,"requirements":["Q01","Q02","Q03","Q17","Q18","Q22"],"productionEffects":0,"oldDatabasesTouched":0}
+{"status":"PASS","checks":41,"requirements":["Q01","Q02","Q03","Q17","Q18","Q22"],"productionEffects":0,"oldDatabasesTouched":0}

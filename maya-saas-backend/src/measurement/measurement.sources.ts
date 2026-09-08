@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   measurementHash,
@@ -21,6 +22,12 @@ export class MeasurementSources {
     tenantId: string,
     i: NormalizedMeasurementIntent,
   ): Promise<void> {
+    if (
+      ['appointment_outcome', 'client_history'].includes(i.kind) &&
+      (Object.keys(i.scope.dimensions).length ||
+        Object.keys(i.scope.sourceQuery).length)
+    )
+      throw new Error('measurement_scope_not_supported_by_rule');
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
       select: { status: true },
@@ -79,6 +86,7 @@ export class MeasurementSources {
   ): Promise<MeasurementResult> {
     if (!this.supports(i.kind)) throw new Error('measurement_rule_not_enabled');
     await this.authorize(tenantId, i);
+    if (i.kind === 'client_history') return this.history(tenantId, i);
     const rows = await this.prisma.appointment.findMany({
       where: {
         tenantId,
@@ -105,7 +113,7 @@ export class MeasurementSources {
         updatedAt: true,
       },
       orderBy: [{ startAt: 'asc' }, { id: 'asc' }],
-      take: 1000,
+      take: 1,
     });
     if (i.appointmentId && !rows.length)
       throw new Error('measurement_appointment_scope_mismatch');
@@ -179,34 +187,6 @@ export class MeasurementSources {
         'cash_and_refund_require_qualified_financial_evidence',
         'attribution_requires_exact_effect_lineage',
       );
-    } else {
-      const attended = rows.filter((row) => row.attendance === 'arrived');
-      metric(
-        'observed_attended_visits',
-        String(attended.length),
-        'count',
-        null,
-        'known_canonical_visit_coverage',
-        'PARTIAL',
-      );
-      metric(
-        'last_proven_visit',
-        attended.at(-1)?.startAt.toISOString() ?? null,
-        'instant',
-        null,
-        'known_canonical_visit_coverage',
-        attended.length ? 'PARTIAL' : 'NOT_MEASURED',
-      );
-      metric(
-        'observed_bookings',
-        String(rows.length),
-        'count',
-        null,
-        'known_canonical_visit_coverage',
-        'PARTIAL',
-      );
-      reasons.push('canonical_mirror_history_coverage_not_proven_complete');
-      if (rows.length === 1000) reasons.push('source_window_truncated');
     }
     if (rows.some((row) => row.updatedAt > i.asOf))
       reasons.push('source_observed_after_business_cutoff');
@@ -219,6 +199,90 @@ export class MeasurementSources {
       qualification: 'VERIFIED',
       attributionStatus:
         i.kind === 'appointment_outcome' ? 'UNATTRIBUTED' : 'NOT_APPLICABLE',
+      creditedExecutionId: null,
+      creditedAttemptId: null,
+    };
+  }
+
+  private async history(
+    tenantId: string,
+    i: NormalizedMeasurementIntent,
+  ): Promise<MeasurementResult> {
+    // One bounded receipt for the aggregate query, not one retained copy per visit.
+    // The source owner still owns each appointment and its history.
+    const fact = await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+      const [value] = await tx.$queryRaw<
+        Array<{
+          bookings: string;
+          arrived: string;
+          noShow: string;
+          cancelled: string;
+          lastVisit: Date | null;
+          updatedAt: Date | null;
+          observedAt: Date;
+        }>
+      >(Prisma.sql`SELECT count(*)::text AS bookings,
+        count(*) FILTER (WHERE attendance='arrived')::text AS arrived,
+        count(*) FILTER (WHERE attendance='no_show')::text AS "noShow",
+        count(*) FILTER (WHERE status='cancelled')::text AS cancelled,
+        max("startAt") FILTER (WHERE attendance='arrived') AS "lastVisit",
+        max("updatedAt") AS "updatedAt", clock_timestamp() AS "observedAt"
+        FROM "Appointment" WHERE "tenantId"=${tenantId} AND "mayaClientId"=${i.clientId}
+        AND "startAt">=${i.periodFrom} AND "startAt"<${i.periodTo} AND "startAt"<=${i.asOf}
+        ${i.branchId ? Prisma.sql`AND "branchId"=${i.branchId}` : Prisma.empty}
+        ${i.scope.branchIds.length ? Prisma.sql`AND "branchId" IN (${Prisma.join(i.scope.branchIds)})` : Prisma.empty}
+        ${i.staffId ? Prisma.sql`AND "staffId"=${i.staffId}` : Prisma.empty}`);
+      return value;
+    });
+    const metric = (
+      key: string,
+      value: string | null,
+      unit = 'count',
+    ): MeasurementMetric => ({
+      key,
+      value,
+      unit,
+      currency: null,
+      basis: 'known_canonical_visit_coverage',
+      state: value === null ? 'NOT_MEASURED' : 'PARTIAL',
+      dimensions: {},
+      sourceRefs: [0],
+    });
+    return {
+      sources: [
+        {
+          owner: 'Appointment',
+          kind: 'canonical_history_query',
+          tenantId,
+          id: measurementHash(['c7.canonical-history-query/1', tenantId, i]),
+          stateHash: measurementHash(fact),
+          observedAt: fact.observedAt.toISOString(),
+          qualification: 'VERIFIED',
+          coverage: 'canonical_stored_history_query_v1',
+        },
+      ],
+      dependencies: [],
+      metrics: [
+        metric('observed_bookings', fact.bookings),
+        metric('observed_attended_visits', fact.arrived),
+        metric('observed_no_shows', fact.noShow),
+        metric('observed_cancellations', fact.cancelled),
+        metric(
+          'last_proven_visit',
+          fact.lastVisit?.toISOString() ?? null,
+          'instant',
+        ),
+      ],
+      reasons: [
+        'canonical_mirror_history_coverage_not_proven_complete',
+        ...(fact.updatedAt && fact.updatedAt > i.asOf
+          ? ['source_observed_after_business_cutoff']
+          : []),
+      ],
+      completeness: 'PARTIAL',
+      qualification: 'VERIFIED',
+      attributionStatus: 'NOT_APPLICABLE',
       creditedExecutionId: null,
       creditedAttemptId: null,
     };

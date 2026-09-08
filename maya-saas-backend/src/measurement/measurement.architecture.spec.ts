@@ -17,7 +17,9 @@ describe('C7 permanent shared measurement boundaries', () => {
     const body = schema.split('model MeasurementRevision {')[1].split('\n}')[0];
     const scalar = body
       .split('\n')
-      .filter((l) => /^\s+\w+\s+(?:String|Int|DateTime|Json)\??\s/.test(l));
+      .filter((l) =>
+        /^\s+\w+\s+(?:String|Int|DateTime|Json)\??(?:\s|$)/.test(l),
+      );
     expect(scalar).toHaveLength(37);
     expect(schema).not.toMatch(
       /model (FinancialMeasurement|AttributionMeasurement|ReputationMeasurement|GoalMeasurement|PeriodMeasurement)\b/,

@@ -49,7 +49,7 @@ export type NormalizedMeasurementIntent = Omit<
 export const MEASUREMENT_SOURCE_KINDS: Readonly<
   Record<string, readonly string[]>
 > = {
-  Appointment: ['canonical_appointment'],
+  Appointment: ['canonical_appointment', 'canonical_history_query'],
 };
 export type MeasurementSource = {
   owner: string;
