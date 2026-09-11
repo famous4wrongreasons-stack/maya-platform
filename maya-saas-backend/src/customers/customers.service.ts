@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { ClientChannelLinkService } from '../crm/client-channel-link.service';

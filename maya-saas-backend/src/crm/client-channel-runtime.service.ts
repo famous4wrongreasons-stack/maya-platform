@@ -131,9 +131,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         };
       }
     }
-    throw new ForbiddenException(
-      'Trusted verified Client resolution required',
-    );
+    throw new ForbiddenException('Trusted verified Client resolution required');
   }
 
   async issue(channelProof: string) {
