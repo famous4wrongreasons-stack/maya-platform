@@ -47,7 +47,8 @@ def real_functions(*names):
     namespace = {'APP_URL': 'https://app.synthetic.test/', 'database': Trap(),
                  'yc': Trap(), 'get_ai_response': Trap(), 'warm_client_history_cache_for_phone': Trap(),
                  'asyncio': Trap(), 'conversations': Trap(), 'booking_flow': Trap(),
-                 're': re, 'logger': logging.getLogger(__name__)}
+                 're': re, 'logger': logging.getLogger(__name__),
+                 'canonical_staff_access': LegacyStaffPredicateOnly()}
     exec(compile(HELPER, str(ROOT / 'legacy_client_entry.py'), 'exec'), namespace)
     selected = []
     for node in BOT.body:

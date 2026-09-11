@@ -28,6 +28,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { PhoneAuthDeliveryService } from './phone-auth-delivery.service';
 import { SocialAuthService } from './social-auth.service';
 import { TenantAuthRepository } from './tenant-auth.repository';
+import { TelegramStaffPrincipalController } from './telegram-staff-principal.controller';
 
 @Module({
   imports: [
@@ -60,7 +61,11 @@ import { TenantAuthRepository } from './tenant-auth.repository';
       },
     }),
   ],
-  controllers: [AuthController, LegacyStaffPrincipalController],
+  controllers: [
+    AuthController,
+    LegacyStaffPrincipalController,
+    TelegramStaffPrincipalController,
+  ],
   providers: [
     {
       provide: APP_FILTER,

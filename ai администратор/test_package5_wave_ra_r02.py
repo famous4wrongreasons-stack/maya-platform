@@ -22,6 +22,12 @@ def principal(**changes):
     return value
 
 
+def telegram_principal(**changes):
+    value = principal(contract='maya.canonical-telegram-staff-principal/1')
+    value.update(changes)
+    return value
+
+
 def extracted(filename, name, namespace):
     source = (ROOT / filename).read_text()
     node = next(n for n in ast.parse(source).body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name)
@@ -69,6 +75,24 @@ class AuthorityTest(unittest.IsolatedAsyncioTestCase):
             response = await access.middleware(Request(headers={'Authorization': 'Bearer jwt'}), handler)
         self.assertEqual(200, response.status)
         self.assertIsNone(access.current())
+
+    async def test_trusted_telegram_update_gets_task_scoped_canonical_owner(self):
+        with patch.object(access, 'read_telegram_principal',
+                          return_value=telegram_principal()) as read:
+            self.assertTrue(await access.bind_telegram_update(100))
+            self.assertTrue(access.is_admin(100))
+            self.assertFalse(access.is_admin(200))
+        read.assert_called_once_with(100)
+
+        async def inherited_child():
+            return access.is_admin(100)
+        self.assertFalse(await asyncio.create_task(inherited_child()))
+
+    async def test_unlinked_or_revoked_telegram_update_fails_closed(self):
+        for resolved in [None, telegram_principal(role='client')]:
+            with patch.object(access, 'read_telegram_principal', return_value=resolved):
+                self.assertFalse(await access.bind_telegram_update(100))
+                self.assertFalse(access.is_staff(100))
 
     async def test_next_request_revalidates_revocation_and_never_caches_chat(self):
         async def handler(request):

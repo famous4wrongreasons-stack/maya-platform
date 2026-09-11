@@ -1,7 +1,9 @@
-"""R02: request-scoped canonical account authority; no legacy role fallback.
+"""Request-scoped canonical staff authority; no legacy role fallback.
 
-Native Telegram updates carry no accepted Maya session. They never acquire this
-context. Canonical auth is queried for every HTTP request, never cached by chat.
+HTTP requests resolve a signed Maya session. Native bot updates resolve their
+trusted Telegram subject through the installation-bound, read-only canonical
+AuthIdentity adapter. Neither path caches authority by chat or accepts a local
+ID allowlist.
 """
 from __future__ import annotations
 
@@ -49,6 +51,46 @@ def read_principal(credential):
             or (not principal.get('platform') and not principal.get('membershipId'))):
         raise ValueError('canonical_staff_session_required')
     return principal
+
+
+def read_telegram_principal(chat_id):
+    """Resolve one Bot API-authenticated subject through canonical identity."""
+    import requests
+    from config import YCLIENTS_COMPANY_ID
+    token = os.getenv('MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN', '').strip()
+    if not token or not re.fullmatch(r'[1-9][0-9]{0,19}', str(chat_id or '')):
+        return None
+    response = requests.post(
+        'http://127.0.0.1:3107/api/internal/legacy/telegram-staff-principal',
+        headers={'x-maya-legacy-bridge': token},
+        json={'provider': 'yclients', 'externalCompanyId': str(YCLIENTS_COMPANY_ID),
+              'providerUserId': str(chat_id)}, timeout=8,
+    )
+    if response.status_code >= 400:
+        return None
+    principal = response.json()
+    if isinstance(principal, dict) and principal.get('principal') is None:
+        return None
+    if (not isinstance(principal, dict)
+            or principal.get('contract') != 'maya.canonical-telegram-staff-principal/1'
+            or principal.get('role') not in _ROLE or not principal.get('userId')
+            or not principal.get('tenantId') or not principal.get('membershipId')
+            or principal.get('businessMutations') != 0 or principal.get('platform')
+            or str(principal.get('telegramId') or '') != str(chat_id)
+            or not principal.get('authIdentityId')):
+        return None
+    return principal
+
+
+async def bind_telegram_update(chat_id):
+    """Bind canonical authority to the current PTB process_update task only."""
+    _principal.set(None)
+    principal = await asyncio.to_thread(read_telegram_principal, chat_id)
+    if not principal:
+        return False
+    _principal.set({'principal': principal, 'credential': None, 'active': True,
+                    'owner_task': asyncio.current_task()})
+    return True
 
 
 def current(chat_id=None):

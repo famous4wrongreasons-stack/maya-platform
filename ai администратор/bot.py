@@ -356,6 +356,15 @@ _GATE_ALLOWED_COMMANDS = {"/start", "/privacy", "/cancel"}
 _GATE_ALLOWED_CALLBACK_PREFIXES = ("pdn_", "mkt_")
 
 
+async def canonical_telegram_authority(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Resolve the trusted Bot API sender through canonical AuthIdentity/A16."""
+    del context
+    user = update.effective_user
+    if not user or user.is_bot:
+        return
+    await canonical_staff_access.bind_telegram_update(user.id)
+
+
 def _is_staff_chat_id(chat_id: int) -> bool:
     """Only an active canonical request context can establish staff access."""
     return canonical_staff_access.is_staff(chat_id)
@@ -544,7 +553,16 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # A plain /start is not an identity or Client-linking operation.
+    if canonical_staff_access.is_admin(update.effective_user.id):
+        await update.effective_message.reply_text(
+            "✅ Вы распознаны как владелец MAYA.\n\n"
+            "Бот снова принимает владельческие команды и будет присылать "
+            "канонические отчёты в Telegram. Команды: /admin и /dashboard.\n\n"
+            "PWA временно закрыта на технические работы."
+        )
+        return
+
+    # A plain /start is not a Client-linking operation.
     await update.effective_message.reply_text(client_handoff_message(APP_URL))
 
 
@@ -4970,6 +4988,7 @@ def main():
     # покажет нужный экран и остановит обработку апдейта.
     # Мастера, админы, /start, /privacy и кнопки самих согласий проходят без
     # проверки.
+    app.add_handler(TypeHandler(Update, canonical_telegram_authority), group=-2)
     app.add_handler(TypeHandler(Update, consent_gate), group=-1)
 
     app.add_handler(CommandHandler("start", cmd_start))
