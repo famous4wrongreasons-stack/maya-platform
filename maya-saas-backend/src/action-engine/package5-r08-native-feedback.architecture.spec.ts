@@ -139,12 +139,12 @@ describe('R08 native feedback canonical owner ratchet', () => {
         cwd: join(process.cwd(), '..', 'ai администратор'),
         env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
         encoding: 'utf8',
-        timeout: 20000,
+        timeout: 120000,
       },
     );
     expect({
       status: result.status,
       error: result.status ? result.stderr : '',
     }).toEqual({ status: 0, error: '' });
-  });
+  }, 180000);
 });

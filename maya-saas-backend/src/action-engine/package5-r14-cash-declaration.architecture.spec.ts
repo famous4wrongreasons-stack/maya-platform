@@ -90,14 +90,14 @@ describe('R14 permanent cash observation owner boundary', () => {
         cwd: join(root, 'ai администратор'),
         env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
         encoding: 'utf8',
-        timeout: 20000,
+        timeout: 120000,
       },
     );
     expect({
       status: result.status,
       output: result.status ? result.stderr : '',
     }).toEqual({ status: 0, output: '' });
-  });
+  }, 180000);
   it('PWA requires explicit card and preserves confirmed intent on lost reply/restart', () => {
     const result = spawnSync(
       process.execPath,

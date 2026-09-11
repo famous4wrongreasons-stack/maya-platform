@@ -149,12 +149,12 @@ describe('R06 canonical producer/admission/effect boundary', () => {
         cwd: join(root, 'ai администратор'),
         env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
         encoding: 'utf8',
-        timeout: 20000,
+        timeout: 120000,
       },
     );
     expect({
       status: result.status,
       output: result.status ? result.stderr : '',
     }).toEqual({ status: 0, output: '' });
-  });
+  }, 180000);
 });

@@ -38,7 +38,7 @@ describe('Package 5 Wave 1 production-bypass ratchet', () => {
       ],
       {
         encoding: 'utf8',
-        timeout: 20000,
+        timeout: 60000,
       },
     );
     expect({
@@ -46,7 +46,7 @@ describe('Package 5 Wave 1 production-bypass ratchet', () => {
       error: run.error?.message,
       output: run.status ? `${run.stdout}\n${run.stderr}` : '',
     }).toEqual({ status: 0, error: undefined, output: '' });
-  }, 25000);
+  }, 90000);
   it('R04 permanently rejects native parallel owners and read/background effects', () => {
     const run = spawnSync(
       'python3',

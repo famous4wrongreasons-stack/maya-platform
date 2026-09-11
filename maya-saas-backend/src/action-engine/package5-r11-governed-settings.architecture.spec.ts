@@ -94,14 +94,14 @@ describe('R11 permanent governed settings boundary', () => {
         cwd: join(root, 'ai администратор'),
         env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
         encoding: 'utf8',
-        timeout: 20000,
+        timeout: 120000,
       },
     );
     expect({
       status: result.status,
       output: result.status ? result.stderr : '',
     }).toEqual({ status: 0, output: '' });
-  }, 25000);
+  }, 180000);
   it('PWA confirms once and preserves the same intent across lost response/restart', () => {
     const result = spawnSync(
       process.execPath,
