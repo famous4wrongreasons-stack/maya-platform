@@ -1,5 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import { ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -37,6 +37,12 @@ describe('ClientIdentityService', () => {
     const linkUpdate: jest.MockedFunction<
       (args: LinkUpdateArgs) => Promise<unknown>
     > = jest.fn().mockResolvedValue({});
+    const clientFindMany: jest.MockedFunction<
+      () => Promise<Array<{ id: string }>>
+    > = jest.fn().mockResolvedValue([]);
+    const userFindUnique: jest.MockedFunction<
+      () => Promise<{ phone: string | null } | null>
+    > = jest.fn().mockResolvedValue({ phone: null });
     const clientCreate: jest.MockedFunction<
       (args: ClientCreateArgs) => Promise<{ id: string }>
     > = jest.fn().mockResolvedValue({ id: 'client-1' });
@@ -53,8 +59,14 @@ describe('ClientIdentityService', () => {
     > = jest.fn(async (callback) => callback(prisma));
     const prisma = {
       crmClientLink: { findUnique: linkFindUnique, update: linkUpdate },
-      client: { create: clientCreate, updateMany: clientUpdateMany },
+      client: {
+        create: clientCreate,
+        updateMany: clientUpdateMany,
+        findMany: clientFindMany,
+      },
+      user: { findUnique: userFindUnique },
       unresolvedClientIdentityHold: { findUnique: holdFindUnique },
+      $queryRaw: jest.fn().mockResolvedValue([]),
       $transaction: transaction,
     } as unknown as PrismaService;
     const tenantContext = new TenantContextService();
@@ -72,6 +84,8 @@ describe('ClientIdentityService', () => {
       linkFindUnique,
       linkUpdate,
       clientCreate,
+      clientFindMany,
+      userFindUnique,
       clientUpdateMany,
       holdFindUnique,
       transaction,
@@ -441,5 +455,58 @@ describe('ClientIdentityService', () => {
 
     const createArgs = clientCreate.mock.calls[0]?.[0];
     expect(createArgs?.data.phoneHash).toBeNull();
+  });
+
+  it('creates a first-party Client without a CRM link', async () => {
+    const {
+      service,
+      tenantContext,
+      clientCreate,
+      clientFindMany,
+      userFindUnique,
+    } = createService();
+
+    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.ensureFirstPartyClient('tenant-1', 'user-1'),
+    );
+
+    expect(result).toEqual({ id: 'client-1' });
+    expect(clientFindMany).toHaveBeenCalled();
+    expect(userFindUnique).toHaveBeenCalledWith({
+      where: { id: 'user-1' },
+      select: { phone: true },
+    });
+    expect(clientCreate.mock.calls[0]?.[0].data).toEqual({
+      tenantId: 'tenant-1',
+      userId: 'user-1',
+      phoneHash: null,
+    });
+    expect(clientCreate.mock.calls[0]?.[0].data).not.toHaveProperty('crmLinks');
+  });
+
+  it('returns the existing exact first-party Client', async () => {
+    const { service, tenantContext, clientCreate, clientFindMany } =
+      createService();
+    clientFindMany.mockResolvedValue([{ id: 'owned-client' }]);
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.ensureFirstPartyClient('tenant-1', 'user-1'),
+      ),
+    ).resolves.toEqual({ id: 'owned-client' });
+    expect(clientCreate).not.toHaveBeenCalled();
+  });
+
+  it('refuses an ambiguous first-party Client set', async () => {
+    const { service, tenantContext, clientCreate, clientFindMany } =
+      createService();
+    clientFindMany.mockResolvedValue([{ id: 'a' }, { id: 'b' }]);
+
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.ensureFirstPartyClient('tenant-1', 'user-1'),
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(clientCreate).not.toHaveBeenCalled();
   });
 });

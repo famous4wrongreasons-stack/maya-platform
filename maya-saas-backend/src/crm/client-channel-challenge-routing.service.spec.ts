@@ -23,7 +23,7 @@ function fixture() {
     clientChannelLink: { findMany: jest.fn().mockResolvedValue([link]) },
     clientLinkChallenge: { create: jest.fn() },
     clientConsentFact: { create: jest.fn() },
-    client: { create: jest.fn() },
+    client: { create: jest.fn(), findMany: jest.fn().mockResolvedValue([]) },
     actionExecution: { create: jest.fn() },
   };
   const authenticate = jest.fn().mockResolvedValue(channel);
@@ -40,6 +40,17 @@ function fixture() {
       channels: { authenticate },
       context,
       challenges: { issue },
+      prisma: {
+        $transaction: jest.fn(async (work: (client: typeof tx) => unknown) =>
+          work(tx),
+        ),
+      },
+      identity: { ensureFirstPartyClient: jest.fn() },
+      encryption: {
+        opaqueReference: jest.fn((namespace: string, value: string) =>
+          `${namespace}:${value}`.padEnd(64, '0').slice(0, 64),
+        ),
+      },
     },
   ) as ClientChannelRuntimeService;
   return { service, tx, authenticate, issue };
@@ -117,4 +128,21 @@ describe('A18 existing canonical Client provenance', () => {
       ).rejects.toBeInstanceOf(ForbiddenException);
     },
   );
+
+  it('resolves an exact first-party Maya Client when no channel link exists', async () => {
+    const { service, tx, authenticate } = fixture();
+    authenticate.mockResolvedValue({
+      ...channel,
+      provider: 'maya_user',
+      userId: 'user-1',
+    });
+    tx.clientChannelLink.findMany.mockResolvedValue([]);
+    tx.client.findMany.mockResolvedValue([{ id: 'owned-client' }]);
+    await expect(service.resolve('proof', tx as never)).resolves.toMatchObject({
+      clientId: 'owned-client',
+      tenantId: channel.tenantId,
+      resolver: 'a18.active-verified-client-channel.v1',
+      resolutionEvidenceRef: 'first-party-maya-user:user-1',
+    });
+  });
 });

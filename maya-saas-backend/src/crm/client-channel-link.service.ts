@@ -268,6 +268,21 @@ export class ClientChannelLinkService {
     return this.bindVerified(proof, undefined, tx, true);
   }
 
+  /**
+   * First-party Maya account → Client binding. The User already owns the
+   * Client (`Client.userId`); JWT authentication is the channel proof.
+   * HTTP callers cannot supply this proof — only a trusted initiator.
+   */
+  async bindProvenMayaUser(proof: VerifiedClientChannelProof) {
+    if (
+      proof.method !== 'proven_user_client_link' ||
+      proof.provider !== 'maya_user' ||
+      proof.supersedesLinkId
+    )
+      throw new ForbiddenException('Proven Maya user link required');
+    return this.bindVerified(proof);
+  }
+
   async assertClientEligible(tx: Tx, tenantId: string, clientId: string) {
     this.context.assertTenantId(tenantId);
     return this.assertClient(tx, tenantId, clientId);

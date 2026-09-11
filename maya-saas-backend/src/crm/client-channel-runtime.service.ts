@@ -19,7 +19,10 @@ import {
 } from '../action-engine';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import { ClientChannelAuthenticatorService } from './client-channel-authenticator.service';
+import {
+  ClientChannelAuthenticatorService,
+  type CurrentClientChannel,
+} from './client-channel-authenticator.service';
 import {
   ClientLinkChallengeService,
   type ClientChallengeIssuerAuthority,
@@ -31,10 +34,12 @@ import {
 import { EncryptionService } from '../encryption/encryption.service';
 import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { clientChannelSubjectHash } from './client-channel-subject';
+import { ClientIdentityService } from './client-identity.service';
 import { CrmService } from './crm.service';
 
-/** Only an existing verified Client link can authorize this challenge issuer.
- * Missing provenance fails closed; User/Profile rows cannot bootstrap authority.
+/** Verified channel links issue another channel's challenge.
+ * First-party Maya users (`maya_user`) may open their own Client by exact
+ * User ownership — that is not heuristic enrollment from phone or CRM.
  */
 @Injectable()
 export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthority {
@@ -54,6 +59,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       encryption,
       crm,
     ),
+    private readonly identity?: ClientIdentityService,
   ) {
     const closedVerifier = {
       verifyLink: () =>
@@ -102,10 +108,44 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       current.providerSubjectHash !== channel.providerSubjectHash ||
       links[0].verificationVersion !== 1 ||
       links[0].subjectHashVersion !== 1
-    )
+    ) {
+      if (
+        links.length === 0 &&
+        current.tenantId === channel.tenantId &&
+        current.provider === 'maya_user' &&
+        current.provider === channel.provider &&
+        current.userId &&
+        current.providerSubjectHash === channel.providerSubjectHash
+      ) {
+        const clients = await tx.client.findMany({
+          where: {
+            tenantId: current.tenantId,
+            userId: current.userId,
+            mergedIntoClientId: null,
+          },
+          take: 2,
+          select: { id: true },
+        });
+        if (clients.length === 1) {
+          const clientId = clients[0].id;
+          return {
+            tenantId: current.tenantId,
+            clientId,
+            resolver: this.resolverId,
+            resolutionEvidenceRef: `first-party-maya-user:${current.userId}`,
+            resolutionEvidenceHash: this.encryption.opaqueReference(
+              'a18.first-party-maya-user.resolution.v1',
+              `${current.tenantId}\0${current.userId}\0${clientId}`,
+            ),
+            issuerAuthorityHash: current.channelControlProofHash,
+            validUntil: current.validUntil,
+          };
+        }
+      }
       throw new ForbiddenException(
         'Trusted verified Client resolution required',
       );
+    }
     const link = links[0];
     return {
       tenantId: link.tenantId,
@@ -119,7 +159,15 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     };
   }
 
-  issue(channelProof: string) {
+  async issue(channelProof: string) {
+    const channel = await this.prisma.$transaction((tx) =>
+      this.channels.authenticate(channelProof, tx),
+    );
+    if (this.identity && channel.provider === 'maya_user' && channel.userId)
+      await this.identity.ensureFirstPartyClient(
+        channel.tenantId,
+        channel.userId,
+      );
     return this.challenges.issue({ resolutionProof: channelProof });
   }
 
@@ -212,6 +260,8 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     const channel = await this.prisma.$transaction((tx) =>
       this.channels.authenticate(channelProof, tx),
     );
+    if (channel.provider === 'maya_user' && channel.userId)
+      await this.ensureFirstPartyMayaLink(channel);
     const recheck = async (tx: Prisma.TransactionClient) => {
       const current = await this.channels.authenticate(channelProof, tx);
       if (
@@ -241,6 +291,50 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       recheck,
     );
     return { privacy, marketing };
+  }
+
+  private async ensureFirstPartyMayaLink(channel: CurrentClientChannel) {
+    if (!this.identity || channel.provider !== 'maya_user' || !channel.userId)
+      return;
+    const tenantId = this.context.assertTenantId(channel.tenantId);
+    const client = await this.identity.ensureFirstPartyClient(
+      tenantId,
+      channel.userId,
+    );
+    const links = await this.prisma.clientChannelLink.findMany({
+      where: {
+        tenantId,
+        provider: 'maya_user',
+        providerSubjectHash: channel.providerSubjectHash,
+        revokedAt: null,
+      },
+      take: 2,
+      select: { id: true, clientId: true },
+    });
+    if (links.length > 1 || (links[0] && links[0].clientId !== client.id))
+      throw new ForbiddenException('Verified Client binding required');
+    if (links[0]) return;
+    await this.links.bindProvenMayaUser({
+      tenantId,
+      clientId: client.id,
+      provider: 'maya_user',
+      providerSubjectHash: channel.providerSubjectHash,
+      method: 'proven_user_client_link',
+      verifier: 'a18.proven-maya-user.v1',
+      verificationIdentityHash: this.encryption.opaqueReference(
+        'a18.proven-maya-user.identity.v1',
+        `${tenantId}\0${channel.userId}`,
+      ),
+      channelControlProofHash: this.encryption.opaqueReference(
+        'a18.proven-maya-user.channel.v1',
+        `${tenantId}\0${channel.userId}`,
+      ),
+      clientAuthorityProofHash: this.encryption.opaqueReference(
+        'a18.proven-maya-user.authority.v1',
+        `${tenantId}\0${channel.userId}\0${client.id}`,
+      ),
+      validUntil: new Date(Date.now() + 10 * 60 * 1000),
+    });
   }
 
   /** Compatibility ingress for native bundles released before e5ec27fd.
