@@ -41,7 +41,7 @@ function fixture() {
       context,
       challenges: { issue },
       prisma: {
-        $transaction: jest.fn(async (work: (client: typeof tx) => unknown) =>
+        $transaction: jest.fn((work: (client: typeof tx) => unknown) =>
           work(tx),
         ),
       },
