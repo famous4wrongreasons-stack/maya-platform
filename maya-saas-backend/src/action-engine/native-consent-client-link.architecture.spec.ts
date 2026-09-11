@@ -36,11 +36,9 @@ describe('native consent verified Client link boundary', () => {
     );
     expect(resolver).toContain('lockClientChannelIdentity(');
     expect(resolver).toContain('revokedAt: null');
-    expect(resolver).toContain(
-      'this.challenges.issue({ resolutionProof: channelProof })',
-    );
     expect(resolver).toContain('ensureFirstPartyClient(');
-    expect(resolver).toContain('first-party-maya-user:');
+    expect(resolver).toContain('this.firstPartyMayaChallenges');
+    expect(resolver).toContain('.issue({ resolutionProof: channelProof })');
     expect(resolver).not.toMatch(/customerProfile\.|initialMayaChallenges/);
   });
 });

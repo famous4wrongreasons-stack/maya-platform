@@ -128,21 +128,4 @@ describe('A18 existing canonical Client provenance', () => {
       ).rejects.toBeInstanceOf(ForbiddenException);
     },
   );
-
-  it('resolves an exact first-party Maya Client when no channel link exists', async () => {
-    const { service, tx, authenticate } = fixture();
-    authenticate.mockResolvedValue({
-      ...channel,
-      provider: 'maya_user',
-      userId: 'user-1',
-    });
-    tx.clientChannelLink.findMany.mockResolvedValue([]);
-    tx.client.findMany.mockResolvedValue([{ id: 'owned-client' }]);
-    await expect(service.resolve('proof', tx as never)).resolves.toMatchObject({
-      clientId: 'owned-client',
-      tenantId: channel.tenantId,
-      resolver: 'a18.active-verified-client-channel.v1',
-      resolutionEvidenceRef: 'first-party-maya-user:user-1',
-    });
-  });
 });

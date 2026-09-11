@@ -36,6 +36,7 @@ import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5
 import { clientChannelSubjectHash } from './client-channel-subject';
 import { ClientIdentityService } from './client-identity.service';
 import { CrmService } from './crm.service';
+import { MayaUserFirstPartyIssuer } from './maya-user-first-party-issuer';
 
 /** Verified channel links issue another channel's challenge.
  * First-party Maya users (`maya_user`) may open their own Client by exact
@@ -45,6 +46,7 @@ import { CrmService } from './crm.service';
 export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthority {
   readonly resolverId = 'a18.active-verified-client-channel.v1';
   private readonly challenges: ClientLinkChallengeService;
+  private readonly firstPartyMayaChallenges: ClientLinkChallengeService;
   private readonly links: ClientChannelLinkService;
   constructor(
     private readonly prisma: PrismaService,
@@ -80,6 +82,14 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       this,
       channels,
     );
+    this.firstPartyMayaChallenges = new ClientLinkChallengeService(
+      prisma,
+      context,
+      encryption,
+      this.links,
+      new MayaUserFirstPartyIssuer(context, channels, encryption),
+      channels,
+    );
   }
 
   async resolve(proof: string, tx: Prisma.TransactionClient) {
@@ -108,44 +118,10 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       current.providerSubjectHash !== channel.providerSubjectHash ||
       links[0].verificationVersion !== 1 ||
       links[0].subjectHashVersion !== 1
-    ) {
-      if (
-        links.length === 0 &&
-        current.tenantId === channel.tenantId &&
-        current.provider === 'maya_user' &&
-        current.provider === channel.provider &&
-        current.userId &&
-        current.providerSubjectHash === channel.providerSubjectHash
-      ) {
-        const clients = await tx.client.findMany({
-          where: {
-            tenantId: current.tenantId,
-            userId: current.userId,
-            mergedIntoClientId: null,
-          },
-          take: 2,
-          select: { id: true },
-        });
-        if (clients.length === 1) {
-          const clientId = clients[0].id;
-          return {
-            tenantId: current.tenantId,
-            clientId,
-            resolver: this.resolverId,
-            resolutionEvidenceRef: `first-party-maya-user:${current.userId}`,
-            resolutionEvidenceHash: this.encryption.opaqueReference(
-              'a18.first-party-maya-user.resolution.v1',
-              `${current.tenantId}\0${current.userId}\0${clientId}`,
-            ),
-            issuerAuthorityHash: current.channelControlProofHash,
-            validUntil: current.validUntil,
-          };
-        }
-      }
+    )
       throw new ForbiddenException(
         'Trusted verified Client resolution required',
       );
-    }
     const link = links[0];
     return {
       tenantId: link.tenantId,
@@ -168,7 +144,26 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
         channel.tenantId,
         channel.userId,
       );
-    return this.challenges.issue({ resolutionProof: channelProof });
+    const existingLink = await this.prisma.$transaction(async (tx) => {
+      const links = await tx.clientChannelLink.findMany({
+        where: {
+          tenantId: channel.tenantId,
+          provider: channel.provider,
+          providerSubjectHash: channel.providerSubjectHash,
+          revokedAt: null,
+        },
+        take: 2,
+        select: { id: true },
+      });
+      if (links.length > 1)
+        throw new ForbiddenException('Client channel identity is ambiguous');
+      return links[0] ?? null;
+    });
+    return (
+      existingLink || channel.provider !== 'maya_user'
+        ? this.challenges
+        : this.firstPartyMayaChallenges
+    ).issue({ resolutionProof: channelProof });
   }
 
   consume(channelProof: string, token: string) {
