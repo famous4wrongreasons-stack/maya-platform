@@ -1,6 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { ClientChannelLinkService } from '../crm/client-channel-link.service';
+import { clientChannelSubjectHash } from '../crm/client-channel-subject';
+import { ClientIdentityService } from '../crm/client-identity.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { UserRole } from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -15,6 +18,8 @@ const CUSTOMER_ROLES = [UserRole.CLIENT, UserRole.CUSTOMER] as const;
 
 @Injectable()
 export class CustomersService {
+  private readonly links: ClientChannelLinkService;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
@@ -23,7 +28,19 @@ export class CustomersService {
     private readonly auditLogService: AuditLogService,
     private readonly loyaltyService: LoyaltyService,
     private readonly canonicalWave3: Package5Wave3CanonicalCutoverService,
-  ) {}
+    private readonly clientIdentity: ClientIdentityService,
+  ) {
+    this.links = new ClientChannelLinkService(this.prisma, this.tenantContext, {
+      verifyLink: () =>
+        Promise.reject(
+          new ForbiddenException('Initial links require ClientLinkChallenge'),
+        ),
+      verifyRevocation: () =>
+        Promise.reject(
+          new ForbiddenException('Explicit verified rebind operation required'),
+        ),
+    });
+  }
 
   async getOwnProfile(tenantId: string, userId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
@@ -51,7 +68,7 @@ export class CustomersService {
         'At least one customer profile field must be provided',
       );
     }
-    const client = await this.exactClientForUser(scopedTenantId, userId);
+    const client = await this.ensureOwnClient(scopedTenantId, userId);
     const source = this.canonicalWave3.intentRef(idempotencyKey);
     const now = new Date();
     const currentProfile = await this.prisma.customerProfile.findFirst({
@@ -290,6 +307,54 @@ export class CustomersService {
     if (clients.length !== 1)
       throw new BadRequestException('Exact canonical Client is unresolved');
     return clients[0];
+  }
+
+  private async ensureOwnClient(tenantId: string, userId: string) {
+    const client = await this.clientIdentity.ensureFirstPartyClient(
+      tenantId,
+      userId,
+    );
+    const subjectHash = clientChannelSubjectHash(
+      this.encryptionService,
+      'maya_user',
+      userId,
+    );
+    const links = await this.prisma.clientChannelLink.findMany({
+      where: {
+        tenantId,
+        provider: 'maya_user',
+        providerSubjectHash: subjectHash,
+        revokedAt: null,
+      },
+      take: 2,
+      select: { id: true, clientId: true },
+    });
+    if (links.length > 1 || (links[0] && links[0].clientId !== client.id))
+      throw new ForbiddenException('Verified Client binding required');
+    if (!links[0]) {
+      await this.links.bindProvenMayaUser({
+        tenantId,
+        clientId: client.id,
+        provider: 'maya_user',
+        providerSubjectHash: subjectHash,
+        method: 'proven_user_client_link',
+        verifier: 'a18.proven-maya-user.v1',
+        verificationIdentityHash: this.encryptionService.opaqueReference(
+          'a18.proven-maya-user.identity.v1',
+          `${tenantId}\0${userId}`,
+        ),
+        channelControlProofHash: this.encryptionService.opaqueReference(
+          'a18.proven-maya-user.channel.v1',
+          `${tenantId}\0${userId}`,
+        ),
+        clientAuthorityProofHash: this.encryptionService.opaqueReference(
+          'a18.proven-maya-user.authority.v1',
+          `${tenantId}\0${userId}\0${client.id}`,
+        ),
+        validUntil: new Date(Date.now() + 10 * 60 * 1000),
+      });
+    }
+    return client;
   }
 
   private serializeOwnProfile(

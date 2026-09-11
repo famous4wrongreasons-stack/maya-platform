@@ -109,6 +109,7 @@ const runtime = () =>
     encryption,
     facade,
     {} as CrmService,
+    {} as import('../src/crm/client-identity.service').ClientIdentityService,
   );
 const hash = (value: string) =>
   createHash('sha256').update(value).digest('hex');

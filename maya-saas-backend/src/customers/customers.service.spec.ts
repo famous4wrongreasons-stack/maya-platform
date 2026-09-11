@@ -86,6 +86,10 @@ describe('CustomersService', () => {
     const loyaltyService: Pick<LoyaltyService, 'authoritySnapshot'> = {
       authoritySnapshot: authoritySnapshotMock,
     };
+    const canonicalWave3 = {} as never;
+    const clientIdentity = {
+      ensureFirstPartyClient: jest.fn(),
+    };
 
     return {
       tenantContext,
@@ -100,6 +104,8 @@ describe('CustomersService', () => {
         encryptionService,
         auditLogService,
         loyaltyService as LoyaltyService,
+        canonicalWave3,
+        clientIdentity as never,
       ),
     };
   };

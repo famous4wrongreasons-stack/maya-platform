@@ -121,6 +121,7 @@ function setup(options: SetupOptions = {}) {
     encryption as never,
     {} as never,
     crm as never,
+    { ensureFirstPartyClient: jest.fn() } as never,
   );
   return { service, tx, prisma, channels, encryption, crm };
 }

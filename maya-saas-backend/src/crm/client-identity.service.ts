@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { createHmac } from 'node:crypto';
@@ -171,6 +171,53 @@ export class ClientIdentityService {
 
         throw error;
       });
+  }
+
+  /**
+   * First-party Maya user → canonical Client. Phone/Telegram signup creates a
+   * User + membership and nothing else; consent cannot be recorded against an
+   * unresolved Client. This is not a CRM registration and creates no
+   * CrmClientLink.
+   */
+  async ensureFirstPartyClient(
+    tenantId: string,
+    userId: string,
+  ): Promise<{ id: string }> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    return this.prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRaw(Prisma.sql`
+          SELECT pg_advisory_xact_lock(hashtextextended(
+            jsonb_build_array('maya.first-party-client.v1', ${scopedTenantId}::text,
+              ${userId}::text)::text, 0))::text
+        `);
+        const clients = await tx.client.findMany({
+          where: {
+            tenantId: scopedTenantId,
+            userId,
+            mergedIntoClientId: null,
+          },
+          take: 2,
+          select: { id: true },
+        });
+        if (clients.length > 1)
+          throw new BadRequestException('Exact canonical Client is unresolved');
+        if (clients[0]) return clients[0];
+        const user = await tx.user.findUnique({
+          where: { id: userId },
+          select: { phone: true },
+        });
+        return tx.client.create({
+          data: {
+            tenantId: scopedTenantId,
+            userId,
+            phoneHash: this.hashPhone(user?.phone),
+          },
+          select: { id: true },
+        });
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
   }
 
   /**

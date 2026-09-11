@@ -91,6 +91,7 @@ const channelRuntime = new ClientChannelRuntimeService(
   encryption,
   {} as Package5Wave3CanonicalCutoverService,
   {} as CrmService,
+  {} as import('../src/crm/client-identity.service').ClientIdentityService,
 );
 const communication = new CommunicationDeliveryService(
   db as unknown as PrismaService,

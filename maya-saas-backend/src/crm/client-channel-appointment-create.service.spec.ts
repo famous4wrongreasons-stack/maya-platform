@@ -92,6 +92,7 @@ function setup(options: Options = {}) {
     encryption as never,
     {} as never,
     crm as never,
+    { ensureFirstPartyClient: jest.fn() } as never,
   );
   const payload = {
     idempotencyKey: 'chat-booking:stable-intent',

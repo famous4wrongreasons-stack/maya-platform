@@ -145,6 +145,7 @@ function setup(options: Options = {}) {
     {} as never,
     {} as never,
     crm as never,
+    { ensureFirstPartyClient: jest.fn() } as never,
   );
   return {
     service,

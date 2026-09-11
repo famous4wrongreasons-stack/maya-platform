@@ -15,7 +15,7 @@ if (in_array($origin, $allowedOrigins, true)) {
     header('Vary: Origin');
 }
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS');
-header('Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, X-Session-Token, X-Telegram-InitData');
+header('Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, Idempotency-Key, X-Request-ID, X-Session-Token, X-Telegram-InitData');
 header('Access-Control-Expose-Headers: Content-Type, ETag, Last-Modified, Location, Retry-After');
 
 $method = strtoupper(isset($_SERVER['REQUEST_METHOD']) ? (string) $_SERVER['REQUEST_METHOD'] : 'GET');
@@ -68,7 +68,7 @@ if ($authorization === null && isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
 }
 
 $forwardHeaders = ['Accept: application/json'];
-foreach (['Content-Type', 'If-None-Match', 'X-Session-Token', 'X-Telegram-InitData'] as $name) {
+foreach (['Content-Type', 'If-None-Match', 'Idempotency-Key', 'X-Request-ID', 'X-Session-Token', 'X-Telegram-InitData'] as $name) {
     $value = $headerValue($requestHeaders, $name);
     if ($value !== null && $value !== '') {
         $forwardHeaders[] = $name . ': ' . $value;

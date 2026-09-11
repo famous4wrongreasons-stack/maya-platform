@@ -24,10 +24,12 @@ import {
 import { EncryptionService } from '../encryption/encryption.service';
 import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { clientChannelSubjectHash } from './client-channel-subject';
+import { ClientIdentityService } from './client-identity.service';
 import { CrmService } from './crm.service';
 
-/** Only already verified provenance can issue another channel's challenge.
- * A cold-start Client with no trusted resolution fails closed; no heuristic enrollment.
+/** Verified channel links issue another channel's challenge.
+ * First-party Maya users (`maya_user`) may open their own Client by exact
+ * User ownership — that is not heuristic enrollment from phone or CRM.
  */
 @Injectable()
 export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthority {
@@ -41,6 +43,7 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
     private readonly encryption: EncryptionService,
     private readonly consent: Package5Wave3CanonicalCutoverService,
     private readonly crm: CrmService,
+    private readonly identity: ClientIdentityService,
   ) {
     const closedVerifier = {
       verifyLink: () =>
@@ -82,27 +85,66 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
       take: 2,
     });
     if (
-      links.length !== 1 ||
-      current.providerSubjectHash !== channel.providerSubjectHash ||
-      links[0].verificationVersion !== 1 ||
-      links[0].subjectHashVersion !== 1
-    )
-      throw new ForbiddenException(
-        'Trusted verified Client resolution required',
-      );
-    const link = links[0];
-    return {
-      tenantId: link.tenantId,
-      clientId: link.clientId,
-      resolver: this.resolverId,
-      resolutionEvidenceRef: `client-channel-link:${link.id}`,
-      resolutionEvidenceHash: link.verificationEvidenceHash,
-      issuerAuthorityHash: current.channelControlProofHash,
-      validUntil: current.validUntil,
-    };
+      links.length === 1 &&
+      current.providerSubjectHash === channel.providerSubjectHash &&
+      links[0].verificationVersion === 1 &&
+      links[0].subjectHashVersion === 1
+    ) {
+      const link = links[0];
+      return {
+        tenantId: link.tenantId,
+        clientId: link.clientId,
+        resolver: this.resolverId,
+        resolutionEvidenceRef: `client-channel-link:${link.id}`,
+        resolutionEvidenceHash: link.verificationEvidenceHash,
+        issuerAuthorityHash: current.channelControlProofHash,
+        validUntil: current.validUntil,
+      };
+    }
+    if (
+      current.provider === 'maya_user' &&
+      current.userId &&
+      current.providerSubjectHash === channel.providerSubjectHash
+    ) {
+      const clients = await tx.client.findMany({
+        where: {
+          tenantId: current.tenantId,
+          userId: current.userId,
+          mergedIntoClientId: null,
+        },
+        take: 2,
+        select: { id: true },
+      });
+      if (clients.length === 1) {
+        const clientId = clients[0].id;
+        return {
+          tenantId: current.tenantId,
+          clientId,
+          resolver: this.resolverId,
+          resolutionEvidenceRef: `first-party-maya-user:${current.userId}`,
+          resolutionEvidenceHash: this.encryption.opaqueReference(
+            'a18.first-party-maya-user.resolution.v1',
+            `${current.tenantId}\0${current.userId}\0${clientId}`,
+          ),
+          issuerAuthorityHash: current.channelControlProofHash,
+          validUntil: current.validUntil,
+        };
+      }
+    }
+    throw new ForbiddenException(
+      'Trusted verified Client resolution required',
+    );
   }
 
-  issue(channelProof: string) {
+  async issue(channelProof: string) {
+    const channel = await this.prisma.$transaction((tx) =>
+      this.channels.authenticate(channelProof, tx),
+    );
+    if (channel.provider === 'maya_user' && channel.userId)
+      await this.identity.ensureFirstPartyClient(
+        channel.tenantId,
+        channel.userId,
+      );
     return this.challenges.issue({ resolutionProof: channelProof });
   }
   consume(channelProof: string, token: string) {
