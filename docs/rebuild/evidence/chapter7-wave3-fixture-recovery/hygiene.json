@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-09-12T13:52:20.868726+00:00",
+  "originalMainEntriesPreserved": 24,
+  "originalProtectedFileHashesPreserved": 22,
+  "observedMainEntries": 25,
+  "externalAdditionalEntry": "сайт и приложение/app.html",
+  "mainTouchedByTask": false,
+  "mainStatusUnchangedSinceResume": true,
+  "oldDatabasesTouched": 0,
+  "ownedTemporaryDatabasesCreated": 0,
+  "ownedTemporaryDatabasesRemaining": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTemporaryProcessesRemaining": 0,
+  "historicalMigrationInventoryHashesPreserved": 85,
+  "privateRecoveryCopyRemoved": true,
+  "productionWrites": 0,
+  "productionMessages": 0,
+  "productionProviderBusinessEffects": 0,
+  "processHygiene": 0
+}

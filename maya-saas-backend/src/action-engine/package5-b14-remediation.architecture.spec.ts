@@ -20,7 +20,9 @@ describe('Package 5 B14 GOD billing and overview remediation', () => {
   const webhook = read('ai администратор/webhook_server.py');
   const app = read('сайт и приложение/app.html');
   const site = read('maya-os-site/index.html');
-  const proxy = read('сайт и приложение/pwa-assets/tg-auth/api-proxy.php');
+  const proxy = read(
+    'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php',
+  );
 
   it('keeps the active PWA under the B13/B14 deployment guard', () => {
     const guard = resolve(pwa, 'package5_control_plane_runtime_guard.py');

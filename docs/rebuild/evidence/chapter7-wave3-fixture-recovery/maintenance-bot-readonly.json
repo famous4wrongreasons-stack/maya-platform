@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-09-12T13:41:41.413640+00:00",
+  "maintenanceConfig": [
+    "true"
+  ],
+  "unit": [
+    "MainPID=1631168",
+    "ExecMainStartTimestamp=Tue 2026-09-08 21:22:50 MSK",
+    "ActiveState=active"
+  ],
+  "files": {
+    "legacy_client_entry.py": {
+      "sha256": "e98973e776f9d81c6dab682441ed6b71f54b7499d68b12a2e49e77d4a8656fb8",
+      "mtime": "2026-09-08T18:18:16.929978+00:00"
+    },
+    "webhook_server.py": {
+      "sha256": "5b01fdbc32ad3062010ed1312eba12931d8679c5a24e518c19fb8505dc37e9b8",
+      "mtime": "2026-09-08T18:22:49.707824+00:00"
+    }
+  }
+}

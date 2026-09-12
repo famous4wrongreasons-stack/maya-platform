@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-09-12T13:43:11.365476+00:00",
+  "followExistingTenantRedirect": true,
+  "rows": [
+    {
+      "url": "https://mayaos.ru/app/",
+      "sha256": "cb27000739b179ddea6546fb4dd169fc9f1f397abca998acdcacf4dc1162c249",
+      "bytes": 2247,
+      "maintenance": true
+    },
+    {
+      "url": "https://malesthetic.pro/app/",
+      "sha256": "cb27000739b179ddea6546fb4dd169fc9f1f397abca998acdcacf4dc1162c249",
+      "bytes": 2247,
+      "maintenance": true
+    }
+  ]
+}

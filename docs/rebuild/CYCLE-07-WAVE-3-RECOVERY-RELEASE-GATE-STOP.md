@@ -18,7 +18,7 @@ P01/P02/P05 production acceptance remains preserved: **10/22 requirements, 3/6 p
 
 The last two commits arrived while the full gate was running. The gate completed on `cd157b66`; only afterward was the clean worktree fast-forwarded to `7fb5f9ee`. No source was changed under the running test process. The existing R01 wrapper expected exactly eight Python tests; it now expects nine because upstream added one maintenance test. No original test, invariant, timeout or lint setting was removed or relaxed.
 
-Post-fast-forward auth/PWA/identity/tenant/C7/inherited owner checks: **39 suites / 432 tests PASS**. P01/P02/P05 and P03/P04 rule proofs are not invalidated by these diffs. New production surface: NO. Frozen C7 manifest defect: NO. The earlier maintenance clarification is resolved by the committed exact artifact evidence; no extra maintenance owner decision is requested.
+Post-fast-forward auth/PWA/identity/tenant/C7/inherited owner checks: **39 suites / 432 tests PASS**. P01/P02/P05 and P03/P04 rule proofs are not invalidated by these diffs. New production surface: NO. Frozen C7 manifest defect: NO. **Correction on 2026-09-12:** the earlier conclusion that a matching committed maintenance artifact resolved the desired-state question was incorrect. A hash establishes artifact identity, not owner approval. The current owner says maintenance is unexpected and forbids restoring or changing it in this task. See the [subsequent fixture/provenance reconciliation](CYCLE-07-WAVE-3-FIXTURE-AND-MAINTENANCE-RECONCILIATION.md); this historical report's test results remain unchanged.
 
 ## Restored executable proof
 

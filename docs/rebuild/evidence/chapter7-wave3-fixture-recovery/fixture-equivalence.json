@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-09-12T13:40:18.827076+00:00",
+  "productionSha256": "b1006160a28e66448886bdc4b520a2d94021121748259c2cd1aeefda5f1aaaa0",
+  "fixtureSha256": "5b5059f820b6337b59866fd6260f0b3fef87e65db8f969e7f4e7a9537619dd7e",
+  "productionSourceBytes": 116748,
+  "fixtureBytes": 116760,
+  "changes": [
+    {
+      "constant": "PARTNER_TOKEN",
+      "line": 96,
+      "classification": "credential"
+    },
+    {
+      "constant": "COMPANY_ID",
+      "line": 97,
+      "classification": "environment-specific company identifier"
+    }
+  ],
+  "allOtherBytesIdentical": true,
+  "structuralEquivalence": "PASS",
+  "securitySemanticsEquivalence": "PASS",
+  "credentialSignatures": {
+    "privateKey": 0,
+    "telegramToken": 0,
+    "jwt": 0,
+    "cloudKey": 0,
+    "openaiKey": 0,
+    "urlCredential": 0
+  },
+  "mixedEntropyLiteralCandidates": 0,
+  "secretScan": "PASS",
+  "secretsInVersionedFixture": 0,
+  "applicationExecutions": 0,
+  "productionWrites": 0,
+  "messages": 0,
+  "phpTokenProof": {
+    "parser": "PASS",
+    "tokenCount": 21665,
+    "changedLiteralLines": [
+      96,
+      97
+    ],
+    "allOtherTokensIdentical": true,
+    "phpVersion": "8.4.6",
+    "applicationExecutions": 0
+  }
+}

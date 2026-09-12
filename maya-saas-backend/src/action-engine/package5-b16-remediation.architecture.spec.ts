@@ -59,7 +59,9 @@ describe('Package 5 B16 booking prefill identity and PII remediation', () => {
   });
 
   it('forwards Maya bearer proof without making the proxy an identity owner', () => {
-    const proxy = read('сайт и приложение/pwa-assets/tg-auth/api-proxy.php');
+    const proxy = read(
+      'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php',
+    );
     const branch = proxy.match(
       /case 'booking_prefill':[\s\S]*?(?=\n\s*case ')/,
     )?.[0];

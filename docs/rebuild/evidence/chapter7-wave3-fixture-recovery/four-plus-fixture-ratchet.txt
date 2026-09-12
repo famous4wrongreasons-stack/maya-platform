@@ -1,0 +1,9 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent --runTestsByPath src/action-engine/package5-b13-remediation.architecture.spec.ts src/action-engine/package5-b14-remediation.architecture.spec.ts src/action-engine/package5-b16-remediation.architecture.spec.ts src/action-engine/package5-b17-remediation.architecture.spec.ts src/action-engine/beget-relay-fixture.architecture.spec.ts
+
+
+Test Suites: 5 passed, 5 total
+Tests:       26 passed, 26 total
+Snapshots:   0 total
+Time:        135.897 s

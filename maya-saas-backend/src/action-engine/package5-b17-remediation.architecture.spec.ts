@@ -95,7 +95,9 @@ describe('Package 5 B17 Client appointment identity remediation', () => {
   });
 
   it('forwards signed Telegram and Maya session proof through the active proxy', () => {
-    const proxy = read('сайт и приложение/pwa-assets/tg-auth/api-proxy.php');
+    const proxy = read(
+      'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php',
+    );
     const branch = proxy.match(
       /case 'client_cancel_record':[\s\S]*?\n\s*break;/,
     )?.[0];

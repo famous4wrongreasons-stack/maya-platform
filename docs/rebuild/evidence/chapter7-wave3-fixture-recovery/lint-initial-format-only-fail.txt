@@ -1,0 +1,27 @@
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/beget-relay-fixture.architecture.spec.ts
+   6:20  error  Insert `⏎·`                                                                                                                                                                                                                prettier/prettier
+  15:11  error  Replace `·sha256:·string;·fixtureSha256:·string;·allOtherBytesIdentical:·boolean` with `⏎······sha256:·string;⏎······fixtureSha256:·string;⏎······allOtherBytesIdentical:·boolean;⏎···`                                    prettier/prettier
+  27:30  error  Replace `"define('PARTNER_TOKEN',·'FIXTURE_ONLY_NOT_A_CREDENTIAL');"` with `⏎······"define('PARTNER_TOKEN',·'FIXTURE_ONLY_NOT_A_CREDENTIAL');",⏎····`                                                                      prettier/prettier
+  31:32  error  Replace `/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/` with `⏎······/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/,⏎····`                                                                                  prettier/prettier
+  39:25  error  Replace ``maya-saas-backend/src/action-engine/package5-b${blocker}-remediation.architecture.spec.ts`` with `⏎········`maya-saas-backend/src/action-engine/package5-b${blocker}-remediation.architecture.spec.ts`,⏎······`  prettier/prettier
+
+/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/package5-b13-remediation.architecture.spec.ts
+  25:22  error  Replace `'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php'` with `⏎····'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php',⏎··`  prettier/prettier
+
+/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/package5-b14-remediation.architecture.spec.ts
+  23:22  error  Replace `'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php'` with `⏎····'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php',⏎··`  prettier/prettier
+
+/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/package5-b16-remediation.architecture.spec.ts
+  62:24  error  Replace `'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php'` with `⏎······'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php',⏎····`  prettier/prettier
+
+/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/package5-b17-remediation.architecture.spec.ts
+  98:24  error  Replace `'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php'` with `⏎······'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php',⏎····`  prettier/prettier
+
+✖ 9 problems (9 errors, 0 warnings)
+  9 errors and 0 warnings potentially fixable with the `--fix` option.
+

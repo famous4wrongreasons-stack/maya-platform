@@ -1,0 +1,32 @@
+{
+  "classification": "Separate PWA operational maintenance introduced outside Chapter 7 Wave 3; not an unknown code regression",
+  "actorTaskId": "01a068b0-ad02-7582-bdc7-f96b9af49535",
+  "actorTaskTitle": "Выполнить Package 5 cutover",
+  "artifactCommit": "1ac62a5148927a45384ab4d07253a86ed16840a6",
+  "latestUserInstructionTakesPrecedence": true,
+  "desiredChapter7PwaBaseline": false,
+  "historicalReceipts": [
+    {
+      "timestamp": "2026-09-08T18:08:30.661Z",
+      "kind": "user",
+      "text": "Давай просто закроем временно pwa версию и напишем там Ведутся технические работы . Потом когда я доделаю Майю  нативную  Будем уже использовать ее. А в телеге сделай так чтобы бот присылал мне сообщения и отчеты в телеге"
+    },
+    {
+      "timestamp": "2026-09-08T18:10:40.280Z",
+      "kind": "historical_tool_command_NOT_EXECUTED_IN_THIS_TASK",
+      "command": "set -euo pipefail\nstamp=$(date +%Y%m%d-%H%M%S)\nscp -q -i ~/.ssh/beget_deploy -o BatchMode=yes 'сайт и приложение/maintenance.html' mocine3388@prime.beget.com:~/mayaos.ru/public_html/app/index.html.maintenance-incoming\nscp -q -i ~/.ssh/beget_deploy -o BatchMode=yes 'сайт и приложение/maintenance.html' mocine3388@prime.beget.com:~/muzhskayaestetika.rf/public_html/app/index.html.maintenance-incoming\nssh -i ~/.ssh/beget_deploy -o BatchMode=yes mocine3388@prime.beget.com \"set -e; cp -p ~/mayaos.ru/public_html/app/index.html ~/mayaos.ru/public_html/app/index.html.pre-maintenance-$stamp; cp -p ~/muzhskayaestetika.rf/public_html/app/index.html ~/muzhskayaestetika.rf/public_html/app/index.html.pre-maintenance-$stamp; chmod 644 ~/mayaos.ru/public_html/app/index.html.maintenance-incoming ~/muzhskayaestetika.rf/public_html/app/index.html.maintenance-incoming; mv ~/mayaos.ru/public_html/app/index.html.maintenance-incoming ~/mayaos.ru/public_html/app/index.html; mv ~/muzhskayaestetika.rf/public_html/app/index.html.maintenance-incoming ~/muzhskayaestetika.rf/public_html/app/index.html; printf '%s\\n' '$stamp'\"\n"
+    },
+    {
+      "timestamp": "2026-09-08T18:10:59.294Z",
+      "kind": "historical_tool_command_NOT_EXECUTED_IN_THIS_TASK",
+      "command": "ssh -i ~/.ssh/beget_deploy -o BatchMode=yes mocine3388@prime.beget.com 'set -e; cp ~/muzhskayaestetika.rf/public_html/app/index.html ~/muzhskayaestetika.rf/public_html/app/index.html.pre-maintenance-20260908-211040; chmod 644 ~/mayaos.ru/public_html/app/index.html.maintenance-incoming ~/muzhskayaestetika.rf/public_html/app/index.html.maintenance-incoming; mv ~/mayaos.ru/public_html/app/index.html.maintenance-incoming ~/mayaos.ru/public_html/app/index.html; mv ~/muzhskayaestetika.rf/public_html/app/index.html.maintenance-incoming ~/muzhskayaestetika.rf/public_html/app/index.html; stat -c \"%n %s %a\" ~/mayaos.ru/public_html/app/index.html ~/muzhskayaestetika.rf/public_html/app/index.html ~/mayaos.ru/public_html/app/index.html.pre-maintenance-20260908-211040 ~/muzhskayaestetika.rf/public_html/app/index.html.pre-maintenance-20260908-211040'"
+    },
+    {
+      "timestamp": "2026-09-08T18:12:05.892Z",
+      "kind": "assistant",
+      "text": "PWA уже закрыта на всех трёх публичных вариантах адреса: сервер отдаёт `200` и одинаковую страницу «Ведутся технические работы». Резервные копии обеих прежних PWA сохранены. Перехожу к Telegram: проверяю, создались ли сегодня durable-отчёты, включён ли Telegram-слот для owner и на каком состоянии остановилась доставка."
+    }
+  ],
+  "mechanism": "SCP incoming file then mv over each app/index.html; cp backup. Not a dynamic Beget maintenance flag. Separate Python handoff env flag true.",
+  "writesThisTask": 0
+}

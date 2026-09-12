@@ -22,7 +22,9 @@ describe('Package 5 B13 control-plane remediation', () => {
   const growth = read('ai администратор/growth_planner.py');
   const app = read('сайт и приложение/app.html');
   const site = read('maya-os-site/index.html');
-  const proxy = read('сайт и приложение/pwa-assets/tg-auth/api-proxy.php');
+  const proxy = read(
+    'maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php',
+  );
 
   it('keeps the active PWA under the B13 deployment guard', () => {
     const guard = resolve(pwa, 'package5_control_plane_runtime_guard.py');

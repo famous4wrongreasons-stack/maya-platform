@@ -1,0 +1,28 @@
+{
+  "sourcePath": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+  "sha256": "b1006160a28e66448886bdc4b520a2d94021121748259c2cd1aeefda5f1aaaa0",
+  "bytes": 116748,
+  "readAt": "2026-09-08T18:37:07.890894+00:00",
+  "certifiedManifest": "docs/rebuild/evidence/package5-rc-policy-approved/edge-manifest.json",
+  "productionWrites": 0,
+  "fixture": "api-proxy.sanitized.php",
+  "fixtureSha256": "5b5059f820b6337b59866fd6260f0b3fef87e65db8f969e7f4e7a9537619dd7e",
+  "purpose": "Static architecture-test input only; never execute or deploy this fixture.",
+  "redactions": [
+    {
+      "constant": "PARTNER_TOKEN",
+      "line": 96,
+      "replacement": "FIXTURE_ONLY_NOT_A_CREDENTIAL",
+      "classification": "credential"
+    },
+    {
+      "constant": "COMPANY_ID",
+      "line": 97,
+      "replacement": "999999999",
+      "classification": "environment-specific company identifier"
+    }
+  ],
+  "allOtherBytesIdentical": true,
+  "includedConfigurationCopied": false,
+  "sameLineCount": 2413
+}
