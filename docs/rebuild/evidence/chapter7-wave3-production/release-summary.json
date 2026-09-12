@@ -1,0 +1,23 @@
+{
+  "release": "20260912-c7-wave3-76916297",
+  "candidateCommit": "76916297",
+  "mandatory": {
+    "suites": 431,
+    "tests": 3609,
+    "status": "PASS"
+  },
+  "lint": "PASS",
+  "applicationTypecheck": "PASS",
+  "scriptsTypecheck": "PASS",
+  "build": "PASS",
+  "prisma": "PASS",
+  "pendingMigrations": 0,
+  "drift": "NONE",
+  "compiledArtifactsMatched": 19,
+  "relayVerifications": 3,
+  "denialsPerVerification": 128,
+  "maintenanceAndBackupChanges": 0,
+  "productionBusinessProviderMessageProofEffects": 0,
+  "P03": "PRODUCTION PASS",
+  "P04": "PRODUCTION PASS"
+}
