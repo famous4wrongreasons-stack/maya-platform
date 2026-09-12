@@ -40,7 +40,7 @@ The standard backend release now runs the live VPS PWA guard alongside the R01 r
 
 ## Finite preservation, not a new inventory
 
-The frozen manifest supplies the 32 surface groups and their inherited ratchets. The bounded preservation proof reads 122 known Python artifacts, runs 15 existing static guards, compares seven known cron/config files and five known service states. Its hashes include already accepted `31126aa5` and maintenance/registry-refresh upstream receipts; it does not mistake the older C6 snapshot for the later certified baseline. R01 verifies the established 42-entry public manifest and 128 denied HEAD paths. No private Beget vhost access or theoretical-alias search is required.
+The frozen manifest supplies the 32 surface groups and their inherited ratchets. The bounded preservation proof reads 121 known Python artifacts and the pre-cutover VPS PWA, runs 15 existing static guards, compares seven known cron/config files and five known service states. Its hashes include already accepted `31126aa5` and maintenance/registry-refresh upstream receipts; it does not mistake the older C6 snapshot for the later certified baseline. R01 verifies the established 42-entry public manifest and 128 denied HEAD paths. No private Beget vhost access or theoretical-alias search is required.
 
 The dormant/loyal scenario remains split: C7 provides exact observed Client visits/outcomes and qualified monetary facts; C8 owns valuation/ranking, C9 strategy/orchestration and C10 autonomy. Unknown visit history is not dormancy; scoring is not consent. PushSMS, mass contact export, causal uplift without evidence and the broader bridge credential migration before L3 remain deferred.
 
@@ -49,3 +49,9 @@ P06 LOCAL/PRODUCTION and final Chapter 7 verdicts are recorded in the subsequent
 ## Final local acceptance
 
 P06 LOCAL ACCEPTANCE: PASS. P06 REQUIREMENTS: 5/5 local PASS (Q16/Q17/Q19/Q20/Q21; production attestation follows cutover). Mandatory regression: 435 suites / 3653 tests PASS, zero skipped/failed tests. Exact architecture-only and architecture-plus-ratchet selections are recorded in [mandatory summary](evidence/chapter7-p06/mandatory-summary.json). Lint, both typechecks, build, Prisma, clean replay and schema drift PASS. Full P01/source-owner/P03/P04/P06 PostgreSQL proof: 91 checks PASS. Targeted consumer/compatibility/relay selection: 30 suites / 359 tests PASS. No production acceptance is inferred from this local result.
+
+## Production acceptance
+
+**P06 PRODUCTION: PASS.** Standard release `20260912-c7-p06-4058cd8c` completed all gates and three live R01/VPS consumer checks. The [production receipt](evidence/chapter7-p06/release-summary.json), [680-file/schema/authority verification](evidence/chapter7-p06/production-structural.txt), [PWA post-state](evidence/chapter7-p06/pwa-verify.txt) and [runtime preservation](evidence/chapter7-p06/preservation-after.json) pass. Maintenance pages and both Beget PWA backups are unchanged; no real business/provider/message proof mutation was performed.
+
+Q01–Q22: 22/22; packages: 6/6; waves: 4/4. The one [Chapter 7 final completion gate](CYCLE-07-FINAL-COMPLETION-REPORT.md) is PASS. No Chapter 8 work is started.

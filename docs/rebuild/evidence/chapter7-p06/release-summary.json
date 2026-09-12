@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "release": "20260912-c7-p06-4058cd8c",
+  "candidateCommit": "4058cd8c",
+  "mandatory": {
+    "suites": 435,
+    "tests": 3653,
+    "failedSuites": 0,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "architecture": {
+      "suites": 95,
+      "tests": 522
+    },
+    "architectureAndRatchets": {
+      "suites": 103,
+      "tests": 578
+    },
+    "chapter7Measurement": {
+      "suites": 17,
+      "tests": 228
+    }
+  },
+  "lint": "PASS",
+  "applicationTypecheck": "PASS",
+  "scriptsTypecheck": "PASS",
+  "build": "PASS",
+  "prisma": "PASS",
+  "pendingMigrations": 0,
+  "drift": "NONE",
+  "health": "PASS",
+  "readiness": "PASS",
+  "compiledArtifactsMatched": 680,
+  "relayVerifications": 3,
+  "denialsPerVerification": 128,
+  "vpsPwaVerifications": 3,
+  "pythonFilesMatched": 121,
+  "vpsStaticFilesMatched": 3,
+  "pythonGuards": 15,
+  "knownCronSources": 7,
+  "knownServices": 5,
+  "measurementRows": 0,
+  "maintenanceAndBackupChanges": 0,
+  "productionBusinessProviderMessageProofEffects": 0,
+  "deploymentLogSha256": "800578854f7a26d3bdb9bcfe05a361ce52139ae95de17c070d261f71f63ee076",
+  "P06": "PRODUCTION PASS"
+}

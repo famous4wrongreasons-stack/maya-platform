@@ -40,7 +40,7 @@ const db=new PrismaClient({adapter:new PrismaPg({connectionString:process.env.DA
   const {TenantAuditReadController}=require('./dist/src/audit-log/tenant-audit-read.controller.js');
   for (const C of [MeasurementController,TenantAuditReadController]) {
     assert.equal(Reflect.getMetadata('tenantScope',C).requireTenant,true);
-    assert.equal(Reflect.getMetadata('__isPublic__',C),undefined);
+    assert.equal(Reflect.getMetadata('isPublic',C),undefined);
     assert.equal(Reflect.getMetadata('method',C.prototype.read),0);
   }
   assert.deepEqual(Reflect.getMetadata('roles',TenantAuditReadController),['tenant_owner','business_owner']);

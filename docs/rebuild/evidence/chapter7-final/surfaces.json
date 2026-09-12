@@ -1,0 +1,833 @@
+[
+  {
+    "id": "S01",
+    "name": "Backend HTTP routes",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "analytics/recovery/review/owner-report read contracts",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S02",
+    "name": "Active salon PWA",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "existing cabinet/report/motivation C7 result presenters",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/relay-release-verifications.json"
+    ],
+    "acceptanceScope": "Owner-approved maintenance page and both historical PWA backups preserved. Repository consumer variant tested; active VPS consumer deployed. No Beget PWA restoration is claimed."
+  },
+  {
+    "id": "S03",
+    "name": "Maya platform PWA / VPS static",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "existing platform read result consumers",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/pwa-verify.txt",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S04",
+    "name": "Public site / Next / shop",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/relay-release-verifications.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S05",
+    "name": "Proxy / compatibility routes",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "pass-through compatibility/read disclosure only",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/relay-release-verifications.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S06",
+    "name": "Chat / stream / history",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "fact envelopes in existing chat/tool result rendering",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S07",
+    "name": "Realtime / voice",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "same read fact contract through current voice bridge; no new agents",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S08",
+    "name": "AI tools",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P04",
+      "P06"
+    ],
+    "chapter7Boundary": "existing analytic/goal tools consume canonical facts",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S09",
+    "name": "Journal",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P02",
+      "P06"
+    ],
+    "chapter7Boundary": "period/money fact disclosure where C7 changes contract; general journal UX stays C9",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S10",
+    "name": "Python services / importers",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P02",
+      "P06"
+    ],
+    "chapter7Boundary": "existing report readers and accepted financial-event adapters; retired writers stay retired",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S11",
+    "name": "Schedulers",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P01",
+      "P06"
+    ],
+    "chapter7Boundary": "existing scheduled report evidence inputs; no new send cadence",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S12",
+    "name": "VPS cron / timers",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S13",
+    "name": "Beget cron / hosting scheduled tasks",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "package5-s13-closure-pass.json",
+      "package5-s13-scheduled-jobs.json"
+    ],
+    "acceptanceScope": "Accepted Beget empty enabled/disabled Cron owner receipt remains baseline; this cutover creates/changes no hosting task or launcher. No new control-plane inventory is asserted."
+  },
+  {
+    "id": "S14",
+    "name": "Background workers / installed operator CLIs",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P01",
+      "P06"
+    ],
+    "chapter7Boundary": "measurement projection claims/audit and existing readers, no business effect",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S15",
+    "name": "Telegram handlers / commands / replies",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S16",
+    "name": "Inbox",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S17",
+    "name": "APNS",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S18",
+    "name": "Web Push",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/package5-b24-remediation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S19",
+    "name": "Communication Delivery",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S20",
+    "name": "Panel / GOD / admin",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P04",
+      "P06"
+    ],
+    "chapter7Boundary": "existing exact-role goal/analytics consumers",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S21",
+    "name": "Internal calendar",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S22",
+    "name": "CRM / YClients adapters / helpers",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P01",
+      "P02"
+    ],
+    "chapter7Boundary": "bounded history, financial/attendance source interpretation",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S23",
+    "name": "Marketing / bulk",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/relay-release-verifications.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S24",
+    "name": "Finance / expense",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P02",
+      "P04"
+    ],
+    "chapter7Boundary": "financial/expense/goal measurement reads",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S25",
+    "name": "Loyalty / value / certificates",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P02"
+    ],
+    "chapter7Boundary": "read-only P4 ledger/card discrepancy",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+      "maya-saas-backend/src/action-engine/package4-active-pwa-runtime-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S26",
+    "name": "Reviews",
+    "scopeKind": "DIRECT READ/FACT INTEGRATION",
+    "packages": [
+      "P05"
+    ],
+    "chapter7Boundary": "source-qualified review/feedback aggregates",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S27",
+    "name": "Onboarding",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S28",
+    "name": "Auth / identity",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/consent-security-invalidation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S29",
+    "name": "Maintenance",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/relay-release-verifications.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S30",
+    "name": "All direct database writer candidates",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-final-remediation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/relay-release-verifications.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S31",
+    "name": "All direct provider / delivery candidates",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+      "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/relay-release-verifications.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  },
+  {
+    "id": "S32",
+    "name": "Legacy identity / projection fallbacks",
+    "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+    "packages": [
+      "P06"
+    ],
+    "chapter7Boundary": "Existing canonical runtime/launcher/owner remains unchanged; consume permitted metadata only; inherited guard and production attestation required",
+    "inheritedRatchets": [
+      "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+      "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+      "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+      "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+    ],
+    "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+    "status": "PASS",
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/mandatory-summary.json",
+      "chapter7-p06/relay-release-verifications.json",
+      "chapter7-p06/preservation-after.json"
+    ],
+    "acceptanceScope": "Exact deployed owner artifacts, inherited mandatory guards and bounded preservation evidence; no production business scenarios."
+  }
+]
