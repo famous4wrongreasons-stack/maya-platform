@@ -17,7 +17,7 @@
 - Mandatory backend: **431 suites / 3609 tests PASS**, normal exit.
 - Affected R01/fixture/B31–B33/auth/PWA/P03/P04: **37 suites / 345 tests PASS**.
 - Exact retirement/atomic repair/scanner tests: **3 suites / 14 tests PASS**; wrong pre-state, partial restart, concurrent retry and preserved evidence covered.
-- Architecture-only suites: **95 / 523 tests PASS** within mandatory; broader architecture-or-ratchet filename selection: **102 / 573 PASS**. Selection is explicit in the [gate receipt](evidence/r01-proportional-remediation/mandatory-summary.json); no test excluded or weakened.
+- Architecture-only filename selection: **94 / 517 tests PASS** within mandatory; broader architecture-or-ratchet filename selection: **102 / 573 PASS**. Selection is explicit in the [gate receipt](evidence/r01-proportional-remediation/mandatory-summary.json); no test excluded or weakened.
 - Lint, application typecheck, scripts typecheck, build, Prisma: PASS. New migrations/schema changes: 0.
 - Incoming backend `20260908-c7-wave2-4b03a29c`: health/readiness PASS, repository migrations 94 / applied 97 with the existing three recognized historical migrations, pending 0, drift NONE; 37 MeasurementRevision columns and all canonical constraints/guard bodies match. [Read-only receipt](evidence/r01-proportional-remediation/backend-preflight.txt).
 - Main worktree status and all 23 recorded file hashes match the prior baseline (24 original dirty entries plus the previously documented external 25th entry). No main edits; 17 old DB untouched.
