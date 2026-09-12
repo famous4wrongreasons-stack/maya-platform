@@ -1,4 +1,12 @@
-import { readFileSync } from 'node:fs';
+import {
+  closeSync,
+  mkdtempSync,
+  openSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
@@ -158,13 +166,26 @@ function isFailClosed(guard: Guard, overrides?: SourceOverrides): boolean {
           contents,
         ]),
     );
-    const result = execFileSync(
-      'python3',
-      [
-        '-I',
-        '-B',
-        '-c',
-        `import importlib.util
+    // A finite regular-file stdin avoids the reproduced Node/macOS sync-pipe
+    // EOF stall. Python receives exactly the same JSON; guard/assertions stay
+    // unchanged. Never pass fixture source through argv or inherit caller stdin.
+    const directory = mkdtempSync(join(tmpdir(), 'maya-retention-proof-'));
+    let inputFd: number | undefined;
+    try {
+      const inputPath = join(directory, 'request.json');
+      writeFileSync(
+        inputPath,
+        JSON.stringify({ root: pythonRoot, overrides: files }),
+        { mode: 0o600 },
+      );
+      inputFd = openSync(inputPath, 'r');
+      const result = execFileSync(
+        'python3',
+        [
+          '-I',
+          '-B',
+          '-c',
+          `import importlib.util
 import json
 import pathlib
 import sys
@@ -175,13 +196,17 @@ guard = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(guard)
 print(json.dumps(guard.scan_retention_sources(root, request['overrides'])))
 `,
-      ],
-      {
-        encoding: 'utf8',
-        input: JSON.stringify({ root: pythonRoot, overrides: files }),
-      },
-    );
-    return (JSON.parse(result) as string[]).length === 0;
+        ],
+        {
+          encoding: 'utf8',
+          stdio: [inputFd, 'pipe', 'pipe'],
+        },
+      );
+      return (JSON.parse(result) as string[]).length === 0;
+    } finally {
+      if (inputFd !== undefined) closeSync(inputFd);
+      rmSync(directory, { recursive: true, force: true });
+    }
   }
   const body = functionBody(source(guard.file, overrides), guard.entrypoint);
   const marker = body.indexOf(guard.marker);

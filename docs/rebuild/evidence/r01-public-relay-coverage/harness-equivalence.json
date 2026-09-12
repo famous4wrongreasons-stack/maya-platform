@@ -1,0 +1,12 @@
+{
+  "base": "6df459e848f5b1aa2fc1678fb14cb6cb8b2b19fc",
+  "file": "maya-saas-backend/src/action-engine/p4-05-all8-cutover-ratchet.spec.ts",
+  "allTestDefinitionsAndAssertionsByteIdentical": true,
+  "testBodySha256": "76f12bd0f87870b850ee95b044604c43584043cd8639cf5ee0dbbf6ac67cdcc0",
+  "pythonGuardProgramByteIdentical": true,
+  "pythonGuardProgramSha256": "fe826943a55c862f051e3af6bb9c78b4faf7f611d40218c9aa1e1ffa0bfa7e2e",
+  "oldTransport": "execFileSync input JSON over pipe; EOF-dependent",
+  "newTransport": "same JSON, 0600 regular file fd as stdin; close/remove finally",
+  "releaseTestTimeoutChange": 0,
+  "businessRuntimeChanges": 0
+}

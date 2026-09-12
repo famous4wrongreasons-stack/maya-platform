@@ -1,0 +1,26 @@
+{
+  "node": "v22.23.2",
+  "trialCount": 300,
+  "passCount": 300,
+  "failedTrials": [],
+  "payloadByteSizes": [
+    183648
+  ],
+  "firstTrial": {
+    "i": 0,
+    "bytes": 183648,
+    "status": 0,
+    "signal": null,
+    "readProgress": "READ_BYTES:183648\nEOF:0\n"
+  },
+  "lastTrial": {
+    "i": 299,
+    "bytes": 183648,
+    "status": 0,
+    "signal": null,
+    "readProgress": "READ_BYTES:183648\nEOF:0\n"
+  },
+  "fullLocalReceiptSha256": "09fcf4dff8e50ce84156ccf4e1077890935b2d52dcc661af719788b63f2a3efd",
+  "fullTrialListingCommitted": false,
+  "reproducer": "corresponding versioned reproduce-*.cjs; raw local receipt is preserved"
+}
