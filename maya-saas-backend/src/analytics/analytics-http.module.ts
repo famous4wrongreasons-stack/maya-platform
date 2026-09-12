@@ -1,3 +1,4 @@
+import { MeasurementModule } from '../measurement/measurement.module';
 import { Module } from '@nestjs/common';
 
 import { BusinessStateModule } from '../business-state/business-state.module';
@@ -11,7 +12,7 @@ import { OperationsAnalyticsModule } from './operations-analytics.module';
  * Обратного пути нет, и храповик границы это проверяет.
  */
 @Module({
-  imports: [BusinessStateModule, OperationsAnalyticsModule],
+  imports: [BusinessStateModule, OperationsAnalyticsModule, MeasurementModule],
   controllers: [OperationsAnalyticsController],
 })
 export class AnalyticsHttpModule {}

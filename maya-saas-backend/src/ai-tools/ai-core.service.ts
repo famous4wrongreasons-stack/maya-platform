@@ -1,4 +1,8 @@
 import {
+  measurementText,
+  type MeasurementPresentation,
+} from '../measurement/measurement.presentation';
+import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
@@ -724,7 +728,7 @@ export class AiCoreService {
           decisions,
           {
             reply:
-              'Поняла, аренда за этот период — 0 ₽. Прибыль уже можно считать по кассе, зарплате из CRM и внесённым расходам. Если есть другие расходы — расходники, реклама, коммунальные услуги или что-то ещё — напишите статью и сумму, и я добавлю их после вашего подтверждения.',
+              'Поняла, аренды за этот период нет. Это само по себе не подтверждает полноту остальных расходов и чистую прибыль. Если есть другие расходы — расходники, реклама, коммунальные услуги или что-то ещё — напишите статью и сумму, и я добавлю их после вашего подтверждения.',
             source: 'safe_fallback',
             action: null,
           },
@@ -2363,6 +2367,32 @@ export class AiCoreService {
     userText: string,
   ): string | null {
     const text = userText.toLowerCase().replace(/ё/g, 'е');
+    const measured = this.record(this.record(evidence.result).measurement);
+    if (
+      measured.contract === 'c7.measurement.read/1' &&
+      (['analytics.business.profit', 'expenses.period.complete'].includes(
+        evidence.name,
+      ) ||
+        /прибыл|выруч|поступлен|касс|оборот|деньг|заработ|расход|зарплат/.test(
+          text,
+        ))
+    ) {
+      const period = this.record(this.record(evidence.result).resolved_period);
+      const notice =
+        period.truncated_to_today === true
+          ? 'Месяц ещё не закончился: показаны факты на текущую дату. '
+          : '';
+      const qualification = /привести|привлеч|нов[а-я]* клиент/.test(text)
+        ? 'Стоимость привлечения клиента не измерена: расходы на рекламу и совпадение по времени не доказывают результат конкретного действия. '
+        : /валов[а-я]*\s+прибыл/.test(text)
+          ? 'Валовая прибыль не измерена: нужна подтверждённая прямая себестоимость услуг. '
+          : '';
+      return (
+        qualification +
+        notice +
+        measurementText(measured as unknown as MeasurementPresentation)
+      );
+    }
     switch (evidence.name) {
       case 'analytics.business.query':
       case 'analytics.employee.query': {

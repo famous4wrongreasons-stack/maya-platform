@@ -1,3 +1,4 @@
+import { MeasurementModule } from '../measurement/measurement.module';
 import { OwnerReportDownloadService } from './owner-report-download.service';
 import { OwnerReportSnapshotsController } from './owner-report-snapshots.controller';
 import { OwnerReportFoundationModule } from './owner-report-foundation.module';
@@ -15,6 +16,7 @@ import { OwnerReportsService } from './owner-reports.service';
 
 @Module({
   imports: [
+    MeasurementModule,
     OwnerReportFoundationModule,
     CommunicationDeliveryModule,
     PrismaModule,

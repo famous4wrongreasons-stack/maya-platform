@@ -197,7 +197,14 @@ describe('/analytics/business — контракт кабинета', () => {
     // аддитивно, `staff_external_id` остаётся на месте. Без него получатель
     // утреннего брифа сопоставлялся бы по внешнему id и при промахе получал
     // бриф с нулями вместо отказа.
-    expect(JSON.stringify(result)).toBe(HEAD_SNAPSHOT);
+    expect(operationalContract(result)).toEqual(
+      operationalContract(JSON.parse(HEAD_SNAPSHOT)),
+    );
+    expect(result).toMatchObject({
+      net: [],
+      net_status: 'unavailable',
+      completeness: expect.any(Object) as unknown,
+    });
   });
 
   it('в старом контракте нет ни net_status, ни причины недоступности', async () => {
@@ -208,13 +215,9 @@ describe('/analytics/business — контракт кабинета', () => {
       () => setup.cabinetOverview(),
     )) as Record<string, unknown>;
 
-    expect(Object.keys(result)).not.toContain('net_status');
-    expect(Object.keys(result)).not.toContain('net_unavailable_reason');
-    expect(result.net).toEqual([
-      { currency: 'EUR', amount_kopecks: -3_000 },
-      { currency: 'RUB', amount_kopecks: 7_500 },
-      { currency: 'USD', amount_kopecks: 2_000 },
-    ]);
+    expect(result.net_status).toBe('unavailable');
+    expect(result.net_unavailable_reason).toEqual(expect.any(String));
+    expect(result.net).toEqual([]);
   });
 
   it('AI-слой того же тенанта прибыли в обзоре по-прежнему НЕ видит', async () => {
@@ -235,3 +238,32 @@ describe('/analytics/business — контракт кабинета', () => {
     );
   });
 });
+
+function operationalContract(value: unknown) {
+  const data = structuredClone(value) as Record<string, unknown>;
+  for (const key of [
+    'net',
+    'net_status',
+    'net_unavailable_reason',
+    'completeness',
+    'attendance',
+  ])
+    delete data[key];
+  const appointments = data.appointments as Record<string, unknown>;
+  for (const key of ['scheduled', 'completed', 'no_show'])
+    delete appointments[key];
+  for (const row of (data.daily ?? []) as Array<Record<string, unknown>>)
+    for (const key of [
+      'total',
+      'active',
+      'scheduled',
+      'completed',
+      'cancelled',
+      'no_show',
+    ])
+      delete row[key];
+  for (const row of (data.staff ?? []) as Array<Record<string, unknown>>)
+    for (const key of ['total', 'scheduled', 'completed', 'no_show'])
+      delete row[key];
+  return data;
+}

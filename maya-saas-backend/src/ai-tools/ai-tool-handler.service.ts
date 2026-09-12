@@ -1,3 +1,8 @@
+import { MeasurementReadService } from '../measurement/measurement.read.service';
+import {
+  measurementForAi,
+  comparePresentedMeasurements,
+} from '../measurement/measurement.presentation';
 import { GovernedSettingsReadService } from '../package5-wave1/governed-settings.read';
 import {
   BadRequestException,
@@ -68,10 +73,6 @@ import {
   analyzeClientRegistry,
   type ClientRegistryAnalysis,
 } from './client-registry-analysis';
-import {
-  computePeriodMoneyMotivation,
-  toMotivationVisit,
-} from './master-money-motivation';
 import { parseVisitOutcome } from '../domain';
 import type { PeriodRead } from '../domain';
 
@@ -218,6 +219,7 @@ export class AiToolHandlerService {
     private readonly canonicalWave1?: Package5Wave1CanonicalCutoverService,
     private readonly canonicalWave3?: Package5Wave3CanonicalCutoverService,
     private readonly governedSettings?: GovernedSettingsReadService,
+    private readonly measurementRead?: MeasurementReadService,
   ) {}
 
   async execute(
@@ -267,8 +269,24 @@ export class AiToolHandlerService {
         return this.requireBusinessContentService().getReferralProgram(
           principal.tenantId,
         );
-      case 'reviews.list.read':
-        return this.requireBusinessContentService().listReviews(
+      case 'reviews.list.read': {
+        if (!this.measurementRead)
+          throw new Error('canonical_measurement_reader_required');
+        const branchId =
+          typeof args.branch_id === 'string' ? args.branch_id : undefined;
+        const scope = await this.measurementRead.reviewScope(
+          principal.tenantId,
+          principal.userId,
+          branchId,
+        );
+        if (!scope.registryAllowed)
+          return {
+            configured: false,
+            source: 'not_measured',
+            reviews: [],
+            limitation: 'review_registry_has_no_exact_staff_subject',
+          };
+        const result = await this.requireBusinessContentService().listReviews(
           principal.tenantId,
           {
             days: Number(args.days),
@@ -276,27 +294,50 @@ export class AiToolHandlerService {
               ? {}
               : { rating: Number(args.rating) }),
             limit: Number(args.limit),
-            ...(typeof args.branch_id === 'string'
-              ? { branchId: args.branch_id }
-              : {}),
+            branchId: scope.branchId,
           },
         );
+        await this.measurementRead.reviewScope(
+          principal.tenantId,
+          principal.userId,
+          branchId,
+        );
+        return result;
+      }
       case 'reviews.analyze': {
-        const options = {
-          days: Number(args.days),
-          ...(typeof args.branch_id === 'string'
-            ? { branchId: args.branch_id }
-            : {}),
-        };
-        return args.mode === 'trend'
-          ? this.requireBusinessContentService().reviewTrend(
+        if (!this.measurementRead)
+          throw new Error('canonical_measurement_reader_required');
+        const result = await this.measurementRead.reputationMonths(
+          principal.tenantId,
+          principal.userId,
+          Number(args.days ?? 365),
+          typeof args.branch_id === 'string' ? args.branch_id : undefined,
+        );
+        const scope = await this.measurementRead.reviewScope(
+          principal.tenantId,
+          principal.userId,
+          typeof args.branch_id === 'string' ? args.branch_id : undefined,
+        );
+        const analysis = scope.registryAllowed
+          ? await this.requireBusinessContentService().analyzeReviews(
               principal.tenantId,
-              options,
+              { days: Number(args.days ?? 365), branchId: scope.branchId },
             )
-          : this.requireBusinessContentService().analyzeReviews(
-              principal.tenantId,
-              options,
-            );
+          : null;
+        await this.measurementRead.reviewScope(
+          principal.tenantId,
+          principal.userId,
+          scope.branchId,
+        );
+        return {
+          ...result,
+          items: result.items.map(measurementForAi),
+          topics: {
+            source: analysis?.source ?? 'not_measured',
+            items: analysis?.topics ?? [],
+            qualification: 'source_labelled_text_topics_not_rating',
+          },
+        };
       }
       case 'appointments.own.list':
         return this.listOwnAppointments(principal);
@@ -2117,22 +2158,22 @@ export class AiToolHandlerService {
     args: ValidatedAiToolArguments,
   ) {
     const window = await this.reportingWindow(principal.tenantId, args);
-    const profitability = await this.analyticsService.getBusinessProfitability(
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    const measurement = await this.measurementRead.readPeriod(
       principal.tenantId,
+      principal.userId,
+      'business_period',
       window.query,
     );
-    const data = this.record(profitability);
-    const period = this.record(data.period);
-    const resolved = this.resolvedPeriodPayload(args, window);
     return {
-      ...data,
-      resolved_period: resolved,
-      period: {
-        ...period,
-        ...resolved,
-        // Месяц ещё не кончился — сказать это обязаны мы, а не владелец,
-        // который сам заметит расхождение с бухгалтерией.
-        truncated_to_today: window.truncatedToToday,
+      measurement: measurementForAi(measurement),
+      resolved_period: this.resolvedPeriodPayload(args, window),
+      net_profit: {
+        status: 'unavailable',
+        amount: null,
+        unavailable_reason:
+          'confirmed_cash_refunds_and_complete_cost_basis_required',
       },
     };
   }
@@ -2235,21 +2276,25 @@ export class AiToolHandlerService {
       periodToDay,
       idempotencyKey,
     );
-    const profitability = await this.analyticsService.getBusinessProfitability(
-      principal.tenantId,
-      window.query,
-    );
-    const data = this.record(profitability);
-    const period = this.record(data.period);
-    const resolved = this.resolvedPeriodPayload(args, window);
+    const measurement = this.measurementRead
+      ? measurementForAi(
+          await this.measurementRead.readPeriod(
+            principal.tenantId,
+            principal.userId,
+            'business_period',
+            window.query,
+          ),
+        )
+      : null;
     return {
-      ...data,
       expense_period_declaration: declaration,
-      resolved_period: resolved,
-      period: {
-        ...period,
-        ...resolved,
-        truncated_to_today: window.truncatedToToday,
+      measurement,
+      resolved_period: this.resolvedPeriodPayload(args, window),
+      net_profit: {
+        status: 'unavailable',
+        amount: null,
+        unavailable_reason:
+          'confirmed_cash_refunds_and_complete_cost_basis_required',
       },
     };
   }
@@ -2451,116 +2496,17 @@ export class AiToolHandlerService {
     args: ValidatedAiToolArguments,
   ) {
     const window = await this.reportingWindow(principal.tenantId, args);
-    const [state, financePreference] = await Promise.all([
-      this.businessState.business({
-        tenantId: principal.tenantId,
-        period: window.query,
-        comparisonMode: 'none',
-        comparisonPeriod: null,
-        financeAllowed: CRM_FINANCE_ROLES.has(principal.role),
-        bookedValueAllowed: BOOKED_VALUE_ROLES.has(principal.role),
-        disclose: (rows) => this.businessDisclosure(principal, rows),
-      }),
-      this.prisma.dashboardPreference.findUnique({
-        where: {
-          userId_tenantId_section: {
-            userId: principal.userId,
-            tenantId: principal.tenantId,
-            section: 'finance',
-          },
-        },
-        select: { configJson: true },
-      }),
-    ]);
-    const financeConfig = this.record(financePreference?.configJson);
-    const staffTargets = this.record(financeConfig.staff_targets_rub);
-    const monthlyTarget = this.optionalMetricNumber(
-      financeConfig.monthly_target_rub,
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    const result = await this.measurementRead.teamGoals(
+      principal.tenantId,
+      principal.userId,
+      window.query,
     );
-    const businessRevenueKopecks = this.optionalMetricNumber(
-      state.metrics.revenue_amount_kopecks,
-    );
-    const period = this.requiredString(args.period);
-    const monthlyTargetComparable =
-      period === 'month_to_date' || period === 'named_month';
-
-    /**
-     * 🔴 Планы — не бизнес-факт канонического слоя, а настройка владельца, и
-     * живут они под внешним ключом мастера. Поэтому соединение делает этот
-     * слой, а числа мастера берутся уже посчитанными: своей копии вычисления
-     * здесь не осталось.
-     */
-    const staff = state.staffJoin
-      .map(({ externalId, published }) => {
-        const target = this.optionalMetricNumber(staffTargets[externalId]);
-        const revenue = this.record(published.confirmed_revenue);
-        const revenueAmount = this.safeMoneyAmount(revenue.amount);
-        return {
-          name:
-            typeof published.name === 'string' && published.name !== ''
-              ? published.name
-              : 'Мастер',
-          appointments: this.optionalMetricNumber(published.appointments) ?? 0,
-          scheduled: this.optionalMetricNumber(published.scheduled) ?? 0,
-          completed: this.optionalMetricNumber(published.completed) ?? 0,
-          booked_minutes:
-            this.optionalMetricNumber(published.booked_minutes) ?? 0,
-          confirmed_revenue: published.confirmed_revenue,
-          accrued_salary: published.salary,
-          monthly_target_rub: target,
-          target_progress_percent:
-            monthlyTargetComparable && target && revenueAmount
-              ? Math.round(
-                  ((revenueAmount.amount_major_units ?? 0) / target) * 1_000,
-                ) / 10
-              : null,
-        };
-      })
-      .sort(
-        (left, right) =>
-          (this.record(right.confirmed_revenue).status === 'available'
-            ? 1
-            : 0) -
-            (this.record(left.confirmed_revenue).status === 'available'
-              ? 1
-              : 0) ||
-          right.appointments - left.appointments ||
-          left.name.localeCompare(right.name),
-      );
-
     return {
-      verified: state.verified,
-      finance_verified: state.financeVerified,
-      source: state.source,
+      ...result,
+      items: result.items.map(measurementForAi),
       resolved_period: this.resolvedPeriodPayload(args, window),
-      target_basis: 'calendar_month',
-      monthly_target_comparable: monthlyTargetComparable,
-      team_monthly_target_rub: monthlyTarget,
-      team_confirmed_revenue:
-        businessRevenueKopecks === null
-          ? null
-          : {
-              currency: 'RUB',
-              amount_kopecks: businessRevenueKopecks,
-              amount_major_units: this.majorUnits(businessRevenueKopecks),
-            },
-      team_target_progress_percent:
-        monthlyTargetComparable && monthlyTarget && businessRevenueKopecks
-          ? Math.round((businessRevenueKopecks / 100 / monthlyTarget) * 1_000) /
-            10
-          : null,
-      staff,
-      /**
-       * 🔴 Конверт KPI команды оставлен ПРЕЖНИМ: тот же состав и тот же
-       * порядок, что работали в бою. Утверждения «маржа и окупаемость рекламы
-       * недоступны» и разрез когорт сюда не входили — добавить их значило бы
-       * поменять ответ под видом переноса.
-       */
-      limitations: [
-        ...state.unavailableParts.staffMoney,
-        ...state.unavailableParts.attendance,
-        ...state.limitations,
-      ],
     };
   }
   private async compareBranches(
@@ -2703,6 +2649,13 @@ export class AiToolHandlerService {
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
   ) {
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    const viewer = await this.measurementRead.viewer(
+      principal.tenantId,
+      principal.userId,
+      'client_history',
+    );
     const comparison = this.requiredString(args.comparison);
     if (
       !['none', 'previous_period', 'previous_year_same_period'].includes(
@@ -2721,8 +2674,20 @@ export class AiToolHandlerService {
      * ключ не входил вовсе.
      */
     const window = await this.reportingWindow(principal.tenantId, args);
+    if (
+      viewer.branchId &&
+      window.query.branchId &&
+      window.query.branchId !== viewer.branchId
+    )
+      throw new ForbiddenException('measurement_branch_scope_denied');
+    if (viewer.branchId) window.query.branchId = viewer.branchId;
     const cacheKey = this.periodCacheKey(
-      [principal.tenantId, principal.role],
+      [
+        principal.tenantId,
+        principal.userId,
+        principal.role,
+        viewer.branchId ?? 'all',
+      ],
       window,
       comparison,
     );
@@ -2751,7 +2716,10 @@ export class AiToolHandlerService {
       period: window.query,
       comparisonMode: comparison as PeriodComparisonMode,
       comparisonPeriod: previousQuery,
-      financeAllowed: CRM_FINANCE_ROLES.has(principal.role),
+      financeAllowed: false,
+      financeProjection: CRM_FINANCE_ROLES.has(principal.role)
+        ? 'measurement'
+        : undefined,
       /**
        * 🔴 Стоимость записанного — ОПЕРАЦИОННЫЙ факт, и право на неё шире
        * права на кассу: это сумма цен того, что стоит в журнале, а не деньги
@@ -2762,8 +2730,44 @@ export class AiToolHandlerService {
       disclose: (rows) => this.businessDisclosure(principal, rows),
     });
 
+    const currentMeasurement =
+      CRM_FINANCE_ROLES.has(principal.role) && !window.query.branchId
+        ? await this.measurementRead.readPeriod(
+            principal.tenantId,
+            principal.userId,
+            'business_period',
+            window.query,
+          )
+        : null;
+    const previousMeasurement =
+      currentMeasurement && previousQuery
+        ? await this.measurementRead.readPeriod(
+            principal.tenantId,
+            principal.userId,
+            'business_period',
+            previousQuery,
+          )
+        : null;
+    const measurement = currentMeasurement
+      ? measurementForAi(currentMeasurement)
+      : null;
+    await this.measurementRead.viewer(
+      principal.tenantId,
+      principal.userId,
+      'client_history',
+    );
     const resolved = this.resolvedPeriodPayload(args, window);
     const result = {
+      measurement,
+      measurement_comparison:
+        currentMeasurement && previousMeasurement
+          ? comparePresentedMeasurements(
+              currentMeasurement,
+              previousMeasurement,
+            ).filter(
+              (comparison) => Object.keys(comparison.dimensions).length === 0,
+            )
+          : [],
       verified: state.verified,
       finance_verified: state.financeVerified,
       source: state.source,
@@ -2846,6 +2850,13 @@ export class AiToolHandlerService {
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
   ) {
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    await this.measurementRead.viewer(
+      principal.tenantId,
+      principal.userId,
+      'staff_goal',
+    );
     const comparison = this.requiredString(args.comparison);
     if (
       !['none', 'previous_period', 'previous_year_same_period'].includes(
@@ -2861,13 +2872,8 @@ export class AiToolHandlerService {
       window,
       comparison,
     );
-    const cached = this.employeeQueryCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.value;
-    }
-    if (cached) {
-      this.employeeQueryCache.delete(cacheKey);
-    }
+    // Staff binding/access is re-read by the existing source owner on every request.
+    // A cached former Staff authorization must never bypass a current revocation.
 
     const previousQuery =
       comparison === 'none'
@@ -2920,19 +2926,14 @@ export class AiToolHandlerService {
       limitations: state.limitations,
       unavailable_metrics: state.unavailableMetrics,
     };
-    const motivation = await this.employeeMoneyMotivation(
-      principal,
-      window.query,
-    );
+    if (this.measurementRead)
+      await this.measurementRead.viewer(
+        principal.tenantId,
+        principal.userId,
+        'staff_goal',
+      );
     const enriched = {
-      ...(motivation
-        ? {
-            ...result,
-            limitations: [...result.limitations, ...motivation.limitations],
-            money_motivation: motivation.money_motivation,
-          }
-        : result),
-      // 🔴 Cycle 04 P7. Тот же штамп момента расчёта, что и у среза салона.
+      ...result,
       calculated_at: new Date(Date.now()).toISOString(),
     };
     // Неполный ответ не кэшируется — та же причина, что и у бизнес-среза.
@@ -2945,87 +2946,6 @@ export class AiToolHandlerService {
     }
     return enriched;
   }
-  /**
-   * Денежная мотивация мастера.
-   *
-   * 🔴 Опубликованный срез сюда больше не передаётся: начисление здесь не
-   * читается (см. комментарий ниже), а всё остальное берётся из визитов. Оставь
-   * я аргумент «на будущее» — он бы намекал, что состояние тут используется.
-   */
-  private async employeeMoneyMotivation(
-    principal: AiToolPrincipal,
-    query: AnalyticsRangeQueryDto,
-  ): Promise<{
-    money_motivation: ReturnType<typeof computePeriodMoneyMotivation>;
-    /** Оговорки об источнике, если история прочитана не целиком. */
-    limitations: Array<{ key: string; reason: string }>;
-  } | null> {
-    try {
-      const bundle = await this.analyticsService.getEmployeeMotivationVisits(
-        principal.tenantId,
-        principal.userId,
-        query,
-        60,
-      );
-      if (!bundle) return null;
-      const mapVisit = (appointment: {
-        clientId: string | null;
-        startAt: Date;
-        status: string;
-        totalPriceKopecks: number | null;
-        services: Array<{ name: string; amountKopecks: number }>;
-      }) =>
-        toMotivationVisit({
-          clientId: appointment.clientId,
-          startAt: appointment.startAt,
-          status: appointment.status,
-          totalPriceKopecks: appointment.totalPriceKopecks,
-          services: appointment.services,
-        });
-      const periodVisits = bundle.period.map(mapVisit);
-      const historyVisits = bundle.history.map(mapVisit);
-      /**
-       * 🔴 Начисление здесь НЕ читается — и это сохранение боевого поведения,
-       * а не упущение.
-       *
-       * Боевой код доставал строку мастера через обёртку `staffRows`, у которой
-       * начисление лежит уровнем глубже. Поэтому `earned_rub` в бою был ВСЕГДА
-       * `null`, доля мастера — всегда `0.5`, а «потенциал» считался от неё.
-       * Это латентный дефект, а не задумка: числа мотивации годами стояли не на
-       * том, на чём должны.
-       *
-       * P1 — перенос, а не исправление. Починить его здесь значит поменять
-       * числа, которые видит мастер, под видом переезда: `potential_rub` и
-       * `upside_rub` меняются в разы, а доля прыгает с 0.5 на настоящую.
-       * Дефект зарегистрирован (реестр 4.22) и ждёт отдельного решения.
-       */
-      const earnedRub: number | null = null;
-      const money_motivation = computePeriodMoneyMotivation({
-        periodVisits,
-        historyVisits,
-        earnedRub,
-        lookbackDays: 60,
-      });
-      return {
-        money_motivation,
-        // 🔴 Целевой чек берётся из верхних 40 % истории. Неполная история
-        // сдвигает этот квартиль вниз, а «потенциал» при этом остаётся точным
-        // на вид числом. Молчать об этом нельзя.
-        limitations: bundle.complete
-          ? []
-          : [
-              {
-                key: 'motivation_history',
-                reason:
-                  'the visit history behind the target check was read incompletely, so target_check_rub and potential_rub rest on a partial sample',
-              },
-            ],
-      };
-    } catch {
-      return null;
-    }
-  }
-
   private async comparisonReportingQuery(
     tenantId: string,
     current: AnalyticsRangeQueryDto,
@@ -3230,14 +3150,16 @@ export class AiToolHandlerService {
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
   ) {
-    if (!this.recoveryService) {
-      throw new Error('Recovery attribution service is unavailable');
-    }
     const query = await this.reportingQuery(principal.tenantId, args);
-    return this.recoveryService.report(
-      principal.tenantId,
-      new Date(query.from),
-      new Date(query.to),
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    return measurementForAi(
+      await this.measurementRead.readPeriod(
+        principal.tenantId,
+        principal.userId,
+        'execution_funnel',
+        query,
+      ),
     );
   }
 

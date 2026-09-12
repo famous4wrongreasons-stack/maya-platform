@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 /**
  * P6 §10 — ОБЯЗАТЕЛЬНАЯ РЕГРЕССИЯ КОНСОЛИДАЦИИ ЖУРНАЛА.
  *
@@ -168,6 +169,16 @@ function build(options: Options = {}) {
     businessState,
     new AppointmentPeriodReader(crmService),
     new ClientRecencyFactsService(crmService),
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    measurementReaderDouble(),
   );
   return { analytics, businessState, handler, tenantContext, getJournal };
 }

@@ -98,17 +98,17 @@ describe('AiCoreModelService', () => {
     expect(system).toContain('средний чек из кассы/записей за период, НЕ цена');
     expect(system).toContain('🔴 ПЕРИОД — В КАЖДОМ ОТВЕТЕ С ЧИСЛАМИ:');
     expect(system).toContain('предупреди об этом ПЕРВОЙ фразой');
+    expect(system).toContain('C7 ФИНАНСОВЫЕ РЕЗУЛЬТАТЫ:');
+    expect(system).toContain('Неизвестное не равно нулю');
+    expect(system).toContain('Не складывай валюты');
+    expect(system).toContain('measurement с contract=c7.measurement.read/1');
     expect(system).toContain(
-      '🔴 ПОСТУПЛЕНИЯ, НАЧИСЛЕНИЯ И ПРИБЫЛЬ — ТРИ РАЗНЫЕ ВЕЛИЧИНЫ:',
+      'дедупликация принадлежит источнику по durable identity',
     );
-    expect(system).toContain('Прибыль — серверный результат');
     expect(system).toContain(
-      '🔴 ДОПОЛНИТЕЛЬНЫЕ РАСХОДЫ ВЛАДЕЛЕЦ МОЖЕТ ДОБАВИТЬ В ЛЮБОЙ МОМЕНТ:',
+      'Команда expenses.period.complete сохраняет только',
     );
-    expect(system).toContain('Аренда не является обязательной статьёй');
-    expect(system).toContain('временно считает нулевыми');
-    expect(system).toContain('вызови expenses.period.complete');
-    expect(system).toContain('входит в расходы ровно один раз');
+    expect(system).not.toContain('временно считает нулевыми');
     expect(system).toContain('🔴 СТОИМОСТЬ НОВОГО КЛИЕНТА:');
     expect(system).toContain('На нуле новых гостей делить нечего');
     expect(system).toContain(

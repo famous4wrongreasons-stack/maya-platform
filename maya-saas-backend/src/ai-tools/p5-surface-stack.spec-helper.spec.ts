@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 /**
  * Стенд пользовательских поверхностей MAYA.
  *
@@ -242,6 +243,18 @@ export function buildSurfaceStack(options: StackOptions = {}) {
     {} as CustomersService,
     {} as StaffService,
     businessState,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    measurementReaderDouble(),
   );
 
   return {
@@ -311,7 +324,10 @@ describe('стенд пользовательских поверхностей',
 
     expect(
       (evidence.metrics as Record<string, unknown>).revenue_amount_kopecks,
-    ).toBe(5_000_000);
+    ).toBeNull();
+    expect(evidence.measurement).toMatchObject({
+      contract: 'c7.measurement.read/1',
+    });
     expect(
       (evidence.metrics as Record<string, unknown>).booked_value_amount_kopecks,
     ).toBe(250_000);

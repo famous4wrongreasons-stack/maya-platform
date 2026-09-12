@@ -1,3 +1,4 @@
+import { MeasurementReportReader } from '../measurement/measurement.report';
 import { staffTelegramEligible } from '../package5-wave1/governed-settings.read';
 import { type OwnerReportRun } from '@prisma/client';
 import { OwnerReportStore } from './owner-report.store';
@@ -91,6 +92,7 @@ export class OwnerReportsService {
     private readonly dashboardPreferences: DashboardPreferencesService,
     @Optional() private readonly reportStore?: OwnerReportStore,
     @Optional() private readonly reportDelivery?: CommunicationDeliveryService,
+    @Optional() private readonly measurementReports?: MeasurementReportReader,
   ) {}
 
   async tick(now: Date = new Date()): Promise<{
@@ -377,7 +379,16 @@ export class OwnerReportsService {
       // Preserve the existing canonical financial/business facts and composition.
       const state = await this.readState(tenant, localDate, {
         financeAllowed: true,
+        financeProjection: 'measurement',
       });
+      if (!this.measurementReports)
+        throw new Error('canonical_measurement_report_reader_required');
+      state.measurement = await this.measurementReports.snapshot(
+        tenant.id,
+        `daily_report/1/${localDate}`,
+        dayIsoRange(tenant.defaultTimezone, localDate),
+        now,
+      );
       const facts = businessBriefFacts(state, localDate);
       if (facts.revenue.basis === 'unavailable')
         this.logger.warn(
@@ -406,7 +417,11 @@ export class OwnerReportsService {
           version: 1,
           preference: 'daily_brief',
         },
-        content: { ...composed, deepLink: '/app/?panel=chat' },
+        content: {
+          ...composed,
+          payload: { ...composed.payload, measurement: state.measurement },
+          deepLink: '/app/?panel=chat',
+        },
         recipients,
       });
       let run: OwnerReportRun;
@@ -598,16 +613,19 @@ export class OwnerReportsService {
   private async readState(
     tenant: EligibleTenant,
     localDate: string,
-    options: { financeAllowed: boolean },
+    options: { financeAllowed: boolean; financeProjection?: 'measurement' },
   ): Promise<BusinessState> {
     const range = dayIsoRange(tenant.defaultTimezone, localDate);
-    return this.tenantContext.runAsSystemTenant(tenant.id, () =>
-      this.businessState.business({
+    return this.tenantContext.runAsSystemTenant(tenant.id, async () => {
+      const state = await this.businessState.business({
         tenantId: tenant.id,
         period: range,
         comparisonMode: 'none',
         comparisonPeriod: null,
         financeAllowed: options.financeAllowed,
+        financeProjection:
+          options.financeProjection ??
+          (options.financeAllowed ? 'measurement' : undefined),
         // Стоимость записанного — операционный факт владельца салона (P2.1).
         bookedValueAllowed: true,
         operationalDetail: false,
@@ -650,8 +668,21 @@ export class OwnerReportsService {
           }
           return { names, allowedExternalIds: null };
         },
-      }),
-    );
+      });
+      if (
+        options.financeAllowed &&
+        options.financeProjection !== 'measurement'
+      ) {
+        if (!this.measurementReports)
+          throw new Error('canonical_measurement_report_reader_required');
+        state.measurement = await this.measurementReports.observe(
+          tenant.id,
+          range,
+          new Date(),
+        );
+      }
+      return state;
+    });
   }
 
   async listEligibleTenants(): Promise<EligibleTenant[]> {

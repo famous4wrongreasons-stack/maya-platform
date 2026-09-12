@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 /**
  * P7 §11 — СОСТЯЗАТЕЛЬНАЯ ПРОВЕРКА ГРАНИЦ КЭША.
  *
@@ -185,6 +186,16 @@ function build(options: Options = {}) {
     businessState,
     new AppointmentPeriodReader(crmService),
     new ClientRecencyFactsService(crmService),
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    measurementReaderDouble(),
   );
   return { handler, tenantContext, getJournal, businessSpy, analytics };
 }
@@ -302,7 +313,11 @@ describe('P7 §11 — кэш не становится источником ис
 
     expect(
       (owner.metrics as Record<string, number>).revenue_amount_kopecks,
-    ).toBe(7_777_700);
+    ).toBeNull();
+    expect(owner.measurement).toMatchObject({
+      contract: 'c7.measurement.read/1',
+    });
+    expect(restricted.measurement).toBeNull();
     // 🔴 Роль без права на кассу не должна получить её из кэша владельца.
     expect(
       (restricted.metrics as Record<string, number | null>)

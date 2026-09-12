@@ -1,3 +1,4 @@
+import { MeasurementModule } from '../measurement/measurement.module';
 import { Module } from '@nestjs/common';
 import { AiToolPolicyModule } from './ai-tool-policy.module';
 import { ActionEngineModule } from '../action-engine/action-engine.module';
@@ -37,6 +38,7 @@ import { ConversationIntelligenceService } from '../conversation-intelligence/co
 
 @Module({
   imports: [
+    MeasurementModule,
     AiToolPolicyModule,
     ActionEngineModule,
     BusinessStateModule,

@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { canonicalReceiptFixture } from '../../test/fixtures/ai-tool-receipt.fixture';
 /**
  * СОСТЯЗАТЕЛЬНЫЙ ПРОГОН: запись расхода из чата.
@@ -1174,6 +1175,16 @@ function createHarness() {
     // 🔴 Cycle 04 P6. Канонический читатель периода.
     new AppointmentPeriodReader({} as CrmService),
     new ClientRecencyFactsService({} as CrmService),
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    measurementReaderDouble(),
   );
   const runtime = new AiToolRuntimeService(
     prisma,

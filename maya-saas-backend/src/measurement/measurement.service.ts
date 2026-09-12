@@ -76,6 +76,83 @@ export class MeasurementService {
     });
   }
 
+  /** Live projection uses the same source/rule pipeline without admission or publication. */
+  async observe(input: MeasurementIntent): Promise<MeasurementResult> {
+    const tenantId = this.authority();
+    const intent = normalizeMeasurement(input);
+    await this.sources.authorize(tenantId, intent);
+    const prepared = await this.sources.prepare(tenantId, intent);
+    return this.readDb(async (tx) => {
+      await this.sources.authorizeReceipt(tenantId, intent, tx);
+      if (intent.appointmentId) {
+        const [source] = await tx.$queryRaw<
+          Array<{ mayaClientId: string | null }>
+        >`
+          SELECT "mayaClientId" FROM "Appointment"
+          WHERE id=${intent.appointmentId} AND "tenantId"=${tenantId} FOR SHARE`;
+        if (!source || source.mayaClientId !== intent.clientId)
+          throw new Error('measurement_appointment_client_mismatch');
+      }
+      if (prepared)
+        await this.sources.assertPreparedCurrent(
+          tenantId,
+          intent,
+          prepared,
+          tx,
+        );
+      return normalizeMeasurementResult(
+        prepared ?? (await this.sources.read(tenantId, intent, tx)),
+        tenantId,
+      );
+    });
+  }
+
+  /** Existing report intent is the durable occurrence; first admission fixes asOf once. */
+  async reportSnapshot(
+    input: MeasurementIntent,
+    reportIdentity: string,
+  ): Promise<MeasurementRevision> {
+    const tenantId = this.authority();
+    const occurrence: MeasurementOccurrence = {
+      namespace: 'measurement_request',
+      id: measurementHash(['c7.owner-report/1', tenantId, reportIdentity]),
+    };
+    const requestKeyHash = measurementHash([
+      'c7.measurement.request/1',
+      tenantId,
+      occurrence.namespace,
+      occurrence.id,
+    ]);
+    const prior = await this.readDb((tx) =>
+      tx.measurementRevision.findUnique({
+        where: { tenantId_requestKeyHash: { tenantId, requestKeyHash } },
+      }),
+    );
+    let row: MeasurementRevision;
+    try {
+      row = await this.admit(
+        { ...input, asOf: prior?.asOf ?? input.asOf },
+        occurrence,
+      );
+    } catch (error) {
+      if (
+        prior ||
+        !(error instanceof Error) ||
+        error.message !== 'measurement_idempotency_conflict'
+      )
+        throw error;
+      const winner = await this.readDb((tx) =>
+        tx.measurementRevision.findUnique({
+          where: { tenantId_requestKeyHash: { tenantId, requestKeyHash } },
+        }),
+      );
+      if (!winner) throw error;
+      // Only the first-observation clock is resolved from the winner; every other input must still match.
+      row = await this.admit({ ...input, asOf: winner.asOf }, occurrence);
+    }
+    return this.resume(row.id);
+  }
+
   async admit(
     input: MeasurementIntent,
     occurrence: MeasurementOccurrence,

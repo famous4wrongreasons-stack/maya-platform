@@ -88,8 +88,9 @@ describe('граница сводок владельца', () => {
   it('слой фактов ничего не измеряет — он только достаёт', () => {
     const facts = readFileSync(FACTS, 'utf8');
 
-    // Единственный импорт — тип канонического состояния.
+    // C7 adds only the shared typed presenter; no report-local financial computation.
     expect(importedPaths(FACTS)).toEqual([
+      '../measurement/measurement.presentation',
       '../business-state/business-state.service',
     ]);
     expect(facts).not.toMatch(/reduce\(|Math\.|\bfilter\(.*\+/);

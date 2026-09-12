@@ -1,4 +1,5 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { MeasurementReadService } from '../measurement/measurement.read.service';
+import { ForbiddenException, Controller, Get, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -62,6 +63,7 @@ export class OperationsAnalyticsController {
     private readonly businessState: BusinessStateService,
     /** Финансовая сводка провайдера: другой факт, другой владелец. */
     private readonly analytics: OperationsAnalyticsService,
+    private readonly measurementRead?: MeasurementReadService,
   ) {}
 
   /**
@@ -105,11 +107,28 @@ export class OperationsAnalyticsController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: AnalyticsRangeQueryDto,
   ) {
-    return this.cabinet(
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    const viewer = await this.measurementRead.viewer(
+      user.tenantId!,
+      user.userId,
+      'client_history',
+    );
+    if (viewer.branchId && query.branchId && query.branchId !== viewer.branchId)
+      throw new ForbiddenException('measurement_branch_scope_denied');
+    if (viewer.branchId) query = { ...query, branchId: viewer.branchId };
+    const result = this.cabinet(
       await this.businessState.business(
         this.cabinetRequest(user.tenantId!, query),
       ),
     );
+    if (this.measurementRead)
+      await this.measurementRead.viewer(
+        user.tenantId!,
+        user.userId,
+        'client_history',
+      );
+    return result;
   }
 
   @Get('business/finance')
@@ -118,11 +137,19 @@ export class OperationsAnalyticsController {
   @ApiOperation({
     summary: 'Get verified tenant finance and payroll from the external CRM',
   })
-  getBusinessFinance(
+  async getBusinessFinance(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: AnalyticsRangeQueryDto,
   ) {
-    return this.analytics.getBusinessFinance(user.tenantId!, query);
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    const measurement = await this.measurementRead.readPeriod(
+      user.tenantId!,
+      user.userId,
+      'business_period',
+      query,
+    );
+    return { measurement };
   }
 
   @Get('me')
@@ -133,13 +160,27 @@ export class OperationsAnalyticsController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: AnalyticsRangeQueryDto,
   ) {
-    return this.cabinet(
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    await this.measurementRead.viewer(
+      user.tenantId!,
+      user.userId,
+      'staff_goal',
+    );
+    const result = this.cabinet(
       await this.businessState.employee({
         ...this.cabinetRequest(user.tenantId!, query),
         userId: user.userId,
         nameRows: () => new Map<string, string>(),
       }),
     );
+    if (this.measurementRead)
+      await this.measurementRead.viewer(
+        user.tenantId!,
+        user.userId,
+        'staff_goal',
+      );
+    return result;
   }
 
   /** Канонический state → опубликованный контракт кабинета. */

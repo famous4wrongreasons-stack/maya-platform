@@ -1,0 +1,28 @@
+{
+  "sourceOwnerCompatibility": "PASS",
+  "option": "A",
+  "checks": 18,
+  "results": [
+    "no measurement: canonical A→B correction succeeds",
+    "pending measurement does not block canonical source correction",
+    "wrong/current Client initial admission rejected",
+    "wrong tenant and cross-Client admission rejected",
+    "SQL admission guard independently verifies exact Client",
+    "pending closes unavailable with no stale facts, credit or silent Client rebind",
+    "restart/retry preserves exact unavailable outcome",
+    "current Client B does not receive historical Client A result",
+    "genuine Client B observation uses same Appointment identity and next revision",
+    "published A→B correction succeeds; all historical snapshot fields remain immutable",
+    "current projection cannot resurrect an older matching Client revision",
+    "published historical Client cannot be changed in place",
+    "SQL publication guard rejects stale Client facts independently; retry closes same receipt",
+    "concurrent correction wins → pending publication unavailable",
+    "publication wins → later correction succeeds and historical snapshot immutable",
+    "concurrent admission/claims: one winner, deterministic next revision and restart-safe current outcome",
+    "old request identity cannot be reused to change Client",
+    "Client without Maya User supported; no business actions, provider calls or fabricated source lineage"
+  ],
+  "productionMutations": 0,
+  "providerCalls": 0,
+  "oldDatabasesTouched": 0
+}

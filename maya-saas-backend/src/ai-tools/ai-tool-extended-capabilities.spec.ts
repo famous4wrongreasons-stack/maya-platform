@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { BusinessStateService } from '../business-state/business-state.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
@@ -584,5 +585,8 @@ function createService(overrides: {
     undefined,
     undefined,
     overrides.canonicalWave1,
+    undefined,
+    undefined,
+    measurementReaderDouble(),
   );
 }

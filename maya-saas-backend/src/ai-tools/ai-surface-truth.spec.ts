@@ -187,6 +187,84 @@ const DECLARED: Record<string, Record<string, string>> = {
   '10. чтение журнала оборвано': { rows: ROWS_REASON },
 };
 
+// C7 D4/D6: shared qualified money receipt replaces unqualified legacy money;
+// frozen operational counters and old fixture bytes remain unchanged.
+const C7_MONEY_REASON =
+  'C7 D4: legacy provider gross is not confirmed cash; typed measurement keeps unknown amounts and basis explicit';
+const C7_STAFF_REASON =
+  'C7 D6/C8 boundary: no default commission, monetary potential, target ticket or predicted upside as measured fact';
+const C7_DELTAS: Record<string, string[]> = {
+  '1. деньги недоступны: контур не ответил': ['measurement'],
+  '3. измеренный ноль: записей нет': [
+    'average_ticket_rub',
+    'measurement',
+    'revenue_basis',
+    'revenue_rub',
+    'status_text',
+  ],
+  '4. записанное есть, заработок мастеру неизвестен': [
+    'footnote',
+    'potential_rub',
+    'target_check_rub',
+    'upside_rub',
+  ],
+  '4б. виджет допродаж: заработок неизвестен': [
+    'footnote',
+    'potential_rub',
+    'target_check_rub',
+    'upside_rub',
+  ],
+  '5. касса и записанное расходятся': [
+    'average_ticket_rub',
+    'measurement',
+    'revenue_basis',
+    'revenue_caption',
+    'revenue_rub',
+    'status_text',
+  ],
+  '6. неявка из канонического присутствия': [
+    'average_ticket_rub',
+    'measurement',
+    'revenue_basis',
+    'revenue_caption',
+    'revenue_rub',
+    'status_text',
+  ],
+  '7. присутствие сверено не полностью': [
+    'average_ticket_rub',
+    'measurement',
+    'revenue_basis',
+    'revenue_caption',
+    'revenue_rub',
+    'status_text',
+  ],
+  '8. строка мастера с неизвестной метрикой': [
+    'average_ticket_rub',
+    'measurement',
+    'revenue_basis',
+    'revenue_caption',
+    'revenue_rub',
+  ],
+  '9. внутренний календарь: кассы нет как понятия': ['measurement'],
+  '10. чтение журнала оборвано': [
+    'average_ticket_rub',
+    'measurement',
+    'revenue_basis',
+    'revenue_caption',
+    'revenue_rub',
+  ],
+};
+for (const [name, keys] of Object.entries(C7_DELTAS))
+  DECLARED[name] = {
+    ...DECLARED[name],
+    ...Object.fromEntries(
+      keys.map((key) => [
+        key,
+        name.startsWith('4') ? C7_STAFF_REASON : C7_MONEY_REASON,
+      ]),
+    ),
+  };
+
 async function render(kase: Case) {
   const evidence = kase.personal
     ? await employeeEvidence(kase.options)
@@ -206,11 +284,26 @@ async function render(kase: Case) {
 describe('P5 §7 — карточки против эталонов до миграции', () => {
   for (const kase of CASES) {
     it(`«${kase.name}»: изменилось только объявленное`, async () => {
-      const { card } = await render(kase);
+      const { card, evidence } = await render(kase);
       const before: Record<string, unknown> =
         GOLDEN[kase.name]?.card?.widget_data ?? {};
       const after: Record<string, unknown> = card?.widget_data ?? {};
       const declared = DECLARED[kase.name] ?? {};
+      if (kase.personal) {
+        for (const key of ['potential_rub', 'upside_rub', 'target_check_rub'])
+          expect(after[key]).toBeNull();
+      } else {
+        expect(after.revenue_rub).toBeNull();
+        if (kase.role !== UserRole.MANAGER) {
+          expect(after.measurement).toEqual(evidence.measurement);
+          expect(after.measurement).toMatchObject({
+            contract: 'c7.measurement.read/1',
+            metrics: [
+              expect.objectContaining({ key: 'net_profit', value: null }),
+            ],
+          });
+        }
+      }
 
       const changed: string[] = [];
       for (const key of new Set([
@@ -222,6 +315,7 @@ describe('P5 §7 — карточки против эталонов до миг�
         }
       }
 
+      expect(changed.sort()).toEqual(Object.keys(declared).sort());
       for (const key of changed) {
         const reason: string | null = declared[key] ?? null;
         // Изменение без названной причины — это и есть тихий регресс.
@@ -324,10 +418,9 @@ describe('P5 §8 — одна семантика на всех поверхно�
     const data = card?.widget_data as Record<string, unknown>;
 
     // Выручка: одно число и одно основание.
-    expect(metrics.revenue_basis).toBe('provider_transactions');
-    expect(data.revenue_rub).toBe(
-      (metrics.revenue_amount_kopecks as number) / 100,
-    );
+    expect(metrics.revenue_basis).toBe('unavailable');
+    expect(data.revenue_rub).toBeNull();
+    expect(data.measurement).toEqual(evidence.measurement);
     expect(data.revenue_basis).toBe(metrics.revenue_basis);
 
     // Стоимость записанного: другое число, другое основание, другое поле.

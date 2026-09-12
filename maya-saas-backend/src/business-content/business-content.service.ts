@@ -368,7 +368,8 @@ export class BusinessContentService {
   private topicTags(row: BusinessReview): string[] {
     if (!Array.isArray(row.topicTagsJson)) return [];
     return row.topicTagsJson.filter(
-      (value): value is string => typeof value === 'string',
+      (value): value is string =>
+        typeof value === 'string' && Object.hasOwn(REVIEW_TOPICS, value),
     );
   }
 

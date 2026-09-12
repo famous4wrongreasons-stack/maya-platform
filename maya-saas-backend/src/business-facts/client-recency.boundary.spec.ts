@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -139,6 +140,16 @@ describe('Cycle 04 P9 — кэш не меняет правду о давнос�
       new BusinessStateService({} as OperationsAnalyticsService, prisma),
       new AppointmentPeriodReader(crmService),
       new ClientRecencyFactsService(crmService),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      measurementReaderDouble(),
     );
     return { handler, tenantContext, getClientRegistry };
   }

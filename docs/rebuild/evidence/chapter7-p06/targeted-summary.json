@@ -1,0 +1,160 @@
+{
+  "status": "PASS",
+  "suites": 30,
+  "tests": 359,
+  "failedSuites": 0,
+  "failedTests": 0,
+  "selection": "owner-report|measurement|tenant-audit|ai-surface|beget-relay-release",
+  "suitesCovered": [
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-reports.regression.spec.ts",
+      "tests": 26,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.pwa.spec.ts",
+      "tests": 7,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts",
+      "tests": 9,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-surface-truth.spec.ts",
+      "tests": 17,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.staff-goal.spec.ts",
+      "tests": 35,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.finance.spec.ts",
+      "tests": 13,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-reports.migration.spec.ts",
+      "tests": 14,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-report.runtime.spec.ts",
+      "tests": 7,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.read.spec.ts",
+      "tests": 15,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.outcomes.spec.ts",
+      "tests": 33,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.architecture.spec.ts",
+      "tests": 14,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-reports.service.spec.ts",
+      "tests": 4,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.reputation.spec.ts",
+      "tests": 26,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/brief-stack.spec-helper.spec.ts",
+      "tests": 1,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/audit-log/tenant-audit-read.spec.ts",
+      "tests": 16,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.contract.spec.ts",
+      "tests": 32,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.value.spec.ts",
+      "tests": 9,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.finance.architecture.spec.ts",
+      "tests": 4,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.reputation.architecture.spec.ts",
+      "tests": 5,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-report.contract.spec.ts",
+      "tests": 16,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.staff-goal.architecture.spec.ts",
+      "tests": 3,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.wave3.architecture.spec.ts",
+      "tests": 3,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.period.spec.ts",
+      "tests": 15,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-reports.composers.spec.ts",
+      "tests": 7,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.wave2.architecture.spec.ts",
+      "tests": 4,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-surface-boundary.spec.ts",
+      "tests": 6,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.consumers.architecture.spec.ts",
+      "tests": 5,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.outcomes.architecture.spec.ts",
+      "tests": 5,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-reports.boundary.spec.ts",
+      "tests": 6,
+      "status": "passed"
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts",
+      "tests": 2,
+      "status": "passed"
+    }
+  ]
+}

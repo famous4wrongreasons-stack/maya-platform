@@ -157,6 +157,9 @@ describe('граница канонического состояния бизн�
     const source = readFileSync(HANDLER, 'utf8');
 
     expect(source).toMatch(/Math\.round/);
-    expect(source).toMatch(/target_progress_percent/);
+    expect(source).toMatch(/this\.measurementRead\.teamGoals/);
+    expect(source).not.toMatch(
+      /computePeriodMoneyMotivation|target_progress_percent\s*:/,
+    );
   });
 });

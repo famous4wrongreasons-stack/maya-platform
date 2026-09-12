@@ -12496,13 +12496,14 @@ function ABookFlow() {
     return 'from=' + encodeURIComponent(from.toISOString()) + '&to=' + encodeURIComponent(to.toISOString());
   }
   function moneyList(arr) {
-    if (!Array.isArray(arr) || !arr.length) return '0';
+    if (!Array.isArray(arr) || !arr.length) return '—';
     return arr.map(function (x) {
-      var hasKopecks = x && (x.amount_kopecks != null || x.amountKopecks != null);
-      var raw = x && (x.amount_kopecks != null ? x.amount_kopecks : (x.amountKopecks != null ? x.amountKopecks : (x.amount != null ? x.amount : x.total)));
-      var amt = (Number(raw) || 0) / (hasKopecks ? 100 : 1);
-      var cur = (x && x.currency) === 'RUB' || !(x && x.currency) ? '₽' : x.currency;
-      return amt.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ' + cur;
+      if (!x || !/^[A-Z]{3}$/.test(x.currency || '')) return '—';
+      var hasKopecks = x.amount_kopecks != null || x.amountKopecks != null;
+      var raw = x.amount_kopecks != null ? x.amount_kopecks : (x.amountKopecks != null ? x.amountKopecks : (x.amount != null ? x.amount : x.total));
+      if (raw == null || !Number.isFinite(Number(raw)) || (hasKopecks && !Number.isSafeInteger(Number(raw)))) return '—';
+      var amt = Number(raw) / (hasKopecks ? 100 : 1);
+      return amt.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ' + (x.currency === 'RUB' ? '₽' : x.currency);
     }).join(' · ');
   }
   function loadMyBiz() {
@@ -12511,21 +12512,20 @@ function ABookFlow() {
     ensureLocalSession().then(function (sess) {
       var h = { headers: { Authorization: 'Bearer ' + sess.token } };
       var externalHint = !!(window.__SAAS_TENANT && window.__SAAS_TENANT.calendar_source && window.__SAAS_TENANT.calendar_source !== 'internal');
+      var measurementWindow = meRange30();
       return Promise.all([
-        localBookingFetch('/analytics/business?' + meRange30(), h),
+        localBookingFetch('/analytics/business?' + measurementWindow, h),
         localBookingFetch('/customers', h).catch(function () { return null; }),
-        externalHint ? Promise.resolve(null) : localBookingFetch('/expenses?' + meRange30(), h).catch(function () { return null; }),
-        externalHint
-          ? localBookingFetch('/analytics/business/finance?' + meRange30(), h).catch(function (e) {
+        externalHint ? Promise.resolve(null) : localBookingFetch('/expenses?' + measurementWindow, h).catch(function () { return null; }),
+        localBookingFetch('/analytics/business/finance?' + measurementWindow, h).catch(function (e) {
               return { _unavailable: true, message: readErrorText(e, 'Финансы CRM недоступны') };
-            })
-          : Promise.resolve(null),
+            }),
         Promise.resolve(h)
       ]).then(function (r) {
         // Публичный конфиг может прийти позже первого запроса кабинета. Решение
         // о CRM принимаем по tenant-scoped ответу analytics, а не по гонке boot UI.
         if (r[0] && r[0].data_source === 'crm' && !r[3]) {
-          return localBookingFetch('/analytics/business/finance?' + meRange30(), r[4]).then(function (finance) {
+          return localBookingFetch('/analytics/business/finance?' + measurementWindow, r[4]).then(function (finance) {
             r[3] = finance;
             return r;
           }).catch(function (e) {
@@ -14090,8 +14090,8 @@ function ABookFlow() {
           var payrollStaff = isCrm && F && F.payroll && Array.isArray(F.payroll.staff) ? F.payroll.staff : [];
           var dailyRows = Array.isArray(A.daily) ? A.daily : [];
           var staffPerformance = Array.isArray(A.staff) ? A.staff : [];
-          var firstKopecks = function (list) {
-            return Array.isArray(list) && list[0] ? Number(list[0].amount_kopecks != null ? list[0].amount_kopecks : list[0].amountKopecks) || 0 : 0;
+          var observedCount = function (row) {
+            return row && Number.isInteger(row.appointments) && row.appointments >= 0 ? row.appointments : null;
           };
           var sectionLabel = function (text) {
             return React.createElement('div', { style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, margin: '18px 2px 9px' } }, text);
@@ -14107,17 +14107,12 @@ function ABookFlow() {
             statCard('Визиты', String(ap.active != null ? ap.active : (ap.total != null ? ap.total : 0)), ap.cancelled ? 'отменено: ' + ap.cancelled : 'по данным CRM'),
             statCard('Клиенты', String(ap.unique_clients != null ? ap.unique_clients : (myBiz.customers || 0)), 'уникальные за период')
           ];
-          if (isCrm) {
-            cards.push(statCard('Поступления YClients', revenueReady ? moneyList([F.revenue.total]) : 'Недоступно', revenueReady ? 'финансовые операции' : 'проверьте права токена'));
-            cards.push(statCard('Средний чек', moneyList(A.average_ticket), 'по проведённым визитам'));
-            cards.push(statCard('Начислено ЗП', payrollReady && F.payroll.accrued_total ? moneyList([F.payroll.accrued_total]) : 'Недоступно', payrollReady ? 'взаиморасчёты CRM' : 'без приблизительного расчёта'));
-            cards.push(statCard('Операции кассы', revenueReady && F.revenue.transaction_count != null ? String(F.revenue.transaction_count) : '—', 'подтверждено YClients'));
-          } else {
-            cards.push(statCard('Выручка', moneyList(A.revenue), null));
-            cards.push(statCard('Чистыми', moneyList(A.net), 'выручка − расходы'));
-            cards.push(statCard('Расходы', moneyList(expTotals || A.expenses), null));
-            cards.push(statCard('Средний чек', moneyList(A.average_ticket), null));
-          }
+          var M = F && F.measurement;
+          cards.push(statCard('Оборот по данным CRM', meMeasurementValue(M, 'provider_reported_gross'), 'наблюдаемые операции; не чистая прибыль'));
+          cards.push(statCard('Стоимость записанного', meMeasurementValue(M, 'observed_booked_value'), 'не подтверждённая касса'));
+          cards.push(statCard('Начисленная зарплата', meMeasurementValue(M, 'confirmed_salary_accrued'), 'только подтверждённое начисление'));
+          cards.push(statCard('Подтверждённые возвраты', meMeasurementValue(M, 'confirmed_refunds'), 'отсутствие данных не означает ноль'));
+          cards.push(statCard('Чистая прибыль', meMeasurementValue(M, 'net_profit'), 'требуется полная финансовая основа'));
           var financeWarnings = isCrm
             ? ((F && Array.isArray(F.warnings) ? F.warnings : []).map(function (w) { return String(w && w.message || ''); }).filter(Boolean))
             : [];
@@ -14128,13 +14123,13 @@ function ABookFlow() {
           staffPerformance.forEach(function (x) { if (x && x.staff_external_id != null) performanceById[String(x.staff_external_id)] = { stats: x, payroll: payrollById[String(x.staff_external_id)] || null }; });
           payrollStaff.forEach(function (x) { var id = String(x && x.staff_id || ''); if (id && !performanceById[id]) performanceById[id] = { stats: null, payroll: x }; });
           var teamRows = Object.keys(performanceById).map(function (id) { return Object.assign({ id: id }, performanceById[id]); }).sort(function (a, b) {
-            return firstKopecks(b.stats && b.stats.revenue) - firstKopecks(a.stats && a.stats.revenue);
+            return String(a.id).localeCompare(String(b.id));
           });
-          var chartRows = dailyRows.slice(-14);
-          var chartMax = Math.max.apply(Math, [1].concat(chartRows.map(function (x) { return firstKopecks(x && x.revenue); })));
+          var chartRows = dailyRows.slice(-14).filter(function (row) { return observedCount(row) != null; });
+          var chartMax = Math.max.apply(Math, [1].concat(chartRows.map(function (x) { return observedCount(x); })));
           return React.createElement(React.Fragment, null,
             React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, margin: '0 2px 10px' } },
-              React.createElement('div', { style: { fontFamily: BODY, fontSize: 11, color: t.faint } }, 'Последние 30 дней · источник: ' + (isCrm ? String(F && F.provider || 'YClients').toUpperCase() : 'MAYA')),
+              React.createElement('div', { style: { fontFamily: BODY, fontSize: 11, color: t.faint } }, 'Последние 30 дней · ' + meMeasurementNotice(M)),
               React.createElement('button', { type: 'button', disabled: myBizBusy, onClick: loadMyBiz, style: { flex: 'none', border: '1px solid ' + t.line, borderRadius: 999, background: 'transparent', color: t.dim, padding: '6px 10px', fontFamily: DISPLAY, fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase' } }, 'Обновить')),
             React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8 } }, cards),
             accountBreakdown.length ? React.createElement(React.Fragment, null,
@@ -14146,22 +14141,22 @@ function ABookFlow() {
               sectionLabel('Продажи по данным YClients'),
               React.createElement('div', null, salesBreakdown.map(function (x, i) { return detailRow(x.key || i, String(x.label || x.key || 'Продажи'), moneyList([x])); }))) : null,
             chartRows.length ? React.createElement(React.Fragment, null,
-              sectionLabel('Динамика выручки · последние 14 дней'),
+              sectionLabel('Наблюдаемые записи · последние 14 дней'),
               React.createElement('div', { style: { border: '1px solid ' + t.line, borderRadius: 14, padding: '14px 12px 11px' } },
                 React.createElement('div', { style: { height: 92, display: 'flex', alignItems: 'flex-end', gap: 4 } }, chartRows.map(function (x, i) {
-                  var amount = firstKopecks(x && x.revenue);
-                  return React.createElement('div', { key: x.date || i, title: moneyList(x.revenue), style: { flex: 1, minWidth: 0, height: Math.max(4, Math.round(amount / chartMax * 88)) + 'px', borderRadius: '4px 4px 1px 1px', background: t.ink, opacity: 0.28 + 0.72 * amount / chartMax } });
+                  var amount = observedCount(x);
+                  return React.createElement('div', { key: x.date || i, title: String(amount) + ' записей', style: { flex: 1, minWidth: 0, height: Math.max(4, Math.round(amount / chartMax * 88)) + 'px', borderRadius: '4px 4px 1px 1px', background: t.ink, opacity: 0.28 + 0.72 * amount / chartMax } });
                 })),
                 React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 8, fontFamily: BODY, fontSize: 9.5, color: t.faint } },
                   React.createElement('span', null, chartRows[0] && String(chartRows[0].date || '').slice(5).split('-').reverse().join('.')),
                   React.createElement('span', null, chartRows[chartRows.length - 1] && String(chartRows[chartRows.length - 1].date || '').slice(5).split('-').reverse().join('.'))))) : null,
             teamRows.length ? React.createElement(React.Fragment, null,
-              sectionLabel('Команда · выручка и начисления'),
+              sectionLabel('Команда · записи и подтверждённые начисления'),
               React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 7 } }, teamRows.map(function (row, i) {
                 var s = row.stats || {}; var p = row.payroll || {}; var salaryReady = p.status === 'available' && p.accrued;
                 var meta = [];
                 if (s.appointments != null) meta.push('визитов: ' + s.appointments);
-                if (s.revenue && s.revenue.length) meta.push('выручка: ' + moneyList(s.revenue));
+                if (s.revenue && s.revenue.length) meta.push('стоимость записей: ' + moneyList(s.revenue));
                 return React.createElement('div', { key: row.id || i, style: { border: '1px solid ' + t.line, borderRadius: 12, padding: '11px 13px' } },
                   React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 } },
                     React.createElement('div', { style: { minWidth: 0, fontFamily: BODY, fontWeight: 650, fontSize: 12.5, color: t.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, String(p.name || 'Сотрудник')),
@@ -16158,10 +16153,39 @@ function AChatReportShell(props) {
     props.children,
     props.footnote ? e('div', { style: { fontFamily: p.BODYF, fontSize: 11, lineHeight: 1.45, color: p.dim, marginTop: 12 } }, props.footnote) : null);
 }
+function meMeasurementValue(measurement, key) {
+  if (!measurement || measurement.contract !== 'c7.measurement.read/1' || !Array.isArray(measurement.metrics)) return '—';
+  var metrics = measurement.metrics.filter(function (m) { return m && m.key === key; });
+  if (!metrics.length) return '—';
+  return metrics.map(function (m) {
+    if (m.value == null || m.state === 'NOT_MEASURED' || m.state === 'UNAVAILABLE') return '—';
+    if (m.unit !== 'money_minor') return String(m.value);
+    if (!/^[A-Z]{3}$/.test(m.currency || '') || !/^-?(0|[1-9][0-9]*)$/.test(String(m.value)) || !Number.isSafeInteger(Number(m.value))) return '—';
+    return (Number(m.value) / 100).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ' + (m.currency === 'RUB' ? '₽' : m.currency);
+  }).join(' · ');
+}
+function meMeasurementNotice(measurement) {
+  if (!measurement || measurement.contract !== 'c7.measurement.read/1') return 'измерение недоступно';
+  var at = new Date(measurement.asOf);
+  return (measurement.completeness === 'COMPLETE' ? 'полные данные' : 'данные с ограничениями') +
+    (Number.isFinite(at.getTime()) ? ' · на ' + at.toLocaleString('ru-RU') : '');
+}
 function ABusinessReportCard(props) {
   var e = React.createElement;
   var p = meReportPanelTheme(!!props.dark);
   var d = props.data || {};
+  if (d.measurement && d.measurement.contract === 'c7.measurement.read/1') {
+    var measured = d.measurement;
+    var fields = [['Оборот по данным CRM', 'provider_reported_gross'], ['Стоимость записанного', 'observed_booked_value'],
+      ['Подтверждённая касса', 'confirmed_cash'], ['Подтверждённые возвраты', 'confirmed_refunds'], ['Начисленная зарплата', 'confirmed_salary_accrued'], ['Чистая прибыль', 'net_profit']];
+    return e(AChatReportShell, { dark: props.dark, eyebrow: 'отчёт', title: d.title || 'Измеренные результаты', period: d.period_label || '', footnote: meMeasurementNotice(measured) },
+      e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 } }, fields.map(function (field) {
+        return e('div', { key: field[1], style: { minWidth: 0 } }, e('div', { style: { fontFamily: p.BODYF, fontSize: 11.5, color: p.dim } }, field[0]),
+          e('div', { style: { fontFamily: p.DISPF, fontSize: 16, color: p.ink, marginTop: 4 } }, meMeasurementValue(measured, field[1])));
+      })), e('div', { style: { fontFamily: p.BODYF, fontSize: 12, color: p.ink, marginTop: 12 } },
+        [['Записей', d.appointments], ['Клиентов', d.unique_clients], ['Отмен', d.cancellations]].filter(function (item) { return item[1] != null; }).map(function (item) { return item[0] + ': ' + String(item[1]); }).join(' · ')),
+      e('div', { style: { fontFamily: p.BODYF, fontSize: 11.5, color: p.dim, marginTop: 12 } }, '«—» означает, что факт не измерен. Оборот и стоимость записей не являются чистой прибылью.'));
+  }
   var rows = Array.isArray(d.rows) ? d.rows : [];
   var hasCustomPrimary = d.primary_rub != null;
   var primary = hasCustomPrimary

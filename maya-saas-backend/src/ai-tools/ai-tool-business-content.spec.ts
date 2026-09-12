@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { BusinessStateService } from '../business-state/business-state.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
@@ -47,6 +48,10 @@ describe('AiToolHandlerService extended business tools', () => {
       undefined,
       undefined,
       (options.businessContent ?? {}) as BusinessContentService,
+      undefined,
+      undefined,
+      undefined,
+      measurementReaderDouble(),
     );
   }
 
@@ -104,9 +109,13 @@ describe('AiToolHandlerService extended business tools', () => {
 
   it('delegates tenant-scoped catalog and review reads', async () => {
     const listCatalog = jest.fn().mockResolvedValue({ count: 1 });
-    const reviewTrend = jest.fn().mockResolvedValue({ direction: 'improving' });
+    const reviewTrend = jest.fn();
+    const analyzeReviews = jest.fn().mockResolvedValue({
+      source: 'tenant_review_registry',
+      topics: [{ topic: 'service', count: 2 }],
+    });
     const service = createService({
-      businessContent: { listCatalog, reviewTrend },
+      businessContent: { listCatalog, reviewTrend, analyzeReviews },
     });
 
     await expect(
@@ -124,10 +133,21 @@ describe('AiToolHandlerService extended business tools', () => {
         { mode: 'trend', days: 90 },
         'reviews-read-a',
       ),
-    ).resolves.toEqual({ direction: 'improving' });
+    ).resolves.toMatchObject({
+      contract: 'c7.reputation-months/1',
+      items: [],
+      topics: {
+        qualification: 'source_labelled_text_topics_not_rating',
+        items: [{ topic: 'service', count: 2 }],
+      },
+    });
     expect(listCatalog).toHaveBeenCalledWith('tenant-a', 'inventory', {
       lowStockOnly: true,
     });
-    expect(reviewTrend).toHaveBeenCalledWith('tenant-a', { days: 90 });
+    expect(reviewTrend).not.toHaveBeenCalled();
+    expect(analyzeReviews).toHaveBeenCalledWith('tenant-a', {
+      days: 90,
+      branchId: undefined,
+    });
   });
 });

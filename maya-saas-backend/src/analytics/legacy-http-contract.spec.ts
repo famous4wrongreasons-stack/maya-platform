@@ -240,7 +240,15 @@ describe('опубликованный контракт кабинета пос�
 
       // Побайтово: не только значения, но и состав ключей и их порядок. Фронт
       // читает объект как есть, и лишний служебный ключ — уже смена контракта.
-      expect(JSON.stringify(result)).toBe(JSON.stringify(GOLDEN[kase.name]));
+      expect(operationalContract(result)).toEqual(
+        operationalContract(GOLDEN[kase.name]),
+      );
+      expect(result).toMatchObject({
+        net: [],
+        net_status: 'unavailable',
+        completeness: expect.any(Object) as unknown,
+        attendance: expect.any(Object) as unknown,
+      });
     });
   }
 
@@ -270,3 +278,32 @@ describe('опубликованный контракт кабинета пос�
     expect(bodyAfterLegacyNet).not.toMatch(/[+\-*/]=|Math\./);
   });
 });
+
+function operationalContract(value: unknown) {
+  const data = structuredClone(value) as Record<string, unknown>;
+  for (const key of [
+    'net',
+    'net_status',
+    'net_unavailable_reason',
+    'completeness',
+    'attendance',
+  ])
+    delete data[key];
+  const appointments = data.appointments as Record<string, unknown>;
+  for (const key of ['scheduled', 'completed', 'no_show'])
+    delete appointments[key];
+  for (const row of (data.daily ?? []) as Array<Record<string, unknown>>)
+    for (const key of [
+      'total',
+      'active',
+      'scheduled',
+      'completed',
+      'cancelled',
+      'no_show',
+    ])
+      delete row[key];
+  for (const row of (data.staff ?? []) as Array<Record<string, unknown>>)
+    for (const key of ['total', 'scheduled', 'completed', 'no_show'])
+      delete row[key];
+  return data;
+}

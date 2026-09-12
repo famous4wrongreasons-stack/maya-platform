@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { BadRequestException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
@@ -140,6 +141,16 @@ function createHandler(
     new BusinessStateService({} as OperationsAnalyticsService, prisma),
     new AppointmentPeriodReader({} as CrmService),
     new ClientRecencyFactsService({} as CrmService),
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    measurementReaderDouble(),
   );
 }
 

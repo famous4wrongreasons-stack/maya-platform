@@ -1,3 +1,4 @@
+import { MeasurementModule } from '../measurement/measurement.module';
 import { Module } from '@nestjs/common';
 
 import {
@@ -16,7 +17,12 @@ import { P409ValueConfigurationShadowService } from './p4-09-value-configuration
 import { P409ValueConfigurationCanonicalCutoverService } from './p4-09-value-configuration-canonical-cutover.service';
 
 @Module({
-  imports: [ActionEngineModule, AuditLogModule, Package5Wave4Module],
+  imports: [
+    MeasurementModule,
+    ActionEngineModule,
+    AuditLogModule,
+    Package5Wave4Module,
+  ],
   controllers: [BusinessContentController],
   providers: [
     BusinessContentService,

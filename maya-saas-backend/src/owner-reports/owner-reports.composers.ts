@@ -1,3 +1,4 @@
+import { measurementText } from '../measurement/measurement.presentation';
 import type {
   BriefCount,
   BriefFacts,
@@ -331,7 +332,16 @@ export function composeDailyReport(input: { facts: BriefFacts }): {
    * касса есть. Ноль и незнание — не одно и то же, и владелец имеет право
    * знать, какое из двух.
    */
-  if (revenue.amountKopecks === null && revenue.basis === 'booked_prices') {
+  if (facts.measurement) {
+    if (facts.source === 'maya')
+      lines.push(
+        'Данные собственного календаря описывают записи, а не подтверждённые оплаты.',
+      );
+    lines.push(measurementText(facts.measurement));
+  } else if (
+    revenue.amountKopecks === null &&
+    revenue.basis === 'booked_prices'
+  ) {
     /**
      * 🔴 У арендатора на СОБСТВЕННОМ календаре кассового контура не существует
      * как понятия — обвинять его в молчании нельзя.

@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { AiToolHandlerService } from '../ai-tools/ai-tool-handler.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
@@ -413,6 +414,16 @@ describe('Cycle 04 P9 — поверхности после переезда', (
       new BusinessStateService({} as OperationsAnalyticsService, prisma),
       new AppointmentPeriodReader(crmService),
       new ClientRecencyFactsService(crmService),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      measurementReaderDouble(),
     );
     return { handler, tenantContext };
   }

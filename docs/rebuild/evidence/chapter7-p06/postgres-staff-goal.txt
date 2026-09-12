@@ -1,0 +1,10 @@
+PASS canonical A22 execution/generation plus Staff without User yields private revenue progress and exact salary despite partial company payroll
+PASS own staff salary remains readable while owner-private target is absent from staff configuration
+PASS measurement readers leave salary binding and A22 source owners byte-for-byte unchanged
+PASS wrong own subject or integration is denied before a revision is admitted
+PASS canonical A22 change while payroll read is pending prevents stale publication without holding its owner transaction
+PASS exact provider Staff binding changed during payroll read fences publication
+PASS own staff access revocation during payroll read prevents publication
+PASS expired remote-read lease is fenced and retry publishes one logical outcome
+PASS missing salary source remains explicit unknown without a heuristic fallback
+{"package":"C7-P04","checks":9,"tenantId":"cmtys9kfk00001hc9r9p8bcem","productionTouched":false,"sourceWritesByMeasurement":0}

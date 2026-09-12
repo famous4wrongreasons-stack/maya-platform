@@ -71,6 +71,29 @@ export function buildChatReportCard(
   if (!latest) {
     return null;
   }
+  const measured = record(record(latest.result).measurement);
+  if (measured.contract === 'c7.measurement.read/1') {
+    if (latest.name === 'analytics.business.query') {
+      const card = buildBusinessCard(latest.result);
+      return {
+        ...card,
+        widget_data: { ...card.widget_data, measurement: measured },
+      };
+    }
+    return {
+      widget: 'business_report',
+      widget_data: {
+        title: 'Измеренные результаты',
+        period_label:
+          record(record(latest.result).resolved_period).label_ru ?? '',
+        measurement: measured,
+        primary_rub: null,
+        primary_label: 'Чистая прибыль не измерена',
+        status_text:
+          'Оборот CRM, начисления и стоимость записей — разные факты. Неизвестная сумма не равна нулю.',
+      },
+    };
+  }
   if (
     latest.name === 'analytics.business.profit' ||
     latest.name === 'expenses.period.complete'
@@ -482,26 +505,11 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
           ? salary.unavailable_reason
           : 'crm_payroll_is_unavailable';
 
-  // Реальный потенциал из истории чеков мастера (топ-40% за ~60 дней), не +18%.
-  //
-  // 🔴 Именно это и было нарушено: при отсутствии расчёта подставлялось
-  // «выручка × 1.18» — выдуманное число, которое карточка подписывала как
-  // «ориентир из твоей истории чеков». Мастер видел точную сумму, за которой
-  // не стоит ничего. Нет расчёта — нет цифры.
-  const motivation = record(data.money_motivation);
-  const potential = metricNumber(motivation.potential_rub) ?? null;
-  /**
-   * 🔴 Запасной путь через стоимость записанного убран: «потенциал минус
-   * записанное» — это не апсайд к заработку, а разность двух РАЗНЫХ фактов.
-   * Нет начисления — нет и разницы с ним.
-   */
-  const upside =
-    metricNumber(motivation.upside_rub) ??
-    (potential != null && earned != null
-      ? Math.max(0, potential - earned)
-      : null);
-  const motivationFootnote =
-    typeof motivation.footnote === 'string' ? motivation.footnote : null;
+  // D6: potential/upside from the former 0.5 default is retired, including old tool payloads.
+  const potential: number | null = null;
+  const upside: number | null = null;
+  const motivationFootnote: string | null =
+    'Начисления — только подтверждённые данные CRM. Потенциал заработка не измеряется.';
 
   const tips = masterUpsellTips(data);
   // 🔴 Голые «уход» и «бород» ловили обычные вопросы: «сколько клиентов
@@ -538,7 +546,7 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
         earned_unavailable_reason: earnedUnavailableReason,
         potential_rub: potential,
         upside_rub: upside,
-        target_check_rub: metricNumber(motivation.target_check_rub),
+        target_check_rub: null,
         tips:
           tips.length > 0
             ? tips
@@ -548,7 +556,7 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
               ],
         footnote:
           motivationFootnote ||
-          'Потенциал — ориентир MAYA по допродажам из твоей истории чеков, не касса.',
+          'Подтверждённые начисления и стоимость записей показаны раздельно.',
         // Неполный журнал вытесняет остальные подписи: числа выше — нижняя
         // граница, и мастеру это важнее совета.
         status_text: masterNote,
@@ -566,7 +574,7 @@ function buildMasterCard(evidence: unknown, userText: string): ChatReportCard {
       booked_rub: booked,
       potential_rub: potential,
       upside_rub: upside,
-      target_check_rub: metricNumber(motivation.target_check_rub),
+      target_check_rub: null,
       appointments: metricNumber(metrics.appointments_total),
       unique_clients: metricNumber(metrics.unique_clients),
       earned_unavailable_reason: earnedUnavailableReason,

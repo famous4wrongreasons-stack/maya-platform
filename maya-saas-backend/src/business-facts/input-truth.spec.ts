@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { CustomersService } from '../customers/customers.service';
@@ -668,6 +669,16 @@ describe('P0 §3 — отмены', () => {
       // 🔴 Cycle 04 P6. Канонический читатель периода.
       new AppointmentPeriodReader({} as CrmService),
       new ClientRecencyFactsService({} as CrmService),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      measurementReaderDouble(),
     );
     const args = {
       period: 'custom',
@@ -756,6 +767,16 @@ describe('P0 §3 — отмены', () => {
       // 🔴 Cycle 04 P6. Канонический читатель периода.
       new AppointmentPeriodReader({} as CrmService),
       new ClientRecencyFactsService({} as CrmService),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      measurementReaderDouble(),
     );
     const args = {
       period: 'custom',
@@ -966,6 +987,16 @@ describe('P0 §4 — журнал дня в AI-слое', () => {
       // 🔴 Cycle 04 P6. Канонический читатель периода.
       new AppointmentPeriodReader({} as CrmService),
       new ClientRecencyFactsService({} as CrmService),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      measurementReaderDouble(),
     );
     return () =>
       tenantContext.runAsSystemTenant('tenant-day', () =>
@@ -1261,6 +1292,16 @@ describe('P0 §26 — периоды разной полноты не сравн
       // 🔴 Cycle 04 P6. Канонический читатель периода.
       new AppointmentPeriodReader({} as CrmService),
       new ClientRecencyFactsService({} as CrmService),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      measurementReaderDouble(),
     );
 
     const result = (await handler.execute(

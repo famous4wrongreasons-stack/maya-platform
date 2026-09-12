@@ -97,6 +97,7 @@ test -f "$BE/dist/scripts/communication-delivery-foundation-proof.js" \
 # Read-only Beget gate also pins maintenance pages, PWA backups and blocked archives.
 verify_live_relays() {
   "${MAYA_DEPLOY_NODE_BIN:+$MAYA_DEPLOY_NODE_BIN/}node" "$BE/deploy/platform/beget-edge/relay-release.cjs" verify
+  "${MAYA_DEPLOY_NODE_BIN:+$MAYA_DEPLOY_NODE_BIN/}node" "$BE/deploy/platform/chapter7-consumers/verify-live.cjs"
 }
 verify_live_relays || fail "R01 live relay baseline расходится; backend cutover запрещён"
 

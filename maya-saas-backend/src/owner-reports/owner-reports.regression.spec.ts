@@ -1,3 +1,8 @@
+import { measurementFinancialFacts } from '../measurement/measurement.finance.facts';
+import type { MeasurementFinancialRead } from '../measurement/measurement.finance.facts';
+import { unavailableMeasurement } from '../../test/helpers/measurement-reader';
+import { composeDailyReport } from './owner-reports.composers';
+import { measurementReportDouble } from '../../test/helpers/measurement-reader';
 import { OwnerReportStore } from './owner-report.store';
 import { CommunicationDeliveryService } from '../communication-delivery/communication-delivery.service';
 /**
@@ -69,6 +74,7 @@ function service(options: StackOptions = {}) {
     dashboardPreferences as unknown as DashboardPreferencesService,
     reportStore,
     {} as CommunicationDeliveryService,
+    measurementReportDouble(),
   );
   return { reports, stack, inbox };
 }
@@ -126,7 +132,7 @@ describe('P4 §11 — обязательная регрессия сводок',
 
     expect(out.facts.revenue.amountKopecks).toBeNull();
     expect(out.facts.revenue.basis).toBe('unavailable');
-    expect(out.evening.bodyText).toContain('недоступна');
+    expect(out.evening.bodyText).toContain('не измерено');
     expect(out.evening.bodyText).not.toContain('пустая');
     expect(out.evening.payload.revenue_total_kopecks).toBeNull();
   });
@@ -180,11 +186,12 @@ describe('P4 §11 — обязательная регрессия сводок',
       finance: FINANCE_FULL,
     });
 
-    expect(out.facts.revenue.amountKopecks).toBe(1_250_000);
-    expect(out.facts.revenue.basis).toBe('provider_transactions');
+    expect(out.facts.revenue.amountKopecks).toBeNull();
+    expect(out.facts.revenue.basis).toBe('unavailable');
     // Записанное — другое число и другое основание.
     expect(out.facts.bookedValue.amountKopecks).toBe(250_000);
-    expect(out.evening.bodyText).toMatch(/Выручка за день: 12\s?500/);
+    expect(out.evening.bodyText).toContain('Чистая прибыль: не измерено');
+    expect(out.evening.bodyText).not.toMatch(/Выручка за день: 12\s?500/);
     expect(out.morning.bodyText).not.toMatch(/12\s?500/);
   });
 
@@ -320,10 +327,8 @@ describe('P4 §11 — обязательная регрессия сводок',
     expect(brief.facts.counts.cancelled).toBe(
       canonical.metrics.appointments_cancelled,
     );
-    expect(brief.facts.revenue.amountKopecks).toBe(
-      canonical.metrics.revenue_amount_kopecks,
-    );
-    expect(brief.facts.revenue.basis).toBe(canonical.metrics.revenue_basis);
+    expect(brief.facts.revenue.amountKopecks).toBeNull();
+    expect(brief.facts.revenue.basis).toBe('unavailable');
     expect(brief.facts.bookedValue.amountKopecks).toBe(
       canonical.metrics.booked_value_amount_kopecks,
     );
@@ -340,9 +345,11 @@ describe('P4 §11 — обязательная регрессия сводок',
 
     // 5 000 наличными + 7 000 картой при выручке 12 500: раньше 500 ₽
     // сертификата исчезали молча.
-    expect(out.evening.bodyText).toMatch(/Наличные — 5\s?000/);
-    expect(out.evening.bodyText).toMatch(/Карта — 7\s?000/);
-    expect(out.evening.bodyText).toContain('не отнёс ни к наличным');
+    // D4: channel labels on provider operations do not prove confirmed cash.
+    expect(out.facts.revenue.cashKopecks).toBeNull();
+    expect(out.facts.revenue.cashlessKopecks).toBeNull();
+    expect(out.facts.revenue.unclassifiedKopecks).toBeNull();
+    expect(out.evening.bodyText).toContain('не измерено');
   });
 
   it('🔴 сверх списка: календарь мастера не сопоставлен — нулей не будет', async () => {
@@ -373,7 +380,7 @@ describe('P4 — находки состязательной проверки', 
     // «не ответил» сказать нельзя: это не отказ, это отсутствие понятия.
     expect(out.evening.bodyText).not.toContain('не ответил');
     expect(out.evening.bodyText).toContain('собственного календаря');
-    expect(out.facts.revenue.basis).toBe('booked_prices');
+    expect(out.facts.revenue.basis).toBe('unavailable');
   });
 
   it('🔴 строка зарплаты со статусом «недоступно» остаётся видимой', async () => {
@@ -529,5 +536,51 @@ describe('P4 — находки состязательной проверки', 
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('finance unavailable'),
     );
+  });
+});
+
+describe('C7 qualified report money', () => {
+  it('preserves provider gross and confirmed payroll without calling either confirmed cash or profit', async () => {
+    const out = await render({
+      visits: [visit('a', 'crm-1', 2500)],
+      finance: FINANCE_FULL,
+    });
+    const facts = measurementFinancialFacts(
+      {
+        ...FINANCE_FULL,
+        revenue: { ...FINANCE_FULL.revenue, basis: 'provider_transactions' },
+      } as unknown as MeasurementFinancialRead,
+      0,
+    );
+    const base = unavailableMeasurement();
+    const composed = composeDailyReport({
+      facts: {
+        ...out.facts,
+        measurement: {
+          ...base,
+          metrics: [
+            ...base.metrics,
+            ...facts.map((m) => ({
+              key: m.key,
+              dimensions: m.dimensions ?? {},
+              unit: m.unit,
+              basis: m.basis,
+              currency: m.currency ?? null,
+              state: m.state,
+              value: m.value,
+            })),
+          ],
+        },
+      },
+    });
+    expect(composed.bodyText).toContain(
+      'Оборот операций по данным CRM (не подтверждённая касса)',
+    );
+    expect(composed.bodyText.replace(/\s/g, '')).toContain(
+      '12 500'.replace(/\s/g, ''),
+    );
+    expect(composed.bodyText).toContain('Подтверждённые начисления зарплаты');
+    expect(composed.bodyText).toContain('Чистая прибыль: не измерено');
+    expect(composed.payload.revenue_total_kopecks).toBeNull();
   });
 });

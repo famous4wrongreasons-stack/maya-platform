@@ -1,3 +1,4 @@
+import { MeasurementReadService } from '../measurement/measurement.read.service';
 import {
   Body,
   Controller,
@@ -59,7 +60,10 @@ const BUSINESS_CONTENT_WRITE_ROLES = [
 @TenantScoped()
 @Controller('business-content')
 export class BusinessContentController {
-  constructor(private readonly service: BusinessContentService) {}
+  constructor(
+    private readonly service: BusinessContentService,
+    private readonly measurementRead?: MeasurementReadService,
+  ) {}
 
   @Get('inventory')
   @Roles(...BUSINESS_CONTENT_READ_ROLES)
@@ -266,11 +270,34 @@ export class BusinessContentController {
   @Get('reviews')
   @Roles(...BUSINESS_CONTENT_READ_ROLES)
   @RequiresFeature('reviews.core')
-  reviews(
+  async reviews(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ReviewQueryDto,
   ) {
-    return this.service.listReviews(user.tenantId!, query);
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    const scope = await this.measurementRead.reviewScope(
+      user.tenantId!,
+      user.userId,
+      query.branchId,
+    );
+    if (!scope.registryAllowed)
+      return {
+        configured: false,
+        source: 'not_measured',
+        reviews: [],
+        limitation: 'review_registry_has_no_exact_staff_subject',
+      };
+    const result = await this.service.listReviews(user.tenantId!, {
+      ...query,
+      branchId: scope.branchId,
+    });
+    await this.measurementRead.reviewScope(
+      user.tenantId!,
+      user.userId,
+      query.branchId,
+    );
+    return result;
   }
 
   @Post('reviews')
@@ -286,11 +313,37 @@ export class BusinessContentController {
   @Get('reviews/topics')
   @Roles(...BUSINESS_CONTENT_READ_ROLES)
   @RequiresFeature('reviews.core')
-  reviewTopics(
+  async reviewTopics(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ReviewQueryDto,
   ) {
-    return this.service.analyzeReviews(user.tenantId!, query);
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    const scope = await this.measurementRead.reviewScope(
+      user.tenantId!,
+      user.userId,
+      query.branchId,
+    );
+    const analysis = scope.registryAllowed
+      ? await this.service.analyzeReviews(user.tenantId!, {
+          days: query.days,
+          branchId: scope.branchId,
+        })
+      : null;
+    await this.measurementRead.reviewScope(
+      user.tenantId!,
+      user.userId,
+      query.branchId,
+    );
+    return {
+      source: analysis?.source ?? 'not_measured',
+      topics: analysis?.topics ?? [],
+      privacy: 'aggregated_topics_only',
+      qualification: 'source_labelled_text_topics_not_rating',
+      limitations: scope.registryAllowed
+        ? ['topics_are_not_verified_client_reputation']
+        : ['review_registry_has_no_exact_staff_subject'],
+    };
   }
 
   @Get('reviews/trend')
@@ -300,6 +353,13 @@ export class BusinessContentController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ReviewQueryDto,
   ) {
-    return this.service.reviewTrend(user.tenantId!, query);
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    return this.measurementRead.reputationMonths(
+      user.tenantId!,
+      user.userId,
+      query.days,
+      query.branchId,
+    );
   }
 }

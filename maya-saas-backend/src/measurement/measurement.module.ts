@@ -1,3 +1,7 @@
+import { MeasurementReportReader } from './measurement.report';
+import { MeasurementReadService } from './measurement.read.service';
+import { MeasurementController } from './measurement.controller';
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
@@ -13,10 +17,19 @@ import { ActionEngineKernel } from '../action-engine/action-engine.kernel';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 @Module({
-  imports: [PrismaModule, TenancyModule, CrmModule, ActionEngineModule],
+  controllers: [MeasurementController],
+  imports: [
+    PrismaModule,
+    TenancyModule,
+    CrmModule,
+    ActionEngineModule,
+    EntitlementsModule,
+  ],
   providers: [
     MeasurementSources,
     MeasurementService,
+    MeasurementReadService,
+    MeasurementReportReader,
     MeasurementFinanceReader,
     MeasurementReputationReader,
     MeasurementStaffGoalReader,
@@ -45,6 +58,10 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
         ),
     },
   ],
-  exports: [MeasurementService],
+  exports: [
+    MeasurementService,
+    MeasurementReadService,
+    MeasurementReportReader,
+  ],
 })
 export class MeasurementModule {}

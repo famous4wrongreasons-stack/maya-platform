@@ -74,8 +74,8 @@ describe('buildChatReportCard', () => {
               unique_clients: 7,
             },
             money_motivation: {
-              potential_rub: 14000,
-              upside_rub: 4000,
+              potential_rub: null,
+              upside_rub: null,
               target_check_rub: 2800,
               footnote: 'Потенциал из истории чеков.',
             },
@@ -98,8 +98,8 @@ describe('buildChatReportCard', () => {
     expect(card?.widget_data).toMatchObject({
       earned_rub: 10000,
       booked_rub: 20000,
-      potential_rub: 14000,
-      upside_rub: 4000,
+      potential_rub: null,
+      upside_rub: null,
       appointments: 8,
     });
     expect(String(card?.widget_data.footnote)).not.toContain('+18%');
@@ -143,7 +143,7 @@ describe('buildChatReportCard', () => {
     expect(card?.widget_data.tips).toEqual(
       expect.arrayContaining([expect.stringContaining('Уход за бородой')]),
     );
-    expect(card?.widget_data.potential_rub).toBe(8000);
+    expect(card?.widget_data.potential_rub).toBeNull();
   });
 
   it('builds profit card from analytics.business.profit', () => {

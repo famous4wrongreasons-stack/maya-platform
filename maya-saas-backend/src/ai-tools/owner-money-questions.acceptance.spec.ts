@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { canonicalReceiptFixture } from '../../test/fixtures/ai-tool-receipt.fixture';
 /**
  * ПРИЁМКА ЖИВЫМИ ВОПРОСАМИ ВЛАДЕЛЬЦА.
@@ -668,6 +669,8 @@ function createHarness(
     canonicalCutover,
   );
   const registry = new AiToolRegistryService();
+  const measurementReader = measurementReaderDouble();
+  const measurementPeriod = jest.spyOn(measurementReader, 'readPeriod');
   const handler = new AiToolHandlerService(
     crmService,
     {} as AppointmentsService,
@@ -683,6 +686,16 @@ function createHarness(
     // 🔴 Cycle 04 P6. Канонический читатель периода.
     new AppointmentPeriodReader({} as CrmService),
     new ClientRecencyFactsService({} as CrmService),
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    measurementReader,
   );
   const runtime = new AiToolRuntimeService(
     prisma,
@@ -749,6 +762,8 @@ function createHarness(
     tenantContext,
     getFinancialSummary,
     getJournal,
+    measurementReader,
+    measurementPeriod,
     approve: (approvalId: string, payloadHash: string) =>
       tenantContext.runAsSystemTenant('tenant-a', () =>
         runtime.approve(owner, approvalId, { payloadHash }),
@@ -834,19 +849,15 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
       status: 'verified',
     });
     // Окно — календарный июль, а не «месяц по сегодня».
-    const journalRange = h.getJournal.mock.calls.find(
-      (call) =>
-        new Date((call[1] as { to: string }).to).getTime() >
-        Date.parse('2026-07-01'),
+    expect(h.measurementPeriod).toHaveBeenCalledWith(
+      'tenant-a',
+      owner.userId,
+      'business_period',
+      expect.objectContaining({ from: '2026-06-30T21:00:00.000Z' }),
     );
-    expect((journalRange?.[1] as { from: string }).from).toBe(
-      '2026-06-30T21:00:00.000Z',
-    );
-    // 1 200 000 кассы − (120 000 аренды + 30 000 расходников + 40 000
-    // рекламы + 500 000 зарплаты из CRM) = 510 000 ₽.
-    expect(answer.reply).toContain('510 000 ₽');
-    expect(answer.reply).toContain('1 200 000 ₽');
-    expect(answer.reply).toContain('42,5%');
+    // D4: provider totals + declared expenses do not prove confirmed cash/refunds/net.
+    expect(answer.reply).toContain('Чистая прибыль: не измерено');
+    expect(answer.reply).not.toMatch(/510 000|1 200 000|42,5%/);
     // Понятно без знания схемы: ни имён полей, ни служебных кодов.
     expect(answer.reply).not.toMatch(/net_profit|amount_kopecks|unavailable/);
 
@@ -870,7 +881,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
       'analytics.business.profit',
     ]);
     expect(answer.reply).toContain('Чистая прибыль');
-    expect(answer.reply).toContain('510 000 ₽');
+    expect(answer.reply).toContain('Чистая прибыль: не измерено');
   });
 
   it('«сколько стоит привести нового клиента» — экономика, а не прайс', async () => {
@@ -885,13 +896,9 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
     expect(answer.tools_used.map((tool) => tool.name)).not.toContain(
       'catalog.services.read',
     );
-    // 40 000 ₽ рекламы на одного нового гостя — и это ПЕРВОЕ, что сказано:
-    // ответ на заданный вопрос не должен ждать, пока договорит отчёт.
-    expect(answer.reply.startsWith('Новый гость обходился в 40 000 ₽')).toBe(
-      true,
-    );
-    expect(answer.reply).toContain('90 дней');
-    expect(answer.reply).toContain('не доказательство');
+    expect(answer.reply).toContain('Стоимость привлечения клиента не измерена');
+    expect(answer.reply).toContain('не доказывают');
+    expect(answer.reply).not.toContain('40 000 ₽');
   });
 
   it('«какая прибыль в августе» — месяц ещё идёт, и MAYA это говорит', async () => {
@@ -905,13 +912,11 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
     ]);
     expect(answer.reply).toContain('Месяц ещё не закончился');
     // Окно начинается с 1 августа по местному времени, а не «месяц назад».
-    const periodCall = h.getJournal.mock.calls.find(
-      (call) =>
-        new Date((call[1] as { from: string }).from).getTime() >=
-        Date.parse('2026-07-31T21:00:00.000Z'),
-    );
-    expect((periodCall?.[1] as { from: string }).from).toBe(
-      '2026-07-31T21:00:00.000Z',
+    expect(h.measurementPeriod).toHaveBeenCalledWith(
+      'tenant-a',
+      owner.userId,
+      'business_period',
+      expect.objectContaining({ from: '2026-07-31T21:00:00.000Z' }),
     );
   });
 
@@ -1074,8 +1079,9 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
       },
     ]);
 
-    expect(answer.reply).toContain('аренда за этот период — 0 ₽');
-    expect(answer.reply).toContain('Прибыль уже можно считать');
+    expect(answer.reply).toContain('аренды за этот период нет');
+    expect(answer.reply).toContain('не подтверждает полноту');
+    expect(answer.reply).not.toContain('Прибыль уже можно считать');
     expect(answer.reply).toContain('Если есть другие расходы');
     expect(answer.tools_used).toEqual([]);
   });
@@ -1086,7 +1092,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
     'Кроме зарплаты расходов нет',
     'Больше расходов нет',
   ])(
-    'явное «%s» закрывает период и сразу считает прибыль',
+    'явное «%s» фиксирует декларацию расходов без выдуманной прибыли',
     async (confirmation) => {
       const h = createHarness({
         expenses: [
@@ -1113,7 +1119,8 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
       expect(answer.tools_used.map((tool) => tool.name)).toEqual([
         'expenses.period.complete',
       ]);
-      expect(answer.reply).toContain('Чистая прибыль: 660 000 ₽');
+      expect(answer.reply).toContain('Чистая прибыль: не измерено');
+      expect(answer.reply).not.toContain('660 000');
       expect(h.store.declarations).toHaveLength(1);
       expect(answer.widget).toBe('business_report');
     },
@@ -1125,11 +1132,9 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
     const answer = await h.ask('какая валовая прибыль в июле');
 
-    expect(answer.reply).toContain('Валовый доход до расходов: 1 200 000 ₽');
-    expect(answer.reply).toContain('Аренда здесь не нужна');
-    expect(answer.reply).toContain('прямую себестоимость услуг');
-    expect(answer.reply).not.toContain('не внесена аренда');
-    expect(answer.reply).not.toContain('Чистая прибыль:');
+    expect(answer.reply).toContain('Валовая прибыль не измерена');
+    expect(answer.reply).toContain('себестоимость услуг');
+    expect(answer.reply).not.toMatch(/1 200 000|не внесена аренда/);
   });
 
   it('малая аренда допустима после подтверждения владельца', async () => {
@@ -1143,7 +1148,8 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
     const answer = await h.ask('какая была прибыль в июле');
 
-    expect(answer.reply).toContain('Чистая прибыль: 699 999 ₽');
+    expect(answer.reply).toContain('Чистая прибыль: не измерено');
+    expect(answer.reply).not.toContain('699 999');
     expect(answer.reply).not.toContain('похоже, внесено не всё');
   });
 
@@ -1159,13 +1165,8 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
     // 🔴 Замкнутый круг: вносить зарплату руками запрещено, поэтому её
     // отсутствие — отдельная причина, а не пункт списка «что внести».
-    expect(answer.reply).toContain('только из расчёта CRM');
-    expect(answer.reply).toContain('за месяц');
+    expect(answer.reply).toContain('Чистая прибыль: не измерено');
     expect(answer.reply).not.toContain('Внесите');
-    expect(answer.reply).toContain(
-      'Поступления до вычета расходов: 1 200 000 ₽',
-    );
-    expect(answer.reply).toContain('не чистая прибыль');
-    expect(answer.reply).not.toContain('510 000');
+    expect(answer.reply).not.toMatch(/510 000|1 200 000/);
   });
 });

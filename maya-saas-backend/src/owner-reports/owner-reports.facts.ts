@@ -1,3 +1,7 @@
+import {
+  measurementMoney,
+  type MeasurementPresentation,
+} from '../measurement/measurement.presentation';
 import type { BusinessState } from '../business-state/business-state.service';
 
 /**
@@ -20,6 +24,7 @@ import type { BusinessState } from '../business-state/business-state.service';
 export type BriefCount = number | null;
 
 export type BriefFacts = {
+  measurement?: MeasurementPresentation;
   localDate: string;
   /** Откуда факты: внешняя CRM или собственный календарь. */
   source: string | null;
@@ -174,6 +179,13 @@ export function businessBriefFacts(
   state: BusinessState,
   localDate: string,
 ): BriefFacts {
+  const measuredMoney = (key: string): number | null => {
+    if (!state.measurement) return null;
+    const money = measurementMoney(state.measurement, key);
+    return money.length === 1 && money[0].currency === 'RUB'
+      ? money[0].amount_kopecks
+      : null;
+  };
   const metrics = state.metrics;
   const source = completeness(state);
   const finance = rec(rec(rec(state.current).finance).revenue);
@@ -194,6 +206,7 @@ export function businessBriefFacts(
 
   return {
     localDate,
+    ...(state.measurement ? { measurement: state.measurement } : {}),
     source: str(state.source),
     sourceComplete: source.complete,
     incompleteReason: source.reason,
@@ -229,15 +242,25 @@ export function businessBriefFacts(
           : null,
     },
     revenue: {
-      amountKopecks: num(metrics.revenue_amount_kopecks),
-      basis: str(metrics.revenue_basis),
-      cashKopecks: money(finance.cash_total),
-      cashlessKopecks: money(finance.cashless_total),
-      unclassifiedKopecks: money(finance.unclassified_total),
+      amountKopecks: state.measurement
+        ? measuredMoney('confirmed_cash')
+        : num(metrics.revenue_amount_kopecks),
+      basis: state.measurement
+        ? measuredMoney('confirmed_cash') === null
+          ? 'unavailable'
+          : 'confirmed_cash'
+        : str(metrics.revenue_basis),
+      cashKopecks: state.measurement ? null : money(finance.cash_total),
+      cashlessKopecks: state.measurement ? null : money(finance.cashless_total),
+      unclassifiedKopecks: state.measurement
+        ? null
+        : money(finance.unclassified_total),
     },
     payroll: {
       status: str(payroll.status),
-      accruedTotalKopecks: money(payroll.accrued_total),
+      accruedTotalKopecks: state.measurement
+        ? measuredMoney('confirmed_salary_accrued')
+        : money(payroll.accrued_total),
       /**
        * 🔴 Строки берутся из расчёта зарплаты ЦЕЛИКОМ, а не из разреза мастеров
        * периода: мастеру могло быть начислено в день, когда у него нет ни

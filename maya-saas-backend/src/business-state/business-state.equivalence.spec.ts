@@ -534,11 +534,34 @@ describe('🔴 P1 §9 — legacy против канонического вла�
       );
       // Изменения между периодами считаются по тем же метрикам, поэтому
       // исправленная стоимость записанного меняет и свою дельту.
-      expect(withoutP4Added(withoutP2Changes(canonical.changes))).toEqual(
-        withoutP4Added(withoutP2Changes(legacy.changes)),
-      );
-      expect(canonical.serviceChanges).toEqual(legacy.service_changes);
-      expect(canonical.staffChanges).toEqual(legacy.staff_changes);
+      // C7 D7 deliberately retires legacy comparisons without complete coverage.
+      // Golden source facts above remain unchanged; currency-free money deltas move to the typed owner.
+      const incomplete = scenario.name.includes('неполно');
+      if (incomplete && withPrevious) {
+        expect(canonical.changes).toEqual({});
+        expect(canonical.serviceChanges).toEqual([]);
+        expect(canonical.staffChanges).toEqual([]);
+      } else {
+        const countChanges = (value: unknown) =>
+          Object.fromEntries(
+            Object.entries(
+              withoutP4Added(withoutP2Changes(value)) as Record<
+                string,
+                unknown
+              >,
+            ).filter(([key]) => !key.includes('amount_kopecks')),
+          );
+        expect(countChanges(canonical.changes)).toEqual(
+          countChanges(legacy.changes),
+        );
+        expect(
+          Object.keys(canonical.changes).some((key) =>
+            key.includes('amount_kopecks'),
+          ),
+        ).toBe(false);
+        expect(canonical.serviceChanges).toEqual(legacy.service_changes);
+        expect(canonical.staffChanges).toEqual(legacy.staff_changes);
+      }
       const withoutChangedAndAdded = (keys: string[]) =>
         keys.filter(
           (key) =>

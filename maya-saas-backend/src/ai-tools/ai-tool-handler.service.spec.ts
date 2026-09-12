@@ -1,3 +1,4 @@
+import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { BusinessStateService } from '../business-state/business-state.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
@@ -1155,52 +1156,20 @@ describe('AiToolHandlerService output minimization', () => {
 
     expect(published(result)).toMatchObject({
       data_source: 'crm',
-      revenue: [
-        {
-          currency: 'RUB',
-          amount_kopecks: 120_439_000,
-          amount_major_units: 1_204_390,
-        },
-      ],
+      revenue: [],
       expenses: [],
       net: [],
-      average_ticket: [
-        {
-          currency: 'RUB',
-          amount_kopecks: 146_698,
-          amount_major_units: 1_466.98,
-        },
-      ],
+      average_ticket: [],
       service_summary: [
         {
           name: 'Мужская стрижка',
           appointments: 300,
-          booked_value: [],
-          confirmed_revenue: {
-            status: 'available',
-            basis: 'crm_single_service_transaction_attribution',
-            amount: {
-              currency: 'RUB',
-              amount_kopecks: 60_000_000,
-              amount_major_units: 600_000,
-            },
-            attribution_status: 'partial',
-            attribution_coverage_percent: 49.8,
-          },
+          confirmed_revenue: { status: 'unavailable', amount: null },
         },
       ],
       finance: {
-        source: 'external_crm',
-        provider: 'yclients',
-        revenue: { verified: true, transaction_count: 821 },
-        payroll: {
-          status: 'available',
-          verified: true,
-          accrued_total: {
-            amount_kopecks: 56_388_001,
-            amount_major_units: 563_880.01,
-          },
-        },
+        revenue: { verified: false, total: null },
+        payroll: { verified: false, accrued_total: null },
       },
     });
     expect(JSON.stringify(result)).not.toContain('Антон');
@@ -1229,9 +1198,10 @@ describe('AiToolHandlerService output minimization', () => {
     // Под своим именем — можно, и основание обязано быть однозначным.
     expect(metrics.booked_value_amount_kopecks).toBe(9_999_999);
     expect(metrics.booked_value_basis).toBe('booked_prices');
-    expect(getBusinessFinance).toHaveBeenCalledWith('tenant-a', {
-      from: '2026-07-01T00:00:00.000Z',
-      to: '2026-07-31T23:59:59.999Z',
+    expect(getBusinessFinance).not.toHaveBeenCalled();
+    expect(answer.measurement).toMatchObject({
+      contract: 'c7.measurement.read/1',
+      completeness: 'NOT_MEASURED',
     });
   });
 
@@ -1397,52 +1367,16 @@ describe('AiToolHandlerService output minimization', () => {
         {
           name: 'Стас',
           appointments: 30,
-          // Цены журнала по-прежнему не выдаются за кассу.
           revenue: [],
-          confirmed_revenue: {
-            status: 'available',
-            basis: 'crm_financial_transaction_attribution',
-            amount: {
-              currency: 'RUB',
-              amount_kopecks: 30_000_000,
-              amount_major_units: 300_000,
-            },
-            transaction_count: 60,
-            attribution_status: 'partial',
-            attribution_coverage_percent: 60,
-            unavailable_reason: null,
-          },
-          salary: {
-            status: 'available',
-            basis: 'crm_payroll_accrual',
-            accrued: {
-              currency: 'RUB',
-              amount_kopecks: 12_000_000,
-              amount_major_units: 120_000,
-            },
-            paid: {
-              currency: 'RUB',
-              amount_kopecks: 5_000_000,
-              amount_major_units: 50_000,
-            },
-            unavailable_reason: null,
-          },
+          confirmed_revenue: { status: 'unavailable', amount: null },
+          salary: { status: 'unavailable', accrued: null },
         },
         {
           name: 'Илья',
           appointments: 20,
           revenue: [],
-          confirmed_revenue: {
-            status: 'unavailable',
-            amount: null,
-          },
-          salary: {
-            status: 'unavailable',
-            basis: null,
-            accrued: null,
-            paid: null,
-            unavailable_reason: 'crm_payroll_row_unavailable_for_this_master',
-          },
+          confirmed_revenue: { status: 'unavailable', amount: null },
+          salary: { status: 'unavailable', accrued: null },
         },
       ],
     });
@@ -1710,7 +1644,7 @@ describe('AiToolHandlerService output minimization', () => {
             status: 'unavailable',
             accrued: null,
             paid: null,
-            unavailable_reason: 'crm_payroll_range_too_large',
+            unavailable_reason: 'exact_staff_salary_measurement_required',
           },
         },
       ],
@@ -1908,14 +1842,7 @@ describe('AiToolHandlerService output minimization', () => {
     expect(result).toMatchObject({
       verified: true,
       comparison: { mode: 'previous_year_same_period' },
-      changes: {
-        appointments_total: {
-          current: 120,
-          previous: 100,
-          delta: 20,
-          percent_change: 20,
-        },
-      },
+      changes: {},
     });
   });
 
@@ -2010,30 +1937,8 @@ describe('AiToolHandlerService output minimization', () => {
         unique_clients: 80,
         average_ticket_amount_kopecks: 125_000,
       },
-      changes: {
-        // Динамика считается по забронированному — под своим именем.
-        booked_value_amount_kopecks: {
-          current: 15_000_000,
-          previous: 17_500_000,
-          delta: -2_500_000,
-          percent_change: -14.3,
-        },
-        unique_clients: {
-          current: 80,
-          previous: 100,
-          delta: -20,
-          percent_change: -20,
-        },
-      },
-      service_changes: [
-        {
-          name: 'Мужская стрижка',
-          current_appointments: 60,
-          previous_appointments: 75,
-          delta: -15,
-          percent_change: -20,
-        },
-      ],
+      changes: {},
+      service_changes: [],
     });
     expect(getBusinessOverview).toHaveBeenCalledTimes(2);
   });
@@ -2208,56 +2113,7 @@ describe('AiToolHandlerService output minimization', () => {
           { name: 'Пётр', appointments: 4 },
         ],
       },
-      staff_changes: [
-        {
-          name: 'Илья',
-          current_appointments: 8,
-          previous_appointments: 20,
-          delta: -12,
-          percent_change: -60,
-          // 🔴 Ради этого разреза всё и переделывалось: «у Ильи просела
-          // «Борода» на 12 записей» берётся отсюда и больше ниоткуда.
-          services: [
-            {
-              name: 'Борода',
-              current_appointments: 8,
-              previous_appointments: 20,
-              delta: -12,
-              percent_change: -60,
-            },
-          ],
-        },
-        {
-          name: 'Пётр',
-          current_appointments: 0,
-          previous_appointments: 4,
-          delta: -4,
-          percent_change: -100,
-          services: [
-            {
-              name: 'Борода',
-              current_appointments: 0,
-              previous_appointments: 4,
-              delta: -4,
-              percent_change: -100,
-            },
-          ],
-        },
-        {
-          name: 'Анна',
-          current_appointments: 32,
-          previous_appointments: 30,
-          delta: 2,
-          services: [
-            {
-              name: 'Мужская стрижка',
-              current_appointments: 32,
-              previous_appointments: 30,
-              delta: 2,
-            },
-          ],
-        },
-      ],
+      staff_changes: [],
     });
     // 🔴 Внешний идентификатор CRM наружу не уходит ни при какой роли: он ключ
     // к чужой системе, а не показатель.
@@ -2497,10 +2353,7 @@ describe('AiToolHandlerService output minimization', () => {
         cohort_lookback_days: 90,
         repeat_clients_in_period: 3,
       },
-      changes: {
-        clients_returning: { current: 62, previous: 50, delta: 12 },
-        returning_share_percent: { current: 66, previous: 55.6 },
-      },
+      changes: {},
     });
     expect(result.available_metrics).toEqual(
       expect.arrayContaining([
@@ -2661,25 +2514,7 @@ describe('AiToolHandlerService output minimization', () => {
           },
         ],
       },
-      staff_changes: [
-        {
-          name: 'Илья',
-          current_appointments: 8,
-          previous_appointments: 20,
-          current_cancelled: 6,
-          previous_cancelled: 2,
-          cancelled_delta: 4,
-          current_cancellation_rate_percent: 42.9,
-          previous_cancellation_rate_percent: 9.1,
-          cancellation_rate_delta_percentage_points: 33.8,
-          current_unique_clients: 7,
-          previous_unique_clients: 18,
-          unique_clients_delta: -11,
-          current_repeat_clients_in_period: 1,
-          previous_repeat_clients_in_period: 2,
-          repeat_clients_delta: -1,
-        },
-      ],
+      staff_changes: [],
     });
     expect(JSON.stringify(result)).not.toContain('provider-secret-id');
     /**
@@ -2888,12 +2723,7 @@ describe('AiToolHandlerService output minimization', () => {
         appointments_total: 20,
         unique_clients: 15,
       },
-      changes: {
-        booked_value_amount_kopecks: {
-          delta: 760_000,
-          percent_change: 33.9,
-        },
-      },
+      changes: {},
     });
     expect(JSON.stringify(result)).not.toContain('secret-provider');
     expect(JSON.stringify(result)).not.toContain('Анна');
@@ -2963,7 +2793,7 @@ describe('AiToolHandlerService output minimization', () => {
     });
     expect(second).toEqual(first);
     expect(getBusinessOverview).toHaveBeenCalledTimes(2);
-    expect(getBusinessFinance).toHaveBeenCalledTimes(2);
+    expect(getBusinessFinance).not.toHaveBeenCalled();
   });
 
   /**
@@ -3040,6 +2870,8 @@ describe('AiToolHandlerService output minimization', () => {
       undefined,
       undefined,
       overrides.canonicalWave3,
+      undefined,
+      measurementReaderDouble(),
     );
   }
 });

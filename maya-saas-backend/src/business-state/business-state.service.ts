@@ -1,3 +1,5 @@
+import { compareMeasurementPeriods } from '../measurement/measurement.period';
+import type { MeasurementPresentation } from '../measurement/measurement.presentation';
 import { Injectable } from '@nestjs/common';
 
 import type { AnalyticsRangeQueryDto } from '../analytics/dto/analytics-range-query.dto';
@@ -138,6 +140,7 @@ export interface BusinessStateRequest {
   comparisonPeriod: AnalyticsRangeQueryDto | null;
   /** Разрешено ли читать денежный контур. Решение по роли — вызывающего. */
   financeAllowed: boolean;
+  financeProjection?: 'measurement';
   /**
    * Разрешено ли показывать стоимость записанного.
    *
@@ -204,6 +207,8 @@ export interface EmployeeStateRequest {
  * внешние идентификаторы и непубликуемые денежные разрезы.
  */
 export interface BusinessState {
+  /** Optional exact C7 snapshot, pinned only by an admitted report producer. */
+  measurement?: MeasurementPresentation;
   verified: boolean;
   financeVerified: boolean;
   source: unknown;
@@ -283,6 +288,7 @@ export class BusinessStateService {
         {
           tenantId: request.tenantId,
           financeAllowed: request.financeAllowed,
+          financeProjection: request.financeProjection,
           bookedValueAllowed: request.bookedValueAllowed,
         },
         query,
@@ -409,6 +415,10 @@ export class BusinessStateService {
         : this.businessMetricSnapshot(value);
     const currentSnapshot = snapshot(current);
     const previousSnapshot = previous ? snapshot(previous) : null;
+    const comparisonAllowed =
+      !!previous &&
+      !!previousQuery &&
+      this.comparablePeriods(current, previous, currentQuery, previousQuery);
 
     return {
       verified: this.businessOperationalAnalyticsVerified(current),
@@ -429,19 +439,22 @@ export class BusinessStateService {
       current,
       previous,
       metrics: currentSnapshot,
-      changes: previousSnapshot
-        ? this.businessMetricChanges(currentSnapshot, previousSnapshot)
-        : {},
-      serviceChanges: previous
-        ? this.businessServiceChanges(current, previous)
-        : [],
-      staffChanges: previousInternal
-        ? this.businessStaffChanges(
-            currentInternal,
-            previousInternal,
-            disclosure,
-          )
-        : [],
+      changes:
+        previousSnapshot && comparisonAllowed
+          ? this.businessMetricChanges(currentSnapshot, previousSnapshot)
+          : {},
+      serviceChanges:
+        previous && comparisonAllowed
+          ? this.businessServiceChanges(current, previous)
+          : [],
+      staffChanges:
+        previousInternal && comparisonAllowed
+          ? this.businessStaffChanges(
+              currentInternal,
+              previousInternal,
+              disclosure,
+            )
+          : [],
       availableMetrics: Object.entries(currentSnapshot)
         .filter(([, value]) => value !== null)
         .map(([key]) => key),
@@ -634,6 +647,7 @@ export class BusinessStateService {
     actor: {
       tenantId: string;
       financeAllowed: boolean;
+      financeProjection?: 'measurement';
       bookedValueAllowed: boolean;
     },
     query: AnalyticsRangeQueryDto,
@@ -791,11 +805,18 @@ export class BusinessStateService {
       return this.withStaffSalary(
         {
           ...failClosed,
-          finance: this.unavailableFinance('role_restricted'),
+          finance: this.unavailableFinance(
+            actor.financeProjection === 'measurement'
+              ? 'financial_measurement_separate'
+              : 'role_restricted',
+          ),
         },
         {
           status: 'unavailable',
-          reason: STAFF_SALARY_UNAVAILABLE.roleRestricted,
+          reason:
+            actor.financeProjection === 'measurement'
+              ? 'exact_staff_salary_measurement_required'
+              : STAFF_SALARY_UNAVAILABLE.roleRestricted,
         },
       );
     }
@@ -2011,6 +2032,54 @@ export class BusinessStateService {
 
   /** Почему присутствие не стало метрикой — словами. */
 
+  /** D7: a requested comparison is not evidence of comparable coverage. */
+  private comparablePeriods(
+    current: Record<string, unknown>,
+    previous: Record<string, unknown>,
+    currentQuery: AnalyticsRangeQueryDto,
+    previousQuery: AnalyticsRangeQueryDto,
+  ): boolean {
+    const fact = (
+      data: Record<string, unknown>,
+      query: AnalyticsRangeQueryDto,
+    ) => {
+      const period = this.record(data.period);
+      const status = this.record(
+        this.record(data.completeness).appointments,
+      ).status;
+      const from = new Date(query.from);
+      const to = new Date(Date.parse(query.to) + 1);
+      return {
+        from,
+        to,
+        coverageFrom: from,
+        coverageTo: to,
+        asOf: new Date(),
+        timezone: typeof period.timezone === 'string' ? period.timezone : '',
+        basis:
+          typeof data.data_source === 'string'
+            ? data.data_source
+            : 'unavailable',
+        currency: null,
+        unit: 'count',
+        value: '0',
+        completeness:
+          status === 'complete'
+            ? ('COMPLETE' as const)
+            : ('NOT_MEASURED' as const),
+      };
+    };
+    const a = fact(current, currentQuery),
+      b = fact(previous, previousQuery);
+    const elapsed = compareMeasurementPeriods(a, b);
+    return (
+      elapsed.comparable ||
+      (elapsed.reasons.length === 1 &&
+        elapsed.reasons[0] === 'comparison_elapsed_interval_mismatch' &&
+        compareMeasurementPeriods(a, b, 'complete_months').comparable)
+    );
+  }
+
   private businessMetricChanges(
     current: Record<string, unknown>,
     previous: Record<string, unknown>,
@@ -2019,6 +2088,7 @@ export class BusinessStateService {
       Object.keys(current).flatMap((key) => {
         const currentValue = current[key];
         const previousValue = previous[key];
+        if (key.includes('amount_kopecks')) return [];
         // Не всякая метрика — число: у денежного числа есть ещё и ОСНОВАНИЕ,
         // а разницу оснований не считают вычитанием.
         if (

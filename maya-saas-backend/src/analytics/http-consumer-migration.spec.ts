@@ -214,7 +214,9 @@ describe('P3 §10 — обязательная регрессия HTTP-потр�
     // 🔴 Презентер снимает диагностику, но НЕ подменяет её словом «полно»:
     // ключа нет вовсе. Слепота кабинета к неполноте — свойство выпущенного
     // контракта фронта (реестр 4.2), а не решение, принятое этой миграцией.
-    expect(Object.keys(response)).not.toContain('completeness');
+    expect(record(record(response.completeness).appointments).status).toBe(
+      'incomplete',
+    );
     expect(JSON.stringify(response)).not.toContain('"complete"');
   });
 
@@ -237,8 +239,8 @@ describe('P3 §10 — обязательная регрессия HTTP-потр�
     });
 
     expect(response.data_source).toBe('maya');
-    expect(response.net).toEqual([{ currency: 'RUB', amount_kopecks: 250000 }]);
-    expect(Object.keys(response)).not.toContain('net_status');
+    expect(response.net).toEqual([]);
+    expect(response.net_status).toBe('unavailable');
   });
 
   it('4. измеренный ноль: пустой период — это `0`, а не «нет данных»', async () => {
@@ -375,7 +377,8 @@ describe('P3 §10 — обязательная регрессия HTTP-потр�
     expect(state.metrics.appointments_cancelled).toBe(0);
     // Кабинет корзины статусов не публиковал никогда: их в ответе нет, но и
     // счётчики, которые он публиковал, не изменились.
-    expect(Object.keys(record(response.appointments))).not.toContain('no_show');
+    expect(Object.keys(record(response.appointments))).toContain('no_show');
+    expect(record(response.attendance).no_show).toBe(1);
     expect(record(response.appointments).total).toBe(2);
   });
 
