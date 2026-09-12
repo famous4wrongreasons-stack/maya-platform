@@ -298,6 +298,14 @@ Phase B ввела единственного deterministic owner для уро�
 
 ### Chapter 7 — Measurement & Attribution
 
+**Prerequisite addendum, 2026-09-12:**
+[service-business principles](../architecture/README.md#chapter-7-10-boundaries)
+apply to the frozen C7 contract: generic canonical facts/results, provider-qualified
+evidence and one MeasurementRevision. No barbershop assumptions, new scoring,
+tenant-policy writer or connector capability is introduced here. C7 handoff and
+completion refer to [the bounded compatibility mapping](CYCLE-07-PREFLIGHT-AND-SCOPE.md#service-business-handoff).
+Historical Phase B status rows below remain historical, not current acceptance.
+
 | Требуется | Причина |
 |---|---|
 | Outcome measurement | Opportunity и proposed intent не доказывают выполненное действие или результат |
@@ -305,6 +313,18 @@ Phase B ввела единственного deterministic owner для уро�
 | Recovery reporting | `recovered revenue`, заполненное окно и возврат клиента допустимы только как canonical measured outcomes |
 
 ### Chapter 8 — Prediction & Valuation
+
+<a id="service-business-c8"></a>
+
+**Prerequisite addendum, 2026-09-12:**
+[canonical service-business/tenant-policy principles](../architecture/README.md#chapter-7-10-boundaries)
+require canonical facts + explicit tenant/vertical policy for valuation/ranking.
+`3 visits = loyal`, `60 days = dormant`, `high check = valuable` are not universal
+rules. Keep fact, deterministic policy, prediction and recommendation distinct;
+unknown recency is not dormancy and scoring is not consent. The
+[ratchet specification](../architecture/README.md#service-business-ratchets)
+must be mapped into affected C8 package/release proofs before implementation;
+this documentation does not create a model, threshold or capability.
 
 | Требуется | Запрет до реализации |
 |---|---|
@@ -314,6 +334,22 @@ Phase B ввела единственного deterministic owner для уро�
 
 ### Chapter 9 — Orchestrator & Agent Runtime
 
+<a id="service-business-c9"></a>
+
+**Prerequisite addendum, 2026-09-12:**
+[Orchestrator principles](../architecture/README.md#chapter-7-10-boundaries)
+require Canonical State + Vertical Profile + Tenant Policies + Available
+Capabilities. Conversation produces a validated, owner-confirmed draft for the
+canonical configuration owner, never silent policy writes. Credentials remain
+in a separate secure connector flow; external links need confirmed binding and
+actual connector capability, not inferred monitoring. Reports use confirmed
+tenant policies and existing OwnerReportRun/A12/CD; reputation reasoning consumes
+source-qualified facts, without map-provider hardcoding. See the
+[agent gate prerequisite](MAYA-ORCHESTRATOR-AGENTS-ARCHITECTURE-GATE.md#service-business-agent-prerequisites)
+and [ratchet specification](../architecture/README.md#service-business-ratchets).
+The four-agent v1 registry is unchanged; target profile/policy/source concepts
+are not implementation claims or pre-approved new schema.
+
 | Требуется | Состояние Phase B |
 |---|---|
 | Maya Orchestrator runtime | Не создавался; реализованы только deterministic routing contracts |
@@ -322,6 +358,19 @@ Phase B ввела единственного deterministic owner для уро�
 | Conversation presentation | Не должна становиться владельцем Opportunity, canonical metrics или permissions |
 
 ### Chapter 10 — Autonomy
+
+<a id="service-business-c10"></a>
+
+**Prerequisite addendum, 2026-09-12:**
+[capability-first agent/autonomy principles](../architecture/README.md#chapter-7-10-boundaries)
+require tenant/agent/action-class scope, current policy, limits and approved
+execution owners. Vertical expertise is supplied through profiles/skills/policies/
+context, not a rewritten agent system per industry. Profile defaults, conversational
+memory or unconfirmed owner preferences never grant autonomy, bypass Client consent or revive
+UNKNOWN effects. Universal agent-role examples do not change the accepted v1
+registry. Before implementation map the
+[permanent ratchet specification](../architecture/README.md#service-business-ratchets)
+to affected autonomy/release tests; no autonomy is enabled by this addendum.
 
 | Требуется | Состояние Phase B |
 |---|---|

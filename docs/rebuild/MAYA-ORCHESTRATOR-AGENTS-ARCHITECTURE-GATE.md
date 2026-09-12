@@ -639,6 +639,37 @@ interface AgentResult {           // AgentResult@1
 
 Гипотеза задания проверена. Число глав сохранено, содержание уточнено.
 
+<a id="service-business-agent-prerequisites"></a>
+
+**Нормативное дополнение владельца, 2026-09-12:** Chapters 7–10 используют
+[единые service-business principles](../architecture/README.md#service-business-principles)
+и [ratchet specification](../architecture/README.md#service-business-ratchets).
+Таблица ниже сохраняет historical chapter mapping; дополнение не объявляет
+agents/connectors/autonomy реализованными и не меняет registry §3.1.
+
+- C7 поставляет generic/source-qualified Measurement facts; строка §3 про
+  отложенный Reputation Agent означает prerequisite этих фактов, не agent
+  runtime внутри C7. Approved C7 scope/schema не расширяются.
+- C8 вычисляет valuation/ranking из canonical facts и explicit tenant/vertical
+  policy, отличая факт, правило, prediction и recommendation. Нет общих для всех
+  порогов «3 визита», «60 дней», «высокий чек».
+- C9 строит strategy из Canonical State + Vertical Profile + Tenant Policies +
+  Available Capabilities. Conversation → validated draft → owner confirmation →
+  canonical configuration action; история не system of record. Credentials идут
+  отдельно от LLM. User-bound URL не доказывает data access; Reputation Agent
+  получает normalized facts, а reports используют policy и canonical delivery.
+- C10 использует capability-oriented agents, tenant-scoped autonomy и current
+  policy. Profiles/skills/business context дают vertical expertise без нового
+  agent system под каждую отрасль; ни профиль, ни owner approval не обходят
+  security/consent/UNKNOWN boundaries.
+
+Примеры Retention/Scheduling/Communication/Finance-Measurement/Reputation/Admin
+в principles — роли capabilities, не разрешение заменить четыре принятых v1
+agent domains. `ORCHESTRATOR ASSUMES BARBERSHOP WORKFLOW → FAIL`;
+`AGENT REQUIRES BARBERSHOP SEMANTICS WITHOUT VERTICAL SCOPE → FAIL`.
+Перед реализацией соответствующей главы эти правила входят в её package proof
+и mandatory release guards. Это specification, не текущий executable PASS.
+
 | Глава | Было | Становится | Почему именно так |
 |---|---|---|---|
 | **5** | Opportunities | **OPPORTUNITIES & AGENT TASKING** | Канонические примитивы возможности (освободившееся окно, спящий клиент, дыра в расписании, аномалия денег) + **потребитель `DomainEvent`**. Сегодня очередь событий растёт без единого потребителя (4.14, 4.80: 102 pending) — глава 5 даёт ей первого. Здесь же заводятся два недостающих владельца: очередь кандидатов и «ёмкость» (4.54) |

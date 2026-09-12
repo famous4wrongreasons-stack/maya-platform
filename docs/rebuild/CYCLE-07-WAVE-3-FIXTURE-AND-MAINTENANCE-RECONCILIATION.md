@@ -162,6 +162,15 @@ After that operational boundary is resolved, continue existing Wave 3, then
 P06/Wave 4 under the same frozen 22-requirement/6-package/4-wave/32-surface plan.
 The current fixture repair is complete and does not need to be redesigned.
 
+**Documentation handoff addendum, 2026-09-12:** continuation and the eventual C7
+completion report must reference the
+[permanent service-business principles](../architecture/README.md#service-business-principles)
+and [C7 compatibility / future-chapter mapping](CYCLE-07-PREFLIGHT-AND-SCOPE.md#service-business-handoff).
+They preserve the approved C7 owners/envelope and record C8–C10 prerequisites;
+they do not resolve the operational approval above, permit deployment or start
+a new feature wave. The ratchets are specified here by reference, not implemented
+or claimed as newly executed tests.
+
 ## Final status / hygiene
 
 PRODUCTION PHP HASH RECORDED: YES  

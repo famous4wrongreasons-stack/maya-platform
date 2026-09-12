@@ -22,6 +22,9 @@ service, rental, repair, pet services и других сервисных ком�
 - [Product](product/README.md) - миссия, роли, сценарии, продуктовые границы.
 - [Architecture](architecture/README.md) - компоненты ядра, multi-tenant модель,
   данные, безопасность, интеграции.
+- [Permanent service-business principles](architecture/README.md#service-business-principles) -
+  reference vertical, CRM adapters, tenant policies, conversational configuration,
+  secure credentials, user-bound external sources и prerequisites Chapters 7–10.
 - [AI](AI/README.md) - агенты, память, tools, planner, approval gates, prompts.
 - [Engineering](Engineering/README.md) - API-first правила разработки, качество,
   деплой, наблюдаемость.

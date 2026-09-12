@@ -448,3 +448,44 @@ PROCESS HYGIENE: 0
 ```
 
 Final publication: docs/evidence-only commit and normal push to canonical origin; HEAD/origin equality checked after push. No force push, reset, revert, stash, clean, runtime deployment or Chapter7 implementation. **STOP.**
+
+<a id="service-business-handoff"></a>
+
+## 15. Handoff / completion prerequisite addendum — 2026-09-12
+
+The owner-approved [permanent service-business principles](../architecture/README.md#service-business-principles)
+are the single architectural reference for C7 handoff and the §12 completion
+gate. This dated addendum leaves the historical preflight/approval statuses above
+intact. It does not reopen approved D1–D13, the combined schema/action envelope
+or source-owner FK decision, and does not authorize new runtime work in this step.
+
+The [bounded C7 compatibility mapping](../architecture/README.md#chapter-7-10-boundaries)
+is **PASS**: one generic MeasurementRevision, exact source/tenant/subject evidence,
+deterministic facts/results and source-labelled financial/reputation semantics
+are compatible. Calendar-month measurements/private A22 revenue targets are
+scoped contracts, not universal payroll policy. Provider qualification is not
+provider identity as canonical authority. No blanket production re-certification
+is claimed by this documentation check.
+
+The manifest stays **22 requirements / 6 packages / 4 waves / 32 surface groups**;
+the approved envelope stays **1 model / 37 physical fields / 8 relation-only
+model changes / 0 new business action classes / 1 AC6 class / 1 migration /
+0 backfill**. P01–P06 source/configuration/execution owners are unchanged.
+At completion, reference the principles alongside existing Q/guard evidence;
+do not add Q23, connectors, profile schema, new payroll/report policies or agent
+runtime to make future targets appear delivered. The
+[ratchet specification](../architecture/README.md#service-business-ratchets)
+states the permanent review boundaries; it is not a claim of new tests/wiring.
+
+Carry forward without feature leakage: C7 canonical facts/results →
+[C8 facts + explicit policy for valuation](CARRY-FORWARD-REGISTER.md#service-business-c8)
+→ [C9 strategy, conversational policy and capability intake](CARRY-FORWARD-REGISTER.md#service-business-c9)
+→ [C10 scoped autonomy](CARRY-FORWARD-REGISTER.md#service-business-c10).
+No universal loyalty/dormancy threshold, contact export, PushSMS or automatic
+reactivation is introduced. Conversation-first onboarding, secure credentials
+and external bindings remain target prerequisites in their applicable chapters.
+
+Operational status is held in the
+[current Wave 3 handoff](CYCLE-07-WAVE-3-FIXTURE-AND-MAINTENANCE-RECONCILIATION.md).
+This principle addendum does not resolve its maintenance/cutover boundary or
+announce C7 completion. Runtime/schema/migration/production changes: **0**.
