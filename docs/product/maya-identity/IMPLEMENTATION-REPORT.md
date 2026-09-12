@@ -94,3 +94,60 @@ all PHP are outside the release. Backend remains 20260912-c7-p06-4058cd8c.
 Production publication and native installation are recorded separately after
 post-release verification. Production consent/business/provider/message proof
 mutations remain zero. A real user's consent must remain their own decision.
+
+## Final delivery
+
+- Implementation b6b9c5ae; visual proof b70f761c, both pushed before publication.
+- VPS static publication and exact post-hash verification: PASS, eight artifacts.
+  Current app SHA256: 59bd3301dc16ae6f16828a8def6ed1d3c978a205af07e70e4a8cbb2624b03077.
+  The private recovery snapshot remains under `.maya-release-evidence/maya-identity-20260913`
+  on the same VPS. No backend release or service restart was required.
+- Signed ru.mayaos.app v1.0 **build 11** installed and launched on the connected
+  iPhone. Device inventory confirms 11. Built canonical HTML SHA256:
+  02e85f68b7370f7dbc6ce7ba14eae3e5816ac5fac50e1dd2c8d0bc9b1c1547f7.
+- Privacy accept and marketing accept/decline: PASS in executable/synthetic browser
+  and iOS WebView proofs. No real person's production consent was sent for proof.
+- New native/WebView screenshot: [consent form](evidence/consent-ios-synthetic.png).
+- Main dirty status is byte-identical: 25 pre-existing entries (including the
+  prior external extra entry); 23 regular-file hashes unchanged. Original native
+  dirty status: 82 entries identical, 81 regular-file hashes unchanged. Neither
+  original checkout was edited. The previous partial `/tmp` worktree was preserved.
+
+| Requested result | Verdict |
+|---|---|
+| NEW MAYA LOGO | IMPLEMENTED YES |
+| CANONICAL LOGO ASSET | сайт и приложение/assets/maya-identity.js; generated maya-mark.svg |
+| SPLASH MORPH ANIMATION | PASS |
+| THINKING ANIMATION | PASS |
+| VOICE/RECORDING VISUAL | PASS; existing WebAudio amplitude only |
+| REDUCED MOTION | PASS |
+| LEGACY LOGO SURFACES REMAINING | 0 in upgraded active Maya consumer components; tenant brands/history remain independent |
+| NATIVE CONSENT 400 ROOT CAUSE | Saved build 9 keyless consent_submit payload rejected by explicit_consent_decisions_required before effect |
+| PRIVACY CONSENT FLOW | PASS — synthetic/executable, no production grant |
+| MARKETING ACCEPT FLOW | PASS — synthetic/executable |
+| MARKETING DECLINE FLOW | PASS — synthetic/executable + iOS WebView |
+| KEYLESS LEGACY FLOW | STILL FAIL-CLOSED YES |
+| A18/CONSENT SECURITY CONTRACTS PRESERVED | YES |
+| MANDATORY REGRESSION | PASS — 437 suites / 3664 tests |
+| PRODUCTION DEPLOYMENT | PASS — VPS frontend + signed iPhone build 11 |
+| CHAPTER 7 COMPLETE | PRESERVED |
+| CHAPTER 8 STARTED | NO |
+
+Beget maintenance pages/PWA backups are deliberately not restored. No App Store
+submission or Android deployment is claimed. The installed iPhone build is the
+existing development distribution, not a public App Store release.
+
+Hygiene: owned PostgreSQL cluster stopped and removed after a synthetic recovery
+dump; owned simulator deleted, proof-only app removed, preview browser/server
+closed. Existing development build outputs remain as deliverables, not processes.
+No pre-existing database was accessed for proof. Production business/provider/
+message/consent mutations: 0. Final relay post-verification and HEAD/origin receipt
+are appended with the report checkpoint.
+
+Final R01 post-verification: PASS — same 42 entries, 10 active PHP, three public
+roots, nine local routing files, seven protected HTML/backups, 16 blocked artifacts
+and 128 denied HEAD URLs. PHP source evaluation/business effects: 0. All three
+before/prepublish/after checks agree. Backend health/readiness remain PASS without
+restart. **PROCESS HYGIENE: 0.** Final report checkpoint is pushed and HEAD/origin
+verified in the delivery response; all implementation and release evidence is
+retained in this directory.

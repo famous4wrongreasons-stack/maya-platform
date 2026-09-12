@@ -1,0 +1,41 @@
+[
+  {
+    "phase": "before",
+    "status": "PASS",
+    "entries": 42,
+    "activePhp": 10,
+    "publicRoots": 3,
+    "localRoutingFiles": 9,
+    "protectedHtmlAndBackups": 7,
+    "blockedArchives": 16,
+    "phpSourceEvaluation": 0,
+    "bookingProviderMessageEffects": 0,
+    "deniedHeadUrls": 128
+  },
+  {
+    "phase": "prepublish",
+    "status": "PASS",
+    "entries": 42,
+    "activePhp": 10,
+    "publicRoots": 3,
+    "localRoutingFiles": 9,
+    "protectedHtmlAndBackups": 7,
+    "blockedArchives": 16,
+    "phpSourceEvaluation": 0,
+    "bookingProviderMessageEffects": 0,
+    "deniedHeadUrls": 128
+  },
+  {
+    "phase": "after",
+    "status": "PASS",
+    "entries": 42,
+    "activePhp": 10,
+    "publicRoots": 3,
+    "localRoutingFiles": 9,
+    "protectedHtmlAndBackups": 7,
+    "blockedArchives": 16,
+    "phpSourceEvaluation": 0,
+    "bookingProviderMessageEffects": 0,
+    "deniedHeadUrls": 128
+  }
+]
