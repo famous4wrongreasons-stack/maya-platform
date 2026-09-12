@@ -1,0 +1,34 @@
+# Observed PHP artifact inventory — completeness NOT certified
+
+Account web roots: R1 `mayaos.ru/public_html`; R2 `mocine3388.beget.tech/public_html`; R3 `muzhskayaestetika.rf/public_html`, each under `/home/m/mocine3388/`. All paths below are exact.
+
+HTTP YES means a public application URL, including auth rejection or runtime error; it does not mean successful business execution. NO requires identified server archive/config denial. Effective server-root/rewrite completeness remains unknown.
+
+| Root/path | HTTP reachable / response | Classification | SHA-256 | book_record | Phone/fullname booking authority | R01 refusal | Action required |
+|---|---|---|---|---|---|---|---|
+| R1/maya-platform-api.php | YES / 200 | CANONICAL / existing helper | `0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50` | NO | NO | NO / N/A (no legacy create) | Preserve canonical behavior; pin complete root/alias mapping |
+| R1/maya-platform-api.php.pre-php56-hotfix-20260908 | NO / 403 (server denial) | BACKUP | `ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46` | NO | NO | NO / N/A (no legacy create) | Preserve evidence and verify all host aliases remain denied |
+| R2/api-proxy.php | YES / 500 | LEGACY | `5904e859bfdd9c78f841f6ee0b7971cea93b924011619cc8c0ab6f41e3b54d81` | NO | YES | NO | Reconcile effective technical-domain route; forbidden /records writer must not be promoted |
+| R3/app/api-proxy.codex-loyalty-20260721.php | YES / 200 | CANONICAL / existing helper | `1460bc8d30b5eea2b8347ed8b3f60fae1c545669d980d58394e77b5b99d40ac6` | NO | NO | YES | Preserve canonical behavior; pin complete root/alias mapping |
+| R3/app/api-proxy.php | YES / 200 | CANONICAL / existing helper | `d5eeaa82f69f6d72c366576797c2920fecd0d27f76262e2c5f4a342f363ddd05` | YES | YES | NO | Restore exact certified R01 refusal after complete inventory + gates |
+| R3/app/api-proxy.php.20260708211912.bak | NO / 403 (server denial) | BACKUP | `e9eec4db6591e972ac2afa297a11b678df1b5ddb61461bad598246bebc51d9e1` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/api-proxy.php.bak-20260702-1305 | NO / 403 (server denial) | BACKUP | `03bf7cd55781626958808a6650be4aea851b961daab3e3da9af0d77516541a7e` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/api-proxy.php.bak-20260703-213132 | NO / 403 (server denial) | BACKUP | `827e3163d16c88a1096ab07eae11a8207c71d49833ea28b7ce2c1fafbe2995c8` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/api-proxy.php.bak-20260703-221534 | NO / 403 (server denial) | BACKUP | `9ef4f197ccd4cb5f13646a55fb30bb0dc31d116f93f6ea46c378ff52d87e66aa` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/api-proxy.php.bak-20260703-221742 | NO / 403 (server denial) | BACKUP | `74389d5884886ef9f3943ca4230ad5b58be3cce578b15168380326b8d09e8718` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/api-proxy.php.bak-20260704_223539 | NO / 403 (server denial) | BACKUP | `b8a40ac681dfcb7bd33ed5b95bd6cc8cbfeda1e3518c4d637293f6a6d606cf2f` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/api-proxy.php.bak-20260704_230004 | NO / 403 (server denial) | BACKUP | `c91491e7c6f1515a25c297f5c760089c7d063eacf765fc9e32c874c939db02d7` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/api-proxy.php.bak-20260705_235508 | NO / 403 (server denial) | BACKUP | `76596de979329437a2d2a61910abb0cda779e1d1940219d0de1c36bae22db2da` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/api-proxy.php.bak.staff_tasks_20260709230559 | NO / 403 (server denial) | BACKUP | `1d980c2c6a720314734fc7a08877268508df585a9ad1f5978e241f8015b7241d` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/api-proxy.php.bak.staff_tasks_retry_20260709230808 | NO / 403 (server denial) | BACKUP | `1d980c2c6a720314734fc7a08877268508df585a9ad1f5978e241f8015b7241d` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/api-proxy.php.pre-b13-031977e4 | NO / 403 (server denial) | BACKUP | `df2749fb1f85e33787ac1d01b2f7542ae9d85a986dad80c21c552145386afed5` | YES | YES | NO | Preserve evidence and verify all host aliases remain denied |
+| R3/app/backups/api-proxy-before-loyalty-20260721-2035.php | YES / 200 | BACKUP | `8cc22eafdcefbaa620427c53e7c930c01bb72e0e51e2af45e7d9205edd3e4cb5` | YES | YES | NO | Retire HTTP exposure; preserve historical bytes privately |
+| R3/app/maya-native-api.php | YES / 200 | CANONICAL / existing helper | `91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391` | NO | NO | NO / N/A (no legacy create) | Preserve canonical behavior; pin complete root/alias mapping |
+| R3/app/package5-b35-bulk-proxy.php | YES / 200 | CANONICAL / existing helper | `140b651a2fdf8ea1abb3bb112312ed2ce5c0e54deebb8ed0f6b3a7fdb86d59e9` | NO | NO | NO / N/A (no legacy create) | Preserve canonical behavior; pin complete root/alias mapping |
+| R3/app/package5-client-consent-proxy.php | YES / 200 | CANONICAL / existing helper | `267383a99603957efce1d515346a0c32760847f341e1f85181859384cd883c69` | NO | NO | NO / N/A (no legacy create) | Preserve canonical behavior; pin complete root/alias mapping |
+| R3/app/site-community-proxy.php | YES / 200 | CANONICAL / existing helper | `bc2540b99d9b59c6bf09dd9f7f9c56b59c3a5f71c72c44c590182a570aa52a16` | NO | NO | NO / N/A (no legacy create) | Preserve canonical behavior; pin complete root/alias mapping |
+| R3/app/site-publications-proxy.php | YES / 200 | CANONICAL / existing helper | `e0c930b3e4bb6ee35289c075097a5e9b6a5ab179a5e1f10fc00f4fbbd0071f97` | NO | NO | NO / N/A (no legacy create) | Preserve canonical behavior; pin complete root/alias mapping |
+| R3/app/tenant-config.php | YES / 200 | CANONICAL / existing helper | `0a2bb2734d619ed5c5330a057477c6dd017d0b6dc71063b05cb9bff9c8b59c5c` | NO | NO | NO / N/A (no legacy create) | Preserve canonical behavior; pin complete root/alias mapping |
+| R3/app/tg-config.php | NO / 403 (server denial) | CONFIG | `dc9f21ddb3fc6afeb2f9bb289bd7add07b25a6260f0d8329e5a0626a6ce21a68` | NO | NO | NO / N/A (no legacy create) | Preserve evidence and verify all host aliases remain denied |
+| R3/app/tg-config.php.bak.20260703030847 | NO / 403 (server denial) | BACKUP | `c25f194be9db7df01f4f834999c75954ad03f318acb51b223b2806e82f533239` | NO | NO | NO / N/A (no legacy create) | Preserve evidence and verify all host aliases remain denied |
+| R3/yclients-webhook.php | YES / 403 | LEGACY | `5081d0d6e7f7f47b272552f793fafcf54bc5b68700428aee8fe58297536f97f8` | NO | NO | NO / N/A (no legacy create) | Preserve canonical behavior; pin complete root/alias mapping |

@@ -1,0 +1,13 @@
+{
+  "url": "http://mocine3388.beget.tech/api-proxy.php",
+  "method": "HEAD",
+  "status": 500,
+  "contentType": "text/html",
+  "poweredBy": "PHP/5.6.40",
+  "server": "nginx-reuseport/1.21.1",
+  "contentLength": "0",
+  "at": "2026-09-12T16:41:15.468079+00:00",
+  "requestAction": null,
+  "businessRequests": 0,
+  "conclusion": "Public URL responds 500; not an access-deny proof, not proof of successful PHP/provider execution."
+}

@@ -43,21 +43,7 @@ function candidate(source) {
   return result;
 }
 
-const inspectScript = String.raw`
-import pathlib,json,base64,hashlib
-request=json.loads(input())
-rows=[]
-for item in request['entries']:
- p=pathlib.Path(item['path']); b=p.read_bytes()
- row=dict(path=str(p),sha256=hashlib.sha256(b).hexdigest(),bytes=len(b))
- if item['role'] in ['full_php','relay_php']: row['source']=base64.b64encode(b).decode()
- rows.append(row)
-found=[]
-for domain in ['muzhskayaestetika.rf','mayaos.ru']:
- root=pathlib.Path('/home/m/mocine3388')/domain/'public_html'
- found.extend(str(p) for p in root.rglob('*api*.php*') if p.is_file())
-print(json.dumps(dict(rows=rows,found=sorted(found))))
-`;
+const {inspectScript} = require('./public-relay-inventory.cjs');
 function sshPython(script, input) {
   // Script is fixed repository code; data (including candidate credentials) uses stdin.
   const command = 'python3 -c ' + "'" + script.replaceAll("'", "'\\''") + "'";
@@ -77,6 +63,11 @@ function parseCandidate(source) {
   assert.ok(result.status === 0 && result.stdout === 'PARSE_PASS', 'Candidate PHP syntax check failed');
 }
 function validateObserved(observed, allowIncident = false) {
+  const expectedRoots = [...new Set(manifest.entries.map(e =>
+    e.path.slice(0, e.path.indexOf('/public_html') + '/public_html'.length)))].sort();
+  assert.deepEqual(observed.roots, expectedRoots, 'Unreconciled public web root');
+  assert.deepEqual(observed.symlinks, [], 'Unreconciled public symlink/alias target');
+  assert.deepEqual(observed.scanErrors, [], 'Incomplete public-root scan');
   const expectedPaths = manifest.entries.filter(e => e.role.endsWith('php') || e.role === 'blocked_archive').map(e => e.path).sort();
   assert.deepEqual(observed.found, expectedPaths, 'Unregistered/missing relay copy');
   assert.equal(observed.rows.length, manifest.entries.length);
