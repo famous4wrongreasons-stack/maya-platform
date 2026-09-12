@@ -1,0 +1,210 @@
+{
+  "source": "сайт и приложение/assets/maya-identity.js",
+  "version": "ribbon-v1",
+  "artifacts": [
+    {
+      "path": "сайт и приложение/assets/maya-mark.svg",
+      "sha256": "228b8afd3a9489837891ccef1554cd42302d334b389c7afd43a3d7213cb53af7"
+    },
+    {
+      "path": "сайт и приложение/assets/maya-mark-mono.svg",
+      "sha256": "228b8afd3a9489837891ccef1554cd42302d334b389c7afd43a3d7213cb53af7"
+    },
+    {
+      "path": "сайт и приложение/assets/maya-mark-light.svg",
+      "sha256": "228b8afd3a9489837891ccef1554cd42302d334b389c7afd43a3d7213cb53af7"
+    },
+    {
+      "path": "сайт и приложение/assets/maya-mark-dark.svg",
+      "sha256": "228b8afd3a9489837891ccef1554cd42302d334b389c7afd43a3d7213cb53af7"
+    },
+    {
+      "path": "сайт и приложение/assets/maya-icon.svg",
+      "sha256": "6eb63da99f82004305425e6b51328da326756597703bea4c56de44e3646d5888"
+    },
+    {
+      "path": "сайт и приложение/apple-touch-icon.png",
+      "sha256": "a1a79dba4f5fa1edb2656e907a0c8e6bcbace3914a52e1b0e452956e8905a037"
+    },
+    {
+      "path": "сайт и приложение/assets/maya-mark-dark-1024.png",
+      "sha256": "31152b887ed106825519f9177d65a8b4432788dafe61cc7b96cd602336669ba8"
+    },
+    {
+      "path": "сайт и приложение/assets/maya-mark-dark.png",
+      "sha256": "31152b887ed106825519f9177d65a8b4432788dafe61cc7b96cd602336669ba8"
+    },
+    {
+      "path": "сайт и приложение/assets/maya-mark-icon.png",
+      "sha256": "31152b887ed106825519f9177d65a8b4432788dafe61cc7b96cd602336669ba8"
+    },
+    {
+      "path": "сайт и приложение/assets/maya-mark-light-1024.png",
+      "sha256": "31152b887ed106825519f9177d65a8b4432788dafe61cc7b96cd602336669ba8"
+    },
+    {
+      "path": "сайт и приложение/assets/maya-mark-light.png",
+      "sha256": "31152b887ed106825519f9177d65a8b4432788dafe61cc7b96cd602336669ba8"
+    },
+    {
+      "path": "сайт и приложение/assets/maya-mark-mono.png",
+      "sha256": "31152b887ed106825519f9177d65a8b4432788dafe61cc7b96cd602336669ba8"
+    },
+    {
+      "path": "сайт и приложение/assets/mayaos-login-bot-avatar-640.png",
+      "sha256": "1f7bdba285a53ea8b401a6d03c3ff75b6c661a1e7c06c3aecc7f4e958334873e"
+    },
+    {
+      "path": "сайт и приложение/favicon-256.png",
+      "sha256": "b6f1642170333254d22267055e8da481c7e68cf38e2ad5a2a7fee6d97810673d"
+    },
+    {
+      "path": "сайт и приложение/icon-192-maskable.png",
+      "sha256": "1cbc3fa71bb57d206e2b3a25450e9e7012428f48d3576520b4ea86e37d9e75e1"
+    },
+    {
+      "path": "сайт и приложение/icon-192-rounded.png",
+      "sha256": "1cbc3fa71bb57d206e2b3a25450e9e7012428f48d3576520b4ea86e37d9e75e1"
+    },
+    {
+      "path": "сайт и приложение/icon-192.png",
+      "sha256": "1cbc3fa71bb57d206e2b3a25450e9e7012428f48d3576520b4ea86e37d9e75e1"
+    },
+    {
+      "path": "сайт и приложение/icon-512-maskable.png",
+      "sha256": "160793a07d7a44bb6c01c627a701f2e9e79df846e1d043a8bba556f309666d68"
+    },
+    {
+      "path": "сайт и приложение/icon-512-rounded.png",
+      "sha256": "160793a07d7a44bb6c01c627a701f2e9e79df846e1d043a8bba556f309666d68"
+    },
+    {
+      "path": "сайт и приложение/icon-512.png",
+      "sha256": "160793a07d7a44bb6c01c627a701f2e9e79df846e1d043a8bba556f309666d68"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-128.png",
+      "sha256": "e60fa026ede5f9d3fd3e25b77ffc105bd01debfa0bd5f3391663701dada31be3"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-128 — maskable.png",
+      "sha256": "e60fa026ede5f9d3fd3e25b77ffc105bd01debfa0bd5f3391663701dada31be3"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-144.png",
+      "sha256": "5e6f2b439a3624c69adcbecefec9c7f40b6f155c7f290b3cb21168c48eaf714c"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-144 — maskable.png",
+      "sha256": "5e6f2b439a3624c69adcbecefec9c7f40b6f155c7f290b3cb21168c48eaf714c"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-152.png",
+      "sha256": "9e190585ecd885ec1149b733acb08d7a4e0a8b9840eb23da93f4d7c1fcf08f48"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-152 — maskable.png",
+      "sha256": "9e190585ecd885ec1149b733acb08d7a4e0a8b9840eb23da93f4d7c1fcf08f48"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-16.png",
+      "sha256": "667a5c4eb2a3fa3fd33388fd622f6227a67524ecb5608bf7e1e8f37244048b07"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-16 — maskable.png",
+      "sha256": "667a5c4eb2a3fa3fd33388fd622f6227a67524ecb5608bf7e1e8f37244048b07"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-180.png",
+      "sha256": "a1a79dba4f5fa1edb2656e907a0c8e6bcbace3914a52e1b0e452956e8905a037"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-180 — maskable.png",
+      "sha256": "a1a79dba4f5fa1edb2656e907a0c8e6bcbace3914a52e1b0e452956e8905a037"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-192-maskable.png",
+      "sha256": "1cbc3fa71bb57d206e2b3a25450e9e7012428f48d3576520b4ea86e37d9e75e1"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-192.png",
+      "sha256": "1cbc3fa71bb57d206e2b3a25450e9e7012428f48d3576520b4ea86e37d9e75e1"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-32.png",
+      "sha256": "c30b17166b9fbcd5bead15470b118f627a6352fea462b5b392c113694132f996"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-32 — maskable.png",
+      "sha256": "c30b17166b9fbcd5bead15470b118f627a6352fea462b5b392c113694132f996"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-512-maskable.png",
+      "sha256": "160793a07d7a44bb6c01c627a701f2e9e79df846e1d043a8bba556f309666d68"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-512.png",
+      "sha256": "160793a07d7a44bb6c01c627a701f2e9e79df846e1d043a8bba556f309666d68"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-72.png",
+      "sha256": "a467e46bf4713a52d0e21d70543926297e712b8913edd498ca06c62c7342a372"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-72 — maskable.png",
+      "sha256": "a467e46bf4713a52d0e21d70543926297e712b8913edd498ca06c62c7342a372"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-96.png",
+      "sha256": "3bf730249bf6e1b75c0546e1e1a8427af64ee21cbe60d7063e5871ff4a5a6b36"
+    },
+    {
+      "path": "сайт и приложение/icons/icon-96 — maskable.png",
+      "sha256": "3bf730249bf6e1b75c0546e1e1a8427af64ee21cbe60d7063e5871ff4a5a6b36"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/for-app/apple-touch-icon.png",
+      "sha256": "a1a79dba4f5fa1edb2656e907a0c8e6bcbace3914a52e1b0e452956e8905a037"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/for-app/icon-192-maskable.png",
+      "sha256": "1cbc3fa71bb57d206e2b3a25450e9e7012428f48d3576520b4ea86e37d9e75e1"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/for-app/icon-192.png",
+      "sha256": "1cbc3fa71bb57d206e2b3a25450e9e7012428f48d3576520b4ea86e37d9e75e1"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/for-app/icon-512-maskable.png",
+      "sha256": "160793a07d7a44bb6c01c627a701f2e9e79df846e1d043a8bba556f309666d68"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/for-app/icon-512.png",
+      "sha256": "160793a07d7a44bb6c01c627a701f2e9e79df846e1d043a8bba556f309666d68"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/for-root/apple-touch-icon.png",
+      "sha256": "a1a79dba4f5fa1edb2656e907a0c8e6bcbace3914a52e1b0e452956e8905a037"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/for-root/icon-192-maskable.png",
+      "sha256": "1cbc3fa71bb57d206e2b3a25450e9e7012428f48d3576520b4ea86e37d9e75e1"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/for-root/icon-192.png",
+      "sha256": "1cbc3fa71bb57d206e2b3a25450e9e7012428f48d3576520b4ea86e37d9e75e1"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/for-root/icon-512-maskable.png",
+      "sha256": "160793a07d7a44bb6c01c627a701f2e9e79df846e1d043a8bba556f309666d68"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/for-root/icon-512.png",
+      "sha256": "160793a07d7a44bb6c01c627a701f2e9e79df846e1d043a8bba556f309666d68"
+    },
+    {
+      "path": "сайт и приложение/pwa-assets/logo-source.png",
+      "sha256": "a1a79dba4f5fa1edb2656e907a0c8e6bcbace3914a52e1b0e452956e8905a037"
+    }
+  ]
+}

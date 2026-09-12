@@ -7,8 +7,8 @@
 <meta name="screen-orientation" content="portrait"/><meta name="x5-orientation" content="portrait"/><meta name="full-screen" content="yes"/>
 <title>Мужская Эстетика</title>
 <link rel="manifest" href="manifest.json"/>
-<link rel="icon" href="favicon-256.png"/>
-<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="icon" href="favicon-256.png?v=maya-ribbon-v1"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=maya-ribbon-v1"/>
 <meta name="apple-mobile-web-app-title" content="Malesthetic"/>
 <link rel="stylesheet" href="./fonts.css">
 <script>
@@ -42,28 +42,7 @@
 .me-orb .c{right:16%;bottom:16%;width:48%;height:48%;background:radial-gradient(circle,#9a9794 0%,rgba(154,151,148,0) 64%);filter:blur(9px);animation:meOrbC 9s ease-in-out infinite}html.me-web-desktop,#me-bg{}html.me-web-desktop body,html.me-web-desktop #me-bg{background:#ffffff;}html.me-web-desktop.me-dark body,html.me-web-desktop.me-dark #me-bg{background:#000000;}@media (min-width:481px){html.me-web-desktop #root{max-width:430px!important;width:430px!important;left:50%!important;right:auto!important;transform:translateX(-50%);margin:0 auto!important;border:0!important;box-shadow:none!important;border-radius:0!important;}}</style>
 <script>(function(){var doc=document.documentElement;function setAppViewport(){var vv=window.visualViewport;var innerH=window.innerHeight||0;var clientH=doc.clientHeight||0;var vvH=(vv&&Math.round(vv.height))||0;/* Полная высота layout-viewport (в iOS Safari standalone PWA visualViewport.height часто занижает при запуске → приложение «обрезалось снизу»; innerHeight/clientHeight там стабильно = весь экран). Клавиатуру ловим по заметной убавке visual-высоты и только тогда ужимаемся. */var full=Math.max(innerH,clientH,vvH);var h=(vvH&&full&&(full-vvH)>140)?vvH:full;if(h>0)doc.style.setProperty('--me-app-height',h+'px');}setAppViewport();window.addEventListener('resize',setAppViewport,{passive:true});window.addEventListener('orientationchange',setAppViewport,{passive:true});if(window.visualViewport){window.visualViewport.addEventListener('resize',setAppViewport,{passive:true});window.visualViewport.addEventListener('scroll',setAppViewport,{passive:true});}document.addEventListener('visibilitychange',function(){if(!document.hidden)setAppViewport();});})();</script>
 <style>:root{--maya-accent:#0A84FF}</style>
-<style id="maya-splash-kf">
-/* Заставка MAYA. Фаза 1 (0–72 %) — звуковая волна: полосы выровнены по центру
-   и танцуют. Фаза 2 (72–100 %) — сборка в знак: translateY и scaleY уходят
-   в 0 и 1, последний кадр совпадает с логотипом. */
-@keyframes mayaBarA{0%{transform:translateY(0) scaleY(.26)}10%{transform:translateY(0) scaleY(.62)}20%{transform:translateY(0) scaleY(.34)}30%{transform:translateY(0) scaleY(.7)}40%{transform:translateY(0) scaleY(.3)}50%{transform:translateY(0) scaleY(.58)}60%{transform:translateY(0) scaleY(.38)}72%{transform:translateY(0) scaleY(.5)}88%{transform:translateY(0) scaleY(1.05)}100%{transform:translateY(0) scaleY(1)}}
-@keyframes mayaBarB{0%{transform:translateY(13.5px) scaleY(.6)}10%{transform:translateY(13.5px) scaleY(1.4)}20%{transform:translateY(13.5px) scaleY(.75)}30%{transform:translateY(13.5px) scaleY(1.6)}40%{transform:translateY(13.5px) scaleY(.68)}50%{transform:translateY(13.5px) scaleY(1.3)}60%{transform:translateY(13.5px) scaleY(.85)}72%{transform:translateY(13.5px) scaleY(1.05)}88%{transform:translateY(1px) scaleY(1.04)}100%{transform:translateY(0) scaleY(1)}}
-@keyframes mayaBarC{0%{transform:translateY(-6px) scaleY(.45)}10%{transform:translateY(-6px) scaleY(1.1)}20%{transform:translateY(-6px) scaleY(.55)}30%{transform:translateY(-6px) scaleY(1.25)}40%{transform:translateY(-6px) scaleY(.5)}50%{transform:translateY(-6px) scaleY(1)}60%{transform:translateY(-6px) scaleY(.62)}72%{transform:translateY(-6px) scaleY(.78)}88%{transform:translateY(-1px) scaleY(1.03)}100%{transform:translateY(0) scaleY(1)}}
-@keyframes mayaMarkIn{0%{transform:scale(.82);opacity:0}60%{transform:scale(1.03);opacity:1}100%{transform:scale(1);opacity:1}}
-@keyframes mayaMarkSettle{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
-@keyframes mayaPuffPop{0%{transform:translateY(16px) scale(.35);opacity:0}55%{transform:translateY(-3px) scale(1.16);opacity:1}78%{transform:translateY(1px) scale(.96);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
-@keyframes mayaPuffFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-5px) rotate(2deg)}}
-@keyframes mayaDotRun{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
-@keyframes mayaGlowPulse{0%,100%{opacity:.22;transform:scale(1)}50%{opacity:.42;transform:scale(1.16)}}
-@keyframes mayaWordmarkIn{0%{opacity:0;letter-spacing:.5em}100%{opacity:1;letter-spacing:.34em}}
-/* Без движения — статичный знак и вордмарк: смысл экрана не теряется.
-   Гасим только анимации: transform держит наклон облачков и центровку ряда,
-   и снимать его нельзя — композиция уедет вбок. */
-@media (prefers-reduced-motion:reduce){
-  #maya-splash *{animation:none!important}
-  #maya-splash .maya-splash-glow{opacity:.28}
-}
-</style>
+
 <style>@keyframes mayaTypingLight{0%,64%,100%{background:rgba(11,11,12,.22);transform:scale(1)}22%{background:#0b0b0c;transform:scale(1.24)}}.maya-typing.maya-typing-light span{background:rgba(11,11,12,.22);animation-name:mayaTypingLight}</style>
 <style>@keyframes mayaTypeCaret{0%,44%{opacity:.78}45%,100%{opacity:0}}.maya-typewriter-caret{display:inline-block;width:1.5px;height:1.02em;margin-left:2px;background:currentColor;border-radius:2px;vertical-align:-.12em;animation:mayaTypeCaret .72s steps(1,end) infinite}@media (prefers-reduced-motion:reduce){.maya-typewriter-caret{display:none}}</style>
 <!-- 🔴 В нативной обёртке стоит KeyboardPlugin "no resize": при клавиатуре НЕ
@@ -81,6 +60,98 @@
   // on every deploy/focus. Native Cap updates go through App Store / explicit reload.
   try{ window.__meDocReloadWatchdog = 'off'; }catch(e){}
 })();</script>
+<script id="maya-identity-source">
+/* MAYA identity v1. Canonical vector source, traced from owner may.png.
+ * Generated SVG/PNG/inline copies must be regenerated, never independently edited.
+ * Business logos are independent. No audio or network access in this renderer. */
+(function (root) {
+  'use strict';
+  var mark = [
+    [240,790], [238,769,249,747,262,724], [302,652,363,534,406,475],
+    [445,422,503,415,541,443], [586,472,600,556,631,674],
+    [691,576,751,484,821,475], [900,463,945,520,941,606],
+    [939,694,946,721,984,743], [1026,765,1028,799,997,827],
+    [960,865,904,870,864,846], [809,814,804,747,807,651],
+    [783,682,767,715,748,746], [709,812,665,863,610,853],
+    [545,844,521,783,499,716], [489,684,480,653,473,636],
+    [444,689,419,747,393,801], [369,854,325,873,284,850],
+    [252,834,239,814,240,790]
+  ];
+  // Same topology as the mark. The ribbon opens into a connected listening wave.
+  var wave = [
+    [240,646], [282,646,309,646,342,640], [382,634,404,601,430,608],
+    [455,615,457,646,482,638], [510,631,531,571,558,576],
+    [587,582,591,657,619,664], [638,669,668,548,692,528],
+    [729,496,740,613,759,638], [778,663,798,580,825,578],
+    [851,576,870,640,894,635], [922,628,936,607,958,620],
+    [980,634,996,646,1018,646], [982,648,968,650,943,653],
+    [920,658,904,685,875,675], [840,661,834,639,815,650],
+    [782,671,776,711,744,711], [702,711,698,593,674,613],
+    [640,641,632,715,596,709]
+  ];
+  // Close the lower wave with a smooth return; paths are resampled by arc length
+  // once so every state has identical, deterministic interpolation topology.
+  var waveTail = ' C555 702 545 641 513 650 C480 659 477 676 447 665 C404 649 371 646 240 646Z';
+  var fold = 'M240 790C286 700 425 574 501 582C565 571 604 638 639 709C668 770 716 773 750 740C793 654 866 567 941 598C939 693 946 721 984 743C1026 765 1028 799 997 827C960 865 904 870 864 846C809 814 804 747 807 651C783 682 767 715 748 746C709 812 665 863 610 853C545 844 521 783 499 716C489 684 480 653 473 636C444 689 419 747 393 801C369 854 325 873 284 850C252 834 239 814 240 790Z';
+  function path(points) { return 'M' + points[0].join(' ') + points.slice(1).map(function(p){return 'C'+p.join(' ');}).join('') + 'Z'; }
+  var markPath = path(mark);
+  var wavePath = path(wave).slice(0,-1) + waveTail;
+  var serial = 0;
+  function markup(id, tile) {
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="220 408 820 474" fill="none" aria-hidden="true" data-maya-identity="ribbon-v1"><defs>' +
+      '<linearGradient id="'+id+'a" x1="400" y1="485" x2="784" y2="851" gradientUnits="userSpaceOnUse"><stop stop-color="#0055ff"/><stop offset=".5" stop-color="#08a9fc"/><stop offset="1" stop-color="#32c5f4"/></linearGradient>' +
+      '<linearGradient id="'+id+'b" x1="0" y1="580" x2="0" y2="875" gradientUnits="userSpaceOnUse"><stop stop-color="#0532ed"/><stop offset=".58" stop-color="#007dff"/><stop offset="1" stop-color="#22baf5"/></linearGradient></defs>' +
+      '<path data-maya-ribbon="base" d="'+markPath+'" fill="url(#'+id+'a)"/>' +
+      '<path data-maya-ribbon="fold" d="'+fold+'" fill="url(#'+id+'b)"/></svg>';
+  }
+  // Sampling uses the browser's native SVG geometry, only at first mount.
+  var samples;
+  function sample(d, count) {
+    var p = document.createElementNS('http://www.w3.org/2000/svg','path'); p.setAttribute('d',d);
+    var len=p.getTotalLength(), result=[];
+    for(var i=0;i<count;i++){var v=p.getPointAtLength(len*i/count); result.push([v.x,v.y]);}
+    return result;
+  }
+  function getSamples() { return samples || (samples={mark:sample(markPath,192),wave:sample(wavePath,192)}); }
+  function interpolate(amount, phase, amplitude) {
+    var s=getSamples();
+    return s.mark.map(function(p,i){var w=s.wave[i], x=p[0]+(w[0]-p[0])*amount;
+      var envelope=Math.sin(Math.PI*Math.max(0,Math.min(1,(x-240)/778)));
+      var y=p[1]+(w[1]-p[1])*amount + amount*envelope*Math.sin((x-240)/83+phase)*amplitude;
+      return (i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2);
+    }).join('')+'Z';
+  }
+  function mount(host, options) {
+    options=options||{}; host.innerHTML=markup('maya'+(++serial));
+    var svg=host.querySelector('svg'); svg.style.cssText='display:block;width:100%;height:100%;overflow:visible';
+    var base=svg.querySelector('[data-maya-ribbon=base]'), shade=svg.querySelector('[data-maya-ribbon=fold]');
+    var media=window.matchMedia('(prefers-reduced-motion: reduce)'), state=options.state||'idle';
+    var raf=0,last=0,start=0,amount=0,disposed=false;
+    function stop(){if(raf)cancelAnimationFrame(raf);raf=0;}
+    function staticMark(){base.setAttribute('d',markPath);shade.setAttribute('d',fold);shade.style.opacity='1';}
+    function tick(now){raf=0;if(disposed)return;
+      if(media.matches||document.hidden){staticMark();return;}
+      if(!start)start=now; var dt=Math.min(64,now-(last||now)); last=now;
+      var active=state!=='idle'&&state!=='done'&&state!=='cancelled';
+      var target=active?1:0;
+      if(state==='launch') {var elapsed=now-start;target=elapsed<250?0:elapsed<1250?1:0;}
+      amount+=(target-amount)*Math.min(1,dt/220);
+      if(!target&&amount<.005){amount=0;staticMark();if((state==='launch'&&now-start>=1250)||!active)return;}
+      else {var level=typeof options.level==='function'?Math.max(0,Math.min(1,options.level()||0)):0;
+        base.setAttribute('d',interpolate(amount,now/900,state==='recording'?level*42:state==='responding'?12:6));
+        shade.style.opacity=String(1-amount);}
+      raf=requestAnimationFrame(tick);
+    }
+    function wake(){stop();last=0;if(media.matches||document.hidden){staticMark();return;}if(state==='idle'&&amount===0){staticMark();return;}raf=requestAnimationFrame(tick);}
+    function setState(value){if(state===value)return;state=value;start=0;wake();}
+    document.addEventListener('visibilitychange',wake);media.addEventListener('change',wake);wake();
+    return {setState:setState,destroy:function(){disposed=true;stop();document.removeEventListener('visibilitychange',wake);media.removeEventListener('change',wake);host.innerHTML='';}};
+  }
+  root.MayaIdentity={version:'ribbon-v1',markPath:markPath,foldPath:fold,wavePath:wavePath,markup:markup,mount:mount};
+  if(typeof module!=='undefined')module.exports=root.MayaIdentity;
+})(typeof window==='undefined'?globalThis:window);
+
+</script>
 </head><script>(function(){try{var C=window.Capacitor;var n=C&&C.isNativePlatform&&C.isNativePlatform();if(n){document.documentElement.classList.add('me-native');}else{document.documentElement.classList.add('me-web-desktop');}}catch(e){document.documentElement.classList.add('me-web-desktop');}})();</script>
 <body><div id="me-bg" aria-hidden="true"></div><div id="root"></div>
 <div id="rotate-lock"><div class="rl-in"><div class="rl-ic">↻</div><div class="rl-t">Поверните телефон</div><div class="rl-s">Приложение работает только в вертикальном режиме</div></div></div>
@@ -389,7 +460,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 <script>window.__ME_CONTACT_ICON={phone:"<style>@keyframes ph2W{0%,100%{opacity:.25;transform:scale(.85)}50%{opacity:1;transform:scale(1.06)}}@keyframes ph2R{0%,14%,100%{transform:rotate(0)}3%{transform:rotate(-8deg)}6%{transform:rotate(6deg)}9%{transform:rotate(-4deg)}12%{transform:rotate(2deg)}}.ph2-w1{animation:ph2W 1.9s ease-in-out infinite;transform-box:view-box;transform-origin:78px 44px}.ph2-w2{animation:ph2W 1.9s ease-in-out infinite .35s;transform-box:view-box;transform-origin:78px 44px}.ph2-ring{animation:ph2R 3.6s ease-in-out infinite;transform-box:view-box;transform-origin:60px 62px}@media (prefers-reduced-motion:reduce){.ph2-w1,.ph2-w2,.ph2-ring{animation:none}}</style><svg viewBox=\"0 0 120 120\" width=\"100%\" height=\"100%\" style=\"display:block;overflow:visible\"><defs><linearGradient id=\"ph2G\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#b4b2ae\"/><stop offset=\"1\" stop-color=\"#686664\"/></linearGradient></defs><g class=\"ph2-ring\"><path class=\"ph2-w1\" d=\"M78 34 a14 14 0 0 1 12 12\" fill=\"none\" stroke=\"#9a9895\" stroke-width=\"5\" stroke-linecap=\"round\"/><path class=\"ph2-w2\" d=\"M80 23 a25 25 0 0 1 21 21\" fill=\"none\" stroke=\"#807e7b\" stroke-width=\"5\" stroke-linecap=\"round\"/><g transform=\"translate(13 15) scale(.8)\"><path fill=\"url(#ph2G)\" d=\"M33.1 53.95c7.2 14.15 18.8 25.7 32.95 32.95l11-11c1.35-1.35 3.35-1.8 5.1-1.2 5.6 1.85 11.65 2.85 17.85 2.85 2.75 0 5 2.25 5 5v17.5c0 2.75-2.25 5-5 5C53.05 105 15 66.95 15 20c0-2.75 2.25-5 5-5h17.5c2.75 0 5 2.25 5 5 0 6.25 1 12.25 2.85 17.85.6 1.75.15 3.75-1.2 5.1z\"/></g></g></svg>",location:"<style>@keyframes lo2Ping{0%{opacity:.55;transform:scale(.4)}100%{opacity:0;transform:scale(1.55)}}@keyframes lo2Bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3.5px)}}.lo2-ping{animation:lo2Ping 2.4s ease-out infinite;transform-box:view-box;transform-origin:60px 88px}.lo2-pin{animation:lo2Bob 3s ease-in-out infinite;transform-box:view-box;transform-origin:center}@media (prefers-reduced-motion:reduce){.lo2-ping,.lo2-pin{animation:none}}</style><svg viewBox=\"0 0 120 120\" width=\"100%\" height=\"100%\" style=\"display:block;overflow:visible\"><defs><linearGradient id=\"lo2G\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#898784\"/><stop offset=\"1\" stop-color=\"#4f4e4d\"/></linearGradient></defs><ellipse cx=\"60\" cy=\"88\" rx=\"13\" ry=\"4.5\" fill=\"rgba(0,0,0,.25)\"/><ellipse class=\"lo2-ping\" cx=\"60\" cy=\"88\" rx=\"21\" ry=\"7\" fill=\"none\" stroke=\"#908e8b\" stroke-width=\"3\"/><g class=\"lo2-pin\"><path fill=\"url(#lo2G)\" d=\"M60 20 a25 25 0 0 1 25 25 c0 18 -25 43 -25 43 s-25 -25 -25 -43 a25 25 0 0 1 25 -25 Z\"/><circle cx=\"60\" cy=\"45\" r=\"10.5\" fill=\"#fff\"/><circle cx=\"60\" cy=\"45\" r=\"5\" fill=\"#4f4e4d\"/></g></svg>",maya:"<div style=\"position:absolute;inset:0\"><div style=\"position:absolute;top:50%;left:50%;width:84px;height:84px;margin:-40px 0 0 -37px;transform:scale(.62)\"><div class=\"me-orb\" style=\"width:84px;height:84px\"><i class=\"a\"></i><i class=\"b\"></i><i class=\"c\"></i><i class=\"d\"></i><i class=\"e\"></i><i class=\"f\"></i></div></div></div>"};</script>
 <script>window.__ME_SOCIAL_ICON={telegram:"<svg viewBox=\"0 0 24 24\" width=\"100%\" height=\"100%\" style=\"display:block\"><path fill=\"#fff\" transform=\"translate(.8 .4)\" d=\"M16.906 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z\"/></svg>",vk:"<svg viewBox=\"0 0 24 24\" width=\"100%\" height=\"100%\" style=\"display:block\"><path fill=\"#fff\" transform=\"translate(.9 -.6) scale(1.06)\" d=\"M6.79 7.3H4.05c.13 6.24 3.25 9.99 8.72 9.99h.31v-3.57c2.01.2 3.53 1.67 4.14 3.57h2.84c-.78-2.84-2.83-4.41-4.11-5.01 1.28-.74 3.08-2.54 3.51-4.98h-2.58c-.56 1.98-2.22 3.78-3.8 3.95V7.3H10.5v6.92c-1.6-.4-3.62-2.34-3.71-6.92Z\"/></svg>",tiktok:"<svg viewBox=\"0 0 24 24\" width=\"100%\" height=\"100%\" style=\"display:block\"><g transform=\"translate(-.6 0)\"><path fill=\"#c3c0bc\" transform=\"translate(-.9 -.9)\" d=\"M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z\"/><path fill=\"#5f5e5c\" transform=\"translate(.9 .9)\" d=\"M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z\"/><path fill=\"#fff\" d=\"M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z\"/></g></svg>",youtube:"<svg viewBox=\"0 0 24 24\" width=\"100%\" height=\"100%\" style=\"display:block\"><path fill=\"#fff\" d=\"M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z\"/></svg>",whatsapp:"<svg viewBox=\"0 0 24 24\" width=\"100%\" height=\"100%\" style=\"display:block\"><path fill=\"#fff\" d=\"M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z\"/></svg>",dzen:"<svg viewBox=\"-1.8 -1.8 31.2 31.2\" width=\"100%\" height=\"100%\" style=\"display:block\"><g fill=\"#fff\"><path d=\"M10.55,10.55C12.6,8.51,12.97,5.45,13.04,0,5.93.21.22,5.93,0,13.04c5.44-.07,8.51-.44,10.55-2.48Z\"/><path d=\"M13.84,0c.07,5.44.44,8.51,2.48,10.55,2.04,2.04,5.1,2.42,10.55,2.48C26.67,5.93,20.95.21,13.84,0Z\"/><path d=\"M0,13.84c.21,7.1,5.93,12.82,13.03,13.03-.07-5.44-.44-8.51-2.48-10.55C8.51,14.28,5.45,13.91,0,13.84Z\"/><path d=\"M16.33,16.33c-2.04,2.04-2.42,5.1-2.48,10.55,7.1-.21,12.82-5.93,13.03-13.03-5.44.07-8.51.44-10.55,2.48Z\"/></g></svg>"};window.__ME_SOCIAL_BG={telegram:"linear-gradient(135deg,#94928f,#898784)",vk:"linear-gradient(135deg,#82807e,#5d5b59)",tiktok:"#010101",youtube:"linear-gradient(135deg,#5b5a58,#302f2e)",whatsapp:"linear-gradient(135deg,#adaaa7,#8e8c89)",dzen:"#000000"};window.__ME_RATING_ICON=["<svg viewBox=\"0 0 24 24\" width=\"38\" height=\"38\" style=\"display:block\"><path d=\"M2.04 12c0-5.523 4.476-10 10-10 5.522 0 10 4.477 10 10s-4.478 10-10 10c-5.524 0-10-4.477-10-10z\" fill=\"#686664\"/><path d=\"M13.32 7.666h-.924c-1.694 0-2.585.858-2.585 2.123 0 1.43.616 2.1 1.881 2.959l1.045.704-3.003 4.487H7.49l2.695-4.014c-1.55-1.111-2.42-2.19-2.42-4.015 0-2.288 1.595-3.85 4.62-3.85h3.003v11.868H13.32V7.666z\" fill=\"#fff\"/></svg>","<svg viewBox=\"0 0 48 48\" width=\"34\" height=\"34\" style=\"display:block\"><rect width=\"48\" height=\"48\" rx=\"11\" fill=\"#8e8b89\"/><g transform=\"translate(9.540 8.985) scale(0.001938)\"><path fill=\"#fff\" d=\"M11081.41 9218.29c-2695.72,13.7 -3131.78,1697.02 -3277.11,3120.34l-66.06 629.52 -541.83 0 -66.06 -629.52c-145.33,-1423.32 -594.61,-3106.65 -3197.84,-3120.34 -436.06,-930.68 -621.06,-1683.39 -621.06,-2531.9 0,-2121.25 1678.22,-4105.74 4162.45,-4105.74 2484.28,0 4136.06,1970.73 4136.06,4119.49 0.01,834.76 -79.27,1587.47 -528.55,2518.15l0 0zm-3633.89 -9210.56c-4096.39,0 -7452.84,3476.21 -7452.84,7732.41 0,4270.01 3356.45,7746.16 7452.84,7746.16 4136,0 7479.23,-3476.15 7479.23,-7746.16 0,-4256.19 -3343.23,-7732.41 -7479.23,-7732.41z\"/></g></svg>"];</script>
 <script>window.__ME_TILE_HTML={cabinet:"<style>@keyframes cb7R{to{transform:rotate(360deg)}}@keyframes cb7Bar{0%{transform:scaleY(.45)}100%{transform:scaleY(1)}}@keyframes cb7Dot{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}.cb7-ring{animation:cb7R 14s linear infinite;transform-box:view-box;transform-origin:79px 52px}.cb7-sw{animation:cb7R 4.5s linear infinite;transform-box:view-box;transform-origin:79px 52px}.cb7-bar{animation:cb7Bar 2.4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:bottom}.cb7-b2{animation-duration:2.9s;animation-delay:-.5s}.cb7-b3{animation-duration:2.1s;animation-delay:-1.1s}.cb7-dot{animation:cb7Dot 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@media (prefers-reduced-motion:reduce){.cb7-ring,.cb7-sw,.cb7-bar,.cb7-dot{animation:none}}</style><div style=\"position:relative;width:100%;height:100%;border-radius:26%;overflow:hidden;box-shadow:0 6px 16px rgba(23,23,22,.5),0 0 14px rgba(137,135,132,.24)\"><svg viewBox=\"0 0 120 120\" width=\"100%\" height=\"100%\" style=\"display:block\"><defs><linearGradient id=\"cb7Bg\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#51504e\"/><stop offset=\"1\" stop-color=\"#2d2c2b\"/></linearGradient></defs><rect x=\"4\" y=\"4\" width=\"112\" height=\"112\" rx=\"30\" fill=\"url(#cb7Bg)\"/><rect x=\"13\" y=\"13\" width=\"94\" height=\"94\" rx=\"22\" fill=\"#212020\" opacity=\".5\"/><circle cx=\"24\" cy=\"24\" r=\"2.4\" fill=\"#8e8c89\"/><circle cx=\"32\" cy=\"24\" r=\"2.4\" fill=\"#bcb9b5\"/><circle cx=\"40\" cy=\"24\" r=\"2.4\" fill=\"#aba8a4\"/><circle cx=\"41\" cy=\"50\" r=\"12\" fill=\"#cdc9c5\"/><path d=\"M27 72 C27 61 33 57.5 41 57.5 C49 57.5 55 61 55 72 Z\" fill=\"#aba8a4\"/><circle class=\"cb7-dot\" cx=\"50\" cy=\"42\" r=\"4\" fill=\"#aba8a4\" stroke=\"#2d2c2b\" stroke-width=\"2\"/><g class=\"cb7-ring\"><circle cx=\"79\" cy=\"52\" r=\"15\" fill=\"none\" stroke=\"#a19e9b\" stroke-width=\"7\" stroke-linecap=\"round\" stroke-dasharray=\"39 55.2\" transform=\"rotate(-90 79 52)\"/><circle cx=\"79\" cy=\"52\" r=\"15\" fill=\"none\" stroke=\"#aba8a4\" stroke-width=\"7\" stroke-linecap=\"round\" stroke-dasharray=\"24 70.2\" stroke-dashoffset=\"-42\" transform=\"rotate(-90 79 52)\"/><circle cx=\"79\" cy=\"52\" r=\"15\" fill=\"none\" stroke=\"#9c9996\" stroke-width=\"7\" stroke-linecap=\"round\" stroke-dasharray=\"18 76.2\" stroke-dashoffset=\"-69\" transform=\"rotate(-90 79 52)\"/></g><g class=\"cb7-sw\"><circle cx=\"79\" cy=\"52\" r=\"15\" fill=\"none\" stroke=\"#fff\" stroke-width=\"7\" stroke-linecap=\"round\" stroke-dasharray=\"6 88.2\" opacity=\".45\" transform=\"rotate(-90 79 52)\"/></g><g transform=\"translate(27 92)\"><rect class=\"cb7-bar\" x=\"0\" y=\"-16\" width=\"7\" height=\"16\" rx=\"3\" fill=\"#adaaa6\"/><rect class=\"cb7-bar cb7-b2\" x=\"11\" y=\"-24\" width=\"7\" height=\"24\" rx=\"3\" fill=\"#aba8a4\"/><rect class=\"cb7-bar cb7-b3\" x=\"22\" y=\"-11\" width=\"7\" height=\"11\" rx=\"3\" fill=\"#9c9996\"/></g><rect x=\"66\" y=\"78\" width=\"26\" height=\"4.5\" rx=\"2.2\" fill=\"#b0ada9\" opacity=\".8\"/><rect x=\"66\" y=\"87\" width=\"18\" height=\"4.5\" rx=\"2.2\" fill=\"#b0ada9\" opacity=\".5\"/><text x=\"60\" y=\"108\" text-anchor=\"middle\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"500\" font-size=\"8.5\" letter-spacing=\"0.2em\" fill=\"rgba(255,255,255,.85)\">КАБИНЕТ</text></svg><div style=\"position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.1) 26%,rgba(255,255,255,0) 48%);pointer-events:none\"></div><div style=\"position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(to top,rgba(15,14,14,.3),rgba(15,14,14,0));pointer-events:none\"></div><div style=\"position:absolute;inset:0;border-radius:26%;box-shadow:inset 0 1px 1px rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.15);pointer-events:none\"></div></div>",shop:"<style>@keyframes sh6B{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}@keyframes sh6S{0%,100%{opacity:.4;transform:scale(.7) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(20deg)}}.sh6-bag{animation:sh6B 3.8s ease-in-out infinite;transform-box:view-box;transform-origin:60px 70px}.sh6-spk{animation:sh6S 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@media (prefers-reduced-motion:reduce){.sh6-bag,.sh6-spk{animation:none}}</style><div style=\"position:relative;width:100%;height:100%;border-radius:26%;overflow:hidden;box-shadow:0 6px 16px rgba(23,23,22,.5),0 0 14px rgba(99,97,95,.32)\"><svg viewBox=\"0 0 120 120\" width=\"100%\" height=\"100%\" style=\"display:block\"><defs><linearGradient id=\"sh6Bg\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#63615f\"/><stop offset=\"1\" stop-color=\"#2a2928\"/></linearGradient></defs><rect x=\"4\" y=\"4\" width=\"112\" height=\"112\" rx=\"30\" fill=\"url(#sh6Bg)\"/><g class=\"sh6-bag\"><path d=\"M41 42 H79 L82.5 84 A6 6 0 0 1 76.5 90 H43.5 A6 6 0 0 1 37.5 84 Z\" fill=\"#eae7e2\"/><path d=\"M51 42 V35 A9 9 0 0 1 69 35 V42\" fill=\"none\" stroke=\"#8c8a87\" stroke-width=\"4\" stroke-linecap=\"round\"/></g><path class=\"sh6-spk\" d=\"M93 24 l1.9 4.6 4.6 1.9 -4.6 1.9 -1.9 4.6 -1.9-4.6 -4.6-1.9 4.6-1.9 Z\" fill=\"#ede9e4\"/><text x=\"60\" y=\"107\" text-anchor=\"middle\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"500\" font-size=\"8.5\" letter-spacing=\"0.2em\" fill=\"rgba(255,255,255,.88)\">МАГАЗИН</text></svg><img src=\""+(window.__ME_LOGO||"assets/logo-m.png")+"\" alt=\"\" style=\"position:absolute;left:36.5%;top:42%;width:27%;height:27%;object-fit:contain;filter:brightness(0);opacity:.8;animation:sh6B 3.8s ease-in-out infinite;pointer-events:none\"/><div style=\"position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.12) 26%,rgba(255,255,255,0) 48%);pointer-events:none\"></div><div style=\"position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(to top,rgba(15,14,14,.28),rgba(15,14,14,0));pointer-events:none\"></div><div style=\"position:absolute;inset:0;border-radius:26%;box-shadow:inset 0 1px 1px rgba(255,255,255,.5),inset 0 0 0 1px rgba(255,255,255,.16);pointer-events:none\"></div></div>",invite:"<style>@keyframes fb7L{0%,70%,100%{transform:translateX(0)}38%,52%{transform:translateX(6px)}}@keyframes fb7R{0%,70%,100%{transform:translateX(0)}38%,52%{transform:translateX(-6px)}}@keyframes fb7S{0%,36%,66%,100%{opacity:0;transform:scale(.4)}44%,54%{opacity:1;transform:scale(1.15)}}.fb7-l{animation:fb7L 2.8s ease-in-out infinite;transform-box:view-box;transform-origin:center}.fb7-r{animation:fb7R 2.8s ease-in-out infinite;transform-box:view-box;transform-origin:center}.fb7-s{animation:fb7S 2.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@media (prefers-reduced-motion:reduce){.fb7-l,.fb7-r,.fb7-s{animation:none}}</style><div style=\"position:relative;width:100%;height:100%;border-radius:26%;overflow:hidden;box-shadow:0 6px 16px rgba(23,23,22,.5),0 0 14px rgba(164,161,158,.3)\"><svg viewBox=\"0 0 120 120\" width=\"100%\" height=\"100%\" style=\"display:block\"><defs><linearGradient id=\"fb7Bg\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#a4a19e\"/><stop offset=\"1\" stop-color=\"#605f5d\"/></linearGradient></defs><rect x=\"4\" y=\"4\" width=\"112\" height=\"112\" rx=\"30\" fill=\"url(#fb7Bg)\"/><g class=\"fb7-l\"><rect x=\"6\" y=\"54\" width=\"20\" height=\"20\" rx=\"6\" fill=\"#504f4d\"/><rect x=\"24\" y=\"50\" width=\"26\" height=\"28\" rx=\"9\" fill=\"#dfdbd7\"/><g stroke=\"#b7b4b0\" stroke-width=\"2.2\" stroke-linecap=\"round\"><line x1=\"47\" y1=\"56\" x2=\"47\" y2=\"72\"/><line x1=\"41\" y1=\"55\" x2=\"41\" y2=\"73\"/><line x1=\"35\" y1=\"55\" x2=\"35\" y2=\"73\"/></g><rect x=\"26\" y=\"46\" width=\"14\" height=\"9\" rx=\"4.5\" fill=\"#cfccc7\"/></g><g class=\"fb7-r\"><rect x=\"94\" y=\"54\" width=\"20\" height=\"20\" rx=\"6\" fill=\"#f0ece7\"/><rect x=\"70\" y=\"50\" width=\"26\" height=\"28\" rx=\"9\" fill=\"#d4d1cd\"/><g stroke=\"#afaca8\" stroke-width=\"2.2\" stroke-linecap=\"round\"><line x1=\"73\" y1=\"56\" x2=\"73\" y2=\"72\"/><line x1=\"79\" y1=\"55\" x2=\"79\" y2=\"73\"/><line x1=\"85\" y1=\"55\" x2=\"85\" y2=\"73\"/></g><rect x=\"80\" y=\"46\" width=\"14\" height=\"9\" rx=\"4.5\" fill=\"#c6c3bf\"/></g><g class=\"fb7-s\" stroke=\"#f0ece7\" stroke-width=\"3.2\" stroke-linecap=\"round\"><line x1=\"60\" y1=\"34\" x2=\"60\" y2=\"26\"/><line x1=\"48\" y1=\"38\" x2=\"43\" y2=\"32\"/><line x1=\"72\" y1=\"38\" x2=\"77\" y2=\"32\"/><line x1=\"52\" y1=\"88\" x2=\"48\" y2=\"94\"/><line x1=\"68\" y1=\"88\" x2=\"72\" y2=\"94\"/></g><text x=\"60\" y=\"108\" text-anchor=\"middle\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"500\" font-size=\"8.5\" letter-spacing=\"0.2em\" fill=\"rgba(255,255,255,.85)\">ДРУЗЬЯ</text></svg><div style=\"position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.1) 26%,rgba(255,255,255,0) 48%);pointer-events:none\"></div><div style=\"position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(to top,rgba(15,14,14,.3),rgba(15,14,14,0));pointer-events:none\"></div><div style=\"position:absolute;inset:0;border-radius:26%;box-shadow:inset 0 1px 1px rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.15);pointer-events:none\"></div></div>",contacts:"<style>@keyframes ct7Scan{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}@keyframes ct7Dot{0%,100%{opacity:.45;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}.ct7-scan{animation:ct7Scan 2.6s ease-in-out infinite}.ct7-dot{animation:ct7Dot 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@media (prefers-reduced-motion:reduce){.ct7-scan,.ct7-dot{animation:none}}</style><div style=\"position:relative;width:100%;height:100%;border-radius:26%;overflow:hidden;box-shadow:0 6px 16px rgba(23,23,22,.5),0 0 14px rgba(120,118,115,.3)\"><svg viewBox=\"0 0 120 120\" width=\"100%\" height=\"100%\" style=\"display:block\"><defs><linearGradient id=\"ct7Bg\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#484745\"/><stop offset=\"1\" stop-color=\"#191818\"/></linearGradient></defs><rect x=\"4\" y=\"4\" width=\"112\" height=\"112\" rx=\"30\" fill=\"url(#ct7Bg)\"/><g transform=\"rotate(-3 60 62)\"><rect x=\"20\" y=\"38\" width=\"80\" height=\"48\" rx=\"7\" fill=\"#eef2f8\"/><text x=\"28\" y=\"55\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"500\" font-size=\"13\" fill=\"#484745\">|M|</text><rect x=\"28\" y=\"62\" width=\"30\" height=\"4\" rx=\"2\" fill=\"#a4a19e\"/><rect x=\"28\" y=\"70\" width=\"22\" height=\"4\" rx=\"2\" fill=\"#c6c3bf\"/><rect x=\"74\" y=\"48\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"74\" y=\"52\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"74\" y=\"61\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"78\" y=\"48\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"78\" y=\"57\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"83\" y=\"52\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"83\" y=\"61\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"87\" y=\"48\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"87\" y=\"57\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"87\" y=\"61\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"78\" y=\"61\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect x=\"83\" y=\"48\" width=\"3.6\" height=\"3.6\" rx=\"0.8\" fill=\"#484745\"/><rect class=\"ct7-scan\" x=\"72\" y=\"46\" width=\"21\" height=\"2.4\" rx=\"1.2\" fill=\"#aba9a5\"/></g><circle class=\"ct7-dot\" cx=\"96\" cy=\"27\" r=\"4.5\" fill=\"#aba8a4\"/><path d=\"M24 94 a10 10 0 0 1 8 -4 M24 100 a16 16 0 0 1 13 -7\" stroke=\"#aba9a5\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" opacity=\".7\"/><text x=\"60\" y=\"108\" text-anchor=\"middle\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"500\" font-size=\"8.5\" letter-spacing=\"0.2em\" fill=\"rgba(255,255,255,.85)\">КОНТАКТЫ</text></svg><div style=\"position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.1) 26%,rgba(255,255,255,0) 48%);pointer-events:none\"></div><div style=\"position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(to top,rgba(15,14,14,.3),rgba(15,14,14,0));pointer-events:none\"></div><div style=\"position:absolute;inset:0;border-radius:26%;box-shadow:inset 0 1px 1px rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.15);pointer-events:none\"></div></div>"};</script>
-<script>window.__ME_MAYA_HTML="<style>@keyframes mvoSpin{to{transform:rotate(360deg)}}@keyframes mvoDot{0%,100%{opacity:.45;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}@keyframes mvoShine{0%,100%{opacity:.14;transform:translateX(-6%)}50%{opacity:.48;transform:translateX(6%)}}.mvo-shine{animation:mvoShine 5.5s ease-in-out infinite}.mvo-dot{animation:mvoDot 2.2s ease-in-out infinite;transform-origin:center}</style><div style=\"position:relative;width:100%;height:100%;border-radius:24%;overflow:hidden;background:radial-gradient(circle at 50% 42%,#3d3c3b 0%,#1e1e1d 48%,#0f0f0e 100%);box-shadow:0 6px 16px rgba(23,23,22,.5),0 0 16px rgba(131,129,126,.34)\"><div style=\"position:absolute;inset:0;display:flex;align-items:center;justify-content:center\"><div style=\"width:78%;height:78%;animation:mvoSpin 18s linear infinite\"><div class=\"me-orb\" style=\"width:100%;height:100%\"><i class=\"a\"></i><i class=\"b\"></i><i class=\"c\"></i></div></div></div><div class=\"mvo-dot\" style=\"position:absolute;top:10%;right:10%;width:11%;height:11%;border-radius:50%;background:#aba8a4;box-shadow:0 0 9px #aba8a4\"></div><div style=\"position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.1) 26%,rgba(255,255,255,0) 48%);pointer-events:none\"></div><div class=\"mvo-shine\" style=\"position:absolute;top:-20%;left:-28%;width:56%;height:140%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.5),rgba(255,255,255,0));filter:blur(2px);pointer-events:none\"></div><div style=\"position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(to top,rgba(4,8,20,.32),rgba(4,8,20,0));pointer-events:none\"></div><div style=\"position:absolute;inset:0;border-radius:24%;box-shadow:inset 0 1px 1px rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.15);pointer-events:none\"></div><div style=\"position:absolute;left:0;right:0;bottom:8%;text-align:center;font-family:Montserrat,sans-serif;font-weight:400;font-size:10px;letter-spacing:.3em;text-indent:.3em;color:rgba(255,255,255,.9);text-shadow:0 1px 5px rgba(0,0,0,.45);pointer-events:none\">MAYA</div></div>";window.__ME_DAY_ICON=function(t){var off=t&&t.dayOff,hh=new Date().getHours(),past=hh>=21,c0=(t&&typeof t.count==="number")?t.count:null,tm=(t&&typeof t.tomorrow==="number")?t.tomorrow:null,c=past?tm:c0,n=(c==null)?"\u2026":(""+c),lb=(c==null||!past)?"":"\u041F\u0420\u0415\u0414\u0421\u0422\u041E\u0418\u0422",w=(c==null)?"":(c%100>=11&&c%100<=14?"записей":c%10===1?"запись":(c%10>=2&&c%10<=4)?"записи":"записей");if(off)return "<style>@keyframes doSway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4.5deg)}}@keyframes doSun{to{transform:rotate(360deg)}}@keyframes doShine{0%,100%{opacity:.15;transform:translateX(-6%)}50%{opacity:.5;transform:translateX(6%)}}.do-palm{animation:doSway 4.2s ease-in-out infinite;transform-box:view-box;transform-origin:61px 96px}.do-sun{animation:doSun 20s linear infinite;transform-box:view-box;transform-origin:37px 37px}.do-shine{animation:doShine 5.5s ease-in-out infinite}</style><div style=\"position:relative;width:100%;height:100%;border-radius:24%;overflow:hidden;box-shadow:0 6px 16px rgba(23,23,22,.5),0 0 14px rgba(164,161,158,.30)\"><svg viewBox=\"0 0 120 120\" width=\"100%\" height=\"100%\" style=\"display:block\"><defs><linearGradient id=\"doBg\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#a4a19e\"/><stop offset=\"1\" stop-color=\"#605f5d\"/></linearGradient></defs><rect x=\"4\" y=\"4\" width=\"112\" height=\"112\" rx=\"30\" fill=\"url(#doBg)\"/><g class=\"do-sun\"><line x1=\"49\" y1=\"37\" x2=\"54\" y2=\"37\" stroke=\"#d9d5d1\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"45.4853\" y1=\"45.4853\" x2=\"49.0208\" y2=\"49.0208\" stroke=\"#d9d5d1\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"37\" y1=\"49\" x2=\"37\" y2=\"54\" stroke=\"#d9d5d1\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"28.5147\" y1=\"45.4853\" x2=\"24.9792\" y2=\"49.0208\" stroke=\"#d9d5d1\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"25\" y1=\"37\" x2=\"20\" y2=\"37\" stroke=\"#d9d5d1\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"28.5147\" y1=\"28.5147\" x2=\"24.9792\" y2=\"24.9792\" stroke=\"#d9d5d1\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"37\" y1=\"25\" x2=\"37\" y2=\"20\" stroke=\"#d9d5d1\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"45.4853\" y1=\"28.5147\" x2=\"49.0208\" y2=\"24.9792\" stroke=\"#d9d5d1\" stroke-width=\"2.4\" stroke-linecap=\"round\"/></g><circle cx=\"37\" cy=\"37\" r=\"9\" fill=\"#d9d5d1\"/><g class=\"do-palm\"><path d=\"M61 96 Q57 78 62 61\" stroke=\"#5c5a58\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M61 60 Q38 48 22 55 Q40 55 61 64 Z\" fill=\"#999794\"/><path d=\"M61 60 Q46 40 42 24 Q54 40 63 60 Z\" fill=\"#999794\"/><path d=\"M61 60 Q62 38 70 22 Q66 42 63 61 Z\" fill=\"#999794\"/><path d=\"M61 60 Q82 42 96 34 Q78 48 62 63 Z\" fill=\"#999794\"/><path d=\"M61 60 Q84 54 100 60 Q80 58 61 64 Z\" fill=\"#999794\"/><circle cx=\"66\" cy=\"62\" r=\"3\" fill=\"#b9b6b2\"/><circle cx=\"57\" cy=\"63\" r=\"2.6\" fill=\"#b9b6b2\"/></g><text x=\"60\" y=\"106\" text-anchor=\"middle\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"400\" font-size=\"9\" letter-spacing=\"0.16em\" fill=\"rgba(255,255,255,.82)\">ВЫХОДНОЙ</text></svg><div style=\"position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.1) 26%,rgba(255,255,255,0) 48%);pointer-events:none\"></div><div class=\"do-shine\" style=\"position:absolute;top:-20%;left:-28%;width:56%;height:140%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.5),rgba(255,255,255,0));filter:blur(2px);pointer-events:none\"></div><div style=\"position:absolute;left:0;right:0;bottom:0;height:36%;background:linear-gradient(to top,rgba(15,14,14,.30),rgba(15,14,14,0));pointer-events:none\"></div><div style=\"position:absolute;inset:0;border-radius:24%;box-shadow:inset 0 1px 1px rgba(255,255,255,.5),inset 0 0 0 1px rgba(255,255,255,.16);pointer-events:none\"></div></div>";return "<style>@keyframes diSpin{to{transform:rotate(360deg)}}@keyframes diPulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}@keyframes diShine{0%,100%{opacity:.15;transform:translateX(-6%)}50%{opacity:.5;transform:translateX(6%)}}.di-sweep{animation:diSpin 9s linear infinite;transform-box:view-box;transform-origin:60px 52px}.di-dot{animation:diPulse 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.di-shine{animation:diShine 5.5s ease-in-out infinite}</style><div style=\"position:relative;width:100%;height:100%;border-radius:24%;overflow:hidden;box-shadow:0 6px 16px rgba(23,23,22,.5),0 0 14px rgba(99,97,95,.32)\"><svg viewBox=\"0 0 120 120\" width=\"100%\" height=\"100%\" style=\"display:block\"><defs><linearGradient id=\"diBg\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#63615f\"/><stop offset=\"1\" stop-color=\"#2a2928\"/></linearGradient></defs><rect x=\"4\" y=\"4\" width=\"112\" height=\"112\" rx=\"30\" fill=\"url(#diBg)\"/><circle cx=\"60\" cy=\"52\" r=\"33\" fill=\"none\" stroke=\"rgba(255,255,255,.12)\" stroke-width=\"3\"/><g class=\"di-sweep\"><circle cx=\"60\" cy=\"52\" r=\"33\" fill=\"none\" stroke=\"#b7b4b1\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 177\" transform=\"rotate(-90 60 52)\"/></g><circle class=\"di-dot\" cx=\"91\" cy=\"30\" r=\"5.5\" fill=\"#aba8a4\" stroke=\"#2a2928\" stroke-width=\"2.5\"/><text x=\"60\" y=\"50\" text-anchor=\"middle\" dominant-baseline=\"central\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"500\" font-size=\"40\" fill=\"#fff\">"+n+"</text><text x=\"60\" y=\"78\" text-anchor=\"middle\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"400\" font-size=\"11\" letter-spacing=\"0.03em\" fill=\"rgba(255,255,255,.74)\">"+w+"</text><text x=\"60\" y=\"107\" text-anchor=\"middle\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"500\" font-size=\"8.5\" letter-spacing=\"0.2em\" fill=\"rgba(255,255,255,.85)\">"+lb+"</text></svg><div style=\"position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.1) 26%,rgba(255,255,255,0) 48%);pointer-events:none\"></div><div class=\"di-shine\" style=\"position:absolute;top:-20%;left:-28%;width:56%;height:140%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.5),rgba(255,255,255,0));filter:blur(2px);pointer-events:none\"></div><div style=\"position:absolute;left:0;right:0;bottom:0;height:36%;background:linear-gradient(to top,rgba(15,14,14,.30),rgba(15,14,14,0));pointer-events:none\"></div><div style=\"position:absolute;inset:0;border-radius:24%;box-shadow:inset 0 1px 1px rgba(255,255,255,.5),inset 0 0 0 1px rgba(255,255,255,.16);pointer-events:none\"></div></div>";};</script>
+<script>window.__ME_MAYA_HTML="<svg style=\"display:block;width:100%;height:100%;border-radius:24%\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 1000\"><rect width=\"1000\" height=\"1000\" fill=\"#fff\"/><svg x=\"120\" y=\"280\" width=\"760\" height=\"440\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"220 408 820 474\" fill=\"none\" aria-hidden=\"true\" data-maya-identity=\"ribbon-v1\"><defs><linearGradient id=\"maya-canonicala\" x1=\"400\" y1=\"485\" x2=\"784\" y2=\"851\" gradientUnits=\"userSpaceOnUse\"><stop stop-color=\"#0055ff\"/><stop offset=\".5\" stop-color=\"#08a9fc\"/><stop offset=\"1\" stop-color=\"#32c5f4\"/></linearGradient><linearGradient id=\"maya-canonicalb\" x1=\"0\" y1=\"580\" x2=\"0\" y2=\"875\" gradientUnits=\"userSpaceOnUse\"><stop stop-color=\"#0532ed\"/><stop offset=\".58\" stop-color=\"#007dff\"/><stop offset=\"1\" stop-color=\"#22baf5\"/></linearGradient></defs><path data-maya-ribbon=\"base\" d=\"M240 790C238 769 249 747 262 724C302 652 363 534 406 475C445 422 503 415 541 443C586 472 600 556 631 674C691 576 751 484 821 475C900 463 945 520 941 606C939 694 946 721 984 743C1026 765 1028 799 997 827C960 865 904 870 864 846C809 814 804 747 807 651C783 682 767 715 748 746C709 812 665 863 610 853C545 844 521 783 499 716C489 684 480 653 473 636C444 689 419 747 393 801C369 854 325 873 284 850C252 834 239 814 240 790Z\" fill=\"url(#maya-canonicala)\"/><path data-maya-ribbon=\"fold\" d=\"M240 790C286 700 425 574 501 582C565 571 604 638 639 709C668 770 716 773 750 740C793 654 866 567 941 598C939 693 946 721 984 743C1026 765 1028 799 997 827C960 865 904 870 864 846C809 814 804 747 807 651C783 682 767 715 748 746C709 812 665 863 610 853C545 844 521 783 499 716C489 684 480 653 473 636C444 689 419 747 393 801C369 854 325 873 284 850C252 834 239 814 240 790Z\" fill=\"url(#maya-canonicalb)\"/></svg></svg>";</script>
 <script>/* Хаптик: Capacitor Haptics (iOS/Android native) с фолбэком на navigator.vibrate. Ленивое разрешение — Capacitor готов не сразу. */window.tactile=function(style){var now=Date.now();if(window.__tactileLast&&now-window.__tactileLast<55)return;window.__tactileLast=now;try{var C=window.Capacitor,H=C&&C.Plugins&&C.Plugins.Haptics;if(H&&H.impact){H.impact({style:style||'MEDIUM'});return;}if(H&&H.selectionChanged){H.selectionChanged();return;}}catch(e){}try{if(navigator.vibrate)navigator.vibrate(style==='LIGHT'?10:18);}catch(e){}};(function(){function tappable(el){for(var i=0;i<6&&el&&el.nodeType===1;i++){var tg=el.tagName;if(tg==='BUTTON'||tg==='A'||tg==='SELECT'||tg==='LABEL'||tg==='SUMMARY'||tg==='INPUT'||tg==='TEXTAREA')return true;try{if(el.getAttribute&&(el.getAttribute('role')==='button'||el.hasAttribute('data-haptic')))return true;}catch(e){}try{if(getComputedStyle(el).cursor==='pointer')return true;}catch(e){}el=el.parentNode;}return false;}document.addEventListener('click',function(ev){try{if(tappable(ev.target))window.tactile('MEDIUM');}catch(e){}},true);})();</script>
 <script>window.__ME_CAM_HTML="<style>@keyframes camScan{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(15deg)}}@keyframes camIris{to{transform:rotate(360deg)}}@keyframes camRec{0%,100%{opacity:1}50%{opacity:.25}}@keyframes camShine{0%,100%{opacity:.14;transform:translateX(-6%)}50%{opacity:.48;transform:translateX(6%)}}.cam-scan{animation:camScan 4s ease-in-out infinite;transform-box:view-box;transform-origin:70px 56px}.cam-iris{animation:camIris 6s linear infinite;transform-box:view-box;transform-origin:70px 56px}.cam-rec{animation:camRec 1.3s ease-in-out infinite}.cam-shine{animation:camShine 5.5s ease-in-out infinite}</style><div style=\"position:relative;width:100%;height:100%;border-radius:24%;overflow:hidden;box-shadow:0 6px 16px rgba(23,23,22,.5),0 0 14px rgba(120,118,115,.30)\"><svg viewBox=\"0 0 120 120\" width=\"100%\" height=\"100%\" style=\"display:block\"><defs><linearGradient id=\"camBg\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#484745\"/><stop offset=\"1\" stop-color=\"#191818\"/></linearGradient><linearGradient id=\"scanG\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#c1beba\" stop-opacity=\".55\"/><stop offset=\"1\" stop-color=\"#c1beba\" stop-opacity=\"0\"/></linearGradient></defs><rect x=\"4\" y=\"4\" width=\"112\" height=\"112\" rx=\"30\" fill=\"url(#camBg)\"/><g class=\"cam-scan\"><path d=\"M70 56 L46 104 L94 104 Z\" fill=\"url(#scanG)\"/></g><g transform=\"rotate(-16 60 56)\"><rect x=\"28\" y=\"47\" width=\"40\" height=\"18\" rx=\"7\" fill=\"#d4d1cc\"/><rect x=\"28\" y=\"47\" width=\"40\" height=\"7\" rx=\"6\" fill=\"#eef2f8\"/><rect x=\"24\" y=\"42\" width=\"8\" height=\"7\" rx=\"2\" fill=\"#a4a19e\"/></g><path d=\"M50 24 L50 40\" stroke=\"#9f9d9a\" stroke-width=\"3\" stroke-linecap=\"round\"/><circle cx=\"70\" cy=\"56\" r=\"10.5\" fill=\"#232222\"/><circle cx=\"70\" cy=\"56\" r=\"7\" fill=\"#4b4948\"/><circle class=\"cam-iris\" cx=\"70\" cy=\"56\" r=\"4.6\" fill=\"none\" stroke=\"#aba9a5\" stroke-width=\"1.6\" stroke-dasharray=\"4 3.5\"/><circle cx=\"70\" cy=\"56\" r=\"2\" fill=\"#dbd8d3\"/><circle class=\"cam-rec\" cx=\"95\" cy=\"26\" r=\"5\" fill=\"#6b6967\"/><text x=\"87\" y=\"29.5\" text-anchor=\"end\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"500\" font-size=\"8\" letter-spacing=\"0.12em\" fill=\"rgba(255,255,255,.8)\" class=\"cam-rec\">REC</text><text x=\"60\" y=\"110\" text-anchor=\"middle\" font-family=\"Montserrat,system-ui,sans-serif\" font-weight=\"500\" font-size=\"9\" letter-spacing=\"0.26em\" fill=\"rgba(255,255,255,.85)\">CAM</text></svg><div style=\"position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.1) 26%,rgba(255,255,255,0) 48%);pointer-events:none\"></div><div class=\"cam-shine\" style=\"position:absolute;top:-20%;left:-28%;width:56%;height:140%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.5),rgba(255,255,255,0));filter:blur(2px);pointer-events:none\"></div><div style=\"position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(to top,rgba(4,8,20,.34),rgba(4,8,20,0));pointer-events:none\"></div><div style=\"position:absolute;inset:0;border-radius:24%;box-shadow:inset 0 1px 1px rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.15);pointer-events:none\"></div></div>";window.__ME_GOD_HTML="<style>@keyframes gwO1{to{transform:rotate(360deg)}}@keyframes gwO2{to{transform:rotate(-360deg)}}@keyframes gwCore{0%,100%{opacity:.75;transform:scale(.9)}50%{opacity:1;transform:scale(1.08)}}@keyframes gwShine{0%,100%{opacity:.1;transform:translateX(-30%)}50%{opacity:.4;transform:translateX(30%)}}.gw-o1{animation:gwO1 15s linear infinite;transform-box:view-box;transform-origin:60px 60px}.gw-o2{animation:gwO2 10s linear infinite;transform-box:view-box;transform-origin:60px 60px}.gw-core{animation:gwCore 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.gw-shine{animation:gwShine 6s ease-in-out infinite}</style><div style=\"position:relative;width:100%;border-radius:22px;overflow:hidden;background:linear-gradient(100deg,#242323 0%,#161515 55%,#09060f 100%);box-shadow:0 8px 22px rgba(12,12,12,.5),0 0 16px rgba(179,176,172,.18)\"><div style=\"position:relative;display:flex;align-items:center;gap:16px;padding:16px 20px\"><div style=\"width:52px;height:52px;flex-shrink:0\"><svg viewBox=\"0 0 120 120\" width=\"52\" height=\"52\" style=\"display:block;overflow:visible\"><defs><radialGradient id=\"gwCoreG\" cx=\".5\" cy=\".42\" r=\".6\"><stop offset=\"0\" stop-color=\"#e1ddd8\"/><stop offset=\".5\" stop-color=\"#b3b0ac\"/><stop offset=\"1\" stop-color=\"#817f7c\"/></radialGradient></defs><g class=\"gw-o1\"><circle cx=\"60\" cy=\"60\" r=\"42\" fill=\"none\" stroke=\"rgba(187,184,181,.5)\" stroke-width=\"2\"/><circle cx=\"102\" cy=\"60\" r=\"4.5\" fill=\"#c9c5c1\"/></g><g class=\"gw-o2\"><circle cx=\"60\" cy=\"60\" r=\"29\" fill=\"none\" stroke=\"rgba(154,151,148,.55)\" stroke-width=\"2\"/><circle cx=\"60\" cy=\"31\" r=\"4\" fill=\"#b5b2ae\"/></g><circle class=\"gw-core\" cx=\"60\" cy=\"60\" r=\"17\" fill=\"url(#gwCoreG)\"/><path d=\"M60 51 L62 57 L68.5 57 L63.2 61 L65.2 67.5 L60 63.5 L54.8 67.5 L56.8 61 L51.5 57 L58 57 Z\" fill=\"#373635\" opacity=\".5\"/></svg></div><div style=\"flex:1;min-width:0\"><div style=\"font-family:Montserrat,sans-serif;font-weight:300;font-size:15px;letter-spacing:.14em;color:#b3b0ac\">MAYA</div><div style=\"font-family:Montserrat,sans-serif;font-weight:400;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#eae6f7;margin-top:4px\">Центр управления</div><div style=\"font-family:Montserrat,sans-serif;font-size:10px;color:rgba(255,255,255,.45);margin-top:2px\">GOD Mode</div></div><div style=\"color:rgba(255,255,255,.5);font-size:18px;flex-shrink:0\">→</div></div><div class=\"gw-shine\" style=\"position:absolute;top:-30%;left:-20%;width:34%;height:160%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);filter:blur(3px);pointer-events:none\"></div><div style=\"position:absolute;inset:0;border-radius:22px;box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 0 0 1px rgba(255,255,255,.1);pointer-events:none\"></div></div>";window.__ME_REV_ICON=function(a,l,behind){var s=(a==null||a==="")?"…":a;var bg=behind?"linear-gradient(100deg,#757371 0%,#41403e 55%,#242322 100%)":"linear-gradient(100deg,#928f8c 0%,#636260 55%,#42413f 100%)";var gl=behind?"rgba(117,115,113,.26)":"rgba(145,143,140,.22)";return "<style>@keyframes rwDot{0%,100%{opacity:.5;transform:scale(.8)}50%{opacity:1;transform:scale(1.25)}}@keyframes rwShine{0%,100%{opacity:.1;transform:translateX(-30%)}50%{opacity:.4;transform:translateX(30%)}}.rw-dot{animation:rwDot 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.rw-shine{animation:rwShine 6s ease-in-out infinite}</style><div style=\"position:relative;width:100%;border-radius:22px;overflow:hidden;background:"+bg+";box-shadow:0 8px 22px rgba(52,51,50,.5),0 0 16px "+gl+"\"><div style=\"position:relative;display:flex;align-items:center;gap:16px;padding:16px 20px\"><div style=\"width:52px;height:52px;flex-shrink:0\"><svg viewBox=\"0 0 120 120\" width=\"52\" height=\"52\" style=\"display:block\"><defs><linearGradient id=\"rwA\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#efece7\" stop-opacity=\".5\"/><stop offset=\"1\" stop-color=\"#efece7\" stop-opacity=\"0\"/></linearGradient></defs><path d=\"M14 84 L36 72 L56 78 L78 52 L104 34 L104 92 L14 92 Z\" fill=\"url(#rwA)\"/><path d=\"M14 84 L36 72 L56 78 L78 52 L104 34\" fill=\"none\" stroke=\"#efece7\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle class=\"rw-dot\" cx=\"104\" cy=\"34\" r=\"5.5\" fill=\"#efece7\"/></svg></div><div style=\"flex:1;min-width:0\"><div style=\"font-family:Montserrat,sans-serif;font-weight:400;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.74)\">"+(l||"")+"</div><div style=\"font-family:Montserrat,sans-serif;font-weight:300;font-size:24px;color:#fff;margin-top:5px;line-height:1\">"+s+" ₽</div></div><div style=\"color:rgba(255,255,255,.75);flex-shrink:0;font-family:Montserrat,sans-serif;font-size:16px\">↑</div></div><div class=\"rw-shine\" style=\"position:absolute;top:-30%;left:-20%;width:34%;height:160%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);filter:blur(3px);pointer-events:none\"></div><div style=\"position:absolute;inset:0;border-radius:22px;box-shadow:inset 0 1px 1px rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.1);pointer-events:none\"></div></div>";};</script>
 <script>
@@ -2362,197 +2433,25 @@ function LogoM({
     }
   }));
 }
-// Maya OS: фирменный знак — handoff_maya-1 / docs/logo.md
-// Пять шкал: внешние высокие, средние ступеньками вниз (читается как M).
-function MayaMarkGeometry() {
-  // 🔴 ЕДИНСТВЕННЫЙ источник пропорций знака MAYA. Те же доли, что у иконки
-  // приложения, нативной заставки и экрана входа: на сетке 96 это полосы
-  // шириной 8 с зазором 6, высоты 65/29/38/29/65, отступы сверху 15/25/33/25/15.
-  // Раньше здесь стояла «живая шкала» — средние полосы уходили вниз и знак не
-  // читался как логотип. Менять только вместе с иконкой и заставкой.
-  return {
-    XS: [0.16667, 0.3125, 0.45833, 0.60417, 0.75],
-    BW: 0.08333,
-    Y0: 0.15625,
-    TH: 0.67708,
-    HS: [1, 0.44615, 0.58462, 0.44615, 1],
-    YS: [0, 0.15385, 0.27692, 0.15385, 0],
-    DL: [0, 0.07, 0.14, 0.07, 0]
-  };
+// Shared render adapters. Geometry/motion comes only from MayaIdentity.
+var mayaIdentityInstance = 0;
+function MayaMark({size=22,tile=false,tileBg,style}) {
+  var id=React.useRef('maya-static-'+(++mayaIdentityInstance));
+  return React.createElement('span', {'data-maya-mark':'ribbon-v1', 'aria-hidden':'true',
+    style:Object.assign({display:'inline-flex',width:size,height:size,flex:'none',alignItems:'center',background:tile?(tileBg||'#fff'):undefined,borderRadius:tile?'24%':undefined},style||{}),
+    dangerouslySetInnerHTML:{__html:window.MayaIdentity.markup(id.current).replace('<svg ', '<svg style="display:block;width:100%;height:100%" ')}});
 }
-function MayaMark({
-  size = 22,
-  color = "currentColor",
-  tile = false,
-  tileBg,
-  style
-}) {
-  // Только шкалы (без плитки-иконки): на тёмном — светлые, на светлом — тёмные.
-  const g = MayaMarkGeometry();
-  const S = 100;
-  const bars = g.XS.map(function (x, i) {
-    const w = g.BW * S;
-    const h = g.HS[i] * g.TH * S;
-    const y = (g.Y0 + g.YS[i] * g.TH) * S;
-    return React.createElement("rect", {
-      key: i,
-      x: x * S,
-      y: y,
-      width: w,
-      height: h,
-      rx: w / 2,
-      fill: color
-    });
-  });
-  return React.createElement("svg", {
-    viewBox: "0 0 " + S + " " + S,
-    width: size,
-    height: size,
-    style: Object.assign({ display: "block", flex: "none" }, style || {})
-  }, tile ? React.createElement("rect", {
-    width: S,
-    height: S,
-    rx: 22.37,
-    fill: tileBg || (window.__meDark ? "#0B0B0C" : "#F4F0EB")
-  }) : null, bars);
+function MayaMarkAnimated({size=64,mode='loop',state,tile=false,tileBg,style}) {
+  var host=React.useRef(null),player=React.useRef(null);
+  var actual=state||(mode==='static'?'idle':mode==='once'||mode==='loop'?'launch':'thinking');
+  React.useEffect(function(){
+    player.current=window.MayaIdentity.mount(host.current,{state:actual,level:function(){return window.__mayaAudioLevel||0;}});
+    return function(){player.current.destroy();player.current=null;};
+  },[]);
+  React.useEffect(function(){if(player.current)player.current.setState(actual);},[actual]);
+  return React.createElement('span',{ref:host,'data-maya-motion':actual,'aria-hidden':'true',style:Object.assign({display:'inline-flex',width:size,height:size,flex:'none',background:tile?(tileBg||'#fff'):undefined,borderRadius:tile?'24%':undefined},style||{})});
 }
-// Статичный кадр шкалы громкости для кнопки записи аудио.
-// Это не собранная буква M: полосы зафиксированы в положении живого waveform.
-function MayaVolumeMark({
-  size = 18,
-  color = "currentColor",
-  style
-}) {
-  const g = MayaMarkGeometry();
-  const S = 100;
-  const levels = [0.58, 0.96, 0.4, 0.82, 0.62];
-  const bars = g.XS.map(function (x, i) {
-    const w = g.BW * S;
-    const h = levels[i] * g.TH * S;
-    const y = (g.Y0 + (1 - levels[i]) * g.TH / 2) * S;
-    return React.createElement("rect", {
-      key: i,
-      x: x * S,
-      y: y,
-      width: w,
-      height: h,
-      rx: w / 2,
-      fill: color
-    });
-  });
-  return React.createElement("svg", {
-    viewBox: "0 0 " + S + " " + S,
-    width: size,
-    height: size,
-    "aria-hidden": "true",
-    style: Object.assign({ display: "block", flex: "none" }, style || {})
-  }, bars);
-}
-// Анимация «слушает → собирается в M» (handoff_maya-1). mode: loop | listen | once | static
-function MayaMarkAnimated({
-  size = 64,
-  color,
-  mode = "loop",
-  tile = false,
-  tileBg,
-  style
-}) {
-  const g = MayaMarkGeometry();
-  const reduce = (function () {
-    try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; }
-  })();
-  const st = React.useState(function () {
-    return reduce || mode === 'static' ? g.HS.slice() : g.HS.map(function () { return 0.62; });
-  });
-  const eq = st[0], setEq = st[1];
-  const ph = React.useState(reduce || mode === 'static' ? 'm' : 'eq');
-  const phase = ph[0], setPhase = ph[1];
-  const timers = React.useRef([]);
-  React.useEffect(function () {
-    timers.current.forEach(function (id) { clearTimeout(id); });
-    timers.current = [];
-    if (reduce || mode === 'static') {
-      setPhase('m');
-      setEq(g.HS.slice());
-      return;
-    }
-    var cancelled = false;
-    function clearAll() {
-      timers.current.forEach(function (id) { clearTimeout(id); });
-      timers.current = [];
-    }
-    function schedule(fn, ms) {
-      var id = setTimeout(fn, ms);
-      timers.current.push(id);
-      return id;
-    }
-    function listenTick(started) {
-      if (cancelled) return;
-      setPhase('eq');
-      setEq(g.HS.map(function () { return 0.24 + Math.random() * 0.76; }));
-      if (mode === 'listen') {
-        schedule(function () { listenTick(started); }, 145);
-        return;
-      }
-      if (Date.now() - started > 2100) {
-        setPhase('m');
-        setEq(g.HS.slice());
-        if (mode === 'once') return;
-        schedule(function () { run(); }, 2200);
-      } else {
-        schedule(function () { listenTick(started); }, 145);
-      }
-    }
-    function run() {
-      if (cancelled) return;
-      clearAll();
-      listenTick(Date.now());
-    }
-    run();
-    return function () {
-      cancelled = true;
-      clearAll();
-    };
-  }, [mode, reduce]);
-  const S = size;
-  const assembled = phase === 'm';
-  const bars = g.XS.map(function (x, i) {
-    const hMul = assembled ? g.HS[i] : (eq[i] || g.HS[i]);
-    const h = hMul * g.TH * S;
-    const off = assembled ? g.YS[i] : (1 - hMul) / 2;
-    const top = (g.Y0 + off * g.TH) * S;
-    const w = g.BW * S;
-    const tr = assembled
-      ? ('top .78s cubic-bezier(.16,1,.3,1) ' + g.DL[i] + 's, height .78s cubic-bezier(.16,1,.3,1) ' + g.DL[i] + 's')
-      : 'top .14s linear, height .14s linear';
-    return React.createElement("div", {
-      key: i,
-      style: {
-        position: "absolute",
-        left: (x * S) + "px",
-        top: top + "px",
-        width: w + "px",
-        height: h + "px",
-        borderRadius: (w / 2) + "px",
-        background: color || "currentColor",
-        transition: tr,
-        willChange: "top, height"
-      }
-    });
-  });
-  return React.createElement("div", {
-    style: Object.assign({
-      position: "relative",
-      width: size,
-      height: size,
-      color: color || "inherit",
-      flex: "none",
-      borderRadius: tile ? (size * 0.2237) : 0,
-      background: tile ? (tileBg || (window.__meDark ? "#0B0B0C" : "#F4F0EB")) : "transparent",
-      overflow: "hidden"
-    }, style || {})
-  }, bars);
-}
+function MayaVolumeMark({size=18,style}) {return React.createElement(MayaMark,{size:size,style:style});}
 // Alias: старый SeedLogo → новый знак Maya (совместимость call sites).
 function SeedLogo({
   size = 22,
@@ -15929,193 +15828,20 @@ function meIsReportChatWidget(w) {
  * бы на логотипе, и знак никогда не собрался бы.
  */
 function MayaSplash(props) {
-  var e = React.createElement;
-  var ACCENT = (typeof MAYA_ACCENT !== 'undefined') ? MAYA_ACCENT : '#0A84FF';
-  // Часы/Wi-Fi/батарея поверх синего должны быть белыми. Тема приложения
-  // считается по времени суток, и днём она светлая — тогда системные виджеты
-  // чёрные и на заставке их почти не видно. На время заставки навязываем
-  // белый стиль, при уходе возвращаем расчёт темы.
-  React.useEffect(function () {
-    var prevBg = window.__meActiveRootBg;
-    try {
-      window.__meActiveRootBg = ACCENT;
-      var SB = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.StatusBar;
-      // Capacitor: Style.Dark = БЕЛЫЙ текст.
-      if (SB && SB.setStyle) SB.setStyle({ style: 'DARK' });
-      if (document.documentElement) document.documentElement.style.background = ACCENT;
-      if (document.body) document.body.style.background = ACCENT;
-    } catch (e) {}
-    return function () {
-      try {
-        window.__meActiveRootBg = prevBg;
-        if (window.__meApplyRootBg) window.__meApplyRootBg();
-      } catch (e2) {}
-    };
-  }, []);
-  // Финальная (логотипная) геометрия: те же доли, что в иконке —
-  // высоты 68 / 30 / 40 / 30 / 68 %, верх на 16 / 26 / 34 / 26 / 16 %.
-  var BARS = [
-    { h: 102, top: 24, anim: 'mayaBarA', delay: 0.10 },
-    { h: 45, top: 39, anim: 'mayaBarB', delay: 0.04 },
-    { h: 60, top: 51, anim: 'mayaBarC', delay: 0 },
-    { h: 45, top: 39, anim: 'mayaBarB', delay: 0.08 },
-    { h: 102, top: 24, anim: 'mayaBarA', delay: 0.14 }
-  ];
-  var puff = function (key, tilt, delay, floatDelay, body) {
-    // 🔴 Три уровня вложенности обязательны: наклон, всплытие и покачивание
-    // живут на разных элементах, иначе transform из keyframes затирает
-    // статический поворот и облачко встаёт ровно.
-    return e('div', { key: key, style: { transform: tilt } },
-      e('div', { style: { animation: 'mayaPuffPop .45s cubic-bezier(.34,1.56,.64,1) ' + delay + 's both' } },
-        e('div', { style: { animation: 'mayaPuffFloat 3.2s ease-in-out ' + floatDelay + 's infinite' } }, body)));
-  };
-  // Хвостик облачка — треугольник на границах, а не повёрнутый квадрат:
-  // квадрат под наклоном ±16° даёт скошенный «клык», треугольник смотрит на знак.
-  var tail = function (w, h) {
-    return e('div', {
-      style: {
-        position: 'absolute', left: '50%', bottom: -8, marginLeft: -w,
-        width: 0, height: 0,
-        borderLeft: w + 'px solid transparent',
-        borderRight: w + 'px solid transparent',
-        borderTop: h + 'px solid #fff'
-      }
-    });
-  };
-  var dot = function (i) {
-    return e('span', {
-      key: i,
-      style: {
-        width: 6, height: 6, borderRadius: 999, background: ACCENT,
-        animation: 'mayaDotRun 1.1s ease-in-out ' + (i * 0.16) + 's infinite'
-      }
-    });
-  };
-  return e('div', {
-    id: 'maya-splash',
-    onClick: props.onSkip,
-    style: {
-      position: 'fixed', inset: 0, zIndex: 2147483000,
-      background: ACCENT, display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      opacity: props.leaving ? 0 : 1,
-      transition: 'opacity .3s ease',
-      cursor: 'pointer', overflow: 'hidden'
-    }
-  },
-    // Свечение за знаком.
-    e('div', {
-      'aria-hidden': true,
-      className: 'maya-splash-glow',
-      style: {
-        position: 'absolute', width: 340, height: 340, borderRadius: 999,
-        background: 'radial-gradient(circle, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 70%)',
-        transform: 'translateY(-61px)', animation: 'mayaGlowPulse 2.6s ease-in-out infinite',
-        pointerEvents: 'none'
-      }
-    }),
-    e('div', {
-      style: {
-        position: 'relative', display: 'flex', flexDirection: 'column',
-        alignItems: 'center',
-        // Знак чуть выше геометрического центра: над ним живут облачка,
-        // и симметричная посадка прижала бы их к вырезу.
-        transform: 'translateY(-24px)'
-      }
-    },
-      e('div', {
-        style: {
-          position: 'relative', width: 150, height: 150,
-          animation: 'mayaMarkIn .62s cubic-bezier(.16,1,.3,1) both, mayaMarkSettle .5s ease-out 1.8s both'
-        }
-      },
-        // Облачка веером над знаком: остаются на месте и медленно качаются.
-        e('div', {
-          style: {
-            position: 'absolute', bottom: '100%', left: '50%',
-            transform: 'translateX(-50%)', marginBottom: 22,
-            display: 'flex', alignItems: 'flex-end', gap: 14
-          }
-        },
-          puff('bang', 'rotate(-16deg) translateY(18px)', 0.30, 0.95,
-            e('div', { style: { position: 'relative' } },
-              e('div', {
-                style: {
-                  width: 34, height: 34, borderRadius: 999, background: '#fff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: DISPLAY, fontSize: 19, fontWeight: 700, color: ACCENT
-                }
-              }, '!'),
-              tail(5, 8))),
-          puff('dots', 'none', 0.55, 1.3,
-            e('div', { style: { position: 'relative' } },
-              e('div', {
-                style: {
-                  minWidth: 36, height: 36, padding: '0 10px', borderRadius: 999, background: '#fff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5
-                }
-              }, [0, 1, 2].map(dot)),
-              tail(6, 9))),
-          puff('ask', 'rotate(16deg) translateY(18px)', 0.80, 1.65,
-            e('div', { style: { position: 'relative' } },
-              e('div', {
-                style: {
-                  width: 40, height: 40, borderRadius: 999, background: '#fff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: DISPLAY, fontSize: 22, fontWeight: 700, color: ACCENT
-                }
-              }, '?'),
-              tail(5, 8)))),
-        // Пять полос. Выравнивание по верху контейнера: именно оно позволяет
-        // одной анимацией и уводить полосу вниз (волна), и ставить на уровень.
-        e('div', {
-          style: {
-            position: 'absolute', inset: 0, display: 'flex',
-            alignItems: 'flex-start', justifyContent: 'center', gap: 9
-          }
-        }, BARS.map(function (bar, i) {
-          return e('div', {
-            key: i,
-            style: {
-              width: 13, height: bar.h, marginTop: bar.top, borderRadius: 6.5,
-              background: '#fff', transformOrigin: 'center',
-              animation: bar.anim + ' 1.7s cubic-bezier(.33,1,.68,1) ' + bar.delay + 's both'
-            }
-          });
-        }))),
-      // Вордмарк.
-      e('div', {
-        style: {
-          marginTop: 34, display: 'flex', flexDirection: 'column',
-          alignItems: 'center', gap: 7
-        }
-      },
-        e('div', {
-          style: {
-            fontFamily: DISPLAY, fontSize: 15, fontWeight: 600, letterSpacing: '.34em',
-            paddingLeft: '.34em', color: '#fff',
-            animation: 'mayaWordmarkIn .8s ease-out .4s both'
-          }
-        }, 'MAYA OS'),
-        e('div', {
-          className: 'maya-splash-sub',
-          style: {
-            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 8.5,
-            letterSpacing: '.22em', paddingLeft: '.22em', color: 'rgba(255,255,255,.72)',
-            animation: 'mayaWordmarkIn .8s ease-out .55s both'
-          }
-        }, 'AI BUSINESS AGENTS'))),
-    // Индикатор жеста.
-    e('div', {
-      'aria-hidden': true,
-      style: {
-        position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 9px)',
-        width: 118, height: 3, borderRadius: 999, background: 'rgba(255,255,255,.35)'
-      }
-    })
-  );
+  var e=React.createElement;
+  React.useEffect(function(){
+    var before=window.__meActiveRootBg;
+    window.__meActiveRootBg='#ffffff';
+    if(window.__meApplyRootBg)window.__meApplyRootBg();
+    var SB=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.StatusBar;
+    if(SB&&SB.setStyle)SB.setStyle({style:'LIGHT'});
+    return function(){window.__meActiveRootBg=before;if(window.__meApplyRootBg)window.__meApplyRootBg();};
+  },[]);
+  return e('div',{id:'maya-splash',onClick:props.onSkip,'aria-label':'Maya — запуск',style:{position:'fixed',inset:0,zIndex:2147483000,background:'#fff',display:'flex',alignItems:'center',justifyContent:'center',opacity:props.leaving?0:1,transition:'opacity .22s ease'}},
+    e(MayaMarkAnimated,{size:220,mode:'once'}));
 }
 window.MayaSplash = MayaSplash;
+
 function meReportPanelTheme(dark) {
   return {
     bg: dark ? '#f4f0eb' : '#18160f',
@@ -20393,6 +20119,7 @@ function AChat() {
   }
 
   function vmCleanup() {
+    window.__mayaAudioLevel = 0;
     const V = vmRef.current;
     if (V.tick) { clearInterval(V.tick); V.tick = null; }
     try { if (V.rec && V.rec.state !== 'inactive') V.rec.stop(); } catch (er) {}
@@ -20499,6 +20226,7 @@ function AChat() {
           an.getByteTimeDomainData(buf);
           let sum = 0; for (let i = 0; i < buf.length; i++) { const d = (buf[i] - 128) / 128; sum += d * d; }
           const rms = Math.sqrt(sum / buf.length);
+          window.__mayaAudioLevel = Math.min(1, rms * 6);
           const now = Date.now();
           if (rms > 0.045) { V.spoke = true; lastLoud = now; }
           if (V.spoke && now - lastLoud > 600) vmStopRec();
@@ -20537,6 +20265,7 @@ function AChat() {
         an.getByteTimeDomainData(buf);
         let sum = 0; for (let i = 0; i < buf.length; i++) { const d = (buf[i] - 128) / 128; sum += d * d; }
         const rms = Math.sqrt(sum / buf.length);
+          window.__mayaAudioLevel = Math.min(1, rms * 6);
         const now = Date.now();
         if (rms > 0.045) { V.spoke = true; lastLoud = now; }
         if (V.spoke && now - lastLoud > 600) vmStopRec();
@@ -21316,17 +21045,7 @@ function AChat() {
 	    e('path', { d: 'm7 7 1 13h8l1-13' }),
 	    e('path', { d: 'M10 11v5M14 11v5' }));
 	}
-  const typingDots = e('div', {
-    className: 'maya-typing' + (dark ? '' : ' maya-typing-light'),
-    role: 'status',
-    'aria-label': 'Maya печатает',
-    style: {
-      padding: '4px 2px'
-    }
-  }, [0, 1, 2].map(i => e('span', {
-    key: i,
-    'aria-hidden': 'true'
-  })));
+  const typingDots = e('div', { role:'status', 'aria-label':'Maya думает', style:{padding:'4px 2px'} }, e(MayaMarkAnimated,{size:48,state:'thinking'}));
   const mayaThinking = msgs.some(function (message) {
     return !!(message && message.role === 'bot' && message.typing && !String(message.text || '').trim());
   });
@@ -21844,7 +21563,7 @@ function AChat() {
     }
   }, e('div', {
     style: { color: t.ink, display: 'flex' }
-  }, e(MayaMarkAnimated, { size: 36, color: t.ink, mode: 'listen' }))) : null,
+  }, e(MayaMarkAnimated, { size: 76, state: vmSpeaking ? 'responding' : sending ? 'thinking' : 'recording' }))) : null,
   mayaThinking ? e('div', {
     'data-maya-thinking-dock': 'true',
     style: {
@@ -25294,351 +25013,8 @@ window.AOwnerTrial = AOwnerTrial;
 // показывает экран подписи, шлёт consent_submit, и кабинет открывается.
 // Бэкенд готов (consent_status/consent_submit). Сотрудникам не показываем.
 // ======================================================================
-function AConsentGate() {
-  var e = React.createElement;
-  var CONSENT_PROXY = 'https://malesthetic.pro/app/api-proxy.php';
-  var dark = window.__meDark;
-  var t = tokens('aurora', dark);
-  var sh = React.useState(false);
-  var show = sh[0],
-    setShow = sh[1];
-  var stt = React.useState('');
-  var status = stt[0],
-    setStatus = stt[1];
-  var pv = React.useState('');
-  var privacy = pv[0],
-    setPrivacy = pv[1];
-  var pd = React.useState(false);
-  var pdn = pd[0],
-    setPdn = pd[1];
-  var mk = React.useState(false);
-  var mkt = mk[0],
-    setMkt = mk[1];
-  var bz = React.useState(false);
-  var busy = bz[0],
-    setBusy = bz[1];
-  var er = React.useState('');
-  var err = er[0],
-    setErr = er[1];
-  var pol = React.useState(false);
-  var showPol = pol[0],
-    setShowPol = pol[1];
-  function canonicalConsentRequest(payload) {
-    var rq = window.__meAuthReq ? window.__meAuthReq(payload) : null;
-    try {
-      var tg = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
-      var auth = window.__tgAuthData || JSON.parse(localStorage.getItem('tg_auth_data') || 'null');
-      var bundle = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
-      var headers = { 'Content-Type': 'application/json' };
-      if (tg) headers['X-Telegram-InitData'] = tg;
-      else if (bundle && bundle.token) headers.Authorization = 'Bearer ' + bundle.token;
-      else if (auth && auth.hash && auth.auth_date) payload.auth_data = auth;
-      else return rq;
-      return { headers: headers, body: JSON.stringify(payload) };
-    } catch (e) { return rq; }
-  }
-  function consentCommandId(marketing) {
-    var key = 'maya.consent.pending.v1';
-    var saved = JSON.parse(sessionStorage.getItem(key) || 'null');
-    if (!saved || saved.marketing !== marketing) {
-      var bytes = new Uint8Array(24);
-      window.crypto.getRandomValues(bytes);
-      saved = { marketing: marketing, id: Array.prototype.map.call(bytes, function (v) { return ('0' + v.toString(16)).slice(-2); }).join('') };
-      sessionStorage.setItem(key, JSON.stringify(saved));
-    }
-    return saved.id;
-  }
-  var checkedRef = React.useRef(false);
-  React.useEffect(function () {
-    var done = false;
-    var force = false; // ?consent=1 — форс-показ для теста (минует сотрудника и «уже подписал»)
-    try {
-      force = new URLSearchParams(location.search).get('consent') === '1';
-    } catch (x) {}
-    function loggedIn() {
-      try {
-        return !!(window.__meAuthReq && window.__meAuthReq({}));
-      } catch (x) {
-        return false;
-      }
-    }
-    function check() {
-      if (done || checkedRef.current) return;
-      if (!force && window.__meCurMode === 'staff') return; // не сотруднику (force — для теста)
-      if (!loggedIn()) return; // только после логина
-      checkedRef.current = true;
-      var rq = canonicalConsentRequest({});
-      if (!rq) {
-        checkedRef.current = false;
-        return;
-      }
-      fetch(CONSENT_PROXY + '?action=consent_status', {
-        method: 'POST',
-        headers: rq.headers,
-        body: rq.body
-      }).then(function (r) {
-        if (r.status === 401) return {
-          _unauth: true
-        }; // нет валидной авторизации — гейт не применяем
-        if (!r.ok) throw new Error('http'); // 5xx/прокси-ошибка — НЕ гасим гейт, повторим
-        return r.json();
-      }).then(function (d) {
-        if (d && d._unauth) {
-          done = true;
-          return;
-        }
-        if (!d || !d.status) {
-          checkedRef.current = false;
-          return;
-        } // не распарсили — повторим (а не молча пропустить согласие)
-        if (!force && d.status === 'pass') {
-          done = true;
-          return;
-        }
-        setStatus(force && d.status === 'pass' ? 'need_pdn' : d.status);
-        setPrivacy(d.privacy_text || '');
-        setShow(true);
-        done = true;
-      }).catch(function () {
-        checkedRef.current = false;
-      }); // сеть ИЛИ http-ошибка — дадим повторить
-    }
-    check();
-    var iv = setInterval(check, 800);
-    return function () {
-      clearInterval(iv);
-    };
-  }, []);
-  function submit() {
-    if (status === 'need_pdn' && !pdn) {
-      setErr('Поставьте галочку согласия на обработку персональных данных.');
-      return;
-    }
-    setErr('');
-    setBusy(true);
-    var rq;
-    try { rq = canonicalConsentRequest({
-      accept_pdn: true,
-      accept_marketing: !!mkt,
-      idempotency_key: consentCommandId(!!mkt)
-    }); } catch (e) { setBusy(false); setErr('Не удалось подготовить безопасный запрос. Перезагрузите приложение.'); return; }
-    if (!rq) {
-      setBusy(false);
-      return;
-    }
-    fetch(CONSENT_PROXY + '?action=consent_submit', {
-      method: 'POST',
-      headers: rq.headers,
-      body: rq.body
-    }).then(function (r) {
-      return r.json().catch(function () {
-        return null;
-      });
-    }).then(function (d) {
-      setBusy(false);
-      if (d && d.status === 'pass') {
-        setShow(false);
-        try {
-          if (window.__meHydrate) window.__meHydrate('cabinet'); // перетянуть кабинет: needs_consent → full
-        } catch (x) {}
-        try {
-          if (window.__meRefresh) window.__meRefresh();
-        } catch (x) {}
-      } else {
-        setErr(d && d.message || 'Не удалось сохранить. Попробуйте ещё раз.');
-      }
-    }).catch(function () {
-      setBusy(false);
-      setErr('Ошибка сети. Попробуйте ещё раз.');
-    });
-  }
-  if (!show) return null;
-  var needPdn = status === 'need_pdn';
-  var SAFE_TOP = 'calc(env(safe-area-inset-top, 0px) + 20px)';
-  var SAFE_BOT = 'calc(env(safe-area-inset-bottom, 0px) + 22px)';
-  function checkbox(on, onClick, label, sub) {
-    return e('div', {
-      onClick: onClick,
-      style: {
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 12,
-        padding: '14px 16px',
-        borderRadius: 14,
-        border: '1px solid ' + (on ? t.accent : t.line),
-        background: on ? 'rgba(170,167,163,0.06)' : 'transparent',
-        cursor: 'pointer',
-        marginBottom: 12
-      }
-    }, e('div', {
-      style: {
-        width: 22,
-        height: 22,
-        borderRadius: 6,
-        flex: '0 0 auto',
-        marginTop: 1,
-        border: '1.5px solid ' + (on ? t.accent : t.faint),
-        background: on ? t.accent : 'transparent',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }
-    }, on ? e('svg', {
-      width: 13,
-      height: 13,
-      viewBox: '0 0 24 24',
-      fill: 'none',
-      stroke: dark ? '#0b0d16' : '#fff',
-      strokeWidth: 3.4,
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round'
-    }, e('path', {
-      d: 'M5 12.5l4.2 4.2L19 7'
-    })) : null), e('div', {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, e('div', {
-      style: {
-        fontFamily: BODY,
-        fontWeight: 500,
-        fontSize: 13.5,
-        color: t.ink,
-        lineHeight: 1.35
-      }
-    }, label), sub ? e('div', {
-      style: {
-        fontFamily: BODY,
-        fontSize: 11.5,
-        color: t.dim,
-        marginTop: 3,
-        lineHeight: 1.4
-      }
-    }, sub) : null));
-  }
-  return e('div', {
-    style: {
-      position: 'fixed',
-      inset: 0,
-      zIndex: 100000,
-      background: t.bg,
-      display: 'flex',
-      flexDirection: 'column',
-      paddingTop: SAFE_TOP
-    }
-  }, e('div', {
-    style: {
-      flex: 1,
-      overflow: 'auto',
-      WebkitOverflowScrolling: 'touch',
-      padding: '0 24px'
-    }
-  }, e('div', {
-    style: {
-      fontFamily: DISPLAY,
-      fontSize: 10,
-      letterSpacing: '0.22em',
-      textTransform: 'uppercase',
-      color: t.accent,
-      marginBottom: 12
-    }
-  }, needPdn ? 'Согласие · 152-ФЗ' : 'Ещё один шаг'), e('div', {
-    style: {
-      fontFamily: DISPLAY,
-      fontWeight: 200,
-      fontSize: 28,
-      color: t.ink,
-      lineHeight: 1.1,
-      marginBottom: 14
-    }
-  }, needPdn ? 'Подпишите согласие' : 'Рассылки'), e('p', {
-    style: {
-      fontFamily: BODY,
-      fontSize: 13.5,
-      lineHeight: 1.55,
-      color: t.dim,
-      margin: '0 0 18px'
-    }
-  }, needPdn ? 'Чтобы записываться и пользоваться кабинетом, подпишите согласие на обработку персональных данных. Это требование закона (152-ФЗ).' : 'Согласие на обработку данных уже подписано. Остался выбор по рассылкам.'), needPdn ? e('div', {
-    style: {
-      marginBottom: 16
-    }
-  }, e('div', {
-    onClick: function () {
-      setShowPol(!showPol);
-    },
-    style: {
-      fontFamily: DISPLAY,
-      fontSize: 10,
-      letterSpacing: '0.16em',
-      textTransform: 'uppercase',
-      color: t.accent,
-      cursor: 'pointer',
-      marginBottom: showPol ? 10 : 0
-    }
-  }, (showPol ? '▾ ' : '▸ ') + 'Политика конфиденциальности'), showPol ? e('div', {
-    style: {
-      fontFamily: BODY,
-      fontSize: 12,
-      lineHeight: 1.6,
-      color: t.dim,
-      whiteSpace: 'pre-wrap',
-      border: '1px solid ' + t.line,
-      borderRadius: 12,
-      padding: '14px 16px',
-      maxHeight: 220,
-      overflow: 'auto'
-    }
-  }, privacy || '—') : null) : null, needPdn ? checkbox(pdn, function () {
-    setPdn(!pdn);
-    setErr('');
-  }, 'Согласен на обработку персональных данных', 'Имя и телефон — для записи и связи. Обязательно.') : null, checkbox(mkt, function () {
-    setMkt(!mkt);
-  }, 'Получать промокоды, акции и поздравления', 'Скидка −20% в день рождения, свободные окна у мастера, акции. Необязательно, отписаться можно в любой момент.'), err ? e('div', {
-    style: {
-      fontFamily: BODY,
-      fontSize: 12.5,
-      color: '#8b8986',
-      margin: '4px 2px 0'
-    }
-  }, err) : null), e('div', {
-    style: {
-      padding: '14px 24px ' + SAFE_BOT,
-      borderTop: '1px solid ' + t.line
-    }
-  }, e('div', {
-    onClick: busy ? null : submit,
-    style: {
-      textAlign: 'center',
-      fontFamily: DISPLAY,
-      fontSize: 11,
-      letterSpacing: '0.2em',
-      textTransform: 'uppercase',
-      color: dark ? '#0b0d16' : '#fff',
-      background: needPdn && !pdn || busy ? t.faint : t.accent,
-      padding: '17px',
-      fontWeight: 600,
-      borderRadius: 999,
-      cursor: busy ? 'default' : 'pointer',
-      transition: 'background .2s'
-    }
-  }, busy ? 'Сохраняю…' : 'Подтвердить и продолжить'), e('div', {
-    onClick: function () {
-      try {
-        if (window.__meLogout) window.__meLogout();
-      } catch (x) {}
-    },
-    style: {
-      textAlign: 'center',
-      fontFamily: BODY,
-      fontSize: 12,
-      color: t.faint,
-      marginTop: 14,
-      cursor: 'pointer'
-    }
-  }, 'Выйти')));
-}
+// Retired legacy consent presentation. Only AMayaConsent is mounted below.
+function AConsentGate() { return null; }
 window.AConsentGate = AConsentGate;
 
 // ======================================================================
@@ -25704,28 +25080,32 @@ function AMayaConsent() {
   var commandRef = React.useRef(null);
 
   React.useEffect(function () {
+    var cancelled=false, checking=false, checkedSession='';
     function check() {
+      var key;
       try {
-        var mode = typeof meAppAccessCurrentMode === 'function' ? meAppAccessCurrentMode() : null;
-        if (mode !== 'client') { setShow(false); return; }
-        var access = window.__meAppAccess || null;
-        var client = access && typeof meAppAccessFindMode === 'function'
-          ? meAppAccessFindMode(access, 'client') : null;
-        // Client preview is deliberately public/read-only. It must remain
-        // usable while no verified ClientChannelLink exists; the consent
-        // command cannot bootstrap Client authority from the account/session.
-        if (client && client.access === 'preview') {
-          setShow(false);
-          return;
-        }
-        setShow(!!client && client.profile_linked !== true);
-        var pending = meMayaConsentPending(meMayaConsentPendingKey());
-        if (pending) { setPdn(pending.privacy); setMkt(pending.marketing); }
-      } catch (x) {}
+        if (typeof meAppAccessCurrentMode !== 'function' || meAppAccessCurrentMode() !== 'client') {setShow(false);checkedSession='';return;}
+        key=meMayaConsentPendingKey();
+        var bundle=meSaasCurrentBundle();
+        var signature=key+':'+String(bundle.token||'');
+        if(checking||checkedSession===signature)return;
+        var authedFetch=window.__meSaasAuthedFetch;
+        if(typeof authedFetch!=='function')return;
+        checking=true;checkedSession=signature;
+        Promise.resolve(authedFetch('/client-channel/status')).then(function(status){
+          if(cancelled||meMayaConsentPendingKey()!==key)return;
+          checkedSession=signature;
+          // Preview/profile rows never establish consent or Client authority.
+          // Only this authenticated canonical status can make the form eligible.
+          setShow(!!status&&status.linked===true&&(status.privacy!==true||status.marketing_decided!==true));
+          var pending=meMayaConsentPending(key);
+          if(pending){setPdn(pending.privacy);setMkt(pending.marketing);}
+        }).catch(function(){if(!cancelled)setShow(false);}).finally(function(){checking=false;});
+      } catch(error) {setShow(false);checkedSession='';}
     }
     check();
-    var iv = setInterval(check, 800);
-    return function () { clearInterval(iv); };
+    var iv=setInterval(check,800);
+    return function(){cancelled=true;clearInterval(iv);};
   }, []);
 
   function submit() {
@@ -25757,7 +25137,7 @@ function AMayaConsent() {
       commandRef.current = null;
       setBusy(false); setShow(false);
       try { if (window.tactile) window.tactile('SUCCESS'); } catch (x) {}
-      // Перетянуть /me: profile_linked станет true, режим — полным.
+      // Refresh the independently computed effective consent/access projection.
       try { if (window.__meRefresh) window.__meRefresh(); } catch (x) {}
     }).catch(function (error) {
       commandRef.current = null;
@@ -25768,60 +25148,33 @@ function AMayaConsent() {
     });
   }
 
+  React.useEffect(function(){
+    if(!show)return;
+    var title=document.getElementById('maya-consent-title');
+    var dialog=title&&title.closest('[role="dialog"]');
+    if(!dialog)return;
+    var previous=document.activeElement;
+    var first=dialog.querySelector('input');if(first)first.focus();
+    function trap(event){if(event.key!=='Tab')return;var nodes=dialog.querySelectorAll('input:not(:disabled),button:not(:disabled),a[href]');if(!nodes.length)return;var first=nodes[0],last=nodes[nodes.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}
+    dialog.addEventListener('keydown',trap);
+    return function(){dialog.removeEventListener('keydown',trap);if(previous&&previous.isConnected&&previous.focus)previous.focus();};
+  },[show]);
+
   if (!show) return null;
-
-  var SAFE_BOT = 'calc(env(safe-area-inset-bottom, 0px) + 22px)';
-  function row(on, onClick, label, sub) {
-    return e('div', { onClick: onClick, style: {
-      display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 2px', cursor: 'pointer'
-    } },
-      e('div', { style: {
-        width: 22, height: 22, flex: '0 0 22px', borderRadius: 7, marginTop: 1,
-        border: on ? '0' : '1.5px solid rgba(255,255,255,.35)',
-        background: on ? '#fff' : 'transparent', color: '#000',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700
-      } }, on ? '✓' : ''),
-      e('div', null,
-        e('div', { style: { fontFamily: FONT_BODY, fontSize: 14.5, color: '#fff', lineHeight: 1.35 } }, label),
-        sub ? e('div', { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: 'rgba(255,255,255,.55)', marginTop: 3, lineHeight: 1.35 } }, sub) : null
-      )
-    );
+  function choice(on, setValue, title, detail) {
+    return e('label',{style:{display:'flex',gap:14,alignItems:'flex-start',padding:'20px 0',borderTop:'1px solid #e8ecf1',cursor:busy?'default':'pointer'}},
+      e('input',{type:'checkbox',checked:on,disabled:busy,onChange:function(ev){setValue(ev.target.checked);setErr('');},style:{width:22,height:22,margin:'2px 0 0',flex:'0 0 22px',accentColor:'#0069f5'}}),
+      e('span',null,e('span',{style:{display:'block',fontWeight:600,fontSize:16,color:'#172336',lineHeight:1.4}},title),e('span',{style:{display:'block',marginTop:5,fontSize:13.5,lineHeight:1.55,color:'#526176'}},detail)));
   }
-
-  return e('div', { style: {
-    position: 'fixed', inset: 0, zIndex: 4000, background: 'rgba(0,0,0,.72)',
-    backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
-    display: 'flex', alignItems: 'flex-end'
-  } },
-    e('div', { style: {
-      width: '100%', background: '#111', borderRadius: '22px 22px 0 0',
-      padding: '26px 22px ' + SAFE_BOT, boxSizing: 'border-box'
-    } },
-      e('div', { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 600, color: '#fff', letterSpacing: '.01em' } },
-        'Согласие на обработку данных'),
-      e('div', { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: 'rgba(255,255,255,.6)', marginTop: 8, lineHeight: 1.45 } },
-        'Чтобы записываться и пользоваться кабинетом, подпишите согласие на обработку персональных данных. Это требование закона (152-ФЗ).'),
-      e('div', { style: { marginTop: 14 } },
-        row(pdn, function () { setPdn(!pdn); setErr(''); },
-          'Согласен на обработку персональных данных',
-          'Имя и телефон — для записи и связи. Обязательно.'),
-        row(mkt, function () { setMkt(!mkt); },
-          'Согласен получать сообщения о предложениях',
-          'Акции, напоминания и бонусы. По желанию — можно отключить позже.')
-      ),
-      err ? e('div', { style: { fontFamily: FONT_BODY, fontSize: 13, color: '#ff6b6b', marginTop: 6, lineHeight: 1.35 } }, err) : null,
-      e('div', {
-        onClick: busy ? null : submit,
-        style: {
-          marginTop: 16, height: 52, borderRadius: 14,
-          background: busy ? 'rgba(255,255,255,.35)' : '#fff', color: '#000',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: FONT_DISPLAY, fontSize: 16, fontWeight: 600, cursor: busy ? 'default' : 'pointer'
-        }
-      }, busy ? 'Сохраняю…' : 'Подписать и продолжить')
-    )
-  );
+  return e('div',{role:'dialog','aria-modal':'true','aria-labelledby':'maya-consent-title','data-maya-consent':'canonical-v2',style:{position:'fixed',inset:0,zIndex:4000,background:'rgba(239,244,249,.94)',backdropFilter:'blur(14px)',WebkitBackdropFilter:'blur(14px)',display:'flex',alignItems:'center',justifyContent:'center',overflowY:'auto',padding:'calc(env(safe-area-inset-top,0px) + 24px) 20px calc(env(safe-area-inset-bottom,0px) + 24px)',boxSizing:'border-box',fontFamily:FONT_BODY}},
+    e('form',{onSubmit:function(ev){ev.preventDefault();if(!busy)submit();},style:{width:'100%',maxWidth:420,margin:'auto',background:'#fff',borderRadius:28,padding:'28px 24px',boxSizing:'border-box',boxShadow:'0 12px 42px rgba(28,63,101,.07)'}},
+      e(MayaMark,{size:84}),
+      e('h1',{id:'maya-consent-title',style:{fontFamily:FONT_DISPLAY,fontSize:24,fontWeight:600,lineHeight:1.25,color:'#172336',margin:'20px 0 10px'}},'Ваш выбор'),
+      e('p',{style:{color:'#526176',fontSize:14,lineHeight:1.6,margin:'0 0 22px'}},'Подтвердите обработку данных для записи и кабинета. Сообщения о предложениях — отдельный выбор.'),
+      choice(pdn,setPdn,'Обработка данных','Согласен на обработку данных для записи и связи со мной.'),
+      choice(mkt,setMkt,'Маркетинговые сообщения','Хочу получать акции и предложения. Необязательно: можно продолжить без подписки и изменить выбор позже.'),
+      err?e('p',{role:'alert',style:{fontSize:13.5,lineHeight:1.5,color:'#a12c2c',margin:'0 0 14px'}},err):null,
+      e('button',{type:'submit',disabled:busy||!pdn,style:{width:'100%',minHeight:52,border:0,borderRadius:14,fontFamily:FONT_BODY,fontWeight:600,fontSize:16,background:busy||!pdn?'#e7edf5':'#0069f5',color:busy||!pdn?'#53647c':'#fff',cursor:busy||!pdn?'default':'pointer',display:'flex',gap:12,alignItems:'center',justifyContent:'center'}},busy?e(MayaLoadingLogo,{size:26}):null,busy?'Сохраняем выбор…':'Продолжить')));
 }
 window.AMayaConsent = AMayaConsent;
 

@@ -1,0 +1,2 @@
+{"case":"legacy","accepted_transport":false,"exception":"explicit_consent_decisions_required","proxy_status":400,"proxy_error":"invalid_client_command"}
+{"case":"keyed","accepted_transport":true,"target":"\/api\/consent\/submit"}

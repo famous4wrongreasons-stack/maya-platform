@@ -153,15 +153,53 @@ describe('PWA app-access recovery for an unlinked Client surface', () => {
     expect(resolved.saved).toBe(true);
   });
 
-  it('never opens the blocking consent transition over Client preview', () => {
-    const consent = pwa.slice(
-      pwa.indexOf('function AMayaConsent()'),
-      pwa.indexOf('window.AMayaConsent = AMayaConsent;'),
-    );
-
-    expect(consent).toContain("client.access === 'preview'");
-    expect(consent.indexOf("client.access === 'preview'")).toBeLessThan(
-      consent.indexOf("authedFetch('/client-channel/status')"),
-    );
-  });
+  it.each([false, true])(
+    'opens consent only for canonical verified channel linked=%s, never from preview/profile metadata',
+    async (linked) => {
+      const code = pwa.slice(
+        pwa.indexOf('function AMayaConsent()'),
+        pwa.indexOf('window.AMayaConsent = AMayaConsent;'),
+      );
+      const effects: Array<() => unknown> = [];
+      const setters: Array<jest.Mock> = [];
+      const readStatus = jest.fn().mockResolvedValue({
+        linked,
+        privacy: false,
+        marketing_decided: false,
+      });
+      const sandbox = {
+        React: {
+          createElement: jest.fn(),
+          useState: (v: unknown) => {
+            const set = jest.fn();
+            setters.push(set);
+            return [v, set];
+          },
+          useRef: () => ({ current: null }),
+          useEffect: (f: () => unknown) => effects.push(f),
+        },
+        window: {
+          __meSaasAuthedFetch: readStatus,
+          __meAppAccess: {
+            available_modes: [
+              { mode: 'client', access: 'preview', profile_linked: false },
+            ],
+          },
+        },
+        meAppAccessCurrentMode: () => 'client',
+        meMayaConsentPendingKey: () => 'synthetic-scope',
+        meSaasCurrentBundle: () => ({ token: 'synthetic-token' }),
+        meMayaConsentPending: () => null,
+        setInterval: jest.fn(),
+        clearInterval: jest.fn(),
+      };
+      runInNewContext(code + ';AMayaConsent();', sandbox);
+      for (const effect of effects) effect();
+      await new Promise<void>((done) => setImmediate(done));
+      expect(readStatus.mock.calls).toEqual([['/client-channel/status']]);
+      expect(setters[0]).toHaveBeenLastCalledWith(linked);
+      // No challenge, consume, consent or hidden Client creation during this read.
+      expect(readStatus).toHaveBeenCalledTimes(1);
+    },
+  );
 });

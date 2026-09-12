@@ -1,0 +1,36 @@
+{
+  "mandatoryRegression": {
+    "suites": 437,
+    "tests": 3664,
+    "status": "PASS",
+    "logSha256": "204dfe3641dd39c956fad7164e5128d6bc1e767c05518f52bf17a8032ab18e54"
+  },
+  "targeted": {
+    "suites": 4,
+    "tests": 38,
+    "status": "PASS"
+  },
+  "postgresSecurityChecks": 36,
+  "migrationReplay": 94,
+  "schemaDrift": "NONE",
+  "pendingMigrations": 0,
+  "r01": {
+    "entries": 42,
+    "activePhp": 10,
+    "publicRoots": 3,
+    "headDenials": 128,
+    "status": "PASS"
+  },
+  "nativeSimulator": "BUILD PASS",
+  "nativeDevice": "SIGNED BUILD 11 PASS",
+  "nativeSyntheticWebViewConsent": "privacy accepted, marketing unchecked, form completed; no real identity or network",
+  "motion": {
+    "launchMorph": true,
+    "returnToMark": true,
+    "reducedMotionStatic": true,
+    "amplitudeChangesWave": true,
+    "doneReturnsToMark": true
+  },
+  "productionProofEffects": 0,
+  "historicalFailure": "One initial test expected preview to suppress even a canonical read; replaced by executable status-read-only/zero-writes cases. One subsequent existing R02 HTTP test had socket hang up; unchanged targeted and complete rerun passed. No timeout, assertions or lint configuration weakened."
+}

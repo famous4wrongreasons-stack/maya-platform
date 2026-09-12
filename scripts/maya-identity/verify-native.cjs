@@ -1,0 +1,13 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const root=path.resolve(__dirname,'../..');const native=path.resolve(process.argv[2]||'');
+if(!process.argv[2])throw Error('Native source directory required');
+const canonical=fs.readFileSync(path.join(root,'сайт и приложение/app.html'));
+const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+for(const rel of ['www/index.html','ios/App/App/public/index.html'])assert.equal(hash(fs.readFileSync(path.join(native,rel))),hash(canonical),rel+' is not the certified current canonical consumer');
+if(process.argv[3])assert.equal(hash(fs.readFileSync(path.join(process.argv[3],'public/index.html'))),hash(canonical),'Built native bundle drifted');
+const code=canonical.toString();const a=code.indexOf('function AMayaConsent()'),b=code.indexOf('window.AMayaConsent',a),consent=code.slice(a,b);
+assert.ok(consent.includes("authedFetch('/client-channel/consent'"));assert.ok(consent.includes('meMayaConsentTransition('));assert.ok(consent.includes('body: JSON.stringify(command)'));
+assert.ok(!consent.includes('/customers/me/profile'));assert.ok(code.includes('function AConsentGate() { return null; }'));assert.ok(!code.includes("'?action=consent_submit'"));assert.ok(consent.includes('status.linked===true'));assert.ok(consent.includes('status.marketing_decided!==true'));
+assert.ok(code.includes('maya-consent-pending-v1:'));assert.ok(code.includes("localStorage.setItem(key, JSON.stringify(pending))"));
+for(const m of code.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi))if(!/src=|type="application/.test(m[1]))new Function(m[2]);
+console.log(JSON.stringify({nativeSource:'PASS',nativeSync:'PASS',builtBundle:process.argv[3]?'PASS':'not supplied',canonicalHash:hash(canonical),keylessMutation:false,authority:'existing verified ClientChannelLink',identity:'ribbon-v1'}));

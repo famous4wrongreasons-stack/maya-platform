@@ -1,0 +1,56 @@
+{
+  "sourceHash": "204daaf2ce452ba5e1383750bded372683596cceade4c9f0f33dade3831b862a",
+  "resultHash": "59bd3301dc16ae6f16828a8def6ed1d3c978a205af07e70e4a8cbb2624b03077",
+  "changes": [
+    {
+      "start": "function SeedLogo({",
+      "oldHash": "c4f0bb0b13c480fbcbb696398744666c60a2e8370decf6fa3ac6bb6455cd970c",
+      "newHash": "c48d1c7a68757e216b77fd707f6b7e57b7d3bd39ce1b59b808dc09b77f8e6371"
+    },
+    {
+      "start": "function AConsentGate()",
+      "oldHash": "0b8668a78349df245b02effdc0285c507718b4e52f62cdc98508b85e603c603e",
+      "newHash": "e87897b4eb670161038e4acb14ff572d4b56f9b27a518ab5c843a491bfd548ec"
+    },
+    {
+      "start": "  const typingDots =",
+      "oldHash": "4ec65f7b558e1305eeb7bbe5dd98c74c42fa57e61037eefe4cb16fe2f3845f8d",
+      "newHash": "29f228484bca79ef0201e13a9230c35b1290de695afbe03d139676f338a02907"
+    },
+    {
+      "start": "  (voiceMode || recState === 'recording') ? (function () {",
+      "oldHash": "8b388763d08b8c9e5da1c8fa0948d65b5198edac41d0e800a9f58e19e3ad5056",
+      "newHash": "3d21c3589d0d78fd05e5b0d02616b5faca658703990b288cc0038861ac442c31"
+    },
+    {
+      "match": "const rms = Math.sqrt(sum / buf.length);",
+      "occurrences": 2
+    },
+    {
+      "match": "function vmCleanup() {",
+      "occurrences": 1
+    },
+    {
+      "block": "generated Maya tile"
+    },
+    {
+      "match": "</head>",
+      "occurrences": 1
+    },
+    {
+      "match": "</body>",
+      "occurrences": 1
+    },
+    {
+      "match": "@keyframes meSeedSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}.me-seedspin{animation:meSeedSpin 16s linear infinite}@media (prefers-reduced-motion:reduce){.me-seedspin{animation:none}}",
+      "occurrences": 1
+    }
+  ],
+  "chapter7": {
+    "status": "PASS",
+    "scriptsParsed": 27,
+    "sha256": "59bd3301dc16ae6f16828a8def6ed1d3c978a205af07e70e4a8cbb2624b03077"
+  },
+  "phpChanges": 0,
+  "backendChanges": 0
+}
