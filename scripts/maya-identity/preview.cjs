@@ -17,3 +17,20 @@ function MayaLoadingLogo(p){return React.createElement(MayaMarkAnimated,Object.a
 function Demo(){const[state,set]=React.useState('idle'),[show,consent]=React.useState(new URLSearchParams(location.search).get('consent')==='1');return React.createElement(React.Fragment,null,React.createElement('main',null,React.createElement(MayaMarkAnimated,{size:280,state:state}),['idle','launch','thinking','recording','responding','done'].map(s=>React.createElement('button',{key:s,onClick:()=>set(s)},s)),React.createElement('button',{onClick:()=>consent(true)},'Consent')),show?React.createElement(AMayaConsent):null);}
 ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(Demo));
 </script>`);console.log(out);
+// Actual mode resolver/chooser with synthetic server metadata, no auth tokens.
+const access=html.slice(html.indexOf("var ME_APP_MODES = ['platform', 'owner', 'staff', 'client'];"),html.indexOf('function meAppAccessRouteAfterMe('));
+const chooser=html.slice(html.indexOf('function ChooseVersion()'),html.indexOf('function AccessCompatScreen()'));
+fs.writeFileSync(path.join(out,'modes.html'),`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Maya mode recovery proof</title><div id="root"></div><script>${react.join('\n')}</script><script>${fs.readFileSync(path.join(root,'сайт и приложение/assets/maya-identity.js'),'utf8')}</script><script>${fs.readFileSync(path.join(root,'scripts/maya-identity/react-components.js'),'utf8')}</script><script>
+const BODY='system-ui',DISPLAY='system-ui';const user={id:'proof-user',role:'tenant_owner',tenant:{id:'proof-tenant'},app_access:{schema_version:1,default_mode:'owner',can_switch_mode:true,chooser_required:true,available_modes:[{mode:'owner',access:'granted',profile_linked:true,tenant_id:'proof-tenant'},{mode:'client',access:'preview',profile_linked:false,tenant_id:'proof-tenant'}]}};
+window.APP_DATA={brand:{name:'MAYA'}};
+function tokens(){return{bg:'#fff',ink:'#172336',dim:'#61758c',line:'#e3eaf1',faint:'#8a9aaa'};}
+function LogoM(p){return React.createElement(MayaMark,p);}
+function meSaasCurrentBundle(){return{user:user};}function meSaasStoreUser(){return true;}function meSaasApplyIdentity(){}function meSaasHasStaffProfile(){return false;}function meSaasSetWorkspace(){}function meSaasBusinessEntryScreen(){return'owner-home';}function meSaasRememberChatSurface(){}
+window.__meResetCabinetData=function(){window.__proofCabinetCleared=true;};
+${access}
+${chooser}
+const root=ReactDOM.createRoot(document.getElementById('root'));
+function choose(){window.__meAppAccess=meAppAccessNormalize(user.app_access);root.render(React.createElement(ChooseVersion));}
+window.__meGo=function(screen){root.render(React.createElement('main',{style:{padding:40,fontFamily:'system-ui'}},React.createElement('h1',null,screen==='home'?'Клиентский просмотр':'Режим владельца'),React.createElement('p',null,window.__meAppModeAccess==='preview'?'Без личной истории и баллов':'Рабочий режим'),React.createElement('button',{onClick:choose},'Выбор режима')));};
+choose();
+</script>`);

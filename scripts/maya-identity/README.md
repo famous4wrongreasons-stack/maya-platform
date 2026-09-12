@@ -38,3 +38,12 @@ Beget maintenance HTML, backups and PHP relays are outside this UI deployment.
 network mutations. Its privacy/marketing selections never change real consent.
 A simulator proof build may replace only its own bundled HTML with that fixture;
 never install that proof bundle on a user device or deploy it.
+
+Follow-up smooth motion release: `overlay-smooth.cjs` accepts only the certified
+59bd3301 PWA and changes one inline motion block. `publish-smooth.py` publishes
+only app.html with an exact hash precondition and private recovery backup; all
+other VPS/Beget files remain outside scope. The Client chooser correction applies
+to the canonical/native bundle. Never infer verified Client access from preview.
+`motion-proof.cjs` runs against `preview.cjs`'s local fixture through Playwright;
+it exercises the actual player's finite return and frame cleanup as well as
+capturing six morph stages. Use synthetic UI fixtures only in a separate simulator.

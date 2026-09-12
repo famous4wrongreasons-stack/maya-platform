@@ -40,7 +40,7 @@ function browser(savedMode?: string) {
       user: Record<string, unknown>,
       opts?: Record<string, unknown>,
     ) => { mode: string; descriptor: { access: string }; saved: boolean };
-    selectable: (access: unknown) => Array<{ mode: string }>;
+    selectable: (access: unknown) => Array<{ mode: string; access: string }>;
   };
   return { ...api, storage, localStorage, key };
 }
@@ -96,14 +96,54 @@ describe('PWA app-access recovery for an unlinked Client surface', () => {
     expect(b.localStorage.removeItem).toHaveBeenCalledWith(b.key);
   });
 
-  it('does not let an explicit Client-preview choice trap a business account', () => {
-    const b = browser();
-
-    expect(
-      b.resolve(ownerWithUnlinkedClient, {
+  it.each(['owner', 'staff'])(
+    'keeps Client preview selectable after %s login, without granting private access',
+    (businessMode) => {
+      const b = browser();
+      const user = {
+        ...ownerWithUnlinkedClient,
+        app_access: {
+          ...ownerWithUnlinkedClient.app_access,
+          default_mode: businessMode,
+          available_modes:
+            ownerWithUnlinkedClient.app_access.available_modes.map((m) =>
+              m.mode === 'owner' ? { ...m, mode: businessMode } : m,
+            ),
+        },
+      };
+      expect(b.selectable(b.normalize(user.app_access))).toEqual([
+        expect.objectContaining({ mode: businessMode, access: 'granted' }),
+        expect.objectContaining({ mode: 'client', access: 'preview' }),
+      ]);
+      expect(b.resolve(user)).toEqual(
+        expect.objectContaining({ chooser: true }),
+      );
+      const clientChoice = b.resolve(user, {
         forceMode: 'client',
         skipChooser: true,
-      }).mode,
+      });
+      expect(clientChoice.mode).toBe('client');
+      expect(clientChoice.descriptor.access).toBe('preview');
+      expect(
+        b.resolve(user, { forceMode: businessMode, skipChooser: true }).mode,
+      ).toBe(businessMode);
+    },
+  );
+
+  it('does not invent Client access when the server did not return that mode', () => {
+    const b = browser();
+    const user = {
+      ...ownerWithUnlinkedClient,
+      app_access: {
+        ...ownerWithUnlinkedClient.app_access,
+        available_modes: [
+          ownerWithUnlinkedClient.app_access.available_modes[0],
+        ],
+      },
+    };
+    expect(b.selectable(b.normalize(user.app_access))).toHaveLength(1);
+    expect(
+      b.resolve(user, { forceMode: 'client', skipChooser: true }).mode,
     ).toBe('owner');
   });
 

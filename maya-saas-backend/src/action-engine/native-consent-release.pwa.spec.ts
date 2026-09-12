@@ -134,7 +134,7 @@ describe('native release consent compatibility regression', () => {
     const runtime = Object.assign(
       Object.create(ClientChannelRuntimeService.prototype) as object,
       { channels, context },
-    ) as ClientChannelRuntimeService;
+    ) as unknown as ClientChannelRuntimeService;
     await expect(
       runtime.submitConsent('synthetic-proof', {
         privacy: true,
