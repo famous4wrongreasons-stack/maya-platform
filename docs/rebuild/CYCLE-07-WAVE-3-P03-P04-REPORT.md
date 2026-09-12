@@ -2,6 +2,11 @@
 
 Status: **P03 LOCAL PASS / P04 LOCAL PASS / PRODUCTION CUTOVER NOT STARTED**. Certified incoming release: `20260908-c7-wave2-4b03a29c`.
 
+Latest release boundary (2026-09-12): backend-only cutover is owner-approved and
+maintenance/backup preflight passes, but the current production PHP fails the
+existing R01 ratchet after a separately observed `create_record` regression.
+[Exact evidence and STOP](CYCLE-07-WAVE-3-PRODUCTION-RELAY-REGRESSION-STOP.md).
+
 ## Scope and ownership
 
 P03 covers Q04/Q12/Q13/Q14/Q15; P04 covers Q08/Q09. Both reuse the deployed MeasurementRevision admission, leases, publication, current projection and retention. The applied P01 source-owner FK semantics remain unchanged. New models/fields/migrations/business actions/AC6 classes/backfills: **0**.

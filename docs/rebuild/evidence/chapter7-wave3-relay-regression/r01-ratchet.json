@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-09-12T15:38:10.276Z",
+  "guard": "maya-saas-backend/deploy/platform/beget-edge/client-initiator-boundary.cjs#assertRetiredPhp",
+  "guardSha256": "b480f1124f9f1ec97d4c2b3cccbd2c196d62a55be2ab590bd61daa532a6f0977",
+  "certifiedFixture": "PASS",
+  "currentProductionSource": "FAIL",
+  "rejection": "Retired PHP entry changed: no writer, authority lookup, or delegation allowed before refusal",
+  "certifiedSanitizedSha256": "5b5059f820b6337b59866fd6260f0b3fef87e65db8f969e7f4e7a9537619dd7e",
+  "currentSanitizedSha256": "ba5b5643a767bfb10c456a7a240dcbbb28704787f897d60a3443c2480c60b643",
+  "rawProductionSha256": "d5eeaa82f69f6d72c366576797c2920fecd0d27f76262e2c5f4a342f363ddd05",
+  "inventoryBlocker": "B38 / R01",
+  "newProductionSurface": false,
+  "phpApplicationExecutions": 0,
+  "businessProviderMessageEffects": 0
+}

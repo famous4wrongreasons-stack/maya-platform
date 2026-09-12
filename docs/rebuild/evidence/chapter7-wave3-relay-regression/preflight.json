@@ -1,0 +1,22 @@
+{
+  "baseline": "7ef0e29f5164038905da73f85db184cef80fb25a",
+  "originAtPreflight": "7ef0e29f5164038905da73f85db184cef80fb25a",
+  "upstreamChanged": false,
+  "deployScript": "maya-saas-backend/deploy/vps/deploy.sh",
+  "deployScriptSha256": "148da0b9cf3f54bef63e8dac9d5fceeb1a047cdadd8c4a30874beb9e670fbc76",
+  "sshWrapperSha256": "3c26c4534295fd90401e5b357a36a7f053fb1deac2bb065998c3e07cbabe9173",
+  "releaseTarget": "/opt/maya-saas/releases",
+  "begetRole": "SSH jump only",
+  "backendCutoverTouchesBegetApp": false,
+  "ownerBackendOnlyApproval": "ACCEPTED; not reopened",
+  "maintenanceAcceptanceIssue": "RESOLVED for backend-only Wave 3",
+  "deploymentStarted": false,
+  "newRuntimeSchemaMigrations": 0,
+  "currentBlocker": "Known B38/R01 public PHP create_record security regression",
+  "productionChangeAttribution": "Exact writer/process unproven; no corresponding new canonical commit at preflight",
+  "scopeExpansion": false,
+  "secretsInCommittedEvidence": 0,
+  "newRatchets": 0,
+  "guardAction": "Existing assertRetiredPhp executed as pure source inspection; no PHP execution",
+  "productionBusinessProviderMessageEffects": 0
+}

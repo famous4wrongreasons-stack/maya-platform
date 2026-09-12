@@ -1,0 +1,105 @@
+{
+  "checkedAt": "2026-09-12T15:36:44.986052+00:00",
+  "rows": [
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html",
+      "expected": "cb27000739b179ddea6546fb4dd169fc9f1f397abca998acdcacf4dc1162c249",
+      "sha256": "cb27000739b179ddea6546fb4dd169fc9f1f397abca998acdcacf4dc1162c249",
+      "matches": true,
+      "bytes": 2247,
+      "mtime": "2026-09-08T18:10:45.515910+00:00",
+      "ctime": "2026-09-08T18:11:01.125908+00:00"
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html",
+      "expected": "cb27000739b179ddea6546fb4dd169fc9f1f397abca998acdcacf4dc1162c249",
+      "sha256": "cb27000739b179ddea6546fb4dd169fc9f1f397abca998acdcacf4dc1162c249",
+      "matches": true,
+      "bytes": 2247,
+      "mtime": "2026-09-08T18:10:42.892576+00:00",
+      "ctime": "2026-09-08T18:11:01.122575+00:00"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.codex-loyalty-20260721.html",
+      "expected": "23e03edb05a6ff07eaa7d81338092796fe9868a4b061cb47d6a834dcf94bce5c",
+      "sha256": "23e03edb05a6ff07eaa7d81338092796fe9868a4b061cb47d6a834dcf94bce5c",
+      "matches": true,
+      "bytes": 2123462,
+      "mtime": "2026-09-08T12:31:56.544966+00:00",
+      "ctime": "2026-09-08T12:31:56.564966+00:00"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.backup-20260731-anton-analytics.html",
+      "expected": "b2d84aeaf5501e0b417c42fc4bb0473fd216cdfb0e9568caec9b911df353d7ab",
+      "sha256": "b2d84aeaf5501e0b417c42fc4bb0473fd216cdfb0e9568caec9b911df353d7ab",
+      "matches": true,
+      "bytes": 2121618,
+      "mtime": "2026-09-08T12:31:56.384966+00:00",
+      "ctime": "2026-09-08T12:31:56.521633+00:00"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-test.html",
+      "expected": "4d9fc3528ca88f6ecd43e93594814e8eaa60de4ceec82b17166595927276b4e5",
+      "sha256": "4d9fc3528ca88f6ecd43e93594814e8eaa60de4ceec82b17166595927276b4e5",
+      "matches": true,
+      "bytes": 1126060,
+      "mtime": "2026-09-08T12:31:56.651633+00:00",
+      "ctime": "2026-09-08T12:31:56.688299+00:00"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+      "expected": "b1006160a28e66448886bdc4b520a2d94021121748259c2cd1aeefda5f1aaaa0",
+      "sha256": "d5eeaa82f69f6d72c366576797c2920fecd0d27f76262e2c5f4a342f363ddd05",
+      "matches": false,
+      "bytes": 119193,
+      "mtime": "2026-09-12T13:56:21.327021+00:00",
+      "ctime": "2026-09-12T13:56:21.327021+00:00"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.codex-loyalty-20260721.php",
+      "expected": "1460bc8d30b5eea2b8347ed8b3f60fae1c545669d980d58394e77b5b99d40ac6",
+      "sha256": "1460bc8d30b5eea2b8347ed8b3f60fae1c545669d980d58394e77b5b99d40ac6",
+      "matches": true,
+      "bytes": 122317,
+      "mtime": "2026-09-08T12:31:56.368300+00:00",
+      "ctime": "2026-09-08T12:31:56.368300+00:00"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php",
+      "expected": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "matches": true,
+      "bytes": 6662,
+      "mtime": "2026-09-07T19:13:10.791349+00:00",
+      "ctime": "2026-09-07T19:13:10.791349+00:00"
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php",
+      "expected": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+      "sha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+      "matches": true,
+      "bytes": 6580,
+      "mtime": "2026-09-07T21:16:15.119504+00:00",
+      "ctime": "2026-09-07T21:16:15.166171+00:00"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html.pre-maintenance-20260908-211040",
+      "expected": "784b68630d659a5aceb9832d84f6ebd5c6519a1ecd0a15adcbe5e5dd029607b6",
+      "sha256": "784b68630d659a5aceb9832d84f6ebd5c6519a1ecd0a15adcbe5e5dd029607b6",
+      "matches": true,
+      "bytes": 2444044,
+      "mtime": "2026-09-08T18:11:01.119241+00:00",
+      "ctime": "2026-09-08T18:11:01.119241+00:00"
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html.pre-maintenance-20260908-211040",
+      "expected": "b3278512ca71beee709b93c1de2892fa841ef0cb19ae965791d71dfcb2a65e6e",
+      "sha256": "b3278512ca71beee709b93c1de2892fa841ef0cb19ae965791d71dfcb2a65e6e",
+      "matches": true,
+      "bytes": 2738358,
+      "mtime": "2026-09-08T18:00:01.812625+00:00",
+      "ctime": "2026-09-08T18:10:48.279243+00:00"
+    }
+  ],
+  "writes": 0
+}

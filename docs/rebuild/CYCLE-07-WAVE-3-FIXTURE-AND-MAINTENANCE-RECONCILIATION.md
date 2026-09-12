@@ -3,6 +3,12 @@
 **PHP FIXTURE RECOVERY: PASS. MANDATORY REGRESSION: PASS.**
 **STOP before production cutover — accepted PWA operational state / cutover scope unresolved.**
 
+**Subsequent checkpoint, 2026-09-12:** the owner explicitly approved backend-only
+Wave 3 while preserving both maintenance pages. That operational decision is now
+resolved. A fresh preflight then proved an independent B38/R01 production PHP
+security regression; see the [current STOP evidence](CYCLE-07-WAVE-3-PRODUCTION-RELAY-REGRESSION-STOP.md).
+The historical findings/statuses below remain evidence of this earlier cycle.
+
 Scope is the owner's two decisions after `c5f1383e`: recover the certified PHP
 test input without secrets, and identify the unexpected maintenance state without
 altering production. P03/P04 implementation and C7 product/schema decisions are
