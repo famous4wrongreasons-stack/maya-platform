@@ -1,0 +1,354 @@
+{
+  "observedAt": "2026-09-12T17:33:42.976255+00:00",
+  "method": "HEAD only; redirects not followed; no action/query/body/auth",
+  "requests": [
+    {
+      "url": "http://malesthetic.pro/",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://malesthetic.pro/",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "179"
+      }
+    },
+    {
+      "url": "https://malesthetic.pro/",
+      "method": "HEAD",
+      "status": 200,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "141609"
+      }
+    },
+    {
+      "url": "http://malesthetic.pro/app/",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://malesthetic.pro/app/",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "179"
+      }
+    },
+    {
+      "url": "https://malesthetic.pro/app/",
+      "method": "HEAD",
+      "status": 200,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "2247"
+      }
+    },
+    {
+      "url": "http://malesthetic.pro/app/api-proxy.php",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://malesthetic.pro/app/api-proxy.php",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "179"
+      }
+    },
+    {
+      "url": "https://malesthetic.pro/app/api-proxy.php",
+      "method": "HEAD",
+      "status": 200,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": "PHP/8.2.28",
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "66"
+      }
+    },
+    {
+      "url": "http://malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "179"
+      }
+    },
+    {
+      "url": "https://malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "method": "HEAD",
+      "status": 200,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": "PHP/8.2.28",
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "66"
+      }
+    },
+    {
+      "url": "http://www.malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://www.malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "179"
+      }
+    },
+    {
+      "url": "https://www.malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html; charset=iso-8859-1",
+        "Content-Length": "369"
+      }
+    },
+    {
+      "url": "http://xn--80aaocmjdk0cclbf8l3a.xn--p1ai/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html; charset=iso-8859-1",
+        "Content-Length": "383"
+      }
+    },
+    {
+      "url": "https://xn--80aaocmjdk0cclbf8l3a.xn--p1ai/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html; charset=iso-8859-1",
+        "Content-Length": "383"
+      }
+    },
+    {
+      "url": "http://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html; charset=iso-8859-1",
+        "Content-Length": "387"
+      }
+    },
+    {
+      "url": "https://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html; charset=iso-8859-1",
+        "Content-Length": "387"
+      }
+    },
+    {
+      "url": "http://mayaos.ru/",
+      "method": "HEAD",
+      "status": 200,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "89134"
+      }
+    },
+    {
+      "url": "https://mayaos.ru/",
+      "method": "HEAD",
+      "status": 200,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "89134"
+      }
+    },
+    {
+      "url": "http://mayaos.ru/app/",
+      "method": "HEAD",
+      "status": 302,
+      "headers": {
+        "Location": "https://mayaos.ru/app/?booking_tenant=maya-os",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html; charset=iso-8859-1",
+        "Content-Length": "302"
+      }
+    },
+    {
+      "url": "https://mayaos.ru/app/",
+      "method": "HEAD",
+      "status": 302,
+      "headers": {
+        "Location": "https://mayaos.ru/app/?booking_tenant=maya-os",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html; charset=iso-8859-1",
+        "Content-Length": "302"
+      }
+    },
+    {
+      "url": "http://mayaos.ru/api/",
+      "method": "HEAD",
+      "status": 200,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": "PHP/5.6.40",
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "163"
+      }
+    },
+    {
+      "url": "https://mayaos.ru/api/",
+      "method": "HEAD",
+      "status": 200,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": "PHP/5.6.40",
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "163"
+      }
+    },
+    {
+      "url": "http://mayaos.ru/maya-platform-api.php",
+      "method": "HEAD",
+      "status": 200,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": "PHP/5.6.40",
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "163"
+      }
+    },
+    {
+      "url": "https://mayaos.ru/maya-platform-api.php",
+      "method": "HEAD",
+      "status": 200,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": "PHP/5.6.40",
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "163"
+      }
+    },
+    {
+      "url": "http://www.mayaos.ru/api/",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://mayaos.ru/api/",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html; charset=iso-8859-1",
+        "Content-Length": "307"
+      }
+    },
+    {
+      "url": "https://www.mayaos.ru/api/",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://mayaos.ru/api/",
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": null,
+        "Content-Type": "text/html; charset=iso-8859-1",
+        "Content-Length": "307"
+      }
+    },
+    {
+      "url": "http://mocine3388.beget.tech/api-proxy.php",
+      "method": "HEAD",
+      "status": 500,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": "PHP/5.6.40",
+        "Content-Type": "text/html",
+        "Content-Length": "0"
+      }
+    },
+    {
+      "url": "https://mocine3388.beget.tech/api-proxy.php",
+      "method": "HEAD",
+      "error": "URLError",
+      "reason": "[Errno 61] Connection refused"
+    },
+    {
+      "url": "http://www.mocine3388.beget.tech/api-proxy.php",
+      "method": "HEAD",
+      "status": 500,
+      "headers": {
+        "Location": null,
+        "Server": "nginx-reuseport/1.21.1",
+        "X-Powered-By": "PHP/5.6.40",
+        "Content-Type": "text/html",
+        "Content-Length": "0"
+      }
+    },
+    {
+      "url": "https://www.mocine3388.beget.tech/api-proxy.php",
+      "method": "HEAD",
+      "error": "URLError",
+      "reason": "[Errno 61] Connection refused"
+    },
+    {
+      "url": "http://rt.malesthetic.pro/",
+      "method": "HEAD",
+      "status": 301,
+      "headers": {
+        "Location": "https://rt.malesthetic.pro/",
+        "Server": "nginx/1.18.0 (Ubuntu)",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "178"
+      }
+    },
+    {
+      "url": "https://rt.malesthetic.pro/",
+      "method": "HEAD",
+      "status": 403,
+      "headers": {
+        "Location": null,
+        "Server": "nginx/1.18.0 (Ubuntu)",
+        "X-Powered-By": null,
+        "Content-Type": "text/html",
+        "Content-Length": "162"
+      }
+    }
+  ]
+}

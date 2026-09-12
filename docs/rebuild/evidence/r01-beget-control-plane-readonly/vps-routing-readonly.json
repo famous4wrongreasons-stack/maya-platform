@@ -1,0 +1,300 @@
+{
+  "observedAt": "2026-09-12T17:34:54.361737+00:00",
+  "command": "sudo -n nginx -T (read-only)",
+  "exitCode": 0,
+  "configurationSha256": "16b1b351019d97fb64312f77cab136ce28fc4c989cce63f4104dbe1524afffba",
+  "configurationTestSuccessful": true,
+  "selectedRoutingLines": [
+    {
+      "source": "/etc/nginx/nginx.conf",
+      "lineInDump": 5,
+      "text": "include /etc/nginx/modules-enabled/*.conf;"
+    },
+    {
+      "source": "/etc/nginx/nginx.conf",
+      "lineInDump": 26,
+      "text": "\tinclude /etc/nginx/mime.types;"
+    },
+    {
+      "source": "/etc/nginx/nginx.conf",
+      "lineInDump": 60,
+      "text": "\tinclude /etc/nginx/conf.d/*.conf;"
+    },
+    {
+      "source": "/etc/nginx/nginx.conf",
+      "lineInDump": 61,
+      "text": "\tinclude /etc/nginx/sites-enabled/*;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 206,
+      "text": "    listen 80;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 207,
+      "text": "    listen [::]:80;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 208,
+      "text": "    server_name api.111.88.148.206.nip.io;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 210,
+      "text": "    location ^~ /.well-known/acme-challenge/ {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 211,
+      "text": "        root /var/www/maya-saas-acme;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 215,
+      "text": "    location / {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 216,
+      "text": "        return 301 https://$host$request_uri;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 221,
+      "text": "    listen 443 ssl http2;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 222,
+      "text": "    server_name api.111.88.148.206.nip.io;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 228,
+      "text": "    include /etc/letsencrypt/options-ssl-nginx.conf;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 236,
+      "text": "    location / {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/api.111.88.148.206.nip.io",
+      "lineInDump": 237,
+      "text": "        proxy_pass http://127.0.0.1:3107;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/default",
+      "lineInDump": 288,
+      "text": "\tlisten 80 default_server;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/default",
+      "lineInDump": 289,
+      "text": "\tlisten [::]:80 default_server;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/default",
+      "lineInDump": 307,
+      "text": "\troot /var/www/html;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/default",
+      "lineInDump": 312,
+      "text": "\tserver_name _;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/default",
+      "lineInDump": 314,
+      "text": "\tlocation / {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 361,
+      "text": "    listen 80;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 362,
+      "text": "    listen [::]:80;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 363,
+      "text": "    server_name maya.111.88.148.206.nip.io;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 365,
+      "text": "    root /var/www/maya-platform;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 367,
+      "text": "    location ^~ /.well-known/acme-challenge/ {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 372,
+      "text": "    location / {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 373,
+      "text": "        return 301 https://$host$request_uri;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 378,
+      "text": "    listen 443 ssl http2;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 379,
+      "text": "    server_name maya.111.88.148.206.nip.io;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 381,
+      "text": "    root /var/www/maya-platform;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 388,
+      "text": "    include /etc/letsencrypt/options-ssl-nginx.conf;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 397,
+      "text": "    location = / {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 398,
+      "text": "        return 302 /app.html;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 401,
+      "text": "    location ^~ /api/ {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 402,
+      "text": "        proxy_pass http://127.0.0.1:3107;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 414,
+      "text": "    location ~* \\.(?:woff2|png|jpg|jpeg|webp|svg|ico)$ {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 420,
+      "text": "    location = /service-worker.js {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 426,
+      "text": "    location = /oauth-callback.html {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/maya.111.88.148.206.nip.io",
+      "lineInDump": 431,
+      "text": "    location / {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/mayaos.ru",
+      "lineInDump": 439,
+      "text": "    listen 80;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/mayaos.ru",
+      "lineInDump": 440,
+      "text": "    listen [::]:80;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/mayaos.ru",
+      "lineInDump": 441,
+      "text": "    server_name mayaos.ru;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/mayaos.ru",
+      "lineInDump": 443,
+      "text": "    root /var/www/maya-platform;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/mayaos.ru",
+      "lineInDump": 445,
+      "text": "    location ^~ /.well-known/acme-challenge/ {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/mayaos.ru",
+      "lineInDump": 450,
+      "text": "    location / {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/mayaos.ru",
+      "lineInDump": 451,
+      "text": "        return 301 https://$host$request_uri;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 457,
+      "text": "    server_name rt.malesthetic.pro;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 463,
+      "text": "    location = /api/realtime {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 464,
+      "text": "        proxy_pass http://127.0.0.1:8080;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 478,
+      "text": "    location / {"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 484,
+      "text": "        proxy_pass http://127.0.0.1:8080;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 494,
+      "text": "    listen 443 ssl; # managed by Certbot"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 497,
+      "text": "    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 502,
+      "text": "        return 301 https://$host$request_uri;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 505,
+      "text": "    listen 80;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 506,
+      "text": "    server_name rt.malesthetic.pro;"
+    },
+    {
+      "source": "/etc/nginx/sites-enabled/rt.malesthetic.pro",
+      "lineInDump": 507,
+      "text": "    return 404; # managed by Certbot"
+    }
+  ],
+  "phpOrFastCgiMention": true
+}

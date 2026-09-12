@@ -1,0 +1,255 @@
+{
+  "observedOn": "2026-09-12",
+  "capturedBy": "Native Chrome CUA AX text and screenshots in the current authenticated account; manually transcribed facts, not a server-config export",
+  "account": "mocine3388",
+  "incomingCheckpoint": "9ff45e6a12ab69027bc995ff71e2533ce0a4134d",
+  "pagesRead": [
+    "https://cp.beget.com/sites",
+    "https://cp.beget.com/domains",
+    "https://cp.beget.com/sites/ip",
+    "https://cp.beget.com/info/account",
+    "https://cp.beget.com/info/server",
+    "https://cp.beget.com/support"
+  ],
+  "siteListCount": 4,
+  "siteQuota": 12,
+  "domainListCount": 4,
+  "accountStatisticsConfirmSitesAndDomains": [
+    4,
+    4
+  ],
+  "siteFilterEmpty": true,
+  "sites": [
+    {
+      "site": "mayaos.ru",
+      "documentRoot": "/home/m/mocine3388/mayaos.ru/public_html",
+      "linkedDomains": [
+        "mayaos.ru"
+      ]
+    },
+    {
+      "site": "mocine3388.beget.tech",
+      "documentRoot": "/home/m/mocine3388/mocine3388.beget.tech/public_html",
+      "linkedDomains": [
+        "mocine3388.beget.tech"
+      ]
+    },
+    {
+      "site": "muzhskayaestetik.rf",
+      "documentRoot": "/home/m/mocine3388/muzhskayaestetik.rf/public_html",
+      "linkedDomains": []
+    },
+    {
+      "site": "muzhskayaestetika.rf",
+      "documentRoot": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "linkedDomains": [
+        "мужскаяэстетика.рф",
+        "malesthetic.pro"
+      ]
+    }
+  ],
+  "domains": [
+    "мужскаяэстетика.рф",
+    "malesthetic.pro",
+    "mayaos.ru",
+    "mocine3388.beget.tech"
+  ],
+  "domainSettings": [
+    {
+      "domain": "mayaos.ru",
+      "php": "5.6",
+      "cgi": false,
+      "redisSessions": false,
+      "httpToHttpsRedirect": false,
+      "customPhpDirectiveRows": 0,
+      "applyButtonDisabledInDirectiveEditor": true
+    },
+    {
+      "domain": "mocine3388.beget.tech",
+      "php": "5.6",
+      "cgi": false,
+      "redisSessions": false,
+      "httpToHttpsRedirect": null,
+      "customPhpDirectiveRows": 0,
+      "applyButtonDisabledInDirectiveEditor": true
+    },
+    {
+      "domain": "мужскаяэстетика.рф",
+      "php": "8.2",
+      "cgi": false,
+      "redisSessions": false,
+      "httpToHttpsRedirect": false,
+      "customPhpDirectiveRows": 0,
+      "applyButtonDisabledInDirectiveEditor": true
+    },
+    {
+      "domain": "malesthetic.pro",
+      "php": "8.2",
+      "cgi": false,
+      "redisSessions": false,
+      "httpToHttpsRedirect": true,
+      "customPhpDirectiveRows": 0,
+      "applyButtonDisabledInDirectiveEditor": true
+    }
+  ],
+  "technicalDomainHttpsControl": "Not presented in settings; external HTTPS connection fails; not represented as an observed OFF toggle",
+  "dnsZones": [
+    {
+      "zone": "mayaos.ru",
+      "source": "https://cp.beget.com/dns/14516620",
+      "view": "Полное содержимое зоны",
+      "routingRecords": [
+        {
+          "name": "mayaos.ru",
+          "type": "A",
+          "value": "45.130.41.193"
+        },
+        {
+          "name": "www.mayaos.ru",
+          "type": "A",
+          "value": "45.130.41.193"
+        },
+        {
+          "name": "autoconfig.mayaos.ru",
+          "type": "CNAME",
+          "value": "autoconfig.beget.com."
+        },
+        {
+          "name": "autodiscover.mayaos.ru",
+          "type": "CNAME",
+          "value": "autoconfig.beget.com."
+        }
+      ],
+      "wildcardRecordsPresent": false,
+      "otherRecordTypes": [
+        "SOA",
+        "MX",
+        "NS",
+        "TXT"
+      ],
+      "otherRecordValuesOmitted": "Not needed for HTTP routing; no DNS values changed"
+    },
+    {
+      "zone": "malesthetic.pro",
+      "source": "https://cp.beget.com/dns/14226341",
+      "view": "Полное содержимое зоны",
+      "routingRecords": [
+        {
+          "name": "malesthetic.pro",
+          "type": "A",
+          "value": "45.130.41.193"
+        },
+        {
+          "name": "www.malesthetic.pro",
+          "type": "A",
+          "value": "45.130.41.193"
+        },
+        {
+          "name": "autoconfig.malesthetic.pro",
+          "type": "CNAME",
+          "value": "autoconfig.beget.com."
+        },
+        {
+          "name": "autodiscover.malesthetic.pro",
+          "type": "CNAME",
+          "value": "autoconfig.beget.com."
+        },
+        {
+          "name": "rt.malesthetic.pro",
+          "type": "A",
+          "value": "111.88.148.206"
+        }
+      ],
+      "wildcardRecordsPresent": false,
+      "otherRecordTypes": [
+        "SOA",
+        "MX",
+        "NS",
+        "TXT"
+      ],
+      "otherRecordValuesOmitted": "Not needed for HTTP routing; no DNS values changed"
+    },
+    {
+      "zone": "xn--80aaocmjdk0cclbf8l3a.xn--p1ai",
+      "source": "https://cp.beget.com/dns/14209048",
+      "view": "Полное содержимое зоны",
+      "routingRecords": [
+        {
+          "name": "xn--80aaocmjdk0cclbf8l3a.xn--p1ai",
+          "type": "A",
+          "value": "45.130.41.193"
+        },
+        {
+          "name": "www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai",
+          "type": "A",
+          "value": "45.130.41.193"
+        },
+        {
+          "name": "autoconfig.xn--80aaocmjdk0cclbf8l3a.xn--p1ai",
+          "type": "CNAME",
+          "value": "autoconfig.beget.com."
+        },
+        {
+          "name": "autodiscover.xn--80aaocmjdk0cclbf8l3a.xn--p1ai",
+          "type": "CNAME",
+          "value": "autoconfig.beget.com."
+        }
+      ],
+      "wildcardRecordsPresent": false,
+      "otherRecordTypes": [
+        "SOA",
+        "MX",
+        "NS",
+        "TXT"
+      ],
+      "otherRecordValuesOmitted": "Not needed for HTTP routing; no DNS values changed"
+    },
+    {
+      "zone": "mocine3388.beget.tech",
+      "source": "https://cp.beget.com/dns/14208874",
+      "view": "Полное содержимое зоны",
+      "routingRecords": [
+        {
+          "name": "mocine3388.beget.tech",
+          "type": "A",
+          "value": "5.101.153.111"
+        },
+        {
+          "name": "www.mocine3388.beget.tech",
+          "type": "A",
+          "value": "5.101.153.111"
+        },
+        {
+          "name": "autoconfig.mocine3388.beget.tech",
+          "type": "CNAME",
+          "value": "autoconfig.beget.com."
+        },
+        {
+          "name": "autodiscover.mocine3388.beget.tech",
+          "type": "CNAME",
+          "value": "autoconfig.beget.com."
+        }
+      ],
+      "wildcardRecordsPresent": false,
+      "otherRecordTypes": [
+        "SOA",
+        "MX",
+        "NS",
+        "TXT"
+      ],
+      "otherRecordValuesOmitted": "Not needed for HTTP routing; no DNS values changed"
+    }
+  ],
+  "dnsNamedHosts": 17,
+  "serverInfo": {
+    "host": "prime.beget.com",
+    "apache": "2.4.63",
+    "nginx": "1.21.1",
+    "phpInfoLinks": "Shared server-version phpinfo links, not account-specific effective vhosts"
+  },
+  "ipManagement": "Account statistics show one dedicated IP. /sites/ip presented an order form; no additional mapping export was available. Nothing ordered or changed.",
+  "supportList": "Созданные тикеты: Нет данных для отображения; no existing configuration attestation obtained; nothing sent",
+  "controlsChanged": 0,
+  "formsSubmitted": 0,
+  "missingEvidenceType": "Account-scoped effective Beget Nginx/Apache virtual-host routing and PHP-handler configuration including all includes/defaults/overrides, or authoritative provider attestation of its complete mapping"
+}

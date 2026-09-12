@@ -1,0 +1,12 @@
+{
+  "mainStatusByteUnchanged": true,
+  "mainHashedFileChanges": [],
+  "mainEntries": 25,
+  "preExistingDatabasesTouched": 0,
+  "ownedProcessesAfterReadOnlyProbes": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsersCreated": 0,
+  "ownedTemporaryDatabases": 0,
+  "productionConfigurationMutations": 0,
+  "productionBusinessProviderMessageMutations": 0
+}

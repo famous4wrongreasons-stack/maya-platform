@@ -1,5 +1,10 @@
 # B38/R01 public relay coverage — bounded inventory and release harness
 
+> Follow-up 2026-09-12: authenticated Beget panel access/site/domain/PHP inventory
+> is now obtained. See [the read-only control-plane inventory](CYCLE-07-R01-BEGET-CONTROL-PLANE-READONLY-INVENTORY.md).
+> The remaining gap is only the effective shared-host vhost/handler configuration,
+> not login or another screenshot of Sites. Historical findings below are retained.
+
 Incoming checkpoint `6df459e8`; worktree `contour/c7-recovery-cd157b66`, canonical
 remote `codex/maya-brain-systemic-release-20260815`. Fetch initially confirmed
 HEAD = origin and a clean isolated worktree. No main-worktree reset/stash/clean.
