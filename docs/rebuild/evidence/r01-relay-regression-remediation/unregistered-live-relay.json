@@ -1,0 +1,30 @@
+{
+  "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+  "sha256": "8cc22eafdcefbaa620427c53e7c930c01bb72e0e51e2af45e7d9205edd3e4cb5",
+  "bytes": 144766,
+  "mtimeUtc": "2026-07-21T17:39:00.144332+00:00",
+  "createCaseStartLine": 839,
+  "createCaseEndLineExclusive": 908,
+  "createCaseSha256": "ee52237a3d54faf1a9aa2f4e3b747299a45f3a3e6a1710280a922be63a9376bc",
+  "directBookRecord": true,
+  "phoneInput": true,
+  "fullnameInput": true,
+  "canonicalRefusal": false,
+  "actionEngineDelegation": false,
+  "folderAccessFile": false,
+  "localTgConfigExists": false,
+  "http": {
+    "method": "HEAD",
+    "url": "https://malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+    "status": 200,
+    "contentType": "application/json; charset=utf-8",
+    "contentLength": "66",
+    "poweredBy": "PHP/8.2.28"
+  },
+  "observedAt": "2026-09-12T16:01:54.782859+00:00",
+  "realBookingRequests": 0,
+  "providerMutations": 0,
+  "productionFileChanges": 0,
+  "sourcePrintedOrCommitted": false,
+  "mainR01ManifestContainsPath": false
+}

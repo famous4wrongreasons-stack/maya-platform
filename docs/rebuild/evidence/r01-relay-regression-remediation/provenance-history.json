@@ -1,0 +1,15 @@
+{
+  "historyMatches": [
+    {
+      "file": ".bash_history",
+      "line": 9,
+      "operations": [
+        "php"
+      ],
+      "artifacts": [
+        "api-proxy",
+        "api-proxy.php"
+      ]
+    }
+  ]
+}

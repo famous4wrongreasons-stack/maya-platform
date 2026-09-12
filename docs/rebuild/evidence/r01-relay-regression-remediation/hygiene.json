@@ -1,0 +1,18 @@
+{
+  "observedAt": "2026-09-12T16:20:18.891939+00:00",
+  "mainStatusByteEquivalent": true,
+  "originalEntriesPreserved": 24,
+  "previouslyDocumentedExternalEntryPreserved": true,
+  "currentEntryCount": 25,
+  "protectedFileHashesMatched": 22,
+  "mainWorktreeTouched": false,
+  "oldDatabasesTouched": 0,
+  "ownedDatabasesCreated": 0,
+  "productionMutations": 0,
+  "ownedBrowserWatchersCreated": 0,
+  "ownedProcessesFinal": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTemporaryDatabases": 0,
+  "temporaryFileFixturesRemaining": 0
+}

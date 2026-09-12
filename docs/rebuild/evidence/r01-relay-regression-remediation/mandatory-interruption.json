@@ -1,0 +1,20 @@
+{
+  "at": "2026-09-12T16:17:05.892166+00:00",
+  "gate": "mandatory-regression",
+  "runtime": "Node 22.23.2",
+  "status": "INTERRUPTED_NOT_PASS",
+  "reason": "New production alias STOP; observed local Python stdin read wait, no successful completion",
+  "observedChild": 17499,
+  "observedTest": "p4-05-all8-cutover-ratchet.spec.ts / package5_retention_runtime_guard.py",
+  "observedStack": "Python json.load(sys.stdin) -> TextIOWrapper.read -> read; parent SyncProcessRunner awaits child",
+  "ownedProcessGroup": 15152,
+  "ownedPids": [
+    15152,
+    16420,
+    16437,
+    17499
+  ],
+  "termination": "SIGTERM explicitly sent to owned group only",
+  "timeoutsOrAssertionsChanged": false,
+  "productionReached": false
+}

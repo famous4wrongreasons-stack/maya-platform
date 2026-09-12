@@ -1,0 +1,18 @@
+[
+  {
+    "path": "docs/rebuild/evidence/package5-wave-ra-r01-overlay-manifest.json",
+    "exactUnregisteredAliasPresent": false
+  },
+  {
+    "path": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-EXHAUSTIVE-REMAINDER-INVENTORY-COMPLETE.md",
+    "exactUnregisteredAliasPresent": false
+  },
+  {
+    "path": "docs/rebuild/evidence/chapter7-preflight/production-surface-manifest.json",
+    "exactUnregisteredAliasPresent": false
+  },
+  {
+    "path": "docs/rebuild/evidence/chapter7-wave3-fixture-recovery/nine-aliases.json",
+    "exactUnregisteredAliasPresent": false
+  }
+]
