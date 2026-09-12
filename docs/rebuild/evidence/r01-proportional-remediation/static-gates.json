@@ -1,0 +1,27 @@
+[
+  {
+    "gate": "lint",
+    "exit": 0,
+    "seconds": 44.29
+  },
+  {
+    "gate": "application-typecheck",
+    "exit": 0,
+    "seconds": 6.78
+  },
+  {
+    "gate": "scripts-typecheck",
+    "exit": 0,
+    "seconds": 15.76
+  },
+  {
+    "gate": "build",
+    "exit": 0,
+    "seconds": 19.79
+  },
+  {
+    "gate": "prisma",
+    "exit": 0,
+    "seconds": 0.91
+  }
+]

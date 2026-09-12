@@ -18,6 +18,8 @@ const release = load('../../deploy/platform/beget-edge/relay-release.cjs') as {
   candidate: (source: string) => string;
   validateObserved: (observed: object) => unknown;
   replaceScript: string;
+  retireScript: string;
+  denialUrls: (entry: { path: string }) => string[];
   manifest: {
     incident: { path: string; canonicalSha256: string; unsafeSha256: string };
     entries: Array<{ path: string; role: string; sha256: string }>;
@@ -90,16 +92,17 @@ describe('R01 live artifact and release/recovery protection', () => {
 
   it('registers every live alias, PWA backup and inaccessible historical relay copy', () => {
     const entries = release.manifest.entries;
-    expect(entries).toHaveLength(23);
-    expect(new Set(entries.map((e) => e.path)).size).toBe(23);
-    expect(entries.filter((e) => e.role.endsWith('php'))).toHaveLength(4);
+    expect(entries).toHaveLength(42);
+    expect(new Set(entries.map((e) => e.path)).size).toBe(42);
+    expect(entries.filter((e) => e.role.endsWith('php'))).toHaveLength(10);
     expect(entries.filter((e) => e.role === 'preserved_html')).toHaveLength(5);
     expect(entries.filter((e) => e.role === 'preserved_backup')).toHaveLength(
       2,
     );
     expect(entries.filter((e) => e.role === 'blocked_archive')).toHaveLength(
-      12,
+      16,
     );
+    expect(entries.filter((e) => e.role === 'hosting_config')).toHaveLength(9);
     expect(() => release.validateObserved({ found: [], rows: [] })).toThrow();
     expect(() =>
       release.validateObserved({

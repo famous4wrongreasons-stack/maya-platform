@@ -124,9 +124,13 @@ If a reference screenshot conflicts with generic chat conventions, follow the sc
 R01 relay security is a prerequisite for every PWA/PHP recovery or release.
 Use `maya-saas-backend/deploy/platform/beget-edge/RELAY-RELEASE.md`: inspect
 candidates with the permanent R01 guard and verify the complete finite public
-relay surface (roots, aliases, rewrites, nested/recovery copies and symlinks).
+relay surface within the authenticated panel mapping (known roots, aliases, local
+rewrites, nested/recovery copies and symlinks).
 An unchanged nine-file list does not prove public coverage. Unknown roots or PHP
-artifacts block release until their effective hosting mappings are reconciled.
+artifacts block release until their concrete reachability/authority is reconciled.
+Do not require inaccessible private provider vhost configuration or theoretical
+alias discovery without an existing canonical requirement or concrete evidence.
+See `docs/rebuild/CYCLE-07-R01-INDEPENDENT-CANONICAL-REVIEW.md`.
 Never restore a production/backup PHP as canonical source merely by matching
 its own hash. Sanitized fixtures are test-only and may not be deployed.
 `api-proxy.php?action=create_record` must retain the certified 410 refusal;

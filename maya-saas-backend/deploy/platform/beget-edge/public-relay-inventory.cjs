@@ -9,11 +9,16 @@ request=json.loads(input())
 home=pathlib.Path('/home/m/mocine3388')
 rows=[]
 for item in request['entries']:
- p=pathlib.Path(item['path']); b=p.read_bytes()
+ p=pathlib.Path(item['path'])
+ if not p.exists():
+  rows.append(dict(path=str(p),sha256=None,missing=True));continue
+ b=p.read_bytes()
  row=dict(path=str(p),sha256=hashlib.sha256(b).hexdigest(),bytes=len(b))
  if item['role'] in ['full_php','relay_php']:row['source']=base64.b64encode(b).decode()
  rows.append(row)
-roots=[];discovered=[];symlinks=[];errors=[]
+roots=[];discovered=[];symlinks=[];errors=[];configuration=[]
+for name in request.get('hosting',{}).get('absentAncestors',[]):
+ if pathlib.Path(name).exists():errors.append('Unexpected ancestor configuration: '+name)
 for directory in sorted(home.iterdir()):
  if not directory.is_dir():continue
  root=directory/'public_html'
@@ -30,7 +35,8 @@ for root in roots:
    p=pathlib.Path(parent)/name
    if p.is_symlink():continue
    try:
-    php_name=bool(re.search(r'\.(?:php\d*|phtml|phar)(?:\.|$)',name,re.I))
+    if name in ['.htaccess','.user.ini','php.ini']:configuration.append(str(p))
+    php_name=bool(re.search(r'\.(?:php\d*|phtml?|phar)(?:\.|$)',name,re.I))
     with p.open('rb') as f:
      prefix=f.read(8192)
      # Binary non-PHP assets cannot be promoted silently by this scanner. The
@@ -47,7 +53,7 @@ for root in roots:
      providerWriteCandidate=bool(re.search(r'yc_post\s*\(|yc_request\s*\(\s*[\x27\x22](?:POST|PUT|PATCH|DELETE)',s,re.I)),
      canonicalRefusal='verified_client_channel_required' in s))
    except OSError as e:errors.append(str(e))
-print(json.dumps(dict(rows=rows,found=sorted(r['path'] for r in discovered),
+print(json.dumps(dict(rows=rows,found=sorted(r['path'] for r in discovered),configurationFound=sorted(configuration),
  discovered=discovered,roots=sorted(str(r) for r in roots),symlinks=symlinks,scanErrors=errors)))
 `;
 module.exports = {inspectScript};

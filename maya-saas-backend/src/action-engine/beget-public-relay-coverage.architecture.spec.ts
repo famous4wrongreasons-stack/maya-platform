@@ -24,6 +24,7 @@ const release = load('../../deploy/platform/beget-edge/relay-release.cjs') as {
 };
 interface Scan {
   found: string[];
+  configurationFound: string[];
   roots: string[];
   symlinks: Array<{ path: string; target: string }>;
   scanErrors: string[];
@@ -108,6 +109,7 @@ describe('R01 finite public relay surface class', () => {
         join(root, 'app/api-proxy.php'),
         join(root, 'app/backups/before-loyalty.php'),
         join(root, 'app/backups/recovered.phtml'),
+        join(root, 'app/backups/recovered.phtm'),
         join(root, 'app/backups/service.php.bak'),
         join(root, 'app/backups/renamed.txt'),
         join(other, 'gateway.php'),
@@ -117,11 +119,13 @@ describe('R01 finite public relay surface class', () => {
           file,
           '<?php yc_post("/records/$tenant", $body); file_put_contents("EXECUTED", "bad");',
         );
+      writeFileSync(join(root, '.htaccess'), 'Require all denied');
       writeFileSync(paths[1], '<?php yc_post("/book_record/1", $body);');
       writeFileSync(join(root, 'photo.jpg'), Buffer.from([0, 1, 2, 3]));
       const result = inspect(home);
       expect(result.roots).toEqual([root, other]);
       expect(result.found).toEqual(paths.sort());
+      expect(result.configurationFound).toEqual([join(root, '.htaccess')]);
       expect(result.scanErrors).toEqual([]);
       expect(result.discovered.every((r) => r.providerWriteCandidate)).toBe(
         true,

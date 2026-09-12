@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "contract": "B38/R01; no new booking owner",
-  "authority": "Owner-approved regression repair after 5163eb15; preserve maintenance",
+  "authority": "Owner-approved proportional repair of known R01 regressions; independent canonical review; preserve maintenance and historical files",
   "entries": [
     {
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html",
@@ -117,11 +117,174 @@
       "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php.pre-php56-hotfix-20260908",
       "sha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
       "role": "blocked_archive"
+    },
+    {
+      "path": "/home/m/mocine3388/mocine3388.beget.tech/public_html/api-proxy.php",
+      "sha256": "5904e859bfdd9c78f841f6ee0b7971cea93b924011619cc8c0ab6f41e3b54d81",
+      "role": "blocked_archive"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/yclients-webhook.php",
+      "sha256": "5081d0d6e7f7f47b272552f793fafcf54bc5b68700428aee8fe58297536f97f8",
+      "role": "relay_php"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tg-config.php",
+      "sha256": "dc9f21ddb3fc6afeb2f9bb289bd7add07b25a6260f0d8329e5a0626a6ce21a68",
+      "role": "blocked_archive"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/site-publications-proxy.php",
+      "sha256": "e0c930b3e4bb6ee35289c075097a5e9b6a5ab179a5e1f10fc00f4fbbd0071f97",
+      "role": "relay_php"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-config.php",
+      "sha256": "0a2bb2734d619ed5c5330a057477c6dd017d0b6dc71063b05cb9bff9c8b59c5c",
+      "role": "relay_php"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/site-community-proxy.php",
+      "sha256": "bc2540b99d9b59c6bf09dd9f7f9c56b59c3a5f71c72c44c590182a570aa52a16",
+      "role": "relay_php"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/package5-client-consent-proxy.php",
+      "sha256": "267383a99603957efce1d515346a0c32760847f341e1f85181859384cd883c69",
+      "role": "relay_php"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tg-config.php.bak.20260703030847",
+      "sha256": "c25f194be9db7df01f4f834999c75954ad03f318acb51b223b2806e82f533239",
+      "role": "blocked_archive"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/package5-b35-bulk-proxy.php",
+      "sha256": "140b651a2fdf8ea1abb3bb112312ed2ce5c0e54deebb8ed0f6b3a7fdb86d59e9",
+      "role": "relay_php"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "sha256": "8cc22eafdcefbaa620427c53e7c930c01bb72e0e51e2af45e7d9205edd3e4cb5",
+      "role": "blocked_archive"
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/.htaccess",
+      "sha256": "b265cfd8a86708ec88589921091240c1f21f12892870f615747bff2f675b2e98",
+      "role": "hosting_config"
+    },
+    {
+      "path": "/home/m/mocine3388/mocine3388.beget.tech/public_html/.htaccess",
+      "sha256": "008fa9061799a1344789c8182a632415bf11091c41ee6f56d70afbfc64e25e9d",
+      "role": "hosting_config"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/.htaccess",
+      "sha256": "e745c6490a775061c53208dc07b9c10226a60201306a8cbb3bab41be2cc3637b",
+      "role": "hosting_config"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/new.bak/.htaccess",
+      "sha256": "d1af58ecb83e0e602b5b0889559fef4f518ceecf89e2dd0d4a9a1c01027a69f1",
+      "role": "hosting_config"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/new/.htaccess",
+      "sha256": "d1af58ecb83e0e602b5b0889559fef4f518ceecf89e2dd0d4a9a1c01027a69f1",
+      "role": "hosting_config"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/.htaccess",
+      "sha256": "cb4b8aa2a8913d9697f2d07c7627bfb91d23bcbd9bbade72e0c159170a643731",
+      "role": "hosting_config"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/media/.htaccess",
+      "sha256": "879ff85596bd7a31621e8a948324187d7085b5f4031179c23327b9e8529afebe",
+      "role": "hosting_config"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/media/team/.htaccess",
+      "sha256": "f8a587c3f1d5d45f4b977e9164cd325ad5161d8747984d80b215063e5593864f",
+      "role": "hosting_config"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/backups/.htaccess",
+      "sha256": "c4491dbf4a323734d29ec036ce17e4cd74425962c5481c93c1297287c342f851",
+      "role": "hosting_config"
     }
   ],
   "incident": {
     "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
     "unsafeSha256": "d5eeaa82f69f6d72c366576797c2920fecd0d27f76262e2c5f4a342f363ddd05",
     "canonicalSha256": "b1006160a28e66448886bdc4b520a2d94021121748259c2cd1aeefda5f1aaaa0"
+  },
+  "retirements": [
+    {
+      "path": "/home/m/mocine3388/mocine3388.beget.tech/public_html/.htaccess",
+      "beforeSha256": "2b51e11d058e6e8f9698ba55967af68142bd4bd87e7b60b22666d2000549fb9e",
+      "sha256": "008fa9061799a1344789c8182a632415bf11091c41ee6f56d70afbfc64e25e9d",
+      "append": "\n# B38/R01: retired direct-provider booking surface; preserve historical PHP.\n<Files \"api-proxy.php\">\n    Require all denied\n</Files>\n",
+      "artifact": "/home/m/mocine3388/mocine3388.beget.tech/public_html/api-proxy.php"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/backups/.htaccess",
+      "beforeSha256": null,
+      "sha256": "c4491dbf4a323734d29ec036ce17e4cd74425962c5481c93c1297287c342f851",
+      "append": "\n# B38/R01: retired direct-provider booking surface; preserve historical PHP.\n<Files \"api-proxy-before-loyalty-20260721-2035.php\">\n    Require all denied\n</Files>\n",
+      "artifact": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/backups/api-proxy-before-loyalty-20260721-2035.php"
+    }
+  ],
+  "hosting": {
+    "evidence": "docs/rebuild/CYCLE-07-R01-BEGET-CONTROL-PLANE-READONLY-INVENTORY.md",
+    "scope": "Known authenticated panel mappings + all PHP/local routing files in the three bound roots; not a claim over private provider configuration",
+    "roots": [
+      {
+        "path": "/home/m/mocine3388/mayaos.ru/public_html",
+        "origins": [
+          "http://mayaos.ru",
+          "https://mayaos.ru",
+          "http://www.mayaos.ru",
+          "https://www.mayaos.ru"
+        ]
+      },
+      {
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+        "origins": [
+          "http://malesthetic.pro",
+          "https://malesthetic.pro",
+          "http://www.malesthetic.pro",
+          "https://www.malesthetic.pro",
+          "http://xn--80aaocmjdk0cclbf8l3a.xn--p1ai",
+          "https://xn--80aaocmjdk0cclbf8l3a.xn--p1ai",
+          "http://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai",
+          "https://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai"
+        ]
+      },
+      {
+        "path": "/home/m/mocine3388/mocine3388.beget.tech/public_html",
+        "origins": [
+          "http://mocine3388.beget.tech",
+          "http://www.mocine3388.beget.tech"
+        ]
+      }
+    ],
+    "absentAncestors": [
+      "/home/m/mocine3388/.htaccess",
+      "/home/m/mocine3388/.user.ini",
+      "/home/m/mocine3388/php.ini",
+      "/home/m/mocine3388/mayaos.ru/.htaccess",
+      "/home/m/mocine3388/mayaos.ru/.user.ini",
+      "/home/m/mocine3388/mayaos.ru/php.ini",
+      "/home/m/mocine3388/mocine3388.beget.tech/.htaccess",
+      "/home/m/mocine3388/mocine3388.beget.tech/.user.ini",
+      "/home/m/mocine3388/mocine3388.beget.tech/php.ini",
+      "/home/m/mocine3388/muzhskayaestetik.rf/.htaccess",
+      "/home/m/mocine3388/muzhskayaestetik.rf/.user.ini",
+      "/home/m/mocine3388/muzhskayaestetik.rf/php.ini",
+      "/home/m/mocine3388/muzhskayaestetika.rf/.htaccess",
+      "/home/m/mocine3388/muzhskayaestetika.rf/.user.ini",
+      "/home/m/mocine3388/muzhskayaestetika.rf/php.ini"
+    ]
   }
 }

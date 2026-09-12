@@ -15,14 +15,14 @@ candidate is accepted. A matching new fixture hash alone does not certify safety
 `verify-edge-candidate.cjs DIRECTORY` inspects all candidate PHP/PWA files,
 rejects backup PHP and placeholder credentials, and is mandatory in the edge
 builder. The existing R01 registered-overlay checks remain mandatory for alias
-changes. `relay-release-manifest.json` pins all nine admitted aliases, the two
-maintenance backups and twelve blocked historical PHP archives. Archive content
+changes. `relay-release-manifest.json` pins the 26 inspected PHP artifacts in three mapped roots (10 active,
+16 denied), seven HTML/backup files and nine local routing files. Archive content
 is historical evidence, not a permitted rollback target.
 
 `node deploy/platform/beget-edge/relay-release.cjs verify` reads the live manifest,
-checks all four active PHP copies, pins both maintenance pages and both backups,
-and checks HTTP HEAD denial for every historical archive. It never executes PHP
-application code. Backend deployment runs this gate before upload, before
+checks all ten active PHP copies, pins both maintenance pages and both backups,
+and checks HTTP HEAD denial across known domain aliases for every denied PHP
+artifact. Source inspection never evaluates PHP; HTTP probes have no action/body. Backend deployment runs this gate before upload, before
 activation and after activation. An unknown file or hash fails closed and needs
 exact reconciliation; do not change the manifest just to get a green release.
 
@@ -36,7 +36,11 @@ never include/eval/application execution.
 After mandatory regression, lint, both typechecks, build and Prisma PASS,
 `repair` may perform that exact replacement. It pins all protected pre-state,
 uses a lock and compare-before-replace, keeps a private mode-0600 incident backup
-outside the document root and atomically replaces only the main relay. A retry
+outside the document root and atomically replaces only the main relay. The two exact legacy writers are
+first retired with pinned filename-denial rules, preserving their PHP bytes.
+Routing updates are monotonic and individually atomic under the same lock;
+interrupted batches resume without ever reopening a writer. All pre-states are
+validated before the batch, and actual URL denial is required before proceeding. A retry
 recognizes the certified result. Never roll back to the unsafe artifact. Any
 post-state error requires read-only reconciliation. The command contains no
 config/hash/path override and cannot promote an unrelated source.
@@ -58,25 +62,24 @@ targets. Unknown artifacts, roots, links or scan errors fail closed before repai
 or backend upload. Direct `/records` through a provider writer is forbidden too;
 the exact `book_record` string is not the entire violation class.
 
-The filesystem convention is **not** authoritative virtual-host configuration.
-The current 23-entry manifest is intentionally NOT expanded into an approved
-allowlist: the effective domain → document-root / server alias / rewrite / PHP
-handler mapping has not yet been obtained. Both discovery of additional artifacts
-and this missing control-plane evidence prevent completeness certification.
-Do not infer that private recovery directories are unreachable merely from their
-names, or that HTTP 500 makes a legacy PHP writer safe. Anonymous HEAD returning
-403 at an authenticated canonical webhook is different from server-level archive
-denial; classify using source and effective routing, not status alone.
+The authenticated Beget panel mapping, known local routing configuration and
+actual URL evidence are recorded in the control-plane inventory. Private provider
+vhost export is **not** a canonical R01/C7 prerequisite: see the independent
+canonical review, which supersedes the previous operational STOP. Do not infer
+infinite coverage from directory names; equally, do not add unrestricted
+infrastructure discovery to the frozen Chapter 7 gate.
 
-Current read-only evidence covers three observed site roots, all their PHP
-artifacts/htaccess files and a bounded list of outside-root recovery directories.
-The new technical-domain relay is included alongside the known public backup.
-No production file, maintenance page or PWA backup has been changed. See
-`docs/rebuild/CYCLE-07-R01-PUBLIC-RELAY-COVERAGE-REPORT.md` at repository root.
+The version-2 manifest registers the three bound roots and eight known public
+host aliases. Technical HTTP is included; technical HTTPS has no listener.
+Known local configuration, including ancestor absence, is pinned and drift fails
+closed. Newly observed concrete roots/files/symlinks are reconciled before release.
+The two exact retired writers are checked both by filename and PATH_INFO URL.
+An authenticated webhook's application 403 is not an archive denial: active PHP
+must pass the whole-source guard. HTTP 500 is never accepted as safe retirement.
 
-Before repair: obtain authoritative complete virtual-host/root/alias/handler
-mapping, finish reachability classification for every artifact, pin the reviewed
-manifest and pass all mandatory gates. Only then perform the already authorized
-active-relay restoration and historical HTTP retirement, preserving private
-hash-verified recovery evidence. A fresh business architecture approval is not
-required for these already-approved R01 semantics.
+`prepare` accepts only the exact known incident pre-state, without mutation.
+`repair` is authorized only after mandatory gates. It writes two exact HTTP
+denial rules and restores the certified main relay; historical PHP, maintenance
+pages and both PWA backups are pinned byte-for-byte. `verify` never accepts the
+incident pre-state. A failed post-state check blocks backend cutover; never
+restore unsafe bytes as a rollback. No business/provider/message proof is used.

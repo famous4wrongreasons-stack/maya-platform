@@ -11,9 +11,9 @@ function verify(directory) {
       const file = path.join(folder, entry.name);
       if (entry.isSymbolicLink()) throw Error('Unreviewed symlink release input');
       if (entry.isDirectory()) { walk(file); continue; }
-      if (/\.php.+$/i.test(entry.name)) throw Error('Historical PHP archives are not release candidates');
-      if (/\.php$/i.test(entry.name)) {
-        const source = fs.readFileSync(file, 'utf8');
+      if (/\.(?:php\d*|phtml?|phar)\..+$/i.test(entry.name)) throw Error('Historical PHP archives are not release candidates');
+      const source = fs.readFileSync(file, 'utf8');
+      if (/\.(?:php\d*|phtml?|phar)$/i.test(entry.name) || /<\?php(?:\s|$)|<\?=/i.test(source)) {
         boundary.assertNoDirectBooking(source);
         if (/\bcase\s+['"]create_record['"]\s*:/.test(source)) boundary.assertRetiredPhp(source);
         if (source.includes('FIXTURE_ONLY_NOT_A_CREDENTIAL')) throw Error('Sanitized fixture is not deployable');
