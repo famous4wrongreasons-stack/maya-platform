@@ -1,2152 +1,432 @@
 [
-  {
-    "path": "src/action-engine/package5-b13-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/package5-b22-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/package5-b23-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/package5-b24-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/marketing/canonical-bulk.architecture.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/action-engine/package5-b34-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/package5-r12-team-communications.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/package5-b15-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/package5-b21-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/package5-b19-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/package5-b18-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/package5-b14-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/package5-b20-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/package5-b17-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/package5-b16-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/auth/legacy-staff-principal.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/crm/client-initiator-boundary.architecture.spec.ts",
-    "status": "passed",
-    "tests": 11
-  },
-  {
-    "path": "src/action-engine/p4-05-all8-cutover-ratchet.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/action-engine/package5-r09-public-community.architecture.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/crm/client-identity-registration-guard.architecture.spec.ts",
-    "status": "passed",
-    "tests": 17
-  },
-  {
-    "path": "src/action-engine/package4-active-pwa-runtime-ratchet.architecture.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/action-engine/p4-03-all8-cutover-ratchet.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/action-engine/appointment-action-boundary.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/consent-security-invalidation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/crm/client-appointment-cancel.architecture.spec.ts",
-    "status": "passed",
-    "tests": 18
-  },
-  {
-    "path": "src/crm/client-profile-read.architecture.spec.ts",
-    "status": "passed",
-    "tests": 14
-  },
-  {
-    "path": "src/crm/client-appointment-read.architecture.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/crm/client-loyalty-read.architecture.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/ai-tools/cache-boundary.spec.ts",
-    "status": "passed",
-    "tests": 24
-  },
-  {
-    "path": "src/business-state/business-state.equivalence.spec.ts",
-    "status": "passed",
-    "tests": 42
-  },
-  {
-    "path": "src/auth/social-auth.service.spec.ts",
-    "status": "passed",
-    "tests": 24
-  },
-  {
-    "path": "src/analytics/http-consumer-migration.spec.ts",
-    "status": "passed",
-    "tests": 14
-  },
-  {
-    "path": "src/ai-tools/ai-core.service.spec.ts",
-    "status": "passed",
-    "tests": 67
-  },
-  {
-    "path": "src/ai-tools/routing-regression.acceptance.spec.ts",
-    "status": "passed",
-    "tests": 73
-  },
-  {
-    "path": "src/auth/legacy-staff-principal.http.spec.ts",
-    "status": "passed",
-    "tests": 21
-  },
-  {
-    "path": "src/package5-wave1/operational-work.http.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/analytics/operations-analytics.service.spec.ts",
-    "status": "passed",
-    "tests": 40
-  },
-  {
-    "path": "src/ai-tools/owner-money-questions.acceptance.spec.ts",
-    "status": "passed",
-    "tests": 19
-  },
-  {
-    "path": "src/gift-certificates/gift-certificate-activation-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 18
-  },
-  {
-    "path": "src/crm/legacy-appointment-bridge.service.spec.ts",
-    "status": "passed",
-    "tests": 27
-  },
-  {
-    "path": "src/ai-tools/ai-tool-canonical-receipt.spec.ts",
-    "status": "passed",
-    "tests": 16
-  },
-  {
-    "path": "src/appointment-notifications/background-communication.architecture.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/ai-tools/ai-tool-handler.service.spec.ts",
-    "status": "passed",
-    "tests": 36
-  },
-  {
-    "path": "src/ai-tools/ai-surface-truth.spec.ts",
-    "status": "passed",
-    "tests": 17
-  },
-  {
-    "path": "src/business-facts/client-recency.spec.ts",
-    "status": "passed",
-    "tests": 20
-  },
-  {
-    "path": "src/action-engine/beget-public-relay-coverage.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/users/users.service.spec.ts",
-    "status": "passed",
-    "tests": 27
-  },
-  {
-    "path": "src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
-    "status": "passed",
-    "tests": 12
-  },
-  {
-    "path": "src/admin/admin.service.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/action-engine/ai-invocation-receipt.architecture.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/loyalty/legacy-loyalty-refund-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 11
-  },
-  {
-    "path": "src/customer-subscriptions/customer-subscription-revocation-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/action-engine/beget-relay-release.architecture.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/loyalty/legacy-loyalty-grant-consume-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 12
-  },
-  {
-    "path": "src/auth/auth.service.spec.ts",
-    "status": "passed",
-    "tests": 15
-  },
-  {
-    "path": "src/owner-reports/owner-reports.migration.spec.ts",
-    "status": "passed",
-    "tests": 14
-  },
-  {
-    "path": "src/appointments/client-appointment-create.service.spec.ts",
-    "status": "passed",
-    "tests": 22
-  },
-  {
-    "path": "src/measurement/measurement.architecture.spec.ts",
-    "status": "passed",
-    "tests": 14
-  },
-  {
-    "path": "src/customer-subscriptions/customer-subscription-expiry-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/business-facts/input-truth.spec.ts",
-    "status": "passed",
-    "tests": 37
-  },
-  {
-    "path": "src/tenants/tenant-pwa.service.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/expenses/expense-canon.spec.ts",
-    "status": "passed",
-    "tests": 14
-  },
-  {
-    "path": "src/customer-subscriptions/customer-subscription-usage-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/customer-subscriptions/customer-subscription-renewal-activation-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 15
-  },
-  {
-    "path": "src/ai-tools/adversarial-expense-audit.spec.ts",
-    "status": "passed",
-    "tests": 56
-  },
-  {
-    "path": "src/gift-certificates/gift-certificate-purchase-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/action-engine/client-habits.architecture.spec.ts",
-    "status": "passed",
-    "tests": 13
-  },
-  {
-    "path": "src/referrals/referral-reward-fulfill-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/gift-certificates/gift-certificate-redemption-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 13
-  },
-  {
-    "path": "src/customer-subscriptions/customer-subscription-purchase-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/owner-reports/owner-reports.regression.spec.ts",
-    "status": "passed",
-    "tests": 25
-  },
-  {
-    "path": "src/customer-subscriptions/customer-subscription-cancellation-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/crm/crm.visit-operations.spec.ts",
-    "status": "passed",
-    "tests": 21
-  },
-  {
-    "path": "src/ai-tools/staff-schedule-command.service.spec.ts",
-    "status": "passed",
-    "tests": 13
-  },
-  {
-    "path": "src/appointments/appointments.service.spec.ts",
-    "status": "passed",
-    "tests": 17
-  },
-  {
-    "path": "src/admin/admin.controller.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/action-engine/client-action-principal.spec.ts",
-    "status": "passed",
-    "tests": 17
-  },
-  {
-    "path": "src/loyalty/legacy-loyalty-backfill-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/customer-subscriptions/customer-subscription-activation-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 14
-  },
-  {
-    "path": "src/action-engine/client-preferences.architecture.spec.ts",
-    "status": "passed",
-    "tests": 13
-  },
-  {
-    "path": "src/referrals/referral-reward-issue-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 12
-  },
-  {
-    "path": "src/business-facts/journal-consolidation.spec.ts",
-    "status": "passed",
-    "tests": 17
-  },
-  {
-    "path": "src/crm/opportunity-lifecycle.runner.spec.ts",
-    "status": "passed",
-    "tests": 11
-  },
-  {
-    "path": "src/auth/email-auth.service.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/referrals/referral-resolve-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/loyalty/legacy-loyalty-import-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/loyalty/legacy-loyalty-grant-issue-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/loyalty/legacy-loyalty-redemption-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/loyalty/legacy-loyalty-expiry-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/canonical-action-ingress.architecture.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/action-engine.durable-policy.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/customer-subscriptions/customer-subscription-renewal-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 11
-  },
-  {
-    "path": "src/crm/appointment-reconciliation.scheduler.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/ai-tools/ai-tool-extended-capabilities.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/crm/shadow-ingestion.service.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/measurement/measurement.finance.spec.ts",
-    "status": "passed",
-    "tests": 13
-  },
-  {
-    "path": "src/referrals/referral-create-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/expenses/expenses.service.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/ai-tools/ai-tool-runtime.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/owner-reports/owner-report.runtime.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/measurement/measurement.staff-goal.spec.ts",
-    "status": "passed",
-    "tests": 35
-  },
-  {
-    "path": "src/loyalty/legacy-loyalty-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/crm/legacy-native-consent.service.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/loyalty/loyalty.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/inbox/inbox.service.spec.ts",
-    "status": "passed",
-    "tests": 17
-  },
-  {
-    "path": "src/crm/crm.service.spec.ts",
-    "status": "passed",
-    "tests": 20
-  },
-  {
-    "path": "src/communication-delivery/communication-bulk-delivery.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/ai-tools/ai-tool-expenses-create.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/analytics/legacy-http-contract.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/client-link-challenge-schema.architecture.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/customer-subscriptions/customer-subscription-purchase-cutover.service.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/action-engine.registry.spec.ts",
-    "status": "passed",
-    "tests": 15
-  },
-  {
-    "path": "src/expenses/expense-canonical-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 11
-  },
-  {
-    "path": "src/crm/adapters/yclients-crm.adapter.spec.ts",
-    "status": "passed",
-    "tests": 43
-  },
-  {
-    "path": "src/onboarding/ai-onboarding.service.spec.ts",
-    "status": "passed",
-    "tests": 11
-  },
-  {
-    "path": "src/action-engine/package5-final-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/action-engine/action-engine.ingress.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/tenancy/bridge-source.service.spec.ts",
-    "status": "passed",
-    "tests": 12
-  },
-  {
-    "path": "src/crm/appointment-reconciliation.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/auth/auth-session.service.spec.ts",
-    "status": "passed",
-    "tests": 12
-  },
-  {
-    "path": "src/owner-reports/owner-reports.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/crm/appointment-mirror.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/events/event-store.service.spec.ts",
-    "status": "passed",
-    "tests": 11
-  },
-  {
-    "path": "src/crm/quarantine-catchup.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/marketing/marketing.service.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/internal-calendar/internal-calendar.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/internal-calendar/internal-calendar.controller.spec.ts",
-    "status": "passed",
-    "tests": 1
-  },
-  {
-    "path": "src/events/ingestion-retention.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/expenses/p4-07-expense-architecture.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/commerce/p4-10-commerce-credential-canonical-cutover.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/crm/appointment-change.service.spec.ts",
-    "status": "passed",
-    "tests": 12
-  },
-  {
-    "path": "src/commerce/p4-10-commerce-credential-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/auth/auth.controller.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/analytics/financial-truth.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/onboarding/trial-activation.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/business-content/p4-09-all7-cutover-ratchet.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/action-engine/package5-wave4-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 14
-  },
-  {
-    "path": "src/action-engine/action-engine.runtime-concurrency.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/marketing/canonical-bulk.controller.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/branding/branding.service.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/tenants/tenants.host-guard.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/marketing/canonical-bulk.contract.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/domain/appointment-change.spec.ts",
-    "status": "passed",
-    "tests": 16
-  },
-  {
-    "path": "src/billing/billing-scheduler.service.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/ai-tools/p5-surface-stack.spec-helper.spec.ts",
-    "status": "passed",
-    "tests": 1
-  },
-  {
-    "path": "src/action-engine/action-engine.approval-binding.spec.ts",
-    "status": "passed",
-    "tests": 22
-  },
-  {
-    "path": "src/app.controller.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/package5-wave5/package5-wave5-canonical-cutover.service.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/appointment-notifications/appointment-reminder-policy.spec.ts",
-    "status": "passed",
-    "tests": 14
-  },
-  {
-    "path": "src/tenants/tenants.update.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/package5-wave5/package5-wave5.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/package5-wave1-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 11
-  },
-  {
-    "path": "src/tenants/tenants.service.spec.ts",
-    "status": "passed",
-    "tests": 16
-  },
-  {
-    "path": "src/package5-wave1/governed-settings.spec.ts",
-    "status": "passed",
-    "tests": 18
-  },
-  {
-    "path": "src/auth/jwt.strategy.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/action-engine.canonical-kernel.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/commerce/p4-10-all4-cutover-ratchet.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/dashboard-preferences/dashboard-preferences.service.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/crm/client-identity.service.spec.ts",
-    "status": "passed",
-    "tests": 17
-  },
-  {
-    "path": "src/ai-tools/chat-report-card.spec.ts",
-    "status": "passed",
-    "tests": 13
-  },
-  {
-    "path": "src/action-engine/gift-certificate-redemption-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 18
-  },
-  {
-    "path": "src/opportunities/opportunity.boundary.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/business-facts/client-recency.boundary.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/onboarding/conversational-onboarding-interpreter.spec.ts",
-    "status": "passed",
-    "tests": 13
-  },
-  {
-    "path": "src/entitlements/entitlements.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/domain/loyalty-authority.spec.ts",
-    "status": "passed",
-    "tests": 15
-  },
-  {
-    "path": "src/action-engine/action-engine.policy-resolver.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/business-state/chapter4-closure.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/crm/staff-identity-writer.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/common/phone.util.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/billing/billing.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/opportunities/opportunity.engine.spec.ts",
-    "status": "passed",
-    "tests": 26
-  },
-  {
-    "path": "src/communication-delivery/communication-bulk-policy.service.spec.ts",
-    "status": "passed",
-    "tests": 21
-  },
-  {
-    "path": "src/business-facts/closure-truth.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/action-engine/p4-09-value-configuration-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/gift-certificate-purchase-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 14
-  },
-  {
-    "path": "src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/crm/crm-attendance.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/billing/p4-08-yookassa-payment-provider.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/p4-08-all4-cutover-ratchet.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/auth/phone-auth-delivery.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/analytics/legacy-net-contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/p4-05-customer-subscription-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/ai-brain/maya-brain-router.service.spec.ts",
-    "status": "passed",
-    "tests": 11
-  },
-  {
-    "path": "src/package5-wave4/package5-wave4-canonical-cutover.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/business-content/business-content.service.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/branches/branches.service.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/billing/tenant-billing-canonical-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/recovery/recovery.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/opportunities/opportunity.shadow.spec.ts",
-    "status": "passed",
-    "tests": 22
-  },
-  {
-    "path": "src/communication-delivery/communication-web-push.transport.spec.ts",
-    "status": "passed",
-    "tests": 13
-  },
-  {
-    "path": "src/auth/email-auth-delivery.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/auth/auth-rate-limit.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/business-content/p4-09-value-configuration-shadow.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/ai-tools/ai-tool-registry.service.spec.ts",
-    "status": "passed",
-    "tests": 20
-  },
-  {
-    "path": "src/auth/tenant-auth.repository.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/appointment-notifications/appointment-notifications.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/p4-07-expense-declaration-epoch-runtime.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/quotas/quota.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/package5-wave2/package5-wave2-canonical-cutover.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/measurement/measurement.value.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/customer-subscriptions/p4-05-yookassa-checkout-provider.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/commerce/commerce-integration.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/audit-log/audit-log.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/p4-06-all3-cutover-ratchet.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/onboarding/onboarding.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/customer-portal/customer-portal.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/customers/customers.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/business-content/p4-09-canonical-offer-authority.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/package5-wave3-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/action-engine/p4-10-commerce-credential-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/expense-intake/expense-reminder.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/business-content/p4-09-value-configuration-canonical-cutover.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/ai-tools/ai-tool-business-content.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/gift-certificates/p4-06-yookassa-checkout-provider.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/encryption/encryption.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/conversation-intelligence/conversation-intelligence.service.spec.ts",
-    "status": "passed",
-    "tests": 19
-  },
-  {
-    "path": "src/ai-tools/ai-memory.service.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/owner-reports/owner-report.contract.spec.ts",
-    "status": "passed",
-    "tests": 16
-  },
-  {
-    "path": "src/guards/tenant-access.guard.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/expenses/p4-07-expense-canonical-cutover.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/domain/domain-event.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/crm/crm.disconnect-policy.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/crm/client-channel-appointment-authority.service.spec.ts",
-    "status": "passed",
-    "tests": 16
-  },
-  {
-    "path": "src/action-engine/gift-certificate-activation-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 19
-  },
-  {
-    "path": "src/domain/money.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/config/runtime-config.spec.ts",
-    "status": "passed",
-    "tests": 19
-  },
-  {
-    "path": "src/owner-reports/brief-stack.spec-helper.spec.ts",
-    "status": "passed",
-    "tests": 1
-  },
-  {
-    "path": "src/appointments/tenant-appointment.repository.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/package5-wave5-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/measurement/measurement.reputation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/domain/visit-outcome.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/common/postgres-transaction-conflict.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/ai-tools/reporting-period.closure.spec.ts",
-    "status": "passed",
-    "tests": 18
-  },
-  {
-    "path": "src/action-engine/package5-wave2-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 17
-  },
-  {
-    "path": "src/tenancy/tenant-context.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/referrals/referral-reward-presentation.service.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/business-content/p4-09-canonical-offer-materialization.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/p4-04-all4-cutover-ratchet.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/client-booking-idempotency.kernel.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/tenancy/tenant-resolver.service.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/domain/boundary.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/ai-tools/ai-core-model.service.spec.ts",
-    "status": "passed",
-    "tests": 23
-  },
-  {
-    "path": "src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/commerce/p4-10-yookassa-credential-verifier.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/measurement/measurement.reputation.spec.ts",
-    "status": "passed",
-    "tests": 26
-  },
-  {
-    "path": "src/communication-delivery/communication-web-push.service.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/ai-tools/dto/ai-core-chat.dto.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/referrals/referral-reward-claim.contract.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/onboarding/safe-onboarding-interpreter.spec.ts",
-    "status": "passed",
-    "tests": 33
-  },
-  {
-    "path": "src/config/security-config.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-backfill-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/tenants/tenants.create.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/tenants/salon-timezone.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/customer-portal/customer-portal.controller.spec.ts",
-    "status": "passed",
-    "tests": 1
-  },
-  {
-    "path": "src/action-engine/p4-09-immutable-offer-value-version-schema.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/action-engine/p4-03-all8-executable-gate-gap.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/crm/appointment-time.utils.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/ai-tools/ai-speech.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/measurement/measurement.finance.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/measurement/measurement.contract.spec.ts",
-    "status": "passed",
-    "tests": 32
-  },
-  {
-    "path": "src/guards/subscription-access.guard.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/auth/auth-session.repository.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/ai-tools/ai-tool-policy.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/owner-reports/owner-reports.composers.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/p4-05-all8-executable-gate-gap.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/measurement/measurement.period.spec.ts",
-    "status": "passed",
-    "tests": 15
-  },
-  {
-    "path": "src/crm/maya-user-client-association-issuer.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/crm/client-appointment-read.service.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/auth/auth-retention.repository.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/referral-reward-fulfillment-schema.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/crm/client-effective-consent.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/crm/client-appointment-reschedule.service.spec.ts",
-    "status": "passed",
-    "tests": 12
-  },
-  {
-    "path": "src/action-engine/p4-04-contract-to-value-schema.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/package5-wave6/package5-wave6.policy.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/loyalty-redemption-grant-revocation-schema.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/customer-subscription-purchase-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/subscriptions/subscriptions.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/measurement/measurement.outcomes.spec.ts",
-    "status": "passed",
-    "tests": 33
-  },
-  {
-    "path": "src/domain/revenue-basis.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/crm/client-appointment-cancel.service.spec.ts",
-    "status": "passed",
-    "tests": 11
-  },
-  {
-    "path": "src/business-state/business-state.boundary.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/ai-tools/reporting-period.resolver.spec.ts",
-    "status": "passed",
-    "tests": 26
-  },
-  {
-    "path": "src/action-engine/customer-subscription-renewal-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/referrals/referral-reward-scheduler-envelope.service.spec.ts",
-    "status": "passed",
-    "tests": 1
-  },
-  {
-    "path": "src/gift-certificates/gift-certificate-claim.contract.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/p4-06-gift-certificate-presentation-key-version-schema.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/native-consent-transition.pwa.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-grant-issue-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/gift-certificate-schema.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/customer-subscription-schema.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/customer-subscription-cancellation-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/tenants/tenant-access-state.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/tenants/tenant-access-state.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/quotas/quota.guard.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/marketing/bulk-audience-equivalence.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/appointments/appointment-preview.utils.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/p4-07-expense-period-declaration-epoch-schema.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/customer-subscription-usage-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/customer-subscription-revocation-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/ai-tools/ai-surface-boundary.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/unresolved-client-identity-hold-schema.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/referral-create-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/p4-06-gift-certificate-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/loyalty-account-runtime-nullability.architecture.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/customer-subscription-expiry-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/conversation-intelligence/conversation-capability.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/customer-subscription-activation-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/owner-reports/owner-reports.boundary.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/crm/client-channel-booking-prefill.service.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/crm/client-channel-appointment-create.service.spec.ts",
-    "status": "passed",
-    "tests": 7
-  },
-  {
-    "path": "src/action-engine/package5-common-authority-foundation-schema.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-grant-consume-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/customer-subscription-renewal-activation-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/ai-confirmation-receipt-schema.architecture.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/p4-08-tenant-billing-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/crm/client-channel-realtime-authority.service.spec.ts",
-    "status": "passed",
-    "tests": 10
-  },
-  {
-    "path": "src/crm/client-channel-challenge-routing.service.spec.ts",
-    "status": "passed",
-    "tests": 9
-  },
-  {
-    "path": "src/crm/client-channel-cabinet-projection.service.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/p4-09-offer-replacement-lineage-schema.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/tenancy/memberships.service.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/action-engine/referral-reward-issue-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/package5-b10-b11-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/p4-06-all3-executable-gate-gap.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/action-engine/client-owned-loyalty-account-schema.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/domain/fetch-completeness.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/auth/auth-rate-limit.repository.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/billing/billing-system.gateway.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/action-engine/p4-04-referral-reward-executable.contract.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-refund-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-redeem-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-grant-consume-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/crm/crm-adapter.factory.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/action-engine/loyalty-transaction-action-binding-schema.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-import-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-import-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/measurement/measurement.wave2.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/p4-04-all4-executable-gate-gap.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/client-habits-schema.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/crm/crm-provider-settings.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/referral-reward-fulfill-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/loyalty-redemption-grant-schema.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/subscriptions/plan-catalog.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/entitlements/feature-registry.service.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/auth/auth-retention.service.spec.ts",
-    "status": "passed",
-    "tests": 1
-  },
-  {
-    "path": "src/auth/auth-session-system.gateway.spec.ts",
-    "status": "passed",
-    "tests": 1
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-refund-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-grant-issue-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-backfill-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/gift-certificate-redemption-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/client-wanted-slot-runtime.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/auth/auth-flow-system.gateway.spec.ts",
-    "status": "passed",
-    "tests": 1
-  },
-  {
-    "path": "src/analytics/analytics-boundary.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/referral-reward-fulfill-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/referral-resolve-shadow.contract.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/referral-create-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-redeem-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/config/core-notifications-migration-provenance.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/common/current-salon-import.utils.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-expire-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/billing-payment-action-binding-schema.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/expenses/expense-category.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/crm/client-channel-link.service.spec.ts",
-    "status": "passed",
-    "tests": 16
-  },
-  {
-    "path": "src/common/feature-catalog.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/appointments/appointment-identity.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/expense-period-declaration-action-binding-schema.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/expense-action-binding-schema.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/users/app-access.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/consent-security-cutover.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/crm/adapters/capability-contract.spec.ts",
-    "status": "passed",
-    "tests": 34
-  },
-  {
-    "path": "src/action-engine/referral-reward-scheduler-envelope.contract.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/customer-subscription-renewal-activation-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/app.module.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/ai-tools/reporting-period.boundary.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/legacy-loyalty-earn-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/gift-certificate-activation-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/customer-subscription-renewal-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/referral-reward-issue-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/referral-resolve-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/package5-b29-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/gift-certificate-purchase-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/customer-subscription-usage-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/customer-subscription-revocation-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/customer-subscription-purchase-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/customer-subscription-expiry-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/customer-subscription-activation-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/client-channel-link-schema.architecture.spec.ts",
-    "status": "passed",
-    "tests": 8
-  },
-  {
-    "path": "src/action-engine/package5-b30-remediation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/customer-subscription-cancellation-shadow.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/client-preferences-schema.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/loyalty/p4-03-contract-to-runtime-closure.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/crm/crm-provider-catalog.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/client-wanted-slot-schema.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/client-booking-intent.contract.spec.ts",
-    "status": "passed",
-    "tests": 13
-  },
-  {
-    "path": "src/action-engine/action-engine.policy-attestation-schema.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/action-engine.identity.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/marketing/canonical-bulk-panel.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/internal-calendar/internal-calendar.utils.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/client-booking-idempotency.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/system-metrics.service.spec.ts",
-    "status": "passed",
-    "tests": 1
-  },
-  {
-    "path": "src/action-engine/native-consent-client-link.architecture.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/owner-reports/owner-report-retention.architecture.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/ai-tools/client-registry-analysis.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/action-engine/client-booking-confirmation.architecture.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/common/validation-errors.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/common/industry-presets.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/ai-tools/master-money-motivation.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/crm/adapters/mock-crm.adapter.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/auth/auth-client-metadata.spec.ts",
-    "status": "passed",
-    "tests": 2
-  },
-  {
-    "path": "src/measurement/measurement.staff-goal.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
-    "status": "passed",
-    "tests": 1
-  },
-  {
-    "path": "src/measurement/measurement.wave3.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/users/app-access-pwa.spec.ts",
-    "status": "passed",
-    "tests": 6
-  },
-  {
-    "path": "src/auth/native-owner-telegram-login.pwa.spec.ts",
-    "status": "passed",
-    "tests": 4
-  },
-  {
-    "path": "src/action-engine/client-appointment-idempotency.schema.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/measurement/measurement.outcomes.architecture.spec.ts",
-    "status": "passed",
-    "tests": 5
-  },
-  {
-    "path": "src/action-engine/beget-relay-fixture.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  },
-  {
-    "path": "src/action-engine/client-channel-delivery-address.architecture.spec.ts",
-    "status": "passed",
-    "tests": 3
-  }
+  {"path": "src/action-engine/package5-b13-remediation.architecture.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/package5-b22-remediation.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/package5-b23-remediation.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/package5-b24-remediation.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/marketing/canonical-bulk.architecture.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/action-engine/package5-b34-remediation.architecture.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/action-engine/package5-r06-operational-delivery.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/package5-r08-native-feedback.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/package5-r11-governed-settings.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/package5-r13-expense-intake.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/package5-r12-team-communications.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/package5-r14-cash-declaration.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/package5-b15-remediation.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/package5-b21-remediation.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/package5-b19-remediation.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/package5-b18-remediation.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/package5-b14-remediation.architecture.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/package5-b20-remediation.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/package5-b17-remediation.architecture.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/package5-b16-remediation.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/auth/legacy-staff-principal.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/crm/client-initiator-boundary.architecture.spec.ts", "status": "passed", "tests": 11},
+  {"path": "src/action-engine/p4-05-all8-cutover-ratchet.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/action-engine/package5-r09-public-community.architecture.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/package-4-final-value-ownership-ratchet.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/crm/client-identity-registration-guard.architecture.spec.ts", "status": "passed", "tests": 17},
+  {"path": "src/action-engine/package4-active-pwa-runtime-ratchet.architecture.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/action-engine/p4-03-all8-cutover-ratchet.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/action-engine/appointment-action-boundary.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/consent-security-invalidation.architecture.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/crm/client-appointment-cancel.architecture.spec.ts", "status": "passed", "tests": 18},
+  {"path": "src/crm/client-profile-read.architecture.spec.ts", "status": "passed", "tests": 14},
+  {"path": "src/crm/client-appointment-read.architecture.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/crm/client-loyalty-read.architecture.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/ai-tools/cache-boundary.spec.ts", "status": "passed", "tests": 24},
+  {"path": "src/business-state/business-state.equivalence.spec.ts", "status": "passed", "tests": 42},
+  {"path": "src/auth/social-auth.service.spec.ts", "status": "passed", "tests": 24},
+  {"path": "src/analytics/http-consumer-migration.spec.ts", "status": "passed", "tests": 14},
+  {"path": "src/ai-tools/ai-core.service.spec.ts", "status": "passed", "tests": 67},
+  {"path": "src/ai-tools/routing-regression.acceptance.spec.ts", "status": "passed", "tests": 73},
+  {"path": "src/auth/legacy-staff-principal.http.spec.ts", "status": "passed", "tests": 21},
+  {"path": "src/package5-wave1/operational-work.http.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/analytics/operations-analytics.service.spec.ts", "status": "passed", "tests": 40},
+  {"path": "src/ai-tools/owner-money-questions.acceptance.spec.ts", "status": "passed", "tests": 19},
+  {"path": "src/gift-certificates/gift-certificate-activation-shadow.service.spec.ts", "status": "passed", "tests": 18},
+  {"path": "src/crm/legacy-appointment-bridge.service.spec.ts", "status": "passed", "tests": 27},
+  {"path": "src/ai-tools/ai-tool-canonical-receipt.spec.ts", "status": "passed", "tests": 16},
+  {"path": "src/appointment-notifications/background-communication.architecture.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/ai-tools/ai-tool-handler.service.spec.ts", "status": "passed", "tests": 36},
+  {"path": "src/ai-tools/ai-surface-truth.spec.ts", "status": "passed", "tests": 17},
+  {"path": "src/business-facts/client-recency.spec.ts", "status": "passed", "tests": 20},
+  {"path": "src/action-engine/beget-public-relay-coverage.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/users/users.service.spec.ts", "status": "passed", "tests": 27},
+  {"path": "src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts", "status": "passed", "tests": 12},
+  {"path": "src/admin/admin.service.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/action-engine/ai-invocation-receipt.architecture.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/loyalty/legacy-loyalty-refund-shadow.service.spec.ts", "status": "passed", "tests": 11},
+  {"path": "src/customer-subscriptions/customer-subscription-revocation-shadow.service.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/action-engine/beget-relay-release.architecture.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/loyalty/legacy-loyalty-grant-consume-shadow.service.spec.ts", "status": "passed", "tests": 12},
+  {"path": "src/auth/auth.service.spec.ts", "status": "passed", "tests": 15},
+  {"path": "src/owner-reports/owner-reports.migration.spec.ts", "status": "passed", "tests": 14},
+  {"path": "src/appointments/client-appointment-create.service.spec.ts", "status": "passed", "tests": 22},
+  {"path": "src/measurement/measurement.architecture.spec.ts", "status": "passed", "tests": 14},
+  {"path": "src/customer-subscriptions/customer-subscription-expiry-shadow.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/business-facts/input-truth.spec.ts", "status": "passed", "tests": 37},
+  {"path": "src/tenants/tenant-pwa.service.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/expenses/expense-canon.spec.ts", "status": "passed", "tests": 14},
+  {"path": "src/customer-subscriptions/customer-subscription-usage-shadow.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/customer-subscriptions/customer-subscription-renewal-activation-shadow.service.spec.ts", "status": "passed", "tests": 15},
+  {"path": "src/ai-tools/adversarial-expense-audit.spec.ts", "status": "passed", "tests": 56},
+  {"path": "src/gift-certificates/gift-certificate-purchase-shadow.service.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/action-engine/client-habits.architecture.spec.ts", "status": "passed", "tests": 13},
+  {"path": "src/referrals/referral-reward-fulfill-shadow.service.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/gift-certificates/gift-certificate-redemption-shadow.service.spec.ts", "status": "passed", "tests": 13},
+  {"path": "src/customer-subscriptions/customer-subscription-purchase-shadow.service.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/owner-reports/owner-reports.regression.spec.ts", "status": "passed", "tests": 25},
+  {"path": "src/customer-subscriptions/customer-subscription-cancellation-shadow.service.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/crm/crm.visit-operations.spec.ts", "status": "passed", "tests": 21},
+  {"path": "src/ai-tools/staff-schedule-command.service.spec.ts", "status": "passed", "tests": 13},
+  {"path": "src/appointments/appointments.service.spec.ts", "status": "passed", "tests": 17},
+  {"path": "src/admin/admin.controller.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/action-engine/client-action-principal.spec.ts", "status": "passed", "tests": 17},
+  {"path": "src/loyalty/legacy-loyalty-backfill-shadow.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/customer-subscriptions/customer-subscription-activation-shadow.service.spec.ts", "status": "passed", "tests": 14},
+  {"path": "src/action-engine/client-preferences.architecture.spec.ts", "status": "passed", "tests": 13},
+  {"path": "src/referrals/referral-reward-issue-shadow.service.spec.ts", "status": "passed", "tests": 12},
+  {"path": "src/business-facts/journal-consolidation.spec.ts", "status": "passed", "tests": 17},
+  {"path": "src/crm/opportunity-lifecycle.runner.spec.ts", "status": "passed", "tests": 11},
+  {"path": "src/auth/email-auth.service.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/referrals/referral-resolve-shadow.service.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/loyalty/legacy-loyalty-import-shadow.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/loyalty/legacy-loyalty-grant-issue-shadow.service.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/loyalty/legacy-loyalty-redemption-shadow.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/loyalty/legacy-loyalty-expiry-shadow.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/canonical-action-ingress.architecture.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/action-engine.durable-policy.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/customer-subscriptions/customer-subscription-renewal-shadow.service.spec.ts", "status": "passed", "tests": 11},
+  {"path": "src/crm/appointment-reconciliation.scheduler.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/ai-tools/ai-tool-extended-capabilities.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/crm/shadow-ingestion.service.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/measurement/measurement.finance.spec.ts", "status": "passed", "tests": 13},
+  {"path": "src/referrals/referral-create-shadow.service.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/expenses/expenses.service.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/ai-tools/ai-tool-runtime.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/owner-reports/owner-report.runtime.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/measurement/measurement.staff-goal.spec.ts", "status": "passed", "tests": 35},
+  {"path": "src/loyalty/legacy-loyalty-shadow.service.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/crm/legacy-native-consent.service.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/loyalty/loyalty.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/inbox/inbox.service.spec.ts", "status": "passed", "tests": 17},
+  {"path": "src/crm/crm.service.spec.ts", "status": "passed", "tests": 20},
+  {"path": "src/communication-delivery/communication-bulk-delivery.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/ai-tools/ai-tool-expenses-create.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/analytics/legacy-http-contract.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/client-link-challenge-schema.architecture.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/customer-subscriptions/customer-subscription-purchase-cutover.service.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/action-engine.registry.spec.ts", "status": "passed", "tests": 15},
+  {"path": "src/expenses/expense-canonical-shadow.service.spec.ts", "status": "passed", "tests": 11},
+  {"path": "src/crm/adapters/yclients-crm.adapter.spec.ts", "status": "passed", "tests": 43},
+  {"path": "src/onboarding/ai-onboarding.service.spec.ts", "status": "passed", "tests": 11},
+  {"path": "src/action-engine/package5-final-remediation.architecture.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/action-engine/action-engine.ingress.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/tenancy/bridge-source.service.spec.ts", "status": "passed", "tests": 12},
+  {"path": "src/crm/appointment-reconciliation.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/auth/auth-session.service.spec.ts", "status": "passed", "tests": 12},
+  {"path": "src/owner-reports/owner-reports.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/crm/appointment-mirror.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/events/event-store.service.spec.ts", "status": "passed", "tests": 11},
+  {"path": "src/crm/quarantine-catchup.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/marketing/marketing.service.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/internal-calendar/internal-calendar.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/internal-calendar/internal-calendar.controller.spec.ts", "status": "passed", "tests": 1},
+  {"path": "src/events/ingestion-retention.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/expenses/p4-07-expense-architecture.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/commerce/p4-10-commerce-credential-canonical-cutover.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/crm/appointment-change.service.spec.ts", "status": "passed", "tests": 12},
+  {"path": "src/commerce/p4-10-commerce-credential-shadow.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/auth/auth.controller.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/analytics/financial-truth.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/onboarding/trial-activation.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/business-content/p4-09-all7-cutover-ratchet.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/action-engine/package5-wave4-executable.contract.spec.ts", "status": "passed", "tests": 14},
+  {"path": "src/action-engine/action-engine.runtime-concurrency.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/marketing/canonical-bulk.controller.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/branding/branding.service.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/tenants/tenants.host-guard.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/marketing/canonical-bulk.contract.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/domain/appointment-change.spec.ts", "status": "passed", "tests": 16},
+  {"path": "src/billing/billing-scheduler.service.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/ai-tools/p5-surface-stack.spec-helper.spec.ts", "status": "passed", "tests": 1},
+  {"path": "src/action-engine/action-engine.approval-binding.spec.ts", "status": "passed", "tests": 22},
+  {"path": "src/app.controller.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/package5-wave5/package5-wave5-canonical-cutover.service.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/appointment-notifications/appointment-reminder-policy.spec.ts", "status": "passed", "tests": 14},
+  {"path": "src/tenants/tenants.update.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/package5-wave5/package5-wave5.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/package5-wave1-executable.contract.spec.ts", "status": "passed", "tests": 11},
+  {"path": "src/tenants/tenants.service.spec.ts", "status": "passed", "tests": 16},
+  {"path": "src/package5-wave1/governed-settings.spec.ts", "status": "passed", "tests": 18},
+  {"path": "src/auth/jwt.strategy.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/action-engine.canonical-kernel.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/commerce/p4-10-all4-cutover-ratchet.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/dashboard-preferences/dashboard-preferences.service.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/crm/client-identity.service.spec.ts", "status": "passed", "tests": 17},
+  {"path": "src/ai-tools/chat-report-card.spec.ts", "status": "passed", "tests": 13},
+  {"path": "src/action-engine/gift-certificate-redemption-shadow.contract.spec.ts", "status": "passed", "tests": 18},
+  {"path": "src/opportunities/opportunity.boundary.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/business-facts/client-recency.boundary.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/onboarding/conversational-onboarding-interpreter.spec.ts", "status": "passed", "tests": 13},
+  {"path": "src/entitlements/entitlements.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/domain/loyalty-authority.spec.ts", "status": "passed", "tests": 15},
+  {"path": "src/action-engine/action-engine.policy-resolver.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/business-state/chapter4-closure.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/crm/staff-identity-writer.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/common/phone.util.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/billing/billing.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/opportunities/opportunity.engine.spec.ts", "status": "passed", "tests": 26},
+  {"path": "src/communication-delivery/communication-bulk-policy.service.spec.ts", "status": "passed", "tests": 21},
+  {"path": "src/business-facts/closure-truth.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/action-engine/p4-09-value-configuration-executable.contract.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/gift-certificate-purchase-shadow.contract.spec.ts", "status": "passed", "tests": 14},
+  {"path": "src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/crm/crm-attendance.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/billing/p4-08-yookassa-payment-provider.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/p4-08-all4-cutover-ratchet.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/auth/phone-auth-delivery.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/analytics/legacy-net-contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/p4-05-customer-subscription-executable.contract.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/ai-brain/maya-brain-router.service.spec.ts", "status": "passed", "tests": 11},
+  {"path": "src/package5-wave4/package5-wave4-canonical-cutover.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/business-content/business-content.service.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/branches/branches.service.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/billing/tenant-billing-canonical-shadow.service.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/recovery/recovery.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/opportunities/opportunity.shadow.spec.ts", "status": "passed", "tests": 22},
+  {"path": "src/communication-delivery/communication-web-push.transport.spec.ts", "status": "passed", "tests": 13},
+  {"path": "src/auth/email-auth-delivery.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/auth/auth-rate-limit.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/business-content/p4-09-value-configuration-shadow.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/ai-tools/ai-tool-registry.service.spec.ts", "status": "passed", "tests": 20},
+  {"path": "src/auth/tenant-auth.repository.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/appointment-notifications/appointment-notifications.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/p4-07-expense-declaration-epoch-runtime.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/quotas/quota.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/package5-wave2/package5-wave2-canonical-cutover.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/measurement/measurement.value.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/customer-subscriptions/p4-05-yookassa-checkout-provider.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/commerce/commerce-integration.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/audit-log/audit-log.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/p4-06-all3-cutover-ratchet.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/onboarding/onboarding.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/customer-portal/customer-portal.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/customers/customers.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/business-content/p4-09-canonical-offer-authority.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/package5-wave3-executable.contract.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/action-engine/p4-10-commerce-credential-executable.contract.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/expense-intake/expense-reminder.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/business-content/p4-09-value-configuration-canonical-cutover.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/ai-tools/ai-tool-business-content.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/gift-certificates/p4-06-yookassa-checkout-provider.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/encryption/encryption.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/conversation-intelligence/conversation-intelligence.service.spec.ts", "status": "passed", "tests": 19},
+  {"path": "src/ai-tools/ai-memory.service.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/owner-reports/owner-report.contract.spec.ts", "status": "passed", "tests": 16},
+  {"path": "src/guards/tenant-access.guard.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/expenses/p4-07-expense-canonical-cutover.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/domain/domain-event.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/crm/crm.disconnect-policy.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/crm/client-channel-appointment-authority.service.spec.ts", "status": "passed", "tests": 16},
+  {"path": "src/action-engine/gift-certificate-activation-shadow.contract.spec.ts", "status": "passed", "tests": 19},
+  {"path": "src/domain/money.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/config/runtime-config.spec.ts", "status": "passed", "tests": 19},
+  {"path": "src/owner-reports/brief-stack.spec-helper.spec.ts", "status": "passed", "tests": 1},
+  {"path": "src/appointments/tenant-appointment.repository.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/package5-wave5-executable.contract.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/measurement/measurement.reputation.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/domain/visit-outcome.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/common/postgres-transaction-conflict.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/ai-tools/reporting-period.closure.spec.ts", "status": "passed", "tests": 18},
+  {"path": "src/action-engine/package5-wave2-executable.contract.spec.ts", "status": "passed", "tests": 17},
+  {"path": "src/tenancy/tenant-context.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/referrals/referral-reward-presentation.service.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/business-content/p4-09-canonical-offer-materialization.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/p4-04-all4-cutover-ratchet.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/client-booking-idempotency.kernel.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/tenancy/tenant-resolver.service.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/domain/boundary.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/ai-tools/ai-core-model.service.spec.ts", "status": "passed", "tests": 23},
+  {"path": "src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/commerce/p4-10-yookassa-credential-verifier.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/measurement/measurement.reputation.spec.ts", "status": "passed", "tests": 26},
+  {"path": "src/communication-delivery/communication-web-push.service.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/ai-tools/dto/ai-core-chat.dto.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/referrals/referral-reward-claim.contract.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/onboarding/safe-onboarding-interpreter.spec.ts", "status": "passed", "tests": 33},
+  {"path": "src/config/security-config.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/legacy-loyalty-backfill-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/tenants/tenants.create.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/tenants/salon-timezone.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/customer-portal/customer-portal.controller.spec.ts", "status": "passed", "tests": 1},
+  {"path": "src/action-engine/p4-09-immutable-offer-value-version-schema.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/action-engine/p4-03-all8-executable-gate-gap.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/crm/appointment-time.utils.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/ai-tools/ai-speech.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/measurement/measurement.finance.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/measurement/measurement.contract.spec.ts", "status": "passed", "tests": 32},
+  {"path": "src/guards/subscription-access.guard.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/auth/auth-session.repository.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/ai-tools/ai-tool-policy.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/owner-reports/owner-reports.composers.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/p4-05-all8-executable-gate-gap.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/measurement/measurement.period.spec.ts", "status": "passed", "tests": 15},
+  {"path": "src/crm/maya-user-client-association-issuer.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/crm/client-appointment-read.service.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/auth/auth-retention.repository.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/referral-reward-fulfillment-schema.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/crm/client-effective-consent.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/crm/client-appointment-reschedule.service.spec.ts", "status": "passed", "tests": 12},
+  {"path": "src/action-engine/p4-04-contract-to-value-schema.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/package5-wave6/package5-wave6.policy.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/loyalty-redemption-grant-revocation-schema.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/customer-subscription-purchase-shadow.contract.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/subscriptions/subscriptions.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/measurement/measurement.outcomes.spec.ts", "status": "passed", "tests": 33},
+  {"path": "src/domain/revenue-basis.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/crm/client-appointment-cancel.service.spec.ts", "status": "passed", "tests": 11},
+  {"path": "src/business-state/business-state.boundary.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/ai-tools/reporting-period.resolver.spec.ts", "status": "passed", "tests": 26},
+  {"path": "src/action-engine/customer-subscription-renewal-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/referrals/referral-reward-scheduler-envelope.service.spec.ts", "status": "passed", "tests": 1},
+  {"path": "src/gift-certificates/gift-certificate-claim.contract.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/p4-06-gift-certificate-presentation-key-version-schema.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/native-consent-transition.pwa.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/legacy-loyalty-grant-issue-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/gift-certificate-schema.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/customer-subscription-schema.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/customer-subscription-cancellation-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/tenants/tenant-access-state.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/tenants/tenant-access-state.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/quotas/quota.guard.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/marketing/bulk-audience-equivalence.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/appointments/appointment-preview.utils.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/p4-07-expense-period-declaration-epoch-schema.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/customer-subscription-usage-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/customer-subscription-revocation-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/ai-tools/ai-surface-boundary.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/unresolved-client-identity-hold-schema.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/referral-create-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/p4-06-gift-certificate-executable.contract.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/loyalty-account-runtime-nullability.architecture.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/customer-subscription-expiry-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/conversation-intelligence/conversation-capability.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/customer-subscription-activation-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/owner-reports/owner-reports.boundary.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/crm/client-channel-booking-prefill.service.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/crm/client-channel-appointment-create.service.spec.ts", "status": "passed", "tests": 7},
+  {"path": "src/action-engine/package5-common-authority-foundation-schema.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/legacy-loyalty-grant-consume-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/customer-subscription-renewal-activation-shadow.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/ai-confirmation-receipt-schema.architecture.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/p4-08-tenant-billing-executable.contract.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/crm/client-channel-realtime-authority.service.spec.ts", "status": "passed", "tests": 10},
+  {"path": "src/crm/client-channel-challenge-routing.service.spec.ts", "status": "passed", "tests": 9},
+  {"path": "src/crm/client-channel-cabinet-projection.service.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/p4-09-offer-replacement-lineage-schema.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/tenancy/memberships.service.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/action-engine/referral-reward-issue-shadow.contract.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/package5-b10-b11-remediation.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/p4-06-all3-executable-gate-gap.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/action-engine/client-owned-loyalty-account-schema.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/domain/fetch-completeness.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/auth/auth-rate-limit.repository.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/billing/billing-system.gateway.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/action-engine/p4-04-referral-reward-executable.contract.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/action-engine/legacy-loyalty-refund-shadow.contract.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/action-engine/legacy-loyalty-redeem-shadow.contract.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/action-engine/legacy-loyalty-grant-consume-shadow.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/crm/crm-adapter.factory.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/action-engine/loyalty-transaction-action-binding-schema.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/legacy-loyalty-import-shadow.contract.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/action-engine/legacy-loyalty-import-shadow.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/measurement/measurement.wave2.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/p4-04-all4-executable-gate-gap.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/client-habits-schema.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/crm/crm-provider-settings.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/referral-reward-fulfill-shadow.contract.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/loyalty-redemption-grant-schema.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/subscriptions/plan-catalog.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/entitlements/feature-registry.service.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/auth/auth-retention.service.spec.ts", "status": "passed", "tests": 1},
+  {"path": "src/auth/auth-session-system.gateway.spec.ts", "status": "passed", "tests": 1},
+  {"path": "src/action-engine/legacy-loyalty-refund-shadow.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/legacy-loyalty-grant-issue-shadow.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/legacy-loyalty-backfill-shadow.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/gift-certificate-redemption-shadow.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/client-wanted-slot-runtime.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/auth/auth-flow-system.gateway.spec.ts", "status": "passed", "tests": 1},
+  {"path": "src/analytics/analytics-boundary.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/referral-reward-fulfill-shadow.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/referral-resolve-shadow.contract.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/referral-create-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/legacy-loyalty-redeem-shadow.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/config/core-notifications-migration-provenance.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/common/current-salon-import.utils.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/legacy-loyalty-expire-shadow.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/billing-payment-action-binding-schema.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/expenses/expense-category.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/crm/client-channel-link.service.spec.ts", "status": "passed", "tests": 16},
+  {"path": "src/common/feature-catalog.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/appointments/appointment-identity.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/expense-period-declaration-action-binding-schema.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/expense-action-binding-schema.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/users/app-access.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/consent-security-cutover.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/crm/adapters/capability-contract.spec.ts", "status": "passed", "tests": 34},
+  {"path": "src/action-engine/referral-reward-scheduler-envelope.contract.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/customer-subscription-renewal-activation-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/app.module.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/ai-tools/reporting-period.boundary.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/legacy-loyalty-earn-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/gift-certificate-activation-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/customer-subscription-renewal-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/referral-reward-issue-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/referral-resolve-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/package5-b29-remediation.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/gift-certificate-purchase-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/customer-subscription-usage-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/customer-subscription-revocation-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/customer-subscription-purchase-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/customer-subscription-expiry-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/customer-subscription-activation-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/client-channel-link-schema.architecture.spec.ts", "status": "passed", "tests": 8},
+  {"path": "src/action-engine/package5-b30-remediation.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/customer-subscription-cancellation-shadow.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/client-preferences-schema.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/loyalty/p4-03-contract-to-runtime-closure.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/crm/crm-provider-catalog.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/client-wanted-slot-schema.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/client-booking-intent.contract.spec.ts", "status": "passed", "tests": 13},
+  {"path": "src/action-engine/action-engine.policy-attestation-schema.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/action-engine.identity.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/marketing/canonical-bulk-panel.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/internal-calendar/internal-calendar.utils.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/client-booking-idempotency.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/system-metrics.service.spec.ts", "status": "passed", "tests": 1},
+  {"path": "src/action-engine/native-consent-client-link.architecture.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/owner-reports/owner-report-retention.architecture.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/ai-tools/client-registry-analysis.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/action-engine/client-booking-confirmation.architecture.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/common/validation-errors.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/common/industry-presets.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/ai-tools/master-money-motivation.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/crm/adapters/mock-crm.adapter.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/auth/auth-client-metadata.spec.ts", "status": "passed", "tests": 2},
+  {"path": "src/measurement/measurement.staff-goal.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts", "status": "passed", "tests": 1},
+  {"path": "src/measurement/measurement.wave3.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/users/app-access-pwa.spec.ts", "status": "passed", "tests": 6},
+  {"path": "src/auth/native-owner-telegram-login.pwa.spec.ts", "status": "passed", "tests": 4},
+  {"path": "src/action-engine/client-appointment-idempotency.schema.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/measurement/measurement.outcomes.architecture.spec.ts", "status": "passed", "tests": 5},
+  {"path": "src/action-engine/beget-relay-fixture.architecture.spec.ts", "status": "passed", "tests": 3},
+  {"path": "src/action-engine/client-channel-delivery-address.architecture.spec.ts", "status": "passed", "tests": 3}
 ]

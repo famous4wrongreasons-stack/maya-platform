@@ -145,7 +145,7 @@ final mandatory run below.
 - Final mandatory, including new class coverage: **PASS — 430 suites / 3607 tests**.
 - Final lint/application typecheck/scripts typecheck/build/Prisma: **PASS**. See the [final receipt](evidence/r01-public-relay-coverage/verification.json).
   A formatting-only lint defect in the new test was fixed; rules were unchanged.
-- Production structural/read-only probe: 14 compiled artifacts match
+- [Production structural/read-only receipt](evidence/r01-public-relay-coverage/backend-readonly.txt): 14 compiled artifacts match
   `20260908-c7-wave2-4b03a29c`; health/readiness PASS, pending 0, drift NONE,
   MeasurementRevision 37 columns/16 CHECK/8 FK/4 triggers, rows/backfill 0.
 - Both maintenance pages, both PWA backups and all other 23 previously pinned
