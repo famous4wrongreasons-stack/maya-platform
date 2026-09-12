@@ -1,0 +1,29 @@
+{
+  "targeted": {
+    "suites": 35,
+    "tests": 333,
+    "status": "PASS"
+  },
+  "architectural": {
+    "suites": 94,
+    "tests": 520,
+    "status": "PASS",
+    "node": "22.23.2"
+  },
+  "finalOwnedTests": {
+    "suites": 1,
+    "tests": 9,
+    "status": "PASS"
+  },
+  "mandatoryRegression": "INTERRUPTED_NOT_PASS",
+  "lint": "PASS",
+  "applicationTypecheck": "PASS",
+  "scriptsTypecheck": "PASS",
+  "build": "PASS",
+  "prisma": "PASS",
+  "shellSyntax": "PASS",
+  "livePrepare": "FAIL_CLOSED_UNREGISTERED_EXECUTABLE_ALIAS",
+  "productionChanges": 0,
+  "schemaChanges": 0,
+  "migrationChanges": 0
+}

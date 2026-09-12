@@ -93,6 +93,13 @@ test -f "$BE/dist/scripts/action-engine-kernel-proof.js" \
 test -f "$BE/dist/scripts/communication-delivery-foundation-proof.js" \
   || fail "нет immutable Communication Delivery foundation proof после build"
 
+# R01: tests of a versioned fixture cannot certify a separately uploaded live PHP.
+# Read-only Beget gate also pins maintenance pages, PWA backups and blocked archives.
+verify_live_relays() {
+  "${MAYA_DEPLOY_NODE_BIN:+$MAYA_DEPLOY_NODE_BIN/}node" "$BE/deploy/platform/beget-edge/relay-release.cjs" verify
+}
+verify_live_relays || fail "R01 live relay baseline расходится; backend cutover запрещён"
+
 step "3/10 каталог релиза"
 # /opt/maya-saas/releases принадлежит maya-saas, поэтому создаём под sudo и
 # сразу отдаём botadmin — иначе rsync не сможет писать.
@@ -234,6 +241,7 @@ run "set -e
   echo 'смоук пройден; процесс завершён и reap выполнен'" || fail "смоук"
 
 step "10/10 переключение, проверка, уборка"
+verify_live_relays || fail "R01 live relay изменился после preflight"
 run "set -e
   PREV=\$(readlink /opt/maya-saas/current)
   echo \"\$PREV\" | sudo -n tee /opt/maya-saas/previous-release >/dev/null
@@ -267,6 +275,8 @@ run "set -e
   PRV=\$(basename \"\$PREV\")
   ls -1t | tail -n +$((KEEP+1)) | grep -v \"^\$CUR\$\" | grep -v \"^\$PRV\$\" | xargs -r sudo -n rm -rf
   df -h /opt | tail -1" || fail "переключение или проверка"
+
+verify_live_relays || fail "R01 post-cutover relay/maintenance verification"
 
 echo
 echo "### ГОТОВО: $STAMP"

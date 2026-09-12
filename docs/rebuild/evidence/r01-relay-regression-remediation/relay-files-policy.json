@@ -1,0 +1,181 @@
+[
+  {
+    "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/.htaccess",
+    "rules": [
+      {
+        "line": 11,
+        "text": "  RewriteRule ^ https://malesthetic.pro%{REQUEST_URI} [R=301,L,NE]"
+      },
+      {
+        "line": 15,
+        "text": "  RewriteRule ^ https://malesthetic.pro%{REQUEST_URI} [R=301,L,NE]"
+      },
+      {
+        "line": 51,
+        "text": "  <FilesMatch \"\\.(jpg|jpeg|png|webp|avif|gif|svg|mp4|webm|woff2?|ico)$\">"
+      },
+      {
+        "line": 53,
+        "text": "  </FilesMatch>"
+      },
+      {
+        "line": 54,
+        "text": "  <FilesMatch \"\\.(html)$\">"
+      },
+      {
+        "line": 56,
+        "text": "  </FilesMatch>"
+      },
+      {
+        "line": 57,
+        "text": "  <FilesMatch \"\\.apk$\">"
+      },
+      {
+        "line": 60,
+        "text": "  </FilesMatch>"
+      },
+      {
+        "line": 61,
+        "text": "  <Files \"apple-app-site-association\">"
+      },
+      {
+        "line": 64,
+        "text": "  </Files>"
+      },
+      {
+        "line": 69,
+        "text": "  <Files \"apple-app-site-association\">"
+      },
+      {
+        "line": 71,
+        "text": "  </Files>"
+      },
+      {
+        "line": 81,
+        "text": "  RewriteRule ^g/.*$ /g-landing.html [L]"
+      }
+    ]
+  },
+  {
+    "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/.htaccess",
+    "rules": [
+      {
+        "line": 2,
+        "text": "<Files \"tg-config.php\">"
+      },
+      {
+        "line": 3,
+        "text": "    Order allow,deny"
+      },
+      {
+        "line": 4,
+        "text": "    Deny from all"
+      },
+      {
+        "line": 5,
+        "text": "</Files>"
+      },
+      {
+        "line": 6,
+        "text": "<FilesMatch \"\\.(env|ini|log|conf|pem|sqlite|sqlite3|db)$\">"
+      },
+      {
+        "line": 7,
+        "text": "    Order allow,deny"
+      },
+      {
+        "line": 8,
+        "text": "    Deny from all"
+      },
+      {
+        "line": 9,
+        "text": "</FilesMatch>"
+      },
+      {
+        "line": 11,
+        "text": "# \u041d\u0435 \u043e\u0442\u0434\u0430\u0432\u0430\u0442\u044c \u043d\u0430\u0440\u0443\u0436\u0443 \u0431\u044d\u043a\u0430\u043f-\u043a\u043e\u043f\u0438\u0438 \u0438\u0441\u0445\u043e\u0434\u043d\u0438\u043a\u043e\u0432 \u043a\u0430\u043a plaintext (api-proxy.php.bak-*,"
+      },
+      {
+        "line": 12,
+        "text": "# index.html.bak-*, *.sesstoken, *.py). \u0418\u043d\u0430\u0447\u0435 \u0442\u043e\u043a\u0435\u043d\u044b/\u043a\u043e\u0434 \u0443\u0442\u0435\u043a\u0430\u044e\u0442 \u0447\u0435\u0440\u0435\u0437 \u0431\u0440\u0430\u0443\u0437\u0435\u0440."
+      },
+      {
+        "line": 13,
+        "text": "<FilesMatch \"\\.bak\">"
+      },
+      {
+        "line": 14,
+        "text": "    Order allow,deny"
+      },
+      {
+        "line": 15,
+        "text": "    Deny from all"
+      },
+      {
+        "line": 16,
+        "text": "</FilesMatch>"
+      },
+      {
+        "line": 17,
+        "text": "<FilesMatch \"\\.(sesstoken|py)$\">"
+      },
+      {
+        "line": 18,
+        "text": "    Order allow,deny"
+      },
+      {
+        "line": 19,
+        "text": "    Deny from all"
+      },
+      {
+        "line": 20,
+        "text": "</FilesMatch>"
+      },
+      {
+        "line": 26,
+        "text": "    <FilesMatch \"(index\\.html|service-worker\\.js)$\">"
+      },
+      {
+        "line": 28,
+        "text": "    </FilesMatch>"
+      }
+    ]
+  },
+  {
+    "path": "/home/m/mocine3388/mayaos.ru/public_html/.htaccess",
+    "rules": [
+      {
+        "line": 9,
+        "text": "  RewriteRule ^ https://mayaos.ru%{REQUEST_URI} [R=301,L,NE]"
+      },
+      {
+        "line": 12,
+        "text": "  RewriteRule ^app\\.html$ https://mayaos.ru/app/?booking_tenant=maya-os [R=302,L,NE]"
+      },
+      {
+        "line": 14,
+        "text": "  RewriteRule ^app/?$ https://mayaos.ru/app/?booking_tenant=maya-os [R=302,L,NE]"
+      },
+      {
+        "line": 18,
+        "text": "  RewriteRule ^api(?:/(.*))?$ maya-platform-api.php/$1 [QSA,L]"
+      },
+      {
+        "line": 22,
+        "text": "  <FilesMatch \"^(app|oauth-callback)\\.html$\">"
+      },
+      {
+        "line": 25,
+        "text": "  </FilesMatch>"
+      },
+      {
+        "line": 27,
+        "text": "  <Files \"service-worker.js\">"
+      },
+      {
+        "line": 29,
+        "text": "  </Files>"
+      }
+    ]
+  }
+]

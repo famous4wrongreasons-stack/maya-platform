@@ -1,0 +1,38 @@
+[
+  {
+    "alias": "salon_backup",
+    "url": "https://malesthetic.pro/app/api-proxy.php.bak-20260704_230004",
+    "exit": 0,
+    "headers": [
+      "HTTP/2 403 ",
+      "content-type: text/html; charset=iso-8859-1",
+      "content-length: 278"
+    ],
+    "method": "HEAD",
+    "bodyRead": false
+  },
+  {
+    "alias": "salon_pre_b13",
+    "url": "https://malesthetic.pro/app/api-proxy.php.pre-b13-031977e4",
+    "exit": 0,
+    "headers": [
+      "HTTP/2 403 ",
+      "content-type: text/html; charset=iso-8859-1",
+      "content-length: 278"
+    ],
+    "method": "HEAD",
+    "bodyRead": false
+  },
+  {
+    "alias": "platform_pre_hotfix",
+    "url": "https://mayaos.ru/maya-platform-api.php.pre-php56-hotfix-20260908",
+    "exit": 0,
+    "headers": [
+      "HTTP/2 403 ",
+      "content-type: text/html; charset=iso-8859-1",
+      "content-length: 272"
+    ],
+    "method": "HEAD",
+    "bodyRead": false
+  }
+]

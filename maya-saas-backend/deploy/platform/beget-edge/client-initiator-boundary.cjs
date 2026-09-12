@@ -20,6 +20,16 @@ const allowedPhpCase = phpCase(retirePhp("<?php\n    case 'create_record':\n yc_
 
 function assertRetiredPhp(source) {
   if (phpCase(source) !== allowedPhpCase) throw Error('Retired PHP entry changed: no writer, authority lookup, or delegation allowed before refusal');
+  assertNoDirectBooking(source);
+  return true;
+}
+
+function assertNoDirectBooking(source) {
+  if (/book_record/i.test(source)) throw Error('Direct provider book_record is forbidden in a PHP relay');
+  // Preserve the certified, unused transport helper; no call site may use it.
+  const withoutHelper = source.replace(/function yc_post\(\$url, \$data, \$user_token = ''\) \{\s*return yc_request\('POST', \$url, \$data, \$user_token\);\s*\}/g, '');
+  if (/\byc_post\s*\(/.test(withoutHelper) || /\byc_request\s*\(\s*['"](?:POST|PUT|PATCH|DELETE)['"]/i.test(withoutHelper))
+    throw Error('Provider mutation call site is forbidden in a PHP relay');
   return true;
 }
 
@@ -88,7 +98,7 @@ function assertRegisteredDeployment(entries, manifest) {
   return seen.size;
 }
 
-module.exports = {assertRetiredPhp, assertRetiredPwa, assertOverlayTransition, assertRegisteredDeployment};
+module.exports = {assertRetiredPhp, assertNoDirectBooking, assertRetiredPwa, assertOverlayTransition, assertRegisteredDeployment};
 if (require.main === module) {
   const [directory, manifestPath] = process.argv.slice(2);
   if (!directory || !manifestPath) throw Error('Candidate directory and manifest required');

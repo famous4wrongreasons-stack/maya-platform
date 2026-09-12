@@ -73,4 +73,7 @@ NODE
 find "$output" -type f -exec chmod 0644 {} +
 find "$output" -type d -exec chmod 0755 {} +
 
+# Candidate inspection is mandatory, including PWA compatibility and relay copies.
+node "$script_dir/beget-edge/verify-edge-candidate.cjs" "$output"
+
 echo "MAYA OS edge release prepared at: $output"
