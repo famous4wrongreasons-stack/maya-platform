@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-09-13T06:59:17.157360+00:00",
+  "status": "PASS",
+  "requirements": 24,
+  "oneAcceptingPackagePerRequirement": true,
+  "packages": 6,
+  "waves": 4,
+  "surfaces": 32,
+  "decisionsPresented": 16,
+  "decisionsApproved": 0,
+  "reusableFoundations": 24,
+  "legacyGroups": 8,
+  "missingFoundations": 6,
+  "linkedFilesExist": true,
+  "inheritedRatchetPathsExist": true,
+  "runtimeSchemaMigrationChanges": 0,
+  "productionBusinessEffects": 0,
+  "newExecutableTestsRun": 0,
+  "freshChecks": [
+    "production health/readiness/migrations/drift",
+    "exact static hashes",
+    "existing live C7 PWA consumer verifier",
+    "documentation crossrefs/counts/source hashes",
+    "protected-checkout status/file hashes"
+  ],
+  "notClaimed": [
+    "C8 runtime acceptance",
+    "new model accuracy or calibration",
+    "fresh full mandatory backend regression"
+  ],
+  "ownedChangeScopeOnly": true
+}

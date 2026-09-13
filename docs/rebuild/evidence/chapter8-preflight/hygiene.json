@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-09-13T06:59:17.157360+00:00",
+  "mainWorktreeTouched": false,
+  "preExistingDatabasesTouched": 0,
+  "ownedTempProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTempDatabases": 0,
+  "productionMutations": 0,
+  "processHygiene": 0,
+  "protectedCheckouts": [
+    {
+      "kind": "main",
+      "statusByteIdentical": true,
+      "statusEntries": 25,
+      "regularFileHashesPreserved": 23
+    },
+    {
+      "kind": "native",
+      "statusByteIdentical": true,
+      "statusEntries": 82,
+      "regularFileHashesPreserved": 81
+    }
+  ]
+}

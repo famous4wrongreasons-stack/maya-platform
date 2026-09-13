@@ -1,0 +1,326 @@
+{
+  "baseline": "bf0426996fe4eee6ca6ab6668fa91360a7a701b7",
+  "createdAt": "2026-09-13T06:59:17.157360+00:00",
+  "sourcePrecedence": "accepted completion/contracts + normative addenda, then chapter carry-forward; historical prose is not current runtime",
+  "sources": [
+    {
+      "path": "ai администратор/growth_planner.py",
+      "sha256": "529ecf522677c8e141615ba8469a4a358a2cbc78f1908c3219b32294862e1bda"
+    },
+    {
+      "path": "ai администратор/masters_ai.py",
+      "sha256": "f56ed09f92d126059d3f24a97cec132dc12640ef77ccc114e3201d290654ada2"
+    },
+    {
+      "path": "ai администратор/owner_ai.py",
+      "sha256": "14ac33e9e2dbb4737760264bafed1cae16080938a1a3f427a0311c128b1d3098"
+    },
+    {
+      "path": "docs/architecture/README.md",
+      "sha256": "1d35830905a2a7cc949e51a5c41a8536caada81c1b54958fb31b55a8853d965c"
+    },
+    {
+      "path": "docs/architecture/data-model.md",
+      "sha256": "b1857814010e4a774ad44f56d0a6594c3d7442e6fd9484124b1b752dd9b59af6"
+    },
+    {
+      "path": "docs/product/maya-identity/IMPLEMENTATION-REPORT.md",
+      "sha256": "6548b30c38b28ccf2a70a0c315c029c546923613a34f4800a5bb0c6ffa8e5a36"
+    },
+    {
+      "path": "docs/product/maya-identity/OWNER-REFERENCE-MOTION.md",
+      "sha256": "a9f17c84c7c4d4b908f63ea8b4641cbd22a2fe45fec9b53407d81f06caa940a2"
+    },
+    {
+      "path": "docs/product/maya-identity/SMOOTH-MOTION-AND-CLIENT-MODE.md",
+      "sha256": "b0df62ec1a9a3a53079173e651afa7da9c51463a81cf9717ee62829facff3408"
+    },
+    {
+      "path": "docs/rebuild/BASELINE.md",
+      "sha256": "d0069eca6d07cebd9acfc9f63212649c63edf32d8e0ac658c983bbb5b4d12050"
+    },
+    {
+      "path": "docs/rebuild/CARRY-FORWARD-REGISTER.md",
+      "sha256": "89b062f69aba2a408d9f974779e59526d1ade7f4a50d007bcecc66b77085f27b"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-04-P9-VISIT-RECENCY-REPORT.md",
+      "sha256": "84063b388e3b2adcb735f01851b52ad00143ecd71977dbbf1b5fc7e9ee4d39b5"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-04-REMAINDER-REVIEW.md",
+      "sha256": "12bdb4970923785c3bdfe196f55564bdc3082d938b2f858c7f537510b761a9c3"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-05-CHAPTER-5-COMPLETION-REPORT.md",
+      "sha256": "f0bf81c6b58ade7d924c9f402dfaa2b44b58b0f33036a0aa83dab12882a53c0f"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-05-PHASE-A-OPPORTUNITIES-AGENT-TASKING.md",
+      "sha256": "6cf1f8d9efe43c16bf0ea8ed443d09f2183efd6ebae66836664246d1baa54817"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-05-PHASE-B-OPPORTUNITY-ENGINE-REPORT.md",
+      "sha256": "f07e4deff356a941481bee8a598e169b8992ad54b707e9ede45b16eb0b770d81"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-05-PHASE-C-OPPORTUNITY-LIFECYCLE-REPORT.md",
+      "sha256": "53284b4f08166612664e8cdc46c8d5563e66965d3d8b338508d12d2b0a77e612"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-FINAL-COMPLETION-REPORT.md",
+      "sha256": "8bba55852e82fb788bdfae5ca826f747c5a3bd60869991667a447944de0a6f11"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-07-COMBINED-SCHEMA-ACTION-MAPPING.md",
+      "sha256": "ca1697f7f89a6a98a07a0820ce528fad105bb1b62e7f3533a2d9f861a82e5cda"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-07-FINAL-COMPLETION-REPORT.md",
+      "sha256": "69764952fa6535b59e5fe020c5e7509e351a6d751bcfdc2e616c7820ed11aca3"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-07-OWNER-DECISION-PACK.md",
+      "sha256": "8ed3d1564a64ef84f36e899be67f0ccfaa32b9e86062a5db598db2cfea47bd87"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-07-P02-FINANCIAL-TRUTH.md",
+      "sha256": "793548b54b2bba6d45bd9f93e9fabe001a6230f2bfa877f913edddd798db457a"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-07-P06-CONSUMERS-AND-ACCEPTANCE.md",
+      "sha256": "3767bffd8d120d9a2e77612d987252c02bd6a8f01a362d9affc210bc916cd1ce"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-08-OWNER-DECISION-PACK.md",
+      "sha256": "4bbcc2549ddab93521231bb394204edc122dcf67cb3029b031a77182aa92bab2"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-08-PREFLIGHT-AND-SCOPE.md",
+      "sha256": "8f4ac51089c9ebd9dc76dc9c3bffe41c1fd0cb6197418593ffe4e61e94131a59"
+    },
+    {
+      "path": "docs/rebuild/MAYA-ORCHESTRATOR-AGENTS-ARCHITECTURE-GATE.md",
+      "sha256": "811c8c265376e131856b6c3d70b074232120942a648206ec9cf111625822cc4f"
+    },
+    {
+      "path": "docs/rebuild/evidence/chapter7-final/surfaces.json",
+      "sha256": "49f9e32e0ce8d5f77c6ee25118ddc4859517260c9be667f018bf87bdf914a0f6"
+    },
+    {
+      "path": "docs/rebuild/evidence/chapter8-preflight/hygiene.json",
+      "sha256": "3398af179a278349edd8fbb1fc072076da25674f747aa3d70ad41523984b248a"
+    },
+    {
+      "path": "docs/rebuild/evidence/chapter8-preflight/late-commits.json",
+      "sha256": "382a7c06277b479939c27f24bf698bddae58abd33912a0cc327746afd6634363"
+    },
+    {
+      "path": "docs/rebuild/evidence/chapter8-preflight/live-c7-consumer.txt",
+      "sha256": "757f0f316381b14a82fbf93623062f1d2332d7d75103e5475f8c1b3acd8e852c"
+    },
+    {
+      "path": "docs/rebuild/evidence/chapter8-preflight/manifest.json",
+      "sha256": "35c5a1ad19e27ae68e059e7d5c82eaaa3379b4b2d332aa90ff3115c9942d4a7d"
+    },
+    {
+      "path": "docs/rebuild/evidence/chapter8-preflight/production-artifacts.txt",
+      "sha256": "94384e494d2a1fc6ab0f5a3061dcc60b70f6d6d5e0da039d6fb4279af9ac56ae"
+    },
+    {
+      "path": "docs/rebuild/evidence/chapter8-preflight/production-preflight.txt",
+      "sha256": "b05cc132700b7808a4caf54558a0389e5220797471497ccc35893f1eefa3d90b"
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "82a428195ecab66436a644ac02011211ca1a9d58769e9767e714663ef993dffc"
+    },
+    {
+      "path": "maya-saas-backend/src/action-engine/action-engine.runtime.ts",
+      "sha256": "37e4175c0cc21ef4270e4a36763ca189cf36d097f744dd17a77de39ef95da6b8"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.ts",
+      "sha256": "55b776e86fc492a4587fdf2024a382e1a5fa628841ea06e9f45b916a21a60784"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "sha256": "effe2347bfa977ef9861158fb3b5b754a1579f9eaef35c160c3370d314344b1b"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-policy.service.ts",
+      "sha256": "cc18770343151f2b53e7dab35e25db50c5c88fac0f186df0ee842950b2894032"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/client-registry-analysis.ts",
+      "sha256": "4b2430b69a8440a947e12662d50b4f85651ba49d6a7c6a407209c96d52d90612"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/master-money-motivation.ts",
+      "sha256": "a9d42243f8301cdd149ab77121477692daff86be1a86284ef8e6fd62626ad2e0"
+    },
+    {
+      "path": "maya-saas-backend/src/business-facts/client-recency-facts.service.ts",
+      "sha256": "e94a34783674ea67c662ad07052e1dea2bf71975ba328737288991b538dbfc2a"
+    },
+    {
+      "path": "maya-saas-backend/src/business-state/business-state.service.ts",
+      "sha256": "81bc4f92f33e572438b2d1a90113dd444c0856ee65dfa702b4460e620237d68c"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "sha256": "fbf4b172eaef1588f65e5d9050fbe17fdd74be1fe8673a674995ca88d93fc421"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-effective-consent.ts",
+      "sha256": "b2a07d432c14f3e539431465118dffd670e7c106d53854dfcc33fd753da3f029"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+      "sha256": "b9e05099ece3989ebeabd1b3e71dc610298f8f2c176b32c647f30ac9662b48e8"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm-adapter.interface.ts",
+      "sha256": "53cd00d9341d034a55d6c2b19339cc12ba7d525d6ad25529767cb22a14939ef1"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.service.ts",
+      "sha256": "a03856423aa512cf57652012ee46e635254fb6cabe2e6742a06cb20016f335c7"
+    },
+    {
+      "path": "maya-saas-backend/src/expenses/expense-period.reader.ts",
+      "sha256": "82aecc24ee1c2207a98d98247c31c7f172caa4f5c9cce5e9a1887fc95e403b8d"
+    },
+    {
+      "path": "maya-saas-backend/src/marketing/canonical-bulk.service.ts",
+      "sha256": "ed2e9f92c0361e31cb104b4ef43e566710ace856e10502c7528ba8d63d23a2ef"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.contract.ts",
+      "sha256": "86d63072b1161c84ff9dc0755aa5cfc48d6a1eb71183fa8c710e3de5d6b5c4e2"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.finance.facts.ts",
+      "sha256": "056b6aa92b3809cf97ec0438136a6e8902c83611b2c9d23404ff2f4a7711ab09"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.finance.ts",
+      "sha256": "63386484a61dd87be09227e8f0ab802d6f390ed2f208f1fbb5f89a768c34ac47"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.outcomes.facts.ts",
+      "sha256": "7a232e7f4f5a7d0682f9f7a0d2992152baae39118f15b11a9f70c0614d817333"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.outcomes.funnel.ts",
+      "sha256": "a8850f5dfb4d7e13c44a425031f7d158f7e1bace342bd9f23f785ac821952445"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.outcomes.ts",
+      "sha256": "5c343817b0e68275c62fa49319c9790e5a5ea68bbeb5faf7905884e19d33906e"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.presentation.ts",
+      "sha256": "fb658972fdb0a5fec4d1a200eba04649bb98bd22b0e0ab8dc028d7f4383efeac"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.read.service.ts",
+      "sha256": "b36af70a59307ad2f751ce920b635e337546d1e6730989ee80fe9589eb7304bb"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.reputation.ts",
+      "sha256": "70b5def32f7910c40bc97e54ee5868700f137452918d23aac18b4ec95ff967c3"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.service.ts",
+      "sha256": "3b080504d1c21350e2f66570f6dc5e75f69b8d86501c788658e5afa918247ca2"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.sources.ts",
+      "sha256": "ff662e66b81b23ce90ea82b4745e63f5367f95c6d87bf0951a3a3b5adc96e627"
+    },
+    {
+      "path": "maya-saas-backend/src/opportunities/opportunity.contract.ts",
+      "sha256": "722cd396e7d9f394b0cc41cda7e874abdb0f7287ccbd08dfd899b5b88c7460bc"
+    },
+    {
+      "path": "maya-saas-backend/src/opportunities/opportunity.engine.ts",
+      "sha256": "dbf3adf7f84e290fbb6e0d37c7bf0745725a89f56a915f6e775ac33d3a8ef19e"
+    },
+    {
+      "path": "maya-saas-backend/src/opportunities/opportunity.lifecycle.ts",
+      "sha256": "a069e14dff11cbadbdabef6c39e50d279d7e03f995f0b14285ef504552bbf63e"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave1/governed-settings.contract.ts",
+      "sha256": "5f502087aae94acaae38409a0aff1367f2d44115ee7d7caf1711acea865eabdf"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave6/chapter7-measurement-retention.ts",
+      "sha256": "8986759a2228d52cfc0a56108aaa4f4c5dc6951c833f381a4bfcd7ec3566382a"
+    },
+    {
+      "path": "maya-saas-backend/src/recovery/recovery.service.ts",
+      "sha256": "5af59b60f17ecb2b0b02e7d08fac7ad8d92f82a4bae3b51c40f639f05ea85ff9"
+    },
+    {
+      "path": "Документация/MAYA_AI_NATIVE_ROADMAP.md",
+      "sha256": "16d16a8409b57a6fc214fea8e5c10c89ccdd9e17722f9c55a2b231b8ae91576b"
+    }
+  ],
+  "additionalSearchedDocumentCandidates": [
+    "docs/architecture/auth-retention-maintenance-runbook.md",
+    "docs/architecture/data-model.md",
+    "docs/architecture/README.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-3-CANONICAL-APPROVAL-BINDING-REPORT.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-P4-04-RESOLVE-CUSTOMER-REFERRAL-SHADOW-REPORT.md",
+    "docs/rebuild/CYCLE-06-PACKAGE-5-REMAINDER-E2-STAGE-1-ASSESSMENT.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-A30-AUTH-POLICY-V1-PROPOSAL.md",
+    "docs/rebuild/CYCLE-05-PHASE-B-OPPORTUNITY-ENGINE-REPORT.md",
+    "docs/rebuild/package5-remainder-e3-r05-decision-sheet.md",
+    "docs/rebuild/CARRY-FORWARD-REGISTER.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-P4-03-LEGACY-LOYALTY-RUNTIME-CONTRACT-GATE.md",
+    "docs/rebuild/CYCLE-02-P4-FINANCIAL-TRUTH-PLAN.md",
+    "docs/rebuild/CYCLE-07-PREFLIGHT-AND-SCOPE.md",
+    "docs/rebuild/CYCLE-06-COMMUNICATION-DELIVERY-SCHEMA-GATE.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-3-CANONICAL-INGRESS-GATE.md",
+    "docs/rebuild/CYCLE-05-PHASE-C-OPPORTUNITY-LIFECYCLE-REPORT.md",
+    "docs/rebuild/evidence/package5-wave-rb-r04-completion.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-P4-03-CONTRACT-CLOSURE-GATE.md",
+    "docs/rebuild/evidence/chapter7-wave3-interruption/p06-read-preparation.md",
+    "docs/rebuild/CYCLE-07-COMBINED-SCHEMA-ACTION-MAPPING.md",
+    "docs/rebuild/CYCLE-07-P06-CONSUMERS-AND-ACCEPTANCE.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-P4-03-EXPIRE-LEGACY-LOYALTY-SHADOW-PRECHECKPOINT.md",
+    "docs/rebuild/evidence/package5-remainder-e2-r04-assessment.md",
+    "docs/rebuild/CYCLE-05-CHAPTER-5-COMPLETION-REPORT.md",
+    "docs/rebuild/CYCLE-06-FINAL-COMPLETION-REPORT.md",
+    "docs/rebuild/CYCLE-06-ACTION-ENGINE-SCHEMA-GATE.md",
+    "docs/rebuild/CYCLE-05-PHASE-A-OPPORTUNITIES-AGENT-TASKING.md",
+    "docs/rebuild/CYCLE-04-REMAINDER-REVIEW.md",
+    "docs/rebuild/CYCLE-07-P02-FINANCIAL-TRUTH.md",
+    "docs/rebuild/CYCLE-07-OWNER-DECISION-PACK.md",
+    "docs/rebuild/CYCLE-06-NATIVE-CONSENT-SECURITY-OWNER-FOUNDATION-STOP.md",
+    "docs/rebuild/CYCLE-07-FINAL-COMPLETION-REPORT.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-WAVE-6-A30-APPROVED-RUNTIME-CONTRACT-GATE.md",
+    "docs/rebuild/CYCLE-06-PHASE-A-ACTION-ENGINE-AUDIT.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-3-CANONICAL-POLICY-RESOLVER-REPORT.md",
+    "docs/rebuild/CYCLE-07-P04-STAFF-GOALS.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-B5-B6-REMEDIATION-REPORT.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-STAGE-3-SCHEDULER-REMAINDER-INVENTORY.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-P4-04-REFERRAL-REWARD-RUNTIME-CONTRACT-GATE.md",
+    "docs/rebuild/CYCLE-05-OPPORTUNITY-LIFECYCLE-SCHEMA-GATE.md",
+    "docs/rebuild/CYCLE-04-PHASE-A-BUSINESS-FACTS-AUDIT.md",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-4-P4-03-EXPIRE-LEGACY-LOYALTY-SHADOW-REPORT.md",
+    "docs/rebuild/MAYA-ORCHESTRATOR-AGENTS-ARCHITECTURE-GATE.md",
+    "docs/rebuild/package5-b21-realtime-session-history-v1-proposal.md",
+    "docs/rebuild/CYCLE-04-P9-VISIT-RECENCY-REPORT.md",
+    "docs/rebuild/CYCLE-04-P4-BRIEFINGS-REPORTS-MIGRATION-REPORT.md",
+    "docs/rebuild/CYCLE-02-P3-COMPLETION.md"
+  ],
+  "queries": [
+    "C8 / Chapter 8 / PREDICT / valuation in architecture, rebuild, roadmap",
+    "CLV / churn / no_show risk / forecast / loyal / cadence in current backend + bounded Python + PWA",
+    "current schema models, source owners, Opportunity policy and measurement contract"
+  ],
+  "backendRuntimeOrSchemaDeltaSinceC7": 0
+}

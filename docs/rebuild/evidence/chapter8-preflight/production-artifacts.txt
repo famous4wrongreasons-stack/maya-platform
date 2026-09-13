@@ -1,0 +1,5 @@
+Welcome to LTD BeGet SSH Server 'prime'
+dae6c0b057bf4fc05d26393da13dbd0dafb38a6ba38359244a7870ee495d8715  /var/www/maya-platform/app.html
+b57b04948f6b029ba9eb10ed186cf03e408cb78ea8911103eed83eb4f35ef385  /var/www/maya-platform/maya-motion-reference.png
+/opt/maya-saas/releases/20260912-c7-p06-4058cd8c
+Initial attempt to invoke a non-existent remote guard path failed; no writes occurred. Correct committed verify-live.cjs then passed; see live-c7-consumer.txt.
