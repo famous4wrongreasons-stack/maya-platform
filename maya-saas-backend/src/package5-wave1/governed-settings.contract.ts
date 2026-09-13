@@ -1,3 +1,4 @@
+import { c8Policy } from '../valuation/c8.policy';
 import { businessRuleContainsKnownPii } from './business-rule-safety';
 import { createHash } from 'node:crypto';
 import { BadRequestException } from '@nestjs/common';
@@ -8,6 +9,7 @@ export const TENANT_CONFIGURATION_NAMESPACES = [
   'business_rules',
   'client_capabilities',
   'staff_ai_provider',
+  'c8_valuation',
 ] as const;
 export type TenantConfigurationNamespace =
   (typeof TENANT_CONFIGURATION_NAMESPACES)[number];
@@ -68,6 +70,7 @@ export function governedConfigurationContent(
   value: unknown,
   context?: { tenantId: string; actorUserId: string; callerId: string },
 ): Record<string, unknown> {
+  if (namespace === 'c8_valuation') return c8Policy(value);
   if (namespace === 'client_capabilities') {
     const object = governedObject(value, ['client_self_visit_history']);
     if (typeof object.client_self_visit_history !== 'boolean')

@@ -1,3 +1,4 @@
+import { C8_RETENTION_CLASSES } from './chapter8-valuation-retention';
 import {
   C7_MEASUREMENT_RETENTION_CLASS,
   C7_MEASUREMENT_RETENTION_RULE,
@@ -35,6 +36,7 @@ const RC_RULES = Object.fromEntries(
   };
 };
 export const WAVE6_CLASSES = {
+  ...C8_RETENTION_CLASSES,
   [C7_MEASUREMENT_RETENTION_CLASS]: C7_MEASUREMENT_RETENTION_RULE,
   ...RC_RULES,
   purge_auth_sessions: {

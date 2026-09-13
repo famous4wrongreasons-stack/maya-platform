@@ -1,4 +1,10 @@
 import {
+  isC8RetentionClass,
+  selectC8Retention,
+  c8RetentionItem,
+  purgeC8Revision,
+} from './chapter8-valuation-retention';
+import {
   C7_MEASUREMENT_RETENTION_CLASS,
   selectMeasurementRetention,
   measurementRetentionItem,
@@ -87,7 +93,8 @@ export class Package5Wave6MaintenanceService {
     const { actionClass, batchSize } = wave6Request(request);
     const authority = this.authority();
     if (
-      (isRCPayloadClass(actionClass) ||
+      (isC8RetentionClass(actionClass) ||
+        isRCPayloadClass(actionClass) ||
         actionClass === C7_MEASUREMENT_RETENTION_CLASS) &&
       authority.scope !== 'tenant'
     )
@@ -218,6 +225,12 @@ export class Package5Wave6MaintenanceService {
   }
 
   private async selection(tx: Tx, plan: Plan, lock: boolean): Promise<Item[]> {
+    if (isC8RetentionClass(plan.actionClass)) {
+      await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+      return (await selectC8Retention(tx, plan, lock)).map((row) =>
+        c8RetentionItem(plan, row),
+      );
+    }
     if (plan.actionClass === C7_MEASUREMENT_RETENTION_CLASS) {
       await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
       return (await selectMeasurementRetention(tx, plan, lock)).map((row) =>
@@ -451,7 +464,11 @@ export class Package5Wave6MaintenanceService {
           where: { maintenanceRunId: run.id },
         });
         const payload = isRCPayloadClass(plan.actionClass);
-        if (payload || plan.actionClass === C7_MEASUREMENT_RETENTION_CLASS)
+        if (
+          payload ||
+          isC8RetentionClass(plan.actionClass) ||
+          plan.actionClass === C7_MEASUREMENT_RETENTION_CLASS
+        )
           await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
         const allowedKinds: string[] = payload
           ? rcPayloadKinds(plan.actionClass)
@@ -467,7 +484,11 @@ export class Package5Wave6MaintenanceService {
         )
           throw new Error('maintenance_manifest_mismatch');
         const deleted = new Set<string>();
-        if (plan.actionClass === C7_MEASUREMENT_RETENTION_CLASS) {
+        if (isC8RetentionClass(plan.actionClass)) {
+          for (const target of await selectC8Retention(tx, plan, true, run.id))
+            if (await purgeC8Revision(tx, plan, target))
+              deleted.add(c8RetentionItem(plan, target).itemRefHash);
+        } else if (plan.actionClass === C7_MEASUREMENT_RETENTION_CLASS) {
           for (const target of await selectMeasurementRetention(
             tx,
             plan,

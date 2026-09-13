@@ -1,3 +1,4 @@
+import { C8_RETENTION_CLASSES } from './chapter8-valuation-retention';
 import { RC_PAYLOAD_CLASSES } from './package5-wave-rc-payloads';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -9,8 +10,8 @@ import {
 import { Package5Wave6MaintenanceService } from './package5-wave6.service';
 
 describe('approved Wave 6 policy boundary', () => {
-  it('pins six unchanged auth policies, eight R-C payload classes and the approved C7 derived lifecycle', () => {
-    expect(Object.keys(WAVE6_CLASSES)).toHaveLength(15);
+  it('pins six unchanged auth policies, eight R-C payload classes and the approved C7/C8 derived lifecycle', () => {
+    expect(Object.keys(WAVE6_CLASSES)).toHaveLength(18);
     expect(WAVE6_CLASSES.purge_auth_sessions.retentionMs).toBe(30 * 86_400_000);
     for (const key of [
       'purge_phone_auth_codes',
@@ -36,12 +37,26 @@ describe('approved Wave 6 policy boundary', () => {
             Object.entries(WAVE6_CLASSES).filter(
               ([key]) =>
                 !Object.hasOwn(RC_PAYLOAD_CLASSES, key) &&
+                !Object.hasOwn(C8_RETENTION_CLASSES, key) &&
                 key !== 'expire_measurement_revisions',
             ),
           ),
         ),
       ),
     ).toBe('9fc9734d27a82ce042ec46eb26b454329749ea877811733dbc70c06bf799f9e7');
+  });
+  it('pins exactly the approved three C8 leaves independently of unchanged auth policies', () => {
+    expect(Object.keys(C8_RETENTION_CLASSES).sort()).toEqual([
+      'expire_c8_evaluation_revisions',
+      'expire_c8_model_versions',
+      'expire_c8_result_revisions',
+    ]);
+    for (const [key, rule] of Object.entries(C8_RETENTION_CLASSES)) {
+      expect(WAVE6_CLASSES[key as keyof typeof WAVE6_CLASSES]).toEqual(rule);
+      expect(rule.expiry).toBe('expiresAt');
+      expect(rule.stamp).toBe('admittedAt');
+      expect(rule.retentionMs).toBe(0);
+    }
   });
   it('rejects untrusted clock, tenant, target, predicate and policy overrides', () => {
     for (const key of [

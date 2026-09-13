@@ -1,0 +1,804 @@
+{
+    "columns": [
+        {
+            "name": "id",
+            "type": "uuid",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "tenantId",
+            "type": "text",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "modelVersionId",
+            "type": "uuid",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "modelManifestHash",
+            "type": "character",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "identityHash",
+            "type": "character",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "revision",
+            "type": "integer",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "intentHash",
+            "type": "character",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "contractVersion",
+            "type": "integer",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "evaluationContractHash",
+            "type": "character",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "mode",
+            "type": "text",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "targetKey",
+            "type": "text",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "scopeJson",
+            "type": "jsonb",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "t0From",
+            "type": "timestamp with time zone",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "t0To",
+            "type": "timestamp with time zone",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "labelsAsOf",
+            "type": "timestamp with time zone",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "admittedAt",
+            "type": "timestamp with time zone",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "expiresAt",
+            "type": "timestamp with time zone",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "state",
+            "type": "text",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "leaseGeneration",
+            "type": "integer",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "leaseTokenHash",
+            "type": "character",
+            "table": "C8EvaluationRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "leaseExpiresAt",
+            "type": "timestamp with time zone",
+            "table": "C8EvaluationRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "publishedAt",
+            "type": "timestamp with time zone",
+            "table": "C8EvaluationRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "snapshotHash",
+            "type": "character",
+            "table": "C8EvaluationRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "casesJson",
+            "type": "jsonb",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "evidenceHash",
+            "type": "character",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "countsJson",
+            "type": "jsonb",
+            "table": "C8EvaluationRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "metricsJson",
+            "type": "jsonb",
+            "table": "C8EvaluationRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "calibrationJson",
+            "type": "jsonb",
+            "table": "C8EvaluationRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "driftJson",
+            "type": "jsonb",
+            "table": "C8EvaluationRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "outcome",
+            "type": "text",
+            "table": "C8EvaluationRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "reasonsJson",
+            "type": "jsonb",
+            "table": "C8EvaluationRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "id",
+            "type": "uuid",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "tenantId",
+            "type": "text",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "modelKey",
+            "type": "text",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "version",
+            "type": "integer",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "contractVersion",
+            "type": "integer",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "manifestHash",
+            "type": "character",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "artifactHash",
+            "type": "character",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "featureContractHash",
+            "type": "character",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "evaluationContractHash",
+            "type": "character",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "targetKey",
+            "type": "text",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "targetJson",
+            "type": "jsonb",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "scopeJson",
+            "type": "jsonb",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "methodJson",
+            "type": "jsonb",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "parametersJson",
+            "type": "jsonb",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "trainingEvidenceJson",
+            "type": "jsonb",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "informationCutoffAt",
+            "type": "timestamp with time zone",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "trainingMode",
+            "type": "text",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "releaseDigest",
+            "type": "character",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "requestKeyHash",
+            "type": "character",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "intentHash",
+            "type": "character",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "admittedAt",
+            "type": "timestamp with time zone",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "expiresAt",
+            "type": "timestamp with time zone",
+            "table": "C8ModelVersion",
+            "nullable": "NO"
+        },
+        {
+            "name": "id",
+            "type": "uuid",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "tenantId",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "kind",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "subjectKind",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "subjectId",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "identityHash",
+            "type": "character",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "revision",
+            "type": "integer",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "intentHash",
+            "type": "character",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "contractVersion",
+            "type": "integer",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "ruleKey",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "ruleVersion",
+            "type": "integer",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "modelVersionId",
+            "type": "uuid",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "modelManifestHash",
+            "type": "character",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "policyRevisionId",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "policyContentHash",
+            "type": "character",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "t0",
+            "type": "timestamp with time zone",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "horizonEnd",
+            "type": "timestamp with time zone",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "periodFrom",
+            "type": "timestamp with time zone",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "periodTo",
+            "type": "timestamp with time zone",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "timezone",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "scopeJson",
+            "type": "jsonb",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "basis",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "currency",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "inputHash",
+            "type": "character",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "inputSnapshotJson",
+            "type": "jsonb",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "evidenceRefsJson",
+            "type": "jsonb",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "completeness",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "qualification",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "eligibility",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "admittedAt",
+            "type": "timestamp with time zone",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "expiresAt",
+            "type": "timestamp with time zone",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "state",
+            "type": "text",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "leaseGeneration",
+            "type": "integer",
+            "table": "C8ResultRevision",
+            "nullable": "NO"
+        },
+        {
+            "name": "leaseTokenHash",
+            "type": "character",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "leaseExpiresAt",
+            "type": "timestamp with time zone",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "publishedAt",
+            "type": "timestamp with time zone",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "snapshotHash",
+            "type": "character",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "valuesJson",
+            "type": "jsonb",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "uncertaintyJson",
+            "type": "jsonb",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "reasonsJson",
+            "type": "jsonb",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        },
+        {
+            "name": "rankingJson",
+            "type": "jsonb",
+            "table": "C8ResultRevision",
+            "nullable": "YES"
+        }
+    ],
+    "triggers": [
+        {
+            "name": "C8_eval_truncate_trg",
+            "table": "C8EvaluationRevision",
+            "enabled": "O"
+        },
+        {
+            "name": "C8_eval_write_trg",
+            "table": "C8EvaluationRevision",
+            "enabled": "O"
+        },
+        {
+            "name": "C8_model_truncate_trg",
+            "table": "C8ModelVersion",
+            "enabled": "O"
+        },
+        {
+            "name": "C8_model_write_trg",
+            "table": "C8ModelVersion",
+            "enabled": "O"
+        },
+        {
+            "name": "C8_result_truncate_trg",
+            "table": "C8ResultRevision",
+            "enabled": "O"
+        },
+        {
+            "name": "C8_result_write_trg",
+            "table": "C8ResultRevision",
+            "enabled": "O"
+        }
+    ],
+    "functions": [
+        {
+            "hash": "7eaa9e3a431d63073d5b8f92d42ee8132f188a40cbccd47e86de12345113d841",
+            "name": "C8_eval_guard"
+        },
+        {
+            "hash": "fe05a159cbab19bb3572883f5b3720d92329aa41a51d7b1e61c289bb956a1e7e",
+            "name": "C8_model_guard"
+        },
+        {
+            "hash": "c39b589a78feba62122d165d6b3cfe51e15cfa29bf3eeb410c3b116099b6c7b4",
+            "name": "C8_result_guard"
+        },
+        {
+            "hash": "b16a0c9b27a7a02bd8825ec5ce0eefb6da36e219f549a07c0e194f0fe520ee11",
+            "name": "C8_retention_claim"
+        },
+        {
+            "hash": "8183cb2840649663642dcb096875890ed624555c96ee32b17ec6859361c9c166",
+            "name": "C8_validate_refs"
+        }
+    ],
+    "constraints": [
+        {
+            "kind": "p",
+            "name": "C8EvaluationRevision_pkey",
+            "table": "C8EvaluationRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_eval_contract_ck",
+            "table": "C8EvaluationRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_eval_hashes_ck",
+            "table": "C8EvaluationRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_eval_mode_ck",
+            "table": "C8EvaluationRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_eval_outcome_ck",
+            "table": "C8EvaluationRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_eval_publication_ck",
+            "table": "C8EvaluationRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_eval_state_lease_ck",
+            "table": "C8EvaluationRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_eval_target_ck",
+            "table": "C8EvaluationRevision",
+            "validated": true
+        },
+        {
+            "kind": "f",
+            "name": "C8_eval_tenant_fk",
+            "table": "C8EvaluationRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_eval_time_ck",
+            "table": "C8EvaluationRevision",
+            "validated": true
+        },
+        {
+            "kind": "p",
+            "name": "C8ModelVersion_pkey",
+            "table": "C8ModelVersion",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_model_contract_ck",
+            "table": "C8ModelVersion",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_model_hashes_ck",
+            "table": "C8ModelVersion",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_model_mode_ck",
+            "table": "C8ModelVersion",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_model_payload_ck",
+            "table": "C8ModelVersion",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_model_target_ck",
+            "table": "C8ModelVersion",
+            "validated": true
+        },
+        {
+            "kind": "f",
+            "name": "C8_model_tenant_fk",
+            "table": "C8ModelVersion",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_model_time_ck",
+            "table": "C8ModelVersion",
+            "validated": true
+        },
+        {
+            "kind": "p",
+            "name": "C8ResultRevision_pkey",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_result_contract_ck",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_result_eligibility_ck",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_result_hashes_ck",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_result_kind_ck",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_result_lease_ck",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_result_payload_ck",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_result_publication_ck",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_result_state_ck",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_result_subject_ck",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "f",
+            "name": "C8_result_tenant_fk",
+            "table": "C8ResultRevision",
+            "validated": true
+        },
+        {
+            "kind": "c",
+            "name": "C8_result_time_ck",
+            "table": "C8ResultRevision",
+            "validated": true
+        }
+    ]
+}

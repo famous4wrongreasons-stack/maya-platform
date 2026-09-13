@@ -168,6 +168,9 @@ enum CommunicationCampaignState {
 }
 
 model Tenant {
+  c8ModelVersions C8ModelVersion[]
+  c8ResultRevisions C8ResultRevision[]
+  c8EvaluationRevisions C8EvaluationRevision[]
   measurementRevisions MeasurementRevision[] @relation("C7TenantMeasurement")
   consentInvalidations ClientConsentInvalidation[]
   ownerReportRuns OwnerReportRun[]
@@ -3716,4 +3719,134 @@ model MeasurementRevision {
   @@index([expiresAt, id], map: "C7_measurement_expiry_idx")
   @@index([tenantId, creditedExecutionId], map: "C7_measurement_execution_idx")
   @@index([tenantId, creditedAttemptId], map: "C7_measurement_attempt_idx")
+}
+
+
+model C8ModelVersion {
+  id                     String   @id @db.Uuid
+  tenantId               String
+  modelKey               String
+  version                Int
+  contractVersion        Int
+  manifestHash           String   @db.Char(64)
+  artifactHash           String   @db.Char(64)
+  featureContractHash    String   @db.Char(64)
+  evaluationContractHash String   @db.Char(64)
+  targetKey              String
+  targetJson             Json     @db.JsonB
+  scopeJson              Json     @db.JsonB
+  methodJson             Json     @db.JsonB
+  parametersJson         Json     @db.JsonB
+  trainingEvidenceJson   Json     @db.JsonB
+  informationCutoffAt    DateTime @db.Timestamptz(3)
+  trainingMode           String
+  releaseDigest          String   @db.Char(64)
+  requestKeyHash         String   @db.Char(64)
+  intentHash             String   @db.Char(64)
+  admittedAt             DateTime @db.Timestamptz(3)
+  expiresAt              DateTime @db.Timestamptz(3)
+  tenant                 Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C8_model_tenant_fk")
+
+  @@unique([id, tenantId], map: "C8_model_id_tenant_uq")
+  @@unique([tenantId, modelKey, version], map: "C8_model_version_uq")
+  @@unique([tenantId, requestKeyHash], map: "C8_model_request_uq")
+  @@unique([tenantId, manifestHash], map: "C8_model_manifest_uq")
+  @@index([tenantId, targetKey, admittedAt], map: "C8_model_target_idx")
+  @@index([expiresAt, id], map: "C8_model_expiry_idx")
+}
+
+model C8ResultRevision {
+  id                String    @id @db.Uuid
+  tenantId          String
+  kind              String
+  subjectKind       String
+  subjectId         String
+  identityHash      String    @db.Char(64)
+  revision          Int
+  intentHash        String    @db.Char(64)
+  contractVersion   Int
+  ruleKey           String
+  ruleVersion       Int
+  modelVersionId    String?   @db.Uuid
+  modelManifestHash String?   @db.Char(64)
+  policyRevisionId  String
+  policyContentHash String    @db.Char(64)
+  t0                DateTime  @db.Timestamptz(3)
+  horizonEnd        DateTime? @db.Timestamptz(3)
+  periodFrom        DateTime  @db.Timestamptz(3)
+  periodTo          DateTime  @db.Timestamptz(3)
+  timezone          String
+  scopeJson         Json      @db.JsonB
+  basis             String
+  currency          String?
+  inputHash         String    @db.Char(64)
+  inputSnapshotJson Json      @db.JsonB
+  evidenceRefsJson  Json      @db.JsonB
+  completeness      String
+  qualification     String
+  eligibility       String
+  admittedAt        DateTime  @db.Timestamptz(3)
+  expiresAt         DateTime  @db.Timestamptz(3)
+  state             String
+  leaseGeneration   Int
+  leaseTokenHash    String?   @db.Char(64)
+  leaseExpiresAt    DateTime? @db.Timestamptz(3)
+  publishedAt       DateTime? @db.Timestamptz(3)
+  snapshotHash      String?   @db.Char(64)
+  valuesJson        Json?     @db.JsonB
+  uncertaintyJson   Json?     @db.JsonB
+  reasonsJson       Json?     @db.JsonB
+  rankingJson       Json?     @db.JsonB
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C8_result_tenant_fk")
+
+  @@unique([id, tenantId], map: "C8_result_id_tenant_uq")
+  @@unique([tenantId, identityHash, revision], map: "C8_result_revision_uq")
+  @@unique([tenantId, intentHash], map: "C8_result_intent_uq")
+  @@index([tenantId, subjectKind, subjectId, t0], map: "C8_result_subject_idx")
+  @@index([tenantId, kind, periodFrom, periodTo], map: "C8_result_period_idx")
+  @@index([tenantId, state, leaseExpiresAt], map: "C8_result_claim_idx")
+  @@index([expiresAt, id], map: "C8_result_expiry_idx")
+  @@index([tenantId, modelVersionId], map: "C8_result_model_idx")
+}
+
+model C8EvaluationRevision {
+  id                     String    @id @db.Uuid
+  tenantId               String
+  modelVersionId         String    @db.Uuid
+  modelManifestHash      String    @db.Char(64)
+  identityHash           String    @db.Char(64)
+  revision               Int
+  intentHash             String    @db.Char(64)
+  contractVersion        Int
+  evaluationContractHash String    @db.Char(64)
+  mode                   String
+  targetKey              String
+  scopeJson              Json      @db.JsonB
+  t0From                 DateTime  @db.Timestamptz(3)
+  t0To                   DateTime  @db.Timestamptz(3)
+  labelsAsOf             DateTime  @db.Timestamptz(3)
+  admittedAt             DateTime  @db.Timestamptz(3)
+  expiresAt              DateTime  @db.Timestamptz(3)
+  state                  String
+  leaseGeneration        Int
+  leaseTokenHash         String?   @db.Char(64)
+  leaseExpiresAt         DateTime? @db.Timestamptz(3)
+  publishedAt            DateTime? @db.Timestamptz(3)
+  snapshotHash           String?   @db.Char(64)
+  casesJson              Json      @db.JsonB
+  evidenceHash           String    @db.Char(64)
+  countsJson             Json      @db.JsonB
+  metricsJson            Json?     @db.JsonB
+  calibrationJson        Json?     @db.JsonB
+  driftJson              Json?     @db.JsonB
+  outcome                String?
+  reasonsJson            Json?     @db.JsonB
+  tenant                 Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C8_eval_tenant_fk")
+
+  @@unique([id, tenantId], map: "C8_eval_id_tenant_uq")
+  @@unique([tenantId, identityHash, revision], map: "C8_eval_revision_uq")
+  @@unique([tenantId, intentHash], map: "C8_eval_intent_uq")
+  @@index([tenantId, modelVersionId, t0From, t0To], map: "C8_eval_period_idx")
+  @@index([tenantId, state, leaseExpiresAt], map: "C8_eval_claim_idx")
+  @@index([expiresAt, id], map: "C8_eval_expiry_idx")
 }

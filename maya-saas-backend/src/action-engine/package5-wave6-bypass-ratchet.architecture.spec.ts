@@ -142,6 +142,9 @@ describe('Wave 6 exact AC6 owner / final narrowed family coverage', () => {
         'purge_expense_reminder_payloads',
         'purge_cash_declaration_reason_payloads',
         'expire_measurement_revisions',
+        'expire_c8_result_revisions',
+        'expire_c8_evaluation_revisions',
+        'expire_c8_model_versions',
       ].sort(),
     );
   });

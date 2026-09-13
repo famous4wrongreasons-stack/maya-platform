@@ -1,0 +1,18 @@
+Welcome to LTD BeGet SSH Server 'prime'
+/opt/maya-saas/releases/20260912-c7-p06-4058cd8c
+{"status":"ok","service":"maya-saas-backend","release":"20260912-c7-p06-4058cd8c","started_at":"2026-09-12T20:09:10.635Z","timestamp":"2026-09-13T10:16:00.847Z"}{"status":"ready","service":"maya-saas-backend","checks":{"database":"ready"},"timestamp":"2026-09-13T10:16:00.859Z"}{
+  "ok": true,
+  "environment": "production",
+  "config": "safe",
+  "local_migrations": 94,
+  "database": {
+    "status": "ready",
+    "applied_migrations": 97,
+    "pending_migrations": 0
+  }
+}
+Loaded Prisma config from prisma.config.ts.
+
+No difference detected.
+
+[{"model":null,"result":null,"evaluation":null,"unsupported_policy_rows":"0"}]

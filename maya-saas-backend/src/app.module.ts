@@ -1,3 +1,4 @@
+import { C8Module } from './valuation/c8.module';
 import { MeasurementModule } from './measurement/measurement.module';
 import { ExpenseIntakeModule } from './expense-intake/expense-intake.module';
 import { MarketingModule } from './marketing/marketing.module';
@@ -97,6 +98,7 @@ import { SystemMetricsService } from './system-metrics.service';
     LoyaltyModule,
     OwnerReportsModule,
     MeasurementModule,
+    C8Module,
     OperationalAlertsModule,
     ServicesModule,
     StaffModule,

@@ -1,3 +1,4 @@
+import { c8PolicyScope } from '../valuation/c8.policy';
 import {
   RC_DURABLE_COMMANDS,
   expenseReminderPreferenceTransition,
@@ -218,6 +219,8 @@ export class Package5Wave1ShadowService {
             semanticCommand.content,
             { tenantId, actorUserId, callerId },
           );
+          if (namespace === 'c8_valuation')
+            await c8PolicyScope(tx, tenantId, content);
           if (namespace === 'business_rules') {
             const submitted = this.governedRules(semanticCommand.content);
             const previous = this.governedRules(current.content);
@@ -1156,6 +1159,8 @@ export class Package5Wave1ExecutableService {
       if (operation === 'tenant_business_configuration') {
         const namespace = governedNamespace(config.namespace);
         const content = governedConfigurationContent(namespace, config.content);
+        if (namespace === 'c8_valuation')
+          await c8PolicyScope(tx, execution.tenantId, content);
         await tx.tenantBusinessConfigurationRevision.create({
           data: {
             id: randomUUID(),
