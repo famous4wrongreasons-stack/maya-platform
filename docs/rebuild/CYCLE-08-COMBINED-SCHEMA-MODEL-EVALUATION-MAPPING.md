@@ -1,5 +1,7 @@
 # Chapter 8 — combined schema / model / evaluation mapping
 
+**2026-09-13 owner approval after `8c185b75`: the 3-model / 94-field / 2-altered-model / 0-AE / 3-AC6 / 1-migration / no-backfill envelope below is APPROVED for limited-data implementation.** See [limited-data decision](CYCLE-08-LIMITED-DATA-IMPLEMENTATION-DECISION.md). D01–D16 remain approved. Historical proposal/STOP text below describes the earlier mapping checkpoint; it no longer blocks safe foundation implementation. Numeric activation budgets remain future per-model evidence, not assumed approved. T01–T08 stay disabled; unavailable is never calibration PASS. No new fields or owners are authorized.
+
 Date: 2026-09-13. Inspected canonical origin and isolated checkout: `0cdf45fd6a12622f5071967a02214cb526f5ebe8`. Local branch `codex/maya-identity-consent-20260913` tracks canonical `codex/maya-brain-systemic-release-20260815`; fetch: ahead 0 / behind 0, initially clean.
 
 **D01–D16 Option A: APPROVED by the owner's request accepting 0cdf45fd.** This supersedes the *pending approval* status of the original [decision pack](CYCLE-08-OWNER-DECISION-PACK.md), without rewriting that historical proposal. Product boundaries, 24 requirements / 6 packages / 4 waves / 32 surfaces remain unchanged.
