@@ -511,6 +511,86 @@ export class C8Store {
         where: { tenantId_intentHash: { tenantId, intentHash } },
       });
       if (prior) return prior;
+      // c8_evaluation_same_evidence: a poll-clock change is not a new evaluation transition.
+      const sameEvidence = await tx.c8EvaluationRevision.findFirst({
+        where: {
+          tenantId,
+          identityHash: identity.hash,
+          evidenceHash: c8Digest(record.evidenceHash),
+          modelManifestHash: prepared.modelManifestHash,
+          evaluationContractHash: prepared.evaluationContractHash,
+        },
+        orderBy: { revision: 'desc' },
+      });
+      if (sameEvidence) {
+        // A new current observation must requalify its labels even when deduplicated.
+        // Exact historical retries above still return their immutable original receipt.
+        if (prepared.labelsAsOf > now || expiry <= now.getTime())
+          throw new Error('c8_evaluation_current_time_required');
+        for (const c of cases) {
+          const [valid] = await tx.$queryRaw<{ valid: boolean }[]>(Prisma.sql`
+            SELECT "C8_validate_refs"(${tenantId},${encode(c.labelRefs)}::jsonb,${prepared.labelsAsOf}::timestamptz) valid`);
+          if (!valid.valid) throw new Error('c8_current_label_unavailable');
+          if (
+            c.labelState === 'QUALIFIED' &&
+            ['attended_return', 'appointment_no_show'].includes(
+              prepared.targetKey,
+            )
+          ) {
+            const prediction = await tx.c8ResultRevision.findFirstOrThrow({
+              where: { tenantId, id: c.predictionRef.id },
+            });
+            for (const ref of c.labelRefs) {
+              const label = await tx.measurementRevision.findFirstOrThrow({
+                where: { tenantId, id: ref.id },
+              });
+              if (
+                prepared.targetKey === 'attended_return' &&
+                c.labelValue === '0'
+              )
+                continue;
+              const ap = label.appointmentId
+                ? await tx.appointment.findFirst({
+                    where: { tenantId, id: label.appointmentId },
+                  })
+                : null;
+              if (
+                !ap ||
+                ap.mayaClientId !== label.clientId ||
+                ap.status !== 'confirmed' ||
+                ap.endAt > prepared.labelsAsOf
+              )
+                throw new Error('c8_current_binary_label_unavailable');
+              if (prepared.targetKey === 'attended_return') {
+                if (
+                  c.labelValue !== '1' ||
+                  ap.attendance !== 'arrived' ||
+                  ap.startAt <= prediction.t0 ||
+                  ap.startAt > prediction.horizonEnd!
+                )
+                  throw new Error('c8_current_return_label_unavailable');
+              } else {
+                const features = (
+                  prediction.inputSnapshotJson as unknown as {
+                    features: Array<{ key: string; value: unknown }>;
+                  }
+                ).features;
+                if (
+                  ap.startAt.toISOString() !==
+                    features.find((f) => f.key === 'scheduled_start_at')
+                      ?.value ||
+                  ap.endAt.toISOString() !==
+                    features.find((f) => f.key === 'scheduled_end_at')?.value ||
+                  !['arrived', 'no_show'].includes(ap.attendance ?? '') ||
+                  c.labelValue !== (ap.attendance === 'no_show' ? '1' : '0')
+                )
+                  throw new Error('c8_current_no_show_label_unavailable');
+              }
+            }
+          }
+        }
+        return sameEvidence;
+      }
       const head = await tx.c8EvaluationRevision.aggregate({
         where: { tenantId, identityHash: identity.hash },
         _max: { revision: true },

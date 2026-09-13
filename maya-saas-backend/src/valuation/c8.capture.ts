@@ -1,3 +1,5 @@
+import { resultFromRevision } from '../measurement/measurement.presentation';
+import { MeasurementResult } from '../measurement/measurement.contract';
 import { Injectable } from '@nestjs/common';
 import { MeasurementService } from '../measurement/measurement.service';
 import { MeasurementIntent } from '../measurement/measurement.contract';
@@ -12,7 +14,71 @@ export async function c8C7Snapshot(
   owner: MeasurementService,
   input: MeasurementIntent,
   identity: string,
+  publishedAfter?: Date,
 ): Promise<MeasurementRevision> {
+  if (input.kind === 'appointment_outcome') {
+    const current = await owner.current(input);
+    const row = current.revision;
+    if (
+      row &&
+      !current.refreshPending &&
+      row.publishedAt &&
+      (!publishedAfter || row.publishedAt > publishedAfter) &&
+      row.asOf <= input.asOf &&
+      row.staffId === (input.staffId ?? null) &&
+      row.branchId === (input.branchId ?? null) &&
+      row.timezone === input.timezone &&
+      c8Hash(
+        (row.scopeJson as unknown as MeasurementIntent['scope']).branchIds,
+      ) === c8Hash(input.scope.branchIds)
+    ) {
+      const original: MeasurementIntent = {
+        kind: 'appointment_outcome',
+        clientId: row.clientId,
+        appointmentId: row.appointmentId,
+        staffId: row.staffId,
+        branchId: row.branchId,
+        periodFrom: row.periodFrom,
+        periodTo: row.periodTo,
+        timezone: row.timezone,
+        asOf: row.asOf,
+        scope: row.scopeJson as unknown as MeasurementIntent['scope'],
+      };
+      const reobserved = await owner.observe(original),
+        fresh = await owner.observe(input);
+      const content = (r: MeasurementResult) => {
+        const sources = r.sources.map((source) =>
+          Object.fromEntries(
+            Object.entries(source).filter(([key]) => key !== 'observedAt'),
+          ),
+        );
+        const metrics = r.metrics.map((m) => ({
+          ...m,
+          sourceRefs: m.sourceRefs.map((n) => c8Hash(sources[n])).sort(),
+        }));
+        return {
+          ...r,
+          sources: sources.sort((a, b) => c8Hash(a).localeCompare(c8Hash(b))),
+          metrics,
+        };
+      };
+      const values = (r: MeasurementResult) =>
+        r.metrics.map((metric) =>
+          Object.fromEntries(
+            Object.entries(metric).filter(([key]) => key !== 'sourceRefs'),
+          ),
+        );
+      // The C7 appointment identity is the Appointment, not the caller's report window.
+      // Reuse only after a full authoritative re-read at the original query and unchanged current metrics.
+      if (
+        c8Hash(content(reobserved)) ===
+          c8Hash(content(resultFromRevision(row))) &&
+        c8Hash([values(reobserved), reobserved.reasons]) ===
+          c8Hash([values(fresh), fresh.reasons])
+      )
+        return row;
+    }
+  }
   for (let attempt = 0; ; attempt++)
     try {
       return await owner.reportSnapshot(input, identity);

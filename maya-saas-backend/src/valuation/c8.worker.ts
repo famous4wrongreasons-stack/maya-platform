@@ -1,3 +1,5 @@
+import { C8OpportunityBridge } from './c8.opportunity';
+import { C8EvaluationService } from './c8.evaluation';
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { C8Store } from './c8.store';
@@ -14,6 +16,8 @@ export class C8Worker {
     private readonly sources: C8Sources,
     private readonly producer: C8Producer,
     private readonly ranking: C8RankingService,
+    private readonly evaluation: C8EvaluationService,
+    private readonly opportunities: C8OpportunityBridge,
   ) {}
   async tickTenant(tenantId: string) {
     if (tenantId !== this.store.tenant()) throw new Error('c8_worker_tenant');
@@ -24,6 +28,8 @@ export class C8Worker {
       }),
     );
     if (!configured) return { captured: 0, resumed: 0 };
+    await this.evaluation.tickTenant();
+    await this.opportunities.refresh();
     const policy = await this.store.transaction((tx) =>
       this.sources.policy(tx),
     );

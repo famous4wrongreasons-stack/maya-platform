@@ -1,3 +1,6 @@
+import { C8EvaluationService } from './c8.evaluation';
+import { C8LabelCollector } from './c8.labels';
+import { C8OpportunityBridge } from './c8.opportunity';
 import { C8Worker } from './c8.worker';
 import { C8RankingService } from './c8.ranking';
 import { C8Producer } from './c8.producer';
@@ -23,7 +26,18 @@ import { C8Sources } from './c8.sources';
     C8Producer,
     C8RankingService,
     C8Worker,
+    C8OpportunityBridge,
+    C8LabelCollector,
+    C8EvaluationService,
   ],
-  exports: [C8Store, C8Sources, C8Producer, C8RankingService, C8Worker],
+  exports: [
+    C8Store,
+    C8Sources,
+    C8Producer,
+    C8RankingService,
+    C8Worker,
+    C8OpportunityBridge,
+    C8EvaluationService,
+  ],
 })
 export class C8Module {}

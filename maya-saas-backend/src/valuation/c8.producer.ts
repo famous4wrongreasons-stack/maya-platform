@@ -211,6 +211,11 @@ export class C8Producer {
         appointment.status !== 'confirmed'
       )
         throw new Error('c8_existing_future_appointment_required');
+      if (
+        family === 'prediction' &&
+        ['arrived', 'no_show'].includes(appointment.attendance ?? '')
+      )
+        throw new Error('c8_outcome_already_observed_at_t0');
       if (family === 'scenario') currency = appointment.currency;
     } else {
       const query: C8PopulationQuery = {
@@ -394,6 +399,7 @@ export class C8Producer {
           startAt: true,
           endAt: true,
           status: true,
+          attendance: true,
           currency: true,
           branchId: true,
           serviceIds: true,

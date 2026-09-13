@@ -34,7 +34,8 @@ export interface OpportunityEvidenceV1 {
     | 'business_state_change'
     | 'watch_domain_event'
     | 'occupancy_capacity'
-    | 'admin_request';
+    | 'admin_request'
+    | 'c8_result';
   capability: string;
   factRef?: string;
   version: number;

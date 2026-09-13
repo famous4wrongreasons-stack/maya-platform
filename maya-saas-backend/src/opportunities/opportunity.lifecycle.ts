@@ -208,6 +208,7 @@ export class OpportunityLifecycleRepository {
     opportunity: OpportunityV1;
     task: AgentTaskV1 | null;
     validatedAt: Date;
+    verifyEvidence?: (tx: Prisma.TransactionClient) => Promise<void>;
   }): Promise<PersistedOpportunityResult> {
     validateTrustedPersistenceInput(input);
     return this.withSerializableRetry((tx) =>
@@ -557,9 +558,16 @@ async function persistOpportunityInTransaction(
     opportunity: OpportunityV1;
     task: AgentTaskV1 | null;
     validatedAt: Date;
+    verifyEvidence?: (tx: Prisma.TransactionClient) => Promise<void>;
   },
 ): Promise<PersistedOpportunityResult> {
   validateTrustedPersistenceInput(input);
+  if (input.opportunity.evidence.some((e) => e.owner === 'c8_result')) {
+    if (!input.verifyEvidence)
+      throw new Error('c8_opportunity_verifier_required');
+    await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+    await input.verifyEvidence(tx);
+  }
   const expiredAtWrite =
     new Date(input.opportunity.expiresAt).getTime() <=
     input.validatedAt.getTime();

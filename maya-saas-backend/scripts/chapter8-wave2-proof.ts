@@ -1,3 +1,6 @@
+import { C8OpportunityBridge } from '../src/valuation/c8.opportunity';
+import { C8LabelCollector } from '../src/valuation/c8.labels';
+import { C8EvaluationService } from '../src/valuation/c8.evaluation';
 /** Real P01 PostgreSQL/owner proof; only this new disposable database is permitted. */
 import 'reflect-metadata';
 import assert from 'node:assert/strict';
@@ -224,7 +227,17 @@ const measurement = new MeasurementService(
 const capture = new C8CaptureService(store, sources, measurement);
 const producer = new C8Producer(store, sources, capture, measurement);
 const ranking = new C8RankingService(store, sources, producer);
-const worker = new C8Worker(store, sources, producer, ranking);
+const worker = new C8Worker(
+  store,
+  sources,
+  producer,
+  ranking,
+  new C8EvaluationService(
+    store,
+    new C8LabelCollector(store, sources, measurement),
+  ),
+  new C8OpportunityBridge(db, store, sources),
+);
 function object(value: Prisma.JsonValue | null | undefined): Prisma.JsonObject {
   assert.ok(value && typeof value === 'object' && !Array.isArray(value));
   return value;
@@ -515,7 +528,17 @@ async function main() {
             select: { id: true, t0: true, intentHash: true },
           }),
         );
-        const resumedWorker = new C8Worker(store, sources, producer, ranking);
+        const resumedWorker = new C8Worker(
+          store,
+          sources,
+          producer,
+          ranking,
+          new C8EvaluationService(
+            store,
+            new C8LabelCollector(store, sources, measurement),
+          ),
+          new C8OpportunityBridge(db, store, sources),
+        );
         await resumedWorker.tickTenant(tenant.id);
         const two = await store.transaction((tx) =>
           tx.c8ResultRevision.findMany({

@@ -1,3 +1,4 @@
+import { c8AssertOpportunityBranch } from '../valuation/c8.opportunity.contract';
 import { createHash } from 'node:crypto';
 
 import {
@@ -774,6 +775,7 @@ export function assertCanonicalOpportunity(opportunity: OpportunityV1): void {
   if (expiresAt.getTime() <= observedAt.getTime()) {
     throw new Error('Opportunity expiry must be after its observation.');
   }
+  c8AssertOpportunityBranch(opportunity);
   assertNoInventedValuation(opportunity);
 }
 
