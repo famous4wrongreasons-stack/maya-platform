@@ -1,0 +1,14 @@
+PASS disabled Opportunity policy creates no review item
+PASS verified value plus policy dormancy admits one existing Opportunity without ActionExecution
+PASS changed authoritative value refreshes evidence on the same semantic Opportunity
+PASS current source correction resolves review without changing source or history
+PASS current A22 revocation prevents new Opportunity admission
+PASS future exact Appointment capture is durable before its outcome; immature is not zero
+PASS concurrent polling and restart reuse identical immature evaluation
+PASS later qualified no-show yields a new evaluation, never rewrites frozen T0
+PASS authoritative attendance correction changes current label revision only
+PASS reassignment excludes exact appointment outcome; unrelated Client is not negative
+PASS post-T0 attended visit creates a real positive return label without waiting for full H
+PASS cross-tenant evaluator rejects model; no hidden Client or source writer
+PASS outcome known before T0 is excluded from prospective prediction admission
+{"status":"PASS","checks":13,"productionEffects":0,"numericTargetsActive":0,"calibration":"UNAVAILABLE"}

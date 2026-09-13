@@ -329,7 +329,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'analytics.revenue.forecast',
     description:
-      'Deterministic period-end revenue forecast based only on verified CRM cash already received in the selected period. Returns the actual amount, run-rate projection, conservative/base/optimistic scenarios and explicit assumptions. This is a forecast, not a guaranteed result; never present it as confirmed revenue.',
+      'Read canonical C8 business revenue prediction state; unqualified models return unavailable. No linear extrapolation, fixed currency, scenario or confidence fallback.',
     inputSchema: REPORTING_PERIOD_SCHEMA,
     allowedRoles: FINANCE_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -533,7 +533,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'clients.dormant.list',
     description:
-      'List salon guests who have not returned for at least inactive_days, by name, longest inactivity first. Use for "кто давно не приходил", "кого можно вернуть", "покажи спящих клиентов", "выгрузи тех кто пропал". Returns real client names because the owner needs to know WHOM to win back; phone numbers are included only for the salon owner. This is the only client tool that carries personal data, so its answer is composed by the server and never sent to an external model. Counts and cohorts without names live in clients.retention.scan; a single guest dossier lives in clients.dossier.read.',
+      'Read existing canonical C8 dormancy policy signals, privacy-safe and bounded. Caller inactive_days never overrides confirmed policy. No names, phones or export; unavailable stays unavailable.',
     inputSchema: {
       type: 'object',
       additionalProperties: false,
@@ -565,9 +565,39 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
+    name: 'valuations.read',
+    description:
+      'Read bounded current C8 facts/policy/rank/model-unavailability with safe ephemeral handles. No computation, exports, contacts, strategy, activation or source writes.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        kind: {
+          type: 'string',
+          enum: [
+            'OBSERVED_VALUE',
+            'POLICY_SIGNAL',
+            'RANKING',
+            'PREDICTION',
+            'SCENARIO',
+          ],
+        },
+      },
+    },
+    allowedRoles: [...STAFF_ROLES, ...BUSINESS_ROLES],
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['analytics.business'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 15000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
     name: 'clients.retention.scan',
     description:
-      'Analyze the complete paginated CRM client registry without PII. Returns exact total cards, repeat and loyal counts, cumulative inactivity counts, the intersection of loyal + inactive clients, and non-overlapping reactivation cohorts over 1, 2, 3, 4, 5, 6 months and 1 year. Use for "how many clients are in the whole database", "how many loyal clients", "which loyal clients have not visited for N months", win-back advice, retention and dormant-base questions. Never substitute period analytics for this tool.',
+      'Read source-labelled full CRM registry aggregate counts and calendar date buckets. No loyalty/CLV/churn classification or reactivation advice. Use valuations.read for qualified C8 results; no numeric prediction fallback.',
     inputSchema: EMPTY_OBJECT_SCHEMA,
     allowedRoles: BUSINESS_ROLES,
     allowedSurfaces: ALL_SURFACES,
@@ -610,7 +640,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'clients.high-value.read',
     description:
-      'Rank the complete CRM client registry by verified lifetime spend, visit count or recency. Results are anonymized as client_1, client_2 and never expose CRM ids, names, phones or contacts to the model. Use for high-value and loyal-client prioritization, not for direct outreach.',
+      'Read existing qualified C8 ranks under the confirmed named objective; no caller-defined scoring or legacy spend/visits threshold. Ephemeral handles only; rank is not contact permission.',
     inputSchema: {
       type: 'object',
       additionalProperties: false,

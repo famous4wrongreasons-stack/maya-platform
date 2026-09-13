@@ -435,7 +435,7 @@ describe('Cycle 04 P9 — поверхности после переезда', (
     membershipId: 'membership-a',
   } as never;
 
-  it('список «давно не приходили» называет источник давности и не выдаёт его за приход', async () => {
+  it('C8: карточка провайдера не становится dormancy-policy без canonical reader', async () => {
     const stack = build([
       {
         id: '1',
@@ -457,9 +457,12 @@ describe('Cycle 04 P9 — поверхности после переезда', (
           'execution-dormant',
         ),
     )) as Record<string, unknown>;
-    expect(result.recency_basis).toBe('provider_client_card');
-    expect(result.recency_attendance_proven).toBe(false);
-    expect(result.timezone).toBe(MOSCOW);
+    expect(result).toMatchObject({
+      available: false,
+      reason: 'canonical_c8_reader_unavailable',
+      numericPrediction: null,
+    });
+    expect(result).not.toHaveProperty('clients');
   });
 
   it('рейтинг по свежести не превращает неизвестную дату в 1970 год', async () => {
@@ -501,11 +504,12 @@ describe('Cycle 04 P9 — поверхности после переезда', (
           { metric: 'recency', limit: 10 },
           'execution-rank',
         ),
-    )) as { clients: Array<Record<string, unknown>> };
-    const days = result.clients.map((entry) => entry.inactivity_days);
-    // Сначала свежий, затем давний, и только потом — карточка без даты:
-    // неизвестность стоит в конце, но древностью не притворяется.
-    expect(days[0]).toBeLessThan(days[1] as number);
-    expect(days[2]).toBeNull();
+    )) as Record<string, unknown>;
+    expect(result).toMatchObject({
+      available: false,
+      reason: 'canonical_c8_reader_unavailable',
+    });
+    expect(result).not.toHaveProperty('clients');
+    expect(JSON.stringify(result)).not.toContain('1970');
   });
 });

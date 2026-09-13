@@ -2,7 +2,7 @@ import type { CrmClientRegistrySnapshot } from '../crm/crm-adapter.interface';
 import { analyzeClientRegistry } from './client-registry-analysis';
 
 describe('analyzeClientRegistry', () => {
-  it('calculates exact cumulative inactivity and loyalty cohorts for the full CRM registry', () => {
+  it('preserves calendar facts and retires universal loyalty/CLV claims', () => {
     const snapshot: CrmClientRegistrySnapshot = {
       provider: 'yclients',
       generated_at: '2026-08-12T09:00:00.000Z',
@@ -31,11 +31,13 @@ describe('analyzeClientRegistry', () => {
       clients_with_visits: 6,
       clients_without_visits: 1,
       clients_with_unknown_last_visit: 1,
-      loyal_clients_with_unknown_last_visit: 1,
+      loyal_clients_with_unknown_last_visit: null,
+      clients_with_unknown_visit_count: 0,
       repeat_clients: 5,
-      loyal_clients: 4,
+      loyal_clients: null,
       total_recorded_visits: 28,
-      lifetime_sold_amount: 60_800,
+      lifetime_sold_amount: null,
+      observed_recorded_visits: 28,
       inactivity: {
         over_1_month: 4,
         over_2_months: 3,
@@ -45,29 +47,12 @@ describe('analyzeClientRegistry', () => {
         over_6_months: 1,
         over_1_year: 1,
       },
-      loyal_inactivity: {
-        over_1_month: 3,
-        over_2_months: 3,
-        over_3_months: 2,
-        over_4_months: 2,
-        over_5_months: 2,
-        over_6_months: 1,
-        over_1_year: 1,
-      },
-      loyal_reactivation_cohorts: {
-        from_1_to_2_months: 0,
-        from_2_to_3_months: 1,
-        from_3_to_6_months: 1,
-        from_6_to_12_months: 0,
-        over_1_year: 1,
-      },
-      definitions: {
-        loyal_client: 'Не менее 3 визитов по карточке CRM.',
-        inactivity:
-          'Накопительные группы: дата последнего визита раньше календарного порога; клиенты без визитов сюда не входят.',
-        without_visits:
-          'Отдельные CRM-карточки с нулевым числом визитов; их возраст по одной дате последнего визита определить нельзя.',
-      },
+      loyal_inactivity: null,
+      loyal_reactivation_cohorts: null,
+      definitions: expect.objectContaining({
+        loyal_client: expect.stringContaining('Unavailable') as unknown,
+        inactivity: expect.stringContaining('not proven attendance') as unknown,
+      }) as unknown,
     });
     expect(JSON.stringify(result)).not.toContain('never-visited');
     expect(JSON.stringify(result)).not.toContain('one-year');

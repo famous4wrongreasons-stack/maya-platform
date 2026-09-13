@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "release": "c8-wave4",
+  "files": [
+    {
+      "name": "owner_ai.py",
+      "target": "/home/botadmin/barbershop-bot/owner_ai.py",
+      "before": "9972e1c2a560cf99a03b8fbc88f542cee4050ccfca028fa14d9eedc5a0cb722a",
+      "after": "d78e46a18b4a4fa6bf51ca74c2550119215e6bb2647ee6417589a1b70e76a29e",
+      "patch": "owner_ai.py.patch"
+    },
+    {
+      "name": "masters_ai.py",
+      "target": "/home/botadmin/barbershop-bot/masters_ai.py",
+      "before": "f56ed09f92d126059d3f24a97cec132dc12640ef77ccc114e3201d290654ada2",
+      "after": "2106311b6ad54da691dd5ec61fa6842eac7a1d7f40b786548403d5c0f8e94905",
+      "patch": "masters_ai.py.patch"
+    },
+    {
+      "name": "growth_planner.py",
+      "target": "/home/botadmin/barbershop-bot/growth_planner.py",
+      "before": "529ecf522677c8e141615ba8469a4a358a2cbc78f1908c3219b32294862e1bda",
+      "after": "d7526a808c9ba7c06e53d83cbd9de669fa3ddedb54204bc47f36cb6039944471",
+      "patch": "growth_planner.py.patch"
+    },
+    {
+      "name": "webhook_server.py",
+      "target": "/home/botadmin/barbershop-bot/webhook_server.py",
+      "before": "5b01fdbc32ad3062010ed1312eba12931d8679c5a24e518c19fb8505dc37e9b8",
+      "after": "71953c8b9f12ebf9dd52211821d1759d7e53e695a9c92cc1297f4681fb3be128",
+      "patch": "webhook_server.py.patch"
+    },
+    {
+      "name": "app.html",
+      "target": "/var/www/maya-platform/app.html",
+      "before": "dae6c0b057bf4fc05d26393da13dbd0dafb38a6ba38359244a7870ee495d8715",
+      "after": "4751ebfd7f0f3a08f96b6867b50e375ddf2fe9310b6d3562e70dc0827dc1b9ae",
+      "builder": "build-pwa.cjs"
+    }
+  ],
+  "productionProofEffects": 0
+}

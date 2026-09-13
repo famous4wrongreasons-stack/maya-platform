@@ -2684,150 +2684,85 @@ export class AiCoreService {
     text: string,
   ): string | null {
     const data = this.record(evidence);
-    if (data.complete !== true || data.source !== 'external_crm') {
-      return null;
-    }
-    const total = this.safeMetricNumber(data.total_clients);
-    const loyal = this.safeMetricNumber(data.loyal_clients);
-    const repeat = this.safeMetricNumber(data.repeat_clients);
-    const noVisits = this.safeMetricNumber(data.clients_without_visits);
-    const unknown = this.safeMetricNumber(data.clients_with_unknown_last_visit);
-    const loyalUnknown = this.safeMetricNumber(
-      data.loyal_clients_with_unknown_last_visit,
-    );
-    const inactivity = this.record(data.inactivity);
-    const loyalInactivity = this.record(data.loyal_inactivity);
-    const values = {
-      1: this.safeMetricNumber(inactivity.over_1_month),
-      2: this.safeMetricNumber(inactivity.over_2_months),
-      3: this.safeMetricNumber(inactivity.over_3_months),
-      4: this.safeMetricNumber(inactivity.over_4_months),
-      5: this.safeMetricNumber(inactivity.over_5_months),
-      6: this.safeMetricNumber(inactivity.over_6_months),
-      12: this.safeMetricNumber(inactivity.over_1_year),
-    } as const;
-    const loyalValues = {
-      1: this.safeMetricNumber(loyalInactivity.over_1_month),
-      2: this.safeMetricNumber(loyalInactivity.over_2_months),
-      3: this.safeMetricNumber(loyalInactivity.over_3_months),
-      4: this.safeMetricNumber(loyalInactivity.over_4_months),
-      5: this.safeMetricNumber(loyalInactivity.over_5_months),
-      6: this.safeMetricNumber(loyalInactivity.over_6_months),
-      12: this.safeMetricNumber(loyalInactivity.over_1_year),
-    } as const;
-    const threshold = this.requestedInactivityMonths(text);
-    const loyalSegment = /лояльн/i.test(text);
-
+    if (data.source !== 'external_crm') return null;
+    const fact = (x: unknown) =>
+      typeof x === 'number' && Number.isFinite(x) ? String(x) : 'неизвестно';
+    const c8 = this.record(data.valuation);
     if (
-      BUSINESS_ACTION_REQUEST_PATTERN.test(text) &&
-      /(вернут|возврат|удерж|реактив|рассыл)/i.test(text)
+      /лояльн|вернут|реактив|удерж|ценн/i.test(text) &&
+      c8.contract === 'c8.valuation.ai/1'
     ) {
-      return this.deterministicClientReactivationAdvice(
-        data,
-        loyal,
-        loyalValues,
-        threshold,
+      const rows = Array.isArray(c8.items)
+        ? c8.items.map((x) => this.record(x))
+        : [];
+      const rank = rows.find(
+        (x) =>
+          x.kind === 'RANKING' && x.current === true && x.available === true,
       );
+      if (rank) {
+        const ranking = this.record(rank.ranking),
+          members = Array.isArray(ranking.members)
+            ? ranking.members.slice(0, 20)
+            : [];
+        const lines = members.map((m) => {
+          const item = this.record(m);
+          const indicators = Array.isArray(item.indicators)
+            ? item.indicators
+            : [];
+          return (
+            String(item.position) +
+            '. ' +
+            String(item.handle) +
+            ': ' +
+            indicators
+              .map((v) => {
+                const x = this.record(v);
+                return (
+                  String(x.basis) +
+                  ': ' +
+                  (Array.isArray(x.values)
+                    ? x.values
+                        .map((v) => {
+                          const f = this.record(v);
+                          return f.value === null
+                            ? 'неизвестно'
+                            : (typeof f.value === 'string' ||
+                              typeof f.value === 'number' ||
+                              typeof f.value === 'boolean'
+                                ? String(f.value)
+                                : 'неизвестно') +
+                                (f.unit === 'money_minor'
+                                  ? ' в минимальных денежных единицах ' +
+                                    String(f.currency)
+                                  : '');
+                        })
+                        .join(', ')
+                    : 'неизвестно')
+                );
+              })
+              .join('; ')
+          );
+        });
+        return (
+          'Порядок по подтверждённому правилу ' +
+          String(ranking.objectiveKey) +
+          ':\n' +
+          lines.join('\n') +
+          '\nОхват неполный; неизвестные данные выделены отдельно. Прогноз возврата недоступен и в порядок не входит. Это оценка, а не согласие на контакт или план отправки.'
+        );
+      }
     }
-
-    if (threshold !== null) {
-      const selectedValues = loyalSegment ? loyalValues : values;
-      const count = selectedValues[threshold];
-      const period =
-        threshold === 12
-          ? 'больше года'
-          : `больше ${this.inactivityMonthLabel(threshold)}`;
-      const selectedUnknown = loyalSegment ? loyalUnknown : unknown;
-      const suffix =
-        selectedUnknown > 0
-          ? ` Ещё у ${selectedUnknown} ${this.pluralize(selectedUnknown, 'карточки', 'карточек', 'карточек')} с визитами CRM не указала дату последнего визита, поэтому в этот срок они не включены.`
-          : '';
-      const scope = loyalSegment
-        ? `Из ${loyal} лояльных клиентов`
-        : 'По полному реестру CRM';
-      return `${scope} ${period} не посещали салон ${count} ${this.pluralize(count, 'клиент', 'клиента', 'клиентов')}.${suffix}`;
-    }
-    if (/лояльн/i.test(text)) {
-      return `В полной CRM-базе ${loyal} лояльных ${this.pluralize(loyal, 'клиент', 'клиента', 'клиентов')} из ${total}. Лояльными считаю карточки минимум с 3 визитами; повторных клиентов с 2 и более визитами — ${repeat}.`;
-    }
-    if (
-      /вс[ея]\s+(?:клиент|баз)|сколько\s+(?:всего\s+)?(?:клиент|гост)|(?:клиент|гост)[а-яёa-z]*\s+в\s+баз/i.test(
-        text,
-      )
-    ) {
-      return `В полной CRM-базе ${total} ${this.pluralize(total, 'клиентская карточка', 'клиентские карточки', 'клиентских карточек')}. Из них лояльных с 3 и более визитами — ${loyal}, повторных с 2 и более — ${repeat}, без единого визита — ${noVisits}.`;
-    }
-    const suffix =
-      unknown > 0
-        ? ` Ещё у ${unknown} ${this.pluralize(unknown, 'карточки', 'карточек', 'карточек')} с визитами CRM не указала дату последнего визита.`
-        : '';
-    return `По полной CRM-базе: всего ${total} ${this.pluralize(total, 'карточка', 'карточки', 'карточек')}, лояльных — ${loyal}, повторных — ${repeat}. Не были больше 1 месяца — ${values[1]}, 2 месяцев — ${values[2]}, 3 — ${values[3]}, 4 — ${values[4]}, 5 — ${values[5]}, 6 — ${values[6]}, больше года — ${values[12]}.${suffix}`;
-  }
-
-  private deterministicClientReactivationAdvice(
-    data: Record<string, unknown>,
-    loyalClients: number,
-    loyalValues: Record<1 | 2 | 3 | 4 | 5 | 6 | 12, number>,
-    requestedThreshold: 1 | 2 | 3 | 4 | 5 | 6 | 12 | null,
-  ): string {
-    const threshold = requestedThreshold ?? 1;
-    const targetCount = loyalValues[threshold];
-    const cohorts = this.record(data.loyal_reactivation_cohorts);
-    const candidates: Array<{ count: number; label: string }> = [
-      {
-        count: this.safeMetricNumber(cohorts.from_1_to_2_months),
-        label: 'не были 1–2 месяца',
-      },
-      {
-        count: this.safeMetricNumber(cohorts.from_2_to_3_months),
-        label: 'не были 2–3 месяца',
-      },
-      {
-        count: this.safeMetricNumber(cohorts.from_3_to_6_months),
-        label: 'не были 3–6 месяцев',
-      },
-      {
-        count: this.safeMetricNumber(cohorts.from_6_to_12_months),
-        label: 'не были 6–12 месяцев',
-      },
-      {
-        count: this.safeMetricNumber(cohorts.over_1_year),
-        label: 'не были больше года',
-      },
-    ];
-    const startIndex =
-      threshold >= 12
-        ? 4
-        : threshold >= 6
-          ? 3
-          : threshold >= 3
-            ? 2
-            : threshold >= 2
-              ? 1
-              : 0;
-    const warmest = candidates
-      .slice(startIndex)
-      .find((candidate) => candidate.count > 0) ??
-      candidates.find((candidate) => candidate.count > 0) ?? {
-        count: targetCount,
-        label:
-          threshold === 12
-            ? 'не были больше года'
-            : `не были больше ${this.inactivityMonthLabel(threshold)}`,
-      };
-    const pilotCount = Math.min(100, warmest.count || targetCount);
-    const targetPeriod =
-      threshold === 12
-        ? 'больше года'
-        : `больше ${this.inactivityMonthLabel(threshold)}`;
-
-    return [
-      `В базе ${loyalClients} лояльных клиентов; ${targetPeriod} не были ${targetCount}. Писать всем сразу не стоит: начните с самого тёплого сегмента — ${warmest.count} ${this.pluralize(warmest.count, 'клиент', 'клиента', 'клиентов')}, которые ${warmest.label}.`,
-      `1. Перед контактом исключить уже записанных, клиентов без согласия на сообщения, дубли и тех, кому уже недавно писали.`,
-      '2. Обратиться персонально: напомнить привычного мастера и услугу, предложить 2–3 реальных окна. Первый контакт — без скидки.',
-      `3. Запустить пилот не больше чем на ${pilotCount} ${this.pluralize(pilotCount, 'человека', 'человек', 'человек')}; не ответившим — один повтор через 5–7 дней, не массовый спам.`,
-      '4. Считать не отправки, а результат: доставка, ответы, записи, состоявшиеся визиты, возвращённая выручка и отказы от рассылки. Любая отправка — только после проверки согласий и вашего подтверждения.',
-    ].join('\n');
+    if (/лояльн|вернут|реактив|удерж|ценн/i.test(text))
+      return 'Ценность и давность визита требуют подтверждённого правила бизнеса и точных Client-фактов. Используйте оценки Maya в кабинете. Прогноз возврата пока недоступен; отбор не даёт разрешения на контакт или отправку.';
+    const months = this.requestedInactivityMonths(text),
+      inactivity = this.record(data.inactivity);
+    const summary = `В CRM-реестре: ${fact(data.total_clients)} карточек, с двумя и более визитами — ${fact(data.repeat_clients)}, без визитов — ${fact(data.clients_without_visits)}. Неизвестное число визитов: ${fact(data.clients_with_unknown_visit_count)}; неизвестная дата последнего визита среди посещавших: ${fact(data.clients_with_unknown_last_visit)}.`;
+    if (months !== null)
+      return (
+        summary +
+        ` По утверждению карточки CRM дата раньше ${months} календарных месяцев: ${fact(inactivity[months === 12 ? 'over_1_year' : 'over_' + months + '_month' + (months === 1 ? '' : 's')])}. Это календарный факт источника, не доказанный приход и не политика «спящего» клиента.`
+      );
+    return summary + ' Эти числа не являются оценкой лояльности или прогнозом.';
   }
 
   private deterministicClientDossierReply(evidence: unknown): string | null {
@@ -2838,20 +2773,7 @@ export class AiCoreService {
         : 'Клиент не найден. Уточните имя или последние четыре цифры телефона.';
     }
 
-    const segmentLabels: Record<string, string> = {
-      without_visits: 'без визитов',
-      new: 'новый клиент',
-      repeat: 'повторный клиент',
-      loyal: 'лояльный клиент',
-      regular: 'постоянный клиент',
-      core: 'ядро постоянных клиентов',
-    };
-    const segment =
-      typeof data.loyalty_segment === 'string'
-        ? (segmentLabels[data.loyalty_segment] ?? data.loyalty_segment)
-        : data.loyal === true
-          ? 'лояльный клиент'
-          : 'статус лояльности не определён';
+    const segment = 'требуется подтверждённое правило C8';
     /**
      * 🔴 Cycle 04 closure B4. Фраза следует ИСТОЧНИКУ числа.
      *

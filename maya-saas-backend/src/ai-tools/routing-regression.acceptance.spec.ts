@@ -484,7 +484,7 @@ describe('КОРПУС: живые формулировки владельца �
     expect(result.tools).toEqual(['clients.retention.scan']);
     expect(result.domain).toBe('client_retention');
     expect(result.answer.reply).toContain('310');
-    expect(result.answer.reply).toMatch(/больше 2 месяцев/i);
+    expect(result.answer.reply).toMatch(/2 календарных месяцев/i);
   });
 
   it('«сколько лояльных» — пожизненные визиты карточки CRM', async () => {
@@ -492,8 +492,8 @@ describe('КОРПУС: живые формулировки владельца �
 
     expect(result.tools).toEqual(['clients.retention.scan']);
     expect(result.domain).toBe('client_retention');
-    expect(result.answer.reply).toContain('620');
-    expect(result.answer.reply).toMatch(/минимум с 3 визитами/i);
+    expect(result.answer.reply).not.toContain('620');
+    expect(result.answer.reply).toMatch(/подтверждённого правила/i);
   });
 
   it('пересекает лояльность и срок отсутствия, а не берёт всю базу', async () => {
@@ -502,8 +502,8 @@ describe('КОРПУС: живые формулировки владельца �
     );
 
     expect(result.tools).toEqual(['clients.retention.scan']);
-    expect(result.answer.reply).toContain('260');
-    expect(result.answer.reply).toContain('Из 620 лояльных');
+    expect(result.answer.reply).not.toContain('260');
+    expect(result.answer.reply).toContain('Прогноз возврата пока недоступен');
     expect(result.answer.reply).not.toContain('430');
     expect(result.modelCalls).toBe(0);
   });
@@ -516,11 +516,11 @@ describe('КОРПУС: живые формулировки владельца �
 
     expect(result.tools).toEqual(['clients.retention.scan']);
     expect(result.tools).not.toContain('analytics.business.query');
-    expect(result.answer.reply).toContain('260');
-    expect(result.answer.reply).toContain('80 клиентов');
-    expect(result.answer.reply).toContain('1–2 месяца');
-    expect(result.answer.reply).toMatch(/привычного мастера и услугу/i);
-    expect(result.answer.reply).toMatch(/проверки согласий/i);
+    expect(result.answer.reply).not.toContain('260');
+    expect(result.answer.reply).not.toContain('80 клиентов');
+    expect(result.answer.reply).not.toContain('1–2 месяца');
+    expect(result.answer.reply).toMatch(/оценки Maya в кабинете/i);
+    expect(result.answer.reply).toMatch(/не даёт разрешения на контакт/i);
     expect(result.answer.reply).not.toMatch(/снизить отмены/i);
     expect(result.modelCalls).toBe(0);
   });

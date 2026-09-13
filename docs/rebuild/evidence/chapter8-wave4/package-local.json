@@ -1,0 +1,59 @@
+{
+  "status": "PASS",
+  "postgres": [
+    {
+      "phase": "foundation",
+      "checks": 24,
+      "file": "final-foundation-postgres.txt",
+      "sha256": "3ace6e8701d1866d2922eaf1bf60db50331c227c2db7f109aecbdc1c9a9ba669",
+      "productionEffects": 0
+    },
+    {
+      "phase": "wave2",
+      "checks": 13,
+      "file": "final-wave2-postgres.txt",
+      "sha256": "11bdde844c943b80dcc64b0d0949947345ab9ce67c8389149ac9ad05a910c39b",
+      "productionEffects": 0
+    },
+    {
+      "phase": "wave3",
+      "checks": 13,
+      "file": "final-wave3-postgres.txt",
+      "sha256": "ba61b15cbd19933cc001ec94ebb5caef309d896ff17c5858cf247b7b7058671f",
+      "productionEffects": 0
+    },
+    {
+      "phase": "wave4",
+      "checks": 14,
+      "file": "final-wave4-postgres.txt",
+      "sha256": "e596973759cef266a79d9226e5b951f2d06df93fc3128fb1affca3ff95c4f025",
+      "productionEffects": 0
+    }
+  ],
+  "totalPostgresScenarios": 64,
+  "visual": {
+    "synthetic": true,
+    "viewports": [
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 1280,
+        "height": 900
+      }
+    ],
+    "horizontalOverflow": false,
+    "openRequests": [
+      "GET readiness",
+      "GET list"
+    ],
+    "explicitCompute": "POST derived only",
+    "unconfiguredComputeButtons": 0,
+    "browserClosed": true,
+    "previewServerClosed": true
+  },
+  "schemaChangesP06": 0,
+  "numericTargetsActive": 0,
+  "calibration": "UNAVAILABLE"
+}

@@ -1,0 +1,1844 @@
+--- a/owner_ai.py
++++ b/owner_ai.py
+@@ -26 +26 @@
+-_RETURN_RATE = 0.25          # доля уснувших, что вернётся при персональном касании
++_RETURN_RATE = None          # доля уснувших, что вернётся при персональном касании
+@@ -410 +410 @@
+-    """Операционная картина «сегодня»: записи, ожидаемая выручка, загрузка, тренд."""
++    """C8 L08: retain source-labelled operational observations, never extrapolate money/load."""
+@@ -412,54 +412,2 @@
+-    avg = _avg_check_30d()
+-    base = _summary_30d() or {}
+-    free_capacity = sum(
+-        m["free_slots_est"] for m in load["masters"]
+-        if not m.get("baseline_conflict")
+-    )
+-    priced_revenue = _rub(load.get("booked_service_revenue_rub"))
+-    unpriced = _rub(load.get("unpriced_records"))
+-    expected = priced_revenue + unpriced * avg
+-    if not expected:
+-        expected = _rub(load["booked_today"] * avg)
+-    attendance = base.get("attendance") if isinstance(base.get("attendance"), dict) else {}
+-    show_rate = attendance.get("show_rate_pct")
+-    show_factor = max(0.75, min(1.0, float(show_rate or 100) / 100))
+-    service_mix = base.get("service_mix") if isinstance(base.get("service_mix"), dict) else {}
+-    attach_rate = max(0, min(100, _rub(service_mix.get("attach_rate_pct"))))
+-    avg_addon = _rub(service_mix.get("avg_addon_rub"))
+-    upsell_potential = _rub(
+-        _rub(load.get("single_service_records")) * (attach_rate / 100) * avg_addon
+-    )
+-    fill_potential = _rub(free_capacity * avg)
+-    forecast_low = _rub(expected * show_factor)
+-    capacity_revenue = _rub((load["booked_today"] + free_capacity) * avg)
+-    today_masters = today_master_revenue()
+-    return {
+-        **load,
+-        "avg_check_rub": avg,
+-        "expected_revenue_rub": expected,
+-        "forecast_low_rub": forecast_low,
+-        "forecast_high_rub": _rub(expected + upsell_potential),
+-        "free_capacity_today": free_capacity,
+-        "potential_fill_revenue_rub": fill_potential,
+-        "upsell_potential_rub": upsell_potential,
+-        "potential_revenue_rub": _rub(expected + upsell_potential + fill_potential),
+-        "capacity_revenue_rub": capacity_revenue,
+-        "historical_show_rate_pct": show_rate,
+-        "historical_addon_attach_rate_pct": attach_rate or None,
+-        "historical_avg_addon_rub": avg_addon,
+-        "today_paid_revenue_rub": _rub(today_masters.get("total_gross_rub")),
+-        "today_paid_visits": _rub(today_masters.get("paid_visits")),
+-        "top_today_master": today_masters.get("top_gross_master"),
+-        "today_master_revenue": today_masters.get("masters") or [],
+-        "forecast_price_coverage_pct": (
+-            round(_rub(load.get("priced_records")) * 100 / load["booked_today"])
+-            if load["booked_today"] else None
+-        ),
+-        "week_trend": _week_trend(),
+-        "note": (
+-            "Прогноз использует цены услуг в сегодняшней записи; только записи без цены "
+-            "оцениваются по среднему чеку. Потенциал включает исторические допродажи и "
+-            "свободную ёмкость, поэтому не является гарантией. Ёмкость — оценка по ~%d "
+-            "визитов на смену." % _VISITS_PER_SHIFT
+-        ),
+-    }
++    facts = {key: load.get(key) for key in ("date", "booked_today", "priced_records", "unpriced_records", "booked_service_revenue_rub", "working_masters", "confirmed_working_masters", "staff_schedule")}
++    return {**facts, "source": "legacy_provider_observation", "valuation_available": False, "status": "unavailable", "reason": "qualified_c8_tenant_read_required", "avg_check_rub": None, "expected_revenue_rub": None, "forecast_low_rub": None, "forecast_high_rub": None, "free_capacity_today": None, "potential_fill_revenue_rub": None, "upsell_potential_rub": None, "potential_revenue_rub": None, "capacity_revenue_rub": None, "idle_masters": [], "underused_masters": [], "masters": [], "week_trend": {}, "note": "Это наблюдения источника, не оценка C8. Числовой прогноз недоступен; подтверждённые факты C7 и оценки по правилам доступны в кабинете Maya."}
+@@ -586,88 +534,2 @@
+-    """Smart plan: strategic target, booked forecast and reachable potential."""
+-    snap = snap or business_snapshot()
+-    base = _summary_30d() or {}
+-    today = _today_revenue_summary()
+-    try:
+-        target_day = date.fromisoformat(str(snap.get("date") or _today())[:10])
+-    except ValueError:
+-        target_day = date.today()
+-    baseline = _smart_daily_baseline(base, target_day)
+-    manual_target = _manual_daily_target_rub()
+-    month_target = _manual_month_gross_target_rub()
+-    month_allocation = _weighted_month_target(month_target, base, target_day)
+-    if manual_target:
+-        daily_target = manual_target
+-        target_source = "manual_setting"
+-        target_explanation = "Ручная дневная цель владельца."
+-    elif month_target and month_allocation.get("daily_target_rub"):
+-        daily_target = _rub(month_allocation.get("daily_target_rub"))
+-        target_source = "monthly_goal_weighted"
+-        target_explanation = (
+-            "Остаток месячной цели распределён по оставшимся дням с учётом "
+-            "исторической силы этого дня недели."
+-        )
+-    else:
+-        daily_target = _rub(baseline.get("baseline_rub"))
+-        target_source = "weekday_history_baseline"
+-        target_explanation = (
+-            "Ориентир рассчитан по похожим дням недели, средней выручке и тренду "
+-            "последних семи дней. Это рабочая база, пока владелец не задал цель."
+-        )
+-
+-    actual = _rub(today.get("total_gross"))
+-    paid_visits = _rub(today.get("visits"))
+-    expected = _rub(snap.get("expected_revenue_rub"))
+-    projected = max(actual, expected)
+-    forecast_low = max(actual, _rub(snap.get("forecast_low_rub")))
+-    forecast_high = max(projected, _rub(snap.get("forecast_high_rub")))
+-    potential = max(forecast_high, _rub(snap.get("potential_revenue_rub")))
+-    avg_check = _rub(snap.get("avg_check_rub") or base.get("avg_check"))
+-    gap = projected - daily_target if daily_target else 0
+-    progress = round((projected / daily_target) * 100) if daily_target else None
+-    needed = 0
+-    if daily_target and gap < 0 and avg_check:
+-        needed = int((abs(gap) + avg_check - 1) // avg_check)
+-    if not daily_target:
+-        status = "ok"
+-    elif progress is not None and progress < 70:
+-        status = "risk"
+-    elif progress is not None and progress < 95:
+-        status = "warn"
+-    else:
+-        status = "ok"
+-
+-    return {
+-        "status": status,
+-        "date": snap.get("date") or _today(),
+-        "daily_target_rub": daily_target,
+-        "target_source": target_source,
+-        "target_explanation": target_explanation,
+-        "baseline_rub": _rub(baseline.get("baseline_rub")),
+-        "baseline": baseline,
+-        "month_allocation": month_allocation,
+-        "actual_revenue_rub": actual,
+-        "paid_visits": paid_visits,
+-        "booked_today": _rub(snap.get("booked_today")),
+-        "expected_revenue_rub": expected,
+-        "projected_revenue_rub": projected,
+-        "forecast_low_rub": forecast_low,
+-        "forecast_high_rub": forecast_high,
+-        "potential_revenue_rub": potential,
+-        "upsell_potential_rub": _rub(snap.get("upsell_potential_rub")),
+-        "fill_potential_rub": _rub(snap.get("potential_fill_revenue_rub")),
+-        "capacity_revenue_rub": _rub(snap.get("capacity_revenue_rub")),
+-        "forecast_price_coverage_pct": snap.get("forecast_price_coverage_pct"),
+-        "historical_show_rate_pct": snap.get("historical_show_rate_pct"),
+-        "gap_rub": gap,
+-        "progress_pct": progress,
+-        "needed_visits_to_target": needed,
+-        "avg_check_rub": avg_check,
+-        "estimate": True,
+-        "methodology_version": "maya_smart_plan_v2",
+-        "confidence": baseline.get("confidence") or "low",
+-        "note": (
+-            "Цель, прогноз и потенциал разделены. Прогноз использует цены услуг "
+-            "в записи, потенциал добавляет исторические допродажи и свободные окна. "
+-            "Потенциал является оценкой, а не гарантированной выручкой."
+-        ),
+-    }
++    """C8 L08 numerical caller: no legacy valuation or financial forecast."""
++    return _fallback_plan_fact()
+@@ -938,59 +800,2 @@
+-    """Combines dormant clients with the ranked personal-cycle owner queue."""
+-    import json as _json
+-    count, at = None, None
+-    try:
+-        import database
+-        raw = database.get_setting("reactivation_last")
+-        if raw:
+-            d = _json.loads(raw)
+-            count = int(d.get("count"))
+-            at = d.get("at")
+-    except Exception as e:
+-        logger.error(f"owner_ai return_candidates: {e}")
+-    avg = _avg_check_30d()
+-    cycle = _cycle_candidate_queue(include_personal_data=include_personal_data)
+-    cycle_summary = cycle.get("summary") or {}
+-    cycle_count = cycle_summary.get("pending")
+-    out = {
+-        "avg_check_rub": avg,
+-        "action": "reactivation",
+-        "recommended_action": "cycle",
+-        "action_hint": ("Запустить персональную рассылку «соскучились» уснувшим — "
+-                        "команда /reactivation_now (владелец)."),
+-        "cycle_due_count": cycle_count,
+-        "cycle_overdue_count": _rub(cycle_summary.get("overdue")),
+-        "cycle_due_now_count": _rub(cycle_summary.get("due")),
+-        "cycle_due_soon_count": _rub(cycle_summary.get("due_soon")),
+-        "cycle_sent_count": _rub(cycle_summary.get("sent")),
+-        "cycle_snapshot_at": cycle.get("generated_at"),
+-        "cycle_snapshot_state": cycle.get("state"),
+-        "owner_alert": cycle.get("owner_alert") or _cycle_owner_alert({}),
+-        "owner_question": "Что сделать с клиентами, которым уже пора вернуться?",
+-        "decision_options": _return_decision_options(cycle_count),
+-    }
+-    if cycle_count is not None:
+-        out["action_hint"] = (
+-            "MAYA уже сформировала очередь по личному циклу. После выбора владельца можно "
+-            "написать без скидки, открыть список для звонка или подготовить отдельное предложение."
+-        )
+-        out["cycle_potential_return_revenue_rub"] = _rub(_rub(cycle_count) * avg * _RETURN_RATE)
+-        out["cycle_note"] = (
+-            "MAYA ранжирует очередь по отклонению от личного цикла. Потенциал — сценарная "
+-            "оценка при возврате около %d%%, не гарантированная выручка." % int(_RETURN_RATE * 100)
+-        )
+-    if include_personal_data:
+-        out["candidates"] = cycle.get("candidates") or []
+-        out["privacy"] = "owner_ui_only_not_for_llm"
+-    if count is None:
+-        out["count"] = None
+-        out["note"] = ("Ещё не считалось (реактивация ещё не запускалась). Ищет уснувших "
+-                       "28–56 дней без визита, с согласием на маркетинг. Запусти "
+-                       "/reactivation_now — покажу число и разошлю приглашения.")
+-    else:
+-        out["count"] = count
+-        out["as_of"] = at
+-        out["potential_return_revenue_rub"] = _rub(count * avg * _RETURN_RATE)
+-        out["note"] = ("Уснувшие с маркетинг-согласием (28–56 дней без визита), данные на "
+-                       "%s. Потенциал возврата — ОЦЕНКА ~%d%% при персональном касании, не факт."
+-                       % (at or "?", int(_RETURN_RATE * 100)))
+-    return out
++    """C8: legacy scorer retired; no qualified canonical tenant evidence here."""
++    return {"available": False, "status": "unavailable", "reason": "qualified_c8_tenant_read_required", "count": None, "cycle_due_count": None, "potential_return_revenue_rub": None, "cycle_potential_return_revenue_rub": None, "candidates": [], "decision_options": [], "note": "Оценка возврата недоступна. Используйте подтверждённые правила и факты в кабинете Maya; прогноз и отправка не выполняются."}
+@@ -1000,9 +805 @@
+-    """Последний обезличенный снимок удержания для быстрого Command Center."""
+-    try:
+-        import database
+-        raw = database.get_setting(_RETENTION_SETTING)
+-        payload = json.loads(raw) if raw else None
+-        if isinstance(payload, dict) and payload.get("version") == "maya_client_retention_v1":
+-            return payload
+-    except Exception as e:
+-        logger.error("owner_ai stored client_retention: %s", e)
++    """C8: legacy scorer retired; no qualified canonical tenant evidence here."""
+@@ -1013,129 +810,2 @@
+-    """Когортное удержание и будущая запись без клиентских ПД.
+-
+-    Обычный вызов мгновенно возвращает сохранённый снимок. Полная выгрузка
+-    YClients запускается только фоновым циклом или явным ``force=True``.
+-    """
+-    now = time.time()
+-    if not force and _retention_cache["val"] is not None and now - _retention_cache["ts"] < 900:
+-        return _retention_cache["val"]
+-    stored = _stored_client_retention()
+-    if not force:
+-        if stored is not None:
+-            _retention_cache.update(val=stored, ts=now)
+-            return stored
+-        pending = _fallback_client_retention()
+-        pending.update(
+-            snapshot_state="pending",
+-            next_step="MAYA уже готовит первый когортный снимок удержания из YClients.",
+-            note="Первичный расчёт выполняется в фоне и не блокирует Command Center.",
+-        )
+-        _retention_cache.update(val=pending, ts=now)
+-        return pending
+-    today = date.today()
+-    previous_from = today - timedelta(days=179)
+-    previous_to = today - timedelta(days=90)
+-    current_from = today - timedelta(days=89)
+-    recent_from = today - timedelta(days=59)
+-    future_to = today + timedelta(days=60)
+-    try:
+-        from yclients import YClientsAPI
+-        records = YClientsAPI().get_company_records(
+-            previous_from.isoformat(),
+-            future_to.isoformat(),
+-        ) or []
+-    except Exception as e:
+-        logger.error("owner_ai client_retention: %s", e)
+-        records = []
+-    if not records and stored is not None:
+-        preserved = dict(stored)
+-        preserved["snapshot_state"] = "stale"
+-        preserved["refresh_error"] = "YClients временно не вернул данные; сохранён последний успешный снимок."
+-        _retention_cache.update(val=preserved, ts=now)
+-        return preserved
+-
+-    previous_clients = set()
+-    current_clients = set()
+-    recent_clients = set()
+-    future_clients = set()
+-    current_visits = {}
+-    for record in records:
+-        if not isinstance(record, dict):
+-            continue
+-        client = record.get("client") or {}
+-        try:
+-            client_id = int(client.get("id") or record.get("client_id") or 0)
+-        except (TypeError, ValueError):
+-            client_id = 0
+-        if not client_id:
+-            continue
+-        raw_date = str(record.get("datetime") or record.get("date") or "")[:10]
+-        try:
+-            visit_date = date.fromisoformat(raw_date)
+-        except Exception:
+-            continue
+-        attendance = record.get("attendance")
+-        if attendance == 1:
+-            if previous_from <= visit_date <= previous_to:
+-                previous_clients.add(client_id)
+-            if current_from <= visit_date <= today:
+-                current_clients.add(client_id)
+-                current_visits[client_id] = current_visits.get(client_id, 0) + 1
+-            if recent_from <= visit_date <= today:
+-                recent_clients.add(client_id)
+-        elif visit_date > today and attendance != -1 and not record.get("deleted") and not record.get("is_deleted"):
+-            future_clients.add(client_id)
+-
+-    returned = previous_clients & current_clients
+-    retained_pct = round(len(returned) * 100 / len(previous_clients)) if previous_clients else None
+-    repeat_clients = {client_id for client_id, visits in current_visits.items() if visits >= 2}
+-    repeat_share = round(len(repeat_clients) * 100 / len(current_clients)) if current_clients else None
+-    forward_booked = recent_clients & future_clients
+-    forward_booking_pct = round(len(forward_booked) * 100 / len(recent_clients)) if recent_clients else None
+-    churn_candidates = previous_clients - current_clients
+-    status = "warn"
+-    if retained_pct is not None:
+-        status = "risk" if retained_pct < 40 else ("warn" if retained_pct < 60 else "ok")
+-    if forward_booking_pct is not None and forward_booking_pct < 25:
+-        status = _command_status(status, "warn")
+-    result = {
+-        "version": "maya_client_retention_v1",
+-        "status": status,
+-        "period": {
+-            "previous_from": previous_from.isoformat(),
+-            "previous_to": previous_to.isoformat(),
+-            "current_from": current_from.isoformat(),
+-            "current_to": today.isoformat(),
+-            "future_to": future_to.isoformat(),
+-        },
+-        "summary": {
+-            "previous_cohort_clients": len(previous_clients),
+-            "returned_clients": len(returned),
+-            "retention_90d_pct": retained_pct,
+-            "current_clients": len(current_clients),
+-            "repeat_clients": len(repeat_clients),
+-            "repeat_client_share_pct": repeat_share,
+-            "recent_clients_60d": len(recent_clients),
+-            "future_booked_clients": len(forward_booked),
+-            "forward_booking_pct": forward_booking_pct,
+-            "churn_candidates": len(churn_candidates),
+-            "data_complete": bool(previous_clients or current_clients),
+-        },
+-        "next_step": (
+-            "Поднять долю следующей записи до ухода клиента и вернуть когорту без повторного визита."
+-            if status != "ok" else "Удержание в рабочем диапазоне; контролировать следующую запись и качество."
+-        ),
+-        "note": (
+-            "Retention 90d = доля клиентов предыдущего 90-дневного окна, вернувшихся "
+-            "в текущем окне. Forward booking = доля недавних клиентов с будущей записью."
+-        ),
+-        "generated_at": datetime.now().isoformat(timespec="seconds"),
+-        "snapshot_state": "fresh",
+-        "data_source": "yclients_records",
+-    }
+-    try:
+-        import database
+-        database.set_setting(_RETENTION_SETTING, json.dumps(result, ensure_ascii=False))
+-    except Exception as e:
+-        logger.error("owner_ai save client_retention: %s", e)
+-    _retention_cache.update(val=result, ts=now)
+-    return result
++    """C8: legacy scorer retired; no qualified canonical tenant evidence here."""
++    return _fallback_client_retention()
+@@ -1145,19 +815,2 @@
+-    return {
+-        "version": "maya_client_retention_v1",
+-        "status": "warn",
+-        "summary": {
+-            "previous_cohort_clients": 0,
+-            "returned_clients": 0,
+-            "retention_90d_pct": None,
+-            "current_clients": 0,
+-            "repeat_clients": 0,
+-            "repeat_client_share_pct": None,
+-            "recent_clients_60d": 0,
+-            "future_booked_clients": 0,
+-            "forward_booking_pct": None,
+-            "churn_candidates": 0,
+-            "data_complete": False,
+-        },
+-        "next_step": "Повторить расчёт удержания после восстановления данных YClients.",
+-        "note": "Когортный расчёт временно недоступен.",
+-    }
++    """C8: legacy scorer retired; no qualified canonical tenant evidence here."""
++    return {"version": "c8.legacy.unavailable/1", "available": False, "status": "unavailable", "complete": False, "summary": {"previous_cohort_clients": None, "returned_clients": None, "retention_90d_pct": None, "current_clients": None, "repeat_clients": None, "repeat_client_share_pct": None, "recent_clients_60d": None, "future_booked_clients": None, "forward_booking_pct": None, "churn_candidates": None, "data_complete": False}, "reason": "qualified_c8_tenant_read_required", "note": "Оценка по подтверждённым фактам и правилам доступна в кабинете Maya. Старые пороги лояльности и прогноза не применяются."}
+@@ -1609,17 +1262,2 @@
+-    return {
+-        "status": "ok",
+-        "date": _today(),
+-        "daily_target_rub": 0,
+-        "target_source": "unavailable",
+-        "actual_revenue_rub": 0,
+-        "paid_visits": 0,
+-        "booked_today": 0,
+-        "expected_revenue_rub": 0,
+-        "projected_revenue_rub": 0,
+-        "gap_rub": 0,
+-        "progress_pct": None,
+-        "needed_visits_to_target": 0,
+-        "avg_check_rub": 0,
+-        "estimate": True,
+-        "note": "План-факт временно недоступен.",
+-    }
++    """C8 L08 numerical caller: no legacy valuation or financial forecast."""
++    return {"available": False, "status": "unavailable", "daily_target_rub": None, "target_source": "canonical_a22_required", "actual_revenue_rub": None, "paid_visits": None, "booked_today": None, "expected_revenue_rub": None, "projected_revenue_rub": None, "gap_rub": None, "progress_pct": None, "needed_visits_to_target": None, "confidence": None, "note": "Оценка по C8 недоступна; подтверждённый план/факт C7 доступен отдельно."}
+@@ -1669,6 +1307,2 @@
+-    vals = []
+-    rows = list(opps or []) or list(risks or [])
+-    for row in rows:
+-        if isinstance(row, dict) and row.get("potential_rub") is not None:
+-            vals.append(_rub(row.get("potential_rub")))
+-    return sum(vals)
++    """C8: legacy scorer retired; no qualified canonical tenant evidence here."""
++    return None
+@@ -3050,110 +2684,2 @@
+-    """Сводный KPI-пульт: не бухгалтерия, а быстрый health-score бизнеса."""
+-    progress = plan.get("progress_pct")
+-    free_capacity = _rub(snap.get("free_capacity_today"))
+-    booked = _rub(snap.get("booked_today"))
+-    capacity_total = booked + free_capacity
+-    load_pct = int(round(booked * 100 / capacity_total)) if capacity_total else 100
+-    sleeping = _rub(ret.get("count"))
+-    weak_services = len(svc.get("weak_services") or [])
+-    review_ready = _rub((owner_review.get("summary") or {}).get("ready_count"))
+-    overdue = _rub((control_focus.get("summary") or {}).get("overdue_count"))
+-    automation_actions = _rub((automation_queue.get("summary") or {}).get("actionable_count"))
+-    broken_loops = _rub(((execution_loop or {}).get("summary") or {}).get("broken_count"))
+-    score = 100
+-    if progress is not None and progress < 100:
+-        score -= min(24, int((100 - max(0, progress)) * 0.35))
+-    if load_pct < 80:
+-        score -= min(18, int((80 - load_pct) * 0.45))
+-    if sleeping:
+-        score -= min(14, max(3, sleeping // 2))
+-    if weak_services:
+-        score -= min(12, weak_services * 4)
+-    if overdue:
+-        score -= min(18, overdue * 6)
+-    if review_ready:
+-        score -= min(10, review_ready * 3)
+-    if automation_actions:
+-        score -= min(8, automation_actions * 2)
+-    if broken_loops:
+-        score -= min(16, broken_loops * 4)
+-    score = max(0, min(100, score))
+-    if score < 55:
+-        status = "risk"
+-        headline = "Бизнес требует вмешательства"
+-    elif score < 78:
+-        status = "warn"
+-        headline = "Есть управленческие просадки"
+-    else:
+-        status = "ok"
+-        headline = "Операционный контур в норме"
+-    items = [
+-        {
+-            "key": "revenue_plan",
+-            "title": "План выручки",
+-            "value": progress,
+-            "unit": "%",
+-            "status": "warn" if progress is not None and progress < 100 else "ok",
+-            "detail": "Прогресс дневного плана." if progress is not None else "План пока считается автоматически.",
+-        },
+-        {
+-            "key": "daily_load",
+-            "title": "Загрузка дня",
+-            "value": load_pct,
+-            "unit": "%",
+-            "status": "warn" if load_pct < 80 else "ok",
+-            "detail": "Записи относительно доступной ёмкости дня.",
+-        },
+-        {
+-            "key": "client_base",
+-            "title": "Клиентская база",
+-            "value": sleeping,
+-            "unit": "уснувших",
+-            "status": "warn" if sleeping else "ok",
+-            "detail": "Клиенты без визита 28-56 дней.",
+-        },
+-        {
+-            "key": "execution",
+-            "title": "Исполнение",
+-            "value": overdue + review_ready,
+-            "unit": "контролей",
+-            "status": "risk" if overdue else ("warn" if review_ready else "ok"),
+-            "detail": "Просрочки и задачи, ожидающие решения владельца.",
+-        },
+-    ]
+-    if execution_loop:
+-        items.append({
+-            "key": "closed_loop",
+-            "title": "Замкнутый цикл",
+-            "value": ((execution_loop.get("summary") or {}).get("closed_loop_score")),
+-            "unit": "%",
+-            "status": "risk" if broken_loops >= 3 else ("warn" if broken_loops else "ok"),
+-            "detail": "Сколько задач проходит путь от постановки до проверки результата.",
+-        })
+-    top_profit = masters.get("top_profit_master") or {}
+-    if top_profit:
+-        items.append({
+-            "key": "master_profit_leader",
+-            "title": "Лидер вклада",
+-            "value": top_profit.get("name"),
+-            "unit": "",
+-            "status": "ok",
+-            "detail": "Вклад после процента: %s ₽." % _m(top_profit.get("profit_after_salary_rub")),
+-        })
+-    return {
+-        "status": status,
+-        "headline": headline,
+-        "score": score,
+-        "summary": {
+-            "score": score,
+-            "plan_progress_pct": progress,
+-            "daily_load_pct": load_pct,
+-            "free_capacity_today": free_capacity,
+-            "sleeping_clients": sleeping,
+-            "weak_services_count": weak_services,
+-            "owner_review_ready_count": review_ready,
+-            "automation_actionable_count": automation_actions,
+-            "broken_execution_loops": broken_loops,
+-        },
+-        "items": items,
+-        "note": "KPI-score — операционный индикатор, не бухгалтерский отчёт.",
+-    }
++    """C8 L08: legacy derived scoring/strategy is retired; source owners remain independent."""
++    return {"available": False, "status": "unavailable", "reason": "qualified_c8_tenant_read_required", "score": None, "summary": {}, "items": [], "decisions": [], "goals": [], "dimensions": [], "sections": [], "note": "Оценки и прогнозы доступны только по проверенным данным и подтверждённым правилам в кабинете Maya."}
+@@ -3164,53 +2690,2 @@
+-    """Финансовый директор: прогноз по run-rate и оценка возможностей роста."""
+-    today = date.today()
+-    first = today.replace(day=1)
+-    next_month = (first.replace(year=first.year + 1, month=1) if first.month == 12
+-                  else first.replace(month=first.month + 1))
+-    days_in_month = max(1, (next_month - first).days)
+-    gross_30 = _rub(masters.get("total_gross_rub"))
+-    salary_30 = _rub(masters.get("salary_total_rub"))
+-    contribution_30 = _rub(masters.get("profit_after_salary_total_rub"))
+-    daily_gross_run_rate = _rub(gross_30 / 30) if gross_30 else _rub(snap.get("avg_check_rub")) * _rub(snap.get("booked_today"))
+-    daily_contribution_run_rate = _rub(contribution_30 / 30) if contribution_30 else 0
+-    projected_month_gross = daily_gross_run_rate * days_in_month
+-    projected_month_contribution = daily_contribution_run_rate * days_in_month
+-    money_at_stake = _money_at_stake(opps, risks)
+-    plan_gap = _rub(plan.get("gap_rub"))
+-    runway_status = "warn" if plan_gap < 0 or money_at_stake else "ok"
+-    decisions = []
+-    if plan_gap < 0:
+-        decisions.append({
+-            "key": "close_daily_gap",
+-            "title": "Закрыть разрыв дня",
+-            "detail": "Не хватает %s ₽ до дневного плана." % _m(abs(plan_gap)),
+-            "status": "high" if plan.get("status") == "risk" else "medium",
+-            "potential_rub": abs(plan_gap),
+-        })
+-    if money_at_stake:
+-        decisions.append({
+-            "key": "protect_money_at_stake",
+-            "title": "Использовать возможность роста",
+-            "detail": "Возможности и риски дают до %s ₽ потенциального эффекта." % _m(money_at_stake),
+-            "status": "medium",
+-            "potential_rub": money_at_stake,
+-        })
+-    return {
+-        "status": runway_status,
+-        "headline": "Финансовый директор держит прогноз месяца",
+-        "summary": {
+-            "gross_30d_rub": gross_30,
+-            "salary_30d_rub": salary_30,
+-            "contribution_after_salary_30d_rub": contribution_30,
+-            "daily_gross_run_rate_rub": daily_gross_run_rate,
+-            "projected_month_gross_rub": projected_month_gross,
+-            "projected_month_contribution_after_salary_rub": projected_month_contribution,
+-            "money_at_stake_rub": money_at_stake,
+-            "plan_gap_rub": plan_gap,
+-            "days_in_month": days_in_month,
+-        },
+-        "decisions": decisions[:4],
+-        "note": (
+-            "Прогноз месяца считается по run-rate последних 30 дней. Общие расходы "
+-            "салона пока не распределены: это вклад после выплат мастерам, не чистая прибыль."
+-        ),
+-    }
++    """C8 L08: legacy derived scoring/strategy is retired; source owners remain independent."""
++    return {"available": False, "status": "unavailable", "reason": "qualified_c8_tenant_read_required", "score": None, "summary": {}, "items": [], "decisions": [], "goals": [], "dimensions": [], "sections": [], "note": "Оценки и прогнозы доступны только по проверенным данным и подтверждённым правилам в кабинете Maya."}
+@@ -3242,232 +2717,2 @@
+-    """Слой целей бизнеса: план, факт, разрыв и следующий управленческий шаг."""
+-    today = date.today()
+-    first = today.replace(day=1)
+-    next_month = (first.replace(year=first.year + 1, month=1) if first.month == 12
+-                  else first.replace(month=first.month + 1))
+-    days_in_month = max(1, (next_month - first).days)
+-    finance_summary = finance.get("summary") if isinstance(finance.get("summary"), dict) else {}
+-    goals = []
+-
+-    def add(key: str, title: str, *, actual_value=0, target_value=0,
+-            gap_value=None, progress_pct=None, unit: str = "rub",
+-            status: str | None = None, target_source: str = "",
+-            period: str = "", detail: str = "", owner_next_step: str = "",
+-            estimate: bool = True) -> None:
+-        if progress_pct is None:
+-            progress_pct = _goal_progress(actual_value, target_value)
+-        if gap_value is None:
+-            if unit == "count":
+-                gap_value = _rub(target_value) - _rub(actual_value)
+-            else:
+-                gap_value = _rub(actual_value) - _rub(target_value)
+-        if not status:
+-            status = _goal_status(progress_pct)
+-        goals.append({
+-            "key": key,
+-            "title": title,
+-            "status": status,
+-            "actual_value": _rub(actual_value) if actual_value is not None else None,
+-            "target_value": _rub(target_value) if target_value is not None else None,
+-            "gap_value": _rub(gap_value) if gap_value is not None else None,
+-            "progress_pct": progress_pct,
+-            "unit": unit,
+-            "target_source": target_source,
+-            "period": period,
+-            "detail": detail,
+-            "owner_next_step": owner_next_step,
+-            "estimate": bool(estimate),
+-        })
+-
+-    daily_target = _rub(plan.get("daily_target_rub"))
+-    daily_actual = _rub(plan.get("projected_revenue_rub"))
+-    daily_progress = plan.get("progress_pct")
+-    daily_gap = _rub(plan.get("gap_rub"))
+-    add(
+-        "daily_revenue",
+-        "Выручка дня",
+-        actual_value=daily_actual,
+-        target_value=daily_target,
+-        gap_value=daily_gap,
+-        progress_pct=daily_progress,
+-        unit="rub",
+-        status=plan.get("status") or _goal_status(daily_progress),
+-        target_source=plan.get("target_source") or "last_30_actual_average",
+-        period="day",
+-        detail="Факт оплат + прогноз по текущим записям против дневной цели.",
+-        owner_next_step=(
+-            "Закрыть свободные окна и добрать примерно %s визит(а/ов)."
+-            % _m(plan.get("needed_visits_to_target"))
+-            if _rub(plan.get("needed_visits_to_target"))
+-            else "Держать темп дня и проверить фактические оплаты."
+-        ),
+-    )
+-
+-    manual_month_target = _manual_month_gross_target_rub()
+-    month_target = manual_month_target or (daily_target * days_in_month if daily_target else 0)
+-    month_actual = _rub(finance_summary.get("projected_month_gross_rub"))
+-    month_progress = _goal_progress(month_actual, month_target)
+-    month_gap = month_actual - month_target if month_target else 0
+-    add(
+-        "month_gross",
+-        "Выручка месяца",
+-        actual_value=month_actual,
+-        target_value=month_target,
+-        gap_value=month_gap,
+-        progress_pct=month_progress,
+-        unit="rub",
+-        status=_goal_status(month_progress, warn_below=98, risk_below=82),
+-        target_source="manual_setting" if manual_month_target else "daily_target_x_days",
+-        period="month",
+-        detail="Прогноз месяца по run-rate против месячной цели.",
+-        owner_next_step=(
+-            "Есть разрыв месяца %s ₽: усилить загрузку, возврат и средний чек."
+-            % _m(abs(month_gap))
+-            if month_gap < 0 else "Месячная цель держится. Контролировать маржу и качество загрузки."
+-        ),
+-    )
+-
+-    booked = _rub(snap.get("booked_today"))
+-    free_capacity = _rub(snap.get("free_capacity_today"))
+-    capacity_total = booked + free_capacity
+-    load_pct = int(round(booked * 100 / capacity_total)) if capacity_total else 100
+-    load_target = 80
+-    load_gap = load_pct - load_target
+-    load_status = "risk" if load_pct < 60 else ("warn" if load_pct < load_target else "ok")
+-    add(
+-        "daily_load",
+-        "Загрузка дня",
+-        actual_value=load_pct,
+-        target_value=load_target,
+-        gap_value=load_gap,
+-        progress_pct=round(load_pct * 100 / load_target) if load_target else None,
+-        unit="pct",
+-        status=load_status,
+-        target_source="operational_threshold",
+-        period="day",
+-        detail="Записи относительно доступной ёмкости дня.",
+-        owner_next_step=(
+-            "Пустая ёмкость %s визит(а/ов): поручить админу заполнить ближайшие окна."
+-            % _m(free_capacity)
+-            if free_capacity else "Окна дня закрыты. Следить за переносами и отменами."
+-        ),
+-    )
+-
+-    avg_actual = _rub(plan.get("avg_check_rub") or snap.get("avg_check_rub"))
+-    manual_avg_target = _manual_avg_check_target_rub()
+-    avg_target = manual_avg_target or avg_actual
+-    avg_check_progress = _goal_progress(avg_actual, avg_target)
+-    add(
+-        "avg_check",
+-        "Средний чек",
+-        actual_value=avg_actual,
+-        target_value=avg_target,
+-        gap_value=avg_actual - avg_target if avg_target else 0,
+-        progress_pct=avg_check_progress,
+-        unit="rub",
+-        status=_goal_status(avg_check_progress, warn_below=98, risk_below=85),
+-        target_source="manual_setting" if manual_avg_target else "current_30d_baseline",
+-        period="30d",
+-        detail="Средний чек за 30 дней против ручной цели или текущей базы.",
+-        owner_next_step=(
+-            "Проверить допродажи, абонементы и услуги с высоким чеком."
+-            if manual_avg_target and avg_actual < avg_target else "Средний чек держится на текущей базе."
+-        ),
+-    )
+-
+-    sleeping = ret.get("count")
+-    sleeping_known = sleeping is not None
+-    sleeping_count = _rub(sleeping) if sleeping_known else None
+-    sleeping_status = "ok"
+-    if sleeping_known:
+-        sleeping_status = "risk" if sleeping_count >= 10 else ("warn" if sleeping_count > 0 else "ok")
+-    sleeping_progress = None if not sleeping_known else max(0, 100 - min(100, sleeping_count * 8))
+-    add(
+-        "sleeping_clients",
+-        "Уснувшие клиенты",
+-        actual_value=sleeping_count,
+-        target_value=0 if sleeping_known else None,
+-        gap_value=-(sleeping_count or 0) if sleeping_known else None,
+-        progress_pct=sleeping_progress,
+-        unit="count",
+-        status=sleeping_status,
+-        target_source="reactivation_threshold",
+-        period="28-56d",
+-        detail="Клиенты без визита 28-56 дней с готовым поводом для возврата.",
+-        owner_next_step=(
+-            "Запустить безопасный сценарий реактивации после подтверждения владельца."
+-            if sleeping_count else "База возврата сейчас не требует вмешательства."
+-        ) if sleeping_known else "Сначала пересчитать кандидатов на возврат.",
+-    )
+-
+-    manual_contribution_target = _manual_month_contribution_target_rub()
+-    contribution_actual = _rub(finance_summary.get("projected_month_contribution_after_salary_rub"))
+-    gross_30 = _rub(finance_summary.get("gross_30d_rub") or masters.get("total_gross_rub"))
+-    contribution_30 = _rub(
+-        finance_summary.get("contribution_after_salary_30d_rub")
+-        or masters.get("profit_after_salary_total_rub")
+-    )
+-    contribution_rate = (contribution_30 / gross_30) if gross_30 else 0
+-    contribution_target = manual_contribution_target or _rub(month_target * contribution_rate)
+-    contribution_progress = _goal_progress(contribution_actual, contribution_target)
+-    contribution_gap = contribution_actual - contribution_target if contribution_target else 0
+-    add(
+-        "contribution_after_salary",
+-        "Вклад после выплат",
+-        actual_value=contribution_actual,
+-        target_value=contribution_target,
+-        gap_value=contribution_gap,
+-        progress_pct=contribution_progress,
+-        unit="rub",
+-        status=_goal_status(contribution_progress, warn_below=98, risk_below=82),
+-        target_source="manual_setting" if manual_contribution_target else "month_goal_x_current_margin",
+-        period="month",
+-        detail="Прогноз вклада после выплат мастерам. Это ещё не чистая прибыль.",
+-        owner_next_step=(
+-            "Проверить маржинальность мастеров и услуг, где вклад просел."
+-            if contribution_gap < 0 else "Вклад после выплат идёт в цели месяца."
+-        ),
+-    )
+-
+-    off_track = [g for g in goals if g.get("status") != "ok"]
+-    risk_count = len([g for g in goals if g.get("status") == "risk"])
+-    avg_progresses = [
+-        int(g.get("progress_pct"))
+-        for g in goals
+-        if g.get("progress_pct") is not None
+-    ]
+-    avg_progress = round(sum(avg_progresses) / len(avg_progresses)) if avg_progresses else None
+-    status = "risk" if risk_count else ("warn" if off_track else "ok")
+-    headline = (
+-        "Цели требуют немедленных действий" if status == "risk"
+-        else ("Есть отклонения от целей" if status == "warn" else "Цели бизнеса под контролем")
+-    )
+-    next_step = (
+-        (off_track[0].get("owner_next_step") if off_track else "")
+-        or "Держать текущий план и проверять отклонения каждый день."
+-    )
+-    return {
+-        "version": "maya_os_v4_business_goals",
+-        "mode": "plan_fact_goals",
+-        "status": status,
+-        "headline": headline,
+-        "summary": {
+-            "goals_count": len(goals),
+-            "off_track_count": len(off_track),
+-            "risk_count": risk_count,
+-            "avg_progress_pct": avg_progress,
+-            "daily_goal_progress_pct": daily_progress,
+-            "daily_goal_gap_rub": daily_gap,
+-            "month_goal_progress_pct": month_progress,
+-            "month_goal_gap_rub": month_gap,
+-            "daily_load_pct": load_pct,
+-            "load_gap_pct": load_gap,
+-            "avg_check_progress_pct": avg_check_progress,
+-            "sleeping_clients_count": sleeping_count,
+-            "contribution_goal_progress_pct": contribution_progress,
+-            "contribution_goal_gap_rub": contribution_gap,
+-            "days_in_month": days_in_month,
+-        },
+-        "goals": goals,
+-        "next_step": next_step,
+-        "note": "Цели используют факты YClients и оценочные прогнозы; внешние действия требуют отдельного подтверждения.",
+-    }
++    """C8 L08: legacy derived scoring/strategy is retired; source owners remain independent."""
++    return {"available": False, "status": "unavailable", "reason": "qualified_c8_tenant_read_required", "score": None, "summary": {}, "items": [], "decisions": [], "goals": [], "dimensions": [], "sections": [], "note": "Оценки и прогнозы доступны только по проверенным данным и подтверждённым правилам в кабинете Maya."}
+@@ -3486,231 +2731,2 @@
+-    """Шесть доказательных советов владельцу без свободной арифметики LLM."""
+-    goals = {
+-        row.get("key"): row
+-        for row in (business_goals.get("goals") or [])
+-        if isinstance(row, dict) and row.get("key")
+-    }
+-    dimensions = []
+-
+-    def add(
+-        key: str,
+-        title: str,
+-        status: str,
+-        *,
+-        metrics: dict,
+-        evidence: str,
+-        recommendation: str,
+-        potential_rub=None,
+-    ) -> None:
+-        dimensions.append({
+-            "key": key,
+-            "title": title,
+-            "status": status if status in ("ok", "warn", "risk") else "warn",
+-            "metrics": metrics,
+-            "evidence": evidence,
+-            "recommendation": recommendation,
+-            "potential_rub": _rub(potential_rub) if potential_rub is not None else None,
+-        })
+-
+-    daily = goals.get("daily_revenue") or {}
+-    month = goals.get("month_gross") or {}
+-    revenue_status = _command_status(daily.get("status"), month.get("status"))
+-    revenue_gap = min(0, int(daily.get("gap_value") or 0))
+-    month_gap = min(0, int(month.get("gap_value") or 0))
+-    add(
+-        "revenue",
+-        "Выручка",
+-        revenue_status,
+-        metrics={
+-            "daily_actual_rub": _rub(daily.get("actual_value")),
+-            "daily_target_rub": _rub(daily.get("target_value")),
+-            "daily_gap_rub": int(daily.get("gap_value") or 0),
+-            "month_projected_rub": _rub(month.get("actual_value")),
+-            "month_target_rub": _rub(month.get("target_value")),
+-            "month_gap_rub": int(month.get("gap_value") or 0),
+-        },
+-        evidence=(
+-            "План дня выполнен на %s%%; прогноз месяца — %s%%."
+-            % (daily.get("progress_pct") or 0, month.get("progress_pct") or 0)
+-        ),
+-        recommendation=(
+-            daily.get("owner_next_step")
+-            or month.get("owner_next_step")
+-            or "Держать текущий темп и сверить фактические оплаты."
+-        ),
+-        potential_rub=abs(revenue_gap) + abs(month_gap),
+-    )
+-
+-    load = goals.get("daily_load") or {}
+-    free_capacity = _rub(snap.get("free_capacity_today"))
+-    add(
+-        "load",
+-        "Загрузка",
+-        load.get("status") or "warn",
+-        metrics={
+-            "load_pct": _rub(load.get("actual_value")),
+-            "target_pct": _rub(load.get("target_value")),
+-            "free_capacity_visits": free_capacity,
+-            "working_masters": _rub(snap.get("working_masters")),
+-        },
+-        evidence=(
+-            "Занято %s%% доступной ёмкости; свободно около %s визит(а/ов)."
+-            % (_m(load.get("actual_value")), _m(free_capacity))
+-        ),
+-        recommendation=(
+-            load.get("owner_next_step")
+-            or "Поручить админу закрыть ближайшие свободные окна."
+-        ),
+-        potential_rub=free_capacity * _rub(snap.get("avg_check_rub")),
+-    )
+-
+-    avg_check = goals.get("avg_check") or {}
+-    avg_gap = int(avg_check.get("actual_value") or 0) - int(avg_check.get("target_value") or 0)
+-    add(
+-        "avg_check",
+-        "Средний чек",
+-        avg_check.get("status") or "ok",
+-        metrics={
+-            "actual_rub": _rub(avg_check.get("actual_value")),
+-            "target_rub": _rub(avg_check.get("target_value")),
+-            "gap_rub": avg_gap,
+-        },
+-        evidence=(
+-            "Средний чек %s ₽ против цели %s ₽."
+-            % (_m(avg_check.get("actual_value")), _m(avg_check.get("target_value")))
+-        ),
+-        recommendation=(
+-            avg_check.get("owner_next_step")
+-            or "Проверить исторические допродажи и долю комплексных услуг."
+-        ),
+-        potential_rub=(abs(avg_gap) * _rub(snap.get("booked_today")) if avg_gap < 0 else 0),
+-    )
+-
+-    booked = _rub(snap.get("booked_today"))
+-    booking_status = "risk" if not booked and _rub(snap.get("working_masters")) else (
+-        "warn" if free_capacity else "ok"
+-    )
+-    trend = snap.get("week_trend") if isinstance(snap.get("week_trend"), dict) else {}
+-    gross_trend = (trend.get("metrics") or {}).get("gross") if isinstance(trend.get("metrics"), dict) else {}
+-    if not gross_trend and isinstance(trend.get("gross"), dict):
+-        gross_trend = trend.get("gross")
+-    add(
+-        "bookings",
+-        "Записи",
+-        booking_status,
+-        metrics={
+-            "booked_today": booked,
+-            "free_capacity_visits": free_capacity,
+-            "week_revenue_delta_pct": (gross_trend or {}).get("delta_pct"),
+-        },
+-        evidence=(
+-            "На сегодня %s записей; незаполненная ёмкость — %s."
+-            % (_m(booked), _m(free_capacity))
+-        ),
+-        recommendation=(
+-            "Сначала заполнить самые близкие окна тёплой базой и листом ожидания."
+-            if free_capacity else "Контролировать переносы, отмены и подтверждение визитов."
+-        ),
+-        potential_rub=free_capacity * _rub(snap.get("avg_check_rub")),
+-    )
+-
+-    sleeping = ret.get("count")
+-    sleeping_known = sleeping is not None
+-    sleeping_count = _rub(sleeping) if sleeping_known else None
+-    retention_summary = retention.get("summary") or {}
+-    retention_status = retention.get("status") or "warn"
+-    add(
+-        "retention",
+-        "Удержание клиентов",
+-        retention_status,
+-        metrics={
+-            "retention_90d_pct": retention_summary.get("retention_90d_pct"),
+-            "repeat_client_share_pct": retention_summary.get("repeat_client_share_pct"),
+-            "forward_booking_pct": retention_summary.get("forward_booking_pct"),
+-            "churn_candidates": _rub(retention_summary.get("churn_candidates")),
+-            "sleeping_clients_28_56d": sleeping_count,
+-            "return_potential_rub": ret.get("potential_return_revenue_rub"),
+-        },
+-        evidence=(
+-            "Retention 90 дней: %s; будущая запись: %s; к возврату: %s."
+-            % (
+-                (str(retention_summary.get("retention_90d_pct")) + "%")
+-                if retention_summary.get("retention_90d_pct") is not None else "нет базы",
+-                (str(retention_summary.get("forward_booking_pct")) + "%")
+-                if retention_summary.get("forward_booking_pct") is not None else "нет базы",
+-                _m(sleeping_count) if sleeping_known else "ещё не пересчитано",
+-            )
+-        ),
+-        recommendation=(
+-            retention.get("next_step")
+-            or "Поднять долю следующей записи и вернуть клиентов без повторного визита."
+-        ),
+-        potential_rub=ret.get("potential_return_revenue_rub"),
+-    )
+-
+-    internal_avg = internal_reviews.get("avg_rating")
+-    internal_count = _rub(internal_reviews.get("total_rated"))
+-    reputation_summary = reputation_payload.get("summary") or {}
+-    external_avg = reputation_summary.get("overall_rating")
+-    external_negative = _rub(reputation_summary.get("negative_reviews_count"))
+-    quality_status = reputation_payload.get("status") or "warn"
+-    if internal_avg is not None:
+-        if float(internal_avg) < 4.2:
+-            quality_status = "risk"
+-        elif float(internal_avg) < 4.7 and quality_status == "ok":
+-            quality_status = "warn"
+-    quality_recommendation = (reputation_payload.get("recommendations") or [
+-        "Собрать больше оценок и разобрать причины низких отзывов."
+-    ])[0]
+-    add(
+-        "quality",
+-        "Качество и отзывы",
+-        quality_status,
+-        metrics={
+-            "internal_rating_90d": round(float(internal_avg), 2) if internal_avg is not None else None,
+-            "internal_reviews_90d": internal_count,
+-            "maps_rating": external_avg,
+-            "maps_negative_reviews": external_negative,
+-            "maps_sources_connected": _rub(reputation_summary.get("rated_sources_count")),
+-            "text_analysis_status": reputation_summary.get("text_analysis_status"),
+-        },
+-        evidence=(
+-            "Внутренний рейтинг: %s (%s оценок); карты: %s."
+-            % (
+-                round(float(internal_avg), 2) if internal_avg is not None else "нет данных",
+-                _m(internal_count),
+-                external_avg if external_avg is not None else "источник ещё не подключён",
+-            )
+-        ),
+-        recommendation=quality_recommendation,
+-    )
+-
+-    dimensions.sort(key=lambda item: (
+-        -_severity_rank(item.get("status")),
+-        item.get("potential_rub") is None,
+-        -_rub(item.get("potential_rub")),
+-        item.get("title") or "",
+-    ))
+-    attention = [item for item in dimensions if item.get("status") != "ok"]
+-    risk_count = len([item for item in dimensions if item.get("status") == "risk"])
+-    score = max(0, 100 - risk_count * 18 - (len(attention) - risk_count) * 8)
+-    status = "risk" if risk_count else ("warn" if attention else "ok")
+-    return {
+-        "version": "maya_owner_advisor_v1",
+-        "mode": "evidence_based_advice",
+-        "status": status,
+-        "headline": (
+-            "Есть управленческие разрывы" if status == "risk"
+-            else ("Есть точки роста" if status == "warn" else "Ключевые показатели под контролем")
+-        ),
+-        "summary": {
+-            "score": score,
+-            "dimensions_count": len(dimensions),
+-            "attention_count": len(attention),
+-            "risk_count": risk_count,
+-            "top_priority_key": dimensions[0].get("key") if dimensions else None,
+-            "money_opportunity_rub": sum(_rub(item.get("potential_rub")) for item in attention),
+-        },
+-        "dimensions": dimensions,
+-        "top_advice": dimensions[:3],
+-        "note": "Каждый совет содержит метрику, доказательство и конкретный следующий шаг.",
+-    }
++    """C8 L08: legacy derived scoring/strategy is retired; source owners remain independent."""
++    return {"available": False, "status": "unavailable", "reason": "qualified_c8_tenant_read_required", "score": None, "summary": {}, "items": [], "decisions": [], "goals": [], "dimensions": [], "sections": [], "note": "Оценки и прогнозы доступны только по проверенным данным и подтверждённым правилам в кабинете Maya."}
+@@ -3728,250 +2744,2 @@
+-    """Evidence-first growth decisions with measurable effect and guardrails."""
+-    decisions = []
+-    avg_check = _rub(plan.get("avg_check_rub") or snap.get("avg_check_rub"))
+-
+-    def add(
+-        key: str,
+-        domain: str,
+-        title: str,
+-        *,
+-        evidence: str,
+-        reasoning: str,
+-        action: str,
+-        metric: str,
+-        effect_min=0,
+-        effect_max=0,
+-        unit: str = "rub",
+-        confidence: str = "medium",
+-        effort: str = "low",
+-        kpi: str,
+-        review_after_hours: int = 72,
+-        guardrail: str = "Не запускать без проверки данных и допустимого контакта.",
+-    ) -> None:
+-        confidence_weight = {"high": 0.9, "medium": 0.65, "low": 0.4}.get(confidence, 0.5)
+-        effort_weight = {"low": 1.0, "medium": 0.75, "high": 0.5}.get(effort, 0.75)
+-        money_midpoint = (_rub(effect_min) + _rub(effect_max)) / 2 if unit == "rub" else 0
+-        priority_score = round(money_midpoint * confidence_weight * effort_weight)
+-        decisions.append({
+-            "key": key,
+-            "domain": domain,
+-            "title": title,
+-            "evidence": evidence,
+-            "reasoning": reasoning,
+-            "action": action,
+-            "expected_effect": {
+-                "metric": metric,
+-                "min": _rub(effect_min) if unit == "rub" else effect_min,
+-                "max": _rub(effect_max) if unit == "rub" else effect_max,
+-                "unit": unit,
+-                "basis": "scenario_estimate" if unit == "rub" else "operational_target",
+-            },
+-            "confidence": confidence,
+-            "effort": effort,
+-            "priority_score": priority_score,
+-            "kpi": kpi,
+-            "review_after_hours": max(24, _rub(review_after_hours)),
+-            "guardrail": guardrail,
+-            "requires_owner_approval": True,
+-        })
+-
+-    free_capacity = _rub(snap.get("free_capacity_today"))
+-    if free_capacity and avg_check:
+-        min_visits = max(1, min(free_capacity, round(free_capacity * 0.15)))
+-        max_visits = max(min_visits, min(free_capacity, round(free_capacity * 0.35)))
+-        add(
+-            "fill_nearest_windows",
+-            "acquisition",
+-            "Заполнить ближайшие свободные окна тёплым спросом",
+-            evidence=f"Сегодня свободно около {free_capacity} визит(а/ов); средний чек {avg_check} ₽.",
+-            reasoning="Ближайший денежный резерв находится в уже доступной ёмкости, а не в массовой скидке.",
+-            action="Выбрать клиентов, которым уже подходит привычный срок визита, и предложить конкретные ближайшие окна.",
+-            metric="incremental_revenue_rub",
+-            effect_min=min_visits * avg_check,
+-            effect_max=max_visits * avg_check,
+-            confidence="medium",
+-            kpi="Новые подтверждённые записи в свободные часы и фактическая выручка.",
+-            guardrail="Только клиенты с допустимым контактом; не давать скидку на уже заполненные часы.",
+-        )
+-
+-    upsell = _rub(plan.get("upsell_potential_rub"))
+-    if upsell:
+-        add(
+-            "historical_addons",
+-            "average_check",
+-            "Вернуть уместные дополнительные услуги",
+-            evidence=(
+-                f"История комплексных визитов даёт до {upsell} ₽ дополнительного потенциала "
+-                "в сегодняшней записи."
+-            ),
+-            reasoning="Предложение основано на фактическом поведении клиентов, а не на случайной допродаже.",
+-            action="До визита показать мастеру только релевантные услуги, которые клиент уже выбирал или регулярно сочетает.",
+-            metric="additional_service_revenue_rub",
+-            effect_min=round(upsell * 0.3),
+-            effect_max=round(upsell * 0.7),
+-            confidence="medium",
+-            kpi="Доля визитов с дополнительной услугой и прирост среднего чека.",
+-            guardrail="Не навязывать услугу и не раскрывать мастеру лишние клиентские данные.",
+-        )
+-
+-    retention_summary = retention.get("summary") or {}
+-    churn_candidates = _rub(retention_summary.get("churn_candidates"))
+-    cycle_candidates = _rub(ret.get("cycle_due_count"))
+-    forward_pct = retention_summary.get("forward_booking_pct")
+-    if cycle_candidates or (churn_candidates and (forward_pct is None or _rub(forward_pct) < 35)):
+-        ranked_count = cycle_candidates or churn_candidates
+-        targeted = bool(cycle_candidates)
+-        min_returns = max(1, round(ranked_count * (0.15 if targeted else 0.03)))
+-        max_returns = max(min_returns, round(ranked_count * (0.35 if targeted else 0.08)))
+-        add(
+-            "personal_return_cycle",
+-            "retention",
+-            "Возвращать клиентов по их личному циклу",
+-            evidence=(
+-                (
+-                    f"MAYA уже нашла {cycle_candidates} клиент(а/ов) по личному циклу; "
+-                    f"просрочили привычный срок — {_rub(ret.get('cycle_overdue_count'))}."
+-                ) if targeted else (
+-                    f"Без повторного визита {churn_candidates} клиент(а/ов); будущая запись "
+-                    f"{forward_pct if forward_pct is not None else 'ещё не рассчитана'}%."
+-                )
+-            ),
+-            reasoning="Отклонение от привычного интервала визита является более точным сигналом ухода, чем единый срок для всей базы.",
+-            action=(
+-                "Открыть готовый список MAYA и выбрать: написать без скидки, позвонить или подготовить предложение."
+-                if targeted else
+-                "Дождаться ближайшего сканирования личного цикла и работать уже с готовой очередью, а не со всей когортой."
+-            ),
+-            metric="returned_revenue_rub",
+-            effect_min=min_returns * avg_check,
+-            effect_max=max_returns * avg_check,
+-            confidence="high" if targeted else "medium",
+-            kpi="Возвраты за 14 дней, фактическая выручка и повторный визит после возврата.",
+-            review_after_hours=336,
+-            guardrail="Маркетинговое согласие, ограничение частоты сообщений и контрольная группа.",
+-        )
+-
+-    reputation_summary = reputation_payload.get("summary") or {}
+-    negative_30d = _rub(
+-        reputation_summary.get("negative_reviews_30d")
+-        or reputation_summary.get("negative_reviews_count")
+-    )
+-    if negative_30d:
+-        add(
+-            "reputation_recovery",
+-            "reputation",
+-            "Разобрать свежий негатив по первопричине",
+-            evidence=f"За анализируемый период найдено негативных отзывов: {negative_30d}.",
+-            reasoning="Один повторяющийся дефект сервиса влияет и на удержание, и на выбор новых клиентов.",
+-            action=(reputation_payload.get("recommendations") or [
+-                "Классифицировать причину, исправить процесс и подготовить спокойный предметный ответ."
+-            ])[0],
+-            metric="negative_review_resolution_pct",
+-            effect_min=80,
+-            effect_max=100,
+-            unit="pct",
+-            confidence="high",
+-            kpi="Доля разобранных негативных отзывов и повторяемость темы за 30 дней.",
+-            review_after_hours=168,
+-            guardrail="Не публиковать персональные данные и не спорить с клиентом в ответе.",
+-        )
+-
+-    market_summary = market_payload.get("summary") or {}
+-    market_recommendation = (market_payload.get("recommendations") or [{}])[0]
+-    if market_summary.get("competitors_scanned"):
+-        has_yandex_market = bool(market_summary.get("yandex_competitor_position"))
+-        add(
+-            "market_position",
+-            "market",
+-            "Усилить позицию по доказанному рыночному разрыву",
+-            evidence=(
+-                market_recommendation.get("fact")
+-                or f"Сравнено {market_summary.get('competitors_scanned')} конкурентов в публичной выдаче."
+-            ),
+-            reasoning="Рынок оценивается по цене, отзывам, видимости, наполнению профиля и предложениям, а не по одной медиане.",
+-            action=(
+-                market_recommendation.get("action")
+-                or "Исправить самый большой измеримый разрыв и проверить изменение позиции через неделю."
+-            ),
+-            metric=("yandex_discovery_share_pct" if has_yandex_market else "market_visibility_proxy_score"),
+-            effect_min=5,
+-            effect_max=12,
+-            unit="points",
+-            confidence=market_recommendation.get("confidence") or "medium",
+-            effort="medium",
+-            kpi=(
+-                "Доля дискавери-переходов Яндекса, записи из Яндекса и выручка этих визитов."
+-                if has_yandex_market else
+-                "Индекс видимости, место по отзывам, цена и динамика поисковой позиции."
+-            ),
+-            review_after_hours=168,
+-            guardrail=(
+-                "Не называть долю переходов Яндекса долей выручки всего рынка."
+-                if has_yandex_market else
+-                "Не называть косвенный индекс реальным трафиком или долей рынка."
+-            ),
+-        )
+-
+-    try:
+-        import database
+-        source_stats = database.sources_stats(days=30) or {}
+-    except Exception:
+-        source_stats = {}
+-    by_source = source_stats.get("by_source") if isinstance(source_stats.get("by_source"), dict) else {}
+-    weak_sources = [
+-        {"source": key, **value}
+-        for key, value in by_source.items()
+-        if isinstance(value, dict) and _rub(value.get("clients")) >= 3 and float(value.get("conversion") or 0) < 30
+-    ]
+-    if weak_sources:
+-        weak_sources.sort(key=lambda row: float(row.get("conversion") or 0))
+-        weak = weak_sources[0]
+-        add(
+-            "source_conversion",
+-            "acquisition",
+-            "Исправить слабую конверсию источника",
+-            evidence=(
+-                f"Источник {weak.get('source')} привёл {weak.get('clients')} клиент(а/ов), "
+-                f"в запись перешло {weak.get('conversion')}%."
+-            ),
+-            reasoning="Рост трафика невыгоден, пока текущий источник плохо превращается в запись.",
+-            action="Проверить обещание, путь до записи и причину отказа до увеличения бюджета.",
+-            metric="source_booking_conversion_pct",
+-            effect_min=5,
+-            effect_max=15,
+-            unit="pct",
+-            confidence="medium",
+-            effort="medium",
+-            kpi="Конверсия источника в запись и стоимость фактически пришедшего клиента.",
+-            review_after_hours=336,
+-            guardrail="Не увеличивать бюджет без сквозной атрибуции до состоявшегося визита.",
+-        )
+-
+-    decisions.sort(key=lambda row: (-_rub(row.get("priority_score")), row.get("domain") or ""))
+-    status = "warn" if decisions else "ok"
+-    return {
+-        "version": "maya_growth_engine_v1",
+-        "mode": "evidence_to_action",
+-        "status": status,
+-        "headline": (
+-            decisions[0].get("title") if decisions else "Критичных возможностей роста сейчас не найдено"
+-        ),
+-        "summary": {
+-            "decisions_count": len(decisions),
+-            "money_opportunity_min_rub": sum(
+-                _rub((row.get("expected_effect") or {}).get("min"))
+-                for row in decisions if (row.get("expected_effect") or {}).get("unit") == "rub"
+-            ),
+-            "money_opportunity_max_rub": sum(
+-                _rub((row.get("expected_effect") or {}).get("max"))
+-                for row in decisions if (row.get("expected_effect") or {}).get("unit") == "rub"
+-            ),
+-            "domains": sorted({row.get("domain") for row in decisions if row.get("domain")}),
+-            "attribution_sources_count": len(by_source),
+-        },
+-        "decisions": decisions[:6],
+-        "source_attribution": source_stats,
+-        "note": (
+-            "MAYA отделяет факт от гипотезы. Денежный эффект указан диапазоном и "
+-            "должен проверяться по KPI после выполнения."
+-        ),
+-    }
++    """C8 L08: legacy derived scoring/strategy is retired; source owners remain independent."""
++    return {"available": False, "status": "unavailable", "reason": "qualified_c8_tenant_read_required", "score": None, "summary": {}, "items": [], "decisions": [], "goals": [], "dimensions": [], "sections": [], "note": "Оценки и прогнозы доступны только по проверенным данным и подтверждённым правилам в кабинете Maya."}
+@@ -3993,357 +2761,2 @@
+-    """One plain-language owner surface instead of a stack of subsystem cards."""
+-    goals = {
+-        row.get("key"): row
+-        for row in (business_goals.get("goals") or [])
+-        if isinstance(row, dict) and row.get("key")
+-    }
+-    advice = {
+-        row.get("key"): row
+-        for row in (owner_advisor.get("dimensions") or [])
+-        if isinstance(row, dict) and row.get("key")
+-    }
+-    reputation_summary = reputation_payload.get("summary") or {}
+-    market_summary = market_payload.get("summary") or {}
+-    retention_summary = retention.get("summary") or {}
+-    growth_decisions = [
+-        row for row in (growth_engine.get("decisions") or []) if isinstance(row, dict)
+-    ]
+-    growth_by_domain = {}
+-    for row in growth_decisions:
+-        growth_by_domain.setdefault(row.get("domain"), row)
+-    top_growth = growth_decisions[0] if growth_decisions else {}
+-
+-    def growth_action(domain: str, fallback: str) -> str:
+-        return str((growth_by_domain.get(domain) or {}).get("action") or fallback)
+-
+-    plan_target = _rub(plan.get("daily_target_rub"))
+-    plan_expected = _rub(plan.get("projected_revenue_rub") or snap.get("expected_revenue_rub"))
+-    plan_gap = plan_expected - plan_target if plan_target else 0
+-    plan_progress = plan.get("progress_pct")
+-    free_capacity = _rub(snap.get("free_capacity_today"))
+-    booked = _rub(snap.get("booked_today"))
+-    avg_check = _rub(snap.get("avg_check_rub"))
+-
+-    if plan_target and plan_gap < 0:
+-        headline = "Сегодня до плана не хватает %s" % (_m(abs(plan_gap)) + " ₽")
+-        status = "risk" if plan_progress is not None and plan_progress < 70 else "warn"
+-        summary_text = (
+-            "Ожидаем %s при плане %s. Свободно примерно %s визит(а/ов)."
+-            % (_money(plan_expected), _money(plan_target), _m(free_capacity))
+-        )
+-    elif free_capacity:
+-        headline = "План достижим, но часть дня ещё свободна"
+-        status = "warn"
+-        summary_text = (
+-            "Ожидаем %s; свободно примерно %s визит(а/ов)."
+-            % (_money(plan_expected), _m(free_capacity))
+-        )
+-    else:
+-        headline = "Сегодня бизнес идёт по плану"
+-        status = "ok"
+-        summary_text = "Запись заполнена; ожидаемая выручка — %s." % _money(plan_expected)
+-
+-    cards = []
+-
+-    def add_card(
+-        key, label, title, value, value_label, second_value, second_label,
+-        analysis, action, tone="neutral", decision=None, extra=None,
+-    ):
+-        card = {
+-            "key": key,
+-            "label": label,
+-            "title": title,
+-            "value": value,
+-            "value_label": value_label,
+-            "second_value": second_value,
+-            "second_label": second_label,
+-            "analysis": analysis,
+-            "action": action,
+-            "tone": tone if tone in ("positive", "attention", "neutral") else "neutral",
+-        }
+-        if isinstance(decision, dict) and decision:
+-            card["decision"] = decision
+-        if isinstance(extra, dict):
+-            card.update(extra)
+-        cards.append(card)
+-
+-    add_card(
+-        "pulse",
+-        "Главное",
+-        headline,
+-        _money(plan_expected),
+-        "ожидаем сегодня",
+-        str(booked),
+-        "записей",
+-        summary_text,
+-        top_growth.get("action") or (
+-            "Сначала закрыть ближайшие свободные окна клиентами с привычным циклом визитов."
+-            if free_capacity else "Сохранить темп и проверить фактические оплаты в конце дня."
+-        ),
+-        "attention" if status != "ok" else "positive",
+-        top_growth,
+-    )
+-
+-    revenue_advice = advice.get("revenue") or {}
+-    month = goals.get("month_gross") or {}
+-    add_card(
+-        "revenue",
+-        "Выручка",
+-        "План дня и прогноз месяца",
+-        _money(plan_expected),
+-        "сегодня",
+-        _money(month.get("actual_value")),
+-        "прогноз месяца",
+-        (
+-            "План дня %s; прогноз месяца выполнен на %s%%."
+-            % (_money(plan_target), _integer(month.get("progress_pct")))
+-        ),
+-        growth_action(
+-            "average_check",
+-            revenue_advice.get("recommendation")
+-            or "Удерживать загрузку и средний чек без скидки на уже заполненные часы.",
+-        ),
+-        "attention" if (revenue_advice.get("status") or "ok") != "ok" else "positive",
+-        growth_by_domain.get("average_check"),
+-    )
+-
+-    load = goals.get("daily_load") or {}
+-    load_pct = _integer(load.get("actual_value"))
+-    add_card(
+-        "load",
+-        "Загрузка",
+-        "Насколько заполнен рабочий день",
+-        str(load_pct) + "%",
+-        "занято",
+-        str(free_capacity),
+-        "мест свободно",
+-        "Сегодня работают %s мастер(а/ов), записей — %s." % (
+-            _m(snap.get("working_masters")), _m(booked)
+-        ),
+-        growth_action(
+-            "acquisition",
+-            "Сфокусировать возврат клиентов на ближайших свободных часах."
+-            if free_capacity else "Следить за отменами и сразу отдавать окна листу ожидания.",
+-        ),
+-        "attention" if free_capacity else "positive",
+-        growth_by_domain.get("acquisition"),
+-    )
+-
+-    retention_pct = retention_summary.get("retention_90d_pct")
+-    forward_pct = retention_summary.get("forward_booking_pct")
+-    cycle_count = return_candidates.get("cycle_due_count")
+-    cycle_rows = [
+-        row for row in (return_candidates.get("candidates") or [])
+-        if isinstance(row, dict)
+-    ]
+-    if cycle_count is None:
+-        client_analysis = (
+-            "К возврату сейчас %s клиент(а/ов). MAYA готовит персональную очередь по циклам."
+-            % _m(retention_summary.get("churn_candidates"))
+-        )
+-        client_action = "Обновить данные и дождаться первого расчёта личного цикла."
+-    elif _rub(cycle_count):
+-        preview = "; ".join(
+-            "%s — %s" % (row.get("name") or "Клиент", row.get("reason") or "срок наступил")
+-            for row in cycle_rows[:3]
+-        )
+-        client_analysis = (
+-            "MAYA уже отобрала %s клиент(а/ов), из них просрочили привычный срок — %s.%s"
+-            % (
+-                _m(cycle_count),
+-                _m(return_candidates.get("cycle_overdue_count")),
+-                (" " + preview + ".") if preview else "",
+-            )
+-        )
+-        client_action = "Выберите действие ниже. Рекомендация MAYA — сначала написать без скидки."
+-    else:
+-        client_analysis = "По личному циклу сейчас нет клиентов, которым уже пора напомнить о визите."
+-        client_action = "Проверить очередь завтра; массовую скидку сейчас не запускать."
+-    add_card(
+-        "clients",
+-        "Клиенты",
+-        "Возвращаются ли гости",
+-        (str(retention_pct) + "%") if retention_pct is not None else "—",
+-        "вернулись за 90 дней",
+-        (str(forward_pct) + "%") if forward_pct is not None else "—",
+-        "уже записаны снова",
+-        client_analysis,
+-        client_action,
+-        "attention" if (retention.get("status") or "warn") != "ok" else "positive",
+-        growth_by_domain.get("retention"),
+-        {
+-            "candidate_queue": cycle_rows[:8],
+-            "candidate_count": cycle_count,
+-            "owner_question": return_candidates.get("owner_question"),
+-            "decision_options": return_candidates.get("decision_options") or [],
+-            "cycle_snapshot_state": return_candidates.get("cycle_snapshot_state"),
+-            "owner_alert": return_candidates.get("owner_alert") or _cycle_owner_alert({}),
+-        },
+-    )
+-
+-    maps_rating = reputation_summary.get("overall_rating")
+-    negative_reviews = _rub(reputation_summary.get("negative_reviews_count"))
+-    reputation_sources = {
+-        row.get("key"): row
+-        for row in (reputation_payload.get("sources") or [])
+-        if isinstance(row, dict) and row.get("key")
+-    }
+-    yandex = reputation_sources.get("yandex") or {}
+-    two_gis = reputation_sources.get("2gis") or {}
+-
+-    def rating_value(source: dict) -> str:
+-        return ("%.1f" % float(source.get("rating"))) if source.get("rating") is not None else "—"
+-
+-    review_periods = reputation_payload.get("text_analysis") or {}
+-    period_summary = review_periods.get("periods") or {}
+-    add_card(
+-        "quality",
+-        "Качество",
+-        "Репутация на двух площадках",
+-        rating_value(yandex),
+-        "Яндекс · %s" % _ru_count(yandex.get("reviews_count"), "отзыв", "отзыва", "отзывов"),
+-        rating_value(two_gis),
+-        "2ГИС · %s" % _ru_count(two_gis.get("reviews_count"), "отзыв", "отзыва", "отзывов"),
+-        (
+-            "Общий взвешенный рейтинг %s. Проанализировано %s. За 30 дней: новых отзывов — %s, негативных — %s."
+-            % (
+-                ("%.2f" % float(maps_rating)) if maps_rating is not None else "—",
+-                _ru_count(reputation_summary.get("text_reviews_count"), "текст", "текста", "текстов"),
+-                _m(period_summary.get("new_30d")),
+-                _m(period_summary.get("negative_30d") or negative_reviews),
+-            )
+-        ),
+-        growth_action(
+-            "reputation",
+-            ((reputation_payload.get("recommendations") or [
+-                "Поддерживать поток свежих отзывов и быстро разбирать конкретные причины негатива."
+-            ])[0]),
+-        ),
+-        "attention" if negative_reviews else "positive",
+-        growth_by_domain.get("reputation"),
+-    )
+-
+-    market_scanned = _rub(market_summary.get("competitors_scanned"))
+-    market_price = market_summary.get("market_median_haircut_price_rub")
+-    own_price = market_summary.get("own_haircut_price_rub")
+-    if market_scanned:
+-        yandex_rank = market_summary.get("yandex_competitor_position")
+-        yandex_set_size = market_summary.get("yandex_competitor_set_size")
+-        yandex_share = market_summary.get("yandex_discovery_share_pct")
+-        review_rank = market_summary.get("review_volume_rank")
+-        tracked_count = market_summary.get("tracked_businesses_count") or market_scanned
+-        price_index = market_summary.get("price_index_pct")
+-        visibility_score = market_summary.get("visibility_proxy_score")
+-        if yandex_rank and yandex_set_size:
+-            market_value = "№%s из %s" % (_m(yandex_rank), _m(yandex_set_size))
+-            market_value_label = "место по переходам в Яндексе"
+-            market_second = (str(yandex_share) + "%") if yandex_share is not None else "—"
+-            market_second_label = "доля дискавери-переходов"
+-            price_index_text = (str(price_index) + "%") if price_index is not None else "нет данных"
+-            market_analysis = (
+-                "Яндекс за неделю: %s переходов из %s, запросов по категории — %s, "
+-                "похожих компаний в радиусе 5 км — %s. Индекс цены по 2ГИС — %s."
+-                % (
+-                    _m(market_summary.get("yandex_own_discovery_visits_week")),
+-                    _m(market_summary.get("yandex_total_discovery_visits_week")),
+-                    _m(market_summary.get("yandex_category_queries_week")),
+-                    _m(market_summary.get("yandex_similar_companies_5km")),
+-                    price_index_text,
+-                )
+-            )
+-        else:
+-            market_value = ("№%s из %s" % (_m(review_rank), _m(tracked_count))) if review_rank else "—"
+-            market_value_label = "место по объёму отзывов"
+-            market_second = (str(price_index) + "%") if price_index is not None else "—"
+-            market_second_label = "индекс цены к медиане"
+-            market_analysis = (
+-                "Сравнено %s брендов: цена, отзывы, акции, публичная позиция и наполнение карточки. "
+-                "Индекс видимости %s/100 является косвенной оценкой, не реальным трафиком."
+-                % (_m(market_scanned), _m(visibility_score))
+-            )
+-        market_action = growth_action(
+-            "market",
+-            ((market_payload.get("recommendations") or [{}])[0].get("action")
+-             or (market_payload.get("insights") or [
+-                 "Следить за ценой, рекламными обещаниями и сильными темами конкурентов."
+-             ])[0]),
+-        )
+-    else:
+-        market_value = "—"
+-        market_value_label = "место по рынку"
+-        market_second = "—"
+-        market_second_label = "доля переходов"
+-        market_analysis = "MAYA готовит первый снимок рынка Ставрополя."
+-        market_action = "После первого сбора появится сравнение цены, рейтинга, рекламы и отзывов."
+-    add_card(
+-        "market",
+-        "Рынок",
+-        "Позиция среди барбершопов Ставрополя",
+-        market_value,
+-        market_value_label,
+-        market_second,
+-        market_second_label,
+-        market_analysis,
+-        market_action,
+-        "neutral",
+-        growth_by_domain.get("market"),
+-    )
+-
+-    daily = goals.get("daily_revenue") or {}
+-    daily_target = _rub(daily.get("target_value"))
+-    daily_actual = _rub(daily.get("actual_value"))
+-    daily_gap = daily_actual - daily_target if daily_target else 0
+-    simple_goal = {
+-        "title": "План на сегодня",
+-        "actual_rub": daily_actual,
+-        "forecast_rub": _rub(plan.get("projected_revenue_rub")),
+-        "forecast_low_rub": _rub(plan.get("forecast_low_rub")),
+-        "forecast_high_rub": _rub(plan.get("forecast_high_rub")),
+-        "potential_rub": _rub(plan.get("potential_revenue_rub")),
+-        "baseline_rub": _rub(plan.get("baseline_rub")),
+-        "upsell_potential_rub": _rub(plan.get("upsell_potential_rub")),
+-        "fill_potential_rub": _rub(plan.get("fill_potential_rub")),
+-        "target_rub": daily_target,
+-        "progress_pct": _integer(daily.get("progress_pct")) if daily.get("progress_pct") is not None else None,
+-        "gap_rub": daily_gap,
+-        "status": daily.get("status") or "warn",
+-        "target_source": daily.get("target_source") or plan.get("target_source"),
+-        "target_explanation": plan.get("target_explanation") or "",
+-        "confidence": plan.get("confidence") or "low",
+-        "plain_status": (
+-            "Не хватает %s до плана" % _money(abs(daily_gap))
+-            if daily_target and daily_gap < 0 else (
+-                "Выше плана на %s" % _money(daily_gap)
+-                if daily_target and daily_gap > 0 else "Идём по плану"
+-            )
+-        ),
+-        "next_step": top_growth.get("action") or (
+-            "Главный рычаг сейчас — загрузка, повторная запись и средний чек."
+-            if daily_gap < 0 else "План дня выполнен; свободные окна можно заполнять без скидки на уже занятые часы."
+-        ),
+-    }
+-    top_master = snap.get("top_today_master") or {}
+-    top_master_value = str(top_master.get("name") or "—")
+-    if top_master.get("name") and _rub(top_master.get("gross_rub")):
+-        top_master_value += " · " + _money(top_master.get("gross_rub"))
+-    quick_stats = [
+-        {"key": "today", "label": "Сегодня", "value": _money(plan_expected)},
+-        {"key": "avg_check", "label": "Средний чек", "value": _money(avg_check)},
+-        {"key": "load", "label": "Загрузка", "value": str(load_pct) + "%"},
+-        {
+-            "key": "top_master_today",
+-            "label": "Лидер сегодня",
+-            "value": top_master_value,
+-        },
+-    ]
+-    return {
+-        "version": "maya_owner_brief_v1",
+-        "status": status,
+-        "headline": headline,
+-        "summary": summary_text,
+-        "cards": cards,
+-        "simple_goal": simple_goal,
+-        "quick_stats": quick_stats,
+-        "decisions": growth_decisions,
+-        "updated_at": datetime.now().isoformat(timespec="seconds"),
+-        "note": "Один управленческий вход: факт, смысл и следующий шаг без подтверждений и технических очередей.",
+-    }
++    """C8 L08: legacy derived scoring/strategy is retired; source owners remain independent."""
++    return {"available": False, "status": "unavailable", "reason": "qualified_c8_tenant_read_required", "score": None, "summary": {}, "items": [], "decisions": [], "goals": [], "dimensions": [], "sections": [], "note": "Оценки и прогнозы доступны только по проверенным данным и подтверждённым правилам в кабинете Maya."}
+@@ -5303,0 +3717,10 @@
++
++
++def _c8_legacy_projection(value):
++    """Consumer boundary: legacy bridges may expose observations, never revive cached C8 estimates."""
++    forbidden = {"confidence", "confidence_pct", "planning_confidence_pct", "money_at_stake_rub", "free_capacity_today", "risk_level", "recoverable_clients", "lost_clients", "loyal_clients", "retention_90d_pct", "forward_booking_pct", "retention_score", "plan_potential_rub", "plan_baseline_rub", "plan_gap_rub", "daily_target_rub", "plan_progress_pct", "avg_check_rub", "daily_load_pct", "kpi_score", "owner_advisor_score", "growth_opportunity_min_rub", "growth_opportunity_max_rub", "growth_realistic_ceiling_rub", "growth_recoverable_clients", "month_goal_gap_rub", "month_goal_progress_pct", "growth_target_rub"}
++    if isinstance(value, dict):
++        return {key: None if key in forbidden or key.startswith(("potential_", "forecast_", "projected_", "expected_", "realistic_95_", "theoretical_max_", "upsell_potential", "fill_potential", "capacity_revenue")) else _c8_legacy_projection(item) for key, item in value.items()}
++    if isinstance(value, list):
++        return [_c8_legacy_projection(item) for item in value]
++    return value
+@@ -5902 +4325 @@
+-    return {
++    return _c8_legacy_projection({
+@@ -6020 +4443 @@
+-    }
++    })
+@@ -6025,76 +4448,2 @@
+-    """Риски бизнеса: падение выручки, пустые окна, уснувшие клиенты, просевшие услуги."""
+-    snap = snap or business_snapshot()
+-    exp = exp or expiring_assets()
+-    ret = ret or return_candidates()
+-    svc = svc or service_insights()
+-    risks = []
+-
+-    trend = snap.get("week_trend") or {}
+-    gross = trend.get("gross") or {}
+-    dgross = gross.get("delta_pct")
+-    if dgross is not None and dgross <= -10:
+-        risks.append({
+-            "type": "revenue_drop",
+-            "severity": "high" if dgross <= -20 else "medium",
+-            "title": "Выручка ниже прошлой недели",
+-            "detail": "Текущая неделя к прошлой: %s%d%% по выручке." % ("+" if dgross >= 0 else "", dgross),
+-            "potential_rub": abs(_rub(gross.get("delta"))),
+-            "action_hint": "Проверь пустые окна и быстро верни клиентов с тёплым поводом.",
+-        })
+-
+-    if snap.get("free_capacity_today"):
+-        risks.append({
+-            "type": "idle_capacity",
+-            "severity": "high" if snap.get("idle_masters") else "medium",
+-            "title": "Сегодня есть незаполненные окна",
+-            "detail": "Свободная ёмкость дня ≈%s." % _ru_count(
+-                snap.get("free_capacity_today"),
+-                "свободный слот",
+-                "свободных слота",
+-                "свободных слотов",
+-            ),
+-            "potential_rub": _rub(snap.get("potential_fill_revenue_rub")),
+-            "action_hint": "Подними тёплый спрос: уснувшие + цикл-напоминание + лист ожидания.",
+-        })
+-
+-    if ret.get("count"):
+-        risks.append({
+-            "type": "sleeping_clients",
+-            "severity": "medium",
+-            "title": "Клиенты могут окончательно отвалиться",
+-            "detail": "%d уснувших клиентов без визита 28–56 дней." % _rub(ret.get("count")),
+-            "potential_rub": _rub(ret.get("potential_return_revenue_rub")),
+-            "action_hint": ret.get("action_hint"),
+-        })
+-
+-    weak = (svc.get("weak_services") or [])
+-    if weak:
+-        top = weak[0]
+-        risks.append({
+-            "type": "weak_service",
+-            "severity": "medium",
+-            "title": "Просела одна из услуг",
+-            "detail": "%s: выручка ниже на ~%s ₽ против прошлых 30 дней." % (
+-                top.get("title") or "Услуга",
+-                _m(abs(top.get("delta_sum_rub") or 0)),
+-            ),
+-            "potential_rub": abs(_rub(top.get("delta_sum_rub"))),
+-            "action_hint": "Перепроверь, кто обычно берёт эту услугу, и усили допродажу/напоминания.",
+-        })
+-
+-    if exp.get("subscriptions_expiring_7d"):
+-        risks.append({
+-            "type": "expiring_subscriptions",
+-            "severity": "low",
+-            "title": "Скоро сгорят абонементы без продления",
+-            "detail": "%d абонементов истекают в ближайшие 7 дней." % _rub(exp.get("subscriptions_expiring_7d")),
+-            "potential_rub": None,
+-            "action_hint": "Запусти обновление абонементов и напоминания о продлении.",
+-        })
+-
+-    risks.sort(key=lambda r: (r.get("potential_rub") is None, -(r.get("potential_rub") or 0)))
+-    return {
+-        "risks": risks,
+-        "top_risk": risks[0] if risks else None,
+-        "note": "Риски приоритизированы по ожидаемому эффекту, если оценка доступна.",
+-    }
++    """C8: legacy scorer retired; no qualified canonical tenant evidence here."""
++    return {"available": False, "risks": [], "top_risk": None, "reason": "qualified_c8_tenant_read_required", "note": "Ожидаемые деньги и приоритеты не оценены. Это не означает отсутствие риска."}
+@@ -6104,64 +4453,2 @@
+-    """Приоритизированный ПО ДЕНЬГАМ список возможностей (что сделать, чтобы заработать/
+-    не потерять). Принимает предвычисленные snap/exp/ret, чтобы не дёргать API дважды."""
+-    snap = snap or business_snapshot()
+-    exp = exp or expiring_assets()
+-    ret = ret or return_candidates()
+-    opps = []
+-
+-    if ret.get("count"):
+-        opps.append({
+-            "type": "return_clients",
+-            "title": "Вернуть уснувших клиентов",
+-            "detail": "%d клиентов не были 28–56 дней (на %s)." % (ret["count"], ret.get("as_of") or "?"),
+-            "potential_rub": ret.get("potential_return_revenue_rub", 0),
+-            "estimate": True,
+-            "action": "reactivation",
+-            "action_hint": ret.get("action_hint"),
+-        })
+-
+-    if snap.get("free_capacity_today"):
+-        who = ", ".join((snap.get("idle_masters") or []) + (snap.get("underused_masters") or [])) or "мастера с окнами"
+-        opps.append({
+-            "type": "empty_windows",
+-            "title": "Заполнить пустые окна сегодня",
+-            "detail": "≈%s сегодня (%s)." % (
+-                _ru_count(
+-                    snap["free_capacity_today"],
+-                    "свободный слот",
+-                    "свободных слота",
+-                    "свободных слотов",
+-                ),
+-                who,
+-            ),
+-            "potential_rub": snap.get("potential_fill_revenue_rub", 0),
+-            "estimate": True,
+-            "action": "fill_slots",
+-            "action_hint": "Предложить запись клиентам из листа ожидания и уснувшим — на сегодня.",
+-        })
+-
+-    if exp.get("gift_certs_active_value_rub"):
+-        opps.append({
+-            "type": "unredeemed_certs",
+-            "title": "Пригласить погасить сертификаты",
+-            "detail": "%d активных сертификатов на руках у клиентов, сумма ~%s ₽." % (
+-                exp["gift_certs_active_count"], _m(exp["gift_certs_active_value_rub"])),
+-            "potential_rub": exp["gift_certs_active_value_rub"],
+-            "estimate": False,   # это уже оплаченные деньги (face value)
+-            "action": "cert_nudge",
+-            "action_hint": "Напомнить владельцам сертификатов записаться — оплаченные деньги, приведут людей в кресло.",
+-        })
+-
+-    if exp.get("subscriptions_expiring_7d"):
+-        opps.append({
+-            "type": "expiring_subscriptions",
+-            "title": "Продлить истекающие абонементы",
+-            "detail": "%d абонементов истекают в ближайшие 7 дней." % exp["subscriptions_expiring_7d"],
+-            "potential_rub": None,   # цена абонемента варьируется — не выдумываем сумму
+-            "estimate": True,
+-            "action": "renew_reminder",
+-            "action_hint": "Истекающим уходит авто-напоминание о продлении; можно усилить личным сообщением.",
+-        })
+-
+-    # Ранжируем по ожидаемому эффекту (None → в конец).
+-    opps.sort(key=lambda o: (o.get("potential_rub") is None, -(o.get("potential_rub") or 0)))
+-    return opps
++    """C8: legacy scorer retired; no qualified canonical tenant evidence here."""
++    return []
+@@ -6237 +4524 @@
+-    return {
++    return _c8_legacy_projection({
+@@ -6273 +4560 @@
+-    }
++    })
+@@ -6312,2 +4599 @@
+-            f"Ожидаемая выручка — около {_money(today.get('expected_revenue_rub'))}, "
+-            f"средний чек — {_money(today.get('avg_check_rub'))}."
++            "Прогноз выручки недоступен — нет квалифицированной модели C8."
+@@ -6366,6 +4652 @@
+-    free_capacity = _rub(today.get("free_capacity_today"))
+-    lines.append("")
+-    lines.append(
+-        f"Подтверждённая свободная ёмкость — примерно {free_capacity} "
+-        + ("слот." if free_capacity == 1 else "слота." if 2 <= free_capacity <= 4 else "слотов.")
+-    )
++    lines.extend(["", "Свободная ёмкость не измерена; числовой прогноз загрузки недоступен."])

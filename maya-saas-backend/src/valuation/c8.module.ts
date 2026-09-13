@@ -1,3 +1,5 @@
+import { C8Controller } from './c8.controller';
+import { C8ReadService } from './c8.read';
 import { C8EvaluationService } from './c8.evaluation';
 import { C8LabelCollector } from './c8.labels';
 import { C8OpportunityBridge } from './c8.opportunity';
@@ -19,7 +21,9 @@ import { C8Sources } from './c8.sources';
     Package5Wave1Module,
     MeasurementModule,
   ],
+  controllers: [C8Controller],
   providers: [
+    C8ReadService,
     C8Store,
     C8Sources,
     C8CaptureService,
@@ -31,6 +35,7 @@ import { C8Sources } from './c8.sources';
     C8EvaluationService,
   ],
   exports: [
+    C8ReadService,
     C8Store,
     C8Sources,
     C8Producer,

@@ -107,9 +107,10 @@ describe('AiToolHandlerService output minimization', () => {
       avg_cycle_days: 40,
       total_spent: 62_150,
       total_spent_scope: 'full_crm_card',
-      loyal: true,
-      loyalty_segment: 'core',
-      loyalty_rule: 'Лояльный клиент — не менее 3 визитов по карточке CRM.',
+      loyal: null,
+      loyalty_segment: null,
+      loyalty_rule:
+        'Ценность и давность оцениваются только по подтверждённому правилу C8.',
       bonus_balance: null,
       bonus_currency: null,
       bonus_observed_from: null,
@@ -158,13 +159,13 @@ describe('AiToolHandlerService output minimization', () => {
       ['tenant-a', 'Стаса'],
       ['tenant-a', 'Стас'],
     ]);
-    expect(result).toMatchObject({ found: true, visits: 8, loyal: true });
+    expect(result).toMatchObject({ found: true, visits: 8, loyal: null });
     expect(JSON.stringify(result)).not.toContain('Стас');
   });
 
   // Единственный инструмент, который называет гостей по именам: владельцу нужно
   // знать, КОГО возвращать. Телефон при этом видит только владелец.
-  it('называет спящих гостей поимённо, а телефон открывает только владельцу', async () => {
+  it('не возвращает контакты или старый threshold без canonical C8 reader', async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-08-15T09:00:00.000Z'));
     const registry = {
@@ -226,23 +227,17 @@ describe('AiToolHandlerService output minimization', () => {
       'execution-dormant-admin',
     );
 
-    // Спящий только один: второй был на днях, третий не приходил ни разу —
-    // он не ушедший, а не пришедший, и в список возврата не попадает.
-    expect(forOwner).toMatchObject({
-      total_dormant: 1,
-      contains_personal_data: true,
-      phone_visible: true,
-      clients: [{ name: 'Иван Петров', phone: '+79990000001', visits: 6 }],
-    });
-    expect(JSON.stringify(forOwner)).not.toContain('Недавний Гость');
-    expect(JSON.stringify(forOwner)).not.toContain('Ни Разу Не Приходил');
+    for (const result of [forOwner, forAdmin]) {
+      expect(result).toMatchObject({
+        available: false,
+        reason: 'canonical_c8_reader_unavailable',
+        numericPrediction: null,
+      });
+      expect(JSON.stringify(result)).not.toMatch(
+        /Иван|Петров|\+7999|Недавний|phone|name/,
+      );
+    }
 
-    // Администратор узнаёт гостя по имени, но контактов не получает.
-    expect(forAdmin).toMatchObject({
-      phone_visible: false,
-      clients: [{ name: 'Иван Петров' }],
-    });
-    expect(JSON.stringify(forAdmin)).not.toContain('+7999');
     jest.useRealTimers();
   });
   it('returns and caches a PII-free full client registry analysis', async () => {
@@ -299,7 +294,7 @@ describe('AiToolHandlerService output minimization', () => {
       total_clients: 2,
       clients_with_visits: 1,
       clients_without_visits: 1,
-      loyal_clients: 1,
+      loyal_clients: null,
       inactivity: {
         over_1_month: 1,
         over_2_months: 1,
@@ -309,22 +304,8 @@ describe('AiToolHandlerService output minimization', () => {
         over_6_months: 0,
         over_1_year: 0,
       },
-      loyal_inactivity: {
-        over_1_month: 1,
-        over_2_months: 1,
-        over_3_months: 1,
-        over_4_months: 0,
-        over_5_months: 0,
-        over_6_months: 0,
-        over_1_year: 0,
-      },
-      loyal_reactivation_cohorts: {
-        from_1_to_2_months: 0,
-        from_2_to_3_months: 0,
-        from_3_to_6_months: 1,
-        from_6_to_12_months: 0,
-        over_1_year: 0,
-      },
+      loyal_inactivity: null,
+      loyal_reactivation_cohorts: null,
     });
     expect(second).toEqual(first);
     expect(getClientRegistry).toHaveBeenCalledTimes(1);

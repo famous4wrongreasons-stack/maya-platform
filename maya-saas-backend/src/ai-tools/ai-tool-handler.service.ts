@@ -1,3 +1,4 @@
+import { C8ReadService } from '../valuation/c8.read';
 import { MeasurementReadService } from '../measurement/measurement.read.service';
 import {
   measurementForAi,
@@ -156,11 +157,6 @@ const NAMED_STAFF_BREAKDOWN_ROLES = new Set<UserRole>([
  */
 const PERIOD_CACHE_MAX_ENTRIES = 200;
 
-const DORMANT_PHONE_ROLES = new Set<UserRole>([
-  UserRole.TENANT_OWNER,
-  UserRole.BUSINESS_OWNER,
-]);
-
 /** Сколько визитов читает досье. Публикуется рядом со счётом приходов. */
 const DOSSIER_HISTORY_LIMIT = 30;
 
@@ -220,6 +216,7 @@ export class AiToolHandlerService {
     private readonly canonicalWave3?: Package5Wave3CanonicalCutoverService,
     private readonly governedSettings?: GovernedSettingsReadService,
     private readonly measurementRead?: MeasurementReadService,
+    private readonly valuationRead?: C8ReadService,
   ) {}
 
   async execute(
@@ -233,8 +230,33 @@ export class AiToolHandlerService {
         return this.readStaff(principal.tenantId);
       case 'customers.count':
         return this.customersService.countCustomers(principal.tenantId);
-      case 'clients.retention.scan':
-        return this.scanClientRetention(principal.tenantId);
+      case 'valuations.read':
+        if (!this.valuationRead)
+          throw new Error('canonical_c8_reader_required');
+        return this.valuationRead.forAi(
+          principal.tenantId,
+          principal.userId,
+          typeof args.kind === 'string' ? { kind: args.kind } : {},
+        );
+      case 'clients.retention.scan': {
+        // The old CRM aggregate has tenant-wide coverage; a branch entitlement
+        // cannot authorize reading that broader source before C8 projection.
+        if (this.valuationRead) {
+          const scope = await this.valuationRead.readiness(
+            principal.tenantId,
+            principal.userId,
+          );
+          if (scope.branchId)
+            throw new ForbiddenException(
+              'crm_registry_branch_scope_unavailable',
+            );
+        }
+        const facts = await this.scanClientRetention(principal.tenantId);
+        const valuation = this.valuationRead
+          ? await this.valuationRead.forAi(principal.tenantId, principal.userId)
+          : null;
+        return { ...facts, valuation };
+      }
       case 'clients.dossier.read':
         return this.readClientDossier(principal, args);
       case 'clients.high-value.read':
@@ -789,10 +811,10 @@ export class AiToolHandlerService {
           ? 'recent_attended_history_fallback'
           : 'full_crm_card',
       // Сегмент лояльности стоит на числе визитов: нет числа — нет сегмента.
-      loyal: exactVisits === null ? null : exactVisits >= 3,
-      loyalty_segment:
-        exactVisits === null ? null : this.clientLoyaltySegment(exactVisits),
-      loyalty_rule: 'Лояльный клиент — не менее 3 визитов по карточке CRM.',
+      loyal: null,
+      loyalty_segment: null,
+      loyalty_rule:
+        'Ценность и давность оцениваются только по подтверждённому правилу C8.',
       bonus_balance: loyalty?.balance ?? null,
       bonus_currency: loyalty?.currency ?? null,
       bonus_observed_from: loyalty ? 'maya' : null,
@@ -826,149 +848,36 @@ export class AiToolHandlerService {
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
   ) {
-    const inactiveDays = this.requiredNumber(args.inactive_days);
-    const limit = this.requiredNumber(args.limit);
-    const [snapshot, timezone] = await Promise.all([
-      this.crmService.getClientRegistry(principal.tenantId),
-      this.reportingTimezone(principal.tenantId),
-    ]);
-    const when = { asOf: new Date(Date.now()), timezone };
-    const asOf = this.clientRecency.localDate(when);
-    const showPhone = DORMANT_PHONE_ROLES.has(principal.role);
-
-    const measured = snapshot.clients.map((client) => ({
-      client,
-      // 🔴 Cycle 04 P9. Давность — у владельца факта, и она по КАРТОЧКЕ
-      // провайдера: истории визитов по каждому из сотен гостей не запросить,
-      // поэтому источник назван, а не подразумевается.
-      days: this.clientRecency.fromProviderCard(client, when).distance.days,
-    }));
-    /**
-     * 🔴 Cycle 04 closure B3. Гость с НЕИЗМЕРЕННОЙ давностью — отдельная
-     * корзина.
-     *
-     * Раньше он выпадал из выдачи тем же условием, что и активный, нигде не
-     * считался, и пустой список произносился как «база активна». Неизвестность
-     * молчанием не бывает: она либо названа, либо выдана за факт.
-     *
-     * Гость без единого визита сюда не относится: это не «ушедший», а никогда
-     * не пришедший, и давности у него нет по построению.
-     */
-    // Гость без единого визита — не «ушедший», а никогда не пришедший.
-    // Гость, чьё число визитов карточка не назвала, — третий случай: про него
-    // неизвестно даже это, и молча выкидывать его нельзя.
-    const visitsUnknown = measured.filter(
-      (entry) => entry.client.visits_count === null,
-    );
-    const visited = measured.filter(
-      (entry) => (entry.client.visits_count ?? 0) > 0,
-    );
-    const unknownRecency = visited.filter((entry) => entry.days === null);
-    const dormant = visited
-      .filter((entry) => entry.days !== null && entry.days >= inactiveDays)
-      .sort(
-        (left, right) =>
-          (right.days ?? 0) - (left.days ?? 0) ||
-          right.client.visits_count - left.client.visits_count,
-      );
-
-    return {
-      verified: true,
-      complete_registry: snapshot.complete,
-      source: snapshot.provider,
-      generated_at: snapshot.generated_at,
-      scope: 'salon',
-      inactive_days: inactiveDays,
-      as_of: asOf,
-      timezone,
-      /**
-       * На чём стоит давность. Карточка провайдера присутствия не доказывает —
-       * это отбор по её утверждению, а не по каноническому приходу.
-       */
-      recency_basis: 'provider_client_card',
-      recency_attendance_proven: false,
-      total_dormant: dormant.length,
-      /**
-       * Гости с визитами, у которых давность НЕ измерена: карточка провайдера
-       * даты последнего визита не назвала. Они не активные и не спящие — они
-       * непосчитанные, и пустой список спящих без этого числа читать нельзя.
-       */
-      clients_with_unknown_recency: unknownRecency.length,
-      clients_with_visits: visited.length,
-      /** Карточки, у которых провайдер не назвал даже числа визитов. */
-      clients_with_unknown_visit_count: visitsUnknown.length,
-      clients: dormant.slice(0, limit).map((entry) => ({
-        name: entry.client.name,
-        ...(showPhone ? { phone: entry.client.phone } : {}),
-        visits: entry.client.visits_count,
-        last_visit_date: entry.client.last_visit_date,
-        inactivity_days: entry.days,
-        lifetime_spend_amount_major_units: entry.client.sold_amount,
-      })),
-      contains_personal_data: true,
-      phone_visible: showPhone,
-    };
+    void args;
+    if (!this.valuationRead)
+      return {
+        available: false,
+        reason: 'canonical_c8_reader_unavailable',
+        numericPrediction: null,
+        calibration: 'UNAVAILABLE',
+        activation: 'DISABLED',
+      };
+    return this.valuationRead.forAi(principal.tenantId, principal.userId, {
+      kind: 'POLICY_SIGNAL',
+    });
   }
 
   private async readHighValueClients(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
   ) {
-    const metric = this.requiredString(args.metric);
-    const limit = this.requiredNumber(args.limit);
-    const [snapshot, timezone] = await Promise.all([
-      this.crmService.getClientRegistry(principal.tenantId),
-      this.reportingTimezone(principal.tenantId),
-    ]);
-    const when = { asOf: new Date(Date.now()), timezone };
-    const asOf = this.clientRecency.localDate(when);
-    /**
-     * 🔴 Cycle 04 P9. Неизвестная дата больше не превращается в 1970 год.
-     *
-     * Прежний компаратор считал отсутствие даты нулём и ронял такие карточки
-     * в самый конец «по свежести» — то есть выдавал неизвестность за глубокую
-     * древность. Теперь карточки без даты уходят в конец ЯВНО, а между собой
-     * сравниваются уже не по выдуманному нулю.
-     */
-    const recencyDays = (card: { last_visit_date: string | null }) =>
-      this.clientRecency.fromProviderCard(card, when).distance.days;
-    const ranked = [...snapshot.clients].sort((left, right) => {
-      const primary =
-        metric === 'visits'
-          ? right.visits_count - left.visits_count
-          : metric === 'recency'
-            ? this.compareRecency(recencyDays(left), recencyDays(right))
-            : right.sold_amount - left.sold_amount;
-      return (
-        primary ||
-        right.visits_count - left.visits_count ||
-        right.sold_amount - left.sold_amount ||
-        left.external_id.localeCompare(right.external_id)
-      );
+    void args;
+    if (!this.valuationRead)
+      return {
+        available: false,
+        reason: 'canonical_c8_reader_unavailable',
+        numericPrediction: null,
+        calibration: 'UNAVAILABLE',
+        activation: 'DISABLED',
+      };
+    return this.valuationRead.forAi(principal.tenantId, principal.userId, {
+      kind: 'RANKING',
     });
-
-    return {
-      verified: true,
-      complete_registry: snapshot.complete,
-      source: snapshot.provider,
-      generated_at: snapshot.generated_at,
-      metric,
-      currency: 'RUB',
-      as_of: asOf,
-      timezone,
-      recency_basis: 'provider_client_card',
-      recency_attendance_proven: false,
-      clients: ranked.slice(0, limit).map((client, index) => ({
-        alias: `client_${index + 1}`,
-        visits: client.visits_count,
-        lifetime_spend_amount_major_units: client.sold_amount,
-        last_visit_date: client.last_visit_date,
-        inactivity_days: recencyDays(client),
-        loyalty_segment: this.clientLoyaltySegment(client.visits_count),
-      })),
-      contains_personal_data: false,
-      note: 'Для контакта с конкретным клиентом используйте защищённый CRM-экран: имена и телефоны не передаются модели.',
-    };
   }
 
   /**
@@ -1118,10 +1027,11 @@ export class AiToolHandlerService {
         provider_marked_arrived: row.arrived,
         attendance_not_marked: row.notObserved,
         last_event_at: row.lastEventAt,
-        risk_level:
-          row.noShow >= 2 || row.noShow + row.canceled >= 3
-            ? 'high'
-            : 'attention',
+        risk_level: null,
+        prediction: {
+          available: false,
+          reason: 'exact_future_appointment_and_qualified_model_required',
+        },
       })),
       contains_personal_data: false,
       limitations: [
@@ -1564,15 +1474,6 @@ export class AiToolHandlerService {
       return token.slice(0, -1);
     }
     return token;
-  }
-
-  private clientLoyaltySegment(visits: number): string {
-    if (visits <= 0) return 'without_visits';
-    if (visits === 1) return 'new';
-    if (visits === 2) return 'repeat';
-    if (visits < 6) return 'loyal';
-    if (visits < 12) return 'regular';
-    return 'core';
   }
 
   private stringList(value: unknown): string[] {
@@ -2423,70 +2324,19 @@ export class AiToolHandlerService {
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
   ) {
-    const analytics = this.record(
-      await this.queryBusinessAnalytics(principal, {
-        ...args,
-        comparison: 'none',
-      }),
-    );
-    const metrics = this.record(analytics.metrics);
-    const actualKopecks = this.optionalMetricNumber(
-      metrics.revenue_amount_kopecks,
-    );
-    if (actualKopecks === null || analytics.finance_verified !== true) {
+    void args;
+    if (!this.valuationRead)
       return {
         available: false,
-        reason: 'verified_crm_revenue_is_unavailable',
-        resolved_period: analytics.resolved_period,
+        reason: 'canonical_c8_reader_unavailable',
+        numericPrediction: null,
+        calibration: 'UNAVAILABLE',
+        activation: 'DISABLED',
       };
-    }
-
-    const timezone = await this.reportingTimezone(principal.tenantId);
-    const horizon = this.revenueForecastHorizon(
-      this.requiredString(args.period),
-      typeof args.month === 'string' ? args.month : null,
-      timezone,
-    );
-    const factor =
-      horizon.elapsed_units > 0
-        ? horizon.total_units / horizon.elapsed_units
-        : 1;
-    const projectedKopecks = Math.max(
-      actualKopecks,
-      Math.round(actualKopecks * factor),
-    );
-    const amount = (value: number) => ({
-      currency: 'RUB',
-      amount_kopecks: value,
-      amount_major_units: this.majorUnits(value),
+    return this.valuationRead.forAi(principal.tenantId, principal.userId, {
+      kind: 'PREDICTION',
+      ruleKey: 'c8.prediction/business_revenue',
     });
-
-    return {
-      available: true,
-      verified_actual: true,
-      source: analytics.source,
-      resolved_period: analytics.resolved_period,
-      horizon,
-      actual_revenue: amount(actualKopecks),
-      projection: {
-        method:
-          factor === 1 ? 'closed_or_fixed_period' : 'linear_daily_run_rate',
-        base: amount(projectedKopecks),
-        conservative: amount(Math.round(projectedKopecks * 0.9)),
-        optimistic: amount(Math.round(projectedKopecks * 1.1)),
-        confidence:
-          factor === 1
-            ? 'actual'
-            : horizon.elapsed_units >= 14
-              ? 'medium'
-              : 'low',
-      },
-      assumptions: [
-        'only verified CRM revenue is used',
-        'future seasonality, cancellations and capacity changes are not modelled',
-        'the range is a scenario, not a guaranteed accounting forecast',
-      ],
-    };
   }
 
   /** KPI команды с личными планами из настроек владельца. */
@@ -3557,12 +3407,6 @@ export class AiToolHandlerService {
    * Неизвестность — не древность: карточки без даты уходят в конец списка, но
    * не притворяются самыми старыми гостями салона.
    */
-  private compareRecency(left: number | null, right: number | null): number {
-    if (left === null && right === null) return 0;
-    if (left === null) return 1;
-    if (right === null) return -1;
-    return left - right;
-  }
 
   private normalizedAppointmentStatus(
     value: string,
@@ -3606,54 +3450,6 @@ export class AiToolHandlerService {
 
   private localWeekday(value: string): number {
     return new Date(`${value}T00:00:00.000Z`).getUTCDay();
-  }
-
-  private revenueForecastHorizon(
-    period: string,
-    namedMonth: string | null,
-    timezone: string,
-  ) {
-    const today = this.localDate(new Date(), timezone);
-    const year = Number(today.slice(0, 4));
-    const month = Number(today.slice(5, 7));
-    const day = Number(today.slice(8, 10));
-    if (period === 'week_to_date') {
-      return {
-        status: 'open',
-        unit: 'day',
-        elapsed_units: ((this.localWeekday(today) + 6) % 7) + 1,
-        total_units: 7,
-      };
-    }
-    if (
-      period === 'month_to_date' ||
-      (period === 'named_month' && namedMonth === today.slice(0, 7))
-    ) {
-      return {
-        status: 'open',
-        unit: 'day',
-        elapsed_units: day,
-        total_units: new Date(Date.UTC(year, month, 0)).getUTCDate(),
-      };
-    }
-    if (period === 'year_to_date') {
-      const start = Date.UTC(year, 0, 1);
-      const current = Date.UTC(year, month - 1, day);
-      return {
-        status: 'open',
-        unit: 'day',
-        elapsed_units: Math.floor((current - start) / 86_400_000) + 1,
-        total_units: Math.floor(
-          (Date.UTC(year + 1, 0, 1) - start) / 86_400_000,
-        ),
-      };
-    }
-    return {
-      status: 'closed_or_fixed',
-      unit: 'period',
-      elapsed_units: 1,
-      total_units: 1,
-    };
   }
 
   private safeAppointment(value: unknown) {

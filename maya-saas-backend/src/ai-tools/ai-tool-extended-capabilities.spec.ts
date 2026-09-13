@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { BusinessStateService } from '../business-state/business-state.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
@@ -98,7 +99,7 @@ describe('AiTool extended capabilities', () => {
     });
   });
 
-  it('ranks the complete CRM registry without exposing client identifiers', async () => {
+  it('delegates ranking to C8 without legacy CRM scoring or identifiers', async () => {
     const getClientRegistry = jest.fn().mockResolvedValue({
       provider: 'yclients',
       generated_at: '2026-08-14T08:00:00.000Z',
@@ -122,6 +123,13 @@ describe('AiTool extended capabilities', () => {
       crmService: { getClientRegistry } as unknown as CrmService,
     });
 
+    const payload = {
+      contract: 'c8.valuation.ai/1',
+      items: [],
+      numericPredictionsAvailable: false,
+    };
+    const forAi = jest.fn().mockResolvedValue(payload);
+    Object.assign(service, { valuationRead: { forAi } });
     const result = await service.execute(
       'clients.high-value.read',
       owner,
@@ -129,25 +137,34 @@ describe('AiTool extended capabilities', () => {
       'high-value-a',
     );
 
-    expect(result).toMatchObject({
-      verified: true,
-      complete_registry: true,
-      contains_personal_data: false,
-      clients: [
-        {
-          alias: 'client_1',
-          visits: 12,
-          lifetime_spend_amount_major_units: 48_000,
-        },
-        {
-          alias: 'client_2',
-          visits: 3,
-          lifetime_spend_amount_major_units: 4_500,
-        },
-      ],
+    expect(result).toEqual(payload);
+    expect(forAi).toHaveBeenCalledWith(owner.tenantId, owner.userId, {
+      kind: 'RANKING',
     });
+    expect(getClientRegistry).not.toHaveBeenCalled();
     expect(JSON.stringify(result)).not.toContain('secret-client');
   });
+
+  it.each(['branch-only', 'revoked'])(
+    'denies %s authority before reading tenant-wide CRM registry facts',
+    async (scope) => {
+      const getClientRegistry = jest.fn();
+      const service = createService({
+        crmService: { getClientRegistry } as unknown as CrmService,
+      });
+      const readiness =
+        scope === 'revoked'
+          ? jest.fn().mockRejectedValue(new ForbiddenException('revoked'))
+          : jest.fn().mockResolvedValue({ branchId: 'branch-a' });
+      const forAi = jest.fn();
+      Object.assign(service, { valuationRead: { readiness, forAi } });
+      await expect(
+        service.execute('clients.retention.scan', owner, {}, 'scope-test'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(getClientRegistry).not.toHaveBeenCalled();
+      expect(forAi).not.toHaveBeenCalled();
+    },
+  );
 
   it('compares branches with verified operations and never invents branch cash', async () => {
     const service = createService({
