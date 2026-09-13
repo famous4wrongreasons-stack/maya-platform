@@ -695,6 +695,225 @@ async function main() {
       }),
   );
   await proof(
+    'qualified no-show label survives unrelated unknown money; wrong value and rescheduled capture reject',
+    () =>
+      system(async () => {
+        const startAt = new Date(Date.now() + 2000);
+        const endAt = new Date(startAt.getTime() + 500);
+        const ap = await db.appointment.create({
+          data: {
+            tenantId: tenant.id,
+            mayaClientId: a.id,
+            source: 'internal',
+            staffExternalId: randomUUID(),
+            serviceIds: [],
+            startAt,
+            endAt,
+            blockedStartAt: startAt,
+            blockedEndAt: endAt,
+            attendance: null,
+          },
+        });
+        const input = await prepare(a.id, {
+          kind: 'PREDICTION',
+          subjectKind: 'appointment',
+          subjectId: ap.id,
+          ruleKey: 'c8.appointment_no_show',
+          basis: 'appointment_no_show',
+          horizonEnd: endAt,
+          eligibility: 'INSUFFICIENT_DATA',
+        });
+        const apRef = await store.transaction((tx) =>
+          sources.subjectRef(tx, 'Appointment', ap.id),
+        );
+        input.t0 = new Date();
+        input.evidenceRefsJson.push(apRef);
+        input.scopeJson = {
+          ...input.scopeJson,
+          targetKey: 'appointment_no_show',
+          targetContractHash: c8Hash(C8_TARGET_DEFINITIONS.appointment_no_show),
+        };
+        input.inputSnapshotJson.features = [
+          {
+            key: 'scheduled_start_at',
+            value: startAt.toISOString(),
+            unit: 'instant',
+            basis: 'canonical_appointment',
+            currency: null,
+            sourceRefs: [apRef],
+          },
+          {
+            key: 'scheduled_end_at',
+            value: endAt.toISOString(),
+            unit: 'instant',
+            basis: 'canonical_appointment',
+            currency: null,
+            sourceRefs: [apRef],
+          },
+        ];
+        const pr = await store.admitResult(input);
+        const lease = await store.claim('C8ResultRevision', pr.id);
+        assert.ok(lease);
+        await store.publishUnavailable(lease, ['qualified_model_unavailable']);
+        const capture = await store.result(pr.id);
+        assert.ok(capture?.snapshotHash);
+        const noShowModel = await store.admitDefinition(
+          {
+            ...definition,
+            targetKey: 'appointment_no_show',
+            eventDefinition: C8_TARGET_DEFINITIONS.appointment_no_show.event,
+            horizon: { unit: 'appointment_outcome' },
+            basis: 'appointment_no_show',
+          },
+          scope,
+        );
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.max(0, endAt.getTime() - Date.now() + 20)),
+        );
+        await db.appointment.update({
+          where: { id: ap.id },
+          data: { attendance: 'no_show' },
+        });
+        const c7 = new MeasurementService(
+          db,
+          context,
+          new MeasurementSources(db),
+        );
+        const asOf = new Date();
+        const observed = await c7.admit(
+          {
+            kind: 'appointment_outcome',
+            appointmentId: ap.id,
+            clientId: a.id,
+            periodFrom: startAt,
+            periodTo: new Date(endAt.getTime() + 1),
+            asOf,
+            timezone: 'UTC',
+            scope: {
+              version: 1,
+              capabilityKey: 'measurement.read',
+              branchIds: [],
+              dimensions: {},
+              sourceQuery: {},
+            },
+          },
+          { namespace: 'measurement_request', id: randomUUID() },
+        );
+        await c7.resume(observed.id);
+        const snapshot = await store.transaction((tx) =>
+          tx.measurementRevision.findUniqueOrThrow({
+            where: { id: observed.id },
+          }),
+        );
+        assert.equal(snapshot.completeness, 'PARTIAL');
+        const goodCase: C8Case = {
+          ...caseInput,
+          caseKey: c8Hash(pr.id),
+          predictionRef: {
+            tenantId: tenant.id,
+            id: pr.id,
+            hash: capture.snapshotHash,
+          },
+          labelRefs: [sources.measurementRef(snapshot)],
+          labelState: 'QUALIFIED',
+          labelValue: '1',
+          exclusionCodes: [],
+          dependencyDeadline: pr.expiresAt.toISOString(),
+        };
+        const e = {
+          ...evalInput,
+          modelVersionId: noShowModel.id,
+          modelManifestHash: noShowModel.manifestHash,
+          evaluationContractHash: noShowModel.evaluationContractHash,
+          targetKey: 'appointment_no_show',
+          scopeJson: {
+            ...evalScope,
+            targetContractHash: input.scopeJson.targetContractHash,
+            featureContractHash: noShowModel.featureContractHash,
+          },
+          t0From: pr.t0,
+          t0To: pr.t0,
+          labelsAsOf: new Date(),
+          casesJson: [goodCase],
+        };
+        const saved = await store.admitEvaluation(e);
+        assert.equal((saved.countsJson as { qualified: number }).qualified, 1);
+        assert.equal((await store.admitEvaluation(e)).id, saved.id);
+        await assert.rejects(() =>
+          store.admitEvaluation({
+            ...e,
+            casesJson: [{ ...goodCase, labelValue: '0' }],
+          }),
+        );
+        await db.appointment.update({
+          where: { id: ap.id },
+          data: { startAt: new Date(startAt.getTime() + 10000) },
+        });
+        await assert.rejects(() =>
+          store.admitEvaluation({ ...e, labelsAsOf: new Date(Date.now() + 1) }),
+        );
+        assert.equal(
+          (await store.result(pr.id))?.snapshotHash,
+          capture.snapshotHash,
+        );
+        await db.appointment.update({
+          where: { id: ap.id },
+          data: { startAt, attendance: 'arrived' },
+        });
+        const arrivedAt = new Date();
+        const attended = await c7.admit(
+          {
+            kind: 'appointment_outcome',
+            appointmentId: ap.id,
+            clientId: a.id,
+            periodFrom: startAt,
+            periodTo: new Date(endAt.getTime() + 1),
+            asOf: arrivedAt,
+            timezone: 'UTC',
+            scope: {
+              version: 1,
+              capabilityKey: 'measurement.read',
+              branchIds: [],
+              dimensions: {},
+              sourceQuery: {},
+            },
+          },
+          { namespace: 'measurement_request', id: randomUUID() },
+        );
+        await c7.resume(attended.id);
+        const attendedSnapshot = await store.transaction((tx) =>
+          tx.measurementRevision.findUniqueOrThrow({
+            where: { id: attended.id },
+          }),
+        );
+        const returnedCase: C8Case = {
+          ...caseInput,
+          labelRefs: [sources.measurementRef(attendedSnapshot)],
+          labelState: 'QUALIFIED',
+          labelValue: '1',
+          exclusionCodes: [],
+        };
+        const returnedInput = {
+          ...evalInput,
+          labelsAsOf: new Date(),
+          casesJson: [returnedCase],
+        };
+        const returned = await store.admitEvaluation(returnedInput);
+        assert.equal(
+          (returned.countsJson as { qualified: number }).qualified,
+          1,
+        );
+        // Early positive is observed; incomplete history cannot prove non-return.
+        assert.ok(predictionRow.horizonEnd! > returnedInput.labelsAsOf);
+        await assert.rejects(() =>
+          store.admitEvaluation({
+            ...returnedInput,
+            casesJson: [{ ...returnedCase, labelValue: '0' }],
+          }),
+        );
+      }),
+  );
+  await proof(
     'actual scoped AC6 purge of all three expired derived leaves preserves sources and live history',
     () =>
       system(async () => {

@@ -114,6 +114,22 @@ describe('C8 permanent shared owner/security/release ratchets', () => {
     expect(read(migration)).toContain("interval '31536000 seconds'");
     expect(read(migration)).toContain('RC_payload_claim');
   });
+  it('binary label qualification uses exact C7 attendance and frozen schedule, not unrelated money coverage', () => {
+    const sql = read(migration);
+    for (const marker of [
+      'C8 binary label metric not proven',
+      'C8 no-show label schedule/outcome mismatch',
+      'C8 non-return requires complete covered horizon',
+    ])
+      expect(sql).toContain(marker);
+    expect(sql).toContain("m->>'state'='COMPLETE'");
+    expect(sql).toContain(
+      'label_appointment."startAt" IS DISTINCT FROM schedule_start',
+    );
+    expect(sql).toContain(
+      "NEW.\"targetKey\" NOT IN ('attended_return','appointment_no_show')",
+    );
+  });
   it('mandatory deployment runs all src specifications, not a standalone opt-in test', () => {
     expect(read('package.json')).toContain('.*\\\\.spec\\\\.ts$');
     expect(read('deploy/vps/deploy.sh')).toContain(

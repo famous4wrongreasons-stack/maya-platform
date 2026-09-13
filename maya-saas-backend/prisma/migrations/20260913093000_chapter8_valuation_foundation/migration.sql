@@ -172,7 +172,7 @@ ALTER TABLE "TenantBusinessConfigurationRevision" ADD CONSTRAINT "R11_config_con
 -- Non-owning, tenant-qualified references. Source owners remain mutable and retain their own cleanup.
 CREATE FUNCTION "C8_validate_refs"(tenant text, refs jsonb, cutoff timestamptz) RETURNS boolean
 LANGUAGE plpgsql SET timezone='UTC' AS $$
-DECLARE ref jsonb; source jsonb; expected text; table_name text; newer boolean; source_client text;
+DECLARE ref jsonb; source_row jsonb; expected text; table_name text; newer boolean; source_client text;
 BEGIN
  IF jsonb_typeof(refs)<>'array' OR jsonb_array_length(refs)>5000 THEN RETURN false; END IF;
  FOR ref IN SELECT value FROM jsonb_array_elements(refs) LOOP
@@ -184,38 +184,38 @@ BEGIN
    AND ref->>'coverage' IN ('COMPLETE','PARTIAL','UNAVAILABLE','NOT_MEASURED'),false) THEN RETURN false; END IF;
   table_name:=ref->>'owner';
   IF table_name NOT IN ('Client','Appointment','Staff','Branch','CrmClientLink','DomainEvent','MeasurementRevision','TenantBusinessConfigurationRevision','C8ResultRevision','C8ModelVersion','C8EvaluationRevision') THEN RETURN false; END IF;
-  source:=NULL;
+  source_row:=NULL;
   EXECUTE format('SELECT to_jsonb(s) FROM %I s WHERE s.id::text=$1 AND s."tenantId"=$2 FOR SHARE',table_name)
-   INTO source USING ref->>'id',tenant;
-  IF source IS NULL THEN RETURN false; END IF;
-  IF table_name='Client' AND source->>'mergedIntoClientId' IS NOT NULL THEN RETURN false; END IF;
+   INTO source_row USING ref->>'id',tenant;
+  IF source_row IS NULL THEN RETURN false; END IF;
+  IF table_name='Client' AND source_row->>'mergedIntoClientId' IS NOT NULL THEN RETURN false; END IF;
   IF table_name IN ('MeasurementRevision','C8ResultRevision','C8EvaluationRevision') THEN
-   IF source->>'state'<>'PUBLISHED' OR (source->>'expiresAt')::timestamptz<=clock_timestamp()
-     OR (source->>'publishedAt')::timestamptz>cutoff THEN RETURN false; END IF;
+   IF source_row->>'state'<>'PUBLISHED' OR (source_row->>'expiresAt')::timestamptz<=clock_timestamp()
+     OR (source_row->>'publishedAt')::timestamptz>cutoff THEN RETURN false; END IF;
    EXECUTE format('SELECT EXISTS(SELECT 1 FROM %I WHERE "tenantId"=$1 AND "identityHash"=$2 AND revision>$3)',table_name)
-    INTO newer USING tenant,source->>'identityHash',(source->>'revision')::int;
+    INTO newer USING tenant,source_row->>'identityHash',(source_row->>'revision')::int;
    IF newer THEN RETURN false; END IF;
-   IF table_name='MeasurementRevision' AND source->>'appointmentId' IS NOT NULL THEN
-    SELECT "mayaClientId" INTO source_client FROM "Appointment" WHERE id=source->>'appointmentId' AND "tenantId"=tenant FOR SHARE;
-    IF NOT FOUND OR source_client IS DISTINCT FROM source->>'clientId' THEN RETURN false; END IF;
+   IF table_name='MeasurementRevision' AND source_row->>'appointmentId' IS NOT NULL THEN
+    SELECT "mayaClientId" INTO source_client FROM "Appointment" WHERE id=source_row->>'appointmentId' AND "tenantId"=tenant FOR SHARE;
+    IF NOT FOUND OR source_client IS DISTINCT FROM source_row->>'clientId' THEN RETURN false; END IF;
    END IF;
-   IF table_name='C8ResultRevision' AND NOT "C8_validate_refs"(tenant,source->'evidenceRefsJson',(source->>'t0')::timestamptz) THEN RETURN false; END IF;
-   expected:=source->>'snapshotHash';
-   IF (ref->>'expiresAt')::timestamptz IS DISTINCT FROM (source->>'expiresAt')::timestamptz THEN RETURN false; END IF;
+   IF table_name='C8ResultRevision' AND NOT "C8_validate_refs"(tenant,source_row->'evidenceRefsJson',(source_row->>'t0')::timestamptz) THEN RETURN false; END IF;
+   expected:=source_row->>'snapshotHash';
+   IF (ref->>'expiresAt')::timestamptz IS DISTINCT FROM (source_row->>'expiresAt')::timestamptz THEN RETURN false; END IF;
    IF table_name IN ('MeasurementRevision','C8ResultRevision') AND
-    (source->>'qualification' IS DISTINCT FROM ref->>'qualification' OR source->>'completeness' IS DISTINCT FROM ref->>'coverage') THEN RETURN false; END IF;
+    (source_row->>'qualification' IS DISTINCT FROM ref->>'qualification' OR source_row->>'completeness' IS DISTINCT FROM ref->>'coverage') THEN RETURN false; END IF;
   ELSIF table_name='TenantBusinessConfigurationRevision' THEN
-   expected:=source->>'contentHash';
-   IF source->>'namespace'<>'c8_valuation' OR source->>'encryptedContent' IS NULL
-    OR (source->>'createdAt')::timestamptz>cutoff THEN RETURN false; END IF;
+   expected:=source_row->>'contentHash';
+   IF source_row->>'namespace'<>'c8_valuation' OR source_row->>'encryptedContent' IS NULL
+    OR (source_row->>'createdAt')::timestamptz>cutoff THEN RETURN false; END IF;
   ELSIF table_name='C8ModelVersion' THEN
-   expected:=source->>'manifestHash';
-   IF (source->>'admittedAt')::timestamptz>cutoff OR (source->>'expiresAt')::timestamptz<=clock_timestamp() THEN RETURN false; END IF;
+   expected:=source_row->>'manifestHash';
+   IF (source_row->>'admittedAt')::timestamptz>cutoff OR (source_row->>'expiresAt')::timestamptz<=clock_timestamp() THEN RETURN false; END IF;
   ELSE
-   expected:=encode(sha256(convert_to(source::text,'UTF8')),'hex');
-   IF table_name='DomainEvent' AND (source->>'receivedAt')::timestamptz>cutoff THEN RETURN false; END IF;
-   IF source ? 'createdAt' AND (source->>'createdAt')::timestamptz>cutoff THEN RETURN false; END IF;
-   IF source ? 'updatedAt' AND (source->>'updatedAt')::timestamptz>cutoff THEN RETURN false; END IF;
+   expected:=encode(sha256(convert_to(source_row::text,'UTF8')),'hex');
+   IF table_name='DomainEvent' AND (source_row->>'receivedAt')::timestamptz>cutoff THEN RETURN false; END IF;
+   IF source_row ? 'createdAt' AND (source_row->>'createdAt')::timestamptz>cutoff THEN RETURN false; END IF;
+   IF source_row ? 'updatedAt' AND (source_row->>'updatedAt')::timestamptz>cutoff THEN RETURN false; END IF;
   END IF;
   IF expected IS DISTINCT FROM ref->>'revisionOrStateHash' THEN RETURN false; END IF;
  END LOOP;
@@ -367,6 +367,7 @@ END $$;
 CREATE FUNCTION "C8_eval_guard"() RETURNS trigger LANGUAGE plpgsql SET timezone='UTC' AS $$
 DECLARE mutable text[]:=ARRAY['state','leaseGeneration','leaseTokenHash','leaseExpiresAt','publishedAt','snapshotHash','metricsJson','calibrationJson','driftJson','outcome','reasonsJson'];
  model "C8ModelVersion"%ROWTYPE; head int; expected text; c jsonb; prediction "C8ResultRevision"%ROWTYPE; label jsonb; label_source "MeasurementRevision"%ROWTYPE;
+ label_appointment "Appointment"%ROWTYPE; label_scalar text; metric_proven boolean; schedule_start timestamptz; schedule_end timestamptz;
 BEGIN
  IF TG_OP='TRUNCATE' THEN RAISE EXCEPTION 'C8 truncate forbidden' USING ERRCODE='23514'; END IF;
  IF TG_OP='DELETE' THEN
@@ -444,10 +445,49 @@ BEGIN
      OR (prediction."subjectKind"='appointment' AND label_source."appointmentId" IS DISTINCT FROM prediction."subjectId")
      OR (prediction."subjectKind"='staff' AND label_source."staffId" IS DISTINCT FROM prediction."subjectId")
      OR NEW."expiresAt">label_source."expiresAt"
-     OR (c->>'labelState'='QUALIFIED' AND (label_source.qualification<>'VERIFIED' OR label_source.completeness<>'COMPLETE')) THEN
+     OR (c->>'labelState'='QUALIFIED' AND (label_source.qualification<>'VERIFIED' OR
+       (label_source.completeness<>'COMPLETE' AND NEW."targetKey" NOT IN ('attended_return','appointment_no_show')))) THEN
      RAISE EXCEPTION 'C8 later label subject/knowledge/coverage mismatch' USING ERRCODE='23514'; END IF;
+    -- Per-target label proof: an unrelated unknown cash metric must not erase
+    -- proven attendance. PARTIAL is never itself evidence of a binary outcome.
+    IF c->>'labelState'='QUALIFIED' AND NEW."targetKey" IN ('attended_return','appointment_no_show') THEN
+     IF NEW."targetKey"='attended_return' AND c->>'labelValue'='0' THEN
+      IF label_source.kind<>'client_history' OR label_source.completeness<>'COMPLETE'
+       OR label_source."periodFrom">prediction.t0 OR label_source."periodTo"<=prediction."horizonEnd"
+       OR label_source."asOf"<prediction."horizonEnd" OR NOT EXISTS (
+        SELECT 1 FROM jsonb_array_elements(label_source."valuesJson"->'metrics') m
+        WHERE m->>'key'='observed_attended_visits' AND m->>'value'='0' AND m->>'state'='COMPLETE') THEN
+        RAISE EXCEPTION 'C8 non-return requires complete covered horizon' USING ERRCODE='23514'; END IF;
+     ELSE
+     SELECT * INTO label_appointment FROM "Appointment" WHERE id=label_source."appointmentId" AND "tenantId"=NEW."tenantId" FOR SHARE;
+     IF label_appointment.id IS NULL OR label_appointment."mayaClientId" IS DISTINCT FROM label_source."clientId"
+      OR label_appointment.status<>'confirmed' OR label_appointment."endAt">NEW."labelsAsOf" THEN
+       RAISE EXCEPTION 'C8 binary label requires exact completed appointment' USING ERRCODE='23514'; END IF;
+     IF NEW."targetKey"='attended_return' THEN
+      IF c->>'labelValue'<>'1' OR label_appointment.attendance IS DISTINCT FROM 'arrived'
+       OR label_appointment."startAt"<=prediction.t0 OR label_appointment."startAt">prediction."horizonEnd" THEN
+        RAISE EXCEPTION 'C8 return label requires exact attended horizon event' USING ERRCODE='23514'; END IF;
+      label_scalar:='arrived';
+     ELSE
+      SELECT (f->>'value')::timestamptz INTO schedule_start FROM jsonb_array_elements(prediction."inputSnapshotJson"->'features') f WHERE f->>'key'='scheduled_start_at';
+      SELECT (f->>'value')::timestamptz INTO schedule_end FROM jsonb_array_elements(prediction."inputSnapshotJson"->'features') f WHERE f->>'key'='scheduled_end_at';
+      IF schedule_start IS NULL OR schedule_end IS NULL OR label_appointment."startAt" IS DISTINCT FROM schedule_start
+       OR label_appointment."endAt" IS DISTINCT FROM schedule_end OR schedule_end IS DISTINCT FROM prediction."horizonEnd"
+       OR label_appointment.attendance NOT IN ('arrived','no_show') OR label_appointment.attendance IS NULL
+       OR c->>'labelValue' IS DISTINCT FROM (CASE label_appointment.attendance WHEN 'no_show' THEN '1' WHEN 'arrived' THEN '0' END) THEN
+        RAISE EXCEPTION 'C8 no-show label schedule/outcome mismatch' USING ERRCODE='23514'; END IF;
+      label_scalar:=label_appointment.attendance;
+     END IF;
+     SELECT EXISTS (SELECT 1 FROM jsonb_array_elements(label_source."valuesJson"->'metrics') m
+      WHERE m->>'state'='COMPLETE' AND (
+       (m->>'key'='attendance' AND m->>'value'=label_scalar) OR
+       (m->>'key'='current_attended_outcome' AND m->>'value'=CASE label_scalar WHEN 'arrived' THEN 'true' WHEN 'no_show' THEN 'false' END))) INTO metric_proven;
+     IF NOT metric_proven THEN RAISE EXCEPTION 'C8 binary label metric not proven' USING ERRCODE='23514'; END IF;
+     END IF;
+    END IF;
    END LOOP;
-   IF c->>'labelState'='QUALIFIED' AND prediction."horizonEnd">NEW."labelsAsOf" THEN
+   IF c->>'labelState'='QUALIFIED' AND prediction."horizonEnd">NEW."labelsAsOf"
+    AND NOT (NEW."targetKey"='attended_return' AND c->>'labelValue'='1') THEN
     RAISE EXCEPTION 'C8 immature label cannot be qualified' USING ERRCODE='23514'; END IF;
   END IF;
  END LOOP;

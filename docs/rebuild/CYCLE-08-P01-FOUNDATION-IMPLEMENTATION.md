@@ -36,11 +36,15 @@ A22 policies preserve explicit tenant/service windows. Days are elapsed days; ca
 | Q06 | c8.eligibility, c8.targets | Observed zero distinct from unknown; missing/partial source, disabled model and explicit evidence-floor tests |
 | Q21 | Existing AC6 + three C8 leaves | Real PostgreSQL expiry purge of all three derived leaves; live history and canonical sources retained |
 
-Local PostgreSQL: **23 checks PASS**. Targeted suite including shared AC6 ratchets: **6 suites / 51 tests PASS**. Clean replay: **95 repository migrations PASS**. Local Prisma schema comparison: **NONE**. No migration backfill and no source mutation in migration. The synthetic fixture inserts occur only in a new isolated local cluster; they are not real-world model evaluation.
+Local PostgreSQL: **24 checks PASS**. Targeted suite including shared AC6 ratchets: **6 suites / 52 tests PASS**. Clean replay: **95 repository migrations PASS**. Local Prisma schema comparison: **NONE**. No migration backfill and no source mutation in migration. The synthetic fixture inserts occur only in a new isolated local cluster; they are not real-world model evaluation.
 
 Permanent tests live under `src/valuation/*.spec.ts` and the existing mandatory `src` Jest discovery. The deployment script runs the complete suite. The historical AC6 policy tests retain the original auth-policy fingerprint and exact old classes, adding only the three approved C8 leaves.
 
 The first full local run crashed in Node 24.15.0 V8 `ClearStaleLeftTrimmedPointerVisitor`, matching documented C7 incidents; it is not PASS. The checksum-verified previously certified Node 22.23.2 runtime is used for gates without changing tests or production Node. A subsequent full run found only the two expected exact AC6 allowlist assertions (439 suites passed); both were updated to include precisely the approved classes and targeted rerun passed. Complete mandatory rerun is still required before upload/migration and is enforced by `deploy/vps/deploy.sh`.
+
+## Pre-upload label proof correction
+
+The first deployment attempt was intentionally terminated during its local Jest gate, before upload, migration or release change. A cross-package review found that requiring whole-C7-snapshot COMPLETE would suppress an independently proven attendance label when cash/refunds were unknown. The same unapplied migration now checks the exact binary target, completed Appointment, unchanged admitted schedule and COMPLETE attendance metric. Complete horizon coverage remains mandatory for a non-return negative. The executable proof admits a real later C7 no-show label from a PARTIAL financial snapshot, rejects an opposite label and changed schedule, and admits an early proven attended-return positive while rejecting a fabricated negative. The real Appointment-backed C7 reference also exposed an SQL variable/column ambiguity, repaired in the shared validator before production. No model/field/constraint budget or numeric activation changes.
 
 ## Production baseline before cutover
 

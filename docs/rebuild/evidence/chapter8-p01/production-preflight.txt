@@ -1,6 +1,6 @@
 Welcome to LTD BeGet SSH Server 'prime'
 /opt/maya-saas/releases/20260912-c7-p06-4058cd8c
-{"status":"ok","service":"maya-saas-backend","release":"20260912-c7-p06-4058cd8c","started_at":"2026-09-12T20:09:10.635Z","timestamp":"2026-09-13T10:16:00.847Z"}{"status":"ready","service":"maya-saas-backend","checks":{"database":"ready"},"timestamp":"2026-09-13T10:16:00.859Z"}{
+{"status":"ok","service":"maya-saas-backend","release":"20260912-c7-p06-4058cd8c","started_at":"2026-09-12T20:09:10.635Z","timestamp":"2026-09-13T10:39:22.029Z"}{"status":"ready","service":"maya-saas-backend","checks":{"database":"ready"},"timestamp":"2026-09-13T10:39:22.036Z"}{
   "ok": true,
   "environment": "production",
   "config": "safe",
@@ -16,3 +16,13 @@ Loaded Prisma config from prisma.config.ts.
 No difference detected.
 
 [{"model":null,"result":null,"evaluation":null,"unsupported_policy_rows":"0"}]
+┌─────────────────────────────────────────────────────────┐
+│  Update available 7.9.1 -> 8.0.0-rc.14                  │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘

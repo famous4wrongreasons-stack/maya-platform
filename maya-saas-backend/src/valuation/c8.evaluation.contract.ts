@@ -64,7 +64,9 @@ export function c8Cases(
         if (
           !refs.length ||
           refs.some(
-            (r) => r.qualification !== 'VERIFIED' || r.coverage !== 'COMPLETE',
+            (r) =>
+              r.qualification !== 'VERIFIED' ||
+              !['COMPLETE', 'PARTIAL'].includes(r.coverage),
           ) ||
           typeof c.labelValue !== 'string' ||
           !/^-?(0|[1-9]\d*)(\.\d+)?$/.test(c.labelValue)

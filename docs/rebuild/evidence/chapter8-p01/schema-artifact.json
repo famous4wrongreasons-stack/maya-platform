@@ -599,24 +599,24 @@
     ],
     "functions": [
         {
-            "hash": "7eaa9e3a431d63073d5b8f92d42ee8132f188a40cbccd47e86de12345113d841",
-            "name": "C8_eval_guard"
+            "name": "C8_eval_guard",
+            "hash": "7a0f6e36ba14faa4aa1239f854e4f6d7491a6fda205abe4a1e339eb8be917a4f"
         },
         {
-            "hash": "fe05a159cbab19bb3572883f5b3720d92329aa41a51d7b1e61c289bb956a1e7e",
-            "name": "C8_model_guard"
+            "name": "C8_model_guard",
+            "hash": "fe05a159cbab19bb3572883f5b3720d92329aa41a51d7b1e61c289bb956a1e7e"
         },
         {
-            "hash": "c39b589a78feba62122d165d6b3cfe51e15cfa29bf3eeb410c3b116099b6c7b4",
-            "name": "C8_result_guard"
+            "name": "C8_result_guard",
+            "hash": "c39b589a78feba62122d165d6b3cfe51e15cfa29bf3eeb410c3b116099b6c7b4"
         },
         {
-            "hash": "b16a0c9b27a7a02bd8825ec5ce0eefb6da36e219f549a07c0e194f0fe520ee11",
-            "name": "C8_retention_claim"
+            "name": "C8_retention_claim",
+            "hash": "b16a0c9b27a7a02bd8825ec5ce0eefb6da36e219f549a07c0e194f0fe520ee11"
         },
         {
-            "hash": "8183cb2840649663642dcb096875890ed624555c96ee32b17ec6859361c9c166",
-            "name": "C8_validate_refs"
+            "name": "C8_validate_refs",
+            "hash": "ea16982598f6bfe3765abd83944add3835c59cb37f390f25c25633ecdee8b6bd"
         }
     ],
     "constraints": [

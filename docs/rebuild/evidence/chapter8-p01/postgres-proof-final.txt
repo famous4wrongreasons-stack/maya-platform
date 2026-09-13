@@ -17,8 +17,9 @@ PASS model history immutable and source tables have no new C8 FK
 PASS direct deletion and truncate cannot bypass AC6
 PASS AC6 new leaf classes require exact tenant and preserve live/source rows
 PASS real C7 snapshot is qualified by hash/tenant/Client and preserved as source history
+PASS qualified no-show label survives unrelated unknown money; wrong value and rescheduled capture reject
 PASS actual scoped AC6 purge of all three expired derived leaves preserves sources and live history
 PASS restart reclaims an expired fence; old worker cannot publish duplicate outcome
 PASS A22 policy changed before publication closes the same pending revision unavailable
 PASS exact approved 22/41/31 physical fields; no backfill
-{"checks":23,"status":"PASS","calibration":"UNAVAILABLE","numericTargetsActive":0,"productionEffects":0,"sourceBusinessEffects":0}
+{"checks":24,"status":"PASS","calibration":"UNAVAILABLE","numericTargetsActive":0,"productionEffects":0,"sourceBusinessEffects":0}
