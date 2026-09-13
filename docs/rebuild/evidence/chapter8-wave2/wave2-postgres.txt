@@ -1,0 +1,14 @@
+PASS historical booked value uses exact C7 evidence and Client without Maya User
+PASS unknown cash stays unavailable and historical money never becomes CLV
+PASS confirmed cadence uses exact last proven visit; no visit is not dormant
+PASS whole deterministic cohort preserves stable order and separate unknowns
+PASS disabled predictive comparator cannot silently become deterministic ranking
+PASS new canonical Appointment invalidates old query despite unchanged old rows
+PASS source Client correction succeeds; immutable old result loses current eligibility
+PASS future no-show captures existing Appointment schedule but publishes no numeric probability
+PASS conditional existing-booking scenario is explicitly not cash or expected revenue
+PASS worker restart retains T0 and horizon rather than manufacturing duplicate observations
+PASS concurrent claims publish one immutable result; direct user producer denied
+PASS all eight target instances persist honest prospective disabled contracts
+PASS concurrent first prospective worker capture has one immutable T0 winner
+{"status":"PASS","checks":13,"productionEffects":0,"numericTargetsActive":0,"calibration":"UNAVAILABLE"}

@@ -1,3 +1,4 @@
+import { C8Module } from '../valuation/c8.module';
 import { OperationalAlertsController } from './operational-alerts.controller';
 import { OperationalAlertsScheduler } from './operational-alerts.scheduler';
 import { CanonicalAppointmentAlertsService } from './canonical-appointment-alerts.service';
@@ -15,6 +16,7 @@ import { OperationalAlertSourceService } from './operational-alert-source.servic
 import { OperationalAlertsService } from './operational-alerts.service';
 @Module({
   imports: [
+    C8Module,
     InboxModule,
     PrismaModule,
     TenancyModule,

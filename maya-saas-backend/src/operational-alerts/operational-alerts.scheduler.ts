@@ -1,3 +1,4 @@
+import { C8Worker } from '../valuation/c8.worker';
 import { CanonicalAppointmentAlertsService } from './canonical-appointment-alerts.service';
 import {
   Injectable,
@@ -23,6 +24,7 @@ export class OperationalAlertsScheduler
     private readonly owner: OperationalAlertsService,
     private readonly config: ConfigService,
     private readonly projections: CanonicalAppointmentAlertsService,
+    private readonly valuation: C8Worker,
   ) {}
   onModuleInit() {
     if (
@@ -57,7 +59,16 @@ export class OperationalAlertsScheduler
           ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
         });
         if (!tenants.length) break;
-        for (const tenant of tenants)
+        for (const tenant of tenants) {
+          try {
+            await this.context.runAsSystemTenant(tenant.id, () =>
+              this.valuation.tickTenant(tenant.id),
+            );
+          } catch {
+            this.logger.warn(
+              'C8 derived observation tick retained unresolved work',
+            );
+          }
           try {
             await this.context.runAsSystemTenant(tenant.id, async () => {
               await this.owner.tickTenant(tenant.id);
@@ -68,6 +79,7 @@ export class OperationalAlertsScheduler
               'Canonical operational alert tick retained unresolved work',
             );
           }
+        }
         cursor = tenants.at(-1)!.id;
       }
     } finally {

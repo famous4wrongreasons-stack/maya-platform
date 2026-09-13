@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { c8PopulationCurrent } from './c8.population';
 import { randomUUID } from 'node:crypto';
 import {
   C8ResultRevision,
@@ -289,7 +290,10 @@ export class C8Store {
       return this.insert<C8ModelVersion>(tx, 'C8ModelVersion', record);
     });
   }
-  async admitResult(prepared: C8PreparedResult): Promise<C8ResultRevision> {
+  async admitResult(
+    prepared: C8PreparedResult,
+    reuseOpenTarget = false,
+  ): Promise<C8ResultRevision> {
     const tenantId = this.tenant();
     c8Id(prepared.subjectId);
     c8Id(prepared.ruleKey);
@@ -313,6 +317,33 @@ export class C8Store {
           throw new Error('c8_feature_evidence_not_in_manifest');
     return this.transaction(async (tx) => {
       const now = await this.now(tx);
+      if (reuseOpenTarget) {
+        if (prepared.kind !== 'PREDICTION')
+          throw new Error('c8_open_target_kind');
+        const captureKey = c8Hash([
+          tenantId,
+          prepared.subjectKind,
+          prepared.subjectId,
+          prepared.ruleKey,
+          prepared.policyRevisionId,
+          prepared.scopeJson,
+        ]);
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`c8/open-target/${captureKey}`},0))::text`;
+        const existing = await tx.c8ResultRevision.findFirst({
+          where: {
+            tenantId,
+            subjectKind: prepared.subjectKind,
+            subjectId: prepared.subjectId,
+            ruleKey: prepared.ruleKey,
+            policyRevisionId: prepared.policyRevisionId,
+            scopeJson: { equals: prepared.scopeJson },
+            horizonEnd: { gt: now },
+            expiresAt: { gt: now },
+          },
+          orderBy: { admittedAt: 'desc' },
+        });
+        if (existing) return existing;
+      }
       const expiry = Math.min(
         now.getTime() + C8_RETENTION_MS,
         ...evidence
@@ -378,6 +409,13 @@ export class C8Store {
         intentHash,
         revision: (head._max.revision ?? 0) + 1,
       };
+      if (
+        !(await c8PopulationCurrent(tx, {
+          tenantId,
+          inputSnapshotJson: prepared.inputSnapshotJson,
+        }))
+      )
+        throw new Error('c8_source_population_changed');
       return this.insert<C8ResultRevision>(tx, 'C8ResultRevision', record);
     });
   }
@@ -650,7 +688,12 @@ export class C8Store {
       }),
     );
   }
-  async refsCurrent(row: C8ResultRevision, tx: Tx): Promise<boolean> {
+  async refsCurrent(
+    row: C8ResultRevision,
+    tx: Tx,
+    depth = 0,
+  ): Promise<boolean> {
+    if (depth > 4) return false;
     if (row.tenantId !== this.tenant() || row.expiresAt <= new Date())
       return false;
     const active = await tx.$queryRaw<
@@ -675,6 +718,15 @@ export class C8Store {
     const [r] = await tx.$queryRaw<
       { valid: boolean }[]
     >`SELECT "C8_validate_refs"(${row.tenantId},${encode(row.evidenceRefsJson)}::jsonb,${row.t0}) valid`;
-    return r.valid;
+    if (!r.valid || !(await c8PopulationCurrent(tx, row))) return false;
+    for (const ref of row.evidenceRefsJson as unknown as C8Ref[]) {
+      if (ref.owner !== 'C8ResultRevision') continue;
+      const dependency = await tx.c8ResultRevision.findFirst({
+        where: { id: ref.id, tenantId: row.tenantId },
+      });
+      if (!dependency || !(await this.refsCurrent(dependency, tx, depth + 1)))
+        return false;
+    }
+    return true;
   }
 }
