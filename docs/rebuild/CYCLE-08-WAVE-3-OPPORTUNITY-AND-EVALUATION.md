@@ -27,11 +27,17 @@ The existing bounded operational worker performs evaluation and Opportunity refr
 
 Package proof: `scripts/chapter8-wave3-proof.ts` (13 PostgreSQL scenarios); preserved Wave 2 proof (13); P01 foundation (24). Release-discoverable tests include `c8.opportunity.spec.ts`, `c8.prospective.spec.ts`, `c8.wave3.architecture.spec.ts` and all inherited C8/Opportunity/Chapter 6/7 guards. Full mandatory gates and production evidence are recorded after the coordinated release.
 
-P04/P05 PRODUCTION: NOT YET DEPLOYED
-WAVE 3 MANDATORY RELEASE GATE: PENDING
+P04 PRODUCTION: PASS
+P05 PRODUCTION: PASS
+RELEASE: 20260913-c8-wave3-66e83891
+WAVE 3 MANDATORY RELEASE GATE: PASS — 446 suites / 3745 tests
+LINT / BOTH TYPECHECKS / BUILD / PRISMA: PASS
+PENDING MIGRATIONS: 0
+DRIFT: NONE
+HEALTH/READINESS: PASS
 T01–T08 ACTIVE: 0/8
 T01–T08 DISABLED: 8/8
 REAL-WORLD CALIBRATION: UNAVAILABLE
 PRODUCTION PROOF EFFECTS: 0
 
-Expected accounting after verified release: Q20/24, packages5/6, waves3/4. P06 consumer/legacy retirement and the frozen final gate remain. No Chapter 9 work.
+Verified accounting: Q20/24, packages5/6, waves3/4. P06 consumer/legacy retirement and the frozen final gate remain. No Chapter 9 work.
