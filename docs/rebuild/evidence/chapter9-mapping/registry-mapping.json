@@ -1,0 +1,549 @@
+{
+  "contract": "maya.c9-registry-mapping/1",
+  "status": "PROPOSED; NO PERMISSION GRANTED",
+  "baseline": "b9402e39",
+  "catalogTools": [
+    {
+      "tool": "catalog.services.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "OCCUPANCY",
+        "ADMIN"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "booking.availability.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "OCCUPANCY"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "booking.group-availability.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "OCCUPANCY"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "appointments.own.list",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "loyalty.own.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "CLIENT_LIFECYCLE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "analytics.employee.query",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "analytics.business.query",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "analytics.business.profit",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "analytics.revenue.forecast",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "analytics.team-kpi.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "analytics.branches.compare",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "reports.recovered",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "catalog.staff.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "OCCUPANCY",
+        "ADMIN"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "inventory.stock.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "commerce.certificates.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "commerce.memberships.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "referrals.status.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "reviews.list.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE",
+        "CLIENT_LIFECYCLE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "reviews.analyze",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE",
+        "CLIENT_LIFECYCLE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "customers.count",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE",
+        "CLIENT_LIFECYCLE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "clients.dormant.list",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "CLIENT_LIFECYCLE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "valuations.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE",
+        "CLIENT_LIFECYCLE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "clients.retention.scan",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "CLIENT_LIFECYCLE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "clients.dossier.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "CLIENT_LIFECYCLE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "clients.high-value.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "CLIENT_LIFECYCLE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "clients.no-show-risk.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "CLIENT_LIFECYCLE",
+        "OCCUPANCY"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "expenses.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "BUSINESS_INTELLIGENCE"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "appointments.own.cancel",
+      "existingRisk": "medium_write",
+      "existingApproval": "actor",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "appointments.own.create",
+      "existingRisk": "medium_write",
+      "existingApproval": "actor",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "appointments.own.reschedule",
+      "existingRisk": "medium_write",
+      "existingApproval": "actor",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "staff.schedule.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "OCCUPANCY"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "staff.schedule.own.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "OCCUPANCY"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "operations.journal.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "OCCUPANCY"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "staff.schedule.update",
+      "existingRisk": "medium_write",
+      "existingApproval": "actor",
+      "proposedDomains": [
+        "OCCUPANCY"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "loyalty.internal.adjust",
+      "existingRisk": "high_write",
+      "existingApproval": "owner",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "expenses.create",
+      "existingRisk": "high_write",
+      "existingApproval": "actor",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "expenses.period.complete",
+      "existingRisk": "low_write",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "company.business-hours.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "OCCUPANCY"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "settings.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "settings.update",
+      "existingRisk": "low_write",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "tasks.list",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "tasks.create",
+      "existingRisk": "medium_write",
+      "existingApproval": "actor",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "tasks.complete",
+      "existingRisk": "low_write",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "notifications.appointments.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "notifications.appointments.update",
+      "existingRisk": "medium_write",
+      "existingApproval": "actor",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    },
+    {
+      "tool": "support.integration-status.read",
+      "existingRisk": "read",
+      "existingApproval": "none",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "READ",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "NONE"
+    },
+    {
+      "tool": "support.contact-admin.request",
+      "existingRisk": "medium_write",
+      "existingApproval": "actor",
+      "proposedDomains": [
+        "ADMIN"
+      ],
+      "agentMode": "PROPOSE_ONLY",
+      "permission": "CURRENT SOURCE PRINCIPAL/SCOPE/POLICY/ENTITLEMENT REQUIRED",
+      "effectAdapter": "EXISTING CANONICAL OWNER VIA P05; no agent dispatch"
+    }
+  ],
+  "extraExistingInterfaces": [
+    "C7 measurement safe read",
+    "C8 result qualified read",
+    "B35 preview/status/confirm",
+    "A22 governed configuration",
+    "OwnerReport status/download"
+  ],
+  "pureCoordinationCapabilities": [
+    "c9.no_action"
+  ],
+  "taskKeys": [
+    "c9.route",
+    "c9.admin",
+    "c9.client_lifecycle",
+    "c9.occupancy",
+    "c9.bi",
+    "c9.compose"
+  ]
+}
