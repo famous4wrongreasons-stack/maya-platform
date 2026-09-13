@@ -1,0 +1,18 @@
+{
+  "assessedAt": "2026-09-13T09:21:43.853Z",
+  "productionRelease": "20260912-c7-p06-4058cd8c",
+  "health": "PASS",
+  "readiness": "PASS",
+  "successfulAggregateTransactions": 2,
+  "aggregateStatements": 18,
+  "abortedReadOnlySqlAttempts": 3,
+  "abortedReason": "query alias syntax; rolled back, no mutation",
+  "providerGETs": 8,
+  "providerWrites": 0,
+  "productionMutations": 0,
+  "rawProviderRowsRetained": 0,
+  "individualIdentifiersExported": 0,
+  "productionFilesChanged": 0,
+  "modelTraining": 0,
+  "scopeLimit": "current canonical DB aggregates and one week of existing verified YClients financial read; not a provider-wide history census; no old DBs or UI/provider effects"
+}

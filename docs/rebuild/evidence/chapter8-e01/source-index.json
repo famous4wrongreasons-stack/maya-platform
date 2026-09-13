@@ -1,0 +1,57 @@
+{
+  "baseline": "12af40b2e5c99678ad94122b45907a337ea4a2c0",
+  "files": [
+    {
+      "path": "docs/rebuild/CYCLE-08-COMBINED-SCHEMA-MODEL-EVALUATION-MAPPING.md",
+      "sha256": "c88ec439a18e31aa3850d1b05228555412281fad375a41b012ae2432df9b7493"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-08-OWNER-DECISION-PACK.md",
+      "sha256": "4bbcc2549ddab93521231bb394204edc122dcf67cb3029b031a77182aa92bab2"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-08-PREFLIGHT-AND-SCOPE.md",
+      "sha256": "8f4ac51089c9ebd9dc76dc9c3bffe41c1fd0cb6197418593ffe4e61e94131a59"
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "82a428195ecab66436a644ac02011211ca1a9d58769e9767e714663ef993dffc"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/appointment-change.service.ts",
+      "sha256": "5c619f295fc172eb8ce30c01b96c88cc499cc29e4c0ab6688f086e50fba1c5bd"
+    },
+    {
+      "path": "maya-saas-backend/src/domain/appointment-change.ts",
+      "sha256": "8279d2bde99fa9a86d415a40b4914dfebfb6513f2677658af8de02309da355e0"
+    },
+    {
+      "path": "maya-saas-backend/src/domain/domain-event.ts",
+      "sha256": "27b7d5be2e6e7c0f92bb136c75933e23368370e537890d1362b344ef0e386e8f"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.sources.ts",
+      "sha256": "ff662e66b81b23ce90ea82b4745e63f5367f95c6d87bf0951a3a3b5adc96e627"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.finance.facts.ts",
+      "sha256": "056b6aa92b3809cf97ec0438136a6e8902c83611b2c9d23404ff2f4a7711ab09"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.staff-goal.facts.ts",
+      "sha256": "f10994055df243cbcecccf112247a7106c0c6df9c7ef977b79af96d9b2a62663"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "sha256": "63cff8295e6c41225d4072b52243a707a8b8d1b80127019d18f59214dcb84699"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm-adapter.interface.ts",
+      "sha256": "53cd00d9341d034a55d6c2b19339cc12ba7d525d6ad25529767cb22a14939ef1"
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-report.contract.ts",
+      "sha256": "93f99420db2c9d2e33c28b7345d6c1df28af954effeb7fa10ff49ab28e0186a4"
+    }
+  ]
+}

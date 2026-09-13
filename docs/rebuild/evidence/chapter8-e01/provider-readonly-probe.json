@@ -1,0 +1,49 @@
+{
+  "assessedAt": "2026-09-13T09:24:28.220Z",
+  "readOnlyDatabaseTransaction": "ROLLED_BACK",
+  "providerMethods": [
+    "GET"
+  ],
+  "providerRequests": 8,
+  "httpStatuses": {
+    "200": 8
+  },
+  "requestBudget": 40,
+  "results": [
+    {
+      "scope": "exact verified active integration",
+      "provider": "yclients",
+      "period": {
+        "from": "2026-08-31",
+        "to": "2026-09-06",
+        "timezone": "Europe/Moscow"
+      },
+      "revenue": {
+        "status": "available",
+        "verified": true,
+        "basis": "provider_transactions",
+        "transactionCount": 179,
+        "currency": "RUB",
+        "discarded": {
+          "negative_count": 0,
+          "zero_count": 0,
+          "untyped_count": 0
+        },
+        "staffAttributionCoverage": 100,
+        "serviceAttributionCoverage": 57
+      },
+      "payroll": {
+        "status": "available",
+        "verified": true,
+        "staffRows": 5,
+        "accruedPresent": true,
+        "paidPresent": true
+      },
+      "warningCodes": [
+        "crm_service_revenue_partially_attributed"
+      ],
+      "rawRowsRetained": 0,
+      "individualIdentifiersExported": 0
+    }
+  ]
+}

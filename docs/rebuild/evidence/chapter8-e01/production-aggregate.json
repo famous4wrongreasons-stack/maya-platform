@@ -1,0 +1,595 @@
+{
+  "version": 1,
+  "scope": "aggregate canonical production PostgreSQL; no provider calls/no raw records",
+  "queries": {
+    "protocol": [
+      {
+        "read_only": "on",
+        "isolation": "repeatable read",
+        "assessed_at": "2026-09-13T09:21:43.853Z",
+        "statement_timeout": "15s"
+      }
+    ],
+    "tenants": [
+      {
+        "alias": "tenant_1",
+        "status": "active",
+        "calendarSource": "external",
+        "explicit_vertical": "unqualified_or_unspecified",
+        "provider": "none",
+        "integration_status": null,
+        "watchStartedAt": null,
+        "verifiedAt": null,
+        "createdAt": "2026-08-03T14:30:31.510Z"
+      },
+      {
+        "alias": "tenant_2",
+        "status": "active",
+        "calendarSource": "external",
+        "explicit_vertical": "barbershop",
+        "provider": "yclients",
+        "integration_status": "active",
+        "watchStartedAt": "2026-08-17T14:02:47.098Z",
+        "verifiedAt": "2026-08-15T08:36:22.186Z",
+        "createdAt": "2026-08-15T08:36:21.267Z"
+      }
+    ],
+    "core_counts": [
+      {
+        "clients": "23",
+        "unmerged_clients": "23",
+        "clients_without_user": "22",
+        "crm_client_links": "23",
+        "appointments": "2489",
+        "measurements": "0",
+        "domain_events": "1431",
+        "reconciliation_runs": "1430",
+        "internal_capacity_rules": "0",
+        "internal_capacity_exceptions": "0",
+        "expenses": "0",
+        "expense_declarations": "0",
+        "recovery_conversions": "0",
+        "c8_policies": "0",
+        "c8_model_table_present": false
+      }
+    ],
+    "appointments_by_tenant": [
+      {
+        "alias": "tenant_2",
+        "provider": "yclients",
+        "rows": "2489",
+        "exact_current_client_rows": "36",
+        "clients": "17",
+        "missing_client": "2453",
+        "missing_staff": "14",
+        "missing_branch": "2489",
+        "unknown_attendance": "1312",
+        "missing_booked_price": "45",
+        "changed_since_first_stored": "1168",
+        "earliest_visit": "2024-10-24T08:15:00.000Z",
+        "latest_visit": "2026-10-03T04:15:00.000Z",
+        "earliest_mirror_admission": "2026-08-15T12:01:49.567Z",
+        "latest_mirror_update": "2026-09-13T06:17:24.810Z"
+      }
+    ],
+    "appointment_outcome_inventory": [
+      {
+        "attendance": "awaiting",
+        "status": "canceled",
+        "time_window": "future",
+        "rows": "1",
+        "client_linked": "0"
+      },
+      {
+        "attendance": "awaiting",
+        "status": "confirmed",
+        "time_window": "future",
+        "rows": "22",
+        "client_linked": "1"
+      },
+      {
+        "attendance": "UNKNOWN",
+        "status": "canceled",
+        "time_window": "past",
+        "rows": "162",
+        "client_linked": "0"
+      },
+      {
+        "attendance": "UNKNOWN",
+        "status": "completed",
+        "time_window": "past",
+        "rows": "1140",
+        "client_linked": "0"
+      },
+      {
+        "attendance": "UNKNOWN",
+        "status": "no_show",
+        "time_window": "past",
+        "rows": "10",
+        "client_linked": "0"
+      },
+      {
+        "attendance": "arrived",
+        "status": "canceled",
+        "time_window": "past",
+        "rows": "1",
+        "client_linked": "0"
+      },
+      {
+        "attendance": "arrived",
+        "status": "completed",
+        "time_window": "past",
+        "rows": "1032",
+        "client_linked": "23"
+      },
+      {
+        "attendance": "awaiting",
+        "status": "canceled",
+        "time_window": "past",
+        "rows": "104",
+        "client_linked": "10"
+      },
+      {
+        "attendance": "awaiting",
+        "status": "completed",
+        "time_window": "past",
+        "rows": "2",
+        "client_linked": "2"
+      },
+      {
+        "attendance": "awaiting",
+        "status": "confirmed",
+        "time_window": "past",
+        "rows": "8",
+        "client_linked": "0"
+      },
+      {
+        "attendance": "no_show",
+        "status": "no_show",
+        "time_window": "past",
+        "rows": "7",
+        "client_linked": "0"
+      }
+    ],
+    "temporal_appointment_inventory": [
+      {
+        "period_month": "2024-10",
+        "rows": "1",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "1",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2024-11",
+        "rows": "1",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "1",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2025-02",
+        "rows": "1",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "1",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2025-03",
+        "rows": "1",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "1",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2025-07",
+        "rows": "2",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "2",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2025-08",
+        "rows": "2",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "2",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2025-09",
+        "rows": "3",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "3",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2025-10",
+        "rows": "2",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "2",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2025-11",
+        "rows": "1",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "1",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2025-12",
+        "rows": "1",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "1",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2026-02",
+        "rows": "1",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "1",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2026-05",
+        "rows": "326",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "326",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2026-06",
+        "rows": "603",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "603",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2026-07",
+        "rows": "653",
+        "client_linked": "3",
+        "arrived": "261",
+        "no_show": "2",
+        "unknown_attendance": "367",
+        "stored_before_start": "0"
+      },
+      {
+        "period_month": "2026-08",
+        "rows": "634",
+        "client_linked": "29",
+        "arrived": "557",
+        "no_show": "4",
+        "unknown_attendance": "0",
+        "stored_before_start": "311"
+      },
+      {
+        "period_month": "2026-09",
+        "rows": "254",
+        "client_linked": "4",
+        "arrived": "215",
+        "no_show": "1",
+        "unknown_attendance": "0",
+        "stored_before_start": "243"
+      },
+      {
+        "period_month": "2026-10",
+        "rows": "3",
+        "client_linked": "0",
+        "arrived": "0",
+        "no_show": "0",
+        "unknown_attendance": "0",
+        "stored_before_start": "3"
+      }
+    ],
+    "visit_subject_history": [
+      {
+        "observed_subjects": "17",
+        "subjects_with_arrival": "16",
+        "subjects_with_multiple_observed_arrivals": "6",
+        "subjects_with_observed_no_show": "0"
+      }
+    ],
+    "measurements": [],
+    "events": [
+      {
+        "type": "appointment.attendance_changed",
+        "source": "yclients",
+        "ingestionMethod": "reconciliation",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "26",
+        "entities": "26",
+        "first_occurred": "2026-09-01T05:01:16.033Z",
+        "last_occurred": "2026-09-10T09:04:21.818Z",
+        "first_received": "2026-09-01T05:01:16.038Z",
+        "last_received": "2026-09-10T09:04:21.824Z",
+        "received_later": "26"
+      },
+      {
+        "type": "appointment.attendance_changed",
+        "source": "yclients",
+        "ingestionMethod": "webhook",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "478",
+        "entities": "465",
+        "first_occurred": "2026-08-18T05:01:08.498Z",
+        "last_occurred": "2026-09-13T06:17:24.808Z",
+        "first_received": "2026-08-18T05:01:08.503Z",
+        "last_received": "2026-09-13T06:17:24.814Z",
+        "received_later": "478"
+      },
+      {
+        "type": "appointment.attendance_recorded",
+        "source": "yclients",
+        "ingestionMethod": "webhook",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "1",
+        "entities": "1",
+        "first_occurred": "2026-08-15T07:15:00.000Z",
+        "last_occurred": "2026-08-15T07:15:00.000Z",
+        "first_received": "2026-08-17T11:24:22.981Z",
+        "last_received": "2026-08-17T11:24:22.981Z",
+        "received_later": "1"
+      },
+      {
+        "type": "appointment.created",
+        "source": "yclients",
+        "ingestionMethod": "reconciliation",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "26",
+        "entities": "26",
+        "first_occurred": "2026-09-01T02:01:14.075Z",
+        "last_occurred": "2026-09-11T04:04:22.471Z",
+        "first_received": "2026-09-01T02:01:14.113Z",
+        "last_received": "2026-09-11T04:04:22.476Z",
+        "received_later": "26"
+      },
+      {
+        "type": "appointment.created",
+        "source": "yclients",
+        "ingestionMethod": "webhook",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "523",
+        "entities": "523",
+        "first_occurred": "2026-08-17T23:48:46.870Z",
+        "last_occurred": "2026-09-13T04:06:24.207Z",
+        "first_received": "2026-08-17T23:48:46.882Z",
+        "last_received": "2026-09-13T04:06:24.214Z",
+        "received_later": "523"
+      },
+      {
+        "type": "appointment.removed",
+        "source": "yclients",
+        "ingestionMethod": "reconciliation",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "4",
+        "entities": "4",
+        "first_occurred": "2026-09-01T05:01:16.020Z",
+        "last_occurred": "2026-09-02T05:18:02.354Z",
+        "first_received": "2026-09-01T05:01:16.027Z",
+        "last_received": "2026-09-02T05:18:02.358Z",
+        "received_later": "4"
+      },
+      {
+        "type": "appointment.removed",
+        "source": "yclients",
+        "ingestionMethod": "webhook",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "50",
+        "entities": "50",
+        "first_occurred": "2026-08-17T23:49:04.223Z",
+        "last_occurred": "2026-09-12T11:44:12.261Z",
+        "first_received": "2026-08-17T23:49:04.228Z",
+        "last_received": "2026-09-12T11:44:12.268Z",
+        "received_later": "50"
+      },
+      {
+        "type": "appointment.rescheduled",
+        "source": "yclients",
+        "ingestionMethod": "reconciliation",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "8",
+        "entities": "7",
+        "first_occurred": "2026-08-29T04:26:23.506Z",
+        "last_occurred": "2026-09-04T07:11:20.767Z",
+        "first_received": "2026-08-29T04:26:23.510Z",
+        "last_received": "2026-09-04T07:11:20.773Z",
+        "received_later": "8"
+      },
+      {
+        "type": "appointment.rescheduled",
+        "source": "yclients",
+        "ingestionMethod": "webhook",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "183",
+        "entities": "147",
+        "first_occurred": "2026-08-18T05:49:43.288Z",
+        "last_occurred": "2026-09-13T05:37:18.356Z",
+        "first_received": "2026-08-18T05:49:43.293Z",
+        "last_received": "2026-09-13T05:37:18.364Z",
+        "received_later": "183"
+      },
+      {
+        "type": "appointment.services_changed",
+        "source": "yclients",
+        "ingestionMethod": "reconciliation",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "7",
+        "entities": "6",
+        "first_occurred": "2026-08-29T04:26:23.506Z",
+        "last_occurred": "2026-09-02T11:02:29.211Z",
+        "first_received": "2026-08-29T04:26:23.512Z",
+        "last_received": "2026-09-02T11:02:29.216Z",
+        "received_later": "7"
+      },
+      {
+        "type": "appointment.services_changed",
+        "source": "yclients",
+        "ingestionMethod": "webhook",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "119",
+        "entities": "106",
+        "first_occurred": "2026-08-18T06:19:19.484Z",
+        "last_occurred": "2026-09-13T05:37:18.356Z",
+        "first_received": "2026-08-18T06:19:19.492Z",
+        "last_received": "2026-09-13T05:37:18.365Z",
+        "received_later": "119"
+      },
+      {
+        "type": "appointment.staff_changed",
+        "source": "yclients",
+        "ingestionMethod": "webhook",
+        "observation": "after_watch_started",
+        "status": "pending",
+        "rows": "6",
+        "entities": "6",
+        "first_occurred": "2026-08-27T06:38:48.759Z",
+        "last_occurred": "2026-08-28T07:44:55.098Z",
+        "first_received": "2026-08-27T06:38:48.764Z",
+        "last_received": "2026-08-28T07:44:55.104Z",
+        "received_later": "6"
+      }
+    ],
+    "event_payload_shape_only": [
+      {
+        "type": "appointment.attendance_changed",
+        "key": "from",
+        "rows": "504"
+      },
+      {
+        "type": "appointment.attendance_changed",
+        "key": "to",
+        "rows": "504"
+      },
+      {
+        "type": "appointment.created",
+        "key": "end_at",
+        "rows": "549"
+      },
+      {
+        "type": "appointment.created",
+        "key": "service_ids",
+        "rows": "549"
+      },
+      {
+        "type": "appointment.created",
+        "key": "staff_external_id",
+        "rows": "549"
+      },
+      {
+        "type": "appointment.created",
+        "key": "staff_id",
+        "rows": "549"
+      },
+      {
+        "type": "appointment.created",
+        "key": "start_at",
+        "rows": "549"
+      },
+      {
+        "type": "appointment.rescheduled",
+        "key": "from",
+        "rows": "191"
+      },
+      {
+        "type": "appointment.rescheduled",
+        "key": "to",
+        "rows": "191"
+      }
+    ],
+    "reconciliation": [
+      {
+        "provider": "yclients",
+        "completeness": "complete",
+        "runs": "1428",
+        "with_failure": "0",
+        "first_started": "2026-08-17T18:03:58.586Z",
+        "last_finished": "2026-09-13T06:09:13.386Z",
+        "earliest_queried": "2026-07-17T18:55:02.958Z",
+        "latest_queried": "2026-10-13T17:16:11.332Z",
+        "fetched_observations": "312305",
+        "created_observations": "26",
+        "updated_observations": "2977"
+      },
+      {
+        "provider": "yclients",
+        "completeness": "unfinished_or_failed",
+        "runs": "2",
+        "with_failure": "2",
+        "first_started": "2026-09-01T12:35:19.645Z",
+        "last_finished": null,
+        "earliest_queried": "2026-08-01T12:35:19.642Z",
+        "latest_queried": "2026-10-02T12:35:19.642Z",
+        "fetched_observations": "0",
+        "created_observations": "0",
+        "updated_observations": "0"
+      }
+    ],
+    "known_data_tables": [
+      {
+        "table_name": "BillingPayment"
+      },
+      {
+        "table_name": "CashDeclaration"
+      },
+      {
+        "table_name": "MeasurementRevision"
+      }
+    ],
+    "safe_financial_source_inventory": [
+      {
+        "currency": "RUB",
+        "rows": "2489",
+        "booked_price_known": "2444",
+        "booked_price_unknown": "45",
+        "first_source_at": "2024-10-24T08:15:00.000Z",
+        "last_source_at": "2026-10-03T04:15:00.000Z"
+      }
+    ],
+    "expense_inventory": [],
+    "pipeline_label_state": [
+      {
+        "quarantined_deliveries": "7",
+        "unresolved_deliveries": "7",
+        "earliest_received": "2026-09-03T04:32:59.253Z",
+        "latest_received": "2026-09-08T08:59:51.661Z"
+      }
+    ]
+  },
+  "transactionOutcome": "ROLLED_BACK_READ_ONLY"
+}

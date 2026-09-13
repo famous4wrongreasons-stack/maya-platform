@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "scope": "aggregate canonical production PostgreSQL; no provider calls/no raw records",
+  "queries": {
+    "linked_outcome_correction": [
+      {
+        "linked": "36",
+        "consistent_arrived": "23",
+        "consistent_no_show": "0",
+        "conflicting_arrived_canceled": "0"
+      }
+    ],
+    "linked_subject_history_corrected": [
+      {
+        "linked_subjects": "17",
+        "subjects_with_arrival": "16",
+        "subjects_with_multiple_arrivals": "6"
+      }
+    ],
+    "other_durable_fact_snapshots": [
+      {
+        "owner_report_runs": "9",
+        "admitted_report_runs": "9",
+        "cash_declarations": "0"
+      }
+    ]
+  },
+  "transactionOutcome": "ROLLED_BACK_READ_ONLY"
+}
