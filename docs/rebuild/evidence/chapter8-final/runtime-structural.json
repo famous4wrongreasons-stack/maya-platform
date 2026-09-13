@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "release": "20260913-c8-wave4-e082786b",
+  "artifacts": 707,
+  "tenantAuthority": true,
+  "readMethods": 3,
+  "derivedAdmissionMethods": 1,
+  "unfilteredReleaseGate": true,
+  "productionEffects": 0
+}

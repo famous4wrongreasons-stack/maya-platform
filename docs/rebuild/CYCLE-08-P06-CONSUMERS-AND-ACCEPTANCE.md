@@ -48,4 +48,10 @@ Real isolated PostgreSQL consumer proof: 14 scenarios; foundation/value/prospect
 
 Production certification and final counts are recorded only after the actual coordinated cutover in `CYCLE-08-FINAL-COMPLETION-REPORT.md`. This report does not independently assert a deployment before that receipt exists.
 
-P06 LOCAL ACCEPTANCE: PASS. Mandatory gate: 447 suites / 3752 tests; lint, both typechecks, build and Prisma PASS. Fresh production preflight: pending0, drift NONE, health/readiness PASS on Wave3. Production P06 cutover is the next authorized step.
+P06 LOCAL ACCEPTANCE: PASS. Mandatory gate: 447 suites / 3752 tests; lint, both typechecks, build and Prisma PASS. Fresh production preflight: pending0, drift NONE, health/readiness PASS on Wave3.
+
+## Production acceptance
+
+P06 PRODUCTION: PASS on `20260913-c8-wave4-e082786b`, implementation `e082786b`. The documented deployment repeated the unfiltered 447-suite / 3752-test gate and all three finite R01/C7/C8 live checkpoints. Five approved PWA/Python artifacts match their certified hashes; maintenance and protected backups remain unchanged. Read-only post-cutover verification matched all 707 release artifacts, exact P01 C8 schema and preserved C7 schema, pending0/drift NONE, health/readiness PASS. The independent finite preservation pass checked 124 files, 15 Python guards and seven cron sources. No business/provider/message effects were used as proof.
+
+All four P06 requirements and the final frozen 24/24 requirements, six packages, four waves and 32 surfaces are accepted in [Chapter 8 Final Completion Report](CYCLE-08-FINAL-COMPLETION-REPORT.md). T01–T08 remain disabled and calibration UNAVAILABLE. [Release evidence](evidence/chapter8-wave4/release-summary.json).
