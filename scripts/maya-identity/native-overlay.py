@@ -12,6 +12,7 @@ target.write_text(canonical)
 for row in json.loads((root/'docs/product/maya-identity/generated-assets.json').read_text())['artifacts']:
  p=root/row['path'];rel=p.relative_to(web);dest=native/'www'/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p,dest)
 shutil.copyfile(web/'assets/maya-identity.js',native/'www/assets/maya-identity.js')
+shutil.copyfile(web/'maya-motion-reference.png',native/'www/maya-motion-reference.png')
 for name in ['capacitor.config.json','www/manifest.json']:
  p=native/name;data=json.loads(p.read_text())
  if name.startswith('www'):

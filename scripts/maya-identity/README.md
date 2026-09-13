@@ -47,3 +47,17 @@ to the canonical/native bundle. Never infer verified Client access from preview.
 `motion-proof.cjs` runs against `preview.cjs`'s local fixture through Playwright;
 it exercises the actual player's finite return and frame cleanup as well as
 capturing six morph stages. Use synthetic UI fixtures only in a separate simulator.
+
+Current follow-up: **owner-reference-v3** supersedes the synthetic smooth-v2
+wave. Motion poses come from unchanged `сайт и приложение/maya-motion-reference.png`.
+`generate.cjs` updates inline JS; `native-overlay.py` and `verify-native.cjs` ensure
+that source, synced and built native bundles contain the same reference PNG.
+`preview.cjs` creates `reference.html`, `transitions.html` and `proof.html`.
+`reference-proof.js` checks exact source pixels and actual player lifecycle;
+`motion-proof.cjs` reads that fixture's verdict. Do not resurrect a formula/warp
+as reference-exact geometry. The static PNG supplies poses, not a motion timeline.
+
+`overlay-reference.cjs` accepts only the 2d85dbe8 VPS baseline; its two permitted
+presentation changes are inline motion JS and voice width. `publish-reference.py`
+publishes that candidate plus the unmodified PNG; no PHP, Beget or backend write.
+Previous publishers are historical, exact-baseline tools, not a generic rollback.

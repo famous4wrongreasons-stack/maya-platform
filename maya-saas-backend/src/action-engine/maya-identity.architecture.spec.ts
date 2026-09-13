@@ -39,6 +39,27 @@ describe('one Maya identity and verified native release boundary', () => {
     expect(code).toContain("removeEventListener('visibilitychange',wake)");
     expect(code).not.toMatch(/Math\.random|setInterval|setTimeout|fetch\(/);
   });
+  it('uses the unchanged owner storyboard for motion rather than a synthesized wave', () => {
+    const code = read('сайт и приложение/assets/maya-identity.js');
+    expect(
+      createHash('sha256')
+        .update(
+          readFileSync(
+            resolve(root, 'сайт и приложение/maya-motion-reference.png'),
+          ),
+        )
+        .digest('hex'),
+    ).toBe('b57b04948f6b029ba9eb10ed186cf03e408cb78ea8911103eed83eb4f35ef385');
+    expect(code).toContain("motionVersion:'owner-reference-v3'");
+    expect(code).toContain("{name:'wave',x:0,y:300,w:1672,h:286}");
+    expect(code).not.toMatch(/function wavePath|Math\.sin|Math\.cos/);
+    expect(read('scripts/maya-identity/verify-native.cjs')).toContain(
+      'Built native reference drifted',
+    );
+    expect(read('scripts/maya-identity/native-overlay.py')).toContain(
+      'maya-motion-reference.png',
+    );
+  });
   it('blocks stale native source, generated copy or built app before release', () => {
     const guard = read('scripts/maya-identity/verify-native.cjs');
     expect(guard).toContain('ios/App/App/public/index.html');

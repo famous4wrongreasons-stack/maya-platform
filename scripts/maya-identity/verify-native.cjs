@@ -5,6 +5,10 @@ const canonical=fs.readFileSync(path.join(root,'сайт и приложение
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
 for(const rel of ['www/index.html','ios/App/App/public/index.html'])assert.equal(hash(fs.readFileSync(path.join(native,rel))),hash(canonical),rel+' is not the certified current canonical consumer');
 if(process.argv[3])assert.equal(hash(fs.readFileSync(path.join(process.argv[3],'public/index.html'))),hash(canonical),'Built native bundle drifted');
+const reference=fs.readFileSync(path.join(root,'сайт и приложение/maya-motion-reference.png'));
+assert.equal(hash(reference),'b57b04948f6b029ba9eb10ed186cf03e408cb78ea8911103eed83eb4f35ef385','Owner reference changed');
+for(const rel of ['www/maya-motion-reference.png','ios/App/App/public/maya-motion-reference.png'])assert.equal(hash(fs.readFileSync(path.join(native,rel))),hash(reference),'Native reference asset drifted: '+rel);
+if(process.argv[3])assert.equal(hash(fs.readFileSync(path.join(process.argv[3],'public/maya-motion-reference.png'))),hash(reference),'Built native reference drifted');
 const code=canonical.toString();const a=code.indexOf('function AMayaConsent()'),b=code.indexOf('window.AMayaConsent',a),consent=code.slice(a,b);
 assert.ok(consent.includes("authedFetch('/client-channel/consent'"));assert.ok(consent.includes('meMayaConsentTransition('));assert.ok(consent.includes('body: JSON.stringify(command)'));
 assert.ok(!consent.includes('/customers/me/profile'));assert.ok(code.includes('function AConsentGate() { return null; }'));assert.ok(!code.includes("'?action=consent_submit'"));assert.ok(consent.includes('status.linked===true'));assert.ok(consent.includes('status.marketing_decided!==true'));

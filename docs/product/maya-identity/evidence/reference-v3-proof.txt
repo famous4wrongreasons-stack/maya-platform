@@ -1,0 +1,17 @@
+Source pixels preserved: logo (max 0/255)
+Source pixels preserved: activation (max 0/255)
+Source pixels preserved: transition (max 0/255)
+Source pixels preserved: listening-symbol (max 0/255)
+Source pixels preserved: return (max 0/255)
+Source pixels preserved: ready (max 0/255)
+Source pixels preserved: wave (max 0/255)
+Launch completes through reference poses
+Wide recording uses exact reference wave
+Existing audio amplitude drives opacity, no new microphone
+Completion returns and stops its frame loop
+Compact thinking uses supplied compact pose
+Response uses supplied expanded pose
+Reduced motion is static and stops animation
+Hidden document releases animation
+Unmount removes frames, animations and listeners
+ALL PASS: 16
