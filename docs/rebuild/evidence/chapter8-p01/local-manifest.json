@@ -12,8 +12,8 @@
   "postgresChecks": 24,
   "targetedSuites": 6,
   "targetedTests": 52,
-  "fullReleaseGate": "PENDING_AFTER_PREUPLOAD_LABEL_PROOF_CORRECTION",
-  "productionStatus": "NOT_DEPLOYED",
+  "fullReleaseGate": "PASS: 441 suites / 3711 tests",
+  "productionStatus": "PASS",
   "requirements": {
     "Q01": "c8.contract/c8.sources; C7 source/tenant/hash proof",
     "Q02": "c8.store; concurrent identity/fence/restart proof",
@@ -41,5 +41,6 @@
     "prisma/migrations/20260913093000_chapter8_valuation_foundation/migration.sql": "9e8192c002f1c2e70ce09f7164e23611cac48aded22f449f223f70ce6e203c8f",
     "scripts/chapter8-foundation-proof.ts": "deb1104cf4aae9f72ea24e1dd4f2d2e19ecefb88b23a53e5855a3517b093c02e",
     "src/package5-wave6/chapter8-valuation-retention.ts": "83ff5364e40e50390ca8fd78c667df7b24f92724eff384bc6e28799d6dcda347"
-  }
+  },
+  "release": "20260913-c8-p01-12f0f35b"
 }

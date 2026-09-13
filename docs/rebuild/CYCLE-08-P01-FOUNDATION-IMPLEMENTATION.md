@@ -1,6 +1,6 @@
 # C8 P01 — limited-data foundation implementation
 
-Owner approval: accepted checkpoint `8c185b75`, recorded in [limited-data decision](CYCLE-08-LIMITED-DATA-IMPLEMENTATION-DECISION.md). D1–D16 and the combined envelope remain unchanged. This report records P01 local implementation; production acceptance is pending the mandatory release gate and cutover. P02–P06 are not claimed complete.
+Owner approval: accepted checkpoint `8c185b75`, recorded in [limited-data decision](CYCLE-08-LIMITED-DATA-IMPLEMENTATION-DECISION.md). D1–D16 and the combined envelope remain unchanged. P01 local and production acceptance are PASS on release `20260913-c8-p01-12f0f35b`. P02–P06 are not claimed complete.
 
 ## Implemented owner boundary
 
@@ -40,7 +40,7 @@ Local PostgreSQL: **24 checks PASS**. Targeted suite including shared AC6 ratche
 
 Permanent tests live under `src/valuation/*.spec.ts` and the existing mandatory `src` Jest discovery. The deployment script runs the complete suite. The historical AC6 policy tests retain the original auth-policy fingerprint and exact old classes, adding only the three approved C8 leaves.
 
-The first full local run crashed in Node 24.15.0 V8 `ClearStaleLeftTrimmedPointerVisitor`, matching documented C7 incidents; it is not PASS. The checksum-verified previously certified Node 22.23.2 runtime is used for gates without changing tests or production Node. A subsequent full run found only the two expected exact AC6 allowlist assertions (439 suites passed); both were updated to include precisely the approved classes and targeted rerun passed. Complete mandatory rerun is still required before upload/migration and is enforced by `deploy/vps/deploy.sh`.
+The first full local run crashed in Node 24.15.0 V8 `ClearStaleLeftTrimmedPointerVisitor`, matching documented C7 incidents; it is not PASS. The checksum-verified previously certified Node 22.23.2 runtime is used for gates without changing tests or production Node. A subsequent full run found only the two expected exact AC6 allowlist assertions (439 suites passed); both were updated to include precisely the approved classes and targeted rerun passed. The enforced complete rerun subsequently passed: **441 suites / 3711 tests**, followed by lint, both typechecks, Prisma and build PASS.
 
 ## Pre-upload label proof correction
 
@@ -52,12 +52,19 @@ Read-only preflight: release `20260912-c7-p06-4058cd8c`, health/readiness PASS, 
 
 Evidence: [local manifest](evidence/chapter8-p01/local-manifest.json), [PostgreSQL proof](evidence/chapter8-p01/postgres-proof-final.txt), [schema artifact](evidence/chapter8-p01/schema-artifact.json), [runtime receipt](evidence/chapter8-p01/local-node-runtime.json), [production preflight](evidence/chapter8-p01/production-preflight.txt).
 
-P01 PRODUCTION: NOT DEPLOYED
-C8 PACKAGES COMPLETE: 0/6
-C8 WAVES COMPLETE: 0/4
+P01 PRODUCTION: PASS
+C8 REQUIREMENTS COMPLETE: 7/24
+C8 PACKAGES COMPLETE: 1/6
+C8 WAVES COMPLETE: 1/4
 T01–T08 ACTIVE: 0/8
 CHAPTER 8 COMPLETE: NO
 CHAPTER 9 STARTED: NO
 PRODUCTION PROOF EFFECTS: 0
 
-Next: mandatory documented release gate → P01 schema/runtime cutover → structural verification → automatically continue P02/P03. No further owner decision is needed for approved scope.
+Next: automatically continue P02/P03. No further owner decision is needed for approved scope.
+
+## Production acceptance
+
+Documented deployment completed successfully. Exactly the approved migration was applied; pending0 and drift NONE after apply. All five production function digests and all constraint definitions equal the clean-replay fixture. The three tables contain **0 rows**, confirming no proof/backfill observations were inserted. New field counts are 22+41+31=94. Backup-port smoke and live health/readiness passed. The finite R01 gate passed (42 entries, three roots, ten active PHP files, nine routing artifacts, seven protected HTML/backups and sixteen blocked archives). The active PWA hash is unchanged. No production business/provider/message effects were used as proof.
+
+Evidence: [release acceptance](evidence/chapter8-p01/release-acceptance.json), [read-only schema/runtime verification](evidence/chapter8-p01/production-structural.json). P02–P06 remain the known remainder; all numeric targets remain disabled, real-world calibration unavailable.
