@@ -1,0 +1,18 @@
+{
+  "schemaRuntimeMigrationFilesChanged": 0,
+  "mappingRequirements": 24,
+  "packageOwnershipExact": true,
+  "packages": 6,
+  "waves": 4,
+  "surfacesExactInherited": 32,
+  "physicalFieldsRecount": 94,
+  "targetFamilies": 8,
+  "numericAcceptanceContractsFrozen": 0,
+  "legacyGroups": 8,
+  "sourceFilesPinnedUnchanged": 52,
+  "markdownLinksResolve": true,
+  "secretDataAdded": false,
+  "syntheticOrRealModelEvaluationRun": false,
+  "runtimeTestsRun": false,
+  "status": "DOCUMENTATION_CONSISTENCY_PASS_NOT_IMPLEMENTATION_PROOF"
+}
