@@ -51,15 +51,15 @@ All eight rows above were exercised as actual durable PostgreSQL captures, not m
 
 P02 LOCAL EXECUTABLE PROOF: PASS
 P03 LOCAL EXECUTABLE PROOF: PASS
-WAVE 2 MANDATORY RELEASE GATE: PENDING
-P02 PRODUCTION: NOT DEPLOYED
-P03 PRODUCTION: NOT DEPLOYED
-C8 REQUIREMENTS COMPLETE: 7/24 (production)
-C8 PACKAGES COMPLETE: 1/6 (production)
-C8 WAVES COMPLETE: 1/4 (production)
+WAVE 2 MANDATORY RELEASE GATE: PASS — 443 suites / 3729 tests
+P02 PRODUCTION: PASS
+P03 PRODUCTION: PASS
+C8 REQUIREMENTS COMPLETE: 16/24 (production)
+C8 PACKAGES COMPLETE: 3/6 (production)
+C8 WAVES COMPLETE: 2/4 (production)
 T01–T08 ACTIVE: 0/8
 T01–T08 DISABLED: 8/8
 REAL-WORLD CALIBRATION: UNAVAILABLE
 PRODUCTION PROOF EFFECTS: 0
 
-Next: the documented full mandatory release gate and coordinated Wave 2 cutover; only then production acceptance and automatic P04/P05. P06 retains the bounded UI/AI/read and legacy consumer cutover scope. No Chapter 9 implementation.
+Release `20260913-c8-wave2-57b677a1` completed. Health/readiness PASS; pending migrations 0; drift NONE. All five schema function hashes and all 30 constraint definitions equal certified P01. C8 production model/result/evaluation counts remain zero: no proof rows or invented configuration. Three finite relay/PWA verifications passed with unchanged active-PWA hash and protected maintenance/backups. Next: automatic P04/P05. P06 retains the bounded UI/AI/read and legacy consumer cutover scope. No Chapter 9 implementation.

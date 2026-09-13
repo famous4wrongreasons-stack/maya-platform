@@ -24,8 +24,8 @@
   "newActionClasses": 0,
   "numericTargetsActive": 0,
   "calibration": "UNAVAILABLE",
-  "productionStatus": "NOT_DEPLOYED",
-  "mandatoryReleaseGate": "PENDING",
+  "productionStatus": "PASS",
+  "mandatoryReleaseGate": "PASS",
   "artifacts": {
     "maya-saas-backend/src/valuation/c8.ranking.ts": "1e2567ebc244695f0adeed56970792b6ee1967d4e0a3a2ee6d9e6e422e0f5b5c",
     "maya-saas-backend/src/valuation/c8.evaluation.contract.ts": "4b4e31dd7705cb01e0fd9278c160b465f2d864f80ff70de8ad7a9045a8c59f62",
@@ -51,5 +51,15 @@
     "maya-saas-backend/src/operational-alerts/operational-alerts.module.ts": "ba246e5602796af519369890094f46967d69daf12dc67fbd851d3b8265215cf4",
     "maya-saas-backend/src/operational-alerts/operational-alerts.scheduler.ts": "ad7b95e383378731454d19f9daa5d2421303fa75f9e366e2cd995d4832e0bf0c",
     "maya-saas-backend/scripts/chapter8-wave2-proof.ts": "0df0b74a941630cb06f8250904dfb35aba2fe7657d074408399e27334670e6c3"
-  }
+  },
+  "release": "20260913-c8-wave2-57b677a1",
+  "mandatorySuites": 443,
+  "mandatoryTests": 3729,
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "healthReadiness": "PASS",
+  "productionProofEffects": 0,
+  "requirementsComplete": 16,
+  "packagesComplete": 3,
+  "wavesComplete": 2
 }
