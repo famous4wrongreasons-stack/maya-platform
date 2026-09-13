@@ -58,3 +58,25 @@ Expected VPS HTML SHA256:
 This report precedes publication; the delivery receipt records actual installation
 and post-publication verification. No production business/provider/message proof
 mutation, main/native user-checkout change, historical DB access or Chapter 8 work.
+
+## Delivery receipt
+
+Implementation `8132fea6` was pushed before publication. VPS publish/post-verify
+PASS: the expected HTML and the unchanged source PNG are both served over verified
+HTTPS with their exact expected hashes. Existing C7 consumer guard PASS (27 parsed
+scripts); health/readiness remains PASS. Backend release is unchanged.
+The private recovery snapshot is `.maya-release-evidence/maya-reference-20260913`
+on the same VPS; earlier snapshots are retained. No Beget artifact was published.
+
+Signed `ru.mayaos.app` **1.0 / build 13 installed successfully**. Device inventory
+confirms version 13; application launch also succeeded. The installed artifact is
+the guarded build described above. No claim is made to have inspected the user's
+private logged-in iPhone screens: chooser/consent/state proofs use synthetic data.
+
+Post-publication R01 verification: **PASS**, 42 entries / 3 roots / 128 denied
+HEAD URLs; all 7 protected HTML/backup artifacts unchanged. Main and original
+native dirty status remain byte-identical, with all 23/81 recorded regular-file
+hashes preserved. No pre-existing database was used. Owned browser tab and local
+preview server are closed; owned upload stage removed, private recovery snapshots
+retained. No owned watcher, temporary database or test process remains.
+Production business/provider/message proof effects: **0**. Process hygiene: **0**.
