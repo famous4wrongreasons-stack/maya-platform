@@ -97,7 +97,26 @@ occurs, and the counts are asserted before and after.
 New permanent ratchets: `c9.limited-data-and-strategy.spec.ts` (P04),
 `c9.approval.spec.ts` (P05), `c9.resume.spec.ts` (P05).
 
-## 6. What this wave does **not** claim
+## 6. Production deployment and read-only verification
+
+Release **`20260914-c9-wave3-78ad0247`**, all ten deploy steps, exit 0.
+[Transcript](evidence/chapter9-wave3/deployment.txt) ·
+[release acceptance](evidence/chapter9-wave3/release-acceptance.json) ·
+[verification](evidence/chapter9-wave3/production-verification.txt).
+
+| Production gate | Result |
+|---|---|
+| `migrate deploy` | `No pending migrations to apply.` |
+| Applied / pending migrations | 99 / **0**, unchanged by this wave |
+| Drift | **NONE** |
+| Strict preflight, both PWA runtime guards | PASS |
+| Port-3199 smoke, then health and readiness after cutover | PASS / `ok` / `ready` |
+| R01 relay verification before preflight and after cutover | PASS |
+| Structural probe vs Wave 1 | **byte-for-byte identical**: 123 fields, 8 functions, 10 triggers, 74 validated constraints, 11 RESTRICT, 0 CASCADE |
+| Rows in the five C9 tables | **0** → production proof effects **0** |
+| Coordination routes, unauthenticated | 401 |
+
+## 7. What this wave does **not** claim
 
 - Paid reasoning remains closed; no price basis or cap is configured in production.
 - The C7/C8 reader boundary is still unwired in the executable proofs. Domain reasoning over
@@ -105,3 +124,18 @@ New permanent ratchets: `c9.limited-data-and-strategy.spec.ts` (P04),
   production code; the projections themselves stay certified by C7 and C8.
 - No agent calls another agent, and no agent writes to a source. Delegation is hub-and-spoke
   through the single Orchestrator.
+
+```text
+C9 WAVE 3 ENVELOPE CONFORMANCE: EXACT (0 models / 0 fields / 0 migrations / 0 actions / 0 AC6)
+LOCAL GATES: PASS
+POSTGRESQL PROOFS: P01 27/27, P02 13/13, WAVE 3 SCENARIOS 15/15
+BUSINESS/PROVIDER/MESSAGE MUTATIONS FOR PROOF: 0
+PRODUCTION RELEASE: 20260914-c9-wave3-78ad0247
+PENDING MIGRATIONS: 0
+DRIFT: NONE
+HEALTH: PASS
+READINESS: PASS
+PAID REASONING: DISABLED
+PRODUCTION EFFECTS: 0
+WAVE 3: COMPLETE
+```
