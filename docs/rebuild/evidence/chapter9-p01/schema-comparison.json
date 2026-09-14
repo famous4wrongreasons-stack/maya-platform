@@ -1,0 +1,39 @@
+{
+  "contract": "maya.c9-p01-schema-comparison/1",
+  "release": "20260914-c9-p01-336d270d",
+  "productionDatabase": "maya-saas production",
+  "localDatabase": "owned synthetic replay cluster 127.0.0.1:55529/maya_c9_replay",
+  "functionsMatchLocal": 8,
+  "functionsTotal": 8,
+  "constraintDefinitionsMatchLocal": 74,
+  "constraintsTotal": 74,
+  "indexDefinitionsMatchLocal": 25,
+  "indexesTotal": 25,
+  "triggersMatchLocal": true,
+  "fieldTotalProduction": 123,
+  "fieldTotalLocal": 123,
+  "constraintCounts": {
+    "f": 11,
+    "u": 12,
+    "c": 46,
+    "p": 5
+  },
+  "restrictReferences": 11,
+  "cascadeReferences": 0,
+  "productionRows": {
+    "C9Run": 0,
+    "C9StrategyRevision": 0,
+    "C9PlanStep": 0,
+    "C9StepBinding": 0,
+    "C9WorkReceipt": 0
+  },
+  "productionProofEffects": 0,
+  "localReplayRows": {
+    "C9Run": 19,
+    "C9StrategyRevision": 14,
+    "C9PlanStep": 14,
+    "C9StepBinding": 0,
+    "C9WorkReceipt": 72
+  },
+  "note": "Local replay rows are the P01 PostgreSQL proof fixtures in the owned disposable cluster; production holds none."
+}

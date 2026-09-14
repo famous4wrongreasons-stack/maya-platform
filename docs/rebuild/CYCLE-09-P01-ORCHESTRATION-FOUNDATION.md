@@ -36,6 +36,7 @@ non-unique indexes, 8 functions, 10 triggers, 0 enums, 0 destructive statements.
 | `npm run lint` | PASS (0 errors) |
 | `npm run build` | PASS |
 | Mandatory backend regression (`jest`, unfiltered) | **453 suites / 3804 tests PASS** (C8 inherited 447/3752 + 6 C9 suites / 52 tests) |
+| Gate runtime | certified Node **22.23.2**, checksums re-verified; production Node unchanged |
 | P01 PostgreSQL proof | **27/27 checks PASS**, `productionEffects: 0` |
 
 ## 3. Mandatory P01 proofs → evidence
@@ -86,10 +87,68 @@ Permanent specs wired into the unfiltered Jest run:
    **Requirement recorded:** the P01 proof must be run with a UTC session, e.g.
    `DATABASE_URL=…/maya_c9_replay?schema=public&options=-c%20TimeZone%3DUTC`.
 
+4. **The deployment gate aborted with `Segmentation fault: 11`** in
+   `npm test -- --runInBand` under local Node 24.15.0 — the documented V8
+   `ClearStaleLeftTrimmedPointerVisitor` GC crash already recorded for C7 P01 and
+   C8 P01. That run is **not** PASS. The gate was re-run unchanged on the
+   already-certified Node 22.23.2, whose archive `61130f39…85c6` and binary
+   `18e387c9…f572` were re-verified against the stored receipts before use.
+   No test, assertion, flag or configuration was weakened, and the production
+   runtime stays `/opt/node-v24`. [Runtime receipt](evidence/chapter9-p01/local-node-runtime.json).
+
 No envelope field, model, action class, AC6 class or migration was added while
 fixing these.
 
-## 5. Boundaries preserved
+## 5. Production deployment and read-only P01 production proof
+
+Release **`20260914-c9-p01-336d270d`** deployed through the unchanged documented
+process (`deploy/vps/deploy.sh`), all ten steps, exit 0.
+[Deployment transcript](evidence/chapter9-p01/deployment.txt) ·
+[release acceptance](evidence/chapter9-p01/release-acceptance.json).
+
+| Production gate | Result |
+|---|---|
+| Repository migrations in release | 96 |
+| Pending migrations before cutover | **1** — only `20260913160000_chapter9_orchestration_foundation` |
+| `prisma migrate deploy` | applied, `All migrations have been successfully applied` |
+| Applied migrations after | **99**, pending **0** |
+| `migrate diff --exit-code` (drift) | **NONE** — `No difference detected` |
+| `release-preflight` strict, after migration, before cutover | PASS, `config: safe` |
+| Package 4 / Package 5 active PWA runtime guards | PASS / PASS |
+| Port-3199 smoke on `/api/health/ready` | PASS, probe reaped |
+| `/api/health` after cutover | `ok`, release `20260914-c9-p01-336d270d` |
+| `/api/health/ready` after cutover | `ready`, `database: ready` |
+| `journalctl -p err` over the following 2 minutes | empty |
+| R01 live relay verification, before preflight and after cutover | PASS (42 entries, 10 active PHP, 16 blocked archives, 0 provider/message effects) |
+
+Structural proof `maya.c9-p01-production-structural/1`, executed read-only against
+the production database from inside the active release
+([probe](evidence/chapter9-p01/production-structural.probe.cjs) ·
+[result](evidence/chapter9-p01/production-structural.json)):
+
+| Measured in production | Value |
+|---|---:|
+| C9 tables | 5 |
+| Physical fields (28+27+26+16+26) | **123** |
+| Guard/shared functions | 8 |
+| Triggers | 10 |
+| PRIMARY KEY / UNIQUE / CHECK / FOREIGN KEY constraints | 5 / 12 / 46 / 11 |
+| All constraints validated | true |
+| `ON DELETE RESTRICT` references | **11** |
+| `CASCADE` references | **0** |
+| Indexes, of which partial UNIQUE | 25, 1 (`C9StepBinding_one_execution_idx`) |
+| Rows in all five C9 tables | 0 |
+| **Production proof effects** | **0** |
+
+The deployed schema equals the certified local schema exactly
+([comparison](evidence/chapter9-p01/schema-comparison.json)): **8/8 function
+definition hashes**, **74/74 constraint definitions**, **25/25 index definitions**
+and an identical trigger set match the owned synthetic replay cluster that the
+27/27 PostgreSQL proof ran against. The replay cluster still holds that proof's
+synthetic rows; production holds none, so no business, provider or message effect
+was performed to prove anything.
+
+## 6. Boundaries preserved
 
 `ORCHESTRATOR != ACTION ENGINE`, `AGENT != ACTION OWNER`,
 `AGENT MEMORY != BUSINESS STATE`, `STRATEGY != PLAN != ACTION`,
@@ -102,5 +161,11 @@ requires a numeric prediction.
 C9 P01 ENVELOPE CONFORMANCE: EXACT
 LOCAL GATES: PASS
 POSTGRESQL PROOF: 27/27
+PRODUCTION RELEASE: 20260914-c9-p01-336d270d
+PENDING MIGRATIONS: 0
+DRIFT: NONE
+HEALTH: PASS
+READINESS: PASS
 PRODUCTION EFFECTS: 0
+WAVE 1: COMPLETE
 ```
