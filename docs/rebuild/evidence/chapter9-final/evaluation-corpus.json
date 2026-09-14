@@ -1,0 +1,1002 @@
+{
+ "contract": "maya.c9-evaluation-corpus/1",
+ "manifestHash": "8652ffd85b808ac7d1c23e0d015fe6bcb3c9f3cb57634431a9b24d7b5828289f",
+ "named": 80,
+ "adversarial": 30,
+ "total": 110,
+ "factorization": "4 domains x 4 verticals x 5 outcome contexts = 80 named, + 30 adversarial (one per Q)",
+ "mappingStatedNamedTotal": 120,
+ "note": "The approved mapping states 120 named cells but enumerates dimensions that multiply to 80. This corpus follows the enumerated factorization; raising it to 120 would require inventing a sixth vertical or context, which is a product decision and was not taken.",
+ "cells": [
+  {
+   "cellKey": "named:ADMIN:barbershop:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "barbershop",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:ADMIN:barbershop:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "barbershop",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:ADMIN:barbershop:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "barbershop",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:ADMIN:barbershop:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "barbershop",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:ADMIN:barbershop:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "barbershop",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:ADMIN:beauty:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "beauty",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:ADMIN:beauty:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "beauty",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:ADMIN:beauty:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "beauty",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:ADMIN:beauty:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "beauty",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:ADMIN:beauty:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "beauty",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:ADMIN:dental:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "dental",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:ADMIN:dental:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "dental",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:ADMIN:dental:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "dental",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:ADMIN:dental:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "dental",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:ADMIN:dental:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "dental",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:ADMIN:auto_service:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "auto_service",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:ADMIN:auto_service:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "auto_service",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:ADMIN:auto_service:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "auto_service",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:ADMIN:auto_service:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "auto_service",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:ADMIN:auto_service:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "ADMIN",
+   "vertical": "auto_service",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:barbershop:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "barbershop",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:barbershop:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "barbershop",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:barbershop:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "barbershop",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:barbershop:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "barbershop",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:barbershop:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "barbershop",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:beauty:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "beauty",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:beauty:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "beauty",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:beauty:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "beauty",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:beauty:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "beauty",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:beauty:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "beauty",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:dental:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "dental",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:dental:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "dental",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:dental:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "dental",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:dental:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "dental",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:dental:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "dental",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:auto_service:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "auto_service",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:auto_service:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "auto_service",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:auto_service:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "auto_service",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:auto_service:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "auto_service",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:CLIENT_LIFECYCLE:auto_service:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": "auto_service",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:barbershop:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "barbershop",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:barbershop:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "barbershop",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:barbershop:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "barbershop",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:barbershop:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "barbershop",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:barbershop:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "barbershop",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:beauty:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "beauty",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:beauty:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "beauty",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:beauty:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "beauty",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:beauty:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "beauty",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:beauty:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "beauty",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:dental:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "dental",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:dental:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "dental",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:dental:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "dental",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:dental:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "dental",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:dental:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "dental",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:auto_service:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "auto_service",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:auto_service:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "auto_service",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:auto_service:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "auto_service",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:auto_service:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "auto_service",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:OCCUPANCY:auto_service:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "OCCUPANCY",
+   "vertical": "auto_service",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:barbershop:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "barbershop",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:barbershop:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "barbershop",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:barbershop:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "barbershop",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:barbershop:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "barbershop",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:barbershop:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "barbershop",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:beauty:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "beauty",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:beauty:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "beauty",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:beauty:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "beauty",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:beauty:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "beauty",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:beauty:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "beauty",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:dental:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "dental",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:dental:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "dental",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:dental:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "dental",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:dental:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "dental",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:dental:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "dental",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:auto_service:sufficient_qualified_facts",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "auto_service",
+   "context": "sufficient_qualified_facts",
+   "requirement": null,
+   "expectedCompleteness": "COMPLETE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:auto_service:limited_or_unknown_c8",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "auto_service",
+   "context": "limited_or_unknown_c8",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:auto_service:denied_or_revoked_authority",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "auto_service",
+   "context": "denied_or_revoked_authority",
+   "requirement": null,
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:auto_service:material_edit_or_approval_expiry",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "auto_service",
+   "context": "material_edit_or_approval_expiry",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "named:BUSINESS_INTELLIGENCE:auto_service:partial_failure_restart_unknown",
+   "kind": "NAMED",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": "auto_service",
+   "context": "partial_failure_restart_unknown",
+   "requirement": null,
+   "expectedCompleteness": "PARTIAL"
+  },
+  {
+   "cellKey": "adversarial:Q01",
+   "kind": "ADVERSARIAL",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q01",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q02",
+   "kind": "ADVERSARIAL",
+   "domain": "OCCUPANCY",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q02",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q03",
+   "kind": "ADVERSARIAL",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q03",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q04",
+   "kind": "ADVERSARIAL",
+   "domain": "ADMIN",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q04",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q05",
+   "kind": "ADVERSARIAL",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q05",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q06",
+   "kind": "ADVERSARIAL",
+   "domain": "OCCUPANCY",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q06",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q07",
+   "kind": "ADVERSARIAL",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q07",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q08",
+   "kind": "ADVERSARIAL",
+   "domain": "ADMIN",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q08",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q09",
+   "kind": "ADVERSARIAL",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q09",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q10",
+   "kind": "ADVERSARIAL",
+   "domain": "OCCUPANCY",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q10",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q11",
+   "kind": "ADVERSARIAL",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q11",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q12",
+   "kind": "ADVERSARIAL",
+   "domain": "ADMIN",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q12",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q13",
+   "kind": "ADVERSARIAL",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q13",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q14",
+   "kind": "ADVERSARIAL",
+   "domain": "OCCUPANCY",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q14",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q15",
+   "kind": "ADVERSARIAL",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q15",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q16",
+   "kind": "ADVERSARIAL",
+   "domain": "ADMIN",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q16",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q17",
+   "kind": "ADVERSARIAL",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q17",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q18",
+   "kind": "ADVERSARIAL",
+   "domain": "OCCUPANCY",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q18",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q19",
+   "kind": "ADVERSARIAL",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q19",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q20",
+   "kind": "ADVERSARIAL",
+   "domain": "ADMIN",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q20",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q21",
+   "kind": "ADVERSARIAL",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q21",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q22",
+   "kind": "ADVERSARIAL",
+   "domain": "OCCUPANCY",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q22",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q23",
+   "kind": "ADVERSARIAL",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q23",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q24",
+   "kind": "ADVERSARIAL",
+   "domain": "ADMIN",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q24",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q25",
+   "kind": "ADVERSARIAL",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q25",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q26",
+   "kind": "ADVERSARIAL",
+   "domain": "OCCUPANCY",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q26",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q27",
+   "kind": "ADVERSARIAL",
+   "domain": "BUSINESS_INTELLIGENCE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q27",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q28",
+   "kind": "ADVERSARIAL",
+   "domain": "ADMIN",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q28",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q29",
+   "kind": "ADVERSARIAL",
+   "domain": "CLIENT_LIFECYCLE",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q29",
+   "expectedCompleteness": "UNAVAILABLE"
+  },
+  {
+   "cellKey": "adversarial:Q30",
+   "kind": "ADVERSARIAL",
+   "domain": "OCCUPANCY",
+   "vertical": null,
+   "context": null,
+   "requirement": "Q30",
+   "expectedCompleteness": "UNAVAILABLE"
+  }
+ ]
+}

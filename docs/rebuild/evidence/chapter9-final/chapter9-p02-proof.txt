@@ -1,0 +1,14 @@
+PASS a simple request is answered without delegating to any agent
+PASS a coordinator-only answer consumes no delegated call
+PASS the same request event returns the same run, not a second one
+PASS routing is bounded by the approved two-domain ceiling
+PASS a delegated domain answers honestly with no permitted evidence
+PASS an unavailable answer states its reason and invents no number
+PASS paid reasoning stays closed without a released price basis
+PASS a run cannot be cancelled twice under a different key
+PASS a cancelled run admits no further coordination work
+PASS the snapshot projection exposes no raw request payload
+PASS another tenant sees no run and cannot open one
+PASS unauthenticated context cannot coordinate anything
+PASS no business, provider or message effect was produced
+{"contract":"maya.c9-p02-postgresql-proof/1","checks":13,"passed":["a simple request is answered without delegating to any agent","a coordinator-only answer consumes no delegated call","the same request event returns the same run, not a second one","routing is bounded by the approved two-domain ceiling","a delegated domain answers honestly with no permitted evidence","an unavailable answer states its reason and invents no number","paid reasoning stays closed without a released price basis","a run cannot be cancelled twice under a different key","a cancelled run admits no further coordination work","the snapshot projection exposes no raw request payload","another tenant sees no run and cannot open one","unauthenticated context cannot coordinate anything","no business, provider or message effect was produced"],"paidReasoning":"DISABLED","productionEffects":0}
