@@ -1,3 +1,4 @@
+import { C9Module } from './orchestration/c9.module';
 import { C8Module } from './valuation/c8.module';
 import { MeasurementModule } from './measurement/measurement.module';
 import { ExpenseIntakeModule } from './expense-intake/expense-intake.module';
@@ -99,6 +100,7 @@ import { SystemMetricsService } from './system-metrics.service';
     OwnerReportsModule,
     MeasurementModule,
     C8Module,
+    C9Module,
     OperationalAlertsModule,
     ServicesModule,
     StaffModule,

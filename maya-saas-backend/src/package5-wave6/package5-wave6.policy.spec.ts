@@ -1,3 +1,4 @@
+import { C9_RETENTION_CLASSES } from './chapter9-orchestration-retention';
 import { C8_RETENTION_CLASSES } from './chapter8-valuation-retention';
 import { RC_PAYLOAD_CLASSES } from './package5-wave-rc-payloads';
 import { PrismaService } from '../prisma/prisma.service';
@@ -10,8 +11,8 @@ import {
 import { Package5Wave6MaintenanceService } from './package5-wave6.service';
 
 describe('approved Wave 6 policy boundary', () => {
-  it('pins six unchanged auth policies, eight R-C payload classes and the approved C7/C8 derived lifecycle', () => {
-    expect(Object.keys(WAVE6_CLASSES)).toHaveLength(18);
+  it('pins six unchanged auth policies, eight R-C payload classes and the approved C7/C8/C9 derived lifecycle', () => {
+    expect(Object.keys(WAVE6_CLASSES)).toHaveLength(19);
     expect(WAVE6_CLASSES.purge_auth_sessions.retentionMs).toBe(30 * 86_400_000);
     for (const key of [
       'purge_phone_auth_codes',
@@ -38,6 +39,7 @@ describe('approved Wave 6 policy boundary', () => {
               ([key]) =>
                 !Object.hasOwn(RC_PAYLOAD_CLASSES, key) &&
                 !Object.hasOwn(C8_RETENTION_CLASSES, key) &&
+                !Object.hasOwn(C9_RETENTION_CLASSES, key) &&
                 key !== 'expire_measurement_revisions',
             ),
           ),
@@ -57,6 +59,19 @@ describe('approved Wave 6 policy boundary', () => {
       expect(rule.stamp).toBe('admittedAt');
       expect(rule.retentionMs).toBe(0);
     }
+  });
+  it('pins one approved C9 cleanup owner independently', () => {
+    expect(Object.keys(C9_RETENTION_CLASSES)).toEqual([
+      'expire_c9_orchestration_runs',
+    ]);
+    expect(WAVE6_CLASSES.expire_c9_orchestration_runs).toEqual({
+      table: 'C9Run',
+      stamp: 'admittedAt',
+      expiry: 'retentionUntil',
+      terminal: null,
+      retentionMs: 0,
+      policyKey: 'chapter9.orchestration-retention',
+    });
   });
   it('rejects untrusted clock, tenant, target, predicate and policy overrides', () => {
     for (const key of [

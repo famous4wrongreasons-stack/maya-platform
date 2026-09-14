@@ -168,6 +168,13 @@ enum CommunicationCampaignState {
 }
 
 model Tenant {
+  // Chapter 9: derived coordination only; source ownership is unchanged.
+  c9Runs C9Run[] @relation("C9Run_1_fkey")
+  c9StrategyRevisions C9StrategyRevision[] @relation("C9StrategyRevision_1_fkey")
+  c9PlanSteps C9PlanStep[] @relation("C9PlanStep_1_fkey")
+  c9StepBindings C9StepBinding[] @relation("C9StepBinding_1_fkey")
+  c9WorkReceipts C9WorkReceipt[] @relation("C9WorkReceipt_1_fkey")
+
   c8ModelVersions C8ModelVersion[]
   c8ResultRevisions C8ResultRevision[]
   c8EvaluationRevisions C8EvaluationRevision[]
@@ -3849,4 +3856,193 @@ model C8EvaluationRevision {
   @@index([tenantId, modelVersionId, t0From, t0To], map: "C8_eval_period_idx")
   @@index([tenantId, state, leaseExpiresAt], map: "C8_eval_claim_idx")
   @@index([expiresAt, id], map: "C8_eval_expiry_idx")
+}
+
+/// Chapter 9 approved shared derived foundation; never a source business owner.
+model C9Run {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String
+  contractVersion Int
+  principalJson Json @db.JsonB
+  authorityHash String @db.Char(64)
+  requestKeyHash String @db.Char(64)
+  requestHash String @db.Char(64)
+  requestIntentJson Json @db.JsonB
+  entryKind String
+  entryRefJson Json? @db.JsonB
+  admittedAt DateTime @db.Timestamptz(3)
+  validUntil DateTime @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  state String
+  currentRevision Int
+  counterVersion Int
+  budgetManifestHash String @db.Char(64)
+  budgetManifestJson Json @db.JsonB
+  budgetStateJson Json @db.JsonB
+  reasoningUsedMs Int
+  reasoningWindowStartedAt DateTime? @db.Timestamptz(3)
+  reasoningWindowDeadlineAt DateTime? @db.Timestamptz(3)
+  leaseTokenHash String? @db.Char(64)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  leaseGeneration Int
+  cancelKeyHash String? @db.Char(64)
+  cancelledAt DateTime? @db.Timestamptz(3)
+  updatedAt DateTime @db.Timestamptz(3)
+
+  tenant Tenant @relation("C9Run_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C9Run_1_fkey")
+  c9StrategyRevisions C9StrategyRevision[] @relation("C9StrategyRevision_2_fkey")
+  c9WorkReceipts C9WorkReceipt[] @relation("C9WorkReceipt_2_fkey")
+
+  @@unique([id, tenantId], map: "C9Run_1_key")
+  @@unique([tenantId, requestKeyHash], map: "C9Run_2_key")
+  @@index([tenantId, state, validUntil, id], map: "C9Run_1_idx")
+  @@index([tenantId, retentionUntil, id], map: "C9Run_2_idx")
+}
+
+/// Chapter 9 approved shared derived foundation; never a source business owner.
+model C9StrategyRevision {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String
+  runId String @db.Uuid
+  revision Int
+  parentRevisionId String? @db.Uuid
+  editKeyHash String @db.Char(64)
+  inputHash String @db.Char(64)
+  snapshotHash String @db.Char(64)
+  state String
+  proposalContract String
+  registryHash String @db.Char(64)
+  skillVersionsJson Json @db.JsonB
+  objectiveJson Json @db.JsonB
+  constraintsJson Json @db.JsonB
+  alternativesJson Json @db.JsonB
+  evidenceRefsJson Json @db.JsonB
+  selectedOptionKey String?
+  reviewKeyHash String? @db.Char(64)
+  reviewHash String? @db.Char(64)
+  reviewActorJson Json? @db.JsonB
+  reviewedAt DateTime? @db.Timestamptz(3)
+  reviewDecision String?
+  admittedAt DateTime @db.Timestamptz(3)
+  validUntil DateTime @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  terminalReason String?
+  terminalAt DateTime? @db.Timestamptz(3)
+
+  tenant Tenant @relation("C9StrategyRevision_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C9StrategyRevision_1_fkey")
+  run C9Run @relation("C9StrategyRevision_2_fkey", fields: [runId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9StrategyRevision_2_fkey")
+  parentRevision C9StrategyRevision? @relation("C9StrategyRevision_3_fkey", fields: [parentRevisionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9StrategyRevision_3_fkey")
+  c9StrategyRevisions C9StrategyRevision[] @relation("C9StrategyRevision_3_fkey")
+  c9PlanSteps C9PlanStep[] @relation("C9PlanStep_2_fkey")
+  c9WorkReceipts C9WorkReceipt[] @relation("C9WorkReceipt_3_fkey")
+
+  @@unique([id, tenantId], map: "C9StrategyRevision_1_key")
+  @@unique([tenantId, runId, revision], map: "C9StrategyRevision_2_key")
+  @@unique([tenantId, runId, editKeyHash], map: "C9StrategyRevision_3_key")
+  @@index([tenantId, state, validUntil, id], map: "C9StrategyRevision_1_idx")
+}
+
+/// Chapter 9 approved shared derived foundation; never a source business owner.
+model C9PlanStep {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String
+  revisionId String @db.Uuid
+  optionKey String
+  stepKey String
+  ordinal Int
+  domain String
+  kind String
+  capability String
+  registryHash String @db.Char(64)
+  intentContract String
+  intentHash String @db.Char(64)
+  intentEncrypted String?
+  dependenciesJson Json @db.JsonB
+  evidenceRefsJson Json @db.JsonB
+  budgetSliceJson Json @db.JsonB
+  state String
+  leaseGeneration Int
+  leaseTokenHash String? @db.Char(64)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  admittedAt DateTime @db.Timestamptz(3)
+  validUntil DateTime @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  terminalAt DateTime? @db.Timestamptz(3)
+  stopReason String?
+  updatedAt DateTime @db.Timestamptz(3)
+
+  tenant Tenant @relation("C9PlanStep_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C9PlanStep_1_fkey")
+  strategyRevision C9StrategyRevision @relation("C9PlanStep_2_fkey", fields: [revisionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9PlanStep_2_fkey")
+  c9StepBindings C9StepBinding[] @relation("C9StepBinding_2_fkey")
+
+  @@unique([id, tenantId], map: "C9PlanStep_1_key")
+  @@unique([tenantId, revisionId, optionKey, stepKey], map: "C9PlanStep_2_key")
+  @@unique([tenantId, revisionId, optionKey, ordinal], map: "C9PlanStep_3_key")
+  @@index([tenantId, state, validUntil, id], map: "C9PlanStep_1_idx")
+}
+
+/// Chapter 9 approved shared derived foundation; never a source business owner.
+model C9StepBinding {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String
+  stepId String @db.Uuid
+  slotKey String
+  ownerKey String
+  bindingKind String
+  sourceType String
+  sourceId String
+  sourceIdentityHash String @db.Char(64)
+  sourceIntentHash String @db.Char(64)
+  sourceApprovalHash String? @db.Char(64)
+  lineageJson Json @db.JsonB
+  bindingHash String @db.Char(64)
+  boundAt DateTime @db.Timestamptz(3)
+  validUntil DateTime? @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+
+  tenant Tenant @relation("C9StepBinding_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C9StepBinding_1_fkey")
+  step C9PlanStep @relation("C9StepBinding_2_fkey", fields: [stepId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9StepBinding_2_fkey")
+
+  @@unique([id, tenantId], map: "C9StepBinding_1_key")
+  @@unique([tenantId, stepId, bindingKind, slotKey], map: "C9StepBinding_2_key")
+  @@index([tenantId, sourceType, sourceId], map: "C9StepBinding_1_idx")
+}
+
+/// Chapter 9 approved shared derived foundation; never a source business owner.
+model C9WorkReceipt {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String
+  runId String @db.Uuid
+  revisionId String? @db.Uuid
+  callKeyHash String @db.Char(64)
+  domain String
+  kind String
+  taskKey String
+  registryHash String @db.Char(64)
+  skillHash String? @db.Char(64)
+  inputHash String @db.Char(64)
+  inputEvidenceRefsJson Json @db.JsonB
+  providerModelKey String?
+  priceBasisJson Json? @db.JsonB
+  reservationJson Json @db.JsonB
+  usageJson Json? @db.JsonB
+  state String
+  resultJson Json? @db.JsonB
+  resultHash String? @db.Char(64)
+  startedAt DateTime? @db.Timestamptz(3)
+  settledAt DateTime? @db.Timestamptz(3)
+  admittedAt DateTime @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  leaseGeneration Int
+  leaseTokenHash String? @db.Char(64)
+  leaseUntil DateTime? @db.Timestamptz(3)
+
+  tenant Tenant @relation("C9WorkReceipt_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C9WorkReceipt_1_fkey")
+  run C9Run @relation("C9WorkReceipt_2_fkey", fields: [runId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9WorkReceipt_2_fkey")
+  strategyRevision C9StrategyRevision? @relation("C9WorkReceipt_3_fkey", fields: [revisionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9WorkReceipt_3_fkey")
+
+  @@unique([id, tenantId], map: "C9WorkReceipt_1_key")
+  @@unique([tenantId, runId, callKeyHash], map: "C9WorkReceipt_2_key")
+  @@index([tenantId, state, leaseUntil, id], map: "C9WorkReceipt_1_idx")
+  @@index([tenantId, runId, domain, kind], map: "C9WorkReceipt_2_idx")
 }

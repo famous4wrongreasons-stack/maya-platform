@@ -1,4 +1,11 @@
 import {
+  C9_RETENTION_KINDS,
+  c9RetentionItem,
+  isC9RetentionClass,
+  selectC9Retention,
+  purgeC9Derived,
+} from './chapter9-orchestration-retention';
+import {
   isC8RetentionClass,
   selectC8Retention,
   c8RetentionItem,
@@ -225,6 +232,12 @@ export class Package5Wave6MaintenanceService {
   }
 
   private async selection(tx: Tx, plan: Plan, lock: boolean): Promise<Item[]> {
+    if (isC9RetentionClass(plan.actionClass)) {
+      await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+      return (await selectC9Retention(tx, plan, lock)).map((row) =>
+        c9RetentionItem(plan, row),
+      );
+    }
     if (isC8RetentionClass(plan.actionClass)) {
       await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
       return (await selectC8Retention(tx, plan, lock)).map((row) =>
@@ -466,13 +479,16 @@ export class Package5Wave6MaintenanceService {
         const payload = isRCPayloadClass(plan.actionClass);
         if (
           payload ||
+          isC9RetentionClass(plan.actionClass) ||
           isC8RetentionClass(plan.actionClass) ||
           plan.actionClass === C7_MEASUREMENT_RETENTION_CLASS
         )
           await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
-        const allowedKinds: string[] = payload
-          ? rcPayloadKinds(plan.actionClass)
-          : [plan.rule.table];
+        const allowedKinds: string[] = isC9RetentionClass(plan.actionClass)
+          ? [...C9_RETENTION_KINDS]
+          : payload
+            ? rcPayloadKinds(plan.actionClass)
+            : [plan.rule.table];
         if (plan.rule.table === 'AuthSession')
           allowedKinds.push('AuthRefreshToken');
         if (
@@ -484,7 +500,11 @@ export class Package5Wave6MaintenanceService {
         )
           throw new Error('maintenance_manifest_mismatch');
         const deleted = new Set<string>();
-        if (isC8RetentionClass(plan.actionClass)) {
+        if (isC9RetentionClass(plan.actionClass)) {
+          for (const target of await selectC9Retention(tx, plan, true, run.id))
+            if (await purgeC9Derived(tx, plan, target))
+              deleted.add(c9RetentionItem(plan, target).itemRefHash);
+        } else if (isC8RetentionClass(plan.actionClass)) {
           for (const target of await selectC8Retention(tx, plan, true, run.id))
             if (await purgeC8Revision(tx, plan, target))
               deleted.add(c8RetentionItem(plan, target).itemRefHash);
