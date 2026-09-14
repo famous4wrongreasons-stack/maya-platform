@@ -10,7 +10,10 @@ import { C9RequestIdentity, c9PrincipalHash } from './c9.identity';
 import { C9Sources } from './c9.sources';
 import { c9OwnerDraft } from './c9.inputs';
 import { C9_REGISTRY_HASH, c9Capability } from './c9.registry';
-import { c9Budget, c9DefaultBudget, c9EmptyBudget } from './c9.budget';
+import { c9Budget, c9EmptyBudget } from './c9.budget';
+import { C9Allowance } from './c9.allowance';
+import { GovernedSettingsReadService } from '../package5-wave1/governed-settings.read';
+import { c9EffectiveLimits } from './c9.policy';
 import {
   C9Domain,
   C9Object,
@@ -110,6 +113,8 @@ export class C9Store {
     private readonly identity: C9RequestIdentity,
     private readonly encryption: EncryptionService,
     private readonly sources: C9Sources,
+    private readonly allowance: C9Allowance,
+    private readonly governed: GovernedSettingsReadService,
   ) {}
   async transaction<T>(
     channelProof: string | undefined,
@@ -171,7 +176,21 @@ export class C9Store {
       )
         c9Deny('request_event_mismatch');
       c9Bytes(requestInput, 16384);
-      const budget = c9Budget(c9DefaultBudget()) as C9Object; // P01 admits the released deterministic/no-paid foundation.
+      // Released allowance is frozen into the immutable manifest at admission. Without
+      // configured price evidence this is the deterministic no-paid-allowance foundation.
+      // A confirmed tenant ceiling can only tighten it, never widen it, and is frozen here
+      // so a later configuration change cannot retroactively re-fund a running request.
+      const confirmed = await this.governed.configuration(
+        tx,
+        p.tenantId,
+        'c9_orchestration',
+      );
+      const budget = c9Budget(
+        c9EffectiveLimits(
+          this.allowance.manifest(now),
+          confirmed.content?.resourceLimits ?? null,
+        ),
+      ) as C9Object;
       const material = c9Hash('request-intent/1', [p, requestInput]);
       const existing = await tx.c9Run.findFirst({
         where: { tenantId: p.tenantId, requestKeyHash: event.keyHash },
@@ -556,6 +575,47 @@ export class C9Store {
           reviewedAt: now,
           reviewDecision: accept ? 'ACCEPTED' : 'DECLINED',
           ...(accept ? {} : { terminalAt: now, terminalReason: 'DECLINED' }),
+        },
+      });
+    });
+  }
+  /** Write-once cancellation under current authority. Already-admitted source effects
+   * keep their own lifetimes; this fences unstarted C9 work, it does not roll anything back. */
+  cancel(runId: string, cancelKey: string, channelProof?: string) {
+    return this.transaction(channelProof, async (tx, p, now) => {
+      const root = await this.lock(tx, p, runId, false, now),
+        key = c9Hash('cancel-key/1', [p.tenantId, runId, c9Id(cancelKey)]);
+      if (root.cancelKeyHash) {
+        if (root.cancelKeyHash !== key) c9Deny('cancel_conflict');
+        return root;
+      }
+      if (terminal.includes(root.state)) c9Deny('run_expired_or_terminal');
+      if (
+        await tx.c9WorkReceipt.count({
+          where: { tenantId: p.tenantId, runId, state: 'DISPATCHED' },
+        })
+      )
+        c9Deny('cancel_races_dispatched_work');
+      await tx.c9StrategyRevision.updateMany({
+        where: {
+          tenantId: p.tenantId,
+          runId,
+          state: { notIn: [...terminal, 'SUPERSEDED'] },
+        },
+        data: {
+          state: 'CANCELLED',
+          terminalAt: now,
+          terminalReason: 'CANCELLED',
+        },
+      });
+      return tx.c9Run.update({
+        where: { id: root.id },
+        data: {
+          state: 'CANCELLED',
+          cancelKeyHash: key,
+          cancelledAt: now,
+          counterVersion: { increment: 1 },
+          updatedAt: now,
         },
       });
     });

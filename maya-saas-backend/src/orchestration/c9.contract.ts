@@ -17,6 +17,22 @@ export const C9_TASKS = [
   'c9.bi',
   'c9.compose',
 ] as const;
+/**
+ * Released routing table. An objective names the domains that may be delegated to; a
+ * request outside it is answered by the coordinator alone rather than routed by guess.
+ * At most two domains per objective — the resource ceiling is not a target to fill.
+ */
+export const C9_ROUTES: Readonly<Record<string, readonly C9Domain[]>> =
+  Object.freeze({
+    'c9.business_overview': ['BUSINESS_INTELLIGENCE'],
+    'c9.client_value': ['BUSINESS_INTELLIGENCE', 'CLIENT_LIFECYCLE'],
+    'c9.client_return': ['CLIENT_LIFECYCLE'],
+    'c9.occupancy_review': ['OCCUPANCY', 'BUSINESS_INTELLIGENCE'],
+    'c9.operations_support': ['ADMIN'],
+  });
+/** Released per-call reasoning timeout. The effective bound is the smaller of this and
+ * the remaining run window; a provider timeout never proves the call did not happen. */
+export const C9_MODEL_TIMEOUT_MS = 60_000;
 export const C9_DAY = 86_400_000;
 export const C9_RETENTION = 365 * C9_DAY;
 export type C9Object = Record<string, unknown>;

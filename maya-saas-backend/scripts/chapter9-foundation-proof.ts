@@ -15,6 +15,8 @@ import { C9RequestIdentity } from '../src/orchestration/c9.identity';
 import { C9Store, C9Proposal, c9Insert } from '../src/orchestration/c9.store';
 import { C9WorkService } from '../src/orchestration/c9.work';
 import { C9Sources } from '../src/orchestration/c9.sources';
+import { C9Allowance } from '../src/orchestration/c9.allowance';
+import { GovernedSettingsReadService } from '../src/package5-wave1/governed-settings.read';
 import {
   C9Object,
   C9_RETENTION,
@@ -54,7 +56,21 @@ const sources = new C9Sources(
   reader as unknown as MeasurementReadService,
   reader as unknown as C8ReadService,
 );
-const store = new C9Store(db, authority, identity, encryption, sources),
+// No price manifest and no cap are configured here, so the proof runs entirely on the
+// deterministic zero-charge branch and no paid reasoning can be started.
+const allowance = new C9Allowance(cfg);
+// The real confirmed-configuration reader: with no confirmed c9_orchestration revision it
+// reports an explicit absence, so the released ceilings apply unchanged.
+const governed = new GovernedSettingsReadService(db, ctx, encryption, cfg);
+const store = new C9Store(
+    db,
+    authority,
+    identity,
+    encryption,
+    sources,
+    allowance,
+    governed,
+  ),
   work = new C9WorkService(store);
 const checks: string[] = [];
 async function proof(name: string, fn: () => unknown) {
@@ -338,6 +354,8 @@ async function main() {
           identity,
           encryption,
           sources,
+          allowance,
+          governed,
         );
         const result = await restarted.snapshot(root.id);
         assert.equal(result.run.currentRevision, 2);

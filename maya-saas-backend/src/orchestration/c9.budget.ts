@@ -3,6 +3,7 @@ import {
   c9Deny,
   c9Enum,
   c9Evidence,
+  c9Hash,
   c9HashValue,
   c9Id,
   c9Instant,
@@ -143,4 +144,75 @@ export function c9PriceUpperBound(
     BigInt(p.maxAdditionalFeeMicros as string);
   if (total > 9223372036854775807n) c9Deny('money_overflow');
   return total.toString();
+}
+/** Content digest of a price manifest. A caller cannot label an arbitrary tariff as approved. */
+export function c9PriceHash(value: C9Object): string {
+  return c9Hash('price-basis/1', [
+    value.contract,
+    value.providerModelKey,
+    value.taskKey,
+    value.currency,
+    value.unitScale,
+    value.priceVersion,
+    value.sourceEvidenceRef,
+    value.verifiedAt,
+    value.validUntil,
+    value.inputRate,
+    value.outputRate,
+    value.fixedFeeMicros,
+    value.maxAdditionalFeeMicros,
+  ]);
+}
+/**
+ * D10 fail-closed admission for paid work. The run's own immutable manifest must already
+ * carry an approved allowance, and the supplied manifest must be exactly the one it names.
+ * Absent configuration is no allowance, never an unlimited one.
+ */
+export function c9PriceAdmission(
+  manifest: unknown,
+  price: unknown,
+  now: Date,
+): { basis: C9Object; capMicros: bigint } {
+  const ai = (c9Budget(manifest) as C9Object).aiCost as C9Object | null;
+  if (!ai) c9Deny('paid_capability_not_activated');
+  const basis = c9Price(price) as C9Object;
+  if (basis.hash !== c9PriceHash(basis)) c9Deny('price_manifest_digest');
+  if (basis.hash !== ai.priceManifestHash || basis.currency !== ai.currency)
+    c9Deny('price_manifest_unrecognized');
+  if (Date.parse(ai.validUntil as string) <= now.getTime())
+    c9Deny('price_allowance_expired');
+  const capMicros = BigInt(ai.capMicros as string);
+  if (capMicros <= 0n) c9Deny('paid_allowance_absent');
+  return { basis, capMicros };
+}
+/**
+ * Released allowance for paid reasoning. It exists only when the deployment supplies a
+ * verified price manifest and an explicit finite cap; no price is ever inferred or defaulted.
+ */
+export function c9AiCostConfig(
+  manifest: string | undefined,
+  capMicros: string | undefined,
+  now: Date,
+): { aiCost: C9Object; basis: C9Object } | null {
+  if (!manifest || !capMicros) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(manifest) as unknown;
+  } catch {
+    c9Deny('price_manifest_encoding');
+  }
+  const basis = c9Price(parsed) as C9Object;
+  if (basis.hash !== c9PriceHash(basis)) c9Deny('price_manifest_digest');
+  if (Date.parse(basis.validUntil as string) <= now.getTime()) return null;
+  const cap = c9Money(capMicros) as string;
+  if (BigInt(cap) <= 0n) return null;
+  return {
+    aiCost: {
+      currency: basis.currency,
+      capMicros: cap,
+      priceManifestHash: basis.hash,
+      validUntil: basis.validUntil,
+    },
+    basis,
+  };
 }

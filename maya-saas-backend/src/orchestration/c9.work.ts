@@ -5,6 +5,7 @@ import { C9Store, C9Tx, c9Insert } from './c9.store';
 import {
   C9Domain,
   C9Object,
+  C9_MODEL_TIMEOUT_MS,
   C9_TASKS,
   c9Bytes,
   c9Deny,
@@ -13,7 +14,12 @@ import {
   c9Refs,
 } from './c9.contract';
 import { C9_REGISTRY_HASH, c9Capability } from './c9.registry';
-import { c9Reservation, c9Usage } from './c9.budget';
+import {
+  c9PriceAdmission,
+  c9PriceUpperBound,
+  c9Reservation,
+  c9Usage,
+} from './c9.budget';
 
 export type C9WorkDraft = {
   callKey: string;
@@ -26,6 +32,8 @@ export type C9WorkDraft = {
   revisionId?: string;
   skillHash?: string;
   providerModelKey?: string;
+  /** Verified release/billing manifest. Required for MODEL, forbidden otherwise. */
+  priceBasis?: unknown;
 };
 export type C9WorkLease = {
   runId: string;
@@ -56,30 +64,59 @@ export class C9WorkService {
       const root = await this.store.lock(tx, p, runId, false, now),
         reservation = c9Reservation(input.reservation) as C9Object,
         refs = c9Refs(input.evidenceRefs) as C9Object[];
+      const manifest = root.budgetManifestJson as C9Object;
+      let priceBasis: C9Object | null = null;
       if (input.kind === 'MODEL') {
         if (!C9_TASKS.includes(input.taskKey as (typeof C9_TASKS)[number]))
           c9Deny('unregistered_model_task');
-        // No paid activation is inferred from absent release/billing configuration.
-        c9Deny('paid_capability_not_activated');
+        if (!input.skillHash || !input.providerModelKey)
+          c9Deny('model_release_version_required');
+        // Fail-closed: without an approved cap and the exact verified manifest the
+        // run itself names, no paid work starts. Absent configuration is not zero cost.
+        priceBasis = c9PriceAdmission(manifest, input.priceBasis, now).basis;
+        if (priceBasis.providerModelKey !== input.providerModelKey)
+          c9Deny('price_manifest_unrecognized');
+        if (
+          reservation.domain !== input.domain ||
+          reservation.modelCalls !== 1 ||
+          reservation.toolCalls !== 0 ||
+          reservation.zeroCostEvidenceRef !== null ||
+          reservation.priceHash !== priceBasis.hash ||
+          (reservation.inputTokens as number) >
+            (manifest.inputTokensPerCallMax as number) ||
+          (reservation.outputTokens as number) >
+            (manifest.outputTokensPerCallMax as number) ||
+          // Reserve the full bound, fees included; a cheaper actual usage is released at settlement.
+          reservation.costMicros !==
+            c9PriceUpperBound(
+              priceBasis,
+              reservation.inputTokens as number,
+              reservation.outputTokens as number,
+              now,
+            )
+        )
+          c9Deny('unverified_cost_basis');
+      } else {
+        if (input.priceBasis !== undefined) c9Deny('unpriced_work_basis');
+        if (input.domain === 'ORCHESTRATOR')
+          c9Deny('tool_requires_registered_domain');
+        const cap = c9Capability(input.taskKey, input.domain);
+        if (
+          (input.kind === 'TOOL_READ' && cap.mode !== 'READ') ||
+          (input.kind === 'OWNER_HANDOFF' && cap.mode === 'READ')
+        )
+          c9Deny('work_capability_mode');
+        if (
+          reservation.domain !== input.domain ||
+          reservation.modelCalls !== 0 ||
+          reservation.toolCalls !== 1 ||
+          reservation.costMicros !== '0' ||
+          reservation.priceHash !== null ||
+          reservation.zeroCostEvidenceRef !==
+            `local:${cap.toolOrInterface}:no-provider-charge`
+        )
+          c9Deny('unverified_cost_basis');
       }
-      if (input.domain === 'ORCHESTRATOR')
-        c9Deny('tool_requires_registered_domain');
-      const cap = c9Capability(input.taskKey, input.domain);
-      if (
-        (input.kind === 'TOOL_READ' && cap.mode !== 'READ') ||
-        (input.kind === 'OWNER_HANDOFF' && cap.mode === 'READ')
-      )
-        c9Deny('work_capability_mode');
-      if (
-        reservation.domain !== input.domain ||
-        reservation.modelCalls !== 0 ||
-        reservation.toolCalls !== 1 ||
-        reservation.costMicros !== '0' ||
-        reservation.priceHash !== null ||
-        reservation.zeroCostEvidenceRef !==
-          `local:${cap.toolOrInterface}:no-provider-charge`
-      )
-        c9Deny('unverified_cost_basis');
       const callKeyHash = c9Hash('call-key/1', [
           p.tenantId,
           runId,
@@ -118,7 +155,7 @@ export class C9WorkService {
         inputHash: hash,
         inputEvidenceRefsJson: refs,
         providerModelKey: input.providerModelKey ?? null,
-        priceBasisJson: null,
+        priceBasisJson: priceBasis,
         reservationJson: reservation,
         usageJson: null,
         state: 'RESERVED',
@@ -196,11 +233,14 @@ export class C9WorkService {
         where: { tenantId: p.tenantId, runId, state: 'DISPATCHED' },
       });
       if (active >= (manifest.parallelDomainsMax as number)) return null;
-      const cap = c9Capability(
-        work.taskKey,
-        work.domain as C9Domain,
-        work.registryHash,
-      );
+      const timeoutMs =
+        work.kind === 'MODEL'
+          ? C9_MODEL_TIMEOUT_MS
+          : c9Capability(
+              work.taskKey,
+              work.domain as C9Domain,
+              work.registryHash,
+            ).timeoutMs;
       const remaining =
         (manifest.reasoningMsMax as number) - root.reasoningUsedMs;
       if (remaining <= 0) return null;
@@ -229,7 +269,7 @@ export class C9WorkService {
           leaseGeneration: generation,
           leaseTokenHash: c9Hash('work-fence/1', [token]),
           leaseUntil: new Date(
-            Math.min(deadline.getTime(), now.getTime() + cap.timeoutMs),
+            Math.min(deadline.getTime(), now.getTime() + timeoutMs),
           ),
         },
       });
@@ -270,12 +310,20 @@ export class C9WorkService {
         work.leaseUntil <= now
       )
         c9Deny('work_fenced');
-      if (
-        actual.costMicros !== '0' ||
-        actual.priceHash !== null ||
-        actual.completionKind !== 'CONFIRMED'
-      )
-        c9Deny('unverified_usage');
+      const basis = work.priceBasisJson as C9Object | null,
+        reserved = work.reservationJson as C9Object;
+      if (actual.completionKind !== 'CONFIRMED') c9Deny('unverified_usage');
+      if (basis === null) {
+        if (actual.costMicros !== '0' || actual.priceHash !== null)
+          c9Deny('unverified_usage');
+      } else if (actual.priceHash !== basis.hash) c9Deny('unverified_usage'); // A settlement cannot re-tariff itself.
+      // Reported usage above the reservation is an incident, never a silent clamp:
+      // it settles once against the receipt and then stops the run below.
+      const beyondReservation =
+        BigInt(actual.costMicros as string) >
+          BigInt(reserved.costMicros as string) ||
+        (actual.inputTokens as number) > (reserved.inputTokens as number) ||
+        (actual.outputTokens as number) > (reserved.outputTokens as number);
       await tx.$executeRaw`SELECT set_config('maya.c9_work_fence',${work.leaseTokenHash},true)`;
       const settled = await tx.c9WorkReceipt.update({
         where: { id: work.id },
@@ -294,12 +342,17 @@ export class C9WorkService {
           string,
           Record<string, number>
         >,
+        cost = measured.budget.aiCostMicros as Record<string, string>,
         limits = root.budgetManifestJson as C9Object;
+      const cap = (limits.aiCost as C9Object | null)?.capMicros;
       const overrun =
+        beyondReservation ||
         Object.values(tokens.input).reduce((a, b) => a + b, 0) >
           Number(limits.inputTokensMax) ||
         Object.values(tokens.output).reduce((a, b) => a + b, 0) >
-          Number(limits.outputTokensMax);
+          Number(limits.outputTokensMax) ||
+        Object.values(cost).reduce((a, b) => a + BigInt(b), 0n) >
+          BigInt((cap as string | undefined) ?? '0');
       if (overrun)
         await tx.c9Run.update({
           where: { id: root.id },
