@@ -112,7 +112,43 @@ New permanent ratchets wired into the mandatory suite:
 `c9.budget.spec.ts` (P02), `c9.context-and-bi.spec.ts` (P02/P06),
 `c9.policy-and-sources.spec.ts` (P03), alongside the P01 five.
 
-## 5. What this wave does **not** claim
+## 5. Production deployment and read-only verification
+
+Release **`20260914-c9-wave2-b7ae4ddc`** deployed through the unchanged documented process,
+all ten steps, exit 0. [Transcript](evidence/chapter9-wave2/deployment.txt) ·
+[release acceptance](evidence/chapter9-wave2/release-acceptance.json) ·
+[verification](evidence/chapter9-wave2/production-verification.txt).
+
+| Production gate | Result |
+|---|---|
+| Pending migrations before and after | **0 / 0** — `No pending migrations to apply.` |
+| Applied migrations | 99, unchanged by this wave |
+| `migrate diff --exit-code` (drift) | **NONE** |
+| `release-preflight` strict | PASS, `config: safe` |
+| Package 4 / Package 5 PWA runtime guards | PASS / PASS |
+| Port-3199 smoke on `/api/health/ready` | PASS — the new controller and module wiring boot cleanly |
+| `/api/health` and `/api/health/ready` after cutover | `ok` / `ready`, `database: ready` |
+| `journalctl -p err` over the following 2 minutes | `-- No entries --` |
+| R01 live relay verification, before preflight and after cutover | PASS (42 entries, 10 active PHP, 16 blocked archives, 0 provider/message effects) |
+
+The zero-schema envelope is not asserted, it is measured. The same structural probe run
+against production returns a result **byte-for-byte identical to Wave 1**: 5 tables, 123
+fields, 8 functions, 10 triggers, 5 PK + 12 UNIQUE + 46 CHECK + 11 FK all valid, 11
+RESTRICT, 0 CASCADE, 25 indexes with the one partial UNIQUE — and still **0 rows in all
+five C9 tables**, so **production proof effects remain 0**.
+
+The coordination surface is present and authenticated, not open. Unauthenticated calls to
+each route return `401`:
+
+| Route | Unauthenticated |
+|---|---|
+| `POST /api/orchestration/request-identity` | 401 |
+| `GET /api/orchestration/runs/:id` | 401 |
+| `GET /api/orchestration/tenant-context` | 401 |
+
+No new public or provider surface was added; the frozen 32 stand unchanged.
+
+## 6. What this wave does **not** claim
 
 - The `c9.route`/`c9.compose` model task keys exist and are budgeted, but **no model call
   is possible in production** — the answer is deterministic, and the response says so in
@@ -128,5 +164,14 @@ New permanent ratchets wired into the mandatory suite:
 
 ```text
 C9 WAVE 2 ENVELOPE CONFORMANCE: EXACT (0 models / 0 fields / 0 migrations / 0 actions / 0 AC6)
+LOCAL GATES: PASS
+POSTGRESQL PROOFS: P01 27/27, P02 13/13
+PRODUCTION RELEASE: 20260914-c9-wave2-b7ae4ddc
+PENDING MIGRATIONS: 0
+DRIFT: NONE
+HEALTH: PASS
+READINESS: PASS
 PAID REASONING: DISABLED
+PRODUCTION EFFECTS: 0
+WAVE 2: COMPLETE
 ```
