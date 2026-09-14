@@ -16,6 +16,8 @@ import { C9RequestIdentity } from './c9.identity';
 import { C9Sources } from './c9.sources';
 import { C9Store } from './c9.store';
 import { C9ContextService } from './c9.context';
+import { C9Execution } from './c9.execution';
+import { C9Strategy } from './c9.strategy';
 import { C9PolicyService } from './c9.policy.service';
 
 @Module({
@@ -32,7 +34,9 @@ import { C9PolicyService } from './c9.policy.service';
     C9Agents,
     C9Allowance,
     C9ContextService,
+    C9Execution,
     C9ModelGateway,
+    C9Strategy,
     C9Orchestrator,
     C9WorkService,
     C9Authority,
@@ -47,6 +51,8 @@ import { C9PolicyService } from './c9.policy.service';
     C9ContextService,
     C9Orchestrator,
     C9PolicyService,
+    C9Execution,
+    C9Strategy,
   ],
 })
 export class C9Module {}

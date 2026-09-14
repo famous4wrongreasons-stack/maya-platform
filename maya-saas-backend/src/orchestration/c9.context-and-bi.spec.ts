@@ -116,16 +116,57 @@ describe('c9 context and business intelligence', () => {
     );
   });
 
-  test('a domain that is not activated says so instead of answering', () => {
-    for (const domain of ['ADMIN', 'CLIENT_LIFECYCLE', 'OCCUPANCY']) {
-      expect(agents.executable(domain as never)).toBe(false);
-      const result = answer([measured], domain);
-      expect(result.completeness).toMatchObject({ status: 'UNAVAILABLE' });
-      expect(result.limitations).toEqual(['domain_capability_not_activated']);
-      expect(result.facts_used).toEqual([]);
-      expect(result.findings).toEqual([]);
+  test('only BI is forbidden to propose, and it is forbidden everywhere', () => {
+    const proposal = {
+      capability: 'c7.measurement.read',
+      argumentHandles: [handle],
+      risk: 'low_write',
+      approval: 'owner',
+      reversibility: 'SOURCE_DEFINED',
+      rationale: 'proposed for owner decision',
+      audience_size: null,
+    };
+    // A proposal offered to BI is dropped by the agent and would be denied by the contract.
+    expect(agents.proposes('BUSINESS_INTELLIGENCE')).toBe(false);
+    expect(
+      agents.answer(
+        'BUSINESS_INTELLIGENCE',
+        'c9.business_overview',
+        context([measured]),
+        new Set(['c7.measurement.read']),
+        new Set([handle]),
+        [proposal],
+      ).result.proposed_action_intents,
+    ).toEqual([]);
+    for (const domain of ['ADMIN', 'CLIENT_LIFECYCLE', 'OCCUPANCY'] as const) {
+      expect(agents.executable(domain)).toBe(true);
+      expect(agents.proposes(domain)).toBe(true);
+      const result = agents.answer(
+        domain,
+        'c9.operations_support',
+        context([measured], domain),
+        new Set(['c7.measurement.read']),
+        new Set([handle]),
+        [proposal],
+      ).result;
+      expect(result.proposed_action_intents).toHaveLength(1);
+      // A proposal is a request for an owner decision, never an authority to act.
+      expect((result.proposed_action_intents as C9Object[])[0]).toMatchObject({
+        approval: 'owner',
+        reversibility: 'SOURCE_DEFINED',
+      });
+      // And it may only name a capability this invocation actually resolved.
+      expect(() =>
+        agents.answer(
+          domain,
+          'c9.operations_support',
+          context([measured], domain),
+          new Set(['c7.measurement.read']),
+          new Set([handle]),
+          [{ ...proposal, capability: 'appointments.own.cancel' }],
+        ),
+      ).toThrow('c9_result_action');
     }
-    expect(agents.executable('BUSINESS_INTELLIGENCE')).toBe(true);
   });
 
   test('an answer may only cite evidence and capabilities it was actually given', () => {

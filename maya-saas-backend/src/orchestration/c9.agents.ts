@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   C9Domain,
   C9Object,
+  C9_DOMAINS,
   c9AgentResult,
   c9Deny,
   c9Hash,
@@ -46,15 +47,21 @@ export type C9AgentAnswer = {
 /**
  * The four canonical domains. They read qualified projections and speak only about them:
  * no source mutation, no model-invented number, and no claim that an absent probability
- * is a value. BUSINESS_INTELLIGENCE is read-only by contract and proposes nothing.
+ * is a value.
  *
- * In this package only BUSINESS_INTELLIGENCE answers. The other three domains return an
- * explicit unavailable result rather than a fabricated one; their reasoning is P04.
+ * BUSINESS_INTELLIGENCE is read-only by contract and proposes nothing — enforced here, by
+ * the registry, and by a database CHECK. ADMIN, CLIENT_LIFECYCLE and OCCUPANCY may propose
+ * typed intents for capabilities that actually resolved for this invocation; a proposal is
+ * a request for an owner decision, never an authority to act.
  */
 @Injectable()
 export class C9Agents {
+  /** Every canonical domain reasons; only BI is forbidden to propose. */
   executable(domain: C9Domain): boolean {
-    return domain === 'BUSINESS_INTELLIGENCE';
+    return C9_DOMAINS.includes(domain);
+  }
+  proposes(domain: C9Domain): boolean {
+    return domain !== 'BUSINESS_INTELLIGENCE';
   }
   answer(
     domain: C9Domain,
@@ -62,6 +69,7 @@ export class C9Agents {
     context: C9Object,
     permittedCapabilities: ReadonlySet<string>,
     permittedEvidence: ReadonlySet<string>,
+    proposedIntents: readonly C9Object[] = [],
   ): C9AgentAnswer {
     const trusted = c9Object(context.trusted),
       facts = (context.facts ?? []) as C9Object[];
@@ -171,8 +179,10 @@ export class C9Agents {
           confidence: status === 'COMPLETE' ? 'high' : 'low',
           limitations:
             status === 'COMPLETE' && !limitations.length ? [] : limitations,
-          // Read-only domain: an intent here would be denied by the result contract.
-          proposed_action_intents: [],
+          // BI is read-only: an intent here is denied by the result contract itself.
+          proposed_action_intents: this.proposes(domain)
+            ? proposedIntents.slice(0, 12)
+            : [],
           completeness: {
             status,
             requestedScopeHash,
