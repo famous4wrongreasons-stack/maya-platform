@@ -1,0 +1,85 @@
+{
+  "functions": {
+    "webhook_server.py": {
+      "_verify_telegram_login_widget": {
+        "line": 1840,
+        "sha256": "2f34c3c02577429cc77d76409e39db9a01dfed506733736274e74bba4f9c9e3c"
+      },
+      "_panel_resolve_role": {
+        "line": 1964,
+        "sha256": "c32613a9979d4b13cf16b1272c76f1678e46a6fae3ec640bb571ce709730d709"
+      },
+      "_panel_auth": {
+        "line": 1995,
+        "sha256": "19c2d25865b2db6d4b4c0dbb7261ef7ca8d63634b606dfe1f2b89bc9f9fbc182"
+      },
+      "panel_external_reviews_import_handler": {
+        "line": 3646,
+        "sha256": "44b17d43f75a6e4cdd6050cf5df54f8eaeb94b7e0b2a061a66314303011bcfd5"
+      },
+      "panel_reputation_refresh_handler": {
+        "line": 3688,
+        "sha256": "03ac74db1056d56baf8821ffa3eaf3517f1d584f616998e3183f736b63f62162"
+      },
+      "reputation_monitor_loop": {
+        "line": 10706,
+        "sha256": "54142649cd18bbcca46519f45d1f78393c6174098b2dcc5ba6e6affd8039b61b"
+      },
+      "start_webhook_server": {
+        "line": 12040,
+        "sha256": "a43bfa22ef62b14e7aa7c9e818028d1e026a2aee8a9201b381c3b5bc30d11155"
+      }
+    },
+    "reputation.py": {
+      "_float": {
+        "line": 47,
+        "sha256": "6f6e930e3ce9876563da10e08d14cfdf7c07e82ae9273f3cba711c970849ef5e"
+      },
+      "import_reviews": {
+        "line": 518,
+        "sha256": "cdea9dbf3c7cde1f916452fc91378fa31fa5c6bb1b01b08dc5da25382f15cbf8"
+      },
+      "refresh_public_reviews": {
+        "line": 567,
+        "sha256": "6f2eefe936991f92c5d26e7e94383fdd680fa89ae5d03428493742264a6d1aa5"
+      }
+    },
+    "database.py": {
+      "_db": {
+        "line": 31,
+        "sha256": "2da5cd9dad382af72f4f46a58a82d6ed471c5cafb33bc863f58ed280ce6fa5df"
+      },
+      "_now": {
+        "line": 49,
+        "sha256": "e6688d71f9a6c4179268c6f7d16ce491d8b4b056cbc6e82427a4d56c76c1ad51"
+      },
+      "_external_reviews_ensure": {
+        "line": 2658,
+        "sha256": "3534d0e980b307d7561f14cbd6018b1b38b4e486e00854251b2b84cc2366e911"
+      },
+      "upsert_external_review": {
+        "line": 2684,
+        "sha256": "806241a1e516a703d7670f94f6976f991516e312348a07773ca6a4ed22e176f5"
+      }
+    }
+  },
+  "allExecutedFunctionSourceHashesMatch": true,
+  "activeRelease": "20260906-p5-b33-0636e559",
+  "launcher": {
+    "service": "barbershop-pwa",
+    "script": "pwa_api.py",
+    "call": "webhook_server.start_webhook_server(app, start_background_tasks=False)",
+    "legacyBot": "inactive"
+  },
+  "reachability": {
+    "registeredPath": "POST /api/panel/external_reviews/import",
+    "registeredHandler": "panel_external_reviews_import_handler",
+    "nginxServer": "rt.malesthetic.pro",
+    "location": "/",
+    "proxyPass": "http://127.0.0.1:8080",
+    "listener": "0.0.0.0:8080",
+    "source": "read-only service, nginx configuration and AST inventory; no endpoint invocation"
+  },
+  "pwaProxyConvenienceActionFound": false,
+  "backgroundReputationLoopClaimedActive": false
+}

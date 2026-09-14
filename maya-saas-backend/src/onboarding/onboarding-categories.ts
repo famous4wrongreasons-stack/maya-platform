@@ -1,6 +1,9 @@
 import type { IndustryPresetId } from '../common/industry-presets';
 import type { AiOnboardingServiceItem } from './ai-onboarding.types';
-import type { BusinessTemplateId } from './business-templates';
+import {
+  BUSINESS_TEMPLATES,
+  type BusinessTemplateId,
+} from './business-templates';
 
 export const ONBOARDING_WORK_MODES = ['solo', 'business'] as const;
 export type AiOnboardingWorkMode = (typeof ONBOARDING_WORK_MODES)[number];
@@ -57,14 +60,7 @@ const services = (
     durationMinutes,
   }));
 
-const BARBER_SERVICES = services(
-  ['Мужская стрижка', 60],
-  ['Стрижка машинкой', 30],
-  ['Коррекция бороды и усов', 30],
-  ['Бритьё лица', 45],
-  ['Бритьё головы', 45],
-  ['Укладка', 20],
-);
+const BARBER_SERVICES = BUSINESS_TEMPLATES.barbershop.suggestedServices;
 
 const HAIR_SERVICES = services(
   ['Стрижка', 60],

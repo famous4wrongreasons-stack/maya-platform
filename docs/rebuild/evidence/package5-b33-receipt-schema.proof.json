@@ -1,0 +1,30 @@
+{
+  "verdict": "PASS",
+  "realPostgreSQL": true,
+  "persistedFields": 8,
+  "concurrentSame": 12,
+  "receiptsForSameEvent": 1,
+  "concurrentDivergent": "one accepted source / one conflict",
+  "tenantClientIsolation": true,
+  "clientWithoutUser": true,
+  "immutable": true,
+  "reopenSameKey": true,
+  "revokedDenied": true,
+  "backfill": 0,
+  "actionExecutions": 0,
+  "appointments": 0,
+  "providerWrites": 0,
+  "productionMutations": 0,
+  "migration": "20260906180000_b33_client_booking_confirmation",
+  "migrationSha256": "02f473415f8c21c096995a5ca2a227f7ac03722ef7d94936a074ca6271fb5a1c",
+  "cleanReplay": true,
+  "drift": "NONE",
+  "prismaValidate": "PASS",
+  "lint": "PASS",
+  "typecheck": "PASS",
+  "typecheckScripts": "PASS",
+  "architecture": {
+    "suites": 1,
+    "tests": 2
+  }
+}

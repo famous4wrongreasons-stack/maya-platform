@@ -12,7 +12,18 @@ describe('runtime config validation', () => {
     AUTH_RATE_LIMIT_SECRET: secret('rate-limit'),
     PHONE_AUTH_SECRET: secret('phone'),
     CRM_ENCRYPTION_KEY: secret('crm'),
+    MAYA_LOYALTY_REDEMPTION_CODE_PEPPER: secret('loyalty-redemption'),
+    MAYA_REFERRAL_REWARD_PRESENTATION_KEY: secret('referral-presentation'),
+    MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION: 'v1',
+    MAYA_REFERRAL_REWARD_CLAIM_SECRET: secret('referral-claim'),
+    MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY: secret(
+      'gift-certificate-presentation',
+    ),
+    MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION: 'v1',
+    MAYA_GIFT_CERTIFICATE_CLAIM_SECRET: secret('gift-certificate-claim'),
+    CLIENT_IDENTITY_HASH_SECRET: secret('client-identity'),
     CORS_ALLOWED_ORIGINS: 'https://app.example.test,capacitor://localhost',
+    AUTH_TRUST_PROXY: '127.0.0.1',
     PHONE_AUTH_PROVIDER: 'smsru',
     PHONE_AUTH_DEBUG: 'false',
     PHONE_AUTH_FIXED_CODE: '',
@@ -35,15 +46,105 @@ describe('runtime config validation', () => {
   };
 
   it('keeps development usable without production credentials', () => {
-    expect(validateRuntimeConfig({})).toMatchObject({
+    expect(validateRuntimeConfig({ NODE_ENV: 'development' })).toMatchObject({
       NODE_ENV: 'development',
     });
   });
 
-  it('rejects ambiguous boolean casing instead of silently changing behavior', () => {
-    expect(() => validateRuntimeConfig({ SWAGGER_ENABLED: 'TRUE' })).toThrow(
-      'SWAGGER_ENABLED must be true or false',
+  it('refuses to start when the environment is not stated', () => {
+    expect(() => validateRuntimeConfig({})).toThrow('NODE_ENV is required');
+  });
+
+  it('requires an independent secret for the client identity hash', () => {
+    // Отдельный домен безопасности: хеш личности клиента ротируется независимо
+    // от сессий и токенов, поэтому переиспользовать чужой секрет нельзя.
+    const config = productionConfig();
+    delete config.CLIENT_IDENTITY_HASH_SECRET;
+    expect(validationMessage(config)).toContain('CLIENT_IDENTITY_HASH_SECRET');
+  });
+
+  it('requires an independent loyalty redemption claim pepper', () => {
+    const config = productionConfig();
+    delete config.MAYA_LOYALTY_REDEMPTION_CODE_PEPPER;
+    expect(validationMessage(config)).toContain(
+      'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER is required in production',
     );
+
+    config.MAYA_LOYALTY_REDEMPTION_CODE_PEPPER = config.CRM_ENCRYPTION_KEY;
+    expect(validationMessage(config)).toContain(
+      'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER must be independent from CRM_ENCRYPTION_KEY',
+    );
+  });
+
+  it('requires independent referral reward presentation and claim secrets', () => {
+    const config = productionConfig();
+    delete config.MAYA_REFERRAL_REWARD_PRESENTATION_KEY;
+    expect(validationMessage(config)).toContain(
+      'MAYA_REFERRAL_REWARD_PRESENTATION_KEY is required in production',
+    );
+
+    config.MAYA_REFERRAL_REWARD_PRESENTATION_KEY = secret(
+      'referral-presentation',
+    );
+    config.MAYA_REFERRAL_REWARD_CLAIM_SECRET = config.CRM_ENCRYPTION_KEY;
+    expect(validationMessage(config)).toContain(
+      'MAYA_REFERRAL_REWARD_CLAIM_SECRET must be independent from CRM_ENCRYPTION_KEY',
+    );
+
+    config.MAYA_REFERRAL_REWARD_CLAIM_SECRET = secret('referral-claim');
+    config.MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION = 'unsafe version';
+    expect(validationMessage(config)).toContain(
+      'MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION must be a stable version identifier',
+    );
+  });
+
+  it('requires independent gift-certificate presentation and claim secrets', () => {
+    const config = productionConfig();
+    delete config.MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY;
+    expect(validationMessage(config)).toContain(
+      'MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY is required in production',
+    );
+
+    config.MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY = secret(
+      'gift-certificate-presentation',
+    );
+    config.MAYA_GIFT_CERTIFICATE_CLAIM_SECRET = config.CRM_ENCRYPTION_KEY;
+    expect(validationMessage(config)).toContain(
+      'MAYA_GIFT_CERTIFICATE_CLAIM_SECRET must be independent from CRM_ENCRYPTION_KEY',
+    );
+
+    config.MAYA_GIFT_CERTIFICATE_CLAIM_SECRET = secret(
+      'gift-certificate-claim',
+    );
+    config.MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION = 'unsafe version';
+    expect(validationMessage(config)).toContain(
+      'MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION must be a stable version identifier',
+    );
+  });
+
+  it('refuses a client identity secret copied from another domain', () => {
+    const config = productionConfig();
+    config.CLIENT_IDENTITY_HASH_SECRET = config.JWT_SECRET;
+    expect(validationMessage(config)).toContain('CLIENT_IDENTITY_HASH_SECRET');
+  });
+
+  it('requires the trusted proxy list in production', () => {
+    // Без него request.ip у всех запросов равен адресу nginx, и лимиты со
+    // scope 'ip' считают одного субъекта на всю платформу.
+    const config = productionConfig();
+    delete config.AUTH_TRUST_PROXY;
+    expect(validationMessage(config)).toContain(
+      'AUTH_TRUST_PROXY is required in production',
+    );
+  });
+
+  it('rejects ambiguous boolean casing instead of silently changing behavior', () => {
+    expect(() =>
+      validateRuntimeConfig({
+        NODE_ENV: 'development',
+        SWAGGER_ENABLED: 'TRUE',
+      }),
+    ).toThrow('SWAGGER_ENABLED must be true or false');
   });
 
   it('accepts independent production secrets and explicit boundaries', () => {
@@ -134,6 +235,54 @@ describe('runtime config validation', () => {
     expect(message).toContain(
       'OAUTH_ALLOWED_REDIRECT_URIS is required when social login is enabled',
     );
+    expect(message).toContain(
+      'OAUTH_NATIVE_REDIRECT_URI is required when its provider is enabled',
+    );
+  });
+
+  it('accepts only a credential-free local Telegram OAuth proxy', () => {
+    const config = productionConfig();
+    config.TELEGRAM_LOGIN_ENABLED = 'true';
+    config.TELEGRAM_CLIENT_ID = 'telegram-client-id';
+    config.TELEGRAM_CLIENT_SECRET = secret('telegram');
+    config.TELEGRAM_JWKS_URL =
+      'https://oauth.telegram.org/.well-known/jwks.json';
+    config.OAUTH_ALLOWED_REDIRECT_URIS =
+      'https://maya.example/api/auth/oauth/native/callback';
+    config.OAUTH_NATIVE_REDIRECT_URI =
+      'https://maya.example/api/auth/oauth/native/callback';
+    config.TELEGRAM_OAUTH_PROXY_URL = 'socks5h://127.0.0.1:1081';
+
+    expect(validateRuntimeConfig(config)).toMatchObject({
+      TELEGRAM_OAUTH_PROXY_URL: 'socks5h://127.0.0.1:1081',
+    });
+
+    config.TELEGRAM_OAUTH_PROXY_URL = 'https://proxy.example.test:443';
+    expect(validationMessage(config)).toContain(
+      'TELEGRAM_OAUTH_PROXY_URL must be a credential-free local socks5h URL with an explicit port',
+    );
+  });
+
+  it('requires the native callback to be in the exact OAuth allowlist', () => {
+    const config = productionConfig();
+    config.YANDEX_LOGIN_ENABLED = 'true';
+    config.YANDEX_CLIENT_ID = 'yandex-client-id';
+    config.YANDEX_CLIENT_SECRET = secret('yandex');
+    config.OAUTH_ALLOWED_REDIRECT_URIS =
+      'https://maya.example/oauth-callback.html';
+    config.OAUTH_NATIVE_REDIRECT_URI =
+      'https://maya.example/api/auth/oauth/native/callback';
+
+    expect(validationMessage(config)).toContain(
+      'OAUTH_NATIVE_REDIRECT_URI must be an exact entry in OAUTH_ALLOWED_REDIRECT_URIS',
+    );
+
+    config.OAUTH_ALLOWED_REDIRECT_URIS +=
+      ',https://maya.example/api/auth/oauth/native/callback';
+    expect(validateRuntimeConfig(config)).toMatchObject({
+      OAUTH_NATIVE_REDIRECT_URI:
+        'https://maya.example/api/auth/oauth/native/callback',
+    });
   });
 
   it('requires independent secrets and SMTP when email login is enabled', () => {

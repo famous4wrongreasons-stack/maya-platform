@@ -1,0 +1,6440 @@
+{
+  "inspection": "read-only AST; names/lines only, no PII or credentials; call and SQL inventory is not a bypass count",
+  "routes": [
+    {
+      "file": "site_community.py",
+      "line": 358,
+      "owner": "register_routes",
+      "register": "add_post",
+      "route": "/api/site/community/{action}",
+      "handler": "handler"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 319,
+      "owner": "register_routes",
+      "register": "add_get",
+      "route": "/api/site/posts",
+      "handler": "posts"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 320,
+      "owner": "register_routes",
+      "register": "add_get",
+      "route": "/api/site/posts/{slug}",
+      "handler": "post"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 321,
+      "owner": "register_routes",
+      "register": "add_get",
+      "route": "/api/site/post-media/{name}",
+      "handler": "media"
+    },
+    {
+      "file": "tenant_config_api.py",
+      "line": 80,
+      "owner": "attach",
+      "register": "add_get",
+      "route": "/api/tenant-config",
+      "handler": "handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11926,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/yclients-webhook",
+      "handler": "handle_yclients_webhook"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11927,
+      "owner": "start_webhook_server",
+      "register": "add_get",
+      "route": "/yclients-webhook",
+      "handler": "health_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11930,
+      "owner": "start_webhook_server",
+      "register": "add_get",
+      "route": "/api/cabinet/me",
+      "handler": "cabinet_me_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11932,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/internal/loyalty-snapshot",
+      "handler": "internal_loyalty_snapshot_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11935,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/internal/action-engine/privacy-telegram",
+      "handler": "internal_privacy_telegram_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11939,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/internal/action-engine/package2-telegram",
+      "handler": "internal_package2_telegram_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11945,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/cabinet/me-via-login",
+      "handler": "cabinet_me_via_login_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11949,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/auth/phone/start",
+      "handler": "auth_phone_start_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11951,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/auth/phone/verify",
+      "handler": "auth_phone_verify_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11953,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/auth/vk",
+      "handler": "auth_vk_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11955,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/auth/vk-sdk",
+      "handler": "auth_vk_sdk_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11957,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/auth/yandex/start",
+      "handler": "auth_yandex_start_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11959,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/auth/yandex",
+      "handler": "auth_yandex_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11961,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/cabinet/me-via-session",
+      "handler": "cabinet_me_via_session_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11963,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/cabinet/link-phone",
+      "handler": "cabinet_link_phone_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11965,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/booking/prefill",
+      "handler": "booking_prefill_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11967,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/client/cancel-record",
+      "handler": "client_cancel_record_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11969,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/client/reschedule-record",
+      "handler": "client_reschedule_record_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11971,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/client/book-with-loyalty",
+      "handler": "client_book_with_loyalty_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11973,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/team_chat/normalize_voice",
+      "handler": "team_chat_normalize_voice_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11975,
+      "owner": "start_webhook_server",
+      "register": "add_get",
+      "route": "/api/auth/status",
+      "handler": "auth_status_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11979,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/set-visit-mood",
+      "handler": "set_visit_mood_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11980,
+      "owner": "start_webhook_server",
+      "register": "add_get",
+      "route": "/api/nearest-slot",
+      "handler": "nearest_slot_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11984,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/me/photo",
+      "handler": "me_photo_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11988,
+      "owner": "start_webhook_server",
+      "register": "add_get",
+      "route": "/api/knowledge/image/{name}",
+      "handler": "knowledge_image_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11989,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/chat/history",
+      "handler": "chat_history_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11991,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/chat/delete",
+      "handler": "chat_delete_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11995,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/chat",
+      "handler": "chat_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11997,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/chat/stream",
+      "handler": "chat_stream_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11999,
+      "owner": "start_webhook_server",
+      "register": "add_get",
+      "route": "/api/realtime",
+      "handler": "realtime_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12002,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/push/subscribe",
+      "handler": "push_subscribe_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12003,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/push/unsubscribe",
+      "handler": "push_unsubscribe_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12007,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/tips/sent",
+      "handler": "tip_sent_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12011,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/client-link/consume",
+      "handler": "client_link_consume_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12012,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/consent/status",
+      "handler": "consent_status_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12014,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/consent/submit",
+      "handler": "consent_submit_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12018,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/applogin/start",
+      "handler": "applogin_start_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12020,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/applogin/poll",
+      "handler": "applogin_poll_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12024,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/cabinet/notify-prefs",
+      "handler": "notify_prefs_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12028,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/cert/create",
+      "handler": "cert_create_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12032,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/sub/create",
+      "handler": "sub_create_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12036,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/me",
+      "handler": "panel_me_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12038,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/dashboard",
+      "handler": "panel_dashboard_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12040,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/command_center",
+      "handler": "panel_command_center_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12042,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/plan_target",
+      "handler": "panel_plan_target_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12044,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/action/evaluate",
+      "handler": "panel_action_evaluate_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12046,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/control/create",
+      "handler": "panel_control_create_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12048,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/autonomy/tick",
+      "handler": "panel_autonomy_tick_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12050,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/autopilot/supervise",
+      "handler": "panel_autopilot_supervision_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12052,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/execution/loop",
+      "handler": "panel_execution_loop_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12054,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/control/update",
+      "handler": "panel_control_update_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12056,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/staff_tasks",
+      "handler": "panel_staff_tasks_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12058,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/staff_task/update",
+      "handler": "panel_staff_task_update_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12060,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/master/overview",
+      "handler": "panel_master_overview_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12062,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/master/day",
+      "handler": "panel_master_day_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12064,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/master/clients",
+      "handler": "panel_master_clients_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12066,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/redeem",
+      "handler": "panel_redeem_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12068,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/job/run",
+      "handler": "panel_job_run_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12070,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/reviews",
+      "handler": "panel_reviews_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12072,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/external_reviews/import",
+      "handler": "panel_external_reviews_import_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12074,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/reputation/refresh",
+      "handler": "panel_reputation_refresh_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12076,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/master_day_brief",
+      "handler": "panel_master_day_brief_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12078,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/broadcast",
+      "handler": "panel_broadcast_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12080,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/team",
+      "handler": "panel_team_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12082,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/managers",
+      "handler": "panel_managers_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12084,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/masters_stats",
+      "handler": "panel_masters_stats_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12086,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/salary",
+      "handler": "panel_salary_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12088,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/my_earnings",
+      "handler": "panel_my_earnings_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12091,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/god/overview",
+      "handler": "god_overview_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12093,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/god/health",
+      "handler": "god_health_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12095,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/god/billing",
+      "handler": "god_billing_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12097,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/god/subscribers",
+      "handler": "god_subscribers_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12099,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/daily_report",
+      "handler": "panel_daily_report_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12101,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/report_pdf",
+      "handler": "panel_report_pdf_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12103,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/salon_stats",
+      "handler": "panel_salon_stats_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12105,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/salon_today",
+      "handler": "panel_salon_today_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12107,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal",
+      "handler": "panel_journal_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12109,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_create",
+      "handler": "panel_journal_create_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12110,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/client_search",
+      "handler": "panel_client_search_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12112,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/waitlist",
+      "handler": "panel_waitlist_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12114,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/promo_gift",
+      "handler": "promo_gift_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12117,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_reschedule",
+      "handler": "panel_journal_reschedule_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12119,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_cancel",
+      "handler": "panel_journal_cancel_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12121,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/team_chat/send",
+      "handler": "team_chat_send_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12123,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/team_chat/upload_auth",
+      "handler": "team_chat_upload_auth_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12125,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/team_chat/delete",
+      "handler": "team_chat_delete_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12127,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/team_chat/fetch",
+      "handler": "team_chat_fetch_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12129,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_attendance",
+      "handler": "panel_journal_attendance_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12131,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_record",
+      "handler": "panel_journal_record_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12133,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_pay",
+      "handler": "panel_journal_pay_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12135,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_add_service",
+      "handler": "panel_journal_add_service_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12137,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_set_services",
+      "handler": "panel_journal_set_services_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12139,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_set_duration",
+      "handler": "panel_journal_set_duration_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12141,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_set_client_name",
+      "handler": "panel_journal_set_client_name_handler"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12143,
+      "owner": "start_webhook_server",
+      "register": "add_post",
+      "route": "/api/panel/journal_set_client_data",
+      "handler": "panel_journal_set_client_name_handler"
+    }
+  ],
+  "calls": [
+    {
+      "file": "barber_knowledge.py",
+      "line": 144,
+      "owner": "_load_sections",
+      "call": "_SECTIONS_CACHE.update"
+    },
+    {
+      "file": "birthday.py",
+      "line": 122,
+      "owner": "run_birthday_job",
+      "call": "database.save_birthday_promo"
+    },
+    {
+      "file": "birthday.py",
+      "line": 157,
+      "owner": "run_birthday_job",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 102,
+      "owner": "<module>",
+      "call": "conversations.update"
+    },
+    {
+      "file": "bot.py",
+      "line": 516,
+      "owner": "cmd_start",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 526,
+      "owner": "cmd_start",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 573,
+      "owner": "cmd_start",
+      "call": "database.create_web_session"
+    },
+    {
+      "file": "bot.py",
+      "line": 598,
+      "owner": "cmd_start",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 700,
+      "owner": "cmd_start",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 803,
+      "owner": "cmd_clear",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 1063,
+      "owner": "cmd_today._send_day",
+      "call": "_send_today_record_card"
+    },
+    {
+      "file": "bot.py",
+      "line": 1074,
+      "owner": "cmd_today",
+      "call": "_send_day"
+    },
+    {
+      "file": "bot.py",
+      "line": 1117,
+      "owner": "cmd_today",
+      "call": "_send_day"
+    },
+    {
+      "file": "bot.py",
+      "line": 1162,
+      "owner": "_send_today_record_card",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 1654,
+      "owner": "_admin_dispatch",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 1842,
+      "owner": "_close_master_booking",
+      "call": "database.update_ai_advice_outcome"
+    },
+    {
+      "file": "bot.py",
+      "line": 1854,
+      "owner": "_close_master_booking",
+      "call": "database.update_ai_advice_final_services"
+    },
+    {
+      "file": "bot.py",
+      "line": 2120,
+      "owner": "cmd_client",
+      "call": "update.message.chat.send_action"
+    },
+    {
+      "file": "bot.py",
+      "line": 2247,
+      "owner": "handle_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 2286,
+      "owner": "handle_callback",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 2287,
+      "owner": "handle_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 2324,
+      "owner": "handle_callback",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 2325,
+      "owner": "handle_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 2356,
+      "owner": "handle_callback",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 2357,
+      "owner": "handle_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 2380,
+      "owner": "handle_callback",
+      "call": "_handle_cancel_record_confirm"
+    },
+    {
+      "file": "bot.py",
+      "line": 2397,
+      "owner": "handle_callback",
+      "call": "_handle_cancel_record_request"
+    },
+    {
+      "file": "bot.py",
+      "line": 2449,
+      "owner": "handle_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 2463,
+      "owner": "handle_callback",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 2486,
+      "owner": "handle_callback",
+      "call": "_broadcast_execute"
+    },
+    {
+      "file": "bot.py",
+      "line": 2491,
+      "owner": "handle_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 2502,
+      "owner": "handle_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 2543,
+      "owner": "handle_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 2580,
+      "owner": "handle_callback",
+      "call": "_send_bind_code_card"
+    },
+    {
+      "file": "bot.py",
+      "line": 2581,
+      "owner": "handle_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 2704,
+      "owner": "handle_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 2714,
+      "owner": "handle_callback",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 2744,
+      "owner": "handle_callback",
+      "call": "qr_img.save"
+    },
+    {
+      "file": "bot.py",
+      "line": 2746,
+      "owner": "handle_callback",
+      "call": "context.bot.send_photo"
+    },
+    {
+      "file": "bot.py",
+      "line": 2769,
+      "owner": "handle_callback",
+      "call": "loyalty.consume_redeem_code"
+    },
+    {
+      "file": "bot.py",
+      "line": 2833,
+      "owner": "handle_voice",
+      "call": "context.bot.send_chat_action"
+    },
+    {
+      "file": "bot.py",
+      "line": 2850,
+      "owner": "handle_message",
+      "call": "_save_anton_expenses"
+    },
+    {
+      "file": "bot.py",
+      "line": 2879,
+      "owner": "handle_contact",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 2883,
+      "owner": "handle_contact",
+      "call": "database.update_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 2900,
+      "owner": "handle_contact",
+      "call": "context.bot.send_chat_action"
+    },
+    {
+      "file": "bot.py",
+      "line": 2910,
+      "owner": "handle_contact",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 2918,
+      "owner": "handle_contact",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 2923,
+      "owner": "handle_contact",
+      "call": "database.update_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 3142,
+      "owner": "_handle_master_self_intro",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3162,
+      "owner": "_bind_master_chat_direct",
+      "call": "conn.execute"
+    },
+    {
+      "file": "bot.py",
+      "line": 3167,
+      "owner": "_bind_master_chat_direct",
+      "call": "conn.execute"
+    },
+    {
+      "file": "bot.py",
+      "line": 3235,
+      "owner": "_handle_admin_bind_request",
+      "call": "_send_bind_code_card"
+    },
+    {
+      "file": "bot.py",
+      "line": 3468,
+      "owner": "process_message",
+      "call": "_is_commands_request"
+    },
+    {
+      "file": "bot.py",
+      "line": 3471,
+      "owner": "process_message",
+      "call": "_show_commands_for_role"
+    },
+    {
+      "file": "bot.py",
+      "line": 3500,
+      "owner": "process_message",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 3524,
+      "owner": "process_message",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 3563,
+      "owner": "process_message",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 3636,
+      "owner": "process_message",
+      "call": "context.bot.send_chat_action"
+    },
+    {
+      "file": "bot.py",
+      "line": 3649,
+      "owner": "process_message",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 3677,
+      "owner": "process_message",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 3728,
+      "owner": "process_message",
+      "call": "context.bot.send_chat_action"
+    },
+    {
+      "file": "bot.py",
+      "line": 3740,
+      "owner": "process_message",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 3757,
+      "owner": "process_message",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 3794,
+      "owner": "process_message",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 3798,
+      "owner": "process_message",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3803,
+      "owner": "process_message",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3822,
+      "owner": "process_message",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3830,
+      "owner": "process_message",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3852,
+      "owner": "_request_contact_share",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3864,
+      "owner": "_start_contact_flow",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 3879,
+      "owner": "_start_contact_flow",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3901,
+      "owner": "_start_contact_flow",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3914,
+      "owner": "_start_contact_flow",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3918,
+      "owner": "_start_contact_flow",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3974,
+      "owner": "_show_confirm",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 3999,
+      "owner": "_send_visit_mood_prompt",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4035,
+      "owner": "_finalize_booking",
+      "call": "yc.create_booking"
+    },
+    {
+      "file": "bot.py",
+      "line": 4052,
+      "owner": "_finalize_booking",
+      "call": "database.update_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 4060,
+      "owner": "_finalize_booking",
+      "call": "database.save_booking"
+    },
+    {
+      "file": "bot.py",
+      "line": 4090,
+      "owner": "_finalize_booking",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4105,
+      "owner": "_finalize_booking",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4120,
+      "owner": "_finalize_booking",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4144,
+      "owner": "_finalize_booking",
+      "call": "_send_visit_mood_prompt"
+    },
+    {
+      "file": "bot.py",
+      "line": 4155,
+      "owner": "_finalize_booking",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 4203,
+      "owner": "_finalize_booking",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4236,
+      "owner": "_finalize_gift_cert",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 4242,
+      "owner": "_finalize_gift_cert",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4250,
+      "owner": "_finalize_gift_cert",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 4258,
+      "owner": "_start_digital_cert_flow",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4316,
+      "owner": "_handle_digital_cert_input",
+      "call": "_send_cert_invoice"
+    },
+    {
+      "file": "bot.py",
+      "line": 4333,
+      "owner": "_send_cert_invoice",
+      "call": "database.save_gift_certificate"
+    },
+    {
+      "file": "bot.py",
+      "line": 4352,
+      "owner": "_send_cert_invoice",
+      "call": "yukassa_api.create_payment"
+    },
+    {
+      "file": "bot.py",
+      "line": 4362,
+      "owner": "_send_cert_invoice",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4377,
+      "owner": "_send_cert_invoice",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4389,
+      "owner": "_send_cert_invoice",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "bot.py",
+      "line": 4429,
+      "owner": "_poll_payment",
+      "call": "database.mark_cert_canceled"
+    },
+    {
+      "file": "bot.py",
+      "line": 4433,
+      "owner": "_poll_payment",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4472,
+      "owner": "_deliver_paid_cert",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4484,
+      "owner": "_deliver_paid_cert",
+      "call": "app.bot.send_document"
+    },
+    {
+      "file": "bot.py",
+      "line": 4693,
+      "owner": "_handle_cancel_record_confirm",
+      "call": "yc.cancel_booking"
+    },
+    {
+      "file": "bot.py",
+      "line": 4702,
+      "owner": "_handle_cancel_record_confirm",
+      "call": "database.mark_cancel_actor"
+    },
+    {
+      "file": "bot.py",
+      "line": 4725,
+      "owner": "_handle_cancel_record_confirm",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 4731,
+      "owner": "_handle_cancel_record_confirm",
+      "call": "loyalty.refund_for_cancelled_record"
+    },
+    {
+      "file": "bot.py",
+      "line": 4733,
+      "owner": "_handle_cancel_record_confirm",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4754,
+      "owner": "_handle_cancel_record_confirm",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 4828,
+      "owner": "_handle_freed_slot_accept",
+      "call": "save_conversations"
+    },
+    {
+      "file": "bot.py",
+      "line": 4829,
+      "owner": "_handle_freed_slot_accept",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 4863,
+      "owner": "_start_subscription_purchase",
+      "call": "database.get_or_create_client"
+    },
+    {
+      "file": "bot.py",
+      "line": 4904,
+      "owner": "_start_subscription_purchase",
+      "call": "database.create_subscription"
+    },
+    {
+      "file": "bot.py",
+      "line": 4918,
+      "owner": "_start_subscription_purchase",
+      "call": "yukassa_api.create_payment"
+    },
+    {
+      "file": "bot.py",
+      "line": 4928,
+      "owner": "_start_subscription_purchase",
+      "call": "database.update_subscription_status"
+    },
+    {
+      "file": "bot.py",
+      "line": 4953,
+      "owner": "_start_subscription_purchase",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "bot.py",
+      "line": 4981,
+      "owner": "_poll_subscription_payment",
+      "call": "database.update_subscription_status"
+    },
+    {
+      "file": "bot.py",
+      "line": 5012,
+      "owner": "_activate_paid_subscription",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 5270,
+      "owner": "_broadcast_execute",
+      "call": "webhook_server.broadcast_send_to_base"
+    },
+    {
+      "file": "bot.py",
+      "line": 5474,
+      "owner": "cmd_reviews_now",
+      "call": "reviews.send_pending_review_requests"
+    },
+    {
+      "file": "bot.py",
+      "line": 5716,
+      "owner": "cmd_migrate_qr",
+      "call": "context.bot.send_document"
+    },
+    {
+      "file": "bot.py",
+      "line": 5892,
+      "owner": "cmd_admin_pdf",
+      "call": "context.bot.send_document"
+    },
+    {
+      "file": "bot.py",
+      "line": 5951,
+      "owner": "_schedule_reminder",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6002,
+      "owner": "_send_reminder",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 6010,
+      "owner": "_send_reminder",
+      "call": "webhook_server._send_client_push"
+    },
+    {
+      "file": "bot.py",
+      "line": 6066,
+      "owner": "post_init",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "bot.py",
+      "line": 6072,
+      "owner": "post_init",
+      "call": "conn.execute"
+    },
+    {
+      "file": "bot.py",
+      "line": 6078,
+      "owner": "post_init",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "bot.py",
+      "line": 6094,
+      "owner": "post_init",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "bot.py",
+      "line": 6098,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6109,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6121,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6134,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6146,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6158,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6169,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6182,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6193,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6204,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6215,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6226,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6238,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6250,
+      "owner": "post_init",
+      "call": "scheduler.add_job"
+    },
+    {
+      "file": "bot.py",
+      "line": 6269,
+      "owner": "_pii_rotation_job",
+      "call": "database.rotate_old_pii"
+    },
+    {
+      "file": "bot.py",
+      "line": 6456,
+      "owner": "cmd_rashod",
+      "call": "_save_anton_expenses"
+    },
+    {
+      "file": "bot.py",
+      "line": 6506,
+      "owner": "_anton_expense_reminder_job",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 6623,
+      "owner": "notify_owner",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 6628,
+      "owner": "notify_owner",
+      "call": "webhook_server._send_client_push"
+    },
+    {
+      "file": "bot.py",
+      "line": 6886,
+      "owner": "_daily_report_job",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 6890,
+      "owner": "_daily_report_job",
+      "call": "webhook_server._send_client_push"
+    },
+    {
+      "file": "bot.py",
+      "line": 6969,
+      "owner": "_god_watch_job",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 6973,
+      "owner": "_god_watch_job",
+      "call": "webhook_server._send_client_push"
+    },
+    {
+      "file": "bot.py",
+      "line": 7045,
+      "owner": "_dual_role_guard_job",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "bot.py",
+      "line": 7049,
+      "owner": "_dual_role_guard_job",
+      "call": "webhook_server._send_client_push"
+    },
+    {
+      "file": "bot.py",
+      "line": 7071,
+      "owner": "_reviews_job",
+      "call": "reviews.send_pending_review_requests"
+    },
+    {
+      "file": "bot.py",
+      "line": 7181,
+      "owner": "_run_polling_resilient.error_callback",
+      "call": "app.create_task"
+    },
+    {
+      "file": "bot.py",
+      "line": 7210,
+      "owner": "_serve_webhook_only_until_telegram_back",
+      "call": "Application.builder().token(TELEGRAM_TOKEN).request(_telegram_httpx_request()).get_updates_request"
+    },
+    {
+      "file": "bot.py",
+      "line": 7239,
+      "owner": "main",
+      "call": "Application.builder().token(TELEGRAM_TOKEN).request(_telegram_httpx_request()).get_updates_request"
+    },
+    {
+      "file": "cert_pdf.py",
+      "line": 186,
+      "owner": "_qr_image",
+      "call": "img.save"
+    },
+    {
+      "file": "cert_pdf.py",
+      "line": 226,
+      "owner": "_load_background._shrink",
+      "call": "im.save"
+    },
+    {
+      "file": "cert_pdf.py",
+      "line": 343,
+      "owner": "_generate_premium_pdf",
+      "call": "c.save"
+    },
+    {
+      "file": "cert_pdf.py",
+      "line": 409,
+      "owner": "_generate_fallback_pdf",
+      "call": "c.save"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 1285,
+      "owner": "_client_relevant_tool_names",
+      "call": "names.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 1288,
+      "owner": "_client_relevant_tool_names",
+      "call": "names.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 1289,
+      "owner": "_client_relevant_tool_names",
+      "call": "names.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 1291,
+      "owner": "_client_relevant_tool_names",
+      "call": "names.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 1293,
+      "owner": "_client_relevant_tool_names",
+      "call": "names.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 1295,
+      "owner": "_client_relevant_tool_names",
+      "call": "names.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 1297,
+      "owner": "_client_relevant_tool_names",
+      "call": "names.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 1302,
+      "owner": "_client_relevant_tool_names",
+      "call": "names.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 1609,
+      "owner": "_client_appointment_command",
+      "call": "command"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 2402,
+      "owner": "_execute_tool",
+      "call": "_client_appointment_command"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 2414,
+      "owner": "_execute_tool",
+      "call": "_client_appointment_command"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 2422,
+      "owner": "_execute_tool",
+      "call": "_client_appointment_command"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 2494,
+      "owner": "_execute_tool",
+      "call": "owner_ai.command_center"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 2556,
+      "owner": "_execute_tool",
+      "call": "owner_ai.create_control_task"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 2573,
+      "owner": "_execute_tool",
+      "call": "owner_ai.update_control_task"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 3558,
+      "owner": "_brain_turn",
+      "call": "_get_anthropic_client().messages.create"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 4123,
+      "owner": "_run_schedule_preflight",
+      "call": "_execute_tool"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 4225,
+      "owner": "_run_business_preflight",
+      "call": "_execute_tool"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 4273,
+      "owner": "_numbers_from_value",
+      "call": "values.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 4277,
+      "owner": "_numbers_from_value",
+      "call": "values.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 4318,
+      "owner": "_tool_result_values",
+      "call": "values.update"
+    },
+    {
+      "file": "claude_ai.py",
+      "line": 4832,
+      "owner": "_run_tool_uses",
+      "call": "_execute_tool"
+    },
+    {
+      "file": "cutmatch.py",
+      "line": 284,
+      "owner": "_analyze_claude",
+      "call": "client.messages.create"
+    },
+    {
+      "file": "cutmatch.py",
+      "line": 436,
+      "owner": "submit_haircut",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "cycle_reminder.py",
+      "line": 259,
+      "owner": "_owner_alert_for_snapshot",
+      "call": "alert.update"
+    },
+    {
+      "file": "cycle_reminder.py",
+      "line": 289,
+      "owner": "_owner_alert_for_snapshot",
+      "call": "alert.update"
+    },
+    {
+      "file": "cycle_reminder.py",
+      "line": 299,
+      "owner": "_owner_alert_for_snapshot",
+      "call": "alert.update"
+    },
+    {
+      "file": "cycle_reminder.py",
+      "line": 428,
+      "owner": "mark_owner_alert_notified",
+      "call": "alert.update"
+    },
+    {
+      "file": "cycle_reminder.py",
+      "line": 498,
+      "owner": "run_cycle_reminder_job",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "cycle_reminder.py",
+      "line": 504,
+      "owner": "run_cycle_reminder_job",
+      "call": "webhook_server._send_client_push"
+    },
+    {
+      "file": "database.py",
+      "line": 41,
+      "owner": "_db",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 42,
+      "owner": "_db",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 44,
+      "owner": "_db",
+      "call": "conn.commit"
+    },
+    {
+      "file": "database.py",
+      "line": 56,
+      "owner": "init_db",
+      "call": "conn.executescript"
+    },
+    {
+      "file": "database.py",
+      "line": 563,
+      "owner": "init_db",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 577,
+      "owner": "init_db",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 588,
+      "owner": "init_db",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 599,
+      "owner": "init_db",
+      "call": "conn.executescript"
+    },
+    {
+      "file": "database.py",
+      "line": 633,
+      "owner": "_migrate_add_encrypted_columns._add",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 694,
+      "owner": "_backfill_encryption",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 702,
+      "owner": "_backfill_encryption",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 711,
+      "owner": "_backfill_encryption",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 720,
+      "owner": "_backfill_encryption",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 733,
+      "owner": "get_or_create_client",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 739,
+      "owner": "get_or_create_client",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 768,
+      "owner": "update_client",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 782,
+      "owner": "get_client",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 792,
+      "owner": "get_client_by_id",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 801,
+      "owner": "get_whats_new_seen",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 811,
+      "owner": "mark_whats_new_seen",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 829,
+      "owner": "record_first_source",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 836,
+      "owner": "record_first_source",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 851,
+      "owner": "sources_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 866,
+      "owner": "sources_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 895,
+      "owner": "find_client_by_phone",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 936,
+      "owner": "save_web_login_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 941,
+      "owner": "save_web_login_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 956,
+      "owner": "verify_web_login_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 965,
+      "owner": "verify_web_login_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 970,
+      "owner": "verify_web_login_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 989,
+      "owner": "create_web_session",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1008,
+      "owner": "get_web_session",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1015,
+      "owner": "get_web_session",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1024,
+      "owner": "revoke_web_session",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1033,
+      "owner": "_applogin_ensure",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1043,
+      "owner": "applogin_create",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1055,
+      "owner": "applogin_authorize",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1068,
+      "owner": "applogin_poll",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1075,
+      "owner": "applogin_poll",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1097,
+      "owner": "_canonical_delivery_consent_for_client",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1126,
+      "owner": "_preference_delivery_subject",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1157,
+      "owner": "get_maya_audience_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1239,
+      "owner": "_marketing_last_ensure",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1248,
+      "owner": "set_marketing_last_sent",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1261,
+      "owner": "marketing_sent_within",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1301,
+      "owner": "export_consents_csv",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1324,
+      "owner": "export_consents_csv",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1359,
+      "owner": "save_booking",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1372,
+      "owner": "get_last_booking",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1417,
+      "owner": "save_gift_certificate",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1436,
+      "owner": "get_gift_certificate",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1450,
+      "owner": "mark_cert_paid",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1465,
+      "owner": "set_cert_payment_id",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1479,
+      "owner": "list_pending_certs",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1490,
+      "owner": "mark_cert_canceled",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1505,
+      "owner": "mark_cert_used",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1519,
+      "owner": "list_certs_by_phone",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1532,
+      "owner": "add_admin",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1542,
+      "owner": "is_admin",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1559,
+      "owner": "list_cashiers",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1581,
+      "owner": "find_master_by_partial_name",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1590,
+      "owner": "list_admins",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1596,
+      "owner": "remove_admin",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1636,
+      "owner": "get_master_by_chat_id",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1646,
+      "owner": "get_master_by_staff_id",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1656,
+      "owner": "list_masters",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1674,
+      "owner": "_staff_messages_ensure",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1695,
+      "owner": "_staff_messages_ensure",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1707,
+      "owner": "add_staff_message",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1725,
+      "owner": "get_staff_messages_since",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1737,
+      "owner": "get_staff_messages_recent",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1749,
+      "owner": "get_staff_latest_message_id",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1757,
+      "owner": "delete_staff_message",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1766,
+      "owner": "delete_staff_message",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1777,
+      "owner": "mute_master",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1787,
+      "owner": "unmute_master",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1797,
+      "owner": "is_master_muted",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1886,
+      "owner": "mark_record_processed",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1901,
+      "owner": "get_record_state",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1916,
+      "owner": "upsert_record_state",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1933,
+      "owner": "delete_record_state",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1966,
+      "owner": "delete_visit_mood",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1974,
+      "owner": "get_client_history_cached",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 1992,
+      "owner": "set_client_history_cache",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2013,
+      "owner": "log_ai_advice",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2027,
+      "owner": "update_ai_advice_final_services",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2054,
+      "owner": "ai_advice_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2058,
+      "owner": "ai_advice_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2064,
+      "owner": "ai_advice_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2068,
+      "owner": "ai_advice_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2075,
+      "owner": "ai_advice_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2095,
+      "owner": "ai_advice_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2121,
+      "owner": "update_ai_advice_outcome",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2131,
+      "owner": "get_ai_advice_for_record",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2142,
+      "owner": "get_setting",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2151,
+      "owner": "set_setting",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2163,
+      "owner": "list_maya_tenants",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2187,
+      "owner": "add_salon_expense",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2198,
+      "owner": "get_salon_expenses",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2208,
+      "owner": "sum_salon_expenses",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2218,
+      "owner": "clear_salon_expenses",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2231,
+      "owner": "set_cash_log",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2244,
+      "owner": "get_cash_log",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2262,
+      "owner": "add_slot_interest",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2269,
+      "owner": "add_slot_interest",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2283,
+      "owner": "get_waitlist_pending_admin_alert",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2300,
+      "owner": "mark_waitlist_admin_alerted",
+      "call": "conn.executemany"
+    },
+    {
+      "file": "database.py",
+      "line": 2317,
+      "owner": "get_slot_waitlist",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2340,
+      "owner": "get_active_waitlist",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2356,
+      "owner": "mark_slot_waitlist_notified",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2371,
+      "owner": "log_ai_usage",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2392,
+      "owner": "sum_ai_usage",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2409,
+      "owner": "aggregate_ai_usage_by_feature",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2420,
+      "owner": "list_pending_payments_for_staff",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2434,
+      "owner": "list_telegram_clients",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2445,
+      "owner": "was_recently_reactivated",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2457,
+      "owner": "was_recently_declined",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2468,
+      "owner": "log_reactivation",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2481,
+      "owner": "was_recently_cycle_reminded",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2497,
+      "owner": "log_cycle_reminder",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2524,
+      "owner": "schedule_review_request",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2539,
+      "owner": "pending_review_requests_to_send",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2550,
+      "owner": "mark_review_request_sent",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2559,
+      "owner": "mark_review_request_failed",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2572,
+      "owner": "record_review_response",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2581,
+      "owner": "get_review_request_by_id",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2591,
+      "owner": "expire_stale_review_requests",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2603,
+      "owner": "review_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2610,
+      "owner": "review_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2634,
+      "owner": "list_recent_reviews",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2703,
+      "owner": "upsert_client_chat_state",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2708,
+      "owner": "upsert_client_chat_state",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2717,
+      "owner": "upsert_client_chat_state",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2724,
+      "owner": "upsert_client_chat_state",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2747,
+      "owner": "find_pending_lead_alerts",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2768,
+      "owner": "mark_lead_alerted",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2778,
+      "owner": "lead_alert_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2782,
+      "owner": "lead_alert_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2790,
+      "owner": "lead_alert_stats",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2810,
+      "owner": "was_recently_offered_freed_slot",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2822,
+      "owner": "log_freed_slot_offer",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2838,
+      "owner": "create_subscription",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2852,
+      "owner": "set_subscription_payment_id",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2860,
+      "owner": "get_subscription",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2868,
+      "owner": "get_subscription_by_payment_id",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2879,
+      "owner": "activate_subscription",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2890,
+      "owner": "update_subscription_status",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2899,
+      "owner": "update_subscription_usage",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2907,
+      "owner": "mark_subscription_renew_pushed",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2916,
+      "owner": "get_active_subscription_for_client",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2926,
+      "owner": "list_active_subscriptions",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2937,
+      "owner": "list_subscriptions_for_client_ever",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2957,
+      "owner": "add_loyalty_transaction",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2970,
+      "owner": "loyalty_balance",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2993,
+      "owner": "reserve_loyalty_points",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2994,
+      "owner": "reserve_loyalty_points",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 2999,
+      "owner": "reserve_loyalty_points",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3005,
+      "owner": "reserve_loyalty_points",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3021,
+      "owner": "reserve_loyalty_points",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3042,
+      "owner": "finalize_loyalty_reservation",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3043,
+      "owner": "finalize_loyalty_reservation",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3061,
+      "owner": "finalize_loyalty_reservation",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3081,
+      "owner": "release_loyalty_reservation",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3096,
+      "owner": "redeem_loyalty_points",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3097,
+      "owner": "redeem_loyalty_points",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3102,
+      "owner": "redeem_loyalty_points",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3117,
+      "owner": "redeem_loyalty_points",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3136,
+      "owner": "client_has_loyalty_backfill",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3147,
+      "owner": "client_has_loyalty_yclients_import",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3163,
+      "owner": "loyalty_backfill_exists_for_phone",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3176,
+      "owner": "loyalty_redemption_exists",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3187,
+      "owner": "loyalty_redemptions_for_record",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3198,
+      "owner": "loyalty_refund_exists",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3208,
+      "owner": "loyalty_already_earned_for_record",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3218,
+      "owner": "loyalty_code_is_free",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3227,
+      "owner": "create_loyalty_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3237,
+      "owner": "get_loyalty_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3245,
+      "owner": "mark_loyalty_code_used",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3259,
+      "owner": "claim_loyalty_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3275,
+      "owner": "active_sold_gift_certs",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3315,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3325,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3329,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3336,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3339,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3348,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3355,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3364,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3375,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3380,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3385,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3390,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3395,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3399,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3404,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3411,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3419,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3423,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3431,
+      "owner": "dashboard_metrics",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3512,
+      "owner": "dashboard_timeseries",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3517,
+      "owner": "dashboard_timeseries",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3522,
+      "owner": "dashboard_timeseries",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3527,
+      "owner": "dashboard_timeseries",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3540,
+      "owner": "reviews_by_master",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3550,
+      "owner": "loyalty_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3553,
+      "owner": "loyalty_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3556,
+      "owner": "loyalty_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3559,
+      "owner": "loyalty_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3562,
+      "owner": "loyalty_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3565,
+      "owner": "loyalty_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3568,
+      "owner": "loyalty_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3586,
+      "owner": "subscriptions_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3590,
+      "owner": "subscriptions_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3595,
+      "owner": "subscriptions_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3611,
+      "owner": "get_referral_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3620,
+      "owner": "is_ref_code_free",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3629,
+      "owner": "create_ref_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3639,
+      "owner": "get_client_by_ref_code",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3651,
+      "owner": "get_referral_for_referee",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3662,
+      "owner": "create_referral",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3673,
+      "owner": "list_pending_referrals",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3683,
+      "owner": "set_referral_referee_client",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3693,
+      "owner": "update_referral_status",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3704,
+      "owner": "save_referral_promo",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3715,
+      "owner": "referral_stats_for_client",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3720,
+      "owner": "referral_stats_for_client",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3731,
+      "owner": "referral_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3735,
+      "owner": "referral_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3738,
+      "owner": "referral_summary",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3753,
+      "owner": "already_sent_birthday_this_year",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3763,
+      "owner": "get_birthday_promo_for_year",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3782,
+      "owner": "save_birthday_promo",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3796,
+      "owner": "get_active_birthday_promo",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3810,
+      "owner": "mark_birthday_promo_used",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3851,
+      "owner": "cutmatch_count_today",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3862,
+      "owner": "cutmatch_incr_today",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3867,
+      "owner": "cutmatch_incr_today",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3886,
+      "owner": "log_tool_call",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3902,
+      "owner": "recent_tool_audit",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3924,
+      "owner": "_ensure_owner_action_journal",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3945,
+      "owner": "_ensure_owner_action_journal",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3949,
+      "owner": "_ensure_owner_action_journal",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3961,
+      "owner": "_ensure_owner_action_journal",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 3984,
+      "owner": "create_owner_action",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4048,
+      "owner": "link_owner_control_task_action",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4057,
+      "owner": "link_owner_control_task_action",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4068,
+      "owner": "link_owner_control_task_action",
+      "call": "payload.update"
+    },
+    {
+      "file": "database.py",
+      "line": 4081,
+      "owner": "link_owner_control_task_action",
+      "call": "control_summary.update"
+    },
+    {
+      "file": "database.py",
+      "line": 4109,
+      "owner": "link_owner_control_task_action",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4141,
+      "owner": "finish_owner_action",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4152,
+      "owner": "finish_owner_action",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4203,
+      "owner": "update_owner_control_task",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4217,
+      "owner": "update_owner_control_task",
+      "call": "summary.update"
+    },
+    {
+      "file": "database.py",
+      "line": 4274,
+      "owner": "update_owner_control_task",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4310,
+      "owner": "mark_owner_control_task_delivery",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4337,
+      "owner": "mark_owner_control_task_delivery",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4381,
+      "owner": "update_owner_assignment_work_state",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4408,
+      "owner": "update_owner_assignment_work_state",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4428,
+      "owner": "list_owner_actions",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4552,
+      "owner": "evaluate_owner_action",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4572,
+      "owner": "evaluate_owner_action",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4592,
+      "owner": "evaluate_due_owner_actions",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4614,
+      "owner": "payment_already_done",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4631,
+      "owner": "mark_payment_done",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4649,
+      "owner": "add_salon_rule",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4664,
+      "owner": "list_salon_rules",
+      "call": "conn.execute"
+    },
+    {
+      "file": "database.py",
+      "line": 4673,
+      "owner": "deactivate_salon_rule",
+      "call": "conn.execute"
+    },
+    {
+      "file": "freed_slot.py",
+      "line": 79,
+      "owner": "_notify_admins",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "generate_admin_pdf.py",
+      "line": 321,
+      "owner": "build_pdf",
+      "call": "c.save"
+    },
+    {
+      "file": "growth_planner.py",
+      "line": 907,
+      "owner": "calculate_growth_plan",
+      "call": "_save_json_setting"
+    },
+    {
+      "file": "import_gift_certs.py",
+      "line": 53,
+      "owner": "<module>",
+      "call": "database.save_gift_certificate"
+    },
+    {
+      "file": "lead_alerts.py",
+      "line": 179,
+      "owner": "scan_and_alert",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "legacy_client_command_bridge.py",
+      "line": 132,
+      "owner": "delivery_consent",
+      "call": "command"
+    },
+    {
+      "file": "legacy_client_command_bridge.py",
+      "line": 151,
+      "owner": "loyalty_projection",
+      "call": "command"
+    },
+    {
+      "file": "legacy_client_habits_bridge.py",
+      "line": 46,
+      "owner": "request_context",
+      "call": "command"
+    },
+    {
+      "file": "legacy_client_habits_bridge.py",
+      "line": 114,
+      "owner": "read_preferences",
+      "call": "command"
+    },
+    {
+      "file": "legacy_client_habits_bridge.py",
+      "line": 132,
+      "owner": "remember_preference",
+      "call": "command"
+    },
+    {
+      "file": "legacy_client_habits_bridge.py",
+      "line": 136,
+      "owner": "remember_preference",
+      "call": "command"
+    },
+    {
+      "file": "legacy_client_preferences_bridge.py",
+      "line": 33,
+      "owner": "delivery_read",
+      "call": "command"
+    },
+    {
+      "file": "legacy_client_preferences_bridge.py",
+      "line": 56,
+      "owner": "visit_projection",
+      "call": "result.update"
+    },
+    {
+      "file": "legacy_client_preferences_bridge.py",
+      "line": 56,
+      "owner": "visit_projection",
+      "call": "command"
+    },
+    {
+      "file": "loyalty.py",
+      "line": 369,
+      "owner": "_send_affordable_care_offer",
+      "call": "webhook_server._send_client_push"
+    },
+    {
+      "file": "loyalty.py",
+      "line": 460,
+      "owner": "run_earning_job",
+      "call": "_send_affordable_care_offer"
+    },
+    {
+      "file": "loyalty.py",
+      "line": 940,
+      "owner": "generate_redeem_code",
+      "call": "database.create_loyalty_code"
+    },
+    {
+      "file": "market_intelligence.py",
+      "line": 164,
+      "owner": "_sanitise_yandex_business_snapshot",
+      "call": "clean.update"
+    },
+    {
+      "file": "masters_ai.py",
+      "line": 338,
+      "owner": "_call_claude",
+      "call": "client.messages.create"
+    },
+    {
+      "file": "memory.py",
+      "line": 139,
+      "owner": "warm_client_history_cache_for_phone",
+      "call": "out.update"
+    },
+    {
+      "file": "memory.py",
+      "line": 156,
+      "owner": "warm_client_history_cache_for_phone",
+      "call": "out.update"
+    },
+    {
+      "file": "memory.py",
+      "line": 247,
+      "owner": "audit_dual_role_client_context",
+      "call": "issue.update"
+    },
+    {
+      "file": "memory.py",
+      "line": 253,
+      "owner": "audit_dual_role_client_context",
+      "call": "issue.update"
+    },
+    {
+      "file": "migration.py",
+      "line": 77,
+      "owner": "find_unbound_clients",
+      "call": "conn.execute"
+    },
+    {
+      "file": "migration.py",
+      "line": 192,
+      "owner": "_make_qr_png",
+      "call": "img.save"
+    },
+    {
+      "file": "migration.py",
+      "line": 367,
+      "owner": "build_qr_pdf",
+      "call": "c.save"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 182,
+      "owner": "_summary_30d",
+      "call": "_summary30_cache.update"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 302,
+      "owner": "_today_load",
+      "call": "reference.update"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 759,
+      "owner": "today_master_revenue",
+      "call": "_today_master_cache.update"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 1024,
+      "owner": "client_retention",
+      "call": "_retention_cache.update"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 1027,
+      "owner": "client_retention",
+      "call": "pending.update"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 1032,
+      "owner": "client_retention",
+      "call": "_retention_cache.update"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 1053,
+      "owner": "client_retention",
+      "call": "_retention_cache.update"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 1099,
+      "owner": "client_retention",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 1140,
+      "owner": "client_retention",
+      "call": "_retention_cache.update"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 1483,
+      "owner": "create_control_task",
+      "call": "database.create_owner_action"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 1523,
+      "owner": "update_control_task",
+      "call": "database.update_owner_control_task"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 1666,
+      "owner": "update_staff_task",
+      "call": "database.update_owner_assignment_work_state"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 3688,
+      "owner": "_owner_business_advisor",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 4238,
+      "owner": "_owner_briefing.add_card",
+      "call": "card.update"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 4873,
+      "owner": "run_operating_rhythm_tick",
+      "call": "command_center"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5505,
+      "owner": "run_execution_loop_tick",
+      "call": "command_center"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5517,
+      "owner": "run_execution_loop_tick",
+      "call": "create_control_task"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5536,
+      "owner": "run_execution_loop_tick",
+      "call": "command_center"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5592,
+      "owner": "run_autonomous_director_tick",
+      "call": "command_center"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5600,
+      "owner": "run_autonomous_director_tick",
+      "call": "create_control_task"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5620,
+      "owner": "run_autonomous_director_tick",
+      "call": "command_center"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5635,
+      "owner": "run_autopilot_supervision_tick",
+      "call": "command_center"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5652,
+      "owner": "run_autopilot_supervision_tick",
+      "call": "database.update_owner_assignment_work_state"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5670,
+      "owner": "run_autopilot_supervision_tick",
+      "call": "create_control_task"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5692,
+      "owner": "run_autopilot_supervision_tick",
+      "call": "command_center"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5778,
+      "owner": "command_center",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5782,
+      "owner": "command_center",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5786,
+      "owner": "command_center",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5790,
+      "owner": "command_center",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5791,
+      "owner": "command_center",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5797,
+      "owner": "command_center",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5801,
+      "owner": "command_center",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5805,
+      "owner": "command_center",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 5809,
+      "owner": "command_center",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 6016,
+      "owner": "command_center",
+      "call": "_command_status"
+    },
+    {
+      "file": "owner_ai.py",
+      "line": 6635,
+      "owner": "daily_briefing",
+      "call": "command_center"
+    },
+    {
+      "file": "pwa_api.py",
+      "line": 27,
+      "owner": "serve",
+      "call": "Application.builder().token(TELEGRAM_TOKEN).request(_telegram_httpx_request()).get_updates_request"
+    },
+    {
+      "file": "reactivation.py",
+      "line": 202,
+      "owner": "run_reactivation_job",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 99,
+      "owner": "_stt_prompt",
+      "call": "_STT_CACHE.update"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 116,
+      "owner": "_known_master_names",
+      "call": "_MASTER_NAMES_CACHE.update"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 131,
+      "owner": "_audio_to_pcm24",
+      "call": "asyncio.create_subprocess_exec"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 398,
+      "owner": "run_session",
+      "call": "ws_oa.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 438,
+      "owner": "run_session.say",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 443,
+      "owner": "run_session.say",
+      "call": "ws_client.send_bytes"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 449,
+      "owner": "run_session.say",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 458,
+      "owner": "run_session.say",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 469,
+      "owner": "run_session.say",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 473,
+      "owner": "run_session.say",
+      "call": "ws_oa.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 487,
+      "owner": "run_session.think_and_reply",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 540,
+      "owner": "run_session.think_and_reply",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 545,
+      "owner": "run_session.think_and_reply",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 556,
+      "owner": "run_session.think_and_reply",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 567,
+      "owner": "run_session.ask_repeat_for_unclear",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 581,
+      "owner": "run_session.pump_client",
+      "call": "ws_oa.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 639,
+      "owner": "run_session.pump_openai",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 655,
+      "owner": "run_session.pump_openai",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 656,
+      "owner": "run_session.pump_openai",
+      "call": "ws_client.send_bytes"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 665,
+      "owner": "run_session.pump_openai",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 675,
+      "owner": "run_session.pump_openai",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "realtime_bridge.py",
+      "line": 687,
+      "owner": "run_session",
+      "call": "ws_client.send_json"
+    },
+    {
+      "file": "referral.py",
+      "line": 66,
+      "owner": "get_or_create_ref_code",
+      "call": "database.create_ref_code"
+    },
+    {
+      "file": "referral.py",
+      "line": 112,
+      "owner": "handle_referral_visit",
+      "call": "database.create_referral"
+    },
+    {
+      "file": "referral.py",
+      "line": 167,
+      "owner": "_send_referral_rewards",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "referral.py",
+      "line": 226,
+      "owner": "run_referral_resolver_job",
+      "call": "database.update_referral_status"
+    },
+    {
+      "file": "referral.py",
+      "line": 251,
+      "owner": "run_referral_resolver_job",
+      "call": "database.update_referral_status"
+    },
+    {
+      "file": "referral.py",
+      "line": 271,
+      "owner": "run_referral_resolver_job",
+      "call": "database.save_referral_promo"
+    },
+    {
+      "file": "referral.py",
+      "line": 276,
+      "owner": "run_referral_resolver_job",
+      "call": "database.save_referral_promo"
+    },
+    {
+      "file": "referral.py",
+      "line": 281,
+      "owner": "run_referral_resolver_job",
+      "call": "database.update_referral_status"
+    },
+    {
+      "file": "referral.py",
+      "line": 282,
+      "owner": "run_referral_resolver_job",
+      "call": "_send_referral_rewards"
+    },
+    {
+      "file": "referral.py",
+      "line": 312,
+      "owner": "build_referral_card",
+      "call": "get_or_create_ref_code"
+    },
+    {
+      "file": "reviews.py",
+      "line": 119,
+      "owner": "send_pending_review_requests",
+      "call": "database.pending_review_requests_to_send"
+    },
+    {
+      "file": "reviews.py",
+      "line": 139,
+      "owner": "send_pending_review_requests",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "reviews.py",
+      "line": 166,
+      "owner": "send_pending_review_requests",
+      "call": "webhook_server._send_client_push"
+    },
+    {
+      "file": "reviews.py",
+      "line": 269,
+      "owner": "handle_rating_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "reviews.py",
+      "line": 275,
+      "owner": "handle_rating_callback",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "reviews.py",
+      "line": 307,
+      "owner": "handle_negative_comment",
+      "call": "conn.execute"
+    },
+    {
+      "file": "reviews.py",
+      "line": 341,
+      "owner": "_notify_admins_positive",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "reviews.py",
+      "line": 368,
+      "owner": "_notify_admins_negative",
+      "call": "context.bot.send_message"
+    },
+    {
+      "file": "site_community.py",
+      "line": 66,
+      "owner": "init_schema",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 72,
+      "owner": "init_schema",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 73,
+      "owner": "init_schema",
+      "call": "db.executescript"
+    },
+    {
+      "file": "site_community.py",
+      "line": 84,
+      "owner": "init_schema",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 92,
+      "owner": "spend_limits",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 93,
+      "owner": "spend_limits",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 95,
+      "owner": "spend_limits",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 99,
+      "owner": "spend_limits",
+      "call": "db.executemany"
+    },
+    {
+      "file": "site_community.py",
+      "line": 105,
+      "owner": "public_status",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 107,
+      "owner": "public_status",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 108,
+      "owner": "public_status",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 116,
+      "owner": "set_like",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 119,
+      "owner": "set_like",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 121,
+      "owner": "set_like",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 124,
+      "owner": "set_like",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 139,
+      "owner": "reserve_comment",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 140,
+      "owner": "reserve_comment",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 145,
+      "owner": "reserve_comment",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 147,
+      "owner": "reserve_comment",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 156,
+      "owner": "comment_result",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 162,
+      "owner": "mark_review",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 167,
+      "owner": "review_queue",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 175,
+      "owner": "resolve_comment",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 176,
+      "owner": "resolve_comment",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 182,
+      "owner": "resolve_comment",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 192,
+      "owner": "notify_owner",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 204,
+      "owner": "notify_owner",
+      "call": "bot.send_message"
+    },
+    {
+      "file": "site_community.py",
+      "line": 213,
+      "owner": "notify_owner",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 225,
+      "owner": "process_comment",
+      "call": "db.execute"
+    },
+    {
+      "file": "site_community.py",
+      "line": 288,
+      "owner": "register_routes.handler",
+      "call": "guest_chat.send"
+    },
+    {
+      "file": "site_community.py",
+      "line": 323,
+      "owner": "register_routes.handler",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "site_community.py",
+      "line": 338,
+      "owner": "register_routes.handler",
+      "call": "payload.update"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 52,
+      "owner": "_connect",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 53,
+      "owner": "_connect",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 54,
+      "owner": "_connect",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 64,
+      "owner": "init_schema",
+      "call": "conn.executescript"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 163,
+      "owner": "_maya_text",
+      "call": "brain._get_anthropic_client().messages.create"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 177,
+      "owner": "_maya_text",
+      "call": "body.update"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 248,
+      "owner": "record_view",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 257,
+      "owner": "toggle_like",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 262,
+      "owner": "toggle_like",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 267,
+      "owner": "toggle_like",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 283,
+      "owner": "add_comment",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 305,
+      "owner": "add_brand_reply",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 306,
+      "owner": "add_brand_reply",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 309,
+      "owner": "add_brand_reply",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 315,
+      "owner": "add_brand_reply",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 340,
+      "owner": "event_status",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 343,
+      "owner": "event_status",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 346,
+      "owner": "event_status",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 359,
+      "owner": "event_status",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_guest_chat.py",
+      "line": 110,
+      "owner": "send",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "site_guest_chat.py",
+      "line": 115,
+      "owner": "send.completed",
+      "call": "future.cancelled"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 30,
+      "owner": "_connect",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 31,
+      "owner": "_connect",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 45,
+      "owner": "init_schema",
+      "call": "conn.executescript"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 71,
+      "owner": "active_draft",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 79,
+      "owner": "start_draft",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 80,
+      "owner": "start_draft",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 86,
+      "owner": "start_draft",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 90,
+      "owner": "start_draft",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 94,
+      "owner": "_parts",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 104,
+      "owner": "draft_content",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 115,
+      "owner": "has_source",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 127,
+      "owner": "add_part",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 128,
+      "owner": "add_part",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 131,
+      "owner": "add_part",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 138,
+      "owner": "add_part",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 147,
+      "owner": "cancel_draft",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 155,
+      "owner": "publish",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 156,
+      "owner": "publish",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 166,
+      "owner": "publish",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 193,
+      "owner": "public_post",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 201,
+      "owner": "list_posts",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 214,
+      "owner": "public_media",
+      "call": "conn.execute"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 227,
+      "owner": "_store_file",
+      "call": "digest.update"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 250,
+      "owner": "prepare_media",
+      "call": "image.save"
+    },
+    {
+      "file": "subscriptions.py",
+      "line": 263,
+      "owner": "sync_subscription_usage",
+      "call": "database.update_subscription_usage"
+    },
+    {
+      "file": "subscriptions.py",
+      "line": 299,
+      "owner": "_send_renew_push",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "subscriptions.py",
+      "line": 307,
+      "owner": "_send_renew_push",
+      "call": "webhook_server._send_client_push"
+    },
+    {
+      "file": "subscriptions.py",
+      "line": 352,
+      "owner": "run_subscriptions_job",
+      "call": "database.update_subscription_status"
+    },
+    {
+      "file": "subscriptions.py",
+      "line": 362,
+      "owner": "run_subscriptions_job",
+      "call": "_send_renew_push"
+    },
+    {
+      "file": "tenant_config_api.py",
+      "line": 100,
+      "owner": "run_dev.do_GET",
+      "call": "self.send_response"
+    },
+    {
+      "file": "tenant_config_api.py",
+      "line": 101,
+      "owner": "run_dev.do_GET",
+      "call": "self.send_header"
+    },
+    {
+      "file": "tenant_config_api.py",
+      "line": 102,
+      "owner": "run_dev.do_GET",
+      "call": "self.send_header"
+    },
+    {
+      "file": "tenant_config_api.py",
+      "line": 103,
+      "owner": "run_dev.do_GET",
+      "call": "self.send_header"
+    },
+    {
+      "file": "voice.py",
+      "line": 321,
+      "owner": "_pitch_shift",
+      "call": "asyncio.create_subprocess_exec"
+    },
+    {
+      "file": "voice.py",
+      "line": 340,
+      "owner": "_convert_mp3_to_ogg_opus",
+      "call": "asyncio.create_subprocess_exec"
+    },
+    {
+      "file": "web_auth.py",
+      "line": 137,
+      "owner": "verify_phone_login",
+      "call": "_issue_session"
+    },
+    {
+      "file": "web_auth.py",
+      "line": 220,
+      "owner": "issue_vk_session",
+      "call": "_issue_session"
+    },
+    {
+      "file": "web_auth.py",
+      "line": 272,
+      "owner": "vk_session_from_token",
+      "call": "issue_vk_session"
+    },
+    {
+      "file": "web_auth.py",
+      "line": 370,
+      "owner": "issue_yandex_session",
+      "call": "_issue_session"
+    },
+    {
+      "file": "web_auth.py",
+      "line": 427,
+      "owner": "_issue_session",
+      "call": "database.create_web_session"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 118,
+      "owner": "_voice_known_master_names",
+      "call": "_VOICE_MASTER_NAMES_CACHE.update"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 137,
+      "owner": "_voice_known_service_titles",
+      "call": "_VOICE_SERVICE_TITLES_CACHE.update"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 475,
+      "owner": "_offer_tip_to_client",
+      "call": "_send_client_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 531,
+      "owner": "_notify_client_record",
+      "call": "_send_client_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 792,
+      "owner": "_process_record_create",
+      "call": "_save_record_state"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 899,
+      "owner": "_process_record_create",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 918,
+      "owner": "_process_record_create",
+      "call": "_send_master_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1002,
+      "owner": "_process_record_update._persist",
+      "call": "_save_record_state"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1071,
+      "owner": "_process_record_update",
+      "call": "database.pop_recent_reschedule_actor"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1102,
+      "owner": "_process_record_update",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1113,
+      "owner": "_process_record_update",
+      "call": "_send_master_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1205,
+      "owner": "_process_record_update",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1222,
+      "owner": "_process_record_update",
+      "call": "_send_master_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1297,
+      "owner": "_process_record_delete",
+      "call": "database.pop_recent_cancel_actor"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1317,
+      "owner": "_process_record_delete",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1335,
+      "owner": "_process_record_delete",
+      "call": "_send_master_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1384,
+      "owner": "_process_record_delete",
+      "call": "database.delete_record_state"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1463,
+      "owner": "handle_yclients_webhook",
+      "call": "_process_record_create"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1469,
+      "owner": "handle_yclients_webhook",
+      "call": "_process_record_update"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 1474,
+      "owner": "handle_yclients_webhook",
+      "call": "_process_record_delete"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3373,
+      "owner": "_owner_job_chat_response",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3440,
+      "owner": "panel_job_run_handler",
+      "call": "database.create_owner_action"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3459,
+      "owner": "panel_job_run_handler",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3546,
+      "owner": "_run_owner_job_from_chat",
+      "call": "database.create_owner_action"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3555,
+      "owner": "_run_owner_job_from_chat",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3678,
+      "owner": "broadcast_send_to_base",
+      "call": "database.has_saved_notify_prefs"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3686,
+      "owner": "broadcast_send_to_base",
+      "call": "bot.send_message"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3694,
+      "owner": "broadcast_send_to_base",
+      "call": "bot.send_message"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3704,
+      "owner": "broadcast_send_to_base",
+      "call": "_send_client_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3779,
+      "owner": "panel_broadcast_handler",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 3779,
+      "owner": "panel_broadcast_handler",
+      "call": "broadcast_send_to_base"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 4137,
+      "owner": "panel_salary_handler",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 4265,
+      "owner": "_gross_month_for",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 5368,
+      "owner": "_build_analytics_pdf",
+      "call": "c.save"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 5392,
+      "owner": "panel_report_pdf_handler",
+      "call": "bot.send_document"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 5801,
+      "owner": "_client_record_failure",
+      "call": "payload.update"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 5926,
+      "owner": "client_cancel_record_handler",
+      "call": "_client_appointment_command_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 5959,
+      "owner": "client_reschedule_record_handler",
+      "call": "_client_appointment_command_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 6133,
+      "owner": "applogin_start_handler",
+      "call": "database.applogin_create"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 6278,
+      "owner": "_finalize_booking_for_chat",
+      "call": "client_commands.command"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 6494,
+      "owner": "_subscription_shop_catalog",
+      "call": "prices.update"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 7146,
+      "owner": "_founder_learning_reply",
+      "call": "_founder_rule_command"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 7248,
+      "owner": "_founder_permission_reply",
+      "call": "_founder_permission_command"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8121,
+      "owner": "_store_assistant_message_in_chat",
+      "call": "memory.save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8201,
+      "owner": "install_staff_telegram_chat_mirror._send_message_with_app_mirror",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8202,
+      "owner": "install_staff_telegram_chat_mirror._send_message_with_app_mirror",
+      "call": "maya_inbox_bridge.observe_legacy_telegram_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8422,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8447,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8448,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8460,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8461,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8473,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8474,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8487,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8488,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8500,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8501,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8515,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8516,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8528,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8529,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8541,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8542,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8556,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8557,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8589,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8590,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8611,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8620,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8637,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8656,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8664,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8665,
+      "owner": "chat_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8713,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8790,
+      "owner": "chat_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8972,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8997,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 8998,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9010,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9011,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9023,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9024,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9037,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9038,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9050,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9051,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9065,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9066,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9078,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9079,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9091,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9092,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9106,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9107,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9123,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9124,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9145,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9154,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9171,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9190,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9198,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9199,
+      "owner": "chat_stream_handler",
+      "call": "_saved_chat_response"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9245,
+      "owner": "chat_stream_handler",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9254,
+      "owner": "chat_stream_handler",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9271,
+      "owner": "chat_stream_handler",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9280,
+      "owner": "chat_stream_handler",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9347,
+      "owner": "chat_stream_handler._emit",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9358,
+      "owner": "chat_stream_handler._queue_sentences",
+      "call": "loop.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9376,
+      "owner": "chat_stream_handler._cancel_audio",
+      "call": "t.cancel"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9390,
+      "owner": "chat_stream_handler",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9399,
+      "owner": "chat_stream_handler",
+      "call": "_cancel_audio"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9400,
+      "owner": "chat_stream_handler",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9411,
+      "owner": "chat_stream_handler",
+      "call": "_cancel_audio"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9412,
+      "owner": "chat_stream_handler",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9414,
+      "owner": "chat_stream_handler",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9417,
+      "owner": "chat_stream_handler",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9430,
+      "owner": "chat_stream_handler",
+      "call": "_cancel_audio"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9504,
+      "owner": "chat_stream_handler",
+      "call": "save_conversations"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9522,
+      "owner": "chat_stream_handler",
+      "call": "_send"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9545,
+      "owner": "realtime_handler",
+      "call": "ws.send_json"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9576,
+      "owner": "realtime_handler",
+      "call": "ws.send_json"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9580,
+      "owner": "realtime_handler",
+      "call": "ws.send_json"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9584,
+      "owner": "realtime_handler",
+      "call": "ws.send_json"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9739,
+      "owner": "auth_vk_handler",
+      "call": "web_auth.issue_vk_session"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9791,
+      "owner": "auth_yandex_handler",
+      "call": "web_auth.issue_yandex_session"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9900,
+      "owner": "_send_growth_role_briefs_once",
+      "call": "_master_day_brief_send_hour"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 9933,
+      "owner": "_send_growth_role_briefs_once",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10132,
+      "owner": "_send_master_day_briefs_once",
+      "call": "_master_day_brief_send_hour"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10231,
+      "owner": "_send_master_day_briefs_once",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10239,
+      "owner": "_send_master_day_briefs_once",
+      "call": "_send_master_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10347,
+      "owner": "panel_master_day_brief_handler",
+      "call": "_send_master_day_briefs_once"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10452,
+      "owner": "_send_shift_reminders_once",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10460,
+      "owner": "_send_shift_reminders_once",
+      "call": "_send_master_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10489,
+      "owner": "master_shift_reminder_loop",
+      "call": "_send_shift_reminders_once"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10500,
+      "owner": "master_day_brief_loop",
+      "call": "_send_master_day_briefs_once"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10511,
+      "owner": "master_day_brief_loop",
+      "call": "_send_growth_role_briefs_once"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 10571,
+      "owner": "notify_owner_cycle_candidates",
+      "call": "_send_client_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11235,
+      "owner": "panel_journal_reschedule_handler",
+      "call": "database.mark_reschedule_actor"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11471,
+      "owner": "_push_team_message",
+      "call": "app.bot.send_message"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11481,
+      "owner": "_push_team_message",
+      "call": "_send_master_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11485,
+      "owner": "_push_team_message",
+      "call": "_send_client_push"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11579,
+      "owner": "team_chat_send_handler",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 11591,
+      "owner": "team_chat_send_handler",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12159,
+      "owner": "start_webhook_server",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12160,
+      "owner": "start_webhook_server",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12161,
+      "owner": "start_webhook_server",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12162,
+      "owner": "start_webhook_server",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "webhook_server.py",
+      "line": 12163,
+      "owner": "start_webhook_server",
+      "call": "asyncio.create_task"
+    },
+    {
+      "file": "yclients.py",
+      "line": 238,
+      "owner": "_delete",
+      "call": "requests.delete"
+    },
+    {
+      "file": "yclients.py",
+      "line": 567,
+      "owner": "change_staff_day_schedule",
+      "call": "preview.update"
+    }
+  ],
+  "sql": [
+    {
+      "file": "bot.py",
+      "line": 3168,
+      "owner": "_bind_master_chat_direct",
+      "verb": "UPDATE",
+      "table": "masters_telegram"
+    },
+    {
+      "file": "database.py",
+      "line": 703,
+      "owner": "_backfill_encryption",
+      "verb": "UPDATE",
+      "table": "clients"
+    },
+    {
+      "file": "database.py",
+      "line": 721,
+      "owner": "_backfill_encryption",
+      "verb": "UPDATE",
+      "table": "gift_certificates"
+    },
+    {
+      "file": "database.py",
+      "line": 740,
+      "owner": "get_or_create_client",
+      "verb": "INSERT INTO",
+      "table": "clients"
+    },
+    {
+      "file": "database.py",
+      "line": 768,
+      "owner": "update_client",
+      "verb": "UPDATE",
+      "table": "clients"
+    },
+    {
+      "file": "database.py",
+      "line": 812,
+      "owner": "mark_whats_new_seen",
+      "verb": "UPDATE",
+      "table": "clients"
+    },
+    {
+      "file": "database.py",
+      "line": 837,
+      "owner": "record_first_source",
+      "verb": "UPDATE",
+      "table": "clients"
+    },
+    {
+      "file": "database.py",
+      "line": 937,
+      "owner": "save_web_login_code",
+      "verb": "UPDATE",
+      "table": "web_login_codes"
+    },
+    {
+      "file": "database.py",
+      "line": 942,
+      "owner": "save_web_login_code",
+      "verb": "INSERT INTO",
+      "table": "web_login_codes"
+    },
+    {
+      "file": "database.py",
+      "line": 966,
+      "owner": "verify_web_login_code",
+      "verb": "UPDATE",
+      "table": "web_login_codes"
+    },
+    {
+      "file": "database.py",
+      "line": 971,
+      "owner": "verify_web_login_code",
+      "verb": "UPDATE",
+      "table": "web_login_codes"
+    },
+    {
+      "file": "database.py",
+      "line": 990,
+      "owner": "create_web_session",
+      "verb": "INSERT OR REPLACE INTO",
+      "table": "web_sessions"
+    },
+    {
+      "file": "database.py",
+      "line": 1016,
+      "owner": "get_web_session",
+      "verb": "UPDATE",
+      "table": "web_sessions"
+    },
+    {
+      "file": "database.py",
+      "line": 1024,
+      "owner": "revoke_web_session",
+      "verb": "UPDATE",
+      "table": "web_sessions"
+    },
+    {
+      "file": "database.py",
+      "line": 1044,
+      "owner": "applogin_create",
+      "verb": "INSERT OR REPLACE INTO",
+      "table": "applogin_nonces"
+    },
+    {
+      "file": "database.py",
+      "line": 1056,
+      "owner": "applogin_authorize",
+      "verb": "UPDATE",
+      "table": "applogin_nonces"
+    },
+    {
+      "file": "database.py",
+      "line": 1075,
+      "owner": "applogin_poll",
+      "verb": "UPDATE",
+      "table": "applogin_nonces"
+    },
+    {
+      "file": "database.py",
+      "line": 1249,
+      "owner": "set_marketing_last_sent",
+      "verb": "INSERT OR REPLACE INTO",
+      "table": "client_marketing_last"
+    },
+    {
+      "file": "database.py",
+      "line": 1360,
+      "owner": "save_booking",
+      "verb": "INSERT INTO",
+      "table": "bookings"
+    },
+    {
+      "file": "database.py",
+      "line": 1418,
+      "owner": "save_gift_certificate",
+      "verb": "INSERT INTO",
+      "table": "gift_certificates"
+    },
+    {
+      "file": "database.py",
+      "line": 1451,
+      "owner": "mark_cert_paid",
+      "verb": "UPDATE",
+      "table": "gift_certificates"
+    },
+    {
+      "file": "database.py",
+      "line": 1466,
+      "owner": "set_cert_payment_id",
+      "verb": "UPDATE",
+      "table": "gift_certificates"
+    },
+    {
+      "file": "database.py",
+      "line": 1491,
+      "owner": "mark_cert_canceled",
+      "verb": "UPDATE",
+      "table": "gift_certificates"
+    },
+    {
+      "file": "database.py",
+      "line": 1506,
+      "owner": "mark_cert_used",
+      "verb": "UPDATE",
+      "table": "gift_certificates"
+    },
+    {
+      "file": "database.py",
+      "line": 1533,
+      "owner": "add_admin",
+      "verb": "INSERT OR IGNORE INTO",
+      "table": "admins"
+    },
+    {
+      "file": "database.py",
+      "line": 1597,
+      "owner": "remove_admin",
+      "verb": "DELETE FROM",
+      "table": "admins"
+    },
+    {
+      "file": "database.py",
+      "line": 1708,
+      "owner": "add_staff_message",
+      "verb": "INSERT INTO",
+      "table": "staff_messages"
+    },
+    {
+      "file": "database.py",
+      "line": 1767,
+      "owner": "delete_staff_message",
+      "verb": "DELETE FROM",
+      "table": "staff_messages"
+    },
+    {
+      "file": "database.py",
+      "line": 1778,
+      "owner": "mute_master",
+      "verb": "UPDATE",
+      "table": "masters_telegram"
+    },
+    {
+      "file": "database.py",
+      "line": 1788,
+      "owner": "unmute_master",
+      "verb": "UPDATE",
+      "table": "masters_telegram"
+    },
+    {
+      "file": "database.py",
+      "line": 1887,
+      "owner": "mark_record_processed",
+      "verb": "INSERT INTO",
+      "table": "processed_records"
+    },
+    {
+      "file": "database.py",
+      "line": 1917,
+      "owner": "upsert_record_state",
+      "verb": "INSERT INTO",
+      "table": "record_state"
+    },
+    {
+      "file": "database.py",
+      "line": 1917,
+      "owner": "upsert_record_state",
+      "verb": "UPDATE",
+      "table": "SET"
+    },
+    {
+      "file": "database.py",
+      "line": 1933,
+      "owner": "delete_record_state",
+      "verb": "DELETE FROM",
+      "table": "record_state"
+    },
+    {
+      "file": "database.py",
+      "line": 1966,
+      "owner": "delete_visit_mood",
+      "verb": "DELETE FROM",
+      "table": "visit_mood"
+    },
+    {
+      "file": "database.py",
+      "line": 1993,
+      "owner": "set_client_history_cache",
+      "verb": "INSERT OR REPLACE INTO",
+      "table": "client_history_cache"
+    },
+    {
+      "file": "database.py",
+      "line": 2014,
+      "owner": "log_ai_advice",
+      "verb": "INSERT INTO",
+      "table": "ai_advice_log"
+    },
+    {
+      "file": "database.py",
+      "line": 2028,
+      "owner": "update_ai_advice_final_services",
+      "verb": "UPDATE",
+      "table": "ai_advice_log"
+    },
+    {
+      "file": "database.py",
+      "line": 2122,
+      "owner": "update_ai_advice_outcome",
+      "verb": "UPDATE",
+      "table": "ai_advice_log"
+    },
+    {
+      "file": "database.py",
+      "line": 2152,
+      "owner": "set_setting",
+      "verb": "INSERT INTO",
+      "table": "settings"
+    },
+    {
+      "file": "database.py",
+      "line": 2152,
+      "owner": "set_setting",
+      "verb": "UPDATE",
+      "table": "SET"
+    },
+    {
+      "file": "database.py",
+      "line": 2188,
+      "owner": "add_salon_expense",
+      "verb": "INSERT INTO",
+      "table": "salon_expenses"
+    },
+    {
+      "file": "database.py",
+      "line": 2218,
+      "owner": "clear_salon_expenses",
+      "verb": "DELETE FROM",
+      "table": "salon_expenses"
+    },
+    {
+      "file": "database.py",
+      "line": 2232,
+      "owner": "set_cash_log",
+      "verb": "INSERT INTO",
+      "table": "cash_log"
+    },
+    {
+      "file": "database.py",
+      "line": 2232,
+      "owner": "set_cash_log",
+      "verb": "UPDATE",
+      "table": "SET"
+    },
+    {
+      "file": "database.py",
+      "line": 2270,
+      "owner": "add_slot_interest",
+      "verb": "INSERT INTO",
+      "table": "slot_waitlist"
+    },
+    {
+      "file": "database.py",
+      "line": 2301,
+      "owner": "mark_waitlist_admin_alerted",
+      "verb": "UPDATE",
+      "table": "slot_waitlist"
+    },
+    {
+      "file": "database.py",
+      "line": 2357,
+      "owner": "mark_slot_waitlist_notified",
+      "verb": "UPDATE",
+      "table": "slot_waitlist"
+    },
+    {
+      "file": "database.py",
+      "line": 2372,
+      "owner": "log_ai_usage",
+      "verb": "INSERT INTO",
+      "table": "ai_usage_log"
+    },
+    {
+      "file": "database.py",
+      "line": 2469,
+      "owner": "log_reactivation",
+      "verb": "INSERT INTO",
+      "table": "reactivation_log"
+    },
+    {
+      "file": "database.py",
+      "line": 2498,
+      "owner": "log_cycle_reminder",
+      "verb": "INSERT INTO",
+      "table": "cycle_reminder_log"
+    },
+    {
+      "file": "database.py",
+      "line": 2525,
+      "owner": "schedule_review_request",
+      "verb": "INSERT INTO",
+      "table": "review_requests"
+    },
+    {
+      "file": "database.py",
+      "line": 2551,
+      "owner": "mark_review_request_sent",
+      "verb": "UPDATE",
+      "table": "review_requests"
+    },
+    {
+      "file": "database.py",
+      "line": 2560,
+      "owner": "mark_review_request_failed",
+      "verb": "UPDATE",
+      "table": "review_requests"
+    },
+    {
+      "file": "database.py",
+      "line": 2573,
+      "owner": "record_review_response",
+      "verb": "UPDATE",
+      "table": "review_requests"
+    },
+    {
+      "file": "database.py",
+      "line": 2592,
+      "owner": "expire_stale_review_requests",
+      "verb": "UPDATE",
+      "table": "review_requests"
+    },
+    {
+      "file": "database.py",
+      "line": 2704,
+      "owner": "upsert_client_chat_state",
+      "verb": "INSERT OR IGNORE INTO",
+      "table": "client_chat_state"
+    },
+    {
+      "file": "database.py",
+      "line": 2709,
+      "owner": "upsert_client_chat_state",
+      "verb": "UPDATE",
+      "table": "client_chat_state"
+    },
+    {
+      "file": "database.py",
+      "line": 2718,
+      "owner": "upsert_client_chat_state",
+      "verb": "UPDATE",
+      "table": "client_chat_state"
+    },
+    {
+      "file": "database.py",
+      "line": 2725,
+      "owner": "upsert_client_chat_state",
+      "verb": "UPDATE",
+      "table": "client_chat_state"
+    },
+    {
+      "file": "database.py",
+      "line": 2769,
+      "owner": "mark_lead_alerted",
+      "verb": "UPDATE",
+      "table": "client_chat_state"
+    },
+    {
+      "file": "database.py",
+      "line": 2823,
+      "owner": "log_freed_slot_offer",
+      "verb": "INSERT INTO",
+      "table": "freed_slot_offers"
+    },
+    {
+      "file": "database.py",
+      "line": 2839,
+      "owner": "create_subscription",
+      "verb": "INSERT INTO",
+      "table": "subscriptions"
+    },
+    {
+      "file": "database.py",
+      "line": 2853,
+      "owner": "set_subscription_payment_id",
+      "verb": "UPDATE",
+      "table": "subscriptions"
+    },
+    {
+      "file": "database.py",
+      "line": 2880,
+      "owner": "activate_subscription",
+      "verb": "UPDATE",
+      "table": "subscriptions"
+    },
+    {
+      "file": "database.py",
+      "line": 2891,
+      "owner": "update_subscription_status",
+      "verb": "UPDATE",
+      "table": "subscriptions"
+    },
+    {
+      "file": "database.py",
+      "line": 2900,
+      "owner": "update_subscription_usage",
+      "verb": "UPDATE",
+      "table": "subscriptions"
+    },
+    {
+      "file": "database.py",
+      "line": 2908,
+      "owner": "mark_subscription_renew_pushed",
+      "verb": "UPDATE",
+      "table": "subscriptions"
+    },
+    {
+      "file": "database.py",
+      "line": 2958,
+      "owner": "add_loyalty_transaction",
+      "verb": "INSERT INTO",
+      "table": "loyalty_transactions"
+    },
+    {
+      "file": "database.py",
+      "line": 2995,
+      "owner": "reserve_loyalty_points",
+      "verb": "DELETE FROM",
+      "table": "loyalty_transactions"
+    },
+    {
+      "file": "database.py",
+      "line": 3022,
+      "owner": "reserve_loyalty_points",
+      "verb": "INSERT INTO",
+      "table": "loyalty_transactions"
+    },
+    {
+      "file": "database.py",
+      "line": 3062,
+      "owner": "finalize_loyalty_reservation",
+      "verb": "UPDATE",
+      "table": "loyalty_transactions"
+    },
+    {
+      "file": "database.py",
+      "line": 3082,
+      "owner": "release_loyalty_reservation",
+      "verb": "DELETE FROM",
+      "table": "loyalty_transactions"
+    },
+    {
+      "file": "database.py",
+      "line": 3118,
+      "owner": "redeem_loyalty_points",
+      "verb": "INSERT INTO",
+      "table": "loyalty_transactions"
+    },
+    {
+      "file": "database.py",
+      "line": 3228,
+      "owner": "create_loyalty_code",
+      "verb": "INSERT INTO",
+      "table": "loyalty_redeem_codes"
+    },
+    {
+      "file": "database.py",
+      "line": 3246,
+      "owner": "mark_loyalty_code_used",
+      "verb": "UPDATE",
+      "table": "loyalty_redeem_codes"
+    },
+    {
+      "file": "database.py",
+      "line": 3260,
+      "owner": "claim_loyalty_code",
+      "verb": "UPDATE",
+      "table": "loyalty_redeem_codes"
+    },
+    {
+      "file": "database.py",
+      "line": 3630,
+      "owner": "create_ref_code",
+      "verb": "INSERT INTO",
+      "table": "referral_codes"
+    },
+    {
+      "file": "database.py",
+      "line": 3663,
+      "owner": "create_referral",
+      "verb": "INSERT INTO",
+      "table": "referrals"
+    },
+    {
+      "file": "database.py",
+      "line": 3684,
+      "owner": "set_referral_referee_client",
+      "verb": "UPDATE",
+      "table": "referrals"
+    },
+    {
+      "file": "database.py",
+      "line": 3694,
+      "owner": "update_referral_status",
+      "verb": "UPDATE",
+      "table": "referrals"
+    },
+    {
+      "file": "database.py",
+      "line": 3705,
+      "owner": "save_referral_promo",
+      "verb": "INSERT INTO",
+      "table": "referral_promos"
+    },
+    {
+      "file": "database.py",
+      "line": 3783,
+      "owner": "save_birthday_promo",
+      "verb": "INSERT INTO",
+      "table": "birthday_promo"
+    },
+    {
+      "file": "database.py",
+      "line": 3811,
+      "owner": "mark_birthday_promo_used",
+      "verb": "UPDATE",
+      "table": "birthday_promo"
+    },
+    {
+      "file": "database.py",
+      "line": 3863,
+      "owner": "cutmatch_incr_today",
+      "verb": "INSERT INTO",
+      "table": "cutmatch_usage"
+    },
+    {
+      "file": "database.py",
+      "line": 3863,
+      "owner": "cutmatch_incr_today",
+      "verb": "UPDATE",
+      "table": "SET"
+    },
+    {
+      "file": "database.py",
+      "line": 3887,
+      "owner": "log_tool_call",
+      "verb": "INSERT INTO",
+      "table": "tool_audit"
+    },
+    {
+      "file": "database.py",
+      "line": 3985,
+      "owner": "create_owner_action",
+      "verb": "INSERT INTO",
+      "table": "owner_action_journal"
+    },
+    {
+      "file": "database.py",
+      "line": 4110,
+      "owner": "link_owner_control_task_action",
+      "verb": "UPDATE",
+      "table": "owner_action_journal"
+    },
+    {
+      "file": "database.py",
+      "line": 4153,
+      "owner": "finish_owner_action",
+      "verb": "UPDATE",
+      "table": "owner_action_journal"
+    },
+    {
+      "file": "database.py",
+      "line": 4275,
+      "owner": "update_owner_control_task",
+      "verb": "UPDATE",
+      "table": "owner_action_journal"
+    },
+    {
+      "file": "database.py",
+      "line": 4338,
+      "owner": "mark_owner_control_task_delivery",
+      "verb": "UPDATE",
+      "table": "owner_action_journal"
+    },
+    {
+      "file": "database.py",
+      "line": 4409,
+      "owner": "update_owner_assignment_work_state",
+      "verb": "UPDATE",
+      "table": "owner_action_journal"
+    },
+    {
+      "file": "database.py",
+      "line": 4573,
+      "owner": "evaluate_owner_action",
+      "verb": "UPDATE",
+      "table": "owner_action_journal"
+    },
+    {
+      "file": "database.py",
+      "line": 4632,
+      "owner": "mark_payment_done",
+      "verb": "INSERT OR IGNORE INTO",
+      "table": "payment_idempotency"
+    },
+    {
+      "file": "database.py",
+      "line": 4650,
+      "owner": "add_salon_rule",
+      "verb": "INSERT INTO",
+      "table": "salon_rules"
+    },
+    {
+      "file": "database.py",
+      "line": 4674,
+      "owner": "deactivate_salon_rule",
+      "verb": "UPDATE",
+      "table": "salon_rules"
+    },
+    {
+      "file": "reviews.py",
+      "line": 308,
+      "owner": "handle_negative_comment",
+      "verb": "UPDATE",
+      "table": "review_requests"
+    },
+    {
+      "file": "site_community.py",
+      "line": 84,
+      "owner": "init_schema",
+      "verb": "UPDATE",
+      "table": "site_event_comments"
+    },
+    {
+      "file": "site_community.py",
+      "line": 93,
+      "owner": "spend_limits",
+      "verb": "DELETE FROM",
+      "table": "site_community_limits"
+    },
+    {
+      "file": "site_community.py",
+      "line": 99,
+      "owner": "spend_limits",
+      "verb": "INSERT INTO",
+      "table": "site_community_limits"
+    },
+    {
+      "file": "site_community.py",
+      "line": 119,
+      "owner": "set_like",
+      "verb": "DELETE FROM",
+      "table": "site_guest_likes"
+    },
+    {
+      "file": "site_community.py",
+      "line": 147,
+      "owner": "reserve_comment",
+      "verb": "INSERT INTO",
+      "table": "site_event_comments"
+    },
+    {
+      "file": "site_community.py",
+      "line": 162,
+      "owner": "mark_review",
+      "verb": "UPDATE",
+      "table": "site_event_comments"
+    },
+    {
+      "file": "site_community.py",
+      "line": 182,
+      "owner": "resolve_comment",
+      "verb": "UPDATE",
+      "table": "site_event_comments"
+    },
+    {
+      "file": "site_community.py",
+      "line": 213,
+      "owner": "notify_owner",
+      "verb": "UPDATE",
+      "table": "site_event_comments"
+    },
+    {
+      "file": "site_community.py",
+      "line": 225,
+      "owner": "process_comment",
+      "verb": "UPDATE",
+      "table": "site_event_comments"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 249,
+      "owner": "record_view",
+      "verb": "INSERT OR IGNORE INTO",
+      "table": "site_event_views"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 263,
+      "owner": "toggle_like",
+      "verb": "DELETE FROM",
+      "table": "site_event_likes"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 268,
+      "owner": "toggle_like",
+      "verb": "INSERT INTO",
+      "table": "site_event_likes"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 284,
+      "owner": "add_comment",
+      "verb": "INSERT INTO",
+      "table": "site_event_comments"
+    },
+    {
+      "file": "site_engagement.py",
+      "line": 316,
+      "owner": "add_brand_reply",
+      "verb": "INSERT INTO",
+      "table": "site_event_comments"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 87,
+      "owner": "start_draft",
+      "verb": "INSERT INTO",
+      "table": "site_posts"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 139,
+      "owner": "add_part",
+      "verb": "INSERT INTO",
+      "table": "site_post_parts"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 148,
+      "owner": "cancel_draft",
+      "verb": "UPDATE",
+      "table": "site_posts"
+    },
+    {
+      "file": "site_publications.py",
+      "line": 166,
+      "owner": "publish",
+      "verb": "UPDATE",
+      "table": "site_posts"
+    },
+    {
+      "file": "yclients.py",
+      "line": 593,
+      "owner": "change_staff_day_schedule",
+      "verb": "UPDATE",
+      "table": "failed"
+    }
+  ]
+}

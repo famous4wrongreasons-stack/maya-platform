@@ -1,0 +1,29 @@
+{
+  "status": "PASS_DIAGNOSTIC_GAPS_CONFIRMED",
+  "sourceCheckpoint": "7201f7bd",
+  "checks": {
+    "dailyReportPlanAccepted": true,
+    "weeklyReminderRejectedByB36Normalizer": true,
+    "expenseSameSourceSameValuesSameDerivedKey": true,
+    "expenseSameSourceChangedAmountChangesDerivedKeyAndTarget": true,
+    "revokedMembershipRejectedByExpensePlanner": true,
+    "existingAiApprovalSameIntentAccepted": true,
+    "existingAiApprovalChangedIntentRejected": true
+  },
+  "limitation": "Pure source-method proof only. No claim of B37 admitted execution, PostgreSQL behavior, staff Telegram authentication, durable reply binding or runtime remediation.",
+  "sourceHashes": {
+    "maya-saas-backend/src/expenses/expense-canonical-shadow.service.ts": "0cba259b0cf48c08428827529c3c8c8e75d02a1c3bd6bf69dcdad78fd8de1477",
+    "maya-saas-backend/src/expenses/p4-07-expense-executable.service.ts": "5a193f512fc4b271db2d28d8545bbda3bdae472f42c3c70ef4afa13d6e62b7c4",
+    "maya-saas-backend/src/expenses/p4-07-expense-canonical-cutover.service.ts": "ceced189bba2ef42e6eb4b2c23984e8b3b550d1079fe21dc241b082b50d87eaa",
+    "maya-saas-backend/src/expenses/expenses.controller.ts": "1d12390e87ebe87c19738826d4c0d939465b494ec14be30e5c9d80fe82e9a8fa",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "0c780feee85bb5a179185aebf281a713338c4a4d4ad20662fb5ed9fcb66d27ef",
+    "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts": "64294fb16c8cf9159726d781168351844a9f409d7b615e17910bfbecc20b2311",
+    "maya-saas-backend/src/action-engine/action-engine.policy-registry.ts": "303982dba6c32c08b85e95cf59d366aafeb24ac6cdbc96464d624e5d6d52410f",
+    "maya-saas-backend/src/owner-reports/owner-report.contract.ts": "36eeaa19f3489425c320959577fcf8413d509f30323f0bb1f57a575ae5cfc77f",
+    "maya-saas-backend/prisma/migrations/20260907180000_b36_owner_report_run/migration.sql": "3572d6327a1f24f055370d44004c6ddfdebdfcc6746d3a2fbb33a14955a676f0"
+  },
+  "databasesOpened": 0,
+  "productionMessages": 0,
+  "productionExpenseMutations": 0,
+  "processHygiene": 0
+}

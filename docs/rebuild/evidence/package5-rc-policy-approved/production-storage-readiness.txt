@@ -1,0 +1,8 @@
+UMask=0027
+User=maya-saas
+Group=maya-saas
+ReadWritePaths=/var/lib/maya-saas
+ProtectSystem=strict
+700 root root /var/lib/maya-saas
+750 maya-saas maya-saas /var/lib/maya-saas/uploads
+{"status":"ready","service":"maya-saas-backend","checks":{"database":"ready"},"timestamp":"2026-09-08T11:49:17.525Z"}

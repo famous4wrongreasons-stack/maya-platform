@@ -1,0 +1,13 @@
+{
+  "contract": "package5.wave3.all8-executable-proof/1",
+  "actionClasses": 8,
+  "shadows": 8,
+  "shadowDivergences": 0,
+  "mutationFacts": 9,
+  "providerDispatches": 1,
+  "providerReconciliation": true,
+  "duplicateBusinessMutationPossible": false,
+  "tenantIsolation": true,
+  "p02p03Hold": true,
+  "rawCredentialOrNotesInActionEvidence": false
+}

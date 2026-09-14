@@ -1,0 +1,240 @@
+import assert from 'node:assert/strict';
+import { ConfigService } from '@nestjs/config';
+import type { CrmService } from '../src/crm/crm.service';
+import { InternalCalendarService } from '../src/internal-calendar/internal-calendar.service';
+import type { UsersService } from '../src/users/users.service';
+import type { QuotaService } from '../src/quotas/quota.service';
+import { localWeekday } from '../src/internal-calendar/internal-calendar.utils';
+import { OwnerReportStore } from '../src/owner-reports/owner-report.store';
+import { OperationalAlertStore } from '../src/operational-alerts/operational-alert.store';
+import { OperationalAlertSourceService } from '../src/operational-alerts/operational-alert-source.service';
+import { OperationalAlertsService } from '../src/operational-alerts/operational-alerts.service';
+import { ActionEngineRuntimeService } from '../src/action-engine';
+import { CommunicationDeliveryService } from '../src/communication-delivery';
+import {
+  alertRequest,
+  normalizeAlert,
+} from '../src/operational-alerts/operational-alert.contract';
+import {
+  config,
+  context,
+  db,
+  engine,
+  ingress,
+  secret,
+  staffFixture,
+  tenantFixture,
+} from './package5-wave-rc-proof-support';
+const settings = new ConfigService({
+  DATABASE_URL: config.get<string>('DATABASE_URL'),
+  CRM_ENCRYPTION_KEY: secret,
+  OPERATIONAL_ALERTS_CANONICAL_CUTOVER_AT: new Date(
+    Date.now() - 86400000,
+  ).toISOString(),
+});
+const store = new OperationalAlertStore(db, context, ingress, settings),
+  bindings = new OwnerReportStore(db, context, ingress, settings);
+const internal = new InternalCalendarService(
+  db,
+  context,
+  {} as UsersService,
+  {} as QuotaService,
+);
+const sources = new OperationalAlertSourceService(
+  db,
+  context,
+  {
+    getStaffScheduleDay: () =>
+      Promise.reject(Error('external provider forbidden in internal proof')),
+  } as unknown as CrmService,
+  internal,
+  bindings,
+  store,
+);
+const delivery = new CommunicationDeliveryService(
+  db,
+  new ActionEngineRuntimeService(engine, ingress),
+  settings,
+);
+const owner = () =>
+  new OperationalAlertsService(db, context, store, sources, delivery);
+const checks: string[] = [];
+async function main() {
+  await db.$connect();
+  const tenant = await tenantFixture();
+  await db.tenant.update({
+    where: { id: tenant.id },
+    data: { calendarSource: 'internal', defaultTimezone: 'UTC' },
+  });
+  const user = await staffFixture(tenant.id, 'staff'),
+    branch = await db.branch.create({
+      data: {
+        tenantId: tenant.id,
+        name: 'Synthetic shift branch',
+        timezone: 'UTC',
+      },
+    });
+  const provider = await db.internalProvider.create({
+    data: {
+      tenantId: tenant.id,
+      userId: user.user.id,
+      branchId: branch.id,
+      displayName: 'Synthetic staff',
+    },
+  });
+  await db.staff.create({
+    data: {
+      id: provider.id,
+      tenantId: tenant.id,
+      userId: user.user.id,
+      branchId: branch.id,
+      encryptedDisplayName: 'synthetic',
+    },
+  });
+  const start = new Date(Math.floor(Date.now() / 60000) * 60000 + 3600000),
+    day = start.toISOString().slice(0, 10),
+    minute = start.getUTCHours() * 60 + start.getUTCMinutes();
+  assert.ok(minute < 1439, 'synthetic fixture needs a nonmidnight end');
+  const rule = await db.internalAvailabilityRule.create({
+    data: {
+      tenantId: tenant.id,
+      providerId: provider.id,
+      weekday: localWeekday(day),
+      startMinute: minute,
+      endMinute: Math.min(minute + 60, 1440),
+    },
+  });
+  await context.runAsSystemTenant(tenant.id, async () => {
+    const result = await Promise.all(
+      Array.from({ length: 4 }, () =>
+        owner().shift(tenant.id, provider.id, day, 60),
+      ),
+    );
+    const ids = result.map((r) => ('runId' in r ? r.runId : null));
+    assert.equal(new Set(ids).size, 1);
+    const roots = await db.operationalAlertRun.findMany({
+      where: { tenantId: tenant.id },
+    });
+    assert.equal(roots.length, 1);
+    const root = roots[0],
+      plan = store.read(root),
+      rows = await store.executions(root, plan);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].state, 'SUCCEEDED');
+    assert.equal(
+      await db.inboxItem.count({ where: { tenantId: tenant.id } }),
+      1,
+    );
+    assert.equal(
+      await db.marketingCampaignRecipient.count({
+        where: { tenantId: tenant.id, campaign: { channel: { not: 'inbox' } } },
+      }),
+      0,
+    );
+    checks.push(
+      'actual internal schedule + exact Staff/User/Membership; four concurrent ticks one root/A11/CD/Inbox',
+    );
+    await owner().resume(root);
+    assert.equal(
+      await db.inboxItem.count({ where: { tenantId: tenant.id } }),
+      1,
+    );
+    await assert.rejects(
+      store.admit(
+        {
+          ...plan,
+          recipients: plan.recipients.map((r) => ({
+            ...r,
+            content: { ...r.content, bodyText: 'changed intent' },
+          })),
+        },
+        () => Promise.resolve(),
+      ),
+      /IDEMPOTENCY_CONFLICT/,
+    );
+    assert.throws(() =>
+      normalizeAlert({
+        ...plan,
+        policy: { ...plan.policy, channelOrder: ['telegram'] },
+      }),
+    );
+    await assert.rejects(
+      ingress.createExecution({
+        ...alertRequest(root.id, store.identity, plan, plan.recipients[0]),
+        operationalAlertSlot: undefined,
+        input: {
+          ...(alertRequest(root.id, store.identity, plan, plan.recipients[0])
+            .input as object),
+          messageType: 'daily_report',
+        },
+      }),
+    );
+    checks.push(
+      'frozen manifest exact replay; changed intent conflicts; external-channel plan rejected',
+    );
+    const pendingPlan = {
+      ...plan,
+      occurrenceRef: store.identity.hmac('synthetic-other-occurrence', {
+        root: root.id,
+      }),
+      recipients: plan.recipients.map((r) => ({
+        ...r,
+        slot: {
+          ...r.slot,
+          key: store.identity.hmac('maya.operational-alert-slot/1', {
+            tenantId: tenant.id,
+            occurrenceRef: store.identity.hmac('synthetic-other-occurrence', {
+              root: root.id,
+            }),
+            userId: r.userId,
+            membershipId: r.membershipId,
+            channel: 'inbox',
+          }),
+        },
+      })),
+    };
+    const pending = await store.admit(pendingPlan, () => Promise.resolve());
+    await db.internalAvailabilityRule.update({
+      where: { id: rule.id },
+      data: { startMinute: minute + 1 },
+    });
+    const before = await db.inboxItem.count({ where: { tenantId: tenant.id } });
+    await owner().resume(pending);
+    assert.equal(
+      await db.inboxItem.count({ where: { tenantId: tenant.id } }),
+      before,
+    );
+    const execution = (await store.executions(pending, pendingPlan))[0];
+    assert.equal(execution.state, 'FAILED');
+    checks.push(
+      'changed schedule before pending effect terminates original slot; no replacement or direct effect',
+    );
+    await db.membership.update({
+      where: { id: user.member.id },
+      data: { status: 'suspended' },
+    });
+    await assert.rejects(sources.shift(tenant.id, provider.id, day, 60));
+    checks.push(
+      'revoked canonical Staff membership cannot admit or authorize shifts',
+    );
+  });
+  console.log(
+    JSON.stringify(
+      {
+        package: 'R06',
+        scope: 'B44 internal alert foundation',
+        result: 'PASS',
+        checks,
+        productionEffects: 0,
+      },
+      null,
+      2,
+    ),
+  );
+}
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  })
+  .finally(() => db.$disconnect());

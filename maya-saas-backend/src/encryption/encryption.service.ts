@@ -4,12 +4,14 @@ import {
   createCipheriv,
   createDecipheriv,
   createHash,
+  createHmac,
   randomBytes,
 } from 'crypto';
 
 @Injectable()
 export class EncryptionService {
   private readonly key: Buffer;
+  private readonly opaqueReferenceKey: Buffer;
 
   constructor(private readonly configService: ConfigService) {
     const secret = this.configService.get<string>('CRM_ENCRYPTION_KEY');
@@ -21,6 +23,9 @@ export class EncryptionService {
     }
 
     this.key = createHash('sha256').update(secret).digest();
+    this.opaqueReferenceKey = createHmac('sha256', this.key)
+      .update('maya:opaque-reference:v1', 'utf8')
+      .digest();
   }
 
   encrypt(plainText: string): string {
@@ -61,5 +66,24 @@ export class EncryptionService {
     ]);
 
     return decrypted.toString('utf8');
+  }
+
+  /**
+   * Stable blind reference for identity/fingerprint use. The original value is
+   * not recoverable and never appears in an ActionExecution target reference.
+   */
+  opaqueReference(namespace: string, value: string): string {
+    const normalizedNamespace = namespace.trim();
+    const normalizedValue = value.trim();
+    if (!normalizedNamespace || !normalizedValue) {
+      throw new InternalServerErrorException(
+        'Opaque reference namespace and value are required',
+      );
+    }
+    return createHmac('sha256', this.opaqueReferenceKey)
+      .update(normalizedNamespace, 'utf8')
+      .update('\0', 'utf8')
+      .update(normalizedValue, 'utf8')
+      .digest('hex');
   }
 }

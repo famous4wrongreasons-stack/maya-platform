@@ -1,0 +1,71 @@
+{
+  "wave": "R-B",
+  "productionCutover": false,
+  "source": "85cdd762",
+  "supersededRelease": "39c465fdeca3a98c9a93cf9e24504f38f246270c",
+  "failures": [
+    {
+      "gate": "aggregate-canonical",
+      "stage": "architecture",
+      "passedSuites": 85,
+      "passedTests": 494,
+      "failedSuites": 1,
+      "failedTests": 1,
+      "cause": "R07 nested guard imported via ambient sys.path under existing B13 absolute-path loader",
+      "proofHash": "360df33320ab26dcf244e694395da5a499f24bca88e00258b2d5633a966f081e"
+    },
+    {
+      "gate": "aggregate-release",
+      "stage": "architecture",
+      "passedSuites": 85,
+      "passedTests": 494,
+      "failedSuites": 1,
+      "failedTests": 1,
+      "cause": "R07 nested guard imported via ambient sys.path under existing B13 absolute-path loader",
+      "proofHash": "4ad168e767641ce72c127a7dac29646c4fe4cfca854e36810d2411c9e6d5e912"
+    }
+  ],
+  "diagnosticStages": [
+    {
+      "stage": "lint",
+      "exitCode": 1
+    },
+    {
+      "stage": "typecheck",
+      "exitCode": 2
+    },
+    {
+      "stage": "typecheck:scripts",
+      "exitCode": 2
+    },
+    {
+      "stage": "build",
+      "exitCode": 1
+    }
+  ],
+  "diagnosticCause": "R04 existing appointment_notifications config branch lacked local config declaration after A23 null-config retry correction",
+  "productionMutationsMessages": 0,
+  "secondAttemptFailures": [
+    {
+      "gate": "aggregate-canonical-v2",
+      "stage": "mandatory-backend",
+      "passedSuites": 389,
+      "passedTests": 3222,
+      "failedSuites": 1,
+      "failedTests": 1,
+      "cause": "Existing P405 ratchet demanded removed unreachable run_subscriptions_job mutation text; R07 replaced entire body with pure B35-required retirement",
+      "proofHash": "5e2469c7b0e759b03cc9b5e3a4490ed8efdc9ca43d6bd36a6d6859e6d6b7ca4e"
+    },
+    {
+      "gate": "aggregate-release-v2",
+      "stage": "mandatory-backend",
+      "passedSuites": 388,
+      "passedTests": 3215,
+      "failedSuites": 1,
+      "failedTests": 1,
+      "cause": "Existing P405 ratchet demanded removed unreachable run_subscriptions_job mutation text; R07 replaced entire body with pure B35-required retirement",
+      "proofHash": "18aba184f2b9b0728b0e7ce973e2fc69281c118f8daf89e68b4512fb75c837b0"
+    }
+  ],
+  "secondAttemptEarlierEightStages": "PASS on both canonical and release"
+}

@@ -1,0 +1,872 @@
+{
+  "status": "PASS",
+  "inventoryReopened": false,
+  "sourceInventorySha256": "f0d29c9f60c4699c1458b383b86decf0fb26aef5ee56e89a2d9a89b6b62df425",
+  "sourceCoverageSha256": "f196d09b425c67ab6a556c1fb9a99ccbfe1f8a67e00aa674de54f9d121be9443",
+  "productionSurfaces": 32,
+  "coveredSurfaces": 32,
+  "newUnaccountedSurfaces": 0,
+  "ratchetsWiredIntoMandatoryGates": true,
+  "hostConfigurationAttestationIsSeparateFromUnitTests": true,
+  "surfaces": [
+    {
+      "id": "S01",
+      "name": "Backend HTTP routes",
+      "closedCoverage": "Closed S01 Nest route inventory plus approved R-C canonical replacements; source-matched controllers, guards and canonical cutovers",
+      "remediationPackages": [
+        "R05",
+        "R06",
+        "R10"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S02",
+      "name": "Active salon PWA",
+      "closedCoverage": "app/index.html + retained reachable PWA variants; PHP callers",
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R04",
+        "R05",
+        "R12"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S03",
+      "name": "Maya platform PWA / VPS static",
+      "closedCoverage": "VPS app.html and mayaos/app/index.html, OAuth callbacks, service workers",
+      "remediationPackages": [
+        "R01"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S04",
+      "name": "Public site / Next / shop",
+      "closedCoverage": "All acquired public HTML/JS; checkout/account, public booking, community routes",
+      "remediationPackages": [
+        "R01",
+        "R09"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S05",
+      "name": "Proxy / compatibility routes",
+      "closedCoverage": "11 PHP files; archive-named proxy not denied by inspected .htaccess",
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R12"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S06",
+      "name": "Chat / stream / history",
+      "closedCoverage": "Nest AI + Python chat/stream/history, native shared conversation state",
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R04",
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S07",
+      "name": "Realtime / voice",
+      "closedCoverage": "realtime_bridge, voice, stream tool routing; STT/TTS as protocol transport",
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R03",
+        "R10",
+        "R11"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S08",
+      "name": "AI tools",
+      "closedCoverage": "TypeScript handlers/runtime and Python role/confirmation dispatch",
+      "remediationPackages": [
+        "R01",
+        "R03",
+        "R04",
+        "R10",
+        "R11"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S09",
+      "name": "Journal",
+      "closedCoverage": "Canonical staff journal, legacy read guards and retired mutations",
+      "remediationPackages": [
+        "R02",
+        "R04"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S10",
+      "name": "Python services / importers",
+      "closedCoverage": "71 acquired current root sources, 72 root metadata entries including config example; imports/callers; 24 archived copies separated",
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S11",
+      "name": "Schedulers",
+      "closedCoverage": "Nest scheduler registrations/flags and live bot APScheduler registrations",
+      "remediationPackages": [
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R13"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S12",
+      "name": "VPS cron / timers",
+      "closedCoverage": "root/botadmin no-crontab proved; system tables, cron directories and timers inspected",
+      "remediationPackages": [],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Cron/timer launchers exactly unchanged; application effects remain subject to owner guards. System timer existence is not business authority."
+    },
+    {
+      "id": "S13",
+      "name": "Beget cron / hosting scheduled tasks",
+      "closedCoverage": "Owner screenshot: unfiltered Beget configured-command table explicitly empty; enabled 0, disabled 0; no command targets/parameters to inspect.",
+      "remediationPackages": [],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "No Beget command targets. Owner unfiltered empty-table evidence retained; CI guards code targets, not changes made privately in hosting panel. SSH permission denial is not absence proof."
+    },
+    {
+      "id": "S14",
+      "name": "Background workers / installed operator CLIs",
+      "closedCoverage": "Live units/processes, observer, 15 dist/scripts plus seed CLI; manual versus automatic distinguished",
+      "remediationPackages": [
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R12"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S15",
+      "name": "Telegram handlers / commands / replies",
+      "closedCoverage": "Active bot.py, command/callback/message handlers, global send observation patch",
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R03",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S16",
+      "name": "Inbox",
+      "closedCoverage": "Ingest, publish, consumption/projection, default versus canonical single delivery",
+      "remediationPackages": [
+        "R05",
+        "R06"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S17",
+      "name": "APNS",
+      "closedCoverage": "Exact transport callers and default direct branch; token protocol registration",
+      "remediationPackages": [
+        "R05",
+        "R06"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S18",
+      "name": "Web Push",
+      "closedCoverage": "Canonical endpoint binding/transport; disabled legacy no-op helpers; public push service workers",
+      "remediationPackages": [
+        "R06",
+        "R07",
+        "R12"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/package5-b24-remediation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S19",
+      "name": "Communication Delivery",
+      "closedCoverage": "Single/bulk admissions, attempts, reconciliation, UNKNOWN and direct callers",
+      "remediationPackages": [
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R12"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S20",
+      "name": "Panel / GOD / admin",
+      "closedCoverage": "Canonical platform APIs; legacy role resolver, readers, controls, PDF, job dispatch",
+      "remediationPackages": [
+        "R02",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S21",
+      "name": "Internal calendar",
+      "closedCoverage": "Canonical create and Wave4 configuration executor; unused bootstrap helpers distinguished",
+      "remediationPackages": [],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S22",
+      "name": "CRM / YClients adapters / helpers",
+      "closedCoverage": "Approved fact/recheck/mirror flows; every Python and TS provider write helper traced",
+      "remediationPackages": [
+        "R01",
+        "R03",
+        "R06"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S23",
+      "name": "Marketing / bulk",
+      "closedCoverage": "B35 canonical owner and remaining native scheduled/manual consumers",
+      "remediationPackages": [
+        "R07"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S24",
+      "name": "Finance / expense",
+      "closedCoverage": "P407/P408 canonical paths, raw weekly intake, cash declaration; deferred payment tombstones",
+      "remediationPackages": [
+        "R13",
+        "R14"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S25",
+      "name": "Loyalty / value / certificates",
+      "closedCoverage": "P403–P410 executors; Python lower guards, renewal branch and blocked mint call chains",
+      "remediationPackages": [
+        "R07",
+        "R13"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/package4-active-pwa-runtime-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S26",
+      "name": "Reviews",
+      "closedCoverage": "B34 external import preserved; native pending feedback callbacks and community moderation",
+      "remediationPackages": [
+        "R08",
+        "R09"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S27",
+      "name": "Onboarding",
+      "closedCoverage": "Canonical trial admission/AI receipt/bootstrap; legacy disabled trial setters",
+      "remediationPackages": [],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S28",
+      "name": "Auth / identity",
+      "closedCoverage": "Canonical AC3 protocols, verified Client/staff links; legacy raw owner and staff gates",
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R11"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/consent-security-invalidation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S29",
+      "name": "Maintenance",
+      "closedCoverage": "Wave6 allowlist/coordinator; retired AI/PII execute; persistent media versus speech scratch",
+      "remediationPackages": [
+        "R12"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S30",
+      "name": "All direct database writer candidates",
+      "closedCoverage": "106 SQL candidate functions + all TS candidate callsites, raw SQL and explicit exclusions",
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R04",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-final-remediation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S31",
+      "name": "All direct provider / delivery candidates",
+      "closedCoverage": "Reverse sink scan to every acquired route, command, scheduler and helper caller",
+      "remediationPackages": [
+        "R01",
+        "R03",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R12"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    },
+    {
+      "id": "S32",
+      "name": "Legacy identity / projection fallbacks",
+      "closedCoverage": "Phone, raw Telegram, legacy web session, User/Client distinction; no source fact elevated to authority",
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R03",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "mandatoryRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "baseline-certification.json",
+        "production-probes.json",
+        "../package5-rc-final/coverage.json"
+      ],
+      "status": "PASS",
+      "configurationBoundary": "Runtime artifact/entrypoint hashes and existing code guards both verified."
+    }
+  ]
+}

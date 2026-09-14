@@ -1,0 +1,290 @@
+{
+  "package": "R08",
+  "blockers": [
+    "B47"
+  ],
+  "stage": "E3 / Stage 1, proposal only",
+  "baseline": "60e82664",
+  "productionRuntime": "42962475",
+  "recommendedOption": "A",
+  "canonicalOwner": "Native feedback request/revision owner; existing A12/A13 Communication Delivery",
+  "existingFoundationSufficient": false,
+  "businessDecisionRequired": true,
+  "schemaRequired": true,
+  "newModels": 2,
+  "newFields": 41,
+  "newActionClasses": 4,
+  "newAeActionClasses": 3,
+  "newAc6RetentionClasses": 1,
+  "migrationRequired": true,
+  "backfillRequired": false,
+  "runtimeOnly": false,
+  "models": {
+    "NativeFeedbackRequest": [
+      {
+        "name": "id",
+        "type": "text"
+      },
+      {
+        "name": "tenantId",
+        "type": "text"
+      },
+      {
+        "name": "clientId",
+        "type": "text"
+      },
+      {
+        "name": "appointmentId",
+        "type": "text"
+      },
+      {
+        "name": "requestedByUserId",
+        "type": "text"
+      },
+      {
+        "name": "requestExecutionId",
+        "type": "text"
+      },
+      {
+        "name": "requestIdentityHash",
+        "type": "char64"
+      },
+      {
+        "name": "intentHash",
+        "type": "char64"
+      },
+      {
+        "name": "contractVersion",
+        "type": "int"
+      },
+      {
+        "name": "eligibleAt",
+        "type": "timestamptz"
+      },
+      {
+        "name": "expiresAt",
+        "type": "timestamptz"
+      },
+      {
+        "name": "contentHash",
+        "type": "char64"
+      },
+      {
+        "name": "contentEncrypted",
+        "type": "text?"
+      },
+      {
+        "name": "planHash",
+        "type": "char64"
+      },
+      {
+        "name": "planEncrypted",
+        "type": "text?"
+      },
+      {
+        "name": "state",
+        "type": "text"
+      },
+      {
+        "name": "revision",
+        "type": "int"
+      },
+      {
+        "name": "latestResponseVersion",
+        "type": "int"
+      },
+      {
+        "name": "createdAt",
+        "type": "timestamptz"
+      },
+      {
+        "name": "closedAt",
+        "type": "timestamptz?"
+      },
+      {
+        "name": "payloadErasedAt",
+        "type": "timestamptz?"
+      },
+      {
+        "name": "retentionUntil",
+        "type": "timestamptz"
+      }
+    ],
+    "NativeFeedbackRevision": [
+      {
+        "name": "id",
+        "type": "text"
+      },
+      {
+        "name": "tenantId",
+        "type": "text"
+      },
+      {
+        "name": "requestId",
+        "type": "text"
+      },
+      {
+        "name": "clientId",
+        "type": "text"
+      },
+      {
+        "name": "executionId",
+        "type": "text"
+      },
+      {
+        "name": "identityHash",
+        "type": "char64"
+      },
+      {
+        "name": "intentHash",
+        "type": "char64"
+      },
+      {
+        "name": "version",
+        "type": "int"
+      },
+      {
+        "name": "kind",
+        "type": "text"
+      },
+      {
+        "name": "rating",
+        "type": "int?"
+      },
+      {
+        "name": "commentEncrypted",
+        "type": "text?"
+      },
+      {
+        "name": "contentHash",
+        "type": "char64"
+      },
+      {
+        "name": "planHash",
+        "type": "char64"
+      },
+      {
+        "name": "planEncrypted",
+        "type": "text?"
+      },
+      {
+        "name": "createdAt",
+        "type": "timestamptz"
+      },
+      {
+        "name": "payloadErasedAt",
+        "type": "timestamptz?"
+      }
+    ]
+  },
+  "countingConvention": "NEW FIELDS counts persisted DB columns in new models plus listed existing-model columns. Virtual Prisma relations are not columns. Headline new action classes = enumerated AE classes + enumerated AC6 extensions; no new engine.",
+  "existingModelColumnChanges": [
+    {
+      "model": "ActionExecution",
+      "name": "nativeFeedbackRequestId",
+      "type": "text?"
+    },
+    {
+      "model": "ActionExecution",
+      "name": "nativeFeedbackRevisionId",
+      "type": "text?"
+    },
+    {
+      "model": "ActionExecution",
+      "name": "nativeFeedbackSlotKey",
+      "type": "text?"
+    }
+  ],
+  "integrationDependencies": [
+    "R01 production PASS",
+    "R02 production PASS"
+  ],
+  "integrationDependenciesSatisfied": true,
+  "dependenciesSatisfied": false,
+  "outstandingDependency": "Owner approval of this entire package Option A and exact schema/lifecycle mapping",
+  "subscopes": {},
+  "readyForImplementation": false,
+  "readyForProduction": false,
+  "runtimeSchemaMigrationChanges": 0,
+  "testsExecuted": 0,
+  "databaseConnections": 0,
+  "productionCalls": 0,
+  "productionMutationsMessages": 0,
+  "inventoryReopened": false,
+  "newBlockers": 0,
+  "fakeHistoricalBackfill": false,
+  "processHygiene": 0,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "optionB": {
+    "direction": "Retire package writes/notifications; preserve historical data without manufacturing authority",
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "businessDecisionRequired": true,
+    "runtimeOnlyAfterApproval": true
+  },
+  "minimality": "Use existing ActionExecution parent/slot binding pattern and immutable parent manifest. No separate delivery-slot link model, state, lease or provider attempts.",
+  "newActionClassNames": {
+    "AE": [
+      "request_native_feedback",
+      "submit_native_feedback_revision",
+      "withdraw_native_feedback"
+    ],
+    "AC6": [
+      "purge_native_feedback_payloads"
+    ]
+  },
+  "proposalFile": "package5-remainder-e3-r08-decision-sheet.md",
+  "canonicalFingerprint": "Canonical hash contract for this proposal: a versioned, explicitly named object; recursive sorted object keys and UTF-8; Unicode NFC text with CRLF→LF and trimmed outer whitespace; opaque IDs are exact, not lowercased; dates are UTC ISO milliseconds; absent optional business values become explicit null; arrays retain specified order or are sorted/deduplicated only where declared sets. No raw JSON serialization contract, random encryption bytes, HTTP headers, retry time, worker ID or transport metadata. Caller intent hash is separate from immutable admission-plan hash: retries first match the original command, then reuse the original plan, never recompute recipients/routes from current discovery. Current eligibility is a dispatch check, not permission to rewrite that plan.\n\nExact intent inputs: request = `{contractVersion,tenantId,actorUserId,clientId,appointmentId,purpose:\"native_feedback\",policyVersion}`; response = `{contractVersion,tenantId,clientId,requestId,expectedAcceptedVersion,kind,rating,normalizedComment}`; withdrawal has the same owner/version scope and kind `withdraw` with null content. Request plan hash additionally freezes eligibility evidence digest, original eligibleAt/expiresAt, invitation content/version and exact route/endpoints/order. Revision plan hash freezes its request/revision/content identity and exact deduplicated management User recipients. Slot hash binds parent/phase/recipient/channel/endpoint/content/version. Dates and policy snapshots chosen at first admission are reused on retry.\n\n",
+  "approvalIncludes": "Exact bounded contract, changed business behavior, normalized intent/plan fields, model/column/index/FK mapping and explicitly enumerated new AE/AC6 classes. No implementation approval inferred from proposal.",
+  "businessLosses": [
+    "Old unverifiable pending requests retired; no historical canonical feedback backfill",
+    "Verified surface required for rating/comment; no raw Telegram callback or unrelated-next-reply ownership",
+    "No automatic new request producer; no invitation without canonical arrived attendance",
+    "No staff rewriting Client response; no cross-channel fallback"
+  ],
+  "sourceEvidence": [
+    {
+      "path": "/tmp/maya-b29-contour/ai администратор/reviews.py",
+      "sha256": "16654d2a3f087c92a5dab8ce6941156ba29c371a840c336b906120afdb0a92df",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/tmp/maya-b29-contour/ai администратор/database.py",
+      "sha256": "6394aeaefae0b1189ce7796ad93669467d93f7c6887819072625d9febf242a98",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/tmp/maya-b29-contour/maya-saas-backend/src/crm/client-channel-runtime.service.ts",
+      "sha256": "8ca6d7ac554466ac168ae1d8ec1513725d04b4bf1a882455fd4d7e6615310d19",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/tmp/maya-b29-contour/maya-saas-backend/src/package5-wave4/package5-wave4.service.ts",
+      "sha256": "16630d572e0379bb2eaf9fe3e65aa9542a6c62b20341efc103be83a1842fe94f",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/reviews.py",
+      "sha256": "16654d2a3f087c92a5dab8ce6941156ba29c371a840c336b906120afdb0a92df",
+      "scope": "existing inventoried source; local read only"
+    }
+  ],
+  "proposalSha256": "53a97c1b6b19c43b1e1128bf200e07920641615530238ab9cde547d1f719e594",
+  "documentationChecks": {
+    "modelColumnCounts": "PASS",
+    "classCounts": "PASS",
+    "sheetJsonMapping": "PASS",
+    "schemaPlaceholdersRemaining": 0,
+    "runtimeTestsExecuted": 0
+  },
+  "genuineLimits": [
+    "No implementation/schema feasibility proof or production calls executed at Stage 1.",
+    "Exact business constraints and AC6 extensions remain owner proposals, not existing approvals.",
+    "Historical canonical attribution is not proved and backfill is explicitly prohibited.",
+    "Known production-only/captured variants must be verified and overlaid during an authorized implementation; no source beyond closed inventory was discovered."
+  ]
+}

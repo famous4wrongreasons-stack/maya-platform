@@ -434,7 +434,7 @@ describe('ConversationalOnboardingInterpreter', () => {
     );
 
     expect(requests).toHaveLength(0);
-    expect(result.blueprint.services).toHaveLength(6);
+    expect(result.blueprint.services).toHaveLength(17);
     expect(result.missingFields).toEqual([]);
     expect(result.assistantMessage).toContain('Основа готова');
   });

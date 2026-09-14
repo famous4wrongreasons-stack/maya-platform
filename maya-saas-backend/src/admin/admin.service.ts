@@ -1,16 +1,18 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthenticatedUser } from '../common/authenticated-user.interface';
-import { TenantStatus, UserRole, UserStatus } from '../common/domain.enums';
+import { TenantStatus, UserRole } from '../common/domain.enums';
 import {
   BrandingService,
   UploadedLogoFile,
 } from '../branding/branding.service';
 import { UpdateBrandingDto } from '../branding/dto/update-branding.dto';
 import { CrmService } from '../crm/crm.service';
+import { EncryptionService } from '../encryption/encryption.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
+import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from '../crm/dto/update-crm-integration.dto';
 import { UsersService } from '../users/users.service';
@@ -19,9 +21,27 @@ import { QuotaResource } from '../quotas/quota-resource';
 import { QuotaService } from '../quotas/quota.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
-import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
+import { CreateTrialSignupDto } from '../onboarding/dto/create-trial-signup.dto';
+import { CanonicalTrialOnboardingService } from '../onboarding/canonical-trial-onboarding.service';
 import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
+import { CreateProviderUserDto } from './dto/create-provider-user.dto';
 import { CreateTenantUserDto } from './dto/create-tenant-user.dto';
+
+/**
+ * Имена изменённых полей вместо самого DTO.
+ *
+ * 🔴 Раньше в metadata уезжал сырой объект целиком: `dto as unknown as
+ * Record<string, unknown>`. Тип без белого списка не мешает следующему
+ * разработчику положить туда телефон клиента или ответ провайдера с токеном, а
+ * таблица аудита живёт без срока хранения и копила бы это годами. На вопрос
+ * «что меняли» отвечают имена полей; значения для этого не нужны.
+ */
+function changedFields(dto: object): string[] {
+  return Object.entries(dto)
+    .filter(([, value]) => value !== undefined)
+    .map(([key]) => key)
+    .sort();
+}
 
 @Injectable()
 export class AdminService {
@@ -34,25 +54,19 @@ export class AdminService {
     private readonly auditLogService: AuditLogService,
     private readonly tenantContext: TenantContextService,
     private readonly quotas: QuotaService,
+    private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
+    private readonly encryptionService: EncryptionService,
+    private readonly canonicalWave3: Package5Wave3CanonicalCutoverService,
+    private readonly canonicalTrial: CanonicalTrialOnboardingService,
   ) {}
 
-  createTenant(dto: CreateTenantDto, actor: AuthenticatedUser) {
-    return this.tenantsService.createTenant(dto).then(async (tenant) => {
-      await this.tenantContext.runAsSystemTenant(tenant.id, () =>
-        this.auditLogService.log({
-          tenantId: tenant.id,
-          userId: actor.userId,
-          action: 'tenant.created',
-          entityType: 'tenant',
-          entityId: tenant.id,
-          metadata: {
-            slug: tenant.slug,
-          },
-        }),
-      );
-
-      return tenant;
-    });
+  async createTenant(dto: CreateTrialSignupDto, actor: AuthenticatedUser) {
+    if (actor.role !== UserRole.PLATFORM_OWNER)
+      throw new ForbiddenException('Platform owner authority required');
+    const result = await this.canonicalTrial.activate(dto);
+    return this.tenantsService.serializeTenant(
+      await this.tenantsService.getTenantByIdOrThrow(result.tenantId),
+    );
   }
 
   listTenants() {
@@ -77,7 +91,17 @@ export class AdminService {
   ) {
     this.ensureTenantCanBeManaged(actor, id);
     this.assertTenantUpdateFieldsAllowed(dto, actor);
-    const tenant = await this.tenantsService.updateTenant(id, dto);
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation: 'update_tenant_configuration',
+        changes: this.definedChanges(dto),
+      },
+    );
+    const tenant = this.tenantsService.serializeTenant(
+      await this.tenantsService.getTenantByIdOrThrow(id),
+    );
 
     await this.auditLogService.log({
       tenantId: id,
@@ -85,7 +109,7 @@ export class AdminService {
       action: 'tenant.updated',
       entityType: 'tenant',
       entityId: id,
-      metadata: dto as unknown as Record<string, unknown>,
+      metadata: { changed_fields: changedFields(dto) },
     });
 
     return tenant;
@@ -98,7 +122,15 @@ export class AdminService {
   ) {
     this.ensureTenantCanBeManaged(actor, id);
     await this.quotas.assertCustomBrandingAllowed(id, Object.keys(dto));
-    const branding = await this.brandingService.upsertBranding(id, dto);
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation: 'update_tenant_branding',
+        changes: this.definedChanges(dto),
+      },
+    );
+    const branding = await this.brandingService.getTenantBrandingOrThrow(id);
 
     await this.auditLogService.log({
       tenantId: id,
@@ -106,7 +138,7 @@ export class AdminService {
       action: 'branding.updated',
       entityType: 'branding',
       entityId: branding.id,
-      metadata: dto as unknown as Record<string, unknown>,
+      metadata: { changed_fields: changedFields(dto) },
     });
 
     return this.serializeBranding(branding);
@@ -119,7 +151,18 @@ export class AdminService {
   ) {
     this.ensureTenantCanBeManaged(actor, id);
     await this.tenantsService.getTenantByIdOrThrow(id);
-    const branding = await this.brandingService.uploadTenantLogo(id, file);
+    this.brandingService.assertValidTenantLogoFile(file);
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation: 'upload_tenant_logo',
+        mimeType: file.mimetype as
+          'image/png' | 'image/jpeg' | 'image/webp' | 'image/gif',
+        bytes: file.buffer,
+      },
+    );
+    const branding = await this.brandingService.getTenantBrandingOrThrow(id);
 
     await this.auditLogService.log({
       tenantId: id,
@@ -139,13 +182,22 @@ export class AdminService {
     id: string,
     dto: CreateCrmIntegrationDto | UpdateCrmIntegrationDto,
     actor: AuthenticatedUser,
+    idempotencyKey?: string,
   ) {
     this.ensureTenantCanBeManaged(actor, id);
     this.assertCrmUpdateFieldsAllowed(dto, actor);
-    const integration = await this.crmService.connectAndActivateIntegration(
+    await this.canonicalWave3.installCrmCredentials(
       id,
+      actor,
       dto,
+      `${this.canonicalWave3.intentRef(idempotencyKey)}:install`,
     );
+    const activated = await this.canonicalWave3.activateCrmIntegration(
+      id,
+      actor,
+      `${this.canonicalWave3.intentRef(idempotencyKey)}:activate-flow`,
+    );
+    const integration = activated.connection;
 
     await this.auditLogService.log({
       tenantId: id,
@@ -198,17 +250,48 @@ export class AdminService {
       await this.usersService.ensurePhoneIsAvailable(id, dto.phone);
     }
 
-    const temporaryPassword = dto.password?.trim() || this.generatePassword();
-    const user = await this.usersService.createUser({
-      tenantId: id,
-      branchId: dto.branchId ?? null,
-      email: dto.email,
-      phone: dto.phone ?? null,
-      name: dto.name ?? null,
-      passwordHash: await bcrypt.hash(temporaryPassword, 10),
-      role,
-      status: UserStatus.ACTIVE,
-    });
+    const sourceIntentRef = this.canonicalWave2.intentRef();
+    const temporaryPassword =
+      dto.password?.trim() ||
+      this.encryptionService
+        .opaqueReference(
+          'package5-wave2.generated-tenant-user-password',
+          `${id}\0${sourceIntentRef}`,
+        )
+        .slice(0, 20);
+    const userId = this.canonicalWave2.deterministicTargetId(
+      'create_tenant_user',
+      id,
+      sourceIntentRef,
+    );
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation: 'create_tenant_user',
+        userId,
+        email: dto.email,
+        phone: dto.phone ?? null,
+        encryptedName: dto.name
+          ? this.encryptionService.encrypt(dto.name.trim())
+          : null,
+        passwordHash: await bcrypt.hash(temporaryPassword, 10),
+        credentialIntentHash: this.encryptionService.opaqueReference(
+          'package5-wave2.tenant-user-password-intent',
+          temporaryPassword,
+        ),
+        nameIntentHash: dto.name
+          ? this.encryptionService.opaqueReference(
+              'package5-wave2.tenant-user-name-intent',
+              dto.name.trim(),
+            )
+          : null,
+        role,
+        branchId: dto.branchId ?? null,
+      },
+      sourceIntentRef,
+    );
+    const user = await this.usersService.getTenantUserOrThrow(userId, id);
 
     await this.auditLogService.log({
       tenantId: id,
@@ -229,12 +312,104 @@ export class AdminService {
     };
   }
 
+  async createProviderUser(
+    id: string,
+    providerId: string,
+    dto: CreateProviderUserDto,
+    actor: AuthenticatedUser,
+  ) {
+    this.ensureTenantCanBeManaged(actor, id);
+    await this.tenantsService.getTenantByIdOrThrow(id);
+    await this.usersService.ensureEmailIsAvailable(id, dto.email);
+
+    if (dto.phone) {
+      await this.usersService.ensurePhoneIsAvailable(id, dto.phone);
+    }
+
+    const sourceIntentRef = this.canonicalWave2.intentRef();
+    const temporaryPassword =
+      dto.password?.trim() ||
+      this.encryptionService
+        .opaqueReference(
+          'package5-wave2.generated-provider-user-password',
+          `${id}\0${providerId}\0${sourceIntentRef}`,
+        )
+        .slice(0, 20);
+    const userId = this.canonicalWave2.deterministicTargetId(
+      'create_provider_user',
+      id,
+      sourceIntentRef,
+    );
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation: 'create_provider_user',
+        providerId,
+        userId,
+        email: dto.email,
+        phone: dto.phone ?? null,
+        encryptedName: dto.name
+          ? this.encryptionService.encrypt(dto.name.trim())
+          : null,
+        passwordHash: await bcrypt.hash(temporaryPassword, 10),
+        credentialIntentHash: this.encryptionService.opaqueReference(
+          'package5-wave2.provider-user-password-intent',
+          temporaryPassword,
+        ),
+        nameIntentHash: dto.name
+          ? this.encryptionService.opaqueReference(
+              'package5-wave2.provider-user-name-intent',
+              dto.name.trim(),
+            )
+          : null,
+      },
+      sourceIntentRef,
+    );
+    const user = await this.usersService.getTenantUserOrThrow(userId, id);
+
+    await this.auditLogService.log({
+      tenantId: id,
+      userId: actor.userId,
+      action: 'tenant.provider_user_created',
+      entityType: 'user',
+      entityId: user.id,
+      metadata: {
+        role: user.role,
+        email: user.email,
+        branch_id: user.branchId,
+        provider_id: providerId,
+      },
+    });
+
+    return {
+      user: this.usersService.serializeUser(user),
+      temporary_password: dto.password ? null : temporaryPassword,
+      provider_id: providerId,
+    };
+  }
+
   async setTenantStatus(
     id: string,
     status: TenantStatus,
     actor: AuthenticatedUser,
   ) {
-    const tenant = await this.tenantsService.setTenantStatus(id, status);
+    if (status !== TenantStatus.SUSPENDED && status !== TenantStatus.ACTIVE) {
+      throw new ForbiddenException('Unsupported tenant lifecycle transition');
+    }
+    await this.canonicalWave2.execute(
+      id,
+      { userId: actor.userId },
+      {
+        operation:
+          status === TenantStatus.SUSPENDED
+            ? 'suspend_tenant'
+            : 'reactivate_tenant',
+      },
+    );
+    const tenant = this.tenantsService.serializeTenant(
+      await this.tenantsService.getTenantByIdOrThrow(id),
+    );
 
     await this.tenantContext.runAsSystemTenant(id, () =>
       this.auditLogService.log({
@@ -250,8 +425,10 @@ export class AdminService {
     return tenant;
   }
 
-  private generatePassword() {
-    return randomBytes(12).toString('base64url');
+  private definedChanges(dto: object): Record<string, unknown> {
+    return Object.fromEntries(
+      Object.entries(dto).filter(([, value]) => value !== undefined),
+    );
   }
 
   private assertTenantRoleCanBeAssigned(
@@ -335,6 +512,15 @@ export class AdminService {
       'currentPeriodStart',
       'currentPeriodEnd',
       'billingMethodId',
+      // 🔴 Адресация тенанта. Раньше администратор ЛЮБОГО салона мог задать
+      // себе customDomain или subdomain — в том числе платформенный. Резолвер
+      // определяет тенанта по домену, поэтому чужой салон наутро получал бы
+      // 403 на каждый запрос: его адрес указывал бы на другой бизнес.
+      'customDomain',
+      'subdomain',
+      'slug',
+      // Кто может регистрироваться в бизнес — тоже не решение самого салона.
+      'allowSelfRegistration',
     ];
     const attemptedField = protectedFields.find(
       (field) => dto[field] !== undefined,

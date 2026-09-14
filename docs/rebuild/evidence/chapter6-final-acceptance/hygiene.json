@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "mainDirtyWorktreeTouched": false,
+  "mainPreexistingDirtyEntriesPreserved": 24,
+  "preExistingDatabasesTouched": 0,
+  "temporaryDatabasesCreated": 0,
+  "ownedTemporaryProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTemporaryDatabases": 0,
+  "processHygiene": 0,
+  "method": "All acceptance runner/SSH processes exited; process inspection found no owned runtime candidates; mandatory test fixtures use synthetic DATABASE_URL at closed local port 1; no PostgreSQL instance/database created or old DB connected",
+  "productionProofBusinessMutations": 0,
+  "productionProofMessages": 0,
+  "productionProofProviderEffects": 0,
+  "priorControlledSecurityRemediationRepeated": false,
+  "productionDeployment": false,
+  "productionMigrationsApplied": 0
+}

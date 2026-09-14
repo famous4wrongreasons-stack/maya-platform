@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-09-07T16:18:59.682707+00:00",
+  "host": "beget",
+  "permissionBypass": false,
+  "serverWrites": 0,
+  "jobTriggers": 0,
+  "definitions": [],
+  "commands": [
+    {
+      "path": "/etc/crontab",
+      "readable": false
+    },
+    {
+      "command": "own process names only",
+      "exit": 0,
+      "names": [
+        "ps",
+        "python3",
+        "sshd-session"
+      ]
+    }
+  ],
+  "logs": {},
+  "managerConfigs": [
+    {
+      "path": "/home/m/mocine3388/.config/systemd/user",
+      "exists": false,
+      "readable": false
+    },
+    {
+      "path": "/home/m/mocine3388/.config/supervisor",
+      "exists": false,
+      "readable": false
+    },
+    {
+      "path": "/home/m/mocine3388/.supervisor",
+      "exists": false,
+      "readable": false
+    },
+    {
+      "path": "/home/m/mocine3388/.pm2",
+      "exists": false,
+      "readable": false
+    }
+  ],
+  "accountHome": "/home/m/mocine3388",
+  "currentUid": 8165,
+  "currentUser": "mocine3388",
+  "crontabRead": "Prior PermissionError retained; no permission/configuration change and no alternate-user read",
+  "systemCronDirectoryRead": "PermissionError for /etc/cron.d from first current-user probe; no alternate access attempted"
+}

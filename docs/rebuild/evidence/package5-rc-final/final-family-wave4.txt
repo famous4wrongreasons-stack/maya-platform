@@ -1,0 +1,20 @@
+{
+  "contract": "package5.wave4.all12-executable-proof/1",
+  "families": [
+    "A27",
+    "A28"
+  ],
+  "actionClasses": 12,
+  "shadows": 12,
+  "shadowDivergences": 0,
+  "mutationFacts": 13,
+  "providerDispatches": 1,
+  "providerReconciliation": true,
+  "pendingIsNotUnknown": true,
+  "duplicateBusinessMutationPossible": false,
+  "tenantAuthorityIsolation": true,
+  "frozenAppointmentsPreserved": true,
+  "p409OfferAuthorityPreserved": true,
+  "reviewFactReplaySafe": true,
+  "realProductionBusinessMutations": 0
+}

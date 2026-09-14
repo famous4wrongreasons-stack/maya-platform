@@ -1,0 +1,10 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --testPathPatterns=(final-value-ownership-ratchet|durable-policy.architecture|client-identity-registration-guard|review-import|action-ingress|domain-mutation)
+
+
+Test Suites: 4 passed, 4 total
+Tests:       34 passed, 34 total
+Snapshots:   0 total
+Time:        3.503 s, estimated 4 s
+Ran all test suites matching (final-value-ownership-ratchet|durable-policy.architecture|client-identity-registration-guard|review-import|action-ingress|domain-mutation).

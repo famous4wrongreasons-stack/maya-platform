@@ -1,0 +1,109 @@
+{
+  "acceptedOwnerCheckpoint": "c73134ea",
+  "runtimeCommit": "7260a5a4860c925ab51abf6f2936e4eeec4fceab",
+  "productionRelease": "/opt/maya-saas/releases/20260905-p5-b14-7260a5a4",
+  "b14ProductionRemediation": "PASS",
+  "b14": {
+    "godBillingLegacyMutationOwners": 0,
+    "legacyRenewalTracker": "RETIRED",
+    "editableAiBudget": "RETIRED",
+    "godOverviewLegacyFallbacks": 0,
+    "healthReadMutations": 0,
+    "newModels": 0,
+    "newActionClasses": 0
+  },
+  "productionStructuralReadOnlyVerification": "PASS",
+  "artifactHashes": {
+    "publishedApp": "fe804992306c50d5e8544a48d59d496c75664dd0af542b13b0e1f7810e59ebc7",
+    "publishedProxy": "886ca639708a766996716fcb4b1a6b85690c1c61baca35d6b5959495df4e75f5",
+    "activeWebhookServer": "c997cb66271141a743a1efc9d5a31bdfc75b8f133d37873ea6127ccedd57d14a",
+    "activePackage5Guard": "9e62cf60cebe3ac1b1d4b9dee871803dd8b880f1a306dcebf3015d8084933f48"
+  },
+  "proofs": {
+    "targetedPythonB13B14": "PASS — 24/24",
+    "exactMergedRuntimeBoundary": "PASS — 5/5",
+    "b14ArchitectureRatchet": "PASS — 6/6",
+    "mandatoryLint": "PASS",
+    "mandatoryTypecheck": "PASS",
+    "mandatoryScriptTypecheck": "PASS",
+    "mandatoryBuild": "PASS",
+    "deploymentRegression": "PASS — 339 suites / 2793 tests",
+    "package4CrossPackageGuard": "PASS",
+    "package5ActiveRuntimeGuard": "PASS",
+    "finalAggregateRegression": "NOT RUN — mandatory STOP at new B15 production-reachable inventory blocker"
+  },
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "freshFinalGateStartedFromScratch": true,
+  "sourceInventory": {
+    "productionTypescriptFiles": 537,
+    "typescriptHttpRouteDecorators": 218,
+    "typescriptMutationLikeCalls": 500,
+    "activeRootPythonFiles": 89,
+    "activeProductionRootPythonFiles": 69,
+    "activePythonHttpRoutes": 94,
+    "activePythonHttpRouteHandlers": 93,
+    "publishedProxySha256": "886ca639708a766996716fcb4b1a6b85690c1c61baca35d6b5959495df4e75f5",
+    "activeWebhookServerSha256": "c997cb66271141a743a1efc9d5a31bdfc75b8f133d37873ea6127ccedd57d14a"
+  },
+  "familyInventory": [
+    {"family": "A15", "canonicalFoundation": "Wave 3 AC2 staff-day executor", "result": "registered; aggregate certification stopped at B15"},
+    {"family": "A16", "canonicalFoundation": "Wave 2 AC1 access commands and AC5 reducer", "result": "registered; aggregate certification stopped at B15"},
+    {"family": "A17", "canonicalFoundation": "Wave 3 CRM connection/import and AC3/AC4/AC5 facts", "result": "registered; aggregate certification stopped at B15"},
+    {"family": "A18", "canonicalFoundation": "Client-owned profile, consent, preferences and verified channel foundations", "result": "B15 hidden read-time legacy recommendation mutation found"},
+    {"family": "A22", "canonicalFoundation": "Wave 1 governed settings/preferences", "result": "registered; B14 remediation verified"},
+    {"family": "A23", "canonicalFoundation": "Wave 1 OperationalWorkItem and approved protocol state", "result": "registered; aggregate certification stopped at B15"},
+    {"family": "A25", "canonicalFoundation": "Wave 2 security commands and AC3 auth protocol", "result": "registered; aggregate certification stopped at B15"},
+    {"family": "A26", "canonicalFoundation": "Canonical TrialActivation and Wave 2 lifecycle commands", "result": "registered; B14 legacy projection remediation verified"},
+    {"family": "reduced A27", "canonicalFoundation": "Wave 4 inventory and AC4 review ingestion", "result": "registered; aggregate certification stopped at B15"},
+    {"family": "A28", "canonicalFoundation": "Wave 4 prospective calendar actions and immutable AI receipt children", "result": "registered; aggregate certification stopped at B15"},
+    {"family": "A29", "canonicalFoundation": "Wave 5 recovery correction and immutable evidence", "result": "registered; aggregate certification stopped at B15"},
+    {"family": "A30", "canonicalFoundation": "AC6 coordinator, MaintenanceRun/ItemClaim and Policy V1", "result": "registered; aggregate certification stopped at B15"},
+    {"family": "A31", "canonicalFoundation": "AC4/AC5 event, ingestion and reconciliation facts", "result": "registered; aggregate certification stopped at B15"}
+  ],
+  "familySetCoverage": "13/13",
+  "newBlocker": {
+    "id": "B15-A18-CHAT-HISTORY-READ-MUTATION",
+    "summary": "Published chat history read creates legacy recommendation/chat state through raw chat_id and rewrites historical message IDs outside canonical Client and Communication boundaries.",
+    "endpoint": "POST /api/chat/history",
+    "publishedProxyLines": [2491, 2498],
+    "publishedAppLine": 15531,
+    "activeRouteLine": 13015,
+    "functions": {
+      "chatHistoryHandler": {"line": 8910, "end": 8954, "sha256": "eeaf76c889351a79eee80b672427c3b415007f7e15f61f331bf7a07d20d2eafd"},
+      "loyaltyOffer": {"line": 8706, "end": 8750, "sha256": "07ee3da10c02a75366c2245935868a0661bc0720a2efbbc88bc7d0bf166e0934"},
+      "repeatBookingOffer": {"line": 8753, "end": 8818, "sha256": "0f1866cd0439ef5a391dcd3466f1817bd9a7ec478c3ca3ca4653db27ad13067d"},
+      "chatStateWriter": {"line": 8640, "end": 8703, "sha256": "97fad51f5371e4faeba797af91d73c0ff7580c7fba4a57b106120bf0efd913a8"}
+    },
+    "isolatedReproduction": {
+      "pass": true,
+      "readStateChanged": true,
+      "saveCalls": 1,
+      "legacyOfferHelpersInvoked": ["loyalty", "repeat"],
+      "productionMutations": 0
+    },
+    "implementationAttempted": false,
+    "productionEndpointInvoked": false
+  },
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "productionDirectBusinessValueMutationBypasses": "PRESENT — B15",
+  "legacyMutatingOwnersActive": "PRESENT — B15",
+  "legacyFallbacks": "PRESENT — B15",
+  "wavesAccepted": "6/6",
+  "realProductionMutationsForProof": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}

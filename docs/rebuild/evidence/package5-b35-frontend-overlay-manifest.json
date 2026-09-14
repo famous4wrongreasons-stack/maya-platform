@@ -1,0 +1,14 @@
+[
+  {
+    "file": "salon-index.html",
+    "before": "4e6ec6930dd379c8d61b844c7754782232914060103b382ad94b541e4fd1c488",
+    "after": "2c733573d727b33932107454fc2fd31782e9dddc794c69e5a475b1d67ffefe72",
+    "ownedHunks": 8
+  },
+  {
+    "file": "mayaos-index.html",
+    "before": "cb73695d73803e9589a8980df4a5586b2566b58f484f9642b0828536c363d84e",
+    "after": "0eb94816c1d62b30d279f16555c8d189e57bb988f273bff3cd734d74294f8772",
+    "ownedHunks": 8
+  }
+]

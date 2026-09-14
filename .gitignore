@@ -18,6 +18,7 @@ signing-key-info.txt
 .env
 .env.*
 !.env.*.example
+.local-pilot-tenant.txt
 
 # --- База данных и ПД (152-ФЗ) ---
 *.db
@@ -93,3 +94,6 @@ ai администратор/barber_knowledge_images/
 # Playwright CLI artifacts (logs/screenshots)
 .playwright-cli/
 output/playwright/
+
+# --- локальные артефакты генерации (PDF/PNG превью) ---
+tmp/

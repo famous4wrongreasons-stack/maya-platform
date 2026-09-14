@@ -20,7 +20,7 @@ export interface AiToolDefinition {
   idempotency: 'none' | 'required';
   timeoutMs: number;
   retryPolicy: 'none';
-  fallbackPolicy: 'fail_closed';
+  fallbackPolicy: 'fail_closed' | 'last_verified_snapshot';
 }
 
 export interface AiToolPrincipal {

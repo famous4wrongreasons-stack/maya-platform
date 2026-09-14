@@ -1,0 +1,40 @@
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+Datasource "db": PostgreSQL database "maya_consent_security_proof", schema "public" at "127.0.0.1:55517"
+
+93 migrations found in prisma/migrations
+
+Applying migration `20260908010000_r05_report_kinds`
+Applying migration `20260908010100_shared_approved_foundation`
+Applying migration `20260908010200_r06_approved_foundation`
+Applying migration `20260908010300_r08_approved_foundation`
+Applying migration `20260908010400_r09_approved_foundation`
+Applying migration `20260908010500_r11_approved_foundation`
+Applying migration `20260908010600_r12_approved_foundation`
+Applying migration `20260908010700_r13_approved_foundation`
+Applying migration `20260908010800_r14_approved_foundation`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260908010000_r05_report_kinds/
+    └─ migration.sql
+  └─ 20260908010100_shared_approved_foundation/
+    └─ migration.sql
+  └─ 20260908010200_r06_approved_foundation/
+    └─ migration.sql
+  └─ 20260908010300_r08_approved_foundation/
+    └─ migration.sql
+  └─ 20260908010400_r09_approved_foundation/
+    └─ migration.sql
+  └─ 20260908010500_r11_approved_foundation/
+    └─ migration.sql
+  └─ 20260908010600_r12_approved_foundation/
+    └─ migration.sql
+  └─ 20260908010700_r13_approved_foundation/
+    └─ migration.sql
+  └─ 20260908010800_r14_approved_foundation/
+    └─ migration.sql
+
+All migrations have been successfully applied.

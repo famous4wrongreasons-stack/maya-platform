@@ -1,0 +1,8 @@
+{
+  "sourceOwnerCompatibility": "FAIL \u2014 reproduced in both PENDING and PUBLISHED states",
+  "reproducerExitCode": 0,
+  "reproducerLint": "PASS",
+  "scriptsTypecheck": "PASS",
+  "runtimeOrSchemaCorrectionImplemented": false,
+  "productionMutation": 0
+}

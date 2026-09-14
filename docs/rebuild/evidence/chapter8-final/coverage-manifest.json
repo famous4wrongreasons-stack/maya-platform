@@ -1,0 +1,1182 @@
+{
+  "status": "PASS",
+  "requirements": [
+    {
+      "id": "Q01",
+      "requirement": "Qualified canonical feature inputs; S-A,H,I,J,U",
+      "package": "P01",
+      "executableEvidence": "chapter8-p01/local-manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q02",
+      "requirement": "Durable input/model/rule/policy identity, asOf/revision/retry; S-C,I,U",
+      "package": "P01",
+      "executableEvidence": "chapter8-p01/local-manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q03",
+      "requirement": "Fact/policy/prediction/strategy typed separation; S-A–D,I",
+      "package": "P01",
+      "executableEvidence": "chapter8-p01/local-manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q04",
+      "requirement": "Typed confirmed tenant/profile policy under A22; S-A,C,U",
+      "package": "P01",
+      "executableEvidence": "chapter8-p01/local-manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q05",
+      "requirement": "One core, multiple vertical/provider semantics; S-A,B,U",
+      "package": "P01",
+      "executableEvidence": "chapter8-p01/local-manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q06",
+      "requirement": "Missing data/cold start/no fabricated certainty; S-C,J,U",
+      "package": "P01",
+      "executableEvidence": "chapter8-p01/local-manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q07",
+      "requirement": "Historical value by basis/window/currency; S-H–J,U",
+      "package": "P02",
+      "executableEvidence": "chapter8-wave2/manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q08",
+      "requirement": "Future Client value and bounded CLV semantics; S-C,E,H,U",
+      "package": "P02",
+      "executableEvidence": "chapter8-wave2/manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q09",
+      "requirement": "Opportunity/retention/upsell/lost-money distinctions; S-C–E,I",
+      "package": "P02",
+      "executableEvidence": "chapter8-wave2/manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q10",
+      "requirement": "Tenant-specific dormancy/loyalty/value signals; S-A,C,H,U",
+      "package": "P02",
+      "executableEvidence": "chapter8-wave2/manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q11",
+      "requirement": "Return/churn and no-show probabilities; S-C–G,U",
+      "package": "P03",
+      "executableEvidence": "chapter8-wave2/manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q12",
+      "requirement": "Revenue / conditioned earnings forecast with named basis/error; S-B,F,I,U",
+      "package": "P03",
+      "executableEvidence": "chapter8-wave2/manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q13",
+      "requirement": "Demand/occupancy forecast; S-D",
+      "package": "P03",
+      "executableEvidence": "chapter8-wave2/manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q14",
+      "requirement": "Revenue/operational anomaly; S-C–G",
+      "package": "P03",
+      "executableEvidence": "chapter8-wave2/manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q15",
+      "requirement": "Reproducible eligible ranking; S-A,H,U",
+      "package": "P02",
+      "executableEvidence": "chapter8-wave2/manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q16",
+      "requirement": "Valuation evidence → existing Opportunity admission; S-C–G,U",
+      "package": "P04",
+      "executableEvidence": "chapter8-wave3/local-acceptance.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave3-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q17",
+      "requirement": "Grounded explanation and comparison; S-A,U",
+      "package": "P04",
+      "executableEvidence": "chapter8-wave3/local-acceptance.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave3-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q18",
+      "requirement": "Prediction T0 → later C7 outcomes → evaluation; S-C–E,U",
+      "package": "P05",
+      "executableEvidence": "chapter8-wave3/local-acceptance.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave3-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q19",
+      "requirement": "Calibration/drift/model activation gates; S-B–E,U",
+      "package": "P05",
+      "executableEvidence": "chapter8-wave3/local-acceptance.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave3-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q20",
+      "requirement": "Exact authority/privacy/fairness/finance/AI/exports; S-A,H–J,U",
+      "package": "P06",
+      "executableEvidence": "chapter8-wave4/package-local.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave4-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q21",
+      "requirement": "Derived retention/hold/cleanup and source independence; S-I,U",
+      "package": "P01",
+      "executableEvidence": "chapter8-p01/local-manifest.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q22",
+      "requirement": "Replace scoped legacy numerical claims; S-C,F,H,U",
+      "package": "P06",
+      "executableEvidence": "chapter8-wave4/package-local.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave4-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q23",
+      "requirement": "Consistent bounded UI/AI/report/read consumers; S-A,H–J,U",
+      "package": "P06",
+      "executableEvidence": "chapter8-wave4/package-local.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave4-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    },
+    {
+      "id": "Q24",
+      "requirement": "Mandatory release wiring, 32-surface acceptance and handoff; S-A,H,U",
+      "package": "P06",
+      "executableEvidence": "chapter8-wave4/package-local.json",
+      "status": "PASS",
+      "implemented": true,
+      "tested": true,
+      "productionVerified": true,
+      "finalExecutableProof": "maya-saas-backend/scripts/chapter8-wave4-proof.ts",
+      "finalPreservationProof": "chapter8-wave4/package-local.json",
+      "productionEvidence": "chapter8-final/runtime-structural.json"
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "S01",
+      "name": "Backend HTTP routes",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Bounded C8 reader and explicit derived compute; C7 current authority; no business executor.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S02",
+      "name": "Active salon PWA",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Accepted Beget maintenance and protected PWA backups preserved; no restoration.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S03",
+      "name": "Maya platform PWA / VPS static",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Pinned active VPS PWA safe C8 panel, two retired numerical renderers; C7/identity preserved.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S04",
+      "name": "Public site / Next / shop",
+      "scope": "UNCHANGED_PRESERVATION",
+      "boundary": "Public/shop source owners unchanged, R01 and backend artifact comparison.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S05",
+      "name": "Proxy / compatibility routes",
+      "scope": "UNCHANGED_PRESERVATION",
+      "boundary": "Finite 42-entry relay/9-routing manifest; no new PHP booking/execution authority.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S06",
+      "name": "Chat / stream / history",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Existing chat tools read safe C8 facts/limits; no loyalty/revenue fallback.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S07",
+      "name": "Realtime / voice",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Existing realtime/voice shared tool catalog; no separate prediction/execution owner.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S08",
+      "name": "AI tools",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "One C8 safe AI projection, no stable identifiers/contacts, training/activation/strategy.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S09",
+      "name": "Journal",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Existing C7 journal/report factual contracts preserved; no legacy value as C8 result.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S10",
+      "name": "Python services / importers",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Four pinned Python artifacts; direct/nested L06–08 scorers retired; AST/executable guards.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S11",
+      "name": "Schedulers",
+      "scope": "UNCHANGED_PRESERVATION",
+      "boundary": "Existing schedulers preserved; legacy retention refresh returns, no new timer.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S12",
+      "name": "VPS cron / timers",
+      "scope": "UNCHANGED_PRESERVATION",
+      "boundary": "Seven existing cron sources hash-equivalent; accepted services/launchers preserved.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S13",
+      "name": "Beget cron / hosting scheduled tasks",
+      "scope": "UNCHANGED_PRESERVATION",
+      "boundary": "Closed owner-provided Beget empty-job inventory inherited; no C8 Beget configuration change. No fresh private control-plane discovery claimed.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "INHERITED CLOSED CONTROL-PLANE INVENTORY + NO C8 CONFIGURATION CHANGE",
+      "canonicalEvidence": "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-EXHAUSTIVE-REMAINDER-INVENTORY-COMPLETE.md"
+    },
+    {
+      "id": "S14",
+      "name": "Background workers / installed operator CLIs",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Existing bounded operational worker captures T0/evaluates later C7; no new daemon/training cron.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S15",
+      "name": "Telegram handlers / commands / replies",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Verified Telegram initiators preserved; old Python money/growth/retention retired, no sends.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S16",
+      "name": "Inbox",
+      "scope": "UNCHANGED_PRESERVATION",
+      "boundary": "Inbox owner unchanged; C7 report snapshot preserved, no C8 delivery.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S17",
+      "name": "APNS",
+      "scope": "UNCHANGED_PRESERVATION",
+      "boundary": "APNS owner unchanged; no C8 device selection/fallback.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S18",
+      "name": "Web Push",
+      "scope": "UNCHANGED_PRESERVATION",
+      "boundary": "Web Push owner unchanged; no C8 subscription/export/fanout.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-b24-remediation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S19",
+      "name": "Communication Delivery",
+      "scope": "SOURCE_OWNER_PRESERVATION",
+      "boundary": "AE/CD read evidence only; UNKNOWN not a negative label or retry permission.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S20",
+      "name": "Panel / GOD / admin",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Current role/branch/Staff/finance; existing owner-only safe tenant audit.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S21",
+      "name": "Internal calendar",
+      "scope": "SOURCE_OWNER_PRESERVATION",
+      "boundary": "Source correction remains independent; stale result unavailable, history immutable.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S22",
+      "name": "CRM / YClients adapters / helpers",
+      "scope": "SOURCE_OWNER_PRESERVATION",
+      "boundary": "Provider-neutral C7 qualification; CRM labelled calendar facts not probabilities.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S23",
+      "name": "Marketing / bulk",
+      "scope": "SOURCE_OWNER_PRESERVATION",
+      "boundary": "Rank/value/Opportunity confer no consent, campaign, action or execution authority.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S24",
+      "name": "Finance / expense",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Named basis/currency/completeness; no ledger/profit/default salary/fuzzy dedupe.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S25",
+      "name": "Loyalty / value / certificates",
+      "scope": "SOURCE_OWNER_PRESERVATION",
+      "boundary": "Package4 instruments/owners preserved; loyalty instrument not a C8 score.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/package4-active-pwa-runtime-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S26",
+      "name": "Reviews",
+      "scope": "SOURCE_OWNER_PRESERVATION",
+      "boundary": "Review/NativeFeedback source facts independent; anonymous content not verified Client review.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S27",
+      "name": "Onboarding",
+      "scope": "DIRECT_REVIEW",
+      "boundary": "Existing A22 confirmed typed C8 policy; broader conversational onboarding remains C9.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S28",
+      "name": "Auth / identity",
+      "scope": "SOURCE_OWNER_PRESERVATION",
+      "boundary": "Existing identity/security invalidation preserved; no phone/User association authority.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/consent-security-invalidation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S29",
+      "name": "Maintenance",
+      "scope": "UNCHANGED_PRESERVATION",
+      "boundary": "Three scoped C8 AC6 leaves, nonrenewing dependency-bounded expiry; no source delete.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S30",
+      "name": "All direct database writer candidates",
+      "scope": "CROSS_CUTTING_GUARD",
+      "boundary": "Shared C8 store writes derived rows only; business/source owners preserved.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-final-remediation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S31",
+      "name": "All direct provider / delivery candidates",
+      "scope": "CROSS_CUTTING_GUARD",
+      "boundary": "No provider/message effect; typed Opportunity not execution; AE/CD UNKNOWN preserved.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    },
+    {
+      "id": "S32",
+      "name": "Legacy identity / projection fallbacks",
+      "scope": "CROSS_CUTTING_GUARD",
+      "boundary": "No old numerical/identity fallback; unknown not zero/dormant, no invented lineage.",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "status": "PASS",
+      "currentC8Ratchets": [
+        "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts"
+      ],
+      "productionEvidence": [
+        "chapter8-final/runtime-structural.json",
+        "chapter8-final/preservation-after.json",
+        "chapter8-final/consumer-live.json",
+        "chapter8-final/relay-live.json"
+      ],
+      "verificationMode": "CURRENT STRUCTURAL/READ-ONLY + EXECUTABLE GUARDS"
+    }
+  ],
+  "release": "20260913-c8-wave4-e082786b",
+  "inventoryExpansion": false
+}

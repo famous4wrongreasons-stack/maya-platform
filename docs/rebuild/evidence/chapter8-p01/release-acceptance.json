@@ -1,0 +1,40 @@
+{
+  "release": "20260913-c8-p01-12f0f35b",
+  "codeCommit": "12f0f35b",
+  "deploymentExit": 0,
+  "mandatorySuites": 441,
+  "mandatoryTests": 3711,
+  "lint": "PASS",
+  "applicationTypecheck": "PASS",
+  "scriptsTypecheck": "PASS",
+  "build": "PASS",
+  "prisma": "PASS",
+  "pendingMigrations": 0,
+  "drift": "NONE",
+  "health": "PASS",
+  "readiness": "PASS",
+  "schemaFunctionsMatchLocal": 5,
+  "schemaConstraintDefinitionsMatchLocal": true,
+  "productionProofEffects": 0,
+  "numericTargetsActive": 0,
+  "relay": {
+    "status": "PASS",
+    "mode": "verify",
+    "entries": 42,
+    "activePhp": 10,
+    "publicRoots": 3,
+    "localRoutingFiles": 9,
+    "protectedHtmlAndBackups": 7,
+    "blockedArchives": 16,
+    "repair": null,
+    "phpSourceEvaluation": 0,
+    "bookingProviderMessageEffects": 0
+  },
+  "pwa": {
+    "artifact": "/var/www/maya-platform/app.html",
+    "status": "PASS",
+    "scriptsParsed": 27,
+    "sha256": "dae6c0b057bf4fc05d26393da13dbd0dafb38a6ba38359244a7870ee495d8715",
+    "businessEffects": 0
+  }
+}

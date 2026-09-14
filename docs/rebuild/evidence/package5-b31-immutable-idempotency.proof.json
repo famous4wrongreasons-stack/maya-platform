@@ -1,0 +1,41 @@
+{
+  "verdict": "PASS",
+  "compiledHttpAiAndCanonicalExecutor": true,
+  "realActionEngine": true,
+  "realPostgresql": true,
+  "syntheticOnly": true,
+  "realProductionMutations": 0,
+  "results": {
+    "missing": "denied; appointments=0; executions=0",
+    "revoked": "denied; appointments=0; executions=0",
+    "concurrentHttpAndAi": {
+      "requests": 14,
+      "immediateAccepted": 12,
+      "transientFailures": 0,
+      "appointments": 1,
+      "executions": 1,
+      "actionClass": "create_appointment",
+      "exactCanonicalClient": true
+    },
+    "clientWithoutMayaUser": "PASS \u2014 HTTP contact and AI exact CRM binding",
+    "wrongContext": "denied before ingress; caller ownership ignored",
+    "internalProviderWrites": 0,
+    "crmUnknownReconciled": "one provider dispatch; one canonical Appointment; SUCCEEDED",
+    "crmUnknownNoBlindRetry": "UNKNOWN; provider calls=1; appointments=0",
+    "httpAiSameKey": "same binding / same execution / same Appointment",
+    "secondaryAliasGap": "K1+A / K2+A => same E1; K2+B => IDEMPOTENCY_CONFLICT",
+    "changedBusinessTerms": "time/service/staff/branch/duration/contact/notes: conflict, no new execution/outcome",
+    "changedCanonicalClient": "verified Client B cannot reuse Client A key; conflict and zero new outcomes",
+    "tenantIsolation": "forged context denied before ingress; authorized different tenant owns an independent scoped identity",
+    "concurrentSameKey": {
+      "sameIntent": "12 requests / 1 binding / 1 execution / 1 Appointment",
+      "differentIntent": "1 accepted / 1 conflict / 1 binding / 1 execution / 1 Appointment"
+    },
+    "crashRestart": "new Node process resumed the committed binding/execution and produced its sole Appointment",
+    "crossProcessConcurrency": "two independent Node runtimes; concurrent first requests; one binding/execution/Appointment",
+    "immutableDefaults": "bound replay uses accepted contact/timezone; unavailable catalog labels do not change durable outcome",
+    "unknownImmutableIntent": "same key => same UNKNOWN execution/reconciliation; changed key intent => conflict; no new provider operation",
+    "succeededReplay": "same execution/outcome; no provider dispatch",
+    "changedCalendarTarget": "changed company or calendar source => conflict; zero provider writes"
+  }
+}

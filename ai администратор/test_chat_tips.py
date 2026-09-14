@@ -128,7 +128,7 @@ class ChatTipsTests(unittest.TestCase):
         self.assertEqual(result["status"], "updated")
         self.assertTrue(result["services_changed"])
 
-    def test_tip_sent_accepts_optional_thank_you_note(self):
+    def test_tip_sent_retires_unverified_thank_you_signal(self):
         ws = self._load()
         database = sys.modules["database"]
         saved = []
@@ -152,8 +152,9 @@ class ChatTipsTests(unittest.TestCase):
             "note": "Спасибо за отличный результат!",
         })))
 
-        self.assertEqual(saved[0]["note"], "Спасибо за отличный результат!")
-        self.assertTrue(response["data"]["note_saved"])
+        self.assertEqual(saved, [])
+        self.assertFalse(response["data"]["ok"])
+        self.assertEqual(response["data"]["error"], "tip_signal_retired")
 
 
 if __name__ == "__main__":

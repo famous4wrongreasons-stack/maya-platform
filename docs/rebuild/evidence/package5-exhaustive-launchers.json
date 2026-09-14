@@ -1,0 +1,152 @@
+{
+  "inspection": "readonly launcher/config structure; secrets excluded",
+  "cron": [
+    {
+      "user": "root",
+      "exit": 1,
+      "noCrontab": true,
+      "permissionDenied": false
+    },
+    {
+      "user": "botadmin",
+      "exit": 1,
+      "noCrontab": true,
+      "permissionDenied": false
+    }
+  ],
+  "nginx": {
+    "exit": 0,
+    "unavailable": false,
+    "routing": [
+      "listen 80;",
+      "listen [::]:80;",
+      "server_name api.111.88.148.206.nip.io;",
+      "location ^~ /.well-known/acme-challenge/ {",
+      "root /var/www/maya-saas-acme;",
+      "location / {",
+      "listen 443 ssl http2;",
+      "server_name api.111.88.148.206.nip.io;",
+      "location / {",
+      "proxy_pass http://127.0.0.1:3107;",
+      "listen 80 default_server;",
+      "listen [::]:80 default_server;",
+      "root /var/www/html;",
+      "server_name _;",
+      "location / {",
+      "listen 80;",
+      "listen [::]:80;",
+      "server_name maya.111.88.148.206.nip.io;",
+      "root /var/www/maya-platform;",
+      "location ^~ /.well-known/acme-challenge/ {",
+      "location / {",
+      "listen 443 ssl http2;",
+      "server_name maya.111.88.148.206.nip.io;",
+      "root /var/www/maya-platform;",
+      "location = / {",
+      "location ^~ /api/ {",
+      "proxy_pass http://127.0.0.1:3107;",
+      "location ~* \\.(?:woff2|png|jpg|jpeg|webp|svg|ico)$ {",
+      "location = /service-worker.js {",
+      "location = /oauth-callback.html {",
+      "location / {",
+      "listen 80;",
+      "listen [::]:80;",
+      "server_name mayaos.ru;",
+      "root /var/www/maya-platform;",
+      "location ^~ /.well-known/acme-challenge/ {",
+      "location / {",
+      "server_name rt.malesthetic.pro;",
+      "location = /api/realtime {",
+      "proxy_pass http://127.0.0.1:8080;",
+      "location / {",
+      "proxy_pass http://127.0.0.1:8080;",
+      "listen 443 ssl; # managed by Certbot",
+      "listen 80;",
+      "server_name rt.malesthetic.pro;"
+    ]
+  },
+  "environmentFlags": {
+    "maya-saas": {
+      "SWAGGER_ENABLED": false,
+      "PWA_TENANT_INSTALL_ENABLED": true,
+      "PHONE_LOGIN_ENABLED": false,
+      "EMAIL_LOGIN_ENABLED": false,
+      "YANDEX_LOGIN_ENABLED": true,
+      "TELEGRAM_LOGIN_ENABLED": true,
+      "MAYA_BRAIN_V1_ENABLED": true,
+      "YOOKASSA_RECURRING_ENABLED": false,
+      "OWNER_REPORTS_SCHEDULER_ENABLED": true,
+      "OUTBOUND_MARKETING_SEND_ENABLED": false,
+      "OUTBOUND_MARKETING_WORKER_ENABLED": false,
+      "CRM_SHADOW_INGESTION_ENABLED": true,
+      "CRM_RECONCILIATION_SCHEDULER_ENABLED": true,
+      "OPPORTUNITY_LIFECYCLE_ENABLED": true,
+      "MAYA_LEGACY_APPOINTMENT_BRIDGE_EXECUTION_ENABLED": true
+    },
+    "barbershop-bot": {
+      "VOICE_REPLIES_ENABLED": false,
+      "MAYA_SHADOW_FORWARD_ENABLED": true
+    }
+  },
+  "dailyScripts": [
+    {
+      "file": "/etc/cron.hourly/.placeholder",
+      "sha256": "49674d9b1bd433cdb58f30497f6c441dc823de549160eef5c1acec4c20786810",
+      "applicationRefs": []
+    },
+    {
+      "file": "/etc/cron.daily/sysstat",
+      "sha256": "bf4e40f5cbe6a073dbd2b7148a8f4c574e33729426d44b0ef852d78f12c8a0c9",
+      "applicationRefs": []
+    },
+    {
+      "file": "/etc/cron.daily/logrotate",
+      "sha256": "12b36ff7068d3932f428e6eba07cbc9b9b2f7f7d37756d86ce13ddfcc6cd875f",
+      "applicationRefs": []
+    },
+    {
+      "file": "/etc/cron.daily/apport",
+      "sha256": "ece406240beddfd8d262a9f0f2ffd5aa40cae4bf5401e7641db3ae1aca737a39",
+      "applicationRefs": []
+    },
+    {
+      "file": "/etc/cron.daily/dpkg",
+      "sha256": "9f2fdd4b4e7706dda74e8e443e1e1da0fbbb19c62a58e230e90d648b69177c35",
+      "applicationRefs": []
+    },
+    {
+      "file": "/etc/cron.daily/.placeholder",
+      "sha256": "49674d9b1bd433cdb58f30497f6c441dc823de549160eef5c1acec4c20786810",
+      "applicationRefs": []
+    },
+    {
+      "file": "/etc/cron.daily/man-db",
+      "sha256": "c0130ac86efd06d0c91415d2150be235b7df63efd1e4519ba167be26c1fd6116",
+      "applicationRefs": []
+    },
+    {
+      "file": "/etc/cron.daily/apt-compat",
+      "sha256": "1983c659b042b1ec26127e7874954d83cd97eb8dcfd03238a7d2031ea0182fbe",
+      "applicationRefs": []
+    },
+    {
+      "file": "/etc/cron.weekly/.placeholder",
+      "sha256": "49674d9b1bd433cdb58f30497f6c441dc823de549160eef5c1acec4c20786810",
+      "applicationRefs": []
+    },
+    {
+      "file": "/etc/cron.weekly/man-db",
+      "sha256": "33f6cd0fe83173cfcbe7a6918b48ff0eeea7d3faca74018c14c7146c87f7325c",
+      "applicationRefs": []
+    },
+    {
+      "file": "/etc/cron.monthly/.placeholder",
+      "sha256": "49674d9b1bd433cdb58f30497f6c441dc823de549160eef5c1acec4c20786810",
+      "applicationRefs": []
+    }
+  ],
+  "observer": {
+    "path": "/opt/maya-shadow-observer/legacy_appointment_shadow_observer.py",
+    "sha256": "d018ee62ced28296dc74b76d4e12a57790eb4fe90208641c773705f6ccc37095"
+  }
+}

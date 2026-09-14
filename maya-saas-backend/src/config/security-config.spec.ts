@@ -107,10 +107,20 @@ describe('security config', () => {
   });
 
   it('accepts only known node environments', () => {
-    expect(resolveNodeEnvironment(undefined)).toBe('development');
     expect(resolveNodeEnvironment('test')).toBe('test');
+    expect(resolveNodeEnvironment('production')).toBe('production');
     expect(() => resolveNodeEnvironment('staging')).toThrow(
       'NODE_ENV must be development, test or production',
     );
+  });
+
+  it('refuses to guess the environment when it is not stated', () => {
+    // Раньше отсутствие переменной давало development и вместе с ним выключало
+    // всю production-валидацию. Угаданное окружение опаснее незапущенного
+    // приложения: процесс поднимался зелёным с открытой защитой.
+    expect(() => resolveNodeEnvironment(undefined)).toThrow(
+      'NODE_ENV is required',
+    );
+    expect(() => resolveNodeEnvironment(null)).toThrow('NODE_ENV is required');
   });
 });

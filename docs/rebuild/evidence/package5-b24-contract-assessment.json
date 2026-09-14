@@ -1,0 +1,236 @@
+{
+  "acceptedCheckpoint": "b40e24747f993c305d1131dd243220fa462d23bd",
+  "cycle": "B24/A18 contract and minimal schema/lifecycle proposal only",
+  "assessedOn": "2026-09-06",
+  "productionBaseline": {
+    "release": "/opt/maya-saas/releases/20260906-p5-b23-68e0048f",
+    "codeHashes": {
+      "webhook_server.py": "fc5fedeebff6cf742bc5c9206a7fa1907d8c5a23ef62646bcaa60c46665f22be",
+      "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "package5_control_plane_runtime_guard.py": "1004dc7c12217447eb5f49974923227892a81a5aa3dde84d18a8ef7c8f9b3d7d"
+    }
+  },
+  "activeSnapshotComparison": {
+    "webhook_server.py": {
+      "sha256": "fc5fedeebff6cf742bc5c9206a7fa1907d8c5a23ef62646bcaa60c46665f22be",
+      "matchesFreshRemoteHash": true
+    },
+    "pwa_api.py": {
+      "sha256": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "matchesFreshRemoteHash": true
+    },
+    "package5_control_plane_runtime_guard.py": {
+      "sha256": "1004dc7c12217447eb5f49974923227892a81a5aa3dde84d18a8ef7c8f9b3d7d",
+      "matchesFreshRemoteHash": true
+    }
+  },
+  "activeFunctions": {
+    "_master_by_chat_id": {
+      "lines": [
+        327,
+        341
+      ],
+      "sha256": "ee4531488ca6fc0c6ae65c96ae32f561cf93c3b61405e08cead1cd48e70f47f2"
+    },
+    "_push_db": {
+      "lines": [
+        368,
+        392
+      ],
+      "sha256": "9920f2719b5e280f8c379bd68c2b2d92e621ce450e8a28f265c2765c63ea5be6"
+    },
+    "_save_master_push_subscription_sqlite": {
+      "lines": [
+        395,
+        426
+      ],
+      "sha256": "ea4ccdf73c38f49d9a698a029d81e34ec796c878c9dda1f728b287138b6a378f"
+    },
+    "_list_master_push_subscriptions_sqlite": {
+      "lines": [
+        429,
+        452
+      ],
+      "sha256": "11482c6ff1c87ba0e5396f61067a5442b49321dd6bb173a253e6d0e89df4f6a1"
+    },
+    "_delete_master_push_subscription_sqlite": {
+      "lines": [
+        455,
+        463
+      ],
+      "sha256": "c5662160201748705a553f3c95176021657e332a303fde2ee13674907cdd0c4f"
+    },
+    "_send_master_push": {
+      "lines": [
+        536,
+        593
+      ],
+      "sha256": "01e289dcf9b1c584bd281519fef7b74084e1178815ea321541d3683718219713"
+    },
+    "_send_client_push": {
+      "lines": [
+        596,
+        676
+      ],
+      "sha256": "1e085f90efbacbcec00cb5995b62b9ad6afd725d036faa33a0f2dbdcab127490"
+    },
+    "_authed_chat_id": {
+      "lines": [
+        6117,
+        6136
+      ],
+      "sha256": "2ddfb7cc82ef17e876860be27757419ac72e31e14e13282f604c6c9bdcad679f"
+    },
+    "push_subscribe_handler": {
+      "lines": [
+        10159,
+        10203
+      ],
+      "sha256": "1d79c5595f9eee65c994f90ada74441de2a9f92f4548c60193541f18ff2f5268"
+    }
+  },
+  "priorPwaProxySnapshots": {
+    "app.html": "03b9a33b7200d1f1ff8c429d6ffcc24f2daddfd19ced60873749fb1761584613",
+    "maya-app.html": "7d5664e5ee80ff9f68b91b9c94f869bc8cbb6279096ac8051a6a73396b9c14d9",
+    "api-proxy.php": "70784f765bd35056a9937974510ec1c427b77527154ed0c082db1645243a07a8"
+  },
+  "pwaProxyVerificationScope": "Accepted B23 deployment snapshots inspected locally; these PWA/proxy hashes were not fetched remotely again in this contract cycle.",
+  "reviewedFoundationHashes": {
+    "maya-saas-backend/prisma/schema.prisma": "6776b380b88a13122d327901f7523fc1be866ef9dc27caf041727e66f2b1ae76",
+    "maya-saas-backend/prisma/migrations/20260904090000_a18_client_channel_link_v1/migration.sql": "445ef8a23ade1668a8a1cecb481d5db240298e9f90031fdbac48897f9eb8e0a0",
+    "maya-saas-backend/prisma/migrations/20260905010000_client_channel_delivery_address_v1/migration.sql": "89c1ef5bcaad4227ee52278ff36b2e6416202b025e58db3b493505caad13f944",
+    "maya-saas-backend/src/crm/client-channel-runtime.service.ts": "ebfd44af19a900c6e08d86288651026bdc24bfbd6d8f02c966a0d55450a94965",
+    "maya-saas-backend/src/crm/client-channel-link.service.ts": "742ec211e8186c0d7e6f0c6abc4232db6a20a5c1a10ae53627075b23f0293309",
+    "maya-saas-backend/src/crm/client-channel-authenticator.service.ts": "c809efcb8d4d9394e239d9744cedacdd1e50e284af846d7cdaca048ff75557db",
+    "maya-saas-backend/src/crm/client-channel-subject.ts": "333d84c7361d8e637d4c30ef43677aa61dae7b31a291ed239a1a11f536270484",
+    "maya-saas-backend/src/encryption/encryption.service.ts": "9f0fc845eb1c60cc50c301d8c385802179d95f9cb8d480a790fa30694a9fc01d",
+    "maya-saas-backend/src/inbox/inbox.service.ts": "ea568f3d395a5baa3677158762a928403ce9e92619ab6745d4cbba2c77cbd044",
+    "maya-saas-backend/src/action-engine/action-engine.registry.ts": "7c55e380490d5f926d837067176daae620cf973718c21e899248c5118311c598",
+    "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts": "9f6c20486a3be403b6fafda215e54379bf883f2f905f05d568d38c7861b03326",
+    "maya-saas-backend/src/communication-delivery/communication-delivery.capabilities.ts": "722418489a2358f3ae8f649612f904fe456bc1eb131ae9184c8fe2de1e33c1b2",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-AUTHORITY-CLASSIFICATION-MINIMUM-SCHEMA-DECISION-GATE.md": "9889c5978d71f5be7437f8e42c42e33316663941c18cf81b0fee4c22058cd6db",
+    "docs/rebuild/package5-b9-client-delivery-endpoint-v1-decision.md": "9eec6cf1ea61434efda4eb511a723d4a6c532faf8101d28866e82e7d21cb4b51",
+    "сайт и приложение/service-worker.js": "8e5cbb806ecacad22337e442e5e01a3b37a7e07b3462fc0f98f9e895ee0a2f75"
+  },
+  "priorProof": {
+    "script": "evidence/package5-b24-push-subscribe.probe.py",
+    "result": "evidence/package5-b23-deployed-final-recheck.json",
+    "rerun": false,
+    "realSubscriptionRead": false
+  },
+  "reconstruction": {
+    "payload": "PushSubscription.toJSON(): endpoint, expirationTime nullable, keys.p256dh, keys.auth; legacy persists unchecked full JSON and user-agent",
+    "legacyOwner": "master_push_subscriptions SQLite, staff_id/raw telegram_chat_id; no tenant/Client/link",
+    "legacyRegistrationAuthority": "Telegram channel or legacy resolved session chat_id; bare unauthenticated chat_id rejected",
+    "legacyReplacement": "Global endpoint conflict updates staff/raw identity/material without Client ownership guard",
+    "legacyMultipleDevices": "Multiple distinct endpoints per raw identity; no approved Client-specific count/fan-out/replacement policy found",
+    "legacyLifecycle": "Direct send and physical SQLite endpoint deletion on selected errors; no durable canonical endpoint episode",
+    "registrationSendsNotification": false,
+    "browserPermissionEstablishesClientOrConsent": false
+  },
+  "foundationMapping": [
+    {
+      "foundation": "ClientChannelLink identity",
+      "reuse": true,
+      "scope": "Verified tenant/Client authority, active link, optional User"
+    },
+    {
+      "foundation": "B9 deliveryAddressEncrypted",
+      "sufficientAsIs": false,
+      "reason": "42..512-byte reversible identity subject; provider allowlist maya_user/telegram and identity-HMAC verification; no Web Push material/device lifecycle"
+    },
+    {
+      "foundation": "DevicePushToken",
+      "sufficientAsIs": false,
+      "reason": "User-required plaintext token registry, no Client/link/encrypted episode owner; existing AC3 contract not reopened"
+    },
+    {
+      "foundation": "EncryptionService",
+      "reuse": true,
+      "scope": "Existing AES-GCM envelope and separately namespaced HMAC; no new secret store"
+    },
+    {
+      "foundation": "Communication Delivery",
+      "reuse": true,
+      "sufficientForWebPushAsIs": false,
+      "reason": "Canonical single-delivery normalizer inbox/APNS/Telegram; Web Push needs reviewed transport profile/adapter; existing durable delivery outcomes reusable"
+    }
+  ],
+  "decisionsPending": {
+    "schema": {
+      "status": "PROPOSED_NOT_APPROVED",
+      "newModels": 1,
+      "name": "ClientWebPushEndpoint",
+      "newBusinessActionClasses": 0,
+      "backfill": 0
+    },
+    "devicePolicy": {
+      "status": "OWNER_DECISION_REQUIRED",
+      "recommended": "A: multiple verified endpoints",
+      "proposedMaximumActivePerTenantClient": 5,
+      "proposedMaximumFanOutPerIntent": 5,
+      "overflow": "atomic rejection, no eviction",
+      "alternative": "B: one active endpoint, explicit replacement"
+    },
+    "storagePolicy": {
+      "status": "PROPOSED_NOT_APPROVED",
+      "endpointMaxUtf8Bytes": 4096,
+      "normalizedSubscriptionMaxBytes": 8192,
+      "encryptedEnvelopeMaxBytes": 10963
+    },
+    "lifecycle": "Immutable owner/material episodes, explicit same-Client predecessor replacement, first complete terminal transition, no cross-Client/tenant transfer",
+    "delivery": "No registration send; current consent/policy and verified active endpoint; canonical transport, bounded durable fan-out, UNKNOWN/reconciliation"
+  },
+  "verdicts": {
+    "contractReconstruction": "COMPLETE",
+    "existingSchemaSufficient": false,
+    "additionalSchemaRequired": true,
+    "runtimeCanResume": false,
+    "package5Complete": false,
+    "acceptedFinalGate": "FAIL at B24",
+    "newFinalGateRun": false,
+    "runtimeChanges": 0,
+    "schemaChanges": 0,
+    "migrationChanges": 0,
+    "productionBusinessProviderMutations": 0,
+    "runtimeProofsRunThisCycle": 0,
+    "deploymentGatesRunThisCycle": 0,
+    "wave7Created": false,
+    "p4_11Created": false,
+    "chapter7Started": false
+  },
+  "protectedBaselines": {
+    "B9": "not reopened",
+    "B23": "accepted and unchanged",
+    "waves1Through6": "accepted 6/6",
+    "familyInventoryCoverage": "13/13 accepted inventory, not new final certification",
+    "priorRegression": "B23 353 suites / 2884 tests; not rerun",
+    "pendingMigrationsAndDrift": "Accepted B23 baseline 0 / NONE; not queried this contract cycle"
+  },
+  "processHygiene": {
+    "protectedPreExistingTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedProcessesStarted": 0,
+    "ownedWatchersStarted": 0,
+    "ownedPlaywrightChromeStarted": 0,
+    "ownedDatabasesCreated": 0,
+    "ownedTempProcessesRemaining": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  },
+  "sources": [
+    {
+      "title": "W3C Push API Working Draft 2025-12-01",
+      "url": "https://www.w3.org/TR/2025/WD-push-api-20251201/"
+    },
+    {
+      "title": "RFC 8291",
+      "url": "https://www.rfc-editor.org/rfc/rfc8291.html"
+    },
+    {
+      "title": "RFC 8030 section 7.3",
+      "url": "https://www.rfc-editor.org/rfc/rfc8030.html#section-7.3"
+    }
+  ]
+}

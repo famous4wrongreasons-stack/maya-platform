@@ -1,0 +1,39 @@
+{
+  "contract": "package5-b26-readonly-proof.v1",
+  "verdict": "PASS",
+  "cases": [
+    "verified channel Client without Maya User reads only own canonical Appointment",
+    "real GET controller account route requires verified durable binding; duplicate phones irrelevant",
+    "missing binding/account phone alone rejected",
+    "missing channel binding rejected",
+    "forged phone in channel proof rejected",
+    "forged chat_id in channel proof rejected",
+    "forged clientId in channel proof rejected",
+    "forged account/Client identifiers conflict with authenticated context",
+    "cross-tenant channel cannot select appointments",
+    "cross-tenant account cannot select appointments",
+    "another Client/tenant appointment never projected",
+    "20 concurrent GETs and repeated reads leave all rows unchanged",
+    "missing local Appointment and unmatched remote record do not trigger materialization",
+    "stale canonical state is returned without remote refresh",
+    "public catalog/provider read failure preserves canonical rows and state",
+    "ambiguous canonical Client fails closed",
+    "PostgreSQL read-only transaction rejects a future helper business write",
+    "revoked link returns no private projection"
+  ],
+  "readScenariosWithByteEquivalentBusinessAndProviderState": 18,
+  "productionMutations": 0,
+  "providerWrites": 0,
+  "clientRecordLookups": 0,
+  "newSchema": false,
+  "targetedRegression": {
+    "suites": 6,
+    "tests": 72,
+    "verdict": "PASS"
+  },
+  "cleanReplay": {
+    "migrations": 79,
+    "drift": "NONE",
+    "database": "owned isolated PostgreSQL only"
+  }
+}

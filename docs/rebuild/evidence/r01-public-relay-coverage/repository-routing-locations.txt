@@ -1,0 +1,43 @@
+AGENTS.md:135:scp -i ~/.ssh/beget_deploy '/Users/stanislavmosin/Desktop/сайт и приложение/сайт и приложение/app.html' mocine3388@prime.beget.com:~/muzhskayaestetika.rf/public_html/app/index.html
+maya-saas-backend/deploy/vps/deploy.sh:153:    --root /home/botadmin/barbershop-bot" \
+maya-saas-backend/deploy/vps/deploy.sh:159:    --root /home/botadmin/barbershop-bot" \
+maya-saas-backend/deploy/vps/deploy.sh:248:  sudo -n ln -sfn '$REL' /opt/maya-saas/current
+maya-saas-backend/deploy/vps/deploy.sh:261:    sudo -n ln -sfn \"\$PREV\" /opt/maya-saas/current
+maya-saas-backend/deploy/organic-shadow/test_legacy_appointment_shadow_observer.py:76:        self.database = root / "observer.sqlite3"
+maya-saas-backend/deploy/organic-shadow/test_legacy_appointment_shadow_observer.py:77:        self.summary = root / "summary.json"
+maya-saas-backend/deploy/live-widgets/api.111.88.148.206.nip.io.http.conf:9:        root /var/www/maya-saas-acme;
+maya-saas-backend/deploy/platform/mayaos.ru.http.nginx.conf:6:    root /var/www/maya-platform;
+maya-saas-backend/deploy/platform/maya-platform-staging.http.nginx.conf:6:    root /var/www/maya-platform;
+maya-saas-backend/deploy/platform/maya-platform-staging.https.nginx.conf:6:    root /var/www/maya-platform;
+maya-saas-backend/deploy/platform/maya-platform-staging.https.nginx.conf:22:    root /var/www/maya-platform;
+maya-saas-backend/deploy/platform/beget-edge/relay-release.cjs:57: root=pathlib.Path('/home/m/mocine3388')/domain/'public_html'
+maya-saas-backend/deploy/platform/beget-edge/relay-release.cjs:101:    const url = entry.path.replace('/home/m/mocine3388/muzhskayaestetika.rf/public_html', 'https://malesthetic.pro')
+maya-saas-backend/deploy/platform/beget-edge/relay-release.cjs:102:      .replace('/home/m/mocine3388/mayaos.ru/public_html', 'https://mayaos.ru');
+maya-saas-backend/deploy/platform/beget-edge/relay-release.cjs:112:r=json.loads(input()); target=pathlib.Path('/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php')
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:7:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:12:      "path": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:17:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.codex-loyalty-20260721.html",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:22:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.backup-20260731-anton-analytics.html",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:27:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-test.html",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:32:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:37:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.codex-loyalty-20260721.php",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:42:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:47:      "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:52:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html.pre-maintenance-20260908-211040",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:57:      "path": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html.pre-maintenance-20260908-211040",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:62:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260704_230004",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:67:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.pre-b13-031977e4",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:72:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak.staff_tasks_retry_20260709230808",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:77:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260705_235508",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:82:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260704_223539",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:87:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.20260708211912.bak",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:92:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-221742",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:97:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260702-1305",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:102:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak.staff_tasks_20260709230559",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:107:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-221534",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:112:      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-213132",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:117:      "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php.pre-php56-hotfix-20260908",
+maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json:123:    "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+maya-saas-backend/deploy/platform/mayaos.ru.https.nginx.conf:6:    root /var/www/maya-platform;
+maya-saas-backend/deploy/platform/mayaos.ru.https.nginx.conf:22:    root /var/www/maya-platform;
+maya-saas-backend/deploy/live-widgets/api.111.88.148.206.nip.io.https.conf:7:        root /var/www/maya-saas-acme;

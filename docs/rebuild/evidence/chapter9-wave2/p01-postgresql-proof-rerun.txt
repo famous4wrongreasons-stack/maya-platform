@@ -1,0 +1,28 @@
+PASS same event and material request converge concurrently
+PASS same key changed material conflicts before work
+PASS nonrenewing24h intent and365d derived retention
+PASS full graph validates with pinned registry and snapshot digest
+PASS concurrent revision retry preserves one graph
+PASS material edit under old edit identity conflicts
+PASS strategy review creates no source effect or blanket approval
+PASS retry review returns same immutable review
+PASS new material revision preserves original review and invalidates future old work
+PASS current projection and restart use the same plan
+PASS immutable request and revision SQL guards
+PASS cross tenant graph ref rejected by PostgreSQL
+PASS late insert into accepted graph cannot alter plan
+PASS concurrent same call reserves exactly once
+PASS concurrent claim cannot dispatch same call twice
+PASS settled call skips after restart and does not reset counters
+PASS UNKNOWN holds same receipt; independent work can continue without resend
+PASS SQL settlement requires exact current dispatch fence
+PASS restart recovers expired dispatch as held, charges lost window, never resends
+PASS generic deletion and truncate denied without exact AC6 claim
+PASS current revoked membership denies retained plan read
+PASS real signed channel plus verified Client link works without Maya User
+PASS AC6 due child cleanup stops continuation but preserves live root identity and all source facts
+PASS atomic budget reservation caps domains and calls under concurrency without resetting on retry
+PASS expired signed request cannot insert a replacement after elapsed validity
+PASS unauthenticated context cannot create strategy
+PASS exact five tables and123 physical fields
+{"contract":"maya.c9-p01-postgresql-proof/1","checks":27,"passed":["same event and material request converge concurrently","same key changed material conflicts before work","nonrenewing24h intent and365d derived retention","full graph validates with pinned registry and snapshot digest","concurrent revision retry preserves one graph","material edit under old edit identity conflicts","strategy review creates no source effect or blanket approval","retry review returns same immutable review","new material revision preserves original review and invalidates future old work","current projection and restart use the same plan","immutable request and revision SQL guards","cross tenant graph ref rejected by PostgreSQL","late insert into accepted graph cannot alter plan","concurrent same call reserves exactly once","concurrent claim cannot dispatch same call twice","settled call skips after restart and does not reset counters","UNKNOWN holds same receipt; independent work can continue without resend","SQL settlement requires exact current dispatch fence","restart recovers expired dispatch as held, charges lost window, never resends","generic deletion and truncate denied without exact AC6 claim","current revoked membership denies retained plan read","real signed channel plus verified Client link works without Maya User","AC6 due child cleanup stops continuation but preserves live root identity and all source facts","atomic budget reservation caps domains and calls under concurrency without resetting on retry","expired signed request cannot insert a replacement after elapsed validity","unauthenticated context cannot create strategy","exact five tables and123 physical fields"],"productionEffects":0}

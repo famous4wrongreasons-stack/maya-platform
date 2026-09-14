@@ -1,0 +1,14 @@
+{
+  "package": "R11",
+  "proof": "A22 PostgreSQL runtime",
+  "checks": [
+    "same-key concurrent A22 admission, immutable normalized rule IDs, encrypted revision and exact replay",
+    "different keys against one predecessor have one successor",
+    "foreign tenant, nonowner/founder, PII/secrets/unlisted authority rejected before ActionExecution",
+    "personal mute concurrent winner, retry/restart never extends UTC instant, expiry is read only, explicit off",
+    "revoked member cannot authorize a pending Telegram slot",
+    "AC6 exact expired superseded payload claim; current revision/hash/audit tombstones retained; restart replay"
+  ],
+  "result": "PASS",
+  "productionEffects": 0
+}

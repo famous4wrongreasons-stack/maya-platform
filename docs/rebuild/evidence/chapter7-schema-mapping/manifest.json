@@ -1,0 +1,65 @@
+{
+  "status": "PROPOSED SCHEMA/ACTION ENVELOPE — OWNER APPROVAL PENDING",
+  "baseline": "4d6283871a7abf9d827b9b1262cc1e8ef4e21506",
+  "finalFetchNoLateUpstream": true,
+  "counts": {
+    "requirements": 22,
+    "packages": 6,
+    "waves": 4,
+    "productDecisionsApproved": 13,
+    "foundationsReused": 20,
+    "newModels": 1,
+    "alteredPrismaModelsInverseOnly": 8,
+    "newPhysicalFields": 37,
+    "newAEClasses": 0,
+    "newAC6Classes": 1,
+    "migrationsExpected": 1,
+    "backfills": 0
+  },
+  "evidence": [
+    {
+      "path": "constraints.json",
+      "sha256": "13bed6d17b546bf4706eff113dd1cd0d425668b1e393c779cca7e631c67bf8a9"
+    },
+    {
+      "path": "documentation-validation.json",
+      "sha256": "ec757a454e7728662d7f0de21192c51d9ec8a710f8995a492ee2551cdeaf01d7"
+    },
+    {
+      "path": "existing-schema-inventory.json",
+      "sha256": "52779dbed80f6d19257e238003b076ca83a37d6c334da7a772c87103477c8def"
+    },
+    {
+      "path": "hygiene.json",
+      "sha256": "d53d6f9007d48216657368617b3e6505acadcefd048a5aab8dd3252e3a275d6a"
+    },
+    {
+      "path": "owner-approval.json",
+      "sha256": "603feb0606a93e703bc3809c978fc0e44d32996019e0cd1a5c6b9c8f76fdf74c"
+    },
+    {
+      "path": "proposed-envelope.json",
+      "sha256": "39788262d3324d860b11741cb2a0dbec6da4a47ecc18aaf8a5059512a2446b9d"
+    },
+    {
+      "path": "protected-state.json",
+      "sha256": "f0955a76d78924643b6d1b04e2da1a379e937d7976cd50b271ac7bc0e165e06d"
+    },
+    {
+      "path": "repository-preflight.json",
+      "sha256": "ecfccdb91ef75d3b13c7c532e58d2b4c153ee1098f237e1a6c842b9a39ee0b91"
+    },
+    {
+      "path": "requirement-mapping.json",
+      "sha256": "1208b40409d3d248392e1b9dbabcd8f5fb4c03c762cb4660005ad60b66728184"
+    },
+    {
+      "path": "reused-foundations.json",
+      "sha256": "56d3a9e1727faf342a5c46cf8257699230fc233cb1beebc0d405c8ce2ae5d413"
+    },
+    {
+      "path": "source-index.json",
+      "sha256": "17b480115edb2ac21972c5a2842067f733fc63cae3653a8aa57bc3ebed0a7f34"
+    }
+  ]
+}

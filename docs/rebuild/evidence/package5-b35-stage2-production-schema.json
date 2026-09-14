@@ -1,0 +1,2670 @@
+{
+  "inspection": "PostgreSQL metadata only; explicit READ ONLY transaction; no business rows or DDL",
+  "capturedAt": "2026-09-07T08:50:15.532Z",
+  "readOnly": "on",
+  "release": "/opt/maya-saas/releases/20260906-p5-b34-6f6745f2",
+  "schemaSha256": "ff311c9f19c1bd27c931604a27e695e6120caad1f6045c662c98fd46d58c0aaa",
+  "tables": [
+    "MarketingCampaign",
+    "MarketingAudience",
+    "MarketingAudienceRecipient",
+    "MarketingCampaignRecipient",
+    "MarketingDeliveryAttempt",
+    "MarketingConsentEvidence",
+    "MarketingPolicy",
+    "ActionExecution",
+    "ActionExecutionIdempotencyBinding",
+    "ActionAttempt",
+    "InboxItem",
+    "Client",
+    "Membership",
+    "ClientChannelLink",
+    "ClientWebPushEndpoint",
+    "DevicePushToken",
+    "CustomerProfile",
+    "ClientConsentFact"
+  ],
+  "productionMessages": 0,
+  "productionBusinessRowsRead": 0,
+  "mutations": 0,
+  "rawCatalogSha256": "1029cdf46e0b8dbfdce809741a06bea7620cc562a05f88d538665c715d4399bc",
+  "counts": {
+    "columns": 367,
+    "constraints": 119,
+    "indexes": 96,
+    "triggers": 11
+  },
+  "models": {
+    "MarketingCampaign": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "createdByUserId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "audienceId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "channel": {
+          "type": "text",
+          "nullable": false,
+          "default": "'app'::text"
+        },
+        "status": {
+          "type": "text",
+          "nullable": false,
+          "default": "'draft'::text"
+        },
+        "message": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "recipientUserIdsJson": {
+          "type": "jsonb",
+          "nullable": false,
+          "default": null
+        },
+        "recipientCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "sentCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "idempotencyKey": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "expiresAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        },
+        "sentAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        },
+        "provider": {
+          "type": "text",
+          "nullable": false,
+          "default": "'yclients_sms'::text"
+        },
+        "audienceSnapshotHash": {
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        "messageSnapshotHash": {
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        "confirmationHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "confirmedByUserId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "confirmedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "acceptedCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "failedCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "skippedCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "unknownCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "retryCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "costEstimateStatus": {
+          "type": "text",
+          "nullable": false,
+          "default": "'unavailable'::text"
+        },
+        "costEstimateKopecks": {
+          "type": "int4",
+          "nullable": true,
+          "default": null
+        },
+        "costCurrency": {
+          "type": "text",
+          "nullable": false,
+          "default": "'RUB'::text"
+        },
+        "queuedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "startedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "completedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "cancelledAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "leaseOwner": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "leaseExpiresAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "lastErrorCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "scheduledFor": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "actionExecutionId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "aggregateState": {
+          "type": "CommunicationCampaignState",
+          "nullable": true,
+          "default": null
+        },
+        "auditRetentionUntil": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "contentRef": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "deliveryCapabilityKey": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "deliveryCapabilityVersion": {
+          "type": "int4",
+          "nullable": true,
+          "default": null
+        },
+        "leaseTokenHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "lifecycleVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "payloadRetentionUntil": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "reconciliationPolicyKey": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "reconciliationPolicyVersion": {
+          "type": "int4",
+          "nullable": true,
+          "default": null
+        },
+        "retryPolicyKey": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "retryPolicyVersion": {
+          "type": "int4",
+          "nullable": true,
+          "default": null
+        },
+        "revision": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "scope": {
+          "type": "CommunicationScope",
+          "nullable": true,
+          "default": null
+        }
+      },
+      "constraints": {
+        "MarketingCampaign_actionExecutionId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"actionExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        "MarketingCampaign_audienceId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"audienceId\", \"tenantId\") REFERENCES \"MarketingAudience\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT NOT VALID"
+        },
+        "MarketingCampaign_confirmedByUserId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"confirmedByUserId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT NOT VALID"
+        },
+        "MarketingCampaign_createdByUserId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"createdByUserId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT NOT VALID"
+        },
+        "MarketingCampaign_lease_tuple_check": {
+          "type": "c",
+          "definition": "CHECK ((((\"leaseOwner\" IS NULL) AND (\"leaseTokenHash\" IS NULL) AND (\"leaseExpiresAt\" IS NULL)) OR ((\"leaseOwner\" IS NOT NULL) AND (\"leaseTokenHash\" IS NOT NULL) AND (\"leaseExpiresAt\" IS NOT NULL))))"
+        },
+        "MarketingCampaign_lifecycle_v1_complete_check": {
+          "type": "c",
+          "definition": "CHECK (((\"lifecycleVersion\" = 0) OR ((\"lifecycleVersion\" = 1) AND (scope IS NOT NULL) AND (\"actionExecutionId\" IS NOT NULL) AND (\"aggregateState\" IS NOT NULL) AND (\"contentRef\" IS NOT NULL) AND (length(btrim(\"contentRef\")) > 0) AND (\"messageSnapshotHash\" <> ''::text) AND (\"idempotencyKey\" IS NOT NULL) AND (length(btrim(\"idempotencyKey\")) > 0) AND (\"deliveryCapabilityKey\" IS NOT NULL) AND (length(btrim(\"deliveryCapabilityKey\")) > 0) AND (\"deliveryCapabilityVersion\" IS NOT NULL) AND (\"deliveryCapabilityVersion\" > 0) AND (\"retryPolicyKey\" IS NOT NULL) AND (length(btrim(\"retryPolicyKey\")) > 0) AND (\"retryPolicyVersion\" IS NOT NULL) AND (\"retryPolicyVersion\" > 0) AND (\"reconciliationPolicyKey\" IS NOT NULL) AND (length(btrim(\"reconciliationPolicyKey\")) > 0) AND (\"reconciliationPolicyVersion\" IS NOT NULL) AND (\"reconciliationPolicyVersion\" > 0))))"
+        },
+        "MarketingCampaign_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "MarketingCampaign_scope_check": {
+          "type": "c",
+          "definition": "CHECK (((\"lifecycleVersion\" = 0) OR ((scope = 'SINGLE'::\"CommunicationScope\") AND (\"audienceId\" IS NULL)) OR ((scope = 'BULK'::\"CommunicationScope\") AND (\"audienceId\" IS NOT NULL) AND (\"audienceSnapshotHash\" <> ''::text))))"
+        },
+        "MarketingCampaign_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "MarketingCampaign_actionExecutionId_tenantId_key": "CREATE UNIQUE INDEX \"MarketingCampaign_actionExecutionId_tenantId_key\" ON public.\"MarketingCampaign\" USING btree (\"actionExecutionId\", \"tenantId\")",
+        "MarketingCampaign_id_tenantId_key": "CREATE UNIQUE INDEX \"MarketingCampaign_id_tenantId_key\" ON public.\"MarketingCampaign\" USING btree (id, \"tenantId\")",
+        "MarketingCampaign_pkey": "CREATE UNIQUE INDEX \"MarketingCampaign_pkey\" ON public.\"MarketingCampaign\" USING btree (id)",
+        "MarketingCampaign_status_leaseExpiresAt_queuedAt_idx": "CREATE INDEX \"MarketingCampaign_status_leaseExpiresAt_queuedAt_idx\" ON public.\"MarketingCampaign\" USING btree (status, \"leaseExpiresAt\", \"queuedAt\")",
+        "MarketingCampaign_status_scheduledFor_leaseExpiresAt_idx": "CREATE INDEX \"MarketingCampaign_status_scheduledFor_leaseExpiresAt_idx\" ON public.\"MarketingCampaign\" USING btree (status, \"scheduledFor\", \"leaseExpiresAt\")",
+        "MarketingCampaign_tenantId_aggregateState_scheduledFor_leas_idx": "CREATE INDEX \"MarketingCampaign_tenantId_aggregateState_scheduledFor_leas_idx\" ON public.\"MarketingCampaign\" USING btree (\"tenantId\", \"aggregateState\", \"scheduledFor\", \"leaseExpiresAt\")",
+        "MarketingCampaign_tenantId_audienceId_idx": "CREATE INDEX \"MarketingCampaign_tenantId_audienceId_idx\" ON public.\"MarketingCampaign\" USING btree (\"tenantId\", \"audienceId\")",
+        "MarketingCampaign_tenantId_idempotencyKey_key": "CREATE UNIQUE INDEX \"MarketingCampaign_tenantId_idempotencyKey_key\" ON public.\"MarketingCampaign\" USING btree (\"tenantId\", \"idempotencyKey\")",
+        "MarketingCampaign_tenantId_status_createdAt_idx": "CREATE INDEX \"MarketingCampaign_tenantId_status_createdAt_idx\" ON public.\"MarketingCampaign\" USING btree (\"tenantId\", status, \"createdAt\")"
+      },
+      "triggers": {}
+    },
+    "MarketingAudience": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "createdByUserId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "ruleJson": {
+          "type": "jsonb",
+          "nullable": false,
+          "default": null
+        },
+        "recipientUserIdsJson": {
+          "type": "jsonb",
+          "nullable": false,
+          "default": null
+        },
+        "candidateCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "eligibleCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "unavailableCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "expiresAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "status": {
+          "type": "text",
+          "nullable": false,
+          "default": "'AUDIENCE_CALCULATED'::text"
+        },
+        "provider": {
+          "type": "text",
+          "nullable": false,
+          "default": "'yclients_sms'::text"
+        },
+        "snapshotHash": {
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        "exclusionReasonsJson": {
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        }
+      },
+      "constraints": {
+        "MarketingAudience_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "MarketingAudience_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "MarketingAudience_id_tenantId_key": "CREATE UNIQUE INDEX \"MarketingAudience_id_tenantId_key\" ON public.\"MarketingAudience\" USING btree (id, \"tenantId\")",
+        "MarketingAudience_pkey": "CREATE UNIQUE INDEX \"MarketingAudience_pkey\" ON public.\"MarketingAudience\" USING btree (id)",
+        "MarketingAudience_tenantId_createdAt_idx": "CREATE INDEX \"MarketingAudience_tenantId_createdAt_idx\" ON public.\"MarketingAudience\" USING btree (\"tenantId\", \"createdAt\")",
+        "MarketingAudience_tenantId_expiresAt_idx": "CREATE INDEX \"MarketingAudience_tenantId_expiresAt_idx\" ON public.\"MarketingAudience\" USING btree (\"tenantId\", \"expiresAt\")"
+      },
+      "triggers": {}
+    },
+    "MarketingAudienceRecipient": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "audienceId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "externalClientId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "internalUserId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "eligibilityStatus": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "exclusionReason": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "consentSource": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "consentRecordedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "metricsJson": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "constraints": {
+        "MarketingAudienceRecipient_audienceId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"audienceId\", \"tenantId\") REFERENCES \"MarketingAudience\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "MarketingAudienceRecipient_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "MarketingAudienceRecipient_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "MarketingAudienceRecipient_pkey": "CREATE UNIQUE INDEX \"MarketingAudienceRecipient_pkey\" ON public.\"MarketingAudienceRecipient\" USING btree (id)",
+        "MarketingAudienceRecipient_tenantId_audienceId_eligibilityStatu": "CREATE INDEX \"MarketingAudienceRecipient_tenantId_audienceId_eligibilityStatu\" ON public.\"MarketingAudienceRecipient\" USING btree (\"tenantId\", \"audienceId\", \"eligibilityStatus\")",
+        "MarketingAudienceRecipient_tenantId_audienceId_externalClientId": "CREATE UNIQUE INDEX \"MarketingAudienceRecipient_tenantId_audienceId_externalClientId\" ON public.\"MarketingAudienceRecipient\" USING btree (\"tenantId\", \"audienceId\", \"externalClientId\")"
+      },
+      "triggers": {}
+    },
+    "MarketingCampaignRecipient": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "campaignId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "externalClientId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "internalUserId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "status": {
+          "type": "text",
+          "nullable": false,
+          "default": "'QUEUED'::text"
+        },
+        "idempotencyKey": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "attemptCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "nextAttemptAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "providerMessageId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "providerStatus": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "lastErrorCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "acceptedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "deliveredAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "failedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        },
+        "auditRetentionUntil": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "consentEvidenceId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "contentIdentityHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "deliveryState": {
+          "type": "CommunicationDeliveryState",
+          "nullable": true,
+          "default": null
+        },
+        "dispatchedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "eligibilityBasis": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "eligibilityCheckedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "eligibilityDecision": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "eligibilityEvidenceHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "eligibilityEvidenceRef": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "eligibilityPolicyVersion": {
+          "type": "int4",
+          "nullable": true,
+          "default": null
+        },
+        "externalDispatchState": {
+          "type": "ExternalDispatchState",
+          "nullable": true,
+          "default": null
+        },
+        "identityVersion": {
+          "type": "int4",
+          "nullable": true,
+          "default": null
+        },
+        "leaseExpiresAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "leaseOwner": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "leaseTokenHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "lifecycleVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "payloadRetentionUntil": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "recipientKind": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "recipientRefHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "reconciliationState": {
+          "type": "ActionReconciliationState",
+          "nullable": true,
+          "default": null
+        },
+        "responseReceivedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "revision": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "terminalAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "terminalReasonCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "unknownAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        }
+      },
+      "constraints": {
+        "MarketingCampaignRecipient_campaignId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"campaignId\", \"tenantId\") REFERENCES \"MarketingCampaign\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "MarketingCampaignRecipient_consentEvidenceId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"consentEvidenceId\", \"tenantId\") REFERENCES \"MarketingConsentEvidence\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        "MarketingCampaignRecipient_internalUserId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"internalUserId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT NOT VALID"
+        },
+        "MarketingCampaignRecipient_lease_tuple_check": {
+          "type": "c",
+          "definition": "CHECK ((((\"leaseOwner\" IS NULL) AND (\"leaseTokenHash\" IS NULL) AND (\"leaseExpiresAt\" IS NULL)) OR ((\"leaseOwner\" IS NOT NULL) AND (\"leaseTokenHash\" IS NOT NULL) AND (\"leaseExpiresAt\" IS NOT NULL))))"
+        },
+        "MarketingCampaignRecipient_lifecycle_v1_complete_check": {
+          "type": "c",
+          "definition": "CHECK (((\"lifecycleVersion\" = 0) OR ((\"lifecycleVersion\" = 1) AND (\"identityVersion\" IS NOT NULL) AND (\"identityVersion\" > 0) AND (\"recipientKind\" IS NOT NULL) AND (length(btrim(\"recipientKind\")) > 0) AND (\"recipientRefHash\" IS NOT NULL) AND (length(btrim(\"recipientRefHash\")) > 0) AND (\"contentIdentityHash\" IS NOT NULL) AND (length(btrim(\"contentIdentityHash\")) > 0) AND (\"deliveryState\" IS NOT NULL) AND (\"externalDispatchState\" IS NOT NULL) AND (\"reconciliationState\" IS NOT NULL) AND (\"eligibilityBasis\" IS NOT NULL) AND (length(btrim(\"eligibilityBasis\")) > 0) AND (\"eligibilityDecision\" = ANY (ARRAY['ALLOW'::text, 'SKIP'::text, 'DENY'::text])) AND (\"eligibilityPolicyVersion\" IS NOT NULL) AND (\"eligibilityPolicyVersion\" > 0) AND (\"eligibilityEvidenceRef\" IS NOT NULL) AND (length(btrim(\"eligibilityEvidenceRef\")) > 0) AND (\"eligibilityEvidenceHash\" IS NOT NULL) AND (length(btrim(\"eligibilityEvidenceHash\")) > 0) AND (\"eligibilityCheckedAt\" IS NOT NULL))))"
+        },
+        "MarketingCampaignRecipient_outcome_timestamps_check": {
+          "type": "c",
+          "definition": "CHECK (((\"lifecycleVersion\" = 0) OR (((\"deliveryState\" <> 'ACCEPTED'::\"CommunicationDeliveryState\") OR (\"acceptedAt\" IS NOT NULL)) AND ((\"deliveryState\" <> 'DELIVERED'::\"CommunicationDeliveryState\") OR (\"deliveredAt\" IS NOT NULL)) AND ((\"deliveryState\" <> 'FAILED'::\"CommunicationDeliveryState\") OR (\"failedAt\" IS NOT NULL)) AND ((\"nextAttemptAt\" IS NULL) OR (\"deliveryState\" = 'NOT_SENT'::\"CommunicationDeliveryState\")))))"
+        },
+        "MarketingCampaignRecipient_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "MarketingCampaignRecipient_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "MarketingCampaignRecipient_terminal_check": {
+          "type": "c",
+          "definition": "CHECK (((\"lifecycleVersion\" = 0) OR (((\"terminalAt\" IS NULL) OR ((\"deliveryState\" = ANY (ARRAY['ACCEPTED'::\"CommunicationDeliveryState\", 'DELIVERED'::\"CommunicationDeliveryState\", 'FAILED'::\"CommunicationDeliveryState\", 'SKIPPED'::\"CommunicationDeliveryState\"])) AND (\"leaseOwner\" IS NULL) AND (\"leaseTokenHash\" IS NULL) AND (\"leaseExpiresAt\" IS NULL))) AND ((\"deliveryState\" <> ALL (ARRAY['DELIVERED'::\"CommunicationDeliveryState\", 'FAILED'::\"CommunicationDeliveryState\", 'SKIPPED'::\"CommunicationDeliveryState\"])) OR (\"terminalAt\" IS NOT NULL)) AND ((\"deliveryState\" <> ALL (ARRAY['NOT_SENT'::\"CommunicationDeliveryState\", 'UNKNOWN'::\"CommunicationDeliveryState\"])) OR (\"terminalAt\" IS NULL)))))"
+        },
+        "MarketingCampaignRecipient_unknown_check": {
+          "type": "c",
+          "definition": "CHECK (((\"lifecycleVersion\" = 0) OR (\"deliveryState\" <> 'UNKNOWN'::\"CommunicationDeliveryState\") OR ((\"externalDispatchState\" = 'MAY_HAVE_CROSSED'::\"ExternalDispatchState\") AND (\"reconciliationState\" <> 'NOT_REQUIRED'::\"ActionReconciliationState\") AND (\"nextAttemptAt\" IS NULL) AND (\"unknownAt\" IS NOT NULL) AND (\"terminalAt\" IS NULL))))"
+        }
+      },
+      "indexes": {
+        "MarketingCampaignRecipient_id_tenantId_campaignId_key": "CREATE UNIQUE INDEX \"MarketingCampaignRecipient_id_tenantId_campaignId_key\" ON public.\"MarketingCampaignRecipient\" USING btree (id, \"tenantId\", \"campaignId\")",
+        "MarketingCampaignRecipient_id_tenantId_key": "CREATE UNIQUE INDEX \"MarketingCampaignRecipient_id_tenantId_key\" ON public.\"MarketingCampaignRecipient\" USING btree (id, \"tenantId\")",
+        "MarketingCampaignRecipient_pkey": "CREATE UNIQUE INDEX \"MarketingCampaignRecipient_pkey\" ON public.\"MarketingCampaignRecipient\" USING btree (id)",
+        "MarketingCampaignRecipient_tenantId_campaignId_deliveryStat_idx": "CREATE INDEX \"MarketingCampaignRecipient_tenantId_campaignId_deliveryStat_idx\" ON public.\"MarketingCampaignRecipient\" USING btree (\"tenantId\", \"campaignId\", \"deliveryState\", \"nextAttemptAt\")",
+        "MarketingCampaignRecipient_tenantId_campaignId_externalClientId": "CREATE UNIQUE INDEX \"MarketingCampaignRecipient_tenantId_campaignId_externalClientId\" ON public.\"MarketingCampaignRecipient\" USING btree (\"tenantId\", \"campaignId\", \"externalClientId\")",
+        "MarketingCampaignRecipient_tenantId_campaignId_status_nextAttem": "CREATE INDEX \"MarketingCampaignRecipient_tenantId_campaignId_status_nextAttem\" ON public.\"MarketingCampaignRecipient\" USING btree (\"tenantId\", \"campaignId\", status, \"nextAttemptAt\")",
+        "MarketingCampaignRecipient_tenantId_idempotencyKey_key": "CREATE UNIQUE INDEX \"MarketingCampaignRecipient_tenantId_idempotencyKey_key\" ON public.\"MarketingCampaignRecipient\" USING btree (\"tenantId\", \"idempotencyKey\")",
+        "MarketingCampaignRecipient_tenantId_reconciliationState_lea_idx": "CREATE INDEX \"MarketingCampaignRecipient_tenantId_reconciliationState_lea_idx\" ON public.\"MarketingCampaignRecipient\" USING btree (\"tenantId\", \"reconciliationState\", \"leaseExpiresAt\")"
+      },
+      "triggers": {}
+    },
+    "MarketingDeliveryAttempt": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "campaignId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "recipientId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "batchKey": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "attemptNumber": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "status": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "httpStatus": {
+          "type": "int4",
+          "nullable": true,
+          "default": null
+        },
+        "errorCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "providerResponseCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "startedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "completedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "dispatchedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "externalDispatchState": {
+          "type": "ExternalDispatchState",
+          "nullable": true,
+          "default": null
+        },
+        "kind": {
+          "type": "ActionAttemptKind",
+          "nullable": true,
+          "default": null
+        },
+        "lifecycleVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "outcomeCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "payloadRetentionUntil": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "providerIdempotencyKeyHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "providerReferenceEncrypted": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "providerReferenceHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "providerRequestIdentityHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "reconciliationRequired": {
+          "type": "bool",
+          "nullable": true,
+          "default": null
+        },
+        "responseReceivedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "retryDecisionCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "state": {
+          "type": "ActionAttemptState",
+          "nullable": true,
+          "default": null
+        }
+      },
+      "constraints": {
+        "MarketingDeliveryAttempt_campaignId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"campaignId\", \"tenantId\") REFERENCES \"MarketingCampaign\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "MarketingDeliveryAttempt_completion_check": {
+          "type": "c",
+          "definition": "CHECK (((\"lifecycleVersion\" = 0) OR (((state = 'STARTED'::\"ActionAttemptState\") AND (\"completedAt\" IS NULL)) OR ((state = ANY (ARRAY['SUCCEEDED'::\"ActionAttemptState\", 'FAILED'::\"ActionAttemptState\", 'UNKNOWN'::\"ActionAttemptState\"])) AND (\"completedAt\" IS NOT NULL)))))"
+        },
+        "MarketingDeliveryAttempt_lifecycle_v1_complete_check": {
+          "type": "c",
+          "definition": "CHECK (((\"lifecycleVersion\" = 0) OR ((\"lifecycleVersion\" = 1) AND (\"recipientId\" IS NOT NULL) AND (kind IS NOT NULL) AND (state IS NOT NULL) AND (\"externalDispatchState\" IS NOT NULL) AND (\"reconciliationRequired\" IS NOT NULL) AND (\"attemptNumber\" >= 1))))"
+        },
+        "MarketingDeliveryAttempt_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "MarketingDeliveryAttempt_recipientId_tenantId_campaignId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"recipientId\", \"tenantId\", \"campaignId\") REFERENCES \"MarketingCampaignRecipient\"(id, \"tenantId\", \"campaignId\") ON UPDATE CASCADE ON DELETE CASCADE NOT VALID"
+        },
+        "MarketingDeliveryAttempt_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "MarketingDeliveryAttempt_unknown_check": {
+          "type": "c",
+          "definition": "CHECK (((\"lifecycleVersion\" = 0) OR (state <> 'UNKNOWN'::\"ActionAttemptState\") OR ((\"externalDispatchState\" = 'MAY_HAVE_CROSSED'::\"ExternalDispatchState\") AND (\"reconciliationRequired\" = true))))"
+        }
+      },
+      "indexes": {
+        "MarketingDeliveryAttempt_pkey": "CREATE UNIQUE INDEX \"MarketingDeliveryAttempt_pkey\" ON public.\"MarketingDeliveryAttempt\" USING btree (id)",
+        "MarketingDeliveryAttempt_tenantId_campaignId_createdAt_idx": "CREATE INDEX \"MarketingDeliveryAttempt_tenantId_campaignId_createdAt_idx\" ON public.\"MarketingDeliveryAttempt\" USING btree (\"tenantId\", \"campaignId\", \"createdAt\")",
+        "MarketingDeliveryAttempt_tenantId_providerReferenceHash_idx": "CREATE INDEX \"MarketingDeliveryAttempt_tenantId_providerReferenceHash_idx\" ON public.\"MarketingDeliveryAttempt\" USING btree (\"tenantId\", \"providerReferenceHash\")",
+        "MarketingDeliveryAttempt_tenantId_recipientId_attemptNumber_idx": "CREATE INDEX \"MarketingDeliveryAttempt_tenantId_recipientId_attemptNumber_idx\" ON public.\"MarketingDeliveryAttempt\" USING btree (\"tenantId\", \"recipientId\", \"attemptNumber\")",
+        "MarketingDeliveryAttempt_tenantId_recipientId_attemptNumber_key": "CREATE UNIQUE INDEX \"MarketingDeliveryAttempt_tenantId_recipientId_attemptNumber_key\" ON public.\"MarketingDeliveryAttempt\" USING btree (\"tenantId\", \"recipientId\", \"attemptNumber\")",
+        "MarketingDeliveryAttempt_tenantId_state_startedAt_idx": "CREATE INDEX \"MarketingDeliveryAttempt_tenantId_state_startedAt_idx\" ON public.\"MarketingDeliveryAttempt\" USING btree (\"tenantId\", state, \"startedAt\")"
+      },
+      "triggers": {}
+    },
+    "MarketingConsentEvidence": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "externalClientId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "channel": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "status": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "source": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "evidenceRef": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "grantedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "revokedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "expiresAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        }
+      },
+      "constraints": {
+        "MarketingConsentEvidence_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "MarketingConsentEvidence_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "MarketingConsentEvidence_id_tenantId_key": "CREATE UNIQUE INDEX \"MarketingConsentEvidence_id_tenantId_key\" ON public.\"MarketingConsentEvidence\" USING btree (id, \"tenantId\")",
+        "MarketingConsentEvidence_pkey": "CREATE UNIQUE INDEX \"MarketingConsentEvidence_pkey\" ON public.\"MarketingConsentEvidence\" USING btree (id)",
+        "MarketingConsentEvidence_tenantId_channel_status_idx": "CREATE INDEX \"MarketingConsentEvidence_tenantId_channel_status_idx\" ON public.\"MarketingConsentEvidence\" USING btree (\"tenantId\", channel, status)",
+        "MarketingConsentEvidence_tenantId_externalClientId_channel_key": "CREATE UNIQUE INDEX \"MarketingConsentEvidence_tenantId_externalClientId_channel_key\" ON public.\"MarketingConsentEvidence\" USING btree (\"tenantId\", \"externalClientId\", channel)"
+      },
+      "triggers": {}
+    },
+    "MarketingPolicy": {
+      "columns": {
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "enabled": {
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        "provider": {
+          "type": "text",
+          "nullable": false,
+          "default": "'yclients_sms'::text"
+        },
+        "dailyRecipientLimit": {
+          "type": "int4",
+          "nullable": false,
+          "default": "500"
+        },
+        "monthlyRecipientLimit": {
+          "type": "int4",
+          "nullable": false,
+          "default": "5000"
+        },
+        "maxCampaignRecipients": {
+          "type": "int4",
+          "nullable": false,
+          "default": "500"
+        },
+        "maxCampaignCostKopecks": {
+          "type": "int4",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        }
+      },
+      "constraints": {
+        "MarketingPolicy_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (\"tenantId\")"
+        },
+        "MarketingPolicy_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "MarketingPolicy_pkey": "CREATE UNIQUE INDEX \"MarketingPolicy_pkey\" ON public.\"MarketingPolicy\" USING btree (\"tenantId\")"
+      },
+      "triggers": {}
+    },
+    "ActionExecution": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "identityVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "identityFingerprint": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "idempotencyScope": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "requestIdempotencyKeyHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "sourceType": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "sourceRef": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "agentTaskId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "actorUserId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "actionClass": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "capability": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "capabilityVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "targetKind": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "targetRef": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "normalizedInputContract": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "normalizedInputHash": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "normalizedInputEncrypted": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "evidenceRefsJson": {
+          "type": "jsonb",
+          "nullable": false,
+          "default": null
+        },
+        "intentExpiresAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "dryRun": {
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        "riskProfileVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "riskFacetsJson": {
+          "type": "jsonb",
+          "nullable": false,
+          "default": null
+        },
+        "policyKey": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "policyVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "policyDecision": {
+          "type": "ActionPolicyDecision",
+          "nullable": false,
+          "default": null
+        },
+        "autonomyLevel": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "policyDecidedBy": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "approvalRequirement": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "approvalDecision": {
+          "type": "ActionApprovalDecision",
+          "nullable": false,
+          "default": null
+        },
+        "approvalInputHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "approvalRequestedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "approvalExpiresAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "approvalDecidedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "approvalDecidedByUserId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "state": {
+          "type": "ActionExecutionState",
+          "nullable": false,
+          "default": null
+        },
+        "notExecutedReasonCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "retryPolicyKey": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "retryPolicyVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "maxExecutionAttempts": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "executionAttemptCount": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "nextExecutionAttemptAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "reconciliationPolicyKey": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "reconciliationPolicyVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "reconciliationState": {
+          "type": "ActionReconciliationState",
+          "nullable": false,
+          "default": null
+        },
+        "leaseOwner": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "leaseTokenHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "leaseExpiresAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "revision": {
+          "type": "int4",
+          "nullable": false,
+          "default": "0"
+        },
+        "transportIdentityVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "transportIdempotencyKey": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "finalOutcomeCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "safeResultSummaryJson": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": null
+        },
+        "userExplanationCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "userExplanationParamsJson": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": null
+        },
+        "firstAttemptedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "finalizedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "payloadRetentionUntil": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "auditRetentionUntil": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        },
+        "policyContextContract": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "policyContextHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "policyEvidenceJson": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": null
+        },
+        "policyEvaluatedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "policyValidUntil": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "approvalBindingHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "bookingIntentContract": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "bookingIntentHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "bookingIntentEncrypted": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        }
+      },
+      "constraints": {
+        "ActionExecution_actorUserId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"actorUserId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        "ActionExecution_agentTaskId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"agentTaskId\", \"tenantId\") REFERENCES \"AgentTask\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        "ActionExecution_approvalDecidedByUserId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"approvalDecidedByUserId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        "ActionExecution_approval_hash_check": {
+          "type": "c",
+          "definition": "CHECK (((\"approvalInputHash\" IS NULL) OR (\"approvalInputHash\" = \"normalizedInputHash\")))"
+        },
+        "ActionExecution_approval_shape_check": {
+          "type": "c",
+          "definition": "CHECK ((((\"approvalRequirement\" = 'NONE'::text) AND (\"approvalDecision\" = 'NOT_REQUIRED'::\"ActionApprovalDecision\") AND (\"approvalInputHash\" IS NULL) AND (\"approvalRequestedAt\" IS NULL) AND (\"approvalExpiresAt\" IS NULL) AND (\"approvalDecidedAt\" IS NULL) AND (\"approvalDecidedByUserId\" IS NULL)) OR ((\"approvalRequirement\" = 'REQUIRED'::text) AND (\"approvalInputHash\" = \"normalizedInputHash\") AND (\"approvalRequestedAt\" IS NOT NULL) AND (\"approvalExpiresAt\" IS NOT NULL) AND (\"approvalExpiresAt\" > \"approvalRequestedAt\") AND (((\"approvalDecision\" = 'PENDING'::\"ActionApprovalDecision\") AND (\"approvalDecidedAt\" IS NULL) AND (\"approvalDecidedByUserId\" IS NULL)) OR ((\"approvalDecision\" = ANY (ARRAY['APPROVED'::\"ActionApprovalDecision\", 'REJECTED'::\"ActionApprovalDecision\"])) AND (\"approvalDecidedAt\" IS NOT NULL) AND (\"approvalDecidedByUserId\" IS NOT NULL) AND (\"approvalDecidedAt\" <= \"approvalExpiresAt\")) OR ((\"approvalDecision\" = 'EXPIRED'::\"ActionApprovalDecision\") AND (\"approvalDecidedAt\" IS NOT NULL))))))"
+        },
+        "ActionExecution_b31_binding_required": {
+          "type": "t",
+          "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+        },
+        "ActionExecution_booking_intent_check": {
+          "type": "c",
+          "definition": "CHECK ((((\"bookingIntentContract\" IS NULL) AND (\"bookingIntentHash\" IS NULL) AND (\"bookingIntentEncrypted\" IS NULL)) OR ((\"bookingIntentContract\" IS NOT NULL) AND (\"bookingIntentContract\" = 'maya.client-appointment-create-intent/1'::text) AND (\"bookingIntentHash\" IS NOT NULL) AND (\"bookingIntentHash\" ~ '^[a-f0-9]{64}$'::text) AND (capability = 'crm.appointment.create.v1'::text) AND (\"actionClass\" = 'create_appointment'::text))))"
+        },
+        "ActionExecution_idempotency_pair_check": {
+          "type": "c",
+          "definition": "CHECK (((\"idempotencyScope\" IS NULL) = (\"requestIdempotencyKeyHash\" IS NULL)))"
+        },
+        "ActionExecution_json_shape_check": {
+          "type": "c",
+          "definition": "CHECK (((jsonb_typeof(\"evidenceRefsJson\") = 'array'::text) AND (jsonb_typeof(\"riskFacetsJson\") = 'array'::text)))"
+        },
+        "ActionExecution_lease_tuple_check": {
+          "type": "c",
+          "definition": "CHECK ((((\"leaseOwner\" IS NULL) = (\"leaseTokenHash\" IS NULL)) AND ((\"leaseOwner\" IS NULL) = (\"leaseExpiresAt\" IS NULL))))"
+        },
+        "ActionExecution_nonblank_contract_check": {
+          "type": "c",
+          "definition": "CHECK (((btrim(\"identityFingerprint\") <> ''::text) AND (btrim(\"sourceType\") <> ''::text) AND (btrim(\"actionClass\") <> ''::text) AND (btrim(capability) <> ''::text) AND (btrim(\"targetKind\") <> ''::text) AND (btrim(\"targetRef\") <> ''::text) AND (btrim(\"normalizedInputContract\") <> ''::text) AND (btrim(\"normalizedInputHash\") <> ''::text) AND (btrim(\"policyKey\") <> ''::text) AND (btrim(\"policyDecidedBy\") <> ''::text) AND (btrim(\"retryPolicyKey\") <> ''::text) AND (btrim(\"reconciliationPolicyKey\") <> ''::text) AND (btrim(\"transportIdempotencyKey\") <> ''::text)))"
+        },
+        "ActionExecution_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "ActionExecution_policy_attestation_shape_check": {
+          "type": "c",
+          "definition": "CHECK ((((\"policyContextContract\" IS NULL) AND (\"policyContextHash\" IS NULL) AND (\"policyEvidenceJson\" IS NULL) AND (\"policyEvaluatedAt\" IS NULL) AND (\"policyValidUntil\" IS NULL) AND (\"approvalBindingHash\" IS NULL)) OR ((\"policyContextContract\" IS NOT NULL) AND (btrim(\"policyContextContract\") <> ''::text) AND (\"policyContextHash\" IS NOT NULL) AND (btrim(\"policyContextHash\") <> ''::text) AND (\"policyEvidenceJson\" IS NOT NULL) AND (jsonb_typeof(\"policyEvidenceJson\") = 'object'::text) AND (\"policyEvaluatedAt\" IS NOT NULL) AND (\"policyValidUntil\" IS NOT NULL) AND (\"policyValidUntil\" > \"policyEvaluatedAt\") AND (\"approvalBindingHash\" IS NOT NULL) AND (btrim(\"approvalBindingHash\") <> ''::text))))"
+        },
+        "ActionExecution_policy_shape_check": {
+          "type": "c",
+          "definition": "CHECK (((\"policyDecision\" = 'ALLOW'::\"ActionPolicyDecision\") OR ((\"policyDecision\" = ANY (ARRAY['DENY'::\"ActionPolicyDecision\", 'SHADOW_ONLY'::\"ActionPolicyDecision\"])) AND (state = 'NOT_EXECUTED'::\"ActionExecutionState\") AND (\"executionAttemptCount\" = 0) AND (\"firstAttemptedAt\" IS NULL) AND (\"reconciliationState\" = 'NOT_REQUIRED'::\"ActionReconciliationState\"))))"
+        },
+        "ActionExecution_positive_versions_check": {
+          "type": "c",
+          "definition": "CHECK (((\"identityVersion\" > 0) AND (\"capabilityVersion\" > 0) AND (\"riskProfileVersion\" > 0) AND (\"policyVersion\" > 0) AND (\"retryPolicyVersion\" > 0) AND (\"reconciliationPolicyVersion\" > 0) AND (\"transportIdentityVersion\" > 0) AND (\"maxExecutionAttempts\" > 0) AND (\"executionAttemptCount\" >= 0) AND (\"executionAttemptCount\" <= \"maxExecutionAttempts\") AND (revision >= 0)))"
+        },
+        "ActionExecution_retention_clock_check": {
+          "type": "c",
+          "definition": "CHECK ((((\"payloadRetentionUntil\" IS NULL) OR (\"payloadRetentionUntil\" >= \"createdAt\")) AND ((\"auditRetentionUntil\" IS NULL) OR (\"auditRetentionUntil\" >= \"createdAt\")) AND ((\"payloadRetentionUntil\" IS NULL) OR (\"auditRetentionUntil\" IS NULL) OR (\"auditRetentionUntil\" >= \"payloadRetentionUntil\"))))"
+        },
+        "ActionExecution_shadow_shape_check": {
+          "type": "c",
+          "definition": "CHECK (((\"policyDecision\" <> 'SHADOW_ONLY'::\"ActionPolicyDecision\") OR ((state = 'NOT_EXECUTED'::\"ActionExecutionState\") AND (\"dryRun\" = true) AND (\"executionAttemptCount\" = 0) AND (\"finalOutcomeCode\" IS NULL) AND (\"notExecutedReasonCode\" = 'shadow_only'::text))))"
+        },
+        "ActionExecution_source_shape_check": {
+          "type": "c",
+          "definition": "CHECK (((\"sourceType\" = ANY (ARRAY['agent_task'::text, 'authenticated_request'::text, 'scheduler'::text, 'webhook'::text, 'legacy_bridge'::text, 'synthetic_shadow'::text])) AND (((\"sourceType\" = 'agent_task'::text) AND (\"agentTaskId\" IS NOT NULL) AND (\"sourceRef\" = \"agentTaskId\")) OR ((\"sourceType\" <> 'agent_task'::text) AND (\"agentTaskId\" IS NULL)))))"
+        },
+        "ActionExecution_state_shape_check": {
+          "type": "c",
+          "definition": "CHECK ((((state = 'PENDING_APPROVAL'::\"ActionExecutionState\") AND (\"policyDecision\" = 'ALLOW'::\"ActionPolicyDecision\") AND (\"approvalDecision\" = 'PENDING'::\"ActionApprovalDecision\") AND (\"executionAttemptCount\" = 0) AND (\"firstAttemptedAt\" IS NULL) AND (\"finalizedAt\" IS NULL) AND (\"finalOutcomeCode\" IS NULL) AND (\"notExecutedReasonCode\" IS NULL) AND (\"leaseOwner\" IS NULL) AND (\"reconciliationState\" = 'NOT_REQUIRED'::\"ActionReconciliationState\")) OR ((state = 'READY'::\"ActionExecutionState\") AND (\"policyDecision\" = 'ALLOW'::\"ActionPolicyDecision\") AND (\"approvalDecision\" = ANY (ARRAY['NOT_REQUIRED'::\"ActionApprovalDecision\", 'APPROVED'::\"ActionApprovalDecision\"])) AND (\"finalizedAt\" IS NULL) AND (\"finalOutcomeCode\" IS NULL) AND (\"notExecutedReasonCode\" IS NULL) AND (\"leaseOwner\" IS NULL) AND (\"reconciliationState\" = ANY (ARRAY['NOT_REQUIRED'::\"ActionReconciliationState\", 'RESOLVED'::\"ActionReconciliationState\"]))) OR ((state = 'EXECUTING'::\"ActionExecutionState\") AND (\"policyDecision\" = 'ALLOW'::\"ActionPolicyDecision\") AND (\"approvalDecision\" = ANY (ARRAY['NOT_REQUIRED'::\"ActionApprovalDecision\", 'APPROVED'::\"ActionApprovalDecision\"])) AND (\"executionAttemptCount\" > 0) AND (\"firstAttemptedAt\" IS NOT NULL) AND (\"finalizedAt\" IS NULL) AND (\"notExecutedReasonCode\" IS NULL) AND (\"leaseOwner\" IS NOT NULL) AND (\"reconciliationState\" = 'NOT_REQUIRED'::\"ActionReconciliationState\")) OR ((state = 'UNKNOWN'::\"ActionExecutionState\") AND (\"executionAttemptCount\" > 0) AND (\"firstAttemptedAt\" IS NOT NULL) AND (\"finalizedAt\" IS NULL) AND (\"finalOutcomeCode\" IS NULL) AND (\"notExecutedReasonCode\" IS NULL) AND (((\"reconciliationState\" = ANY (ARRAY['REQUIRED'::\"ActionReconciliationState\", 'MANUAL_REQUIRED'::\"ActionReconciliationState\"])) AND (\"leaseOwner\" IS NULL)) OR ((\"reconciliationState\" = 'IN_PROGRESS'::\"ActionReconciliationState\") AND (\"leaseOwner\" IS NOT NULL)))) OR ((state = ANY (ARRAY['SUCCEEDED'::\"ActionExecutionState\", 'FAILED'::\"ActionExecutionState\"])) AND (\"executionAttemptCount\" > 0) AND (\"firstAttemptedAt\" IS NOT NULL) AND (\"finalizedAt\" IS NOT NULL) AND (\"finalOutcomeCode\" IS NOT NULL) AND (\"notExecutedReasonCode\" IS NULL) AND (\"leaseOwner\" IS NULL) AND (\"reconciliationState\" = ANY (ARRAY['NOT_REQUIRED'::\"ActionReconciliationState\", 'RESOLVED'::\"ActionReconciliationState\"]))) OR ((state = 'NOT_EXECUTED'::\"ActionExecutionState\") AND (\"finalizedAt\" IS NOT NULL) AND (\"notExecutedReasonCode\" IS NOT NULL) AND (\"leaseOwner\" IS NULL) AND (\"reconciliationState\" = ANY (ARRAY['NOT_REQUIRED'::\"ActionReconciliationState\", 'RESOLVED'::\"ActionReconciliationState\", 'MANUAL_REQUIRED'::\"ActionReconciliationState\"])))))"
+        },
+        "ActionExecution_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "ActionExecution_id_tenantId_key": "CREATE UNIQUE INDEX \"ActionExecution_id_tenantId_key\" ON public.\"ActionExecution\" USING btree (id, \"tenantId\")",
+        "ActionExecution_pkey": "CREATE UNIQUE INDEX \"ActionExecution_pkey\" ON public.\"ActionExecution\" USING btree (id)",
+        "ActionExecution_tenantId_agentTaskId_idx": "CREATE INDEX \"ActionExecution_tenantId_agentTaskId_idx\" ON public.\"ActionExecution\" USING btree (\"tenantId\", \"agentTaskId\")",
+        "ActionExecution_tenantId_createdAt_idx": "CREATE INDEX \"ActionExecution_tenantId_createdAt_idx\" ON public.\"ActionExecution\" USING btree (\"tenantId\", \"createdAt\")",
+        "ActionExecution_tenantId_identityFingerprint_key": "CREATE UNIQUE INDEX \"ActionExecution_tenantId_identityFingerprint_key\" ON public.\"ActionExecution\" USING btree (\"tenantId\", \"identityFingerprint\")",
+        "ActionExecution_tenantId_reconciliationState_leaseExpiresAt_idx": "CREATE INDEX \"ActionExecution_tenantId_reconciliationState_leaseExpiresAt_idx\" ON public.\"ActionExecution\" USING btree (\"tenantId\", \"reconciliationState\", \"leaseExpiresAt\")",
+        "ActionExecution_tenantId_state_nextExecutionAttemptAt_idx": "CREATE INDEX \"ActionExecution_tenantId_state_nextExecutionAttemptAt_idx\" ON public.\"ActionExecution\" USING btree (\"tenantId\", state, \"nextExecutionAttemptAt\")",
+        "ActionExecution_tenant_idempotency_key": "CREATE UNIQUE INDEX \"ActionExecution_tenant_idempotency_key\" ON public.\"ActionExecution\" USING btree (\"tenantId\", \"idempotencyScope\", \"requestIdempotencyKeyHash\")"
+      },
+      "triggers": {
+        "ActionExecution_b31_binding_required": {
+          "definition": "CREATE CONSTRAINT TRIGGER \"ActionExecution_b31_binding_required\" AFTER INSERT ON public.\"ActionExecution\" DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_b31_execution_binding()",
+          "function": "require_b31_execution_binding",
+          "functionSha256": "ec765258bc451ff576f9d672b05d5b24e4e38aa326109732d645004fb9ac3f52"
+        },
+        "ActionExecution_b31_intent_guard": {
+          "definition": "CREATE TRIGGER \"ActionExecution_b31_intent_guard\" BEFORE INSERT OR DELETE OR UPDATE ON public.\"ActionExecution\" FOR EACH ROW EXECUTE FUNCTION guard_b31_booking_intent()",
+          "function": "guard_b31_booking_intent",
+          "functionSha256": "93910de30835fa2253880ae7092812c9b7c28b68e2b36cb7110c35c11bd50b2a"
+        },
+        "ActionExecution_transition_guard": {
+          "definition": "CREATE TRIGGER \"ActionExecution_transition_guard\" BEFORE UPDATE ON public.\"ActionExecution\" FOR EACH ROW EXECUTE FUNCTION guard_action_execution_transition()",
+          "function": "guard_action_execution_transition",
+          "functionSha256": "e097e708061ea2e9cf4e42b9dc671efbbd4d642e94bc5035f099f6487873a8ad"
+        }
+      }
+    },
+    "ActionExecutionIdempotencyBinding": {
+      "columns": {
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "clientId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "idempotencyScope": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "requestIdempotencyKeyHash": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "actionExecutionId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "constraints": {
+        "ActionExecutionIdempotencyBinding_actionExecutionId_tenant_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"actionExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        "ActionExecutionIdempotencyBinding_clientId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        "ActionExecutionIdempotencyBinding_key_check": {
+          "type": "c",
+          "definition": "CHECK (((\"idempotencyScope\" = 'appointments.client.create.v1'::text) AND (\"requestIdempotencyKeyHash\" ~ '^[a-f0-9]{64}$'::text)))"
+        },
+        "ActionExecutionIdempotencyBinding_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (\"tenantId\", \"idempotencyScope\", \"requestIdempotencyKeyHash\")"
+        },
+        "ActionExecutionIdempotencyBinding_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "ActionExecutionIdempotencyBinding_actionExecutionId_tenantI_idx": "CREATE INDEX \"ActionExecutionIdempotencyBinding_actionExecutionId_tenantI_idx\" ON public.\"ActionExecutionIdempotencyBinding\" USING btree (\"actionExecutionId\", \"tenantId\")",
+        "ActionExecutionIdempotencyBinding_clientId_tenantId_idx": "CREATE INDEX \"ActionExecutionIdempotencyBinding_clientId_tenantId_idx\" ON public.\"ActionExecutionIdempotencyBinding\" USING btree (\"clientId\", \"tenantId\")",
+        "ActionExecutionIdempotencyBinding_pkey": "CREATE UNIQUE INDEX \"ActionExecutionIdempotencyBinding_pkey\" ON public.\"ActionExecutionIdempotencyBinding\" USING btree (\"tenantId\", \"idempotencyScope\", \"requestIdempotencyKeyHash\")"
+      },
+      "triggers": {
+        "ActionExecutionIdempotencyBinding_immutable_guard": {
+          "definition": "CREATE TRIGGER \"ActionExecutionIdempotencyBinding_immutable_guard\" BEFORE INSERT OR DELETE OR UPDATE ON public.\"ActionExecutionIdempotencyBinding\" FOR EACH ROW EXECUTE FUNCTION guard_b31_idempotency_binding()",
+          "function": "guard_b31_idempotency_binding",
+          "functionSha256": "1115f1b30bf6d4d4093ebd2d399d9dadea2ec1bbbacd6893755da939ad033432"
+        }
+      }
+    },
+    "ActionAttempt": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "actionExecutionId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "attemptNumber": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "kind": {
+          "type": "ActionAttemptKind",
+          "nullable": false,
+          "default": null
+        },
+        "state": {
+          "type": "ActionAttemptState",
+          "nullable": false,
+          "default": null
+        },
+        "executorKey": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "executorVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": null
+        },
+        "externalDispatchState": {
+          "type": "ExternalDispatchState",
+          "nullable": false,
+          "default": null
+        },
+        "providerRequestIdentityHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "providerReferenceEncrypted": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "providerReferenceHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "transportCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "httpStatus": {
+          "type": "int4",
+          "nullable": true,
+          "default": null
+        },
+        "errorClass": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "outcomeCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "safeResultJson": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": null
+        },
+        "retryDecisionCode": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "reconciliationRequired": {
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        "startedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "finishedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "constraints": {
+        "ActionAttempt_actionExecutionId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"actionExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "ActionAttempt_kind_dispatch_check": {
+          "type": "c",
+          "definition": "CHECK ((((kind = 'EXECUTION'::\"ActionAttemptKind\") AND (\"externalDispatchState\" <> 'NOT_APPLICABLE'::\"ExternalDispatchState\")) OR ((kind = 'RECONCILIATION'::\"ActionAttemptKind\") AND (\"externalDispatchState\" = 'NOT_APPLICABLE'::\"ExternalDispatchState\") AND (\"providerRequestIdentityHash\" IS NULL))))"
+        },
+        "ActionAttempt_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "ActionAttempt_positive_values_check": {
+          "type": "c",
+          "definition": "CHECK (((\"attemptNumber\" > 0) AND (\"executorVersion\" > 0) AND ((\"httpStatus\" IS NULL) OR ((\"httpStatus\" >= 100) AND (\"httpStatus\" <= 599))) AND (btrim(\"executorKey\") <> ''::text)))"
+        },
+        "ActionAttempt_state_shape_check": {
+          "type": "c",
+          "definition": "CHECK ((((state = 'STARTED'::\"ActionAttemptState\") AND (\"finishedAt\" IS NULL) AND (\"outcomeCode\" IS NULL) AND (\"errorClass\" IS NULL) AND (\"retryDecisionCode\" IS NULL) AND (\"reconciliationRequired\" = false)) OR ((state = 'SUCCEEDED'::\"ActionAttemptState\") AND (\"finishedAt\" IS NOT NULL) AND (\"outcomeCode\" IS NOT NULL) AND (\"errorClass\" IS NULL)) OR ((state = 'FAILED'::\"ActionAttemptState\") AND (\"finishedAt\" IS NOT NULL) AND (\"errorClass\" IS NOT NULL)) OR ((state = 'UNKNOWN'::\"ActionAttemptState\") AND (\"finishedAt\" IS NOT NULL) AND (\"outcomeCode\" IS NOT NULL) AND (\"reconciliationRequired\" = true))))"
+        },
+        "ActionAttempt_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "ActionAttempt_unknown_dispatch_check": {
+          "type": "c",
+          "definition": "CHECK (((state <> 'UNKNOWN'::\"ActionAttemptState\") OR (kind = 'RECONCILIATION'::\"ActionAttemptKind\") OR (\"externalDispatchState\" = ANY (ARRAY['MAY_HAVE_CROSSED'::\"ExternalDispatchState\", 'ACKNOWLEDGED'::\"ExternalDispatchState\"]))))"
+        }
+      },
+      "indexes": {
+        "ActionAttempt_id_tenantId_key": "CREATE UNIQUE INDEX \"ActionAttempt_id_tenantId_key\" ON public.\"ActionAttempt\" USING btree (id, \"tenantId\")",
+        "ActionAttempt_one_open_per_execution": "CREATE UNIQUE INDEX \"ActionAttempt_one_open_per_execution\" ON public.\"ActionAttempt\" USING btree (\"tenantId\", \"actionExecutionId\") WHERE (state = 'STARTED'::\"ActionAttemptState\")",
+        "ActionAttempt_pkey": "CREATE UNIQUE INDEX \"ActionAttempt_pkey\" ON public.\"ActionAttempt\" USING btree (id)",
+        "ActionAttempt_tenantId_actionExecutionId_attemptNumber_key": "CREATE UNIQUE INDEX \"ActionAttempt_tenantId_actionExecutionId_attemptNumber_key\" ON public.\"ActionAttempt\" USING btree (\"tenantId\", \"actionExecutionId\", \"attemptNumber\")",
+        "ActionAttempt_tenantId_providerReferenceHash_idx": "CREATE INDEX \"ActionAttempt_tenantId_providerReferenceHash_idx\" ON public.\"ActionAttempt\" USING btree (\"tenantId\", \"providerReferenceHash\")",
+        "ActionAttempt_tenantId_state_startedAt_idx": "CREATE INDEX \"ActionAttempt_tenantId_state_startedAt_idx\" ON public.\"ActionAttempt\" USING btree (\"tenantId\", state, \"startedAt\")"
+      },
+      "triggers": {
+        "ActionAttempt_insert_guard": {
+          "definition": "CREATE TRIGGER \"ActionAttempt_insert_guard\" BEFORE INSERT ON public.\"ActionAttempt\" FOR EACH ROW EXECUTE FUNCTION guard_action_attempt_insert()",
+          "function": "guard_action_attempt_insert",
+          "functionSha256": "45b6e3e38f162752ab74904107abc901cf6f8dfbc247d40354604eac02e7a6ef"
+        },
+        "ActionAttempt_transition_guard": {
+          "definition": "CREATE TRIGGER \"ActionAttempt_transition_guard\" BEFORE UPDATE ON public.\"ActionAttempt\" FOR EACH ROW EXECUTE FUNCTION guard_action_attempt_transition()",
+          "function": "guard_action_attempt_transition",
+          "functionSha256": "f8fd9b456f782731400ca8747e9fafb51ab7089f797436df38cca997e0e8b8e3"
+        }
+      }
+    },
+    "InboxItem": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "userId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "type": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "sourceEventId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "title": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "bodyText": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "payloadJson": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": null
+        },
+        "deepLink": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "readAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "archivedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "deletedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "operationalWorkItemId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        }
+      },
+      "constraints": {
+        "InboxItem_operationalWorkItemId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"operationalWorkItemId\", \"tenantId\") REFERENCES \"OperationalWorkItem\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "InboxItem_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "InboxItem_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "InboxItem_userId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "InboxItem_id_tenantId_key": "CREATE UNIQUE INDEX \"InboxItem_id_tenantId_key\" ON public.\"InboxItem\" USING btree (id, \"tenantId\")",
+        "InboxItem_pkey": "CREATE UNIQUE INDEX \"InboxItem_pkey\" ON public.\"InboxItem\" USING btree (id)",
+        "InboxItem_tenantId_operationalWorkItemId_idx": "CREATE INDEX \"InboxItem_tenantId_operationalWorkItemId_idx\" ON public.\"InboxItem\" USING btree (\"tenantId\", \"operationalWorkItemId\")",
+        "InboxItem_tenantId_type_createdAt_idx": "CREATE INDEX \"InboxItem_tenantId_type_createdAt_idx\" ON public.\"InboxItem\" USING btree (\"tenantId\", type, \"createdAt\")",
+        "InboxItem_tenantId_userId_createdAt_idx": "CREATE INDEX \"InboxItem_tenantId_userId_createdAt_idx\" ON public.\"InboxItem\" USING btree (\"tenantId\", \"userId\", \"createdAt\")",
+        "InboxItem_tenantId_userId_type_sourceEventId_key": "CREATE UNIQUE INDEX \"InboxItem_tenantId_userId_type_sourceEventId_key\" ON public.\"InboxItem\" USING btree (\"tenantId\", \"userId\", type, \"sourceEventId\")"
+      },
+      "triggers": {}
+    },
+    "Client": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "userId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "phoneHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "mergedIntoClientId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        }
+      },
+      "constraints": {
+        "Client_merge_not_self_check": {
+          "type": "c",
+          "definition": "CHECK (((\"mergedIntoClientId\" IS NULL) OR (\"mergedIntoClientId\" <> id)))"
+        },
+        "Client_mergedIntoClientId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"mergedIntoClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\")"
+        },
+        "Client_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "Client_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "Client_userId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE CASCADE ON DELETE SET NULL"
+        }
+      },
+      "indexes": {
+        "Client_id_tenantId_key": "CREATE UNIQUE INDEX \"Client_id_tenantId_key\" ON public.\"Client\" USING btree (id, \"tenantId\")",
+        "Client_pkey": "CREATE UNIQUE INDEX \"Client_pkey\" ON public.\"Client\" USING btree (id)",
+        "Client_tenantId_phoneHash_idx": "CREATE INDEX \"Client_tenantId_phoneHash_idx\" ON public.\"Client\" USING btree (\"tenantId\", \"phoneHash\")",
+        "Client_tenantId_userId_idx": "CREATE INDEX \"Client_tenantId_userId_idx\" ON public.\"Client\" USING btree (\"tenantId\", \"userId\")"
+      },
+      "triggers": {}
+    },
+    "Membership": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "userId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "role": {
+          "type": "UserRole",
+          "nullable": false,
+          "default": null
+        },
+        "status": {
+          "type": "MembershipStatus",
+          "nullable": false,
+          "default": "'active'::\"MembershipStatus\""
+        },
+        "invitedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "joinedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        },
+        "branchId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        }
+      },
+      "constraints": {
+        "Membership_branchId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"branchId\", \"tenantId\") REFERENCES \"Branch\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        "Membership_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "Membership_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "Membership_userId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "Membership_pkey": "CREATE UNIQUE INDEX \"Membership_pkey\" ON public.\"Membership\" USING btree (id)",
+        "Membership_tenantId_branchId_idx": "CREATE INDEX \"Membership_tenantId_branchId_idx\" ON public.\"Membership\" USING btree (\"tenantId\", \"branchId\")",
+        "Membership_tenantId_status_idx": "CREATE INDEX \"Membership_tenantId_status_idx\" ON public.\"Membership\" USING btree (\"tenantId\", status)",
+        "Membership_userId_status_idx": "CREATE INDEX \"Membership_userId_status_idx\" ON public.\"Membership\" USING btree (\"userId\", status)",
+        "Membership_userId_tenantId_key": "CREATE UNIQUE INDEX \"Membership_userId_tenantId_key\" ON public.\"Membership\" USING btree (\"userId\", \"tenantId\")"
+      },
+      "triggers": {}
+    },
+    "ClientChannelLink": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "clientId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "provider": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "providerSubjectHash": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "subjectHashVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": "1"
+        },
+        "verificationMethod": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "verificationVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": "1"
+        },
+        "verificationIdentityHash": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "verificationEvidenceJson": {
+          "type": "jsonb",
+          "nullable": false,
+          "default": null
+        },
+        "verificationEvidenceHash": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "verifiedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "timezone('UTC'::text, CURRENT_TIMESTAMP)"
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "timezone('UTC'::text, CURRENT_TIMESTAMP)"
+        },
+        "supersedesLinkId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "revokedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "revocationIdentityHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "revocationEvidenceJson": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": null
+        },
+        "revocationEvidenceHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "deliveryAddressEncrypted": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        }
+      },
+      "constraints": {
+        "ClientChannelLink_clientId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "ClientChannelLink_delivery_address_check": {
+          "type": "c",
+          "definition": "CHECK (((\"deliveryAddressEncrypted\" IS NULL) OR (((octet_length(\"deliveryAddressEncrypted\") >= 42) AND (octet_length(\"deliveryAddressEncrypted\") <= 512)) AND (\"deliveryAddressEncrypted\" ~ '^[A-Za-z0-9_-]{16}\\.[A-Za-z0-9_-]{22}\\.[A-Za-z0-9_-]+$'::text))))"
+        },
+        "ClientChannelLink_identity_check": {
+          "type": "c",
+          "definition": "CHECK (((length(btrim(id)) > 0) AND (length(btrim(\"tenantId\")) > 0) AND (length(btrim(\"clientId\")) > 0) AND (provider = ANY (ARRAY['maya_user'::text, 'telegram'::text])) AND (\"subjectHashVersion\" = 1) AND (\"verificationVersion\" = 1) AND (\"verificationMethod\" = ANY (ARRAY['proven_user_client_link'::text, 'explicit_verified_challenge'::text])) AND ((\"verificationMethod\" <> 'proven_user_client_link'::text) OR (provider = 'maya_user'::text)) AND (\"providerSubjectHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"verificationIdentityHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"verificationEvidenceHash\" ~ '^[0-9a-f]{64}$'::text) AND ((\"supersedesLinkId\" IS NULL) OR (\"supersedesLinkId\" <> id))))"
+        },
+        "ClientChannelLink_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "ClientChannelLink_predecessor_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"supersedesLinkId\", \"tenantId\", provider, \"providerSubjectHash\") REFERENCES \"ClientChannelLink\"(id, \"tenantId\", provider, \"providerSubjectHash\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "ClientChannelLink_revocation_check": {
+          "type": "c",
+          "definition": "CHECK (((((\"revokedAt\" IS NULL) AND (\"revocationIdentityHash\" IS NULL) AND (\"revocationEvidenceJson\" IS NULL) AND (\"revocationEvidenceHash\" IS NULL)) OR ((\"revokedAt\" IS NOT NULL) AND (\"revocationIdentityHash\" IS NOT NULL) AND (\"revocationEvidenceJson\" IS NOT NULL) AND (\"revocationEvidenceHash\" IS NOT NULL) AND (\"revocationIdentityHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"revocationEvidenceHash\" ~ '^[0-9a-f]{64}$'::text) AND (jsonb_typeof(\"revocationEvidenceJson\") = 'object'::text) AND (octet_length((\"revocationEvidenceJson\")::text) <= 8192) AND (\"revocationEvidenceJson\" ?& ARRAY['contract'::text, 'revocationIdentityHash'::text, 'tenantId'::text, 'linkId'::text, 'actorProofHash'::text, 'reason'::text]) AND ((\"revocationEvidenceJson\" - ARRAY['contract'::text, 'revocationIdentityHash'::text, 'tenantId'::text, 'linkId'::text, 'actorProofHash'::text, 'reason'::text]) = '{}'::jsonb) AND ((\"revocationEvidenceJson\" ->> 'contract'::text) = 'a18.client-channel-revocation.v1'::text) AND ((\"revocationEvidenceJson\" ->> 'revocationIdentityHash'::text) = \"revocationIdentityHash\") AND ((\"revocationEvidenceJson\" ->> 'tenantId'::text) = \"tenantId\") AND ((\"revocationEvidenceJson\" ->> 'linkId'::text) = id) AND ((\"revocationEvidenceJson\" ->> 'actorProofHash'::text) ~ '^[0-9a-f]{64}$'::text) AND ((length(btrim((\"revocationEvidenceJson\" ->> 'reason'::text))) >= 1) AND (length(btrim((\"revocationEvidenceJson\" ->> 'reason'::text))) <= 160)))) IS TRUE))"
+        },
+        "ClientChannelLink_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "ClientChannelLink_time_check": {
+          "type": "c",
+          "definition": "CHECK (((\"verifiedAt\" <= \"createdAt\") AND ((\"revokedAt\" IS NULL) OR (\"revokedAt\" >= \"createdAt\"))))"
+        },
+        "ClientChannelLink_verification_evidence_check": {
+          "type": "c",
+          "definition": "CHECK ((((jsonb_typeof(\"verificationEvidenceJson\") = 'object'::text) AND (octet_length((\"verificationEvidenceJson\")::text) <= 8192) AND (\"verificationEvidenceJson\" ?& ARRAY['contract'::text, 'verifier'::text, 'channelControlProofHash'::text, 'clientAuthorityProofHash'::text, 'verificationIdentityHash'::text, 'tenantId'::text, 'provider'::text, 'providerSubjectHash'::text, 'clientId'::text]) AND ((\"verificationEvidenceJson\" - ARRAY['contract'::text, 'verifier'::text, 'channelControlProofHash'::text, 'clientAuthorityProofHash'::text, 'verificationIdentityHash'::text, 'tenantId'::text, 'provider'::text, 'providerSubjectHash'::text, 'clientId'::text, 'verifiedAt'::text, 'validUntil'::text]) = '{}'::jsonb) AND ((\"verificationEvidenceJson\" ->> 'contract'::text) = 'a18.client-channel-verification.v1'::text) AND (length(btrim((\"verificationEvidenceJson\" ->> 'verifier'::text))) > 0) AND ((\"verificationEvidenceJson\" ->> 'channelControlProofHash'::text) ~ '^[0-9a-f]{64}$'::text) AND ((\"verificationEvidenceJson\" ->> 'clientAuthorityProofHash'::text) ~ '^[0-9a-f]{64}$'::text) AND ((\"verificationEvidenceJson\" ->> 'verificationIdentityHash'::text) = \"verificationIdentityHash\") AND ((\"verificationEvidenceJson\" ->> 'tenantId'::text) = \"tenantId\") AND ((\"verificationEvidenceJson\" ->> 'provider'::text) = provider) AND ((\"verificationEvidenceJson\" ->> 'providerSubjectHash'::text) = \"providerSubjectHash\") AND ((\"verificationEvidenceJson\" ->> 'clientId'::text) = \"clientId\")) IS TRUE))"
+        }
+      },
+      "indexes": {
+        "ClientChannelLink_active_subject_key": "CREATE UNIQUE INDEX \"ClientChannelLink_active_subject_key\" ON public.\"ClientChannelLink\" USING btree (\"tenantId\", provider, \"providerSubjectHash\") WHERE (\"revokedAt\" IS NULL)",
+        "ClientChannelLink_client_reference_key": "CREATE UNIQUE INDEX \"ClientChannelLink_client_reference_key\" ON public.\"ClientChannelLink\" USING btree (id, \"tenantId\", \"clientId\")",
+        "ClientChannelLink_id_tenantId_key": "CREATE UNIQUE INDEX \"ClientChannelLink_id_tenantId_key\" ON public.\"ClientChannelLink\" USING btree (id, \"tenantId\")",
+        "ClientChannelLink_identity_reference_key": "CREATE UNIQUE INDEX \"ClientChannelLink_identity_reference_key\" ON public.\"ClientChannelLink\" USING btree (id, \"tenantId\", provider, \"providerSubjectHash\")",
+        "ClientChannelLink_pkey": "CREATE UNIQUE INDEX \"ClientChannelLink_pkey\" ON public.\"ClientChannelLink\" USING btree (id)",
+        "ClientChannelLink_revocation_identity_key": "CREATE UNIQUE INDEX \"ClientChannelLink_revocation_identity_key\" ON public.\"ClientChannelLink\" USING btree (\"tenantId\", \"revocationIdentityHash\")",
+        "ClientChannelLink_supersedesLinkId_key": "CREATE UNIQUE INDEX \"ClientChannelLink_supersedesLinkId_key\" ON public.\"ClientChannelLink\" USING btree (\"supersedesLinkId\")",
+        "ClientChannelLink_tenantId_clientId_idx": "CREATE INDEX \"ClientChannelLink_tenantId_clientId_idx\" ON public.\"ClientChannelLink\" USING btree (\"tenantId\", \"clientId\")",
+        "ClientChannelLink_verification_identity_key": "CREATE UNIQUE INDEX \"ClientChannelLink_verification_identity_key\" ON public.\"ClientChannelLink\" USING btree (\"tenantId\", \"verificationIdentityHash\")"
+      },
+      "triggers": {
+        "ClientChannelLink_lifecycle_guard": {
+          "definition": "CREATE TRIGGER \"ClientChannelLink_lifecycle_guard\" BEFORE INSERT OR DELETE OR UPDATE ON public.\"ClientChannelLink\" FOR EACH ROW EXECUTE FUNCTION guard_client_channel_link_v1()",
+          "function": "guard_client_channel_link_v1",
+          "functionSha256": "6e53460746866efd6b48a3112b40e78bc2f048abd85c7697363bd14c1d14fee0"
+        }
+      }
+    },
+    "ClientWebPushEndpoint": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "clientId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "clientChannelLinkId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "endpointHash": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "hashVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": "1"
+        },
+        "subscriptionEncrypted": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "materialHash": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "registrationIdentityHash": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "policyVersion": {
+          "type": "int4",
+          "nullable": false,
+          "default": "1"
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "timezone('UTC'::text, CURRENT_TIMESTAMP)"
+        },
+        "registrationEvidenceJson": {
+          "type": "jsonb",
+          "nullable": false,
+          "default": null
+        },
+        "registrationEvidenceHash": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "supersedesEndpointId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "endedAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "endReason": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "terminationIdentityHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "terminationEvidenceJson": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": null
+        },
+        "terminationEvidenceHash": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        }
+      },
+      "constraints": {
+        "ClientWebPushEndpoint_clientChannelLinkId_tenantId_clientI_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"clientChannelLinkId\", \"tenantId\", \"clientId\") REFERENCES \"ClientChannelLink\"(id, \"tenantId\", \"clientId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "ClientWebPushEndpoint_clientId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "ClientWebPushEndpoint_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "ClientWebPushEndpoint_registration_check": {
+          "type": "c",
+          "definition": "CHECK ((((jsonb_typeof(\"registrationEvidenceJson\") = 'object'::text) AND (\"registrationEvidenceJson\" ?& ARRAY['contract'::text, 'linkId'::text, 'linkEvidenceHash'::text, 'actorProofHash'::text, 'materialHash'::text, 'registrationIdentityHash'::text]) AND ((\"registrationEvidenceJson\" - ARRAY['contract'::text, 'linkId'::text, 'linkEvidenceHash'::text, 'actorProofHash'::text, 'materialHash'::text, 'registrationIdentityHash'::text]) = '{}'::jsonb) AND ((\"registrationEvidenceJson\" ->> 'contract'::text) = 'b24.web-push.registration.v1'::text) AND ((\"registrationEvidenceJson\" ->> 'linkId'::text) = \"clientChannelLinkId\") AND ((\"registrationEvidenceJson\" ->> 'linkEvidenceHash'::text) ~ '^[0-9a-f]{64}$'::text) AND ((\"registrationEvidenceJson\" ->> 'actorProofHash'::text) ~ '^[0-9a-f]{64}$'::text) AND ((\"registrationEvidenceJson\" ->> 'materialHash'::text) = \"materialHash\") AND ((\"registrationEvidenceJson\" ->> 'registrationIdentityHash'::text) = \"registrationIdentityHash\") AND (octet_length((\"registrationEvidenceJson\")::text) <= 2048)) IS TRUE))"
+        },
+        "ClientWebPushEndpoint_supersedesEndpointId_tenantId_client_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"supersedesEndpointId\", \"tenantId\", \"clientId\") REFERENCES \"ClientWebPushEndpoint\"(id, \"tenantId\", \"clientId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "ClientWebPushEndpoint_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "ClientWebPushEndpoint_terminal_check": {
+          "type": "c",
+          "definition": "CHECK (((((\"endedAt\" IS NULL) AND (\"endReason\" IS NULL) AND (\"terminationIdentityHash\" IS NULL) AND (\"terminationEvidenceJson\" IS NULL) AND (\"terminationEvidenceHash\" IS NULL)) OR ((\"endedAt\" IS NOT NULL) AND (\"endedAt\" >= \"createdAt\") AND (\"endReason\" = ANY (ARRAY['UNSUBSCRIBED'::text, 'REPLACED'::text, 'PERMANENT_ENDPOINT_INVALID'::text])) AND (\"terminationIdentityHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"terminationEvidenceHash\" ~ '^[0-9a-f]{64}$'::text) AND (jsonb_typeof(\"terminationEvidenceJson\") = 'object'::text) AND (\"terminationEvidenceJson\" ?& ARRAY['contract'::text, 'endpointId'::text, 'reason'::text, 'authorityRefHash'::text, 'terminationIdentityHash'::text]) AND ((\"terminationEvidenceJson\" - ARRAY['contract'::text, 'endpointId'::text, 'reason'::text, 'authorityRefHash'::text, 'terminationIdentityHash'::text]) = '{}'::jsonb) AND ((\"terminationEvidenceJson\" ->> 'contract'::text) = 'b24.web-push.termination.v1'::text) AND ((\"terminationEvidenceJson\" ->> 'endpointId'::text) = id) AND ((\"terminationEvidenceJson\" ->> 'reason'::text) = \"endReason\") AND ((\"terminationEvidenceJson\" ->> 'authorityRefHash'::text) ~ '^[0-9a-f]{64}$'::text) AND ((\"terminationEvidenceJson\" ->> 'terminationIdentityHash'::text) = \"terminationIdentityHash\") AND (octet_length((\"terminationEvidenceJson\")::text) <= 2048))) IS TRUE))"
+        },
+        "ClientWebPushEndpoint_versions_check": {
+          "type": "c",
+          "definition": "CHECK (((\"hashVersion\" = 1) AND (\"policyVersion\" = 1) AND (\"endpointHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"materialHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"registrationIdentityHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"registrationEvidenceHash\" ~ '^[0-9a-f]{64}$'::text) AND ((octet_length(\"subscriptionEncrypted\") >= 42) AND (octet_length(\"subscriptionEncrypted\") <= 10963)) AND (\"subscriptionEncrypted\" ~ '^[A-Za-z0-9_-]{16}\\.[A-Za-z0-9_-]{22}\\.[A-Za-z0-9_-]+$'::text) AND ((\"supersedesEndpointId\" IS NULL) OR (\"supersedesEndpointId\" <> id))))"
+        }
+      },
+      "indexes": {
+        "ClientWebPushEndpoint_active_endpoint_key": "CREATE UNIQUE INDEX \"ClientWebPushEndpoint_active_endpoint_key\" ON public.\"ClientWebPushEndpoint\" USING btree (\"endpointHash\") WHERE (\"endedAt\" IS NULL)",
+        "ClientWebPushEndpoint_endpointHash_idx": "CREATE INDEX \"ClientWebPushEndpoint_endpointHash_idx\" ON public.\"ClientWebPushEndpoint\" USING btree (\"endpointHash\")",
+        "ClientWebPushEndpoint_id_tenantId_clientId_key": "CREATE UNIQUE INDEX \"ClientWebPushEndpoint_id_tenantId_clientId_key\" ON public.\"ClientWebPushEndpoint\" USING btree (id, \"tenantId\", \"clientId\")",
+        "ClientWebPushEndpoint_pkey": "CREATE UNIQUE INDEX \"ClientWebPushEndpoint_pkey\" ON public.\"ClientWebPushEndpoint\" USING btree (id)",
+        "ClientWebPushEndpoint_supersedesEndpointId_key": "CREATE UNIQUE INDEX \"ClientWebPushEndpoint_supersedesEndpointId_key\" ON public.\"ClientWebPushEndpoint\" USING btree (\"supersedesEndpointId\")",
+        "ClientWebPushEndpoint_tenantId_clientId_endedAt_createdAt_i_idx": "CREATE INDEX \"ClientWebPushEndpoint_tenantId_clientId_endedAt_createdAt_i_idx\" ON public.\"ClientWebPushEndpoint\" USING btree (\"tenantId\", \"clientId\", \"endedAt\", \"createdAt\", id)",
+        "ClientWebPushEndpoint_tenantId_registrationIdentityHash_key": "CREATE UNIQUE INDEX \"ClientWebPushEndpoint_tenantId_registrationIdentityHash_key\" ON public.\"ClientWebPushEndpoint\" USING btree (\"tenantId\", \"registrationIdentityHash\")",
+        "ClientWebPushEndpoint_terminationIdentityHash_key": "CREATE UNIQUE INDEX \"ClientWebPushEndpoint_terminationIdentityHash_key\" ON public.\"ClientWebPushEndpoint\" USING btree (\"terminationIdentityHash\")"
+      },
+      "triggers": {
+        "ClientWebPushEndpoint_guard": {
+          "definition": "CREATE TRIGGER \"ClientWebPushEndpoint_guard\" BEFORE INSERT OR DELETE OR UPDATE ON public.\"ClientWebPushEndpoint\" FOR EACH ROW EXECUTE FUNCTION guard_client_web_push_endpoint_v1()",
+          "function": "guard_client_web_push_endpoint_v1",
+          "functionSha256": "306886400568d291dda4bb01f12d582098ab8001d58fca48e594e02766e63e9f"
+        }
+      }
+    },
+    "DevicePushToken": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "userId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "platform": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "token": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        }
+      },
+      "constraints": {
+        "DevicePushToken_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "DevicePushToken_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "DevicePushToken_userId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "DevicePushToken_pkey": "CREATE UNIQUE INDEX \"DevicePushToken_pkey\" ON public.\"DevicePushToken\" USING btree (id)",
+        "DevicePushToken_tenantId_token_key": "CREATE UNIQUE INDEX \"DevicePushToken_tenantId_token_key\" ON public.\"DevicePushToken\" USING btree (\"tenantId\", token)",
+        "DevicePushToken_tenantId_userId_idx": "CREATE INDEX \"DevicePushToken_tenantId_userId_idx\" ON public.\"DevicePushToken\" USING btree (\"tenantId\", \"userId\")"
+      },
+      "triggers": {}
+    },
+    "CustomerProfile": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "userId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "preferredLocale": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "privacyConsentAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "marketingConsentAt": {
+          "type": "timestamp",
+          "nullable": true,
+          "default": null
+        },
+        "encryptedNotes": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        },
+        "clientId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "defaultVisitMood": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "notificationPreferencesJson": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": null
+        },
+        "encryptedClientPreferences": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        }
+      },
+      "constraints": {
+        "CustomerProfile_clientId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "CustomerProfile_client_habits_ciphertext_v1_check": {
+          "type": "c",
+          "definition": "CHECK (((\"encryptedClientPreferences\" IS NULL) OR (((octet_length(\"encryptedClientPreferences\") >= 41) AND (octet_length(\"encryptedClientPreferences\") <= 10963)) AND (\"encryptedClientPreferences\" ~ '^[A-Za-z0-9_-]{16}\\.[A-Za-z0-9_-]{22}\\.[A-Za-z0-9_-]+$'::text))))"
+        },
+        "CustomerProfile_client_habits_owner_check": {
+          "type": "c",
+          "definition": "CHECK (((\"encryptedClientPreferences\" IS NULL) OR (\"clientId\" IS NOT NULL)))"
+        },
+        "CustomerProfile_client_preference_owner_check": {
+          "type": "c",
+          "definition": "CHECK ((((\"defaultVisitMood\" IS NULL) AND (\"notificationPreferencesJson\" IS NULL)) OR (\"clientId\" IS NOT NULL)))"
+        },
+        "CustomerProfile_default_visit_mood_check": {
+          "type": "c",
+          "definition": "CHECK (((\"defaultVisitMood\" IS NULL) OR (\"defaultVisitMood\" = ANY (ARRAY['red'::text, 'blue'::text]))))"
+        },
+        "CustomerProfile_notification_preferences_v1_check": {
+          "type": "c",
+          "definition": "CHECK ((valid_client_notification_preferences_v1(\"notificationPreferencesJson\") IS TRUE))"
+        },
+        "CustomerProfile_owner_present_check": {
+          "type": "c",
+          "definition": "CHECK (((\"clientId\" IS NOT NULL) OR (\"userId\" IS NOT NULL)))"
+        },
+        "CustomerProfile_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "CustomerProfile_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        "CustomerProfile_userId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"userId\") REFERENCES \"User\"(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "CustomerProfile_userId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"userId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        }
+      },
+      "indexes": {
+        "CustomerProfile_pkey": "CREATE UNIQUE INDEX \"CustomerProfile_pkey\" ON public.\"CustomerProfile\" USING btree (id)",
+        "CustomerProfile_tenantId_clientId_key": "CREATE UNIQUE INDEX \"CustomerProfile_tenantId_clientId_key\" ON public.\"CustomerProfile\" USING btree (\"tenantId\", \"clientId\")",
+        "CustomerProfile_tenantId_updatedAt_idx": "CREATE INDEX \"CustomerProfile_tenantId_updatedAt_idx\" ON public.\"CustomerProfile\" USING btree (\"tenantId\", \"updatedAt\")",
+        "CustomerProfile_userId_tenantId_key": "CREATE UNIQUE INDEX \"CustomerProfile_userId_tenantId_key\" ON public.\"CustomerProfile\" USING btree (\"userId\", \"tenantId\")"
+      },
+      "triggers": {
+        "CustomerProfile_client_owner_guard": {
+          "definition": "CREATE TRIGGER \"CustomerProfile_client_owner_guard\" BEFORE UPDATE OF \"tenantId\", \"clientId\" ON public.\"CustomerProfile\" FOR EACH ROW EXECUTE FUNCTION guard_customer_profile_client_owner()",
+          "function": "guard_customer_profile_client_owner",
+          "functionSha256": "d983bd8f6dda0ec581081e4b006982372598eae3e657bb4269f1746d0c976168"
+        }
+      }
+    },
+    "ClientConsentFact": {
+      "columns": {
+        "id": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "tenantId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "clientId": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "kind": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "decision": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "occurredAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        },
+        "effectiveAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": null
+        },
+        "sourceType": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "sourceIdentityHash": {
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        "actorUserId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "actionExecutionId": {
+          "type": "text",
+          "nullable": true,
+          "default": null
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "constraints": {
+        "ClientConsentFact_actionExecutionId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"actionExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "ClientConsentFact_actorUserId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"actorUserId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "ClientConsentFact_clientId_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+        },
+        "ClientConsentFact_decision_check": {
+          "type": "c",
+          "definition": "CHECK ((decision = ANY (ARRAY['grant'::text, 'revoke'::text])))"
+        },
+        "ClientConsentFact_kind_source_nonempty_check": {
+          "type": "c",
+          "definition": "CHECK (((length(btrim(kind)) > 0) AND (length(btrim(\"sourceType\")) > 0)))"
+        },
+        "ClientConsentFact_pkey": {
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        "ClientConsentFact_source_hash_check": {
+          "type": "c",
+          "definition": "CHECK ((\"sourceIdentityHash\" ~ '^[0-9a-f]{64}$'::text))"
+        },
+        "ClientConsentFact_tenantId_fkey": {
+          "type": "f",
+          "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        }
+      },
+      "indexes": {
+        "ClientConsentFact_id_tenantId_key": "CREATE UNIQUE INDEX \"ClientConsentFact_id_tenantId_key\" ON public.\"ClientConsentFact\" USING btree (id, \"tenantId\")",
+        "ClientConsentFact_pkey": "CREATE UNIQUE INDEX \"ClientConsentFact_pkey\" ON public.\"ClientConsentFact\" USING btree (id)",
+        "ClientConsentFact_tenantId_actionExecutionId_idx": "CREATE INDEX \"ClientConsentFact_tenantId_actionExecutionId_idx\" ON public.\"ClientConsentFact\" USING btree (\"tenantId\", \"actionExecutionId\")",
+        "ClientConsentFact_tenantId_clientId_kind_effectiveAt_idx": "CREATE INDEX \"ClientConsentFact_tenantId_clientId_kind_effectiveAt_idx\" ON public.\"ClientConsentFact\" USING btree (\"tenantId\", \"clientId\", kind, \"effectiveAt\")",
+        "ClientConsentFact_tenantId_sourceType_sourceIdentityHash_key": "CREATE UNIQUE INDEX \"ClientConsentFact_tenantId_sourceType_sourceIdentityHash_key\" ON public.\"ClientConsentFact\" USING btree (\"tenantId\", \"sourceType\", \"sourceIdentityHash\")"
+      },
+      "triggers": {
+        "ClientConsentFact_append_only_guard": {
+          "definition": "CREATE TRIGGER \"ClientConsentFact_append_only_guard\" BEFORE DELETE OR UPDATE ON public.\"ClientConsentFact\" FOR EACH ROW EXECUTE FUNCTION guard_client_consent_fact_append_only()",
+          "function": "guard_client_consent_fact_append_only",
+          "functionSha256": "877698d4f5f621c160ca4b5b16c9ac5576fd65c50b5641fde95aa0fdb4660235"
+        },
+        "ClientConsentFact_insert_guard": {
+          "definition": "CREATE TRIGGER \"ClientConsentFact_insert_guard\" BEFORE INSERT ON public.\"ClientConsentFact\" FOR EACH ROW EXECUTE FUNCTION guard_client_consent_fact_insert()",
+          "function": "guard_client_consent_fact_insert",
+          "functionSha256": "08316a6407324b29e07cee76a947d9ed5e07034fc01daf5fdbe27be3a65dcd9c"
+        }
+      }
+    }
+  }
+}

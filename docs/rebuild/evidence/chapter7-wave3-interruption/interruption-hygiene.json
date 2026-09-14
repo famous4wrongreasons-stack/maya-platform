@@ -1,0 +1,15 @@
+{
+  "at": "2026-09-08T18:08:03.653190+00:00",
+  "dumpPreserved": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-wave3-p03-p04/wave3-synthetic-proof-final.dump",
+  "sha256": "4bc60766a5d72112e3341b4328f66b54d8a2d018e634032a4f0cceaaf7635656",
+  "dumpArchiveValidated": true,
+  "ownedDatabaseDropped": "maya_c7_replay",
+  "ownedPostgresStopped": 3930,
+  "ownedDataDirectoryRemoved": true,
+  "ownedTempProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTempDatabases": 0,
+  "preExistingDatabasesTouched": 0,
+  "mainDirtyWorktreeTouched": false
+}

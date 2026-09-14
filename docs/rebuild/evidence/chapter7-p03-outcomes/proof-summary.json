@@ -1,0 +1,52 @@
+{
+  "package": "C7-P03",
+  "status": "LOCAL_ACCEPTANCE_PASS",
+  "decisions": ["D02-A", "D03-A", "D13-A"],
+  "foundation": "P01 applied 37-field MeasurementRevision",
+  "schemaChanges": 0,
+  "newBusinessActions": 0,
+  "runtimeSourceMutations": 0,
+  "productionEffects": 0,
+  "testResults": {
+    "ownedUnitAndRatchets": 38,
+    "ownedAndSharedMeasurementBoundaries": 55,
+    "adjacentOwnerArchitecture": 23,
+    "targetedTypeScript": "PASS",
+    "targetedLint": "PASS",
+    "postgresqlScenarios": 10
+  },
+  "requirements": {
+    "Q04": {
+      "implementation": ["current canonical Appointment outcome", "separate A29 source-labelled frozen assignment/current status", "shared immutable revision publication"],
+      "postgresqlProofs": ["canonical B31 cancellation advances current revision and preserves historical snapshot", "A29 cancellation after 50 days preserves frozen one-day assignment"]
+    },
+    "Q12": {
+      "implementation": ["exact internal B31 immutable Client binding plus verified input and direct successful effect receipt", "unique execution/attempt credit", "legacy/external namespace gaps/reconciliation-only/UNKNOWN remain uncredited"],
+      "postgresqlProofs": ["real B31 Client without User receives exact credit", "pending exact Appointment A-to-B correction publishes UNAVAILABLE", "tenant/timezone/scope rejection", "UNKNOWN source remains unchanged"],
+      "unitProofs": ["competing receipt ambiguity", "same receipt deduplication", "foreign Client/tenant", "missing retained input", "input integrity failure versus infrastructure failure", "denied/dry-run/nonapproved/late receipt"]
+    },
+    "Q13": {
+      "implementation": ["exact historical AgentTask/Opportunity and frozen original interval evidence", "same Staff/branch and entire blocked interval", "attendance separate", "missing source remains NOT_MEASURED"],
+      "postgresqlProofs": ["real B31 booking with missing exact capacity lineage stays NOT_MEASURED despite A29 filledWindow flag"],
+      "unitProofs": ["exact complete original interval", "missing evidence", "corrected interval", "partial occupation", "wrong Staff/branch", "late cancellation"]
+    },
+    "Q14": {
+      "implementation": ["root campaign cohort", "distinct logical root recipients and child transport slots", "execution versus reconciliation delivery attempts", "explicit observed receipt ratio numerators/denominators", "read receipt NOT_MEASURED"],
+      "postgresqlProofs": ["canonical CD owner ACCEPTED/DELIVERED/UNKNOWN remain distinct with no new delivery attempts during measurement"],
+      "unitProofs": ["B35 two accepted transport slots count one logical Client", "empty denominator remains unknown"]
+    },
+    "Q15": {
+      "implementation": ["distinct Opportunity logical/revision and AgentTask cohorts", "logical admitted ActionExecution count", "separate policy/approval/execution states", "execution/reconciliation attempts", "ephemeral proposal denominator unavailable"],
+      "postgresqlProofs": ["canonical Opportunity lifecycle and independent action denominator", "1002 Opportunity rows produce PUBLISHED UNAVAILABLE through shared publication"],
+      "unitProofs": ["half-open tenant-qualified cohort queries", "UNKNOWN one logical action with separate attempts"]
+    }
+  },
+  "limits": {
+    "rowsPerSourceOrRelationship": 1000,
+    "overflow": "PUBLISHED UNAVAILABLE with empty metrics and source receipts",
+    "externalCredit": "uncredited without frozen provider namespace in approved owner read interface",
+    "capacityCredit": "NOT_MEASURED when exact AgentTask/Opportunity/original interval lineage is absent",
+    "funnelScope": "exact tenant-wide only; unsupported Client/Staff/branch/configuration scope rejected",
+    "observation": "half-open admission cohorts with current source states observed at read; no invented historical state or causal uplift"
+  }
+}

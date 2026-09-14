@@ -99,7 +99,8 @@ export class SafeOnboardingInterpreter {
         expectsBusinessName &&
         !hasServiceIntro &&
         !this.hasServiceFacts(normalized) &&
-        !this.looksLikeServiceList(normalized),
+        !this.looksLikeServiceList(normalized) &&
+        this.canBeStandaloneBusinessName(normalized),
     );
     const explicitWorkMode = this.detectWorkMode(normalized);
     const workMode =
@@ -376,6 +377,20 @@ export class SafeOnboardingInterpreter {
     }
 
     return null;
+  }
+
+  private canBeStandaloneBusinessName(message: string): boolean {
+    // A short answer is accepted as a name only when it does not clearly
+    // answer another onboarding question. This prevents phrases such as
+    // "Записи ведем в календаре MAYA" from replacing the saved business name.
+    return (
+      !this.detectCalendarSourceDecision(message) &&
+      !this.extractSchedule(message) &&
+      this.extractProviderCount(message) === null &&
+      !this.detectWorkMode(message) &&
+      !this.detectIndustryTemplate(message) &&
+      !/(?:услуг|прайс|цен|стоим|руб|₽|минут|час)/iu.test(message)
+    );
   }
 
   private extractPersonalBrandName(message: string): string | null {
@@ -666,10 +681,13 @@ export class SafeOnboardingInterpreter {
       return null;
     }
 
-    const weekdays =
-      /(?:пн|понедельник)\s*[-–—]\s*(?:пт|пятниц)|с понедельника по пятницу/iu.test(
-        message,
-      )
+    const weekdays = /(?:кажд(?:ый|ую)\s+день|ежедневн|без\s+выходн)/iu.test(
+      message,
+    )
+      ? [0, 1, 2, 3, 4, 5, 6]
+      : /(?:пн|понедельник)\s*[-–—]\s*(?:пт|пятниц)|с понедельника по пятницу/iu.test(
+            message,
+          )
         ? [1, 2, 3, 4, 5]
         : /(?:пн|понедельник)\s*[-–—]\s*(?:сб|суббот)|с понедельника по субботу/iu.test(
               message,
@@ -716,6 +734,7 @@ export class SafeOnboardingInterpreter {
         blueprint.workMode === 'solo'
           ? 'Чем вы занимаетесь?'
           : 'Какой у вас бизнес?',
+      crm_import: 'Подключите CRM, чтобы я загрузила данные бизнеса.',
       business_name:
         blueprint.workMode === 'solo'
           ? 'Как вас знают клиенты? Можно написать имя или название. Если названия нет, пропустим этот шаг.'

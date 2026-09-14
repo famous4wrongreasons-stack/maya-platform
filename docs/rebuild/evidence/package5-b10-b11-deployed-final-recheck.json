@@ -1,0 +1,374 @@
+{
+  "acceptedOwnerCheckpoint": "b932f86f",
+  "runtimeCommit": "ce08e9313f6039ef50f09c508777170f37ecec8d",
+  "productionRelease": "/opt/maya-saas/releases/20260905-p5-b10-b11-ce08e931",
+  "b10B11ProductionRemediation": "PASS",
+  "productionStructuralReadOnlyVerification": "PASS",
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "b10": {
+    "hiddenClientCreationPaths": 0,
+    "legacyPromoIssuance": 0,
+    "subscriptionOwner": "P4-05 initiate_customer_subscription_purchase",
+    "verifiedCanonicalClientRequired": true,
+    "promoCompatibilityOutcome": "410 legacy_promo_issuance_retired; zero business mutations",
+    "productionGetOrCreateClientCallsInActivePwaHandlers": 0,
+    "promoFunction": {
+      "line": 2547,
+      "end": 2558,
+      "sha256": "55ecbe3581b14b32210db313f908dfdc117667483bb70e02cf1888ee5d2f665d",
+      "selectedCalls": []
+    },
+    "subscriptionFunction": {
+      "line": 7285,
+      "end": 7345,
+      "sha256": "017611e7102224e26423b1748ffb2f718a9700fb0db44ffe498997dbb53a44ea",
+      "selectedCalls": []
+    }
+  },
+  "b11": {
+    "automaticScorerOutreach": 0,
+    "legacyChatIdDelivery": 0,
+    "legacyOfferFactWriters": 0,
+    "opportunityToCommunicationAutomaticAuthority": false,
+    "b9WantedSlotBranchPreserved": true,
+    "offerFreedSlotFunction": {
+      "line": 145,
+      "end": 195,
+      "sha256": "1eed94c4580f64db2fd246420252cfda5d1ec4a911002933b8b522a6d1d84fed",
+      "selectedCalls": []
+    }
+  },
+  "deployedFiles": {
+    "webhook_server.py": "156757d8c077c3a3ffacb10b1c00f71de82410b0428c722d445e7fed81c40008",
+    "freed_slot.py": "e0fa7df0cca9c80d159720c564bbd4bcf5c6869b2035a21408884fe59d4ec3c3",
+    "maya_subscription_purchase_bridge.py": "f6aece7fae433699b18b4287e994577ab24513a00abbb6c665df827b74d25af8",
+    "loyalty.py": "64c215ae09e726edb5985a5bf246af6a7bc6dfbb055a603b7a02f231520032e5",
+    "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+    "published api-proxy.php": "df2749fb1f85e33787ac1d01b2f7542ae9d85a986dad80c21c552145386afed5"
+  },
+  "proofs": {
+    "targetedB10B11": "PASS — 5 Jest suites / 35 tests plus 2 Python bridge tests",
+    "ratchets": "PASS",
+    "prismaValidate": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "typecheckScripts": "PASS",
+    "build": "PASS",
+    "deploymentRegression": "PASS — 336 suites / 2779 tests",
+    "productionPreflight": "PASS",
+    "candidateStartup": "PASS",
+    "postdeployHealthReadiness": "PASS",
+    "postdeployErrorPriorityLogs": 0,
+    "finalAggregateRegression": "NOT RUN — mandatory STOP at fresh production baseline blocker"
+  },
+  "freshFinalGateStartedFromScratch": true,
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "wavesAccepted": "6/6",
+  "familySetCoverage": "13/13",
+  "familyInventory": [
+    {
+      "family": "A15",
+      "canonicalFoundation": "Wave 3 AC2 staff-day executor",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A16",
+      "canonicalFoundation": "Wave 2 AC1 access commands and AC5 reducer",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A17",
+      "canonicalFoundation": "Wave 3 CRM connection/import and AC3/AC4/AC5 facts",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A18",
+      "canonicalFoundation": "Client-owned profile, consent, preferences, verified channel and B7-B10 foundations",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A22",
+      "canonicalFoundation": "Wave 1 settings/preferences",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A23",
+      "canonicalFoundation": "Wave 1 OperationalWorkItem and approved protocol state",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A25",
+      "canonicalFoundation": "Wave 2 security commands and AC3 auth protocol",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A26",
+      "canonicalFoundation": "Canonical TrialActivation",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "reduced A27",
+      "canonicalFoundation": "Wave 4 inventory and AC4 review ingestion",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A28",
+      "canonicalFoundation": "Wave 4 prospective calendar actions and immutable AI receipt children",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A29",
+      "canonicalFoundation": "Wave 5 recovery correction and immutable evidence",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A30",
+      "canonicalFoundation": "AC6 coordinator, MaintenanceRun/ItemClaim and Policy V1",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    },
+    {
+      "family": "A31",
+      "canonicalFoundation": "AC4/AC5 event, ingestion and reconciliation facts",
+      "result": "registered; aggregate certification stopped at B12 production baseline drift"
+    }
+  ],
+  "sourceInventory": {
+    "productionTypescriptFiles": 537,
+    "typescriptHttpRouteDecorators": 218,
+    "typescriptPrismaMutationLikeCalls": 500,
+    "activeRootPythonFiles": 85,
+    "activePythonHttpRoutes": 99,
+    "publishedProxySha256": "df2749fb1f85e33787ac1d01b2f7542ae9d85a986dad80c21c552145386afed5"
+  },
+  "newBlocker": {
+    "id": "B12-PACKAGE4-PRODUCTION-GUARD-DRIFT",
+    "summary": "Active published PWA paths lack accepted Package 4 fail-closed legacy mutation guards present in repository HEAD.",
+    "publishedPaths": [
+      {
+        "action": "client_book_loyalty",
+        "endpoint": "POST /api/client/book-with-loyalty",
+        "function": {
+          "line": 6698,
+          "end": 6960,
+          "sha256": "088624cfc4fcf01cbff948c5a4648533962bbee16572e7cf324aec033585709c",
+          "selectedCalls": [
+            {
+              "line": 6715,
+              "call": "database.has_valid_consent_by_chat_id"
+            },
+            {
+              "line": 6719,
+              "call": "database.get_client"
+            },
+            {
+              "line": 6773,
+              "call": "str(body.get('loyalty_service_title') or '').strip"
+            },
+            {
+              "line": 6821,
+              "call": "database.reserve_loyalty_points"
+            },
+            {
+              "line": 6857,
+              "call": "database.release_loyalty_reservation"
+            },
+            {
+              "line": 6870,
+              "call": "database.release_loyalty_reservation"
+            },
+            {
+              "line": 6879,
+              "call": "database.get_notify_prefs_by_chat_id"
+            },
+            {
+              "line": 6899,
+              "call": "database.release_loyalty_reservation"
+            },
+            {
+              "line": 6917,
+              "call": "database.release_loyalty_reservation"
+            },
+            {
+              "line": 6937,
+              "call": "database.release_loyalty_reservation"
+            },
+            {
+              "line": 6941,
+              "call": "database.save_booking"
+            }
+          ]
+        },
+        "effects": [
+          "direct SQLite loyalty reserve/release/finalize facts",
+          "direct YClients booking",
+          "legacy booking fact"
+        ]
+      },
+      {
+        "action": "cert_create",
+        "endpoint": "POST /api/cert/create",
+        "function": {
+          "line": 7158,
+          "end": 7282,
+          "sha256": "e2e910e323f9e56bd3cbd06f991952012a8480687627f25f41d8155b643e0ba7",
+          "selectedCalls": [
+            {
+              "line": 7209,
+              "call": "database.get_client"
+            },
+            {
+              "line": 7220,
+              "call": "database.new_cert_code"
+            },
+            {
+              "line": 7223,
+              "call": "database.save_gift_certificate"
+            },
+            {
+              "line": 7246,
+              "call": "yukassa_api.create_payment"
+            },
+            {
+              "line": 7263,
+              "call": "database.set_cert_payment_id"
+            }
+          ]
+        },
+        "effects": [
+          "direct legacy gift-certificate fact",
+          "direct YooKassa payment create",
+          "direct payment-id/status fact",
+          "legacy poller continuation"
+        ]
+      },
+      {
+        "action": "panel_redeem",
+        "endpoint": "POST /api/panel/redeem",
+        "function": {
+          "line": 3635,
+          "end": 3720,
+          "sha256": "d49659b02f72dafb5adcb57439a6c495cc5ad0899a959d9ab73a03cbffeb2edc",
+          "selectedCalls": [
+            {
+              "line": 3658,
+              "call": "database.get_gift_certificate"
+            },
+            {
+              "line": 3681,
+              "call": "database.mark_cert_used"
+            },
+            {
+              "line": 3689,
+              "call": "database.get_loyalty_code"
+            }
+          ]
+        },
+        "effects": [
+          "direct legacy gift-certificate consume",
+          "live loyalty consume path"
+        ]
+      },
+      {
+        "action": "yclients record-delete",
+        "endpoint": "POST /yclients-webhook",
+        "function": {
+          "line": 1502,
+          "end": 1677,
+          "sha256": "28cfdbb8bbc5db05929e3a6e5cd97d582b3ec17f5094afaa29fcd4647f554e08",
+          "selectedCalls": [
+            {
+              "line": 1515,
+              "call": "_yc.get_record"
+            },
+            {
+              "line": 1548,
+              "call": "database.get_master_by_staff_id"
+            },
+            {
+              "line": 1557,
+              "call": "database.pop_recent_cancel_actor"
+            },
+            {
+              "line": 1573,
+              "call": "database.is_master_muted"
+            },
+            {
+              "line": 1577,
+              "call": "app.bot.send_message"
+            },
+            {
+              "line": 1644,
+              "call": "database.delete_record_state"
+            },
+            {
+              "line": 1651,
+              "call": "loyalty.refund_for_cancelled_record"
+            },
+            {
+              "line": 1669,
+              "call": "freed_slot.offer_freed_slot"
+            }
+          ]
+        },
+        "effects": [
+          "direct live loyalty refund path outside canonical P4-03 owner"
+        ]
+      }
+    ],
+    "publishedProxyLines": {
+      "case 'client_book_loyalty'": [
+        1029
+      ],
+      "/api/client/book-with-loyalty": [
+        1047
+      ],
+      "case 'panel_redeem'": [
+        1670
+      ],
+      "/api/panel/redeem": [
+        1677
+      ],
+      "case 'cert_create'": [
+        2679
+      ],
+      "/api/cert/create": [
+        2676,
+        2687
+      ]
+    },
+    "guardParity": {
+      "webhookServer": {
+        "headSha256": "e88834320b098ee262ae1f20255c58a410392e8acc450a342815b51c0ddb5bcb",
+        "liveSha256": "156757d8c077c3a3ffacb10b1c00f71de82410b0428c722d445e7fed81c40008",
+        "headP403GuardCount": 2,
+        "liveP403GuardCount": 0,
+        "headP406GuardCount": 2,
+        "liveP406GuardCount": 0
+      },
+      "loyalty": {
+        "headSha256": "a73d0c0db7a00d908518188a8f8e394218959c73a1b84b40cfcc88e62339dc17",
+        "liveSha256": "64c215ae09e726edb5985a5bf246af6a7bc6dfbb055a603b7a02f231520032e5",
+        "headLegacyGuardCallCount": 11,
+        "liveLegacyGuardCallCount": 0
+      }
+    }
+  },
+  "productionDirectBusinessMutationBypasses": "PRESENT — B12",
+  "legacyMutatingOwnersActive": "PRESENT — B12",
+  "realProductionMutationsForProof": 0,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}

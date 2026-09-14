@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "hostScope": "edge",
+  "ownedStagingRemoved": [
+    "/tmp/maya-wave-rb-cb4fb27c-edge"
+  ],
+  "activeRuntimeFilesChanged": 0,
+  "businessMutations": 0,
+  "messages": 0
+}

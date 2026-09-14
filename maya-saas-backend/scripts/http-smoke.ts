@@ -22,6 +22,8 @@ const demoPassword =
   process.env.SEED_DEMO_TENANT_ADMIN_PASSWORD ?? 'ChangeMe123!';
 const fixedPhoneCode = '123456';
 const demoTenantSlug = 'demo-business';
+const smokeRunId = randomUUID().replace(/-/g, '');
+const smokeClientIp = `2001:db8:${smokeRunId.slice(0, 4)}:${smokeRunId.slice(4, 8)}::1`;
 
 async function expirePastDueGrace(tenantId: string): Promise<void> {
   const connectionString = process.env.DATABASE_URL;
@@ -76,7 +78,9 @@ async function request(
   path: string,
   init: RequestInit = {},
 ): Promise<ApiResponse> {
-  const response = await fetch(`${apiBase}${path}`, init);
+  const headers = new Headers(init.headers);
+  headers.set('x-forwarded-for', smokeClientIp);
+  const response = await fetch(`${apiBase}${path}`, { ...init, headers });
   let data: unknown = null;
 
   try {
@@ -155,8 +159,10 @@ function startServer() {
     cwd: process.cwd(),
     env: {
       ...process.env,
+      AUTH_TRUST_PROXY: '127.0.0.1,::1',
       HOST: '127.0.0.1',
       AI_CORE_PROVIDER: 'safe',
+      HTTP_SMOKE_ENABLE_LEGACY_AI_ONBOARDING: 'true',
       NODE_ENV: 'test',
       PHONE_AUTH_DEBUG: 'true',
       PHONE_AUTH_FIXED_CODE: fixedPhoneCode,
@@ -268,7 +274,7 @@ async function runSmoke() {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        message: `Я частный массажист, работаю один. Название AI Smoke ${aiSuffix}.`,
+        message: `Барбершоп называется AI Smoke ${aiSuffix}. У нас 2 барбера. Услуги поставь автоматически. Работаем каждый день с 10:00 до 20:00.`,
         trialActivationToken,
       }),
     }),
@@ -276,8 +282,12 @@ async function runSmoke() {
   const aiDraftId = stringField(aiDraft, 'draft_id');
   const aiDraftToken = stringField(aiDraft, 'draft_token');
   const aiBlueprint = asRecord(aiDraft.blueprint);
-  assert.equal(aiBlueprint.categoryId, 'solo_massage_therapist');
-  assert.equal(asArray(aiBlueprint.services).length, 4);
+  assert.equal(aiBlueprint.categoryId, 'business_barbershop');
+  assert.equal(aiBlueprint.templateId, 'barbershop');
+  assert.equal(aiBlueprint.industryPresetId, 'barbershop');
+  assert.equal(aiBlueprint.providerCount, 2);
+  assert.equal(asArray(aiBlueprint.services).length, 17);
+  assert.equal(asArray(aiBlueprint.weeklyRules).length, 7);
   assert.deepEqual(aiDraft.missing_fields, ['calendar_source']);
   assert(Array.isArray(aiDraft.quick_replies));
   assert.equal(aiDraft.interpreter_source, 'safe_fallback');
@@ -360,6 +370,8 @@ async function runSmoke() {
   const aiTenant = asRecord(confirmedAiSignup.tenant);
   const aiTenantId = stringField(aiTenant, 'id');
   const aiTenantSlug = stringField(aiTenant, 'slug');
+  assert.equal(stringField(aiTenant, 'name'), `AI Smoke ${aiSuffix}`);
+  assert(aiTenantSlug.startsWith('ai-smoke-'));
 
   const analyticsAfterRegistration = asRecord(
     await expectStatus('/admin/analytics/trials', 200, {
@@ -399,8 +411,98 @@ async function runSmoke() {
     }),
   );
   assert.equal(aiCalendarSetup.ready, true);
-  assert.equal(asArray(aiCalendarSetup.providers).length, 1);
-  assert.equal(asArray(aiCalendarSetup.services).length, 4);
+  const aiCalendarProviders = asArray(aiCalendarSetup.providers).map(asRecord);
+  assert.equal(aiCalendarProviders.length, 2);
+  assert.equal(asArray(aiCalendarSetup.services).length, 17);
+  const unlinkedBarber = aiCalendarProviders.find(
+    (provider) => provider.user_id === null,
+  );
+  assert(unlinkedBarber, 'Expected a second barbershop provider without login');
+  const quotaBeforeProviderLink = asRecord(
+    await expectStatus('/quotas', 200, {
+      headers: authHeaders(aiSignupToken),
+    }),
+  );
+  const staffQuotaBeforeProviderLink = asRecord(quotaBeforeProviderLink.staff);
+  const staffEmail = `barber-smoke-${aiSuffix}@example.ru`;
+  const staffPassword = 'BarberSmoke123!';
+  const providerUser = asRecord(
+    await expectStatus(
+      `/admin/tenants/${aiTenantId}/providers/${stringField(unlinkedBarber, 'id')}/user`,
+      201,
+      {
+        method: 'POST',
+        headers: {
+          ...authHeaders(aiSignupToken),
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: staffEmail,
+          phone: `+7995${String(aiSuffix % 10_000_000).padStart(7, '0')}`,
+          password: staffPassword,
+        }),
+      },
+    ),
+  );
+  assert.equal(asRecord(providerUser.user).role, 'staff');
+  assert.equal(providerUser.temporary_password, null);
+  const quotaAfterProviderLink = asRecord(
+    await expectStatus('/quotas', 200, {
+      headers: authHeaders(aiSignupToken),
+    }),
+  );
+  assert.equal(
+    numberField(asRecord(quotaAfterProviderLink.staff), 'used'),
+    numberField(staffQuotaBeforeProviderLink, 'used'),
+    'Linking an existing provider must not consume the staff quota twice',
+  );
+  await expectStatus(
+    `/admin/tenants/${aiTenantId}/providers/${stringField(unlinkedBarber, 'id')}/user`,
+    409,
+    {
+      method: 'POST',
+      headers: {
+        ...authHeaders(aiSignupToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: `duplicate-${staffEmail}`,
+        password: staffPassword,
+      }),
+    },
+  );
+  const staffLogin = asRecord(
+    await expectStatus('/auth/login', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        tenantSlug: aiTenantSlug,
+        email: staffEmail,
+        password: staffPassword,
+      }),
+    }),
+  );
+  const staffToken = stringField(staffLogin, 'access_token');
+  assert.equal(asRecord(staffLogin.user).role, 'staff');
+  const staffAnalytics = asRecord(
+    await expectStatus(
+      '/analytics/me?from=2026-07-01T00%3A00%3A00.000Z&to=2026-08-01T00%3A00%3A00.000Z',
+      200,
+      { headers: authHeaders(staffToken) },
+    ),
+  );
+  assert.equal(
+    asRecord(staffAnalytics.employee).provider_id,
+    stringField(unlinkedBarber, 'id'),
+  );
+  await expectStatus(
+    '/analytics/business?from=2026-07-01T00%3A00%3A00.000Z&to=2026-08-01T00%3A00%3A00.000Z',
+    403,
+    { headers: authHeaders(staffToken) },
+  );
+  await expectStatus('/internal-calendar/setup', 403, {
+    headers: authHeaders(staffToken),
+  });
   const fullTrialEntitlements = asRecord(
     await expectStatus('/features/effective', 200, {
       headers: authHeaders(aiSignupToken),
@@ -410,7 +512,298 @@ async function runSmoke() {
   assert(fullTrialFeatureKeys.includes('ai.owner'));
   assert(fullTrialFeatureKeys.includes('ai.admin'));
   assert(fullTrialFeatureKeys.includes('ai.consultant'));
+  assert(fullTrialFeatureKeys.includes('loyalty'));
+  assert(fullTrialFeatureKeys.includes('customer.portal'));
   assert(!fullTrialFeatureKeys.includes('video_analytics'));
+
+  await expectStatus(`/admin/tenants/${aiTenantId}`, 200, {
+    method: 'PATCH',
+    headers: {
+      ...authHeaders(ownerToken),
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ allowSelfRegistration: true }),
+  });
+  const liveBarbershopConfig = asRecord(
+    await expectStatus(`/mobile/config/${aiTenantSlug}`, 200),
+  );
+  assert.equal(liveBarbershopConfig.access_state, 'trial_active');
+  assert.equal(liveBarbershopConfig.booking_live_enabled, true);
+  assert.equal(liveBarbershopConfig.client_registration_enabled, true);
+  assert.equal(asRecord(liveBarbershopConfig.industry_preset).id, 'barbershop');
+
+  const barbershopClientPhone = `+7996${String(aiSuffix % 10_000_000).padStart(7, '0')}`;
+  await expectStatus('/auth/phone/start', 201, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      tenantSlug: aiTenantSlug,
+      phone: barbershopClientPhone,
+    }),
+  });
+  const barbershopClientLogin = asRecord(
+    await expectStatus('/auth/phone/verify', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        tenantSlug: aiTenantSlug,
+        phone: barbershopClientPhone,
+        code: fixedPhoneCode,
+      }),
+    }),
+  );
+  const barbershopClientToken = stringField(
+    barbershopClientLogin,
+    'access_token',
+  );
+  const barbershopClientId = stringField(
+    asRecord(barbershopClientLogin.user),
+    'id',
+  );
+  await expectStatus('/me', 200, {
+    method: 'PATCH',
+    headers: {
+      ...authHeaders(barbershopClientToken),
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ name: 'Barbershop Smoke Client' }),
+  });
+
+  const barbershopServices = asArray(
+    await expectStatus('/services', 200, {
+      headers: authHeaders(barbershopClientToken),
+    }),
+  ).map(asRecord);
+  const barbershopStaff = asArray(
+    await expectStatus('/staff', 200, {
+      headers: authHeaders(barbershopClientToken),
+    }),
+  ).map(asRecord);
+  assert.equal(barbershopServices.length, 17);
+  assert.equal(
+    new Set(barbershopServices.map((service) => stringField(service, 'name')))
+      .size,
+    17,
+  );
+  assert(
+    barbershopServices.every(
+      (service) =>
+        numberField(service, 'price') > 0 &&
+        numberField(service, 'duration_minutes') > 0,
+    ),
+  );
+  assert.equal(barbershopStaff.length, 2);
+
+  const barbershopService = barbershopServices[0];
+  const barbershopProvider = barbershopStaff[0];
+  const barbershopServiceId = stringField(barbershopService, 'id');
+  const barbershopProviderId = stringField(barbershopProvider, 'id');
+  const bookingRangeFrom = new Date(Date.now() + 24 * 60 * 60 * 1_000)
+    .toISOString()
+    .slice(0, 10);
+  const bookingRangeTo = new Date(Date.now() + 14 * 24 * 60 * 60 * 1_000)
+    .toISOString()
+    .slice(0, 10);
+  const barbershopAvailableDays = asArray(
+    asRecord(
+      await expectStatus(
+        `/available-days?from=${bookingRangeFrom}&to=${bookingRangeTo}&staffId=${barbershopProviderId}&serviceIds=${barbershopServiceId}`,
+        200,
+        { headers: authHeaders(barbershopClientToken) },
+      ),
+    ).days,
+  );
+  assert(barbershopAvailableDays.length > 0);
+  const barbershopBookingDay = barbershopAvailableDays[0];
+  assert(typeof barbershopBookingDay === 'string');
+  const barbershopSlots = asArray(
+    await expectStatus(
+      `/available-slots?date=${barbershopBookingDay}T00%3A00%3A00.000Z&staffId=${barbershopProviderId}&serviceIds=${barbershopServiceId}`,
+      200,
+      { headers: authHeaders(barbershopClientToken) },
+    ),
+  ).map(asRecord);
+  assert(barbershopSlots.length > 1);
+  const barbershopAppointmentPayload = {
+    staffId: barbershopProviderId,
+    serviceIds: [barbershopServiceId],
+    start: stringField(barbershopSlots[0], 'start'),
+  };
+  const barbershopAppointment = asRecord(
+    await expectStatus('/appointments', 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(barbershopClientToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(barbershopAppointmentPayload),
+    }),
+  );
+  const barbershopAppointmentId = stringField(barbershopAppointment, 'id');
+  assert.equal(barbershopAppointment.source, 'internal');
+  assert(numberField(barbershopAppointment, 'duration_minutes') > 0);
+  assert(numberField(barbershopAppointment, 'total_price') > 0);
+  await expectStatus('/appointments', 400, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(barbershopClientToken),
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(barbershopAppointmentPayload),
+  });
+
+  const barbershopAppointments = asArray(
+    await expectStatus('/appointments/my', 200, {
+      headers: authHeaders(barbershopClientToken),
+    }),
+  ).map(asRecord);
+  assert.equal(
+    barbershopAppointments.filter(
+      (appointment) => appointment.id === barbershopAppointmentId,
+    ).length,
+    1,
+  );
+  assert(
+    numberField(
+      barbershopAppointments.find(
+        (appointment) => appointment.id === barbershopAppointmentId,
+      )!,
+      'duration_minutes',
+    ) > 0,
+  );
+
+  const barbershopJournalFrom = new Date(
+    new Date(stringField(barbershopSlots[0], 'start')).getTime() -
+      24 * 60 * 60 * 1_000,
+  ).toISOString();
+  const barbershopJournalTo = new Date(
+    new Date(stringField(barbershopSlots[0], 'start')).getTime() +
+      2 * 24 * 60 * 60 * 1_000,
+  ).toISOString();
+  const barbershopJournal = asRecord(
+    await expectStatus(
+      `/internal-calendar/journal?from=${encodeURIComponent(barbershopJournalFrom)}&to=${encodeURIComponent(barbershopJournalTo)}`,
+      200,
+      { headers: authHeaders(aiSignupToken) },
+    ),
+  );
+  assert.equal(barbershopJournal.count, 1);
+  assert.equal(
+    asRecord(asArray(barbershopJournal.appointments)[0]).id,
+    barbershopAppointmentId,
+  );
+
+  const barbershopAnalytics = asRecord(
+    await expectStatus(
+      `/analytics/business?from=${encodeURIComponent(barbershopJournalFrom)}&to=${encodeURIComponent(barbershopJournalTo)}`,
+      200,
+      { headers: authHeaders(aiSignupToken) },
+    ),
+  );
+  const barbershopAnalyticsAppointments = asRecord(
+    barbershopAnalytics.appointments,
+  );
+  assert.equal(barbershopAnalyticsAppointments.active, 1);
+  assert.equal(barbershopAnalyticsAppointments.cancelled, 0);
+  const barbershopRevenue = asArray(barbershopAnalytics.revenue).map(asRecord);
+  assert.equal(
+    numberField(barbershopRevenue[0], 'amount_kopecks'),
+    numberField(barbershopService, 'price') * 100,
+  );
+
+  const loyaltyIdempotencyKey = randomUUID();
+  const adjustedLoyalty = asRecord(
+    await expectStatus(`/admin/loyalty/${barbershopClientId}/adjust`, 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(aiSignupToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        delta: 5_000,
+        reason: 'Barbershop acceptance bonus',
+        idempotencyKey: loyaltyIdempotencyKey,
+      }),
+    }),
+  );
+  assert.equal(adjustedLoyalty.balance, 5_000);
+  const replayedLoyalty = asRecord(
+    await expectStatus(`/admin/loyalty/${barbershopClientId}/adjust`, 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(aiSignupToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        delta: 5_000,
+        reason: 'Barbershop acceptance bonus',
+        idempotencyKey: loyaltyIdempotencyKey,
+      }),
+    }),
+  );
+  assert.equal(replayedLoyalty.balance, 5_000);
+  const barbershopLoyalty = asRecord(
+    await expectStatus('/loyalty/me', 200, {
+      headers: authHeaders(barbershopClientToken),
+    }),
+  );
+  assert.equal(barbershopLoyalty.balance, 5_000);
+  assert.equal(asRecord(barbershopLoyalty.spend_options).status, 'available');
+
+  const barbershopPortal = asRecord(
+    await expectStatus('/customer-portal', 200, {
+      headers: authHeaders(barbershopClientToken),
+    }),
+  );
+  assert.equal(asRecord(barbershopPortal.loyalty).balance, 5_000);
+  assert.equal(
+    asArray(asRecord(barbershopPortal.appointments).items).length,
+    1,
+  );
+
+  const barbershopRemainingSlots = asArray(
+    await expectStatus(
+      `/available-slots?date=${barbershopBookingDay}T00%3A00%3A00.000Z&staffId=${barbershopProviderId}&serviceIds=${barbershopServiceId}`,
+      200,
+      { headers: authHeaders(barbershopClientToken) },
+    ),
+  ).map(asRecord);
+  assert(barbershopRemainingSlots.length > 0);
+  const rescheduledBarbershop = asRecord(
+    await expectStatus(
+      `/appointments/${barbershopAppointmentId}/reschedule`,
+      201,
+      {
+        method: 'POST',
+        headers: {
+          ...authHeaders(barbershopClientToken),
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          start: stringField(barbershopRemainingSlots[0], 'start'),
+        }),
+      },
+    ),
+  );
+  assert.equal(asRecord(rescheduledBarbershop.appointment).source, 'internal');
+  assert(
+    numberField(
+      asRecord(rescheduledBarbershop.appointment),
+      'duration_minutes',
+    ) > 0,
+  );
+  const canceledBarbershop = asRecord(
+    await expectStatus(`/appointments/${barbershopAppointmentId}/cancel`, 201, {
+      method: 'POST',
+      headers: authHeaders(barbershopClientToken),
+    }),
+  );
+  assert.equal(asRecord(canceledBarbershop.appointment).status, 'canceled');
+  await expectStatus(`/appointments/${barbershopAppointmentId}/cancel`, 409, {
+    method: 'POST',
+    headers: authHeaders(barbershopClientToken),
+  });
+
   const confirmedDraft = asRecord(
     await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/read`, 200, {
       method: 'POST',
@@ -566,7 +959,7 @@ async function runSmoke() {
     clientAiTools.some((tool) => tool.name === 'booking.availability.read'),
   );
   assert(
-    !clientAiTools.some((tool) => tool.name === 'analytics.business.read'),
+    !clientAiTools.some((tool) => tool.name === 'analytics.business.query'),
   );
   const aiCatalogResult = asRecord(
     await expectStatus('/ai/tools/catalog.services.read/execute', 201, {
@@ -594,8 +987,20 @@ async function runSmoke() {
       }),
     }),
   );
-  assert.equal(aiChatResult.source, 'safe_fallback');
+  const expectedAiSource =
+    process.env.HTTP_SMOKE_EXPECT_AI_SOURCE?.trim() || 'safe_fallback';
+  assert.equal(aiChatResult.source, expectedAiSource);
   assert.equal(aiChatResult.action, null);
+  if (expectedAiSource !== 'safe_fallback') {
+    const grounding = asRecord(aiChatResult.grounding);
+    const toolsUsed = asArray(aiChatResult.tools_used).map(asRecord);
+    assert.equal(grounding.status, 'verified');
+    assert.equal(grounding.domain, 'service_catalog');
+    assert(
+      toolsUsed.some((tool) => tool.name === 'catalog.services.read'),
+      'Expected AI chat to ground the service answer in catalog.services.read',
+    );
+  }
   const profile = asRecord(
     await expectStatus('/me', 200, {
       headers: authHeaders(clientToken),
@@ -991,7 +1396,7 @@ async function runSmoke() {
   });
 
   console.log(
-    'HTTP smoke passed: verified trial funnel, AI onboarding/tools/approval, tenant fence, auth rotation, CRM preview and internal calendar booking',
+    'HTTP smoke passed: verified barbershop onboarding/catalog/staff, client booking/reschedule/cancel, journal, analytics, loyalty, portal, trial lifecycle, tenant fence, auth rotation and CRM preview',
   );
 }
 

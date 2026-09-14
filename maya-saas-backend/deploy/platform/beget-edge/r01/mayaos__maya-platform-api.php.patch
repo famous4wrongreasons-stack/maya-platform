@@ -1,0 +1,40 @@
+--- a/mayaos/maya-platform-api.php
++++ b/mayaos/maya-platform-api.php
+@@ -18 +18 @@
+-header('Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, X-Session-Token, X-Telegram-InitData');
++header('Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, X-Session-Token, X-Telegram-InitData, Idempotency-Key');
+@@ -69,0 +70,31 @@
++// R01: transport preserves one opaque logical identity; it never normalizes or replaces it.
++function maya_forwarded_idempotency_key(array $headers, array $server) {
++    $values = [];
++    foreach ($headers as $name => $value) {
++        if (strcasecmp((string)$name, 'Idempotency-Key') === 0) $values[] = $value;
++    }
++    if (count($values) > 1) throw new InvalidArgumentException('ambiguous_idempotency_key');
++    $value = isset($values[0])
++        ? $values[0]
++        : (isset($server['HTTP_IDEMPOTENCY_KEY']) ? $server['HTTP_IDEMPOTENCY_KEY'] : null);
++    if ($value !== null && (!is_string($value) || $value === '' || strpbrk($value, "\r\n") !== false))
++        throw new InvalidArgumentException('invalid_idempotency_key');
++    if ($values && isset($server['HTTP_IDEMPOTENCY_KEY']) && $server['HTTP_IDEMPOTENCY_KEY'] !== $value)
++        throw new InvalidArgumentException('ambiguous_idempotency_key');
++    return $value;
++}
++try {
++    $idempotencyKey = maya_forwarded_idempotency_key($requestHeaders, $_SERVER);
++} catch (InvalidArgumentException $e) {
++    http_response_code(400);
++    header('Content-Type: application/json; charset=utf-8');
++    echo '{"error":{"code":"invalid_idempotency_key"}}';
++    exit;
++}
++if ($idempotencyKey !== null) {
++    foreach (array_keys($requestHeaders) as $name) {
++        if (strcasecmp((string)$name, 'Idempotency-Key') === 0) unset($requestHeaders[$name]);
++    }
++    $requestHeaders['Idempotency-Key'] = $idempotencyKey;
++}
++
+@@ -71 +102 @@
+-foreach (['Content-Type', 'If-None-Match', 'X-Session-Token', 'X-Telegram-InitData'] as $name) {
++foreach (['Content-Type', 'If-None-Match', 'X-Session-Token', 'X-Telegram-InitData', 'Idempotency-Key'] as $name) {

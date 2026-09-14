@@ -1,0 +1,39 @@
+{
+  "certifiedBaseline": "0ad0eef2",
+  "wipCheckpoint": "524846ff",
+  "commits": [
+    {
+      "commit": "e5ec27fdfac54db8ac5a5cfc123e4854d5be8f3c",
+      "parent": "0ad0eef23985c0a23b6e680b3ca9d26a9c94efbc",
+      "files": [
+        "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-channel-challenge-routing.service.spec.ts",
+        "maya-saas-backend/src/crm/client-channel-runtime.service.ts",
+        "maya-saas-backend/src/crm/client-profile-read.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-profile-read.architecture.ts",
+        "maya-saas-backend/src/crm/maya-user-client-association-issuer.spec.ts",
+        "maya-saas-backend/src/crm/maya-user-client-association-issuer.ts",
+        "сайт и приложение/app.html"
+      ],
+      "exactWipFileOverlap": [
+        "сайт и приложение/app.html"
+      ],
+      "schemaOrMigrationFiles": [],
+      "actionEngineRuntimeFiles": []
+    },
+    {
+      "commit": "b6c53ff9ee31bb43d0419f5ce32aa6b0e4999ae0",
+      "parent": "e5ec27fdfac54db8ac5a5cfc123e4854d5be8f3c",
+      "files": [
+        "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-channel-runtime.service.ts",
+        "maya-saas-backend/src/crm/legacy-native-consent.service.spec.ts",
+        "maya-saas-backend/src/customers/customers.controller.ts"
+      ],
+      "exactWipFileOverlap": [],
+      "schemaOrMigrationFiles": [],
+      "actionEngineRuntimeFiles": []
+    }
+  ],
+  "wipCommitTreesPreserved": true
+}

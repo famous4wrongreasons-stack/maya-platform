@@ -1,0 +1,356 @@
+{
+  "acceptedOwnerCheckpoint": "9c6ee8bf",
+  "runtimeCommit": "68e0048f9189365a34a06f6adc5bd85cb49c372f",
+  "productionRelease": "/opt/maya-saas/releases/20260906-p5-b23-68e0048f",
+  "b23ProductionRemediation": "PASS",
+  "b23": {
+    "legacyServerChatDelete": "RETIRED",
+    "legacySessionChatIdDeleteAuthority": 0,
+    "historyDisclosedOnDeleteFailure": false,
+    "piiDisclosedOnDeleteFailure": false,
+    "response": "HTTP 410; ok=false; error=FEATURE_NOT_AVAILABLE",
+    "historicalDataChanged": false,
+    "newUserDeletionOwner": false,
+    "retentionScopeExpanded": false,
+    "existingLocalSaasInboxHiding": "PRESERVED AND LABELLED LOCAL; no server deletion claim",
+    "priorB15B21B22Baselines": "PRESERVED"
+  },
+  "schemaChanged": false,
+  "newModels": 0,
+  "newActionClasses": 0,
+  "newMigrations": 0,
+  "productionStructuralReadOnlyVerification": {
+    "health": {
+      "status": "ok",
+      "service": "maya-saas-backend",
+      "release": "20260906-p5-b23-68e0048f",
+      "started_at": "2026-09-05T21:28:22.586Z",
+      "timestamp": "2026-09-05T21:28:55.974Z"
+    },
+    "readiness": {
+      "status": "ready",
+      "service": "maya-saas-backend",
+      "checks": {
+        "database": "ready"
+      },
+      "timestamp": "2026-09-05T21:28:55.987Z"
+    },
+    "maya-saas": "active",
+    "barbershop-pwa": "active",
+    "barbershop-bot": "inactive",
+    "pwaPortListening": true,
+    "maya-saasErrorCount": 0,
+    "barbershop-pwaErrorCount": 0,
+    "pwaRequestOnly": true,
+    "spareSmokePortListening": false,
+    "hashes": {
+      "webhook_server.py": "fc5fedeebff6cf742bc5c9206a7fa1907d8c5a23ef62646bcaa60c46665f22be",
+      "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+      "package5_control_plane_runtime_guard.py": "1004dc7c12217447eb5f49974923227892a81a5aa3dde84d18a8ef7c8f9b3d7d",
+      "realtime_bridge.py": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+      "legacy_client_command_bridge.py": "bf102f2db07203ed7297caa674dec7ce710e75a16442c749705de321b3d82b52",
+      "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d"
+    }
+  },
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "proofs": {
+    "targetedPython": "PASS — 21 tests including 144 unsupported identity/selector/retry/concurrent requests, byte-equivalent synthetic history/audit, negative ratchets",
+    "targetedTypescript": "PASS — 1 suite / 4 tests",
+    "publishedPwaAndIosExecutableChecks": "PASS — no unsupported UI/cache effect, scripts parse, no server delete call",
+    "proxyIsolatedPhp83": "PASS — fixed HTTP 410; no application endpoint invoked",
+    "mandatoryDeploymentRegression": "PASS — 353 suites / 2884 tests",
+    "prismaValidate": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "scriptTypecheck": "PASS",
+    "build": "PASS",
+    "activePackage4Guard": "PASS",
+    "activePackage5Guard": "PASS — B13–B23",
+    "iosSyncAndByteComparison": "PASS; unrelated dirty iOS changes not staged",
+    "finalAggregateRegression": "NOT RUN — STOP AT NEW B24 INVENTORY BLOCKER"
+  },
+  "artifactHashes": {
+    "api-proxy.php": "70784f765bd35056a9937974510ec1c427b77527154ed0c082db1645243a07a8",
+    "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+    "package5_control_plane_runtime_guard.py": "1004dc7c12217447eb5f49974923227892a81a5aa3dde84d18a8ef7c8f9b3d7d",
+    "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+    "maya-app.html": "7d5664e5ee80ff9f68b91b9c94f869bc8cbb6279096ac8051a6a73396b9c14d9",
+    "app.html": "03b9a33b7200d1f1ff8c429d6ffcc24f2daddfd19ced60873749fb1761584613",
+    "webhook_server.py": "fc5fedeebff6cf742bc5c9206a7fa1907d8c5a23ef62646bcaa60c46665f22be"
+  },
+  "freshFinalGateStartedFromScratch": true,
+  "sourceInventoryCounts": {
+    "pythonFiles": 89,
+    "productionPythonFiles": 69,
+    "pythonRoutes": 99,
+    "pythonMutationLikeSites": 625,
+    "backendJs": 537,
+    "sourceTs": 537,
+    "tsRoutes": 218,
+    "tsMutationLikeSites": 516,
+    "webhookHttpRoutes": 94
+  },
+  "inventoryCountersMeaning": "Syntactic indicators; not a count/certification of every business writer or reachable owner. All modules/families inventoried; new B24 route traced independently and aggregate verification stopped.",
+  "familyInventory": [
+    {
+      "family": "A15",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A16",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A17",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A18",
+      "acceptedWave": 3,
+      "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+      "deployedFoundation": {
+        "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+        "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A22",
+      "acceptedWave": 1,
+      "foundationSource": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "sourceSha256": "1cee4166d218a0748dcab14560aef6c489a1d246dc3aa92296ab6da1cc4b4c25",
+      "deployedFoundation": {
+        "file": "package5-wave1/package5-wave1-canonical-cutover.service.js",
+        "sha256": "727cca98d82deef7760d36788441c733c86fae82a2f0a96fb0654f90ac038482"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A23",
+      "acceptedWave": 1,
+      "foundationSource": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "sourceSha256": "1cee4166d218a0748dcab14560aef6c489a1d246dc3aa92296ab6da1cc4b4c25",
+      "deployedFoundation": {
+        "file": "package5-wave1/package5-wave1-canonical-cutover.service.js",
+        "sha256": "727cca98d82deef7760d36788441c733c86fae82a2f0a96fb0654f90ac038482"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A25",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A26",
+      "acceptedWave": 2,
+      "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+      "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+      "deployedFoundation": {
+        "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+        "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A27",
+      "acceptedWave": 4,
+      "foundationSource": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+      "sourceSha256": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+      "deployedFoundation": {
+        "file": "package5-wave4/package5-wave4-canonical-cutover.service.js",
+        "sha256": "d5eab02857a3b017dd739077049722204457d96d5f47ef4e2e71ff3a57231d6f"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A28",
+      "acceptedWave": 4,
+      "foundationSource": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+      "sourceSha256": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+      "deployedFoundation": {
+        "file": "package5-wave4/package5-wave4-canonical-cutover.service.js",
+        "sha256": "d5eab02857a3b017dd739077049722204457d96d5f47ef4e2e71ff3a57231d6f"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A29",
+      "acceptedWave": 5,
+      "foundationSource": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+      "sourceSha256": "fb3e3ef76153d3f880936c950175de53dee18f519d74218cc46b79ca003e2bc4",
+      "deployedFoundation": {
+        "file": "package5-wave5/package5-wave5-canonical-cutover.service.js",
+        "sha256": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A30",
+      "acceptedWave": 6,
+      "foundationSource": "package5-wave6/package5-wave6.service.ts",
+      "sourceSha256": "9c87dbf0db375ee48c55ecf6ca26225577ce6d0cef5a96463d4f2d0d8f9bfe08",
+      "deployedFoundation": {
+        "file": "package5-wave6/package5-wave6.service.js",
+        "sha256": "cc8a10e97b30e1c44a0d924afd83527768cce293e7f85bda68e6707fc8cbcd02"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    },
+    {
+      "family": "A31",
+      "acceptedWave": 5,
+      "foundationSource": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+      "sourceSha256": "fb3e3ef76153d3f880936c950175de53dee18f519d74218cc46b79ca003e2bc4",
+      "deployedFoundation": {
+        "file": "package5-wave5/package5-wave5-canonical-cutover.service.js",
+        "sha256": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d"
+      },
+      "verdict": "registered; aggregate completion stopped at new B24"
+    }
+  ],
+  "familyInventoryCoverage": "13/13",
+  "acceptedWaveFoundationsUnchanged": true,
+  "newBlocker": {
+    "sourceSha256": "fc5fedeebff6cf742bc5c9206a7fa1907d8c5a23ef62646bcaa60c46665f22be",
+    "actualProductionAst": [
+      "_authed_chat_id",
+      "_list_master_push_subscriptions_sqlite",
+      "_master_by_chat_id",
+      "_master_staff_id",
+      "_push_db",
+      "_save_master_push_subscription",
+      "_save_master_push_subscription_sqlite",
+      "push_subscribe_handler"
+    ],
+    "bareForgedChatIdRejected": true,
+    "legacySessionWithoutCanonicalBindingAccepted": true,
+    "legacyClientRoleReturned": true,
+    "durableSqliteSubscriptionCreated": true,
+    "plaintextEndpointAndSubscriptionPersisted": true,
+    "sameEndpointRawIdentityReassigned": true,
+    "canonicalTenantClientLinkColumnsPresent": false,
+    "canonicalIdentityOrCommandInvoked": false,
+    "realProductionMutations": 0,
+    "providerCalls": 0,
+    "ownedTemporaryDatabaseRemoved": true
+  },
+  "b24Reachability": {
+    "route": "POST /api/push/subscribe",
+    "routeRegistrationLine": 12426,
+    "handlerLines": [
+      10159,
+      10203
+    ],
+    "proxyCaseLine": 2762,
+    "proxyUpstreamLine": 2770,
+    "publishedPwaLine": 35834,
+    "mayaPwaLine": 41504,
+    "freshFunctionEvidence": [
+      {
+        "function": "_master_by_chat_id",
+        "startLine": 327,
+        "endLine": 341,
+        "sha256": "ee4531488ca6fc0c6ae65c96ae32f561cf93c3b61405e08cead1cd48e70f47f2"
+      },
+      {
+        "function": "_push_db",
+        "startLine": 368,
+        "endLine": 392,
+        "sha256": "9920f2719b5e280f8c379bd68c2b2d92e621ce450e8a28f265c2765c63ea5be6"
+      },
+      {
+        "function": "_save_master_push_subscription_sqlite",
+        "startLine": 395,
+        "endLine": 426,
+        "sha256": "ea4ccdf73c38f49d9a698a029d81e34ec796c878c9dda1f728b287138b6a378f"
+      },
+      {
+        "function": "_list_master_push_subscriptions_sqlite",
+        "startLine": 429,
+        "endLine": 452,
+        "sha256": "11482c6ff1c87ba0e5396f61067a5442b49321dd6bb173a253e6d0e89df4f6a1"
+      },
+      {
+        "function": "_send_client_push",
+        "startLine": 596,
+        "endLine": 676,
+        "sha256": "1e085f90efbacbcec00cb5995b62b9ad6afd725d036faa33a0f2dbdcab127490"
+      },
+      {
+        "function": "_authed_chat_id",
+        "startLine": 6117,
+        "endLine": 6136,
+        "sha256": "2ddfb7cc82ef17e876860be27757419ac72e31e14e13282f604c6c9bdcad679f"
+      },
+      {
+        "function": "chat_delete_handler",
+        "startLine": 8642,
+        "endLine": 8645,
+        "sha256": "c735752a2c015df5d93812b721461e9f10e215d3a6f2dbbdca00586bbe6aeef6"
+      },
+      {
+        "function": "push_subscribe_handler",
+        "startLine": 10159,
+        "endLine": 10203,
+        "sha256": "1d79c5595f9eee65c994f90ada74441de2a9f92f4548c60193541f18ff2f5268"
+      }
+    ],
+    "requestOnlyService": "barbershop-pwa active; start_background_tasks=False does not remove HTTP route",
+    "staffBranch": "also resolves legacy staff by raw chat ID; isolated confirmed finding uses no-staff Client branch",
+    "importantLimit": "Bare unauthenticated caller chat_id is rejected. Finding requires a valid legacy channel/session, which is not canonical Client authority."
+  },
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "productionDirectBusinessProviderValueMutationBypasses": "PRESENT — B24 legacy Client Web Push subscription owner",
+  "legacyIdentityProjectionFallbacks": "PRESENT — B24",
+  "legacyMutatingOwnersActive": "PRESENT — B24",
+  "wavesAccepted": "6/6",
+  "realProductionMutationsForFinalProof": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "ownedBackgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "preExistingProtectedDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "postgresTestDatabasesCreatedByCycle": 0,
+    "syntheticFixturesRemoved": true,
+    "existingUnownedProcessesUntouched": true,
+    "productionServicesAreIntendedLongLived": true
+  }
+}

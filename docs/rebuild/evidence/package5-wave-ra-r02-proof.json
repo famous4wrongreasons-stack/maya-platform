@@ -1,0 +1,160 @@
+{
+  "package": "R02",
+  "blockers": [
+    "B40",
+    "B41"
+  ],
+  "entryCheckpoint": "4a253449",
+  "scope": "Stage 1 approved canonical foundation proof only; runtime unchanged; no B40/B41 remediation acceptance",
+  "assessment": {
+    "canonicalOwner": "Canonical User/Membership/CrmStaffAccess/platform access owner",
+    "existingFoundationSufficient": true,
+    "businessDecisionRequired": false,
+    "schemaRequired": false,
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "runtimeOnly": true,
+    "dependencies": [],
+    "dependenciesSatisfied": true,
+    "readyForImplementation": true,
+    "readyForProduction": false
+  },
+  "canonicalFoundationProof": {
+    "jest": {
+      "command": "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/auth/jwt.strategy.spec.ts src/auth/auth-session.service.spec.ts src/guards/tenant-access.guard.spec.ts src/package5-wave2/package5-wave2-canonical-cutover.service.spec.ts src/action-engine/package5-wave2-executable.contract.spec.ts src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts src/action-engine/package5-b13-remediation.architecture.spec.ts --json --outputFile ../work/package5-wave-ra/r02-foundation-jest.json",
+      "cwd": "/tmp/maya-b29-contour/maya-saas-backend",
+      "exitCode": 0,
+      "passedSuites": 7,
+      "totalSuites": 7,
+      "passedTests": 58,
+      "totalTests": 58,
+      "failedTests": 0,
+      "success": true,
+      "suites": [
+        {
+          "path": "maya-saas-backend/src/action-engine/package5-b13-remediation.architecture.spec.ts",
+          "status": "passed",
+          "tests": 6
+        },
+        {
+          "path": "maya-saas-backend/src/auth/jwt.strategy.spec.ts",
+          "status": "passed",
+          "tests": 5
+        },
+        {
+          "path": "maya-saas-backend/src/auth/auth-session.service.spec.ts",
+          "status": "passed",
+          "tests": 12
+        },
+        {
+          "path": "maya-saas-backend/src/package5-wave2/package5-wave2-canonical-cutover.service.spec.ts",
+          "status": "passed",
+          "tests": 4
+        },
+        {
+          "path": "maya-saas-backend/src/guards/tenant-access.guard.spec.ts",
+          "status": "passed",
+          "tests": 6
+        },
+        {
+          "path": "maya-saas-backend/src/action-engine/package5-wave2-executable.contract.spec.ts",
+          "status": "passed",
+          "tests": 17
+        },
+        {
+          "path": "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+          "status": "passed",
+          "tests": 8
+        }
+      ],
+      "rawLocalArchive": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra/r02-foundation-jest.json",
+      "rawSha256": "1eb8c1f49e3f0d720ec15dca07b701cfffbb2a25ec41070db1b83d6181abf107",
+      "hermetic": "Repositories/planners mocked; B13 suite executes existing AST-based Python guard in a bounded child; no actual app/DB/provider execution."
+    },
+    "python": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest test_package5_b13_control_plane_boundaries test_package5_b21_realtime_authority -v",
+      "cwd": "/tmp/maya-b29-contour/ai администратор",
+      "exitCode": 0,
+      "passedTests": 10,
+      "totalTests": 10,
+      "failedTests": 0,
+      "hermetic": "Exact functions extracted using AST; fake database guards; requests/urllib fully mocked for executed calls."
+    }
+  },
+  "knownCurrentPathContractFailures": {
+    "scope": "Existing B40/B41 inventory paths only; not remediation acceptance",
+    "witnessResult": "KNOWN DEFECTS REPRODUCED",
+    "cases": [
+      {
+        "blocker": "B40",
+        "case": "existing masters_telegram row direct rebinding",
+        "observed": "One legacy UPDATE attempted against a fake connection",
+        "canonicalContractResult": "FAIL CURRENT PATH"
+      },
+      {
+        "blocker": "B41",
+        "case": "legacy admin alone becomes panel owner",
+        "observed": "owner result without User/Membership/session authority",
+        "canonicalContractResult": "FAIL CURRENT PATH"
+      },
+      {
+        "blocker": "B41",
+        "case": "phone-projection plus legacy admin grants staff web session",
+        "observed": "staff web_session issued only into an in-memory fake",
+        "canonicalContractResult": "FAIL CURRENT PATH"
+      }
+    ],
+    "sourceFunctionSha256": {
+      "bot.py:_bind_master_chat_direct": "dda80924367030274764d9ee2d062cfa552a0a4618dfc92550c427de09b197b6",
+      "webhook_server.py:_panel_resolve_role": "c32613a9979d4b13cf16b1272c76f1678e46a6fae3ec640bb571ce709730d709",
+      "web_auth.py:_issue_session": "2e23f6c8a2f89600f11325d7c65e5bcc8bcd4b15a702ecbfb64478f99368bcd0"
+    },
+    "databaseConnections": 0,
+    "providerCalls": 0,
+    "realMessages": 0,
+    "applicationImports": 0
+  },
+  "knownPathWitnessCommand": "PYTHONDONTWRITEBYTECODE=1 python3 docs/rebuild/evidence/package5-wave-ra-r02-known-paths.proof.py",
+  "knownPathWitnessSha256": "bcd8d597f430c5a4b847f607882471226a048b5701985b2966bd128fd2e02824",
+  "sourceSha256": {
+    "maya-saas-backend/src/action-engine/package5-b13-remediation.architecture.spec.ts": "7d7ef31a9140cde3cff7a5921170d4d2815351b651aa6d73754bf4de1c6c3d79",
+    "maya-saas-backend/src/auth/jwt.strategy.spec.ts": "0aeb2e9853ed070f21b65c79b242ef00d9c12415e32428853401f01146054cde",
+    "maya-saas-backend/src/auth/auth-session.service.spec.ts": "66cd84cafcff76516208ab57633e40f882c1e17c41f663afc374695c2ed1d8ad",
+    "maya-saas-backend/src/package5-wave2/package5-wave2-canonical-cutover.service.spec.ts": "be3ff148366c71cf0c28809b03ec66a8a46aaa0e8d0dc2036dd2fd01ce26f67b",
+    "maya-saas-backend/src/guards/tenant-access.guard.spec.ts": "44de391e1f34124e39dd3d786119cdea2c02e6b9b29418ca1f1886ff98d59822",
+    "maya-saas-backend/src/action-engine/package5-wave2-executable.contract.spec.ts": "ba9456b122122274e309d6116e02310eb861049e19effec1b26ad2f377c4f51a",
+    "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts": "87a3e44396ddec16d1a1497f86c939fc2197fac540063f64981fc62f86938382",
+    "ai администратор/test_package5_b13_control_plane_boundaries.py": "a5a7fd0522aac15e536fb060a43f1eec9dbb8bbb041e7ea5e73f654a74d87877",
+    "ai администратор/test_package5_b21_realtime_authority.py": "c6d174b734474d46ba973ee3605579e45acc9cc96f4f89129e51294db6f902a3",
+    "maya-saas-backend/src/auth/jwt.strategy.ts": "4ce30ef505890a8f6d7fc83be337ed7e1de5b8c967b709c689174695edc0f177",
+    "maya-saas-backend/src/auth/auth-session.service.ts": "337b354878ce99acd1d09236dccefd46a0811af11ba060997f00c4663b8a223e",
+    "maya-saas-backend/src/tenancy/memberships.service.ts": "2683752c17dd18d15dfa8ed93370b70ba2cb5f56acb3be7b1da28a85e58041b1",
+    "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts": "7cadb06f74361d9a09053be7d9f2de3e3869da00f94bd21ddcbbbb8fc1b634fa",
+    "maya-saas-backend/src/package5-wave2/package5-wave2-canonical-cutover.service.ts": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564"
+  },
+  "limitations": [
+    "Existing known B40/B41 paths remain executable; the witness reproduces their contract failures.",
+    "Passing existing B13 tests does not prove removal of its deliberately preserved legacy owner branch.",
+    "New permanent R02 violation-class ratchet is specified as implementation acceptance; it is not implemented or claimed passing in Stage 1.",
+    "No end-to-end package remediation proof, PostgreSQL concurrency proof, broad mandatory regression, lint/typechecks/build, or deployment was run."
+  ],
+  "hygiene": {
+    "ownedJestProcessExited": true,
+    "ownedPythonGuardChildExited": true,
+    "runtimeChanges": 0,
+    "schemaChanges": 0,
+    "migrationChanges": 0,
+    "productionDeployments": 0,
+    "productionReads": 0,
+    "productionMutations": 0,
+    "productionMessages": 0,
+    "databaseConnections": 0,
+    "oldDatabasesTouched": 0,
+    "mainWorktreeWrites": 0,
+    "newInventoryPass": false,
+    "newBlockers": 0
+  }
+}

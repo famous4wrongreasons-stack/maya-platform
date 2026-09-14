@@ -1,0 +1,14 @@
+"MarketingAudienceRecipient"	MarketingAudienceRecipient_audienceId_tenantId_fkey	f	FOREIGN KEY ("audienceId", "tenantId") REFERENCES "MarketingAudience"(id, "tenantId") ON UPDATE CASCADE ON DELETE CASCADE
+"MarketingAudienceRecipient"	MarketingAudienceRecipient_pkey	p	PRIMARY KEY (id)
+"MarketingAudienceRecipient"	MarketingAudienceRecipient_tenantId_fkey	f	FOREIGN KEY ("tenantId") REFERENCES "Tenant"(id) ON UPDATE CASCADE ON DELETE CASCADE
+"MarketingCampaignRecipient"	MarketingCampaignRecipient_campaignId_tenantId_fkey	f	FOREIGN KEY ("campaignId", "tenantId") REFERENCES "MarketingCampaign"(id, "tenantId") ON UPDATE CASCADE ON DELETE CASCADE
+"MarketingCampaignRecipient"	MarketingCampaignRecipient_pkey	p	PRIMARY KEY (id)
+"MarketingCampaignRecipient"	MarketingCampaignRecipient_tenantId_fkey	f	FOREIGN KEY ("tenantId") REFERENCES "Tenant"(id) ON UPDATE CASCADE ON DELETE CASCADE
+"MarketingConsentEvidence"	MarketingConsentEvidence_pkey	p	PRIMARY KEY (id)
+"MarketingConsentEvidence"	MarketingConsentEvidence_tenantId_fkey	f	FOREIGN KEY ("tenantId") REFERENCES "Tenant"(id) ON UPDATE CASCADE ON DELETE CASCADE
+"MarketingDeliveryAttempt"	MarketingDeliveryAttempt_campaignId_tenantId_fkey	f	FOREIGN KEY ("campaignId", "tenantId") REFERENCES "MarketingCampaign"(id, "tenantId") ON UPDATE CASCADE ON DELETE CASCADE
+"MarketingDeliveryAttempt"	MarketingDeliveryAttempt_pkey	p	PRIMARY KEY (id)
+"MarketingDeliveryAttempt"	MarketingDeliveryAttempt_recipientId_tenantId_fkey	f	FOREIGN KEY ("recipientId", "tenantId") REFERENCES "MarketingCampaignRecipient"(id, "tenantId") ON UPDATE CASCADE ON DELETE CASCADE
+"MarketingDeliveryAttempt"	MarketingDeliveryAttempt_tenantId_fkey	f	FOREIGN KEY ("tenantId") REFERENCES "Tenant"(id) ON UPDATE CASCADE ON DELETE CASCADE
+"MarketingPolicy"	MarketingPolicy_pkey	p	PRIMARY KEY ("tenantId")
+"MarketingPolicy"	MarketingPolicy_tenantId_fkey	f	FOREIGN KEY ("tenantId") REFERENCES "Tenant"(id) ON UPDATE CASCADE ON DELETE CASCADE

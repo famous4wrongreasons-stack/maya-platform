@@ -1,8 +1,11 @@
+import { ClientProfileReadService } from '../crm/client-profile-read.service';
 import { ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { UserRole } from '../common/domain.enums';
 import { EncryptionService } from '../encryption/encryption.service';
+import { snapshotAuthorityView } from '../domain';
+import type { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UsersService } from '../users/users.service';
@@ -74,11 +77,34 @@ describe('CustomersService', () => {
     const auditLogService = {
       log: jest.fn().mockResolvedValue(undefined),
     } as unknown as AuditLogService;
+    // 🔴 P7.1. Раньше сервис строился ПЯТЬЮ аргументами при шести обязательных:
+    // спеки не проходят проверку типов, поэтому ошибка не всплывала, а
+    // `loyaltyService` в тестах был `undefined`. Тест списка клиентов из-за
+    // этого закреплял как норму обход границы лояльности.
+    const authoritySnapshotMock: jest.MockedFunction<
+      LoyaltyService['authoritySnapshot']
+    > = jest.fn().mockResolvedValue(snapshotAuthorityView('legacy_bot'));
+    const loyaltyService: Pick<
+      LoyaltyService,
+      'authoritySnapshot' | 'getStateForUser'
+    > = {
+      authoritySnapshot: authoritySnapshotMock,
+      getStateForUser: jest.fn().mockResolvedValue({
+        balance: 640,
+        source: 'internal',
+        authority: 'maya',
+        authority_scope: 'resolved',
+        sync_status: 'current',
+        stale: false,
+        verification_required: false,
+      }),
+    };
 
     return {
       tenantContext,
       userFindMany,
       getTenantUserOrThrowMock,
+      authoritySnapshotMock,
       getMembershipQueryTenantId: () => membershipQueryTenantId,
       service: new CustomersService(
         prisma,
@@ -86,9 +112,37 @@ describe('CustomersService', () => {
         usersService,
         encryptionService,
         auditLogService,
+        loyaltyService as LoyaltyService,
+        undefined as never,
+        {
+          forStaffAccount: jest.fn().mockResolvedValue({
+            clientId: 'canonical-client-a',
+            profile: { profile_id: null, notes: null },
+          }),
+        } as unknown as ClientProfileReadService,
       ),
     };
   };
+
+  it('🔴 владелец лояльности в списке приходит из границы, а не второй формулы', async () => {
+    // P7.1. До правки список выводил владельца сам — из колонки кэша. Одна и та
+    // же строка получала в списке одного владельца, а в карточке другого.
+    const setup = createService();
+
+    const result = await setup.tenantContext.runAsSystemTenant('tenant-a', () =>
+      setup.service.listCustomers('tenant-a', 50),
+    );
+
+    expect(setup.authoritySnapshotMock).not.toHaveBeenCalled();
+    expect(result[0]).toMatchObject({
+      loyalty_authority: 'maya',
+      // Снимок назван снимком: к владельцу за этой строкой не ходили.
+      loyalty_authority_scope: 'resolved',
+      loyalty_sync_status: 'current',
+      loyalty_stale: false,
+      loyalty_verification_required: false,
+    });
+  });
 
   it('lists only active customer memberships from the current tenant', async () => {
     const setup = createService();
@@ -119,8 +173,8 @@ describe('CustomersService', () => {
         id: 'client-a',
         tenant_id: 'tenant-a',
         appointments_count: 39,
-        loyalty_balance: 2133,
-        loyalty_source: 'yclients',
+        loyalty_balance: 640,
+        loyalty_source: 'internal',
       }),
     ]);
   });

@@ -6,6 +6,7 @@ import {
 import {
   AvailableSlot,
   CancelledAppointment,
+  ClientAppointmentsParams,
   ClientLoyaltySnapshot,
   CRMAdapter,
   CreatedAppointment,
@@ -156,12 +157,14 @@ export class MockCRMAdapter implements CRMAdapter {
 
   getAvailableSlots(params: {
     tenantId: string;
+    timezone: string;
     date: string;
     staffId?: string;
     serviceIds?: string[];
     branchId?: string;
   }): Promise<AvailableSlot[]> {
     void params.tenantId;
+    void params.timezone;
     void params.serviceIds;
 
     const parsedDate = new Date(params.date);
@@ -215,10 +218,6 @@ export class MockCRMAdapter implements CRMAdapter {
       staff_id: params.staffId,
       service_ids: params.serviceIds,
       branch_id: params.branchId ?? null,
-      raw: {
-        provider: this.config.provider,
-        client_name: params.clientName,
-      },
     });
   }
 
@@ -231,15 +230,12 @@ export class MockCRMAdapter implements CRMAdapter {
     return Promise.resolve({
       external_id: params.externalId,
       status: 'canceled',
-      raw: {
-        provider: this.config.provider,
-        cancelled: true,
-      },
     });
   }
 
   rescheduleAppointment(params: {
     tenantId: string;
+    timezone: string;
     externalId: string;
     start: string;
     staffId?: string;
@@ -247,6 +243,7 @@ export class MockCRMAdapter implements CRMAdapter {
     notes?: string | null;
   }): Promise<RescheduledAppointment> {
     void params.tenantId;
+    void params.timezone;
     void params.notes;
     const dataset = this.getDataset();
 
@@ -259,15 +256,13 @@ export class MockCRMAdapter implements CRMAdapter {
         params.serviceIds && params.serviceIds.length > 0
           ? params.serviceIds
           : [dataset.services[0]?.id ?? 'svc-standard'],
-      raw: {
-        provider: this.config.provider,
-        rescheduled: true,
-      },
     });
   }
 
-  getClientAppointments(clientId: string): Promise<CreatedAppointment[]> {
-    void clientId;
+  getClientAppointments(
+    params: ClientAppointmentsParams,
+  ): Promise<CreatedAppointment[]> {
+    void params;
     return Promise.resolve([]);
   }
 
@@ -280,7 +275,10 @@ export class MockCRMAdapter implements CRMAdapter {
     return Promise.resolve({
       provider: this.config.provider,
       external_client_id: `mock-${params.phone.replace(/\D/g, '').slice(-4)}`,
-      external_card_id: 'mock-card',
+      // 🔴 Карты у mock-провайдера нет. Раньше здесь стояло 'mock-card' —
+      // выдумка, существовавшая только потому, что так выглядит ответ YCLIENTS.
+      // Канон допускает null, и это честнее: поля нет, а не «есть, но фиктивное».
+      external_card_id: null,
       balance: Number.isFinite(configured)
         ? Math.max(0, Math.round(configured))
         : 0,

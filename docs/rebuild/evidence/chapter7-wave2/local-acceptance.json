@@ -1,0 +1,39 @@
+{
+  "codeCommit": "f09e5b14",
+  "releaseCandidateCommit": "d1489734",
+  "P02": {
+    "requirements": [
+      "Q05",
+      "Q06",
+      "Q07",
+      "Q11"
+    ],
+    "local": "PASS",
+    "targetedTests": 41,
+    "postgresChecks": 9,
+    "independentReviewFindings": 0
+  },
+  "P05": {
+    "requirements": [
+      "Q10"
+    ],
+    "local": "PASS",
+    "targetedTests": 31,
+    "postgresChecks": 9,
+    "independentReviewFindings": 0
+  },
+  "shared": {
+    "targetedSuites": 9,
+    "targetedTests": 122,
+    "p01PostgresRegressionChecks": 41,
+    "sourceOwnerCorrectionChecks": 18
+  },
+  "schema": {
+    "newMigrations": 0,
+    "appliedP01MigrationUnchanged": true,
+    "cleanReplay": "PASS",
+    "drift": "NONE"
+  },
+  "productionCutover": "PENDING_MANDATORY_GATE",
+  "productionProofEffects": 0
+}

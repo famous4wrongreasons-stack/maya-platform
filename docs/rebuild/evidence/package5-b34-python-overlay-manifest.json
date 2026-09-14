@@ -1,0 +1,33 @@
+{
+  "database.py": {
+    "before": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+    "after": "eb1658fee4dadec041e4efe91ee367340782ded5bbb0e6e742ae519e156ec352",
+    "method": "exact repository file"
+  },
+  "reputation.py": {
+    "before": "35e230a2fa67ada544592905f907df30b05929d18f3f0a0849d10b03f695cdc6",
+    "after": "20b4522fe412c88e1a0f8d5f230c10644f1b9774efa5e99cd0257ca49bd9fc4b",
+    "method": "exact repository file"
+  },
+  "package5_control_plane_runtime_guard.py": {
+    "before": "e379c6a965be9e5654b9dfd015b5c556f84228659247b7ae4c48e388777f9122",
+    "after": "cc9764778c72c564f8da2ade520a813f9252e0adec2bd83736e6698650be901c",
+    "method": "exact repository file"
+  },
+  "package5_review_source_guard.py": {
+    "before": null,
+    "after": "0474ba059d967a6cbf3f0b070b050c0c5d2b0c20aa44edd0ae40974fd09cc397",
+    "method": "exact repository file"
+  },
+  "webhook_server.py": {
+    "before": "185afc9cbd0f67d90efa367d5445ac58416cefbad827709c62687a68c8c1a6f0",
+    "after": "56e615d48dfd019ce22e6a79a706996927c7cbb888140f98ccc4ca64d7b48e33",
+    "method": "three repository-baseline functions + reviewed active legacy notifier; remove retired job start",
+    "functions": {
+      "panel_external_reviews_import_handler": "bc5de966d6c09ddb36824885586ca999b9ae8b9a6aee1d23ba96794732b5f606",
+      "panel_reputation_refresh_handler": "b42d90e29068acb15e632f0d0c19ba5c7a1f776024ee062d07a10cda0bcf1f35",
+      "_notify_owner_reputation": "7cc86e4ca9c411b05cbd102e607db4b34ca36ffcf738bb4977c243a0012bfad7",
+      "reputation_monitor_loop": "6c1630009a05ee52f736dad5b8f403bddd6bfd34dd393b8238227316bba823f8"
+    }
+  }
+}

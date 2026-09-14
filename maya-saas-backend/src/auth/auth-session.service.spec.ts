@@ -3,8 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { createHmac } from 'crypto';
 
+import { AuditLogService } from '../audit-log/audit-log.service';
 import { UserRole } from '../common/domain.enums';
+import { CrmService } from '../crm/crm.service';
 import { MembershipsService } from '../tenancy/memberships.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionRepository } from './auth-session.repository';
@@ -93,6 +96,10 @@ describe('AuthSessionService', () => {
     const findAccessSessionMock = jest.fn().mockResolvedValue(null);
     const rateLimitPreflightMock = jest.fn().mockResolvedValue(undefined);
     const rateLimitSessionMock = jest.fn().mockResolvedValue(undefined);
+    const assertCrmStaffAccessMock = jest.fn().mockResolvedValue(undefined);
+    const auditTryLogMock = jest.fn().mockResolvedValue(undefined);
+    const auditTryLogPlatformMock = jest.fn().mockResolvedValue(undefined);
+    const canonicalExecuteMock = jest.fn().mockResolvedValue({});
     const tenantContext = new TenantContextService();
     const service = new AuthSessionService(
       {
@@ -118,13 +125,26 @@ describe('AuthSessionService', () => {
         findRefreshCredentialById: findRefreshCredentialMock,
         findAccessSessionById: findAccessSessionMock,
       } as unknown as AuthSessionSystemGateway,
+      {
+        assertCrmStaffAccessActive: assertCrmStaffAccessMock,
+      } as unknown as CrmService,
+      {
+        tryLog: auditTryLogMock,
+        tryLogPlatformAction: auditTryLogPlatformMock,
+      } as unknown as AuditLogService,
+      {
+        execute: canonicalExecuteMock,
+      } as unknown as Package5Wave2CanonicalCutoverService,
     );
 
     return {
       service,
       tenantContext,
       mocks: {
+        auditTryLogMock,
+        auditTryLogPlatformMock,
         createSessionMock,
+        assertCrmStaffAccessMock,
         findAccessSessionMock,
         findRefreshCredentialMock,
         getActiveMembershipMock,
@@ -135,6 +155,7 @@ describe('AuthSessionService', () => {
         revokeSessionMock,
         rotateRefreshTokenMock,
         signAsyncMock,
+        canonicalExecuteMock,
       },
     };
   };
@@ -201,6 +222,10 @@ describe('AuthSessionService', () => {
       tenantId: 'tenant-a',
       role: UserRole.CLIENT,
     });
+    expect(mocks.assertCrmStaffAccessMock).toHaveBeenCalledWith(
+      'tenant-a',
+      'user-a',
+    );
     const createParams = createArgs?.[1];
     expect(createParams?.deviceLabel).toBe('Safari on iPhone');
     expect(createParams?.ipHash).toMatch(/^[a-f0-9]{64}$/);
@@ -223,6 +248,24 @@ describe('AuthSessionService', () => {
       UnauthorizedException,
     );
     expect(mocks.getActiveMembershipMock).not.toHaveBeenCalled();
+  });
+
+  it('does not issue a session when CRM staff access was disabled', async () => {
+    const { service, mocks } = createService();
+    mocks.assertCrmStaffAccessMock.mockRejectedValueOnce(
+      new UnauthorizedException({
+        error: { code: 'crm_staff_access_disabled' },
+      }),
+    );
+
+    await expect(
+      service.issueSession(tenantUser, {}, 'tenant-a'),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'crm_staff_access_disabled' } },
+    });
+    expect(mocks.getActiveMembershipMock).not.toHaveBeenCalled();
+    expect(mocks.createSessionMock).not.toHaveBeenCalled();
+    expect(mocks.signAsyncMock).not.toHaveBeenCalled();
   });
 
   it('rotates a valid refresh token and returns a new credential', async () => {
@@ -250,6 +293,10 @@ describe('AuthSessionService', () => {
       userId: 'user-a',
       identity: 'session-a',
     });
+    expect(mocks.assertCrmStaffAccessMock).toHaveBeenCalledWith(
+      'tenant-a',
+      'user-a',
+    );
     expect(result.session).toMatchObject({
       id: 'session-a',
       is_current: true,
@@ -322,7 +369,7 @@ describe('AuthSessionService', () => {
         deviceLabel: 'Chrome on Windows',
         createdAt: new Date('2026-07-11T12:00:00.000Z'),
         lastUsedAt: new Date('2026-07-11T12:05:00.000Z'),
-        expiresAt: new Date('2026-08-10T12:00:00.000Z'),
+        expiresAt: new Date(Date.now() + 60_000),
         revokedAt: null,
         revokeReason: null,
       },
@@ -346,8 +393,67 @@ describe('AuthSessionService', () => {
     });
   });
 
+  it('leaves an audit trail when a session ends', async () => {
+    // Раньше выход не оставлял ни строки: менялся только revokeReason самой
+    // сессии, а ретенция её удаляла. Доказать факт входа и его источник спустя
+    // две недели было нечем.
+    const { service, mocks } = createService();
+
+    await service.logout({
+      userId: 'user-a',
+      sessionId: 'session-a',
+      tenantId: 'tenant-a',
+      role: UserRole.CLIENT,
+      email: 'client@example.test',
+      branchId: null,
+      membershipId: 'membership-a',
+      membershipStatus: 'active',
+    });
+
+    expect(mocks.auditTryLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-a',
+        userId: 'user-a',
+        action: 'auth.logout',
+        entityType: 'auth_session',
+        entityId: 'session-a',
+      }),
+    );
+    expect(mocks.auditTryLogPlatformMock).not.toHaveBeenCalled();
+  });
+
+  it('records the platform owner without inventing a tenant', async () => {
+    // У владельца платформы арендатора нет. Служебный арендатор положил бы его
+    // вход в историю чужого салона, поэтому запись обязана быть платформенной.
+    const { service, mocks } = createService();
+
+    await service.logout({
+      userId: 'platform-owner-1',
+      sessionId: 'session-p',
+      tenantId: null,
+      role: UserRole.PLATFORM_OWNER,
+      email: 'owner@maya.local',
+      branchId: null,
+      membershipId: null,
+      membershipStatus: null,
+    });
+
+    expect(mocks.auditTryLogPlatformMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'platform-owner-1',
+        action: 'auth.logout',
+        entityId: 'session-p',
+      }),
+    );
+    expect(mocks.auditTryLogMock).not.toHaveBeenCalled();
+  });
+
   it('revokes every session owned by the authenticated principal', async () => {
     const { service, mocks } = createService();
+    mocks.listSessionsMock.mockResolvedValueOnce([
+      { id: 'session-a', revokedAt: null },
+      { id: 'session-b', revokedAt: null },
+    ]);
     const result = await service.revokeAllSessions({
       userId: 'user-a',
       sessionId: 'session-a',
@@ -360,10 +466,11 @@ describe('AuthSessionService', () => {
     });
 
     expect(result).toEqual({ ok: true, revoked_sessions: 2 });
-    expect(mocks.revokeAllSessionsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: 'user-a', tenantId: 'tenant-a' }),
-      expect.any(Date),
-      'user_revoked_all',
+    expect(mocks.canonicalExecuteMock).toHaveBeenCalledWith(
+      'tenant-a',
+      { userId: 'user-a' },
+      { operation: 'revoke_all_sessions', currentSessionId: 'session-a' },
     );
+    expect(mocks.revokeAllSessionsMock).not.toHaveBeenCalled();
   });
 });

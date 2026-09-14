@@ -1,0 +1,97 @@
+{
+  "package": "C7-P05",
+  "requirement": "Q10",
+  "decision": "D08 Option A APPROVED; shared D01/D09/D10 preserved",
+  "status": "LOCAL_PACKAGE_PASS",
+  "date": "2026-09-08",
+  "productionClaim": false,
+  "combinedWave2Gate": "parent-owned",
+  "schemaChanges": 0,
+  "newBusinessActions": 0,
+  "newSourceOwners": 0,
+  "measurementKind": "reputation_period",
+  "publisher": "existing MeasurementService / MeasurementRevision",
+  "readAdapter": "MeasurementReputationReader.authorize/read",
+  "sourceKinds": {
+    "BusinessReview": "reputation_review_query",
+    "NativeFeedbackRequest": "reputation_native_query"
+  },
+  "bounds": {
+    "sourceFamilies": 16,
+    "aggregateReceipts": 2,
+    "metrics": 240,
+    "groupedRowsReadLimit": 34,
+    "overflow": "PUBLISHED UNAVAILABLE; no truncated facts or pending loop"
+  },
+  "verification": {
+    "runtime": "Node 22.23.2",
+    "unitAndArchitectureTests": { "suites": 2, "passed": 31, "failed": 0 },
+    "targetedTypecheck": "PASS",
+    "postgresqlFinal": { "passed": 9, "failed": 0, "exitCode": 0 },
+    "earlierPostgresqlRun": { "passed": 8, "status": "superseded by final nine-scenario run" },
+    "isolatedDatabase": { "host": "127.0.0.1", "port": 55517, "database": "maya_c7_replay", "user": "maya_c7" },
+    "databaseCleanupPerformed": false,
+    "productionEffects": 0,
+    "providerWrites": 0
+  },
+  "q10ProofMap": [
+    {
+      "contract": "Tenant-local single calendar month, exact half-open endpoints, source scale and denominator separation",
+      "proof": "PG scenarios 1 and 3; unit Moscow/year/DST/month-rejection/source/rating cases"
+    },
+    {
+      "contract": "Exact tenant/branch/Staff/Client/Appointment scope; no legacy Staff/Client broadening; Client without Maya User",
+      "proof": "PG scenarios 1 and 2; unit authority and unsupported-scope cases"
+    },
+    {
+      "contract": "Canonical native feedback uses exact R08 current response pointer; corrections retain original response month",
+      "proof": "PG scenario 4; SQL ownership ratchet exact tenant/request/client/latestResponseVersion joins"
+    },
+    {
+      "contract": "Current withdrawal removes the rating without resurrecting an old response; prior snapshots remain immutable",
+      "proof": "PG scenario 5; unit withdrawal/erasure/expiry qualification and latest-version ratchet"
+    },
+    {
+      "contract": "AsOf is distinct from source observation; current partial months cannot receive full-month deltas",
+      "proof": "PG scenarios 4 and 7; unit future-asOf and partial-month cases"
+    },
+    {
+      "contract": "Bounded aggregate receipts retain no per-review source copy, raw text or PII; no measurement-induced source/business writes",
+      "proof": "PG scenario 6 aggregates 1005 source reviews into 2 receipts; unit maximum 16-source/240-metric payload and permanent read-only ratchets"
+    },
+    {
+      "contract": "Legacy source labels never imply a verified Client author or Appointment; anonymous community excluded",
+      "proof": "PG scenario 1 with BusinessReview source named native_feedback; unit null authority metrics; permanent anonymous/text/PII exclusion ratchet"
+    },
+    {
+      "contract": "One shared publication lifecycle preserves corrected Appointment source authority",
+      "proof": "PG scenario 8 uses actual AppointmentObservationService and AppointmentChangeService; pending reputation receipt closes UNAVAILABLE"
+    },
+    {
+      "contract": "Deterministic source overflow publishes explicit unavailable instead of truncating or permanently retrying",
+      "proof": "PG scenario 9; unit adapter-specific known-error handling and infrastructure failure propagation"
+    },
+    {
+      "contract": "Deterministic observed arithmetic only; explicit sums, denominators, delta numerator/denominator and six-decimal rounding; no reputation score or causal credit",
+      "proof": "PG scenario 3 and final shared publication payloads; unit exact BigInt/negative delta/empty denominator tests; NOT_APPLICABLE attribution"
+    }
+  ],
+  "resolvedSetupCorrections": [
+    "An initial isolated harness bootstrap stopped before DB connection because its synthetic attestation constant was below the existing 32-character minimum; extended the synthetic constant and reran successfully.",
+    "A targeted TypeScript run identified test-data union inference in the unsupported-scope table; explicit MeasurementScope typing resolved it."
+  ],
+  "ownedFiles": [
+    "maya-saas-backend/src/measurement/measurement.reputation.ts",
+    "maya-saas-backend/src/measurement/measurement.reputation.spec.ts",
+    "maya-saas-backend/src/measurement/measurement.reputation.architecture.spec.ts",
+    "maya-saas-backend/scripts/chapter7-reputation-proof.ts",
+    "docs/rebuild/CYCLE-07-P05-REPUTATION.md",
+    "docs/rebuild/evidence/chapter7-p05-reputation/proof-summary.json",
+    "docs/rebuild/evidence/chapter7-p05-reputation/postgresql-proof.txt"
+  ],
+  "remainingIntegration": [
+    "Parent-owned combined Wave 2 mandatory gate and logical commits.",
+    "Parent-owned authorized production cutover and production verification.",
+    "Later package consumers retain existing authorization and delegate to the shared result; this package adds no public measurement API."
+  ]
+}

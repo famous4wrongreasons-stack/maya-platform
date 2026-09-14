@@ -1,0 +1,15 @@
+{
+  "result": "PASS \u2014 metadata and proposal inventory only",
+  "requirementsMapped": 25,
+  "newModels": 0,
+  "newColumns": 12,
+  "alteredExistingColumns": 2,
+  "newUniqueConstraints": 3,
+  "newNonUniqueIndexes": 2,
+  "newForeignKeys": 3,
+  "newActionClasses": 0,
+  "postgresBehaviorProofExecuted": false,
+  "ddlExecuted": false,
+  "databaseConnections": 0,
+  "productionMessages": 0
+}

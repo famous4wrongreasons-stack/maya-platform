@@ -1,0 +1,415 @@
+{
+  "inspection": "read-only AST; no Python runtime modules imported",
+  "rootPythonFiles": 90,
+  "nonTestRootPythonFiles": 70,
+  "launcherReferencesWebhook": true,
+  "allNonTestSources": {
+    "admin_nlu.py": {
+      "sha256": "394a37cc1cd272c20e915731e0bf4d9fcb44c3039c4e107bafe17466ca01153c",
+      "lines": 395,
+      "functions": 5
+    },
+    "ai_billing.py": {
+      "sha256": "167c97fe839f50bca86e6120ed7a40d218b9fdb04207d2ebf3b1cbcb64ff2010",
+      "lines": 352,
+      "functions": 11
+    },
+    "analytics.py": {
+      "sha256": "f04c0316849dfec3fd2403225e2ad6c9c35ae18d95933f286bf6589861da3e23",
+      "lines": 376,
+      "functions": 8
+    },
+    "anonymizer.py": {
+      "sha256": "435e3fbe46d484ef479e5ca9c3ea502b9faf0ea1e6f5ffa830c392612ec141e2",
+      "lines": 150,
+      "functions": 5
+    },
+    "barber_knowledge.py": {
+      "sha256": "54cf59b2ae7e0d21a91433214197bccfe2599410ddac3a81c0b57b352d4b300c",
+      "lines": 441,
+      "functions": 20
+    },
+    "birthday.py": {
+      "sha256": "539e4daf8b612da31b62d18c7906c0f97a97f9cdb52c24dc7bece24017cbb3ba",
+      "lines": 178,
+      "functions": 4
+    },
+    "bot.py": {
+      "sha256": "80f919e21eba206637f98003f31b77cda267b29671771444f95f50daade9725e",
+      "lines": 7332,
+      "functions": 157
+    },
+    "broadcast_templates.py": {
+      "sha256": "240f1cdf1b7f350b7679c93831c8ef6a3b8057ca0db5f9140b44fa087e6dca2d",
+      "lines": 391,
+      "functions": 4
+    },
+    "business_rules.py": {
+      "sha256": "2a6b6246e7aad21800b34ba79df595386624fb52a65f798fd64fa680299cf2f4",
+      "lines": 72,
+      "functions": 2
+    },
+    "cert_pdf.py": {
+      "sha256": "2b27531ee7b20453ce9275ef11b522cc12f75bb5abe70ba28fdb7b157d56f411",
+      "lines": 410,
+      "functions": 12
+    },
+    "chat_widgets.py": {
+      "sha256": "b8cad7a4c4fe7a5ee2bf17786f24e3273c7342b023927e7729298eea3e7e0c62",
+      "lines": 122,
+      "functions": 5
+    },
+    "claude_ai.py": {
+      "sha256": "d70e49ddbbf6880d5f7ad931709c1b1c04cdd6d0908ea7fbd737f86a1e525a59",
+      "lines": 5453,
+      "functions": 97
+    },
+    "client_record_actions.py": {
+      "sha256": "fbab221191169fdd0e6ec4615f699ce6041a99407a30445d62358481c7f84048",
+      "lines": 65,
+      "functions": 2
+    },
+    "config.example.py": {
+      "sha256": "144113a61d77df253a4fc487a21738093131862ee16fabb420fe263c69133f9c",
+      "lines": 238,
+      "functions": 2
+    },
+    "config.py": {
+      "sha256": "f6fe36f5c50c19095d77ebf366b4cca5cbf5772f4e046764c286ee96047b0d51",
+      "lines": 187,
+      "functions": 0
+    },
+    "cutmatch.py": {
+      "sha256": "2d394832cc296f8f8d90417b04c787574aee8f32f1e89efea0b44b0692912612",
+      "lines": 502,
+      "functions": 17
+    },
+    "cycle_reminder.py": {
+      "sha256": "188039aae341fa102ac1a01d51f604d143d227d444f556b338f8675cbe44c41b",
+      "lines": 567,
+      "functions": 18
+    },
+    "database.py": {
+      "sha256": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+      "lines": 4789,
+      "functions": 236
+    },
+    "freed_slot.py": {
+      "sha256": "e0fa7df0cca9c80d159720c564bbd4bcf5c6869b2035a21408884fe59d4ec3c3",
+      "lines": 195,
+      "functions": 8
+    },
+    "generate_admin_pdf.py": {
+      "sha256": "2c52aef9e2cdc9b1872c25fe2e0ab618afe00202e3cc52c0da8446b38297c832",
+      "lines": 327,
+      "functions": 11
+    },
+    "generate_bind_codes.py": {
+      "sha256": "32a20af2254fea27419351426137f9f73c42a048b226f4e0a5277d1eaf974aee",
+      "lines": 20,
+      "functions": 1
+    },
+    "growth_planner.py": {
+      "sha256": "529ecf522677c8e141615ba8469a4a358a2cbc78f1908c3219b32294862e1bda",
+      "lines": 1020,
+      "functions": 34
+    },
+    "identity_utils.py": {
+      "sha256": "74375c8d75d68e76d3fefc44a9808ce677c2b2a9cee9a1a463fac74fd6f2342b",
+      "lines": 81,
+      "functions": 3
+    },
+    "import_gift_certs.py": {
+      "sha256": "c1207d74f84e427c52e0593b7249f094729ec061a0990584a1b5821480b3e23e",
+      "lines": 76,
+      "functions": 0
+    },
+    "lead_alerts.py": {
+      "sha256": "00c16768a92c334e3aaaeed15863069b664808667cd222f7279de18c883d5542",
+      "lines": 250,
+      "functions": 7
+    },
+    "legacy_appointment_bridge.py": {
+      "sha256": "068db16d654c0303e8399789fab6f6f017dfaa6e1c5076fff109637b756dd5ae",
+      "lines": 363,
+      "functions": 19
+    },
+    "legacy_client_command_bridge.py": {
+      "sha256": "7c3e14d2a860233996eb416a862ba0bbec20b891348ea5b60b3e48c0e1f5ea64",
+      "lines": 151,
+      "functions": 6
+    },
+    "legacy_client_habits_bridge.py": {
+      "sha256": "da048864a466a33d366ed64fc17b3fd2aa78be0c2bf2f10fc395d8010517bef1",
+      "lines": 149,
+      "functions": 9
+    },
+    "legacy_client_preferences_bridge.py": {
+      "sha256": "e5b380291685d2a4c467f94560035a5e65f40d26b2ca22c15f78ef8a87b2b720",
+      "lines": 59,
+      "functions": 4
+    },
+    "legacy_wanted_slot_bridge.py": {
+      "sha256": "9f331c19525093bf61e07ca08f382b0dc65c85308b9d76e3a058b50b641944cc",
+      "lines": 115,
+      "functions": 5
+    },
+    "local_stt.py": {
+      "sha256": "76d583c4758e7b8ee96e4189a35059adb724952657b2d52cfeed80ec83ca6b32",
+      "lines": 207,
+      "functions": 10
+    },
+    "loyalty.py": {
+      "sha256": "a73d0c0db7a00d908518188a8f8e394218959c73a1b84b40cfcc88e62339dc17",
+      "lines": 1036,
+      "functions": 29
+    },
+    "market_intelligence.py": {
+      "sha256": "fff91f11e6b43c2137afc3926ca0d85d80aa99879c665d0ebaaca9d950fd11be",
+      "lines": 1279,
+      "functions": 43
+    },
+    "master_briefing.py": {
+      "sha256": "24522ae9a1842c5628007934b65456f9253ebbfcce8b10dadfeba9babdce947f",
+      "lines": 343,
+      "functions": 15
+    },
+    "masters_ai.py": {
+      "sha256": "a3d0b1a8f6cedcdc37ebc3dcd92caef96f94523d110a4bbd1769f3177dd43d08",
+      "lines": 746,
+      "functions": 18
+    },
+    "maya_capabilities.py": {
+      "sha256": "5b5a06eb5124faf6a48428c14cadf61cbb1c7d62e84c609007403f953b8d747c",
+      "lines": 99,
+      "functions": 6
+    },
+    "maya_identity.py": {
+      "sha256": "99ece7c70319713e2f32ade3417af9990603f54aee31b42d55589f74a8ddd054",
+      "lines": 173,
+      "functions": 6
+    },
+    "maya_inbox_bridge.py": {
+      "sha256": "ebdd29b4f46f4c9a48be0af8bd1603f963b7819f5530523ff0306c98fa48dc9f",
+      "lines": 247,
+      "functions": 6
+    },
+    "maya_recovery_bridge.py": {
+      "sha256": "54c574a3140ca0eed97a4a39e608a0c986fe405708626552a3fac11a24cadfef",
+      "lines": 133,
+      "functions": 5
+    },
+    "maya_roles.py": {
+      "sha256": "523eaf200fc8a7b1f433913982cd85f5b84e0680f570df726e701454abf7195a",
+      "lines": 230,
+      "functions": 10
+    },
+    "maya_shadow_bridge.py": {
+      "sha256": "fae47049dccb1c9b2120100b622718be969ec4d9c217eec02b5c057cc444ff5f",
+      "lines": 106,
+      "functions": 4
+    },
+    "maya_subscription_purchase_bridge.py": {
+      "sha256": "f6aece7fae433699b18b4287e994577ab24513a00abbb6c665df827b74d25af8",
+      "lines": 59,
+      "functions": 2
+    },
+    "memory.py": {
+      "sha256": "b286f39327adcc3e82c544ad4409d2e5c75a28e0b8367ceb9e16e320850c1b41",
+      "lines": 574,
+      "functions": 15
+    },
+    "migration.py": {
+      "sha256": "3c6b5eea263026e9a70353ebb461e7caef64c7daf0ec932afffd50a9dfa19791",
+      "lines": 368,
+      "functions": 10
+    },
+    "owner_ai.py": {
+      "sha256": "811b007301ea65526175d9ef791834143d8c9eece250e530604d63ec293e9555",
+      "lines": 6804,
+      "functions": 121
+    },
+    "package4_value_runtime_guard.py": {
+      "sha256": "8fa94249d1aa42d2eff14260c30fccf0949a263a9ce8c3d0dd893ebf3b7e3a51",
+      "lines": 260,
+      "functions": 5
+    },
+    "package5_control_plane_runtime_guard.py": {
+      "sha256": "e379c6a965be9e5654b9dfd015b5c556f84228659247b7ae4c48e388777f9122",
+      "lines": 771,
+      "functions": 4
+    },
+    "package5_loyalty_read_guard.py": {
+      "sha256": "09df868144ae2c5d828a4a55a4efdb769fa84663c365e4b6d79669426f2c4fd9",
+      "lines": 51,
+      "functions": 1
+    },
+    "pii_crypto.py": {
+      "sha256": "4b3ebf61cfd0db3b8e13879aabccd46ff570d1da85492b10438f9669bbbdd9b0",
+      "lines": 83,
+      "functions": 3
+    },
+    "privacy_policy.py": {
+      "sha256": "66f8a003dcb3eab27138acebc2cd7daffefa1afcc2487599e55d773008cd0701",
+      "lines": 20,
+      "functions": 0
+    },
+    "prompts.py": {
+      "sha256": "02c29e8717d1394770351f05378f3557d8bb1ffe0c4fcfa26ab6f6bf464bf0f5",
+      "lines": 430,
+      "functions": 0
+    },
+    "pwa_api.py": {
+      "sha256": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "lines": 66,
+      "functions": 2
+    },
+    "reactivation.py": {
+      "sha256": "c2417c9884437ab08ae059f5f8a0a9757c95beb50d808b6be97b67eb2caa70d6",
+      "lines": 233,
+      "functions": 6
+    },
+    "realtime_bridge.py": {
+      "sha256": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+      "lines": 692,
+      "functions": 19
+    },
+    "referral.py": {
+      "sha256": "6a6b6a769dc140237b7bfd0d2da6de9940ca8c7e44876efda479295035d153b1",
+      "lines": 347,
+      "functions": 9
+    },
+    "reputation.py": {
+      "sha256": "35e230a2fa67ada544592905f907df30b05929d18f3f0a0849d10b03f695cdc6",
+      "lines": 878,
+      "functions": 31
+    },
+    "reviews.py": {
+      "sha256": "16654d2a3f087c92a5dab8ce6941156ba29c371a840c336b906120afdb0a92df",
+      "lines": 374,
+      "functions": 10
+    },
+    "site_community.py": {
+      "sha256": "f631935b676ac26614206b91d8448e415b1db6883e11fcea445e103d731fba65",
+      "lines": 364,
+      "functions": 23
+    },
+    "site_engagement.py": {
+      "sha256": "96bc5a18df899670746ea2dcc3055c6cd7a5feb21885ebc2b5da26a5327ea6ac",
+      "lines": 386,
+      "functions": 16
+    },
+    "site_guest_chat.py": {
+      "sha256": "035541c84fbefa4f38af9ca30c86fca1f21ac2acbd023accc4195544b1af981a",
+      "lines": 137,
+      "functions": 5
+    },
+    "site_publications.py": {
+      "sha256": "846b04430d2f81abc62bb1f0ff37384e27631ce7c23b286f1dadb86344ff4bb5",
+      "lines": 321,
+      "functions": 22
+    },
+    "sources.py": {
+      "sha256": "b5f64a7ec451125d48a8e4b599ecfc7feab5bab431dd11c2b835a09602ba0c1f",
+      "lines": 134,
+      "functions": 4
+    },
+    "subscriptions.py": {
+      "sha256": "335d0e8400d3d457676fafc6bf168109be908645c35a349d5249f9c47f03ae24",
+      "lines": 513,
+      "functions": 16
+    },
+    "tenant_config_api.py": {
+      "sha256": "8bbfdab34c610b93cacb732aea6db00f6500e135f1e78b0664fe1154d81208e2",
+      "lines": 123,
+      "functions": 8
+    },
+    "voice.py": {
+      "sha256": "9482b4f221fe9e309e9b8edc472b091b7ca48b64fbb5dd55d76d7794d1a83459",
+      "lines": 507,
+      "functions": 22
+    },
+    "voice_guard.py": {
+      "sha256": "e0f0446fa6f4e94720daed9a1a4861b5b3ebcb56cbe8b514af3da135af796b0d",
+      "lines": 232,
+      "functions": 7
+    },
+    "web_auth.py": {
+      "sha256": "d5af185be0073187de9fc0023c3b0ea4d711991344523a0fa5fbe4fd88513a19",
+      "lines": 455,
+      "functions": 18
+    },
+    "webhook_server.py": {
+      "sha256": "185afc9cbd0f67d90efa367d5445ac58416cefbad827709c62687a68c8c1a6f0",
+      "lines": 12298,
+      "functions": 340
+    },
+    "yclients.py": {
+      "sha256": "55cf23f02d6e81c91f1f79ae2ef21bda1307f07f6206212b14dd426395617b5a",
+      "lines": 2172,
+      "functions": 75
+    },
+    "yukassa_api.py": {
+      "sha256": "8b4655c8591762a21a9481da6a986b07b8f3a5b5dda2ae0a0dadedff6d703e7d",
+      "lines": 142,
+      "functions": 4
+    }
+  },
+  "functions": {
+    "_finalize_booking_for_chat": {
+      "line": 6319,
+      "sourceSha256": "b5b302733ac6c15d85a6e6d1e5ceaa9467a856c14fa236f796ac8766135a5b8e",
+      "astSha256": "1e420322d3ec9bd0e9633e63a30edb3dcea218a931b197661bbc80402c83dc9d",
+      "usesCanonicalAppointmentCommand": true,
+      "referencesSharedFinalizer": true
+    },
+    "chat_handler": {
+      "line": 8358,
+      "sourceSha256": "54c719eaf218c09f50e3138963bf95a92290d06937ff39aad0ceeb87108101d2",
+      "astSha256": "2c78c7d04b5ce29b7a3d2e7fe91cde50bc1fad6e8b2ce10189c37a74e43e603d",
+      "usesCanonicalAppointmentCommand": false,
+      "referencesSharedFinalizer": true
+    },
+    "chat_stream_handler": {
+      "line": 8935,
+      "sourceSha256": "f0c39143359cae33c669f070fd3a4a48f2d551ca446bd1cebe8c521ed32cb765",
+      "astSha256": "4deb0f7358dd7ff4bd84fde8f6e4f0041c022d17ef9239e131ca70853c21c64b",
+      "usesCanonicalAppointmentCommand": false,
+      "referencesSharedFinalizer": true
+    }
+  },
+  "publishedBackendChatRoutes": [
+    {
+      "line": 12128,
+      "call": "web_app.router.add_post",
+      "route": "/api/chat",
+      "handler": "chat_handler"
+    },
+    {
+      "line": 12129,
+      "call": "web_app.router.add_options",
+      "route": "/api/chat",
+      "handler": "chat_options_handler"
+    },
+    {
+      "line": 12130,
+      "call": "web_app.router.add_post",
+      "route": "/api/chat/stream",
+      "handler": "chat_stream_handler"
+    },
+    {
+      "line": 12131,
+      "call": "web_app.router.add_options",
+      "route": "/api/chat/stream",
+      "handler": "chat_options_handler"
+    }
+  ],
+  "activeUnchangedModulesSinceB32": 66,
+  "changedModules": [
+    "webhook_server.py",
+    "legacy_client_command_bridge.py",
+    "legacy_client_habits_bridge.py",
+    "package5_control_plane_runtime_guard.py"
+  ],
+  "b33FunctionsMatchRepositorySourceHashes": true
+}

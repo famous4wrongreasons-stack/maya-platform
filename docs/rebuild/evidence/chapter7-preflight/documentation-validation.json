@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-09-08T13:56:36.806936+00:00",
+  "sourceAndCodeHashesChecked": 44,
+  "localMarkdownLinksChecked": 51,
+  "requirementsCoveredByPackages": 22,
+  "historicalHandoffItemsMapped": 21,
+  "packageDAG": "acyclic; maximum dependency wave 4",
+  "scopeCountsConsistent": true,
+  "pendingOwnerDecisions": 13,
+  "newRuntimeTestsWritten": 0,
+  "inheritedBackendRegressionRerun": false,
+  "reason": "Documentation-only preflight; runtime hashes unchanged and fresh production/schema preflight PASS; no implementation gate claimed"
+}

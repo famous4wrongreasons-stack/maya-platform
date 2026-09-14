@@ -1,0 +1,19 @@
+// Read-only Chapter 6 catalog acceptance; preserves exact approved historical constraints.
+const path=require('node:path'),fs=require('node:fs'),assert=require('node:assert/strict'),{createRequire}=require('node:module'),{createHash}=require('node:crypto');
+const req=createRequire(path.join(process.cwd(),'package.json')),{Client}=req('pg');
+const db=new Client({connectionString:process.env.DATABASE_URL});
+(async()=>{await db.connect();try{await db.query('BEGIN READ ONLY');
+const constraints=(await db.query(`SELECT r.relname AS table_name,c.conname,c.contype,c.convalidated,pg_get_constraintdef(c.oid) AS definition FROM pg_constraint c JOIN pg_class r ON r.oid=c.conrelid JOIN pg_namespace n ON n.oid=r.relnamespace WHERE n.nspname='public' ORDER BY r.relname,c.conname`)).rows;
+const triggers=(await db.query(`SELECT r.relname AS table_name,t.tgname,t.tgenabled,pg_get_triggerdef(t.oid) AS definition FROM pg_trigger t JOIN pg_class r ON r.oid=t.tgrelid JOIN pg_namespace n ON n.oid=r.relnamespace WHERE n.nspname='public' AND NOT t.tgisinternal ORDER BY r.relname,t.tgname`)).rows;
+const functions=(await db.query(`SELECT p.proname,pg_get_functiondef(p.oid) AS definition FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.prokind='f' ORDER BY p.proname,p.oid`)).rows;
+const ledger=(await db.query(`SELECT migration_name,checksum,finished_at IS NOT NULL AS finished,rolled_back_at IS NOT NULL AS rolled_back FROM "_prisma_migrations" ORDER BY started_at,migration_name`)).rows;
+const names=fs.readdirSync('prisma/migrations').filter(n=>fs.existsSync(path.join('prisma/migrations',n,'migration.sql'))).sort();
+const matching=names.map(name=>{const digest=createHash('sha256').update(fs.readFileSync(path.join('prisma/migrations',name,'migration.sql'))).digest('hex');const rows=ledger.filter(r=>r.migration_name===name&&!r.rolled_back);assert.equal(rows.length,1);assert(rows[0].finished);assert.equal(rows[0].checksum,digest);return{name,sha256:digest};});
+const historicalMigration=fs.readFileSync('prisma/migrations/20260822120000_communication_delivery_foundation/migration.sql','utf8');
+assert.equal(createHash('sha256').update(historicalMigration).digest('hex'),'d6eb8b790bb785810757ff1a1ad6483fea335da35062edaa65af9e7b73daaf29');
+const expectedUnvalidated=[...historicalMigration.matchAll(/ADD CONSTRAINT "([^"]+)"[^;]*?NOT VALID;/g)].map(m=>m[1]).sort();
+assert.equal(expectedUnvalidated.length,5);
+assert.deepEqual(constraints.filter(c=>!c.convalidated).map(c=>c.conname).sort(),expectedUnvalidated);assert(triggers.every(t=>t.tgenabled==='O'));
+for(const table of ['ActionExecution','ActionAttempt','ClientConsentInvalidation','ClientChannelLink','MaintenanceRun','MaintenanceItemClaim','LoyaltyAccount','LoyaltyTransaction'])assert(constraints.some(c=>c.table_name===table),table);
+console.log(JSON.stringify({status:'PASS',productionWrites:0,repositoryMigrationsMatched:matching,recognizedExtraLedgerNames:ledger.filter(r=>r.finished&&!r.rolled_back&&!names.includes(r.migration_name)).map(r=>r.migration_name),constraints,triggers,functions,approvedHistoricalNotValidConstraints:expectedUnvalidated,unapprovedUnvalidatedConstraints:0,allCustomTriggersEnabled:true}));
+}finally{await db.query('ROLLBACK');await db.end();}})().catch(e=>{console.error(e.name,e.message);process.exitCode=1});

@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsIn,
   IsISO8601,
   IsInt,
   IsOptional,
@@ -12,9 +13,15 @@ import {
   Min,
 } from 'class-validator';
 
+import { EXPENSE_CATEGORY_SLUGS } from '../expense-category';
+
 export class CreateExpenseDto {
+  /**
+   * Только слаг из справочника. Свободная строка разъезжалась на «rent» /
+   * «arenda» / «arenda-avgust», и одна статья превращалась в три.
+   */
   @IsString()
-  @Matches(/^[a-z0-9_-]{2,40}$/)
+  @IsIn(EXPENSE_CATEGORY_SLUGS as string[])
   category!: string;
 
   @Type(() => Number)

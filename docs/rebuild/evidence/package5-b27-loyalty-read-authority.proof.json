@@ -1,0 +1,31 @@
+{
+  "verdict": "B27 CONFIRMED",
+  "internal": {
+    "requests": 2,
+    "loyaltyAccountRowsCreated": 1,
+    "canonicalClientOwner": null,
+    "actionExecutions": 0,
+    "verifiedClientLinks": 0
+  },
+  "external": {
+    "privateBalanceReturned": true,
+    "providerPhoneLookup": true,
+    "providerReadCount": 1,
+    "exactCanonicalCrmClient": "101",
+    "returnedCardCrmClient": "202",
+    "exactClientMismatchAccepted": true,
+    "verifiedClientLinks": 0,
+    "providerWrites": 0
+  },
+  "legacy": {
+    "syntheticBridgeCalls": 1,
+    "rawTelegramAuthIdentityAsClientSelector": true,
+    "privateLegacyBalanceReturned": true,
+    "verifiedClientLinks": 0,
+    "realNetworkCalls": 0
+  },
+  "productionMutations": 0,
+  "realProviderCalls": 0,
+  "realCompiledControllerServiceCrmReaderAdapter": true,
+  "realPostgreSQL": true
+}

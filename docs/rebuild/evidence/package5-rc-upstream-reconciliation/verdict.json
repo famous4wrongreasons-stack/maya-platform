@@ -1,0 +1,55 @@
+{
+  "observedAt": "2026-09-08",
+  "release": "/opt/maya-saas/releases/20260908-native-consent-compat-b6c53ff9",
+  "services": {
+    "maya-saas": "active",
+    "barbershop-bot": "active"
+  },
+  "health": 200,
+  "readiness": 200,
+  "reviewedUpstreamCommits": 2,
+  "productionReleaseMatchesB6c53ff9": true,
+  "compiledMatchScope": "Three authority/compatibility runtime modules, exact executable bytes; only sourceMappingURL trailer differs. No all-production-artifact certification claimed.",
+  "combinedBaselineCertified": false,
+  "stopConflict": "U1 unproven legacy FK pair promoted to first-link Client authority",
+  "upstreamReopensApprovedContract": true,
+  "upstreamInvalidatesRcSchema": false,
+  "upstreamInvalidatesRcEndToEndAuthorityProof": true,
+  "newProductionSurfaceCount": 0,
+  "inventoryDefect": false,
+  "knownSurfaceIds": [
+    "S01",
+    "S02",
+    "S03",
+    "S05",
+    "S28",
+    "S32"
+  ],
+  "rcSchemaStillValid": true,
+  "rcBusinessDecisionsStillValid": true,
+  "rcPackagesWithDirectClientAuthorityProofInvalidation": [
+    "R06",
+    "R08"
+  ],
+  "allEightPwaAssemblyProofsRequireRerun": true,
+  "wipTransferred": false,
+  "wipCommitsRewritten": false,
+  "runtimeImplementationChanges": 0,
+  "productionMigrations": 0,
+  "productionDeployments": 0,
+  "productionEffects": 0,
+  "package5FinalGateRun": false,
+  "waveRcReadyToResume": false,
+  "proofsRequiringRerun": [
+    "A18 verified provenance and grant/revoke/new grant",
+    "B6 notification preferences",
+    "B25 appointment policy",
+    "B35 marketing consent/bulk policy",
+    "Client identity and B31/B32/B33",
+    "R06/R08 Client-bound end-to-end proof",
+    "Communication Delivery admission/UNKNOWN",
+    "ActionExecution/kernel",
+    "All composed PWA artifacts",
+    "Combined schema interactions/clean replay/pending/drift"
+  ]
+}

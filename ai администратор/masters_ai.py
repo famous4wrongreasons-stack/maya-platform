@@ -44,27 +44,15 @@ from config import (
 SUPPORTED_PROVIDERS = ("claude", "openai")
 
 
-def get_current_provider() -> str:
-    """
-    Какой провайдер сейчас активен. Сначала смотрит БД (settings.ai_provider),
-    при отсутствии — берёт значение из config.py.
-    """
-    saved = database.get_setting("masters_ai_provider")
-    if saved and saved.lower() in SUPPORTED_PROVIDERS:
-        return saved.lower()
-    return (MASTERS_AI_PROVIDER or "openai").lower()
+def get_current_provider() -> str | None:
+    from canonical_governed_settings import provider
+    return provider()
+
 
 
 def set_current_provider(provider: str) -> bool:
-    """
-    Сохраняет провайдера в БД. Возвращает True если значение допустимо.
-    Изменение применяется сразу — следующий webhook идёт уже через нового AI.
-    """
-    p = (provider or "").lower().strip()
-    if p not in SUPPORTED_PROVIDERS:
-        return False
-    database.set_setting("masters_ai_provider", p)
-    return True
+    raise PermissionError('canonical_A22_confirmed_configuration_required')
+
 
 logger = logging.getLogger(__name__)
 
@@ -463,6 +451,8 @@ async def generate_upsell_advice(
     ai_provider = "claude" / "openai" / "fallback".
     """
     provider = get_current_provider()
+    if provider not in SUPPORTED_PROVIDERS:
+        return None, 'unavailable'
     prompt = _format_history_for_ai(history, current_record)
 
     try:
@@ -680,67 +670,5 @@ def _mp_freq_word(vpm: float) -> str:
 
 
 def money_pitch(staff_id: int, history: list[dict], current_record: dict) -> tuple[str, str]:
-    """Денежная мотивация мастеру по КОНКРЕТНОМУ клиенту.
-
-    Возвращает (full, short): full — 3 строки для Telegram, short — одна строка
-    для web-push. Пусто ("", ""), если посчитать не из чего или это владелец.
-    """
-    try:
-        from business_rules import salary_percent, OWNER_STAFF_ID
-        sid = int(staff_id)
-        if sid == OWNER_STAFF_ID:
-            return "", ""                       # владелец — без ЗП-мотивации
-        pct = float(salary_percent(sid) or 0.5)
-        if pct <= 0 or pct >= 1.0:
-            return "", ""
-    except Exception as e:
-        logger.error(f"money_pitch percent: {e}")
-        return "", ""
-
-    history = history or []
-    mine = [v for v in history if isinstance(v, dict) and v.get("master_id") == int(staff_id)]
-    grosses = [g for g in (_mp_visit_gross(v) for v in mine) if g > 0]
-    if grosses:
-        usual_gross = round(sum(grosses) / len(grosses))
-    else:
-        usual_gross = _mp_visit_gross(current_record) or 0
-    if usual_gross <= 0:
-        return "", ""
-
-    # Частота визитов у этого мастера → проекция на месяц/год.
-    dates = sorted([d for d in (_mp_parse_date(v.get("date")) for v in mine) if d])
-    vpm = 1.0
-    if len(dates) >= 2:
-        span = (dates[-1] - dates[0]).days
-        if span > 0:
-            cycle = span / (len(dates) - 1)
-            if 7 <= cycle <= 120:
-                vpm = 30.0 / cycle
-    vpm = max(0.5, min(vpm, 4.0))
-
-    opportunity = historical_addon_opportunity(
-        history,
-        current_record,
-        service_catalog=_mp_service_catalog(int(staff_id)),
-    )
-    if not opportunity:
-        return "", ""
-    addon = opportunity["title"]
-    addon_price = int(opportunity["price_rub"])
-
-    usual_salary = round(usual_gross * pct)
-    addon_salary = round(addon_price * pct)
-    potential = usual_salary + addon_salary
-    month_delta = round(addon_salary * vpm)
-    year_delta = round(addon_salary * vpm * 12)
-
-    full = (
-        f"💰 Обычно ты берёшь с него ~{usual_gross} ₽ → твои ~{usual_salary} ₽.\n"
-        f"➕ Раньше он уже брал «{addon}» ({addon_price} ₽). Если снова выберет — "
-        f"станет ~{potential} ₽ тебе "
-        f"(+{addon_salary} ₽ за визит).\n"
-        f"📈 Он ходит {_mp_freq_word(vpm)}: это +{month_delta} ₽/мес и +{year_delta} ₽/год "
-        f"к твоему доходу — с одного клиента."
-    )
-    short = f"💰 +{addon_salary} ₽/визит и +{year_delta} ₽/год, если продашь «{addon}»."
-    return full, short
+    """C8: legacy scorer retired; no qualified canonical tenant evidence here."""
+    return "", ""

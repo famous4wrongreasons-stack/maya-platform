@@ -1,0 +1,1072 @@
+[
+  {
+    "file": "reviews.py",
+    "function": "handle_negative_comment",
+    "line": 288,
+    "endLine": 323,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE review_requests"
+    ]
+  },
+  {
+    "file": "yclients.py",
+    "function": "change_staff_day_schedule",
+    "line": 419,
+    "endLine": 624,
+    "earlyStop": false,
+    "sql": [
+      "update failed"
+    ]
+  },
+  {
+    "file": "package5_control_plane_runtime_guard.py",
+    "function": "scan_runtime",
+    "line": 475,
+    "endLine": 736,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM masters_telegram"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "_backfill_encryption",
+    "line": 687,
+    "endLine": 725,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE clients",
+      "UPDATE gift_certificates"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "get_or_create_client",
+    "line": 730,
+    "endLine": 744,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO clients"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "update_client",
+    "line": 747,
+    "endLine": 768,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE clients"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_whats_new_seen",
+    "line": 808,
+    "endLine": 815,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE clients"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "record_first_source",
+    "line": 820,
+    "endLine": 841,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE clients"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "save_web_login_code",
+    "line": 926,
+    "endLine": 946,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO web_login_codes",
+      "UPDATE web_login_codes"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "verify_web_login_code",
+    "line": 949,
+    "endLine": 974,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE web_login_codes"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "create_web_session",
+    "line": 977,
+    "endLine": 998,
+    "earlyStop": false,
+    "sql": [
+      "INSERT OR REPLACE INTO web_sessions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "get_web_session",
+    "line": 1001,
+    "endLine": 1019,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE web_sessions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "revoke_web_session",
+    "line": 1022,
+    "endLine": 1024,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE web_sessions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "applogin_create",
+    "line": 1040,
+    "endLine": 1047,
+    "earlyStop": false,
+    "sql": [
+      "INSERT OR REPLACE INTO applogin_nonces"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "applogin_authorize",
+    "line": 1050,
+    "endLine": 1060,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE applogin_nonces"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "applogin_poll",
+    "line": 1063,
+    "endLine": 1077,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE applogin_nonces"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "set_marketing_last_sent",
+    "line": 1244,
+    "endLine": 1251,
+    "earlyStop": false,
+    "sql": [
+      "INSERT OR REPLACE INTO client_marketing_last"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "save_booking",
+    "line": 1355,
+    "endLine": 1363,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO bookings"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "save_gift_certificate",
+    "line": 1402,
+    "endLine": 1430,
+    "earlyStop": true,
+    "sql": [
+      "INSERT INTO gift_certificates"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_cert_paid",
+    "line": 1443,
+    "endLine": 1455,
+    "earlyStop": true,
+    "sql": [
+      "UPDATE gift_certificates"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "set_cert_payment_id",
+    "line": 1458,
+    "endLine": 1469,
+    "earlyStop": true,
+    "sql": [
+      "UPDATE gift_certificates"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_cert_canceled",
+    "line": 1486,
+    "endLine": 1495,
+    "earlyStop": true,
+    "sql": [
+      "UPDATE gift_certificates"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_cert_used",
+    "line": 1498,
+    "endLine": 1510,
+    "earlyStop": true,
+    "sql": [
+      "UPDATE gift_certificates"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "add_admin",
+    "line": 1529,
+    "endLine": 1537,
+    "earlyStop": false,
+    "sql": [
+      "INSERT OR IGNORE INTO admins"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "remove_admin",
+    "line": 1594,
+    "endLine": 1600,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM admins"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "add_staff_message",
+    "line": 1700,
+    "endLine": 1718,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO staff_messages"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "delete_staff_message",
+    "line": 1753,
+    "endLine": 1770,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM staff_messages"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mute_master",
+    "line": 1773,
+    "endLine": 1781,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE masters_telegram"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "unmute_master",
+    "line": 1784,
+    "endLine": 1791,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE masters_telegram"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_record_processed",
+    "line": 1879,
+    "endLine": 1893,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO processed_records"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "upsert_record_state",
+    "line": 1907,
+    "endLine": 1928,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO record_state",
+      "UPDATE SET"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "delete_record_state",
+    "line": 1931,
+    "endLine": 1933,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM record_state"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "delete_visit_mood",
+    "line": 1964,
+    "endLine": 1966,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM visit_mood"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "set_client_history_cache",
+    "line": 1989,
+    "endLine": 1996,
+    "earlyStop": false,
+    "sql": [
+      "INSERT OR REPLACE INTO client_history_cache"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "log_ai_advice",
+    "line": 2001,
+    "endLine": 2020,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO ai_advice_log"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "update_ai_advice_final_services",
+    "line": 2023,
+    "endLine": 2030,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE ai_advice_log"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "update_ai_advice_outcome",
+    "line": 2113,
+    "endLine": 2125,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE ai_advice_log"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "set_setting",
+    "line": 2148,
+    "endLine": 2156,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO settings",
+      "UPDATE SET"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "add_salon_expense",
+    "line": 2184,
+    "endLine": 2192,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO salon_expenses"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "clear_salon_expenses",
+    "line": 2215,
+    "endLine": 2219,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM salon_expenses"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "set_cash_log",
+    "line": 2224,
+    "endLine": 2237,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO cash_log",
+      "UPDATE SET"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "add_slot_interest",
+    "line": 2255,
+    "endLine": 2274,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO slot_waitlist"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_waitlist_admin_alerted",
+    "line": 2294,
+    "endLine": 2303,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE slot_waitlist"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_slot_waitlist_notified",
+    "line": 2349,
+    "endLine": 2360,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE slot_waitlist"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "log_ai_usage",
+    "line": 2365,
+    "endLine": 2378,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO ai_usage_log"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "log_reactivation",
+    "line": 2465,
+    "endLine": 2472,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO reactivation_log"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "log_cycle_reminder",
+    "line": 2489,
+    "endLine": 2502,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO cycle_reminder_log"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "schedule_review_request",
+    "line": 2507,
+    "endLine": 2532,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO review_requests"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_review_request_sent",
+    "line": 2548,
+    "endLine": 2553,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE review_requests"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_review_request_failed",
+    "line": 2556,
+    "endLine": 2562,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE review_requests"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "record_review_response",
+    "line": 2565,
+    "endLine": 2576,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE review_requests"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "expire_stale_review_requests",
+    "line": 2587,
+    "endLine": 2596,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE review_requests"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "upsert_client_chat_state",
+    "line": 2683,
+    "endLine": 2729,
+    "earlyStop": false,
+    "sql": [
+      "INSERT OR IGNORE INTO client_chat_state",
+      "UPDATE client_chat_state"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_lead_alerted",
+    "line": 2763,
+    "endLine": 2772,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE client_chat_state"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "log_freed_slot_offer",
+    "line": 2818,
+    "endLine": 2827,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO freed_slot_offers"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "create_subscription",
+    "line": 2832,
+    "endLine": 2846,
+    "earlyStop": true,
+    "sql": [
+      "INSERT INTO subscriptions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "set_subscription_payment_id",
+    "line": 2849,
+    "endLine": 2855,
+    "earlyStop": true,
+    "sql": [
+      "UPDATE subscriptions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "activate_subscription",
+    "line": 2875,
+    "endLine": 2883,
+    "earlyStop": true,
+    "sql": [
+      "UPDATE subscriptions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "update_subscription_status",
+    "line": 2886,
+    "endLine": 2893,
+    "earlyStop": true,
+    "sql": [
+      "UPDATE subscriptions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "update_subscription_usage",
+    "line": 2896,
+    "endLine": 2902,
+    "earlyStop": true,
+    "sql": [
+      "UPDATE subscriptions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_subscription_renew_pushed",
+    "line": 2905,
+    "endLine": 2910,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE subscriptions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "add_loyalty_transaction",
+    "line": 2948,
+    "endLine": 2965,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO loyalty_transactions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "reserve_loyalty_points",
+    "line": 2978,
+    "endLine": 3032,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM loyalty_transactions",
+      "INSERT INTO loyalty_transactions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "finalize_loyalty_reservation",
+    "line": 3035,
+    "endLine": 3071,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE loyalty_transactions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "release_loyalty_reservation",
+    "line": 3074,
+    "endLine": 3086,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM loyalty_transactions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "redeem_loyalty_points",
+    "line": 3089,
+    "endLine": 3130,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO loyalty_transactions"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "create_loyalty_code",
+    "line": 3224,
+    "endLine": 3232,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO loyalty_redeem_codes"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_loyalty_code_used",
+    "line": 3243,
+    "endLine": 3249,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE loyalty_redeem_codes"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "claim_loyalty_code",
+    "line": 3252,
+    "endLine": 3264,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE loyalty_redeem_codes"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "create_ref_code",
+    "line": 3626,
+    "endLine": 3633,
+    "earlyStop": true,
+    "sql": [
+      "INSERT INTO referral_codes"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "create_referral",
+    "line": 3659,
+    "endLine": 3667,
+    "earlyStop": true,
+    "sql": [
+      "INSERT INTO referrals"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "set_referral_referee_client",
+    "line": 3680,
+    "endLine": 3686,
+    "earlyStop": true,
+    "sql": [
+      "UPDATE referrals"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "update_referral_status",
+    "line": 3689,
+    "endLine": 3696,
+    "earlyStop": true,
+    "sql": [
+      "UPDATE referrals"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "save_referral_promo",
+    "line": 3699,
+    "endLine": 3709,
+    "earlyStop": true,
+    "sql": [
+      "INSERT INTO referral_promos"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "save_birthday_promo",
+    "line": 3777,
+    "endLine": 3787,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO birthday_promo"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_birthday_promo_used",
+    "line": 3807,
+    "endLine": 3815,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE birthday_promo"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "cutmatch_incr_today",
+    "line": 3858,
+    "endLine": 3871,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO cutmatch_usage",
+      "UPDATE SET"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "log_tool_call",
+    "line": 3876,
+    "endLine": 3892,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO tool_audit"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "create_owner_action",
+    "line": 3966,
+    "endLine": 4006,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO owner_action_journal"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "link_owner_control_task_action",
+    "line": 4024,
+    "endLine": 4125,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE owner_action_journal"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "finish_owner_action",
+    "line": 4128,
+    "endLine": 4171,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE owner_action_journal"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "update_owner_control_task",
+    "line": 4174,
+    "endLine": 4290,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE owner_action_journal"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_owner_control_task_delivery",
+    "line": 4293,
+    "endLine": 4343,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE owner_action_journal"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "update_owner_assignment_work_state",
+    "line": 4346,
+    "endLine": 4420,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE owner_action_journal"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "evaluate_owner_action",
+    "line": 4543,
+    "endLine": 4583,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE owner_action_journal"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "mark_payment_done",
+    "line": 4623,
+    "endLine": 4637,
+    "earlyStop": false,
+    "sql": [
+      "INSERT OR IGNORE INTO payment_idempotency"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "add_salon_rule",
+    "line": 4642,
+    "endLine": 4654,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO salon_rules"
+    ]
+  },
+  {
+    "file": "database.py",
+    "function": "deactivate_salon_rule",
+    "line": 4669,
+    "endLine": 4679,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE salon_rules"
+    ]
+  },
+  {
+    "file": "site_engagement.py",
+    "function": "record_view",
+    "line": 244,
+    "endLine": 252,
+    "earlyStop": false,
+    "sql": [
+      "INSERT OR IGNORE INTO site_event_views"
+    ]
+  },
+  {
+    "file": "site_engagement.py",
+    "function": "toggle_like",
+    "line": 255,
+    "endLine": 271,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM site_event_likes",
+      "INSERT INTO site_event_likes"
+    ]
+  },
+  {
+    "file": "site_engagement.py",
+    "function": "add_comment",
+    "line": 274,
+    "endLine": 297,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO site_event_comments"
+    ]
+  },
+  {
+    "file": "site_engagement.py",
+    "function": "add_brand_reply",
+    "line": 300,
+    "endLine": 327,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO site_event_comments"
+    ]
+  },
+  {
+    "file": "bot.py",
+    "function": "_bind_master_chat_direct",
+    "line": 3159,
+    "endLine": 3171,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE masters_telegram"
+    ]
+  },
+  {
+    "file": "webhook_server.py",
+    "function": "_process_record_update",
+    "line": 960,
+    "endLine": 1239,
+    "earlyStop": false,
+    "sql": [
+      "update на"
+    ]
+  },
+  {
+    "file": "site_community.py",
+    "function": "init_schema",
+    "line": 62,
+    "endLine": 85,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE site_event_comments"
+    ]
+  },
+  {
+    "file": "site_community.py",
+    "function": "spend_limits",
+    "line": 88,
+    "endLine": 99,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM site_community_limits",
+      "INSERT INTO site_community_limits"
+    ]
+  },
+  {
+    "file": "site_community.py",
+    "function": "set_like",
+    "line": 114,
+    "endLine": 124,
+    "earlyStop": false,
+    "sql": [
+      "DELETE FROM site_guest_likes"
+    ]
+  },
+  {
+    "file": "site_community.py",
+    "function": "reserve_comment",
+    "line": 137,
+    "endLine": 151,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO site_event_comments"
+    ]
+  },
+  {
+    "file": "site_community.py",
+    "function": "mark_review",
+    "line": 160,
+    "endLine": 162,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE site_event_comments"
+    ]
+  },
+  {
+    "file": "site_community.py",
+    "function": "resolve_comment",
+    "line": 171,
+    "endLine": 182,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE site_event_comments"
+    ]
+  },
+  {
+    "file": "site_community.py",
+    "function": "notify_owner",
+    "line": 185,
+    "endLine": 215,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE site_event_comments"
+    ]
+  },
+  {
+    "file": "site_community.py",
+    "function": "process_comment",
+    "line": 218,
+    "endLine": 239,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE site_event_comments"
+    ]
+  },
+  {
+    "file": "site_publications.py",
+    "function": "start_draft",
+    "line": 77,
+    "endLine": 90,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO site_posts"
+    ]
+  },
+  {
+    "file": "site_publications.py",
+    "function": "add_part",
+    "line": 118,
+    "endLine": 142,
+    "earlyStop": false,
+    "sql": [
+      "INSERT INTO site_post_parts"
+    ]
+  },
+  {
+    "file": "site_publications.py",
+    "function": "cancel_draft",
+    "line": 145,
+    "endLine": 150,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE site_posts"
+    ]
+  },
+  {
+    "file": "site_publications.py",
+    "function": "publish",
+    "line": 153,
+    "endLine": 167,
+    "earlyStop": false,
+    "sql": [
+      "UPDATE site_posts"
+    ]
+  }
+]

@@ -1,0 +1,110 @@
+{
+  "acceptedCheckpoint": "a4a50d2f",
+  "b13ProductionRemediation": "ACCEPTED_BASELINE",
+  "cycle": "PACKAGE 5 FINAL REMEDIATION — B14 CONTRACT RECONSTRUCTION",
+  "implementationStarted": false,
+  "productionMutations": 0,
+  "godOverview": {
+    "d4aMapping": "COMPLETE",
+    "mayaTenantsCurrentSubscriberAuthority": false,
+    "mayaTenantsFallbackProjection": false,
+    "canonicalSources": [
+      "Tenant",
+      "TrialActivation",
+      "Package 4 subscription/payment/entitlement facts",
+      "approved canonical operational facts"
+    ],
+    "hiddenReadPathSideEffects": [
+      {
+        "call": "database.set_setting(\"god_probe_ts\", ...)",
+        "function": "_god_health_checks",
+        "line": 5215
+      },
+      {
+        "call": "memory.audit_dual_role_client_context(..., repair=True)",
+        "function": "_god_health_checks",
+        "line": 5270
+      }
+    ],
+    "handler": {
+      "lines": "5348-5397",
+      "sha256": "287fd0cd9e1456ea2c6dd4e92d2a0b06db01a8282cfb13a38c544bc94e6bc878"
+    }
+  },
+  "d1Renewals": {
+    "observedMeaning": "manual global infrastructure-payment reminder/countdown list",
+    "items": [
+      "Yandex Cloud",
+      "Timeweb",
+      "Beget",
+      "domain",
+      "YClients licence",
+      "AI top-up"
+    ],
+    "runtimeConsumers": [
+      "GOD billing display",
+      "GOD health countdown/warnings",
+      "inactive full-bot watch job"
+    ],
+    "paymentOrProviderMutationConsumer": false,
+    "p405OwnerMapping": false,
+    "canonicalOwnerAlreadyApproved": false,
+    "recommended": "A — retire writable GOD renewal tracker",
+    "newSchemaIfApproved": false,
+    "newActionClassIfApproved": false,
+    "functions": {
+      "get": {
+        "lines": "5122-5131",
+        "sha256": "d8f5f28ab1a62799634edb89bbe4fc4238b89f498b0331f9460bdaa65d0e52a9"
+      },
+      "set": {
+        "lines": "5134-5135",
+        "sha256": "ac2222cc04e62bb33a890d27df6b867957a3da7114231dcad1df07c879fd008f"
+      }
+    }
+  },
+  "d2AiBudget": {
+    "observedMeaning": "global USD warning threshold compared with measured 30-day AI usage",
+    "defaultUsd": 50.0,
+    "scope": "platform/global",
+    "enforcement": "display warning only",
+    "hardEnforcement": false,
+    "modelOrCustomerFeatureEffect": false,
+    "canonicalOwnerAlreadyApproved": false,
+    "recommended": "A — retire writable global threshold and retain measured spend",
+    "newSchemaIfApproved": false,
+    "newActionClassIfApproved": false,
+    "function": {
+      "lines": "5138-5143",
+      "sha256": "10fe2e515a95d5fde26dd0301e4c40d0418d10235b886e94d3a43d1ba16a8f90"
+    }
+  },
+  "godBillingHandler": {
+    "lines": "5413-5467",
+    "sha256": "ac1d51f9d417acd061aaf2682ecb95efbaa89117b5e1e87a08d06108e4e84be3"
+  },
+  "godHealthChecks": {
+    "lines": "5176-5345",
+    "sha256": "5496ba4e3521eb91dc6bc2d806b633e6d800e400503a03d970f4b4beb0278ca9"
+  },
+  "deploymentContext": {
+    "activePwaService": "ACTIVE",
+    "fullBotService": "INACTIVE",
+    "backgroundTasksEnabled": false
+  },
+  "ownerDecisionRequired": true,
+  "recommendedOptions": "D1-A / D2-A",
+  "newModelsIfApproved": 0,
+  "newActionClassesIfApproved": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "hygiene": {
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}

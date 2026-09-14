@@ -1,0 +1,17 @@
+{
+  "health": {
+    "status": "ok",
+    "service": "maya-saas-backend",
+    "release": "20260912-c7-p06-4058cd8c",
+    "started_at": "2026-09-12T20:09:10.635Z",
+    "timestamp": "2026-09-12T21:53:50.960Z"
+  },
+  "readiness": {
+    "status": "ready",
+    "service": "maya-saas-backend",
+    "checks": {
+      "database": "ready"
+    },
+    "timestamp": "2026-09-12T21:53:50.972Z"
+  }
+}

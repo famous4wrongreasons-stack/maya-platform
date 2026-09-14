@@ -1,0 +1,878 @@
+{
+  "observedAt": "2026-09-12T17:31:20.713661+00:00",
+  "roots": [
+    "/home/m/mocine3388/mayaos.ru/public_html",
+    "/home/m/mocine3388/mocine3388.beget.tech/public_html",
+    "/home/m/mocine3388/muzhskayaestetika.rf/public_html"
+  ],
+  "files": [
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php.pre-php56-hotfix-20260908",
+      "root": "/home/m/mocine3388/mayaos.ru/public_html",
+      "sha256": "ca9e7bd28fd62822816cc9eacf21f06db401740e376dd03c2c5f594799c40d46",
+      "bytes": 6514,
+      "mtime": "2026-09-07T19:13:10.794683+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php",
+      "root": "/home/m/mocine3388/mayaos.ru/public_html",
+      "sha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+      "bytes": 6580,
+      "mtime": "2026-09-07T21:16:15.119504+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/app/cuts/buzz-cut.jpg",
+      "root": "/home/m/mocine3388/mayaos.ru/public_html",
+      "sha256": "e9156d6720055d3dde6b3742bc2da10fa0489dca1410780ef95c6af8a5eaff71",
+      "bytes": 234483,
+      "mtime": "2026-06-05T20:48:39+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": false,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/mocine3388.beget.tech/public_html/ilya.mp4",
+      "root": "/home/m/mocine3388/mocine3388.beget.tech/public_html",
+      "sha256": "0d0a7030b8df5712cf0d93782bb5b4259fb5204bc8b73ab4a01cdac1e7543f41",
+      "bytes": 2160664,
+      "mtime": "2026-05-11T13:50:35.732721+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": false,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/mocine3388.beget.tech/public_html/k4.jpg",
+      "root": "/home/m/mocine3388/mocine3388.beget.tech/public_html",
+      "sha256": "a780ba56fabdcb3efee62b6d0152403565a419b9d2371011d81923a9e62c5255",
+      "bytes": 144389,
+      "mtime": "2026-05-11T13:50:35.769387+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": false,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/mocine3388.beget.tech/public_html/api-proxy.php",
+      "root": "/home/m/mocine3388/mocine3388.beget.tech/public_html",
+      "sha256": "5904e859bfdd9c78f841f6ee0b7971cea93b924011619cc8c0ab6f41e3b54d81",
+      "bytes": 9445,
+      "mtime": "2026-05-11T13:50:35.279387+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/yclients-webhook.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "5081d0d6e7f7f47b272552f793fafcf54bc5b68700428aee8fe58297536f97f8",
+      "bytes": 6261,
+      "mtime": "2026-07-03T16:19:30.486037+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/media/interior-scrub.mp4",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "04260b7804684262dfcf99bb775c9db5d81fbec389038cb92d923eb26b8cb4b4",
+      "bytes": 3167072,
+      "mtime": "2026-07-11T11:40:50+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": false,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/media/clipper-scrub.mp4",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "22b0edee53818532a9fb013ad1e4a9b0e918f8a1983d013abe78533f4482acb7",
+      "bytes": 3120513,
+      "mtime": "2026-07-11T11:40:50+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": false,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/media/s5.webp",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "93a6ead45313556201f64fab30fa5353cabb77c18b949193a555890b1cba57cc",
+      "bytes": 38472,
+      "mtime": "2026-07-11T11:40:50+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": false,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/media/alexey.mp4",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "3ba83861d5c5ac8b0a8be1268c95b54825b62d76882f252ab9d25da5b9d8d107",
+      "bytes": 479154,
+      "mtime": "2026-07-11T11:40:50+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": false,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tg-config.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "dc9f21ddb3fc6afeb2f9bb289bd7add07b25a6260f0d8329e5a0626a6ce21a68",
+      "bytes": 209,
+      "mtime": "2026-07-03T00:09:20.220542+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": false,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/site-publications-proxy.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "e0c930b3e4bb6ee35289c075097a5e9b6a5ab179a5e1f10fc00f4fbbd0071f97",
+      "bytes": 3117,
+      "mtime": "2026-09-04T10:21:18.900898+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": true,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-config.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "0a2bb2734d619ed5c5330a057477c6dd017d0b6dc71063b05cb9bff9c8b59c5c",
+      "bytes": 797,
+      "mtime": "2026-07-02T23:51:36.390758+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": true,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "bytes": 6662,
+      "mtime": "2026-09-07T19:13:10.791349+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260704_230004",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "c91491e7c6f1515a25c297f5c760089c7d063eacf765fc9e32c874c939db02d7",
+      "bytes": 114959,
+      "mtime": "2026-07-04T20:00:04.628523+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/site-community-proxy.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "bc2540b99d9b59c6bf09dd9f7f9c56b59c3a5f71c72c44c590182a570aa52a16",
+      "bytes": 3460,
+      "mtime": "2026-09-08T12:31:56.641633+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.codex-loyalty-20260721.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "1460bc8d30b5eea2b8347ed8b3f60fae1c545669d980d58394e77b5b99d40ac6",
+      "bytes": 122317,
+      "mtime": "2026-09-08T12:31:56.368300+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": true,
+        "relay": true,
+        "refusal": true,
+        "mutation": true,
+        "phone": true,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/package5-client-consent-proxy.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "267383a99603957efce1d515346a0c32760847f341e1f85181859384cd883c69",
+      "bytes": 3120,
+      "mtime": "2026-09-08T12:31:56.641633+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.pre-b13-031977e4",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "df2749fb1f85e33787ac1d01b2f7542ae9d85a986dad80c21c552145386afed5",
+      "bytes": 142938,
+      "mtime": "2026-09-05T09:08:06.707832+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak.staff_tasks_retry_20260709230808",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "1d980c2c6a720314734fc7a08877268508df585a9ad1f5978e241f8015b7241d",
+      "bytes": 137955,
+      "mtime": "2026-07-09T20:08:08.695342+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260705_235508",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "76596de979329437a2d2a61910abb0cda779e1d1940219d0de1c36bae22db2da",
+      "bytes": 133131,
+      "mtime": "2026-07-05T20:55:11.761984+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260704_223539",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "b8a40ac681dfcb7bd33ed5b95bd6cc8cbfeda1e3518c4d637293f6a6d606cf2f",
+      "bytes": 112267,
+      "mtime": "2026-07-04T19:35:39.225453+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tg-config.php.bak.20260703030847",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "c25f194be9db7df01f4f834999c75954ad03f318acb51b223b2806e82f533239",
+      "bytes": 1004,
+      "mtime": "2026-07-03T00:08:50.810549+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": false,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/package5-b35-bulk-proxy.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "140b651a2fdf8ea1abb3bb112312ed2ce5c0e54deebb8ed0f6b3a7fdb86d59e9",
+      "bytes": 2027,
+      "mtime": "2026-09-07T12:22:23.759791+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": false,
+        "fullname": false
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.20260708211912.bak",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "e9eec4db6591e972ac2afa297a11b678df1b5ddb61461bad598246bebc51d9e1",
+      "bytes": 128733,
+      "mtime": "2026-07-08T18:19:12.337719+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-221742",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "74389d5884886ef9f3943ca4230ad5b58be3cce578b15168380326b8d09e8718",
+      "bytes": 112048,
+      "mtime": "2026-07-03T19:17:45.573303+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260702-1305",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "03bf7cd55781626958808a6650be4aea851b961daab3e3da9af0d77516541a7e",
+      "bytes": 106178,
+      "mtime": "2026-07-02T13:41:23.334501+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak.staff_tasks_20260709230559",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "1d980c2c6a720314734fc7a08877268508df585a9ad1f5978e241f8015b7241d",
+      "bytes": 137955,
+      "mtime": "2026-07-09T20:05:59.925716+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "d5eeaa82f69f6d72c366576797c2920fecd0d27f76262e2c5f4a342f363ddd05",
+      "bytes": 119193,
+      "mtime": "2026-09-12T13:56:21.327021+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-221534",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "9ef4f197ccd4cb5f13646a55fb30bb0dc31d116f93f6ea46c378ff52d87e66aa",
+      "bytes": 110033,
+      "mtime": "2026-07-03T19:15:44.226611+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-213132",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "827e3163d16c88a1096ab07eae11a8207c71d49833ea28b7ce2c1fafbe2995c8",
+      "bytes": 106720,
+      "mtime": "2026-07-03T18:31:42.577198+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "8cc22eafdcefbaa620427c53e7c930c01bb72e0e51e2af45e7d9205edd3e4cb5",
+      "bytes": 144766,
+      "mtime": "2026-07-21T17:39:00.144332+00:00",
+      "features": {
+        "bookRecord": true,
+        "provider": true,
+        "relay": true,
+        "refusal": false,
+        "mutation": true,
+        "phone": true,
+        "fullname": true
+      }
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/media/knowledge/IMG_8056.jpg",
+      "root": "/home/m/mocine3388/muzhskayaestetika.rf/public_html",
+      "sha256": "2b63ac0a0b4dd0a60c43db8154e316257d6a47b21bdeb416cc4e015c17949b9c",
+      "bytes": 168190,
+      "mtime": "2026-07-05T11:09:07+00:00",
+      "features": {
+        "bookRecord": false,
+        "provider": false,
+        "relay": false,
+        "refusal": false,
+        "mutation": false,
+        "phone": false,
+        "fullname": false
+      }
+    }
+  ],
+  "htaccess": [
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/.htaccess",
+      "sha256": "b265cfd8a86708ec88589921091240c1f21f12892870f615747bff2f675b2e98",
+      "rules": [
+        {
+          "line": 1,
+          "text": "Options -Indexes"
+        },
+        {
+          "line": 2,
+          "text": "DirectoryIndex index.html"
+        },
+        {
+          "line": 5,
+          "text": "  RewriteEngine On"
+        },
+        {
+          "line": 8,
+          "text": "  RewriteCond %{HTTP_HOST} ^www\\.mayaos\\.ru$ [NC]"
+        },
+        {
+          "line": 9,
+          "text": "  RewriteRule ^ https://mayaos.ru%{REQUEST_URI} [R=301,L,NE]"
+        },
+        {
+          "line": 12,
+          "text": "  RewriteRule ^app\\.html$ https://mayaos.ru/app/?booking_tenant=maya-os [R=302,L,NE]"
+        },
+        {
+          "line": 13,
+          "text": "  RewriteCond %{QUERY_STRING} !(^|&)booking_tenant= [NC]"
+        },
+        {
+          "line": 14,
+          "text": "  RewriteRule ^app/?$ https://mayaos.ru/app/?booking_tenant=maya-os [R=302,L,NE]"
+        },
+        {
+          "line": 18,
+          "text": "  RewriteRule ^api(?:/(.*))?$ maya-platform-api.php/$1 [QSA,L]"
+        },
+        {
+          "line": 22,
+          "text": "  <FilesMatch \"^(app|oauth-callback)\\.html$\">"
+        },
+        {
+          "line": 25,
+          "text": "  </FilesMatch>"
+        },
+        {
+          "line": 27,
+          "text": "  <Files \"service-worker.js\">"
+        },
+        {
+          "line": 29,
+          "text": "  </Files>"
+        }
+      ]
+    },
+    {
+      "path": "/home/m/mocine3388/mocine3388.beget.tech/public_html/.htaccess",
+      "sha256": "2b51e11d058e6e8f9698ba55967af68142bd4bd87e7b60b22666d2000549fb9e",
+      "rules": [
+        {
+          "line": 1,
+          "text": "AddType model/gltf-binary .glb"
+        },
+        {
+          "line": 3,
+          "text": "<FilesMatch \"\\.glb$\">"
+        },
+        {
+          "line": 6,
+          "text": "</FilesMatch>"
+        }
+      ]
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/.htaccess",
+      "sha256": "e745c6490a775061c53208dc07b9c10226a60201306a8cbb3bab41be2cc3637b",
+      "rules": [
+        {
+          "line": 9,
+          "text": "  RewriteEngine On"
+        },
+        {
+          "line": 10,
+          "text": "  RewriteCond %{HTTP_HOST} ^(www\\.)?xn--80aaocmjdk0cclbf8l3a\\.xn--p1ai(:[0-9]+)?$ [NC]"
+        },
+        {
+          "line": 11,
+          "text": "  RewriteRule ^ https://malesthetic.pro%{REQUEST_URI} [R=301,L,NE]"
+        },
+        {
+          "line": 14,
+          "text": "  RewriteCond %{HTTP_HOST} ^www\\.malesthetic\\.pro(:[0-9]+)?$ [NC]"
+        },
+        {
+          "line": 15,
+          "text": "  RewriteRule ^ https://malesthetic.pro%{REQUEST_URI} [R=301,L,NE]"
+        },
+        {
+          "line": 51,
+          "text": "  <FilesMatch \"\\.(jpg|jpeg|png|webp|avif|gif|svg|mp4|webm|woff2?|ico)$\">"
+        },
+        {
+          "line": 53,
+          "text": "  </FilesMatch>"
+        },
+        {
+          "line": 54,
+          "text": "  <FilesMatch \"\\.(html)$\">"
+        },
+        {
+          "line": 56,
+          "text": "  </FilesMatch>"
+        },
+        {
+          "line": 57,
+          "text": "  <FilesMatch \"\\.apk$\">"
+        },
+        {
+          "line": 60,
+          "text": "  </FilesMatch>"
+        },
+        {
+          "line": 61,
+          "text": "  <Files \"apple-app-site-association\">"
+        },
+        {
+          "line": 64,
+          "text": "  </Files>"
+        },
+        {
+          "line": 68,
+          "text": "  AddType application/vnd.android.package-archive .apk"
+        },
+        {
+          "line": 69,
+          "text": "  <Files \"apple-app-site-association\">"
+        },
+        {
+          "line": 71,
+          "text": "  </Files>"
+        },
+        {
+          "line": 80,
+          "text": "  RewriteEngine On"
+        },
+        {
+          "line": 81,
+          "text": "  RewriteRule ^g/.*$ /g-landing.html [L]"
+        }
+      ]
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/new.bak/.htaccess",
+      "sha256": "d1af58ecb83e0e602b5b0889559fef4f518ceecf89e2dd0d4a9a1c01027a69f1",
+      "rules": [
+        {
+          "line": 5,
+          "text": "  <FilesMatch \"\\.html$\">"
+        },
+        {
+          "line": 7,
+          "text": "  </FilesMatch>"
+        },
+        {
+          "line": 8,
+          "text": "  <FilesMatch \"\\.(js|css|woff2|woff|otf)$\">"
+        },
+        {
+          "line": 10,
+          "text": "  </FilesMatch>"
+        },
+        {
+          "line": 11,
+          "text": "  <FilesMatch \"\\.(jpg|jpeg|png|webp|mp4)$\">"
+        },
+        {
+          "line": 13,
+          "text": "  </FilesMatch>"
+        }
+      ]
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/new/.htaccess",
+      "sha256": "d1af58ecb83e0e602b5b0889559fef4f518ceecf89e2dd0d4a9a1c01027a69f1",
+      "rules": [
+        {
+          "line": 5,
+          "text": "  <FilesMatch \"\\.html$\">"
+        },
+        {
+          "line": 7,
+          "text": "  </FilesMatch>"
+        },
+        {
+          "line": 8,
+          "text": "  <FilesMatch \"\\.(js|css|woff2|woff|otf)$\">"
+        },
+        {
+          "line": 10,
+          "text": "  </FilesMatch>"
+        },
+        {
+          "line": 11,
+          "text": "  <FilesMatch \"\\.(jpg|jpeg|png|webp|mp4)$\">"
+        },
+        {
+          "line": 13,
+          "text": "  </FilesMatch>"
+        }
+      ]
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/.htaccess",
+      "sha256": "cb4b8aa2a8913d9697f2d07c7627bfb91d23bcbd9bbade72e0c159170a643731",
+      "rules": [
+        {
+          "line": 2,
+          "text": "<Files \"tg-config.php\">"
+        },
+        {
+          "line": 3,
+          "text": "    Order allow,deny"
+        },
+        {
+          "line": 4,
+          "text": "    Deny from all"
+        },
+        {
+          "line": 5,
+          "text": "</Files>"
+        },
+        {
+          "line": 6,
+          "text": "<FilesMatch \"\\.(env|ini|log|conf|pem|sqlite|sqlite3|db)$\">"
+        },
+        {
+          "line": 7,
+          "text": "    Order allow,deny"
+        },
+        {
+          "line": 8,
+          "text": "    Deny from all"
+        },
+        {
+          "line": 9,
+          "text": "</FilesMatch>"
+        },
+        {
+          "line": 13,
+          "text": "<FilesMatch \"\\.bak\">"
+        },
+        {
+          "line": 14,
+          "text": "    Order allow,deny"
+        },
+        {
+          "line": 15,
+          "text": "    Deny from all"
+        },
+        {
+          "line": 16,
+          "text": "</FilesMatch>"
+        },
+        {
+          "line": 17,
+          "text": "<FilesMatch \"\\.(sesstoken|py)$\">"
+        },
+        {
+          "line": 18,
+          "text": "    Order allow,deny"
+        },
+        {
+          "line": 19,
+          "text": "    Deny from all"
+        },
+        {
+          "line": 20,
+          "text": "</FilesMatch>"
+        },
+        {
+          "line": 26,
+          "text": "    <FilesMatch \"(index\\.html|service-worker\\.js)$\">"
+        },
+        {
+          "line": 28,
+          "text": "    </FilesMatch>"
+        }
+      ]
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/media/.htaccess",
+      "sha256": "879ff85596bd7a31621e8a948324187d7085b5f4031179c23327b9e8529afebe",
+      "rules": [
+        {
+          "line": 3,
+          "text": "Options -ExecCGI -Indexes"
+        }
+      ]
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/media/team/.htaccess",
+      "sha256": "f8a587c3f1d5d45f4b977e9164cd325ad5161d8747984d80b215063e5593864f",
+      "rules": [
+        {
+          "line": 3,
+          "text": "    Require all denied"
+        },
+        {
+          "line": 6,
+          "text": "    Order allow,deny"
+        },
+        {
+          "line": 7,
+          "text": "    Deny from all"
+        }
+      ]
+    }
+  ],
+  "symlinks": [],
+  "errors": []
+}

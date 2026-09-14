@@ -1,0 +1,63 @@
+[Nest] 50921  - 09/08/2026, 1:57:23 AM    WARN [OwnerReportsService] daily_report slot unresolved run=run slot=first-1
+[Nest] 50921  - 09/08/2026, 1:57:23 AM    WARN [OwnerReportsService] daily_report slot unresolved run=run slot=first-1
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM    WARN [AppointmentPeriodReader] journal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM    WARN [AppointmentPeriodReader] journal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 50921  - 09/08/2026, 1:57:23 AM    WARN [AppointmentPeriodReader] journal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM    WARN [AppointmentPeriodReader] journal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM    WARN [AppointmentPeriodReader] journal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM    WARN [AppointmentPeriodReader] journal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 50921  - 09/08/2026, 1:57:23 AM    WARN [AppointmentPeriodReader] journal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM    WARN [AppointmentPeriodReader] journal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 8 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 50921  - 09/08/2026, 1:57:23 AM     LOG [AppointmentPeriodReader] provider returned 8 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+
+Test Suites: 5 passed, 5 total
+Tests:       62 passed, 62 total
+Snapshots:   0 total
+Time:        0.878 s, estimated 1 s
+Ran all test suites within paths "src/owner-reports/owner-report.contract.spec.ts", "src/owner-reports/owner-report.runtime.spec.ts", "src/owner-reports/owner-reports.service.spec.ts", "src/owner-reports/owner-reports.regression.spec.ts", "src/common/postgres-transaction-conflict.spec.ts".

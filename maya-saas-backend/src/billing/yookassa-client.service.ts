@@ -1,4 +1,5 @@
 import {
+  Logger,
   BadGatewayException,
   Injectable,
   ServiceUnavailableException,
@@ -36,6 +37,8 @@ export type YooKassaPaymentPayload = Record<string, unknown>;
 
 @Injectable()
 export class YooKassaClientService {
+  private readonly logger = new Logger(YooKassaClientService.name);
+
   constructor(private readonly configService: ConfigService) {}
 
   isConfigured(): boolean {
@@ -101,14 +104,37 @@ export class YooKassaClientService {
     });
 
     if (!response.ok) {
+      const providerBody = await this.safeReadProviderBody(response);
+      // 🔴 Пишем настоящий ответ банка в лог. Раньше наружу уходил общий текст
+      // «YooKassa rejected the billing request», а причина не сохранялась
+      // нигде — разбирать отказ было не по чему.
+      this.logger.warn(
+        `YooKassa отказал: HTTP ${response.status} ${JSON.stringify(providerBody).slice(0, 400)}`,
+      );
+
+      // Понятный текст вместо общего: салон должен видеть, ЧТО делать.
+      // «Магазину не разрешены рекуррентные платежи» — это заявка в ЮKassa,
+      // а не поломка у нас, и человек не должен догадываться об этом сам.
+      const providerDescription =
+        providerBody &&
+        typeof providerBody === 'object' &&
+        'description' in providerBody
+          ? providerBody.description
+          : null;
+      const description =
+        typeof providerDescription === 'string' ? providerDescription : '';
+      const recurringForbidden =
+        response.status === 403 && /recurring/i.test(description);
+
       throw new BadGatewayException(
         this.buildYooKassaError(
-          'billing_provider_error',
-          'YooKassa rejected the billing request.',
-          {
-            status: response.status,
-            body: await this.safeReadProviderBody(response),
-          },
+          recurringForbidden
+            ? 'billing_recurring_not_allowed'
+            : 'billing_provider_error',
+          recurringForbidden
+            ? 'Магазину в ЮKassa не разрешены автосписания. Напишите менеджеру ЮKassa, чтобы подключить рекуррентные платежи, — или отключите автопродление в настройках MAYA.'
+            : 'YooKassa rejected the billing request.',
+          { status: response.status, body: providerBody },
         ),
       );
     }
@@ -165,7 +191,10 @@ export class YooKassaClientService {
   }
 
   private buildYooKassaError(
-    code: 'billing_provider_error' | 'billing_provider_unavailable',
+    code:
+      | 'billing_provider_error'
+      | 'billing_provider_unavailable'
+      | 'billing_recurring_not_allowed',
     message: string,
     extra?: Record<string, unknown>,
   ) {

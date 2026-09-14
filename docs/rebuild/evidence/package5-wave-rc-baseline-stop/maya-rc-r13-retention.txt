@@ -1,0 +1,17 @@
+{
+  "package": "R13",
+  "scope": "actual AC6 concurrent retention",
+  "result": "PASS",
+  "checks": [
+    "resolved",
+    "pending",
+    "unknown",
+    "empty"
+  ],
+  "hashAndAuditRetained": true,
+  "unresolvedHeld": true,
+  "ordinaryClearAndDeleteDenied": true,
+  "expiredIdentityReused": true,
+  "approvalAndExpenseWrites": 0,
+  "productionEffects": 0
+}

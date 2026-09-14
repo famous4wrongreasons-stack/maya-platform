@@ -1,0 +1,16 @@
+{
+  "scope": [
+    "P05",
+    "shared source correction/publication"
+  ],
+  "requirements": [
+    "Q10"
+  ],
+  "decisions": [
+    "D08",
+    "source-owner Option A"
+  ],
+  "findings": 0,
+  "mode": "read-only code/contract review",
+  "mutationOrProcessEffects": 0
+}

@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-13",
+  "baselineHead": "bae6620c6a2fddbae3b863147860be21842444d5",
+  "origin": "bae6620c6a2fddbae3b863147860be21842444d5",
+  "canonicalBranch": "codex/maya-brain-systemic-release-20260815",
+  "worktreeBranch": "codex/maya-identity-consent-20260913",
+  "lateCommits": 0,
+  "initialWorktreeDirty": 0,
+  "release": "20260913-c8-wave4-e082786b",
+  "health": "PASS",
+  "readiness": "PASS",
+  "pendingMigrations": 0,
+  "repositoryMigrations": 95,
+  "appliedEntriesIncludingThreeHistorical": 98,
+  "schemaDrift": "NONE",
+  "artifactFilesCompared": 707,
+  "c8PhysicalFields": 94,
+  "c8Functions": 5,
+  "c8Constraints": 30,
+  "c7PhysicalFieldsPreserved": 37,
+  "preservedFiles": 124,
+  "pythonGuards": 15,
+  "cronHashes": 7,
+  "freshFullRegressionRun": false,
+  "inheritedMandatory": {
+    "suites": 447,
+    "tests": 3752
+  },
+  "numericTargetsActive": "0/8",
+  "realWorldCalibration": "UNAVAILABLE",
+  "protectedMainStatusMatchesPriorAcceptedSnapshot": true,
+  "protectedMainStatusEntries": 25,
+  "protectedMainFileHashesUnchanged": 23,
+  "productionProofEffects": 0,
+  "temporaryDatabasesCreated": 0,
+  "preExistingDatabasesTouched": 0,
+  "rawEvidenceHashes": {
+    "production-baseline.txt": "ca54ea1d53fcce69df33692f8e8c7a5ab6485eb5fc532372f3b4994864593e29",
+    "preservation.txt": "550c9b9da1dd9632c914a1d280e4d6ec5e5b8b0d3fae1a6ae657a3ffd9c9f51b"
+  }
+}

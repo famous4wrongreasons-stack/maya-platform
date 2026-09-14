@@ -1,0 +1,184 @@
+{
+  "gate": "stopped at newly confirmed B34; not aggregate certification",
+  "checkpoint": "0636e559",
+  "crossBoundaryTests": {
+    "suites": 110,
+    "tests": 753,
+    "failed": 0,
+    "success": true,
+    "logSha256": "dfd8c68ce54a293411b82c72261030e424e1918f1206495a23ea8bc44cc9dd5e"
+  },
+  "freshPostgresWaveProofs": [
+    {
+      "wave": 1,
+      "proof": {
+        "package5Wave1ShadowActionClasses": "6/6",
+        "shadowDivergences": 0,
+        "executableActionClasses": "6/6",
+        "settingMutationOneTime": true,
+        "taskCreateCompleteOneTime": true,
+        "concurrentDuplicateWorkItemPossible": false,
+        "tenantIsolation": true,
+        "serverDerivedAuthority": true,
+        "package2ProjectionPreserved": true,
+        "unknownRequired": false,
+        "providerWrites": 0,
+        "productionMutations": 0,
+        "counts": {
+          "actionClasses": 6,
+          "targetMutations": 7,
+          "workItems": 3,
+          "inboxItems": 0,
+          "unknownExecutions": 0
+        }
+      },
+      "database": "maya_c06_p5_wave1_b33_final_20260906",
+      "cleanMigrationReplay": 81
+    },
+    {
+      "wave": 2,
+      "proof": {
+        "shadowActionClasses": "13/13",
+        "shadowDivergences": 0,
+        "executableActionClasses": "13/13",
+        "actionTargetMutations": 14,
+        "duplicateBusinessMutationPossible": false,
+        "restartRebuildConverges": true,
+        "tenantAuthorityIsolation": true,
+        "serverDerivedPolicyAuthority": true,
+        "trialActivationAtomic": true,
+        "currentLogoutProtocolPreserved": true,
+        "crmProjectionBoundaryPreserved": true,
+        "objectDispatches": 1,
+        "providerUnknownReconciled": true,
+        "blindRetryAfterUnknown": false,
+        "productionBusinessMutations": 0,
+        "productionProviderWrites": 0
+      },
+      "database": "maya_c06_p5_wave2_b33_final_20260906",
+      "cleanMigrationReplay": 81
+    },
+    {
+      "wave": 3,
+      "proof": {
+        "contract": "package5.wave3.all8-executable-proof/1",
+        "actionClasses": 8,
+        "shadows": 8,
+        "shadowDivergences": 0,
+        "mutationFacts": 9,
+        "providerDispatches": 1,
+        "providerReconciliation": true,
+        "duplicateBusinessMutationPossible": false,
+        "tenantIsolation": true,
+        "p02p03Hold": true,
+        "rawCredentialOrNotesInActionEvidence": false
+      },
+      "database": "maya_c06_p5_wave3_b33_final_20260906",
+      "cleanMigrationReplay": 81
+    },
+    {
+      "wave": 4,
+      "proof": {
+        "contract": "package5.wave4.all12-executable-proof/1",
+        "families": [
+          "A27",
+          "A28"
+        ],
+        "actionClasses": 12,
+        "shadows": 12,
+        "shadowDivergences": 0,
+        "mutationFacts": 13,
+        "providerDispatches": 1,
+        "providerReconciliation": true,
+        "pendingIsNotUnknown": true,
+        "duplicateBusinessMutationPossible": false,
+        "tenantAuthorityIsolation": true,
+        "frozenAppointmentsPreserved": true,
+        "p409OfferAuthorityPreserved": true,
+        "reviewFactReplaySafe": true,
+        "realProductionBusinessMutations": 0
+      },
+      "database": "maya_c06_p5_wave4_b33_final_20260906",
+      "cleanMigrationReplay": 81
+    },
+    {
+      "wave": 5,
+      "proof": {
+        "contract": "package5.wave5.all1-executable-proof/1",
+        "families": [
+          "A29",
+          "A31"
+        ],
+        "actionClasses": [
+          "correct_recovery_attribution"
+        ],
+        "shadows": 1,
+        "shadowDivergences": 0,
+        "factPlaneActionExecutions": 0,
+        "touchpointDeduplication": true,
+        "bookingDeduplication": true,
+        "immutableSourceFacts": true,
+        "correctionOwnerApproval": true,
+        "correctionConcurrencyWinnerCount": 1,
+        "a31EventDeduplication": true,
+        "a31SingleLiveLease": true,
+        "providerOperation": "READ_ONLY",
+        "unknownRequired": false,
+        "duplicateBusinessMutationPossible": false,
+        "tenantAuthorityIsolation": true,
+        "realProductionBusinessMutations": 0,
+        "providerWrites": 0
+      },
+      "database": "maya_c06_p5_wave5_b33_final_20260906",
+      "cleanMigrationReplay": 81
+    },
+    {
+      "wave": 6,
+      "proof": {
+        "status": "PASS",
+        "shadowActionClasses": "6/6",
+        "shadowDivergences": 0,
+        "negativeAssertions": 53,
+        "durableRuns": 13,
+        "concurrentPrepare": "ONE RUN",
+        "sameRunLease": "ONE WINNER",
+        "crossRunDelete": "ONE EFFECT",
+        "crashRollback": "PASS",
+        "restartFence": "PASS",
+        "terminalAndBoundaryProtection": "PASS",
+        "cascadeBound": "PASS",
+        "tenantIsolation": "PASS",
+        "immutableAudit": "PASS",
+        "rawPiiInAudit": 0,
+        "fabricatedActionExecutions": 0,
+        "productionBusinessProviderMutations": 0
+      },
+      "database": "maya_c06_p5_wave6_b33_final_20260906",
+      "cleanMigrationReplay": 81
+    }
+  ],
+  "wave3FixtureCorrection": {
+    "initialResult": "FAIL: historical bare User consent fixture rejected by accepted verified channel boundary",
+    "finalResult": "PASS: seeded synthetic verified channel binding; bare User negative case retained",
+    "runtimeChange": false,
+    "lint": "PASS",
+    "typecheckScripts": "PASS"
+  },
+  "wave6ProofPortAdaptation": {
+    "original": 55486,
+    "owned": 55503,
+    "guard": "exact localhost + exact new DB name independently asserted before execution; no runtime policy changed"
+  },
+  "remainingAggregateRegression": "NOT RUN AFTER B34",
+  "b33PreDeploymentMandatoryRegression": {
+    "suites": 375,
+    "tests": 3069,
+    "result": "PASS"
+  },
+  "productionBusinessProofMutations": 0,
+  "activeProductionGuards": {
+    "package4": "PASS",
+    "package5": "PASS",
+    "note": "Existing guards do not cover the newly confirmed B34 review writer"
+  }
+}

@@ -1,0 +1,1351 @@
+{
+  "version": 1,
+  "baseline": "0cdf45fd6a12622f5071967a02214cb526f5ebe8",
+  "status": "STRUCTURAL_PROPOSAL_NUMERIC_E01_OPEN",
+  "ownerProductDecisionsApproved": 16,
+  "schemaApproved": false,
+  "implementationAuthorized": false,
+  "requirements": [
+    {
+      "id": "Q01",
+      "requirement": "Qualified canonical feature inputs; S-A,H,I,J,U",
+      "package": "P01",
+      "ownerAndGap": "P01; source owners → C8 reader. F01–09,12–19,23 → versioned feature admissibility/coverage",
+      "classification": "D",
+      "proof": "D; reuse refs, durability TBD; cross-tenant/Client, correction, unknown/refund/affinity fixtures",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q02",
+      "requirement": "Durable input/model/rule/policy identity, asOf/revision/retry; S-C,I,U",
+      "package": "P01",
+      "ownerAndGap": "P01; C8 derived owner, reuse F04/F24 techniques",
+      "classification": "D",
+      "proof": "D; new persistence mapping TBD; same input retry, changed evidence, crash/concurrent admission, immutable publication",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q03",
+      "requirement": "Fact/policy/prediction/strategy typed separation; S-A–D,I",
+      "package": "P01",
+      "ownerAndGap": "P01; C7/C8 boundary",
+      "classification": "D",
+      "proof": "D; contract mapping TBD; no probabilistic value in C7 fact fields, no LLM-authorized truth",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q04",
+      "requirement": "Typed confirmed tenant/profile policy under A22; S-A,C,U",
+      "package": "P01",
+      "ownerAndGap": "P01; A22/F20 → typed C8 policy, no prompt-only values",
+      "classification": "D",
+      "proof": "D; namespace/validation/action reuse mapping TBD; draft/confirmation/revision/revocation tests",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q05",
+      "requirement": "One core, multiple vertical/provider semantics; S-A,B,U",
+      "package": "P01",
+      "ownerAndGap": "P01; profile/adapter readers",
+      "classification": "D",
+      "proof": "D; no per-vertical engine; four contrasting vertical fixtures and second provider fixture",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q06",
+      "requirement": "Missing data/cold start/no fabricated certainty; S-C,J,U",
+      "package": "P01",
+      "ownerAndGap": "P01; all C8 consumers",
+      "classification": "H",
+      "proof": "H; state/prior mapping TBD; unknown last visit, sparse Client/tenant, missing money/outcomes",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q07",
+      "requirement": "Historical value by basis/window/currency; S-H–J,U",
+      "package": "P02",
+      "ownerAndGap": "P02; C8 valuation consuming C7 money",
+      "classification": "D",
+      "proof": "D; no new ledger; exact-money/currency/coverage tests, lifetime spend != CLV",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q08",
+      "requirement": "Future Client value and bounded CLV semantics; S-C,E,H,U",
+      "package": "P02",
+      "ownerAndGap": "P02; C8 valuation/model",
+      "classification": "H",
+      "proof": "H; durable result/model refs TBD; horizon/conditional-value/version/uncertainty, unavailable without model",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": true
+    },
+    {
+      "id": "Q09",
+      "requirement": "Opportunity/retention/upsell/lost-money distinctions; S-C–E,I",
+      "package": "P02",
+      "ownerAndGap": "P02; valuation not A29 or execution",
+      "classification": "H",
+      "proof": "H; no causal-money shortcut; scenario vs expected vs actual, ambiguous linkage, missing counterfactual",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q10",
+      "requirement": "Tenant-specific dormancy/loyalty/value signals; S-A,C,H,U",
+      "package": "P02",
+      "ownerAndGap": "P02; policy + qualified Client facts",
+      "classification": "D",
+      "proof": "D; F13/F20 reuse; no 3/60/high-check universal, unknown != dormant",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q11",
+      "requirement": "Return/churn and no-show probabilities; S-C–G,U",
+      "package": "P03",
+      "ownerAndGap": "P03; prediction capability",
+      "classification": "P",
+      "proof": "P; models/input/output refs TBD; exact target/horizon, censored/unknown labels, calibration",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": true
+    },
+    {
+      "id": "Q12",
+      "requirement": "Revenue / conditioned earnings forecast with named basis/error; S-B,F,I,U",
+      "package": "P03",
+      "ownerAndGap": "P03; prediction consuming C7 finance/actual salary",
+      "classification": "H",
+      "proof": "H; model refs TBD; currency/refund/completeness, no fixed +/-10 confidence or .5 commission assumption",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": true
+    },
+    {
+      "id": "Q13",
+      "requirement": "Demand/occupancy forecast; S-D",
+      "package": "P03",
+      "ownerAndGap": "P03; prediction consuming capacity/schedule",
+      "classification": "H",
+      "proof": "H; no source owner replacement; resource bounds, missing schedule, horizon and error",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": true
+    },
+    {
+      "id": "Q14",
+      "requirement": "Revenue/operational anomaly; S-C–G",
+      "package": "P03",
+      "ownerAndGap": "P03; named deterministic policy or evaluated detector",
+      "classification": "H",
+      "proof": "H; rule/model mapping TBD; no unnamed threshold/LLM anomaly, seasonality/coverage limitations",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": true
+    },
+    {
+      "id": "Q15",
+      "requirement": "Reproducible eligible ranking; S-A,H,U",
+      "package": "P02",
+      "ownerAndGap": "P02; C8 ranking, reuse F11 identity only",
+      "classification": "H",
+      "proof": "H; immutable comparison manifest TBD; tie/retry/changed policy/unknown bucket tests",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q16",
+      "requirement": "Valuation evidence → existing Opportunity admission; S-C–G,U",
+      "package": "P04",
+      "ownerAndGap": "P04; F10 canonical lifecycle",
+      "classification": "D",
+      "proof": "D; typed integration mapping TBD, no parallel owner; threshold/expiry/supersession/dedup/zero effects",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q17",
+      "requirement": "Grounded explanation and comparison; S-A,U",
+      "package": "P04",
+      "ownerAndGap": "P04; deterministic evidence bundle, AI wording only",
+      "classification": "H",
+      "proof": "H; safe derived rationale refs TBD; every reason supported, no PII or invented causes",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q18",
+      "requirement": "Prediction T0 → later C7 outcomes → evaluation; S-C–E,U",
+      "package": "P05",
+      "ownerAndGap": "P05; C8 evaluation consuming C7 truth",
+      "classification": "H",
+      "proof": "H; maturity/version/evaluation receipt TBD; temporal holdout, censored/unknown labels, no leakage",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": true
+    },
+    {
+      "id": "Q19",
+      "requirement": "Calibration/drift/model activation gates; S-B–E,U",
+      "package": "P05",
+      "ownerAndGap": "P05; C8 quality lifecycle, no automatic retraining",
+      "classification": "H",
+      "proof": "H; activation evidence mapping TBD; failed/insufficient evaluation unavailable, old prediction immutable",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": true
+    },
+    {
+      "id": "Q20",
+      "requirement": "Exact authority/privacy/fairness/finance/AI/exports; S-A,H–J,U",
+      "package": "P06",
+      "ownerAndGap": "P06; existing authority + C8 reads",
+      "classification": "D",
+      "proof": "D; reuse F02/F19/F23/F24; no manager auto-finance, sensitive-feature or cross-tenant leak",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q21",
+      "requirement": "Derived retention/hold/cleanup and source independence; S-I,U",
+      "package": "P01",
+      "ownerAndGap": "P01; AC6 + source owners",
+      "classification": "D",
+      "proof": "D; C8 duration/hold schema TBD; retry no extension, no source delete/blocked correction",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q22",
+      "requirement": "Replace scoped legacy numerical claims; S-C,F,H,U",
+      "package": "P06",
+      "ownerAndGap": "P06; canonical C8 consumers",
+      "classification": "D",
+      "proof": "D; L01–L08 disposition, no new writer; Python/PWA/AI/retired-launcher guards",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q23",
+      "requirement": "Consistent bounded UI/AI/report/read consumers; S-A,H–J,U",
+      "package": "P06",
+      "ownerAndGap": "P06; existing surfaces, C8 safe projection",
+      "classification": "H",
+      "proof": "H; read API mapping TBD; actual vs forecast/unknown/version consistent, no mass export",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    },
+    {
+      "id": "Q24",
+      "requirement": "Mandatory release wiring, 32-surface acceptance and handoff; S-A,H,U",
+      "package": "P06",
+      "ownerAndGap": "P06; release owner",
+      "classification": "D",
+      "proof": "D; no schema implied; all proofs/gates/preservation, unresolved decisions/WIP0",
+      "state": "PROPOSED_NOT_IMPLEMENTED",
+      "mappingStatus": "MAPPED_NOT_IMPLEMENTED",
+      "existingFoundationSufficientForWholeQ": false,
+      "numericContractOpen": false
+    }
+  ],
+  "packages": [
+    {
+      "id": "P01",
+      "requirements": [
+        "Q01",
+        "Q02",
+        "Q03",
+        "Q04",
+        "Q05",
+        "Q06",
+        "Q21"
+      ]
+    },
+    {
+      "id": "P02",
+      "requirements": [
+        "Q07",
+        "Q08",
+        "Q09",
+        "Q10",
+        "Q15"
+      ]
+    },
+    {
+      "id": "P03",
+      "requirements": [
+        "Q11",
+        "Q12",
+        "Q13",
+        "Q14"
+      ]
+    },
+    {
+      "id": "P04",
+      "requirements": [
+        "Q16",
+        "Q17"
+      ]
+    },
+    {
+      "id": "P05",
+      "requirements": [
+        "Q18",
+        "Q19"
+      ]
+    },
+    {
+      "id": "P06",
+      "requirements": [
+        "Q20",
+        "Q22",
+        "Q23",
+        "Q24"
+      ]
+    }
+  ],
+  "waves": [
+    [
+      "P01"
+    ],
+    [
+      "P02",
+      "P03"
+    ],
+    [
+      "P04",
+      "P05"
+    ],
+    [
+      "P06"
+    ]
+  ],
+  "foundationsReused": [
+    {
+      "id": "F01",
+      "capability": "Canonical Client — EXISTS"
+    },
+    {
+      "id": "F02",
+      "capability": "Identity/source bindings — EXISTS"
+    },
+    {
+      "id": "F03",
+      "capability": "Appointment/attendance — EXISTS"
+    },
+    {
+      "id": "F04",
+      "capability": "MeasurementRevision — EXISTS"
+    },
+    {
+      "id": "F05",
+      "capability": "Financial facts — PARTIAL"
+    },
+    {
+      "id": "F06",
+      "capability": "Refund evidence — PARTIAL"
+    },
+    {
+      "id": "F07",
+      "capability": "P407 expenses — EXISTS"
+    },
+    {
+      "id": "F08",
+      "capability": "Review/NativeFeedback — EXISTS"
+    },
+    {
+      "id": "F09",
+      "capability": "A29 assignment and C7 outcome — EXISTS"
+    },
+    {
+      "id": "F10",
+      "capability": "Opportunity/AgentTask — EXISTS"
+    },
+    {
+      "id": "F11",
+      "capability": "Opportunity ordering — PARTIAL"
+    },
+    {
+      "id": "F12",
+      "capability": "CRM history — PARTIAL"
+    },
+    {
+      "id": "F13",
+      "capability": "Recency/frequency — PARTIAL"
+    },
+    {
+      "id": "F14",
+      "capability": "Cancellation/no-show observations — EXISTS"
+    },
+    {
+      "id": "F15",
+      "capability": "Service affinity inputs — PARTIAL"
+    },
+    {
+      "id": "F16",
+      "capability": "Staff affinity inputs — PARTIAL"
+    },
+    {
+      "id": "F17",
+      "capability": "AE/CD outcomes — EXISTS"
+    },
+    {
+      "id": "F18",
+      "capability": "Campaign outcomes — PARTIAL"
+    },
+    {
+      "id": "F19",
+      "capability": "Consent/preferences — EXISTS"
+    },
+    {
+      "id": "F20",
+      "capability": "A22 tenant policy — PARTIAL"
+    },
+    {
+      "id": "F21",
+      "capability": "BusinessState — EXISTS"
+    },
+    {
+      "id": "F22",
+      "capability": "AI reasoning/access — EXISTS"
+    },
+    {
+      "id": "F23",
+      "capability": "Qualified measurement reads — EXISTS"
+    },
+    {
+      "id": "F24",
+      "capability": "Audit/retention/report — EXISTS"
+    }
+  ],
+  "legacyGroups": [
+    {
+      "id": "L01",
+      "source": "[ai-tool-handler.service.ts](../../maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts) `clientLoyaltySegment` (line 1569)"
+    },
+    {
+      "id": "L02",
+      "source": "[client-registry-analysis.ts](../../maya-saas-backend/src/ai-tools/client-registry-analysis.ts) `LOYAL_VISIT_THRESHOLD=3`, `analyzeClientRegistry`"
+    },
+    {
+      "id": "L03",
+      "source": "AI handler `readNoShowRiskClients` (line 978, risk assignment 1121)"
+    },
+    {
+      "id": "L04",
+      "source": "AI handler `forecastBusinessRevenue` (line 2422)"
+    },
+    {
+      "id": "L05",
+      "source": "[master-money-motivation.ts](../../maya-saas-backend/src/ai-tools/master-money-motivation.ts) `computePeriodMoneyMotivation`"
+    },
+    {
+      "id": "L06",
+      "source": "[masters_ai.py](../../ai%20администратор/masters_ai.py) `money_pitch` (line 672)"
+    },
+    {
+      "id": "L07",
+      "source": "[owner_ai.py](../../ai%20администратор/owner_ai.py) `client_retention` (line 1220)"
+    },
+    {
+      "id": "L08",
+      "source": "[growth_planner.py](../../ai%20администратор/growth_planner.py), owner_ai `money_opportunities` / `_money_at_stake`"
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "S01",
+      "name": "Backend HTTP routes",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S02",
+      "name": "Active salon PWA",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S03",
+      "name": "Maya platform PWA / VPS static",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S04",
+      "name": "Public site / Next / shop",
+      "c8Scope": "UNCHANGED_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S05",
+      "name": "Proxy / compatibility routes",
+      "c8Scope": "UNCHANGED_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S06",
+      "name": "Chat / stream / history",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S07",
+      "name": "Realtime / voice",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S08",
+      "name": "AI tools",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S09",
+      "name": "Journal",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S10",
+      "name": "Python services / importers",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S11",
+      "name": "Schedulers",
+      "c8Scope": "UNCHANGED_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S12",
+      "name": "VPS cron / timers",
+      "c8Scope": "UNCHANGED_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S13",
+      "name": "Beget cron / hosting scheduled tasks",
+      "c8Scope": "UNCHANGED_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S14",
+      "name": "Background workers / installed operator CLIs",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S15",
+      "name": "Telegram handlers / commands / replies",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S16",
+      "name": "Inbox",
+      "c8Scope": "UNCHANGED_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S17",
+      "name": "APNS",
+      "c8Scope": "UNCHANGED_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S18",
+      "name": "Web Push",
+      "c8Scope": "UNCHANGED_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-b24-remediation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S19",
+      "name": "Communication Delivery",
+      "c8Scope": "SOURCE_OWNER_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S20",
+      "name": "Panel / GOD / admin",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S21",
+      "name": "Internal calendar",
+      "c8Scope": "SOURCE_OWNER_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S22",
+      "name": "CRM / YClients adapters / helpers",
+      "c8Scope": "SOURCE_OWNER_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S23",
+      "name": "Marketing / bulk",
+      "c8Scope": "SOURCE_OWNER_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S24",
+      "name": "Finance / expense",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S25",
+      "name": "Loyalty / value / certificates",
+      "c8Scope": "SOURCE_OWNER_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/package4-active-pwa-runtime-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S26",
+      "name": "Reviews",
+      "c8Scope": "SOURCE_OWNER_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S27",
+      "name": "Onboarding",
+      "c8Scope": "DIRECT_REVIEW",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S28",
+      "name": "Auth / identity",
+      "c8Scope": "SOURCE_OWNER_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/consent-security-invalidation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S29",
+      "name": "Maintenance",
+      "c8Scope": "UNCHANGED_PRESERVATION",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S30",
+      "name": "All direct database writer candidates",
+      "c8Scope": "CROSS_CUTTING_GUARD",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-final-remediation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S31",
+      "name": "All direct provider / delivery candidates",
+      "c8Scope": "CROSS_CUTTING_GUARD",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    },
+    {
+      "id": "S32",
+      "name": "Legacy identity / projection fallbacks",
+      "c8Scope": "CROSS_CUTTING_GUARD",
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "c8Acceptance": "REQUIRED_NOT_EXECUTED",
+      "source": "docs/rebuild/evidence/chapter7-final/surfaces.json"
+    }
+  ],
+  "models": {
+    "C8ModelVersion": {
+      "fields": [
+        "id",
+        "tenantId",
+        "modelKey",
+        "version",
+        "contractVersion",
+        "manifestHash",
+        "artifactHash",
+        "featureContractHash",
+        "evaluationContractHash",
+        "targetKey",
+        "targetJson",
+        "scopeJson",
+        "methodJson",
+        "parametersJson",
+        "trainingEvidenceJson",
+        "informationCutoffAt",
+        "trainingMode",
+        "releaseDigest",
+        "requestKeyHash",
+        "intentHash",
+        "admittedAt",
+        "expiresAt"
+      ],
+      "fieldCount": 22,
+      "checks": 6,
+      "uniqueExcludingPk": 4,
+      "foreignKeys": 1,
+      "ordinaryIndexes": 2
+    },
+    "C8ResultRevision": {
+      "fields": [
+        "id",
+        "tenantId",
+        "kind",
+        "subjectKind",
+        "subjectId",
+        "identityHash",
+        "revision",
+        "intentHash",
+        "contractVersion",
+        "ruleKey",
+        "ruleVersion",
+        "modelVersionId",
+        "modelManifestHash",
+        "policyRevisionId",
+        "policyContentHash",
+        "t0",
+        "horizonEnd",
+        "periodFrom",
+        "periodTo",
+        "timezone",
+        "scopeJson",
+        "basis",
+        "currency",
+        "inputHash",
+        "inputSnapshotJson",
+        "evidenceRefsJson",
+        "completeness",
+        "qualification",
+        "eligibility",
+        "admittedAt",
+        "expiresAt",
+        "state",
+        "leaseGeneration",
+        "leaseTokenHash",
+        "leaseExpiresAt",
+        "publishedAt",
+        "snapshotHash",
+        "valuesJson",
+        "uncertaintyJson",
+        "reasonsJson",
+        "rankingJson"
+      ],
+      "fieldCount": 41,
+      "checks": 10,
+      "uniqueExcludingPk": 3,
+      "foreignKeys": 1,
+      "ordinaryIndexes": 5
+    },
+    "C8EvaluationRevision": {
+      "fields": [
+        "id",
+        "tenantId",
+        "modelVersionId",
+        "modelManifestHash",
+        "identityHash",
+        "revision",
+        "intentHash",
+        "contractVersion",
+        "evaluationContractHash",
+        "mode",
+        "targetKey",
+        "scopeJson",
+        "t0From",
+        "t0To",
+        "labelsAsOf",
+        "admittedAt",
+        "expiresAt",
+        "state",
+        "leaseGeneration",
+        "leaseTokenHash",
+        "leaseExpiresAt",
+        "publishedAt",
+        "snapshotHash",
+        "casesJson",
+        "evidenceHash",
+        "countsJson",
+        "metricsJson",
+        "calibrationJson",
+        "driftJson",
+        "outcome",
+        "reasonsJson"
+      ],
+      "fieldCount": 31,
+      "checks": 8,
+      "uniqueExcludingPk": 3,
+      "foreignKeys": 1,
+      "ordinaryIndexes": 3
+    }
+  },
+  "alteredModels": [
+    {
+      "name": "Tenant",
+      "delta": "3 reverse Prisma relations; 0 scalar fields"
+    },
+    {
+      "name": "TenantBusinessConfigurationRevision",
+      "delta": "forward R11_config_contract_check namespace extension only"
+    }
+  ],
+  "newPhysicalFields": 94,
+  "newDatabaseEnums": 0,
+  "newPrimaryKeys": 3,
+  "newUniqueConstraints": 10,
+  "newChecks": 24,
+  "changedChecks": 1,
+  "newForeignKeys": 3,
+  "newOrdinaryIndexes": 10,
+  "newActionClasses": [],
+  "newAc6Classes": [
+    "expire_c8_result_revisions",
+    "expire_c8_evaluation_revisions",
+    "expire_c8_model_versions"
+  ],
+  "migrationsExpected": 1,
+  "backfills": 0,
+  "targets": [
+    {
+      "id": "T01",
+      "key": "attended_return",
+      "package": "P03",
+      "semanticMapping": "DEFINED",
+      "numericAcceptanceContract": "NOT_FROZEN",
+      "runtimeNumericActivation": "DISABLED",
+      "unresolvedNumericParameters": [
+        "supportedHorizonDomain",
+        "featureWindowCoverageAndAge",
+        "baselineImprovementOrNoninferiorityMargin",
+        "probabilityReliabilityTolerance",
+        "moneyCountMinuteErrorBudgets",
+        "intervalLevelCoverageSharpness",
+        "minimumIndependentSamplesAndEvents",
+        "temporalSplitEmbargo",
+        "qualityConfidenceLevel",
+        "driftWindowThreshold",
+        "evaluationFreshness",
+        "labelLag"
+      ]
+    },
+    {
+      "id": "T02",
+      "key": "appointment_no_show",
+      "package": "P03",
+      "semanticMapping": "DEFINED",
+      "numericAcceptanceContract": "NOT_FROZEN",
+      "runtimeNumericActivation": "DISABLED",
+      "unresolvedNumericParameters": [
+        "supportedHorizonDomain",
+        "featureWindowCoverageAndAge",
+        "baselineImprovementOrNoninferiorityMargin",
+        "probabilityReliabilityTolerance",
+        "moneyCountMinuteErrorBudgets",
+        "intervalLevelCoverageSharpness",
+        "minimumIndependentSamplesAndEvents",
+        "temporalSplitEmbargo",
+        "qualityConfidenceLevel",
+        "driftWindowThreshold",
+        "evaluationFreshness",
+        "labelLag"
+      ]
+    },
+    {
+      "id": "T03",
+      "key": "client_expected_value",
+      "package": "P02",
+      "semanticMapping": "DEFINED",
+      "numericAcceptanceContract": "NOT_FROZEN",
+      "runtimeNumericActivation": "DISABLED",
+      "unresolvedNumericParameters": [
+        "supportedHorizonDomain",
+        "featureWindowCoverageAndAge",
+        "baselineImprovementOrNoninferiorityMargin",
+        "probabilityReliabilityTolerance",
+        "moneyCountMinuteErrorBudgets",
+        "intervalLevelCoverageSharpness",
+        "minimumIndependentSamplesAndEvents",
+        "temporalSplitEmbargo",
+        "qualityConfidenceLevel",
+        "driftWindowThreshold",
+        "evaluationFreshness",
+        "labelLag"
+      ]
+    },
+    {
+      "id": "T04",
+      "key": "business_revenue",
+      "package": "P03",
+      "semanticMapping": "DEFINED",
+      "numericAcceptanceContract": "NOT_FROZEN",
+      "runtimeNumericActivation": "DISABLED",
+      "unresolvedNumericParameters": [
+        "supportedHorizonDomain",
+        "featureWindowCoverageAndAge",
+        "baselineImprovementOrNoninferiorityMargin",
+        "probabilityReliabilityTolerance",
+        "moneyCountMinuteErrorBudgets",
+        "intervalLevelCoverageSharpness",
+        "minimumIndependentSamplesAndEvents",
+        "temporalSplitEmbargo",
+        "qualityConfidenceLevel",
+        "driftWindowThreshold",
+        "evaluationFreshness",
+        "labelLag"
+      ]
+    },
+    {
+      "id": "T05",
+      "key": "staff_earnings_conditional",
+      "package": "P03",
+      "semanticMapping": "DEFINED",
+      "numericAcceptanceContract": "NOT_FROZEN",
+      "runtimeNumericActivation": "DISABLED",
+      "unresolvedNumericParameters": [
+        "supportedHorizonDomain",
+        "featureWindowCoverageAndAge",
+        "baselineImprovementOrNoninferiorityMargin",
+        "probabilityReliabilityTolerance",
+        "moneyCountMinuteErrorBudgets",
+        "intervalLevelCoverageSharpness",
+        "minimumIndependentSamplesAndEvents",
+        "temporalSplitEmbargo",
+        "qualityConfidenceLevel",
+        "driftWindowThreshold",
+        "evaluationFreshness",
+        "labelLag"
+      ]
+    },
+    {
+      "id": "T06",
+      "key": "observed_booking_demand",
+      "package": "P03",
+      "semanticMapping": "DEFINED",
+      "numericAcceptanceContract": "NOT_FROZEN",
+      "runtimeNumericActivation": "DISABLED",
+      "unresolvedNumericParameters": [
+        "supportedHorizonDomain",
+        "featureWindowCoverageAndAge",
+        "baselineImprovementOrNoninferiorityMargin",
+        "probabilityReliabilityTolerance",
+        "moneyCountMinuteErrorBudgets",
+        "intervalLevelCoverageSharpness",
+        "minimumIndependentSamplesAndEvents",
+        "temporalSplitEmbargo",
+        "qualityConfidenceLevel",
+        "driftWindowThreshold",
+        "evaluationFreshness",
+        "labelLag"
+      ]
+    },
+    {
+      "id": "T07",
+      "key": "scheduled_utilization",
+      "package": "P03",
+      "semanticMapping": "DEFINED",
+      "numericAcceptanceContract": "NOT_FROZEN",
+      "runtimeNumericActivation": "DISABLED",
+      "unresolvedNumericParameters": [
+        "supportedHorizonDomain",
+        "featureWindowCoverageAndAge",
+        "baselineImprovementOrNoninferiorityMargin",
+        "probabilityReliabilityTolerance",
+        "moneyCountMinuteErrorBudgets",
+        "intervalLevelCoverageSharpness",
+        "minimumIndependentSamplesAndEvents",
+        "temporalSplitEmbargo",
+        "qualityConfidenceLevel",
+        "driftWindowThreshold",
+        "evaluationFreshness",
+        "labelLag"
+      ]
+    },
+    {
+      "id": "T08",
+      "key": "statistical_deviation",
+      "package": "P03",
+      "semanticMapping": "DEFINED",
+      "numericAcceptanceContract": "NOT_FROZEN",
+      "runtimeNumericActivation": "DISABLED",
+      "unresolvedNumericParameters": [
+        "supportedHorizonDomain",
+        "featureWindowCoverageAndAge",
+        "baselineImprovementOrNoninferiorityMargin",
+        "probabilityReliabilityTolerance",
+        "moneyCountMinuteErrorBudgets",
+        "intervalLevelCoverageSharpness",
+        "minimumIndependentSamplesAndEvents",
+        "temporalSplitEmbargo",
+        "qualityConfidenceLevel",
+        "driftWindowThreshold",
+        "evaluationFreshness",
+        "labelLag"
+      ]
+    }
+  ],
+  "evaluationSemanticsDefined": 8,
+  "evaluationNumericContractsDefined": 0,
+  "openDecision": {
+    "id": "E01",
+    "recommended": "A",
+    "approved": false,
+    "optionA": "Bounded read-only evaluation-readiness/budget evidence before numerical freeze; no fitting/model code",
+    "optionB": "Owner supplies full numerical risk-budget matrix first, then derive and qualify sample design"
+  },
+  "newImplementationSurfaces": 0,
+  "runtimeSchemaMigrationChanges": 0,
+  "productionMutations": 0
+}

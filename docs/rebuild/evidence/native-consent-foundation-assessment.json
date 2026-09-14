@@ -1,0 +1,153 @@
+{
+  "result": "FOUNDATION_ASSESSMENT_COMPLETE_KEYLESS_EVENT_AMBIGUITY_PROVED",
+  "sources": {
+    "0ad0eef2:maya-saas-backend/src/crm/client-link-challenge.service.ts": "50f35f35bba57c46fb9d641c25c16a6249eabe5a53d595df1de36912ace086aa",
+    "0ad0eef2:maya-saas-backend/src/crm/client-channel-link.service.ts": "742ec211e8186c0d7e6f0c6abc4232db6a20a5c1a10ae53627075b23f0293309",
+    "0ad0eef2:maya-saas-backend/src/crm/client-channel-runtime.service.ts": "8ca6d7ac554466ac168ae1d8ec1513725d04b4bf1a882455fd4d7e6615310d19",
+    "b6c53ff9:maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+    "b6c53ff9:maya-saas-backend/src/crm/client-channel-runtime.service.ts": "b4b9368edb0bcd92b6bc877f4636f1a1eae75c141784ff38b55e0aac929abbbb",
+    "0ad0eef2:сайт и приложение/app.html": "3d711594c74693ee28c54694454cbcc20c781a8af76f5e4b7d0b0c474b78442a"
+  },
+  "g1": [
+    {
+      "case": "CLIENT_USER_ONLY",
+      "outcome": "DENIED",
+      "challengeWrites": 0,
+      "consentWrites": 0,
+      "clientWrites": 0
+    },
+    {
+      "case": "PROFILE_USER_ONLY",
+      "outcome": "DENIED",
+      "challengeWrites": 0,
+      "consentWrites": 0,
+      "clientWrites": 0
+    },
+    {
+      "case": "BOTH_USER_FKS_PROFILE_CLIENT_NULL",
+      "outcome": "DENIED",
+      "challengeWrites": 0,
+      "consentWrites": 0,
+      "clientWrites": 0
+    },
+    {
+      "case": "MATCHING_FKS_WITHOUT_VERIFIED_LINK",
+      "outcome": "DENIED",
+      "challengeWrites": 0,
+      "consentWrites": 0,
+      "clientWrites": 0
+    },
+    {
+      "case": "REVOKED_BINDING",
+      "outcome": "DENIED",
+      "challengeWrites": 0,
+      "consentWrites": 0,
+      "clientWrites": 0
+    },
+    {
+      "case": "WRONG_TENANT_BINDING",
+      "outcome": "DENIED",
+      "challengeWrites": 0,
+      "consentWrites": 0,
+      "clientWrites": 0
+    },
+    {
+      "case": "WRONG_CLIENT_TARGET",
+      "outcome": "DENIED",
+      "challengeWrites": 0,
+      "consentWrites": 0,
+      "clientWrites": 0
+    },
+    {
+      "case": "VERIFIED_MAYA_BINDING",
+      "outcome": "ALLOWED",
+      "challengeWrites": 1
+    },
+    {
+      "case": "VERIFIED_GUEST_BINDING",
+      "outcome": "ALLOWED",
+      "challengeWrites": 1
+    }
+  ],
+  "g1FoundationSufficient": true,
+  "g2KeyedCanonicalFoundationSufficient": true,
+  "g2UnchangedKeylessCompatibilityFoundationSufficient": false,
+  "nativePayload": {
+    "path": "/customers/me/profile",
+    "method": "PATCH",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"privacyConsent\":true,\"marketingConsent\":true}"
+  },
+  "nativeRepeatedPayloadIdentical": true,
+  "canonicalCommandIdentityChecks": {
+    "firstGrantDiffersFromSecondGrant": true,
+    "retriesKeepIdentity": true,
+    "existingEvents": [
+      {
+        "tenant": "tenant-1",
+        "client": "client-1",
+        "source": "grant-event-1:consent:marketing",
+        "sourceIdentityHash": "1ee25d83648832434f8c277c18ac47fdb1f8eb65224fdf91afba0c719fc1c010"
+      },
+      {
+        "tenant": "tenant-1",
+        "client": "client-1",
+        "source": "grant-event-1:consent:marketing",
+        "sourceIdentityHash": "1ee25d83648832434f8c277c18ac47fdb1f8eb65224fdf91afba0c719fc1c010"
+      },
+      {
+        "tenant": "tenant-1",
+        "client": "client-1",
+        "source": "revoke-event-1:consent:marketing",
+        "sourceIdentityHash": "6a3f5bc5c1dc3d2fab87f356bcf705c460adf714ea9fccfe34ad63cb7b911f23"
+      },
+      {
+        "tenant": "tenant-1",
+        "client": "client-1",
+        "source": "revoke-event-1:consent:marketing",
+        "sourceIdentityHash": "6a3f5bc5c1dc3d2fab87f356bcf705c460adf714ea9fccfe34ad63cb7b911f23"
+      },
+      {
+        "tenant": "tenant-1",
+        "client": "client-1",
+        "source": "grant-event-2:consent:marketing",
+        "sourceIdentityHash": "470f67334506416c740d99a5b1e59ac7818be3d37622c5d6fe8c114428ace269"
+      },
+      {
+        "tenant": "tenant-1",
+        "client": "client-1",
+        "source": "grant-event-2:consent:marketing",
+        "sourceIdentityHash": "470f67334506416c740d99a5b1e59ac7818be3d37622c5d6fe8c114428ace269"
+      }
+    ]
+  },
+  "upstreamStateTupleCollisionStillPresent": true,
+  "ambiguity": {
+    "serverObservationsIdentical": true,
+    "delayedRetryRequiredIdentity": "G1",
+    "explicitNewGrantRequiredIdentity": "G2",
+    "currentGenerationCannotDistinguish": true
+  },
+  "proofLimits": "Actual source with memory-only repositories; no database executor/concurrency/production acceptance claimed.",
+  "runtimeChanges": 0,
+  "schemaChanges": 0,
+  "databaseConnections": 0,
+  "productionEffects": 0,
+  "hygiene": {
+    "mainEntriesUnchanged": 24,
+    "mainFileHashesUnchanged": 22,
+    "wipCommitTreesUnchanged": 11,
+    "preservedDumps": [
+      "maya_rc_replay.dump",
+      "maya_rc_b36_runtime.dump",
+      "maya_rc_clean_replay.dump"
+    ],
+    "ownedProcesses": 0,
+    "ownedDatabases": 0,
+    "ownedBrowsers": 0,
+    "ownedWatchers": 0,
+    "oldDatabasesTouched": 0
+  }
+}

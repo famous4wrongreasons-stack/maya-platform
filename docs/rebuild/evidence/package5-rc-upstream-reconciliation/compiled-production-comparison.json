@@ -1,0 +1,41 @@
+{
+  "isolatedTranspileDidNotMatch": true,
+  "comparison": "Full project compiler output at exact b6c53ff9 snapshot; no app started",
+  "rows": [
+    {
+      "file": "src/crm/maya-user-client-association-issuer.ts",
+      "compiledSha256": "60a23e764de8336369771a59117bf1b634d34cafa73ffd00042c6cccf21c6c29",
+      "productionSha256": "b7c9183ed2c7dc223a7446fd3fd09365f5e30473c62c3ccdf004fc2982f44d21",
+      "equal": false,
+      "projectCompilerSha256": "60a23e764de8336369771a59117bf1b634d34cafa73ffd00042c6cccf21c6c29",
+      "projectCompilerMatchesProduction": false,
+      "onlyDifference": "Absent sourceMappingURL trailer in production",
+      "withoutSourceMapTrailerSha256": "b7c9183ed2c7dc223a7446fd3fd09365f5e30473c62c3ccdf004fc2982f44d21",
+      "executableBytesEqual": true
+    },
+    {
+      "file": "src/crm/client-channel-runtime.service.ts",
+      "compiledSha256": "36e324529aa76384ead0b3b4c69b1ab10590b48c5a9522fd1c7cc3cf84e9a8bc",
+      "productionSha256": "5914e02460fd416745d594de430fc4d80b89c3191d7264157c5bd06b9517d2c3",
+      "equal": false,
+      "projectCompilerSha256": "eb5245b0874ec8c59de47d2899feda77ed0ee5e357e253410642909d6281ddec",
+      "projectCompilerMatchesProduction": false,
+      "onlyDifference": "Absent sourceMappingURL trailer in production",
+      "withoutSourceMapTrailerSha256": "5914e02460fd416745d594de430fc4d80b89c3191d7264157c5bd06b9517d2c3",
+      "executableBytesEqual": true
+    },
+    {
+      "file": "src/customers/customers.controller.ts",
+      "compiledSha256": "8288e7182eaac70d0db5a93051b0c53a84d31939b62f7c2d67d58f1fd9e22d07",
+      "productionSha256": "f6d114abd6d1045980f2823f1d1147ba5e873b9577e33c8648def667ad3327b2",
+      "equal": false,
+      "projectCompilerSha256": "b7d20e882ee4570e32d0a445aca61737a4cc28eb3bd08c0e4e243aa559e6e30c",
+      "projectCompilerMatchesProduction": false,
+      "onlyDifference": "Absent sourceMappingURL trailer in production",
+      "withoutSourceMapTrailerSha256": "f6d114abd6d1045980f2823f1d1147ba5e873b9577e33c8648def667ad3327b2",
+      "executableBytesEqual": true
+    }
+  ],
+  "allMatch": false,
+  "allExecutableBytesMatch": true
+}

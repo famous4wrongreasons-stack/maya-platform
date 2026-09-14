@@ -1,0 +1,722 @@
+{
+  "status": "READ-ONLY REPOSITORY INSPECTION",
+  "baseline": "b9402e39d6aaab63104bfce868a636c60beb8cc5",
+  "capturedAt": "2026-09-13T15:31:56.505565+00:00",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "0ed426d5b80716b0cbd58aa3d28d9dd5be8cc241343877d9488e7dfd292dfe5b",
+      "lines": 192,
+      "anchors": [
+        {
+          "term": "Secrets",
+          "lines": [
+            120
+          ]
+        },
+        {
+          "term": "Release",
+          "lines": [
+            124,
+            125,
+            130
+          ]
+        }
+      ]
+    },
+    {
+      "path": "docs/rebuild/CYCLE-09-PREFLIGHT-AND-SCOPE.md",
+      "sha256": "3e0293935190c44719a788deda4dc3805e269e450d85c6a763cce81cf69fc223",
+      "lines": 303,
+      "anchors": [
+        {
+          "term": "Q01",
+          "lines": [
+            204,
+            242,
+            282
+          ]
+        },
+        {
+          "term": "Q30",
+          "lines": [
+            233,
+            282
+          ]
+        },
+        {
+          "term": "P01",
+          "lines": [
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            227,
+            241,
+            242,
+            243,
+            244,
+            245
+          ]
+        },
+        {
+          "term": "32",
+          "lines": [
+            16,
+            28,
+            84,
+            142,
+            230,
+            233,
+            246,
+            254,
+            259,
+            282,
+            294
+          ]
+        }
+      ]
+    },
+    {
+      "path": "docs/rebuild/CYCLE-09-OWNER-DECISION-PACK.md",
+      "sha256": "91fa5ac8c2bb5847b2b96c58bb9a2454714e0466d2a605b64b96c44675663541",
+      "lines": 248,
+      "anchors": [
+        {
+          "term": "## D2",
+          "lines": [
+            23
+          ]
+        },
+        {
+          "term": "## D4",
+          "lines": [
+            49
+          ]
+        },
+        {
+          "term": "## D10",
+          "lines": [
+            126
+          ]
+        },
+        {
+          "term": "## D14",
+          "lines": [
+            178
+          ]
+        },
+        {
+          "term": "## D15",
+          "lines": [
+            191
+          ]
+        }
+      ]
+    },
+    {
+      "path": "docs/rebuild/MAYA-ORCHESTRATOR-AGENTS-ARCHITECTURE-GATE.md",
+      "sha256": "811c8c265376e131856b6c3d70b074232120942a648206ec9cf111625822cc4f",
+      "lines": 849,
+      "anchors": [
+        {
+          "term": "## 3",
+          "lines": [
+            90,
+            113,
+            126
+          ]
+        },
+        {
+          "term": "## 5",
+          "lines": [
+            164
+          ]
+        },
+        {
+          "term": "## 8",
+          "lines": [
+            296,
+            304,
+            312,
+            343
+          ]
+        },
+        {
+          "term": "## 12",
+          "lines": [
+            472,
+            474,
+            490,
+            503
+          ]
+        },
+        {
+          "term": "## 13",
+          "lines": [
+            516
+          ]
+        },
+        {
+          "term": "## 18",
+          "lines": [
+            638
+          ]
+        }
+      ]
+    },
+    {
+      "path": "docs/rebuild/CYCLE-08-COMBINED-SCHEMA-MODEL-EVALUATION-MAPPING.md",
+      "sha256": "67d84bc2a7ace62cde39ce747297bd150d1c02718708788c41aca151c620bd17",
+      "lines": 476,
+      "anchors": [
+        {
+          "term": "No new hold field",
+          "lines": [
+            301
+          ]
+        },
+        {
+          "term": "source-table trigger",
+          "lines": [
+            247
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "f32cc83e58121ffaf1a32ea07d6299e839304fc163b0e90d9c840210e36f1130",
+      "lines": 3852,
+      "anchors": [
+        {
+          "term": "model Opportunity {",
+          "lines": [
+            307
+          ]
+        },
+        {
+          "term": "model AgentTask {",
+          "lines": [
+            353
+          ]
+        },
+        {
+          "term": "model ActionExecution {",
+          "lines": [
+            385
+          ]
+        },
+        {
+          "term": "model AiApprovalRequest {",
+          "lines": [
+            1838
+          ]
+        },
+        {
+          "term": "model AiToolExecution {",
+          "lines": [
+            1875
+          ]
+        },
+        {
+          "term": "model AiBrainSession {",
+          "lines": [
+            1907
+          ]
+        },
+        {
+          "term": "model AiMemoryFact {",
+          "lines": [
+            1932
+          ]
+        },
+        {
+          "term": "model MarketingCampaign {",
+          "lines": [
+            3105
+          ]
+        },
+        {
+          "term": "model MarketingAudience {",
+          "lines": [
+            3075
+          ]
+        },
+        {
+          "term": "model OwnerReportRun {",
+          "lines": [
+            3284
+          ]
+        },
+        {
+          "term": "model TenantBusinessConfigurationRevision {",
+          "lines": [
+            3509
+          ]
+        },
+        {
+          "term": "model MaintenanceRun {",
+          "lines": [
+            2958
+          ]
+        },
+        {
+          "term": "model MaintenanceItemClaim {",
+          "lines": [
+            3003
+          ]
+        },
+        {
+          "term": "model AuditLog {",
+          "lines": [
+            2639
+          ]
+        },
+        {
+          "term": "model MeasurementRevision {",
+          "lines": [
+            3665
+          ]
+        },
+        {
+          "term": "model C8ResultRevision {",
+          "lines": [
+            3758
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/action-engine/action-engine.identity.ts",
+      "sha256": "c02e7fb4f9d5a549ab67854250ae146f4108321fd16721cccd15d25000654317",
+      "lines": 179,
+      "anchors": [
+        {
+          "term": "createHmac",
+          "lines": [
+            4,
+            78,
+            84
+          ]
+        },
+        {
+          "term": "stableActionJson",
+          "lines": [
+            54,
+            87
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/action-engine/action-engine.approval-binding.ts",
+      "sha256": "e8c43770cb3258e8f2b095ac2ca41ed684b5b3985bedea214b7c9a8b9f0da7b6",
+      "lines": 396,
+      "anchors": [
+        {
+          "term": "authorizeForClaim",
+          "lines": [
+            138
+          ]
+        },
+        {
+          "term": "permitsDurablePolicyResume",
+          "lines": [
+            74,
+            169
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/action-engine/action-invocation-receipt.context.ts",
+      "sha256": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+      "lines": 46,
+      "anchors": [
+        {
+          "term": "withActionInvocationReceipt",
+          "lines": [
+            27
+          ]
+        },
+        {
+          "term": "admitWithInvocationReceipt",
+          "lines": [
+            34
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-receipt.service.ts",
+      "sha256": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+      "lines": 508,
+      "anchors": [
+        {
+          "term": "maya.ai-canonical-receipt/1",
+          "lines": [
+            19
+          ]
+        },
+        {
+          "term": "admissionToken",
+          "lines": [
+            39,
+            96,
+            132,
+            138,
+            161,
+            165
+          ]
+        },
+        {
+          "term": "ai_tool_canonical_plan_changed",
+          "lines": [
+            134,
+            163
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+      "sha256": "6f95d56ef2f5b6b85671adcbdfd852a78ec1bbcdd84dd1ca1d53dc93b83cf331",
+      "lines": 1253,
+      "anchors": [
+        {
+          "term": "name: 'appointments.own.create'",
+          "lines": [
+            717
+          ]
+        },
+        {
+          "term": "name: 'expenses.period.complete'",
+          "lines": [
+            992
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.types.ts",
+      "sha256": "ca7a3a2276d963526f6a8aee62514cd50e9f9e1a5205a67c2e871d5643977f08",
+      "lines": 33,
+      "anchors": [
+        {
+          "term": "interface AiToolPrincipal",
+          "lines": [
+            26
+          ]
+        },
+        {
+          "term": "AiToolApprovalPolicy",
+          "lines": [
+            9,
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "fbffe95fad5bed2bae7b7b216f2899cb135fe00c53fc3bc296559cb6fd8a866f",
+      "lines": 4753,
+      "anchors": [
+        {
+          "term": "MAX_CHAT_INPUT_BYTES",
+          "lines": [
+            53,
+            4476
+          ]
+        },
+        {
+          "term": "sanitizeToolResult",
+          "lines": [
+            683,
+            792,
+            1194,
+            4613,
+            4623,
+            4647
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.ts",
+      "sha256": "e1db163080a0df6f466491b5f15188fe99dcb74fb9b512fe723292ad5b7415f1",
+      "lines": 1492,
+      "anchors": [
+        {
+          "term": "MAX_MODEL_OUTPUT_TOKENS",
+          "lines": [
+            22,
+            1400
+          ]
+        },
+        {
+          "term": "maxOutputTokens()",
+          "lines": [
+            732,
+            753,
+            754,
+            837,
+            856,
+            857,
+            1398
+          ]
+        },
+        {
+          "term": "timeoutMs()",
+          "lines": [
+            1407,
+            1417
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave1/governed-settings.contract.ts",
+      "sha256": "d4eabc4e42588fa93185b43e2abad5ae82698cbc41c43466597ddd21dc8309c4",
+      "lines": 241,
+      "anchors": [
+        {
+          "term": "TENANT_CONFIGURATION_NAMESPACES",
+          "lines": [
+            8,
+            15,
+            54
+          ]
+        },
+        {
+          "term": "governedConfigurationContent",
+          "lines": [
+            68,
+            192,
+            224
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave1/governed-settings.controller.ts",
+      "sha256": "f449a64f92611840e1776c170b42d1efa045c84c6d7b590d5126aa792b261cfe",
+      "lines": 69,
+      "anchors": [
+        {
+          "term": "@Post('tenant')",
+          "lines": [
+            54
+          ]
+        },
+        {
+          "term": "tenant_business_configuration",
+          "lines": [
+            64
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/marketing/canonical-bulk.service.ts",
+      "sha256": "ed2e9f92c0361e31cb104b4ef43e566710ace856e10502c7528ba8d63d23a2ef",
+      "lines": 431,
+      "anchors": [
+        {
+          "term": "async confirm",
+          "lines": [
+            320
+          ]
+        },
+        {
+          "term": "async resume",
+          "lines": [
+            381
+          ]
+        },
+        {
+          "term": "confirmationHash",
+          "lines": [
+            361
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-report.contract.ts",
+      "sha256": "93f99420db2c9d2e33c28b7345d6c1df28af954effeb7fa10ff49ab28e0186a4",
+      "lines": 387,
+      "anchors": [
+        {
+          "term": "morning_owner",
+          "lines": [
+            83,
+            235
+          ]
+        },
+        {
+          "term": "morning_staff",
+          "lines": [
+            65,
+            73,
+            83,
+            235,
+            254,
+            256
+          ]
+        },
+        {
+          "term": "daily_report",
+          "lines": [
+            41,
+            124,
+            277,
+            360
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/owner-reports/owner-reports.service.ts",
+      "sha256": "435207e590bfcec2be176c158260d3d2711c34ebf34df7245eced2f4dfc9c5b9",
+      "lines": 742,
+      "anchors": [
+        {
+          "term": "async tick",
+          "lines": [
+            98
+          ]
+        },
+        {
+          "term": "morningHour()",
+          "lines": [
+            114,
+            718
+          ]
+        },
+        {
+          "term": "eveningHour()",
+          "lines": [
+            118,
+            455,
+            722
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave6/chapter8-valuation-retention.ts",
+      "sha256": "83ff5364e40e50390ca8fd78c667df7b24f92724eff384bc6e28799d6dcda347",
+      "lines": 92,
+      "anchors": [
+        {
+          "term": "purge",
+          "lines": [
+            77
+          ]
+        },
+        {
+          "term": "select",
+          "lines": [
+            57,
+            73,
+            74
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave6/package5-wave6.service.ts",
+      "sha256": "bd25dcb02f0c07e1e1d6707c11fdb6033fd8f1bb511c18ff179fb8f986e2f3d0",
+      "lines": 584,
+      "anchors": [
+        {
+          "term": "maintenanceItemClaim",
+          "lines": [
+            311,
+            363,
+            397,
+            420,
+            463,
+            516,
+            555
+          ]
+        },
+        {
+          "term": "C7_MEASUREMENT_RETENTION_CLASS",
+          "lines": [
+            8,
+            98,
+            234,
+            470,
+            491
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260913093000_chapter8_valuation_foundation/migration.sql",
+      "sha256": "9e8192c002f1c2e70ce09f7164e23611cac48aded22f449f223f70ce6e203c8f",
+      "lines": 503,
+      "anchors": [
+        {
+          "term": "R11_config_contract_check",
+          "lines": [
+            166,
+            167
+          ]
+        },
+        {
+          "term": "C8_retention_claim",
+          "lines": [
+            226,
+            244,
+            281,
+            374
+          ]
+        },
+        {
+          "term": "C8_validate_refs",
+          "lines": [
+            173,
+            202,
+            339,
+            426
+          ]
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/package.json",
+      "sha256": "2371ff71284e76c8e1f70ea5c03e5bb76725136d4ea11aed1a35beab162892ca",
+      "lines": 148,
+      "anchors": [
+        {
+          "term": "\"testRegex\"",
+          "lines": [
+            126
+          ]
+        },
+        {
+          "term": "\"test\"",
+          "lines": [
+            33
+          ]
+        },
+        {
+          "term": "\"ci:eval\"",
+          "lines": [
+            21
+          ]
+        }
+      ]
+    }
+  ],
+  "productionVerification": "Inherited accepted C9 preflight evidence; not rerun for this documentation-only mapping",
+  "newRuntimeFiles": [],
+  "newSchemaFiles": [],
+  "productionEffects": 0
+}

@@ -1,0 +1,10 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --testPathPatterns=measurement.*spec
+
+
+Test Suites: 13 passed, 13 total
+Tests:       195 passed, 195 total
+Snapshots:   0 total
+Time:        1.181 s, estimated 3 s
+Ran all test suites matching measurement.*spec.

@@ -1,0 +1,414 @@
+{
+  "inspection": "read-only active source/unit/journal metadata; no runtime imports or business endpoints",
+  "activeUnit": {
+    "MainPID": "1585542",
+    "ActiveState": "active",
+    "ActiveEnterTimestamp": "Mon 2026-09-07 15:22:14 MSK",
+    "botEntry": true,
+    "dailyReportJobRegisteredInCurrentStart": true,
+    "schedulerStartedInCurrentStart": true,
+    "telegramApplicationStarted": true,
+    "degradedNotice": false
+  },
+  "allNonTestSources": {
+    "admin_nlu.py": {
+      "sha256": "394a37cc1cd272c20e915731e0bf4d9fcb44c3039c4e107bafe17466ca01153c",
+      "lines": 395
+    },
+    "ai_billing.py": {
+      "sha256": "167c97fe839f50bca86e6120ed7a40d218b9fdb04207d2ebf3b1cbcb64ff2010",
+      "lines": 352
+    },
+    "analytics.py": {
+      "sha256": "f04c0316849dfec3fd2403225e2ad6c9c35ae18d95933f286bf6589861da3e23",
+      "lines": 376
+    },
+    "anonymizer.py": {
+      "sha256": "435e3fbe46d484ef479e5ca9c3ea502b9faf0ea1e6f5ffa830c392612ec141e2",
+      "lines": 150
+    },
+    "barber_knowledge.py": {
+      "sha256": "54cf59b2ae7e0d21a91433214197bccfe2599410ddac3a81c0b57b352d4b300c",
+      "lines": 441
+    },
+    "birthday.py": {
+      "sha256": "539e4daf8b612da31b62d18c7906c0f97a97f9cdb52c24dc7bece24017cbb3ba",
+      "lines": 178
+    },
+    "bot.py": {
+      "sha256": "425c886e4a832641951998a08e9979445afdc7f15100fbe9cd26271fffa6099d",
+      "lines": 7325
+    },
+    "broadcast_templates.py": {
+      "sha256": "240f1cdf1b7f350b7679c93831c8ef6a3b8057ca0db5f9140b44fa087e6dca2d",
+      "lines": 391
+    },
+    "business_rules.py": {
+      "sha256": "2a6b6246e7aad21800b34ba79df595386624fb52a65f798fd64fa680299cf2f4",
+      "lines": 72
+    },
+    "cert_pdf.py": {
+      "sha256": "2b27531ee7b20453ce9275ef11b522cc12f75bb5abe70ba28fdb7b157d56f411",
+      "lines": 410
+    },
+    "chat_widgets.py": {
+      "sha256": "b8cad7a4c4fe7a5ee2bf17786f24e3273c7342b023927e7729298eea3e7e0c62",
+      "lines": 122
+    },
+    "claude_ai.py": {
+      "sha256": "d70e49ddbbf6880d5f7ad931709c1b1c04cdd6d0908ea7fbd737f86a1e525a59",
+      "lines": 5453
+    },
+    "client_record_actions.py": {
+      "sha256": "fbab221191169fdd0e6ec4615f699ce6041a99407a30445d62358481c7f84048",
+      "lines": 65
+    },
+    "config.example.py": {
+      "sha256": "144113a61d77df253a4fc487a21738093131862ee16fabb420fe263c69133f9c",
+      "lines": 238
+    },
+    "config.py": {
+      "sha256": "f6fe36f5c50c19095d77ebf366b4cca5cbf5772f4e046764c286ee96047b0d51",
+      "lines": 187
+    },
+    "cutmatch.py": {
+      "sha256": "2d394832cc296f8f8d90417b04c787574aee8f32f1e89efea0b44b0692912612",
+      "lines": 502
+    },
+    "cycle_reminder.py": {
+      "sha256": "188039aae341fa102ac1a01d51f604d143d227d444f556b338f8675cbe44c41b",
+      "lines": 567
+    },
+    "database.py": {
+      "sha256": "eb1658fee4dadec041e4efe91ee367340782ded5bbb0e6e742ae519e156ec352",
+      "lines": 4679
+    },
+    "freed_slot.py": {
+      "sha256": "e0fa7df0cca9c80d159720c564bbd4bcf5c6869b2035a21408884fe59d4ec3c3",
+      "lines": 195
+    },
+    "generate_admin_pdf.py": {
+      "sha256": "2c52aef9e2cdc9b1872c25fe2e0ab618afe00202e3cc52c0da8446b38297c832",
+      "lines": 327
+    },
+    "generate_bind_codes.py": {
+      "sha256": "32a20af2254fea27419351426137f9f73c42a048b226f4e0a5277d1eaf974aee",
+      "lines": 20
+    },
+    "growth_planner.py": {
+      "sha256": "529ecf522677c8e141615ba8469a4a358a2cbc78f1908c3219b32294862e1bda",
+      "lines": 1020
+    },
+    "identity_utils.py": {
+      "sha256": "74375c8d75d68e76d3fefc44a9808ce677c2b2a9cee9a1a463fac74fd6f2342b",
+      "lines": 81
+    },
+    "import_gift_certs.py": {
+      "sha256": "c1207d74f84e427c52e0593b7249f094729ec061a0990584a1b5821480b3e23e",
+      "lines": 76
+    },
+    "lead_alerts.py": {
+      "sha256": "00c16768a92c334e3aaaeed15863069b664808667cd222f7279de18c883d5542",
+      "lines": 250
+    },
+    "legacy_appointment_bridge.py": {
+      "sha256": "068db16d654c0303e8399789fab6f6f017dfaa6e1c5076fff109637b756dd5ae",
+      "lines": 363
+    },
+    "legacy_client_command_bridge.py": {
+      "sha256": "7c3e14d2a860233996eb416a862ba0bbec20b891348ea5b60b3e48c0e1f5ea64",
+      "lines": 151
+    },
+    "legacy_client_habits_bridge.py": {
+      "sha256": "da048864a466a33d366ed64fc17b3fd2aa78be0c2bf2f10fc395d8010517bef1",
+      "lines": 149
+    },
+    "legacy_client_preferences_bridge.py": {
+      "sha256": "e5b380291685d2a4c467f94560035a5e65f40d26b2ca22c15f78ef8a87b2b720",
+      "lines": 59
+    },
+    "legacy_marketing_bulk_bridge.py": {
+      "sha256": "86f82322906451958ef5dc7a8f29c76f745c4ca53438ad9d65b2087f8e910aad",
+      "lines": 40
+    },
+    "legacy_wanted_slot_bridge.py": {
+      "sha256": "9f331c19525093bf61e07ca08f382b0dc65c85308b9d76e3a058b50b641944cc",
+      "lines": 115
+    },
+    "local_stt.py": {
+      "sha256": "76d583c4758e7b8ee96e4189a35059adb724952657b2d52cfeed80ec83ca6b32",
+      "lines": 207
+    },
+    "loyalty.py": {
+      "sha256": "a73d0c0db7a00d908518188a8f8e394218959c73a1b84b40cfcc88e62339dc17",
+      "lines": 1036
+    },
+    "market_intelligence.py": {
+      "sha256": "fff91f11e6b43c2137afc3926ca0d85d80aa99879c665d0ebaaca9d950fd11be",
+      "lines": 1279
+    },
+    "master_briefing.py": {
+      "sha256": "24522ae9a1842c5628007934b65456f9253ebbfcce8b10dadfeba9babdce947f",
+      "lines": 343
+    },
+    "masters_ai.py": {
+      "sha256": "a3d0b1a8f6cedcdc37ebc3dcd92caef96f94523d110a4bbd1769f3177dd43d08",
+      "lines": 746
+    },
+    "maya_capabilities.py": {
+      "sha256": "5b5a06eb5124faf6a48428c14cadf61cbb1c7d62e84c609007403f953b8d747c",
+      "lines": 99
+    },
+    "maya_identity.py": {
+      "sha256": "99ece7c70319713e2f32ade3417af9990603f54aee31b42d55589f74a8ddd054",
+      "lines": 173
+    },
+    "maya_inbox_bridge.py": {
+      "sha256": "ebdd29b4f46f4c9a48be0af8bd1603f963b7819f5530523ff0306c98fa48dc9f",
+      "lines": 247
+    },
+    "maya_recovery_bridge.py": {
+      "sha256": "54c574a3140ca0eed97a4a39e608a0c986fe405708626552a3fac11a24cadfef",
+      "lines": 133
+    },
+    "maya_roles.py": {
+      "sha256": "523eaf200fc8a7b1f433913982cd85f5b84e0680f570df726e701454abf7195a",
+      "lines": 230
+    },
+    "maya_shadow_bridge.py": {
+      "sha256": "fae47049dccb1c9b2120100b622718be969ec4d9c217eec02b5c057cc444ff5f",
+      "lines": 106
+    },
+    "maya_subscription_purchase_bridge.py": {
+      "sha256": "f6aece7fae433699b18b4287e994577ab24513a00abbb6c665df827b74d25af8",
+      "lines": 59
+    },
+    "memory.py": {
+      "sha256": "b286f39327adcc3e82c544ad4409d2e5c75a28e0b8367ceb9e16e320850c1b41",
+      "lines": 574
+    },
+    "migration.py": {
+      "sha256": "3c6b5eea263026e9a70353ebb461e7caef64c7daf0ec932afffd50a9dfa19791",
+      "lines": 368
+    },
+    "owner_ai.py": {
+      "sha256": "811b007301ea65526175d9ef791834143d8c9eece250e530604d63ec293e9555",
+      "lines": 6804
+    },
+    "package4_value_runtime_guard.py": {
+      "sha256": "8fa94249d1aa42d2eff14260c30fccf0949a263a9ce8c3d0dd893ebf3b7e3a51",
+      "lines": 260
+    },
+    "package5_bulk_runtime_guard.py": {
+      "sha256": "f52fb182dab9f975a67fc57962ae36477ee7ee7fee669ab154107034bb0a9d5b",
+      "lines": 41
+    },
+    "package5_control_plane_runtime_guard.py": {
+      "sha256": "3f08cf3be6d91b471e65e0051c073f52039a3a916402d41dc4bcc2f385cbd648",
+      "lines": 785
+    },
+    "package5_loyalty_read_guard.py": {
+      "sha256": "09df868144ae2c5d828a4a55a4efdb769fa84663c365e4b6d79669426f2c4fd9",
+      "lines": 51
+    },
+    "package5_review_source_guard.py": {
+      "sha256": "0474ba059d967a6cbf3f0b070b050c0c5d2b0c20aa44edd0ae40974fd09cc397",
+      "lines": 158
+    },
+    "pii_crypto.py": {
+      "sha256": "4b3ebf61cfd0db3b8e13879aabccd46ff570d1da85492b10438f9669bbbdd9b0",
+      "lines": 83
+    },
+    "privacy_policy.py": {
+      "sha256": "66f8a003dcb3eab27138acebc2cd7daffefa1afcc2487599e55d773008cd0701",
+      "lines": 20
+    },
+    "prompts.py": {
+      "sha256": "02c29e8717d1394770351f05378f3557d8bb1ffe0c4fcfa26ab6f6bf464bf0f5",
+      "lines": 430
+    },
+    "pwa_api.py": {
+      "sha256": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "lines": 66
+    },
+    "reactivation.py": {
+      "sha256": "c2417c9884437ab08ae059f5f8a0a9757c95beb50d808b6be97b67eb2caa70d6",
+      "lines": 233
+    },
+    "realtime_bridge.py": {
+      "sha256": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+      "lines": 692
+    },
+    "referral.py": {
+      "sha256": "6a6b6a769dc140237b7bfd0d2da6de9940ca8c7e44876efda479295035d153b1",
+      "lines": 347
+    },
+    "reputation.py": {
+      "sha256": "20b4522fe412c88e1a0f8d5f230c10644f1b9774efa5e99cd0257ca49bd9fc4b",
+      "lines": 453
+    },
+    "reviews.py": {
+      "sha256": "16654d2a3f087c92a5dab8ce6941156ba29c371a840c336b906120afdb0a92df",
+      "lines": 374
+    },
+    "site_community.py": {
+      "sha256": "f631935b676ac26614206b91d8448e415b1db6883e11fcea445e103d731fba65",
+      "lines": 364
+    },
+    "site_engagement.py": {
+      "sha256": "96bc5a18df899670746ea2dcc3055c6cd7a5feb21885ebc2b5da26a5327ea6ac",
+      "lines": 386
+    },
+    "site_guest_chat.py": {
+      "sha256": "035541c84fbefa4f38af9ca30c86fca1f21ac2acbd023accc4195544b1af981a",
+      "lines": 137
+    },
+    "site_publications.py": {
+      "sha256": "846b04430d2f81abc62bb1f0ff37384e27631ce7c23b286f1dadb86344ff4bb5",
+      "lines": 321
+    },
+    "sources.py": {
+      "sha256": "b5f64a7ec451125d48a8e4b599ecfc7feab5bab431dd11c2b835a09602ba0c1f",
+      "lines": 134
+    },
+    "subscriptions.py": {
+      "sha256": "335d0e8400d3d457676fafc6bf168109be908645c35a349d5249f9c47f03ae24",
+      "lines": 513
+    },
+    "tenant_config_api.py": {
+      "sha256": "8bbfdab34c610b93cacb732aea6db00f6500e135f1e78b0664fe1154d81208e2",
+      "lines": 123
+    },
+    "voice.py": {
+      "sha256": "9482b4f221fe9e309e9b8edc472b091b7ca48b64fbb5dd55d76d7794d1a83459",
+      "lines": 507
+    },
+    "voice_guard.py": {
+      "sha256": "e0f0446fa6f4e94720daed9a1a4861b5b3ebcb56cbe8b514af3da135af796b0d",
+      "lines": 232
+    },
+    "web_auth.py": {
+      "sha256": "d5af185be0073187de9fc0023c3b0ea4d711991344523a0fa5fbe4fd88513a19",
+      "lines": 455
+    },
+    "webhook_server.py": {
+      "sha256": "5568115de0a39e0b99f50fa7b811eab086f446dc9f6071883717281841146ee3",
+      "lines": 12076
+    },
+    "yclients.py": {
+      "sha256": "55cf23f02d6e81c91f1f79ae2ef21bda1307f07f6206212b14dd426395617b5a",
+      "lines": 2172
+    },
+    "yukassa_api.py": {
+      "sha256": "8b4655c8591762a21a9481da6a986b07b8f3a5b5dda2ae0a0dadedff6d703e7d",
+      "lines": 142
+    }
+  },
+  "rootPythonFiles": 93,
+  "nonTestRootPythonFiles": 73,
+  "functions": {
+    "bot.py:post_init": {
+      "line": 6026,
+      "sha256": "23a05bc6715fe664ff79ff8cdefd6be9c419bca55a68bfa1de023e0053db0a62",
+      "directSends": [],
+      "canonicalCalls": []
+    },
+    "bot.py:_fmt_rub": {
+      "line": 6327,
+      "sha256": "e1456b2daf7533d142e9901a89ae53326941b2abc6e33fee6c8505529c49b668",
+      "directSends": [],
+      "canonicalCalls": []
+    },
+    "bot.py:notify_owner": {
+      "line": 6557,
+      "sha256": "003576842f8e1944c460ba0f947c518933fd2446cd8e9f1cd74c9e585e118cd7",
+      "directSends": [
+        "app.bot.send_message",
+        "webhook_server._send_client_push"
+      ],
+      "canonicalCalls": [
+        "maya_inbox_bridge.publish_owner_message"
+      ]
+    },
+    "bot.py:_daily_report_job": {
+      "line": 6761,
+      "sha256": "0d39b5fa6730e1d8a18d045e56584bdc86c13a15d14b8e02fbb1253fdbadc533",
+      "directSends": [
+        "app.bot.send_message",
+        "webhook_server._send_client_push"
+      ],
+      "canonicalCalls": [
+        "maya_inbox_bridge.publish_inbox_item"
+      ]
+    },
+    "bot.py:_god_watch_job": {
+      "line": 6906,
+      "sha256": "eaa45819ba6f731c62cd98a6de049c626a3d4ec08dd512e93998bd5e8d91df44",
+      "directSends": [
+        "app.bot.send_message",
+        "webhook_server._send_client_push"
+      ],
+      "canonicalCalls": []
+    },
+    "bot.py:_dual_role_guard_job": {
+      "line": 6975,
+      "sha256": "2c41299b5aaf0b3f6c7617d3776bac1e2e9c98902b5cccb83acc33da04e869cf",
+      "directSends": [
+        "app.bot.send_message",
+        "webhook_server._send_client_push"
+      ],
+      "canonicalCalls": []
+    },
+    "bot.py:_run_polling_resilient": {
+      "line": 7152,
+      "sha256": "cf807face9da111179840e9bfe9712ed677653ed9d57dc2a40c4ad65939e6391",
+      "directSends": [],
+      "canonicalCalls": []
+    },
+    "bot.py:main": {
+      "line": 7215,
+      "sha256": "6b81e52c47512f10f9539b31e9bb224181f8e1a2741a2c490421289def794952",
+      "directSends": [],
+      "canonicalCalls": []
+    },
+    "webhook_server.py:_send_client_push": {
+      "line": 404,
+      "sha256": "bf70fa0a73ed3e172b69abbd3399d86641be70765ad033b407b91991549e5eb9",
+      "directSends": [],
+      "canonicalCalls": []
+    },
+    "webhook_server.py:_daily_report": {
+      "line": 4891,
+      "sha256": "2355c0107bca48f62ae25ea55b7cfd30df02636562eb3a2e53bb3e2eb7bbf446",
+      "directSends": [],
+      "canonicalCalls": []
+    },
+    "webhook_server.py:install_staff_telegram_chat_mirror": {
+      "line": 8088,
+      "sha256": "9e31847cd30d26da113b54642e524330ee9a327f0079ba30cbe364215c977e2f",
+      "directSends": [],
+      "canonicalCalls": []
+    },
+    "database.py:list_admins": {
+      "line": 1588,
+      "sha256": "160af14406d9eb751f830e05895c90a463e537dac5dffd10e46b6fcdaa98c1a8",
+      "directSends": [],
+      "canonicalCalls": []
+    },
+    "maya_inbox_bridge.py:publish_inbox_item": {
+      "line": 59,
+      "sha256": "4682dc5c49105b9a74528e08aa5d7acf521b0389a7d1e7f07848831076407e74",
+      "directSends": [],
+      "canonicalCalls": []
+    },
+    "maya_inbox_bridge.py:observe_legacy_telegram_send": {
+      "line": 127,
+      "sha256": "9db1f0adfe5d14b3f95f079e3c6dcc36f02fb93e49b83ccd2bc3d5d549487737",
+      "directSends": [],
+      "canonicalCalls": []
+    }
+  },
+  "legacyAdminRecipientCount": 2,
+  "productionMessages": 0,
+  "productionBusinessProviderMutations": 0
+}

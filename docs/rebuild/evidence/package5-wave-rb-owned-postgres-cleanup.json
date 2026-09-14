@@ -1,0 +1,15 @@
+{
+  "ownedClusterStopped": true,
+  "ownedDatabasesDropped": [
+    "maya_rb_r03",
+    "maya_rb_r04",
+    "maya_rb_r07",
+    "maya_rb_release",
+    "maya_rb_replay"
+  ],
+  "oldDatabasesTouched": 0,
+  "port": 55508,
+  "ownedPostgresPidGone": true,
+  "ownedSocketRemoved": true,
+  "ownedDataDirectoryRemoved": true
+}

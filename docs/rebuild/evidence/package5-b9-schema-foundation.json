@@ -1,0 +1,29 @@
+{
+  "checkpointAccepted": "57196b09",
+  "scope": "B9 ClientWantedSlotInterest schema foundation",
+  "canonicalOwner": "ClientWantedSlotInterest",
+  "schemaProof": "8/8 PASS",
+  "schemaRatchet": "3/3 PASS",
+  "cleanReplay": "PASS",
+  "replayDrift": "NONE",
+  "prismaValidate": "PASS",
+  "typechecks": "app + scripts PASS",
+  "projectLint": "PASS",
+  "build": "PASS",
+  "matchWindow": "EXACT REQUESTED TIME",
+  "expiry": "REQUESTED SLOT START / SERVER-DERIVED",
+  "maxActivePerClient": 10,
+  "maxMatchFanOut": 3,
+  "deliveryTarget": "CLIENT ONLY",
+  "wantedSlotCreatesMarketingConsent": false,
+  "newModels": 1,
+  "backfill": 0,
+  "productionMigrationApplied": false,
+  "runtimeRemediationDeployed": false,
+  "productionBusinessProviderMutations": 0,
+  "proofOwnedDbRemoved": true,
+  "logs": {
+    "schema-proof.log": "sha256:f02178db1f8e31fd50d44f4abb3e56bf43d6c437297c132030b20556dfe8c1a0",
+    "schema-replay.log": "sha256:8b9dfe395ce17e4983ca338c5edc011d87384413f06f64d2a668bc64d271d01c"
+  }
+}

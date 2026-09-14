@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "mainWorktreeTouched": false,
+  "mainStatusEntriesPreserved": 25,
+  "mainFileHashesPreserved": 23,
+  "original24Preserved": true,
+  "preExistingDatabasesTouched": 0,
+  "ownedTempProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTemporaryDatabases": 0,
+  "remoteCanaryAndStage": {
+    "status": "PASS",
+    "ownedCanaryProcesses": 0,
+    "canaryLogRemoved": true,
+    "ownedPwaStageRemoved": true,
+    "ownedMacArchiveMetadataRemoved": 4,
+    "privateRecoveryBackupPreserved": true,
+    "businessEffects": 0,
+    "maintenanceChanges": 0
+  },
+  "databaseProof": {
+    "status": "PASS",
+    "ownedTemporaryDatabases": 0,
+    "preExistingDatabasesTouched": 0,
+    "ownedClusterStopped": true,
+    "ownedDataAndSocketRemoved": true,
+    "syntheticDumpSha256": "098aa31f689ebfc546aa4b78346944cd5a0c3f675637f306945240ff5541a8e1",
+    "syntheticDumpBytes": 915854
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "acceptedCheckpoint": "01f6d909",
+  "runtimeCommit": "6b3c32f202a3af3b4bb11df53b53e849479d05a9",
+  "release": "/opt/maya-saas/releases/20260906-p5-b29-6b3c32f2",
+  "b29ProductionRemediation": "PASS",
+  "schemaChanges": 0,
+  "newModels": 0,
+  "newActionClasses": 0,
+  "deploymentGate": {
+    "suites": 365,
+    "tests": 2970,
+    "verdict": "PASS",
+    "prismaValidate": "PASS",
+    "projectLint": "PASS",
+    "productionAndScriptTypechecks": "PASS",
+    "build": "PASS",
+    "initialAttempt": "First deploy.sh Jest run segfaulted locally before upload; rerun of the same suite and the complete deploy script then PASS. Production was not touched by the failed first attempt."
+  },
+  "productionVerification": {
+    "health": {
+      "status": "ok",
+      "service": "maya-saas-backend",
+      "release": "20260906-p5-b29-6b3c32f2"
+    },
+    "readiness": {
+      "status": "ready",
+      "checks": { "database": "ready" }
+    },
+    "maya-saas": "active",
+    "barbershop-pwa": "active",
+    "barbershop-bot": "inactive",
+    "pwaPortListening": true,
+    "maya-saasErrorCount": 0,
+    "barbershop-pwaErrorCount": 0,
+    "spareSmokePortListening": false,
+    "hashes": {
+      "appointments.controller.js": "975b6989a62826472ae218a1bff6b97c153ac5b997cbc857b5cca76d821b62b1",
+      "appointments.service.js": "369a6fbfc1e4fed7c8d287b65e1f15aa6f7ec2dafb90f760ece6c30a7327ca9d",
+      "client-appointment-cancel.service.js": "ce237615d94ebe3b370b371e8b4ba4d234fdf9bf4b4808a849cbee44938d5fbd",
+      "tenant-appointment.repository.js": "6175c3c9f379a4e8a89ed05775e806d3ed4b95579e224d67f33a374832175ff8",
+      "client-appointment-read.service.js": "17e98c841a11c533a3403ff6b56c83f186c45a2ed686776771303ffc2ddcc52c"
+    },
+    "deployedCancelUsesCanceler": true,
+    "deployedCancelUsesUpdateForClient": false,
+    "deployedRescheduleUsesFindForClient": true,
+    "deployedRescheduleUsesUpdateForClient": true
+  },
+  "migrationState": {
+    "pending": 0,
+    "drift": "NONE",
+    "repositoryMigrations": 79,
+    "accountedHistoricalMigrations": 82
+  },
+  "package4CrossPackageGuards": "PASS",
+  "package5ControlPlaneGuards": "PASS",
+  "realProductionMutationsForProof": 0,
+  "realCancellationMutations": 0,
+  "realProviderWrites": 0,
+  "productionPrivateEndpointsInvokedForSmoke": 0,
+  "finalGate": "FAIL",
+  "package5Complete": false,
+  "blocker": {
+    "id": "B30 / A18",
+    "route": "POST /api/appointments/:id/reschedule",
+    "proof": "package5-b29-b30-final-gate.proof.json"
+  }
+}

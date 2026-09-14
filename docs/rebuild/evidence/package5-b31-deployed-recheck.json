@@ -1,0 +1,70 @@
+{
+  "release": "/opt/maya-saas/releases/20260906-p5-b31-2aeaacff",
+  "health": {
+    "status": "ok",
+    "service": "maya-saas-backend",
+    "release": "20260906-p5-b31-2aeaacff",
+    "started_at": "2026-09-06T16:51:19.836Z",
+    "timestamp": "2026-09-06T16:51:41.624Z"
+  },
+  "readiness": {
+    "status": "ready",
+    "service": "maya-saas-backend",
+    "checks": {
+      "database": "ready"
+    },
+    "timestamp": "2026-09-06T16:51:41.648Z"
+  },
+  "services": {
+    "backend": "active",
+    "pwa": "active",
+    "legacyBot": "inactive"
+  },
+  "serviceErrors": {
+    "backend": 0,
+    "pwa": 0
+  },
+  "spareSmokePortListening": false,
+  "publicPwa": 200,
+  "structural": {
+    "createUsesCanonicalCreator": true,
+    "createHasDirectAppointmentWrite": false,
+    "verifiedClientResolver": true,
+    "commonScope": true,
+    "immutableBinding": true,
+    "immutableIntent": true
+  },
+  "python": {
+    "webhook_server.py": "e7d426d284d3fd0b817e51f33b3b958ea14e0eac56763599d8ff113404e5cdb1",
+    "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+    "package5_control_plane_runtime_guard.py": "7e23a8adb5afa48417bf2eba0928a7b7a5d386113093c9706a1d07e9c438a262",
+    "realtime_bridge.py": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+    "legacy_client_command_bridge.py": "c539c3176bd26cda723a79d7ec7f0a5ef1032127809b6dac41d019009a87837e",
+    "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+    "claude_ai.py": "d70e49ddbbf6880d5f7ad931709c1b1c04cdd6d0908ea7fbd737f86a1e525a59",
+    "package5_loyalty_read_guard.py": "09df868144ae2c5d828a4a55a4efdb769fa84663c365e4b6d79669426f2c4fd9"
+  },
+  "productionPrivateEndpointsInvoked": 0,
+  "realProductionAppointmentCreates": 0,
+  "realProductionProviderWrites": 0,
+  "b31ProductionRemediation": "PASS",
+  "runtimeCommit": "2aeaacff",
+  "artifactMatches": 577,
+  "b29B30CompiledOwnersUnchanged": true,
+  "acceptedPythonHashesUnchanged": true,
+  "mandatoryDeploymentRegression": {
+    "suites": 373,
+    "tests": 3046,
+    "verdict": "PASS"
+  },
+  "schema": {
+    "repositoryMigrations": 80,
+    "accountedHistoricalMigrations": 83,
+    "pending": 0,
+    "drift": "NONE",
+    "approvedB31MigrationChecksum": "31a4e9bc49892d2a43a06a3f70addaceb9fe1ab247e7b48b5f912702860e472c"
+  },
+  "package4CrossPackageGuards": "PASS",
+  "package5ControlPlaneGuards": "PASS",
+  "finalGate": "FAIL \u2014 B32 channel actor-policy mismatch"
+}

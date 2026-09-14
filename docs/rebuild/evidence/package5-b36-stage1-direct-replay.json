@@ -1,0 +1,104 @@
+{
+  "status": "REPRODUCED",
+  "boundary": "A12 daily report producer outside Action Engine / Communication Delivery",
+  "sourceFunctions": {
+    "webhook_server.py:_send_client_push": {
+      "line": 404,
+      "sha256": "bf70fa0a73ed3e172b69abbd3399d86641be70765ad033b407b91991549e5eb9"
+    },
+    "webhook_server.py:install_staff_telegram_chat_mirror": {
+      "line": 8088,
+      "sha256": "9e31847cd30d26da113b54642e524330ee9a327f0079ba30cbe364215c977e2f"
+    },
+    "bot.py:_fmt_rub": {
+      "line": 6327,
+      "sha256": "e1456b2daf7533d142e9901a89ae53326941b2abc6e33fee6c8505529c49b668"
+    },
+    "bot.py:_daily_report_job": {
+      "line": 6761,
+      "sha256": "0d39b5fa6730e1d8a18d045e56584bdc86c13a15d14b8e02fbb1253fdbadc533"
+    }
+  },
+  "cases": [
+    {
+      "case": "first",
+      "providerOperations": 1,
+      "firstProviderBeforeCanonical": true,
+      "canonicalBridgeUnavailable": true,
+      "trace": [
+        "local-report-timestamp",
+        "provider-send",
+        "canonical-bridge-unavailable",
+        "post-send-shadow"
+      ]
+    },
+    {
+      "case": "identical-repeat",
+      "providerOperations": 1,
+      "firstProviderBeforeCanonical": true,
+      "canonicalBridgeUnavailable": true,
+      "trace": [
+        "local-report-timestamp",
+        "provider-send",
+        "canonical-bridge-unavailable",
+        "post-send-shadow"
+      ]
+    },
+    {
+      "case": "concurrent-same-date",
+      "providerOperations": 4,
+      "firstProviderBeforeCanonical": true,
+      "canonicalBridgeUnavailable": true,
+      "trace": [
+        "local-report-timestamp",
+        "provider-send",
+        "canonical-bridge-unavailable",
+        "post-send-shadow",
+        "local-report-timestamp",
+        "provider-send",
+        "canonical-bridge-unavailable",
+        "post-send-shadow",
+        "local-report-timestamp",
+        "provider-send",
+        "canonical-bridge-unavailable",
+        "local-report-timestamp",
+        "provider-send",
+        "canonical-bridge-unavailable",
+        "post-send-shadow",
+        "post-send-shadow"
+      ]
+    },
+    {
+      "case": "accepted-response-lost",
+      "providerOperations": 1,
+      "firstProviderBeforeCanonical": true,
+      "canonicalBridgeUnavailable": true,
+      "trace": [
+        "local-report-timestamp",
+        "provider-send",
+        "canonical-bridge-unavailable"
+      ]
+    },
+    {
+      "case": "repeat-after-unknown",
+      "providerOperations": 1,
+      "firstProviderBeforeCanonical": true,
+      "canonicalBridgeUnavailable": true,
+      "trace": [
+        "local-report-timestamp",
+        "provider-send",
+        "canonical-bridge-unavailable",
+        "post-send-shadow"
+      ]
+    }
+  ],
+  "syntheticProviderOperations": 8,
+  "canonicalAdmissionsBeforeFirstSend": 0,
+  "productionMessages": 0,
+  "productionBusinessProviderMutations": 0,
+  "limitations": [
+    "Report builder, admin recipient source and bridge availability are explicit fixtures.",
+    "Actual daily report producer, formatter, installed post-send mirror and retired push helper are executed.",
+    "No live SDK, database, business endpoint or real recipient is used."
+  ]
+}

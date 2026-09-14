@@ -34,6 +34,7 @@ from telegram.error import Forbidden, BadRequest
 from telegram.ext import Application
 
 import database
+from maya_recovery_bridge import publish_recovery_touchpoint
 from yclients import YClientsAPI
 
 logger = logging.getLogger(__name__)
@@ -182,6 +183,7 @@ def find_due_clients() -> list[dict]:
         candidates.append({
             "client_id": client["id"],
             "chat_id": chat_id,
+            "phone": phone,
             "name": _first_name(client.get("name")),
             "cycle_days": cycle,
             "last_visit": last_visit.isoformat(),
@@ -463,105 +465,6 @@ def _build_message(c: dict) -> tuple[str, InlineKeyboardMarkup]:
 
 
 async def run_cycle_reminder_job(app: Application) -> dict:
-    """Owner-confirmed send. The scheduler only calls ``scan_cycle_candidates``."""
-    candidates = find_due_clients()
-    sent, blocked, errors, skipped = 0, 0, 0, 0
-    contact_statuses: dict[int, str] = {}
-    previous = load_candidate_snapshot()
-    sending_snapshot = _persist_candidate_snapshot(
-        candidates,
-        mode="owner_confirmed_send",
-        previous_snapshot=previous,
-    )
-
-    logger.info(f"🔁 Цикл-напоминание: найдено {len(candidates)} «по расписанию»")
-
-    for c in candidates:
-        # Персональные настройки: пропускаем при явно выключенном 'cycle' (дефолт ON),
-        # и уважаем тихие часы (неспешное уведомление). Проверка ДО _build_message и
-        # ДО log_cycle_reminder('sent') — иначе пропущенный клиент ложно «заглушится» на 10д.
-        try:
-            _prefs = database.get_notify_prefs(c["client_id"])
-            if _prefs.get("cycle") is False:
-                contact_statuses[int(c["client_id"])] = "disabled"
-                skipped += 1
-                continue
-            import datetime as _dtm
-            if database.in_quiet_hours(_prefs, _dtm.datetime.now().hour):
-                contact_statuses[int(c["client_id"])] = "quiet_hours"
-                skipped += 1
-                continue
-        except Exception:
-            pass
-        text, kb = _build_message(c)
-        try:
-            await app.bot.send_message(c["chat_id"], text, reply_markup=kb)
-            try:
-                # Lazy import avoids a module cycle during bot startup. Chat history
-                # is persisted even when this client has no active Web Push endpoint.
-                import webhook_server
-
-                await webhook_server._send_client_push(
-                    c["chat_id"],
-                    "Пора заглянуть к мастеру",
-                    f"Ваш привычный срок визита подошёл. Записать к {_first_name(c['last_master'])}?",
-                    url="/app/?chat=1&widget=book",
-                    tag=f"cycle-reminder-{c['client_id']}-{c['predicted_visit']}",
-                    data={"event": "cycle_reminder", "staff_id": c.get("last_staff_id")},
-                    persist_in_chat=True,
-                    chat_text=text,
-                    chat_action={
-                        "type": "open_booking",
-                        "label": "Выбрать время",
-                        "screen": "book",
-                        "staff_id": c.get("last_staff_id"),
-                    },
-                    chat_widget="book",
-                    chat_dedupe_key=(
-                        f"cycle-reminder:{c['client_id']}:{c['predicted_visit']}"
-                    ),
-                )
-            except Exception as e:
-                logger.error("cycle reminder PWA chat %s: %s", c["client_id"], e)
-            database.log_cycle_reminder(
-                client_id=c["client_id"],
-                avg_cycle_days=c["cycle_days"],
-                predicted_visit=c["predicted_visit"],
-                action="sent",
-            )
-            sent += 1
-            contact_statuses[int(c["client_id"])] = "sent"
-            logger.info(
-                f"  ✅ {c['name']} (chat_id={c['chat_id']}, цикл≈{c['cycle_days']}д)"
-            )
-        except (Forbidden, BadRequest) as e:
-            database.log_cycle_reminder(
-                client_id=c["client_id"],
-                avg_cycle_days=c["cycle_days"],
-                predicted_visit=c["predicted_visit"],
-                action="blocked",
-            )
-            blocked += 1
-            contact_statuses[int(c["client_id"])] = "blocked"
-            logger.info(f"  🚫 {c['name']}: {e}")
-        except Exception as e:
-            errors += 1
-            contact_statuses[int(c["client_id"])] = "error"
-            logger.error(f"  ❌ {c['name']}: {e}")
-
-    snapshot = _persist_candidate_snapshot(
-        candidates,
-        contact_statuses=contact_statuses,
-        mode="owner_confirmed_send",
-        previous_snapshot=sending_snapshot,
-    )
-    summary = {
-        "candidates": len(candidates),
-        "sent": sent,
-        "blocked": blocked,
-        "errors": errors,
-        "skipped": skipped,
-        "snapshot_at": snapshot.get("generated_at"),
-    }
-    logger.info(f"🔁 Цикл-напоминание завершено: {summary}")
-    return summary
+    """Legacy initiator is not a reviewed canonical campaign."""
+    from canonical_retention_entry import retention_owner_required
+    return retention_owner_required('cycle')

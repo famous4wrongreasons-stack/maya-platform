@@ -1,0 +1,42 @@
+ActionExecutionUncertainError: Canonical reads could not resolve the provider outcome
+    at ActionEngineRuntimeService.reconcile (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:479:13)
+    at ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:324:34)
+    at ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:273:28)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async CommunicationDeliveryService.deliverPackage2TelegramAccepted (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:552:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:375:13
+    at async Promise.all (index 0)
+    at async OwnerReportsService.resumeDailyReport (/private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:361:5)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:350:7
+    at async main (/private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:336:5) {
+  code: 'ACTION_RECONCILIATION_MANUAL_REQUIRED'
+}
+[Nest] 3316  - 09/08/2026, 1:44:47 PM    WARN [OwnerReportsService] daily_report slot unresolved run=7c50c105-2bfc-4112-adee-08ed621d77e4 slot=18ddff7e5d23a40aa3062186c346639b16804daf5792a51cbe8eb0bf2132421f
+ActionClaimError: Canonical claim failed closed: APPROVAL_EXPIRED
+    at ActionEngineKernel.assertCanonicalClaim (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.kernel.ts:2298:13)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async execute (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.kernel.ts:625:9)
+    at async Proxy._transactionWithCallback (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:810:18)
+    at async ActionEngineRuntimeService.dispatch (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:373:15)
+    at async ActionEngineRuntimeService.continueExecution (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:334:21)
+    at async ActionEngineRuntimeService.executeCanonicalWithReceipt (/private/tmp/maya-b29-contour/maya-saas-backend/src/action-engine/action-engine.runtime.ts:276:14)
+    at async CommunicationDeliveryService.deliverPackage2Single (/private/tmp/maya-b29-contour/maya-saas-backend/src/communication-delivery/communication-delivery.service.ts:875:21)
+    at async /private/tmp/maya-b29-contour/maya-saas-backend/src/owner-reports/owner-reports.service.ts:375:13
+    at async Promise.all (index 1) {
+  code: 'CANONICAL_POLICY_OR_APPROVAL_INVALID'
+}
+[Nest] 3316  - 09/08/2026, 1:44:47 PM    WARN [OwnerReportsService] daily_report slot unresolved run=7c50c105-2bfc-4112-adee-08ed621d77e4 slot=1b214c66733dbb17837164e125d3eea240cabd04cba36039b701baa51ae7b8db
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+0 !== 4
+
+    at /private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:355:14
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async main (/private/tmp/maya-b29-contour/maya-saas-backend/scripts/package5-b36-runtime-proof.ts:336:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 0,
+  expected: 4,
+  operator: 'strictEqual',
+  diff: 'simple'
+}

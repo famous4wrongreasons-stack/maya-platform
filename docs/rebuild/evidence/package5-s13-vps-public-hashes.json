@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-09-07T17:32:58.859430+00:00",
+  "host": "vps",
+  "productionWrites": 0,
+  "databaseConnections": 0,
+  "jobTriggers": 0,
+  "sites": {
+    "vps": {
+      "app.html": {
+        "sha256": "08177c652e7c8f0097981c5a8e8163c3f33b70d241e1f001c06931b640296bc3",
+        "bytes": 2379412
+      },
+      "oauth-callback.html": {
+        "sha256": "9bdb1dbfb83386ebd3555302c263cb4875316439fb6b0a225d48fad43fe572d6",
+        "bytes": 11604
+      },
+      "service-worker.js": {
+        "sha256": "8e5cbb806ecacad22337e442e5e01a3b37a7e07b3462fc0f98f9e895ee0a2f75",
+        "bytes": 3060
+      }
+    }
+  },
+  "routing": {
+    "vps": {}
+  }
+}

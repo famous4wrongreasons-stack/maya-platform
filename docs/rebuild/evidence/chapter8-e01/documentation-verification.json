@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "baseline": "12af40b2e5c99678ad94122b45907a337ea4a2c0",
+  "reportTargets": 8,
+  "matrixTargets": 8,
+  "allTargetsDisabled": true,
+  "countsConsistent": true,
+  "completeActivationContracts": 0,
+  "unresolvedBudgetsExplicit": true,
+  "noInventedBaselinePerformance": true,
+  "relativeLinksResolved": true,
+  "jsonValid": true,
+  "sourceHashesUnchanged": true,
+  "ownedDiffDocsEvidenceOnly": true,
+  "secretPIIPatternScan": "PASS",
+  "runtimeSchemaMigrationsChanged": 0,
+  "modelTraining": 0,
+  "productionMutations": 0,
+  "tests": "Documentation/evidence structural checks only; no implementation or model tests claimed",
+  "reportSha256": "92b036ca91cf9d2ff585c38efa9f9c973dc90e4b077c6c1167c62e3649844c22"
+}

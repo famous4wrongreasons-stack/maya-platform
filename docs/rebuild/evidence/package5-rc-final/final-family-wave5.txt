@@ -1,0 +1,26 @@
+{
+  "contract": "package5.wave5.all1-executable-proof/1",
+  "families": [
+    "A29",
+    "A31"
+  ],
+  "actionClasses": [
+    "correct_recovery_attribution"
+  ],
+  "shadows": 1,
+  "shadowDivergences": 0,
+  "factPlaneActionExecutions": 0,
+  "touchpointDeduplication": true,
+  "bookingDeduplication": true,
+  "immutableSourceFacts": true,
+  "correctionOwnerApproval": true,
+  "correctionConcurrencyWinnerCount": 1,
+  "a31EventDeduplication": true,
+  "a31SingleLiveLease": true,
+  "providerOperation": "READ_ONLY",
+  "unknownRequired": false,
+  "duplicateBusinessMutationPossible": false,
+  "tenantAuthorityIsolation": true,
+  "realProductionBusinessMutations": 0,
+  "providerWrites": 0
+}

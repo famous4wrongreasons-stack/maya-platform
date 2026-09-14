@@ -1,0 +1,36 @@
+{
+  "wipCommitTrees": {
+    "b35c4cef": "5eb489a84ca689beeb0d15712fa6869ccf77dbba",
+    "eb9143e2": "dfec62043614ca33b67cb28ce21c2ec838348c15",
+    "b29f969a": "53f1cd5b33b578a2c86f80c0eec1475712cd5160",
+    "790ee48b": "4d70cd5a5055e225657121a8bd9157b6ca9abd02",
+    "46cd6bb9": "b83b006672a31e76ad868e4f1cd095abc63a2bcc",
+    "b39fcb61": "e5344d53d903564b50715fc2dd810d22510a824b",
+    "6bd6d4e0": "2312c1c831998befc7a40760995515938705ebfc",
+    "5bc3c75c": "50d377c440d02471a4205aa843aa779085b7600e",
+    "064a9e6f": "eb6ba3064ca8f35ad2be285e480d78c89593b9cc",
+    "180a4aba": "833109c40540378c4d3297f4cf93b14da813c010",
+    "524846ff": "f6d77c7788ed57d70ee6fe98c661252d8065bf9a"
+  },
+  "syntheticDumpsVerified": [
+    {
+      "name": "maya_rc_replay.dump",
+      "sha256": "01971b0242843d580b67b9a4cfb032b4de931560875eaca25d99a532007af15d",
+      "bytes": 862913
+    },
+    {
+      "name": "maya_rc_b36_runtime.dump",
+      "sha256": "a6c8370cf89c73b310a05780b8fc81e5c32b96bb8e7e75bb20efec9e1531e0b9",
+      "bytes": 972688
+    },
+    {
+      "name": "maya_rc_clean_replay.dump",
+      "sha256": "7eca21f93c81f52f5263a4fd5c6012d2728a9cf86766fa01fe04dfd48c707833",
+      "bytes": 1924418
+    }
+  ],
+  "snapshot": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-rc-upstream-reconciliation-524846ff/upstream-b6c53ff9",
+  "wipRewritten": false,
+  "wipWorktreeClean": true,
+  "snapshotIsTestOnly": true
+}

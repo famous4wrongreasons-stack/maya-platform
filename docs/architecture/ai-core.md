@@ -74,5 +74,11 @@ and tools before any model request. Provider keys never reach a channel.
 7. Pending cutover work: retire duplicated prompt-side business logic only after
    parity and canary tests.
 
+Maya Brain is one always-on router in front of this core: it picks the persona
+(`director` / `admin`) and the intent for the turn, with no flags and no
+storage. The profile registry, plan, preference memory and knowledge base it
+used to carry were removed after measurement. See
+[Maya Brain](maya-brain-v1.md).
+
 Operational details and exact endpoints are in
 [AI Tool Runtime Runbook](ai-tool-runtime-runbook.md).

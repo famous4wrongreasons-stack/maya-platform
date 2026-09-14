@@ -1,0 +1,129 @@
+{
+  "baseline": "bae6620c6a2fddbae3b863147860be21842444d5",
+  "inspectedSourcePins": [
+    {
+      "path": "docs/rebuild/MAYA-ORCHESTRATOR-AGENTS-ARCHITECTURE-GATE.md",
+      "sha256": "811c8c265376e131856b6c3d70b074232120942a648206ec9cf111625822cc4f"
+    },
+    {
+      "path": "docs/architecture/README.md",
+      "sha256": "1d35830905a2a7cc949e51a5c41a8536caada81c1b54958fb31b55a8853d965c"
+    },
+    {
+      "path": "docs/rebuild/CARRY-FORWARD-REGISTER.md",
+      "sha256": "89b062f69aba2a408d9f974779e59526d1ade7f4a50d007bcecc66b77085f27b"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-REMAINDER-REVIEW.md",
+      "sha256": "abf68b115f6569d454f47fe19ea3cf8106a9aa87cc67ac338569abac1fc38a05"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-05-PHASE-A-OPPORTUNITIES-AGENT-TASKING.md",
+      "sha256": "6cf1f8d9efe43c16bf0ea8ed443d09f2183efd6ebae66836664246d1baa54817"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-06-FINAL-COMPLETION-REPORT.md",
+      "sha256": "8bba55852e82fb788bdfae5ca826f747c5a3bd60869991667a447944de0a6f11"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-07-FINAL-COMPLETION-REPORT.md",
+      "sha256": "69764952fa6535b59e5fe020c5e7509e351a6d751bcfdc2e616c7820ed11aca3"
+    },
+    {
+      "path": "docs/rebuild/CYCLE-08-FINAL-COMPLETION-REPORT.md",
+      "sha256": "59e02da998e3f0d3db92c00319b4b7adb28fd7d26273aa30183be8f4d23461e8"
+    },
+    {
+      "path": "docs/architecture/maya-brain-v1.md",
+      "sha256": "bd86cf16b50d53bfde43317842e1c36ca18a6a3bd19b72e73e6176c17a4c95c0"
+    },
+    {
+      "path": "docs/architecture/ai-core.md",
+      "sha256": "40baec946488dd2b8d85933ace44d81ee130e797a75373c2c858b2d6ccd51d3c"
+    },
+    {
+      "path": "docs/AI/README.md",
+      "sha256": "dbc0f648bc0fe9d6135f824cd258e7132e48e1a73a28fabc5ea35f87fa65d636"
+    },
+    {
+      "path": "docs/product/ai-onboarding.md",
+      "sha256": "a6987eaac16bb2d179cb49f660c5bbe15178c2189105bcdf61edb981572ff364"
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "f32cc83e58121ffaf1a32ea07d6299e839304fc163b0e90d9c840210e36f1130"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "fbffe95fad5bed2bae7b7b216f2899cb135fe00c53fc3bc296559cb6fd8a866f"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+      "sha256": "6f95d56ef2f5b6b85671adcbdfd852a78ec1bbcdd84dd1ca1d53dc93b83cf331"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts",
+      "sha256": "0b7903d7cbdcc7651b96fb2fe392ef395effc75b471f9317f923f4b13d09e67d"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.types.ts",
+      "sha256": "ca7a3a2276d963526f6a8aee62514cd50e9f9e1a5205a67c2e871d5643977f08"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-policy.service.ts",
+      "sha256": "cc18770343151f2b53e7dab35e25db50c5c88fac0f186df0ee842950b2894032"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "sha256": "74c716e56eee91124e320b33d90a8f88667d2652c32854b64052747b18ce8684"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-memory.service.ts",
+      "sha256": "73314870fe7a5fd47a21dc242595f00c0b8558456b8da5cc59e84f14241e7323"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/chat-report-card.ts",
+      "sha256": "7fee0bb437e3e22b217d6a0836d57d13421ebbf7885ecef8a5a22f7c823d3c2e"
+    },
+    {
+      "path": "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.types.ts",
+      "sha256": "7f755721c712e5f89986fdd1878511c8dfc7ffe1e6f2e6e60fbe694bd07b5f55"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave1/governed-settings.contract.ts",
+      "sha256": "d4eabc4e42588fa93185b43e2abad5ae82698cbc41c43466597ddd21dc8309c4"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/entitlements.service.ts",
+      "sha256": "54253d31a40b95156f8a8e8575a1bbb47f9a52c4d32f21775a5e9250791b197f"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/feature-registry.service.ts",
+      "sha256": "8a16048595a9b04dd6c7efc5bc051fc13a0a60920ccb5e4b6f85be2b0be1bb3b"
+    },
+    {
+      "path": "maya-saas-backend/src/marketing/canonical-bulk.contract.ts",
+      "sha256": "461092876da7076cb82af91fc43be69b4580c97d8b0dd1e2fca9e912d147a743"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.read.ts",
+      "sha256": "c2a6e193252eb504b20a323635a13f8a1b045ed70c4890342b2542213bc77a8d"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.opportunity.ts",
+      "sha256": "b9b6bde536ec62d4574a150cb4052f0c2209afc42091ad303bb1dcb2ba85e798"
+    },
+    {
+      "path": "maya-saas-backend/package.json",
+      "sha256": "2371ff71284e76c8e1f70ea5c03e5bb76725136d4ea11aed1a35beab162892ca"
+    },
+    {
+      "path": "maya-saas-backend/deploy/vps/deploy.sh",
+      "sha256": "303e7f4b40125b9a329fd8dd2e471aaefb02de7d87a064ee10bdcbc88d6b45ed"
+    }
+  ],
+  "catalogDefinitions": 47,
+  "catalogNotEqualEnabledCapabilities": true,
+  "historicalToolCountUsedAsCurrent": false,
+  "sourceOfTruth": "Normative source precedence in scope §2; historical gaps are reconciled against current code."
+}

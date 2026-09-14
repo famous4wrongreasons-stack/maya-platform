@@ -1,0 +1,69 @@
+{
+  "status": "PASS",
+  "R03": "PASS",
+  "R04": "PASS",
+  "R07": "PASS",
+  "release": "/opt/maya-saas/releases/20260907-p5-rb-cb4fb27c",
+  "pythonArtifacts": 101,
+  "compiledArtifacts": 594,
+  "edgeAliases": 9,
+  "VPS_PWA_owner": [
+    0,
+    0
+  ],
+  "exactRuntimeHashes": true,
+  "flagsUnchanged": true,
+  "serviceStateAndUnownedPidsUnchanged": true,
+  "ownedServicePids": {
+    "maya-saas": "1596913",
+    "barbershop-bot": "1597045"
+  },
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "health": 200,
+  "readiness": 200,
+  "B36Schema": "APPLIED",
+  "B36Runtime": "NOT_DEPLOYED",
+  "B36ProofDefects": [
+    "IDEMPOTENCY_KEY",
+    "CONCURRENT_WRITE_CONFLICT"
+  ],
+  "productionBusinessProviderMessagesForProof": 0,
+  "package5FinalGateRun": false,
+  "deploymentScriptExit": 0,
+  "deploymentRegression": {
+    "suites": 389,
+    "tests": 3218,
+    "status": "PASS"
+  },
+  "deploymentStepsCompleted": 10,
+  "smokeProcessReaped": true,
+  "recentDeploymentErrorJournal": "NO ENTRIES",
+  "newMigrations": 0,
+  "newModels": 0,
+  "newFields": 0,
+  "newActionClasses": 0,
+  "backendReleaseCommit": "6ad559c3cec1dab7a4fc7fdd438e788b77aaaed8",
+  "canonicalRuntimeSource": "42962475",
+  "canonicalPrecutoverHead": "60e82664",
+  "canonicalAndReleaseHeadEqualOriginBeforeCutover": true,
+  "publication": {
+    "pythonPublished": 17,
+    "edgePublished": 4,
+    "edgeChecked": 5,
+    "guards": 7
+  },
+  "proofScope": "Exact artifact/guard/service/schema/health readback; executable business proofs use synthetic providers in newly owned local databases. Normal production runtime activity was not stopped.",
+  "cleanupEvidence": [
+    "package5-wave-rb-owned-postgres-cleanup.json",
+    "package5-wave-rb-vps-staging-cleanup.json",
+    "package5-wave-rb-edge-staging-cleanup.json",
+    "package5-wave-rb-production-process-hygiene.json"
+  ],
+  "laterBaselineHold": {
+    "status": "STOP",
+    "evidence": "package5-wave-rb-late-baseline-stop.json",
+    "reason": "Independent upstream PHP relay commit now matches a changed known production alias",
+    "priorProofAndAssessmentPreserved": true
+  }
+}

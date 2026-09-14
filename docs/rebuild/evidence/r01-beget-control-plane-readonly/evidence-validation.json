@@ -1,0 +1,10 @@
+{
+  "jsonValidation": "PASS",
+  "previousBroadScan34PathHashEquality": "PASS",
+  "dnsNames": 17,
+  "phpEditorsChecked": 4,
+  "sourceOrRuntimeChanges": 0,
+  "newEvidenceSecretPatternScan": "PASS",
+  "secretFindings": [],
+  "note": "No credentials, raw PHP source, browser cookies, environment or provider payloads collected in versioned evidence."
+}

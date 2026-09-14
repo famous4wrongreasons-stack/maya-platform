@@ -1,0 +1,186 @@
+{
+  "package": "R02",
+  "blockers": [
+    "B40",
+    "B41"
+  ],
+  "verdict": "LOCAL EXECUTABLE PROOF PASS",
+  "businessMutations": 0,
+  "productionMessages": 0,
+  "databaseConnectionsByR02": 0,
+  "newSchema": 0,
+  "processHygiene": 0,
+  "tests": [
+    {
+      "command": "node node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/domain/boundary.spec.ts src/auth/legacy-staff-principal.http.spec.ts src/auth/legacy-staff-principal.architecture.spec.ts src/auth/jwt.strategy.spec.ts src/auth/auth-session.service.spec.ts src/tenancy/memberships.service.spec.ts src/package5-wave2/package5-wave2-canonical-cutover.service.spec.ts",
+      "suites": 7,
+      "tests": 53,
+      "embeddedPythonCases": 22,
+      "pass": true
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 package5_control_plane_runtime_guard.py --root . --json",
+      "pass": true,
+      "findings": 0
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js [five R02 changed/new TypeScript files]",
+      "pass": true,
+      "warnings": 0,
+      "errors": 0
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "pass": true
+    },
+    {
+      "command": "node deploy/platform/beget-edge/r02/proof-pwa.cjs [exact candidate directory] [proof.json]",
+      "pass": true,
+      "targets": 6,
+      "checks": 24
+    },
+    {
+      "command": "restricted php8.4 -n stdin, executed by parent; pure R02 fixture",
+      "pass": true,
+      "checks": 15
+    }
+  ],
+  "limitations": [
+    "No R02 production remediation PASS claimed; parent owns coordinated wave cutover and full mandatory checks",
+    "Three historical PWA variants lack canonical authentication; privileged legacy entry fails closed without synthesizing authentication",
+    "No full Package5 discovery/final gate or B36 continuation performed"
+  ],
+  "testedSourceHashes": {
+    "ai администратор/canonical_staff_access.py": "e94ba25cadb9a1775c60d66ff3ad74cdda61e3d31f57df1941a65ea59f0adf2c",
+    "ai администратор/package5_staff_authority_guard.py": "a39cf95945926651667a665599d4d00f67263b68e0cf89277d41c5be4a2809cd",
+    "ai администратор/test_package5_wave_ra_r02.py": "e419c4f303333288f84143823364a2bba3e521b91523442f62384106ad4148d4",
+    "ai администратор/bot.py": "4093414c72a0330adbcba24e4a1d6f424bd32c51c72d8868427ac5c947b9ed36",
+    "ai администратор/webhook_server.py": "aa5ac0d5e7c232bacd9a06f3abfeea5966c13701a94cd8ffefae2159128f2778",
+    "ai администратор/claude_ai.py": "59be8cb8d431b11afd211445e8fdb3fda592d04d05c07dd2bc6a0a8872c993cb",
+    "ai администратор/database.py": "e00d81bf1b7976fa07a34db824944f899d8ea9c408441009cbab3fcea866dbf3",
+    "ai администратор/memory.py": "c7ddc98e57badaf02c475ab6fbd250459731cbbf06791550a99f30faaa0a885e",
+    "ai администратор/web_auth.py": "d7d1163e80c36d8d731c52b4c893ea23db8591ab25302db2defd4ec62adc7d6c",
+    "ai администратор/package5_control_plane_runtime_guard.py": "40bd659751f3b3c9a27650e0a6c34417f5983ba9c4edc60f6686d73960ec5993",
+    "ai администратор/test_package5_b13_control_plane_boundaries.py": "b2db5ecb2e36a9da2979cca95cc544741d1368ad04e918b4ba4bd4443155f24d",
+    "maya-saas-backend/src/auth/auth.module.ts": "838141f40ed0647e22557a493cf22089416ff9ea05173724d6aad2fef60e21ad",
+    "maya-saas-backend/src/auth/legacy-staff-principal.controller.ts": "ab39b9fe1c7ac954991f47cc53b71663a4f9c03d7330a8845d899441a181c113",
+    "maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts": "287ee302949b11d61c26b8ee809568bf8748cc92c570a580c6bd172a1c7aa4aa",
+    "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts": "28da0cb42b9d0741f82fd8adcbd66e4b317e8e2de8d687672685c501e888e44d",
+    "maya-saas-backend/src/action-engine/package5-b13-remediation.architecture.spec.ts": "74b480d3e1ee4c90c98d457417434d4da30344e65b8c0eb29a8c36c8205aa695",
+    "сайт и приложение/app.html": "4d8e2df3180e2a6e797a5c18f39f3eb1feadc8ae4920c609cadd52e1f2f2cf13",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/canonical-staff-payload.php": "b99a7e662c10a74d1ae55e4e5aac8a116eef6b0ba72671be1f8dd8726332433f",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__index.codex-loyalty-20260721.html.patch": "e28142b23dfb80d384e04bf1344f4000ca251e38f94410c07ecf1e16b2daae51",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__index.backup-20260731-anton-analytics.html.patch": "9e9add081ba73d8059c4c60d40fe8e70a627f96984735137f469a49d479ad5cc",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/mayaos__app__index.html.patch": "890a8c82df287ff1744b1cbd3330a0444f73adcc50d3777808e9921d46a257a4",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/proof.cjs": "02c82a36b3e09394935de4b0d5e75993c83e590165f535e1f3291516192b4d46",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__tenant-test.html.patch": "9da2e2298f3fc7191acc3084bdb03fa49b10df9df65b6f4d52bd92dbc759eb56",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__api-proxy.php.patch": "c9249a9025be94816f2d0f926331edb47475eab670bfc60d547c79cd0e4c7821",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/proof-pwa.cjs": "04cc8da611f4070a209332fd12f68b7b00c61bc105570875ed96029737256adc",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__index.html.patch": "27124b97be5166e1c93392f5c2b00df3a228dce340707d9cbd7ca7a0e44a717e",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/vps__app.html.patch": "f85b94b83c0c0d54fcbf693d212b39430b75d54759303e21f922c466f288eca5",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/canonical-staff-overlay.cjs": "583f7efa14ee50ed242576fb13dfbe97bf4553ae42cf313d3adfcc107c199910",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__api-proxy.codex-loyalty-20260721.php.patch": "48253fd5610dc506b94dc95626a45180db3b2163d2ee3e8efde5200ca79b37cd",
+    "maya-saas-backend/src/crm/legacy-staff-reference.projection.ts": "5bafa6d0815518b1193d5b2f8d1a609ea8521236b96fb6f3f6d90110c53b246c"
+  },
+  "logs": {
+    "control-plane-guard.log": {
+      "sha256": "c4a5bec01e22ac0d1537ce1ccdcdcc82fb734295fd8d07681e24114e650baa33",
+      "output": "{\"activePwaIncluded\": true, \"b13LegacyControlPlaneOwners\": 0, \"b14LegacyGodOwners\": 0, \"b15ChatHistoryReadOwners\": 0, \"b16BookingPrefillLegacyIdentityOwners\": 0, \"b17ClientAppointmentLegacyIdentityOwners\": 0, \"b18ActiveLegacyProviderMutationOwners\": 0, \"b18AppointmentSitesMapped\": \"6/6\", \"b18LegacyAppointmentAuthorityBypasses\": 0, \"b19ChatBookingInventoryCoverage\": \"3/3\", \"b19ChatBookingLegacyWriteSites\": 0, \"b19ChatStreamAuthorityParity\": true, \"b19ChatStreamMutationOwnerParity\": true, \"b20CabinetEndpointIdentityParity\": true, \"b20CabinetEndpointReadOnlyParity\": true, \"b20CabinetLegacyIdentityOwners\": 0, \"b20CabinetReadSurfaceWriters\": 0, \"b21RealtimeLegacyHistoryWriters\": 0, \"b21RealtimeLegacyIdentityOwners\": 0, \"b21RealtimePreReadyBypasses\": 0, \"b22UnverifiedTipOwners\": 0, \"b23LegacyHistoryDeleteOwners\": 0, \"b24LegacyWebPushOwners\": 0, \"b34LegacyReviewOwners\": 0, \"b35LegacyBulkOwners\": 0, \"findings\": [], \"pass\": true}\n"
+    },
+    "typecheck-build.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output": ""
+    },
+    "prettier.log": {
+      "sha256": "f813303ea01c22867fe729420071ad665c07cda8cf6e8d22d300088168358e47",
+      "output": "src/auth/legacy-staff-principal.architecture.spec.ts 32ms\n"
+    },
+    "lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output": ""
+    },
+    "targeted-jest.log": {
+      "sha256": "c6ac33e6352d75348513af4774b5baa0a37c28cc1df50ac288d55724fcf23367",
+      "output": "....................\n----------------------------------------------------------------------\nRan 20 tests in 2.580s\n\nOK\n\nTest Suites: 6 passed, 6 total\nTests:       45 passed, 45 total\nSnapshots:   0 total\nTime:        3.581 s, estimated 4 s\nRan all test suites within paths \"src/auth/legacy-staff-principal.http.spec.ts\", \"src/auth/legacy-staff-principal.architecture.spec.ts\", \"src/auth/jwt.strategy.spec.ts\", \"src/auth/auth-session.service.spec.ts\", \"src/tenancy/memberships.service.spec.ts\", \"src/package5-wave2/package5-wave2-canonical-cutover.service.spec.ts\".\n"
+    },
+    "php-proof-result.json": {
+      "sha256": "148fce46fa0d4724806d5f57fdd81bab41d0e2ad9b629be1c5992dc92f957a91",
+      "output": "{\"verdict\":\"PASS\",\"checks\":15,\"providerCalls\":0,\"networkCalls\":0,\"databaseConnections\":0,\"filesWritten\":0,\"appImports\":0}\n"
+    },
+    "boundary-fix-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output": ""
+    },
+    "boundary-fix-jest.log": {
+      "sha256": "a7602d6aa8742c1962fa54d8c98725e3d1ae4dd06619dd158fa70756bfdbda93",
+      "output": "......................\n----------------------------------------------------------------------\nRan 22 tests in 2.458s\n\nOK\n\nTest Suites: 7 passed, 7 total\nTests:       53 passed, 53 total\nSnapshots:   0 total\nTime:        3.423 s, estimated 4 s\nRan all test suites within paths \"src/domain/boundary.spec.ts\", \"src/auth/legacy-staff-principal.http.spec.ts\", \"src/auth/legacy-staff-principal.architecture.spec.ts\", \"src/auth/jwt.strategy.spec.ts\", \"src/auth/auth-session.service.spec.ts\", \"src/tenancy/memberships.service.spec.ts\", \"src/package5-wave2/package5-wave2-canonical-cutover.service.spec.ts\".\n"
+    },
+    "boundary-fix-typecheck.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output": ""
+    },
+    "boundary-fix-prettier.log": {
+      "sha256": "ff4ba94148a0e20d040285fae165559a91378d0b1fedb1474bc95b97e9d5f334",
+      "output": "src/auth/legacy-staff-principal.controller.ts 34ms (unchanged)\nsrc/auth/legacy-staff-principal.http.spec.ts 22ms\nsrc/auth/legacy-staff-principal.architecture.spec.ts 8ms\nsrc/crm/legacy-staff-reference.projection.ts 2ms (unchanged)\n"
+    },
+    "boundary-fix-stage.json": {
+      "sha256": "303a3c1b21795782319b333beeb07ddc425f5be1d5073e5ec7a6198090af5ead",
+      "output": "{\n  \"stagePythonUpdatedOnly\": \"canonical_staff_access.py\",\n  \"afterSha256\": \"e94ba25cadb9a1775c60d66ff3ad74cdda61e3d31f57df1941a65ea59f0adf2c\",\n  \"candidateGuardPass\": true,\n  \"findings\": [],\n  \"B35DailyReportPreserved\": true,\n  \"publisherScriptsChanged\": false\n}\n"
+    }
+  },
+  "candidatePythonStaffGuard": {
+    "pass": true,
+    "findings": 0
+  },
+  "remainingOwnedProcesses": 0,
+  "ownedFiles": [
+    "ai администратор/bot.py",
+    "ai администратор/canonical_staff_access.py",
+    "ai администратор/claude_ai.py",
+    "ai администратор/database.py",
+    "ai администратор/memory.py",
+    "ai администратор/package5_control_plane_runtime_guard.py",
+    "ai администратор/package5_staff_authority_guard.py",
+    "ai администратор/test_package5_b13_control_plane_boundaries.py",
+    "ai администратор/test_package5_wave_ra_r02.py",
+    "ai администратор/web_auth.py",
+    "ai администратор/webhook_server.py",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/canonical-staff-overlay.cjs",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/canonical-staff-payload.php",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/mayaos__app__index.html.patch",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/proof-pwa.cjs",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/proof.cjs",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__api-proxy.codex-loyalty-20260721.php.patch",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__api-proxy.php.patch",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__index.backup-20260731-anton-analytics.html.patch",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__index.codex-loyalty-20260721.html.patch",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__index.html.patch",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/salon__app__tenant-test.html.patch",
+    "maya-saas-backend/deploy/platform/beget-edge/r02/vps__app.html.patch",
+    "maya-saas-backend/src/action-engine/package5-b13-remediation.architecture.spec.ts",
+    "maya-saas-backend/src/auth/auth.module.ts",
+    "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+    "maya-saas-backend/src/auth/legacy-staff-principal.controller.ts",
+    "maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts",
+    "maya-saas-backend/src/crm/legacy-staff-reference.projection.ts",
+    "сайт и приложение/app.html"
+  ],
+  "sourceBaseline": "45688886",
+  "sharedR01Commit": "654028dd",
+  "boundaryCorrection": {
+    "initialAggregateFailure": "auth/legacy-staff-principal.controller.ts read legacy provider reference; 1 failed/85 passed architectural suites",
+    "domainGuardChanged": false,
+    "allowlistChanged": false,
+    "authorizationId": "canonical StaffId",
+    "presentationSource": "exact active StaffProviderLink at CRM boundary after account/access admission",
+    "staleReferenceFallback": false,
+    "missingProjectionLegacyHandlerAllowed": false,
+    "targetedSuites": 7,
+    "targetedTests": 53,
+    "pythonCases": 22,
+    "pass": true,
+    "lint": true,
+    "buildTypecheck": true,
+    "remainingOwnedProcesses": 0
+  }
+}

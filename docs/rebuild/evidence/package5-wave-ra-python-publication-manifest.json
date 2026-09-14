@@ -1,0 +1,99 @@
+{
+  "baselineBackendRelease": "20260907-p5-b35-c8c7a8eb",
+  "requiredBackendRelease": "20260907-p5-ra-d8049d47",
+  "files": [
+    {
+      "file": "app.html",
+      "before": "08177c652e7c8f0097981c5a8e8163c3f33b70d241e1f001c06931b640296bc3",
+      "after": "b37abcd277156e5e6a67505768ea2b5686898cd4512ea860fa57b45ff81b5ee1",
+      "destination": "/var/www/maya-platform/app.html"
+    },
+    {
+      "file": "bot.py",
+      "before": "425c886e4a832641951998a08e9979445afdc7f15100fbe9cd26271fffa6099d",
+      "after": "6d31753b1b3c54886985026d552dd7e61f3860d3f0deb8a511d2a49081f96f86",
+      "destination": "/home/botadmin/barbershop-bot/bot.py"
+    },
+    {
+      "file": "webhook_server.py",
+      "before": "5568115de0a39e0b99f50fa7b811eab086f446dc9f6071883717281841146ee3",
+      "after": "f5956dd6665ac838db8619ac4d52b78ef00a73f89e7fe7f879a7fc1a0971dee9",
+      "destination": "/home/botadmin/barbershop-bot/webhook_server.py"
+    },
+    {
+      "file": "claude_ai.py",
+      "before": "d70e49ddbbf6880d5f7ad931709c1b1c04cdd6d0908ea7fbd737f86a1e525a59",
+      "after": "59be8cb8d431b11afd211445e8fdb3fda592d04d05c07dd2bc6a0a8872c993cb",
+      "destination": "/home/botadmin/barbershop-bot/claude_ai.py"
+    },
+    {
+      "file": "database.py",
+      "before": "eb1658fee4dadec041e4efe91ee367340782ded5bbb0e6e742ae519e156ec352",
+      "after": "e00d81bf1b7976fa07a34db824944f899d8ea9c408441009cbab3fcea866dbf3",
+      "destination": "/home/botadmin/barbershop-bot/database.py"
+    },
+    {
+      "file": "memory.py",
+      "before": "b286f39327adcc3e82c544ad4409d2e5c75a28e0b8367ceb9e16e320850c1b41",
+      "after": "c7ddc98e57badaf02c475ab6fbd250459731cbbf06791550a99f30faaa0a885e",
+      "destination": "/home/botadmin/barbershop-bot/memory.py"
+    },
+    {
+      "file": "web_auth.py",
+      "before": "d5af185be0073187de9fc0023c3b0ea4d711991344523a0fa5fbe4fd88513a19",
+      "after": "d7d1163e80c36d8d731c52b4c893ea23db8591ab25302db2defd4ec62adc7d6c",
+      "destination": "/home/botadmin/barbershop-bot/web_auth.py"
+    },
+    {
+      "file": "legacy_appointment_bridge.py",
+      "before": "068db16d654c0303e8399789fab6f6f017dfaa6e1c5076fff109637b756dd5ae",
+      "after": "47ffce8630e7902d094d5b7dfc2aabf428ce92b12941651422f598516973e096",
+      "destination": "/home/botadmin/barbershop-bot/legacy_appointment_bridge.py"
+    },
+    {
+      "file": "package5_control_plane_runtime_guard.py",
+      "before": "3f08cf3be6d91b471e65e0051c073f52039a3a916402d41dc4bcc2f385cbd648",
+      "after": "40bd659751f3b3c9a27650e0a6c34417f5983ba9c4edc60f6686d73960ec5993",
+      "destination": "/home/botadmin/barbershop-bot/package5_control_plane_runtime_guard.py"
+    },
+    {
+      "file": "canonical_staff_access.py",
+      "before": null,
+      "after": "e94ba25cadb9a1775c60d66ff3ad74cdda61e3d31f57df1941a65ea59f0adf2c",
+      "destination": "/home/botadmin/barbershop-bot/canonical_staff_access.py"
+    },
+    {
+      "file": "package5_staff_authority_guard.py",
+      "before": null,
+      "after": "a39cf95945926651667a665599d4d00f67263b68e0cf89277d41c5be4a2809cd",
+      "destination": "/home/botadmin/barbershop-bot/package5_staff_authority_guard.py"
+    },
+    {
+      "file": "legacy_client_entry.py",
+      "before": null,
+      "after": "7f48e09256b74300dd127585f61e3e3ec744df020e42186722bf270a8f26c291",
+      "destination": "/home/botadmin/barbershop-bot/legacy_client_entry.py"
+    },
+    {
+      "file": "pwa_api.py",
+      "before": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "after": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "destination": "/home/botadmin/barbershop-bot/pwa_api.py"
+    }
+  ],
+  "supportFiles": [
+    {
+      "file": "package5_loyalty_read_guard.py",
+      "sha256": "09df868144ae2c5d828a4a55a4efdb769fa84663c365e4b6d79669426f2c4fd9"
+    },
+    {
+      "file": "package5_review_source_guard.py",
+      "sha256": "0474ba059d967a6cbf3f0b070b050c0c5d2b0c20aa44edd0ae40974fd09cc397"
+    },
+    {
+      "file": "package5_bulk_runtime_guard.py",
+      "sha256": "f52fb182dab9f975a67fc57962ae36477ee7ee7fee669ab154107034bb0a9d5b"
+    }
+  ],
+  "destinationEvidence": "docs/rebuild/evidence/package5-s13-public-hashes.probe.py; package5-s13-vps-public-hashes.json"
+}

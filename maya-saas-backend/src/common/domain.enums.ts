@@ -35,6 +35,13 @@ export enum UserStatus {
   ACTIVE = 'active',
   SUSPENDED = 'suspended',
   INVITED = 'invited',
+  /**
+   * Дубль аккаунта, погашенный слиянием. Статус ТЕРМИНАЛЬНЫЙ — обратно в
+   * ACTIVE не переводится ни сверкой с CRM, ни выдачей доступа команде.
+   * Вход фенсится существующими барьерами (jwt.strategy, assertUserCanLogin),
+   * которые пускают только status === 'active'.
+   */
+  MERGED = 'merged',
 }
 
 export enum CrmProvider {

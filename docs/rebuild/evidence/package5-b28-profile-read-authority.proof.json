@@ -1,0 +1,54 @@
+{
+  "blocker": "B28",
+  "scope": "A18 Client-owned profile/consent projection authority",
+  "realCompiledControllerServiceAndUsersReader": true,
+  "postgresMigrationsApplied": 79,
+  "accountAndActiveMembershipPrerequisitesSatisfied": true,
+  "httpGuardsBypassedClaim": false,
+  "productionClientPopulationExamined": false,
+  "finding": "User association authorizes Client-owned profile projection without verified exact Client binding",
+  "cases": [
+    {
+      "name": "authenticated active member without any verified Client link",
+      "privateProfileReturned": true,
+      "consentTimestampsReturned": true,
+      "activeVerifiedLinks": 0,
+      "exactClientMismatch": false,
+      "businessStateByteEquivalent": true
+    },
+    {
+      "name": "customer-portal preserves unverified profile despite other projections unavailable",
+      "privateProfileReturned": true,
+      "consentTimestampsReturned": true,
+      "activeVerifiedLinks": 0,
+      "exactClientMismatch": false,
+      "businessStateByteEquivalent": true
+    },
+    {
+      "name": "revoked verified Client link still returns private profile",
+      "privateProfileReturned": true,
+      "consentTimestampsReturned": true,
+      "activeVerifiedLinks": 0,
+      "exactClientMismatch": false,
+      "businessStateByteEquivalent": true
+    },
+    {
+      "name": "channel linked to Client A returns account-associated Client B profile",
+      "privateProfileReturned": true,
+      "consentTimestampsReturned": true,
+      "activeVerifiedLinks": 1,
+      "exactClientMismatch": true,
+      "businessStateByteEquivalent": true
+    },
+    {
+      "name": "20 concurrent unlinked reads",
+      "requests": 20,
+      "privateProfileReturned": true,
+      "businessStateByteEquivalent": true
+    }
+  ],
+  "probeBusinessMutationsDuringReads": 0,
+  "providerCalls": 0,
+  "productionMutations": 0,
+  "runtimeRemediationStarted": false
+}

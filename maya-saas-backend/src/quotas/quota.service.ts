@@ -70,8 +70,8 @@ export class QuotaService {
       });
     }
 
-    const [branches, membershipStaff, independentProviders] = await Promise.all(
-      [
+    const [branches, membershipStaff, independentProviders, pendingCrmStaff] =
+      await Promise.all([
         this.prisma.branch.count({ where: { tenantId: scopedTenantId } }),
         this.prisma.membership.count({
           where: {
@@ -87,15 +87,21 @@ export class QuotaService {
             userId: null,
           },
         }),
-      ],
-    );
+        this.prisma.crmStaffAccess.count({
+          where: {
+            tenantId: scopedTenantId,
+            status: 'pending_contact',
+            userId: null,
+          },
+        }),
+      ]);
 
     return {
       tenantId: tenant.id,
       plan: tenant.plan.name,
       branches: { current: branches, limit: tenant.plan.maxBranches },
       staff: {
-        current: membershipStaff + independentProviders,
+        current: membershipStaff + independentProviders + pendingCrmStaff,
         limit: tenant.plan.maxStaff,
       },
       isWhiteLabelEnabled:

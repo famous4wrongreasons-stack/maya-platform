@@ -1,24 +1,52 @@
+import { ClientProfileReadService } from '../crm/client-profile-read.service';
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
+import { Prisma } from '@prisma/client';
 import type {
   MembershipStatus as PrismaMembershipStatus,
   User,
   UserRole as PrismaUserRole,
 } from '@prisma/client';
 
-import { UserRole, UserStatus } from '../common/domain.enums';
+import { MembershipStatus, UserRole, UserStatus } from '../common/domain.enums';
 import {
   buildPhoneLoginEmail,
+  normalizePhoneE164,
   normalizeRussianPhone,
+  phonesMatch,
 } from '../common/phone.util';
 import { EncryptionService } from '../encryption/encryption.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { buildAppAccessContext } from './app-access';
 import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
+import { UpdateCrmTeamAccessDto } from './dto/update-crm-team-access.dto';
+
+/**
+ * Статус пользователя → статус его членства в тенанте.
+ *
+ * До появления UserStatus.MERGED составы двух перечислений совпадали, и
+ * UserStatus передавался в membership напрямую — TypeScript пропускал это
+ * структурно. Теперь значения разошлись, и перевод обязан быть явным:
+ * MERGED — терминальный статус самого аккаунта, а его членство при слиянии
+ * гасится как SUSPENDED (удалять членство нельзя — каскады унесут визиты,
+ * баллы и согласия).
+ */
+function membershipStatusFor(status: UserStatus): PrismaMembershipStatus {
+  return status === UserStatus.INVITED
+    ? MembershipStatus.INVITED
+    : status === UserStatus.ACTIVE
+      ? MembershipStatus.ACTIVE
+      : MembershipStatus.SUSPENDED;
+}
 
 type TenantSummary = {
   id: string;
@@ -50,12 +78,29 @@ type UserWithRelations = User & {
   memberships?: MembershipProjection[];
 };
 
+export type CrmTeamMemberAssignment = {
+  externalStaffId: string;
+  displayName: string;
+  title?: string | null;
+  role: UserRole.ADMINISTRATOR | UserRole.STAFF;
+  email?: string | null;
+  phone?: string | null;
+};
+
+const CRM_OWNER_ROLES = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+];
+
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryptionService: EncryptionService,
     private readonly tenantContext: TenantContextService,
+    private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
+    private readonly profiles?: ClientProfileReadService,
   ) {}
 
   async findTenantUserByEmail(tenantId: string, email: string) {
@@ -124,7 +169,15 @@ export class UsersService {
 
   async findTenantUserByPhone(tenantId: string, phone: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const normalizedPhone = normalizeRussianPhone(phone);
+    // Лукап личности не имеет права падать 400-й на не-российский номер:
+    // подтверждённый провайдером иностранный телефон — это «не нашли», а не
+    // «плохой запрос». Строгая валидация остаётся на записи в РФ-салон и SMS.
+    const normalizedPhone = normalizePhoneE164(phone);
+
+    if (!normalizedPhone) {
+      return null;
+    }
+
     const exact = await this.prisma.user.findFirst({
       where: {
         phone: normalizedPhone,
@@ -167,13 +220,110 @@ export class UsersService {
       },
     });
 
-    const legacyUser = legacyUsers.find(
-      (user) => this.normalizeStoredPhone(user.phone) === normalizedPhone,
+    const legacyUser = legacyUsers.find((user) =>
+      phonesMatch(user.phone, normalizedPhone),
     );
 
     return legacyUser
       ? this.projectTenantMembership(legacyUser, scopedTenantId)
       : null;
+  }
+
+  /**
+   * Поиск ЛИЧНОСТИ в тенанте по телефону — в отличие от findTenantUserByPhone
+   * НЕ фильтрует по `status: 'active'`.
+   *
+   * Личность и право входа — разные вещи. Пока лукап требовал активного
+   * membership, подавленный сверкой с CRM мастер был невидим, и следующий
+   * соц-вход заводил ему второй client-аккаунт вместо понятной ошибки.
+   * Сверка идёт по phoneMatchKey, поэтому формат записи в CRM значения не имеет.
+   *
+   * Возвращает пользователя, его membership в этом тенанте (любого статуса) и
+   * признак привязки к карточке сотрудника CRM.
+   */
+  /**
+   * Идентичность мастера Maya для внешней карточки провайдера.
+   *
+   * 🔴 После cutover грант доступа принадлежит `Staff`, а не внешнему id.
+   * Если создать грант без `staffId`, мастер не сможет войти в журнал:
+   * `journalStaffBinding` отказывает при пустой идентичности намеренно, без
+   * отката на legacy-путь. Поэтому идентичность и связь создаются ЗДЕСЬ, до
+   * гранта, и в той же транзакции.
+   */
+  /**
+   * Совместимый lookup для публичного URL `PATCH team-access/:externalStaffId`.
+   *
+   * 🔴 ЕДИНСТВЕННЫЙ разрешённый путь чтения внешнего id вне границы CRM.
+   * Внешний контракт HTTP не меняется, но внутри он немедленно превращается в
+   * идентичность Maya:
+   *
+   *     provider + externalStaffId → StaffProviderLink → StaffId → грант
+   *
+   * Прямой поиск гранта по `externalStaffId` после cutover запрещён барьерным
+   * тестом: он оставлял бы внешний id вторым источником истины.
+   */
+  private async staffIdByExternal(
+    tx: Prisma.TransactionClient,
+    tenantId: string,
+    externalStaffId: string,
+  ): Promise<string | null> {
+    const integration = await tx.crmIntegration.findUnique({
+      where: { tenantId },
+      select: { provider: true },
+    });
+    if (!integration) return null;
+
+    const link = await tx.staffProviderLink.findFirst({
+      where: {
+        tenantId,
+        provider: integration.provider,
+        externalId: externalStaffId,
+      },
+      select: { staffId: true },
+    });
+    return link?.staffId ?? null;
+  }
+
+  async findTenantIdentityByPhone(tenantId: string, phone: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const normalizedPhone = normalizePhoneE164(phone);
+
+    if (!normalizedPhone) {
+      return null;
+    }
+
+    const candidates = await this.prisma.user.findMany({
+      where: {
+        phone: { not: null },
+        memberships: { some: { tenantId: scopedTenantId } },
+      },
+      include: {
+        memberships: {
+          where: { tenantId: scopedTenantId },
+          include: { tenant: true, branch: true },
+        },
+        crmStaffAccesses: { where: { tenantId: scopedTenantId } },
+      },
+    });
+
+    const matched = candidates.find((user) =>
+      phonesMatch(user.phone, normalizedPhone),
+    );
+
+    if (!matched) {
+      return null;
+    }
+
+    const membership = matched.memberships.find(
+      (candidate) => candidate.tenantId === scopedTenantId,
+    );
+
+    return {
+      user: matched,
+      membershipRole: membership?.role ?? null,
+      membershipStatus: membership?.status ?? null,
+      crmStaffAccess: matched.crmStaffAccesses[0] ?? null,
+    };
   }
 
   async ensureEmailIsAvailable(tenantId: string | null, email: string) {
@@ -273,7 +423,12 @@ export class UsersService {
                 tenantId,
                 branchId: data.branchId ?? null,
                 role: data.role,
-                status,
+                // Статус членства — своё перечисление. Раньше сюда напрямую
+                // передавался UserStatus: составы совпадали, и TypeScript
+                // пропускал. С появлением UserStatus.MERGED (терминальный
+                // статус погашенного дубля) значения разошлись, и совпадение
+                // перестало быть случайно верным — переводим явно.
+                status: membershipStatusFor(status),
                 joinedAt: status === UserStatus.ACTIVE ? new Date() : undefined,
                 invitedAt:
                   status === UserStatus.INVITED ? new Date() : undefined,
@@ -291,6 +446,378 @@ export class UsersService {
     });
 
     return tenantId ? this.projectTenantMembership(user, tenantId) : user;
+  }
+
+  async createStaffUserForInternalProvider(data: {
+    tenantId: string;
+    providerId: string;
+    email: string;
+    phone?: string | null;
+    name?: string | null;
+    passwordHash: string;
+  }) {
+    const tenantId = this.tenantContext.assertTenantId(data.tenantId);
+    const normalizedPhone = this.normalizeOptionalPhone(data.phone);
+    const normalizedName = this.normalizeOptionalName(data.name);
+
+    return this.prisma.$transaction(async (tx) => {
+      const provider = await tx.internalProvider.findFirst({
+        where: { id: data.providerId, tenantId },
+        select: {
+          id: true,
+          branchId: true,
+          displayName: true,
+          userId: true,
+          active: true,
+        },
+      });
+
+      if (!provider) {
+        throw new NotFoundException({
+          message: 'Internal provider not found.',
+          error: { code: 'provider_not_found' },
+        });
+      }
+      if (!provider.active) {
+        throw new ConflictException({
+          message: 'Inactive provider cannot receive an account.',
+          error: { code: 'provider_inactive' },
+        });
+      }
+      if (provider.userId) {
+        throw new ConflictException({
+          message: 'This provider already has a user account.',
+          error: { code: 'provider_account_already_linked' },
+        });
+      }
+
+      const effectiveName =
+        normalizedName ?? this.normalizeOptionalName(provider.displayName);
+      const user = await tx.user.create({
+        data: {
+          tenantId,
+          branchId: provider.branchId,
+          email: data.email.toLowerCase(),
+          phone: normalizedPhone,
+          encryptedName: effectiveName
+            ? this.encryptionService.encrypt(effectiveName)
+            : null,
+          passwordHash: data.passwordHash,
+          role: UserRole.STAFF,
+          status: UserStatus.ACTIVE,
+          memberships: {
+            create: {
+              tenantId,
+              branchId: provider.branchId,
+              role: UserRole.STAFF,
+              status: UserStatus.ACTIVE,
+              joinedAt: new Date(),
+            },
+          },
+        },
+        include: {
+          tenant: true,
+          branch: true,
+          memberships: {
+            include: { tenant: true, branch: true },
+          },
+        },
+      });
+
+      const linked = await tx.internalProvider.updateMany({
+        where: {
+          id: provider.id,
+          tenantId,
+          userId: null,
+          active: true,
+        },
+        data: { userId: user.id },
+      });
+      if (linked.count !== 1) {
+        throw new ConflictException({
+          message: 'Provider account linking changed during the request.',
+          error: { code: 'provider_account_link_conflict' },
+        });
+      }
+
+      return this.projectTenantMembership(user, tenantId);
+    });
+  }
+
+  provisionCrmTeamAccess(data: {
+    tenantId: string;
+    tenantSlug: string;
+    ownerUserId: string;
+    ownerExternalStaffId?: string | null;
+    members: CrmTeamMemberAssignment[];
+  }) {
+    void data;
+    return Promise.reject(
+      new ForbiddenException(
+        'CRM team onboarding requires canonical A17 import and A16 commands',
+      ),
+    );
+  }
+
+  async listCrmTeamAccess(tenantId: string, currentUserId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const accesses = await this.prisma.crmStaffAccess.findMany({
+      where: { tenantId: scopedTenantId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    });
+
+    const items = accesses
+      .map((access) => {
+        const email = this.publicLoginEmail(access.user?.email ?? null);
+        const phone = access.user?.phone ?? null;
+        const isOwner =
+          access.userId === currentUserId ||
+          this.isOwnerAccessRole(access.role);
+
+        return {
+          external_staff_id: access.externalStaffId,
+          display_name: this.encryptionService.decrypt(
+            access.encryptedDisplayName,
+          ),
+          title: access.title,
+          role: access.role,
+          access_status: access.status,
+          email,
+          phone,
+          login_channels: [
+            ...(email ? ['email'] : []),
+            ...(phone ? ['phone'] : []),
+          ],
+          can_login: access.status === 'active' && Boolean(email || phone),
+          is_owner: isOwner,
+        };
+      })
+      .sort((left, right) => {
+        if (left.is_owner !== right.is_owner) return left.is_owner ? -1 : 1;
+        if (left.role !== right.role) {
+          return String(left.role) === 'administrator' ? -1 : 1;
+        }
+        return left.display_name.localeCompare(right.display_name, 'ru');
+      });
+
+    return {
+      items,
+      total: items.length,
+      active_accounts: items.filter((item) => item.can_login).length,
+      pending_contacts: items.filter(
+        (item) => item.access_status === 'pending_contact',
+      ).length,
+      disabled_accounts: items.filter(
+        (item) => item.access_status === 'disabled',
+      ).length,
+    };
+  }
+
+  async updateCrmTeamAccess(data: {
+    tenantId: string;
+    actorUserId: string;
+    externalStaffId: string;
+    update: UpdateCrmTeamAccessDto;
+  }) {
+    const tenantId = this.tenantContext.assertTenantId(data.tenantId);
+    const externalStaffId = data.externalStaffId.trim();
+    const email = data.update.email?.trim().toLowerCase() || null;
+    const phone = this.normalizeOptionalPhone(data.update.phone);
+    const requestedRole = data.update.role;
+
+    if (!externalStaffId) {
+      throw new BadRequestException({
+        message: 'CRM staff identity is required.',
+        error: { code: 'crm_team_member_invalid' },
+      });
+    }
+    if (!requestedRole && !email && !phone) {
+      throw new BadRequestException({
+        message: 'Provide a role, email or phone to update team access.',
+        error: { code: 'crm_team_access_update_empty' },
+      });
+    }
+
+    const staffId = await this.staffIdByExternal(
+      this.prisma,
+      tenantId,
+      externalStaffId,
+    );
+    const access = await this.prisma.crmStaffAccess.findFirst({
+      where: staffId ? { tenantId, staffId } : { tenantId, id: '' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            phone: true,
+            passwordHash: true,
+          },
+        },
+      },
+    });
+    if (!access) {
+      throw new NotFoundException({
+        message: 'CRM team member access was not found.',
+        error: { code: 'crm_team_access_not_found' },
+      });
+    }
+    const role = requestedRole ?? access.role;
+    if (role !== UserRole.ADMINISTRATOR && role !== UserRole.STAFF) {
+      throw new BadRequestException({
+        message: 'Unsupported team access role.',
+        error: { code: 'crm_team_role_invalid' },
+      });
+    }
+
+    const contactClauses = [
+      ...(email ? [{ email }] : []),
+      ...(phone ? [{ phone }] : []),
+    ];
+    let loginUser = access.user;
+    if (!loginUser && contactClauses.length) {
+      const matches = await this.prisma.user.findMany({
+        where: {
+          memberships: { some: { tenantId } },
+          OR: contactClauses,
+        },
+        select: {
+          id: true,
+          email: true,
+          phone: true,
+          passwordHash: true,
+        },
+        take: 2,
+      });
+      if (matches.length > 1) this.throwCrmTeamContactConflict();
+      loginUser = matches[0] ?? null;
+      if (loginUser) {
+        const conflict = await this.prisma.crmStaffAccess.findFirst({
+          where: { tenantId, userId: loginUser.id, id: { not: access.id } },
+          select: { id: true },
+        });
+        if (conflict) this.throwCrmTeamContactConflict();
+      }
+    }
+
+    const sourceIntentRef = this.canonicalWave2.intentRef();
+    const needsLogin = Boolean(loginUser || contactClauses.length);
+    let login:
+      | {
+          userId: string;
+          email: string;
+          phone: string | null;
+          branchId: string | null;
+          passwordHash: string;
+          credentialIntentHash: string;
+        }
+      | undefined;
+    if (needsLogin) {
+      const [tenant, branch] = await Promise.all([
+        this.prisma.tenant.findUnique({
+          where: { id: tenantId },
+          select: { slug: true },
+        }),
+        this.prisma.branch.findFirst({
+          where: { tenantId },
+          orderBy: { createdAt: 'asc' },
+          select: { id: true },
+        }),
+      ]);
+      if (!tenant) throw new NotFoundException('Tenant was not found.');
+      const loginEmail =
+        email ?? loginUser?.email ?? buildPhoneLoginEmail(tenant.slug, phone!);
+      const loginPhone = phone ?? loginUser?.phone ?? null;
+      login = {
+        userId:
+          loginUser?.id ??
+          this.canonicalWave2.deterministicTargetId(
+            'configure_staff_access',
+            tenantId,
+            sourceIntentRef,
+          ),
+        email: loginEmail,
+        phone: loginPhone,
+        branchId: branch?.id ?? null,
+        passwordHash:
+          loginUser?.passwordHash ??
+          (await bcrypt.hash(randomBytes(24).toString('base64url'), 10)),
+        credentialIntentHash: this.encryptionService.opaqueReference(
+          'package5-wave2.crm-login-intent',
+          `${tenantId}\0${loginEmail}\0${loginPhone ?? ''}`,
+        ),
+      };
+    }
+
+    await this.canonicalWave2.execute(
+      tenantId,
+      { userId: data.actorUserId },
+      {
+        operation: 'configure_staff_access',
+        accessId: access.id,
+        role,
+        ...(login ? { login } : {}),
+      },
+      sourceIntentRef,
+    );
+
+    const snapshot = await this.listCrmTeamAccess(tenantId, data.actorUserId);
+    return snapshot.items.find(
+      (item) => item.external_staff_id === externalStaffId,
+    );
+  }
+
+  async claimCrmTeamOwner(data: {
+    tenantId: string;
+    actorUserId: string;
+    externalStaffId: string;
+  }) {
+    const tenantId = this.tenantContext.assertTenantId(data.tenantId);
+    const externalStaffId = data.externalStaffId.trim();
+
+    if (!externalStaffId) {
+      throw new BadRequestException({
+        message: 'CRM staff identity is required.',
+        error: { code: 'crm_team_member_invalid' },
+      });
+    }
+
+    const staffId = await this.staffIdByExternal(
+      this.prisma,
+      tenantId,
+      externalStaffId,
+    );
+    const access = await this.prisma.crmStaffAccess.findFirst({
+      where: staffId ? { tenantId, staffId } : { tenantId, id: '' },
+      select: { id: true },
+    });
+    if (!access) {
+      throw new NotFoundException({
+        message: 'CRM team member access was not found.',
+        error: { code: 'crm_team_access_not_found' },
+      });
+    }
+    await this.canonicalWave2.execute(
+      tenantId,
+      { userId: data.actorUserId },
+      {
+        operation: 'claim_team_owner',
+        accessId: access.id,
+      },
+    );
+
+    const snapshot = await this.listCrmTeamAccess(tenantId, data.actorUserId);
+    return snapshot.items.find(
+      (item) => item.external_staff_id === externalStaffId,
+    );
   }
 
   async createPhoneFirstClientUser(data: {
@@ -373,14 +900,11 @@ export class UsersService {
     if (dto.phone !== undefined) {
       const normalizedPhone = normalizeRussianPhone(dto.phone);
 
-      if (currentUser.phone && currentUser.phone !== normalizedPhone) {
-        throw new ConflictException(
-          'Phone is already set for this user and cannot be changed here',
-        );
-      }
-
-      if (!currentUser.phone) {
-        await this.ensurePhoneIsAvailable(scopedTenantId, normalizedPhone);
+      if (currentUser.phone !== normalizedPhone) {
+        throw new ForbiddenException({
+          message: 'Phone can only be added through a verified login provider.',
+          error: { code: 'phone_verification_required' },
+        });
       }
 
       data.phone = normalizedPhone;
@@ -419,6 +943,66 @@ export class UsersService {
     });
 
     return this.serializeUser(user);
+  }
+
+  async attachVerifiedSocialPhone(
+    userId: string,
+    expectedTenantId: string,
+    phone: string,
+  ) {
+    const tenantId = this.tenantContext.assertTenantId(expectedTenantId);
+    const normalizedPhone = normalizeRussianPhone(phone);
+    const currentUser = await this.getTenantUserOrThrow(userId, tenantId);
+
+    if (currentUser.phone) {
+      if (currentUser.phone !== normalizedPhone) {
+        throw new ConflictException({
+          message: 'The verified social phone conflicts with this account.',
+          error: { code: 'social_identity_conflict' },
+        });
+      }
+      return currentUser;
+    }
+
+    const verifiedIdentity = await this.prisma.authIdentity.findFirst({
+      where: {
+        tenantId,
+        userId,
+        phone: normalizedPhone,
+      },
+      select: { id: true },
+    });
+
+    if (!verifiedIdentity) {
+      throw new ForbiddenException({
+        message: 'The social provider did not verify this phone.',
+        error: { code: 'phone_verification_required' },
+      });
+    }
+
+    await this.ensurePhoneIsAvailable(tenantId, normalizedPhone);
+    const update = await this.prisma.user.updateMany({
+      where: {
+        id: userId,
+        phone: null,
+        memberships: {
+          some: {
+            tenantId,
+            status: 'active',
+          },
+        },
+      },
+      data: { phone: normalizedPhone },
+    });
+
+    if (update.count !== 1) {
+      throw new ConflictException({
+        message: 'The verified phone could not be attached to this account.',
+        error: { code: 'social_identity_conflict' },
+      });
+    }
+
+    return this.getTenantUserOrThrow(userId, tenantId);
   }
 
   async getUserOrThrow(userId: string) {
@@ -513,6 +1097,150 @@ export class UsersService {
     };
   }
 
+  /**
+   * Основатель платформы MAYA.
+   *
+   * 🔴 Это НЕ «владелец с полным доступом». Владелец салона распоряжается своим
+   * бизнесом целиком, но GOD-режим и затраты на ИИ — это метрики и деньги ВСЕЙ
+   * платформы, то есть данные всех тенантов сразу. Признак задаётся списком
+   * MAYA_FOUNDER_IDS / MAYA_FOUNDER_EMAILS в окружении и никак не выводится из
+   * роли внутри тенанта.
+   */
+  private isPlatformFounder(serialized: {
+    id: string;
+    email: string | null;
+    role: string;
+  }): boolean {
+    const parse = (raw?: string) =>
+      String(raw || '')
+        .split(',')
+        .map((x) => x.trim().toLowerCase())
+        .filter(Boolean);
+    const ids = parse(process.env.MAYA_FOUNDER_IDS);
+    const emails = parse(process.env.MAYA_FOUNDER_EMAILS);
+    const email = String(serialized.email || '').toLowerCase();
+
+    return (
+      ids.includes(String(serialized.id).toLowerCase()) ||
+      (email.length > 0 && emails.includes(email))
+    );
+  }
+
+  async serializeCurrentUser(user: UserWithRelations) {
+    const serialized = {
+      ...this.serializeUser(user),
+      is_platform_owner: false,
+    };
+    serialized.is_platform_owner = this.isPlatformFounder(serialized);
+    const tenantId = serialized.tenant_id;
+
+    if (!tenantId) {
+      return {
+        ...serialized,
+        auth_provider: null,
+        avatar_url: null,
+        staff_profile: { linked: false, source: null, title: null },
+        app_access: buildAppAccessContext({
+          tenantId: null,
+          role: serialized.role as UserRole,
+          staffProfileLinked: false,
+          customerProfileLinked: false,
+        }),
+      };
+    }
+
+    const [crmStaffProfile, customerProfile, telegramProfileIdentity] =
+      await Promise.all([
+        this.prisma.crmStaffAccess.findFirst({
+          where: {
+            tenantId,
+            userId: serialized.id,
+            status: 'active',
+          },
+          select: { title: true, externalStaffId: true, staffId: true },
+        }),
+        this.profiles
+          ? this.profiles
+              .forAccount(tenantId, serialized.id)
+              .then((result) => result.profile.profile_id)
+              .catch(() => null)
+          : Promise.resolve(null),
+        this.prisma.authIdentity.findFirst({
+          where: {
+            tenantId,
+            userId: serialized.id,
+            provider: 'telegram',
+          },
+          select: { provider: true, profileJson: true },
+        }),
+      ]);
+
+    const authProvider = telegramProfileIdentity?.provider ?? null;
+    const avatarUrl = this.socialProfileAvatarUrl(
+      telegramProfileIdentity?.profileJson,
+    );
+
+    if (crmStaffProfile) {
+      const staffProfile = {
+        linked: true,
+        source: 'crm' as const,
+        title: crmStaffProfile.title,
+        // Идентичность Maya — есть у обоих источников. Внешний id остаётся
+        // рядом как наследие провода и в решениях о доступе не участвует.
+        staff_id: crmStaffProfile.staffId,
+        // Свой идентификатор в CRM: по нему кабинет отбирает из журнала дня
+        // ИМЕННО свои визиты. Это собственный id пользователя, не чужие ПД.
+        external_staff_id: crmStaffProfile.externalStaffId,
+      };
+
+      return {
+        ...serialized,
+        auth_provider: authProvider,
+        avatar_url: avatarUrl,
+        staff_profile: staffProfile,
+        app_access: buildAppAccessContext({
+          tenantId,
+          role: serialized.role as UserRole,
+          staffProfileLinked: true,
+          customerProfileLinked: Boolean(customerProfile),
+        }),
+      };
+    }
+
+    const internalStaffProfile = await this.prisma.internalProvider.findFirst({
+      where: {
+        tenantId,
+        userId: serialized.id,
+        active: true,
+      },
+      select: { id: true, title: true },
+    });
+
+    const staffProfile = internalStaffProfile
+      ? {
+          linked: true,
+          source: 'internal' as const,
+          title: internalStaffProfile.title,
+          // Закрывает асимметрию: у внутреннего мастера идентификатора не было
+          // вовсе, поэтому кабинет не мог отобрать для него «свои визиты».
+          staff_id: internalStaffProfile.id,
+        }
+      : { linked: false, source: null, title: null, staff_id: null };
+
+    return {
+      ...serialized,
+      auth_provider: authProvider,
+      avatar_url: avatarUrl,
+      staff_profile: staffProfile,
+      app_access: buildAppAccessContext({
+        tenantId,
+        role: serialized.role as UserRole,
+        staffProfileLinked: staffProfile.linked,
+        customerProfileLinked: Boolean(customerProfile),
+      }),
+    };
+  }
+
   private projectTenantMembership(
     user: UserWithRelations,
     tenantId: string,
@@ -554,15 +1282,49 @@ export class UsersService {
     return trimmed.length > 0 ? trimmed : null;
   }
 
-  private normalizeStoredPhone(phone: string | null): string | null {
-    if (!phone) {
+  private socialProfileAvatarUrl(profile: unknown): string | null {
+    if (!profile || typeof profile !== 'object' || Array.isArray(profile)) {
+      return null;
+    }
+
+    const fields = profile as Record<string, unknown>;
+    const candidate = [
+      fields.picture,
+      fields.avatar_url,
+      fields.photo_url,
+    ].find((value): value is string => typeof value === 'string');
+
+    if (!candidate) {
       return null;
     }
 
     try {
-      return normalizeRussianPhone(phone);
+      const url = new URL(candidate.trim());
+      return url.protocol === 'https:' ? url.toString() : null;
     } catch {
       return null;
     }
+  }
+
+  // Раньше здесь стоял строгий российский нормализатор в try/catch: сохранённый
+  // не-российский номер превращался в null и не совпадал ни с чем.
+  private normalizeStoredPhone(phone: string | null): string | null {
+    return normalizePhoneE164(phone);
+  }
+
+  private publicLoginEmail(email: string | null): string | null {
+    if (!email || /^phone-\d+@.+\.client\.local$/i.test(email)) return null;
+    return email;
+  }
+
+  private isOwnerAccessRole(role: string): boolean {
+    return CRM_OWNER_ROLES.includes(role as UserRole);
+  }
+
+  private throwCrmTeamContactConflict(): never {
+    throw new ConflictException({
+      message: 'This email or phone is already used in this business.',
+      error: { code: 'crm_team_contact_already_used' },
+    });
   }
 }

@@ -1,0 +1,19 @@
+{
+  "ownedDatabasesRemoved": [
+    "maya_c06_b31_fg",
+    "maya_c06_b31_schema",
+    "maya_c06_b31_replay"
+  ],
+  "ownedTempDatabasesRemaining": 0,
+  "ownedPostgresStopped": true,
+  "ownedPostgresDataRemoved": true,
+  "ownedSocketRemoved": true,
+  "port55501Listening": false,
+  "preExistingDatabasesTouched": 0,
+  "mainDirtyWorktreeTouched": false,
+  "mainPreExistingStatusEntriesPreserved": 24,
+  "ownedTempProcessesStillRunning": 0,
+  "backgroundWatchersLeft": 0,
+  "ownedPlaywrightChromeProcessesRemaining": 0,
+  "ownedRemoteSchemaStageRemaining": 0
+}

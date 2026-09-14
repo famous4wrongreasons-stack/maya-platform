@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Post,
   Query,
@@ -41,8 +42,13 @@ export class ExpensesController {
   create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateExpenseDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.expensesService.create(user.tenantId!, user.userId, dto);
+    return this.expensesService.create(user.tenantId!, user.userId, dto, {
+      source: 'manual',
+      initiator: 'http',
+      idempotencyKey,
+    });
   }
 
   @Get()

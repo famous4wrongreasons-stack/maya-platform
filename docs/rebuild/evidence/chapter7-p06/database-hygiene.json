@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "ownedTemporaryDatabases": 0,
+  "preExistingDatabasesTouched": 0,
+  "ownedClusterStopped": true,
+  "ownedDataAndSocketRemoved": true,
+  "syntheticDumpSha256": "098aa31f689ebfc546aa4b78346944cd5a0c3f675637f306945240ff5541a8e1",
+  "syntheticDumpBytes": 915854
+}

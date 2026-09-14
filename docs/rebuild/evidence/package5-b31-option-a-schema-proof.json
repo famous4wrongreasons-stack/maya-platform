@@ -1,0 +1,29 @@
+{
+  "verdict": "PASS",
+  "proof": "schema transaction, not runtime dispatch",
+  "cases": [
+    "empty migration: no fabricated historical bindings/fingerprints",
+    "same/same replay; first and secondary key changed intent conflict with zero new executions",
+    "12 PostgreSQL concurrent same/same: one durable binding and execution",
+    "PostgreSQL concurrent same/different: one accepted intent and one conflict; loser execution rolled back",
+    "tenant-qualified FK and immutable Client isolation; authorized tenants have independent key namespaces",
+    "database guards prohibit key/Client/hash/snapshot rewrite and binding deletion",
+    "legacy unchanged; no fake backfill; deferred constraint rejects execution without first binding",
+    "connection restart preserves same UNKNOWN execution and blocks changed intent/payload cleanup"
+  ],
+  "fakeBackfill": 0,
+  "providerWrites": 0,
+  "productionMutations": 0,
+  "sourceCheckpoint": "724d3ef67275812a9e7b64ca9ca873a9bbc7920e",
+  "approvedOption": "A",
+  "modelsAdded": 1,
+  "persistedColumnsAdded": 9,
+  "actionClassesAdded": 0,
+  "migration": "20260906120000_b31_immutable_booking_idempotency",
+  "migrationSha256": "31a4e9bc49892d2a43a06a3f70addaceb9fe1ab247e7b48b5f912702860e472c",
+  "cleanReplay": {
+    "migrations": 80,
+    "pending": 0,
+    "drift": "NONE"
+  }
+}

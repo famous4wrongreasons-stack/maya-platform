@@ -1,0 +1,338 @@
+{
+  "package": "R12",
+  "blockers": [
+    "B53",
+    "B58"
+  ],
+  "stage": "E3 / Stage 1, proposal only",
+  "baseline": "60e82664",
+  "productionRuntime": "42962475",
+  "recommendedOption": "A",
+  "canonicalOwner": "Tenant team-message/attachment lifecycle owner; B53 existing erasure retirement",
+  "existingFoundationSufficient": false,
+  "businessDecisionRequired": true,
+  "schemaRequired": true,
+  "newModels": 2,
+  "newFields": 46,
+  "newActionClasses": 6,
+  "newAeActionClasses": 4,
+  "newAc6RetentionClasses": 2,
+  "migrationRequired": true,
+  "backfillRequired": false,
+  "runtimeOnly": false,
+  "models": {
+    "TeamMessage": [
+      {
+        "name": "id",
+        "type": "text"
+      },
+      {
+        "name": "tenantId",
+        "type": "text"
+      },
+      {
+        "name": "conversationKey",
+        "type": "text"
+      },
+      {
+        "name": "senderUserId",
+        "type": "text"
+      },
+      {
+        "name": "sendExecutionId",
+        "type": "text"
+      },
+      {
+        "name": "identityHash",
+        "type": "char64"
+      },
+      {
+        "name": "intentHash",
+        "type": "char64"
+      },
+      {
+        "name": "payloadEncrypted",
+        "type": "text?"
+      },
+      {
+        "name": "payloadHash",
+        "type": "char64"
+      },
+      {
+        "name": "attachmentId",
+        "type": "text?"
+      },
+      {
+        "name": "createdAt",
+        "type": "timestamptz"
+      },
+      {
+        "name": "expiresAt",
+        "type": "timestamptz"
+      },
+      {
+        "name": "withdrawnAt",
+        "type": "timestamptz?"
+      },
+      {
+        "name": "withdrawnByUserId",
+        "type": "text?"
+      },
+      {
+        "name": "withdrawalExecutionId",
+        "type": "text?"
+      },
+      {
+        "name": "withdrawalIdentityHash",
+        "type": "char64?"
+      },
+      {
+        "name": "withdrawalIntentHash",
+        "type": "char64?"
+      },
+      {
+        "name": "revision",
+        "type": "int"
+      },
+      {
+        "name": "planHash",
+        "type": "char64"
+      },
+      {
+        "name": "planEncrypted",
+        "type": "text?"
+      },
+      {
+        "name": "payloadErasedAt",
+        "type": "timestamptz?"
+      },
+      {
+        "name": "status",
+        "type": "text"
+      }
+    ],
+    "TeamAttachment": [
+      {
+        "name": "id",
+        "type": "text"
+      },
+      {
+        "name": "tenantId",
+        "type": "text"
+      },
+      {
+        "name": "ownerUserId",
+        "type": "text"
+      },
+      {
+        "name": "reserveExecutionId",
+        "type": "text"
+      },
+      {
+        "name": "finalizeExecutionId",
+        "type": "text?"
+      },
+      {
+        "name": "uploadIdentityHash",
+        "type": "char64"
+      },
+      {
+        "name": "intentHash",
+        "type": "char64"
+      },
+      {
+        "name": "objectStoreKey",
+        "type": "text"
+      },
+      {
+        "name": "contentSha256",
+        "type": "char64"
+      },
+      {
+        "name": "declaredSize",
+        "type": "bigint"
+      },
+      {
+        "name": "actualSize",
+        "type": "bigint?"
+      },
+      {
+        "name": "mime",
+        "type": "text"
+      },
+      {
+        "name": "kind",
+        "type": "text"
+      },
+      {
+        "name": "filenameEncrypted",
+        "type": "text?"
+      },
+      {
+        "name": "state",
+        "type": "text"
+      },
+      {
+        "name": "revision",
+        "type": "int"
+      },
+      {
+        "name": "createdAt",
+        "type": "timestamptz"
+      },
+      {
+        "name": "uploadExpiresAt",
+        "type": "timestamptz"
+      },
+      {
+        "name": "mediaExpiresAt",
+        "type": "timestamptz?"
+      },
+      {
+        "name": "storageReceiptHash",
+        "type": "char64?"
+      },
+      {
+        "name": "payloadErasedAt",
+        "type": "timestamptz?"
+      },
+      {
+        "name": "lastObservedAt",
+        "type": "timestamptz?"
+      }
+    ]
+  },
+  "countingConvention": "NEW FIELDS counts persisted DB columns in new models plus listed existing-model columns. Virtual Prisma relations are not columns. Headline new action classes = enumerated AE classes + enumerated AC6 extensions; no new engine.",
+  "existingModelColumnChanges": [
+    {
+      "model": "ActionExecution",
+      "name": "teamMessageId",
+      "type": "text?"
+    },
+    {
+      "model": "ActionExecution",
+      "name": "teamMessageSlotKey",
+      "type": "text?"
+    }
+  ],
+  "integrationDependencies": [
+    "R02 production PASS"
+  ],
+  "integrationDependenciesSatisfied": true,
+  "dependenciesSatisfied": false,
+  "outstandingDependency": "Owner approval of this entire package Option A and exact schema/lifecycle mapping",
+  "subscopes": {
+    "B53": {
+      "foundationSufficient": true,
+      "businessDecisionRequired": false,
+      "schemaRequired": false,
+      "runtimeOnly": true,
+      "readyForImplementation": true
+    }
+  },
+  "readyForImplementation": false,
+  "readyForProduction": false,
+  "runtimeSchemaMigrationChanges": 0,
+  "testsExecuted": 0,
+  "databaseConnections": 0,
+  "productionCalls": 0,
+  "productionMutationsMessages": 0,
+  "inventoryReopened": false,
+  "newBlockers": 0,
+  "fakeHistoricalBackfill": false,
+  "processHygiene": 0,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "optionB": {
+    "direction": "Retire package writes/notifications; preserve historical data without manufacturing authority",
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "businessDecisionRequired": true,
+    "runtimeOnlyAfterApproval": true
+  },
+  "minimality": "Use existing ActionExecution parent/slot binding pattern and immutable parent manifest. No separate delivery-slot link model, state, lease or provider attempts.",
+  "newActionClassNames": {
+    "AE": [
+      "send_team_message",
+      "withdraw_team_message",
+      "reserve_team_attachment",
+      "finalize_team_attachment"
+    ],
+    "AC6": [
+      "purge_team_message_payloads",
+      "purge_team_attachment_payloads"
+    ]
+  },
+  "proposalFile": "package5-remainder-e3-r12-decision-sheet.md",
+  "canonicalFingerprint": "Canonical hash contract for this proposal: a versioned, explicitly named object; recursive sorted object keys and UTF-8; Unicode NFC text with CRLF→LF and trimmed outer whitespace; opaque IDs are exact, not lowercased; dates are UTC ISO milliseconds; absent optional business values become explicit null; arrays retain specified order or are sorted/deduplicated only where declared sets. No raw JSON serialization contract, random encryption bytes, HTTP headers, retry time, worker ID or transport metadata. Caller intent hash is separate from immutable admission-plan hash: retries first match the original command, then reuse the original plan, never recompute recipients/routes from current discovery. Current eligibility is a dispatch check, not permission to rewrite that plan.\n\nExact intent inputs: send = `{contractVersion,tenantId,senderUserId,conversationKey:\"team/main\",normalizedText,attachmentId,attachmentContentHash}`; withdrawal = `{contractVersion,tenantId,senderUserId,messageId,expectedRevision}`. Reserve = `{contractVersion,tenantId,ownerUserId,contentSha256,declaredSize,mediaKind,mime,normalizedFilename,retentionPolicyVersion}`; finalize = `{contractVersion,tenantId,ownerUserId,attachmentId,expectedDigest,verifiedStagedSize,verifiedStagedMime,stagedContentHash}`. Finalize resolves verified staging facts for that reservation server-side before admission; its later final storage receipt is an outcome, excluded from input fingerprint. Retries resume the original normalized intent/reservation and inspect the exact final key/hash when needed, without requiring vanished staging to be republished or accepting a caller receipt hash. Message plan hash freezes content/version, sorted canonical recipient IDs, policy/eligibility snapshot and one exact Inbox slot each. Allocation timestamps/object keys and recipient discovery are first-admission state reused on retry, not reasons to mint another logical message.\n",
+  "approvalIncludes": "Exact bounded contract, changed business behavior, normalized intent/plan fields, model/column/index/FK mapping and explicitly enumerated new AE/AC6 classes. No implementation approval inferred from proposal.",
+  "businessLosses": [
+    "B53 server-history erasure remains unavailable",
+    "No automatic MAYA team replies or external Telegram/Web Push/APNS notification fan-out",
+    "No in-place edit; withdrawal is not erasure of delivered copies",
+    "Historical unbound messages/media excluded; media48h/text365days under proposed lifecycle"
+  ],
+  "sourceEvidence": [
+    {
+      "path": "/tmp/maya-b29-contour/ai администратор/bot.py",
+      "sha256": "83c51b3c7df42632aa078b92606d46b43aa8d8911f45cb01a57e96d94d1e6d42",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/tmp/maya-b29-contour/ai администратор/webhook_server.py",
+      "sha256": "44587eb1341699d2d09b41f1f684b7e0eb1a8bd5b018c1f3ca86a41f2d178645",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/tmp/maya-b29-contour/ai администратор/database.py",
+      "sha256": "6394aeaefae0b1189ce7796ad93669467d93f7c6887819072625d9febf242a98",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/tmp/maya-b29-contour/maya-saas-backend/src/package5-wave6/package5-wave6.policy.ts",
+      "sha256": "84104711a8aca595c5174a7960a0d9071c5aca5a4b50efab6a3b5da494ae3530",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/bot.py",
+      "sha256": "c7f5b79011315732e8ffedb41f3ff6705a5bf7829cdffedd4164baeb9b9a121b",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/webhook_server.py",
+      "sha256": "69bb3fcfa02f93004805de7610d3f9c8eb0d556174a7090d1f465328274a045b",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/database.py",
+      "sha256": "faa8b205072b114518884a1a137abf4b59611522d4bb9ce04c82f09812ab6d69",
+      "scope": "existing inventoried source; local read only"
+    }
+  ],
+  "proposalSha256": "bfea264d8f20b871e2b717dd995fd36896e9a03643b2e3b08633fb981b1a07be",
+  "documentationChecks": {
+    "modelColumnCounts": "PASS",
+    "classCounts": "PASS",
+    "sheetJsonMapping": "PASS",
+    "schemaPlaceholdersRemaining": 0,
+    "runtimeTestsExecuted": 0
+  },
+  "genuineLimits": [
+    "No implementation/schema feasibility proof or production calls executed at Stage 1.",
+    "Exact business constraints and AC6 extensions remain owner proposals, not existing approvals.",
+    "Historical canonical attribution is not proved and backfill is explicitly prohibited.",
+    "Known production-only/captured variants must be verified and overlaid during an authorized implementation; no source beyond closed inventory was discovered."
+  ],
+  "attachmentEffectBoundary": {
+    "transport": "quarantined staging only after canonical reservation; no final publication/attach/unlink",
+    "finalPublishOwner": "finalize_team_attachment canonical executor under same reservation and original AE",
+    "finalInputEvidence": "server-verified staged content hash/size/MIME, stored in existing normalized AE input",
+    "finalOutcomeEvidence": "storageReceiptHash from exact object commit/reconciliation, not an input authority",
+    "unknown": "same AE/reservation/object key/hash; no second publish, new key or final unlink",
+    "infrastructure": "existing documented private storage abstraction only; no new provider/infrastructure approved",
+    "schemaDeltaFromClarification": 0
+  }
+}

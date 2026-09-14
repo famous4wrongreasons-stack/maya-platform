@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "mode": "verify",
+  "entries": 42,
+  "activePhp": 10,
+  "publicRoots": 3,
+  "localRoutingFiles": 9,
+  "protectedHtmlAndBackups": 7,
+  "blockedArchives": 16,
+  "repair": null,
+  "phpSourceEvaluation": 0,
+  "bookingProviderMessageEffects": 0
+}

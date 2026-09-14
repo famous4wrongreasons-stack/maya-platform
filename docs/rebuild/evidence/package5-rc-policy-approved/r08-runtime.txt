@@ -1,0 +1,11 @@
+{
+  "package": "R08",
+  "proof": "real PostgreSQL business executor",
+  "checks": [
+    "missing exact Appointment/attendance rejected before ActionExecution",
+    "four concurrent commands one root/execution; changed intent conflicts; different key same Appointment returns original root; missing marketing consent creates no delivery slots",
+    "User-free verified Client supported; unverified/wrong Client/tenant/rating/extra authority denied before AE; one concurrent correction winner and no loser AE",
+    "exact retry survives expiry; new response denied; withdrawal after window hides content without read write; revoked link denied; BusinessReview/provider/delivery writes zero"
+  ],
+  "productionEffects": 0
+}

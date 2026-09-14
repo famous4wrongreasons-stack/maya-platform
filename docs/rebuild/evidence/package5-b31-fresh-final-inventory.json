@@ -1,0 +1,113 @@
+{
+  "kind": "fresh all-13-family source inventory; inventory is not aggregate certification",
+  "familyInventoryCoverage": "13/13",
+  "familyOwners": {
+    "A15": "Wave 3 / external staff schedule",
+    "A16": "Wave 2 / CRM staff access",
+    "A17": "Wave 3 / CRM lifecycle and source facts",
+    "A18": "Wave 3 + verified Client profile/consent/appointment boundaries",
+    "A22": "Wave 1 / settings and preferences",
+    "A23": "Wave 1 / operational work and inbox projections",
+    "A25": "Wave 2 / security actions and AC3 auth protocol",
+    "A26": "Wave 2 + canonical trial bootstrap / tenant lifecycle",
+    "A27": "Wave 4 / reduced inventory and review facts",
+    "A28": "Wave 4 / internal calendar configuration and objects",
+    "A29": "Wave 5 / recovery correction and facts",
+    "A30": "Wave 6 / approved AC6 maintenance owner",
+    "A31": "Event store / reconciliation / mirror and recovery fact plane"
+  },
+  "registrations": {
+    "wave1": 6,
+    "wave2": 13,
+    "wave3": 8,
+    "wave4": 12,
+    "wave5": 1,
+    "wave6": 6
+  },
+  "sourceTsNonSpec": 561,
+  "tsRoutes": 224,
+  "tsMutationLikeSites": 516,
+  "acceptedWaveFoundationChangesSinceB30": [],
+  "release": "/opt/maya-saas/releases/20260906-p5-b31-2aeaacff",
+  "compiledArtifactsMatched": 577,
+  "compiledSourceModules": 561,
+  "compiledScripts": 14,
+  "productionPython": {
+    "inspection": "read-only AST; no Python runtime modules imported",
+    "rootPythonFiles": 90,
+    "nonTestRootPythonFiles": 70,
+    "launcherReferencesWebhook": true,
+    "functions": {
+      "_finalize_booking_for_chat": {
+        "line": 6319,
+        "sourceSha256": "6dc2cbce9c3cb676f2c9b7b52b5b246010f6cacaf244cd358426b3aa4547d549",
+        "astSha256": "4f75a206f1bcaec3595a21c447fb75fe993567478f884b9d75b07559076a34b5",
+        "usesCanonicalAppointmentCommand": true,
+        "referencesSharedFinalizer": true,
+        "repositorySourceSegmentMatch": true
+      },
+      "chat_handler": {
+        "line": 8358,
+        "sourceSha256": "c98ee0a6f89762c12a34d837252cfcd5faeaf8481784620b64e97cb7219e9e22",
+        "astSha256": "4997a8ff8ec5359dfdd143d3556ed846b92e5db9665e72028c29c3c166766580",
+        "usesCanonicalAppointmentCommand": false,
+        "referencesSharedFinalizer": true,
+        "repositorySourceSegmentMatch": true
+      },
+      "chat_stream_handler": {
+        "line": 8930,
+        "sourceSha256": "c44f21a15895cae9f8205365f252621e89a9f59ff8ceb0995a226f83ec40fa27",
+        "astSha256": "4044eaa30305455b011381920b4c369d5a21ce7192d336c215f1686a7678068c",
+        "usesCanonicalAppointmentCommand": false,
+        "referencesSharedFinalizer": true,
+        "repositorySourceSegmentMatch": true
+      }
+    },
+    "publishedBackendChatRoutes": [
+      {
+        "line": 12118,
+        "sourceSha256": "c44f21a15895cae9f8205365f252621e89a9f59ff8ceb0995a226f83ec40fa27",
+        "call": "web_app.router.add_post",
+        "route": "/api/chat",
+        "handler": "chat_handler"
+      },
+      {
+        "line": 12119,
+        "sourceSha256": "c44f21a15895cae9f8205365f252621e89a9f59ff8ceb0995a226f83ec40fa27",
+        "call": "web_app.router.add_options",
+        "route": "/api/chat",
+        "handler": "chat_options_handler"
+      },
+      {
+        "line": 12120,
+        "sourceSha256": "c44f21a15895cae9f8205365f252621e89a9f59ff8ceb0995a226f83ec40fa27",
+        "call": "web_app.router.add_post",
+        "route": "/api/chat/stream",
+        "handler": "chat_stream_handler"
+      },
+      {
+        "line": 12121,
+        "sourceSha256": "c44f21a15895cae9f8205365f252621e89a9f59ff8ceb0995a226f83ec40fa27",
+        "call": "web_app.router.add_options",
+        "route": "/api/chat/stream",
+        "handler": "chat_options_handler"
+      }
+    ],
+    "note": "AST hashes use production Python; source-segment hashes are version-independent. Full deployed Python file hashes match the accepted B30 baseline."
+  },
+  "freshBlocker": "B32 / A18 \u2014 valid channel create is denied by canonical action actor policy",
+  "aggregateVerdict": "FAIL \u2014 STOP at B32",
+  "remainingAggregateCertification": "NOT RUN AFTER BLOCKER",
+  "exactRuntimeHashes": {
+    "src/crm/client-channel.controller.js": "36191e681a15d6cf468512351de92b6adc8da0ed81744e18b8c251d03b679b55",
+    "src/crm/client-channel-runtime.service.js": "b79a726335e8dd1086ec31728e7012d0f93cf4e96a28c8eddcd30d9f0f15e53c",
+    "src/crm/client-channel-authenticator.service.js": "0406331116899da51347fa2cfbb4b75a2373612a2d77b7f0eb11b7092e78ef47",
+    "src/tenancy/bridge-source.service.js": "0976ce6b1f2722cf1bc59faff0168fda72b980b6d23b673a4cef5310bd4d7d03",
+    "src/tenancy/tenant-context.service.js": "c38dbf6fc7aad5ad510e8a0883905deeb6e259ccbcb375751fbbeec842fc2cc5",
+    "src/crm/crm.service.js": "f7c6addb17273f29075251615ededbc09e4e84d43f64d4556a50abded7e9b7c9",
+    "src/action-engine/action-engine.policy-resolver.js": "c465943136ff5556acb510decdc211982d94cfc6a92df5eea8ccf3002aee4245",
+    "src/action-engine/action-engine.policy-registry.js": "75b25b22870afb63dd35b2ff82fa059ca36dbe89aeac7c9c3e1b9d46faf68de7",
+    "src/action-engine/client-preferences.contract.js": "bde5e9191ac808699b0996902e69965568fb2b803eab3a27c9499492c7ae2356",
+    "src/action-engine/action-engine.kernel.js": "0110dcb117b349d824e6fb516b989322d130649029f68bbe8771df59d64768b1"
+  }
+}

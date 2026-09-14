@@ -1,0 +1,87 @@
+{
+  "stage": "E3_STAGE_1",
+  "status": "PROPOSAL_NOT_APPROVED",
+  "sourceCanonical": "60e82664",
+  "sourceRuntime": "42962475",
+  "sourceProductionEvidence": "parent-verified R-B PASS; local composed-v4 only",
+  "recommendation": "A",
+  "ownerDecisionsRequired": 1,
+  "existingFoundationSufficient": false,
+  "businessDecisionRequired": true,
+  "schemaRequired": true,
+  "migrationRequired": true,
+  "backfillRequired": false,
+  "newActionClasses": 0,
+  "runtimeOnly": false,
+  "dependenciesSatisfied": false,
+  "readyForWholePackageImplementation": false,
+  "readyForProduction": false,
+  "historicalBackfill": false,
+  "inventoryReopened": false,
+  "runtimeSchemaTestChanges": 0,
+  "productionOperations": 0,
+  "oldDatabasesAccessed": 0,
+  "mainWorktreeChanges": 0,
+  "processHygiene": 0,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "package": "R05",
+  "blockers": [
+    "B36",
+    "B43"
+  ],
+  "canonicalOwner": "OwnerReportsService / OwnerReportRun / existing A12 / Communication Delivery",
+  "newModels": 0,
+  "newFields": 0,
+  "newRelationOnlyFields": 0,
+  "schemaDelta": "B36_report_contract_check reportType allowlist extension only; non-daily encrypted manifest v2; existing daily v1 unchanged",
+  "proposedReportTypes": [
+    "daily_report",
+    "morning_owner",
+    "morning_staff"
+  ],
+  "dependencies": {
+    "R02": "PRODUCTION_PASS",
+    "B43ContractDecision": "PENDING",
+    "B36ProofBeforeExtensionAcceptance": "PENDING"
+  },
+  "alreadyApprovedImplementationReady": [
+    "B36_RUNTIME_DEFECT_REPAIR"
+  ],
+  "preservedB36": {
+    "schema": "APPLIED",
+    "runtime": "NOT_DEPLOYED",
+    "order": [
+      "INBOX",
+      "TELEGRAM",
+      "APNS"
+    ],
+    "proofDefects": [
+      "IDEMPOTENCY_KEY",
+      "CONCURRENT_WRITE_CONFLICT"
+    ],
+    "newApprovalRequired": false,
+    "newSchemaForDaily": false
+  },
+  "options": {
+    "A": {
+      "newModels": 0,
+      "newFields": 0,
+      "newRelationOnlyFields": 0,
+      "newActionClasses": 0,
+      "migrationRequired": true,
+      "backfillRequired": false,
+      "meaning": "Retain canonical owner/staff morning runs; converge duplicate growth/director triggers; PDF read-only download"
+    },
+    "B": {
+      "newModels": 0,
+      "newFields": 0,
+      "newRelationOnlyFields": 0,
+      "newActionClasses": 0,
+      "migrationRequired": false,
+      "backfillRequired": false,
+      "meaning": "Daily only; retire all non-daily delivery, PDF read-only download"
+    }
+  },
+  "report": "package5-remainder-e3-r05-decision-sheet.md"
+}

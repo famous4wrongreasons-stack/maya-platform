@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "checks": [
+    "canonical Client deduplication",
+    "same identity immutable content",
+    "same identity changed audience conflicts before a second admission",
+    "User-free verified Client via canonical approval, AE admission and delivery",
+    "repeat skips terminal delivery",
+    "unauthorized and foreign Client rejected before business admission",
+    "preference/no endpoint/frequency history/quiet-hour denials produce no provider attempts",
+    "concurrent confirmation converges; UNKNOWN preserves one attempt and independent sibling succeeds",
+    "deterministic provider failure is terminal, no automatic resend or fallback",
+    "consent withdrawal after approval/claim but before durable boundary prevents effect",
+    "different campaign cannot bypass unresolved Client provider operation",
+    "Inbox commit/crash recovers through original attempt reconciliation without another Inbox write",
+    "resolved UNKNOWN releases its lane; no implicit weekly cap",
+    "User-free Web Push-only, five devices/one logical Client; UNKNOWN device does not block pending devices; no sixth endpoint or resend",
+    "partial graph persisted for actual restart verification"
+  ],
+  "providerCallsSynthetic": 5,
+  "productionMessages": 0
+}

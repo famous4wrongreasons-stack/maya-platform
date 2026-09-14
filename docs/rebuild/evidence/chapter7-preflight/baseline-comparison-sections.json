@@ -1,0 +1,130 @@
+[
+  {
+    "currentOutput": "production-metadata.txt",
+    "baselineFile": "../package5-rc-final/final-production-metadata.json",
+    "section": "release",
+    "currentNormalizedSha256": "52996bf96ad0cbcc54c39970cebef757475a219a54846b692b4d75fa54fd4c1f",
+    "baselineNormalizedSha256": "52996bf96ad0cbcc54c39970cebef757475a219a54846b692b4d75fa54fd4c1f",
+    "equal": true
+  },
+  {
+    "currentOutput": "production-metadata.txt",
+    "baselineFile": "../package5-rc-final/final-production-metadata.json",
+    "section": "python",
+    "currentNormalizedSha256": "c667d4c3bdbbe69b35a711e498a034112e4a883e0fc5c6187c36d9a3a93bc734",
+    "baselineNormalizedSha256": "c667d4c3bdbbe69b35a711e498a034112e4a883e0fc5c6187c36d9a3a93bc734",
+    "equal": true
+  },
+  {
+    "currentOutput": "production-metadata.txt",
+    "baselineFile": "../package5-rc-final/final-production-metadata.json",
+    "section": "compiled",
+    "currentNormalizedSha256": "7950554cd95e0b50d03bbaa6fde3a0da4cc40d84fbac2e6151c56720711c81b9",
+    "baselineNormalizedSha256": "7950554cd95e0b50d03bbaa6fde3a0da4cc40d84fbac2e6151c56720711c81b9",
+    "equal": true
+  },
+  {
+    "currentOutput": "production-metadata.txt",
+    "baselineFile": "../package5-rc-final/final-production-metadata.json",
+    "section": "timers",
+    "currentNormalizedSha256": "c910e00dd361ed9fe2ec5ddfc0a496faaff0a316ae3698c9cfbc100697cbab39",
+    "baselineNormalizedSha256": "c910e00dd361ed9fe2ec5ddfc0a496faaff0a316ae3698c9cfbc100697cbab39",
+    "equal": true
+  },
+  {
+    "currentOutput": "production-metadata.txt",
+    "baselineFile": "../package5-rc-final/final-production-metadata.json",
+    "section": "cron",
+    "currentNormalizedSha256": "ec881211f898be839142bc2fccfc5190977842794411844c3db2460f54b53acf",
+    "baselineNormalizedSha256": "ec881211f898be839142bc2fccfc5190977842794411844c3db2460f54b53acf",
+    "equal": true
+  },
+  {
+    "currentOutput": "production-metadata.txt",
+    "baselineFile": "../package5-rc-final/final-production-metadata.json",
+    "section": "nginx",
+    "currentNormalizedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "baselineNormalizedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "equal": true
+  },
+  {
+    "currentOutput": "runtime-launchers.txt",
+    "baselineFile": "../package5-rc-final/final-runtime-launchers.json",
+    "section": "flags",
+    "currentNormalizedSha256": "c40f23a517a754b3e5e658e35d242104f30236ffdf605c874f5177cde7d48a8d",
+    "baselineNormalizedSha256": "c40f23a517a754b3e5e658e35d242104f30236ffdf605c874f5177cde7d48a8d",
+    "equal": true
+  },
+  {
+    "currentOutput": "runtime-launchers.txt",
+    "baselineFile": "../package5-rc-final/final-runtime-launchers.json",
+    "section": "pythonHashes",
+    "currentNormalizedSha256": "52e97a3e490a43a545eb247a56427113b708969bab30b4cbb27de017a321334c",
+    "baselineNormalizedSha256": "52e97a3e490a43a545eb247a56427113b708969bab30b4cbb27de017a321334c",
+    "equal": true
+  },
+  {
+    "currentOutput": "runtime-launchers.txt",
+    "baselineFile": "../package5-rc-final/final-runtime-launchers.json",
+    "section": "compiledHashes",
+    "currentNormalizedSha256": "e4d510e60222a8977a22def74910f51a9ac71ad9c2a6d3bc50384657cd503373",
+    "baselineNormalizedSha256": "e4d510e60222a8977a22def74910f51a9ac71ad9c2a6d3bc50384657cd503373",
+    "equal": true
+  },
+  {
+    "currentOutput": "runtime-launchers.txt",
+    "baselineFile": "../package5-rc-final/final-runtime-launchers.json",
+    "section": "processManagers",
+    "currentNormalizedSha256": "f50a5f87fa04930c5cec61be574ebc7380602c58fe7b628d32193c50696b5d09",
+    "baselineNormalizedSha256": "f50a5f87fa04930c5cec61be574ebc7380602c58fe7b628d32193c50696b5d09",
+    "equal": true
+  },
+  {
+    "currentOutput": "runtime-launchers.txt",
+    "baselineFile": "../package5-rc-final/final-runtime-launchers.json",
+    "section": "environmentFileFlags",
+    "currentNormalizedSha256": "a7b10e94238fa063a333ef2eb3a50052bf102fc2f60eed93496a3dc57e5b16fe",
+    "baselineNormalizedSha256": "a7b10e94238fa063a333ef2eb3a50052bf102fc2f60eed93496a3dc57e5b16fe",
+    "equal": true
+  },
+  {
+    "currentOutput": "runtime-launchers.txt",
+    "baselineFile": "../package5-rc-final/final-runtime-launchers.json",
+    "section": "release",
+    "currentNormalizedSha256": "52996bf96ad0cbcc54c39970cebef757475a219a54846b692b4d75fa54fd4c1f",
+    "baselineNormalizedSha256": "52996bf96ad0cbcc54c39970cebef757475a219a54846b692b4d75fa54fd4c1f",
+    "equal": true
+  },
+  {
+    "currentOutput": "edge-metadata.txt",
+    "baselineFile": "../package5-rc-final/final-edge-metadata.json",
+    "section": "sites",
+    "currentNormalizedSha256": "71d3748b0eb5072b988bd6970fe7f0df11837148e5abbbdf63c8e565581ba2fc",
+    "baselineNormalizedSha256": "71d3748b0eb5072b988bd6970fe7f0df11837148e5abbbdf63c8e565581ba2fc",
+    "equal": true
+  },
+  {
+    "currentOutput": "edge-metadata.txt",
+    "baselineFile": "../package5-rc-final/final-edge-metadata.json",
+    "section": "cron",
+    "currentNormalizedSha256": "620e1f288e5301132501d86a2bfce0248192b17c59b632da2dbaaf29aa0220d2",
+    "baselineNormalizedSha256": "620e1f288e5301132501d86a2bfce0248192b17c59b632da2dbaaf29aa0220d2",
+    "equal": true
+  },
+  {
+    "currentOutput": "schema-structure.txt",
+    "baselineFile": "../package5-rc-final/production-exact-schema-structure.json",
+    "section": "structure",
+    "currentNormalizedSha256": "92519cdfccdc98783c4529e85626b6b6eeb6af79a0c43b9b03c6d89b06ab5e63",
+    "baselineNormalizedSha256": "92519cdfccdc98783c4529e85626b6b6eeb6af79a0c43b9b03c6d89b06ab5e63",
+    "equal": true
+  },
+  {
+    "currentOutput": "schema-structure.txt",
+    "baselineFile": "../package5-rc-final/production-exact-schema-structure.json",
+    "section": "sha256",
+    "currentNormalizedSha256": "3097c28d8adcec51e113f0f5d9f058829e6309e4cf4876f4dabfac34fc50da29",
+    "baselineNormalizedSha256": "3097c28d8adcec51e113f0f5d9f058829e6309e4cf4876f4dabfac34fc50da29",
+    "equal": true
+  }
+]

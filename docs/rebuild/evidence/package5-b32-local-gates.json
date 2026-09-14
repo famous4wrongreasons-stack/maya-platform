@@ -1,0 +1,97 @@
+{
+  "node": "v24.19.0",
+  "stages": [
+    {
+      "name": "targeted",
+      "exitCode": 0,
+      "seconds": 0.95
+    },
+    {
+      "name": "cross-action",
+      "exitCode": 0,
+      "seconds": 3.44
+    },
+    {
+      "name": "architectural-guards",
+      "exitCode": 0,
+      "seconds": 102.88
+    },
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "seconds": 28.83
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "seconds": 4.71
+    },
+    {
+      "name": "typecheck-scripts",
+      "exitCode": 0,
+      "seconds": 9.97
+    },
+    {
+      "name": "build",
+      "exitCode": 0,
+      "seconds": 13.66
+    },
+    {
+      "name": "schema-validate",
+      "exitCode": 0,
+      "seconds": 0.44
+    },
+    {
+      "name": "migration-status",
+      "exitCode": 0,
+      "seconds": 0.4
+    },
+    {
+      "name": "schema-diff",
+      "exitCode": 0,
+      "seconds": 0.49
+    },
+    {
+      "name": "b31-regression",
+      "exitCode": 0,
+      "seconds": 4.45
+    },
+    {
+      "name": "channel-principal",
+      "exitCode": 0,
+      "seconds": 1.42
+    },
+    {
+      "name": "mandatory-backend",
+      "exitCode": 0,
+      "seconds": 117.57
+    }
+  ],
+  "verdict": "PASS",
+  "testCounts": {
+    "targeted": {
+      "suites": 6,
+      "tests": 68
+    },
+    "cross-action": {
+      "suites": 40,
+      "tests": 381
+    },
+    "architectural-guards": {
+      "suites": 78,
+      "tests": 425
+    },
+    "mandatory-backend": {
+      "suites": 374,
+      "tests": 3065
+    }
+  },
+  "freshOwnedMigrationReplay": "PASS; all 80 repository migrations",
+  "newModels": 0,
+  "newPersistedFields": 0,
+  "newActionClasses": 0,
+  "schemaDiff": "NONE",
+  "productionDeployment": "NOT STARTED at local gate",
+  "productionMutations": 0,
+  "priorDefaultNodeAttempt": "24.15 V8 SIGSEGV; superseded by complete 24.19 run, no tests omitted"
+}

@@ -1,0 +1,26 @@
+{
+  "result": "BLOCKERS REPRODUCED",
+  "checksPassed": 4,
+  "b7ActualClientToolPolicyAllows": true,
+  "b7DirectSqlPreferenceInsert": true,
+  "b7HiddenLegacyClientCreation": true,
+  "b7DuplicateDedupeDoesNotMakeCanonical": true,
+  "b8VerifiedSmsStillDirectLegacyClientProfileWrite": true,
+  "productionMutations": 0,
+  "providerCalls": 0,
+  "database": ":memory:",
+  "importedProductionApplication": false,
+  "canonicalCommandsInvoked": 0,
+  "mocks": [
+    "authenticated channel context",
+    "SMS provider success",
+    "PII codec/redactor",
+    "log transport"
+  ],
+  "sourceFileHashes": {
+    "webhook_server.py": "25a285d9f693b0b0fc15f7c6d7bf379176436c477741446c4dc057fcc7ca6a78",
+    "database.py": "ba1cb1e6926f2f885678b655913c1a02a2c5da5dc934b6d807de96dfa723bdd2",
+    "claude_ai.py": "365055929f50a95a00f2fa7a5a9de6e28ccdcaddd15953061eddfed862076703",
+    "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d"
+  }
+}

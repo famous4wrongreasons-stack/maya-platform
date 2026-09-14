@@ -1,0 +1,17 @@
+{
+  "checkpoint": "5163eb15",
+  "runtimeRegression": true,
+  "releaseRatchetEscape": true,
+  "escape": "local fixture gate did not inspect separately uploaded live PHP before backend activation",
+  "unsafeArtifactSha256": "d5eeaa82f69f6d72c366576797c2920fecd0d27f76262e2c5f4a342f363ddd05",
+  "mtimeUtc": "2026-09-12T13:56:21.327021Z",
+  "exactDiff": "../chapter7-wave3-relay-regression/production-relay.delta.diff",
+  "canonicalFixtureChanged": false,
+  "matchingUpstreamCommitFound": false,
+  "operatorOrCommandProven": false,
+  "unsafeArtifactPassedDocumentedGatedRelease": "NOT PROVEN",
+  "newC7Requirement": false,
+  "originalMainRegressionNewSurface": false,
+  "additionalUnregisteredLiveAliasFound": true,
+  "additionalAliasEvidence": "unregistered-live-relay.json"
+}

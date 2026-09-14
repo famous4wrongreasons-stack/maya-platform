@@ -703,8 +703,8 @@ class OwnerAITests(unittest.TestCase):
             center["decision_memory"]["summary"]["items_count"],
             len(center["decision_memory"]["items"]),
         )
-        self.assertGreaterEqual(center["decision_memory"]["summary"]["positive_signals_count"], 1)
-        self.assertTrue([
+        self.assertEqual(center["decision_memory"]["summary"]["positive_signals_count"], 0)
+        self.assertFalse([
             row for row in center["decision_memory"]["items"]
             if row.get("kind") == "lesson"
         ])
@@ -724,7 +724,7 @@ class OwnerAITests(unittest.TestCase):
         self.assertTrue(center["control_focus"]["items"])
         self.assertEqual(center["summary"]["control_focus_count"], center["control_focus"]["summary"]["focus_count"])
         self.assertIn("control", {section["key"] for section in center["sections"]})
-        self.assertEqual(center["journal"][0]["job"], "cycle")
+        self.assertEqual(center["journal"], [])
         self.assertEqual(center["next_best_actions"][0]["kind"], "run_job")
         self.assertNotIn("execute", center["next_best_actions"][0])
         self.assertTrue(center["automation_status"])
@@ -743,153 +743,51 @@ class OwnerAITests(unittest.TestCase):
             row for row in center["automation_status"]
             if row.get("job") == "cycle"
         ][0]
-        self.assertEqual(cycle_auto["last_action_id"], 1)
-        self.assertEqual(cycle_auto["last_evaluated_at"], "2026-07-08T11:00:00")
-        self.assertEqual(cycle_auto["last_summary"]["sent"], 3)
-        self.assertEqual(cycle_auto["last_impact_status"], "positive_signal")
-        self.assertIn("положительный", cycle_auto["last_impact"]["message"])
+        self.assertFalse(cycle_auto["last_action_id"])
+        self.assertFalse(cycle_auto["last_evaluated_at"])
+        self.assertFalse(cycle_auto["last_summary"])
+        self.assertFalse(cycle_auto["last_impact_status"])
+
 
     def test_autonomous_director_tick_creates_only_internal_control_tasks(self):
-        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
-        before = owner_ai.command_center()
-        open_candidates = [
-            row for row in before["autonomous_director"]["task_candidates"]
-            if row.get("safe_autocreate") and not row.get("in_control")
-        ]
-
-        result = owner_ai.run_autonomous_director_tick(created_by=948205934, limit=10)
-        again = owner_ai.run_autonomous_director_tick(created_by=948205934, limit=10)
-
-        self.assertTrue(open_candidates)
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "supervised_autopilot")
-        self.assertGreater(result["created_count"], 0)
-        self.assertLessEqual(result["created_count"], 10)
-        self.assertEqual(again["created_count"], 0)
-        self.assertGreaterEqual(again["skipped_count"], 0)
-        for row in result["created"]:
-            task = row["task"]
-            payload = task["payload"]
-            self.assertEqual(task["source"], "owner_control")
-            self.assertEqual(task["job"], "control_task")
-            self.assertEqual(task["status"], "pending")
-            self.assertEqual(payload["signal_kind"], "autonomy")
-            self.assertEqual(payload["signal_source"], "maya_os_v2")
-            self.assertTrue(payload["signal_key"].startswith("autonomy:"))
-            self.assertTrue(payload["safe_autocreate"])
-        self.assertTrue([
-            task for task in result["center"]["task_center"]["tasks"]
-            if task.get("safe_autocreate")
-        ])
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.run_autonomous_director_tick(**{'limit': 2})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_autopilot_supervision_starts_maya_task_and_creates_escalation(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
-        maya_task = owner_ai.create_control_task(
-            title="MAYA подготовить сценарий",
-            priority="medium",
-            assigned_to="maya",
-            signal_key="autonomy:test_maya",
-            safe_autocreate=True,
-        )
-        overdue = owner_ai.create_control_task(
-            title="Админ просрочил контроль",
-            priority="high",
-            assigned_to="admin",
-            assignee_name="смена",
-            due_at="2020-01-01T10:00:00",
-            signal_key="autonomy:test_overdue",
-            safe_autocreate=True,
-        )
-        before = owner_ai.command_center()
-        kinds = {row["kind"] for row in before["autopilot_supervisor"]["items"]}
-
-        result = owner_ai.run_autopilot_supervision_tick(created_by=948205934, limit=10)
-        again = owner_ai.run_autopilot_supervision_tick(created_by=948205934, limit=10)
-        actions = sys.modules["database"].list_owner_actions(limit=50)
-        maya_row = [
-            row for row in actions
-            if row.get("id") == maya_task["task_id"]
-        ][0]
-        escalation_rows = [
-            row for row in actions
-            if (row.get("payload") or {}).get("signal_kind") == "autopilot_supervision"
-        ]
-
-        self.assertIn("start_maya_task", kinds)
-        self.assertIn("overdue", kinds)
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "internal_supervision")
-        self.assertGreaterEqual(result["updated_count"], 1)
-        self.assertGreaterEqual(result["created_count"], 1)
-        self.assertEqual(maya_row["payload"]["assignment_work_state"], "running")
-        self.assertEqual(maya_row["payload"]["assignment_work_actor_role"], "maya")
-        self.assertTrue(escalation_rows)
-        self.assertTrue(escalation_rows[0]["payload"]["signal_key"].startswith("autopilot_supervision:overdue:"))
-        self.assertEqual(again["created_count"], 0)
-        self.assertEqual(overdue["control_item"]["assigned_to"], "admin")
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.run_autopilot_supervision_tick(**{'limit': 3})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_execution_loop_tick_creates_owner_followup_without_duplicates(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
-        created = owner_ai.create_control_task(
-            title="Проверить карточки клиентов",
-            priority="medium",
-            due_in_days=1,
-            assigned_to="admin",
-            assignee_name="админ",
-        )
-        done = owner_ai.update_staff_task(
-            task_id=created["task_id"],
-            viewer_role="manager",
-            actor_name="Админ",
-            actor_chat_id=1,
-            action="done",
-        )
-        before = owner_ai.command_center()
-        loop_item = [
-            row for row in before["execution_loop"]["items"]
-            if row.get("control_action_id") == created["task_id"]
-        ][0]
-
-        result = owner_ai.run_execution_loop_tick(created_by=948205934, limit=10)
-        again = owner_ai.run_execution_loop_tick(created_by=948205934, limit=10)
-        actions = sys.modules["database"].list_owner_actions(limit=50)
-        closed_loop_rows = [
-            row for row in actions
-            if (row.get("payload") or {}).get("signal_kind") == "closed_loop"
-        ]
-
-        self.assertTrue(done["ok"])
-        self.assertEqual(loop_item["stage"], "ready_review")
-        self.assertEqual(loop_item["break_kind"], "owner_acceptance_stale")
-        self.assertTrue(loop_item["safe_to_execute"])
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "closed_loop_control")
-        self.assertEqual(result["created_count"], 1)
-        self.assertEqual(again["created_count"], 0)
-        self.assertTrue(closed_loop_rows)
-        self.assertTrue(closed_loop_rows[0]["payload"]["signal_key"].startswith("closed_loop:owner_acceptance_stale:"))
-        self.assertEqual(closed_loop_rows[0]["payload"]["signal_source"], "maya_os_3_0")
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.run_execution_loop_tick(**{'limit': 2})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_operating_rhythm_tick_runs_safe_layers_and_respects_cooldown(self):
-        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
-
-        result = owner_ai.run_operating_rhythm_tick(created_by="test_scheduler", force=True)
-        again = owner_ai.run_operating_rhythm_tick(created_by="test_scheduler", force=False)
-        center = result["center"]
-
-        self.assertTrue(result["ok"])
-        self.assertFalse(result["skipped"])
-        self.assertEqual(result["version"], "maya_os_v6_operating_rhythm")
-        self.assertEqual(result["mode"], "safe_scheduler")
-        self.assertTrue(result["summary"]["safe_only"])
-        self.assertIn("autonomous_director", result["results"])
-        self.assertIn("autopilot_supervision", result["results"])
-        self.assertIn("execution_loop", result["results"])
-        self.assertTrue(again["ok"])
-        self.assertTrue(again["skipped"])
-        self.assertEqual(again["reason"], "cooldown")
-        self.assertEqual(center["operating_rhythm"]["version"], "maya_os_v6_operating_rhythm")
-        self.assertTrue(center["operating_rhythm"]["summary"]["last_run_at"])
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.run_operating_rhythm_tick(**{'force': True})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_command_center_survives_one_block_failure(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
@@ -907,316 +805,93 @@ class OwnerAITests(unittest.TestCase):
 
     def test_owner_control_task_appears_in_command_center_queue(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
-
-        created = owner_ai.create_control_task(
-            title="Проверить план-факт вечером",
-            detail="Сравнить прогноз дня с ручным планом.",
-            priority="high",
-            due_in_days=1,
-            potential_rub=15000,
-            owner_next_step="Если разрыв сохранится — запустить тёплый спрос.",
-            action_job="cycle",
-            created_by=948205934,
-        )
-        center = owner_ai.command_center()
-        control = [
-            item for item in center["control_queue"]
-            if item.get("source") == "owner_control"
-        ]
-
-        self.assertTrue(created["ok"])
-        self.assertEqual(created["control_item"]["status"], "high")
-        self.assertTrue(control)
-        self.assertEqual(control[0]["title"], "Проверить план-факт вечером")
-        self.assertEqual(control[0]["potential_rub"], 15000)
-        self.assertEqual(created["control_item"]["action_job"], "cycle")
-        self.assertEqual(control[0]["action_job"], "cycle")
-        self.assertIn("тёплый спрос", control[0]["owner_next_step"])
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.create_control_task(**{'title': 'Count', 'assigned_to': 'owner'})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_owner_control_task_surfaces_linked_action_status(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
-
-        created = owner_ai.create_control_task(
-            title="Запустить тёплый спрос",
-            detail="Добрать свободные окна.",
-            priority="medium",
-            due_in_days=2,
-            action_job="cycle",
-        )
-        linked_action_id = sys.modules["database"].create_owner_action(
-            "cycle",
-            "Подогреть спрос",
-            status="done",
-            payload={"source_control_id": created["task_id"]},
-        )
-        linked_action = [
-            row for row in sys.modules["database"].list_owner_actions(limit=20)
-            if row.get("id") == linked_action_id
-        ][0]
-        linked_action["evaluated_at"] = "2026-07-08T11:00:00"
-        linked_action["impact_status"] = "positive_signal"
-        linked_action["impact"] = {
-            "status": "positive_signal",
-            "message": "Есть положительный сигнал.",
-        }
-        task = [
-            row for row in sys.modules["database"].list_owner_actions(limit=20)
-            if row.get("id") == created["task_id"]
-        ][0]
-        task["status"] = "running"
-        task["payload"].update({
-            "linked_action_id": linked_action_id,
-            "linked_action_job": "cycle",
-            "linked_action_status": "done",
-            "linked_action_due_at": "2026-07-10T10:00:00",
-        })
-
-        center = owner_ai.command_center()
-        item = [
-            row for row in center["control_queue"]
-            if row.get("action_id") == created["task_id"]
-        ][0]
-
-        self.assertEqual(item["linked_action_id"], linked_action_id)
-        self.assertEqual(item["linked_action_job"], "cycle")
-        self.assertEqual(item["linked_action_status"], "done")
-        self.assertEqual(item["linked_action_evaluated_at"], "2026-07-08T11:00:00")
-        self.assertEqual(item["linked_action_impact_status"], "positive_signal")
-        self.assertIn("положительный", item["linked_action_impact_message"])
-        self.assertIn("Можно закрыть контроль", item["owner_next_step"])
-        self.assertEqual(center["control_focus"]["items"][0]["action_id"], created["task_id"])
-        self.assertEqual(center["control_focus"]["items"][0]["focus_reason"], "ready_to_close")
-        self.assertGreaterEqual(center["control_focus"]["summary"]["ready_to_close_count"], 1)
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.create_control_task(**{'title': 'Run job', 'action_job': 'cycle'})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_control_task_from_same_signal_is_not_duplicated(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
-
-        first = owner_ai.create_control_task(
-            title="День ниже плана",
-            detail="Проверить свободные окна.",
-            priority="high",
-            signal_key="attention:plan_fact",
-        )
-        second = owner_ai.create_control_task(
-            title="День ниже плана",
-            detail="Повторный сигнал.",
-            priority="high",
-            signal_key="attention:plan_fact",
-        )
-
-        self.assertTrue(first["ok"])
-        self.assertTrue(second["ok"])
-        self.assertTrue(second["existing"])
-        self.assertEqual(second["task_id"], first["task_id"])
-        self.assertEqual(second["control_item"]["title"], "День ниже плана")
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.create_control_task(**{'title': 'Signal', 'signal_key': 'same-signal'})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_attention_signal_knows_when_it_is_in_control(self):
-        owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
-        initial = owner_ai.command_center()
-        signal = [
-            row for row in initial["attention_feed"]
-            if row.get("source") != "owner_control" and row.get("signal_key")
-        ][0]
-
-        created = owner_ai.create_control_task(
-            title=signal["title"],
-            detail=signal.get("detail") or "",
-            priority="high",
-            signal_key=signal["signal_key"],
-        )
-        center = owner_ai.command_center()
-        updated = [
-            row for row in center["attention_feed"]
-            if row.get("signal_key") == signal["signal_key"]
-        ][0]
-
-        self.assertTrue(created["ok"])
-        self.assertTrue(updated["in_control"])
-        self.assertEqual(updated["control_task_id"], created["task_id"])
+        owner_ai = _load_owner_ai(reactivation_payload=None)
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.create_control_task(**{'title': 'Signal', 'safe_autocreate': True})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_owner_control_task_lifecycle_updates_queue(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
-
-        created = owner_ai.create_control_task(
-            title="Проверить просадку",
-            priority="medium",
-            due_in_days=1,
-        )
-        postponed = owner_ai.update_control_task(
-            task_id=created["task_id"],
-            action="postpone",
-            due_in_days=2,
-        )
-        center_after_postpone = owner_ai.command_center()
-        completed = owner_ai.update_control_task(
-            task_id=created["task_id"],
-            action="complete",
-            note="Проверено",
-        )
-        center_after_complete = owner_ai.command_center()
-
-        self.assertTrue(postponed["ok"])
-        self.assertEqual(postponed["task"]["status"], "pending")
-        self.assertTrue([
-            item for item in center_after_postpone["control_queue"]
-            if item.get("action_id") == created["task_id"]
-        ])
-        self.assertTrue(completed["ok"])
-        self.assertEqual(completed["task"]["status"], "done")
-        self.assertFalse([
-            item for item in center_after_complete["control_queue"]
-            if item.get("action_id") == created["task_id"]
-        ])
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.update_control_task(**{'task_id': 7, 'action': 'complete'})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_owner_control_task_can_be_assigned(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
-
-        created = owner_ai.create_control_task(
-            title="Проверить пустые окна",
-            priority="medium",
-            due_in_days=1,
-            assigned_to="admin",
-            assignee_name="смена",
-        )
-        center = owner_ai.command_center()
-        task = [
-            row for row in center["task_center"]["tasks"]
-            if row.get("control_action_id") == created["task_id"]
-        ][0]
-        updated = owner_ai.update_control_task(
-            task_id=created["task_id"],
-            action="assign",
-            assigned_to="master",
-            assignee_name="старший",
-        )
-        center_after_assign = owner_ai.command_center()
-        reassigned = [
-            row for row in center_after_assign["task_center"]["tasks"]
-            if row.get("control_action_id") == created["task_id"]
-        ][0]
-
-        self.assertTrue(created["ok"])
-        self.assertEqual(task["assigned_to"], "admin")
-        self.assertEqual(task["assignment_delivery_channel"], "team_chat")
-        self.assertEqual(task["assignment_delivery_state"], "queued")
-        self.assertIn("Админ", task["assigned_label"])
-        self.assertTrue(updated["ok"])
-        self.assertEqual(reassigned["assigned_to"], "master")
-        self.assertEqual(reassigned["assignment_delivery_channel"], "team_chat")
-        self.assertEqual(reassigned["assignment_delivery_state"], "queued")
-        self.assertIn("Мастер", reassigned["assigned_label"])
-        self.assertIn("старший", reassigned["assigned_label"])
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.update_control_task(**{'task_id': 7, 'action': 'assign', 'assigned_to': 'admin'})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_staff_task_inbox_is_role_scoped_and_updates_work_state(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
-
-        created = owner_ai.create_control_task(
-            title="Проверить окна администратора",
-            priority="medium",
-            due_in_days=1,
-            assigned_to="admin",
-            assignee_name="смена",
-        )
-        manager_inbox = owner_ai.staff_task_inbox(viewer_role="manager")
-        master_inbox = owner_ai.staff_task_inbox(viewer_role="master")
-        accepted = owner_ai.update_staff_task(
-            task_id=created["task_id"],
-            viewer_role="manager",
-            actor_name="Админ",
-            actor_chat_id=1,
-            action="accept",
-        )
-        owner_center = owner_ai.command_center()
-        center_task = [
-            row for row in owner_center["task_center"]["tasks"]
-            if row.get("control_action_id") == created["task_id"]
-        ][0]
-
-        self.assertEqual(len(manager_inbox["tasks"]), 1)
-        self.assertEqual(manager_inbox["tasks"][0]["assigned_to"], "admin")
-        self.assertEqual(master_inbox["tasks"], [])
-        self.assertTrue(accepted["ok"])
-        self.assertEqual(accepted["task"]["work_state"], "accepted")
-        self.assertEqual(center_task["assignment_work_state"], "accepted")
-        self.assertEqual(center_task["lane"], "running")
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.update_staff_task(**{'task_id': 7, 'viewer_role': 'master', 'action': 'done'})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_owner_can_return_done_assignment_for_revision(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
-
-        created = owner_ai.create_control_task(
-            title="Проверить карточки клиентов",
-            priority="medium",
-            due_in_days=1,
-            assigned_to="admin",
-            assignee_name="админ",
-        )
-        done = owner_ai.update_staff_task(
-            task_id=created["task_id"],
-            viewer_role="manager",
-            actor_name="Админ",
-            actor_chat_id=1,
-            action="done",
-        )
-        center_ready = owner_ai.command_center()
-        review_ready = [
-            row for row in center_ready["owner_review"]["items"]
-            if row.get("control_action_id") == created["task_id"]
-        ][0]
-        returned = owner_ai.update_control_task(
-            task_id=created["task_id"],
-            action="revision",
-            note="Нужно проверить ещё раз",
-        )
-        inbox = owner_ai.staff_task_inbox(viewer_role="manager")
-        center = owner_ai.command_center()
-        center_task = [
-            row for row in center["task_center"]["tasks"]
-            if row.get("control_action_id") == created["task_id"]
-        ][0]
-        review_after_return = [
-            row for row in center["owner_review"]["items"]
-            if row.get("control_action_id") == created["task_id"]
-        ][0]
-
-        self.assertTrue(done["ok"])
-        self.assertEqual(done["task"]["work_state"], "done")
-        self.assertEqual(review_ready["review_state"], "ready")
-        self.assertEqual(review_ready["next_actions"], ["complete", "revision", "postpone"])
-        self.assertTrue(returned["ok"])
-        self.assertEqual(returned["task"]["payload"]["assignment_work_state"], "revision")
-        self.assertEqual(inbox["tasks"][0]["work_state"], "revision")
-        self.assertEqual(inbox["tasks"][0]["next_actions"], ["start", "done"])
-        self.assertEqual(center_task["assignment_work_state"], "revision")
-        self.assertEqual(center_task["lane"], "running")
-        self.assertEqual(review_after_return["review_state"], "revision")
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.update_control_task(**{'task_id': 7, 'action': 'revision'})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_overdue_owner_control_task_is_urgent(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
-
-        created = owner_ai.create_control_task(
-            title="Просроченный контроль",
-            priority="low",
-            due_at="2020-01-01T10:00:00",
-        )
-        center = owner_ai.command_center()
-        item = [
-            row for row in center["control_queue"]
-            if row.get("action_id") == created["task_id"]
-        ][0]
-        control_section = [
-            section for section in center["sections"]
-            if section.get("key") == "control"
-        ][0]
-
-        self.assertEqual(item["status"], "high")
-        self.assertEqual(item["due_state"], "overdue")
-        self.assertIn("Срок контроля прошёл", item["owner_next_step"])
-        self.assertGreaterEqual(control_section["summary"]["overdue_count"], 1)
-        self.assertTrue([
-            row for row in center["attention_feed"]
-            if row.get("kind") == "control_overdue"
-            and row.get("control_key") == item.get("key")
-        ])
+        before = list(sys.modules["database"].list_owner_actions())
+        for _ in range(2):
+            result = owner_ai.create_control_task(**{'title': 'Overdue', 'due_at': '2020-01-01'})
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "canonical_operational_work_required")
+            self.assertEqual(result["business_mutations"], 0)
+        self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
     def test_plan_fact_uses_manual_owner_target_when_set(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

@@ -1,0 +1,141 @@
+{
+  "stage": "E3_STAGE_1",
+  "status": "PROPOSAL_NOT_APPROVED",
+  "sourceCanonical": "60e82664",
+  "sourceRuntime": "42962475",
+  "sourceProductionEvidence": "parent-verified R-B PASS; local composed-v4 only",
+  "recommendation": "A",
+  "ownerDecisionsRequired": 1,
+  "existingFoundationSufficient": false,
+  "businessDecisionRequired": true,
+  "schemaRequired": true,
+  "migrationRequired": true,
+  "backfillRequired": false,
+  "newActionClasses": 1,
+  "runtimeOnly": false,
+  "dependenciesSatisfied": false,
+  "readyForWholePackageImplementation": false,
+  "readyForProduction": false,
+  "historicalBackfill": false,
+  "inventoryReopened": false,
+  "runtimeSchemaTestChanges": 0,
+  "productionOperations": 0,
+  "oldDatabasesAccessed": 0,
+  "mainWorktreeChanges": 0,
+  "processHygiene": 0,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "package": "R06",
+  "blockers": [
+    "B44",
+    "B45",
+    "B48",
+    "B49"
+  ],
+  "canonicalOwner": "Communication Delivery; exact producer owner; OperationalAlertRun proposed only for finite B44",
+  "newModels": 1,
+  "newFields": 14,
+  "newRelationOnlyFields": 4,
+  "schemaDelta": {
+    "models": {
+      "OperationalAlertRun": [
+        "id String @id @default(uuid())",
+        "tenantId String",
+        "alertType String",
+        "occurrenceRef String",
+        "contractVersion Int",
+        "occurredAt DateTime",
+        "intentHash String",
+        "intentEncrypted String?",
+        "admittedAt DateTime",
+        "expiresAt DateTime",
+        "payloadRetentionUntil DateTime",
+        "auditRetentionUntil DateTime"
+      ]
+    },
+    "existingModelColumns": {
+      "ActionExecution": [
+        "operationalAlertRunId String?",
+        "operationalAlertSlotKey String?"
+      ]
+    },
+    "relationOnlyFields": [
+      "Tenant.operationalAlertRuns",
+      "OperationalAlertRun.tenant",
+      "OperationalAlertRun.executions",
+      "ActionExecution.operationalAlertRun"
+    ]
+  },
+  "dependencies": {
+    "R01": "PRODUCTION_PASS",
+    "R02": "PRODUCTION_PASS",
+    "B44ContractSchemaDecision": "PENDING"
+  },
+  "alreadyApprovedImplementationReady": [
+    "B45",
+    "B48",
+    "B49"
+  ],
+  "proposedAlertTypes": [
+    "staff_shift_reminder",
+    "wanted_slot_admin_notice"
+  ],
+  "proposedB44Channels": [
+    "INBOX"
+  ],
+  "retiredB44ProducerFunctions": [
+    "bot._god_watch_job",
+    "bot._dual_role_guard_job",
+    "lead_alerts.scan_and_alert",
+    "site_community.notify_owner",
+    "new staff approval notices from retired native flows"
+  ],
+  "convergedWithUnresolvedNativeRowsRetired": [
+    "freed_slot.alert_admins_new_waitlist",
+    "webhook_server._send_shift_reminders_once"
+  ],
+  "options": {
+    "A": {
+      "newModels": 1,
+      "newFields": 14,
+      "newRelationOnlyFields": 4,
+      "newActionClasses": 1,
+      "migrationRequired": true,
+      "backfillRequired": false,
+      "meaning": "Finite canonical B44 shift/interest Inbox plans; retire unsupported native alerts",
+      "newActionClassBreakdown": {
+        "AE": 0,
+        "AC6": 1
+      }
+    },
+    "B": {
+      "newModels": 0,
+      "newFields": 0,
+      "newRelationOnlyFields": 0,
+      "newActionClasses": 0,
+      "migrationRequired": false,
+      "backfillRequired": false,
+      "meaning": "Retire all B44 delivery; preserve approved B45/B48/B49 owners"
+    }
+  },
+  "report": "package5-remainder-e3-r06-decision-sheet.md",
+  "newActionClassBreakdown": {
+    "AE": 0,
+    "AC6": 1
+  },
+  "retention": {
+    "executionOwner": "Package5Wave6MaintenanceService / MaintenanceRun / MaintenanceItemClaim",
+    "newAC6Class": "purge_operational_alert_payloads",
+    "policyKey": "package5.r06.operational-alert-payload-retention",
+    "policyVersion": 1,
+    "scope": "exact system tenant only",
+    "effect": "only OperationalAlertRun.intentEncrypted = null",
+    "payloadVisibleDays": 7,
+    "physicalErasure": "deadline and root expired and all slots terminal/resolved and no live attempt/lease; otherwise HOLD",
+    "unknownOrActiveEvidenceDeletion": false,
+    "rootAuditRowDeletionAuthorized": false,
+    "auditRetentionDaysMinimum": 365,
+    "additionalModelsOrColumns": 0,
+    "existingSixAC6ClassesChanged": false
+  }
+}

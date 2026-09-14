@@ -1,48 +1,294 @@
+import { createHash } from 'node:crypto';
+import { clientPrincipalEvidence } from '../action-engine/client-action-principal.contract';
+
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  ServiceUnavailableException,
+  UnauthorizedException,
 } from '@nestjs/common';
 
 import {
+  ACTION_EXECUTION_REQUEST_CONTRACT,
+  ActionEngineRuntimeService,
+  ActionExecutionTerminalError,
+  ActionExecutionUncertainError,
+  stableActionJson,
+  type ActionExecutionPreviewV1,
+  type ActionFailureClassification,
+  type ActionRuntimeHandlers,
+  type ActionRuntimeReceipt,
+  type ActionSourceType,
+  type ExecutionResultV1,
+  type TrustedActionExecutionRequestV1,
+} from '../action-engine';
+import {
+  AppointmentStatus,
   CalendarSource,
   CrmIntegrationStatus,
   CrmProvider,
+  UserRole,
 } from '../common/domain.enums';
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { asJson } from '../common/json.util';
+import { phoneMatchKey } from '../common/phone.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  isUsableTimezone,
+  resolveSalonTimezone,
+} from '../tenants/salon-timezone';
+import { ClientIdentityService } from './client-identity.service';
+import { canonicalAppointmentInstant } from './appointment-time.utils';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CrmAdapterFactory } from './crm-adapter.factory';
+import {
+  CRM_FINANCE_MAX_WINDOW_MS,
+  CRM_JOURNAL_MAX_WINDOW_DAYS,
+  CRM_JOURNAL_MAX_WINDOW_MS,
+} from './crm-provider-limits';
 import {
   CancelledAppointment,
   CRMAdapter,
   CreatedAppointment,
+  AppliedStaffScheduleDayChange,
   CrmAdapterConfig,
+  CrmAppointmentMutationState,
+  CrmAppointmentDetail,
+  CrmAppointmentRevenueSnapshot,
+  CrmCompanyProfile,
+  CrmFinancialSummary,
+  CrmRevenueSummary,
+  CrmTeamMember,
+  CrmVisitPaymentState,
+  PaidVisit,
   RescheduledAppointment,
   ServiceItem,
   StaffMember,
+  StaffScheduleChangePreview,
+  StaffScheduleDay,
+  StaffScheduleSlot,
+  VisitPaymentMethod,
 } from './crm-adapter.interface';
 import {
   getCrmProviderCapability,
   listConnectableCrmProviders,
 } from './crm-provider-catalog';
 import { CreateCrmIntegrationDto } from './dto/create-crm-integration.dto';
-import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
 import { UpdateCrmIntegrationDto } from './dto/update-crm-integration.dto';
+import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
+import { ListCrmJournalDto } from './dto/list-crm-journal.dto';
 import {
   normalizeCrmProviderSettings,
   serializePublicCrmSettings,
 } from './crm-provider-settings';
+import type { StaffId, VisitAttendance } from '../domain';
+import {
+  asStaffId,
+  asStaffIdOrNull,
+  majorToKopecks,
+  kopecksToMajor,
+} from '../domain';
+import { Prisma } from '@prisma/client';
+import {
+  findMatchingSlotByLocalStart,
+  formatDateTimeInTimeZone,
+  normalizeRequestedStart,
+} from '../appointments/appointment-preview.utils';
+import {
+  assertWritableAttendance,
+  attendanceFromWritableCode,
+  attendanceToCode,
+} from './crm-attendance';
+import {
+  CrmOutcomeUnknownError,
+  CrmRecordGoneError,
+} from './crm-request.errors';
 
-type CrmConnectionInput = {
-  provider?: CrmProvider;
-  apiToken?: string;
-  baseUrl?: string;
-  settingsJson?: Record<string, unknown>;
+export type AppointmentActionInvocation = {
+  /** Server-resolved channel and canonical target; never copied from a DTO. */
+  clientPrincipal?: { linkId: string; appointmentId?: string };
+  bookingIntent?: import('../action-engine/client-booking-intent.contract').ClientBookingIntentContext;
+  callerIdempotency?: {
+    scope: string;
+    key: string;
+  };
+  sourceType?: ActionSourceType;
+  agentTaskId?: string;
+  sourceRef?: string;
+  /** Server-only authority recheck immediately before provider dispatch.
+   * This callback is excluded from the durable action identity and payload.
+   */
+  authorizationCheck?: () => Promise<void>;
 };
+
+export type ResidualAppointmentShadowCapability =
+  | 'crm.appointment.attendance.shadow.v1'
+  | 'crm.appointment.duration.shadow.v1'
+  | 'crm.appointment.services.shadow.v1'
+  | 'crm.appointment.fields.shadow.v1';
+
+type ResidualAppointmentShadowAction =
+  | 'set_appointment_attendance'
+  | 'set_appointment_duration'
+  | 'set_appointment_services'
+  | 'set_appointment_fields';
+
+export type ResidualAppointmentCapability =
+  | 'crm.appointment.attendance.v1'
+  | 'crm.appointment.duration.v1'
+  | 'crm.appointment.services.v1'
+  | 'crm.appointment.fields.v1';
+
+export type ResidualAppointmentAction = ResidualAppointmentShadowAction;
+
+export type ResidualAppointmentMutationInput =
+  | { attendanceCode: number }
+  | { durationSeconds: number }
+  | { serviceIds: string[]; durationSeconds?: number }
+  | { fieldKind: 'comment'; value: string }
+  | {
+      fieldKind: 'client_name';
+      value: { name: string; phone?: string };
+    }
+  | { fieldKind: 'sms_flag'; value: number };
+
+export type ResidualAppointmentMutationResult =
+  | { external_id: string; attendance: VisitAttendance }
+  | { external_id: string; duration_minutes: number }
+  | { external_id: string; service_ids: string[] }
+  | { external_id: string; field_kind: string };
+
+const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_PREFIX =
+  'MAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION ';
+const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_CONTRACT =
+  'maya.legacy-appointment-shadow-observation/1';
+
+type CreateAppointmentInput = {
+  clientId: string;
+  clientName: string;
+  clientPhone?: string;
+  branchId?: string;
+  staffId: string;
+  serviceIds: string[];
+  start: string;
+  notes?: string;
+  creationMode: 'client' | 'admin';
+  allowBusy: boolean;
+  durationMinutes?: number;
+  notifyBySmsHours?: number;
+};
+
+export type CreateAppointmentRequest = {
+  clientId: string;
+  clientName: string;
+  clientPhone?: string | null;
+  branchId?: string | null;
+  staffId: string;
+  serviceIds: string[];
+  start: string;
+  notes?: string | null;
+  creationMode?: 'client' | 'admin';
+  allowBusy?: boolean;
+  durationMinutes?: number;
+  notifyBySmsHours?: number;
+};
+
+export type RescheduleAppointmentRequest = {
+  externalId: string;
+  start: string;
+  staffId?: string;
+  serviceIds?: string[];
+  notes?: string | null;
+};
+
+export type PayVisitRequest = {
+  externalId: string;
+  amountKopecks: number;
+  paymentMethod: VisitPaymentMethod;
+};
+
+type AppointmentActionPlan<T> = {
+  request: TrustedActionExecutionRequestV1;
+  handlers: ActionRuntimeHandlers<T>;
+};
+
+type RescheduleAppointmentInput = {
+  externalId: string;
+  start: string;
+  staffId?: string;
+  serviceIds?: string[];
+  notes?: string;
+};
+
+type AppointmentStateEvidence = {
+  externalId: string;
+  status: string;
+  start: string;
+  staffId: string;
+  serviceIds: string[];
+};
+
+function requireString(value: unknown, label: string): string {
+  if (typeof value !== 'string' || !value) {
+    throw new Error(`Invalid durable ${label}`);
+  }
+  return value;
+}
+
+function optionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value ? value : undefined;
+}
+
+function requireStringArray(value: unknown, label: string): string[] {
+  if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) {
+    throw new Error(`Invalid durable ${label}`);
+  }
+  return value as string[];
+}
+
+function optionalNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? value
+    : undefined;
+}
+
+function requireNumber(value: unknown, label: string): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(`Invalid durable ${label}`);
+  }
+  return value;
+}
+
+function normalizedServiceIds(serviceIds: readonly string[]): string[] {
+  return [...new Set(serviceIds)].sort();
+}
+
+function sameServiceIds(left: readonly string[], right: readonly string[]) {
+  return (
+    stableActionJson(normalizedServiceIds(left)) ===
+    stableActionJson(normalizedServiceIds(right))
+  );
+}
+
+function sameInstant(left: string, right: string): boolean {
+  const leftTime = new Date(left).getTime();
+  const rightTime = new Date(right).getTime();
+  return (
+    Number.isFinite(leftTime) &&
+    Number.isFinite(rightTime) &&
+    leftTime === rightTime
+  );
+}
+
+function isCanceledStatus(status: string): boolean {
+  return ['cancelled', 'canceled', 'deleted'].includes(status.toLowerCase());
+}
 
 type StoredCrmIntegration = {
   id: string;
@@ -61,9 +307,10 @@ type StoredCrmIntegration = {
   updatedAt: Date;
 };
 
-type CrmImportPreview = {
+export type CrmImportPreview = {
   provider: CrmProvider;
   company_id: number | string | null;
+  company: CrmCompanyProfile | null;
   services: {
     count: number;
     items: ServiceItem[];
@@ -72,20 +319,108 @@ type CrmImportPreview = {
     count: number;
     items: StaffMember[];
   };
+  team: {
+    count: number;
+    items: CrmTeamMember[];
+  };
   warnings: string[];
 };
 
 @Injectable()
 export class CrmService {
+  private readonly logger = new Logger(CrmService.name);
+  private readonly adapterCache = new Map<
+    string,
+    {
+      signature: string;
+      expiresAt: number;
+      adapter: CRMAdapter;
+    }
+  >();
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryptionService: EncryptionService,
     private readonly adapterFactory: CrmAdapterFactory,
     private readonly tenantContext: TenantContextService,
     private readonly internalCalendarService: InternalCalendarService,
+    private readonly clientIdentityService: ClientIdentityService,
+    private readonly actionEngineRuntime: ActionEngineRuntimeService,
   ) {}
 
-  async createOrUpdateIntegration(
+  async discoverCompanies(tenantId: string, dto: DiscoverCrmCompaniesDto) {
+    this.tenantContext.assertTenantId(tenantId);
+    return this.discoverCompaniesForCredential(dto);
+  }
+
+  async discoverCompaniesForCredential(dto: DiscoverCrmCompaniesDto) {
+    this.assertProviderCanBeTenantConnected(dto.provider);
+
+    const apiToken = dto.apiToken.trim();
+    if (!apiToken) {
+      throw new BadRequestException({
+        message: 'CRM API token is required',
+        error: { code: 'crm_token_required', provider: dto.provider },
+      });
+    }
+
+    const adapter = this.adapterFactory.create(dto.provider, {
+      provider: dto.provider,
+      apiToken,
+      settings: {},
+    });
+
+    if (!adapter.discoverCompanies) {
+      throw new BadRequestException({
+        message: 'CRM company discovery is not supported for this provider',
+        error: {
+          code: 'crm_company_discovery_not_supported',
+          provider: dto.provider,
+        },
+      });
+    }
+
+    try {
+      return {
+        provider: dto.provider,
+        companies: await adapter.discoverCompanies(),
+      };
+    } catch (error) {
+      throw this.toSafeConnectionException(dto.provider, error);
+    }
+  }
+
+  async previewCredentials(
+    provider: CrmProvider,
+    apiToken: string,
+    settingsJson: Record<string, unknown>,
+    baseUrl?: string | null,
+  ): Promise<CrmImportPreview> {
+    this.assertProviderCanBeTenantConnected(provider);
+    const normalizedToken = apiToken.trim();
+
+    if (!normalizedToken) {
+      throw new BadRequestException({
+        message: 'CRM API token is required',
+        error: { code: 'crm_token_required', provider },
+      });
+    }
+
+    const settings = normalizeCrmProviderSettings(provider, settingsJson);
+
+    try {
+      return await this.loadConnectionPreview('onboarding-preview', provider, {
+        provider,
+        apiToken: normalizedToken,
+        baseUrl,
+        settings,
+      });
+    } catch (error) {
+      throw this.toSafeConnectionException(provider, error);
+    }
+  }
+
+  async ensureBootstrapMockIntegration(
     tenantId: string,
     dto: CreateCrmIntegrationDto | UpdateCrmIntegrationDto,
   ) {
@@ -98,9 +433,10 @@ export class CrmService {
       CrmProvider.MOCK) as CrmProvider;
     this.assertProviderConnectable(provider);
 
-    if (provider !== CrmProvider.MOCK) {
-      return this.connectAndActivateIntegration(scopedTenantId, dto);
-    }
+    if (provider !== CrmProvider.MOCK)
+      throw new BadRequestException(
+        'Bootstrap integration path only supports the mock provider',
+      );
 
     const providerChanged = Boolean(
       existing && String(existing.provider) !== String(provider),
@@ -159,121 +495,6 @@ export class CrmService {
     return this.serializeIntegration(integration);
   }
 
-  async stageIntegration(
-    tenantId: string,
-    dto: ConnectCrmIntegrationDto | CrmConnectionInput,
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const existing = (await this.prisma.crmIntegration.findUnique({
-      where: { tenantId: scopedTenantId },
-    })) as StoredCrmIntegration | null;
-    const provider = (dto.provider ?? existing?.provider) as
-      CrmProvider | undefined;
-
-    if (!provider) {
-      throw new BadRequestException('CRM provider is required');
-    }
-
-    this.assertProviderCanBeTenantConnected(provider);
-    const providerChanged = Boolean(
-      existing && existing.provider !== String(provider),
-    );
-    const previousSettings =
-      existing && !providerChanged
-        ? ((existing.settingsJson as Record<string, unknown> | null) ?? {})
-        : {};
-    const settings = normalizeCrmProviderSettings(provider, {
-      ...previousSettings,
-      ...(dto.settingsJson ?? {}),
-    });
-    const suppliedToken = dto.apiToken?.trim();
-    const apiToken = suppliedToken
-      ? suppliedToken
-      : existing && !providerChanged
-        ? this.encryptionService.decrypt(existing.encryptedApiToken)
-        : provider === CrmProvider.MOCK
-          ? 'mock'
-          : null;
-
-    if (!apiToken) {
-      throw new BadRequestException({
-        message: 'CRM API token is required',
-        error: { code: 'crm_token_required', provider },
-      });
-    }
-
-    const requestedBaseUrl = 'baseUrl' in dto ? dto.baseUrl : undefined;
-    const baseUrl =
-      requestedBaseUrl ??
-      (existing && !providerChanged ? existing.baseUrl : null);
-    const adapterConfig = {
-      provider,
-      apiToken,
-      baseUrl,
-      settings,
-    };
-    let preview: CrmImportPreview;
-
-    try {
-      preview = await this.loadConnectionPreview(
-        scopedTenantId,
-        provider,
-        adapterConfig,
-      );
-    } catch (error) {
-      throw this.toSafeConnectionException(provider, error);
-    }
-
-    const checkedAt = new Date();
-    const encryptedApiToken = this.encryptionService.encrypt(apiToken);
-    const integration = await this.prisma.crmIntegration.upsert({
-      where: { tenantId: scopedTenantId },
-      create: {
-        tenantId: scopedTenantId,
-        provider,
-        encryptedApiToken,
-        baseUrl,
-        status: CrmIntegrationStatus.PENDING_ACTIVATION,
-        settingsJson: asJson(settings),
-        verifiedAt: checkedAt,
-        lastCheckedAt: checkedAt,
-        lastSyncAt: checkedAt,
-      },
-      update: {
-        provider,
-        encryptedApiToken,
-        baseUrl,
-        status: CrmIntegrationStatus.PENDING_ACTIVATION,
-        settingsJson: asJson(settings),
-        verifiedAt: checkedAt,
-        lastCheckedAt: checkedAt,
-        lastSyncAt: checkedAt,
-        lastErrorCode: null,
-        lastErrorAt: null,
-      },
-    });
-
-    return {
-      connection: this.serializeIntegration(integration),
-      preview,
-      next_action: 'activate',
-    };
-  }
-
-  async connectAndActivateIntegration(
-    tenantId: string,
-    dto: CrmConnectionInput,
-  ) {
-    const staged = await this.stageIntegration(tenantId, dto);
-    const connection = await this.activateVerifiedIntegration(tenantId);
-
-    return {
-      ...connection,
-      preview: staged.preview,
-      next_action: null,
-    };
-  }
-
   async getIntegrationStatus(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const [tenant, integration] = await Promise.all([
@@ -307,7 +528,37 @@ export class CrmService {
     };
   }
 
+  /**
+   * Public company profile from the active tenant CRM connection.
+   *
+   * This method deliberately returns only the provider public profile. Tokens,
+   * adapter settings and integration records never leave CrmService.
+   */
+  async getCompanyProfile(tenantId: string): Promise<CrmCompanyProfile> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    if (!adapter.getCompanyProfile) {
+      throw new ConflictException({
+        message: 'CRM company profile is not available for this provider.',
+        error: { code: 'crm_company_profile_not_supported' },
+      });
+    }
+    const profile = await adapter.getCompanyProfile();
+    if (!profile) {
+      throw new ConflictException({
+        message: 'CRM company profile is unavailable.',
+        error: { code: 'crm_company_profile_unavailable' },
+      });
+    }
+    return profile;
+  }
+
   async getImportPreview(tenantId: string) {
+    return this.readImportPreviewReadOnly(tenantId);
+  }
+
+  /** AC4 provider observation. Preview reads never confirm an import. */
+  async readImportPreviewReadOnly(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const integration = await this.getStoredIntegration(scopedTenantId);
     const provider = integration.provider as CrmProvider;
@@ -320,43 +571,192 @@ export class CrmService {
         this.createAdapterConfig(integration),
       );
     } catch (error) {
-      await this.recordStoredConnectionFailure(scopedTenantId, error);
       throw this.toSafeConnectionException(provider, error);
     }
 
+    return {
+      connection: this.serializeIntegration(integration),
+      preview,
+      next_action: this.resolveNextAction(integration.status),
+    };
+  }
+
+  /** AC5 projection after one exact provider snapshot was accepted. */
+  async applyCanonicalImportProjection(
+    tenantId: string,
+    preview: CrmImportPreview,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.reconcileCrmTeamAccess(
+      scopedTenantId,
+      preview.team.items.slice(0, 50),
+    );
+    await this.syncTenantPresentationFromCrm(scopedTenantId, preview.company);
     const checkedAt = new Date();
-    const status =
-      integration.status === 'active'
-        ? CrmIntegrationStatus.ACTIVE
-        : CrmIntegrationStatus.PENDING_ACTIVATION;
-    const updated = await this.prisma.crmIntegration.update({
+    await this.prisma.crmIntegration.update({
       where: { tenantId: scopedTenantId },
       data: {
-        status,
-        verifiedAt: integration.verifiedAt ?? checkedAt,
         lastCheckedAt: checkedAt,
         lastSyncAt: checkedAt,
         lastErrorCode: null,
         lastErrorAt: null,
       },
     });
-
-    return {
-      connection: this.serializeIntegration(updated),
-      preview,
-      next_action: this.resolveNextAction(updated.status),
-    };
   }
 
-  async activateIntegration(tenantId: string) {
-    const preview = await this.getImportPreview(tenantId);
-    const connection = await this.activateVerifiedIntegration(tenantId);
+  /**
+   * Часовой пояс салона — из его же CRM.
+   *
+   * 🔴 Пояс тенанта задавался только при создании и оставался московским. Для
+   * салона в Новосибирске или Калининграде это означало пустую сетку
+   * расписания: границы дня уезжали мимо рабочих часов, и владелец видел
+   * «нет записей» при полном дне. CRM — источник истины про локаль салона.
+   */
+  private async syncTenantTimezoneFromCrm(
+    tenantId: string,
+    profile: CrmCompanyProfile | null,
+  ): Promise<void> {
+    const timezone = profile?.timezone?.trim();
 
-    return {
-      connection,
-      preview: preview.preview,
-      next_action: null,
-    };
+    if (!timezone) {
+      return;
+    }
+
+    // Проверяем, что зона вообще существует: подсунутая ерунда сломала бы
+    // форматирование дат на всех экранах разом.
+    try {
+      new Intl.DateTimeFormat('ru-RU', { timeZone: timezone });
+    } catch {
+      this.logger.warn(`CRM returned an unknown timezone: ${timezone}`);
+      return;
+    }
+
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { defaultTimezone: true },
+    });
+
+    if (tenant?.defaultTimezone === timezone) {
+      return;
+    }
+
+    const previousTimezone = tenant?.defaultTimezone ?? null;
+
+    await this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: { defaultTimezone: timezone },
+    });
+
+    // 🔴 Филиалы раньше не обновлялись НИКОГДА — во всём коде нет ни одного
+    // `branch.update`. Пояс присваивался один раз при создании арендатора и
+    // навсегда оставался московским, а бронирование считает настенное время
+    // именно поясом филиала и в этом виде отправляет его в CRM. Салон вне
+    // Москвы записывал клиента не на тот час.
+    //
+    // Обновляем только те филиалы, которые ШЛИ ЗА арендатором: их пояс совпадал
+    // с прежним значением по умолчанию либо не задан вовсе. Филиал с собственным
+    // поясом — законный случай для сети в разных регионах, и синхронизация с
+    // одной компанией CRM не имеет права его перетирать.
+    const followers = await this.prisma.branch.updateMany({
+      where: {
+        tenantId,
+        OR: [
+          { timezone: null },
+          ...(previousTimezone ? [{ timezone: previousTimezone }] : []),
+        ],
+      },
+      data: { timezone },
+    });
+
+    this.logger.log(
+      `Tenant timezone set from CRM: ${timezone} (branches updated: ${followers.count})`,
+    );
+  }
+
+  private safeRemoteLogoUrl(value: string | null | undefined): string | null {
+    if (!value) return null;
+
+    try {
+      const url = new URL(value);
+      if (url.protocol !== 'https:' || url.username || url.password) {
+        return null;
+      }
+      return url.toString();
+    } catch {
+      return null;
+    }
+  }
+
+  private isTenantUploadedLogo(value: string | null | undefined): boolean {
+    if (!value) return false;
+
+    try {
+      const url = new URL(value, 'https://maya.invalid');
+      return url.pathname.startsWith('/api/public/uploads/tenant-logos/');
+    } catch {
+      return false;
+    }
+  }
+
+  private async syncTenantBrandingFromCrm(
+    tenantId: string,
+    profile: CrmCompanyProfile | null,
+  ): Promise<void> {
+    const logoUrl = this.safeRemoteLogoUrl(profile?.logo_url);
+    if (!logoUrl) return;
+
+    const current = await this.prisma.brandingSettings.findUnique({
+      where: { tenantId },
+      select: { logoUrl: true },
+    });
+
+    // A logo uploaded explicitly in MAYA always wins over the CRM copy.
+    if (this.isTenantUploadedLogo(current?.logoUrl)) return;
+
+    await this.prisma.brandingSettings.upsert({
+      where: { tenantId },
+      create: {
+        tenantId,
+        appName: profile?.title?.trim() || undefined,
+        logoUrl,
+      },
+      update: { logoUrl },
+    });
+  }
+
+  private async loadCompanyProfileForRefresh(
+    adapter: CRMAdapter,
+    tenantId: string,
+  ): Promise<CrmCompanyProfile | null> {
+    if (!adapter.getCompanyProfile) return null;
+
+    try {
+      return await adapter.getCompanyProfile();
+    } catch (error) {
+      this.logger.warn(
+        `CRM company profile refresh deferred tenant=${tenantId}: ${this.safeErrorCode(error)}`,
+      );
+      return null;
+    }
+  }
+
+  private async syncTenantPresentationFromCrm(
+    tenantId: string,
+    profile: CrmCompanyProfile | null,
+  ): Promise<void> {
+    if (!profile) return;
+
+    try {
+      await Promise.all([
+        this.syncTenantTimezoneFromCrm(tenantId, profile),
+        this.syncTenantBrandingFromCrm(tenantId, profile),
+      ]);
+    } catch (error) {
+      // Presentation refresh must never invalidate an otherwise healthy CRM.
+      this.logger.warn(
+        `CRM tenant presentation refresh deferred tenant=${tenantId}: ${this.safeErrorCode(error)}`,
+      );
+    }
   }
 
   async recheckIntegration(tenantId: string) {
@@ -372,6 +772,12 @@ export class CrmService {
       if (!result.ok) {
         throw new Error('CRM connection check failed');
       }
+      const [team, company] = await Promise.all([
+        this.loadTeamMembers(adapter, scopedTenantId),
+        this.loadCompanyProfileForRefresh(adapter, scopedTenantId),
+      ]);
+      await this.reconcileCrmTeamAccess(scopedTenantId, team);
+      await this.syncTenantPresentationFromCrm(scopedTenantId, company);
 
       const checkedAt = new Date();
       const status =
@@ -402,20 +808,55 @@ export class CrmService {
     }
   }
 
-  async disconnectIntegration(tenantId: string) {
+  async synchronizeCrmTeamAccess(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const existing = await this.getStoredIntegration(scopedTenantId);
 
-    await this.prisma.crmIntegration.delete({
-      where: { tenantId: scopedTenantId },
+    try {
+      const integration = await this.getStoredIntegration(scopedTenantId);
+      const adapter = this.adapterFactory.create(
+        integration.provider as CrmProvider,
+        this.createAdapterConfig(integration),
+      );
+      const team = await this.loadTeamMembers(adapter, scopedTenantId);
+      await this.reconcileCrmTeamAccess(scopedTenantId, team);
+
+      return { synced: true, active_crm_team: team.length };
+    } catch (error) {
+      const errorCode = this.safeErrorCode(error);
+      this.logger.warn(
+        `CRM team access synchronization deferred tenant=${scopedTenantId}: ${errorCode}`,
+      );
+      return { synced: false, active_crm_team: null, error_code: errorCode };
+    }
+  }
+
+  async assertCrmStaffAccessActive(tenantId: string, userId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const access = await this.prisma.crmStaffAccess.findFirst({
+      where: { tenantId: scopedTenantId, userId },
+      select: {
+        role: true,
+        status: true,
+      },
     });
 
-    return {
-      configured: false,
-      disconnected_provider: existing.provider,
-      connection: null,
-      next_action: 'connect',
-    };
+    if (!access || this.isOwnerAccessRole(access.role)) return;
+
+    const synchronization = await this.synchronizeCrmTeamAccess(scopedTenantId);
+    if (!synchronization.synced) {
+      if (access.status === 'disabled') {
+        throw this.crmStaffAccessDisabled();
+      }
+      return;
+    }
+
+    const current = await this.prisma.crmStaffAccess.findFirst({
+      where: { tenantId: scopedTenantId, userId },
+      select: { status: true },
+    });
+    if (!current || current.status !== 'active') {
+      throw this.crmStaffAccessDisabled();
+    }
   }
 
   async getServices(tenantId: string) {
@@ -444,6 +885,25 @@ export class CrmService {
     return adapter.getStaff(scopedTenantId);
   }
 
+  async getTeamMembers(tenantId: string): Promise<CrmTeamMember[]> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    ) {
+      return (await this.internalCalendarService.listStaff(scopedTenantId)).map(
+        (member) => ({
+          ...member,
+          bookable: true,
+          suggested_role: 'staff' as const,
+        }),
+      );
+    }
+
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    return this.loadTeamMembers(adapter, scopedTenantId);
+  }
+
   async getAvailableSlots(
     tenantId: string,
     query: {
@@ -465,67 +925,2209 @@ export class CrmService {
     }
 
     const adapter = await this.getAdapterForTenant(scopedTenantId);
+    const timezone = await this.tenantTimezone(scopedTenantId);
     return adapter.getAvailableSlots({
       tenantId: scopedTenantId,
+      timezone,
       ...query,
+    });
+  }
+
+  async previewStaffScheduleDayChange(
+    tenantId: string,
+    params: { staffId: string; date: string; slots: StaffScheduleSlot[] },
+  ): Promise<StaffScheduleChangePreview> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getScheduleCapableAdapter(
+      scopedTenantId,
+      'previewStaffScheduleDayChange',
+    );
+    return adapter.previewStaffScheduleDayChange({
+      tenantId: scopedTenantId,
+      ...params,
+      timezone: await this.tenantTimezone(scopedTenantId),
+    });
+  }
+
+  async getStaffScheduleDay(
+    tenantId: string,
+    params: { staffId: string; date: string },
+  ): Promise<StaffScheduleDay> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getScheduleCapableAdapter(
+      scopedTenantId,
+      'getStaffScheduleDay',
+    );
+    return adapter.getStaffScheduleDay({
+      tenantId: scopedTenantId,
+      ...params,
+    });
+  }
+
+  async applyStaffScheduleDayChange(
+    tenantId: string,
+    params: {
+      staffId: string;
+      date: string;
+      slots: StaffScheduleSlot[];
+      expectedRevision: string;
+    },
+  ): Promise<AppliedStaffScheduleDayChange> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getScheduleCapableAdapter(
+      scopedTenantId,
+      'applyStaffScheduleDayChange',
+    );
+    return adapter.applyStaffScheduleDayChange({
+      tenantId: scopedTenantId,
+      ...params,
+      timezone: await this.tenantTimezone(scopedTenantId),
     });
   }
 
   async createAppointment(
     tenantId: string,
-    params: {
-      clientId: string;
-      clientName: string;
-      clientPhone?: string | null;
-      branchId?: string | null;
-      staffId: string;
-      serviceIds: string[];
-      start: string;
-      notes?: string | null;
-    },
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
   ): Promise<CreatedAppointment> {
+    try {
+      return (
+        await this.executeCreateAppointmentWithReceipt(
+          tenantId,
+          params,
+          invocation,
+        )
+      ).value;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  async previewCreateAppointment(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionExecutionPreviewV1> {
+    const plan = await this.createAppointmentActionPlan(
+      tenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.preview(plan.request);
+  }
+
+  async executeCreateAppointmentWithReceipt(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<CreatedAppointment>> {
+    const plan = await this.createAppointmentActionPlan(
+      tenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private async createAppointmentActionPlan(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation,
+    verifiedCanonicalClient = false,
+  ): Promise<AppointmentActionPlan<CreatedAppointment>> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return adapter.createAppointment({
-      tenantId: scopedTenantId,
+    const timezone = await this.tenantTimezone(scopedTenantId);
+    const actionInput: CreateAppointmentRequest = {
       ...params,
+      start: canonicalAppointmentInstant(params.start, timezone),
+      clientId: verifiedCanonicalClient
+        ? params.clientId
+        : this.appointmentClientIdentity(params.clientId, params.clientPhone),
+      clientPhone: params.clientPhone || undefined,
+      branchId: params.branchId || undefined,
+      notes: params.notes || undefined,
+      creationMode:
+        params.creationMode ?? (params.allowBusy === true ? 'admin' : 'client'),
+      allowBusy: params.allowBusy === true,
+      notifyBySmsHours:
+        (params.creationMode ??
+          (params.allowBusy === true ? 'admin' : 'client')) === 'admin'
+          ? 0
+          : this.normalizeNotifyBySmsHours(params.notifyBySmsHours),
+    };
+    const targetRef = `create/${this.appointmentFingerprint({
+      clientId: actionInput.clientId,
+      start: actionInput.start,
+      staffId: actionInput.staffId,
+      serviceIds: normalizedServiceIds(actionInput.serviceIds),
+    })}`;
+
+    return {
+      request: this.appointmentActionRequest({
+        tenantId: scopedTenantId,
+        capability: 'crm.appointment.create.v1',
+        targetRef,
+        input: actionInput,
+        invocation,
+      }),
+      handlers: {
+        dispatch: async (input) => {
+          await invocation.authorizationCheck?.();
+          const durable = this.createAppointmentInput(input);
+          const value = await adapter.createAppointment({
+            tenantId: scopedTenantId,
+            timezone,
+            ...durable,
+          });
+          return { value, safeResult: this.createdAppointmentSafe(value) };
+        },
+        reconcile: async (input) => {
+          const durable = this.createAppointmentInput(input);
+          if (!durable.clientPhone) return { outcome: 'STILL_UNKNOWN' };
+          const candidates = await adapter.getClientAppointments({
+            tenantId: scopedTenantId,
+            phone: durable.clientPhone,
+            timezone,
+          });
+          const matches = candidates.filter(
+            (candidate) =>
+              !isCanceledStatus(candidate.status) &&
+              sameInstant(candidate.start, durable.start) &&
+              candidate.staff_id === durable.staffId &&
+              sameServiceIds(candidate.service_ids, durable.serviceIds),
+          );
+          if (matches.length === 0) return { outcome: 'PROVEN_NOT_EXECUTED' };
+          if (matches.length !== 1) return { outcome: 'STILL_UNKNOWN' };
+          return {
+            outcome: 'PROVEN_SUCCEEDED',
+            safeResult: this.createdAppointmentSafe(matches[0]),
+          };
+        },
+        restore: (safe) => this.restoreCreatedAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  /** B31 reuses the registered create action for both calendars. The durable
+   * normalized clientId is a verified canonical Client, never a User id. */
+  async executeCanonicalClientCreateWithReceipt(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation,
+  ): Promise<ActionRuntimeReceipt<CreatedAppointment>> {
+    // Reject missing/changed authority before ingress as well as at dispatch.
+    if (
+      !invocation.authorizationCheck ||
+      !invocation.clientPrincipal ||
+      !invocation.bookingIntent ||
+      !invocation.callerIdempotency
+    )
+      throw new ForbiddenException('Verified Client create authority required');
+    await invocation.authorizationCheck();
+    const plan = await this.canonicalClientCreatePlan(
+      tenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(plan.request, {
+      ...plan.handlers,
+      authorizeIngress: invocation.authorizationCheck,
     });
+  }
+
+  async canonicalClientBookingTarget(
+    tenantId: string,
+  ): Promise<
+    import('../action-engine/client-booking-intent.contract').ClientBookingCalendarTarget
+  > {
+    this.tenantContext.assertTenantId(tenantId);
+    if ((await this.getCalendarSource(tenantId)) === CalendarSource.INTERNAL)
+      return { source: 'internal', provider: null, companyId: null };
+    const integration = await this.prisma.crmIntegration.findUnique({
+      where: { tenantId },
+      select: { provider: true, settingsJson: true },
+    });
+    if (!integration)
+      throw new ConflictException('Canonical booking provider unavailable');
+    const settings = normalizeCrmProviderSettings(
+      integration.provider as CrmProvider,
+      integration.settingsJson,
+    );
+    return {
+      source: 'external',
+      provider: integration.provider,
+      companyId:
+        typeof settings.companyId === 'number'
+          ? String(settings.companyId)
+          : null,
+    };
+  }
+
+  resolveCanonicalClientBookingRetry(
+    tenantId: string,
+    clientId: string,
+    key: string,
+  ) {
+    this.tenantContext.assertTenantId(tenantId);
+    return this.actionEngineRuntime.resolveClientBookingRetry(
+      tenantId,
+      clientId,
+      key,
+    );
+  }
+
+  async findCanonicalClientCreate(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+  ) {
+    const plan = await this.canonicalClientCreatePlan(tenantId, params, {});
+    const preview = await this.actionEngineRuntime.preview(plan.request);
+    return this.prisma.actionExecution.findUnique({
+      where: {
+        tenantId_identityFingerprint: {
+          tenantId,
+          identityFingerprint: preview.identityFingerprint,
+        },
+      },
+      select: { id: true },
+    });
+  }
+
+  private async canonicalClientCreatePlan(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<CreatedAppointment>> {
+    this.tenantContext.assertTenantId(tenantId);
+    const source = await this.getCalendarSource(tenantId);
+    const input = {
+      ...params,
+      creationMode: 'client' as const,
+      allowBusy: false,
+      notifyBySmsHours: 0,
+    };
+    if (source !== CalendarSource.INTERNAL) {
+      // Preserve the existing provider dispatch, UNKNOWN classification and
+      // reconciliation. Mirror persistence belongs to these handlers too.
+      const plan = await this.createAppointmentActionPlan(
+        tenantId,
+        input,
+        invocation,
+        true,
+      );
+      const provider = await this.getExternalProviderKey(tenantId);
+      return {
+        request: plan.request,
+        handlers: {
+          ...plan.handlers,
+          dispatch: async (durable, key, context) => {
+            const result = await plan.handlers.dispatch(durable, key, context);
+            try {
+              await this.persistCanonicalClientCreate(
+                tenantId,
+                this.createAppointmentInput(durable),
+                result.value,
+                provider,
+              );
+            } catch (error) {
+              throw new CrmOutcomeUnknownError(
+                'Provider accepted; canonical mirror requires reconciliation',
+                error,
+              );
+            }
+            return result;
+          },
+          reconcile: async (durable, prepared, context) => {
+            const result = await plan.handlers.reconcile(
+              durable,
+              prepared,
+              context,
+            );
+            if (result.outcome === 'PROVEN_SUCCEEDED' && result.safeResult)
+              await this.persistCanonicalClientCreate(
+                tenantId,
+                this.createAppointmentInput(durable),
+                this.restoreCreatedAppointment(result.safeResult),
+                provider,
+              );
+            return result;
+          },
+        },
+      };
+    }
+    const actionInput = {
+      ...input,
+      start: canonicalAppointmentInstant(
+        input.start,
+        await this.tenantTimezone(tenantId),
+      ),
+    };
+    return {
+      request: this.appointmentActionRequest({
+        tenantId,
+        capability: 'crm.appointment.create.v1',
+        targetRef: `create/${this.appointmentFingerprint({ clientId: actionInput.clientId, start: actionInput.start, staffId: actionInput.staffId, serviceIds: normalizedServiceIds(actionInput.serviceIds) })}`,
+        input: actionInput,
+        invocation,
+      }),
+      handlers: {
+        dispatch: async (durable, _key, context) => {
+          await invocation.authorizationCheck?.();
+          const request = this.createAppointmentInput(durable);
+          const id = `appointment-action:${context.executionId}`;
+          const existing = await this.prisma.appointment.findFirst({
+            where: { id, tenantId, mayaClientId: request.clientId },
+          });
+          if (existing) {
+            const value = this.internalCreatedAppointment(existing);
+            return { value, safeResult: this.createdAppointmentSafe(value) };
+          }
+          const branch = request.branchId
+            ? await this.prisma.branch.findFirst({
+                where: { id: request.branchId, tenantId },
+              })
+            : null;
+          if (request.branchId && !branch)
+            throw new BadRequestException('Branch not found for this tenant');
+          const timezone = await this.bookingTimezone(tenantId, branch);
+          const localStart = formatDateTimeInTimeZone(request.start, timezone);
+          const slots = await this.internalCalendarService.getAvailableSlots({
+            tenantId,
+            date: localStart,
+            staffId: request.staffId,
+            serviceIds: request.serviceIds,
+            branchId: request.branchId,
+          });
+          const slot = findMatchingSlotByLocalStart(
+            slots,
+            localStart,
+            timezone,
+          );
+          if (!slot)
+            throw new ConflictException({ error: { code: 'slot_taken' } });
+          const value: CreatedAppointment = {
+            external_id: id,
+            status: AppointmentStatus.CONFIRMED,
+            start: slot.start,
+            end: slot.end,
+            staff_id: request.staffId,
+            service_ids: request.serviceIds,
+            branch_id: request.branchId ?? slot.branch_id ?? null,
+          };
+          try {
+            const row = await this.persistCanonicalClientCreate(
+              tenantId,
+              request,
+              value,
+              null,
+            );
+            const accepted = this.internalCreatedAppointment(row);
+            return {
+              value: accepted,
+              safeResult: this.createdAppointmentSafe(accepted),
+            };
+          } catch (error) {
+            if (this.isInternalSlotConstraintError(error))
+              throw new ConflictException({ error: { code: 'slot_taken' } });
+            throw new CrmOutcomeUnknownError(
+              'Local create outcome requires reconciliation',
+              error,
+            );
+          }
+        },
+        reconcile: async (durable, _prepared, context) => {
+          if (!context) return { outcome: 'STILL_UNKNOWN' };
+          const row = await this.prisma.appointment.findFirst({
+            where: {
+              id: `appointment-action:${context.executionId}`,
+              tenantId,
+              mayaClientId: requireString(durable.clientId, 'clientId'),
+            },
+          });
+          if (!row) return { outcome: 'PROVEN_NOT_EXECUTED' };
+          return {
+            outcome: 'PROVEN_SUCCEEDED',
+            safeResult: this.createdAppointmentSafe(
+              this.internalCreatedAppointment(row),
+            ),
+          };
+        },
+        restore: (safe) => this.restoreCreatedAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  private internalCreatedAppointment(row: {
+    id: string;
+    status: string;
+    startAt: Date;
+    endAt: Date;
+    staffExternalId: string;
+    serviceIds: Prisma.JsonValue;
+    branchId: string | null;
+    totalPriceKopecks: number | null;
+    currency: string;
+  }): CreatedAppointment {
+    return {
+      external_id: row.id,
+      status: row.status,
+      start: row.startAt.toISOString(),
+      end: row.endAt.toISOString(),
+      staff_id: row.staffExternalId,
+      service_ids: this.jsonStringArray(row.serviceIds),
+      branch_id: row.branchId,
+      total_price:
+        row.totalPriceKopecks === null
+          ? null
+          : kopecksToMajor(row.totalPriceKopecks),
+      currency: row.currency,
+    };
+  }
+
+  private async persistCanonicalClientCreate(
+    tenantId: string,
+    input: CreateAppointmentRequest,
+    value: CreatedAppointment,
+    provider: string | null,
+  ) {
+    const client = await this.prisma.client.findUnique({
+      where: { id_tenantId: { id: input.clientId, tenantId } },
+      select: { id: true, mergedIntoClientId: true },
+    });
+    if (!client || client.mergedIntoClientId)
+      throw new ForbiddenException('Canonical Client unavailable');
+    const services = (await this.getServices(tenantId)).filter((service) =>
+      input.serviceIds.includes(service.id),
+    );
+    const timing = provider
+      ? { bufferBeforeMinutes: 0, bufferAfterMinutes: 0 }
+      : await this.internalCalendarService.getServiceTiming(
+          tenantId,
+          input.staffId,
+          input.serviceIds,
+        );
+    const startAt = new Date(value.start);
+    const endAt = value.end
+      ? new Date(value.end)
+      : new Date(
+          startAt.getTime() +
+            services.reduce(
+              (sum, service) => sum + service.duration_minutes,
+              0,
+            ) *
+              60_000,
+        );
+    const data = {
+      tenantId,
+      mayaClientId: client.id,
+      clientId: null,
+      branchId: value.branch_id ?? input.branchId ?? null,
+      source: provider ? CalendarSource.EXTERNAL : CalendarSource.INTERNAL,
+      crmProvider: provider,
+      crmExternalId: provider ? value.external_id : null,
+      staffId: await this.resolveStaffIdForBooking(tenantId, input.staffId),
+      staffExternalId: input.staffId,
+      serviceIds: asJson(input.serviceIds),
+      startAt,
+      endAt,
+      blockedStartAt: new Date(
+        startAt.getTime() - timing.bufferBeforeMinutes * 60_000,
+      ),
+      blockedEndAt: new Date(
+        endAt.getTime() + timing.bufferAfterMinutes * 60_000,
+      ),
+      status: value.status,
+      notes: input.notes ?? null,
+      totalPriceKopecks: majorToKopecks(
+        value.total_price ??
+          services.reduce((sum, service) => sum + service.price, 0),
+      ),
+      currency: value.currency ?? services[0]?.currency ?? 'RUB',
+      providerPayload: asJson(
+        value.raw ?? { provider: provider ?? CalendarSource.INTERNAL },
+      ),
+    };
+    const row = await this.prisma.appointment.upsert({
+      where: provider
+        ? {
+            tenantId_crmProvider_crmExternalId: {
+              tenantId,
+              crmProvider: provider,
+              crmExternalId: value.external_id,
+            },
+          }
+        : { id: value.external_id },
+      create: { ...data, ...(!provider ? { id: value.external_id } : {}) },
+      update: {},
+    });
+    if (
+      row.tenantId !== tenantId ||
+      (row.mayaClientId && row.mayaClientId !== client.id)
+    )
+      throw new ConflictException('Canonical Appointment Client conflict');
+    if (!row.mayaClientId) {
+      await this.prisma.appointment.updateMany({
+        where: { id: row.id, tenantId, mayaClientId: null },
+        data: { mayaClientId: client.id },
+      });
+      const owned = await this.prisma.appointment.findFirst({
+        where: { id: row.id, tenantId, mayaClientId: client.id },
+      });
+      if (!owned)
+        throw new ConflictException('Canonical Appointment Client conflict');
+      return owned;
+    }
+    return row;
   }
 
   async cancelAppointment(
     tenantId: string,
     externalId: string,
+    invocation: AppointmentActionInvocation = {},
   ): Promise<CancelledAppointment> {
+    try {
+      return (
+        await this.executeCancelAppointmentWithReceipt(
+          tenantId,
+          externalId,
+          invocation,
+        )
+      ).value;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  async previewCancelAppointment(
+    tenantId: string,
+    externalId: string,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionExecutionPreviewV1> {
+    const plan = await this.cancelAppointmentActionPlan(
+      tenantId,
+      externalId,
+      invocation,
+    );
+    return this.actionEngineRuntime.preview(plan.request);
+  }
+
+  async executeCancelAppointmentWithReceipt(
+    tenantId: string,
+    externalId: string,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<CancelledAppointment>> {
+    const plan = await this.cancelAppointmentActionPlan(
+      tenantId,
+      externalId,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private async cancelAppointmentActionPlan(
+    tenantId: string,
+    externalId: string,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<CancelledAppointment>> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return adapter.cancelAppointment({
-      tenantId: scopedTenantId,
-      externalId,
+    const crmProvider = await this.providerOfTenant(scopedTenantId);
+    return {
+      request: this.appointmentActionRequest({
+        tenantId: scopedTenantId,
+        capability: 'crm.appointment.cancel.v1',
+        targetRef: `appointment/${externalId}`,
+        input: { externalId },
+        invocation,
+      }),
+      handlers: {
+        dispatch: async (input) => {
+          await invocation.authorizationCheck?.();
+          const durableExternalId = requireString(
+            input.externalId,
+            'externalId',
+          );
+          try {
+            const value = await adapter.cancelAppointment({
+              tenantId: scopedTenantId,
+              externalId: durableExternalId,
+            });
+            await this.persistCancelledAppointmentMirror(
+              scopedTenantId,
+              crmProvider,
+              durableExternalId,
+            );
+            return { value, safeResult: this.cancelledAppointmentSafe(value) };
+          } catch (error) {
+            if (!(error instanceof CrmRecordGoneError)) throw error;
+            const value = {
+              external_id: durableExternalId,
+              status: 'canceled',
+            };
+            await this.persistCancelledAppointmentMirror(
+              scopedTenantId,
+              crmProvider,
+              durableExternalId,
+            );
+            return { value, safeResult: this.cancelledAppointmentSafe(value) };
+          }
+        },
+        reconcile: async (input) => {
+          const durableExternalId = requireString(
+            input.externalId,
+            'externalId',
+          );
+          try {
+            const detail = await this.loadAppointmentDetail(
+              scopedTenantId,
+              durableExternalId,
+            );
+            if (!isCanceledStatus(detail.status)) {
+              return { outcome: 'PROVEN_NOT_EXECUTED' };
+            }
+          } catch (error) {
+            if (!(error instanceof CrmRecordGoneError)) throw error;
+          }
+          await this.persistCancelledAppointmentMirror(
+            scopedTenantId,
+            crmProvider,
+            durableExternalId,
+          );
+          return {
+            outcome: 'PROVEN_SUCCEEDED',
+            safeResult: this.cancelledAppointmentSafe({
+              external_id: durableExternalId,
+              status: 'canceled',
+            }),
+          };
+        },
+        restore: (safe) => this.restoreCancelledAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  async executeInternalAppointmentCancelWithReceipt(
+    tenantId: string,
+    appointmentId: string,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<CancelledAppointment>> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const plan = this.internalAppointmentCancelActionPlan(
+      scopedTenantId,
+      appointmentId,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private internalAppointmentCancelActionPlan(
+    tenantId: string,
+    appointmentId: string,
+    invocation: AppointmentActionInvocation,
+  ): AppointmentActionPlan<CancelledAppointment> {
+    return {
+      request: this.appointmentActionRequest({
+        tenantId,
+        capability: 'crm.appointment.cancel.v1',
+        targetRef: `appointment/${appointmentId}`,
+        input: { externalId: appointmentId },
+        invocation,
+      }),
+      handlers: {
+        dispatch: async (input) => {
+          await invocation.authorizationCheck?.();
+          const durableId = requireString(input.externalId, 'externalId');
+          const owned = await this.prisma.appointment.findFirst({
+            where: { id: durableId, tenantId },
+            select: { mayaClientId: true, status: true },
+          });
+          if (!owned?.mayaClientId) {
+            throw new NotFoundException(
+              'Appointment not found for the current client.',
+            );
+          }
+          if (!isCanceledStatus(owned.status)) {
+            await this.persistInternalCancelledAppointment(
+              tenantId,
+              durableId,
+              owned.mayaClientId,
+            );
+          }
+          const value = {
+            external_id: durableId,
+            status: AppointmentStatus.CANCELED,
+          };
+          return { value, safeResult: this.cancelledAppointmentSafe(value) };
+        },
+        reconcile: async (input) => {
+          const durableId = requireString(input.externalId, 'externalId');
+          const row = await this.prisma.appointment.findFirst({
+            where: { id: durableId, tenantId },
+            select: { status: true },
+          });
+          if (!row || !isCanceledStatus(row.status)) {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          return {
+            outcome: 'PROVEN_SUCCEEDED',
+            safeResult: this.cancelledAppointmentSafe({
+              external_id: durableId,
+              status: AppointmentStatus.CANCELED,
+            }),
+          };
+        },
+        restore: (safe) => this.restoreCancelledAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  private persistCancelledAppointmentMirror(
+    tenantId: string,
+    crmProvider: string,
+    crmExternalId: string,
+  ) {
+    return this.prisma.appointment.updateMany({
+      where: { tenantId, crmProvider, crmExternalId },
+      data: { status: AppointmentStatus.CANCELED },
+    });
+  }
+
+  private persistInternalCancelledAppointment(
+    tenantId: string,
+    appointmentId: string,
+    mayaClientId: string,
+  ) {
+    return this.prisma.appointment.updateMany({
+      where: { id: appointmentId, tenantId, mayaClientId },
+      data: { status: AppointmentStatus.CANCELED },
+    });
+  }
+
+  async executeInternalAppointmentRescheduleWithReceipt(
+    tenantId: string,
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<RescheduledAppointment>> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const plan = this.internalAppointmentRescheduleActionPlan(
+      scopedTenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private internalAppointmentRescheduleActionPlan(
+    tenantId: string,
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation,
+  ): AppointmentActionPlan<RescheduledAppointment> {
+    return {
+      request: this.appointmentActionRequest({
+        tenantId,
+        capability: 'crm.appointment.reschedule.v1',
+        targetRef: `appointment/${params.externalId}`,
+        input: {
+          externalId: params.externalId,
+          start: params.start,
+          ...(params.staffId ? { staffId: params.staffId } : {}),
+          ...(params.serviceIds ? { serviceIds: params.serviceIds } : {}),
+          ...(params.notes ? { notes: params.notes } : {}),
+        },
+        invocation,
+      }),
+      handlers: {
+        dispatch: async (input) => {
+          await invocation.authorizationCheck?.();
+          const durable = this.rescheduleAppointmentInput(input);
+          const owned = await this.prisma.appointment.findFirst({
+            where: { id: durable.externalId, tenantId },
+            include: { branch: true },
+          });
+          if (!owned?.mayaClientId) {
+            throw new NotFoundException(
+              'Appointment not found for the current client.',
+            );
+          }
+          const timezone = await this.bookingTimezone(tenantId, owned.branch);
+          const staffId = durable.staffId ?? owned.staffExternalId;
+          const serviceIds =
+            durable.serviceIds ?? this.jsonStringArray(owned.serviceIds);
+          const startAt = new Date(durable.start);
+          const localStart = formatDateTimeInTimeZone(startAt, timezone);
+          const alreadyAtTarget =
+            owned.startAt.getTime() === startAt.getTime() &&
+            owned.staffExternalId === staffId &&
+            this.sameStringArray(
+              this.jsonStringArray(owned.serviceIds),
+              serviceIds,
+            );
+          if (!alreadyAtTarget) {
+            const slots = await this.internalCalendarService.getAvailableSlots({
+              tenantId,
+              date: localStart,
+              staffId,
+              serviceIds,
+              branchId: owned.branchId ?? undefined,
+            });
+            const matchedSlot = findMatchingSlotByLocalStart(
+              slots,
+              localStart,
+              timezone,
+            );
+            if (!matchedSlot) {
+              throw new BadRequestException({
+                message:
+                  'Selected slot is no longer available. Refresh times and try again.',
+                error: {
+                  code: 'slot_taken',
+                  message:
+                    'Selected slot is no longer available. Refresh times and try again.',
+                  field: 'start',
+                },
+              });
+            }
+            const timing = await this.internalCalendarService.getServiceTiming(
+              tenantId,
+              staffId,
+              serviceIds,
+            );
+            const slotStart = new Date(matchedSlot.start);
+            const slotEnd = new Date(matchedSlot.end);
+            try {
+              await this.persistInternalRescheduledAppointment({
+                tenantId,
+                appointmentId: owned.id,
+                mayaClientId: owned.mayaClientId,
+                branchId: owned.branchId ?? matchedSlot.branch_id ?? null,
+                staffId: await this.resolveStaffIdForBooking(tenantId, staffId),
+                staffExternalId: staffId,
+                serviceIds,
+                startAt: slotStart,
+                endAt: slotEnd,
+                blockedStartAt: new Date(
+                  slotStart.getTime() - timing.bufferBeforeMinutes * 60 * 1000,
+                ),
+                blockedEndAt: new Date(
+                  slotEnd.getTime() + timing.bufferAfterMinutes * 60 * 1000,
+                ),
+                status: AppointmentStatus.CONFIRMED,
+                notes: durable.notes ?? owned.notes,
+              });
+            } catch (error) {
+              if (this.isInternalSlotConstraintError(error)) {
+                throw new ConflictException({
+                  message:
+                    'Selected slot was just booked. Choose another time.',
+                  error: {
+                    code: 'slot_taken',
+                    message:
+                      'Selected slot was just booked. Choose another time.',
+                    field: 'start',
+                  },
+                });
+              }
+              throw error;
+            }
+          }
+          const value = {
+            external_id: owned.id,
+            status: AppointmentStatus.CONFIRMED,
+            start: durable.start,
+            staff_id: staffId,
+            service_ids: serviceIds,
+          };
+          return {
+            value,
+            safeResult: this.rescheduledAppointmentSafe(value),
+          };
+        },
+        reconcile: async (input) => {
+          const durable = this.rescheduleAppointmentInput(input);
+          const row = await this.prisma.appointment.findFirst({
+            where: { id: durable.externalId, tenantId },
+            include: { branch: true },
+          });
+          if (!row || isCanceledStatus(row.status)) {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          const timezone = await this.bookingTimezone(tenantId, row.branch);
+          const localStart = formatDateTimeInTimeZone(row.startAt, timezone);
+          const desiredLocal = normalizeRequestedStart(durable.start, timezone);
+          if (
+            localStart === desiredLocal &&
+            (durable.staffId === undefined ||
+              row.staffExternalId === durable.staffId) &&
+            (durable.serviceIds === undefined ||
+              this.sameStringArray(
+                this.jsonStringArray(row.serviceIds),
+                durable.serviceIds,
+              ))
+          ) {
+            return {
+              outcome: 'PROVEN_SUCCEEDED',
+              safeResult: this.rescheduledAppointmentSafe({
+                external_id: durable.externalId,
+                status: row.status,
+                start: durable.start,
+                staff_id: row.staffExternalId,
+                service_ids: this.jsonStringArray(row.serviceIds),
+              }),
+            };
+          }
+          return { outcome: 'STILL_UNKNOWN' };
+        },
+        restore: (safe) => this.restoreRescheduledAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  private persistInternalRescheduledAppointment(input: {
+    tenantId: string;
+    appointmentId: string;
+    mayaClientId: string;
+    branchId: string | null;
+    staffId: string | null;
+    staffExternalId: string;
+    serviceIds: string[];
+    startAt: Date;
+    endAt: Date;
+    blockedStartAt: Date;
+    blockedEndAt: Date;
+    status: string;
+    notes: string | null;
+  }) {
+    return this.prisma.appointment.updateMany({
+      where: {
+        id: input.appointmentId,
+        tenantId: input.tenantId,
+        mayaClientId: input.mayaClientId,
+      },
+      data: {
+        branchId: input.branchId,
+        staffId: input.staffId,
+        staffExternalId: input.staffExternalId,
+        serviceIds: asJson(input.serviceIds),
+        startAt: input.startAt,
+        endAt: input.endAt,
+        blockedStartAt: input.blockedStartAt,
+        blockedEndAt: input.blockedEndAt,
+        status: input.status,
+        notes: input.notes,
+        providerPayload: asJson({ provider: CalendarSource.INTERNAL }),
+      },
+    });
+  }
+
+  private async persistRescheduledAppointmentMirror(
+    tenantId: string,
+    crmProvider: string,
+    value: RescheduledAppointment,
+    desired: RescheduleAppointmentInput,
+    timezone: string,
+  ) {
+    const existing = await this.prisma.appointment.findFirst({
+      where: {
+        tenantId,
+        crmProvider,
+        crmExternalId: value.external_id,
+      },
+      select: {
+        startAt: true,
+        endAt: true,
+        blockedStartAt: true,
+        blockedEndAt: true,
+      },
+    });
+    if (!existing) return;
+    const startAt = new Date(
+      canonicalAppointmentInstant(value.start, timezone),
+    );
+    const durationMs = Math.max(
+      60_000,
+      existing.endAt.getTime() - existing.startAt.getTime(),
+    );
+    const bufferBefore = Math.max(
+      0,
+      existing.startAt.getTime() - existing.blockedStartAt.getTime(),
+    );
+    const bufferAfter = Math.max(
+      0,
+      existing.blockedEndAt.getTime() - existing.endAt.getTime(),
+    );
+    const endAt = new Date(startAt.getTime() + durationMs);
+    await this.prisma.appointment.updateMany({
+      where: {
+        tenantId,
+        crmProvider,
+        crmExternalId: value.external_id,
+      },
+      data: {
+        startAt,
+        endAt,
+        blockedStartAt: new Date(startAt.getTime() - bufferBefore),
+        blockedEndAt: new Date(endAt.getTime() + bufferAfter),
+        staffExternalId: value.staff_id,
+        staffId: await this.resolveStaffIdForBooking(tenantId, value.staff_id),
+        serviceIds: asJson(value.service_ids),
+        status: value.status,
+        ...(desired.notes !== undefined ? { notes: desired.notes } : {}),
+        ...(value.raw ? { providerPayload: asJson(value.raw) } : {}),
+      },
+    });
+  }
+
+  private jsonStringArray(value: Prisma.JsonValue): string[] {
+    if (!Array.isArray(value)) return [];
+    return value.filter((item): item is string => typeof item === 'string');
+  }
+
+  private sameStringArray(left: string[], right: string[]): boolean {
+    return (
+      left.length === right.length &&
+      left.every((item, index) => item === right[index])
+    );
+  }
+
+  private isInternalSlotConstraintError(error: unknown): boolean {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      (error.code === 'P2002' || error.code === 'P2004')
+    ) {
+      return true;
+    }
+    return (
+      error instanceof Error &&
+      error.message.includes('Appointment_internal_no_overlap')
+    );
+  }
+
+  private async bookingTimezone(
+    tenantId: string,
+    branch: { timezone: string | null } | null,
+  ) {
+    if (isUsableTimezone(branch?.timezone)) {
+      return resolveSalonTimezone({ branchTimezone: branch?.timezone });
+    }
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { defaultTimezone: true },
+    });
+    return resolveSalonTimezone({
+      branchTimezone: branch?.timezone,
+      tenantTimezone: tenant?.defaultTimezone,
     });
   }
 
   async rescheduleAppointment(
     tenantId: string,
-    params: {
-      externalId: string;
-      start: string;
-      staffId?: string;
-      serviceIds?: string[];
-      notes?: string | null;
-    },
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
   ): Promise<RescheduledAppointment> {
+    try {
+      return (
+        await this.executeRescheduleAppointmentWithReceipt(
+          tenantId,
+          params,
+          invocation,
+        )
+      ).value;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  async previewRescheduleAppointment(
+    tenantId: string,
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionExecutionPreviewV1> {
+    const plan = await this.rescheduleAppointmentActionPlan(
+      tenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.preview(plan.request);
+  }
+
+  async executeRescheduleAppointmentWithReceipt(
+    tenantId: string,
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<RescheduledAppointment>> {
+    const plan = await this.rescheduleAppointmentActionPlan(
+      tenantId,
+      params,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private async rescheduleAppointmentActionPlan(
+    tenantId: string,
+    params: RescheduleAppointmentRequest,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<RescheduledAppointment>> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return adapter.rescheduleAppointment({
-      tenantId: scopedTenantId,
+    const crmProvider = await this.providerOfTenant(scopedTenantId);
+    const timezone = await this.tenantTimezone(scopedTenantId);
+    const actionInput: RescheduleAppointmentRequest = {
       ...params,
+      start: canonicalAppointmentInstant(params.start, timezone),
+      notes: params.notes || undefined,
+    };
+    return {
+      request: this.appointmentActionRequest({
+        tenantId: scopedTenantId,
+        capability: 'crm.appointment.reschedule.v1',
+        targetRef: `appointment/${actionInput.externalId}`,
+        input: actionInput,
+        invocation,
+      }),
+      handlers: {
+        prepare: async (input) => {
+          const durable = this.rescheduleAppointmentInput(input);
+          const detail = await this.loadAppointmentDetail(
+            scopedTenantId,
+            durable.externalId,
+          );
+          return {
+            externalId: durable.externalId,
+            status: detail.status,
+            start: detail.start_at,
+            staffId: String(detail.provider.id),
+            serviceIds: normalizedServiceIds(detail.service_ids),
+          } satisfies AppointmentStateEvidence;
+        },
+        dispatch: async (input) => {
+          await invocation.authorizationCheck?.();
+          const durable = this.rescheduleAppointmentInput(input);
+          const value = await adapter.rescheduleAppointment({
+            tenantId: scopedTenantId,
+            timezone,
+            ...durable,
+          });
+          await this.persistRescheduledAppointmentMirror(
+            scopedTenantId,
+            crmProvider,
+            value,
+            durable,
+            timezone,
+          );
+          return { value, safeResult: this.rescheduledAppointmentSafe(value) };
+        },
+        reconcile: async (input, previous) => {
+          const durable = this.rescheduleAppointmentInput(input);
+          const detail = await this.loadAppointmentDetail(
+            scopedTenantId,
+            durable.externalId,
+          );
+          const current = this.appointmentEvidence(detail);
+          if (this.matchesDesiredAppointment(current, durable)) {
+            await this.persistRescheduledAppointmentMirror(
+              scopedTenantId,
+              crmProvider,
+              {
+                external_id: current.externalId,
+                status: current.status,
+                start: current.start,
+                staff_id: current.staffId,
+                service_ids: current.serviceIds,
+              },
+              durable,
+              timezone,
+            );
+            return {
+              outcome: 'PROVEN_SUCCEEDED',
+              safeResult: this.rescheduledAppointmentSafe({
+                external_id: current.externalId,
+                status: current.status,
+                start: current.start,
+                staff_id: current.staffId,
+                service_ids: current.serviceIds,
+              }),
+            };
+          }
+          if (previous && this.sameAppointmentEvidence(current, previous)) {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          return { outcome: 'STILL_UNKNOWN' };
+        },
+        restore: (safe) => this.restoreRescheduledAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  async payVisit(
+    tenantId: string,
+    params: PayVisitRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<PaidVisit> {
+    try {
+      return (
+        await this.executePayVisitWithReceipt(tenantId, params, invocation)
+      ).value;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  async previewPayVisit(
+    tenantId: string,
+    params: PayVisitRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionExecutionPreviewV1> {
+    const plan = await this.payVisitActionPlan(tenantId, params, invocation);
+    return this.actionEngineRuntime.preview(plan.request);
+  }
+
+  executePayVisitWithReceipt(
+    tenantId: string,
+    params: PayVisitRequest,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<PaidVisit>> {
+    this.tenantContext.assertTenantId(tenantId);
+    void params;
+    void invocation;
+    return Promise.reject(
+      new ServiceUnavailableException({
+        message:
+          'Visit payment write is deferred. Complete the payment manually in YClients.',
+        error: { code: 'visit_payment_write_provider_contract_deferred' },
+      }),
+    );
+  }
+
+  private async payVisitActionPlan(
+    tenantId: string,
+    params: PayVisitRequest,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<PaidVisit>> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    if (!adapter.getVisitPaymentState || !adapter.payVisit) {
+      throw new ConflictException(
+        'CRM provider does not support canonical visit payment.',
+      );
+    }
+    const actionInput: PayVisitRequest = {
+      externalId: String(params.externalId),
+      amountKopecks: params.amountKopecks,
+      paymentMethod: params.paymentMethod,
+    };
+
+    return {
+      request: this.appointmentActionRequest({
+        tenantId: scopedTenantId,
+        capability: 'crm.visit.payment.v1',
+        targetRef: `appointment/${actionInput.externalId}`,
+        input: actionInput,
+        invocation,
+      }),
+      handlers: {
+        prepare: async (input) => {
+          const durable = this.payVisitInput(input);
+          const state = await adapter.getVisitPaymentState!({
+            tenantId: scopedTenantId,
+            externalId: durable.externalId,
+          });
+          this.assertVisitPaymentAmount(state, durable.amountKopecks);
+          if (
+            state.classification === 'partial_or_inconsistent' ||
+            state.classification === 'unknown'
+          ) {
+            throw new ConflictException(
+              'Visit payment state is not safe for a new payment.',
+            );
+          }
+          return this.visitPaymentSafe(state);
+        },
+        dispatch: async (input) => {
+          const durable = this.payVisitInput(input);
+          const value = await adapter.payVisit!({
+            tenantId: scopedTenantId,
+            ...durable,
+          });
+          return { value, safeResult: this.visitPaymentSafe(value) };
+        },
+        reconcile: async (input) => {
+          const durable = this.payVisitInput(input);
+          const state = await adapter.getVisitPaymentState!({
+            tenantId: scopedTenantId,
+            externalId: durable.externalId,
+          });
+          if (
+            state.classification === 'paid_as_intended' &&
+            state.expected_amount_kopecks === durable.amountKopecks
+          ) {
+            return {
+              outcome: 'PROVEN_SUCCEEDED',
+              safeResult: this.visitPaymentSafe(state),
+            };
+          }
+          if (state.classification === 'unpaid') {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          return { outcome: 'STILL_UNKNOWN' };
+        },
+        restore: (safe) => this.restorePaidVisit(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  async executeResidualAppointmentWithReceipt(
+    tenantId: string,
+    action: ResidualAppointmentAction,
+    externalId: string,
+    input: ResidualAppointmentMutationInput,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<ActionRuntimeReceipt<ResidualAppointmentMutationResult>> {
+    const plan = await this.residualAppointmentActionPlan(
+      tenantId,
+      action,
+      externalId,
+      input,
+      invocation,
+    );
+    return this.actionEngineRuntime.executeWithReceipt(
+      plan.request,
+      plan.handlers,
+    );
+  }
+
+  private async residualAppointmentActionPlan(
+    tenantId: string,
+    action: ResidualAppointmentAction,
+    externalId: string,
+    input: ResidualAppointmentMutationInput,
+    invocation: AppointmentActionInvocation,
+  ): Promise<AppointmentActionPlan<ResidualAppointmentMutationResult>> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    if (!adapter.getAppointmentMutationState) {
+      throw new ConflictException(
+        'CRM provider does not support appointment mutation verification.',
+      );
+    }
+
+    const capabilityByAction: Record<
+      ResidualAppointmentAction,
+      ResidualAppointmentCapability
+    > = {
+      set_appointment_attendance: 'crm.appointment.attendance.v1',
+      set_appointment_duration: 'crm.appointment.duration.v1',
+      set_appointment_services: 'crm.appointment.services.v1',
+      set_appointment_fields: 'crm.appointment.fields.v1',
+    };
+    const readState = () =>
+      adapter.getAppointmentMutationState!({
+        tenantId: scopedTenantId,
+        externalId,
+      });
+
+    return {
+      request: this.appointmentActionRequest({
+        tenantId: scopedTenantId,
+        capability: capabilityByAction[action],
+        targetRef: `appointment/${externalId}`,
+        input,
+        invocation,
+      }),
+      handlers: {
+        prepare: async () => ({
+          beforeHash: this.appointmentFingerprint(await readState()),
+        }),
+        dispatch: async (normalizedInput) => {
+          // Authority is rechecked immediately before the only provider write.
+          // This closes revocation/race gaps between HTTP acceptance and the
+          // durable Action Engine claim for both Client and staff initiators.
+          await invocation.authorizationCheck?.();
+          const durable = this.residualAppointmentInput(
+            action,
+            normalizedInput,
+          );
+          await this.dispatchResidualAppointmentMutation(
+            adapter,
+            scopedTenantId,
+            action,
+            externalId,
+            durable,
+          );
+          const current = await readState();
+          if (!this.matchesResidualAppointment(current, action, durable)) {
+            throw new CrmOutcomeUnknownError(
+              'CRM mutation returned without proving the requested appointment state.',
+            );
+          }
+          const value = this.residualAppointmentResult(
+            externalId,
+            action,
+            durable,
+          );
+          return { value, safeResult: this.residualAppointmentSafe(value) };
+        },
+        reconcile: async (normalizedInput, previous) => {
+          const durable = this.residualAppointmentInput(
+            action,
+            normalizedInput,
+          );
+          const current = await readState();
+          if (this.matchesResidualAppointment(current, action, durable)) {
+            const value = this.residualAppointmentResult(
+              externalId,
+              action,
+              durable,
+            );
+            return {
+              outcome: 'PROVEN_SUCCEEDED',
+              safeResult: this.residualAppointmentSafe(value),
+            };
+          }
+          if (
+            previous &&
+            previous.beforeHash === this.appointmentFingerprint(current)
+          ) {
+            return { outcome: 'PROVEN_NOT_EXECUTED' };
+          }
+          return { outcome: 'STILL_UNKNOWN' };
+        },
+        restore: (safe) => this.restoreResidualAppointment(safe),
+        classifyError: (error, phase) =>
+          this.classifyAppointmentActionError(error, phase),
+      },
+    };
+  }
+
+  private residualAppointmentInput(
+    action: ResidualAppointmentAction,
+    input: Record<string, unknown>,
+  ): ResidualAppointmentMutationInput {
+    if (action === 'set_appointment_attendance') {
+      return {
+        attendanceCode: requireNumber(input.attendanceCode, 'attendanceCode'),
+      };
+    }
+    if (action === 'set_appointment_duration') {
+      return {
+        durationSeconds: requireNumber(
+          input.durationSeconds,
+          'durationSeconds',
+        ),
+      };
+    }
+    if (action === 'set_appointment_services') {
+      return {
+        serviceIds: requireStringArray(input.serviceIds, 'serviceIds'),
+        ...(input.durationSeconds === undefined
+          ? {}
+          : {
+              durationSeconds: requireNumber(
+                input.durationSeconds,
+                'durationSeconds',
+              ),
+            }),
+      };
+    }
+
+    const fieldKind = requireString(input.fieldKind, 'fieldKind');
+    if (fieldKind === 'comment') {
+      if (typeof input.value !== 'string') {
+        throw new BadRequestException('Invalid appointment comment.');
+      }
+      return { fieldKind, value: input.value };
+    }
+    if (fieldKind === 'sms_flag') {
+      return { fieldKind, value: requireNumber(input.value, 'value') };
+    }
+    if (fieldKind !== 'client_name') {
+      throw new BadRequestException('Unsupported appointment field kind.');
+    }
+    const value = input.value;
+    if (!value || Array.isArray(value) || typeof value !== 'object') {
+      throw new BadRequestException('Invalid appointment client value.');
+    }
+    const client = value as Record<string, unknown>;
+    return {
+      fieldKind,
+      value: {
+        name: requireString(client.name, 'client name'),
+        ...(typeof client.phone === 'string' && client.phone
+          ? { phone: client.phone }
+          : {}),
+      },
+    };
+  }
+
+  private async dispatchResidualAppointmentMutation(
+    adapter: CRMAdapter,
+    tenantId: string,
+    action: ResidualAppointmentAction,
+    externalId: string,
+    input: ResidualAppointmentMutationInput,
+  ): Promise<void> {
+    if (action === 'set_appointment_attendance') {
+      if (!adapter.markAppointmentAttendance || !('attendanceCode' in input)) {
+        throw new ConflictException('CRM attendance mutation is unsupported.');
+      }
+      await adapter.markAppointmentAttendance({
+        tenantId,
+        externalId,
+        attendance: attendanceFromWritableCode(input.attendanceCode),
+      });
+      return;
+    }
+    if (action === 'set_appointment_duration') {
+      if (
+        !adapter.setAppointmentDuration ||
+        !('durationSeconds' in input) ||
+        typeof input.durationSeconds !== 'number'
+      ) {
+        throw new ConflictException('CRM duration mutation is unsupported.');
+      }
+      await adapter.setAppointmentDuration({
+        tenantId,
+        externalId,
+        durationMinutes: Math.round(input.durationSeconds / 60),
+      });
+      return;
+    }
+    if (action === 'set_appointment_services') {
+      if (!adapter.setAppointmentServices || !('serviceIds' in input)) {
+        throw new ConflictException('CRM services mutation is unsupported.');
+      }
+      await adapter.setAppointmentServices({
+        tenantId,
+        externalId,
+        serviceIds: input.serviceIds,
+        ...('durationSeconds' in input && input.durationSeconds !== undefined
+          ? { durationMinutes: Math.round(input.durationSeconds / 60) }
+          : {}),
+      });
+      return;
+    }
+    if (!adapter.setAppointmentField || !('fieldKind' in input)) {
+      throw new ConflictException('CRM field mutation is unsupported.');
+    }
+    await adapter.setAppointmentField({
+      tenantId,
+      externalId,
+      update: input,
     });
   }
 
-  async getClientAppointments(tenantId: string, clientId: string) {
+  private matchesResidualAppointment(
+    state: CrmAppointmentMutationState,
+    action: ResidualAppointmentAction,
+    input: ResidualAppointmentMutationInput,
+  ): boolean {
+    if (action === 'set_appointment_attendance' && 'attendanceCode' in input) {
+      return (
+        state.attendance === attendanceFromWritableCode(input.attendanceCode)
+      );
+    }
+    if (
+      action === 'set_appointment_duration' &&
+      'durationSeconds' in input &&
+      typeof input.durationSeconds === 'number'
+    ) {
+      return state.duration_minutes === Math.round(input.durationSeconds / 60);
+    }
+    if (action === 'set_appointment_services' && 'serviceIds' in input) {
+      return (
+        sameServiceIds(state.service_ids, input.serviceIds) &&
+        (!('durationSeconds' in input) ||
+          input.durationSeconds === undefined ||
+          state.duration_minutes === Math.round(input.durationSeconds / 60))
+      );
+    }
+    if (!('fieldKind' in input)) return false;
+    if (input.fieldKind === 'comment') return state.comment === input.value;
+    if (input.fieldKind === 'sms_flag') return state.sms_flag === input.value;
+    return (
+      state.client_name === input.value.name &&
+      (!input.value.phone ||
+        phoneMatchKey(state.client_phone) === phoneMatchKey(input.value.phone))
+    );
+  }
+
+  private residualAppointmentResult(
+    externalId: string,
+    action: ResidualAppointmentAction,
+    input: ResidualAppointmentMutationInput,
+  ): ResidualAppointmentMutationResult {
+    if (action === 'set_appointment_attendance' && 'attendanceCode' in input) {
+      return {
+        external_id: externalId,
+        attendance: attendanceFromWritableCode(input.attendanceCode),
+      };
+    }
+    if (
+      action === 'set_appointment_duration' &&
+      'durationSeconds' in input &&
+      typeof input.durationSeconds === 'number'
+    ) {
+      return {
+        external_id: externalId,
+        duration_minutes: Math.round(input.durationSeconds / 60),
+      };
+    }
+    if (action === 'set_appointment_services' && 'serviceIds' in input) {
+      return { external_id: externalId, service_ids: input.serviceIds };
+    }
+    if ('fieldKind' in input) {
+      return { external_id: externalId, field_kind: input.fieldKind };
+    }
+    throw new Error('Residual appointment result is inconsistent.');
+  }
+
+  private residualAppointmentSafe(
+    value: ResidualAppointmentMutationResult,
+  ): Record<string, unknown> {
+    return { ...value };
+  }
+
+  private restoreResidualAppointment(
+    safe: Record<string, unknown>,
+  ): ResidualAppointmentMutationResult {
+    const externalId = requireString(safe.external_id, 'external_id');
+    if (typeof safe.attendance === 'string') {
+      return {
+        external_id: externalId,
+        attendance: safe.attendance as VisitAttendance,
+      };
+    }
+    if (typeof safe.duration_minutes === 'number') {
+      return {
+        external_id: externalId,
+        duration_minutes: safe.duration_minutes,
+      };
+    }
+    if (Array.isArray(safe.service_ids)) {
+      return {
+        external_id: externalId,
+        service_ids: requireStringArray(safe.service_ids, 'service_ids'),
+      };
+    }
+    return {
+      external_id: externalId,
+      field_kind: requireString(safe.field_kind, 'field_kind'),
+    };
+  }
+
+  private appointmentFingerprint(value: unknown): string {
+    return createHash('sha256')
+      .update(stableActionJson(value))
+      .digest('hex')
+      .slice(0, 48);
+  }
+
+  private appointmentClientIdentity(
+    clientId: string,
+    clientPhone?: string | null,
+  ): string {
+    const phoneKey = phoneMatchKey(clientPhone);
+    const identity = phoneKey ? `phone:${phoneKey}` : `client:${clientId}`;
+    return `client/${this.encryptionService.opaqueReference(
+      'appointment-client-v1',
+      identity,
+    )}`;
+  }
+
+  private normalizeNotifyBySmsHours(value: number | undefined): number {
+    if (value === undefined) return 3;
+    if (!Number.isFinite(value)) return 3;
+    return Math.max(0, Math.min(48, Math.trunc(value)));
+  }
+
+  private appointmentActionRequest(input: {
+    tenantId: string;
+    capability:
+      | 'crm.appointment.create.v1'
+      | 'crm.appointment.reschedule.v1'
+      | 'crm.appointment.cancel.v1'
+      | 'crm.visit.payment.v1'
+      | ResidualAppointmentCapability
+      | ResidualAppointmentShadowCapability;
+    targetRef: string;
+    input: unknown;
+    invocation: AppointmentActionInvocation;
+  }): TrustedActionExecutionRequestV1 {
+    const context = this.tenantContext.get();
+    const sourceType = input.invocation.sourceType ?? 'authenticated_request';
+    const sourceRef =
+      input.invocation.sourceRef ??
+      (sourceType === 'agent_task'
+        ? input.invocation.agentTaskId
+        : context?.requestId);
+
+    return {
+      contract: ACTION_EXECUTION_REQUEST_CONTRACT,
+      tenantId: input.tenantId,
+      capability: input.capability,
+      source: {
+        type: sourceType,
+        occurrenceScope: `appointment-mutation:${input.capability}:v1`,
+        ...(sourceRef ? { sourceRef } : {}),
+        ...(sourceType === 'agent_task' && input.invocation.agentTaskId
+          ? { agentTaskId: input.invocation.agentTaskId }
+          : {}),
+        ...(!input.invocation.clientPrincipal && context?.userId
+          ? { actorUserId: context.userId }
+          : {}),
+      },
+      targetRef: input.targetRef,
+      input: input.input,
+      evidenceRefs: input.invocation.clientPrincipal
+        ? clientPrincipalEvidence(
+            input.invocation.clientPrincipal.linkId,
+            input.invocation.clientPrincipal.appointmentId,
+          )
+        : [],
+      callerIdempotency: input.invocation.callerIdempotency,
+      ...(input.invocation.bookingIntent
+        ? { bookingIntent: input.invocation.bookingIntent }
+        : {}),
+    };
+  }
+
+  async planResidualAppointmentShadow(
+    tenantId: string,
+    capability: ResidualAppointmentShadowCapability,
+    targetRef: string,
+    input: unknown,
+    invocation: AppointmentActionInvocation,
+  ): Promise<ActionExecutionPreviewV1> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const request = this.appointmentActionRequest({
+      tenantId: scopedTenantId,
+      capability,
+      targetRef,
+      input,
+      invocation,
+    });
+    const preview = this.actionEngineRuntime.preview(request);
+    await this.actionEngineRuntime.planShadow(request);
+    return preview;
+  }
+
+  private nestResidualAppointmentInvocation(
+    action: ResidualAppointmentAction,
+    externalId: string,
+    authorizationCheck?: () => Promise<void>,
+  ): AppointmentActionInvocation {
+    const requestId = this.tenantContext.get()?.requestId;
+    return {
+      sourceType: 'authenticated_request',
+      ...(requestId ? { sourceRef: requestId } : {}),
+      ...(requestId
+        ? {
+            callerIdempotency: {
+              scope: `nest.crm.journal:${action}`,
+              key: `${requestId}:${externalId}`,
+            },
+          }
+        : {}),
+      ...(authorizationCheck ? { authorizationCheck } : {}),
+    };
+  }
+
+  private appointmentObservationRef(value: string): string {
+    return createHash('sha256').update(value).digest('hex');
+  }
+
+  private async observeNestResidualAppointmentMutation(input: {
+    tenantId: string;
+    actionClass: ResidualAppointmentShadowAction;
+    capability: ResidualAppointmentShadowCapability;
+    externalId: string;
+    input: unknown;
+  }): Promise<void> {
+    try {
+      const context = this.tenantContext.get();
+      const requestId = context?.requestId;
+      const preview = await this.planResidualAppointmentShadow(
+        input.tenantId,
+        input.capability,
+        `appointment/${input.externalId}`,
+        input.input,
+        {
+          sourceType: 'authenticated_request',
+          ...(requestId ? { sourceRef: requestId } : {}),
+          ...(requestId
+            ? {
+                callerIdempotency: {
+                  scope: `nest.crm.journal:${input.actionClass}`,
+                  key: `${requestId}:${input.externalId}`,
+                },
+              }
+            : {}),
+        },
+      );
+      const observation = {
+        event: 'legacy_appointment_shadow_observation',
+        contract: LEGACY_APPOINTMENT_SHADOW_OBSERVATION_CONTRACT,
+        mode: 'shadow',
+        tenant_ref: this.appointmentObservationRef(input.tenantId),
+        tenant_resolution: 'request_context',
+        origin: 'nest.crm.journal',
+        authorization_context: {
+          transport_authentication: 'authenticated_request',
+          integration_binding: 'verified',
+          origin_action_policy: 'allowed',
+          tenant_scope: 'request_tenant',
+        },
+        legacy_action_class: input.actionClass,
+        preview_action_class: preview.actionClass,
+        capability: preview.capability,
+        capability_version: preview.capabilityVersion,
+        target_kind: preview.targetKind,
+        target_ref_hash: this.appointmentObservationRef(preview.targetRef),
+        normalized_input_hash: preview.normalizedInputHash,
+        identity_fingerprint: preview.identityFingerprint,
+        request_idempotency_key_hash: preview.requestIdempotencyKeyHash,
+        policy_key: preview.policyKey,
+        policy_version: preview.policyVersion,
+        policy_decision: preview.policyDecision,
+        autonomy_level: preview.autonomyLevel,
+        approval_requirement: preview.approvalRequirement,
+        executor_key: preview.executorKey,
+        executor_version: preview.executorVersion,
+        legacy_outcome: {
+          success: true,
+          code: 'legacy_write_succeeded',
+        },
+        preview_external_side_effects: preview.externalSideEffects,
+        bridge_external_side_effects: 0,
+        shadow_side_effects: {
+          crm_writes: 0,
+          messages: 0,
+          campaigns: 0,
+        },
+      };
+      this.logger.log(
+        `${LEGACY_APPOINTMENT_SHADOW_OBSERVATION_PREFIX}${JSON.stringify(
+          observation,
+        )}`,
+      );
+    } catch (error) {
+      const errorClass =
+        error instanceof Error ? error.constructor.name : 'UnknownError';
+      this.logger.warn(
+        `Residual appointment shadow observation failed action=${input.actionClass} error=${errorClass}`,
+      );
+    }
+  }
+
+  async getAppointmentActionExecutionResult(
+    tenantId: string,
+    executionId: string,
+  ): Promise<ExecutionResultV1> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    return this.actionEngineRuntime.getExecutionResult(
+      scopedTenantId,
+      executionId,
+    );
+  }
+
+  private throwAppointmentActionError(error: unknown): never {
+    if (error instanceof ActionExecutionUncertainError) {
+      throw new CrmOutcomeUnknownError(error.message, error);
+    }
+    if (error instanceof ActionExecutionTerminalError) {
+      throw new ConflictException({
+        message: error.message,
+        error: { code: error.code.toLowerCase() },
+      });
+    }
+    throw error;
+  }
+
+  private createAppointmentInput(
+    input: Record<string, unknown>,
+  ): CreateAppointmentInput {
+    return {
+      clientId: requireString(input.clientId, 'clientId'),
+      clientName: requireString(input.clientName, 'clientName'),
+      clientPhone: optionalString(input.clientPhone),
+      branchId: optionalString(input.branchId),
+      staffId: requireString(input.staffId, 'staffId'),
+      serviceIds: requireStringArray(input.serviceIds, 'serviceIds'),
+      start: requireString(input.start, 'start'),
+      notes: optionalString(input.notes),
+      creationMode: input.creationMode === 'admin' ? 'admin' : 'client',
+      allowBusy: input.allowBusy === true,
+      durationMinutes: optionalNumber(input.durationMinutes),
+      notifyBySmsHours: optionalNumber(input.notifyBySmsHours),
+    };
+  }
+
+  private rescheduleAppointmentInput(
+    input: Record<string, unknown>,
+  ): RescheduleAppointmentInput {
+    const rawServices = input.serviceIds;
+    return {
+      externalId: requireString(input.externalId, 'externalId'),
+      start: requireString(input.start, 'start'),
+      staffId: optionalString(input.staffId),
+      serviceIds:
+        rawServices === undefined
+          ? undefined
+          : requireStringArray(rawServices, 'serviceIds'),
+      notes: optionalString(input.notes),
+    };
+  }
+
+  private createdAppointmentSafe(
+    value: CreatedAppointment,
+  ): Record<string, unknown> {
+    return {
+      externalId: value.external_id,
+      status: value.status,
+      start: value.start,
+      ...(value.end ? { end: value.end } : {}),
+      staffId: value.staff_id,
+      serviceIds: normalizedServiceIds(value.service_ids),
+      ...(value.branch_id ? { branchId: value.branch_id } : {}),
+      ...(typeof value.total_price === 'number'
+        ? { totalPrice: value.total_price }
+        : {}),
+      ...(value.currency ? { currency: value.currency } : {}),
+    };
+  }
+
+  private restoreCreatedAppointment(
+    safe: Record<string, unknown>,
+  ): CreatedAppointment {
+    return {
+      external_id: requireString(safe.externalId, 'externalId'),
+      status: requireString(safe.status, 'status'),
+      start: requireString(safe.start, 'start'),
+      end: optionalString(safe.end),
+      staff_id: requireString(safe.staffId, 'staffId'),
+      service_ids: requireStringArray(safe.serviceIds, 'serviceIds'),
+      branch_id: optionalString(safe.branchId) ?? null,
+      total_price: optionalNumber(safe.totalPrice) ?? null,
+      currency: optionalString(safe.currency),
+    };
+  }
+
+  private cancelledAppointmentSafe(
+    value: CancelledAppointment,
+  ): Record<string, unknown> {
+    return {
+      externalId: value.external_id,
+      status: value.status,
+    };
+  }
+
+  private restoreCancelledAppointment(
+    safe: Record<string, unknown>,
+  ): CancelledAppointment {
+    return {
+      external_id: requireString(safe.externalId, 'externalId'),
+      status: requireString(safe.status, 'status'),
+    };
+  }
+
+  private rescheduledAppointmentSafe(
+    value: RescheduledAppointment,
+  ): Record<string, unknown> {
+    return {
+      externalId: value.external_id,
+      status: value.status,
+      start: value.start,
+      staffId: value.staff_id,
+      serviceIds: normalizedServiceIds(value.service_ids),
+    };
+  }
+
+  private restoreRescheduledAppointment(
+    safe: Record<string, unknown>,
+  ): RescheduledAppointment {
+    return {
+      external_id: requireString(safe.externalId, 'externalId'),
+      status: requireString(safe.status, 'status'),
+      start: requireString(safe.start, 'start'),
+      staff_id: requireString(safe.staffId, 'staffId'),
+      service_ids: requireStringArray(safe.serviceIds, 'serviceIds'),
+    };
+  }
+
+  private payVisitInput(input: Record<string, unknown>): PayVisitRequest {
+    const amountKopecks = requireNumber(input.amountKopecks, 'amountKopecks');
+    const paymentMethod = requireString(input.paymentMethod, 'paymentMethod');
+    if (!Number.isSafeInteger(amountKopecks) || amountKopecks <= 0) {
+      throw new BadRequestException('amountKopecks must be a positive integer');
+    }
+    if (paymentMethod !== 'cash' && paymentMethod !== 'card') {
+      throw new BadRequestException('paymentMethod must be cash or card');
+    }
+    return {
+      externalId: requireString(input.externalId, 'externalId'),
+      amountKopecks,
+      paymentMethod,
+    };
+  }
+
+  private assertVisitPaymentAmount(
+    state: CrmVisitPaymentState,
+    amountKopecks: number,
+  ): void {
+    if (state.expected_amount_kopecks !== amountKopecks) {
+      throw new ConflictException(
+        'Visit payment amount does not match provider truth.',
+      );
+    }
+  }
+
+  private visitPaymentSafe(
+    value: CrmVisitPaymentState,
+  ): Record<string, unknown> {
+    return {
+      externalId: value.external_id,
+      visitId: value.visit_id,
+      expectedAmountKopecks: value.expected_amount_kopecks,
+      paid: value.paid,
+      classification: value.classification,
+      paidFull: value.paid_full,
+      paymentStatus: value.payment_status,
+      linkedServicePaymentCount: value.linked_service_payment_count,
+      linkedAmountKopecks: value.linked_amount_kopecks,
+      allocationConsistent: value.allocation_consistent,
+    };
+  }
+
+  private restorePaidVisit(safe: Record<string, unknown>): PaidVisit {
+    const classification = requireString(safe.classification, 'classification');
+    if (classification !== 'paid_as_intended') {
+      throw new ConflictException('Stored visit payment is not proven paid.');
+    }
+    return {
+      external_id: requireString(safe.externalId, 'externalId'),
+      visit_id: requireString(safe.visitId, 'visitId'),
+      expected_amount_kopecks: requireNumber(
+        safe.expectedAmountKopecks,
+        'expectedAmountKopecks',
+      ),
+      paid: safe.paid === true,
+      classification,
+      paid_full: safe.paidFull === true,
+      payment_status: requireNumber(safe.paymentStatus, 'paymentStatus'),
+      linked_service_payment_count: requireNumber(
+        safe.linkedServicePaymentCount,
+        'linkedServicePaymentCount',
+      ),
+      linked_amount_kopecks: requireNumber(
+        safe.linkedAmountKopecks,
+        'linkedAmountKopecks',
+      ),
+      allocation_consistent: safe.allocationConsistent === true,
+    };
+  }
+
+  private appointmentEvidence(
+    detail: CrmAppointmentDetail,
+  ): AppointmentStateEvidence {
+    return {
+      externalId: detail.id,
+      status: detail.status,
+      start: detail.start_at,
+      staffId: String(detail.provider.id),
+      serviceIds: normalizedServiceIds(detail.service_ids),
+    };
+  }
+
+  private matchesDesiredAppointment(
+    current: AppointmentStateEvidence,
+    desired: RescheduleAppointmentInput,
+  ): boolean {
+    return (
+      sameInstant(current.start, desired.start) &&
+      (desired.staffId === undefined || current.staffId === desired.staffId) &&
+      (desired.serviceIds === undefined ||
+        sameServiceIds(current.serviceIds, desired.serviceIds))
+    );
+  }
+
+  private sameAppointmentEvidence(
+    current: AppointmentStateEvidence,
+    previous: Record<string, unknown>,
+  ): boolean {
+    const previousServices = requireStringArray(
+      previous.serviceIds,
+      'serviceIds',
+    );
+    return (
+      current.externalId === requireString(previous.externalId, 'externalId') &&
+      current.status === requireString(previous.status, 'status') &&
+      sameInstant(current.start, requireString(previous.start, 'start')) &&
+      current.staffId === requireString(previous.staffId, 'staffId') &&
+      sameServiceIds(current.serviceIds, previousServices)
+    );
+  }
+
+  private classifyAppointmentActionError(
+    error: unknown,
+    phase: 'prepare' | 'dispatch',
+  ): ActionFailureClassification {
+    if (error instanceof CrmOutcomeUnknownError) {
+      return phase === 'prepare'
+        ? {
+            kind: 'definitive',
+            outcomeCode: 'crm_read_unavailable_before_dispatch',
+            errorClass: 'crm_transient_before_dispatch',
+          }
+        : {
+            kind: 'unknown',
+            outcomeCode: 'crm_provider_outcome_unknown',
+            errorClass: 'crm_outcome_unknown',
+          };
+    }
+
+    return {
+      kind: 'definitive',
+      outcomeCode: 'crm_provider_rejected',
+      errorClass: 'crm_provider_rejected',
+    };
+  }
+
+  async getClientAppointments(tenantId: string, phone: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
 
     if (
@@ -534,11 +3136,814 @@ export class CrmService {
       return [];
     }
 
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: scopedTenantId },
+      select: { defaultTimezone: true },
+    });
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    return adapter.getClientAppointments(clientId);
+    return adapter.getClientAppointments({
+      tenantId: scopedTenantId,
+      phone,
+      timezone: resolveSalonTimezone({
+        tenantTimezone: tenant?.defaultTimezone,
+      }),
+    });
   }
 
-  async getClientLoyalty(tenantId: string, phone: string) {
+  /**
+   * @param options.includeCanceled — отдать отменённые визиты. Намеренно НЕ в
+   * DTO: тогда флаг стал бы частью HTTP-контракта журнала, а его ответом
+   * рисуется сетка расписания — отменённая запись нарисовала бы карточку
+   * поверх времени, которое салон уже перепродал. Просят его только изнутри,
+   * из аналитики.
+   */
+  async getJournal(
+    tenantId: string,
+    query: ListCrmJournalDto,
+    options?: { includeCanceled?: boolean },
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'CRM journal range is invalid.',
+        error: { code: 'crm_journal_range_invalid' },
+      });
+    }
+
+    // 🔴 Правило провайдера живёт константой в границе CRM (глава 2 P3.6).
+    // Литерал здесь означал, что при смене лимита разойдутся два числа.
+    if (to.getTime() - from.getTime() > CRM_JOURNAL_MAX_WINDOW_MS) {
+      throw new BadRequestException({
+        message: `CRM journal range must not exceed ${CRM_JOURNAL_MAX_WINDOW_DAYS} days.`,
+        error: { code: 'crm_journal_range_too_large' },
+      });
+    }
+
+    const [tenant, adapter] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.getAdapterForTenant(scopedTenantId),
+    ]);
+
+    if (!adapter.getJournal) {
+      throw new ConflictException({
+        message: 'CRM journal is not available for this provider.',
+        error: { code: 'crm_journal_not_supported' },
+      });
+    }
+
+    return adapter.getJournal({
+      tenantId: scopedTenantId,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone: resolveSalonTimezone({
+        tenantTimezone: tenant?.defaultTimezone,
+      }),
+      providerId: query.providerId,
+      includeCanceled: options?.includeCanceled === true,
+    });
+  }
+
+  /**
+   * Операции над визитом из сетки расписания.
+   *
+   * Провайдер может их не уметь — метод в адаптере тогда просто не объявлен.
+   * Отдаём 409 с кодом, по которому кабинет прячет кнопку, а не падает.
+   */
+  private async getVisitCapableAdapter<TMethod extends keyof CRMAdapter>(
+    tenantId: string,
+    method: TMethod,
+    code: string,
+  ): Promise<CRMAdapter & Required<Pick<CRMAdapter, TMethod>>> {
+    await this.assertExternalSource(tenantId);
+    const adapter = await this.getAdapterForTenant(tenantId);
+
+    if (typeof adapter[method] !== 'function') {
+      throw new ConflictException({
+        message: 'CRM visit operation is not available for this provider.',
+        error: { code },
+      });
+    }
+
+    return adapter as CRMAdapter & Required<Pick<CRMAdapter, TMethod>>;
+  }
+
+  private async getScheduleCapableAdapter<
+    TMethod extends
+      | 'getStaffScheduleDay'
+      | 'previewStaffScheduleDayChange'
+      | 'applyStaffScheduleDayChange',
+  >(
+    tenantId: string,
+    method: TMethod,
+  ): Promise<CRMAdapter & Required<Pick<CRMAdapter, TMethod>>> {
+    await this.assertExternalSource(tenantId);
+    const adapter = await this.getAdapterForTenant(tenantId);
+    if (typeof adapter[method] !== 'function') {
+      throw new ConflictException({
+        message: 'CRM schedule operation is not available for this provider.',
+        error: { code: 'crm_schedule_update_not_supported' },
+      });
+    }
+    return adapter as CRMAdapter & Required<Pick<CRMAdapter, TMethod>>;
+  }
+
+  private async tenantTimezone(tenantId: string): Promise<string> {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { defaultTimezone: true },
+    });
+
+    return resolveSalonTimezone({ tenantTimezone: tenant?.defaultTimezone });
+  }
+
+  /**
+   * Кому журнал открыт целиком: владелец, управляющий, администратор.
+   * Остальные — только собственные визиты (см. assertJournalRecordAccess).
+   */
+  private static readonly JOURNAL_FULL_ACCESS_ROLES = new Set<string>([
+    UserRole.TENANT_OWNER,
+    UserRole.BUSINESS_OWNER,
+    UserRole.TENANT_ADMIN,
+    UserRole.ADMINISTRATOR,
+    UserRole.MANAGER,
+    UserRole.BRANCH_MANAGER,
+  ]);
+
+  /**
+   * Кому видны телефоны клиентов. Уже — чем доступ к журналу: телефон это ПД
+   * (152-ФЗ), и в легаси-кабинете его видел только владелец. Управляющий ведёт
+   * записи всего салона, но номера ему не показываются.
+   */
+  private static readonly CLIENT_PHONE_ROLES = new Set<string>([
+    UserRole.TENANT_OWNER,
+    UserRole.BUSINESS_OWNER,
+    UserRole.TENANT_ADMIN,
+    UserRole.ADMINISTRATOR,
+  ]);
+
+  private journalRecordForbidden(): ForbiddenException {
+    return new ForbiddenException({
+      message: 'Эта запись не из вашего расписания.',
+      error: { code: 'crm_record_forbidden' },
+    });
+  }
+
+  /**
+   * 🔴 BOLA-страж журнальных операций.
+   *
+   * Внешний идентификатор записи в CRM перебираем. Без этой проверки мастер,
+   * подставив чужой id, читал бы карточку любого визита салона вместе с ПД
+   * клиента и мог бы его отменить, перенести или переписать. Ровно эту границу
+   * держит легаси-кабинет (_panel_record_guard).
+   *
+   * Возвращает уже загруженную карточку, если ради проверки её пришлось
+   * прочитать — чтобы не ходить в CRM дважды.
+   */
+  /**
+   * 🔴 ЕДИНСТВЕННОЕ место, где внешний идентификатор провайдера превращается в
+   * идентичность Maya. Граница интеграции:
+   *
+   *     provider + externalId → StaffProviderLink → StaffId
+   *
+   * Отвязанные связи (`unlinkedAt`) намеренно не разрешаются: карточка, которую
+   * провайдер убрал из состава команды, не даёт доступа.
+   */
+  /** Провайдер, подключённый у арендатора. Единственный источник квалификации. */
+  private async providerOfTenant(tenantId: string): Promise<string> {
+    const integration = await this.prisma.crmIntegration.findUnique({
+      where: { tenantId },
+      select: { provider: true },
+    });
+    if (!integration) {
+      throw new ConflictException({
+        message: 'CRM integration is not configured for this tenant.',
+        error: { code: 'crm_not_configured' },
+      });
+    }
+    return integration.provider;
+  }
+
+  private async resolveStaffIdByExternal(
+    tenantId: string,
+    externalId: string,
+  ): Promise<StaffId | null> {
+    const integration = await this.prisma.crmIntegration.findUnique({
+      where: { tenantId },
+      select: { provider: true },
+    });
+    if (!integration) return null;
+
+    const link = await this.prisma.staffProviderLink.findFirst({
+      where: {
+        tenantId,
+        provider: integration.provider,
+        externalId,
+        unlinkedAt: null,
+      },
+      select: { staffId: true },
+    });
+
+    return asStaffIdOrNull(link?.staffId);
+  }
+
+  /**
+   * Кто этот мастер в идентичности Maya — для ЗАПИСИ визита.
+   *
+   * 🔴 Зачем понадобился публичный резолвер. Колонка `Appointment.staffId`
+   * появилась в фазе A и была залита разово; писателя у неё не завелось, и
+   * каждая новая запись получала `NULL`. То есть идентичность мастера у визита
+   * снова держалась на внешнем id — ровно на том, от чего уходили.
+   *
+   * Два пространства и ОДИН ответ:
+   *
+   * - внешняя CRM: `provider + externalId → StaffProviderLink → StaffId`;
+   * - внутренний календарь: идентификатор мастера УЖЕ является `Staff.id`
+   *   (backfill сохранил `InternalProvider.id` дословно), поэтому связь не
+   *   нужна — нужна проверка существования.
+   *
+   * 🔴 Возвращает `null`, а НЕ внешний id. Подстановка внешнего id сделала бы
+   * колонку носителем чужого пространства, а внешний ключ на `Staff` всё равно
+   * отверг бы такую запись и сломал бронь.
+   *
+   * Проверка существования в внутренней ветке не формальность: без неё в
+   * колонку уехал бы `InternalProvider.id`, у которого строки `Staff` ещё нет,
+   * и внешний ключ уронил бы создание визита целиком.
+   */
+  async resolveStaffIdForBooking(
+    tenantId: string,
+    staffRef: string | null | undefined,
+  ): Promise<StaffId | null> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const reference = String(staffRef ?? '').trim();
+    if (!reference) return null;
+
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    ) {
+      const staff = await this.prisma.staff.findFirst({
+        where: { id: reference, tenantId: scopedTenantId },
+        select: { id: true },
+      });
+      return asStaffIdOrNull(staff?.id);
+    }
+
+    return this.resolveStaffIdByExternal(scopedTenantId, reference);
+  }
+
+  /**
+   * Чей это мастер — в идентичности Maya.
+   *
+   * 🔴 До cutover отдавался `externalStaffId`, и всё право читать чужой визит
+   * держалось на строковом равенстве идентификаторов ЧУЖОЙ системы. Теперь
+   * возвращается `StaffId`, а значения со стороны CRM разрешаются через связь.
+   *
+   * Отсутствие `staffId` — ОТКАЗ, а не откат на внешний id. Откат означал бы,
+   * что старый путь остаётся рабочим обходом инварианта.
+   */
+  private async journalStaffBinding(
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<StaffId | null> {
+    if (CrmService.JOURNAL_FULL_ACCESS_ROLES.has(actor.role)) {
+      return null;
+    }
+
+    const access = await this.prisma.crmStaffAccess.findFirst({
+      where: { tenantId, userId: actor.userId },
+      select: { staffId: true, status: true },
+    });
+
+    // Нет активной привязки к мастеру — значит и своих визитов нет.
+    if (!access || access.status !== 'active' || !access.staffId) {
+      throw this.journalRecordForbidden();
+    }
+
+    return asStaffId(access.staffId);
+  }
+
+  /**
+   * 🔴 Вторая половина того же стража: в ЧЬЁ расписание разрешено писать.
+   *
+   * `assertJournalRecordAccess` закрывает существующую запись, но создание
+   * записи закрывать было нечем — там ещё нет externalId. В результате мастер с
+   * активной привязкой мог отправить `staff_id` ЧУЖОГО мастера, и визит садился
+   * в чужую сетку (`allowBusy: true`), хотя прочитать или отменить чужой визит
+   * тот же модуль ему запрещал. Тот же зазор был у переноса: проверялась
+   * исходная запись, а целевой мастер — нет, поэтому своей записью можно было
+   * занять чужое кресло.
+   *
+   * Роли с полным доступом (владелец, управляющий, администратор) ведут
+   * расписание всего салона — для них ограничения нет.
+   */
+  async assertJournalStaffWritable(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    staffId: string | undefined,
+  ): Promise<void> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const boundStaffId = await this.journalStaffBinding(scopedTenantId, actor);
+
+    if (boundStaffId === null || staffId === undefined) {
+      return;
+    }
+
+    // Значение пришло из запроса в пространстве провайдера — разрешаем его в
+    // идентичность Maya и только потом сравниваем. Связи нет ⇒ отказ.
+    const target = await this.resolveStaffIdByExternal(
+      scopedTenantId,
+      String(staffId),
+    );
+
+    if (target === null || target !== boundStaffId) {
+      throw this.journalRecordForbidden();
+    }
+  }
+
+  private async assertJournalRecordAccess(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    externalId: string,
+  ): Promise<void> {
+    const boundStaffId = await this.journalStaffBinding(tenantId, actor);
+
+    if (boundStaffId === null) {
+      return;
+    }
+
+    const adapter = await this.getVisitCapableAdapter(
+      tenantId,
+      'getAppointmentStaffId',
+      'crm_appointment_detail_not_supported',
+    );
+    const ownerStaffId = await adapter.getAppointmentStaffId({
+      tenantId,
+      externalId,
+    });
+
+    const ownerStaff = ownerStaffId
+      ? await this.resolveStaffIdByExternal(tenantId, String(ownerStaffId))
+      : null;
+
+    if (ownerStaff === null || ownerStaff !== boundStaffId) {
+      throw this.journalRecordForbidden();
+    }
+  }
+
+  private async loadAppointmentDetail(
+    tenantId: string,
+    externalId: string,
+  ): Promise<CrmAppointmentDetail> {
+    const adapter = await this.getVisitCapableAdapter(
+      tenantId,
+      'getAppointmentDetail',
+      'crm_appointment_detail_not_supported',
+    );
+
+    return adapter.getAppointmentDetail({
+      tenantId,
+      externalId,
+      timezone: await this.tenantTimezone(tenantId),
+    });
+  }
+
+  /**
+   * Internal scheduler access to the CRM phone attached to one appointment.
+   * This method is intentionally available only as an in-process service call:
+   * no controller exposes it and tenant context is still mandatory.
+   */
+  async getAppointmentDetailForSystem(
+    tenantId: string,
+    externalId: string,
+  ): Promise<CrmAppointmentDetail> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    return this.loadAppointmentDetail(scopedTenantId, externalId);
+  }
+
+  async getAppointmentDetail(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    externalId: string,
+  ): Promise<CrmAppointmentDetail> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    // Здесь карточку всё равно грузим — проверяем владельца по ней, без
+    // отдельного запроса в CRM.
+    const boundStaffId = await this.journalStaffBinding(scopedTenantId, actor);
+    const detail = await this.loadAppointmentDetail(scopedTenantId, externalId);
+
+    if (boundStaffId !== null) {
+      const detailStaff = await this.resolveStaffIdByExternal(
+        scopedTenantId,
+        String(detail.provider.id),
+      );
+      if (detailStaff === null || detailStaff !== boundStaffId) {
+        throw this.journalRecordForbidden();
+      }
+    }
+
+    if (CrmService.CLIENT_PHONE_ROLES.has(actor.role)) {
+      return detail;
+    }
+
+    // Телефон вырезаем на выходе, а не полагаемся на то, что фронт его не
+    // покажет: ответ API читается и в обход интерфейса.
+    return { ...detail, client_phone: null };
+  }
+
+  async markAppointmentAttendance(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    externalId: string,
+    attendance: VisitAttendance,
+  ): Promise<{ external_id: string; attendance: VisitAttendance }> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
+    // Сервис не доверяет вызывающему: HTTP-край не единственный вход.
+    assertWritableAttendance(attendance);
+    try {
+      const result = (
+        await this.executeResidualAppointmentWithReceipt(
+          scopedTenantId,
+          'set_appointment_attendance',
+          externalId,
+          { attendanceCode: attendanceToCode(attendance) },
+          this.nestResidualAppointmentInvocation(
+            'set_appointment_attendance',
+            externalId,
+            () =>
+              this.assertJournalRecordAccess(scopedTenantId, actor, externalId),
+          ),
+        )
+      ).value;
+      if (!('attendance' in result)) {
+        throw new Error('Attendance action returned an inconsistent result.');
+      }
+      return result;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  async setAppointmentDuration(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    externalId: string,
+    durationMinutes: number,
+  ): Promise<{ external_id: string; duration_minutes: number }> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
+
+    if (
+      !Number.isFinite(durationMinutes) ||
+      durationMinutes < 5 ||
+      durationMinutes > 720
+    ) {
+      throw new BadRequestException({
+        message: 'CRM visit duration must be between 5 and 720 minutes.',
+        error: { code: 'crm_duration_invalid' },
+      });
+    }
+
+    const roundedDurationMinutes = Math.round(durationMinutes);
+    try {
+      const result = (
+        await this.executeResidualAppointmentWithReceipt(
+          scopedTenantId,
+          'set_appointment_duration',
+          externalId,
+          { durationSeconds: roundedDurationMinutes * 60 },
+          this.nestResidualAppointmentInvocation(
+            'set_appointment_duration',
+            externalId,
+            () =>
+              this.assertJournalRecordAccess(scopedTenantId, actor, externalId),
+          ),
+        )
+      ).value;
+      if (!('duration_minutes' in result)) {
+        throw new Error('Duration action returned an inconsistent result.');
+      }
+      return result;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  async setAppointmentServices(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    externalId: string,
+    serviceIds: string[],
+  ): Promise<{ external_id: string; service_ids: string[] }> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
+
+    // Пустой состав стёр бы цену визита — в журнале это всегда ошибка ввода.
+    if (!Array.isArray(serviceIds) || serviceIds.length === 0) {
+      throw new BadRequestException({
+        message: 'CRM visit must keep at least one service.',
+        error: { code: 'crm_services_empty' },
+      });
+    }
+
+    try {
+      const result = (
+        await this.executeResidualAppointmentWithReceipt(
+          scopedTenantId,
+          'set_appointment_services',
+          externalId,
+          { serviceIds },
+          this.nestResidualAppointmentInvocation(
+            'set_appointment_services',
+            externalId,
+            () =>
+              this.assertJournalRecordAccess(scopedTenantId, actor, externalId),
+          ),
+        )
+      ).value;
+      if (!('service_ids' in result)) {
+        throw new Error('Services action returned an inconsistent result.');
+      }
+      return result;
+    } catch (error) {
+      return this.throwAppointmentActionError(error);
+    }
+  }
+
+  /** Перенос визита из журнала — под тем же стражем, что и правки. */
+  async rescheduleJournalAppointment(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    params: {
+      externalId: string;
+      start: string;
+      staffId?: string;
+      serviceIds?: string[];
+    },
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<RescheduledAppointment> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertJournalRecordAccess(
+      scopedTenantId,
+      actor,
+      params.externalId,
+    );
+    // Своей записью нельзя занять чужое кресло: страж выше проверяет ИСХОДНУЮ
+    // запись, а целевой мастер до этого не проверялся вовсе.
+    await this.assertJournalStaffWritable(
+      scopedTenantId,
+      actor,
+      params.staffId,
+    );
+
+    return this.rescheduleAppointment(scopedTenantId, params, invocation);
+  }
+
+  /** Отмена визита из журнала — под тем же стражем. */
+  async cancelJournalAppointment(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    externalId: string,
+    invocation: AppointmentActionInvocation = {},
+  ): Promise<CancelledAppointment> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertJournalRecordAccess(scopedTenantId, actor, externalId);
+
+    return this.cancelAppointment(scopedTenantId, externalId, invocation);
+  }
+
+  async searchClients(tenantId: string, query: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'searchClients',
+      'crm_client_search_not_supported',
+    );
+
+    return adapter.searchClients({ tenantId: scopedTenantId, query });
+  }
+
+  async getClientRegistry(tenantId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getClientRegistry',
+      'crm_client_registry_not_supported',
+    );
+
+    return adapter.getClientRegistry({ tenantId: scopedTenantId });
+  }
+
+  async getClientVisitHistory(
+    tenantId: string,
+    clientId: string,
+    limit = 30,
+    timezone?: string,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getClientVisitHistory',
+      'crm_client_history_not_supported',
+    );
+
+    return adapter.getClientVisitHistory({
+      tenantId: scopedTenantId,
+      clientId,
+      limit,
+      // Пояс салона, а не пояс автора кода: без него провайдерское «14:00»
+      // невозможно превратить в момент времени, не выдумав смещение.
+      timezone: timezone?.trim() || (await this.tenantTimezone(scopedTenantId)),
+    });
+  }
+
+  async getFinancialSummary(
+    tenantId: string,
+    query: { from: string; to: string },
+  ): Promise<CrmFinancialSummary> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'CRM finance range is invalid.',
+        error: { code: 'crm_finance_range_invalid' },
+      });
+    }
+
+    if (to.getTime() - from.getTime() > CRM_FINANCE_MAX_WINDOW_MS) {
+      throw new BadRequestException({
+        message: `CRM finance range must not exceed ${CRM_JOURNAL_MAX_WINDOW_DAYS} days.`,
+        error: { code: 'crm_finance_range_too_large' },
+      });
+    }
+
+    const [tenant, adapter] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.getAdapterForTenant(scopedTenantId),
+    ]);
+
+    if (!adapter.getFinancialSummary) {
+      throw new ConflictException({
+        message: 'CRM financial analytics is not available for this provider.',
+        error: { code: 'crm_finance_not_supported' },
+      });
+    }
+
+    return adapter.getFinancialSummary({
+      tenantId: scopedTenantId,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone: resolveSalonTimezone({
+        tenantTimezone: tenant?.defaultTimezone,
+      }),
+    });
+  }
+
+  async getRevenueSummary(
+    tenantId: string,
+    query: { from: string; to: string },
+  ): Promise<CrmRevenueSummary> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'CRM revenue range is invalid.',
+        error: { code: 'crm_revenue_range_invalid' },
+      });
+    }
+
+    if (to.getTime() - from.getTime() > 366 * 24 * 60 * 60 * 1000) {
+      throw new BadRequestException({
+        message: 'CRM revenue range must not exceed 366 days.',
+        error: { code: 'crm_revenue_range_too_large' },
+      });
+    }
+
+    const [tenant, adapter] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.getAdapterForTenant(scopedTenantId),
+    ]);
+
+    if (!adapter.getRevenueSummary) {
+      throw new ConflictException({
+        message: 'CRM revenue analytics is not available for this provider.',
+        error: { code: 'crm_revenue_not_supported' },
+      });
+    }
+
+    return adapter.getRevenueSummary({
+      tenantId: scopedTenantId,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone: resolveSalonTimezone({
+        tenantTimezone: tenant?.defaultTimezone,
+      }),
+    });
+  }
+
+  async getAppointmentRevenue(
+    tenantId: string,
+    query: { from: string; to: string; externalIds: string[] },
+  ): Promise<CrmAppointmentRevenueSnapshot> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    const from = new Date(query.from);
+    const to = new Date(query.to);
+    const externalIds = [
+      ...new Set(
+        query.externalIds
+          .map((value) => String(value).trim())
+          .filter((value) => value.length > 0),
+      ),
+    ];
+
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from.getTime() >= to.getTime()
+    ) {
+      throw new BadRequestException({
+        message: 'CRM appointment revenue range is invalid.',
+        error: { code: 'crm_appointment_revenue_range_invalid' },
+      });
+    }
+    if (to.getTime() - from.getTime() > 366 * 24 * 60 * 60 * 1000) {
+      throw new BadRequestException({
+        message: 'CRM appointment revenue range must not exceed 366 days.',
+        error: { code: 'crm_appointment_revenue_range_too_large' },
+      });
+    }
+    if (externalIds.length > 2_000) {
+      throw new BadRequestException({
+        message: 'Too many CRM appointments requested for one report.',
+        error: { code: 'crm_appointment_revenue_limit_exceeded' },
+      });
+    }
+
+    const [tenant, adapter] = await Promise.all([
+      this.prisma.tenant.findUnique({
+        where: { id: scopedTenantId },
+        select: { defaultTimezone: true },
+      }),
+      this.getAdapterForTenant(scopedTenantId),
+    ]);
+    if (!adapter.getAppointmentRevenue) {
+      throw new ConflictException({
+        message: 'CRM appointment revenue attribution is not available.',
+        error: { code: 'crm_appointment_revenue_not_supported' },
+      });
+    }
+
+    return adapter.getAppointmentRevenue({
+      tenantId: scopedTenantId,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      timezone: resolveSalonTimezone({
+        tenantTimezone: tenant?.defaultTimezone,
+      }),
+      externalIds,
+    });
+  }
+
+  /**
+   * Provider evidence read with no identity-registration write.
+   *
+   * Canonical value Shadow paths already require an exact CrmClientLink and
+   * must fail closed if the provider returns another card. Registering that
+   * other card as a side effect would mutate identity state after an
+   * ambiguous phone lookup, so the evidence-only boundary is explicit.
+   */
+  async getClientLoyaltyEvidenceReadOnly(tenantId: string, phone: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
 
     if (
@@ -552,6 +3957,52 @@ export class CrmService {
       tenantId: scopedTenantId,
       phone,
     });
+  }
+
+  /**
+   * Exact provider-card loyalty evidence for a canonical CRM identity.
+   *
+   * Guest Clients do not have a User phone by definition. The provider
+   * registry is therefore used only as a read-only bridge from the already
+   * proven external id to the provider's legacy phone-based loyalty read.
+   * The returned snapshot must resolve back to the same external id; an
+   * absent/duplicate card fails closed and no identity registration occurs.
+   */
+  async getClientLoyaltyEvidenceByExternalIdReadOnly(
+    tenantId: string,
+    externalClientId: string,
+  ) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const exactExternalId = externalClientId.trim();
+    if (!exactExternalId) return null;
+
+    const registry = await this.getClientRegistry(scopedTenantId);
+    const matches = registry.clients.filter(
+      (candidate) => candidate.external_id === exactExternalId,
+    );
+    const phone = matches.length === 1 ? matches[0]?.phone?.trim() : '';
+    if (!phone) return null;
+
+    const loyalty = await this.getClientLoyaltyEvidenceReadOnly(
+      scopedTenantId,
+      phone,
+    );
+    return loyalty?.provider === registry.provider &&
+      loyalty.external_client_id === exactExternalId
+      ? loyalty
+      : null;
+  }
+
+  /** Retired phone-based public loyalty helper. Exact evidence imports retain
+   * their separate P4 boundary above; reads cannot register a Client. */
+  getClientLoyalty(tenantId: string, phone: string): Promise<never> {
+    void phone;
+    this.tenantContext.assertTenantId(tenantId);
+    return Promise.reject(
+      new ForbiddenException(
+        'Verified canonical Client loyalty projection required',
+      ),
+    );
   }
 
   async testConnection(tenantId: string) {
@@ -590,10 +4041,32 @@ export class CrmService {
       });
     }
 
-    return this.adapterFactory.create(
+    const signature = [
+      integration.id,
+      integration.provider,
+      integration.updatedAt instanceof Date
+        ? integration.updatedAt.getTime()
+        : String(integration.updatedAt ?? ''),
+    ].join('|');
+    const cached = this.adapterCache.get(scopedTenantId);
+    if (
+      cached &&
+      cached.signature === signature &&
+      cached.expiresAt > Date.now()
+    ) {
+      return cached.adapter;
+    }
+
+    const adapter = this.adapterFactory.create(
       integration.provider as CrmProvider,
       this.createAdapterConfig(integration),
     );
+    this.adapterCache.set(scopedTenantId, {
+      signature,
+      expiresAt: Date.now() + 5 * 60 * 1_000,
+      adapter,
+    });
+    return adapter;
   }
 
   async getCalendarSource(tenantId: string): Promise<CalendarSource> {
@@ -610,6 +4083,12 @@ export class CrmService {
     return tenant.calendarSource === 'internal'
       ? CalendarSource.INTERNAL
       : CalendarSource.EXTERNAL;
+  }
+
+  async getExternalProviderKey(tenantId: string): Promise<string> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(scopedTenantId);
+    return this.providerOfTenant(scopedTenantId);
   }
 
   private async assertExternalSource(tenantId: string): Promise<void> {
@@ -696,15 +4175,27 @@ export class CrmService {
     config: CrmAdapterConfig,
   ): Promise<CrmImportPreview> {
     const adapter = this.adapterFactory.create(provider, config);
-    const check = await adapter.testConnection(tenantId);
+    const check = await this.loadPreviewPart(provider, 'connection_check', () =>
+      adapter.testConnection(tenantId),
+    );
 
     if (!check.ok) {
       throw new Error('CRM connection check failed');
     }
 
-    const [services, staff] = await Promise.all([
-      adapter.getServices(tenantId),
-      adapter.getStaff(tenantId),
+    const [services, staff, team, company] = await Promise.all([
+      this.loadPreviewPart(provider, 'services', () =>
+        adapter.getServices(tenantId),
+      ),
+      this.loadPreviewPart(provider, 'staff', () => adapter.getStaff(tenantId)),
+      this.loadPreviewPart(provider, 'team', () =>
+        this.loadTeamMembers(adapter, tenantId),
+      ),
+      adapter.getCompanyProfile
+        ? this.loadPreviewPart(provider, 'company_profile', () =>
+            adapter.getCompanyProfile!(),
+          )
+        : Promise.resolve(null),
     ]);
     const settings = config.settings ?? {};
     const warnings: string[] = [];
@@ -723,46 +4214,243 @@ export class CrmService {
         typeof settings.companyId === 'string'
           ? settings.companyId
           : null,
+      company,
       services: {
         count: services.length,
-        items: services.slice(0, 12),
+        items: services.slice(0, 30),
       },
       staff: {
         count: staff.length,
-        items: staff.slice(0, 12),
+        items: staff.slice(0, 30),
+      },
+      team: {
+        count: team.length,
+        items: team.slice(0, 50),
       },
       warnings,
     };
   }
 
-  private async activateVerifiedIntegration(tenantId: string) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const existing = await this.getStoredIntegration(scopedTenantId);
-
-    if (!existing.verifiedAt) {
-      throw new ConflictException({
-        message: 'CRM credentials must be verified before activation',
-        error: { code: 'crm_verification_required' },
-      });
+  private async loadTeamMembers(
+    adapter: CRMAdapter,
+    tenantId: string,
+  ): Promise<CrmTeamMember[]> {
+    if (adapter.getTeamMembers) {
+      return adapter.getTeamMembers(tenantId);
     }
 
-    const integration = await this.prisma.$transaction(async (tx) => {
-      const activated = await tx.crmIntegration.update({
-        where: { tenantId: scopedTenantId },
-        data: {
-          status: CrmIntegrationStatus.ACTIVE,
-          lastErrorCode: null,
-          lastErrorAt: null,
-        },
-      });
-      await tx.tenant.update({
-        where: { id: scopedTenantId },
-        data: { calendarSource: CalendarSource.EXTERNAL },
-      });
-      return activated;
+    return (await adapter.getStaff(tenantId)).map((member) => ({
+      ...member,
+      bookable: true,
+      suggested_role: 'staff',
+    }));
+  }
+
+  private async reconcileCrmTeamAccess(
+    tenantId: string,
+    team: CrmTeamMember[],
+  ): Promise<void> {
+    const accesses = await this.prisma.crmStaffAccess.findMany({
+      where: { tenantId },
+      select: {
+        id: true,
+        externalStaffId: true,
+        userId: true,
+        role: true,
+        status: true,
+        encryptedDisplayName: true,
+        title: true,
+      },
     });
 
-    return this.serializeIntegration(integration);
+    const teamById = new Map(team.map((member) => [String(member.id), member]));
+    const activeIds = new Set(teamById.keys());
+    const knownIds = new Set(accesses.map((access) => access.externalStaffId));
+
+    // 🔴 Сопоставление идёт по паре (провайдер, внешний id), а не по голой
+    // строке. Именно голое равенство позволяло при смене CRM отдать права
+    // нового человека старому — достаточно было совпадения числового id.
+    const provider = await this.providerOfTenant(tenantId);
+    const links = await this.prisma.staffProviderLink.findMany({
+      where: { tenantId, provider },
+      select: { id: true, staffId: true, externalId: true, unlinkedAt: true },
+    });
+    const linkByExternal = new Map(
+      links.map((link) => [link.externalId, link]),
+    );
+    const now = new Date();
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const access of accesses) {
+        const member = teamById.get(access.externalStaffId);
+        if (this.isOwnerAccessRole(access.role)) {
+          if (member && access.title !== (member.title ?? null)) {
+            await tx.crmStaffAccess.update({
+              where: { id: access.id },
+              data: { title: member.title ?? null },
+            });
+          }
+          continue;
+        }
+
+        const present = activeIds.has(access.externalStaffId);
+        const nextStatus = present
+          ? access.userId
+            ? 'active'
+            : 'pending_contact'
+          : 'disabled';
+
+        if (
+          access.status !== nextStatus ||
+          (member && access.title !== (member.title ?? null))
+        ) {
+          await tx.crmStaffAccess.update({
+            where: { id: access.id },
+            data: {
+              status: nextStatus,
+              ...(member ? { title: member.title ?? null } : {}),
+            },
+          });
+        }
+
+        if (!access.userId) continue;
+        if (present) {
+          // Reactivate only an account that this CRM fence disabled earlier.
+          // An unrelated manual membership suspension must remain in force.
+          if (access.status !== 'disabled') continue;
+          await tx.membership.updateMany({
+            where: { tenantId, userId: access.userId, status: 'suspended' },
+            data: { status: 'active' },
+          });
+          continue;
+        }
+
+        await tx.membership.updateMany({
+          where: { tenantId, userId: access.userId, status: 'active' },
+          data: { status: 'suspended' },
+        });
+        await tx.authSession.updateMany({
+          where: {
+            tenantId,
+            userId: access.userId,
+            revokedAt: null,
+          },
+          data: {
+            revokedAt: now,
+            revokeReason: 'crm_staff_inactive',
+          },
+        });
+      }
+
+      // Связь, помеченную отвязанной, НЕ активируем молча: карточку с тем же
+      // внешним id провайдер мог отдать другому человеку.
+      for (const [externalId, link] of linkByExternal) {
+        if (link.unlinkedAt === null && activeIds.has(externalId)) {
+          await tx.staffProviderLink.update({
+            where: { id: link.id },
+            data: { syncedAt: now },
+          });
+        }
+        if (link.unlinkedAt === null && !activeIds.has(externalId)) {
+          await tx.staffProviderLink.update({
+            where: { id: link.id },
+            data: { unlinkedAt: now },
+          });
+        }
+      }
+
+      const newMembers = team.filter(
+        (member) => !knownIds.has(String(member.id)),
+      );
+      for (const member of newMembers) {
+        const externalId = String(member.id);
+        const encryptedDisplayName = this.encryptionService.encrypt(
+          member.name,
+        );
+        // 🔴 Порядок обязателен: идентичность → связь → грант. Грант без
+        // staffId после cutover означает мастера, который не сможет войти.
+        const existing = linkByExternal.get(externalId);
+        const staffId =
+          existing?.staffId ??
+          (
+            await tx.staff.create({
+              data: {
+                tenantId,
+                encryptedDisplayName,
+                title: member.title ?? null,
+              },
+              select: { id: true },
+            })
+          ).id;
+
+        if (!existing) {
+          await tx.staffProviderLink.create({
+            data: { tenantId, staffId, provider, externalId },
+          });
+        }
+
+        await tx.crmStaffAccess.create({
+          data: {
+            tenantId,
+            staffId,
+            externalStaffId: externalId,
+            encryptedDisplayName,
+            title: member.title ?? null,
+            role:
+              member.suggested_role === 'administrator'
+                ? UserRole.ADMINISTRATOR
+                : UserRole.STAFF,
+            status: 'pending_contact' as const,
+          },
+        });
+      }
+    });
+  }
+
+  private isOwnerAccessRole(role: string): boolean {
+    return new Set<string>([
+      UserRole.TENANT_ADMIN,
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+    ]).has(role);
+  }
+
+  private crmStaffAccessDisabled(): UnauthorizedException {
+    return new UnauthorizedException({
+      message: 'CRM staff access is no longer active.',
+      error: {
+        code: 'crm_staff_access_disabled',
+        message:
+          '\u0414\u043e\u0441\u0442\u0443\u043f \u043a MAYA \u043e\u0442\u043a\u043b\u044e\u0447\u0451\u043d: \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0435 \u0430\u043a\u0442\u0438\u0432\u0435\u043d \u0432 CRM.',
+      },
+    });
+  }
+
+  private safeErrorCode(error: unknown): string {
+    if (!error || typeof error !== 'object') return 'unknown';
+    const candidate = error as {
+      code?: unknown;
+      response?: { error?: { code?: unknown } };
+    };
+    const value = candidate.response?.error?.code ?? candidate.code;
+    return typeof value === 'string' ? value.slice(0, 64) : 'unavailable';
+  }
+
+  private async loadPreviewPart<T>(
+    provider: CrmProvider,
+    operation: string,
+    loader: () => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await loader();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      const status = message.match(/\bstatus\s+(\d{3})\b/i)?.[1] ?? 'unknown';
+      this.logger.warn(
+        `CRM preview failed provider=${provider} operation=${operation} status=${status}`,
+      );
+      throw error;
+    }
   }
 
   private async recordStoredConnectionFailure(
@@ -801,6 +4489,26 @@ export class CrmService {
         'Не удалось проверить подключение к CRM. Данные не были сохранены.',
     };
 
+    // 🔴 Причину пишем в лог. Раньше она молча превращалась в общий текст, и
+    // когда салон говорил «CRM отклонила токен», в логах не было НИЧЕГО —
+    // диагностировать было нечем. Токен сюда не попадает: логируем только
+    // сообщение провайдера и класс ошибки.
+    let detail = 'unknown';
+    if (error instanceof Error) {
+      detail = error.message;
+    } else if (typeof error === 'string') {
+      detail = error;
+    } else if (error !== null && error !== undefined) {
+      try {
+        detail = JSON.stringify(error) || 'unknown';
+      } catch {
+        detail = 'unserializable_error';
+      }
+    }
+    this.logger.warn(
+      `CRM connection failed provider=${provider} code=${code} detail=${detail.slice(0, 300)}`,
+    );
+
     return new BadRequestException({
       message: messages[code],
       error: { code, provider },
@@ -820,7 +4528,7 @@ export class CrmService {
       return 'crm_platform_configuration_error';
     }
     if (
-      /\b(401|403)\b|unauthor|forbidden|credential|token|авторизац|доступ/.test(
+      /\b(401|403)\b|unauthor|forbidden|credential|token|авторизац|доступ|недостаточно прав/.test(
         normalized,
       )
     ) {

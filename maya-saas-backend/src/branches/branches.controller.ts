@@ -37,6 +37,10 @@ export class BranchesController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateBranchDto,
   ) {
-    return this.branchesService.createForTenant(user.tenantId!, dto);
+    return this.branchesService.createForTenant(
+      user.tenantId!,
+      user.userId,
+      dto,
+    );
   }
 }

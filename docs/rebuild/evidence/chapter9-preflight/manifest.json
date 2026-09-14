@@ -1,0 +1,1344 @@
+{
+  "version": "maya.c9-preflight/1",
+  "status": "PROPOSED FINITE ACCEPTANCE; OWNER AND SCHEMA APPROVAL PENDING",
+  "baseline": "bae6620c6a2fddbae3b863147860be21842444d5",
+  "counts": {
+    "requirements": 30,
+    "reusableFoundations": 28,
+    "missingFoundations": 8,
+    "legacyGroups": 9,
+    "ownerDecisions": 16,
+    "packages": 6,
+    "waves": 4,
+    "productionSurfaces": 32
+  },
+  "requirements": [
+    {
+      "id": "Q01",
+      "package": "P02",
+      "requirement": "Один Orchestrator: intent/period → routing → bounded delegation → response",
+      "source": "G §§2,12,20; ai-core.service.ts",
+      "foundationAndGap": "Существующий router/tool loop; нет общего domain coordinator",
+      "expectedDelta": "Структурированный orchestration runtime; без нового executor",
+      "requiredProof": "single owner; simple request bypasses agents; independent tasks only"
+    },
+    {
+      "id": "Q02",
+      "package": "P01",
+      "requirement": "Четыре versioned agent domains и AgentResult@1",
+      "source": "G §§3,5,13,18.3",
+      "foundationAndGap": "AgentTask routing есть; executable registry нет",
+      "expectedDelta": "Static registry/result contract",
+      "requiredProof": "exact roster; unknown agent denied; malformed result denied"
+    },
+    {
+      "id": "Q03",
+      "package": "P01",
+      "requirement": "Capability → tool → canonical owner mapping",
+      "source": "G §§5–8,10",
+      "foundationAndGap": "47 catalog entries; нет полного composed capability view",
+      "expectedDelta": "Typed registry adapters, no plugin marketplace",
+      "requiredProof": "invented tool/action unavailable; readiness is not permission"
+    },
+    {
+      "id": "Q04",
+      "package": "P01",
+      "requirement": "Effective availability/authority/entitlement intersection",
+      "source": "G §§10,16; EntitlementsService",
+      "foundationAndGap": "Feature/role/provider checks раздельны",
+      "expectedDelta": "Resolved deny-wins view, no billing-policy rewrite",
+      "requiredProof": "tenant deny/trial expiry/provider unsupported/role denied"
+    },
+    {
+      "id": "Q05",
+      "package": "P01",
+      "requirement": "Trusted facts vs untrusted text/context profiles",
+      "source": "G §§10.2,11; C6 remainder §indirect injection",
+      "foundationAndGap": "Redaction есть; typed field provenance неполна",
+      "expectedDelta": "Minimal typed context/evidence/result contract",
+      "requiredProof": "provider text/prompt injection cannot select target/approval/recipient"
+    },
+    {
+      "id": "Q06",
+      "package": "P01",
+      "requirement": "Durable strategy revision/step/assignment/evidence links",
+      "source": "G §§2,8,13; request §§8–9,19",
+      "foundationAndGap": "Opportunity/AgentTask/AE не являются durable Strategy",
+      "expectedDelta": "Shared prospective strategy/run representation; exact schema later",
+      "requiredProof": "source remains owner; immutable proposed revision; restart"
+    },
+    {
+      "id": "Q07",
+      "package": "P01",
+      "requirement": "Request/strategy/step identity and concurrent dedup",
+      "source": "C6 B31/B33/R10; request §19",
+      "foundationAndGap": "Exact action keys есть; whole-plan identity нет",
+      "expectedDelta": "Link durable logical request to immutable strategy and action refs",
+      "requiredProof": "same key same intent same plan; changed intent conflict; one winner"
+    },
+    {
+      "id": "Q08",
+      "package": "P03",
+      "requirement": "Validated confirmed policy changes through A22",
+      "source": "A tenant-policy-and-profiles; G §18.3",
+      "foundationAndGap": "A22 revisions and four namespaces exist",
+      "expectedDelta": "Typed C9 policy/profile drafts through same owner",
+      "requiredProof": "unconfirmed edit no write; stale revision conflict"
+    },
+    {
+      "id": "Q09",
+      "package": "P04",
+      "requirement": "Maya Admin front-office domain",
+      "source": "G §§3.1,10,14",
+      "foundationAndGap": "Own booking/consultation tools and B31–B33 present",
+      "expectedDelta": "Agent adapter over exact Client ingress",
+      "requiredProof": "no User/phone authority; own Client; no Maya User valid binding"
+    },
+    {
+      "id": "Q10",
+      "package": "P04",
+      "requirement": "Client Lifecycle strategy domain",
+      "source": "G §§3.1,10; C8 final",
+      "foundationAndGap": "C8 facts/ranking and B35 present",
+      "expectedDelta": "Evidence-linked retention/reactivation proposal",
+      "requiredProof": "value not consent; insufficient value stays unknown; no auto campaign"
+    },
+    {
+      "id": "Q11",
+      "package": "P04",
+      "requirement": "Occupancy domain",
+      "source": "G §§3.1,10; C6 appointment owners",
+      "foundationAndGap": "Availability/schedule/internal/CRM owners present",
+      "expectedDelta": "Scoped slot/recovery planning adapter",
+      "requiredProof": "unavailable provider denied; no bypass booking/schedule owner"
+    },
+    {
+      "id": "Q12",
+      "package": "P02",
+      "requirement": "BI read-only specialist",
+      "source": "G §§3.1,14,20 M2; C7 final",
+      "foundationAndGap": "C7 measurement/report + C8 reads present",
+      "expectedDelta": "Read-only agent and grounded response",
+      "requiredProof": "manager no automatic finance; staff own scope; no ledger writes"
+    },
+    {
+      "id": "Q13",
+      "package": "P02",
+      "requirement": "C9 works without active C8 probabilities",
+      "source": "C8 final target matrix; request §24",
+      "foundationAndGap": "0/8 disabled and deterministic qualified C8 result owner exist",
+      "expectedDelta": "Consume qualification/completeness; no invented number",
+      "requiredProof": "limited-data end-to-end proposal; unavailable probability omitted"
+    },
+    {
+      "id": "Q14",
+      "package": "P04",
+      "requirement": "Bounded strategy options, tradeoffs and recommendation",
+      "source": "G §2; request §§11–13",
+      "foundationAndGap": "No canonical multi-option policy",
+      "expectedDelta": "Owner decision on option policy; deterministic admissibility",
+      "requiredProof": "no action valid option; no invented expected lift/discount benefit"
+    },
+    {
+      "id": "Q15",
+      "package": "P05",
+      "requirement": "Exact immutable bounded approval",
+      "source": "G §§8–10; C6 R10; request §10",
+      "foundationAndGap": "AE/AiApprovalRequest/receipt owners exist",
+      "expectedDelta": "Strategy-to-existing-approval binding; no blanket grant",
+      "requiredProof": "changed material intent requires approval; actor/tenant mismatch denied"
+    },
+    {
+      "id": "Q16",
+      "package": "P05",
+      "requirement": "Approved strategy handoff to existing owners",
+      "source": "G §§7–9; C6 final; request §§9,21",
+      "foundationAndGap": "AE/CD/B35/A22/booking/value/expense owners exist",
+      "expectedDelta": "Finite step adapters and outcome refs",
+      "requiredProof": "no effect before admission; every business write has existing owner"
+    },
+    {
+      "id": "Q17",
+      "package": "P05",
+      "requirement": "Partial plan/restart/UNKNOWN continuation",
+      "source": "C6 durable policy/UNKNOWN; request §18",
+      "foundationAndGap": "Per-action durable semantics exist",
+      "expectedDelta": "Coordinator state derived from actual execution receipts",
+      "requiredProof": "success skipped; unknown reconciles same execution; no fallback resend"
+    },
+    {
+      "id": "Q18",
+      "package": "P05",
+      "requirement": "Intent expiry, policy refresh, supersession/cancel",
+      "source": "C6 durable policy; C7/C8 revisions; request §§8,18",
+      "foundationAndGap": "Per-action expiry/current-policy enforcement exist",
+      "expectedDelta": "Plan validity policy plus safe future-step cancellation",
+      "requiredProof": "old approval not current ALLOW; no rollback lie; expired plan not revived"
+    },
+    {
+      "id": "Q19",
+      "package": "P02",
+      "requirement": "Global bounded agent/tool/AI and business budgets",
+      "source": "G §12; request §20",
+      "foundationAndGap": "3-step tool loop and per-tool timeout; no global plan budget",
+      "expectedDelta": "Shared admission/reservation ledger semantics to map",
+      "requiredProof": "max2 domains; finite calls/time/spend; exhausted budget blocks new work"
+    },
+    {
+      "id": "Q20",
+      "package": "P03",
+      "requirement": "Conversation edits become validated drafts",
+      "source": "A conversational-policy-and-secrets; request §22",
+      "foundationAndGap": "Onboarding drafts/confirmation receipts exist",
+      "expectedDelta": "Strategy/policy edit binding, no chat approval heuristic",
+      "requiredProof": "do not want discounts creates constraint; changed plan reapproval"
+    },
+    {
+      "id": "Q21",
+      "package": "P03",
+      "requirement": "Service-business profile and relevant onboarding",
+      "source": "A business-onboarding-target; G §18.3",
+      "foundationAndGap": "Templates/onboarding/A22/c8_valuation partial",
+      "expectedDelta": "Typed profile proposal + confirmed tenant overrides",
+      "requiredProof": "barbershop/beauty/dental/auto; solo skips staff payroll; no universal cadence"
+    },
+    {
+      "id": "Q22",
+      "package": "P03",
+      "requirement": "Safe secrets and external source capability intake",
+      "source": "A external-source-capabilities; G §18.3",
+      "foundationAndGap": "Secure CRM integration exists; general source binding partial",
+      "expectedDelta": "Source reference/capability statuses; no new connector promised",
+      "requiredProof": "URL not monitoring; unsupported explicit; secrets never prompt/config"
+    },
+    {
+      "id": "Q23",
+      "package": "P03",
+      "requirement": "Confirmed report policy handoff",
+      "source": "A business-onboarding-target; G §18.3",
+      "foundationAndGap": "OwnerReportRun/A12/CD present",
+      "expectedDelta": "Typed bounded policy invokes existing report owner",
+      "requiredProof": "history not schedule; report retries same plan; no new direct sender"
+    },
+    {
+      "id": "Q24",
+      "package": "P01",
+      "requirement": "Memory is not business state; minimal durable evidence",
+      "source": "G §11; ai-memory.service.ts; request §16",
+      "foundationAndGap": "Explicit user notes active; no strategy evidence retention policy",
+      "expectedDelta": "Tagged untrusted notes; prospective orchestration retention",
+      "requiredProof": "note cannot alter policy/finance; source retention unaffected"
+    },
+    {
+      "id": "Q25",
+      "package": "P06",
+      "requirement": "Versioned reasoning/skills and offline evaluation",
+      "source": "docs/AI README §§architecture/testing; G §§5,12–13; request §17",
+      "foundationAndGap": "Prompt/scenario eval foundations; no canonical agent-training contract",
+      "expectedDelta": "Finite agent evaluation corpus + release wiring; learning disposition decision",
+      "requiredProof": "one agent plus other-agent interference; no self-modifying policy"
+    },
+    {
+      "id": "Q26",
+      "package": "P02",
+      "requirement": "Evidence-grounded explanations/status/cost visibility",
+      "source": "G §§13,17; request §23",
+      "foundationAndGap": "C7/C8 safe projections and AuditLog exist",
+      "expectedDelta": "Safe orchestration trace and typed grounded explanation",
+      "requiredProof": "facts/policy/prediction/strategy separated; no raw PII/hidden CoT"
+    },
+    {
+      "id": "Q27",
+      "package": "P06",
+      "requirement": "Close exact carried tool/presentation limitations",
+      "source": "G §19.3; carry 4.10/32/57/59/61/85-B",
+      "foundationAndGap": "C7/C8 replaced many numeric producers; cap/adapter omissions remain",
+      "expectedDelta": "Contract/presentation closure, never second arithmetic owner",
+      "requiredProof": "server periods; explicit truncation; typed category shapes; journal completeness"
+    },
+    {
+      "id": "Q28",
+      "package": "P06",
+      "requirement": "One consistent UI/chat/voice/Telegram/panel contract",
+      "source": "G §§2,13,16; A; C8 consumer proof",
+      "foundationAndGap": "Existing authenticated initiators/consumer owners",
+      "expectedDelta": "Render proposal/approval/partial/unavailable; supported scopes only",
+      "requiredProof": "channel does not grant authority; no client finance/export leak"
+    },
+    {
+      "id": "Q29",
+      "package": "P06",
+      "requirement": "Cross-tenant/Client/Staff/finance/AI security regression proof",
+      "source": "C6/7/8 final + G §10",
+      "foundationAndGap": "Certified authority ratchets reusable",
+      "expectedDelta": "Cross-agent/plan adversarial matrix",
+      "requiredProof": "revoked membership/link, mixed-tenant refs, unsafe provider text denied"
+    },
+    {
+      "id": "Q30",
+      "package": "P06",
+      "requirement": "Finite release/production/handoff gate; no C10 loop",
+      "source": "G §§9,18–21; C8 final; request §25",
+      "foundationAndGap": "Mandatory unfiltered tests, 32 surfaces, finite relay manifest",
+      "expectedDelta": "Package/wave receipts + C9 final gate",
+      "requiredProof": "no autonomous repeat or new launcher; 32 surfaces evidence; zero proof effects"
+    }
+  ],
+  "foundations": [
+    {
+      "id": "F01",
+      "name": "Canonical Client / channel provenance",
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "reuseBoundary": "Client/ClientChannelLink; C6 B31/B32/A18"
+    },
+    {
+      "id": "F02",
+      "name": "Staff/User/Membership authority",
+      "path": "maya-saas-backend/src/auth",
+      "reuseBoundary": "R02/R03/R04 + CrmStaffAccess"
+    },
+    {
+      "id": "F03",
+      "name": "BusinessState canonical read",
+      "path": "maya-saas-backend/src/business-state/business-state.service.ts",
+      "reuseBoundary": "computed facts, no new arithmetic"
+    },
+    {
+      "id": "F04",
+      "name": "C7 MeasurementRevision",
+      "path": "maya-saas-backend/src/measurement",
+      "reuseBoundary": "fact/current/as-reported distinction"
+    },
+    {
+      "id": "F05",
+      "name": "C8 result/policy/ranking",
+      "path": "maya-saas-backend/src/valuation/c8.read.ts",
+      "reuseBoundary": "qualified limited-data safe projection"
+    },
+    {
+      "id": "F06",
+      "name": "C8 model/evaluation readiness",
+      "path": "maya-saas-backend/src/valuation",
+      "reuseBoundary": "0/8 active does not imply error"
+    },
+    {
+      "id": "F07",
+      "name": "Opportunity lifecycle",
+      "path": "maya-saas-backend/src/opportunities",
+      "reuseBoundary": "semantic identity/qualification/expiry"
+    },
+    {
+      "id": "F08",
+      "name": "AgentTask durable assignment",
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "reuseBoundary": "assignment only, not strategy runtime"
+    },
+    {
+      "id": "F09",
+      "name": "AE registry/identity/executor",
+      "path": "maya-saas-backend/src/action-engine",
+      "reuseBoundary": "one business effect owner"
+    },
+    {
+      "id": "F10",
+      "name": "AE approval/policy/durable resume",
+      "path": "maya-saas-backend/src/action-engine/action-engine.approval-binding.ts",
+      "reuseBoundary": "fresh policy; same execution; UNKNOWN"
+    },
+    {
+      "id": "F11",
+      "name": "R10 tool receipt / AiApprovalRequest",
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-receipt.service.ts",
+      "reuseBoundary": "scoped encrypted exact tool receipt"
+    },
+    {
+      "id": "F12",
+      "name": "B31/B33 booking identities",
+      "path": "maya-saas-backend/src/action-engine",
+      "reuseBoundary": "verified own/internal/CRM create and confirmation"
+    },
+    {
+      "id": "F13",
+      "name": "Communication Delivery",
+      "path": "maya-saas-backend/src/communication-delivery",
+      "reuseBoundary": "policy/routes/effect receipt/reconciliation"
+    },
+    {
+      "id": "F14",
+      "name": "B35 bulk audience/campaign",
+      "path": "maya-saas-backend/src/marketing/canonical-bulk.service.ts",
+      "reuseBoundary": "immutable Client audience/slot/partial resume"
+    },
+    {
+      "id": "F15",
+      "name": "A22 config revisions",
+      "path": "maya-saas-backend/src/package5-wave1/governed-settings.contract.ts",
+      "reuseBoundary": "four admitted namespaces; not arbitrary config"
+    },
+    {
+      "id": "F16",
+      "name": "Entitlements/readiness",
+      "path": "maya-saas-backend/src/entitlements",
+      "reuseBoundary": "server deny-wins feature checks"
+    },
+    {
+      "id": "F17",
+      "name": "Tool catalog/validator/policy/runtime",
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+      "reuseBoundary": "47 definitions, not 47 enabled capabilities"
+    },
+    {
+      "id": "F18",
+      "name": "Existing AiCore and brain router",
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "reuseBoundary": "one pipeline; 3-step configurable loop"
+    },
+    {
+      "id": "F19",
+      "name": "Conversation Intelligence plan",
+      "path": "maya-saas-backend/src/conversation-intelligence",
+      "reuseBoundary": "semantic decomposition not durable approval"
+    },
+    {
+      "id": "F20",
+      "name": "Confirmed onboarding and secure CRM",
+      "path": "maya-saas-backend/src/onboarding",
+      "reuseBoundary": "draft/token/receipt; secure integration separate"
+    },
+    {
+      "id": "F21",
+      "name": "OwnerReportRun/A12/download",
+      "path": "maya-saas-backend/src/owner-reports",
+      "reuseBoundary": "immutable report plan and authorized snapshot"
+    },
+    {
+      "id": "F22",
+      "name": "P407 expense / finance source owners",
+      "path": "maya-saas-backend/src/expenses",
+      "reuseBoundary": "facts and confirmed mutations remain canonical"
+    },
+    {
+      "id": "F23",
+      "name": "Review/NativeFeedback",
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "reuseBoundary": "source/scale/author authority; no auto publication"
+    },
+    {
+      "id": "F24",
+      "name": "Package4 value owners",
+      "path": "maya-saas-backend/src/action-engine",
+      "reuseBoundary": "no agent creates credit/discount/loyalty independently"
+    },
+    {
+      "id": "F25",
+      "name": "Audit and safe C7/C8 access",
+      "path": "maya-saas-backend/src/measurement",
+      "reuseBoundary": "tenant owner audit allowlist and finance scope"
+    },
+    {
+      "id": "F26",
+      "name": "AC6 retention leaves",
+      "path": "maya-saas-backend/src/package5-wave6",
+      "reuseBoundary": "holds/lifecycle/source protection; no new retention autoapproval"
+    },
+    {
+      "id": "F27",
+      "name": "Explicit user memory",
+      "path": "maya-saas-backend/src/ai-tools/ai-memory.service.ts",
+      "reuseBoundary": "human note not fact/policy, existing retention untouched"
+    },
+    {
+      "id": "F28",
+      "name": "Existing release/CI evaluation/guards",
+      "path": "maya-saas-backend/package.json",
+      "reuseBoundary": "mandatory .spec; finite production preservation"
+    }
+  ],
+  "missingFoundations": [
+    {
+      "id": "M01",
+      "gap": "Durable strategy/revision/step/approval/outcome linkage (not AgentTask or AiBrainSession)"
+    },
+    {
+      "id": "M02",
+      "gap": "Executable four-domain agent registry and typed result validation"
+    },
+    {
+      "id": "M03",
+      "gap": "Composed capability/entitlement/provider/role availability view"
+    },
+    {
+      "id": "M04",
+      "gap": "Typed field provenance and bounded agent context contracts"
+    },
+    {
+      "id": "M05",
+      "gap": "Whole-orchestration budget/admission/continuation coordination"
+    },
+    {
+      "id": "M06",
+      "gap": "Typed conversational profile/source/report policy intake under existing owners"
+    },
+    {
+      "id": "M07",
+      "gap": "Versioned domain reasoning/evaluation promotion contract"
+    },
+    {
+      "id": "M08",
+      "gap": "Final consumer/tool contract carry-forward closure"
+    }
+  ],
+  "legacyGroups": [
+    {
+      "id": "L01",
+      "name": "Historical 10-agent/vertical/persona rosters",
+      "disposition": "RETIRE AS AUTHORITY; preserve historical docs; four domains only"
+    },
+    {
+      "id": "L02",
+      "name": "AiBrainSession.planJson and removed profile/knowledge engine",
+      "disposition": "DO NOT REUSE as durable strategy or revive hidden persona state"
+    },
+    {
+      "id": "L03",
+      "name": "Flat ephemeral semantic plan and request-step idempotency",
+      "disposition": "ADAPT as bounded parser/input; not plan lifecycle/approval"
+    },
+    {
+      "id": "L04",
+      "name": "Unqualified tool/feature/role aliases and old readiness counts",
+      "disposition": "ADAPT through canonical resolved availability; no new permissions"
+    },
+    {
+      "id": "L05",
+      "name": "Silent sanitizeToolResult array cap=200",
+      "disposition": "ADAPT to explicit bounded completeness contract; inherited C9 carry"
+    },
+    {
+      "id": "L06",
+      "name": "Historic tool arithmetic/by_category/period/card/journal mappings",
+      "disposition": "RECONCILE current C7/C8 path; close presentation remainder only"
+    },
+    {
+      "id": "L07",
+      "name": "Legacy Python director/growth/auto campaign/report effects",
+      "disposition": "KEEP RETIRED; permitted source-labelled reads only, not agent owners"
+    },
+    {
+      "id": "L08",
+      "name": "Memory or chat as policy/fact and historical claim AiMemory unused",
+      "disposition": "ADAPT: actual explicit notes untrusted; no history-based approvals"
+    },
+    {
+      "id": "L09",
+      "name": "BI expense-period write vs read-only BI documentation",
+      "disposition": "RESOLVE read-only specialist; existing separately confirmed action remains possible"
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "S01",
+      "name": "Backend HTTP routes",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "DIRECT CONSUMER / ORCHESTRATION INTEGRATION"
+    },
+    {
+      "id": "S02",
+      "name": "Active salon PWA",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S03",
+      "name": "Maya platform PWA / VPS static",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "DIRECT CONSUMER / ORCHESTRATION INTEGRATION"
+    },
+    {
+      "id": "S04",
+      "name": "Public site / Next / shop",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S05",
+      "name": "Proxy / compatibility routes",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S06",
+      "name": "Chat / stream / history",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "DIRECT CONSUMER / ORCHESTRATION INTEGRATION"
+    },
+    {
+      "id": "S07",
+      "name": "Realtime / voice",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "DIRECT CONSUMER / ORCHESTRATION INTEGRATION"
+    },
+    {
+      "id": "S08",
+      "name": "AI tools",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "DIRECT CONSUMER / ORCHESTRATION INTEGRATION"
+    },
+    {
+      "id": "S09",
+      "name": "Journal",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "DIRECT CONSUMER / ORCHESTRATION INTEGRATION"
+    },
+    {
+      "id": "S10",
+      "name": "Python services / importers",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S11",
+      "name": "Schedulers",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S12",
+      "name": "VPS cron / timers",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S13",
+      "name": "Beget cron / hosting scheduled tasks",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S14",
+      "name": "Background workers / installed operator CLIs",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S15",
+      "name": "Telegram handlers / commands / replies",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "DIRECT CONSUMER / ORCHESTRATION INTEGRATION"
+    },
+    {
+      "id": "S16",
+      "name": "Inbox",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S17",
+      "name": "APNS",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S18",
+      "name": "Web Push",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-b24-remediation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S19",
+      "name": "Communication Delivery",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "CANONICAL OWNER / SOURCE HANDOFF PRESERVATION"
+    },
+    {
+      "id": "S20",
+      "name": "Panel / GOD / admin",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "DIRECT CONSUMER / ORCHESTRATION INTEGRATION"
+    },
+    {
+      "id": "S21",
+      "name": "Internal calendar",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "CANONICAL OWNER / SOURCE HANDOFF PRESERVATION"
+    },
+    {
+      "id": "S22",
+      "name": "CRM / YClients adapters / helpers",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "CANONICAL OWNER / SOURCE HANDOFF PRESERVATION"
+    },
+    {
+      "id": "S23",
+      "name": "Marketing / bulk",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "CANONICAL OWNER / SOURCE HANDOFF PRESERVATION"
+    },
+    {
+      "id": "S24",
+      "name": "Finance / expense",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "CANONICAL OWNER / SOURCE HANDOFF PRESERVATION"
+    },
+    {
+      "id": "S25",
+      "name": "Loyalty / value / certificates",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/package4-active-pwa-runtime-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "CANONICAL OWNER / SOURCE HANDOFF PRESERVATION"
+    },
+    {
+      "id": "S26",
+      "name": "Reviews",
+      "scopeKind": "DIRECT READ/FACT INTEGRATION",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "CANONICAL OWNER / SOURCE HANDOFF PRESERVATION"
+    },
+    {
+      "id": "S27",
+      "name": "Onboarding",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "DIRECT CONSUMER / ORCHESTRATION INTEGRATION"
+    },
+    {
+      "id": "S28",
+      "name": "Auth / identity",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/consent-security-invalidation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "CANONICAL OWNER / SOURCE HANDOFF PRESERVATION"
+    },
+    {
+      "id": "S29",
+      "name": "Maintenance",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S30",
+      "name": "All direct database writer candidates",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-final-remediation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S31",
+      "name": "All direct provider / delivery candidates",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/appointment-notifications/background-communication.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts",
+        "maya-saas-backend/src/owner-reports/owner-report-retention.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    },
+    {
+      "id": "S32",
+      "name": "Legacy identity / projection fallbacks",
+      "scopeKind": "PRESERVATION / EVIDENCE INPUT ONLY",
+      "packages": [
+        "P06"
+      ],
+      "inheritedRatchets": [
+        "maya-saas-backend/src/action-engine/client-booking-confirmation.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/client-booking-idempotency.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/native-consent-client-link.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r09-public-community.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+        "maya-saas-backend/src/auth/legacy-staff-principal.architecture.spec.ts",
+        "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+        "maya-saas-backend/src/marketing/canonical-bulk.architecture.spec.ts"
+      ],
+      "productionProof": "Structural/read-only artifact and launcher/config comparison; no production actions",
+      "c9Status": "NOT IMPLEMENTED / ACCEPTANCE PENDING",
+      "inheritedBaselineEvidence": "../chapter8-final/coverage-manifest.json",
+      "c9Scope": "INHERITED SURFACE / LAUNCHER / CROSS-CUTTING GUARD PRESERVATION"
+    }
+  ],
+  "waves": [
+    [
+      "P01"
+    ],
+    [
+      "P02",
+      "P03"
+    ],
+    [
+      "P04",
+      "P05"
+    ],
+    [
+      "P06"
+    ]
+  ],
+  "newModels": "NOT MAPPED",
+  "newFields": "NOT MAPPED",
+  "newActionClasses": "NOT MAPPED",
+  "newAc6Classes": "NOT MAPPED",
+  "migrations": "NOT MAPPED",
+  "implementationStarted": false,
+  "productionEffectsThisStep": 0,
+  "inheritedReleaseRatchets": [
+    "src/action-engine/action-engine.durable-policy.architecture.spec.ts",
+    "src/action-engine/ai-confirmation-receipt-schema.architecture.spec.ts",
+    "src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+    "src/action-engine/appointment-action-boundary.spec.ts",
+    "src/action-engine/beget-public-relay-coverage.architecture.spec.ts",
+    "src/action-engine/beget-relay-fixture.architecture.spec.ts",
+    "src/action-engine/beget-relay-release.architecture.spec.ts",
+    "src/action-engine/canonical-action-ingress.architecture.spec.ts",
+    "src/action-engine/client-booking-confirmation.architecture.spec.ts",
+    "src/action-engine/client-booking-idempotency.architecture.spec.ts",
+    "src/action-engine/client-channel-delivery-address.architecture.spec.ts",
+    "src/action-engine/client-channel-link-schema.architecture.spec.ts",
+    "src/action-engine/client-habits-schema.architecture.spec.ts",
+    "src/action-engine/client-habits.architecture.spec.ts",
+    "src/action-engine/client-link-challenge-schema.architecture.spec.ts",
+    "src/action-engine/client-preferences-schema.architecture.spec.ts",
+    "src/action-engine/client-preferences.architecture.spec.ts",
+    "src/action-engine/client-wanted-slot-runtime.architecture.spec.ts",
+    "src/action-engine/client-wanted-slot-schema.architecture.spec.ts",
+    "src/action-engine/consent-security-cutover.architecture.spec.ts",
+    "src/action-engine/consent-security-invalidation.architecture.spec.ts",
+    "src/action-engine/customer-subscription-activation-shadow.architecture.spec.ts",
+    "src/action-engine/customer-subscription-cancellation-shadow.architecture.spec.ts",
+    "src/action-engine/customer-subscription-expiry-shadow.architecture.spec.ts",
+    "src/action-engine/customer-subscription-purchase-shadow.architecture.spec.ts",
+    "src/action-engine/customer-subscription-renewal-activation-shadow.architecture.spec.ts",
+    "src/action-engine/customer-subscription-renewal-shadow.architecture.spec.ts",
+    "src/action-engine/customer-subscription-revocation-shadow.architecture.spec.ts",
+    "src/action-engine/customer-subscription-usage-shadow.architecture.spec.ts",
+    "src/action-engine/gift-certificate-activation-shadow.architecture.spec.ts",
+    "src/action-engine/gift-certificate-purchase-shadow.architecture.spec.ts",
+    "src/action-engine/gift-certificate-redemption-shadow.architecture.spec.ts",
+    "src/action-engine/legacy-loyalty-backfill-shadow.architecture.spec.ts",
+    "src/action-engine/legacy-loyalty-earn-shadow.architecture.spec.ts",
+    "src/action-engine/legacy-loyalty-expire-shadow.architecture.spec.ts",
+    "src/action-engine/legacy-loyalty-grant-consume-shadow.architecture.spec.ts",
+    "src/action-engine/legacy-loyalty-grant-issue-shadow.architecture.spec.ts",
+    "src/action-engine/legacy-loyalty-import-shadow.architecture.spec.ts",
+    "src/action-engine/legacy-loyalty-redeem-shadow.architecture.spec.ts",
+    "src/action-engine/legacy-loyalty-refund-shadow.architecture.spec.ts",
+    "src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts",
+    "src/action-engine/loyalty-account-runtime-nullability.architecture.spec.ts",
+    "src/action-engine/maya-identity.architecture.spec.ts",
+    "src/action-engine/native-consent-client-link.architecture.spec.ts",
+    "src/action-engine/p4-03-all8-cutover-ratchet.spec.ts",
+    "src/action-engine/p4-04-all4-cutover-ratchet.spec.ts",
+    "src/action-engine/p4-05-all8-cutover-ratchet.spec.ts",
+    "src/action-engine/p4-06-all3-cutover-ratchet.spec.ts",
+    "src/action-engine/p4-08-all4-cutover-ratchet.spec.ts",
+    "src/action-engine/package-4-final-value-ownership-ratchet.spec.ts",
+    "src/action-engine/package4-active-pwa-runtime-ratchet.architecture.spec.ts",
+    "src/action-engine/package5-b10-b11-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b13-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b14-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b15-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b16-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b17-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b18-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b19-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b20-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b21-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b22-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b23-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b24-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b29-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b30-remediation.architecture.spec.ts",
+    "src/action-engine/package5-b34-remediation.architecture.spec.ts",
+    "src/action-engine/package5-final-remediation.architecture.spec.ts",
+    "src/action-engine/package5-r06-operational-delivery.architecture.spec.ts",
+    "src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+    "src/action-engine/package5-r09-public-community.architecture.spec.ts",
+    "src/action-engine/package5-r11-governed-settings.architecture.spec.ts",
+    "src/action-engine/package5-r12-team-communications.architecture.spec.ts",
+    "src/action-engine/package5-r13-expense-intake.architecture.spec.ts",
+    "src/action-engine/package5-r14-cash-declaration.architecture.spec.ts",
+    "src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts",
+    "src/action-engine/package5-wave2-bypass-ratchet.architecture.spec.ts",
+    "src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+    "src/action-engine/package5-wave4-bypass-ratchet.architecture.spec.ts",
+    "src/action-engine/package5-wave5-bypass-ratchet.architecture.spec.ts",
+    "src/action-engine/package5-wave6-bypass-ratchet.architecture.spec.ts",
+    "src/action-engine/referral-create-shadow.architecture.spec.ts",
+    "src/action-engine/referral-resolve-shadow.architecture.spec.ts",
+    "src/action-engine/referral-reward-fulfill-shadow.architecture.spec.ts",
+    "src/action-engine/referral-reward-issue-shadow.architecture.spec.ts",
+    "src/appointment-notifications/background-communication.architecture.spec.ts",
+    "src/auth/legacy-staff-principal.architecture.spec.ts",
+    "src/business-content/p4-09-all7-cutover-ratchet.spec.ts",
+    "src/commerce/p4-10-all4-cutover-ratchet.spec.ts",
+    "src/crm/client-appointment-cancel.architecture.spec.ts",
+    "src/crm/client-appointment-read.architecture.spec.ts",
+    "src/crm/client-identity-registration-guard.architecture.spec.ts",
+    "src/crm/client-initiator-boundary.architecture.spec.ts",
+    "src/crm/client-loyalty-read.architecture.spec.ts",
+    "src/crm/client-profile-read.architecture.spec.ts",
+    "src/expenses/p4-07-expense-architecture.spec.ts",
+    "src/marketing/canonical-bulk.architecture.spec.ts",
+    "src/measurement/measurement.architecture.spec.ts",
+    "src/measurement/measurement.consumers.architecture.spec.ts",
+    "src/measurement/measurement.finance.architecture.spec.ts",
+    "src/measurement/measurement.outcomes.architecture.spec.ts",
+    "src/measurement/measurement.reputation.architecture.spec.ts",
+    "src/measurement/measurement.staff-goal.architecture.spec.ts",
+    "src/measurement/measurement.wave2.architecture.spec.ts",
+    "src/measurement/measurement.wave3.architecture.spec.ts",
+    "src/owner-reports/owner-report-retention.architecture.spec.ts",
+    "src/valuation/c8.architecture.spec.ts",
+    "src/valuation/c8.consumers.architecture.spec.ts",
+    "src/valuation/c8.wave2.architecture.spec.ts",
+    "src/valuation/c8.wave3.architecture.spec.ts"
+  ],
+  "inheritedReleaseRatchetEvidence": "../chapter8-final/ratchet-wiring.json"
+}

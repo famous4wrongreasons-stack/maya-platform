@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "baselineCommit": "48557868cc9f80303c4fbd6fea18e889e52ead9f",
+  "productionPythonCompared": 72,
+  "productionPythonMatchB35": true,
+  "compiledCompared": 113,
+  "compiledMatchWorktree": true,
+  "executedBackendArtifactsMatchProduction": 6,
+  "executedPythonFunctionsMatchProduction": 4,
+  "databaseConnections": 0,
+  "productionWrites": 0,
+  "runtimeRemediationClaimed": false,
+  "preflight": {
+    "worktree": "/tmp/maya-b29-contour",
+    "branch": "contour/b29-remediation",
+    "canonicalRemoteBranch": "origin/codex/maya-brain-systemic-release-20260815",
+    "fetch": "PASS",
+    "headEqualsOriginAtStart": true,
+    "ahead": 0,
+    "behind": 0,
+    "unpushedCommits": 0,
+    "dirtyEntriesAtStart": 0
+  },
+  "documentValidation": {
+    "linksChecked": 7,
+    "links": "PASS",
+    "jsonParse": "PASS",
+    "pythonParse": "PASS",
+    "diffWhitespace": "PASS"
+  },
+  "protectedScope": {
+    "mainDirtyEntries": 24,
+    "statusSha256": "c28307f97e02975799f0cd9fcbe854d97285a5c344e25af50c67f60fbfca2c25",
+    "contentHashesPreserved": true,
+    "oldDatabasesProtected": 17,
+    "oldDatabasesTouched": 0
+  },
+  "hygiene": {
+    "ownedDatabases": 0,
+    "ownedBackgroundProcesses": 0,
+    "productionStaging": 0,
+    "processHygiene": 0
+  }
+}

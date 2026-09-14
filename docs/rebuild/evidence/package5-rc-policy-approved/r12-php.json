@@ -1,0 +1,22 @@
+{
+  "api-proxy.codex-loyalty-20260721.php": {
+    "exit": 0,
+    "stdout": "No syntax errors detected in Standard input code\n",
+    "stderr": ""
+  },
+  "api-proxy.codex-loyalty-20260721.php:isolated-cases": {
+    "exit": 0,
+    "stdout": "{\"retiredCases\":7,\"result\":\"PASS\",\"productionEffects\":0}",
+    "stderr": ""
+  },
+  "api-proxy.php": {
+    "exit": 0,
+    "stdout": "No syntax errors detected in Standard input code\n",
+    "stderr": ""
+  },
+  "api-proxy.php:isolated-cases": {
+    "exit": 0,
+    "stdout": "{\"retiredCases\":7,\"result\":\"PASS\",\"productionEffects\":0}",
+    "stderr": ""
+  }
+}

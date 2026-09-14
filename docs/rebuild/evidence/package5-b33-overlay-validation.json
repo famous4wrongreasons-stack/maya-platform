@@ -1,0 +1,11 @@
+{
+  "verdict": "PASS",
+  "pwa": {
+    "inlineScripts": 26,
+    "senderMatchesTestedSource": true
+  },
+  "mayaos-pwa": {
+    "inlineScripts": 28,
+    "senderMatchesTestedSource": true
+  }
+}

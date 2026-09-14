@@ -1,0 +1,15 @@
+PASS unauthenticated reads and compute denied before any derived admission
+PASS exact authorized Client without Maya User computes and reads canonical observed value
+PASS GET list, snapshot and readiness do not create rows or business executions
+PASS caller features, past T0 and computed output are rejected before admission
+PASS manager can read own permitted facts but cannot compute or read financial results
+PASS whole rank uses shared owner; financial-derived rank is not disclosed by hiding amounts
+PASS AI receives bounded deterministic projection without stable Client/evidence/model IDs or contacts
+PASS cross-tenant result, wrong Client and out-of-branch requests fail closed
+PASS branch manager cannot compute a whole-tenant Client scope
+PASS Staff receives only own permitted prospective salary state
+PASS Staff cannot read another subject or whole-client rank
+PASS bounded pages and forbidden query fields are enforced
+PASS source correction makes old current projection unavailable without rewriting its snapshot
+PASS current Membership revocation denies history, list and model readiness
+{"status":"PASS","checks":14,"productionEffects":0,"numericTargetsActive":0,"calibration":"UNAVAILABLE"}

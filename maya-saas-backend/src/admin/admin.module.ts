@@ -6,6 +6,7 @@ import { CrmModule } from '../crm/crm.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { OnboardingModule } from '../onboarding/onboarding.module';
 import { QuotasModule } from '../quotas/quotas.module';
+import { Package5Wave2Module } from '../package5-wave2/package5-wave2.module';
 import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
 import { AdminCatalogController } from './admin-catalog.controller';
@@ -23,6 +24,7 @@ import { AdminService } from './admin.service';
     AuditLogModule,
     OnboardingModule,
     QuotasModule,
+    Package5Wave2Module,
   ],
   controllers: [
     AdminController,

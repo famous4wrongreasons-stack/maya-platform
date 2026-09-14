@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "checks": [
+    "User-free verified Telegram graph; slot admission precedes effects",
+    "slot cannot append an unapproved transport leaf",
+    "root cannot complete while planned recipients are pending",
+    "concurrent actual delivery kernel claim one winner",
+    "boundary without dispatch policy evidence denied",
+    "accepted outcome skipped on repeat",
+    "lost response remains UNKNOWN with original attempt",
+    "finished UNKNOWN attempt proof cannot be overwritten",
+    "UNKNOWN cannot be changed into pending",
+    "independent pending Client progresses beside UNKNOWN",
+    "deterministic failure terminal without fallback",
+    "UNKNOWN logical aggregate cannot claim completed",
+    "schema preserves same pending identity after proven pre-boundary crash; runtime extension still required"
+  ],
+  "fixture": {
+    "tenantId": "cmtr3uqtr0000d5c91khkrbvr",
+    "rootId": "cmtr3uqv30008d5c9tu8eom8l",
+    "slotIds": [
+      "cmtr3uqwh0009d5c94rjpr2nq",
+      "cmtr3uqxf000ad5c969bgsd8u",
+      "cmtr3uqxv000bd5c99xe22b6y",
+      "cmtr3uqy9000cd5c92auof9pj"
+    ],
+    "recipientIds": [
+      "cfd5b22d-44ca-41ed-8a9a-e35e125b5df4",
+      "3fa3c80d-f4ec-41ce-ba9e-a28bd43a1362",
+      "a09b6661-dbab-4941-a731-4100979a0444"
+    ]
+  },
+  "productionMessages": 0,
+  "syntheticAcceptedEffects": 1,
+  "syntheticLostResponseEffects": 1
+}

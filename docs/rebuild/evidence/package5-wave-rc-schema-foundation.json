@@ -1,0 +1,367 @@
+{
+  "checkpoint": "0ad0eef23985c0a23b6e680b3ca9d26a9c94efbc",
+  "approval": "Owner Option A Wave R-C; 11 models / 197 physical fields / 13 AE + 8 AC6 classes",
+  "schemaMapping": {
+    "models": {
+      "NativeFeedbackRequest": {
+        "package": "R08",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "clientId String",
+          "appointmentId String",
+          "requestedByUserId String",
+          "requestExecutionId String",
+          "requestIdentityHash String @db.Char(64)",
+          "intentHash String @db.Char(64)",
+          "contractVersion Int",
+          "eligibleAt DateTime @db.Timestamptz(3)",
+          "expiresAt DateTime @db.Timestamptz(3)",
+          "contentHash String @db.Char(64)",
+          "contentEncrypted String?",
+          "planHash String @db.Char(64)",
+          "planEncrypted String?",
+          "state String",
+          "revision Int",
+          "latestResponseVersion Int",
+          "createdAt DateTime @db.Timestamptz(3)",
+          "closedAt DateTime? @db.Timestamptz(3)",
+          "payloadErasedAt DateTime? @db.Timestamptz(3)",
+          "retentionUntil DateTime @db.Timestamptz(3)"
+        ]
+      },
+      "NativeFeedbackRevision": {
+        "package": "R08",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "requestId String",
+          "clientId String",
+          "executionId String",
+          "identityHash String @db.Char(64)",
+          "intentHash String @db.Char(64)",
+          "version Int",
+          "kind String",
+          "rating Int?",
+          "commentEncrypted String?",
+          "contentHash String @db.Char(64)",
+          "planHash String @db.Char(64)",
+          "planEncrypted String?",
+          "createdAt DateTime @db.Timestamptz(3)",
+          "payloadErasedAt DateTime? @db.Timestamptz(3)"
+        ]
+      },
+      "PublicCommunityComment": {
+        "package": "R09",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "publicationKey String",
+          "parentCommentId String?",
+          "sourceKind String",
+          "visitorSubjectHash String? @db.Char(64)",
+          "identityHash String @db.Char(64)",
+          "intentHash String @db.Char(64)",
+          "authorEncrypted String?",
+          "textEncrypted String?",
+          "contentHash String @db.Char(64)",
+          "consentPolicyVersion String?",
+          "consentAcceptedAt DateTime? @db.Timestamptz(3)",
+          "status String",
+          "revision Int",
+          "createdAt DateTime @db.Timestamptz(3)",
+          "retentionUntil DateTime @db.Timestamptz(3)",
+          "payloadErasedAt DateTime? @db.Timestamptz(3)",
+          "creationExecutionId String?",
+          "sourceGatewayId String",
+          "lastModerationExecutionId String?"
+        ]
+      },
+      "PublicCommunityInteraction": {
+        "package": "R09",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "publicationKey String",
+          "kind String",
+          "visitorSubjectHash String @db.Char(64)",
+          "identityHash String @db.Char(64)",
+          "intentHash String @db.Char(64)",
+          "expectedVersion Int",
+          "version Int",
+          "desiredValue Boolean?",
+          "viewDay DateTime? @db.Date",
+          "receivedAt DateTime @db.Timestamptz(3)",
+          "sourceGatewayId String",
+          "contractVersion Int",
+          "payloadHash String @db.Char(64)"
+        ]
+      },
+      "TeamMessage": {
+        "package": "R12",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "conversationKey String",
+          "senderUserId String",
+          "sendExecutionId String",
+          "identityHash String @db.Char(64)",
+          "intentHash String @db.Char(64)",
+          "payloadEncrypted String?",
+          "payloadHash String @db.Char(64)",
+          "attachmentId String?",
+          "createdAt DateTime @db.Timestamptz(3)",
+          "expiresAt DateTime @db.Timestamptz(3)",
+          "withdrawnAt DateTime? @db.Timestamptz(3)",
+          "withdrawnByUserId String?",
+          "withdrawalExecutionId String?",
+          "withdrawalIdentityHash String? @db.Char(64)",
+          "withdrawalIntentHash String? @db.Char(64)",
+          "revision Int",
+          "planHash String @db.Char(64)",
+          "planEncrypted String?",
+          "payloadErasedAt DateTime? @db.Timestamptz(3)",
+          "status String"
+        ]
+      },
+      "TeamAttachment": {
+        "package": "R12",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "ownerUserId String",
+          "reserveExecutionId String",
+          "finalizeExecutionId String?",
+          "uploadIdentityHash String @db.Char(64)",
+          "intentHash String @db.Char(64)",
+          "objectStoreKey String",
+          "contentSha256 String @db.Char(64)",
+          "declaredSize BigInt",
+          "actualSize BigInt?",
+          "mime String",
+          "kind String",
+          "filenameEncrypted String?",
+          "state String",
+          "revision Int",
+          "createdAt DateTime @db.Timestamptz(3)",
+          "uploadExpiresAt DateTime @db.Timestamptz(3)",
+          "mediaExpiresAt DateTime? @db.Timestamptz(3)",
+          "storageReceiptHash String? @db.Char(64)",
+          "payloadErasedAt DateTime? @db.Timestamptz(3)",
+          "lastObservedAt DateTime? @db.Timestamptz(3)"
+        ]
+      },
+      "TenantBusinessConfigurationRevision": {
+        "package": "R11",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "namespace String",
+          "revision Int",
+          "previousRevisionId String?",
+          "actionExecutionId String",
+          "actorUserId String",
+          "actorMembershipId String",
+          "contractVersion Int",
+          "contentHash String @db.Char(64)",
+          "encryptedContent String?",
+          "createdAt DateTime @db.Timestamptz(3)"
+        ]
+      },
+      "CashDeclaration": {
+        "package": "R14",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "branchId String",
+          "businessDay String @db.Char(10)",
+          "timezone String",
+          "countedAt DateTime @db.Timestamptz(3)",
+          "currency String @db.Char(3)",
+          "countedCashKopecks Int?",
+          "declarationKind String",
+          "revision Int",
+          "previousDeclarationId String?",
+          "actionExecutionId String",
+          "declaredByUserId String",
+          "declaredByMembershipId String",
+          "contractVersion Int",
+          "intentHash String @db.Char(64)",
+          "encryptedReason String?",
+          "createdAt DateTime @db.Timestamptz(3)"
+        ]
+      },
+      "ExpenseReminderRun": {
+        "package": "R13",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "reminderType String",
+          "periodStartLocalDate String @db.Char(10)",
+          "periodEndLocalDate String @db.Char(10)",
+          "contractVersion Int",
+          "timezone String",
+          "intentHash String @db.Char(64)",
+          "intentEncrypted String?",
+          "admittedAt DateTime @db.Timestamptz(3)",
+          "expiresAt DateTime @db.Timestamptz(3)",
+          "payloadRetentionUntil DateTime @db.Timestamptz(3)",
+          "auditRetentionUntil DateTime @db.Timestamptz(3)"
+        ]
+      },
+      "ExpenseIntakeBinding": {
+        "package": "R13",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "actorUserId String",
+          "actorMembershipId String",
+          "authIdentityId String",
+          "sourceNamespace String",
+          "sourceEventHash String @db.Char(64)",
+          "itemIndex Int",
+          "sourceItemCount Int",
+          "sourceContentHash String @db.Char(64)",
+          "reminderRunId String?",
+          "reminderSlotKey String?",
+          "approvalRequestId String",
+          "createdAt DateTime @db.Timestamptz(3)",
+          "auditRetentionUntil DateTime @db.Timestamptz(3)"
+        ]
+      },
+      "OperationalAlertRun": {
+        "package": "R06",
+        "fields": [
+          "id String @id @default(uuid())",
+          "tenantId String",
+          "alertType String",
+          "occurrenceRef String",
+          "contractVersion Int",
+          "occurredAt DateTime",
+          "intentHash String",
+          "intentEncrypted String?",
+          "admittedAt DateTime",
+          "expiresAt DateTime",
+          "payloadRetentionUntil DateTime",
+          "auditRetentionUntil DateTime"
+        ]
+      }
+    },
+    "existingActionExecutionColumns": [
+      "operationalAlertRunId",
+      "operationalAlertSlotKey",
+      "nativeFeedbackRequestId",
+      "nativeFeedbackRevisionId",
+      "nativeFeedbackSlotKey",
+      "teamMessageId",
+      "teamMessageSlotKey",
+      "expenseReminderRunId",
+      "expenseReminderSlotKey"
+    ],
+    "newModels": 11,
+    "newPhysicalFields": 197
+  },
+  "newMigrationCount": 9,
+  "cleanReplayMigrationCount": 92,
+  "schemaDrift": "NONE",
+  "prismaValidation": "PASS",
+  "postgresConstraints": {
+    "status": "PASS",
+    "scope": "SQL constraints only; package runtime acceptance remains pending",
+    "checks": [
+      "R11 foreign Membership rejected",
+      "R11 namespace overwrite rejected",
+      "R11 unclaimed ciphertext purge rejected",
+      "R11 tombstone deletion rejected",
+      "R11 concurrent predecessor has one winner",
+      "R14 negative count rejected",
+      "R14 foreign branch rejected",
+      "R14 mutable observation overwrite rejected",
+      "R14 stale correction rejected",
+      "R14 correction history retained; withdrawal is null, not zero",
+      "R06 same logical occurrence cannot admit twice",
+      "R06 late slot insertion rejected",
+      "R06 arbitrary alert type rejected",
+      "R06 direct payload purge rejected",
+      "R09 guest cannot auto-publish",
+      "R09 anonymous self-edit rejected",
+      "R09 same source key changed intent rejected",
+      "R09 stale anonymous expected version rejected",
+      "R09 interaction facts are immutable",
+      "R08 exact Appointment ownership supports Client without Maya User",
+      "R08 direct root response pointer rejected",
+      "R08 accepted response cannot be rewritten",
+      "R08 admitted delivery cannot omit binding",
+      "R08 revision cannot commit without advancing the exact request projection",
+      "R12 transport cannot mark reservation SEALED without canonical finalization",
+      "R12 UNKNOWN finalize does not grant payload erase",
+      "R12 message in-place editing rejected",
+      "R12 read/transport unlink cannot delete owner",
+      "R12 delivery cannot omit canonical message binding",
+      "R13 late reminder slot insertion rejected",
+      "R13 partial source/card bundle cannot commit",
+      "R13 existing bundle cannot be appended or replaced",
+      "R13 whole two-card bundle admitted atomically without Expense mutation",
+      "AC6 wrong-tenant claim cannot erase community payload",
+      "AC6 changed digest cannot erase community payload",
+      "R09 exact expired AC6 claim erases only encrypted payload, preserving source/visibility tombstone",
+      "R08 exact request/revision AC6 claims retain Client/Appointment identity and rating history",
+      "R11 current configuration cannot be purged even with a valid claim",
+      "R11 exact AC6 claim erases superseded content only after 365 days",
+      "R14 seven-year reason purge retains immutable cash observation/count",
+      "R06 exact seven-day AC6 claim and terminal bound execution permit payload-only purge",
+      "R13 expired empty-audience plan can purge payload while preserving weekly identity/audit",
+      "R12 distinct text and abandoned-upload claims preserve message/attachment tombstones",
+      "11 exact new tables / 188 new-model columns; 9 nullable ActionExecution bindings",
+      "R-C timestamp UTC normalization is transaction-local; database/pool timezone unchanged"
+    ],
+    "productionMutations": 0,
+    "productionMessages": 0,
+    "oldDatabasesTouched": 0
+  },
+  "migrations": [
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260908010000_r05_report_kinds/migration.sql",
+      "sha256": "b175f78320e86fedb08ffc77ce07a4b6e300cec747a17fd315e02020855d1e16"
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260908010100_shared_approved_foundation/migration.sql",
+      "sha256": "5d1fc2962d1400a959f8ed6d2820b22b76fb0bb4fecb54cb90f9044dafa607f9"
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260908010200_r06_approved_foundation/migration.sql",
+      "sha256": "a271bdbf4ff4e49ed5039356a370f40eaa87a811ebc6ac67e66589b237be4e6a"
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260908010300_r08_approved_foundation/migration.sql",
+      "sha256": "abb7cf0bff2ac7e7f36d44c61063cdee1d7cec79e75e31110e0d66cd4b05fa13"
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260908010400_r09_approved_foundation/migration.sql",
+      "sha256": "4cd57d8bddbe34beff3c3e357835df292fd722ec797efdcceb8d3c6fa171403d"
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260908010500_r11_approved_foundation/migration.sql",
+      "sha256": "e2b41675a6af63dd112cba4ae5470ccb6cf6f1449c9b802f77f796d49bab77b1"
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260908010600_r12_approved_foundation/migration.sql",
+      "sha256": "8babe312f6d66ddb61d3856be3cccaae04e695d9839dea21ff5e31cc83c8e220"
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260908010700_r13_approved_foundation/migration.sql",
+      "sha256": "9059d303b9cc8444a8e806678a1b06ed70c25a08695c1e24d42e8089d3feae8d"
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260908010800_r14_approved_foundation/migration.sql",
+      "sha256": "c81091f3fd41b08d72e616e189c25667cee02f55d78cbb3cad7511c7e62c95a2"
+    }
+  ],
+  "b36": "Existing OwnerReportRun retained; R05 forward CHECK extension only",
+  "newModelsCreatedInProduction": 0,
+  "productionMigration": "NOT STARTED",
+  "runtimeAcceptance": "PENDING",
+  "fakeHistoricalBackfill": 0,
+  "productionBusinessMutations": 0,
+  "preExistingDatabasesTouched": 0
+}

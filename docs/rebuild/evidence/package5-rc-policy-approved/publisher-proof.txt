@@ -1,0 +1,1 @@
+{"status": "PASS", "checks": ["publish preserves metadata/unrelated files", "rollback exact owned subset"], "productionWrites": 0}

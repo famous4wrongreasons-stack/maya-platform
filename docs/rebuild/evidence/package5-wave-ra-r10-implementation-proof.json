@@ -1,0 +1,854 @@
+{
+  "contract": "package5.wave-ra.r10.implementation-proof/1",
+  "baseline": "45688886",
+  "package": "R10",
+  "blockers": [
+    "B50"
+  ],
+  "status": "LOCAL_EXECUTABLE_PROOF_PASS",
+  "schema": {
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migrationRequired": false,
+    "backfillRequired": false
+  },
+  "canonicalOwner": "AI invocation/approval compatibility receipt over existing ActionExecution/ActionAttempt truth",
+  "guard": {
+    "path": "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+    "astChecks": true,
+    "realMethodMutationFixtures": true,
+    "cases": 7
+  },
+  "jest": {
+    "status": "PASS",
+    "suites": 11,
+    "tests": 143,
+    "passed": 143,
+    "failed": 0,
+    "command": [
+      "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+      "src/ai-tools/ai-tool-canonical-receipt.spec.ts",
+      "src/ai-tools/ai-tool-runtime.service.spec.ts",
+      "src/ai-tools/ai-tool-expenses-create.spec.ts",
+      "src/ai-tools/owner-money-questions.acceptance.spec.ts",
+      "src/ai-tools/adversarial-expense-audit.spec.ts",
+      "src/action-engine/action-engine.runtime-concurrency.spec.ts",
+      "src/action-engine/action-engine.canonical-kernel.spec.ts",
+      "src/action-engine/client-booking-idempotency.kernel.spec.ts",
+      "src/action-engine/action-engine.ingress.spec.ts",
+      "src/action-engine/canonical-action-ingress.architecture.spec.ts",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/final-jest.json"
+    ],
+    "workingDirectory": "/tmp/maya-b29-contour/maya-saas-backend",
+    "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/final-jest.json",
+    "sha256": "cd03e19e3e4c392a35ec630e7c128b8ee2b4f3f947aa2aa09fc876af1b0b2706",
+    "stdoutPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/final-jest.log",
+    "stdoutSha256": "60318117256aa1123433d3a71aaa50a76df5404a8e9fd0b5e54c13301d0f9e41",
+    "suitesDetail": [
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-tool-canonical-receipt.spec.ts",
+        "tests": 16,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/adversarial-expense-audit.spec.ts",
+        "tests": 56,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+        "tests": 7,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/owner-money-questions.acceptance.spec.ts",
+        "tests": 19,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/canonical-action-ingress.architecture.spec.ts",
+        "tests": 7,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-tool-expenses-create.spec.ts",
+        "tests": 6,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "tests": 8,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/action-engine.canonical-kernel.spec.ts",
+        "tests": 4,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/action-engine.ingress.spec.ts",
+        "tests": 6,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/client-booking-idempotency.kernel.spec.ts",
+        "tests": 10,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/action-engine.runtime-concurrency.spec.ts",
+        "tests": 4,
+        "status": "passed"
+      }
+    ]
+  },
+  "hermetic": {
+    "command": [
+      "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "docs/rebuild/evidence/package5-wave-ra-r10-local-acceptance.cjs",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/hermetic-acceptance.json"
+    ],
+    "workingDirectory": "/tmp/maya-b29-contour",
+    "result": {
+      "contract": "package5.wave-ra.r10.hermetic-acceptance/1",
+      "status": "PASS",
+      "suites": 2,
+      "tests": 23,
+      "passedTests": 23,
+      "failedTests": 0,
+      "blockedIoAttempts": 0,
+      "databaseConnections": 0,
+      "providerCalls": 0,
+      "productionEffects": 0
+    },
+    "rawSha256": "4e4f09b18a744d22f41329fc3bca789f26f4f8d368d0671650567a95086834f7",
+    "stdoutSha256": "407e1c3d2fe3de92d3339920ca65a029507e766e7d13360e8cd33d9735cac091"
+  },
+  "lint": {
+    "status": "PASS",
+    "warnings": 0,
+    "command": [
+      "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "node_modules/eslint/bin/eslint.js",
+      "src/action-engine/action-invocation-receipt.context.ts",
+      "src/action-engine/action-engine.ingress.ts",
+      "src/action-engine/ai-invocation-receipt.architecture.spec.ts",
+      "src/package5-wave1/package5-wave1.service.ts",
+      "src/package5-wave3/package5-wave3.service.ts",
+      "src/ai-tools/ai-tool-receipt.service.ts",
+      "src/ai-tools/ai-tool-runtime.service.ts",
+      "src/ai-tools/ai-tools.module.ts",
+      "src/ai-tools/ai-tool-canonical-receipt.spec.ts",
+      "src/ai-tools/ai-tool-runtime.service.spec.ts",
+      "src/ai-tools/ai-tool-expenses-create.spec.ts",
+      "src/ai-tools/owner-money-questions.acceptance.spec.ts",
+      "src/ai-tools/adversarial-expense-audit.spec.ts",
+      "test/fixtures/ai-tool-receipt.fixture.ts"
+    ],
+    "workingDirectory": "/tmp/maya-b29-contour/maya-saas-backend",
+    "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/final-lint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "typechecks": [
+    {
+      "status": "PASS",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "workingDirectory": "/tmp/maya-b29-contour/maya-saas-backend",
+      "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/typecheck-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "status": "PASS",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.scripts.json",
+        "--incremental",
+        "false"
+      ],
+      "workingDirectory": "/tmp/maya-b29-contour/maya-saas-backend",
+      "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/typecheck-scripts.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "postgres": {
+    "status": "PASS",
+    "database": "postgresql://maya_ra@127.0.0.1:55507/maya_ra_r10",
+    "productionDatabase": false,
+    "freshOwnedDatabase": true,
+    "registeredSyntheticCapability": "kernel.test.safe-retry",
+    "phases": [
+      {
+        "phase": "baseline",
+        "command": [
+          "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs",
+          "baseline",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance"
+        ],
+        "workingDirectory": "/tmp/maya-b29-contour",
+        "exitCode": 0,
+        "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance/baseline.json",
+        "sha256": "e0b3a108131f40355b5bb3ca03021e7ccc065510690a5f2149a2e553825048d1",
+        "result": {
+          "phase": "baseline",
+          "result": [
+            {
+              "case": "concurrent_same_key",
+              "callers": 6,
+              "effects": 1,
+              "status": "PASS"
+            },
+            {
+              "case": "receipt_failure_rolls_back_canonical_admission",
+              "effects": 0,
+              "executions": 0,
+              "status": "PASS"
+            },
+            {
+              "case": "timeout_late_success",
+              "effects": 1,
+              "status": "PASS"
+            },
+            {
+              "case": "audit_failure_preserves_canonical_success",
+              "status": "PASS"
+            },
+            {
+              "case": "lost_presentation_does_not_claim_whole_tool_completion",
+              "effects": 1,
+              "status": "PASS"
+            }
+          ],
+          "processId": 88607,
+          "productionEffects": 0,
+          "providerCalls": 0,
+          "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+          "runtimeHashes": {
+            "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+            "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+            "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+            "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+          },
+          "observedAt": "2026-09-07T18:42:30.388Z"
+        }
+      },
+      {
+        "phase": "crash-ready",
+        "command": [
+          "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs",
+          "crash-ready",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance"
+        ],
+        "workingDirectory": "/tmp/maya-b29-contour",
+        "exitCode": 0,
+        "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance/crash-ready.json",
+        "sha256": "c2e1bbad71b77e172ad3308901789ba8f62e3f86f4371a29871f7f8888d411f5",
+        "result": {
+          "phase": "crash-ready",
+          "executionId": "b9abf215-567e-44b3-8c20-376fd0d205d5",
+          "effects": 0,
+          "state": "READY",
+          "processId": 88644,
+          "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+          "runtimeHashes": {
+            "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+            "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+            "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+            "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+          },
+          "observedAt": "2026-09-07T18:42:31.840Z"
+        }
+      },
+      {
+        "phase": "resume-ready",
+        "command": [
+          "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs",
+          "resume-ready",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance"
+        ],
+        "workingDirectory": "/tmp/maya-b29-contour",
+        "exitCode": 0,
+        "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance/resume-ready.json",
+        "sha256": "8d4174923abe9b0654f3269dae2c022f7a90d3d59b5bf16d27a7b8d6478d6a2e",
+        "result": {
+          "phase": "resume-ready",
+          "status": "PASS",
+          "result": {
+            "status": "completed",
+            "execution_id": "cmtrl8gzh0000ecc9fkqp2nzp",
+            "tool_name": "settings.update",
+            "result": {
+              "accepted": true
+            },
+            "canonical_actions": [
+              {
+                "contract": "maya.action-execution-result/1",
+                "executionId": "b9abf215-567e-44b3-8c20-376fd0d205d5",
+                "state": "SUCCEEDED",
+                "outcomeCode": "provider_applied",
+                "reconciliationState": "NOT_REQUIRED",
+                "safeResult": {
+                  "accepted": true
+                }
+              }
+            ],
+            "replayed": true
+          },
+          "effects": 1,
+          "processId": 88661,
+          "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+          "runtimeHashes": {
+            "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+            "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+            "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+            "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+          },
+          "observedAt": "2026-09-07T18:42:33.432Z"
+        }
+      },
+      {
+        "phase": "crash-prefix",
+        "command": [
+          "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs",
+          "crash-prefix",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance"
+        ],
+        "workingDirectory": "/tmp/maya-b29-contour",
+        "exitCode": 0,
+        "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance/crash-prefix.json",
+        "sha256": "43cf0499077eba3cc60e6703797703e49b778a498888520129a9a4e3e2f7f5bb",
+        "result": {
+          "phase": "crash-prefix",
+          "executionId": "46d38b38-9e96-46b4-a00a-f1e29a17ebc5",
+          "effects": 1,
+          "state": "SUCCEEDED",
+          "nextSlotNotAdmitted": true,
+          "processId": 88694,
+          "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+          "runtimeHashes": {
+            "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+            "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+            "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+            "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+          },
+          "observedAt": "2026-09-07T18:42:34.969Z"
+        }
+      },
+      {
+        "phase": "resume-prefix",
+        "command": [
+          "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs",
+          "resume-prefix",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance"
+        ],
+        "workingDirectory": "/tmp/maya-b29-contour",
+        "exitCode": 0,
+        "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance/resume-prefix.json",
+        "sha256": "330316bc3b7823d14dff2c461b0de4cf109badfb1618aca3ee6c7b190468e8ad",
+        "result": {
+          "phase": "resume-prefix",
+          "status": "PASS",
+          "result": {
+            "status": "unknown",
+            "execution_id": "cmtrl8jdd0000fqc99xbtzk1f",
+            "tool_name": "settings.update",
+            "canonical_actions": [
+              {
+                "contract": "maya.action-execution-result/1",
+                "executionId": "46d38b38-9e96-46b4-a00a-f1e29a17ebc5",
+                "state": "SUCCEEDED",
+                "outcomeCode": "provider_applied",
+                "reconciliationState": "NOT_REQUIRED",
+                "safeResult": {
+                  "accepted": true
+                }
+              }
+            ],
+            "continuation": "manual_required",
+            "invocation_completed": false,
+            "error": {
+              "code": "ai_tool_continuation_unconfirmed"
+            },
+            "replayed": true
+          },
+          "effects": 1,
+          "newSlots": 0,
+          "processId": 88729,
+          "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+          "runtimeHashes": {
+            "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+            "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+            "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+            "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+          },
+          "observedAt": "2026-09-07T18:42:36.401Z"
+        }
+      },
+      {
+        "phase": "crash-unknown",
+        "command": [
+          "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs",
+          "crash-unknown",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance"
+        ],
+        "workingDirectory": "/tmp/maya-b29-contour",
+        "exitCode": 0,
+        "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance/crash-unknown.json",
+        "sha256": "011908a36524b27ec625a346725cfdd08109b185792a44ac765408812ea51dcd",
+        "result": {
+          "phase": "crash-unknown",
+          "executionId": "d67b7fdc-63ed-479b-97ec-6ae9614943b7",
+          "effects": 1,
+          "status": "UNKNOWN_RECONCILIATION_CLAIMED",
+          "processId": 88742,
+          "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+          "runtimeHashes": {
+            "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+            "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+            "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+            "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+          },
+          "observedAt": "2026-09-07T18:42:37.942Z"
+        }
+      },
+      {
+        "phase": "resume-unknown",
+        "command": [
+          "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs",
+          "resume-unknown",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance"
+        ],
+        "workingDirectory": "/tmp/maya-b29-contour",
+        "exitCode": 0,
+        "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance/resume-unknown.json",
+        "sha256": "f91d476c71036cc9c4cc5c33a5fd7a05fd6502e2fd62d2ed5ea6b6e116ac6902",
+        "result": {
+          "phase": "resume-unknown",
+          "status": "PASS",
+          "result": {
+            "status": "unknown",
+            "execution_id": "cmtrl8lny0000h2c9buh3q1yp",
+            "tool_name": "settings.update",
+            "canonical_actions": [
+              {
+                "contract": "maya.action-execution-result/1",
+                "executionId": "d67b7fdc-63ed-479b-97ec-6ae9614943b7",
+                "state": "UNKNOWN",
+                "outcomeCode": null,
+                "reconciliationState": "MANUAL_REQUIRED",
+                "safeResult": null
+              }
+            ],
+            "error": {
+              "code": "ai_tool_outcome_unknown"
+            },
+            "replayed": true
+          },
+          "effects": 1,
+          "attempts": [
+            {
+              "kind": "EXECUTION",
+              "state": "UNKNOWN"
+            },
+            {
+              "kind": "RECONCILIATION",
+              "state": "UNKNOWN"
+            },
+            {
+              "kind": "RECONCILIATION",
+              "state": "UNKNOWN"
+            }
+          ],
+          "newProviderAttempts": 0,
+          "processId": 88764,
+          "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+          "runtimeHashes": {
+            "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+            "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+            "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+            "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+          },
+          "observedAt": "2026-09-07T18:42:39.422Z"
+        }
+      },
+      {
+        "phase": "crash-unknown-ready",
+        "command": [
+          "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs",
+          "crash-unknown-ready",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance"
+        ],
+        "workingDirectory": "/tmp/maya-b29-contour",
+        "exitCode": 0,
+        "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance/crash-unknown-ready.json",
+        "sha256": "e24cd7d08e318ed7b9ae89ab9fcb695d323e941db2207b70ba5db2b5d935cbe0",
+        "result": {
+          "phase": "crash-unknown-ready",
+          "executionId": "bfb67821-7c83-4174-b220-0287f6d43ac7",
+          "state": "UNKNOWN",
+          "attempts": [
+            {
+              "kind": "EXECUTION",
+              "state": "UNKNOWN"
+            }
+          ],
+          "processId": 88777,
+          "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+          "runtimeHashes": {
+            "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+            "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+            "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+            "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+          },
+          "observedAt": "2026-09-07T18:42:40.888Z"
+        }
+      },
+      {
+        "phase": "resume-unknown-ready",
+        "command": [
+          "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs",
+          "resume-unknown-ready",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance"
+        ],
+        "workingDirectory": "/tmp/maya-b29-contour",
+        "exitCode": 0,
+        "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance/resume-unknown-ready.json",
+        "sha256": "e2e98bca181f4b4dd9e692ff906254096b1507869649f8415900f537ad013db7",
+        "result": {
+          "phase": "resume-unknown-ready",
+          "status": "PASS",
+          "result": {
+            "status": "completed",
+            "execution_id": "cmtrl8ny10000i1c9su7suybi",
+            "tool_name": "settings.update",
+            "result": {
+              "accepted": true
+            },
+            "canonical_actions": [
+              {
+                "contract": "maya.action-execution-result/1",
+                "executionId": "bfb67821-7c83-4174-b220-0287f6d43ac7",
+                "state": "SUCCEEDED",
+                "outcomeCode": "reconciled_succeeded",
+                "reconciliationState": "RESOLVED",
+                "safeResult": {
+                  "accepted": true
+                }
+              }
+            ],
+            "replayed": true
+          },
+          "effects": 1,
+          "attempts": [
+            {
+              "kind": "EXECUTION",
+              "state": "UNKNOWN"
+            },
+            {
+              "kind": "RECONCILIATION",
+              "state": "SUCCEEDED"
+            }
+          ],
+          "newProviderAttempts": 0,
+          "processId": 88794,
+          "fixtureSha256": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+          "runtimeHashes": {
+            "src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+            "src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+            "src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+            "src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3"
+          },
+          "observedAt": "2026-09-07T18:42:42.341Z"
+        }
+      }
+    ],
+    "attestation": {
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "docs/rebuild/evidence/package5-wave-ra-r10-postgres-attestation.cjs",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance"
+      ],
+      "result": {
+        "status": "PASS",
+        "tenantId": "cmtrl8fli0000dbc9gj42e6x3",
+        "cases": [
+          {
+            "name": "concurrent",
+            "executions": [
+              {
+                "id": "e916a54d-eafc-4be4-8baa-9492058db075",
+                "sourceRef": "r10-fixture:55988e8f-d841-482e-a38a-614f32c46e5f:first",
+                "state": "SUCCEEDED",
+                "reconciliationState": "NOT_REQUIRED",
+                "executionAttemptCount": 1,
+                "attempts": [
+                  {
+                    "kind": "EXECUTION",
+                    "state": "SUCCEEDED",
+                    "outcomeCode": "provider_applied"
+                  }
+                ]
+              }
+            ],
+            "effects": 1,
+            "invocationCount": 1
+          },
+          {
+            "name": "save-failure",
+            "executions": [],
+            "effects": 0,
+            "invocationCount": 1
+          },
+          {
+            "name": "late",
+            "executions": [
+              {
+                "id": "8f7abf47-f2f9-4751-8bb2-af5060057437",
+                "sourceRef": "r10-fixture:9cbf03f3-8fe9-4b05-aa72-1b7dab73954b:first",
+                "state": "SUCCEEDED",
+                "reconciliationState": "NOT_REQUIRED",
+                "executionAttemptCount": 1,
+                "attempts": [
+                  {
+                    "kind": "EXECUTION",
+                    "state": "SUCCEEDED",
+                    "outcomeCode": "provider_applied"
+                  }
+                ]
+              }
+            ],
+            "effects": 1,
+            "invocationCount": 1
+          },
+          {
+            "name": "audit",
+            "executions": [
+              {
+                "id": "bd94666a-42e3-4851-9c49-cc8b10b43d19",
+                "sourceRef": "r10-fixture:fe8e7f64-2dcc-4837-a510-c753abca9373:first",
+                "state": "SUCCEEDED",
+                "reconciliationState": "NOT_REQUIRED",
+                "executionAttemptCount": 1,
+                "attempts": [
+                  {
+                    "kind": "EXECUTION",
+                    "state": "SUCCEEDED",
+                    "outcomeCode": "provider_applied"
+                  }
+                ]
+              }
+            ],
+            "effects": 1,
+            "invocationCount": 1
+          },
+          {
+            "name": "lost-presentation",
+            "executions": [
+              {
+                "id": "11660808-e468-47ca-b9fa-bccd4b50be9a",
+                "sourceRef": "r10-fixture:a96b0949-d46c-4331-9005-a22aaf11e001:first",
+                "state": "SUCCEEDED",
+                "reconciliationState": "NOT_REQUIRED",
+                "executionAttemptCount": 1,
+                "attempts": [
+                  {
+                    "kind": "EXECUTION",
+                    "state": "SUCCEEDED",
+                    "outcomeCode": "provider_applied"
+                  }
+                ]
+              }
+            ],
+            "effects": 1,
+            "invocationCount": 1
+          },
+          {
+            "name": "ready",
+            "executions": [
+              {
+                "id": "b9abf215-567e-44b3-8c20-376fd0d205d5",
+                "sourceRef": "r10-fixture:50f89a8c-eabd-40a1-912a-0b93400c6a1f:first",
+                "state": "SUCCEEDED",
+                "reconciliationState": "NOT_REQUIRED",
+                "executionAttemptCount": 1,
+                "attempts": [
+                  {
+                    "kind": "EXECUTION",
+                    "state": "SUCCEEDED",
+                    "outcomeCode": "provider_applied"
+                  }
+                ]
+              }
+            ],
+            "effects": 1,
+            "invocationCount": 1
+          },
+          {
+            "name": "prefix",
+            "executions": [
+              {
+                "id": "46d38b38-9e96-46b4-a00a-f1e29a17ebc5",
+                "sourceRef": "r10-fixture:b84c7a6c-dfa3-4f30-a718-24ff87edc876:first",
+                "state": "SUCCEEDED",
+                "reconciliationState": "NOT_REQUIRED",
+                "executionAttemptCount": 1,
+                "attempts": [
+                  {
+                    "kind": "EXECUTION",
+                    "state": "SUCCEEDED",
+                    "outcomeCode": "provider_applied"
+                  }
+                ]
+              }
+            ],
+            "effects": 1,
+            "invocationCount": 1
+          },
+          {
+            "name": "unknown",
+            "executions": [
+              {
+                "id": "d67b7fdc-63ed-479b-97ec-6ae9614943b7",
+                "sourceRef": "r10-fixture:ba2d8ef0-fa9c-478a-8cf5-f4fbf329e041:first",
+                "state": "UNKNOWN",
+                "reconciliationState": "MANUAL_REQUIRED",
+                "executionAttemptCount": 1,
+                "attempts": [
+                  {
+                    "kind": "EXECUTION",
+                    "state": "UNKNOWN",
+                    "outcomeCode": "synthetic_provider_unknown"
+                  },
+                  {
+                    "kind": "RECONCILIATION",
+                    "state": "UNKNOWN",
+                    "outcomeCode": "reconciliation_worker_lost"
+                  },
+                  {
+                    "kind": "RECONCILIATION",
+                    "state": "UNKNOWN",
+                    "outcomeCode": "STILL_UNKNOWN"
+                  }
+                ]
+              }
+            ],
+            "effects": 1,
+            "invocationCount": 1
+          },
+          {
+            "name": "unknown-ready",
+            "executions": [
+              {
+                "id": "bfb67821-7c83-4174-b220-0287f6d43ac7",
+                "sourceRef": "r10-fixture:297e9afa-b605-40a6-b374-93db631226de:first",
+                "state": "SUCCEEDED",
+                "reconciliationState": "RESOLVED",
+                "executionAttemptCount": 1,
+                "attempts": [
+                  {
+                    "kind": "EXECUTION",
+                    "state": "UNKNOWN",
+                    "outcomeCode": "synthetic_provider_unknown"
+                  },
+                  {
+                    "kind": "RECONCILIATION",
+                    "state": "SUCCEEDED",
+                    "outcomeCode": "PROVEN_SUCCEEDED"
+                  }
+                ]
+              }
+            ],
+            "effects": 1,
+            "invocationCount": 1
+          }
+        ],
+        "executionCount": 8,
+        "invocationCount": 9,
+        "syntheticEffects": 8,
+        "providerCalls": 0,
+        "productionEffects": 0,
+        "processId": 89655,
+        "fixtureSha256": "b0ee5c25525187d7d1c7f3c200a25c4ed61c172774fb6f833ef041123ab0446c"
+      },
+      "rawPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-acceptance/read-only-attestation.json",
+      "sha256": "72695cd454d76eee1f401172162aa9bc233defa3c8cfaaa52cb89914fc53c658"
+    }
+  },
+  "sourceSha256": {
+    "maya-saas-backend/src/action-engine/action-invocation-receipt.context.ts": "a1b7fb510deb1366bdb3bc564c1e556b4afe3c16b536ab938b0112d0fa84cb8a",
+    "maya-saas-backend/src/action-engine/action-engine.ingress.ts": "e1df11b29faabe687ea914eb2a631a5614249bd4d5efaac139311379062149f3",
+    "maya-saas-backend/src/action-engine/ai-invocation-receipt.architecture.spec.ts": "da4017b5c040557acd5aefbdaebdfdf5090d57c8dd3a38f37e4efce16321ff44",
+    "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts": "84b561bb1f0f5df8e67ce5c69c4a45aa3a0cb5410db9f6b27274336923d574ba",
+    "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts": "c6885ee3deb147d13a8d3396cf8f42f7f39323fb2925d7109cf0acec306e16c1",
+    "maya-saas-backend/src/ai-tools/ai-tool-receipt.service.ts": "3072efb51d14b3037917d189653145855d100d6ad72b417c1dd4ccf9ab94694a",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "d0ed3295fad5326cf0acbb749669d740887099e980238914345331ce7376d883",
+    "maya-saas-backend/src/ai-tools/ai-tools.module.ts": "9d69a13799270d4cfbeaf3a87759f8e0c3e35928aa146ca7fc2e555c8a1ec1c2",
+    "maya-saas-backend/src/ai-tools/ai-tool-canonical-receipt.spec.ts": "ea8863e2c538eb14b161dd17b5ed3fe538f166197d558f4b5dd967b3c970df5f",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts": "adac6cb57e424deefd003d3cd51bb1b5ad01a195d799a3dbb0cbd412917d67f1",
+    "maya-saas-backend/src/ai-tools/ai-tool-expenses-create.spec.ts": "870280fcd4894de73ab400b14d41e6ec458edbdb30d48647ca8d7629944bb93c",
+    "maya-saas-backend/src/ai-tools/owner-money-questions.acceptance.spec.ts": "9c656b0eed24fb2c6ff6c37084df4166e247553f26c3bcd2e3c3874aaeae4ca4",
+    "maya-saas-backend/src/ai-tools/adversarial-expense-audit.spec.ts": "0b68138841c3b1c3d8b22c1ee03f3d78dbbd34f23863a2cccd224a1d49562677",
+    "maya-saas-backend/test/fixtures/ai-tool-receipt.fixture.ts": "7c13c936e74d1777ba0d229f0e3f25cd13d0a61d49e22b7c37a806bf8236583c",
+    "docs/rebuild/evidence/package5-wave-ra-r10-postgres.proof.cjs": "74b8e0ed494cee72c38791781b74774c30370c4132e41c5f9224f4388f752507",
+    "docs/rebuild/evidence/package5-wave-ra-r10-postgres-attestation.cjs": "b0ee5c25525187d7d1c7f3c200a25c4ed61c172774fb6f833ef041123ab0446c",
+    "docs/rebuild/evidence/package5-wave-ra-r10-local-acceptance.cjs": "8e79c05aeb4cca4c134fc0701e2ae4e027ec7c816ded44e413ada99411b15771"
+  },
+  "historicalProbePreserved": true,
+  "limitations": [
+    "Controlled registered synthetic executor and owned PostgreSQL, not real provider effects",
+    "Current role/approval regression uses existing hermetic authorization fixtures",
+    "B36 runtime WIP exclusion/cutover view and full mandatory aggregate are parent-owned and still pending",
+    "No new business/schema/action contract; no production proof in this artifact"
+  ],
+  "fixtureCorrections": [
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres",
+      "detail": "Initial reconciliation lease of 10 ms expired during PostgreSQL finalization; no extra dispatch. Final frozen proof uses 1000 ms and independently proves manual-required and successful reconciliation."
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10/postgres-final",
+      "detail": "Intermediate proof-only inline comment swallowed a result declaration in resume-unknown. Corrected fixture, then all nine phases rerun from a fresh manifest in postgres-acceptance. Runtime unchanged."
+    },
+    {
+      "detail": "Hermetic Jest discovery initially probed optional watchman. Disabled watchman; final run has zero blocked IO attempts."
+    }
+  ],
+  "hygiene": {
+    "productionReads": 0,
+    "productionMutations": 0,
+    "productionMessages": 0,
+    "providerCalls": 0,
+    "oldDatabasesTouched": 0,
+    "mainWorktreeTouched": false,
+    "activeOwnedProcesses": 0,
+    "scratchRoot": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-ra-implementation/r10"
+  },
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "readyForWaveAggregate": true,
+  "productionStatus": "NOT_DEPLOYED_BY_THIS_PACKAGE_AGENT"
+}

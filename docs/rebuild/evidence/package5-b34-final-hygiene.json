@@ -1,0 +1,14 @@
+{
+  "mainDirtyWorktreeTouched": false,
+  "mainDirtyEntriesPreserved": 24,
+  "mainDirtyFileHashesPreserved": true,
+  "preExistingDatabasesTouched": 0,
+  "protectedOldDatabaseCount": 17,
+  "ownedTemporaryProcessesRemaining": 0,
+  "backgroundWatchersRemaining": 0,
+  "ownedPlaywrightChromeProcessesRemaining": 0,
+  "ownedTemporaryDatabasesRemaining": 0,
+  "ownedCluster55504Listening": false,
+  "ownedProductionStagingRemoved": true,
+  "processHygiene": 0
+}

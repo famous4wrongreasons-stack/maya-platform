@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "suites": 447,
+  "tests": 3752,
+  "seconds": 347.734,
+  "lint": "PASS",
+  "applicationTypecheck": "PASS",
+  "scriptsTypecheck": "PASS",
+  "build": "PASS",
+  "prisma": "PASS",
+  "productionPendingMigrations": 0,
+  "productionDrift": "NONE",
+  "sourceBaseline": "20260913-c8-wave3-66e83891",
+  "privateLogSha256": "54aa2b0c8fae498a2292b09ce640e2bb6435e26fef51f367b2c4d12fb74a85bd",
+  "calibration": "UNAVAILABLE",
+  "numericTargetsActive": 0,
+  "productionProofEffects": 0
+}

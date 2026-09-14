@@ -1,0 +1,12 @@
+{
+  "secretConfiguredBoth": true,
+  "secretMatches": true,
+  "providerConfigured": true,
+  "companyBindingMatchesPython": true,
+  "businessMutations": 0,
+  "messages": 0,
+  "uniqueIntegration": true,
+  "eligibleTenant": true,
+  "resolvedBy": "integration",
+  "status": "PASS"
+}

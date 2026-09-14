@@ -1,0 +1,117 @@
+--- a/claude_ai.py
++++ b/claude_ai.py
+@@ -16,0 +17 @@
++from canonical_staff_schedule_entry import staff_schedule_handoff
+@@ -170,5 +171,3 @@
+-            "Предварительно показать или применить изменение живого графика мастера в YClients: "
+-            "закрыть запись на день, сократить/изменить часы смены или поставить перерыв. "
+-            "Первый вызов ВСЕГДА делай с apply=false и покажи владельцу мастера, дату и новые интервалы. "
+-            "Только после отдельного явного подтверждения владельца вызывай повторно с apply=true. "
+-            "Инструмент не переносит и не удаляет записи; при конфликте изменение блокируется."
++            "Открыть существующее подтверждение изменения графика в приложении MAYA. "
++            "Этот старый чат не меняет график: apply и подтверждение текстом не дают права записи. "
++            "Верни пользователю ссылку из результата; не объявляй изменение выполненным."
+@@ -210 +209 @@
+-                    "description": "false для предпросмотра; true только после отдельного подтверждения владельца",
++                    "description": "Устаревший параметр; не запускает изменение. Подтверждение доступно в приложении MAYA.",
+@@ -1176,8 +1175,4 @@
+-Если владелец просит «закрой Саше завтра», «поставь Стасу перерыв 14:00–15:00» или
+-«Илья сегодня только до 18:00», используй manage_staff_schedule. Если не хватает имени,
+-даты или времени — уточни только недостающую деталь. Сначала вызови инструмент с
+-apply=false и коротко покажи: мастер, дата, текущий график и новый график. После этого
+-остановись и спроси «Применить?». apply=true разрешён ТОЛЬКО в следующем ходе после
+-явного ответа владельца «да/применяй/подтверждаю». Не называй изменение выполненным,
+-пока инструмент не вернул status=applied. Если есть existing_records_conflict, ничего
+-не меняй и перечисли только времена конфликтующих записей без данных клиентов.
++Для изменения графика используй manage_staff_schedule и верни ссылку в MAYA.
++Предпросмотр и точное подтверждение выполняются после входа в приложение.
++apply и ответ «да» в этом старом чате не запускают изменение.
++Не объявляй график изменённым и не предлагай повторить старый вызов.
+@@ -1857,28 +1852,2 @@
+-            staff_name = str(tool_input.get("staff_name") or "").strip()
+-            staff_id = _resolve_staff_id(staff_name)
+-            if not staff_id:
+-                return json.dumps(
+-                    {"success": False, "error": "staff_not_found", "message": f"Мастер '{staff_name}' не найден"},
+-                    ensure_ascii=False,
+-                )
+-            apply_requested = bool(tool_input.get("apply", False))
+-            confirmation_verified = bool(
+-                tool_input.get("_schedule_confirmation_verified", False)
+-            )
+-            result = yclients.change_staff_day_schedule(
+-                staff_id=staff_id,
+-                date_str=tool_input.get("date"),
+-                action=tool_input.get("action"),
+-                work_start=tool_input.get("work_start"),
+-                work_end=tool_input.get("work_end"),
+-                break_start=tool_input.get("break_start"),
+-                break_end=tool_input.get("break_end"),
+-                apply=apply_requested and confirmation_verified,
+-            )
+-            if isinstance(result, dict):
+-                result.setdefault("staff_name", staff_name)
+-                if apply_requested and not confirmation_verified:
+-                    result["apply_ignored"] = True
+-                    result["message"] = (
+-                        "Сначала покажите предпросмотр и получите отдельное подтверждение владельца."
+-                    )
++            # R03: legacy identity/history cannot authorize an A15 write.
++            result = staff_schedule_handoff()
+@@ -4413,5 +4381,0 @@
+-_SCHEDULE_CONFIRM_RE = re.compile(
+-    r"^\s*(да|ага|ок(?:ей)?|подтверждаю|примен(?:и|яй|ить)|сделай|закрывай|ставь|меняй)"
+-    r"(?:[\s,!.].*)?$",
+-    re.IGNORECASE,
+-)
+@@ -4587,15 +4550,0 @@
+-def _schedule_confirmation_verified(messages: list[dict]) -> bool:
+-    """Confirmation must be a new user turn after MAYA showed a preview."""
+-    user_text = _strip_internal_chat_nudges(
+-        _last_user_text_before_current_assistant(messages)
+-    ).strip()
+-    if not _SCHEDULE_CONFIRM_RE.match(user_text):
+-        return False
+-    for msg in reversed(messages[:-1]):
+-        if msg.get("role") != "assistant":
+-            continue
+-        text = _message_text(msg)
+-        return "Применить?" in text and (
+-            "график" in text.lower() or "закрыт" in text.lower()
+-        )
+-    return False
+@@ -4618,0 +4568,3 @@
++        if tool_use.name == "manage_staff_schedule":
++            # Stale preview/applied/error payloads cannot manufacture an A15 outcome.
++            return staff_schedule_handoff()["message"]
+@@ -4667,23 +4618,0 @@
+-        status = payload.get("status")
+-        name = payload.get("staff_name") or tool_use.input.get("staff_name") or "Мастер"
+-        date_str = payload.get("date") or tool_use.input.get("date") or "указанная дата"
+-        if status == "blocked":
+-            times = ", ".join(payload.get("conflict_times") or [])
+-            suffix = f" Конфликтующие записи: {times}." if times else ""
+-            return (
+-                f"Не могу изменить график: существующие записи не помещаются в новые часы.{suffix} "
+-                "Я ничего не меняла."
+-            )
+-        if status == "preview":
+-            before = _schedule_slots_text(payload.get("current_slots") or [])
+-            after = _schedule_slots_text(payload.get("proposed_slots") or [])
+-            return f"{name}, {date_str}: график был {before}; станет {after}. Применить?"
+-        if status == "applied" and payload.get("success"):
+-            after = _schedule_slots_text(payload.get("slots") or [])
+-            if payload.get("verified") is False:
+-                return (
+-                    f"YClients принял изменение для {name} на {date_str}: {after}, "
+-                    "но контрольное чтение графика пока не подтвердилось."
+-                )
+-            return f"Готово. График {name} на {date_str}: {after}."
+-        return str(payload.get("message") or "Не удалось изменить график. Ничего не изменено.")
+@@ -4814,6 +4742,0 @@
+-        if tool_use.name == "manage_staff_schedule":
+-            execution_input = dict(tool_use.input or {})
+-            # Never trust a model-supplied private flag; derive it from chat history.
+-            execution_input["_schedule_confirmation_verified"] = (
+-                _schedule_confirmation_verified(messages)
+-            )

@@ -1,0 +1,109 @@
+{
+  "checkedAt": "2026-09-12T13:41:05.152570+00:00",
+  "aliasesCovered": 9,
+  "rows": [
+    {
+      "alias": "salon/app/index.html",
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html",
+      "sha256": "cb27000739b179ddea6546fb4dd169fc9f1f397abca998acdcacf4dc1162c249",
+      "certifiedRC": "784b68630d659a5aceb9832d84f6ebd5c6519a1ecd0a15adcbe5e5dd029607b6",
+      "matchesCertifiedRC": false,
+      "bytes": 2247,
+      "mtime": "2026-09-08T18:10:45.515910+00:00",
+      "ctime": "2026-09-08T18:11:01.125908+00:00",
+      "backup": {
+        "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html.pre-maintenance-20260908-211040",
+        "exists": true,
+        "sha256": "784b68630d659a5aceb9832d84f6ebd5c6519a1ecd0a15adcbe5e5dd029607b6",
+        "bytes": 2444044
+      }
+    },
+    {
+      "alias": "mayaos/app/index.html",
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html",
+      "sha256": "cb27000739b179ddea6546fb4dd169fc9f1f397abca998acdcacf4dc1162c249",
+      "certifiedRC": "99fdaf34b57dbff4afbc8d45763ade8b19620a9c793366c19e55005dd601e2f6",
+      "matchesCertifiedRC": false,
+      "bytes": 2247,
+      "mtime": "2026-09-08T18:10:42.892576+00:00",
+      "ctime": "2026-09-08T18:11:01.122575+00:00",
+      "backup": {
+        "path": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html.pre-maintenance-20260908-211040",
+        "exists": true,
+        "sha256": "b3278512ca71beee709b93c1de2892fa841ef0cb19ae965791d71dfcb2a65e6e",
+        "bytes": 2738358
+      }
+    },
+    {
+      "alias": "salon/app/index.codex-loyalty-20260721.html",
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.codex-loyalty-20260721.html",
+      "sha256": "23e03edb05a6ff07eaa7d81338092796fe9868a4b061cb47d6a834dcf94bce5c",
+      "certifiedRC": "23e03edb05a6ff07eaa7d81338092796fe9868a4b061cb47d6a834dcf94bce5c",
+      "matchesCertifiedRC": true,
+      "bytes": 2123462,
+      "mtime": "2026-09-08T12:31:56.544966+00:00",
+      "ctime": "2026-09-08T12:31:56.564966+00:00"
+    },
+    {
+      "alias": "salon/app/index.backup-20260731-anton-analytics.html",
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.backup-20260731-anton-analytics.html",
+      "sha256": "b2d84aeaf5501e0b417c42fc4bb0473fd216cdfb0e9568caec9b911df353d7ab",
+      "certifiedRC": "b2d84aeaf5501e0b417c42fc4bb0473fd216cdfb0e9568caec9b911df353d7ab",
+      "matchesCertifiedRC": true,
+      "bytes": 2121618,
+      "mtime": "2026-09-08T12:31:56.384966+00:00",
+      "ctime": "2026-09-08T12:31:56.521633+00:00"
+    },
+    {
+      "alias": "salon/app/tenant-test.html",
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-test.html",
+      "sha256": "4d9fc3528ca88f6ecd43e93594814e8eaa60de4ceec82b17166595927276b4e5",
+      "certifiedRC": "4d9fc3528ca88f6ecd43e93594814e8eaa60de4ceec82b17166595927276b4e5",
+      "matchesCertifiedRC": true,
+      "bytes": 1126060,
+      "mtime": "2026-09-08T12:31:56.651633+00:00",
+      "ctime": "2026-09-08T12:31:56.688299+00:00"
+    },
+    {
+      "alias": "salon/app/api-proxy.php",
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+      "sha256": "b1006160a28e66448886bdc4b520a2d94021121748259c2cd1aeefda5f1aaaa0",
+      "certifiedRC": "b1006160a28e66448886bdc4b520a2d94021121748259c2cd1aeefda5f1aaaa0",
+      "matchesCertifiedRC": true,
+      "bytes": 116748,
+      "mtime": "2026-09-08T12:31:56.371633+00:00",
+      "ctime": "2026-09-08T12:31:56.371633+00:00"
+    },
+    {
+      "alias": "salon/app/api-proxy.codex-loyalty-20260721.php",
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.codex-loyalty-20260721.php",
+      "sha256": "1460bc8d30b5eea2b8347ed8b3f60fae1c545669d980d58394e77b5b99d40ac6",
+      "certifiedRC": "1460bc8d30b5eea2b8347ed8b3f60fae1c545669d980d58394e77b5b99d40ac6",
+      "matchesCertifiedRC": true,
+      "bytes": 122317,
+      "mtime": "2026-09-08T12:31:56.368300+00:00",
+      "ctime": "2026-09-08T12:31:56.368300+00:00"
+    },
+    {
+      "alias": "salon/app/maya-native-api.php",
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php",
+      "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "certifiedRC": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "matchesCertifiedRC": true,
+      "bytes": 6662,
+      "mtime": "2026-09-07T19:13:10.791349+00:00",
+      "ctime": "2026-09-07T19:13:10.791349+00:00"
+    },
+    {
+      "alias": "mayaos/maya-platform-api.php",
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php",
+      "sha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+      "certifiedRC": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+      "matchesCertifiedRC": true,
+      "bytes": 6580,
+      "mtime": "2026-09-07T21:16:15.119504+00:00",
+      "ctime": "2026-09-07T21:16:15.166171+00:00"
+    }
+  ],
+  "productionWrites": 0
+}

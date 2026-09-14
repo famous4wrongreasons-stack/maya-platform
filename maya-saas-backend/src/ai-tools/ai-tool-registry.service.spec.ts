@@ -1,5 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
+import { UserRole } from '../common/domain.enums';
+import { staffScheduleRevision } from '../crm/staff-schedule.utils';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 
 describe('AiToolRegistryService', () => {
@@ -14,7 +16,7 @@ describe('AiToolRegistryService', () => {
 
   it('normalizes bounded analytics ranges', () => {
     expect(
-      service.validateArguments('analytics.business.read', {
+      service.validateArguments('analytics.business.profit', {
         period: 'custom',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
@@ -27,22 +29,49 @@ describe('AiToolRegistryService', () => {
       branch_id: 'branch_12345678',
     });
     expect(() =>
-      service.validateArguments('analytics.business.read', {
+      service.validateArguments('analytics.business.profit', {
         period: 'custom',
         from: '2025-01-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
       }),
     ).toThrow(BadRequestException);
     expect(
-      service.validateArguments('analytics.business.read', {
+      service.validateArguments('analytics.business.profit', {
         period: 'month_to_date',
       }),
     ).toEqual({ period: 'month_to_date' });
     expect(() =>
-      service.validateArguments('analytics.business.read', {
+      service.validateArguments('analytics.business.profit', {
         period: 'month_to_date',
         from: '2026-07-01T00:00:00.000Z',
         to: '2026-07-15T00:00:00.000Z',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('validates universal business and employee analytics comparisons', () => {
+    expect(
+      service.validateArguments('analytics.business.query', {
+        period: 'year_to_date',
+        comparison: 'previous_year_same_period',
+      }),
+    ).toEqual({
+      period: 'year_to_date',
+      comparison: 'previous_year_same_period',
+    });
+    expect(
+      service.validateArguments('analytics.employee.query', {
+        period: 'month_to_date',
+        comparison: 'previous_period',
+      }),
+    ).toEqual({
+      period: 'month_to_date',
+      comparison: 'previous_period',
+    });
+    expect(() =>
+      service.validateArguments('analytics.business.query', {
+        period: 'month_to_date',
+        comparison: 'invented_period',
       }),
     ).toThrow(BadRequestException);
   });
@@ -62,6 +91,154 @@ describe('AiToolRegistryService', () => {
         reason: 'Корректировка',
       }),
     ).toThrow(BadRequestException);
+  });
+
+  it('takes an expense amount in rubles and refuses anything that is not money', () => {
+    expect(
+      service.validateArguments('expenses.create', {
+        category: 'rent',
+        amount_rubles: 60_000,
+        occurred_on: '2026-08-07',
+        note: 'Аренда за август',
+      }),
+    ).toEqual({
+      category: 'rent',
+      amount_rubles: 60_000,
+      occurred_on: '2026-08-07',
+      note: 'Аренда за август',
+    });
+    // Дата необязательна: «сегодня» разрешает сервер в часовом поясе салона.
+    expect(
+      service.validateArguments('expenses.create', {
+        category: 'supplies',
+        amount_rubles: 1_234.56,
+      }),
+    ).toEqual({ category: 'supplies', amount_rubles: 1_234.56 });
+    expect(() =>
+      service.validateArguments('expenses.create', {
+        category: 'rent',
+        amount_rubles: 0,
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('expenses.create', {
+        category: 'rent',
+        amount_rubles: '60000',
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('expenses.create', {
+        category: 'rent',
+        amount_rubles: 60_000,
+        amount_kopecks: 6_000_000,
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('refuses an invented expense category and payroll by hand', () => {
+    expect(() =>
+      service.validateArguments('expenses.create', {
+        category: 'arenda-avgust',
+        amount_rubles: 60_000,
+      }),
+    ).toThrow(BadRequestException);
+
+    let payrollDetail = '';
+    try {
+      service.validateArguments('expenses.create', {
+        category: 'payroll',
+        amount_rubles: 60_000,
+      });
+    } catch (error) {
+      const response = (error as BadRequestException).getResponse() as {
+        error: { code: string; detail: string };
+      };
+      payrollDetail = response.error.detail;
+      expect(response.error.code).toBe('ai_tool_arguments_invalid');
+    }
+    expect(payrollDetail).toContain('payroll');
+    expect(payrollDetail).toContain('twice');
+  });
+
+  it('re-validates stored expense arguments to the same payload', () => {
+    // Аргументы подтверждения проходят валидатор второй раз при исполнении:
+    // если бы валидатор что-то дописывал, хеш карточки перестал бы сходиться.
+    const once = service.validateArguments('expenses.create', {
+      category: 'marketing',
+      amount_rubles: 15_000,
+      note: '  таргет  ',
+    });
+    expect(service.validateArguments('expenses.create', once)).toEqual(once);
+  });
+
+  it('requires a human confirmation for a money-writing expense tool', () => {
+    const definition = service.get('expenses.create');
+    expect(definition.riskTier).toBe('high_write');
+    expect(definition.approvalPolicy).toBe('actor');
+    expect(definition.idempotency).toBe('required');
+    expect(definition.requiredFeatures).toEqual(['expenses.core']);
+    expect(definition.allowedRoles).toEqual([
+      UserRole.TENANT_OWNER,
+      UserRole.BUSINESS_OWNER,
+    ]);
+    const properties = definition.inputSchema.properties as Record<
+      string,
+      { enum?: string[] }
+    >;
+    expect(properties.category.enum).toContain('rent');
+    expect(properties.category.enum).not.toContain('payroll');
+  });
+
+  it('shows the human rubles and the server kopecks on the expense card', () => {
+    expect(
+      service.buildApprovalPreview('expenses.create', {
+        category: 'rent',
+        amount_rubles: 60_000,
+        occurred_on: '2026-08-05',
+        note: 'Аренда за август',
+      }),
+    ).toEqual({
+      // Русского словаря для этого инструмента у отдельно деплоящегося фронта
+      // нет, поэтому подтверждаемое действие читается целиком из summary.
+      summary: 'Записать расход: Аренда — 60 000 ₽ за 05.08.2026.',
+      payload: {
+        sum: '60 000 ₽',
+        date: '05.08.2026',
+        type: 'Аренда',
+        action: 'create_expense',
+        comment: 'Аренда за август',
+        category: 'rent',
+        currency: 'RUB',
+        amount_rubles: 60_000,
+        category_kind: 'fixed',
+        amount_kopecks: 6_000_000,
+      },
+    });
+  });
+
+  it('puts the amount, the date and the category first even after a jsonb round trip', () => {
+    const { payload } = service.buildApprovalPreview('expenses.create', {
+      category: 'rent',
+      amount_rubles: 60_000,
+      occurred_on: '2026-08-05',
+      note: 'Аренда за август',
+    });
+    // Точный код карточки из app.html.
+    const visible = (preview: Record<string, unknown>) =>
+      Object.keys(preview)
+        .filter((key) => key !== 'action')
+        .slice(0, 6);
+    // 🔴 Хранится превью в jsonb, а он сортирует ключи по длине и байтам, а не
+    // по порядку вставки. Поэтому проверяем ОБА порядка: как отдали и как
+    // вернёт Postgres. В обоих сумма, дата и статья обязаны быть первыми.
+    const afterJsonb = Object.fromEntries(
+      Object.entries(payload).sort(
+        ([left], [right]) =>
+          left.length - right.length || (left < right ? -1 : 1),
+      ),
+    );
+    expect(visible(payload)).toEqual(visible(afterJsonb));
+    expect(visible(payload).slice(0, 3)).toEqual(['sum', 'date', 'type']);
   });
 
   it('builds an immutable, explicit approval preview', () => {
@@ -101,6 +278,16 @@ describe('AiToolRegistryService', () => {
     ).toThrow(BadRequestException);
   });
 
+  it('keeps a booking availability day stable across timezone offsets', () => {
+    expect(
+      service.validateArguments('booking.availability.read', {
+        date: '2026-07-31T00:00:00+03:00',
+      }),
+    ).toEqual({
+      date: '2026-07-31T00:00:00.000Z',
+    });
+  });
+
   it('creates a PII-free booking approval payload', () => {
     expect(
       service.buildApprovalPreview('appointments.own.create', {
@@ -118,5 +305,190 @@ describe('AiToolRegistryService', () => {
         branch_id: null,
       },
     });
+  });
+
+  it('validates an exact staff schedule read without accepting tenant scope from the model', () => {
+    expect(
+      service.validateArguments('staff.schedule.read', {
+        date: '2026-08-06',
+        staff_id: '1461615',
+      }),
+    ).toEqual({ date: '2026-08-06', staff_id: '1461615' });
+    expect(
+      service.validateArguments('staff.schedule.read', {
+        date: '2026-08-06',
+      }),
+    ).toEqual({ date: '2026-08-06' });
+    expect(() =>
+      service.validateArguments('staff.schedule.read', {
+        date: '2026-08-06',
+        tenant_id: 'other-tenant',
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('staff.schedule.read', {
+        date: 'tomorrow',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('validates an exact operations journal read without accepting tenant scope from the model', () => {
+    expect(
+      service.validateArguments('operations.journal.read', {
+        date: '2026-08-06',
+        staff_id: '1461615',
+      }),
+    ).toEqual({ date: '2026-08-06', staff_id: '1461615' });
+    expect(
+      service.validateArguments('operations.journal.read', {
+        date: '2026-08-06',
+      }),
+    ).toEqual({ date: '2026-08-06' });
+    expect(() =>
+      service.validateArguments('operations.journal.read', {
+        date: '2026-08-06',
+        tenant_id: 'other-tenant',
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('operations.journal.read', {
+        date: 'tomorrow',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('validates an immutable staff schedule preview', () => {
+    const currentSlots = [{ from: '10:00', to: '20:00' }];
+    const currentRevision = staffScheduleRevision(
+      '1461615',
+      '2026-08-06',
+      currentSlots,
+    );
+    const args = service.validateArguments('staff.schedule.update', {
+      staff_id: '1461615',
+      date: '2026-08-06',
+      operation: 'set_break',
+      current_revision: currentRevision,
+      current_slots: currentSlots,
+      slots: [
+        { from: '10:00', to: '14:00' },
+        { from: '15:00', to: '20:00' },
+      ],
+    });
+
+    expect(args).toEqual({
+      staff_id: '1461615',
+      date: '2026-08-06',
+      operation: 'set_break',
+      current_revision: currentRevision,
+      current_slots: currentSlots,
+      slots: [
+        { from: '10:00', to: '14:00' },
+        { from: '15:00', to: '20:00' },
+      ],
+    });
+    expect(service.buildApprovalPreview('staff.schedule.update', args)).toEqual(
+      {
+        summary:
+          'Change one staff workday. Existing appointments will be preserved.',
+        payload: {
+          action: 'update_staff_schedule',
+          date: '2026-08-06',
+          operation: 'set_break',
+          current_slots: currentSlots,
+          proposed_slots: [
+            { from: '10:00', to: '14:00' },
+            { from: '15:00', to: '20:00' },
+          ],
+          existing_appointments_preserved: true,
+        },
+      },
+    );
+  });
+
+  it('rejects a schedule preview whose revision does not match', () => {
+    expect(() =>
+      service.validateArguments('staff.schedule.update', {
+        staff_id: '1461615',
+        date: '2026-08-06',
+        operation: 'close_day',
+        current_revision: '0'.repeat(64),
+        current_slots: [{ from: '10:00', to: '20:00' }],
+        slots: [],
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('validates bounded group availability without accepting tenant scope', () => {
+    expect(
+      service.validateArguments('booking.group-availability.read', {
+        date: '2026-08-20',
+        party_size: 3,
+        mode: 'nearby',
+        max_gap_minutes: 45,
+        service_ids: ['15'],
+        branch_id: '1',
+      }),
+    ).toEqual({
+      date: '2026-08-20T00:00:00.000Z',
+      party_size: 3,
+      mode: 'nearby',
+      max_gap_minutes: 45,
+      service_ids: ['15'],
+      branch_id: '1',
+    });
+    expect(() =>
+      service.validateArguments('booking.group-availability.read', {
+        date: '2026-08-20',
+        party_size: 1,
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('booking.group-availability.read', {
+        date: '2026-08-20',
+        party_size: 2,
+        tenant_id: 'other-tenant',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('validates privacy-safe review and catalog reads', () => {
+    expect(
+      service.validateArguments('reviews.list.read', {
+        days: 30,
+        rating: 2,
+        limit: 10,
+        branch_id: 'branch-1',
+      }),
+    ).toEqual({
+      days: 30,
+      rating: 2,
+      limit: 10,
+      branch_id: 'branch-1',
+    });
+    expect(
+      service.validateArguments('reviews.analyze', {
+        mode: 'topics',
+        days: 365,
+      }),
+    ).toEqual({ mode: 'topics', days: 365 });
+    expect(
+      service.validateArguments('inventory.stock.read', {
+        low_stock_only: true,
+      }),
+    ).toEqual({ low_stock_only: true });
+    expect(service.validateArguments('commerce.certificates.read', {})).toEqual(
+      {},
+    );
+    expect(() =>
+      service.validateArguments('reviews.analyze', {
+        mode: 'raw_text',
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('commerce.memberships.read', {
+        tenant_id: 'other-tenant',
+      }),
+    ).toThrow(BadRequestException);
   });
 });

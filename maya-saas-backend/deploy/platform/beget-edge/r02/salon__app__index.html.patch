@@ -1,0 +1,15 @@
+--- a/salon/app/index.html
++++ b/salon/app/index.html
+@@ -15740,0 +15741,6 @@
++          const canonical = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
++          if (canonical && canonical.token) {
++            headers.Authorization = 'Bearer ' + canonical.token;
++            payload.maya_token = canonical.token;
++            return { headers: headers, payload: payload };
++          }
+@@ -35474,0 +35481,2 @@
++    var mayaTok = typeof canonicalMayaTok === 'function' ? canonicalMayaTok() : (typeof meSaasCurrentBundle === 'function' ? (meSaasCurrentBundle() || {}).token : '');
++    if (mayaTok) { headers.Authorization = 'Bearer ' + mayaTok; body.maya_token = mayaTok; return { headers: headers, body: JSON.stringify(body) }; }
+@@ -35477,2 +35484,0 @@
+-    var mayaTok = canonicalMayaTok();
+-    if (mayaTok) { headers.Authorization = 'Bearer ' + mayaTok; return { headers: headers, body: JSON.stringify(body) }; }

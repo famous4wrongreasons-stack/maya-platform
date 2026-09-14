@@ -1,0 +1,12 @@
+{
+  "baseline": "bae6620c6a2fddbae3b863147860be21842444d5",
+  "trackedFileGlobs": [
+    "*.md",
+    "*.ts",
+    "*.py",
+    "*.txt"
+  ],
+  "pattern": "admin[-_ ]?alpha|админ.{0,12}альфа|agent.by.agent|agent[-_ ]learning|обучен.{0,35}агент|агент.{0,35}обучен",
+  "matches": [],
+  "meaning": "No explicit Admin Alpha or agent-by-agent training contract found; this does not prove every conceivable synonym absent. Maya Admin and offline evaluation are documented separately."
+}

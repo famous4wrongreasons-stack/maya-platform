@@ -1,0 +1,42 @@
+[
+  {
+    "proof": "production-metadata",
+    "exitCode": 0,
+    "seconds": 9.8
+  },
+  {
+    "proof": "runtime-launchers",
+    "exitCode": 0,
+    "seconds": 3.7
+  },
+  {
+    "proof": "extra-surfaces",
+    "exitCode": 0,
+    "seconds": 3.4
+  },
+  {
+    "proof": "edge-metadata",
+    "exitCode": 0,
+    "seconds": 4.5
+  },
+  {
+    "proof": "live-config",
+    "exitCode": 0,
+    "seconds": 3.3
+  },
+  {
+    "proof": "schema-preflight",
+    "exitCode": 0,
+    "seconds": 5.4
+  },
+  {
+    "proof": "schema-structure",
+    "exitCode": 0,
+    "seconds": 4.8
+  },
+  {
+    "proof": "health-readiness",
+    "exitCode": 0,
+    "seconds": 3.5
+  }
+]

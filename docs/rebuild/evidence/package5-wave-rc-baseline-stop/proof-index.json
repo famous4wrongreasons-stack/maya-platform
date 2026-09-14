@@ -1,0 +1,221 @@
+{
+  "note": "Historical local synthetic proof logs. They do not certify the current combined candidate; see STOP report for stale/missing checks.",
+  "artifacts": [
+    {
+      "artifact": "rc-schema-proof.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/rc-schema-proof.log",
+      "sha256": "ea2c144d7fef54cdee7659798a84469fe0e2d273585ad7932a3210ebce380974",
+      "bytes": 2884
+    },
+    {
+      "artifact": "schema-clean-replay.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/schema-clean-replay.log",
+      "sha256": "8afe18719f32dd0c7b22cd1740d442d54a9aca9390c93123f7921bcdca54c92f",
+      "bytes": 11634
+    },
+    {
+      "artifact": "rc-schema-drift.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/rc-schema-drift.log",
+      "sha256": "83a3899d598a301cb810d4a0f8fa71a7f9514cf5009373f46a2e2e115405950c",
+      "bytes": 70
+    },
+    {
+      "artifact": "b36-schema-rc-proof.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/b36-schema-rc-proof.log",
+      "sha256": "90f756a0cf0db753566655018ccd04d2804137cc28e870164f26590be4464d21",
+      "bytes": 927
+    },
+    {
+      "artifact": "b36-runtime-before.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/b36-runtime-before.log",
+      "sha256": "71b962fd183a48ff0c200fe773e661a682cdee86fb523a950f187d14780b0bae",
+      "bytes": 20576
+    },
+    {
+      "artifact": "b36-runtime-after.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/b36-runtime-after.log",
+      "sha256": "20af82ea8a9e106468e411fe657f24e040b8e7c0b34a021f91fdd4aae77af61b",
+      "bytes": 781
+    },
+    {
+      "artifact": "b36-targeted.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/b36-targeted.log",
+      "sha256": "439ffc90f206ae0be88c80273a0b6761f6852fb72d788d998017b8c8160030de",
+      "bytes": 546
+    },
+    {
+      "artifact": "r05-runtime-proof.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/r05-runtime-proof.log",
+      "sha256": "309f427dc4609b068d8bad2f18b110b35ff71c562e853c7374f6a377e6d87c39",
+      "bytes": 1405
+    },
+    {
+      "artifact": "r05-targeted.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/r05-targeted.log",
+      "sha256": "43f41c4060a43bed201cf7301fd2c3efa1ccef1592f9d1a17afad925a1f696ef",
+      "bytes": 11988
+    },
+    {
+      "artifact": "r06-runtime-proof.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/r06-runtime-proof.log",
+      "sha256": "35bc100578cc8d74b3d761e1fd9c92a04bedc0493a8af0eedc459447bfd7e7bb",
+      "bytes": 511
+    },
+    {
+      "artifact": "r06-after-restart.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/r06-after-restart.log",
+      "sha256": "2f7071d1a9ae3de3cf8e6f81c71a9d15589ed087e9d206f99ad1bf39f798174f",
+      "bytes": 127
+    },
+    {
+      "artifact": "r06-retention-proof.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/r06-retention-proof.log",
+      "sha256": "1192e250c865007766c058dbcdf60d4ba1331eadcebc2d6d60e17b32e1b3a9f3",
+      "bytes": 358
+    },
+    {
+      "artifact": "r06-events-proof.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/r06-events-proof.log",
+      "sha256": "dfbf07d64fb88ae47a9ddcfc04eb1f5d63827674ec323445347096248a51e860",
+      "bytes": 575
+    },
+    {
+      "artifact": "r11-runtime-proof.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/r11-runtime-proof.log",
+      "sha256": "e68b2a9b6b27fd18381d0138763a08054d518c9ff1bf264200292d5b571dc107",
+      "bytes": 695
+    },
+    {
+      "artifact": "r11-ratchets.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/r11-ratchets.log",
+      "sha256": "44c7fc0e149849d307850aef50e06ea5930cc71d003f14a9e51f9bd2e994defd",
+      "bytes": 1402
+    },
+    {
+      "artifact": "r14-runtime-proof.txt",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/r14-runtime-proof.log",
+      "sha256": "f582db141a4fd81358473ad3020be4c06fdbcd264c2ad0233a27db044a90af6a",
+      "bytes": 649
+    },
+    {
+      "artifact": "maya-rc-r12-runtime.txt",
+      "source": "/tmp/maya-rc-r12-runtime.log",
+      "sha256": "dd5a265ff8d760774489b26b9dbf2877fbc355c3dcd2e6e073b69e2e772b77a8",
+      "bytes": 873
+    },
+    {
+      "artifact": "maya-rc-r13-before-restart.txt",
+      "source": "/tmp/maya-rc-r13-before-restart.log",
+      "sha256": "73364577b05751e02f8de7ac83147f58fdea4174aa0281a0b6e666b5a6cf6ced",
+      "bytes": 711
+    },
+    {
+      "artifact": "maya-rc-r13-retention.txt",
+      "source": "/tmp/maya-rc-r13-retention.log",
+      "sha256": "159dcb9d4f99d453da34d8d984fc072904012b3f415ee04430564524b1a83833",
+      "bytes": 356
+    },
+    {
+      "artifact": "maya-rc-r08-runtime.txt",
+      "source": "/tmp/maya-rc-r08-runtime.log",
+      "sha256": "ff5959116a7f271d6a0e1ad88ec222d365793e2410fdc150c6f79d2e342be0c3",
+      "bytes": 721
+    },
+    {
+      "artifact": "maya-rc-r08-before-restart.txt",
+      "source": "/tmp/maya-rc-r08-before-restart.log",
+      "sha256": "8ee4070d271a736c230283b4b1d3b99179cadf1b6ceb68c6d8927c346521e727",
+      "bytes": 738
+    },
+    {
+      "artifact": "maya-rc-r12-r14-targeted.txt",
+      "source": "/tmp/maya-rc-r12-r14-targeted.log",
+      "sha256": "4a0fef16c5a17a9e827520253cb593c13b0e36854051bb72ed84fb9eaf82a822",
+      "bytes": 785
+    },
+    {
+      "artifact": "maya-rc-r09-retention.txt",
+      "source": "/tmp/maya-rc-r09-retention.log",
+      "sha256": "0a70ff636c891c9490a461b5cdf1638d82daa20ca30732830d26690bd94bc940",
+      "bytes": 201
+    },
+    {
+      "artifact": "maya-rc-r09-before-restart.txt",
+      "source": "/tmp/maya-rc-r09-before-restart.log",
+      "sha256": "089f1519fda6526136266d088670fe59d9eec4298929f34600c83f72f1f8d629",
+      "bytes": 1044
+    },
+    {
+      "artifact": "maya-rc-r09-after-restart.txt",
+      "source": "/tmp/maya-rc-r09-after-restart.log",
+      "sha256": "c0fefb5c36053a8f9b0cd62e360945c9d2369c85da477b498d15e2506c0b6aaf",
+      "bytes": 136
+    },
+    {
+      "artifact": "maya-rc-r14-before-restart.txt",
+      "source": "/tmp/maya-rc-r14-before-restart.log",
+      "sha256": "f582db141a4fd81358473ad3020be4c06fdbcd264c2ad0233a27db044a90af6a",
+      "bytes": 649
+    },
+    {
+      "artifact": "maya-rc-r13-r10-jest.txt",
+      "source": "/tmp/maya-rc-r13-r10-jest.log",
+      "sha256": "f4a3d872b5ca73fc72d909cc01eaa1138c7175c2d8b32cdc96fd8fd458e3e012",
+      "bytes": 324
+    },
+    {
+      "artifact": "maya-rc-r08-retention.txt",
+      "source": "/tmp/maya-rc-r08-retention.log",
+      "sha256": "d3e72cddb8a60660fd5fc057e456acee989659cfa787bbe66494797041f41792",
+      "bytes": 245
+    },
+    {
+      "artifact": "maya-rc-r12-restart-before.txt",
+      "source": "/tmp/maya-rc-r12-restart-before.log",
+      "sha256": "a5b02ccfd61044fbb0ae74e5a3170aa8d0f294f784ee8ea6cb0e03e1e32b7045",
+      "bytes": 628
+    },
+    {
+      "artifact": "maya-rc-r08-after-restart.txt",
+      "source": "/tmp/maya-rc-r08-after-restart.log",
+      "sha256": "3548f71c3b54bbee1c98b914425882960c2517d81d845539b2fac9733337138f",
+      "bytes": 136
+    },
+    {
+      "artifact": "maya-rc-r14-after-restart.txt",
+      "source": "/tmp/maya-rc-r14-after-restart.log",
+      "sha256": "71f90e809d66740305154ad9fc619b2e253107570aabdf6feba88125fdffa6c3",
+      "bytes": 161
+    },
+    {
+      "artifact": "maya-rc-r13-runtime.txt",
+      "source": "/tmp/maya-rc-r13-runtime.log",
+      "sha256": "5573bb50f5b93038cf3e9821210eb1fb99b5a194b27953dc45b21578ed81b2b2",
+      "bytes": 1121
+    },
+    {
+      "artifact": "maya-rc-r12-restart-after.txt",
+      "source": "/tmp/maya-rc-r12-restart-after.log",
+      "sha256": "8c9ae1b5d57bdbafc0d2c85ec3d42f2f65c89532ca3e9a5fd49ca378e9b93ab9",
+      "bytes": 189
+    },
+    {
+      "artifact": "maya-rc-r12-retention.txt",
+      "source": "/tmp/maya-rc-r12-retention.log",
+      "sha256": "cded9402b46960fa30d97c19646be989a76253f705c07b6e21039328915210f5",
+      "bytes": 273
+    },
+    {
+      "artifact": "maya-rc-r09-runtime.txt",
+      "source": "/tmp/maya-rc-r09-runtime.log",
+      "sha256": "089f1519fda6526136266d088670fe59d9eec4298929f34600c83f72f1f8d629",
+      "bytes": 1044
+    },
+    {
+      "artifact": "maya-rc-r13-after-restart.txt",
+      "source": "/tmp/maya-rc-r13-after-restart.log",
+      "sha256": "fb14a959942ad3a7aa560bc1809d48ae6b5f9ee8bd69902aef15a745495ea376",
+      "bytes": 156
+    }
+  ]
+}

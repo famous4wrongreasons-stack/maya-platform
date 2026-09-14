@@ -1,0 +1,11 @@
+{
+  "beforeSha256": "d5eeaa82f69f6d72c366576797c2920fecd0d27f76262e2c5f4a342f363ddd05",
+  "candidateSha256": "b1006160a28e66448886bdc4b520a2d94021121748259c2cd1aeefda5f1aaaa0",
+  "fixtureSha256": "5b5059f820b6337b59866fd6260f0b3fef87e65db8f969e7f4e7a9537619dd7e",
+  "directBookRecord": false,
+  "exactCertifiedResult": true,
+  "changedCaseOnly": true,
+  "productionAccepted": false,
+  "productionWrites": 0,
+  "unknownAliasStillBlocks": true
+}

@@ -17,7 +17,11 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { CalendarSource } from '../../common/domain.enums';
+import {
+  CalendarSource,
+  CrmProvider,
+  UserRole,
+} from '../../common/domain.enums';
 import { BUSINESS_TEMPLATE_IDS } from '../business-templates';
 
 export class CreateAiOnboardingDraftDto {
@@ -64,6 +68,34 @@ export class ReadAiOnboardingDraftDto {
   draftToken!: string;
 }
 
+export class DiscoverAiOnboardingCrmDto {
+  @ApiProperty()
+  @IsString()
+  @MinLength(32)
+  draftToken!: string;
+
+  @ApiProperty({ enum: CrmProvider })
+  @IsEnum(CrmProvider)
+  provider!: CrmProvider;
+
+  @ApiProperty({
+    description:
+      'CRM credential used only for discovery. It is not persisted in the onboarding draft.',
+  })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(4096)
+  apiToken!: string;
+}
+
+export class ImportAiOnboardingCrmDto extends DiscoverAiOnboardingCrmDto {
+  @ApiProperty({ example: '503759' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  companyId!: string;
+}
+
 export class AiOnboardingServiceDto {
   @ApiProperty({ example: 'Мужская стрижка' })
   @IsString()
@@ -103,7 +135,51 @@ export class AiOnboardingWeeklyRuleDto {
   endTime!: string;
 }
 
+const ONBOARDING_TEAM_ROLES = [UserRole.ADMINISTRATOR, UserRole.STAFF] as const;
+
+export class AiOnboardingTeamMemberDto {
+  @ApiProperty({ example: '12345' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  externalStaffId!: string;
+
+  @ApiProperty({ example: 'Илья Третьяков' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  displayName!: string;
+
+  @ApiPropertyOptional({ example: 'Барбер' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  title?: string;
+
+  @ApiProperty({ enum: ONBOARDING_TEAM_ROLES, example: UserRole.STAFF })
+  @IsIn(ONBOARDING_TEAM_ROLES)
+  role!: (typeof ONBOARDING_TEAM_ROLES)[number];
+
+  @ApiPropertyOptional({ example: 'barber@example.ru' })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiPropertyOptional({ example: '+79990000000' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^(?=(?:\D*\d){10,15}\D*$)\+?[\d\s().-]+$/)
+  phone?: string;
+}
+
 export class ConfirmAiOnboardingDraftDto {
+  @ApiProperty({
+    description: 'Exact server revision shown in the approved preview',
+  })
+  @IsInt()
+  @Min(0)
+  expectedDraftRevision!: number;
+
   @ApiProperty()
   @IsString()
   @MinLength(32)
@@ -136,6 +212,25 @@ export class ConfirmAiOnboardingDraftDto {
   @IsString()
   @Matches(/^(?=(?:\D*\d){10,15}\D*$)\+?[\d\s().-]+$/)
   ownerPhone!: string;
+
+  @ApiPropertyOptional({
+    example: '12345',
+    description:
+      'CRM staff identity that belongs to the owner. The owner role itself is immutable during onboarding.',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  ownerExternalStaffId?: string;
+
+  @ApiPropertyOptional({ type: [AiOnboardingTeamMemberDto] })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(30)
+  @ValidateNested({ each: true })
+  @Type(() => AiOnboardingTeamMemberDto)
+  teamMembers?: AiOnboardingTeamMemberDto[];
 
   @ApiPropertyOptional()
   @IsOptional()

@@ -1,0 +1,54 @@
+{
+  "status": "CONFIRMED B36",
+  "sourceMatches": [
+    {
+      "function": "webhook_server.py:_send_client_push",
+      "productionMatch": true,
+      "unchangedByB35": true
+    },
+    {
+      "function": "webhook_server.py:install_staff_telegram_chat_mirror",
+      "productionMatch": true,
+      "unchangedByB35": true
+    },
+    {
+      "function": "bot.py:_fmt_rub",
+      "productionMatch": true,
+      "unchangedByB35": true
+    },
+    {
+      "function": "bot.py:_daily_report_job",
+      "productionMatch": true,
+      "unchangedByB35": true
+    }
+  ],
+  "existingPackage2Ratchet": {
+    "repository": {
+      "canonicalCallPresent": true,
+      "forbiddenCalls": [],
+      "ratchetPass": true
+    },
+    "activeProduction": {
+      "canonicalCallPresent": true,
+      "forbiddenCalls": [
+        "_send_client_push",
+        "send_message"
+      ],
+      "ratchetPass": false
+    }
+  },
+  "activeUnit": {
+    "MainPID": "1585542",
+    "ActiveState": "active",
+    "ActiveEnterTimestamp": "Mon 2026-09-07 15:22:14 MSK",
+    "botEntry": true,
+    "dailyReportJobRegisteredInCurrentStart": true,
+    "schedulerStartedInCurrentStart": true,
+    "telegramApplicationStarted": true,
+    "degradedNotice": false
+  },
+  "sourceSelectorRows": 2,
+  "canonicalAdmissionsBeforeFirstSend": 0,
+  "syntheticProviderOperations": 8,
+  "productionMutations": 0
+}

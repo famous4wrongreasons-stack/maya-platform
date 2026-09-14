@@ -4,6 +4,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import QRCode from 'qrcode';
 import sharp from 'sharp';
 
 import { BrandingService } from '../branding/branding.service';
@@ -51,20 +52,77 @@ export class TenantPwaService {
     const slug = config.slug;
     const manifestPath = `/api/mobile/pwa/${encodeURIComponent(slug)}/manifest.webmanifest`;
     const customIcon = this.getLocalLogoFilename(config) !== null;
+    const encodedSlug = encodeURIComponent(slug);
+    const smartUrl = this.buildStartUrl(slug);
 
     return {
       tenant_slug: slug,
       app_name: this.resolveAppName(config),
+      city: config.brand.city,
+      address: config.brand.address,
+      logo_url: config.brand.logo_url,
       enabled: true,
-      installable: config.active,
+      installable: config.active && config.guest_access_ready === true,
+      guest_access_ready: config.guest_access_ready === true,
       manifest_url: manifestPath,
       apple_touch_icon_url: customIcon
-        ? `/api/mobile/pwa/${encodeURIComponent(slug)}/icon/180.png`
+        ? `/api/mobile/pwa/${encodedSlug}/icon/180.png`
         : '/apple-touch-icon.png',
-      start_url: this.buildStartUrl(slug),
+      start_url: smartUrl,
+      smart_url: smartUrl,
+      nfc_url: smartUrl,
+      qr_url: `/api/mobile/pwa/${encodedSlug}/qr.svg`,
       has_custom_icon: customIcon,
       native_app_icon_policy: 'maya_brand_only',
     };
+  }
+
+  async searchBusinesses(rawQuery: string, rawCity?: string) {
+    this.assertEnabled();
+    const configs = await this.tenantsService.searchPublicMobileConfigs(
+      rawQuery,
+      rawCity,
+    );
+
+    return {
+      query: rawQuery.trim(),
+      items: configs.map((config) => ({
+        tenant_slug: config.slug,
+        name: this.resolveAppName(config),
+        city: config.brand.city,
+        address: config.brand.address,
+        logo_url: config.brand.logo_url,
+        icon_url: this.getLocalLogoFilename(config)
+          ? `/api/mobile/pwa/${encodeURIComponent(config.slug)}/icon/192.png`
+          : null,
+        smart_url: this.buildStartUrl(config.slug),
+      })),
+    };
+  }
+
+  async renderQrSvg(tenantSlug: string): Promise<string> {
+    const metadata = await this.getInstallMetadata(tenantSlug);
+
+    if (!metadata.installable) {
+      throw new ServiceUnavailableException({
+        message: 'This business is not ready to accept clients yet.',
+        error: {
+          code: 'tenant_client_access_not_ready',
+          message: 'This business is not ready to accept clients yet.',
+        },
+      });
+    }
+
+    return QRCode.toString(metadata.smart_url, {
+      type: 'svg',
+      errorCorrectionLevel: 'H',
+      margin: 2,
+      width: 512,
+      color: {
+        dark: '#000000',
+        light: '#ffffff',
+      },
+    });
   }
 
   async getManifest(tenantSlug: string): Promise<TenantPwaManifest> {

@@ -1,0 +1,26 @@
+PASS month start inclusive/end exclusive, tenant-local timezone, exact branch and tenant
+PASS Staff/Client/Appointment exact native scope supports Client without Maya User
+PASS observed average/count delta uses its same source and exact denominator
+PASS current correction remains in original response month and records later observation
+PASS withdrawal supersedes current result without resurrecting earlier responses or rewriting snapshots
+PASS more than 1000 reviews use bounded aggregate receipts and retain no text or individual source copies
+PASS partial current local month comparison remains not measured
+PASS pending exact Appointment reputation receipt closes unavailable after canonical Client correction
+PASS source-family overflow publishes unavailable and supersedes the earlier aggregate without a pending loop
+{
+  "package": "C7-P05",
+  "checks": [
+    "month start inclusive/end exclusive, tenant-local timezone, exact branch and tenant",
+    "Staff/Client/Appointment exact native scope supports Client without Maya User",
+    "observed average/count delta uses its same source and exact denominator",
+    "current correction remains in original response month and records later observation",
+    "withdrawal supersedes current result without resurrecting earlier responses or rewriting snapshots",
+    "more than 1000 reviews use bounded aggregate receipts and retain no text or individual source copies",
+    "partial current local month comparison remains not measured",
+    "pending exact Appointment reputation receipt closes unavailable after canonical Client correction",
+    "source-family overflow publishes unavailable and supersedes the earlier aggregate without a pending loop"
+  ],
+  "productionEffects": 0,
+  "providerWrites": 0,
+  "schemaChanges": 0
+}

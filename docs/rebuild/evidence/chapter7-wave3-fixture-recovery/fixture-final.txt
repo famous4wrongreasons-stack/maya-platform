@@ -1,0 +1,9 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent --runTestsByPath src/action-engine/beget-relay-fixture.architecture.spec.ts
+
+
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        0.187 s, estimated 1 s

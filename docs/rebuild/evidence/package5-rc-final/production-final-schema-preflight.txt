@@ -1,0 +1,15 @@
+Welcome to LTD BeGet SSH Server 'prime'
+{
+  "ok": true,
+  "environment": "production",
+  "config": "safe",
+  "local_migrations": 93,
+  "database": {
+    "status": "ready",
+    "applied_migrations": 96,
+    "pending_migrations": 0
+  }
+}
+Loaded Prisma config from prisma.config.ts.
+
+No difference detected.

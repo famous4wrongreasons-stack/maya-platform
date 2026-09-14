@@ -1,12 +1,12 @@
-import { NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 
 import { TenantStatus } from '../common/domain.enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantAccessStateService } from './tenant-access-state.service';
 
-describe('TenantAccessStateService', () => {
+describe('TenantAccessStateService P4-08 ownership fence', () => {
   const now = new Date('2026-07-13T12:00:00.000Z');
-  const expiredTrial = () => ({
+  const expiredTrial = {
     id: 'tenant-1',
     status: TenantStatus.TRIAL,
     trialEndsAt: new Date('2026-07-13T11:00:00.000Z'),
@@ -14,96 +14,61 @@ describe('TenantAccessStateService', () => {
     currentPeriodEnd: null,
     pastDueAt: null,
     graceEndsAt: null,
-    updatedAt: new Date('2026-07-13T11:30:00.000Z'),
-  });
+  };
 
-  it('persists the grace window with an optimistic lifecycle update', async () => {
-    const tenant = expiredTrial();
-    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+  it('evaluates an expired window without becoming an entitlement writer', async () => {
+    const updateMany = jest.fn();
     const prisma = {
       tenant: {
-        findUnique: jest.fn().mockResolvedValue(tenant),
+        findUnique: jest.fn().mockResolvedValue(expiredTrial),
         updateMany,
       },
     } as unknown as PrismaService;
-    const service = new TenantAccessStateService(prisma);
 
-    const state = await service.getAndSync(tenant.id, now);
+    const state = await new TenantAccessStateService(prisma).getAndSync(
+      expiredTrial.id,
+      now,
+    );
 
     expect(state).toMatchObject({
+      tenantStatus: TenantStatus.PAST_DUE,
       accessState: 'past_due_grace',
-      pastDueAt: tenant.trialEndsAt,
+      shouldMarkPastDue: true,
+      pastDueAt: expiredTrial.trialEndsAt,
       graceEndsAt: new Date('2026-07-16T11:00:00.000Z'),
-      subscriptionRequired: false,
     });
-    expect(updateMany).toHaveBeenCalledWith({
-      where: {
-        id: tenant.id,
-        status: TenantStatus.TRIAL,
-        updatedAt: tenant.updatedAt,
-      },
-      data: {
-        status: TenantStatus.PAST_DUE,
-        trialFullAccess: false,
-        pastDueAt: tenant.trialEndsAt,
-        graceEndsAt: new Date('2026-07-16T11:00:00.000Z'),
-      },
-    });
+    expect(updateMany).not.toHaveBeenCalled();
   });
 
-  it('re-reads a concurrently persisted grace window instead of replacing it', async () => {
-    const tenant = expiredTrial();
-    const persisted = {
-      ...tenant,
-      status: TenantStatus.PAST_DUE,
-      trialFullAccess: false,
-      pastDueAt: tenant.trialEndsAt,
-      graceEndsAt: new Date('2026-07-16T11:00:00.000Z'),
-      updatedAt: new Date('2026-07-13T12:00:00.000Z'),
-    };
-    const findUnique = jest
-      .fn()
-      .mockResolvedValueOnce(tenant)
-      .mockResolvedValueOnce(persisted);
-    const updateMany = jest.fn().mockResolvedValue({ count: 0 });
-    const prisma = {
-      tenant: { findUnique, updateMany },
-    } as unknown as PrismaService;
-    const service = new TenantAccessStateService(prisma);
-
-    const state = await service.getAndSync(tenant.id, now);
-
-    expect(state.pastDueAt).toEqual(persisted.pastDueAt);
-    expect(state.graceEndsAt).toEqual(persisted.graceEndsAt);
-    expect(findUnique).toHaveBeenCalledTimes(2);
-    expect(updateMany).toHaveBeenCalledTimes(1);
-  });
-
-  it('fails closed after repeated synchronization conflicts', async () => {
-    const tenant = expiredTrial();
+  it('projects an already durable access state without rewriting it', async () => {
+    const updateMany = jest.fn();
     const prisma = {
       tenant: {
-        findUnique: jest.fn().mockResolvedValue(tenant),
-        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        findUnique: jest.fn().mockResolvedValue({
+          ...expiredTrial,
+          status: TenantStatus.PAST_DUE,
+          trialFullAccess: false,
+          pastDueAt: expiredTrial.trialEndsAt,
+          graceEndsAt: new Date('2026-07-16T11:00:00.000Z'),
+        }),
+        updateMany,
       },
     } as unknown as PrismaService;
-    const service = new TenantAccessStateService(prisma);
 
-    await expect(service.getAndSync(tenant.id, now)).rejects.toBeInstanceOf(
-      ServiceUnavailableException,
+    const state = await new TenantAccessStateService(prisma).getAndSync(
+      expiredTrial.id,
+      now,
     );
+    expect(state.tenantStatus).toBe(TenantStatus.PAST_DUE);
+    expect(updateMany).not.toHaveBeenCalled();
   });
 
   it('rejects an unknown tenant', async () => {
     const prisma = {
-      tenant: {
-        findUnique: jest.fn().mockResolvedValue(null),
-      },
+      tenant: { findUnique: jest.fn().mockResolvedValue(null) },
     } as unknown as PrismaService;
-    const service = new TenantAccessStateService(prisma);
-
-    await expect(service.getAndSync('missing', now)).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(
+      new TenantAccessStateService(prisma).getAndSync('missing', now),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 });

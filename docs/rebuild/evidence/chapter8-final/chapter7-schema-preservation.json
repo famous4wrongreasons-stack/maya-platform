@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "columns": 37,
+  "functions": 4,
+  "exactConstraints": true,
+  "exactIndexes": true,
+  "exactTriggers": true,
+  "productionEffects": 0
+}

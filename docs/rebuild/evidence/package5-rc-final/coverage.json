@@ -1,0 +1,992 @@
+{
+  "contract": "package5.final-completion-coverage/1",
+  "started": true,
+  "requires": "8/8 R-C production PASS; 24/24 blockers and 14/14 packages remediated",
+  "sourceInventorySha256": "f0d29c9f60c4699c1458b383b86decf0fb26aef5ee56e89a2d9a89b6b62df425",
+  "families": {
+    "1": [
+      "A22",
+      "A23"
+    ],
+    "2": [
+      "A16",
+      "A25",
+      "A26"
+    ],
+    "3": [
+      "A15",
+      "A17",
+      "A18"
+    ],
+    "4": [
+      "reduced A27",
+      "A28"
+    ],
+    "5": [
+      "A29",
+      "A31"
+    ],
+    "6": [
+      "A30"
+    ]
+  },
+  "surfaces": [
+    {
+      "id": "S01",
+      "name": "Backend HTTP routes",
+      "coverage": "Closed S01 Nest route inventory plus approved R-C canonical replacements; source-matched controllers, guards and canonical cutovers",
+      "findings": "B36 B43 B49 B50",
+      "status": "PASS",
+      "knownBlockers": [
+        "B36",
+        "B43",
+        "B49",
+        "B50"
+      ],
+      "remediationPackages": [
+        "R05",
+        "R06",
+        "R10"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S02",
+      "name": "Active salon PWA",
+      "coverage": "app/index.html + retained reachable PWA variants; PHP callers",
+      "findings": "B38 B41 B42 B43 B54 B58",
+      "status": "PASS",
+      "knownBlockers": [
+        "B38",
+        "B41",
+        "B42",
+        "B43",
+        "B54",
+        "B58"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R04",
+        "R05",
+        "R12"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-edge-verify.json",
+        "production-runtime-verify.jsonl",
+        "../package5-rc-policy-approved/manifest.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S03",
+      "name": "Maya platform PWA / VPS static",
+      "coverage": "VPS app.html and mayaos/app/index.html, OAuth callbacks, service workers",
+      "findings": "B38 B54",
+      "status": "PASS",
+      "knownBlockers": [
+        "B38",
+        "B54"
+      ],
+      "remediationPackages": [
+        "R01"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-edge-verify.json",
+        "production-runtime-verify.jsonl",
+        "../package5-rc-policy-approved/manifest.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S04",
+      "name": "Public site / Next / shop",
+      "coverage": "All acquired public HTML/JS; checkout/account, public booking, community routes",
+      "findings": "B38 B52",
+      "status": "PASS",
+      "knownBlockers": [
+        "B38",
+        "B52"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R09"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-edge-verify.json",
+        "production-runtime-verify.jsonl",
+        "../package5-rc-policy-approved/manifest.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S05",
+      "name": "Proxy / compatibility routes",
+      "coverage": "11 PHP files; archive-named proxy not denied by inspected .htaccess",
+      "findings": "B38 B41 B54 B58",
+      "status": "PASS",
+      "knownBlockers": [
+        "B38",
+        "B41",
+        "B54",
+        "B58"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R12"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-edge-verify.json",
+        "production-runtime-verify.jsonl",
+        "../package5-rc-policy-approved/manifest.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S06",
+      "name": "Chat / stream / history",
+      "coverage": "Nest AI + Python chat/stream/history, native shared conversation state",
+      "findings": "B39 B41 B42 B50 B51 B53 B58",
+      "status": "PASS",
+      "knownBlockers": [
+        "B39",
+        "B41",
+        "B42",
+        "B50",
+        "B51",
+        "B53",
+        "B58"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R04",
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S07",
+      "name": "Realtime / voice",
+      "coverage": "realtime_bridge, voice, stream tool routing; STT/TTS as protocol transport",
+      "findings": "B39 B41 B50 B51 B56",
+      "status": "PASS",
+      "knownBlockers": [
+        "B39",
+        "B41",
+        "B50",
+        "B51",
+        "B56"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R03",
+        "R10",
+        "R11"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S08",
+      "name": "AI tools",
+      "coverage": "TypeScript handlers/runtime and Python role/confirmation dispatch",
+      "findings": "B39 B42 B50 B51 B56",
+      "status": "PASS",
+      "knownBlockers": [
+        "B39",
+        "B42",
+        "B50",
+        "B51",
+        "B56"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R03",
+        "R04",
+        "R10",
+        "R11"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S09",
+      "name": "Journal",
+      "coverage": "Canonical staff journal, legacy read guards and retired mutations",
+      "findings": "B41 B42",
+      "status": "PASS",
+      "knownBlockers": [
+        "B41",
+        "B42"
+      ],
+      "remediationPackages": [
+        "R02",
+        "R04"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S10",
+      "name": "Python services / importers",
+      "coverage": "71 acquired current root sources, 72 root metadata entries including config example; imports/callers; 24 archived copies separated",
+      "findings": "B37 B39 B40 B41 B42 B43 B44 B45 B46 B47 B48 B51 B52 B53 B55 B56 B57 B58 B59",
+      "status": "PASS",
+      "knownBlockers": [
+        "B37",
+        "B39",
+        "B40",
+        "B41",
+        "B42",
+        "B43",
+        "B44",
+        "B45",
+        "B46",
+        "B47",
+        "B48",
+        "B51",
+        "B52",
+        "B53",
+        "B55",
+        "B56",
+        "B57",
+        "B58",
+        "B59"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-runtime-verify.jsonl",
+        "final-runtime-launchers.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S11",
+      "name": "Schedulers",
+      "coverage": "Nest scheduler registrations/flags and live bot APScheduler registrations",
+      "findings": "B36 B37 B42 B43 B44 B45 B46 B47 B57",
+      "status": "PASS",
+      "stage3Evidence": "package5-stage3-scheduled-jobs.json; package5-stage3-runtime-metadata.json; package5-stage3-mechanic-dispositions.json",
+      "knownBlockers": [
+        "B36",
+        "B37",
+        "B42",
+        "B43",
+        "B44",
+        "B45",
+        "B46",
+        "B47",
+        "B57"
+      ],
+      "remediationPackages": [
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R13"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-runtime-verify.jsonl",
+        "final-runtime-launchers.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S12",
+      "name": "VPS cron / timers",
+      "coverage": "root/botadmin no-crontab proved; system tables, cron directories and timers inspected",
+      "findings": "NONE additional",
+      "status": "PASS",
+      "stage3Evidence": "package5-stage3-scheduled-jobs.json; package5-stage3-runtime-metadata.json; package5-stage3-mechanic-dispositions.json",
+      "knownBlockers": [],
+      "remediationPackages": [],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-runtime-verify.jsonl",
+        "final-runtime-launchers.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S13",
+      "name": "Beget cron / hosting scheduled tasks",
+      "coverage": "Owner screenshot: unfiltered Beget configured-command table explicitly empty; enabled 0, disabled 0; no command targets/parameters to inspect.",
+      "findings": "NONE",
+      "status": "PASS",
+      "stage3Evidence": "Historical denied-read/UI limitation preserved in package5-stage3-beget-scheduling.json and package5-stage3-beget-control-plane.json; superseded for coverage by owner screenshot, not rewritten as a successful SSH read.",
+      "closureEvidence": "package5-s13-owner-evidence.json; package5-s13-closure-pass.json",
+      "knownBlockers": [],
+      "remediationPackages": [],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "../package5-s13-owner-evidence.json",
+        "../package5-s13-closure-pass.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S14",
+      "name": "Background workers / installed operator CLIs",
+      "coverage": "Live units/processes, observer, 15 dist/scripts plus seed CLI; manual versus automatic distinguished",
+      "findings": "B42 B43 B44 B46 B48 B58",
+      "status": "PASS",
+      "stage3Evidence": "package5-stage3-scheduled-jobs.json; package5-stage3-runtime-metadata.json; package5-stage3-mechanic-dispositions.json",
+      "knownBlockers": [
+        "B42",
+        "B43",
+        "B44",
+        "B46",
+        "B48",
+        "B58"
+      ],
+      "remediationPackages": [
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R12"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-runtime-verify.jsonl",
+        "final-runtime-launchers.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S15",
+      "name": "Telegram handlers / commands / replies",
+      "coverage": "Active bot.py, command/callback/message handlers, global send observation patch",
+      "findings": "B37 B39 B40 B41 B43 B44 B45 B46 B47 B53 B55 B56 B57 B59",
+      "status": "PASS",
+      "knownBlockers": [
+        "B37",
+        "B39",
+        "B40",
+        "B41",
+        "B43",
+        "B44",
+        "B45",
+        "B46",
+        "B47",
+        "B53",
+        "B55",
+        "B56",
+        "B57",
+        "B59"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R03",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-runtime-verify.jsonl",
+        "final-runtime-launchers.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S16",
+      "name": "Inbox",
+      "coverage": "Ingest, publish, consumption/projection, default versus canonical single delivery",
+      "findings": "B36 B43 B49",
+      "status": "PASS",
+      "knownBlockers": [
+        "B36",
+        "B43",
+        "B49"
+      ],
+      "remediationPackages": [
+        "R05",
+        "R06"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-runtime-verify.jsonl",
+        "final-runtime-launchers.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S17",
+      "name": "APNS",
+      "coverage": "Exact transport callers and default direct branch; token protocol registration",
+      "findings": "B36 B43 B49",
+      "status": "PASS",
+      "knownBlockers": [
+        "B36",
+        "B43",
+        "B49"
+      ],
+      "remediationPackages": [
+        "R05",
+        "R06"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-runtime-verify.jsonl",
+        "final-runtime-launchers.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S18",
+      "name": "Web Push",
+      "coverage": "Canonical endpoint binding/transport; disabled legacy no-op helpers; public push service workers",
+      "findings": "B44 B57 B58 upstream delivery paths; no new active direct legacy Web Push sender",
+      "status": "PASS",
+      "knownBlockers": [
+        "B44",
+        "B57",
+        "B58"
+      ],
+      "remediationPackages": [
+        "R06",
+        "R07",
+        "R12"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-runtime-verify.jsonl",
+        "final-runtime-launchers.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S19",
+      "name": "Communication Delivery",
+      "coverage": "Single/bulk admissions, attempts, reconciliation, UNKNOWN and direct callers",
+      "findings": "B36 B43 B44 B45 B46 B47 B48 B49 B57 B58",
+      "status": "PASS",
+      "knownBlockers": [
+        "B36",
+        "B43",
+        "B44",
+        "B45",
+        "B46",
+        "B47",
+        "B48",
+        "B49",
+        "B57",
+        "B58"
+      ],
+      "remediationPackages": [
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R12"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-runtime-verify.jsonl",
+        "final-runtime-launchers.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S20",
+      "name": "Panel / GOD / admin",
+      "coverage": "Canonical platform APIs; legacy role resolver, readers, controls, PDF, job dispatch",
+      "findings": "B37 B41 B42 B43 B44 B46 B51 B55 B58",
+      "status": "PASS",
+      "knownBlockers": [
+        "B37",
+        "B41",
+        "B42",
+        "B43",
+        "B44",
+        "B46",
+        "B51",
+        "B55",
+        "B58"
+      ],
+      "remediationPackages": [
+        "R02",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S21",
+      "name": "Internal calendar",
+      "coverage": "Canonical create and Wave4 configuration executor; unused bootstrap helpers distinguished",
+      "findings": "NONE additional",
+      "status": "PASS",
+      "knownBlockers": [],
+      "remediationPackages": [],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S22",
+      "name": "CRM / YClients adapters / helpers",
+      "coverage": "Approved fact/recheck/mirror flows; every Python and TS provider write helper traced",
+      "findings": "B38 B39 B48 B56",
+      "status": "PASS",
+      "knownBlockers": [
+        "B38",
+        "B39",
+        "B48",
+        "B56"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R03",
+        "R06"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S23",
+      "name": "Marketing / bulk",
+      "coverage": "B35 canonical owner and remaining native scheduled/manual consumers",
+      "findings": "B46 B57",
+      "status": "PASS",
+      "knownBlockers": [
+        "B46",
+        "B57"
+      ],
+      "remediationPackages": [
+        "R07"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-runtime-verify.jsonl",
+        "final-runtime-launchers.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S24",
+      "name": "Finance / expense",
+      "coverage": "P407/P408 canonical paths, raw weekly intake, cash declaration; deferred payment tombstones",
+      "findings": "B37 B55",
+      "status": "PASS",
+      "knownBlockers": [
+        "B37",
+        "B55"
+      ],
+      "remediationPackages": [
+        "R13",
+        "R14"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S25",
+      "name": "Loyalty / value / certificates",
+      "coverage": "P403–P410 executors; Python lower guards, renewal branch and blocked mint call chains",
+      "findings": "B37 B57; native value mint/provider purchase bypass not proved",
+      "status": "PASS",
+      "knownBlockers": [
+        "B37",
+        "B57"
+      ],
+      "remediationPackages": [
+        "R07",
+        "R13"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S26",
+      "name": "Reviews",
+      "coverage": "B34 external import preserved; native pending feedback callbacks and community moderation",
+      "findings": "B47 B52",
+      "status": "PASS",
+      "knownBlockers": [
+        "B47",
+        "B52"
+      ],
+      "remediationPackages": [
+        "R08",
+        "R09"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S27",
+      "name": "Onboarding",
+      "coverage": "Canonical trial admission/AI receipt/bootstrap; legacy disabled trial setters",
+      "findings": "NONE additional",
+      "status": "PASS",
+      "knownBlockers": [],
+      "remediationPackages": [],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S28",
+      "name": "Auth / identity",
+      "coverage": "Canonical AC3 protocols, verified Client/staff links; legacy raw owner and staff gates",
+      "findings": "B39 B40 B41 B59",
+      "status": "PASS",
+      "knownBlockers": [
+        "B39",
+        "B40",
+        "B41",
+        "B59"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R11"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S29",
+      "name": "Maintenance",
+      "coverage": "Wave6 allowlist/coordinator; retired AI/PII execute; persistent media versus speech scratch",
+      "findings": "B53 B58",
+      "status": "PASS",
+      "knownBlockers": [
+        "B53",
+        "B58"
+      ],
+      "remediationPackages": [
+        "R12"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S30",
+      "name": "All direct database writer candidates",
+      "coverage": "106 SQL candidate functions + all TS candidate callsites, raw SQL and explicit exclusions",
+      "findings": "B37 B39 B40 B41 B42 B47 B49 B51 B52 B53 B55 B57 B58 B59",
+      "status": "PASS",
+      "knownBlockers": [
+        "B37",
+        "B39",
+        "B40",
+        "B41",
+        "B42",
+        "B47",
+        "B49",
+        "B51",
+        "B52",
+        "B53",
+        "B55",
+        "B57",
+        "B58",
+        "B59"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R04",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S31",
+      "name": "All direct provider / delivery candidates",
+      "coverage": "Reverse sink scan to every acquired route, command, scheduler and helper caller",
+      "findings": "B36 B38 B43 B44 B45 B46 B47 B48 B49 B56 B57 B58",
+      "status": "PASS",
+      "knownBlockers": [
+        "B36",
+        "B38",
+        "B43",
+        "B44",
+        "B45",
+        "B46",
+        "B47",
+        "B48",
+        "B49",
+        "B56",
+        "B57",
+        "B58"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R03",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R12"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    },
+    {
+      "id": "S32",
+      "name": "Legacy identity / projection fallbacks",
+      "coverage": "Phone, raw Telegram, legacy web session, User/Client distinction; no source fact elevated to authority",
+      "findings": "B37 B38 B39 B40 B41 B44 B47 B51 B52 B55 B56 B57 B58 B59",
+      "status": "PASS",
+      "knownBlockers": [
+        "B37",
+        "B38",
+        "B39",
+        "B40",
+        "B41",
+        "B44",
+        "B47",
+        "B51",
+        "B52",
+        "B55",
+        "B56",
+        "B57",
+        "B58",
+        "B59"
+      ],
+      "remediationPackages": [
+        "R01",
+        "R02",
+        "R03",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "evidence": [
+        "final-surface-comparison.json",
+        "architectural-gate.json",
+        "production-compiled-proof.json",
+        "production-final-security-preservation.json"
+      ],
+      "historicalInventoryFindingsRetained": true
+    }
+  ],
+  "realProductionCommands": 0,
+  "status": "PASS",
+  "completed": true,
+  "completedAt": "2026-09-08T12:57:32.069629+00:00",
+  "productionAcceptanceBeforeFinalGate": true,
+  "productionRuntimeRevision": "8bc03454",
+  "familyCoverage": "13/13",
+  "productionSurfaceCoverage": "32/32",
+  "knownRemainderBlockers": 0,
+  "inventoryDefect": false,
+  "familyProofs": [
+    {
+      "wave": "1",
+      "families": [
+        "A22",
+        "A23"
+      ],
+      "status": "PASS",
+      "evidence": "final-family-wave1.txt"
+    },
+    {
+      "wave": "2",
+      "families": [
+        "A16",
+        "A25",
+        "A26"
+      ],
+      "status": "PASS",
+      "evidence": "final-family-wave2.txt"
+    },
+    {
+      "wave": "3",
+      "families": [
+        "A15",
+        "A17",
+        "A18"
+      ],
+      "status": "PASS",
+      "evidence": "final-family-wave3.txt"
+    },
+    {
+      "wave": "4",
+      "families": [
+        "reduced A27",
+        "A28"
+      ],
+      "status": "PASS",
+      "evidence": "final-family-wave4.txt"
+    },
+    {
+      "wave": "5",
+      "families": [
+        "A29",
+        "A31"
+      ],
+      "status": "PASS",
+      "evidence": "final-family-wave5.txt"
+    },
+    {
+      "wave": "6",
+      "families": [
+        "A30"
+      ],
+      "status": "PASS",
+      "evidence": "final-family-wave6-fixture2.txt"
+    }
+  ],
+  "approvedRCPayloadClassProofs": {
+    "purge_operational_alert_payloads": "final-r06-retention.txt",
+    "purge_native_feedback_payloads": "final-r08-retention.txt",
+    "purge_public_community_payloads": "final-r09-retention.txt",
+    "purge_superseded_business_configuration_payloads": "final-r11-runtime.txt",
+    "purge_team_message_payloads": "final-r12-retention.txt",
+    "purge_team_attachment_payloads": "final-r12-retention.txt",
+    "purge_expense_reminder_payloads": "final-r13-retention.txt",
+    "purge_cash_declaration_reason_payloads": "final-r14-runtime.txt"
+  },
+  "r05ExistingRetentionProof": "final-r05-retention.txt"
+}

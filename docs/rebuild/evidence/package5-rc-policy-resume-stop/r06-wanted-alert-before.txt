@@ -1,0 +1,12 @@
+(node:2345) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+{
+  "package": "R06",
+  "scope": "B44 wanted alert/partial resume/UNKNOWN",
+  "result": "PASS",
+  "checks": [
+    "Client without Maya User uses verified canonical link/confirmed B9 intent; exact branch admin audience; lost Inbox reply UNKNOWN while other recipient succeeds",
+    "durable UNKNOWN retained for actual PostgreSQL restart"
+  ],
+  "productionEffects": 0
+}

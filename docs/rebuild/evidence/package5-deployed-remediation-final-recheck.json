@@ -1,0 +1,3781 @@
+{
+  "acceptedCheckpoint": "03c1c3a7",
+  "sourceCommit": "945430566423fbd6db86b4ebd14f2588f598b9bb",
+  "deployedRelease": "20260904-p5-final-remediation-94543056",
+  "approvedRemediationDeployed": true,
+  "targetedProductionVerification": "PASS",
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "repositoryMigrations": 73,
+  "productionMigrationRecords": 76,
+  "finalGate": "FAIL — new inventory bypass B5/B6; mandatory STOP",
+  "acceptedWaves": 6,
+  "familyInventory": [
+    "A15",
+    "A16",
+    "A17",
+    "A18",
+    "A22",
+    "A23",
+    "A25",
+    "A26",
+    "A27",
+    "A28",
+    "A29",
+    "A30",
+    "A31"
+  ],
+  "globalCanonicalCoverageProven": false,
+  "finalRegression": "NOT RUN after new blocking inventory; remediation regression remains PASS",
+  "productionBusinessProviderMutationsForProof": 0,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "deployedInventory": [
+    {
+      "kind": "registry",
+      "release": "/opt/maya-saas/releases/20260904-p5-final-remediation-94543056",
+      "waves": [
+        {
+          "wave": 1,
+          "rows": [
+            {
+              "operation": "assistant_preferences",
+              "actionClass": "update_assistant_preferences",
+              "targetKind": "setting",
+              "shadowCapability": "package5.settings.assistant.shadow.v1",
+              "executableCapability": "package5.settings.assistant.execute.v1",
+              "allowedSourceTypes": [
+                "authenticated_request",
+                "legacy_bridge",
+                "synthetic_shadow"
+              ],
+              "actualRegistry": {
+                "capability": "package5.settings.assistant.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_assistant_preferences",
+                "normalizedInputContract": "maya.package5-wave1-local-command-input/1",
+                "targetKind": "setting",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "local",
+                  "one_target",
+                  "server_derived_authority",
+                  "configuration",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave1.update_assistant_preferences.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave1.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 1,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": []
+                },
+                "reconciliation": {
+                  "key": "package5.wave1.local-not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave1.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "finance_preferences",
+              "actionClass": "update_finance_dashboard_preferences",
+              "targetKind": "setting",
+              "shadowCapability": "package5.settings.finance.shadow.v1",
+              "executableCapability": "package5.settings.finance.execute.v1",
+              "allowedSourceTypes": [
+                "authenticated_request",
+                "legacy_bridge",
+                "synthetic_shadow"
+              ],
+              "actualRegistry": {
+                "capability": "package5.settings.finance.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_finance_dashboard_preferences",
+                "normalizedInputContract": "maya.package5-wave1-local-command-input/1",
+                "targetKind": "setting",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "local",
+                  "one_target",
+                  "server_derived_authority",
+                  "configuration",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave1.update_finance_dashboard_preferences.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave1.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 1,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": []
+                },
+                "reconciliation": {
+                  "key": "package5.wave1.local-not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave1.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "appointment_notifications",
+              "actionClass": "update_appointment_notification_settings",
+              "targetKind": "setting",
+              "shadowCapability": "package5.settings.appointment-notifications.shadow.v1",
+              "executableCapability": "package5.settings.appointment-notifications.execute.v1",
+              "allowedSourceTypes": [
+                "authenticated_request",
+                "legacy_bridge",
+                "synthetic_shadow"
+              ],
+              "actualRegistry": {
+                "capability": "package5.settings.appointment-notifications.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_appointment_notification_settings",
+                "normalizedInputContract": "maya.package5-wave1-local-command-input/1",
+                "targetKind": "setting",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "local",
+                  "one_target",
+                  "server_derived_authority",
+                  "configuration",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave1.update_appointment_notification_settings.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave1.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 1,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": []
+                },
+                "reconciliation": {
+                  "key": "package5.wave1.local-not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave1.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "create_task",
+              "actionClass": "create_operational_task",
+              "targetKind": "operational_work_item",
+              "shadowCapability": "package5.work-item.task-create.shadow.v1",
+              "executableCapability": "package5.work-item.task-create.execute.v1",
+              "allowedSourceTypes": [
+                "authenticated_request",
+                "legacy_bridge",
+                "synthetic_shadow"
+              ],
+              "actualRegistry": {
+                "capability": "package5.work-item.task-create.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "create_operational_task",
+                "normalizedInputContract": "maya.package5-wave1-local-command-input/1",
+                "targetKind": "operational_work_item",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "local",
+                  "one_target",
+                  "server_derived_authority",
+                  "operational_work",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave1.create_operational_task.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave1.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 1,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": []
+                },
+                "reconciliation": {
+                  "key": "package5.wave1.local-not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave1.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "complete_task",
+              "actionClass": "complete_operational_task",
+              "targetKind": "operational_work_item",
+              "shadowCapability": "package5.work-item.task-complete.shadow.v1",
+              "executableCapability": "package5.work-item.task-complete.execute.v1",
+              "allowedSourceTypes": [
+                "authenticated_request",
+                "legacy_bridge",
+                "synthetic_shadow"
+              ],
+              "actualRegistry": {
+                "capability": "package5.work-item.task-complete.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "complete_operational_task",
+                "normalizedInputContract": "maya.package5-wave1-local-command-input/1",
+                "targetKind": "operational_work_item",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "local",
+                  "one_target",
+                  "server_derived_authority",
+                  "operational_work",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave1.complete_operational_task.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave1.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 1,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": []
+                },
+                "reconciliation": {
+                  "key": "package5.wave1.local-not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave1.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "request_admin_contact",
+              "actionClass": "request_administrator_contact",
+              "targetKind": "operational_work_item",
+              "shadowCapability": "package5.work-item.admin-contact.shadow.v1",
+              "executableCapability": "package5.work-item.admin-contact.execute.v1",
+              "allowedSourceTypes": [
+                "authenticated_request",
+                "legacy_bridge",
+                "synthetic_shadow"
+              ],
+              "actualRegistry": {
+                "capability": "package5.work-item.admin-contact.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "request_administrator_contact",
+                "normalizedInputContract": "maya.package5-wave1-local-command-input/1",
+                "targetKind": "operational_work_item",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "local",
+                  "one_target",
+                  "server_derived_authority",
+                  "operational_work",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave1.request_administrator_contact.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave1.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 1,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": []
+                },
+                "reconciliation": {
+                  "key": "package5.wave1.local-not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave1.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            }
+          ]
+        },
+        {
+          "wave": 2,
+          "rows": [
+            {
+              "operation": "configure_staff_access",
+              "actionClass": "configure_crm_staff_access",
+              "family": "A16",
+              "authorityClass": "AC1",
+              "targetKind": "staff_access",
+              "shadowCapability": "package5.wave2.configure-staff-access.shadow.v1",
+              "executableCapability": "package5.wave2.configure-staff-access.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.configure-staff-access.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "configure_crm_staff_access",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "staff_access",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a16",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.configure_crm_staff_access.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "claim_team_owner",
+              "actionClass": "claim_crm_team_owner",
+              "family": "A16",
+              "authorityClass": "AC1",
+              "targetKind": "staff_access",
+              "shadowCapability": "package5.wave2.claim-team-owner.shadow.v1",
+              "executableCapability": "package5.wave2.claim-team-owner.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.claim-team-owner.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "claim_crm_team_owner",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "staff_access",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a16",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.claim_crm_team_owner.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "revoke_other_session",
+              "actionClass": "revoke_other_auth_session",
+              "family": "A25",
+              "authorityClass": "AC1",
+              "targetKind": "auth_session",
+              "shadowCapability": "package5.wave2.revoke-other-session.shadow.v1",
+              "executableCapability": "package5.wave2.revoke-other-session.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.revoke-other-session.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "revoke_other_auth_session",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "auth_session",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a25",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.revoke_other_auth_session.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "revoke_all_sessions",
+              "actionClass": "revoke_all_auth_sessions",
+              "family": "A25",
+              "authorityClass": "AC1",
+              "targetKind": "auth_subject_sessions",
+              "shadowCapability": "package5.wave2.revoke-all-sessions.shadow.v1",
+              "executableCapability": "package5.wave2.revoke-all-sessions.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.revoke-all-sessions.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "revoke_all_auth_sessions",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "auth_subject_sessions",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a25",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.revoke_all_auth_sessions.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "link_social_identity",
+              "actionClass": "link_social_auth_identity",
+              "family": "A25",
+              "authorityClass": "AC1",
+              "targetKind": "auth_identity",
+              "shadowCapability": "package5.wave2.link-social-identity.shadow.v1",
+              "executableCapability": "package5.wave2.link-social-identity.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.link-social-identity.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "link_social_auth_identity",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "auth_identity",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a25",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.link_social_auth_identity.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "update_tenant_configuration",
+              "actionClass": "update_tenant_configuration",
+              "family": "A26",
+              "authorityClass": "AC1",
+              "targetKind": "tenant",
+              "shadowCapability": "package5.wave2.update-tenant-configuration.shadow.v1",
+              "executableCapability": "package5.wave2.update-tenant-configuration.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.update-tenant-configuration.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_tenant_configuration",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "tenant",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a26",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.update_tenant_configuration.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "update_tenant_branding",
+              "actionClass": "update_tenant_branding",
+              "family": "A26",
+              "authorityClass": "AC1",
+              "targetKind": "tenant_branding",
+              "shadowCapability": "package5.wave2.update-tenant-branding.shadow.v1",
+              "executableCapability": "package5.wave2.update-tenant-branding.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.update-tenant-branding.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_tenant_branding",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "tenant_branding",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a26",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.update_tenant_branding.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "upload_tenant_logo",
+              "actionClass": "upload_tenant_logo",
+              "family": "A26",
+              "authorityClass": "AC2",
+              "targetKind": "tenant_branding",
+              "shadowCapability": "package5.wave2.upload-tenant-logo.shadow.v1",
+              "executableCapability": "package5.wave2.upload-tenant-logo.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.upload-tenant-logo.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "upload_tenant_logo",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "tenant_branding",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a26",
+                  "ac2",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "external_object_write"
+                ],
+                "policyKey": "chapter6.package5.wave2.upload_tenant_logo.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.object-write",
+                  "version": 1,
+                  "maxExecutionAttempts": 1,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.object-head-by-request-identity",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 8,
+                  "retryAfterProvenNonExecution": true
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.object-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "create_tenant_user",
+              "actionClass": "create_tenant_user",
+              "family": "A26",
+              "authorityClass": "AC1",
+              "targetKind": "tenant_user",
+              "shadowCapability": "package5.wave2.create-tenant-user.shadow.v1",
+              "executableCapability": "package5.wave2.create-tenant-user.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.create-tenant-user.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "create_tenant_user",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "tenant_user",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a26",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.create_tenant_user.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "create_provider_user",
+              "actionClass": "create_internal_provider_user",
+              "family": "A26",
+              "authorityClass": "AC1",
+              "targetKind": "internal_provider_user",
+              "shadowCapability": "package5.wave2.create-provider-user.shadow.v1",
+              "executableCapability": "package5.wave2.create-provider-user.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.create-provider-user.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "create_internal_provider_user",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "internal_provider_user",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a26",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.create_internal_provider_user.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "suspend_tenant",
+              "actionClass": "suspend_tenant",
+              "family": "A26",
+              "authorityClass": "AC1",
+              "targetKind": "tenant",
+              "shadowCapability": "package5.wave2.suspend-tenant.shadow.v1",
+              "executableCapability": "package5.wave2.suspend-tenant.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.suspend-tenant.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "suspend_tenant",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "tenant",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a26",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.suspend_tenant.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "reactivate_tenant",
+              "actionClass": "reactivate_tenant",
+              "family": "A26",
+              "authorityClass": "AC1",
+              "targetKind": "tenant",
+              "shadowCapability": "package5.wave2.reactivate-tenant.shadow.v1",
+              "executableCapability": "package5.wave2.reactivate-tenant.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.reactivate-tenant.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "reactivate_tenant",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "tenant",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a26",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.reactivate_tenant.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "create_tenant_branch",
+              "actionClass": "create_tenant_branch",
+              "family": "A26",
+              "authorityClass": "AC1",
+              "targetKind": "branch",
+              "shadowCapability": "package5.wave2.create-tenant-branch.shadow.v1",
+              "executableCapability": "package5.wave2.create-tenant-branch.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave2.create-tenant-branch.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "create_tenant_branch",
+                "normalizedInputContract": "maya.package5-wave2-authority-command-input/1",
+                "targetKind": "branch",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a26",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_secrets_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave2.create_tenant_branch.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave2.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave2.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave2.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            }
+          ]
+        },
+        {
+          "wave": 3,
+          "rows": [
+            {
+              "operation": "update_staff_schedule_day",
+              "actionClass": "update_external_staff_schedule_day",
+              "family": "A15",
+              "authorityClass": "AC2",
+              "targetKind": "staff_schedule_day",
+              "shadowCapability": "package5.wave3.update-staff-schedule-day.shadow.v1",
+              "executableCapability": "package5.wave3.update-staff-schedule-day.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave3.update-staff-schedule-day.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_external_staff_schedule_day",
+                "normalizedInputContract": "maya.package5-wave3-authority-command-input/1",
+                "targetKind": "staff_schedule_day",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a15",
+                  "ac2",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_credentials_or_pii",
+                  "external_staff_day_write"
+                ],
+                "policyKey": "chapter6.package5.wave3.update_external_staff_schedule_day.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave3.staff-day-provider-write",
+                  "version": 1,
+                  "maxExecutionAttempts": 1,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave3.staff-day-exact-reread",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 8,
+                  "retryAfterProvenNonExecution": true
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave3.staff-day-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "install_crm_credentials",
+              "actionClass": "install_or_replace_crm_credentials",
+              "family": "A17",
+              "authorityClass": "AC1",
+              "targetKind": "crm_integration",
+              "shadowCapability": "package5.wave3.install-crm-credentials.shadow.v1",
+              "executableCapability": "package5.wave3.install-crm-credentials.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave3.install-crm-credentials.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "install_or_replace_crm_credentials",
+                "normalizedInputContract": "maya.package5-wave3-authority-command-input/1",
+                "targetKind": "crm_integration",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a17",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_credentials_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave3.install_or_replace_crm_credentials.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave3.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave3.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave3.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "activate_crm_integration",
+              "actionClass": "activate_crm_integration",
+              "family": "A17",
+              "authorityClass": "AC1",
+              "targetKind": "crm_integration",
+              "shadowCapability": "package5.wave3.activate-crm-integration.shadow.v1",
+              "executableCapability": "package5.wave3.activate-crm-integration.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave3.activate-crm-integration.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "activate_crm_integration",
+                "normalizedInputContract": "maya.package5-wave3-authority-command-input/1",
+                "targetKind": "crm_integration",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a17",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_credentials_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave3.activate_crm_integration.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave3.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave3.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave3.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "confirm_crm_import",
+              "actionClass": "confirm_crm_import",
+              "family": "A17",
+              "authorityClass": "AC1",
+              "targetKind": "crm_integration",
+              "shadowCapability": "package5.wave3.confirm-crm-import.shadow.v1",
+              "executableCapability": "package5.wave3.confirm-crm-import.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave3.confirm-crm-import.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "confirm_crm_import",
+                "normalizedInputContract": "maya.package5-wave3-authority-command-input/1",
+                "targetKind": "crm_integration",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a17",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_credentials_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave3.confirm_crm_import.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave3.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave3.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave3.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "disconnect_crm_integration",
+              "actionClass": "disconnect_crm_integration",
+              "family": "A17",
+              "authorityClass": "AC1",
+              "targetKind": "crm_integration",
+              "shadowCapability": "package5.wave3.disconnect-crm-integration.shadow.v1",
+              "executableCapability": "package5.wave3.disconnect-crm-integration.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave3.disconnect-crm-integration.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "disconnect_crm_integration",
+                "normalizedInputContract": "maya.package5-wave3-authority-command-input/1",
+                "targetKind": "crm_integration",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a17",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_credentials_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave3.disconnect_crm_integration.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave3.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave3.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave3.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "update_client_profile",
+              "actionClass": "update_client_profile",
+              "family": "A18",
+              "authorityClass": "AC1",
+              "targetKind": "client_profile",
+              "shadowCapability": "package5.wave3.update-client-profile.shadow.v1",
+              "executableCapability": "package5.wave3.update-client-profile.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave3.update-client-profile.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_client_profile",
+                "normalizedInputContract": "maya.package5-wave3-authority-command-input/1",
+                "targetKind": "client_profile",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a18",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_credentials_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave3.update_client_profile.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave3.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave3.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave3.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "record_client_consent",
+              "actionClass": "record_client_consent",
+              "family": "A18",
+              "authorityClass": "AC1",
+              "targetKind": "client_consent",
+              "shadowCapability": "package5.wave3.record-client-consent.shadow.v1",
+              "executableCapability": "package5.wave3.record-client-consent.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave3.record-client-consent.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "record_client_consent",
+                "normalizedInputContract": "maya.package5-wave3-authority-command-input/1",
+                "targetKind": "client_consent",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a18",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_credentials_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave3.record_client_consent.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave3.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave3.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave3.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "update_client_notes",
+              "actionClass": "update_client_notes",
+              "family": "A18",
+              "authorityClass": "AC1",
+              "targetKind": "client_notes",
+              "shadowCapability": "package5.wave3.update-client-notes.shadow.v1",
+              "executableCapability": "package5.wave3.update-client-notes.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave3.update-client-notes.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_client_notes",
+                "normalizedInputContract": "maya.package5-wave3-authority-command-input/1",
+                "targetKind": "client_notes",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a18",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "no_raw_credentials_or_pii",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave3.update_client_notes.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave3.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave3.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave3.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            }
+          ]
+        },
+        {
+          "wave": 4,
+          "rows": [
+            {
+              "operation": "create_inventory_item",
+              "actionClass": "create_inventory_item",
+              "family": "A27",
+              "authorityClass": "AC1",
+              "targetKind": "inventory_item",
+              "shadowCapability": "package5.wave4.create-inventory-item.shadow.v1",
+              "executableCapability": "package5.wave4.create-inventory-item.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.create-inventory-item.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "create_inventory_item",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "inventory_item",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a27",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.create_inventory_item.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "update_inventory_item",
+              "actionClass": "update_inventory_item",
+              "family": "A27",
+              "authorityClass": "AC1",
+              "targetKind": "inventory_item",
+              "shadowCapability": "package5.wave4.update-inventory-item.shadow.v1",
+              "executableCapability": "package5.wave4.update-inventory-item.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.update-inventory-item.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_inventory_item",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "inventory_item",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a27",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.update_inventory_item.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "archive_inventory_item",
+              "actionClass": "archive_inventory_item",
+              "family": "A27",
+              "authorityClass": "AC1",
+              "targetKind": "inventory_item",
+              "shadowCapability": "package5.wave4.archive-inventory-item.shadow.v1",
+              "executableCapability": "package5.wave4.archive-inventory-item.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.archive-inventory-item.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "archive_inventory_item",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "inventory_item",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a27",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.archive_inventory_item.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "create_internal_service",
+              "actionClass": "create_internal_service",
+              "family": "A28",
+              "authorityClass": "AC1",
+              "targetKind": "internal_service",
+              "shadowCapability": "package5.wave4.create-internal-service.shadow.v1",
+              "executableCapability": "package5.wave4.create-internal-service.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.create-internal-service.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "create_internal_service",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "internal_service",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a28",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.create_internal_service.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "update_internal_service",
+              "actionClass": "update_internal_service",
+              "family": "A28",
+              "authorityClass": "AC1",
+              "targetKind": "internal_service",
+              "shadowCapability": "package5.wave4.update-internal-service.shadow.v1",
+              "executableCapability": "package5.wave4.update-internal-service.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.update-internal-service.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_internal_service",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "internal_service",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a28",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.update_internal_service.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "archive_internal_service",
+              "actionClass": "archive_internal_service",
+              "family": "A28",
+              "authorityClass": "AC1",
+              "targetKind": "internal_service",
+              "shadowCapability": "package5.wave4.archive-internal-service.shadow.v1",
+              "executableCapability": "package5.wave4.archive-internal-service.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.archive-internal-service.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "archive_internal_service",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "internal_service",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a28",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.archive_internal_service.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "create_internal_provider",
+              "actionClass": "create_internal_provider",
+              "family": "A28",
+              "authorityClass": "AC1",
+              "targetKind": "internal_provider",
+              "shadowCapability": "package5.wave4.create-internal-provider.shadow.v1",
+              "executableCapability": "package5.wave4.create-internal-provider.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.create-internal-provider.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "create_internal_provider",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "internal_provider",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a28",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.create_internal_provider.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "update_internal_provider",
+              "actionClass": "update_internal_provider",
+              "family": "A28",
+              "authorityClass": "AC1",
+              "targetKind": "internal_provider",
+              "shadowCapability": "package5.wave4.update-internal-provider.shadow.v1",
+              "executableCapability": "package5.wave4.update-internal-provider.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.update-internal-provider.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "update_internal_provider",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "internal_provider",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a28",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.update_internal_provider.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "replace_weekly_availability",
+              "actionClass": "replace_weekly_availability",
+              "family": "A28",
+              "authorityClass": "AC1",
+              "targetKind": "internal_weekly_availability",
+              "shadowCapability": "package5.wave4.replace-weekly-availability.shadow.v1",
+              "executableCapability": "package5.wave4.replace-weekly-availability.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.replace-weekly-availability.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "replace_weekly_availability",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "internal_weekly_availability",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a28",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.replace_weekly_availability.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "create_time_off",
+              "actionClass": "create_time_off",
+              "family": "A28",
+              "authorityClass": "AC1",
+              "targetKind": "internal_time_off",
+              "shadowCapability": "package5.wave4.create-time-off.shadow.v1",
+              "executableCapability": "package5.wave4.create-time-off.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.create-time-off.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "create_time_off",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "internal_time_off",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a28",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.create_time_off.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "delete_time_off",
+              "actionClass": "delete_time_off",
+              "family": "A28",
+              "authorityClass": "AC1",
+              "targetKind": "internal_time_off",
+              "shadowCapability": "package5.wave4.delete-time-off.shadow.v1",
+              "executableCapability": "package5.wave4.delete-time-off.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.delete-time-off.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "delete_time_off",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "internal_time_off",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a28",
+                  "ac1",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave4.delete_time_off.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.local-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            },
+            {
+              "operation": "upload_provider_avatar",
+              "actionClass": "upload_provider_avatar",
+              "family": "A28",
+              "authorityClass": "AC2",
+              "targetKind": "internal_provider_avatar",
+              "shadowCapability": "package5.wave4.upload-provider-avatar.shadow.v1",
+              "executableCapability": "package5.wave4.upload-provider-avatar.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave4.upload-provider-avatar.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "upload_provider_avatar",
+                "normalizedInputContract": "maya.package5-wave4-catalog-calendar-command-input/1",
+                "targetKind": "internal_provider_avatar",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "legacy_bridge",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a28",
+                  "ac2",
+                  "one_target",
+                  "server_derived_authority",
+                  "prospective_only",
+                  "content_bound_object_write"
+                ],
+                "policyKey": "chapter6.package5.wave4.upload_provider_avatar.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L2_SERVER_POLICY",
+                "approvalRequirement": "NONE",
+                "retry": {
+                  "key": "package5.wave4.object-write",
+                  "version": 1,
+                  "maxExecutionAttempts": 1,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave4.object-head-by-request-identity",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 8,
+                  "retryAfterProvenNonExecution": true
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave4.object-command",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            }
+          ]
+        },
+        {
+          "wave": 5,
+          "rows": [
+            {
+              "operation": "correct_recovery_attribution",
+              "actionClass": "correct_recovery_attribution",
+              "family": "A29",
+              "authorityClass": "AC1",
+              "targetKind": "recovery_attribution",
+              "shadowCapability": "package5.wave5.recovery-attribution-correction.shadow.v1",
+              "executableCapability": "package5.wave5.recovery-attribution-correction.execute.v1",
+              "actualRegistry": {
+                "capability": "package5.wave5.recovery-attribution-correction.execute.v1",
+                "capabilityVersion": 1,
+                "actionClass": "correct_recovery_attribution",
+                "normalizedInputContract": "maya.package5-wave5-recovery-attribution-correction-input/1",
+                "targetKind": "recovery_attribution",
+                "allowedSourceTypes": [
+                  "authenticated_request",
+                  "synthetic_shadow"
+                ],
+                "identityVersion": 1,
+                "riskProfileVersion": 1,
+                "riskFacets": [
+                  "a29",
+                  "ac1",
+                  "one_target",
+                  "owner_approval",
+                  "immutable_source_evidence",
+                  "local_atomic"
+                ],
+                "policyKey": "chapter6.package5.wave5.correct_recovery_attribution.execute",
+                "policyVersion": 1,
+                "policyDecision": "ALLOW",
+                "autonomyLevel": "L3_OWNER_APPROVED",
+                "approvalRequirement": "REQUIRED",
+                "approvalTtlMs": 1800000,
+                "retry": {
+                  "key": "package5.wave5.local-transaction",
+                  "version": 1,
+                  "maxExecutionAttempts": 3,
+                  "retryablePreDispatchErrors": {},
+                  "backoffMs": [
+                    0,
+                    25,
+                    100
+                  ]
+                },
+                "reconciliation": {
+                  "key": "package5.wave5.not-required",
+                  "version": 1,
+                  "maxInconclusiveAttempts": 1,
+                  "retryAfterProvenNonExecution": false
+                },
+                "transportIdentityVersion": 1,
+                "executorKey": "package5.wave5.local-correction",
+                "executorVersion": 1,
+                "payloadRetentionMs": 2592000000,
+                "auditRetentionMs": 220752000000
+              }
+            }
+          ]
+        }
+      ],
+      "wave6": {
+        "owner": "AC6 MAINTENANCE COORDINATOR",
+        "policyVersion": 1,
+        "classes": {
+          "purge_auth_sessions": {
+            "table": "AuthSession",
+            "stamp": "createdAt",
+            "terminal": "revokedAt",
+            "expiry": "expiresAt",
+            "retentionMs": 2592000000,
+            "policyKey": "package5.a30.auth-retention"
+          },
+          "purge_phone_auth_codes": {
+            "table": "PhoneAuthCode",
+            "stamp": "createdAt",
+            "terminal": "consumedAt",
+            "expiry": "expiresAt",
+            "retentionMs": 86400000,
+            "policyKey": "package5.a30.auth-retention"
+          },
+          "purge_email_auth_codes": {
+            "table": "EmailAuthCode",
+            "stamp": "createdAt",
+            "terminal": "consumedAt",
+            "expiry": "expiresAt",
+            "retentionMs": 86400000,
+            "policyKey": "package5.a30.auth-retention"
+          },
+          "purge_auth_flow_states": {
+            "table": "AuthFlowState",
+            "stamp": "createdAt",
+            "terminal": "consumedAt",
+            "expiry": "expiresAt",
+            "retentionMs": 86400000,
+            "policyKey": "package5.a30.auth-retention"
+          },
+          "purge_auth_rate_limit_buckets": {
+            "table": "AuthRateLimitBucket",
+            "stamp": "createdAt",
+            "terminal": null,
+            "expiry": "windowEndsAt",
+            "retentionMs": 86400000,
+            "policyKey": "package5.a30.auth-retention"
+          },
+          "purge_ingestion_quarantine": {
+            "table": "IngestionQuarantine",
+            "stamp": "receivedAt",
+            "terminal": null,
+            "expiry": "expiresAt",
+            "retentionMs": 0,
+            "policyKey": "package5.a30.quarantine-expiry"
+          }
+        }
+      }
+    },
+    {
+      "kind": "python-runtime",
+      "files": {
+        "webhook_server.py": {
+          "sha256": "6408c9a21d9fbfedb28b1886ddeee59da33f5426a8cfa97fbce135c486430010",
+          "functions": [
+            {
+              "name": "consent_submit_handler",
+              "line": 7168,
+              "end": 7190,
+              "sha256": "5913c18aa747c926730ce7f3e0e9173ebc6a0763525b37a3ac62b82ef7391042",
+              "source": "async def consent_submit_handler(request: web.Request) -> web.Response:\n    \"\"\"A18 initiator: backend independently authenticates the original channel.\"\"\"\n    import legacy_client_command_bridge as client_commands\n    try:\n        body = await request.json()\n        if not isinstance(body, dict) or set(body) - {\"auth_data\", \"session_token\", \"accept_pdn\", \"accept_marketing\", \"idempotency_key\"}:\n            raise ValueError(\"invalid_consent_request\")\n        if type(body.get(\"accept_pdn\")) is not bool or type(body.get(\"accept_marketing\")) is not bool:\n            raise ValueError(\"explicit_consent_decisions_required\")\n        proof = client_commands.channel_proof(request.headers, body)\n        await asyncio.to_thread(client_commands.command, \"consent\", proof, {\n            \"privacy\": body[\"accept_pdn\"], \"marketing\": body[\"accept_marketing\"],\n            \"idempotencyKey\": body.get(\"idempotency_key\"),\n        })\n        result = await asyncio.to_thread(client_commands.command, \"status\", proof, {})\n        return _cabinet_response({\"status\": client_commands.consent_status(result), \"marketing\": result.get(\"marketing\", False)})\n    except ValueError:\n        return _cabinet_response({\"error\": \"verified_client_link_required\",\n            \"message\": \"Подтвердите привязку клиента и повторите тот же запрос.\"}, status=403)\n    except Exception:\n        logger.error(\"canonical consent command unavailable; no local fallback\")\n        return _cabinet_response({\"error\": \"consent_unavailable\",\n            \"message\": \"Не удалось получить результат. Повторите тот же запрос.\"}, status=503)"
+            },
+            {
+              "name": "notify_prefs_handler",
+              "line": 7248,
+              "end": 7273,
+              "sha256": "1df8dea98608bb84fb0087ff0d62b06f3cbc2d750bae71b2725b3b1915397868",
+              "source": "async def notify_prefs_handler(request: web.Request) -> web.Response:\n    \"\"\"\n    POST /api/cabinet/notify-prefs — персональные настройки уведомлений клиента.\n    Body: { prefs?: {...} }  (+ auth: auth_data / session_token / X-Telegram-InitData)\n    Если prefs передан — частично обновляем; всегда возвращаем актуальный полный набор.\n    \"\"\"\n    try:\n        body = await request.json()\n    except Exception:\n        body = {}\n    if not isinstance(body, dict):\n        body = {}\n    chat_id = _authed_chat_id(request, body)\n    if not chat_id:\n        return _cabinet_response({\"error\": \"unauthorized\"}, status=401)\n    try:\n        client_id = database.get_or_create_client(chat_id)\n        patch = body.get(\"prefs\")\n        if isinstance(patch, dict) and patch:\n            prefs = database.set_notify_prefs(client_id, patch)\n        else:\n            prefs = database.get_notify_prefs(client_id)\n    except Exception as e:\n        logger.error(f\"notify_prefs chat_id={chat_id}: {e}\")\n        return _cabinet_response({\"error\": \"prefs_failed\"}, status=500)\n    return _cabinet_response({\"prefs\": prefs})"
+            },
+            {
+              "name": "set_visit_mood_handler",
+              "line": 12457,
+              "end": 12513,
+              "sha256": "dad0f821b8a9bd61867f54b2222797029c4d632873674379ed7b6897d24c201d",
+              "source": "async def set_visit_mood_handler(request: web.Request) -> web.Response:\n    \"\"\"POST /api/set-visit-mood {record_id, mood} — клиент из приложения выбрал\n    «настроение визита» (🔴 red — тишина / 🔵 blue — общение). Сохраняем на\n    конкретную запись + дописываем пометку в комментарий записи YClients,\n    чтобы барбер видел выбор. Авторизация — личность клиента (initData/сессия).\"\"\"\n    try:\n        body = await request.json()\n    except Exception:\n        body = {}\n    tg_user = _panel_auth(body, request.headers.get(\"X-Telegram-InitData\", \"\"))\n    if not tg_user or not tg_user.get(\"id\"):\n        return _cabinet_response({\"error\": \"unauthorized\"}, status=401)\n    mood = (body.get(\"mood\") or \"\").strip().lower()\n    if mood not in (\"red\", \"blue\"):\n        return _cabinet_response({\"error\": \"bad_mood\"}, status=400)\n    try:\n        record_id = int(body.get(\"record_id\") or 0)\n    except Exception:\n        record_id = 0\n    if not record_id:\n        return _cabinet_response({\"error\": \"no_record\"}, status=400)\n    client_id = None\n    caller_phone = \"\"\n    try:\n        dbc = await asyncio.to_thread(database.get_client, int(tg_user[\"id\"]))\n        if dbc:\n            client_id = dbc.get(\"id\")\n            caller_phone = dbc.get(\"phone\") or \"\"\n    except Exception:\n        client_id = None\n\n    # Защита от IDOR: настроение можно ставить ТОЛЬКО на СВОЮ запись. record_id у\n    # YClients последовательны и легко перебираются — без проверки любой\n    # авторизованный клиент мог бы менять настроение/комментарий чужих записей.\n    # Сверяем телефон записи с телефоном профиля звонящего.\n    def _digits10(p):\n        return \"\".join(ch for ch in str(p or \"\") if ch.isdigit())[-10:]\n    try:\n        rec = await asyncio.to_thread(_yc.get_record, record_id)\n    except Exception:\n        rec = None\n    rec_phone = ((rec or {}).get(\"client\") or {}).get(\"phone\") if rec else None\n    if not rec or not _digits10(caller_phone) or _digits10(rec_phone) != _digits10(caller_phone):\n        return _cabinet_response({\"error\": \"forbidden\", \"message\": \"Это не ваша запись.\"}, status=403)\n\n    ok = await asyncio.to_thread(database.set_visit_mood, record_id, mood, \"app\", client_id)\n    if not ok:\n        return _cabinet_response({\"error\": \"bad_mood\"}, status=400)\n    note = \"🔴 Просит тишину\" if mood == \"red\" else \"🔵 Настроен общаться\"\n    try:\n        await asyncio.to_thread(\n            _yc.append_record_comment, record_id, note,\n            [\"🔴 Просит тишину\", \"🔵 Настроен общаться\"],\n        )\n    except Exception as e:\n        logger.error(\"set_visit_mood comment record_id=%s: %s\", record_id, e)\n    return _cabinet_response({\"ok\": True, \"mood\": mood})"
+            }
+          ],
+          "routes": [
+            {
+              "line": 13801,
+              "source": "web_app.router.add_post('/api/set-visit-mood', set_visit_mood_handler)"
+            },
+            {
+              "line": 13835,
+              "source": "web_app.router.add_post('/api/consent/submit', consent_submit_handler)"
+            },
+            {
+              "line": 13845,
+              "source": "web_app.router.add_post('/api/cabinet/notify-prefs', notify_prefs_handler)"
+            }
+          ]
+        },
+        "database.py": {
+          "sha256": "7748e34f82e2eddb9010407cfa9229db32a47c7e6f7645d71a1334266bb692f8",
+          "functions": [
+            {
+              "name": "get_or_create_client",
+              "line": 745,
+              "end": 759,
+              "sha256": "e470450037d08b85e87ea6def92e7623baa5570cc28c39eb200e74086b290dcf",
+              "source": "def get_or_create_client(telegram_chat_id: int) -> int:\n    \"\"\"Возвращает внутренний id клиента, создаёт запись если её ещё нет.\"\"\"\n    with _db() as conn:\n        row = conn.execute(\n            \"SELECT id FROM clients WHERE telegram_chat_id = ?\",\n            (telegram_chat_id,),\n        ).fetchone()\n        if row:\n            return row[\"id\"]\n        cur = conn.execute(\n            \"INSERT INTO clients (telegram_chat_id, created_at, updated_at) \"\n            \"VALUES (?, ?, ?)\",\n            (telegram_chat_id, _now(), _now()),\n        )\n        return cur.lastrowid"
+            },
+            {
+              "name": "save_consent",
+              "line": 1134,
+              "end": 1136,
+              "sha256": "ca75857d03dd038c3ae9cc8c67218e9fe17361e2571803c6514375a1d5a217f2",
+              "source": "def save_consent(client_id: int, consent_given: bool, source: str = \"telegram\", consent_version: str = CONSENT_VERSION):\n    \"\"\"Historical entry point is fail closed; only canonical Client commands write.\"\"\"\n    raise RuntimeError(\"canonical_client_consent_required\")"
+            },
+            {
+              "name": "set_marketing_consent",
+              "line": 1139,
+              "end": 1141,
+              "sha256": "7da8bcdb91029c71ebe9ceeb6acb6cf71dd940e55682887fad4dab291e142f0c",
+              "source": "def set_marketing_consent(client_id: int, consent_given: bool):\n    \"\"\"No SQL fallback may replace a canonical consent fact.\"\"\"\n    raise RuntimeError(\"canonical_client_consent_required\")"
+            },
+            {
+              "name": "get_notify_prefs",
+              "line": 1191,
+              "end": 1208,
+              "sha256": "d283c2cc2a2ef4df9970973a635780909b0712069ae207831c851e235623e950",
+              "source": "def get_notify_prefs(client_id: int) -> dict:\n    \"\"\"Настройки уведомлений клиента, слитые с дефолтами (всегда полный набор ключей).\"\"\"\n    prefs = dict(NOTIFY_PREFS_DEFAULTS)\n    try:\n        with _db() as conn:\n            _notify_prefs_ensure(conn)\n            row = conn.execute(\n                \"SELECT prefs FROM notify_prefs WHERE client_id = ?\",\n                (int(client_id),)).fetchone()\n        if row and row[\"prefs\"]:\n            saved = _json_np.loads(row[\"prefs\"])\n            if isinstance(saved, dict):\n                for k in NOTIFY_PREFS_DEFAULTS:\n                    if k in saved:\n                        prefs[k] = saved[k]\n    except Exception:\n        pass\n    return prefs"
+            },
+            {
+              "name": "set_notify_prefs",
+              "line": 1225,
+              "end": 1256,
+              "sha256": "ff854a28cf7a16cc168c46b4c1eb5204575bec0434db1e0bc642f9221d11d8e8",
+              "source": "def set_notify_prefs(client_id: int, partial: dict) -> dict:\n    \"\"\"Частичное обновление настроек (мержим с текущими). Возвращает итог.\"\"\"\n    cur = get_notify_prefs(client_id)\n    for k, v in (partial or {}).items():\n        if k not in NOTIFY_PREFS_DEFAULTS:\n            continue\n        if k in (\"reminder_hours\",):\n            try:\n                v = max(0, min(48, int(v)))\n            except (TypeError, ValueError):\n                continue\n        elif k in (\"quiet_from\", \"quiet_to\"):\n            if v is None or v == \"\":\n                v = None\n            else:\n                try:\n                    v = max(0, min(23, int(v)))\n                except (TypeError, ValueError):\n                    continue\n        elif k == \"marketing_freq\":\n            if v not in MARKETING_FREQ_DAYS:\n                continue\n        else:\n            v = bool(v)\n        cur[k] = v\n    with _db() as conn:\n        _notify_prefs_ensure(conn)\n        conn.execute(\n            \"INSERT OR REPLACE INTO notify_prefs (client_id, prefs, updated_at) \"\n            \"VALUES (?, ?, ?)\",\n            (int(client_id), _json_np.dumps(cur, ensure_ascii=False), _now()))\n    return cur"
+            },
+            {
+              "name": "set_visit_mood",
+              "line": 2176,
+              "end": 2205,
+              "sha256": "bb4aed9e69342dfb515ed6dc849283b31009e2c15325d1b1b6256e592f7eab14",
+              "source": "def set_visit_mood(record_id: int, mood: str, source: str = \"bot\",\n                   client_id: int | None = None) -> bool:\n    \"\"\"Сохраняет выбор настроения для конкретной записи (idempotent upsert).\n    Также запоминает выбор как default клиента для будущих записей.\n    Возвращает True, если mood валиден и сохранён.\"\"\"\n    mood = (mood or \"\").strip().lower()\n    if mood not in _VALID_MOODS:\n        return False\n    _ts = _now()\n    with _db() as conn:\n        conn.execute(\n            \"INSERT INTO visit_mood \"\n            \"(record_id, mood, source, client_id, created_at, updated_at) \"\n            \"VALUES (?, ?, ?, ?, ?, ?) \"\n            \"ON CONFLICT(record_id) DO UPDATE SET \"\n            \"  mood = excluded.mood, \"\n            \"  source = excluded.source, \"\n            \"  client_id = COALESCE(excluded.client_id, visit_mood.client_id), \"\n            \"  updated_at = excluded.updated_at\",\n            (record_id, mood, source, client_id, _ts, _ts),\n        )\n        if client_id:\n            try:\n                conn.execute(\n                    \"UPDATE clients SET default_visit_mood = ? WHERE id = ?\",\n                    (mood, client_id),\n                )\n            except sqlite3.OperationalError:\n                pass  # колонка ещё не мигрирована — не критично\n    return True"
+            }
+          ],
+          "routes": []
+        },
+        "yclients.py": {
+          "sha256": "b1f4a28d0032c42a87a06e79aed91394613c2f433dba435eb007c95493ddba6a",
+          "functions": [
+            {
+              "name": "append_record_comment",
+              "line": 2442,
+              "end": 2518,
+              "sha256": "1f0f98ca656e4aeead61e01e6b541348307066a507ebe3daacca9d1d1927661e",
+              "source": "    def append_record_comment(self, record_id: int, note: str, replace_markers=None) -> dict:\n        \"\"\"Идемпотентно дописывает короткую пометку к comment записи YClients,\n        сохраняя услуги/клиента/статусы записи. Если пометка уже есть — не\n        дублирует. Используется для «настроения визита» (🔴 тишина / 🔵 общение),\n        чтобы барбер видел выбор клиента прямо в своём приложении YClients.\n\n        replace_markers — список взаимоисключающих пометок (оба варианта\n        настроения): перед добавлением прежний вариант удаляется, чтобы в\n        комментарии остался РОВНО один (иначе при смене выбора получалось бы\n        «🔴 … | 🔵 …» — противоречивая подсказка мастеру).\"\"\"\n        try:\n            note = (note or \"\").strip()\n            if not note:\n                return {\"success\": False, \"error\": \"empty note\"}\n            current = self._get(f\"record/{self.company_id}/{record_id}\").get(\"data\") or {}\n            if not current:\n                return {\"success\": False, \"error\": \"record not found\"}\n\n            orig_comment = (current.get(\"comment\") or \"\").strip()\n            existing_comment = orig_comment\n            if replace_markers:\n                parts = [p.strip() for p in existing_comment.split(\"|\")]\n                parts = [p for p in parts if p and p not in replace_markers]\n                existing_comment = \" | \".join(parts)\n            if note in existing_comment:\n                new_comment = existing_comment\n            else:\n                new_comment = f\"{existing_comment} | {note}\" if existing_comment else note\n            if new_comment == orig_comment:\n                return {\"success\": True, \"skipped\": True}  # ничего не изменилось\n\n            # услуги сохраняем как есть (cost/discount/first_cost), ничего не меняем\n            services_payload = [{\n                \"id\": s.get(\"id\"),\n                \"cost\": s.get(\"cost\"),\n                \"discount\": s.get(\"discount\", 0),\n                \"first_cost\": s.get(\"first_cost\") or s.get(\"cost\"),\n            } for s in (current.get(\"services\") or [])]\n\n            client = current.get(\"client\") or {}\n            client_payload = {\n                \"phone\": client.get(\"phone\", \"\"),\n                \"name\":  client.get(\"name\",  \"\"),\n                \"email\": client.get(\"email\", \"\"),\n            } if client.get(\"phone\") else None\n\n            payload = {\n                \"staff_id\":      current.get(\"staff_id\") or (current.get(\"staff\") or {}).get(\"id\"),\n                \"services\":      services_payload,\n                \"client\":        client_payload,\n                \"datetime\":      current.get(\"datetime\"),\n                \"seance_length\": current.get(\"seance_length\"),\n                \"save_if_busy\":  True,\n                \"send_sms\":      False,\n                \"comment\":       new_comment,\n                \"paid_full\":     current.get(\"paid_full\", 0),\n                \"confirmed\":     current.get(\"confirmed\", 1),\n                \"sms_before\":    current.get(\"sms_before\", 0),\n                \"sms_now\":       current.get(\"sms_now\", 0),\n                \"email_now\":     current.get(\"email_now\", 0),\n                \"notified\":      current.get(\"notified\", 0),\n                \"master_request\": current.get(\"master_request\", 0),\n            }\n            self._preserve_attendance(payload, current)\n            data = self._put(f\"record/{self.company_id}/{record_id}\", payload)\n            if not data.get(\"success\"):\n                return {\"success\": False, \"error\": data.get(\"meta\", {}).get(\"message\", \"Ошибка YClients\")}\n            self._observe_sensitive_appointment_action(\n                \"set_appointment_fields\",\n                record_id,\n                \"field_kind\",\n                \"comment\",\n                new_comment,\n            )\n            return {\"success\": True}\n        except Exception as e:\n            return {\"success\": False, \"error\": str(e)}"
+            }
+          ],
+          "routes": []
+        }
+      },
+      "maya-saas": {
+        "MainPID": "1482756",
+        "WorkingDirectory": "/opt/maya-saas/current",
+        "ActiveState": "active",
+        "pythonEntryPoints": []
+      },
+      "barbershop-pwa": {
+        "MainPID": "1482781",
+        "WorkingDirectory": "/home/botadmin/barbershop-bot",
+        "ActiveState": "active",
+        "pythonEntryPoints": [
+          "/home/botadmin/barbershop-bot/pwa_api.py"
+        ]
+      },
+      "startup": [
+        {
+          "line": 35,
+          "call": "webhook_server.start_webhook_server"
+        }
+      ]
+    }
+  ],
+  "deployedProviderBoundary": {
+    "fileHash": "b1f4a28d0032c42a87a06e79aed91394613c2f433dba435eb007c95493ddba6a",
+    "functions": [
+      {
+        "name": "_put",
+        "line": 232,
+        "end": 236,
+        "source": "    def _put(self, endpoint: str, data: dict) -> dict:\n        url = f\"{self.base_url}/{endpoint}\"\n        resp = requests.put(url, headers=self.headers, json=data, timeout=10)\n        resp.raise_for_status()\n        return resp.json()"
+      },
+      {
+        "name": "_observe_sensitive_appointment_action",
+        "line": 294,
+        "end": 313,
+        "source": "    def _observe_sensitive_appointment_action(\n        self,\n        action_class: str,\n        record_id: int,\n        kind_key: str,\n        kind: str,\n        value: object,\n    ) -> bool:\n        try:\n            value_ref = opaque_mutation_reference(value, kind)\n        except Exception:\n            logger.exception(\n                \"Residual appointment value reference failed: %s\", action_class\n            )\n            return False\n        return self._observe_residual_appointment_action(\n            action_class,\n            record_id,\n            {kind_key: kind, \"value_ref\": value_ref},\n        )"
+      }
+    ]
+  },
+  "isolatedReproduction": {
+    "source": "exact deployed function ASTs; synthetic in-memory SQLite; fake authenticated channel and provider transport",
+    "checks": {
+      "visitMoodMutatesLegacyClientProfileWithoutCanonicalCommand": true,
+      "visitMoodProviderPutPrecedesShadowObservation": true,
+      "notifyPreferencesWritesDirectSqlWithoutCanonicalCommand": true,
+      "readOnlyNotifyPreferencesPayloadCreatesLegacyClient": true
+    },
+    "bindingOrChallengeFoundationPresentInExtractedPaths": false,
+    "realProductionBusinessProviderMutations": 0,
+    "networkCalls": 0,
+    "filesystemDatabasesCreated": 0,
+    "providerTransportStubCalls": 1,
+    "sqlMutationKinds": [
+      "INSERT",
+      "UPDATE"
+    ]
+  },
+  "isolatedReproductionScriptSha256": "e8542fdd5aab79accfc25395bb401a5d115654d4412ea8b5aafa5da764b474d1",
+  "publishedCopies": [
+    {
+      "file": "live-mayaos-app.html",
+      "sha256": "cdf681dde560979341db16206261b475f19104709e48adde0c22c768a3465f04",
+      "matchesCandidate": true
+    },
+    {
+      "file": "live-malesthetic-app.html",
+      "sha256": "51096ad841a7de03005fd6e41ece4320eb877d4fe3ae73f30d30ceed21f1fa18",
+      "matchesCandidate": true
+    },
+    {
+      "file": "api-proxy.php",
+      "sha256": "806b0246027cef12e35de3b529ea41af28ee60129e11cade50c0542385a7eba3",
+      "matchesCandidate": true
+    },
+    {
+      "file": "package5-client-consent-proxy.php",
+      "sha256": "583916e8309ea616b851fb19348aaa27df7523337cc66eb3bca660e11745df68",
+      "matchesCandidate": true
+    },
+    {
+      "notifyPreferencesProxyReachable": true,
+      "visitMoodProxyReachable": true
+    }
+  ],
+  "deploymentLogDigests": {
+    "runtime-proof.log": "609125dc7d0a8de08fefa2f7968568bda344446615ceb5af92ea7729906f09cd",
+    "a18-proof.log": "4d3bcf9d659f0cf4ab34a3ef4bdc5940d0667c24e672ebce11d41140b9a7ce5c",
+    "python-proof.log": "83b421894c2f9a16a6816cb4c85fb7fb1bd3eabc1b9119dfe83eee8098d838b3",
+    "proxy-proof.log": "8c73658748ff40eb710e589c92592049f5b57540c190b45b74b506340fd2d97e",
+    "server-deployment-gates.log": "097d5d2fd43672fa600e7ae46a83fa13b2b602ae8053144c7a6afea5cc699d92",
+    "cutover.log": "9c295341a386e0ec4348552ae57192f9c8181901066bbfd718a2b32e536bfe0a",
+    "postdeploy.log": "ffd0ca8f04fbba833d08484c977ce1674e31682c0b910db5b30161c531492d75",
+    "beget-cutover.log": "d650b8cdb27b79bcabdad3f13534fee1dbb0f6abe359b4518e20b6bf03e36822",
+    "beget-postverify.jsonl": "8b2f43f48d68974a39ce86261365aab7358c2bc0dc3ae0a92506bcb031fb57ce",
+    "closure-production.log": "6836ea78919ac20e6edbd469080d128886f05a36c8b13359eeaad56de6a2f2ec"
+  },
+  "artifactManifestDigest": "e9209f2d44325df0ada049d2b42a4dd91b462aaeeaa1ed96ed01354195d5a0f8",
+  "scopedSourceWriteSites": [
+    {
+      "file": "src/auth/auth-session.repository.ts",
+      "klass": "AuthSessionRepository",
+      "method": "createSession",
+      "line": 37,
+      "model": "authSession",
+      "operation": "create"
+    },
+    {
+      "file": "src/auth/auth-session.repository.ts",
+      "klass": "AuthSessionRepository",
+      "method": "rotateRefreshToken",
+      "line": 65,
+      "model": "authRefreshToken",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/auth/auth-session.repository.ts",
+      "klass": "AuthSessionRepository",
+      "method": "rotateRefreshToken",
+      "line": 120,
+      "model": "authSession",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/auth/auth-session.repository.ts",
+      "klass": "AuthSessionRepository",
+      "method": "rotateRefreshToken",
+      "line": 135,
+      "model": "authRefreshToken",
+      "operation": "create"
+    },
+    {
+      "file": "src/auth/auth-session.repository.ts",
+      "klass": "AuthSessionRepository",
+      "method": "revokeAllSessions",
+      "line": 209,
+      "model": "authSession",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/auth/auth-session.repository.ts",
+      "klass": "AuthSessionRepository",
+      "method": "revokeAllSessions",
+      "line": 213,
+      "model": "authRefreshToken",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/auth/auth-session.repository.ts",
+      "klass": "AuthSessionRepository",
+      "method": "revokeSessionInTransaction",
+      "line": 229,
+      "model": "authSession",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/auth/auth-session.repository.ts",
+      "klass": "AuthSessionRepository",
+      "method": "revokeSessionInTransaction",
+      "line": 240,
+      "model": "authRefreshToken",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/auth/tenant-auth.repository.ts",
+      "klass": "TenantAuthRepository",
+      "method": "upsertPhoneChallenge",
+      "line": 21,
+      "model": "phoneAuthCode",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/auth/tenant-auth.repository.ts",
+      "klass": "TenantAuthRepository",
+      "method": "recordInvalidPhoneAttempt",
+      "line": 65,
+      "model": "phoneAuthCode",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/auth/tenant-auth.repository.ts",
+      "klass": "TenantAuthRepository",
+      "method": "claimPhoneChallenge",
+      "line": 99,
+      "model": "phoneAuthCode",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/auth/tenant-auth.repository.ts",
+      "klass": "TenantAuthRepository",
+      "method": "upsertEmailChallenge",
+      "line": 120,
+      "model": "emailAuthCode",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/auth/tenant-auth.repository.ts",
+      "klass": "TenantAuthRepository",
+      "method": "recordInvalidEmailAttempt",
+      "line": 164,
+      "model": "emailAuthCode",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/auth/tenant-auth.repository.ts",
+      "klass": "TenantAuthRepository",
+      "method": "claimEmailChallenge",
+      "line": 194,
+      "model": "emailAuthCode",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/auth/tenant-auth.repository.ts",
+      "klass": "TenantAuthRepository",
+      "method": "createFlowState",
+      "line": 217,
+      "model": "authFlowState",
+      "operation": "create"
+    },
+    {
+      "file": "src/auth/tenant-auth.repository.ts",
+      "klass": "TenantAuthRepository",
+      "method": "claimFlowState",
+      "line": 231,
+      "model": "authFlowState",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/billing/p4-08-tenant-billing-executable.service.ts",
+      "klass": "P408TenantBillingExecutableService",
+      "method": "applyOutcome",
+      "line": 734,
+      "model": "tenant",
+      "operation": "update"
+    },
+    {
+      "file": "src/billing/p4-08-tenant-billing-executable.service.ts",
+      "klass": "P408TenantBillingExecutableService",
+      "method": "applyPastDue",
+      "line": 832,
+      "model": "tenant",
+      "operation": "update"
+    },
+    {
+      "file": "src/branding/branding.service.ts",
+      "klass": "BrandingService",
+      "method": "upsertBranding",
+      "line": 41,
+      "model": "brandingSettings",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/business-content/p4-09-value-configuration-executable.service.ts",
+      "klass": "P409ValueConfigurationExecutableService",
+      "method": "offer",
+      "line": 136,
+      "model": "tenantCatalogItem",
+      "operation": "create"
+    },
+    {
+      "file": "src/business-content/p4-09-value-configuration-executable.service.ts",
+      "klass": "P409ValueConfigurationExecutableService",
+      "method": "offer",
+      "line": 201,
+      "model": "tenantCatalogItem",
+      "operation": "update"
+    },
+    {
+      "file": "src/communication-delivery/communication-delivery.service.ts",
+      "klass": "CommunicationDeliveryService",
+      "method": "deliverNewAppointmentInbox",
+      "line": 355,
+      "model": "inboxItem",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/communication-delivery/communication-delivery.service.ts",
+      "klass": "CommunicationDeliveryService",
+      "method": "deliverPackage2Single",
+      "line": 911,
+      "model": "inboxItem",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/communication-delivery/communication-delivery.service.ts",
+      "klass": "CommunicationDeliveryService",
+      "method": "deliverBulkCampaign",
+      "line": 1321,
+      "model": "inboxItem",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/crm/client-identity.service.ts",
+      "klass": "ClientIdentityService",
+      "method": "registerCrmClient",
+      "line": 111,
+      "model": "crmClientLink",
+      "operation": "update"
+    },
+    {
+      "file": "src/crm/client-identity.service.ts",
+      "klass": "ClientIdentityService",
+      "method": "registerCrmClient",
+      "line": 125,
+      "model": "client",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/crm/client-identity.service.ts",
+      "klass": "ClientIdentityService",
+      "method": "createIdentityForCard",
+      "line": 194,
+      "model": "client",
+      "operation": "create"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "ensureBootstrapMockIntegration",
+      "line": 443,
+      "model": "crmIntegration",
+      "operation": "update"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "ensureBootstrapMockIntegration",
+      "line": 458,
+      "model": "crmIntegration",
+      "operation": "create"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "applyCanonicalImportProjection",
+      "line": 573,
+      "model": "crmIntegration",
+      "operation": "update"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "syncTenantTimezoneFromCrm",
+      "line": 622,
+      "model": "tenant",
+      "operation": "update"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "syncTenantTimezoneFromCrm",
+      "line": 637,
+      "model": "branch",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "syncTenantBrandingFromCrm",
+      "line": 693,
+      "model": "brandingSettings",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "recheckIntegration",
+      "line": 764,
+      "model": "crmIntegration",
+      "operation": "update"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "reconcileCrmTeamAccess",
+      "line": 3416,
+      "model": "crmStaffAccess",
+      "operation": "update"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "reconcileCrmTeamAccess",
+      "line": 3435,
+      "model": "crmStaffAccess",
+      "operation": "update"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "reconcileCrmTeamAccess",
+      "line": 3449,
+      "model": "membership",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "reconcileCrmTeamAccess",
+      "line": 3456,
+      "model": "membership",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "reconcileCrmTeamAccess",
+      "line": 3460,
+      "model": "authSession",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "reconcileCrmTeamAccess",
+      "line": 3477,
+      "model": "staffProviderLink",
+      "operation": "update"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "reconcileCrmTeamAccess",
+      "line": 3483,
+      "model": "staffProviderLink",
+      "operation": "update"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "reconcileCrmTeamAccess",
+      "line": 3504,
+      "model": "staff",
+      "operation": "create"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "reconcileCrmTeamAccess",
+      "line": 3515,
+      "model": "staffProviderLink",
+      "operation": "create"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "reconcileCrmTeamAccess",
+      "line": 3520,
+      "model": "crmStaffAccess",
+      "operation": "create"
+    },
+    {
+      "file": "src/crm/crm.service.ts",
+      "klass": "CrmService",
+      "method": "recordStoredConnectionFailure",
+      "line": 3589,
+      "model": "crmIntegration",
+      "operation": "update"
+    },
+    {
+      "file": "src/crm/quarantine-catchup.service.ts",
+      "klass": "QuarantineCatchupService",
+      "method": "resolve",
+      "line": 191,
+      "model": "ingestionQuarantine",
+      "operation": "update"
+    },
+    {
+      "file": "src/events/event-store.service.ts",
+      "klass": "EventStoreService",
+      "method": "append",
+      "line": 100,
+      "model": "domainEvent",
+      "operation": "create"
+    },
+    {
+      "file": "src/events/event-store.service.ts",
+      "klass": "EventStoreService",
+      "method": "quarantine",
+      "line": 146,
+      "model": "ingestionQuarantine",
+      "operation": "create"
+    },
+    {
+      "file": "src/events/event-store.service.ts",
+      "klass": "EventStoreService",
+      "method": "claimBatch",
+      "line": 208,
+      "model": "domainEvent",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/events/event-store.service.ts",
+      "klass": "EventStoreService",
+      "method": "markProcessed",
+      "line": 222,
+      "model": "domainEvent",
+      "operation": "update"
+    },
+    {
+      "file": "src/events/event-store.service.ts",
+      "klass": "EventStoreService",
+      "method": "markFailed",
+      "line": 245,
+      "model": "domainEvent",
+      "operation": "update"
+    },
+    {
+      "file": "src/events/event-store.service.ts",
+      "klass": "EventStoreService",
+      "method": "markFailed",
+      "line": 252,
+      "model": "domainEvent",
+      "operation": "update"
+    },
+    {
+      "file": "src/inbox/inbox.service.ts",
+      "klass": "InboxService",
+      "method": "publishForTenant",
+      "line": 394,
+      "model": "inboxItem",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/inbox/inbox.service.ts",
+      "klass": "InboxService",
+      "method": "projectOperationalWorkItemCompletion",
+      "line": 484,
+      "model": "inboxItem",
+      "operation": "update"
+    },
+    {
+      "file": "src/inbox/inbox.service.ts",
+      "klass": "InboxService",
+      "method": "softDeleteRelatedAppointmentCards",
+      "line": 542,
+      "model": "inboxItem",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/inbox/inbox.service.ts",
+      "klass": "InboxService",
+      "method": "markRead",
+      "line": 590,
+      "model": "inboxItem",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/internal-calendar/internal-calendar.service.ts",
+      "klass": "InternalCalendarService",
+      "method": "bootstrapCreateService",
+      "line": 264,
+      "model": "internalService",
+      "operation": "create"
+    },
+    {
+      "file": "src/internal-calendar/internal-calendar.service.ts",
+      "klass": "InternalCalendarService",
+      "method": "bootstrapCreateProvider",
+      "line": 331,
+      "model": "internalProvider",
+      "operation": "create"
+    },
+    {
+      "file": "src/internal-calendar/internal-calendar.service.ts",
+      "klass": "InternalCalendarService",
+      "method": "bootstrapCreateProvider",
+      "line": 344,
+      "model": "internalAvailabilityRule",
+      "operation": "createMany"
+    },
+    {
+      "file": "src/internal-calendar/internal-calendar.service.ts",
+      "klass": "InternalCalendarService",
+      "method": "bootstrapUpdateProvider",
+      "line": 403,
+      "model": "internalProvider",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/internal-calendar/internal-calendar.service.ts",
+      "klass": "InternalCalendarService",
+      "method": "bootstrapReplaceWeeklyAvailability",
+      "line": 479,
+      "model": "internalAvailabilityRule",
+      "operation": "deleteMany"
+    },
+    {
+      "file": "src/internal-calendar/internal-calendar.service.ts",
+      "klass": "InternalCalendarService",
+      "method": "bootstrapReplaceWeeklyAvailability",
+      "line": 484,
+      "model": "internalAvailabilityRule",
+      "operation": "createMany"
+    },
+    {
+      "file": "src/package5-wave1/package5-wave1.service.ts",
+      "klass": "Package5Wave1ExecutableService",
+      "method": "mutateSetting",
+      "line": 970,
+      "model": "dashboardPreference",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/package5-wave1/package5-wave1.service.ts",
+      "klass": "Package5Wave1ExecutableService",
+      "method": "mutateSetting",
+      "line": 987,
+      "model": "appointmentNotificationSetting",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/package5-wave1/package5-wave1.service.ts",
+      "klass": "Package5Wave1ExecutableService",
+      "method": "mutateWorkItem",
+      "line": 1015,
+      "model": "operationalWorkItem",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave1/package5-wave1.service.ts",
+      "klass": "Package5Wave1ExecutableService",
+      "method": "mutateWorkItem",
+      "line": 1061,
+      "model": "operationalWorkItem",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "applyLogoDuringReconciliation",
+      "line": 1378,
+      "model": "brandingSettings",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "commitLogo",
+      "line": 1425,
+      "model": "brandingSettings",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1696,
+      "model": "user",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1723,
+      "model": "user",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1732,
+      "model": "membership",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1742,
+      "model": "crmStaffAccess",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1756,
+      "model": "authSession",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1776,
+      "model": "crmStaffAccess",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1787,
+      "model": "authSession",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1791,
+      "model": "authRefreshToken",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1808,
+      "model": "authSession",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1812,
+      "model": "authRefreshToken",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1875,
+      "model": "tenant",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1896,
+      "model": "brandingSettings",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1916,
+      "model": "brandingSettings",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1926,
+      "model": "user",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1958,
+      "model": "user",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1980,
+      "model": "internalProvider",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1989,
+      "model": "tenant",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 1995,
+      "model": "tenant",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave2/package5-wave2.service.ts",
+      "klass": "Package5Wave2ExecutableService",
+      "method": "mutate",
+      "line": 2001,
+      "model": "branch",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "klass": "TrialActivationBootstrapService",
+      "method": "activate",
+      "line": 103,
+      "model": "tenant",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "klass": "TrialActivationBootstrapService",
+      "method": "activate",
+      "line": 118,
+      "model": "brandingSettings",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "klass": "TrialActivationBootstrapService",
+      "method": "activate",
+      "line": 125,
+      "model": "branch",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "klass": "TrialActivationBootstrapService",
+      "method": "activate",
+      "line": 135,
+      "model": "user",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "klass": "TrialActivationBootstrapService",
+      "method": "activate",
+      "line": 160,
+      "model": "internalProvider",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "mutate",
+      "line": 1204,
+      "model": "crmIntegration",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "mutate",
+      "line": 1234,
+      "model": "crmIntegration",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "mutate",
+      "line": 1244,
+      "model": "tenant",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "mutate",
+      "line": 1257,
+      "model": "brandingSettings",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "mutate",
+      "line": 1280,
+      "model": "crmIntegration",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "mutate",
+      "line": 1296,
+      "model": "staffProviderLink",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "mutate",
+      "line": 1309,
+      "model": "crmStaffAccess",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "mutate",
+      "line": 1317,
+      "model": "authSession",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "mutate",
+      "line": 1321,
+      "model": "crmIntegration",
+      "operation": "delete"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "mutate",
+      "line": 1339,
+      "model": "clientConsentFact",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "updateClientProfile",
+      "line": 1403,
+      "model": "customerProfile",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave3/package5-wave3.service.ts",
+      "klass": "Package5Wave3ExecutableService",
+      "method": "updateClientProfile",
+      "line": 1409,
+      "model": "customerProfile",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "applyAvatarDuringReconciliation",
+      "line": 1304,
+      "model": "internalProvider",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "commitAvatar",
+      "line": 1353,
+      "model": "internalProvider",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1374,
+      "model": "tenantCatalogItem",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1384,
+      "model": "tenantCatalogItem",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1390,
+      "model": "tenantCatalogItem",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1396,
+      "model": "internalService",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1418,
+      "model": "internalService",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1424,
+      "model": "internalService",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1434,
+      "model": "internalProvider",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1442,
+      "model": "internalAvailabilityRule",
+      "operation": "createMany"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1466,
+      "model": "internalProvider",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1475,
+      "model": "internalAvailabilityRule",
+      "operation": "deleteMany"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1479,
+      "model": "internalAvailabilityRule",
+      "operation": "createMany"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1490,
+      "model": "internalAvailabilityException",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ExecutableService",
+      "method": "mutate",
+      "line": 1502,
+      "model": "internalAvailabilityException",
+      "operation": "delete"
+    },
+    {
+      "file": "src/package5-wave4/package5-wave4.service.ts",
+      "klass": "Package5Wave4ReviewFactService",
+      "method": "accept",
+      "line": 1833,
+      "model": "businessReview",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave5/package5-wave5.service.ts",
+      "klass": "Package5Wave5RecoveryFactPlaneService",
+      "method": "acceptTouchpoint",
+      "line": 215,
+      "model": "recoveryTouchpoint",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave5/package5-wave5.service.ts",
+      "klass": "Package5Wave5RecoveryFactPlaneService",
+      "method": "acceptTouchpoint",
+      "line": 252,
+      "model": "recoveryTouchpoint",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave5/package5-wave5.service.ts",
+      "klass": "Package5Wave5RecoveryFactPlaneService",
+      "method": "acceptBooking",
+      "line": 338,
+      "model": "recoveryConversion",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave5/package5-wave5.service.ts",
+      "klass": "Package5Wave5RecoveryFactPlaneService",
+      "method": "acceptBooking",
+      "line": 383,
+      "model": "recoveryConversion",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave5/package5-wave5.service.ts",
+      "klass": "Package5Wave5RecoveryFactPlaneService",
+      "method": "acceptBookingStatus",
+      "line": 440,
+      "model": "recoveryConversion",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave5/package5-wave5.service.ts",
+      "klass": "Package5Wave5RecoveryFactPlaneService",
+      "method": "appendEvent",
+      "line": 507,
+      "model": "domainEvent",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave5/package5-wave5.service.ts",
+      "klass": "Package5Wave5ExecutableService",
+      "method": "execute",
+      "line": 1033,
+      "model": "recoveryConversion",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave6/package5-wave6.service.ts",
+      "klass": "Package5Wave6MaintenanceService",
+      "method": "prepare",
+      "line": 297,
+      "model": "maintenanceRun",
+      "operation": "create"
+    },
+    {
+      "file": "src/package5-wave6/package5-wave6.service.ts",
+      "klass": "Package5Wave6MaintenanceService",
+      "method": "prepare",
+      "line": 315,
+      "model": "maintenanceItemClaim",
+      "operation": "createMany"
+    },
+    {
+      "file": "src/package5-wave6/package5-wave6.service.ts",
+      "klass": "Package5Wave6MaintenanceService",
+      "method": "claim",
+      "line": 349,
+      "model": "maintenanceItemClaim",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/package5-wave6/package5-wave6.service.ts",
+      "klass": "Package5Wave6MaintenanceService",
+      "method": "claim",
+      "line": 353,
+      "model": "maintenanceRun",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave6/package5-wave6.service.ts",
+      "klass": "Package5Wave6MaintenanceService",
+      "method": "commit",
+      "line": 470,
+      "model": "maintenanceItemClaim",
+      "operation": "update"
+    },
+    {
+      "file": "src/package5-wave6/package5-wave6.service.ts",
+      "klass": "Package5Wave6MaintenanceService",
+      "method": "commit",
+      "line": 481,
+      "model": "maintenanceRun",
+      "operation": "update"
+    },
+    {
+      "file": "src/tenants/tenants.service.ts",
+      "klass": "TenantsService",
+      "method": "updateTenant",
+      "line": 560,
+      "model": "tenant",
+      "operation": "update"
+    },
+    {
+      "file": "src/tenants/tenants.service.ts",
+      "klass": "TenantsService",
+      "method": "updateTenant",
+      "line": 579,
+      "model": "brandingSettings",
+      "operation": "upsert"
+    },
+    {
+      "file": "src/tenants/tenants.service.ts",
+      "klass": "TenantsService",
+      "method": "setTenantStatus",
+      "line": 620,
+      "model": "tenant",
+      "operation": "update"
+    },
+    {
+      "file": "src/users/users.service.ts",
+      "klass": "UsersService",
+      "method": "createUser",
+      "line": 406,
+      "model": "user",
+      "operation": "create"
+    },
+    {
+      "file": "src/users/users.service.ts",
+      "klass": "UsersService",
+      "method": "createStaffUserForInternalProvider",
+      "line": 494,
+      "model": "user",
+      "operation": "create"
+    },
+    {
+      "file": "src/users/users.service.ts",
+      "klass": "UsersService",
+      "method": "createStaffUserForInternalProvider",
+      "line": 525,
+      "model": "internalProvider",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/users/users.service.ts",
+      "klass": "UsersService",
+      "method": "createPhoneFirstClientUser",
+      "line": 833,
+      "model": "user",
+      "operation": "create"
+    },
+    {
+      "file": "src/users/users.service.ts",
+      "klass": "UsersService",
+      "method": "updateCurrentUserProfile",
+      "line": 912,
+      "model": "user",
+      "operation": "updateMany"
+    },
+    {
+      "file": "src/users/users.service.ts",
+      "klass": "UsersService",
+      "method": "updateCurrentUserProfile",
+      "line": 934,
+      "model": "user",
+      "operation": "update"
+    },
+    {
+      "file": "src/users/users.service.ts",
+      "klass": "UsersService",
+      "method": "attachVerifiedSocialPhone",
+      "line": 982,
+      "model": "user",
+      "operation": "updateMany"
+    }
+  ],
+  "hygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "proofPort55487Listening": false,
+    "unrelatedPlatformDirtyFilesPreserved": 30,
+    "nativeMirrorGeneratedCopyMatches": true
+  }
+}

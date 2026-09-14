@@ -1,6 +1,6 @@
 import {
+  ForbiddenException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -8,8 +8,11 @@ import { JwtService } from '@nestjs/jwt';
 import { createHmac, randomBytes, randomUUID, timingSafeEqual } from 'crypto';
 
 import { AuthenticatedUser } from '../common/authenticated-user.interface';
+import { AuditLogService } from '../audit-log/audit-log.service';
 import { UserRole } from '../common/domain.enums';
+import { CrmService } from '../crm/crm.service';
 import { MembershipsService } from '../tenancy/memberships.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AuthClientMetadata } from './auth-client-metadata';
 import { AuthRateLimitService } from './auth-rate-limit.service';
@@ -44,18 +47,63 @@ export class AuthSessionService {
     private readonly rateLimitService: AuthRateLimitService,
     private readonly repository: AuthSessionRepository,
     private readonly systemGateway: AuthSessionSystemGateway,
+    private readonly crmService: CrmService,
+    private readonly auditLog: AuditLogService,
+    private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
   ) {}
+
+  /**
+   * След от события сессии.
+   *
+   * 🔴 Раньше вход, выход и отзыв не оставляли ни строки: в базе менялся только
+   * `revokeReason` самой сессии, а ретенция штатно её удаляла. Владелец,
+   * обнаруживший компрометацию через две недели, не мог доказать ни факта
+   * входа, ни его источника.
+   *
+   * Арендатора не выдумываем: у владельца платформы его нет, и запись идёт
+   * платформенной. Пишем мягко — событие уже произошло, и провал журнала не
+   * должен превращать успешный выход в ошибку.
+   */
+  private async auditSessionEvent(
+    principal: SessionPrincipal,
+    action: string,
+    sessionId: string,
+    metadata: Record<string, unknown> = {},
+  ): Promise<void> {
+    if (principal.tenantId) {
+      await this.auditLog.tryLog({
+        tenantId: principal.tenantId,
+        userId: principal.userId,
+        action,
+        entityType: 'auth_session',
+        entityId: sessionId,
+        metadata,
+      });
+      return;
+    }
+
+    await this.auditLog.tryLogPlatformAction({
+      userId: principal.userId,
+      action,
+      entityType: 'auth_session',
+      entityId: sessionId,
+      metadata,
+    });
+  }
 
   async issueSession(
     user: SessionUser,
     metadata: Partial<AuthClientMetadata> = {},
     tenantId?: string | null,
   ) {
-    const principal = await this.resolveCurrentPrincipal(
-      user,
+    const requestedTenantId =
       tenantId !== undefined
         ? tenantId
-        : (this.tenantContext.get()?.tenantId ?? null),
+        : (this.tenantContext.get()?.tenantId ?? null);
+    await this.assertCurrentCrmStaffAccess(user.id, requestedTenantId);
+    const principal = await this.resolveCurrentPrincipal(
+      user,
+      requestedTenantId,
     );
     const now = new Date();
     const expiresAt = new Date(
@@ -132,6 +180,7 @@ export class AuthSessionService {
       );
     }
 
+    await this.assertCurrentCrmStaffAccess(session.user.id, session.tenantId);
     const principal = await this.resolveCurrentPrincipal(
       session.user,
       session.tenantId,
@@ -216,13 +265,24 @@ export class AuthSessionService {
 
   async logout(user: AuthenticatedUser) {
     const principal = this.fromAuthenticatedUser(user);
-    const revoked = await this.tenantContext.runAsAuthPrincipal(principal, () =>
-      this.repository.revokeSession(
-        principal,
-        user.sessionId,
-        new Date(),
-        'logout',
-      ),
+    const revoked = await this.tenantContext.runAsAuthPrincipal(
+      principal,
+      async () => {
+        const count = await this.repository.revokeSession(
+          principal,
+          user.sessionId,
+          new Date(),
+          'logout',
+        );
+
+        // Запись идёт ВНУТРИ области принципала: снаружи контекста арендатора
+        // нет, и проверка принадлежности отклонила бы её молча.
+        await this.auditSessionEvent(principal, 'auth.logout', user.sessionId, {
+          revoked: count === 1,
+        });
+
+        return count;
+      },
     );
 
     return { ok: true, revoked: revoked === 1 };
@@ -230,30 +290,58 @@ export class AuthSessionService {
 
   async revokeSession(user: AuthenticatedUser, sessionId: string) {
     const principal = this.fromAuthenticatedUser(user);
-    const revoked = await this.tenantContext.runAsAuthPrincipal(principal, () =>
-      this.repository.revokeSession(
-        principal,
-        sessionId,
-        new Date(),
-        'user_revoked',
-      ),
-    );
-
-    if (revoked !== 1) {
-      throw new NotFoundException('Session not found');
+    if (!principal.tenantId) {
+      throw new ForbiddenException('Tenant-scoped account is required');
     }
+    await this.tenantContext.runAsAuthPrincipal(principal, async () => {
+      await this.canonicalWave2.execute(
+        principal.tenantId!,
+        { userId: principal.userId },
+        {
+          operation: 'revoke_other_session',
+          sessionId,
+          currentSessionId: user.sessionId,
+        },
+      );
+      await this.auditSessionEvent(
+        principal,
+        'auth.session_revoked',
+        sessionId,
+        { by_session_id: user.sessionId },
+      );
+    });
 
     return { ok: true, revoked_session_id: sessionId };
   }
 
   async revokeAllSessions(user: AuthenticatedUser) {
     const principal = this.fromAuthenticatedUser(user);
-    const revoked = await this.tenantContext.runAsAuthPrincipal(principal, () =>
-      this.repository.revokeAllSessions(
-        principal,
-        new Date(),
-        'user_revoked_all',
-      ),
+    if (!principal.tenantId) {
+      throw new ForbiddenException('Tenant-scoped account is required');
+    }
+    const revoked = await this.tenantContext.runAsAuthPrincipal(
+      principal,
+      async () => {
+        const sessions = await this.repository.listSessions(principal);
+        const count = sessions.filter((session) => !session.revokedAt).length;
+        await this.canonicalWave2.execute(
+          principal.tenantId!,
+          { userId: principal.userId },
+          {
+            operation: 'revoke_all_sessions',
+            currentSessionId: user.sessionId,
+          },
+        );
+
+        await this.auditSessionEvent(
+          principal,
+          'auth.all_sessions_revoked',
+          user.sessionId,
+          { revoked_sessions: count },
+        );
+
+        return count;
+      },
     );
 
     return { ok: true, revoked_sessions: revoked };
@@ -317,6 +405,17 @@ export class AuthSessionService {
       tenantId: null,
       role: UserRole.PLATFORM_OWNER,
     };
+  }
+
+  private async assertCurrentCrmStaffAccess(
+    userId: string,
+    tenantId: string | null,
+  ): Promise<void> {
+    if (!tenantId) return;
+
+    await this.tenantContext.runAsSystemTenant(tenantId, () =>
+      this.crmService.assertCrmStaffAccessActive(tenantId, userId),
+    );
   }
 
   private fromAuthenticatedUser(user: AuthenticatedUser): SessionPrincipal {

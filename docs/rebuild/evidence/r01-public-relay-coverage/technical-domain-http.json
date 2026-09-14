@@ -1,0 +1,15 @@
+{
+  "at": "2026-09-12T16:34:03.038665+00:00",
+  "checks": [
+    {
+      "url": "https://mocine3388.beget.tech/api-proxy.php",
+      "error": "URLError",
+      "reason": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "url": "http://mocine3388.beget.tech/api-proxy.php",
+      "error": "HTTPError",
+      "reason": "HTTP Error 500: Internal Server Error"
+    }
+  ]
+}

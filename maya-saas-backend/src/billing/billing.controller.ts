@@ -1,14 +1,24 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
 import { AllowSubscriptionRequired } from '../decorators/allow-subscription-required.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
 import { Public } from '../decorators/public.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { BillingService } from './billing.service';
 import { CreateBillingCheckoutDto } from './dto/create-billing-checkout.dto';
+
+/** Кто распоряжается подпиской СВОЕГО бизнеса. */
+const SELF_BILLING_ROLES = [
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+];
 
 @ApiTags('billing')
 @Controller()
@@ -23,7 +33,50 @@ export class BillingController {
   @Get('billing/plans')
   @ApiOperation({ summary: 'List plans available after a trial ends' })
   listPlans() {
-    return this.subscriptionsService.listPlans();
+    return this.subscriptionsService.listPublicPlans();
+  }
+
+  /**
+   * 🔴 Подписка своего бизнеса — самообслуживание.
+   *
+   * Административные роуты ниже лежат под admin/tenants/:id и открыты только
+   * платформе и tenant_admin. Владелец салона (tenant_owner / business_owner)
+   * не мог начать оплату ВООБЩЕ — то есть продать подписку было физически
+   * нечем. Здесь идентификатора в адресе нет: тенант берётся из сессии, чужой
+   * подставить некуда.
+   */
+  @Get('billing/subscription')
+  @ApiBearerAuth()
+  @Roles(...SELF_BILLING_ROLES)
+  @TenantScoped()
+  @ApiOperation({ summary: 'Read the current tenant subscription' })
+  mySubscription(@CurrentUser() actor: AuthenticatedUser) {
+    return this.billingService.getSubscriptionSummary(actor.tenantId!);
+  }
+
+  @Post('billing/checkout')
+  @ApiBearerAuth()
+  @Roles(...SELF_BILLING_ROLES)
+  @TenantScoped()
+  @ApiOperation({ summary: 'Start a checkout for the current tenant' })
+  myCheckout(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Body() dto: CreateBillingCheckoutDto,
+  ) {
+    return this.billingService.createCheckout(
+      actor.tenantId!,
+      actor.userId,
+      dto,
+    );
+  }
+
+  @Get('billing/payments')
+  @ApiBearerAuth()
+  @Roles(...SELF_BILLING_ROLES)
+  @TenantScoped()
+  @ApiOperation({ summary: 'List payments of the current tenant' })
+  myPayments(@CurrentUser() actor: AuthenticatedUser) {
+    return this.billingService.listTenantPayments(actor.tenantId!);
   }
 
   @Post('admin/tenants/:id/billing/checkout')
@@ -34,8 +87,9 @@ export class BillingController {
   createCheckout(
     @Param('id') tenantId: string,
     @Body() dto: CreateBillingCheckoutDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ) {
-    return this.billingService.createCheckout(tenantId, dto);
+    return this.billingService.createCheckout(tenantId, actor.userId, dto);
   }
 
   @Get('admin/tenants/:id/billing/payments')
@@ -52,8 +106,11 @@ export class BillingController {
   @Roles(UserRole.PLATFORM_OWNER)
   @TenantScoped({ paramKey: 'id', requireTenant: false })
   @ApiOperation({ summary: 'Charge tenant using a saved YooKassa method' })
-  chargeTenant(@Param('id') tenantId: string) {
-    return this.billingService.chargeTenant(tenantId);
+  chargeTenant(
+    @Param('id') tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.billingService.chargeTenant(tenantId, actor.userId);
   }
 
   @Post('admin/billing/run-due')

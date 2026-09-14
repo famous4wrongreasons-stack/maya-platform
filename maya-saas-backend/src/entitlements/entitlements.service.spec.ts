@@ -142,4 +142,61 @@ describe('EntitlementsService', () => {
     expect(result.features['ai.owner']).toBe(true);
     expect(result.features['ai.consultant']).toBeUndefined();
   });
+
+  it('returns a server-derived feature decision with the earliest validity horizon', async () => {
+    const evaluatedAt = new Date('2026-08-29T12:00:00.000Z');
+    const overrideExpiresAt = new Date('2026-08-29T12:02:00.000Z');
+    const service = buildService({
+      id: 'tenant-a',
+      status: 'active',
+      trialFullAccess: false,
+      trialEndsAt: null,
+      planId: 'plan-a',
+      plan: {
+        featuresJson: {},
+        entitlements: [{ featureKey: 'crm.integration', enabled: true }],
+      },
+      entitlements: [
+        {
+          featureKey: 'notifications.core',
+          enabled: true,
+          expiresAt: overrideExpiresAt,
+        },
+      ],
+    });
+
+    await expect(
+      service.resolveFeatureRequirements(
+        'tenant-a',
+        ['crm.integration', 'notifications.core'],
+        evaluatedAt,
+      ),
+    ).resolves.toEqual({
+      contract: 'maya.feature-requirement-decision/1',
+      tenantId: 'tenant-a',
+      planId: 'plan-a',
+      requiredFeatures: [
+        { featureKey: 'crm.integration', enabled: true },
+        { featureKey: 'notifications.core', enabled: true },
+      ],
+      allowed: true,
+      evaluatedAt,
+      validUntil: overrideExpiresAt,
+    });
+  });
+
+  it('fails closed for an unregistered feature requirement', async () => {
+    const service = buildService({
+      id: 'tenant-a',
+      planId: null,
+      plan: null,
+      entitlements: [],
+    });
+
+    await expect(
+      service.resolveFeatureRequirements('tenant-a', [
+        'caller.selected' as 'crm.integration',
+      ]),
+    ).rejects.toThrow('Unknown feature requirement');
+  });
 });

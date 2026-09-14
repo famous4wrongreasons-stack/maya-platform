@@ -1,0 +1,6 @@
+
+Test Suites: 6 passed, 6 total
+Tests:       27 passed, 27 total
+Snapshots:   0 total
+Time:        1.83 s
+Ran all test suites within paths "src/crm/maya-user-client-association-issuer.spec.ts", "src/crm/client-channel-challenge-routing.service.spec.ts", "src/crm/legacy-native-consent.service.spec.ts", "src/action-engine/native-consent-client-link.architecture.spec.ts", "src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts", "src/crm/client-profile-read.architecture.spec.ts".

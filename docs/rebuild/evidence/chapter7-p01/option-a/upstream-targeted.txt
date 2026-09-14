@@ -1,0 +1,9 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent app-access.spec.ts app-access-pwa.spec.ts native-consent-transition.pwa.spec.ts native-consent-client-link.architecture.spec.ts legacy-native-consent-compatibility.architecture.spec.ts client-channel-link-schema.architecture.spec.ts measurement.architecture.spec.ts
+
+
+Test Suites: 7 passed, 7 total
+Tests:       40 passed, 40 total
+Snapshots:   0 total
+Time:        0.381 s, estimated 1 s

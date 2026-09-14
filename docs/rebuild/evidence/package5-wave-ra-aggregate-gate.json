@@ -1,0 +1,213 @@
+{
+  "canonical": {
+    "wave": "R-A",
+    "status": "PASS",
+    "sourceFingerprint": "2fab2fc76f5f74853ec7f30dcb309606ab64733d54187f9d4d6767ee3913801e",
+    "head": "ef091875b1734188c05a51032cb4babd31e943b8",
+    "oldDatabasesTouched": 0,
+    "productionMutationsMessages": 0,
+    "package5FinalGateRun": false,
+    "stages": [
+      {
+        "stage": "architectural-ratchets",
+        "exitCode": 0,
+        "seconds": 276.67
+      },
+      {
+        "stage": "lint",
+        "exitCode": 0,
+        "seconds": 32.34
+      },
+      {
+        "stage": "application-typecheck",
+        "exitCode": 0,
+        "seconds": 4.99
+      },
+      {
+        "stage": "scripts-typecheck",
+        "exitCode": 0,
+        "seconds": 11.09
+      },
+      {
+        "stage": "build",
+        "exitCode": 0,
+        "seconds": 14.79
+      },
+      {
+        "stage": "schema-validate",
+        "exitCode": 0,
+        "seconds": 0.6
+      },
+      {
+        "stage": "migration-status",
+        "exitCode": 0,
+        "seconds": 0.41
+      },
+      {
+        "stage": "schema-diff",
+        "exitCode": 0,
+        "seconds": 0.5
+      },
+      {
+        "stage": "mandatory-backend",
+        "exitCode": 0,
+        "seconds": 297.0
+      }
+    ],
+    "sourceUnchangedDuringGate": true,
+    "architecture": {
+      "numPassedTestSuites": 86,
+      "numPassedTests": 491,
+      "numFailedTestSuites": 0,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "mandatoryBackend": {
+      "numPassedTestSuites": 389,
+      "numPassedTests": 3207,
+      "numFailedTestSuites": 0,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "logHashes": {
+      "application-typecheck.log": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "architectural-ratchets.log": "97a11bf3f8f2e28a42178f3b0bd9c203d6478c4805e03f1f3d04955f842467e3",
+      "build.log": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+      "lint.log": "80f5295fdc4b3e55d92f2aa33e3773ba6f2b9305c454e513f870e95ae3fa198d",
+      "mandatory-backend.log": "2c17e7b54eacf63f3faaf7a50f200c66b02d316bd8f07f2608c5b7b3b34c8021",
+      "migration-status.log": "d6894f0e5f82819cb1d3116de11be34f8c2b24c8df90f3c1d6a21f3108ae735f",
+      "schema-diff.log": "83a3899d598a301cb810d4a0f8fa71a7f9514cf5009373f46a2e2e115405950c",
+      "schema-validate.log": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+      "scripts-typecheck.log": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a"
+    }
+  },
+  "releaseView": {
+    "wave": "R-A",
+    "status": "PASS",
+    "sourceFingerprint": "e46d623fbe4803495ccab69e54f1f2e80c4795f179a5eca83070319e3505044e",
+    "head": "4891f5e758a51bf7f680d0ba27aee490b413dc93",
+    "oldDatabasesTouched": 0,
+    "productionMutationsMessages": 0,
+    "package5FinalGateRun": false,
+    "stages": [
+      {
+        "stage": "architectural-ratchets",
+        "exitCode": 0,
+        "seconds": 279.5
+      },
+      {
+        "stage": "lint",
+        "exitCode": 0,
+        "seconds": 30.81
+      },
+      {
+        "stage": "application-typecheck",
+        "exitCode": 0,
+        "seconds": 5.44
+      },
+      {
+        "stage": "scripts-typecheck",
+        "exitCode": 0,
+        "seconds": 11.06
+      },
+      {
+        "stage": "build",
+        "exitCode": 0,
+        "seconds": 14.65
+      },
+      {
+        "stage": "schema-validate",
+        "exitCode": 0,
+        "seconds": 0.46
+      },
+      {
+        "stage": "migration-status",
+        "exitCode": 0,
+        "seconds": 0.78
+      },
+      {
+        "stage": "schema-diff",
+        "exitCode": 0,
+        "seconds": 0.5
+      },
+      {
+        "stage": "mandatory-backend",
+        "exitCode": 0,
+        "seconds": 295.8
+      }
+    ],
+    "sourceUnchangedDuringGate": true,
+    "architecture": {
+      "numPassedTestSuites": 86,
+      "numPassedTests": 491,
+      "numFailedTestSuites": 0,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "mandatoryBackend": {
+      "numPassedTestSuites": 388,
+      "numPassedTests": 3200,
+      "numFailedTestSuites": 0,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "logHashes": {
+      "application-typecheck.log": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "architectural-ratchets.log": "7cd001c6ce96bcbaaa30a50b645d74459bce90332cafd911be71d9f881eb7c9d",
+      "build.log": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+      "lint.log": "80f5295fdc4b3e55d92f2aa33e3773ba6f2b9305c454e513f870e95ae3fa198d",
+      "mandatory-backend.log": "72e9c40c3b3184a68bdd771fa18f26b972812e21ae351c68d5146defa45567d9",
+      "migration-status.log": "8f39201ea802b3d7c09f9a3b726d653b9e1bf48b2f82cdd2228d4fe6a270eb20",
+      "schema-diff.log": "a016713feecfb17dd2fb0e054e60b5e94ee9a2f86f80112b80a1a2f4e13809a0",
+      "schema-validate.log": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+      "scripts-typecheck.log": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a"
+    }
+  },
+  "documentedDeployment": {
+    "status": "PASS",
+    "script": "maya-saas-backend/deploy/vps/deploy.sh",
+    "scriptUnmodified": true,
+    "scriptSha256": "857a305783a131302cbc7105e82d8fd10c4573e6af996985af2bfbfd780fb0fe",
+    "sourceCommit": "4891f5e758a51bf7f680d0ba27aee490b413dc93",
+    "suites": 388,
+    "tests": 3200,
+    "newMigrationCount": 0,
+    "pendingMigrations": 0,
+    "schemaDrift": "NONE",
+    "spareProcessReaped": true,
+    "fullPrivateLogSha256": "537db98195a557bf91b71829bd13c57d60177ebccec71924c0e10398c71601f6",
+    "safeEvidenceLines": [
+      "### 1/10 шлюз: чистое дерево, линт, типизация, тесты, схема",
+      "Test Suites: 388 passed, 388 total",
+      "Tests:       3200 passed, 3200 total",
+      "### 2/10 локальная сборка dist",
+      "### 3/10 каталог релиза",
+      "### 4/10 заливка сборки",
+      "### 5/10 установка зависимостей (npm ci, без dev)",
+      "### 6/10 release:preflight (блокирующий, до базы)",
+      "### 7/10 миграция базы (до переключения)",
+      "No pending migrations to apply.",
+      "No difference detected.",
+      "### 8/10 клиент базы под свежую схему",
+      "### 9/10 смоук на запасном порту 3199",
+      "смоук пройден; процесс завершён и reap выполнен",
+      "### 10/10 переключение, проверка, уборка",
+      "здоровье: {\"status\":\"ok\",\"service\":\"maya-saas-backend\",\"release\":\"20260907-p5-ra-d8049d47\",\"started_at\":\"2026-09-07T19:21:27.257Z\",\"timestamp\":\"2026-09-07T19:21:28.089Z\"}",
+      "### ГОТОВО: 20260907-p5-ra-d8049d47"
+    ]
+  },
+  "supersededFailures": [
+    {
+      "run": "aggregate",
+      "stage": "architectural-ratchets",
+      "cause": "R02 auth selected external staff presentation reference; fixed in ef091875 with unchanged domain guard",
+      "logSha256": "59e1b434fc3f391291009f8366e2cb816a3868c369ed5be8db48a2108de15631"
+    },
+    {
+      "run": "release-aggregate",
+      "stage": "architectural-ratchets",
+      "cause": "Existing B13/B14/B16/B17 static tests require one ignored PHP fixture; exact local dependency supplied, no test/guard changes",
+      "logSha256": "3bfbced00625ba214c36663d641c5c496b64c3e0867e40859e08e967c7bd2b63"
+    }
+  ]
+}

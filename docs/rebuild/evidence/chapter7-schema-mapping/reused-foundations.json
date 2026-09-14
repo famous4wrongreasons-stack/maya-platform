@@ -1,0 +1,166 @@
+[
+  {
+    "id": "F01",
+    "capability": "Canonical Client / verified bindings",
+    "state": "EXISTS",
+    "reuseBoundary": "Identity and exact tenant authority; never infer from User/phone/profile",
+    "evidencePath": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+    "sha256": "fbf4b172eaef1588f65e5d9050fbe17fdd74be1fe8673a674995ca88d93fc421"
+  },
+  {
+    "id": "F02",
+    "capability": "Opportunity and AgentTask lifecycle",
+    "state": "EXISTS",
+    "reuseBoundary": "Versioned evidence, shadow proposals, expiry; not measured outcomes",
+    "evidencePath": "maya-saas-backend/src/opportunities/opportunity.contract.ts",
+    "sha256": "722cd396e7d9f394b0cc41cda7e874abdb0f7287ccbd08dfd899b5b88c7460bc"
+  },
+  {
+    "id": "F03",
+    "capability": "Scoring / ranking",
+    "state": "PARTIAL",
+    "reuseBoundary": "Stable key/evidence ordering exists; value/churn/CLV ranking owner absent",
+    "evidencePath": "maya-saas-backend/src/opportunities/opportunity.engine.ts",
+    "sha256": "dbf3adf7f84e290fbb6e0d37c7bf0745725a89f56a915f6e775ac33d3a8ef19e"
+  },
+  {
+    "id": "F04",
+    "capability": "Client analytics",
+    "state": "PARTIAL",
+    "reuseBoundary": "Aggregate registry counts; provider-card visits/value are not attended visits or net CLV",
+    "evidencePath": "maya-saas-backend/src/ai-tools/client-registry-analysis.ts",
+    "sha256": "4b2430b69a8440a947e12662d50b4f85651ba49d6a7c6a407209c96d52d90612"
+  },
+  {
+    "id": "F05",
+    "capability": "CRM / visit history access",
+    "state": "EXISTS",
+    "reuseBoundary": "Adapter reads with declared limits/completeness, not unlimited history",
+    "evidencePath": "maya-saas-backend/src/crm/crm.service.ts",
+    "sha256": "a03856423aa512cf57652012ee46e635254fb6cabe2e6742a06cb20016f335c7"
+  },
+  {
+    "id": "F06",
+    "capability": "Attendance / recency facts",
+    "state": "PARTIAL",
+    "reuseBoundary": "Canonical attendance calculation exists; recency contract still provider_client-space; exact Client mapping needed at measurement boundary",
+    "evidencePath": "maya-saas-backend/src/business-facts/client-recency-facts.service.ts",
+    "sha256": "e94a34783674ea67c662ad07052e1dea2bf71975ba328737288991b538dbfc2a"
+  },
+  {
+    "id": "F07",
+    "capability": "Loyalty / value foundations",
+    "state": "EXISTS",
+    "reuseBoundary": "P4 owners and authorized evidence; ledger/card discrepancy is separate measurement",
+    "evidencePath": "maya-saas-backend/src/business-state/business-state.service.ts",
+    "sha256": "b3180aaa525eaeef2282c5a0609e3f8605edd29f0beb4f9aaf9384f150ff26e2",
+    "additionalOwnerEvidence": {
+      "path": "maya-saas-backend/src/loyalty/p4-03-legacy-loyalty-executable.service.ts",
+      "sha256": "c2726ed89ee22ea84c0bfcd03ecfd2a4a7b763c2827cebe92f1f20d6f0303559"
+    }
+  },
+  {
+    "id": "F08",
+    "capability": "Segmentation",
+    "state": "PARTIAL",
+    "reuseBoundary": "Existing threshold/cohort readers; no approved valuable-client ranking or consent implication",
+    "evidencePath": "maya-saas-backend/src/ai-tools/client-registry-analysis.ts",
+    "sha256": "4b2430b69a8440a947e12662d50b4f85651ba49d6a7c6a407209c96d52d90612"
+  },
+  {
+    "id": "F09",
+    "capability": "Retention / reactivation candidates",
+    "state": "PARTIAL",
+    "reuseBoundary": "Tenant minimumDays + attendance evidence; shadow opportunity, not end-to-end campaign product",
+    "evidencePath": "maya-saas-backend/src/opportunities/opportunity.policy.ts",
+    "sha256": "7dd189028bfa9014168ce94130aece587c3cd06c6fc7f19333b91673949eaf9d"
+  },
+  {
+    "id": "F10",
+    "capability": "Recommendations",
+    "state": "PARTIAL",
+    "reuseBoundary": "Read tools/shadow structured suggestions; strategy quality or valuation not proved",
+    "evidencePath": "maya-saas-backend/src/opportunities/opportunity.shadow.ts",
+    "sha256": "f14ddcba619e8a9e3d3312b413ac29887abd18495a61ae608b94466ac2fc6d51"
+  },
+  {
+    "id": "F11",
+    "capability": "Campaign / admitted audience",
+    "state": "EXISTS",
+    "reuseBoundary": "B35 canonical immutable audience; membership never consent",
+    "evidencePath": "maya-saas-backend/src/marketing/canonical-bulk.service.ts",
+    "sha256": "ed2e9f92c0361e31cb104b4ef43e566710ace856e10502c7528ba8d63d23a2ef"
+  },
+  {
+    "id": "F12",
+    "capability": "Owner approval / Action Engine",
+    "state": "EXISTS",
+    "reuseBoundary": "Immutable receipts/execution/attempts and fresh current-policy checks",
+    "evidencePath": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+    "sha256": "f0642a29a05f5c5eb3eaa2ef530d5ea197a78d94dcfb806d3c15ad232c1ef782"
+  },
+  {
+    "id": "F13",
+    "capability": "Bulk execution / Communication Delivery",
+    "state": "EXISTS",
+    "reuseBoundary": "Durable recipient slots, idempotency, UNKNOWN/reconciliation",
+    "evidencePath": "maya-saas-backend/src/communication-delivery/communication-delivery.service.ts",
+    "sha256": "9aafef934eb6a632f60465b3bae648ecb358935933b3c40c8cf9016e4d7fb94d"
+  },
+  {
+    "id": "F14",
+    "capability": "Exports / PDF",
+    "state": "PARTIAL",
+    "reuseBoundary": "Authorized admitted OwnerReport snapshot download; not arbitrary Client call-list export",
+    "evidencePath": "maya-saas-backend/src/owner-reports/owner-report-snapshots.controller.ts",
+    "sha256": "672403f75273e0a53e61784d118aac3ff642813e7d2c78b4fd8707f842f993fe"
+  },
+  {
+    "id": "F15",
+    "capability": "Operational work items / configuration",
+    "state": "EXISTS",
+    "reuseBoundary": "Existing package5-wave1 tasks/A22 revisions; not a second task queue",
+    "evidencePath": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+    "sha256": "3917a523b31316b08ef6f1c4184941cb944281b81a043cca83b9c1b6fd20f2d1"
+  },
+  {
+    "id": "F16",
+    "capability": "AI invocation / tooling",
+    "state": "EXISTS",
+    "reuseBoundary": "Existing policy-scoped initiator/read contracts; no new C9 agents implied",
+    "evidencePath": "maya-saas-backend/src/ai-tools/ai-tool-policy.service.ts",
+    "sha256": "cc18770343151f2b53e7dab35e25db50c5c88fac0f186df0ee842950b2894032"
+  },
+  {
+    "id": "F17",
+    "capability": "Financial / expense facts",
+    "state": "PARTIAL",
+    "reuseBoundary": "BusinessState and canonical expense reader; refund/import/currency/comparison gaps remain assigned C7",
+    "evidencePath": "maya-saas-backend/src/expenses/expense-period.reader.ts",
+    "sha256": "82aecc24ee1c2207a98d98247c31c7f172caa4f5c9cce5e9a1887fc95e403b8d"
+  },
+  {
+    "id": "F18",
+    "capability": "Recovery source fact plane",
+    "state": "PARTIAL",
+    "reuseBoundary": "A29/A31 source dedup/corrections exist; temporal attribution/positive-cash totals are not full causal measurement",
+    "evidencePath": "maya-saas-backend/src/recovery/recovery.service.ts",
+    "sha256": "5af59b60f17ecb2b0b02e7d08fac7ad8d92f82a4bae3b51c40f639f05ea85ff9"
+  },
+  {
+    "id": "F24",
+    "capability": "Tenant audit evidence / read API",
+    "state": "PARTIAL",
+    "reuseBoundary": "AuditLog writer and tenant/platform CHECK exist; no generic tenant audit read API found. Add bounded owner-scoped read without exposing platform/security payloads",
+    "evidencePath": "maya-saas-backend/src/audit-log/audit-log.service.ts",
+    "sha256": "c63662181d76138a67e849362160c205b868bc0e0c6d7fadc4ad78146de64d87"
+  },
+  {
+    "id": "F25",
+    "capability": "Bridge source identity",
+    "state": "PARTIAL",
+    "reuseBoundary": "Server-bound integration guard exists for mutation initiators; legacy recovery ingest still accepts global bridge secret + resolved source. Not sufficient by itself for new C7 attribution credit",
+    "evidencePath": "maya-saas-backend/src/tenancy/bridge-source.service.ts",
+    "sha256": "3cc2ea66f0cd72e7c21c052938d8cb1c7e953685db55023ec79dc2b12abf1f85"
+  }
+]

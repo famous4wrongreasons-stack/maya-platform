@@ -27,7 +27,7 @@ import {
 const CONFIDENCE_THRESHOLD = 0.72;
 const DEFAULT_TIMEOUT_MS = 12_000;
 const DEFAULT_DEEPSEEK_BASE_URL = 'https://api.deepseek.com';
-const DEFAULT_DEEPSEEK_MODEL = 'deepseek-v4-flash';
+const DEFAULT_DEEPSEEK_MODEL = 'deepseek-v4-pro';
 
 const ACCEPTED_FIELDS = [
   'template',

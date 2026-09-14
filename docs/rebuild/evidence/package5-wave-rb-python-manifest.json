@@ -1,0 +1,218 @@
+{
+  "wave": "R-B",
+  "baselineBackendRelease": "20260907-p5-ra-d8049d47",
+  "requiredBackendRelease": "20260907-p5-rb-cb4fb27c",
+  "kind": "python",
+  "files": [
+    {
+      "file": "bot.py",
+      "artifact": "bot.py",
+      "destination": "/home/botadmin/barbershop-bot/bot.py",
+      "before": "6d31753b1b3c54886985026d552dd7e61f3860d3f0deb8a511d2a49081f96f86",
+      "after": "c7f5b79011315732e8ffedb41f3ff6705a5bf7829cdffedd4164baeb9b9a121b",
+      "packages": [
+        "R07"
+      ]
+    },
+    {
+      "file": "canonical_retention_entry.py",
+      "artifact": "canonical_retention_entry.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_retention_entry.py",
+      "before": null,
+      "after": "ede7382c5b1ce941e905384a3408b6eed85f31dd54d9c03fc8645d91aff2c379",
+      "packages": [
+        "R07"
+      ]
+    },
+    {
+      "file": "canonical_staff_schedule_entry.py",
+      "artifact": "canonical_staff_schedule_entry.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_staff_schedule_entry.py",
+      "before": null,
+      "after": "2c8cfbb4a5ff08fc53861e2b029afea23620ceb509f6485a545c1e599f0c7bca",
+      "packages": [
+        "R03"
+      ]
+    },
+    {
+      "file": "canonical_work_entry.py",
+      "artifact": "canonical_work_entry.py",
+      "destination": "/home/botadmin/barbershop-bot/canonical_work_entry.py",
+      "before": null,
+      "after": "a4504a7ac3e9bafee4d6d911748d6fc5e764322ab9a128b44b7d29e7b4c45560",
+      "packages": [
+        "R04"
+      ]
+    },
+    {
+      "file": "claude_ai.py",
+      "artifact": "claude_ai.py",
+      "destination": "/home/botadmin/barbershop-bot/claude_ai.py",
+      "before": "59be8cb8d431b11afd211445e8fdb3fda592d04d05c07dd2bc6a0a8872c993cb",
+      "after": "6d8dabf3ae8959866ddbc5bea4ca68e99bf6888af21af1e9c1c272227c4b78ea",
+      "packages": [
+        "R03",
+        "R04"
+      ]
+    },
+    {
+      "file": "cycle_reminder.py",
+      "artifact": "cycle_reminder.py",
+      "destination": "/home/botadmin/barbershop-bot/cycle_reminder.py",
+      "before": "188039aae341fa102ac1a01d51f604d143d227d444f556b338f8675cbe44c41b",
+      "after": "7f74124ad3eb415537f6433fc2e455960d2defb9ddce4b24c9272c01aa7fa29f",
+      "packages": [
+        "R07"
+      ]
+    },
+    {
+      "file": "database.py",
+      "artifact": "database.py",
+      "destination": "/home/botadmin/barbershop-bot/database.py",
+      "before": "e00d81bf1b7976fa07a34db824944f899d8ea9c408441009cbab3fcea866dbf3",
+      "after": "faa8b205072b114518884a1a137abf4b59611522d4bb9ce04c82f09812ab6d69",
+      "packages": [
+        "R04",
+        "R07"
+      ]
+    },
+    {
+      "file": "owner_ai.py",
+      "artifact": "owner_ai.py",
+      "destination": "/home/botadmin/barbershop-bot/owner_ai.py",
+      "before": "811b007301ea65526175d9ef791834143d8c9eece250e530604d63ec293e9555",
+      "after": "9972e1c2a560cf99a03b8fbc88f542cee4050ccfca028fa14d9eedc5a0cb722a",
+      "packages": [
+        "R04"
+      ]
+    },
+    {
+      "file": "package5_bulk_runtime_guard.py",
+      "artifact": "package5_bulk_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_bulk_runtime_guard.py",
+      "before": "f52fb182dab9f975a67fc57962ae36477ee7ee7fee669ab154107034bb0a9d5b",
+      "after": "f11aa571bb2e562fa359742f4e6549d83541cef4f8da5528c7c5c46d6b632b50",
+      "packages": [
+        "R07"
+      ]
+    },
+    {
+      "file": "package5_operational_work_runtime_guard.py",
+      "artifact": "package5_operational_work_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_operational_work_runtime_guard.py",
+      "before": null,
+      "after": "bb4ffde09588d6ca99c572e9a9859c235bfdc6785681ae60c4b8dc8eba266348",
+      "packages": [
+        "R04"
+      ]
+    },
+    {
+      "file": "package5_retention_runtime_guard.py",
+      "artifact": "package5_retention_runtime_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_retention_runtime_guard.py",
+      "before": null,
+      "after": "83d3453fb62b646c48c1d29d97f787977ce9423011ea978fb4a3748dbebed4d1",
+      "packages": [
+        "R07"
+      ]
+    },
+    {
+      "file": "package5_staff_schedule_guard.py",
+      "artifact": "package5_staff_schedule_guard.py",
+      "destination": "/home/botadmin/barbershop-bot/package5_staff_schedule_guard.py",
+      "before": null,
+      "after": "46c2c940cbb5202e65d263bdf3e4ab31c46ac765afffeb224bc2ead39884eb7a",
+      "packages": [
+        "R03"
+      ]
+    },
+    {
+      "file": "reactivation.py",
+      "artifact": "reactivation.py",
+      "destination": "/home/botadmin/barbershop-bot/reactivation.py",
+      "before": "c2417c9884437ab08ae059f5f8a0a9757c95beb50d808b6be97b67eb2caa70d6",
+      "after": "08ec1414dfd1f9aacb23e5de012be1ca93b0c481d5c1a065957b8d244948a73d",
+      "packages": [
+        "R07"
+      ]
+    },
+    {
+      "file": "subscriptions.py",
+      "artifact": "subscriptions.py",
+      "destination": "/home/botadmin/barbershop-bot/subscriptions.py",
+      "before": "335d0e8400d3d457676fafc6bf168109be908645c35a349d5249f9c47f03ae24",
+      "after": "f126f4fdae4abe18db48da4973c4ea54d22fb825da5063e74a67955693285905",
+      "packages": [
+        "R07"
+      ]
+    },
+    {
+      "file": "webhook_server.py",
+      "artifact": "webhook_server.py",
+      "destination": "/home/botadmin/barbershop-bot/webhook_server.py",
+      "before": "f5956dd6665ac838db8619ac4d52b78ef00a73f89e7fe7f879a7fc1a0971dee9",
+      "after": "69bb3fcfa02f93004805de7610d3f9c8eb0d556174a7090d1f465328274a045b",
+      "packages": [
+        "R04",
+        "R07"
+      ]
+    },
+    {
+      "file": "yclients.py",
+      "artifact": "yclients.py",
+      "destination": "/home/botadmin/barbershop-bot/yclients.py",
+      "before": "55cf23f02d6e81c91f1f79ae2ef21bda1307f07f6206212b14dd426395617b5a",
+      "after": "5a2263a72029589acdac1d9347c42ccb1f05a3d4dcf678c0462a4012e606103b",
+      "packages": [
+        "R03"
+      ]
+    },
+    {
+      "file": "app.html",
+      "artifact": "app.html",
+      "destination": "/var/www/maya-platform/app.html",
+      "before": "b37abcd277156e5e6a67505768ea2b5686898cd4512ea860fa57b45ff81b5ee1",
+      "after": "87f10c2e8505ef7fac76685d07965f5e4a271d1117d8c413a01c02cbf476498f",
+      "packages": [
+        "R04"
+      ]
+    }
+  ],
+  "guards": [
+    {
+      "file": "package4_value_runtime_guard.py",
+      "function": "scan_runtime",
+      "sha256": "8fa94249d1aa42d2eff14260c30fccf0949a263a9ce8c3d0dd893ebf3b7e3a51"
+    },
+    {
+      "file": "package5_control_plane_runtime_guard.py",
+      "function": "scan_runtime",
+      "sha256": "40bd659751f3b3c9a27650e0a6c34417f5983ba9c4edc60f6686d73960ec5993"
+    },
+    {
+      "file": "package5_bulk_runtime_guard.py",
+      "function": "scan_bulk_sources",
+      "sha256": "f11aa571bb2e562fa359742f4e6549d83541cef4f8da5528c7c5c46d6b632b50"
+    },
+    {
+      "file": "package5_staff_authority_guard.py",
+      "function": "scan_staff_authority",
+      "sha256": "a39cf95945926651667a665599d4d00f67263b68e0cf89277d41c5be4a2809cd"
+    },
+    {
+      "file": "package5_staff_schedule_guard.py",
+      "function": "scan_staff_schedule",
+      "sha256": "46c2c940cbb5202e65d263bdf3e4ab31c46ac765afffeb224bc2ead39884eb7a"
+    },
+    {
+      "file": "package5_operational_work_runtime_guard.py",
+      "function": "scan_operational_work",
+      "sha256": "bb4ffde09588d6ca99c572e9a9859c235bfdc6785681ae60c4b8dc8eba266348"
+    },
+    {
+      "file": "package5_retention_runtime_guard.py",
+      "function": "scan_retention_sources",
+      "sha256": "83d3453fb62b646c48c1d29d97f787977ce9423011ea978fb4a3748dbebed4d1"
+    }
+  ]
+}

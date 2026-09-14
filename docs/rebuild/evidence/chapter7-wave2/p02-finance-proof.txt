@@ -1,0 +1,10 @@
+PASS unsupported/cross-client/missing value authority rejects before any revision
+PASS actual shared owner publishes exact scoped financial/expense observation with unknown cash refund net
+PASS Client without Maya User exposes points observations and no mutation/valuation
+PASS new finance observations preserve immutable as-reported revision
+PASS provider integration change during remote read prevents stale publication
+PASS exact Client link change during remote value read prevents stale publication
+PASS lease expiration while remote read is pending fences publish; one logical receipt survives
+PASS complete equal elapsed comparison only; raw partial observation has no growth claim
+PASS financial/value measurement creates zero source facts or business action executions
+{"status":"PASS","checks":9,"requirements":["Q05","Q06","Q07","Q11"],"syntheticTenantId":"cmtsx2k0o0000ruc9o1czklxq","sourceOwnerChangesByMeasurement":0,"providerEffects":0,"oldDatabasesTouched":0,"sourceBaselineHash":"602de2879ccb67eef5e77575aecd05df2c33d1bab24ce34bf243f7949a809c45"}

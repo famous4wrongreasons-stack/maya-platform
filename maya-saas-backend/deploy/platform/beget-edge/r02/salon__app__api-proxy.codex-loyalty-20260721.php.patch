@@ -1,0 +1,107 @@
+--- a/salon/app/api-proxy.codex-loyalty-20260721.php
++++ b/salon/app/api-proxy.codex-loyalty-20260721.php
+@@ -1,0 +2,18 @@
++/** R02 transparent credential forwarding, never actor or role resolution. */
++function maya_r02_staff_payload(string $encoded, array $input): string {
++    $body = json_decode($encoded, true);
++    if (!is_array($body)) throw new InvalidArgumentException('Invalid canonical staff payload');
++    $authorization = $_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
++    $header = is_string($authorization) && str_starts_with($authorization, 'Bearer ') ? substr($authorization, 7) : '';
++    $token = $input['maya_token'] ?? '';
++    if (!is_string($token) || ($header !== '' && $token !== '' && !hash_equals($header, $token))) {
++        throw new InvalidArgumentException('Conflicting canonical staff credentials');
++    }
++    $token = $header !== '' ? $header : $token;
++    if ($token !== '') {
++        if (strlen($token) > 4096 || preg_match('/[\r\n]/', $token)) throw new InvalidArgumentException('Invalid canonical staff credential');
++        $body['maya_token'] = $token;
++    }
++    return json_encode($body, JSON_THROW_ON_ERROR);
++}
++
+@@ -303,0 +322 @@
++    $payload = maya_r02_staff_payload($payload, $input);
+@@ -516,0 +536 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1093,0 +1114 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1129,0 +1151 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1162,0 +1185 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1198,0 +1222 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1235,0 +1260 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1268,0 +1294 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1312,0 +1339 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1347,0 +1375 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1383,0 +1412 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1420,0 +1450 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1466,0 +1497 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1502,0 +1534 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1538,0 +1571 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1574,0 +1608 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1614,0 +1649 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1650,0 +1686 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1689,0 +1726 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1724,0 +1762 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1761,0 +1800 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1800,0 +1840 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1836,0 +1877 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1868,0 +1910 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1897,0 +1940 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1926,0 +1970 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1958,0 +2003 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -1990,0 +2036 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2060,0 +2107 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2108,0 +2156 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2135,0 +2184 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2160,0 +2210 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2247,0 +2298 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2275,0 +2327 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2312,0 +2365 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2348,0 +2402 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2369,0 +2424 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2401,0 +2457 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2433,0 +2490 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2471,0 +2529 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2508,0 +2567 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2542,0 +2602 @@
++        $payload = maya_r02_staff_payload($payload, $input);
+@@ -2594,0 +2655 @@
++        $payload = maya_r02_staff_payload($payload, $input);

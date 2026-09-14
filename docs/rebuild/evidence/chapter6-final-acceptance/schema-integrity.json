@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "repositoryMigrationsMatched": 93,
+  "recognizedHistoricalLedgerEntries": [
+    "20260814205000_marketing_tenant_compound_keys",
+    "20260814210000_outbound_messaging_delivery",
+    "20260814223000_marketing_campaign_scheduling"
+  ],
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "constraints": 589,
+  "customTriggers": 133,
+  "allCustomTriggersEnabled": true,
+  "unapprovedUnvalidatedConstraints": 0,
+  "approvedHistoricalNotValidConstraints": [
+    {
+      "table": "MarketingCampaign",
+      "constraint": "MarketingCampaign_audienceId_tenantId_fkey"
+    },
+    {
+      "table": "MarketingCampaign",
+      "constraint": "MarketingCampaign_confirmedByUserId_tenantId_fkey"
+    },
+    {
+      "table": "MarketingCampaign",
+      "constraint": "MarketingCampaign_createdByUserId_tenantId_fkey"
+    },
+    {
+      "table": "MarketingCampaignRecipient",
+      "constraint": "MarketingCampaignRecipient_internalUserId_tenantId_fkey"
+    },
+    {
+      "table": "MarketingDeliveryAttempt",
+      "constraint": "MarketingDeliveryAttempt_recipientId_tenantId_campaignId_fkey"
+    }
+  ],
+  "historicalConstraintSource": "maya-saas-backend/prisma/migrations/20260822120000_communication_delivery_foundation/migration.sql",
+  "historicalConstraintSourceSha256": "d6eb8b790bb785810757ff1a1ad6483fea335da35062edaa65af9e7b73daaf29",
+  "historicalSemantics": "Preserve lifecycle-v0 evidence without fake membership backfill; PostgreSQL enforces new/changed references, canonical lifecycle v1 remains guarded",
+  "newBusinessOrSchemaDecisionRequired": false,
+  "orphanedWIPSchema": 0,
+  "productionWrites": 0,
+  "executableCatalogAcceptance": "schema-catalog-acceptance.json",
+  "executableProbe": "schema-catalog.probe.cjs"
+}

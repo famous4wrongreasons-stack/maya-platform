@@ -1,0 +1,13 @@
+[Nest] 59002  - 09/08/2026, 2:30:54 AM     LOG [InboxService] inbox stored type=new_appointment but no device tokens yet title=Новая запись
+[Nest] 59002  - 09/08/2026, 2:30:54 AM     LOG [InboxService] inbox stored type=new_appointment but no device tokens yet title=Новая запись
+[Nest] 59002  - 09/08/2026, 2:30:54 AM     LOG [InboxService] inbox stored type=new_appointment but no device tokens yet title=Новая запись
+[Nest] 59002  - 09/08/2026, 2:30:54 AM     LOG [InboxService] inbox soft-deleted 1 related card(s) for cancelled record=1893718680
+[Nest] 59002  - 09/08/2026, 2:30:54 AM     LOG [InboxService] inbox stored type=appointment_cancelled but no device tokens yet title=Запись отменена
+[Nest] 59002  - 09/08/2026, 2:30:54 AM     LOG [InboxService] inbox stored type=new_appointment but no device tokens yet title=New appointment
+[Nest] 59002  - 09/08/2026, 2:30:54 AM     LOG [InboxService] inbox stored type=new_appointment but no device tokens yet title=New appointment
+
+Test Suites: 4 passed, 4 total
+Tests:       40 passed, 40 total
+Snapshots:   0 total
+Time:        15.536 s
+Ran all test suites within paths "src/package5-wave1/governed-settings.spec.ts", "src/action-engine/package5-r11-governed-settings.architecture.spec.ts", "src/action-engine/package5-wave1-bypass-ratchet.architecture.spec.ts", "src/inbox/inbox.service.spec.ts".

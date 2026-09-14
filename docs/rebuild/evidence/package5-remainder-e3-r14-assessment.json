@@ -1,0 +1,237 @@
+{
+  "package": "R14",
+  "blockers": [
+    "B55"
+  ],
+  "stage": "E3 Stage 1 / unapproved proposal only",
+  "baseline": "60e8266473882fac12fca7fe4181b6e5344b29ce",
+  "productionRuntime": "42962475",
+  "recommendedOption": "A",
+  "canonicalOwner": "Proposed Cash Declaration owner over human observations; existing AE, separate from Expense/provider accounting",
+  "existingFoundationSufficient": false,
+  "businessDecisionRequired": true,
+  "schemaRequired": true,
+  "newModels": 1,
+  "newFields": 18,
+  "newFieldCountConvention": "persisted DB columns including new models; virtual Prisma relations excluded",
+  "newActionClasses": 3,
+  "newAeActionClasses": 2,
+  "newAc6RetentionClasses": 1,
+  "actionClasses": {
+    "AE": [
+      "declare_cash_position",
+      "correct_cash_position"
+    ],
+    "AC6": [
+      "purge_cash_declaration_reason_payloads"
+    ]
+  },
+  "models": {
+    "CashDeclaration": [
+      {
+        "name": "id",
+        "type": "String / text",
+        "meaning": "UUID primary key"
+      },
+      {
+        "name": "tenantId",
+        "type": "String / text",
+        "meaning": "Exact canonical tenant"
+      },
+      {
+        "name": "branchId",
+        "type": "String / text",
+        "meaning": "Exact existing Branch; aggregate physical cash at this branch"
+      },
+      {
+        "name": "businessDay",
+        "type": "String / char(10)",
+        "meaning": "Local YYYY-MM-DD matching countedAt"
+      },
+      {
+        "name": "timezone",
+        "type": "String / text",
+        "meaning": "Frozen branch timezone or canonical tenant fallback"
+      },
+      {
+        "name": "countedAt",
+        "type": "DateTime / timestamptz",
+        "meaning": "Explicit observation time; no inferred historical count"
+      },
+      {
+        "name": "currency",
+        "type": "String / char(3)",
+        "meaning": "RUB only in v1"
+      },
+      {
+        "name": "countedCashKopecks",
+        "type": "Int? / integer",
+        "meaning": "COUNT: 0..1000000000; WITHDRAWAL: null, never fake zero"
+      },
+      {
+        "name": "declarationKind",
+        "type": "String / text",
+        "meaning": "COUNT | WITHDRAWAL"
+      },
+      {
+        "name": "revision",
+        "type": "Int / integer",
+        "meaning": "1 for first count; predecessor +1 for correction/withdrawal"
+      },
+      {
+        "name": "previousDeclarationId",
+        "type": "String? / text",
+        "meaning": "Exact preceding declaration, same tenant/branch/day"
+      },
+      {
+        "name": "actionExecutionId",
+        "type": "String / text",
+        "meaning": "Exact canonical declaration/correction execution"
+      },
+      {
+        "name": "declaredByUserId",
+        "type": "String / text",
+        "meaning": "Canonical actor, checked against membership/execution"
+      },
+      {
+        "name": "declaredByMembershipId",
+        "type": "String / text",
+        "meaning": "Exact current admitted membership"
+      },
+      {
+        "name": "contractVersion",
+        "type": "Int / integer",
+        "meaning": "1; immutable interpretation/normalization"
+      },
+      {
+        "name": "intentHash",
+        "type": "String / char(64)",
+        "meaning": "Canonical declaration intent hash"
+      },
+      {
+        "name": "encryptedReason",
+        "type": "String? / text",
+        "meaning": "Mandatory bounded correction/withdrawal explanation; retention may erase ciphertext"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime / timestamptz",
+        "meaning": "Server commit time"
+      }
+    ]
+  },
+  "existingModelFields": {},
+  "newPrismaVirtualRelations": [
+    "CashDeclaration.tenant",
+    "Tenant.cashDeclarations",
+    "CashDeclaration.branch",
+    "Branch.cashDeclarations",
+    "CashDeclaration.declarerMembership",
+    "Membership.cashDeclarations",
+    "CashDeclaration.execution",
+    "ActionExecution.cashDeclaration",
+    "CashDeclaration.previousDeclaration",
+    "CashDeclaration.nextDeclarations"
+  ],
+  "newPrismaVirtualRelationCount": 10,
+  "sharedConstraint": "Membership @@unique([id,tenantId]); constraint only, apply once across approved packages",
+  "migrationRequired": true,
+  "backfillRequired": false,
+  "fakeHistoricalBackfill": false,
+  "runtimeOnly": false,
+  "technicalPrerequisitesSatisfied": true,
+  "dependenciesSatisfied": false,
+  "pendingDependency": "Package owner/contract/schema approval, explicitly included in master definition",
+  "implementationReadyAfterApproval": true,
+  "implementationStarted": false,
+  "productionReady": false,
+  "alternateOptionB": {
+    "semantics": "retire inventoried legacy behavior; preserve unrelated existing canonical owner",
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "businessDecisionRequired": true
+  },
+  "evidence": [
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/bot.py",
+      "line": 4853,
+      "sha256": "c7f5b79011315732e8ffedb41f3ff6705a5bf7829cdffedd4164baeb9b9a121b",
+      "claim": "/kassa current R02 authority followed by direct mutable declaration"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/database.py",
+      "line": 2195,
+      "sha256": "faa8b205072b114518884a1a137abf4b59611522d4bb9ce04c82f09812ab6d69",
+      "claim": "cash_log per-date mutable upsert and reader"
+    },
+    {
+      "sourceView": "accepted R-B composed-v4 (local captured source)",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/composed-v4/python/webhook_server.py",
+      "line": 4511,
+      "sha256": "69bb3fcfa02f93004805de7610d3f9c8eb0d556174a7090d1f465328274a045b",
+      "claim": "Legacy report compares gross cash input with revenue minus all expenses"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "line": 1681,
+      "sha256": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8",
+      "claim": "Expense lacks cash payment, account, float/transfer attribution"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "line": 2930,
+      "sha256": "63cff8295e6c41225d4072b52243a707a8b8d1b80127019d18f59214dcb84699",
+      "claim": "Provider cash-account aggregation and discarded negative-transaction evidence"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/src/analytics/operations-analytics.service.ts",
+      "line": 160,
+      "sha256": "7122d303f0da9b4498a162e8086d8a9627ec73996557c70e4092c128cd19ce0b",
+      "claim": "Existing scope/coverage reasons for finance unavailability"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "line": 629,
+      "sha256": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8",
+      "claim": "Existing exact canonical Branch"
+    },
+    {
+      "sourceView": "repository baseline 60e82664",
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "line": 375,
+      "sha256": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8",
+      "claim": "Existing tenant-qualified AE caller idempotency binding columns"
+    }
+  ],
+  "sourceProofLimit": "Accepted local source capture and source analysis only; no new production access, executable tests or database proof",
+  "inventoryReopened": false,
+  "newBlockerIds": [],
+  "productionMutationsMessages": 0,
+  "databaseConnections": 0,
+  "runtimeSchemaTestEdits": 0,
+  "ownedProcessesRemaining": 0,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "masterCanonicalOwner": "Cash declaration/reconciliation owner — mapping pending",
+  "proposedCanonicalOwner": "Proposed Cash Declaration owner over human observations; existing AE, separate from Expense/provider accounting",
+  "dependencies": [
+    "R02",
+    "B55 owner/schema decision"
+  ],
+  "blockerMembershipMatchesMaster": true,
+  "documentationValidation": {
+    "newColumnCountMatchesFieldLists": true,
+    "newActionTotalMatchesAePlusAc6": true,
+    "allRecordedSourceHashesVerifiedLocally": true,
+    "runtimeProofPerformed": false
+  }
+}

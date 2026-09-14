@@ -1,0 +1,70 @@
+--- a/yclients.py
++++ b/yclients.py
+@@ -5,0 +6 @@
++from canonical_staff_schedule_entry import staff_schedule_handoff
+@@ -430,5 +431,4 @@
+-        """Preview or apply one safe schedule change for a staff member.
+-
+-        Supported actions: close_day, set_hours and set_break. Existing future
+-        records are checked before the PUT and are never moved or deleted here.
+-        """
++        """Read-only legacy preview; A15 owns every schedule mutation."""
++        if apply:
++            # R03: refuse before lookup, cache mutation or provider dispatch.
++            return staff_schedule_handoff()
+@@ -450,3 +449,0 @@
+-        if apply:
+-            # Confirmation may arrive minutes after the preview; re-read live state.
+-            self._clear_staff_day_caches(int(staff_id), date_str)
+@@ -575,50 +572 @@
+-        if not apply:
+-            return preview
+-
+-        payload = {"schedules_to_set": [], "schedules_to_delete": []}
+-        if proposed_slots:
+-            payload["schedules_to_set"].append({
+-                "staff_id": int(staff_id),
+-                "dates": [date_str],
+-                "slots": proposed_slots,
+-            })
+-        else:
+-            payload["schedules_to_delete"].append({
+-                "staff_id": int(staff_id),
+-                "dates": [date_str],
+-            })
+-        try:
+-            response = self._put(f"company/{self.company_id}/staff/schedule", payload)
+-        except Exception as exc:
+-            logger.warning("schedule update failed for staff %s on %s: %s", staff_id, date_str, exc)
+-            return {
+-                "success": False,
+-                "error": "schedule_update_failed",
+-                "message": "YClients не принял изменение графика.",
+-            }
+-        if not isinstance(response, dict) or response.get("success") is False:
+-            return {
+-                "success": False,
+-                "error": "schedule_update_failed",
+-                "message": "YClients не подтвердил изменение графика.",
+-            }
+-
+-        self._clear_staff_day_caches(int(staff_id), date_str)
+-        verified_rows = self.get_staff_schedule(int(staff_id), date_str, date_str)
+-        verified = next(
+-            (
+-                row for row in (verified_rows or [])
+-                if isinstance(row, dict) and str(row.get("date") or "")[:10] == date_str
+-            ),
+-            {},
+-        )
+-        verified_slots = self._normalise_schedule_slots(verified.get("slots") or [])
+-        return {
+-            "success": True,
+-            "status": "applied",
+-            "staff_id": int(staff_id),
+-            "date": date_str,
+-            "is_working": bool(proposed_slots),
+-            "slots": proposed_slots,
+-            "verified": verified_slots == proposed_slots,
+-        }
++        return preview

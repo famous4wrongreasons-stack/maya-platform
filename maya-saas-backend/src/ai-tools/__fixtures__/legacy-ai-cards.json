@@ -1,0 +1,616 @@
+{
+  "1. деньги недоступны: контур не ответил": {
+    "card": {
+      "widget": "business_report",
+      "widget_data": {
+        "title": "Сводка салона",
+        "period_label": "выбранный период",
+        "revenue_rub": 2500,
+        "revenue_basis": "unavailable",
+        "revenue_caption": "Стоимость записанного, а не пробитая касса",
+        "booked_value_rub": 2500,
+        "booked_value_caption": "Стоимость записанного",
+        "booked_value_basis": "booked_prices",
+        "appointments": 1,
+        "unique_clients": 1,
+        "clients_new": 1,
+        "clients_returning": 0,
+        "average_ticket_rub": null,
+        "cancellations": 0,
+        "rows_title": "Касса по мастерам",
+        "rows": [
+          {
+            "label": "Илья",
+            "value_rub": null,
+            "caption": "Нет точной привязки кассы CRM"
+          }
+        ],
+        "status_text": "YClients не передал точную привязку кассы к мастерам. Общая касса остаётся доступна.",
+        "source_complete": true,
+        "insight": null
+      }
+    },
+    "metrics": {
+      "revenue_amount_kopecks": null,
+      "booked_value_amount_kopecks": 250000,
+      "booked_value_basis": "booked_prices",
+      "revenue_basis": "unavailable",
+      "financial_operations": null,
+      "appointments_total": 1,
+      "appointments_active": 1,
+      "appointments_scheduled": 0,
+      "appointments_completed": 1,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 1,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 1,
+      "clients_returning": 0,
+      "clients_new": 1,
+      "returning_share_percent": 0,
+      "cohort_lookback_days": 90,
+      "attended_appointments": null,
+      "attendance_no_show": null,
+      "appointments_attendance_not_observed": 0,
+      "average_ticket_amount_kopecks": null,
+      "average_booked_value_amount_kopecks": 250000,
+      "booked_minutes": 0
+    }
+  },
+  "2. деньги не разрешены роли": {
+    "card": {
+      "widget": "business_report",
+      "widget_data": {
+        "title": "Сводка салона",
+        "period_label": "выбранный период",
+        "revenue_rub": 2500,
+        "revenue_basis": "unavailable",
+        "revenue_caption": "Стоимость записанного, а не пробитая касса",
+        "booked_value_rub": 2500,
+        "booked_value_caption": "Стоимость записанного",
+        "booked_value_basis": "booked_prices",
+        "appointments": 1,
+        "unique_clients": 1,
+        "clients_new": 1,
+        "clients_returning": 0,
+        "average_ticket_rub": null,
+        "cancellations": 0,
+        "rows_title": "Касса по мастерам",
+        "rows": [
+          {
+            "label": "Илья",
+            "value_rub": null,
+            "caption": "Нет точной привязки кассы CRM"
+          }
+        ],
+        "status_text": "YClients не передал точную привязку кассы к мастерам. Общая касса остаётся доступна.",
+        "source_complete": true,
+        "insight": null
+      }
+    },
+    "metrics": {
+      "revenue_amount_kopecks": null,
+      "booked_value_amount_kopecks": 250000,
+      "booked_value_basis": "booked_prices",
+      "revenue_basis": "unavailable",
+      "financial_operations": null,
+      "appointments_total": 1,
+      "appointments_active": 1,
+      "appointments_scheduled": 0,
+      "appointments_completed": 1,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 1,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 1,
+      "clients_returning": 0,
+      "clients_new": 1,
+      "returning_share_percent": 0,
+      "cohort_lookback_days": 90,
+      "attended_appointments": null,
+      "attendance_no_show": null,
+      "appointments_attendance_not_observed": 0,
+      "average_ticket_amount_kopecks": null,
+      "average_booked_value_amount_kopecks": 250000,
+      "booked_minutes": 0
+    }
+  },
+  "3. измеренный ноль: записей нет": {
+    "card": {
+      "widget": "business_report",
+      "widget_data": {
+        "title": "Сводка салона",
+        "period_label": "выбранный период",
+        "revenue_rub": 50000,
+        "revenue_basis": "provider_transactions",
+        "revenue_caption": null,
+        "booked_value_rub": null,
+        "booked_value_caption": null,
+        "booked_value_basis": "unavailable",
+        "appointments": 0,
+        "unique_clients": 0,
+        "clients_new": 0,
+        "clients_returning": 0,
+        "average_ticket_rub": 2500,
+        "cancellations": 0,
+        "rows_title": null,
+        "rows": [],
+        "status_text": "YClients точно связал с мастерами 60% кассы услуг. Остаток не распределён приблизительно.",
+        "source_complete": true,
+        "insight": null
+      }
+    },
+    "metrics": {
+      "revenue_amount_kopecks": 5000000,
+      "booked_value_amount_kopecks": null,
+      "booked_value_basis": "unavailable",
+      "revenue_basis": "provider_transactions",
+      "financial_operations": 20,
+      "appointments_total": 0,
+      "appointments_active": 0,
+      "appointments_scheduled": 0,
+      "appointments_completed": 0,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 0,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 0,
+      "clients_returning": 0,
+      "clients_new": 0,
+      "returning_share_percent": 0,
+      "cohort_lookback_days": 90,
+      "attended_appointments": null,
+      "attendance_no_show": null,
+      "appointments_attendance_not_observed": 0,
+      "average_ticket_amount_kopecks": 250000,
+      "average_booked_value_amount_kopecks": null,
+      "booked_minutes": 0
+    }
+  },
+  "4. записанное есть, заработок мастеру неизвестен": {
+    "card": {
+      "widget": "master_earn",
+      "widget_data": {
+        "title": "Твой результат",
+        "period_label": "выбранный период",
+        "earned_rub": 15000,
+        "booked_rub": 2500,
+        "potential_rub": 3250,
+        "upside_rub": 750,
+        "target_check_rub": 3250,
+        "appointments": 1,
+        "unique_clients": 1,
+        "footnote": "Потенциал = визиты × целевой чек (топ-40% твоих чеков за ~60 дней) × твоя доля. Это ориентир MAYA по допродажам, не касса."
+      }
+    },
+    "metrics": {
+      "booked_value_amount_kopecks": 250000,
+      "appointments_total": 1,
+      "appointments_active": 1,
+      "appointments_scheduled": 0,
+      "appointments_completed": 1,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 1,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 1,
+      "clients_returning": 0,
+      "clients_new": 1,
+      "returning_share_percent": 0,
+      "cohort_lookback_days": 90,
+      "average_booked_value_amount_kopecks": 250000,
+      "booked_minutes": 0
+    }
+  },
+  "4б. виджет допродаж: заработок неизвестен": {
+    "card": {
+      "widget": "master_upsell",
+      "widget_data": {
+        "title": "Совет по допродажам",
+        "period_label": "выбранный период",
+        "earned_rub": 2500,
+        "potential_rub": 3250,
+        "upside_rub": 750,
+        "target_check_rub": 3250,
+        "tips": [
+          "К стрижке предложи уход или бороду, если гость уже брал это раньше — без давления.",
+          "Закрепи следующую запись на 3–4 недели, пока гость в кресле."
+        ],
+        "footnote": "Потенциал = визиты × целевой чек (топ-40% твоих чеков за ~60 дней) × твоя доля. Это ориентир MAYA по допродажам, не касса."
+      }
+    },
+    "metrics": {
+      "booked_value_amount_kopecks": 250000,
+      "appointments_total": 1,
+      "appointments_active": 1,
+      "appointments_scheduled": 0,
+      "appointments_completed": 1,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 1,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 1,
+      "clients_returning": 0,
+      "clients_new": 1,
+      "returning_share_percent": 0,
+      "cohort_lookback_days": 90,
+      "average_booked_value_amount_kopecks": 250000,
+      "booked_minutes": 0
+    }
+  },
+  "5. касса и записанное расходятся": {
+    "card": {
+      "widget": "business_report",
+      "widget_data": {
+        "title": "Сводка салона",
+        "period_label": "выбранный период",
+        "revenue_rub": 50000,
+        "revenue_basis": "provider_transactions",
+        "revenue_caption": null,
+        "booked_value_rub": 5500,
+        "booked_value_caption": "Стоимость записанного",
+        "booked_value_basis": "booked_prices",
+        "appointments": 2,
+        "unique_clients": 2,
+        "clients_new": 2,
+        "clients_returning": 0,
+        "average_ticket_rub": 2500,
+        "cancellations": 0,
+        "rows_title": "Касса по мастерам",
+        "rows": [
+          {
+            "label": "Илья",
+            "value_rub": 30000,
+            "caption": "0 финансовых операций"
+          },
+          {
+            "label": "Стас",
+            "value_rub": null,
+            "caption": "Нет точной привязки кассы CRM"
+          }
+        ],
+        "status_text": "YClients точно связал с мастерами 60% кассы услуг. Остаток не распределён приблизительно.",
+        "source_complete": true,
+        "insight": null
+      }
+    },
+    "metrics": {
+      "revenue_amount_kopecks": 5000000,
+      "booked_value_amount_kopecks": 550000,
+      "booked_value_basis": "booked_prices",
+      "revenue_basis": "provider_transactions",
+      "financial_operations": 20,
+      "appointments_total": 2,
+      "appointments_active": 2,
+      "appointments_scheduled": 0,
+      "appointments_completed": 2,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 2,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 2,
+      "clients_returning": 0,
+      "clients_new": 2,
+      "returning_share_percent": 0,
+      "cohort_lookback_days": 90,
+      "attended_appointments": null,
+      "attendance_no_show": null,
+      "appointments_attendance_not_observed": 0,
+      "average_ticket_amount_kopecks": 250000,
+      "average_booked_value_amount_kopecks": 275000,
+      "booked_minutes": 0
+    }
+  },
+  "6. неявка из канонического присутствия": {
+    "card": {
+      "widget": "business_report",
+      "widget_data": {
+        "title": "Сводка салона",
+        "period_label": "выбранный период",
+        "revenue_rub": 50000,
+        "revenue_basis": "provider_transactions",
+        "revenue_caption": null,
+        "booked_value_rub": 4000,
+        "booked_value_caption": "Стоимость записанного",
+        "booked_value_basis": "booked_prices",
+        "appointments": 2,
+        "unique_clients": 2,
+        "clients_new": 2,
+        "clients_returning": 0,
+        "average_ticket_rub": 2500,
+        "cancellations": 0,
+        "rows_title": "Касса по мастерам",
+        "rows": [
+          {
+            "label": "Илья",
+            "value_rub": 30000,
+            "caption": "0 финансовых операций"
+          }
+        ],
+        "status_text": "YClients точно связал с мастерами 60% кассы услуг. Остаток не распределён приблизительно.",
+        "source_complete": true,
+        "insight": null
+      }
+    },
+    "metrics": {
+      "revenue_amount_kopecks": 5000000,
+      "booked_value_amount_kopecks": 400000,
+      "booked_value_basis": "booked_prices",
+      "revenue_basis": "provider_transactions",
+      "financial_operations": 20,
+      "appointments_total": 2,
+      "appointments_active": 2,
+      "appointments_scheduled": 0,
+      "appointments_completed": 1,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 1,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 2,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 2,
+      "clients_returning": 0,
+      "clients_new": 2,
+      "returning_share_percent": 0,
+      "cohort_lookback_days": 90,
+      "attended_appointments": 1,
+      "attendance_no_show": 1,
+      "appointments_attendance_not_observed": 0,
+      "average_ticket_amount_kopecks": 250000,
+      "average_booked_value_amount_kopecks": 200000,
+      "booked_minutes": 0
+    }
+  },
+  "7. присутствие сверено не полностью": {
+    "card": {
+      "widget": "business_report",
+      "widget_data": {
+        "title": "Сводка салона",
+        "period_label": "выбранный период",
+        "revenue_rub": 50000,
+        "revenue_basis": "provider_transactions",
+        "revenue_caption": null,
+        "booked_value_rub": 5000,
+        "booked_value_caption": "Стоимость записанного",
+        "booked_value_basis": "booked_prices",
+        "appointments": 2,
+        "unique_clients": 2,
+        "clients_new": 2,
+        "clients_returning": 0,
+        "average_ticket_rub": 2500,
+        "cancellations": 0,
+        "rows_title": "Касса по мастерам",
+        "rows": [
+          {
+            "label": "Илья",
+            "value_rub": 30000,
+            "caption": "0 финансовых операций"
+          }
+        ],
+        "status_text": "YClients точно связал с мастерами 60% кассы услуг. Остаток не распределён приблизительно.",
+        "source_complete": true,
+        "insight": null
+      }
+    },
+    "metrics": {
+      "revenue_amount_kopecks": 5000000,
+      "booked_value_amount_kopecks": 500000,
+      "booked_value_basis": "booked_prices",
+      "revenue_basis": "provider_transactions",
+      "financial_operations": 20,
+      "appointments_total": 2,
+      "appointments_active": 2,
+      "appointments_scheduled": 0,
+      "appointments_completed": 2,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 2,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 2,
+      "clients_returning": 0,
+      "clients_new": 2,
+      "returning_share_percent": 0,
+      "cohort_lookback_days": 90,
+      "attended_appointments": null,
+      "attendance_no_show": null,
+      "appointments_attendance_not_observed": 1,
+      "average_ticket_amount_kopecks": 250000,
+      "average_booked_value_amount_kopecks": 250000,
+      "booked_minutes": 0
+    }
+  },
+  "8. строка мастера с неизвестной метрикой": {
+    "card": {
+      "widget": "business_report",
+      "widget_data": {
+        "title": "Сводка салона",
+        "period_label": "выбранный период",
+        "revenue_rub": 50000,
+        "revenue_basis": "provider_transactions",
+        "revenue_caption": null,
+        "booked_value_rub": 2500,
+        "booked_value_caption": "Стоимость записанного",
+        "booked_value_basis": "booked_prices",
+        "appointments": 1,
+        "unique_clients": 1,
+        "clients_new": 1,
+        "clients_returning": 0,
+        "average_ticket_rub": 2500,
+        "cancellations": 0,
+        "rows_title": "Касса по мастерам",
+        "rows": [
+          {
+            "label": "Илья",
+            "value_rub": null,
+            "caption": "Нет точной привязки кассы CRM"
+          }
+        ],
+        "status_text": "YClients не передал точную привязку кассы к мастерам. Общая касса остаётся доступна.",
+        "source_complete": true,
+        "insight": null
+      }
+    },
+    "metrics": {
+      "revenue_amount_kopecks": 5000000,
+      "booked_value_amount_kopecks": 250000,
+      "booked_value_basis": "booked_prices",
+      "revenue_basis": "provider_transactions",
+      "financial_operations": 20,
+      "appointments_total": 1,
+      "appointments_active": 1,
+      "appointments_scheduled": 0,
+      "appointments_completed": 1,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 1,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 1,
+      "clients_returning": 0,
+      "clients_new": 1,
+      "returning_share_percent": 0,
+      "cohort_lookback_days": 90,
+      "attended_appointments": null,
+      "attendance_no_show": null,
+      "appointments_attendance_not_observed": 0,
+      "average_ticket_amount_kopecks": 250000,
+      "average_booked_value_amount_kopecks": 250000,
+      "booked_minutes": 0
+    }
+  },
+  "9. внутренний календарь: кассы нет как понятия": {
+    "card": {
+      "widget": "business_report",
+      "widget_data": {
+        "title": "Сводка салона",
+        "period_label": "выбранный период",
+        "revenue_rub": 2500,
+        "revenue_basis": "booked_prices",
+        "revenue_caption": "Стоимость записанного, а не пробитая касса",
+        "booked_value_rub": 2500,
+        "booked_value_caption": "Стоимость записанного",
+        "booked_value_basis": "booked_prices",
+        "appointments": 1,
+        "unique_clients": 1,
+        "clients_new": 0,
+        "clients_returning": 1,
+        "average_ticket_rub": 2500,
+        "cancellations": 0,
+        "rows_title": "Касса по мастерам",
+        "rows": [
+          {
+            "label": "Мастер",
+            "value_rub": null,
+            "caption": "Нет точной привязки кассы CRM"
+          }
+        ],
+        "status_text": null,
+        "source_complete": true,
+        "insight": null
+      }
+    },
+    "metrics": {
+      "revenue_amount_kopecks": null,
+      "booked_value_amount_kopecks": 250000,
+      "booked_value_basis": "booked_prices",
+      "revenue_basis": "booked_prices",
+      "financial_operations": null,
+      "appointments_total": 1,
+      "appointments_active": 1,
+      "appointments_scheduled": 0,
+      "appointments_completed": 1,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 1,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 1,
+      "clients_returning": 1,
+      "clients_new": 0,
+      "returning_share_percent": 100,
+      "cohort_lookback_days": 90,
+      "attended_appointments": null,
+      "attendance_no_show": null,
+      "appointments_attendance_not_observed": 0,
+      "average_ticket_amount_kopecks": 250000,
+      "average_booked_value_amount_kopecks": 250000,
+      "booked_minutes": 60
+    }
+  },
+  "10. чтение журнала оборвано": {
+    "card": {
+      "widget": "business_report",
+      "widget_data": {
+        "title": "Сводка салона",
+        "period_label": "выбранный период",
+        "revenue_rub": 50000,
+        "revenue_basis": "provider_transactions",
+        "revenue_caption": null,
+        "booked_value_rub": 2500,
+        "booked_value_caption": "Стоимость записанного",
+        "booked_value_basis": "booked_prices",
+        "appointments": 1,
+        "unique_clients": 1,
+        "clients_new": null,
+        "clients_returning": null,
+        "average_ticket_rub": 2500,
+        "cancellations": 0,
+        "rows_title": "Касса по мастерам",
+        "rows": [
+          {
+            "label": "Илья",
+            "value_rub": 30000,
+            "caption": "0 финансовых операций"
+          }
+        ],
+        "status_text": "Журнал за период прочитан не целиком: числа — нижняя граница, ноль означает «не измерено».",
+        "source_complete": false,
+        "insight": null
+      }
+    },
+    "metrics": {
+      "revenue_amount_kopecks": 5000000,
+      "booked_value_amount_kopecks": 250000,
+      "booked_value_basis": "booked_prices",
+      "revenue_basis": "provider_transactions",
+      "financial_operations": 20,
+      "appointments_total": 1,
+      "appointments_active": 1,
+      "appointments_scheduled": 0,
+      "appointments_completed": 1,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 1,
+      "repeat_clients_in_period": 0,
+      "repeat_client_rate_percent": 0,
+      "identified_client_visits": 1,
+      "clients_returning": null,
+      "clients_new": null,
+      "returning_share_percent": null,
+      "cohort_lookback_days": 90,
+      "attended_appointments": null,
+      "attendance_no_show": null,
+      "appointments_attendance_not_observed": 0,
+      "average_ticket_amount_kopecks": 250000,
+      "average_booked_value_amount_kopecks": 250000,
+      "booked_minutes": 0
+    }
+  }
+}

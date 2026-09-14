@@ -1,0 +1,51 @@
+# Chapter 7 — Wave 2: P02 finance and P05 reputation
+
+Status: **P02 PRODUCTION PASS / P05 PRODUCTION PASS**. Active coordinated Wave 2 release: `20260908-c7-wave2-4b03a29c`; P01 remains preserved. This report is not Chapter 7 completion.
+
+## Approved scope and shared architecture
+
+The approved P02 Q05/Q06/Q07/Q11 and P05 Q10 mapping reuse the single deployed MeasurementRevision foundation. There are no new models, physical fields, migrations, business action classes, AC6 classes or backfills. The applied P01 migration is unchanged. No new public route, launcher, provider integration or delivery effect is introduced; consumer routing remains the approved P06 scope. [Implementation manifest](evidence/chapter7-wave2/implementation-manifest.json).
+
+Financial observations use the existing CRM read contract, P407 expenses and Package 4 value facts. Remote reads happen before publication transactions; the same claim then checks current tenant/integration/Client authority and exact prepared evidence under source locks. The shared publisher is the only derived writer. Source owners are never modified by measurement. Reputation reads run in the existing publication transaction; the accepted source-owner correction semantics remain intact.
+
+P02 preserves currency, source/basis, raw expense category evidence, completeness and actual observation times. It does not synthesize fiscal cash, refunds, profit, salary from revenue or value from points. Period comparisons require comparable complete facts. P05 separates stored source-labelled reviews from exact canonical native feedback, retaining source, scale, denominator and deterministic rounding. Later correction/withdrawal changes the new current result; immutable historical snapshots remain unchanged. Known source capacity failures close unavailable rather than publish truncated facts or leave endless pending retries.
+
+## Executable proof
+
+- [P01 shared regression](evidence/chapter7-wave2/p01-regression.txt): 41 checks PASS.
+- [Real source-owner correction/concurrency regression](evidence/chapter7-wave2/source-owner-regression.txt): 18 checks PASS.
+- [P02 PostgreSQL proof](evidence/chapter7-wave2/p02-finance-proof.txt): 9 checks PASS, including exact Client without User, changed binding during remote read, lease expiry/restart on the same revision, separate currency/raw expenses and no source effects.
+- [P05 final PostgreSQL proof](evidence/chapter7-wave2/p05-reputation-proof.final.txt): 9 checks PASS, including real R08 response/correction/withdrawal, 1,005 source reviews with bounded receipts, local calendar boundaries, source correction and published unavailable overflow. The earlier eight-check receipt is retained as history.
+- Shared permanent owner/remote-publication/source-correction ratchets remain part of the standard mandatory Jest command. [Combined targeted tests](evidence/chapter7-wave2/combined-targeted.txt): **9 suites / 122 tests PASS**. Package details: [P02](CYCLE-07-P02-FINANCIAL-TRUTH.md), [P05](CYCLE-07-P05-REPUTATION.md).
+
+All fixtures live in a new isolated owned PostgreSQL cluster on loopback port 55517. The 17 protected databases are untouched. Production proof business/provider/messages are zero.
+
+## Release plan and completion boundary
+
+Run the unchanged documented backend deployment process with the already verified local Node 22.23.2 gate runtime. It requires committed backend files and runs Prisma validation, lint, both typechecks, full mandatory regression and build before upload. Production schema is expected to have no pending migrations and no drift; Wave 2 adds zero migrations. After activation, compare compiled artifacts and all P01 constraint/index/trigger definitions, then health/readiness, using only read-only structural verification.
+
+After both production packages PASS, progress becomes 10/22 Q requirements, 3/6 packages and 2/4 waves; P03/P04 then proceed in parallel. P06 and the one final 22/22 + 32/32 Chapter 7 gate remain outstanding. Chapter 8 is not started. No completion credit is assigned before the production receipt below.
+
+## Mandatory gate attempt and owned correction
+
+The first documented deployment attempt stopped at lint, before upload/production changes: six test/proof-only errors (unused import, unnecessary async and untyped mock-call access). [Original gate receipt](evidence/chapter7-wave2/deployment-first-lint-fail.txt). Fixed only the P05 synthetic proof and test fixture typing; no runtime/schema change or gate relaxation. Focused lint and [fresh combined targeted 9 suites / 122 tests](evidence/chapter7-wave2/combined-targeted-final.txt) PASS. The full mandatory deployment gate must now pass on the corrected candidate. Independent read-only cross-reviews of P02 and P05 found no contract violations.
+
+The second full gate completed **421 suites: 416 PASS, 5 FAIL** before upload. [Full receipt](evidence/chapter7-wave2/deployment-second-integration-fail.txt). Its integration findings are corrected without changing source-owner permissions: the closed source-kind registry uses read-only map entries instead of Prisma-shaped property names; its consumers use the same map lookup; the synthetic expense fixture is classified only under its exact loopback/port/database/user refusal contract; the identity scanner distinguishes a read-only source lock from identity writes; new measurement code reuses the canonical CRM service return types instead of adding adapter-boundary importers. Production owner allowlists and the CRM importer ratchet limit remain unchanged. Fresh passing evidence is required before cutover.
+
+## Late upstream reconciliation — 31126aa5
+
+Before cutover, a normal fetch found `31126aa5` restoring `app_<nonce>` native Telegram login confirmation. It is merged without rewriting upstream or discarding Wave 2. Exact scope: bot import/cmd_start, two synthetic auth tests, and the existing R01 test-count assertion (6→8). It creates only a legacy web-session authentication receipt, not Client/User/binding, consent, preference, booking or staff/business authority. Existing `channel_proof` rejects legacy `session_token`; private Client operations retain verified A18 provenance and canonical keyed commands. Staff access still requires the canonical Maya session/entitlements. This does not promise that a legacy-only session gains a supported private Client capability.
+
+The active backend remains P01. Read-only production comparison proves `database.py` and `web_auth.py` equal the Chapter 6-certified production hashes; active `bot.py` equals the certified production source plus the exact upstream cmd_start/import at AST level (only blank-line formatting differs). No unaccounted runtime function change, new route/launcher/surface group, schema impact or measurement overlap was found. [Exact receipt](evidence/chapter7-wave2/upstream-31126aa5-reconciliation.json); [canonical auth/provenance regression](evidence/chapter7-wave2/upstream-auth-targeted.txt). No auth request, session, message or business/provider mutation was exercised in production. The combined baseline is compatible, subject to the normal full release gate.
+
+[Post-fix targeted proof](evidence/chapter7-wave2/integration-fix-targeted.txt): **13 suites / 159 tests PASS**. The same production owner allowlists, read locks, closed measurement source families and nine-importer boundary limit remain in force.
+
+## Final coordinated production acceptance
+
+The unchanged [documented deployment gate](evidence/chapter7-wave2/deployment-certified.txt) completed: Prisma validation, lint, application/scripts typecheck, **421 suites / 3509 tests**, build, production preflight, zero pending migrations, schema drift NONE, canary cleanup, activation and health/readiness all PASS. The applied P01 migration is unchanged; no migration was introduced in P02/P05.
+
+[Read-only structural proof](evidence/chapter7-wave2/production-structural.txt) verified 14 compiled artifacts, all 37 fields, 16 CHECKs, eight source FKs, 11 index definitions, four triggers and guard bodies. Measurement rows/backfill/proof business-provider-message effects remain zero. Existing production Python includes the reconciled 31126aa5 auth handshake; this cutover changed only the backend release.
+
+P02 requirements Q05/Q06/Q07/Q11 and P05 Q10: LOCAL + PRODUCTION PASS. Progress is now **10/22 Q, 3/6 packages, 2/4 waves**. P03/P04 are next; P06 and final 22/22/32-surface gate remain. CHAPTER 7 COMPLETE: NO; CHAPTER 8 STARTED: NO.
+
+The exact owned Wave 2 PostgreSQL database was dumped then dropped and its cluster stopped/removed. [Dump receipt](evidence/chapter7-wave2/dump-final-evidence.json), [hygiene](evidence/chapter7-wave2/hygiene.json). Protected main remains 24 unchanged entries; 17 pre-existing DBs untouched. No owned process/watcher/browser/database remains from Wave 2.

@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "sourcePinSemantics": "exact source segments, independent of ast.dump Python version",
+  "localPython": "3.14.6",
+  "server": {
+    "python": "3.10.12",
+    "findings": [],
+    "pass": true
+  },
+  "sourceBoundaries": 5,
+  "findings": []
+}

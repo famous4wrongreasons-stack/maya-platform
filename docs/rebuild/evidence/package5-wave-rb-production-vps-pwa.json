@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "path": "/var/www/maya-platform/app.html",
+  "sha256": "87f10c2e8505ef7fac76685d07965f5e4a271d1117d8c413a01c02cbf476498f",
+  "owner": [
+    0,
+    0
+  ],
+  "writes": 0
+}

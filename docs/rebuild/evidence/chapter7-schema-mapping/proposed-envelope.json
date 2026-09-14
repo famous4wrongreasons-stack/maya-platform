@@ -1,0 +1,537 @@
+{
+  "status": "PROPOSED FOR SCHEMA/ACTION APPROVAL — NOT IMPLEMENTED",
+  "baseline": "4d6283871a7abf9d827b9b1262cc1e8ef4e21506",
+  "ownerDecisionsApproved": 13,
+  "newModels": [
+    {
+      "name": "MeasurementRevision",
+      "fields": [
+        {
+          "ordinal": 1,
+          "name": "id",
+          "type": "String @db.Uuid",
+          "meaning": "UUID, stable revision receipt; generated once at admission",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 2,
+          "name": "tenantId",
+          "type": "String",
+          "meaning": "Exact trusted tenant; immutable",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 3,
+          "name": "kind",
+          "type": "String",
+          "meaning": "One of seven measurement families; immutable",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 4,
+          "name": "identityHash",
+          "type": "String @db.Char(64)",
+          "meaning": "Versioned canonical logical subject/scope identity; immutable",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 5,
+          "name": "revision",
+          "type": "Int",
+          "meaning": "Monotonic generation among retained revisions of this identity; immutable",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 6,
+          "name": "requestKeyHash",
+          "type": "String @db.Char(64)",
+          "meaning": "Tenant-qualified durable producer occurrence/retry identity; immutable",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 7,
+          "name": "intentHash",
+          "type": "String @db.Char(64)",
+          "meaning": "Normalized admitted request fingerprint; same key changed intent conflicts",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 8,
+          "name": "ruleKey",
+          "type": "String",
+          "meaning": "Compiled deterministic rule identifier; immutable",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 9,
+          "name": "ruleVersion",
+          "type": "Int",
+          "meaning": "Positive immutable rule version",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 10,
+          "name": "clientId",
+          "type": "String?",
+          "meaning": "Exact canonical Client when applicable; never User/phone",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 11,
+          "name": "appointmentId",
+          "type": "String?",
+          "meaning": "Exact canonical Appointment; requires clientId",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 12,
+          "name": "staffId",
+          "type": "String?",
+          "meaning": "Exact canonical Staff scope when applicable",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 13,
+          "name": "branchId",
+          "type": "String?",
+          "meaning": "Exact single-branch scope where applicable",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 14,
+          "name": "configurationUserId",
+          "type": "String?",
+          "meaning": "A22 personal configuration owner via Membership, not Client authority",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 15,
+          "name": "periodFrom",
+          "type": "DateTime @db.Timestamptz(3)",
+          "meaning": "Inclusive UTC instant resolved from tenant-local bounds",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 16,
+          "name": "periodTo",
+          "type": "DateTime @db.Timestamptz(3)",
+          "meaning": "Exclusive UTC instant",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 17,
+          "name": "timezone",
+          "type": "String",
+          "meaning": "Validated canonical IANA zone used to resolve local bounds",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 18,
+          "name": "scopeJson",
+          "type": "Json",
+          "meaning": "Strict minimal dimension/authorization/source-query scope, no contacts",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 19,
+          "name": "asOf",
+          "type": "DateTime @db.Timestamptz(3)",
+          "meaning": "Immutable business cutoff; source observation time separately in evidence",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 20,
+          "name": "admittedAt",
+          "type": "DateTime @db.Timestamptz(3)",
+          "meaning": "Server first admission time; retry never replaces",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 21,
+          "name": "expiresAt",
+          "type": "DateTime @db.Timestamptz(3)",
+          "meaning": "Exactly admittedAt + 31536000 seconds",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 22,
+          "name": "state",
+          "type": "String",
+          "meaning": "PENDING or PUBLISHED; one-way publication",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 23,
+          "name": "leaseGeneration",
+          "type": "Int",
+          "meaning": "Fencing counter, default 0; only PENDING coordination",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 24,
+          "name": "leaseTokenHash",
+          "type": "String? @db.Char(64)",
+          "meaning": "Hash of current computation claim, not transport identity",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 25,
+          "name": "leaseExpiresAt",
+          "type": "DateTime? @db.Timestamptz(3)",
+          "meaning": "Claim deadline bounded by expiresAt",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 26,
+          "name": "publishedAt",
+          "type": "DateTime? @db.Timestamptz(3)",
+          "meaning": "Set once on publication",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 27,
+          "name": "contractVersion",
+          "type": "Int",
+          "meaning": "Payload normalization/schema version, initially 1",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 28,
+          "name": "evidenceHash",
+          "type": "String? @db.Char(64)",
+          "meaning": "Canonical normalized evidence set digest, set on publication",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 29,
+          "name": "snapshotHash",
+          "type": "String? @db.Char(64)",
+          "meaning": "Canonical published envelope digest, set on publication",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 30,
+          "name": "completeness",
+          "type": "String?",
+          "meaning": "COMPLETE/PARTIAL/UNAVAILABLE/NOT_MEASURED; per-metric details also required",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 31,
+          "name": "qualification",
+          "type": "String?",
+          "meaning": "VERIFIED/SOURCE_LABELLED/UNQUALIFIED; weakest dependency at envelope level",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 32,
+          "name": "evidenceRefsJson",
+          "type": "Json?",
+          "meaning": "Typed bounded source/reader receipts; immutable after publication",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 33,
+          "name": "valuesJson",
+          "type": "Json?",
+          "meaning": "Allowlisted measured values, units, basis, currency and evidence refs",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 34,
+          "name": "limitationsJson",
+          "type": "Json?",
+          "meaning": "Typed reason codes/coverage; no arbitrary message/provider text",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 35,
+          "name": "attributionStatus",
+          "type": "String?",
+          "meaning": "NOT_APPLICABLE/UNATTRIBUTED/AMBIGUOUS/ATTRIBUTED",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 36,
+          "name": "creditedExecutionId",
+          "type": "String?",
+          "meaning": "Existing same-tenant ActionExecution; only unique proved appointment attribution",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        },
+        {
+          "ordinal": 37,
+          "name": "creditedAttemptId",
+          "type": "String?",
+          "meaning": "Existing same-tenant effect receipt attempt belonging to creditedExecutionId",
+          "sourceOrDerived": "DERIVED / coordination, never canonical source fact",
+          "retentionOwner": "AC6 expire_measurement_revisions",
+          "retentionPeriod": "365 days from this revision admittedAt; retry does not extend",
+          "holdSemantics": "No new source/legal hold is introduced; pending claim fences purge only until lease expiry, never extends expiresAt; source holds remain with source owners",
+          "tenantDeletion": "No automatic cascade; approved tenant lifecycle must coordinate derived cleanup and existing source retention",
+          "fkCleanup": "Only the derived row is deleted; all outbound FKs RESTRICT; no source deletion"
+        }
+      ]
+    }
+  ],
+  "alteredExistingModels": [
+    {
+      "name": "Tenant",
+      "change": "Prisma inverse relation only",
+      "newPhysicalFields": 0
+    },
+    {
+      "name": "Client",
+      "change": "Prisma inverse relation only",
+      "newPhysicalFields": 0
+    },
+    {
+      "name": "Appointment",
+      "change": "Prisma inverse relation only",
+      "newPhysicalFields": 0
+    },
+    {
+      "name": "Staff",
+      "change": "Prisma inverse relation only",
+      "newPhysicalFields": 0
+    },
+    {
+      "name": "Branch",
+      "change": "Prisma inverse relation only",
+      "newPhysicalFields": 0
+    },
+    {
+      "name": "Membership",
+      "change": "Prisma inverse relation only",
+      "newPhysicalFields": 0
+    },
+    {
+      "name": "ActionExecution",
+      "change": "Prisma inverse relation only",
+      "newPhysicalFields": 0
+    },
+    {
+      "name": "ActionAttempt",
+      "change": "Prisma inverse relation only",
+      "newPhysicalFields": 0
+    }
+  ],
+  "newBusinessActionClasses": [],
+  "newAC6Classes": [
+    {
+      "name": "expire_measurement_revisions",
+      "policyKey": "chapter7.measurement-retention",
+      "policyVersion": 1,
+      "owner": "existing AC6 MaintenanceRun/MaintenanceItemClaim"
+    }
+  ],
+  "newPrismaEnums": 0,
+  "newExistingEnumValues": 0,
+  "newPhysicalFields": 37,
+  "newMigrationsExpected": 1,
+  "backfills": 0,
+  "prospective": true,
+  "packages": [
+    "P01",
+    "P02",
+    "P03",
+    "P04",
+    "P05",
+    "P06"
+  ],
+  "waves": [
+    [
+      "P01"
+    ],
+    [
+      "P02",
+      "P05"
+    ],
+    [
+      "P03",
+      "P04"
+    ],
+    [
+      "P06"
+    ]
+  ]
+}

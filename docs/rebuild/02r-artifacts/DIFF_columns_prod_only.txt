@@ -1,0 +1,88 @@
+MarketingAudience	exclusionReasonsJson	jsonb				NO	'{}'::jsonb	jsonb
+MarketingAudience	provider	text				NO	'yclients_sms'::text	text
+MarketingAudience	snapshotHash	text				NO	''::text	text
+MarketingAudience	status	text				NO	'AUDIENCE_CALCULATED'::text	text
+MarketingAudienceRecipient	audienceId	text				NO		text
+MarketingAudienceRecipient	consentRecordedAt	timestamp without time zone			3	YES		timestamp
+MarketingAudienceRecipient	consentSource	text				YES		text
+MarketingAudienceRecipient	createdAt	timestamp without time zone			3	NO	CURRENT_TIMESTAMP	timestamp
+MarketingAudienceRecipient	eligibilityStatus	text				NO		text
+MarketingAudienceRecipient	exclusionReason	text				YES		text
+MarketingAudienceRecipient	externalClientId	text				NO		text
+MarketingAudienceRecipient	id	text				NO		text
+MarketingAudienceRecipient	internalUserId	text				YES		text
+MarketingAudienceRecipient	metricsJson	jsonb				YES		jsonb
+MarketingAudienceRecipient	tenantId	text				NO		text
+MarketingCampaign	acceptedCount	integer		32		NO	0	int4
+MarketingCampaign	audienceSnapshotHash	text				NO	''::text	text
+MarketingCampaign	cancelledAt	timestamp without time zone			3	YES		timestamp
+MarketingCampaign	completedAt	timestamp without time zone			3	YES		timestamp
+MarketingCampaign	confirmationHash	text				YES		text
+MarketingCampaign	confirmedAt	timestamp without time zone			3	YES		timestamp
+MarketingCampaign	confirmedByUserId	text				YES		text
+MarketingCampaign	costCurrency	text				NO	'RUB'::text	text
+MarketingCampaign	costEstimateKopecks	integer		32		YES		int4
+MarketingCampaign	costEstimateStatus	text				NO	'unavailable'::text	text
+MarketingCampaign	failedCount	integer		32		NO	0	int4
+MarketingCampaign	lastErrorCode	text				YES		text
+MarketingCampaign	leaseExpiresAt	timestamp without time zone			3	YES		timestamp
+MarketingCampaign	leaseOwner	text				YES		text
+MarketingCampaign	messageSnapshotHash	text				NO	''::text	text
+MarketingCampaign	provider	text				NO	'yclients_sms'::text	text
+MarketingCampaign	queuedAt	timestamp without time zone			3	YES		timestamp
+MarketingCampaign	retryCount	integer		32		NO	0	int4
+MarketingCampaign	scheduledFor	timestamp without time zone			3	YES		timestamp
+MarketingCampaign	skippedCount	integer		32		NO	0	int4
+MarketingCampaign	startedAt	timestamp without time zone			3	YES		timestamp
+MarketingCampaign	unknownCount	integer		32		NO	0	int4
+MarketingCampaignRecipient	acceptedAt	timestamp without time zone			3	YES		timestamp
+MarketingCampaignRecipient	attemptCount	integer		32		NO	0	int4
+MarketingCampaignRecipient	campaignId	text				NO		text
+MarketingCampaignRecipient	createdAt	timestamp without time zone			3	NO	CURRENT_TIMESTAMP	timestamp
+MarketingCampaignRecipient	deliveredAt	timestamp without time zone			3	YES		timestamp
+MarketingCampaignRecipient	externalClientId	text				NO		text
+MarketingCampaignRecipient	failedAt	timestamp without time zone			3	YES		timestamp
+MarketingCampaignRecipient	id	text				NO		text
+MarketingCampaignRecipient	idempotencyKey	text				NO		text
+MarketingCampaignRecipient	internalUserId	text				YES		text
+MarketingCampaignRecipient	lastErrorCode	text				YES		text
+MarketingCampaignRecipient	nextAttemptAt	timestamp without time zone			3	YES		timestamp
+MarketingCampaignRecipient	providerMessageId	text				YES		text
+MarketingCampaignRecipient	providerStatus	text				YES		text
+MarketingCampaignRecipient	status	text				NO	'QUEUED'::text	text
+MarketingCampaignRecipient	tenantId	text				NO		text
+MarketingCampaignRecipient	updatedAt	timestamp without time zone			3	NO		timestamp
+MarketingConsentEvidence	channel	text				NO		text
+MarketingConsentEvidence	createdAt	timestamp without time zone			3	NO	CURRENT_TIMESTAMP	timestamp
+MarketingConsentEvidence	evidenceRef	text				YES		text
+MarketingConsentEvidence	expiresAt	timestamp without time zone			3	YES		timestamp
+MarketingConsentEvidence	externalClientId	text				NO		text
+MarketingConsentEvidence	grantedAt	timestamp without time zone			3	YES		timestamp
+MarketingConsentEvidence	id	text				NO		text
+MarketingConsentEvidence	revokedAt	timestamp without time zone			3	YES		timestamp
+MarketingConsentEvidence	source	text				NO		text
+MarketingConsentEvidence	status	text				NO		text
+MarketingConsentEvidence	tenantId	text				NO		text
+MarketingConsentEvidence	updatedAt	timestamp without time zone			3	NO		timestamp
+MarketingDeliveryAttempt	attemptNumber	integer		32		NO		int4
+MarketingDeliveryAttempt	batchKey	text				NO		text
+MarketingDeliveryAttempt	campaignId	text				NO		text
+MarketingDeliveryAttempt	completedAt	timestamp without time zone			3	YES		timestamp
+MarketingDeliveryAttempt	createdAt	timestamp without time zone			3	NO	CURRENT_TIMESTAMP	timestamp
+MarketingDeliveryAttempt	errorCode	text				YES		text
+MarketingDeliveryAttempt	httpStatus	integer		32		YES		int4
+MarketingDeliveryAttempt	id	text				NO		text
+MarketingDeliveryAttempt	providerResponseCode	text				YES		text
+MarketingDeliveryAttempt	recipientId	text				YES		text
+MarketingDeliveryAttempt	startedAt	timestamp without time zone			3	NO	CURRENT_TIMESTAMP	timestamp
+MarketingDeliveryAttempt	status	text				NO		text
+MarketingDeliveryAttempt	tenantId	text				NO		text
+MarketingPolicy	createdAt	timestamp without time zone			3	NO	CURRENT_TIMESTAMP	timestamp
+MarketingPolicy	dailyRecipientLimit	integer		32		NO	500	int4
+MarketingPolicy	enabled	boolean				NO	false	bool
+MarketingPolicy	maxCampaignCostKopecks	integer		32		YES		int4
+MarketingPolicy	maxCampaignRecipients	integer		32		NO	500	int4
+MarketingPolicy	monthlyRecipientLimit	integer		32		NO	5000	int4
+MarketingPolicy	provider	text				NO	'yclients_sms'::text	text
+MarketingPolicy	tenantId	text				NO		text
+MarketingPolicy	updatedAt	timestamp without time zone			3	NO		timestamp

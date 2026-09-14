@@ -1,0 +1,56 @@
+{
+  "base": "4b13b9f1",
+  "stages": [
+    {
+      "name": "targeted",
+      "exitCode": 0,
+      "seconds": 1.25
+    },
+    {
+      "name": "architecture",
+      "exitCode": 0,
+      "seconds": 248.7
+    },
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "seconds": 29.46
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "seconds": 4.93
+    },
+    {
+      "name": "typecheck-scripts",
+      "exitCode": 0,
+      "seconds": 10.85
+    },
+    {
+      "name": "build",
+      "exitCode": 0,
+      "seconds": 14.15
+    },
+    {
+      "name": "schema-validate",
+      "exitCode": 0,
+      "seconds": 0.45
+    },
+    {
+      "name": "schema-status",
+      "exitCode": 0,
+      "seconds": 0.41
+    },
+    {
+      "name": "schema-diff",
+      "exitCode": 0,
+      "seconds": 0.5
+    },
+    {
+      "name": "mandatory",
+      "exitCode": 0,
+      "seconds": 267.8
+    }
+  ],
+  "status": "PASS"
+}

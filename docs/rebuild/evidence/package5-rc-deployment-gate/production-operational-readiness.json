@@ -1,0 +1,1 @@
+{"providerCredentialPresent": {"CLAUDE_API_KEY": true, "OPENAI_API_KEY": true}, "serviceAccess": {"/home/botadmin/barbershop-bot": false, "/home/botadmin/barbershop-bot/venv/bin/python": false, "/home/botadmin/barbershop-bot/generate_admin_pdf.py": false, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf": true}, "pythonGatewayAlreadyConfigured": false, "productionWrites": 0}

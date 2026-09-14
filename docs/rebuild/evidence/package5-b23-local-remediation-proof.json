@@ -1,0 +1,54 @@
+{
+  "ownerCheckpoint": "9c6ee8bf",
+  "option": "A — retire legacy server-side chat history delete",
+  "schemaChanges": 0,
+  "modelsAdded": 0,
+  "actionClassesAdded": 0,
+  "runtime": "chat_delete_handler returns fixed unsupported without parsing input or accessing storage",
+  "targetedBackendScenarios": 144,
+  "targetedJestTestsPassed": 4,
+  "frontendProof": [
+    {
+      "file": "/tmp/maya-b23-cycle/candidate/app.html",
+      "scripts": 26,
+      "unsupportedInert": true,
+      "existingLocalHidingPreserved": true
+    },
+    {
+      "file": "/tmp/maya-b23-cycle/candidate/maya-app.html",
+      "scripts": 28,
+      "unsupportedInert": true,
+      "existingLocalHidingPreserved": true
+    },
+    {
+      "file": "/Users/stanislavmosin/Desktop/maya-ios/www/index.html",
+      "scripts": 28,
+      "unsupportedInert": true,
+      "existingLocalHidingPreserved": true
+    }
+  ],
+  "overlay": {
+    "onlyRuntimeHandlerChanged": true,
+    "candidateRuntimeGuard": true,
+    "schemaChanges": 0,
+    "historicalDataFilesTouched": 0
+  },
+  "productionBaselinePreflight": "PASS — pending 0, drift NONE, health/readiness, P4/P5 active guards",
+  "deployment": "NOT YET RUN",
+  "productionBusinessMutations": 0,
+  "oldDatabasesDeleted": 0,
+  "candidateHashes": {
+    "api-proxy.php": "70784f765bd35056a9937974510ec1c427b77527154ed0c082db1645243a07a8",
+    "package5_control_plane_runtime_guard.py": "1004dc7c12217447eb5f49974923227892a81a5aa3dde84d18a8ef7c8f9b3d7d",
+    "maya-app.html": "7d5664e5ee80ff9f68b91b9c94f869bc8cbb6279096ac8051a6a73396b9c14d9",
+    "app.html": "03b9a33b7200d1f1ff8c429d6ffcc24f2daddfd19ced60873749fb1761584613",
+    "webhook_server.py": "fc5fedeebff6cf742bc5c9206a7fa1907d8c5a23ef62646bcaa60c46665f22be"
+  },
+  "targetedPythonTestsPassed": 21,
+  "proxyExecutableProof": {
+    "httpStatus": 410,
+    "fixedResponse": true,
+    "historyDisclosure": false,
+    "upstreamRequests": 0
+  }
+}

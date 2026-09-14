@@ -1,0 +1,23 @@
+{
+  "inspection": "read-only active source and nginx configuration; no business endpoint invoked",
+  "routes": [
+    {
+      "line": 12078,
+      "register": "web_app.router.add_post",
+      "route": "/api/panel/broadcast",
+      "handler": "panel_broadcast_handler"
+    },
+    {
+      "line": 12079,
+      "register": "web_app.router.add_options",
+      "route": "/api/panel/broadcast",
+      "handler": "panel_options_handler"
+    }
+  ],
+  "rtHostnameConfigured": true,
+  "pwaUpstream8080Configured": true,
+  "requestOnlyLauncher": true,
+  "launcherBuildsTelegramBot": true,
+  "productionBroadcastRequests": 0,
+  "productionMessages": 0
+}

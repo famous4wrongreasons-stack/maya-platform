@@ -21,6 +21,26 @@ export interface EffectiveEntitlements {
   featureKeys: MayaFeatureKey[];
 }
 
+export const FEATURE_REQUIREMENT_DECISION_CONTRACT =
+  'maya.feature-requirement-decision/1' as const;
+
+export interface FeatureRequirementDecision {
+  contract: typeof FEATURE_REQUIREMENT_DECISION_CONTRACT;
+  tenantId: string;
+  planId: string | null;
+  requiredFeatures: Array<{
+    featureKey: MayaFeatureKey;
+    enabled: boolean;
+  }>;
+  allowed: boolean;
+  evaluatedAt: Date;
+  validUntil: Date | null;
+}
+
+interface EffectiveEntitlementResolution extends EffectiveEntitlements {
+  validUntil: Date | null;
+}
+
 @Injectable()
 export class EntitlementsService {
   constructor(
@@ -31,6 +51,54 @@ export class EntitlementsService {
   async getEffectiveEntitlements(
     tenantId: string,
   ): Promise<EffectiveEntitlements> {
+    const effective = await this.resolveEffectiveEntitlements(
+      tenantId,
+      new Date(),
+    );
+    return {
+      tenantId: effective.tenantId,
+      planId: effective.planId,
+      features: effective.features,
+      featureKeys: effective.featureKeys,
+    };
+  }
+
+  async resolveFeatureRequirements(
+    tenantId: string,
+    requiredFeatures: readonly MayaFeatureKey[],
+    evaluatedAt = new Date(),
+  ): Promise<FeatureRequirementDecision> {
+    const uniqueRequiredFeatures = MAYA_FEATURE_KEYS.filter((featureKey) =>
+      new Set(requiredFeatures).has(featureKey),
+    );
+    if (uniqueRequiredFeatures.length !== new Set(requiredFeatures).size) {
+      throw new NotFoundException('Unknown feature requirement');
+    }
+
+    const effective = await this.resolveEffectiveEntitlements(
+      tenantId,
+      evaluatedAt,
+    );
+    const decisions = uniqueRequiredFeatures.map((featureKey) => ({
+      featureKey,
+      enabled: effective.features[featureKey] === true,
+    }));
+
+    return {
+      contract: FEATURE_REQUIREMENT_DECISION_CONTRACT,
+      tenantId: effective.tenantId,
+      planId: effective.planId,
+      requiredFeatures: decisions,
+      allowed: decisions.every((decision) => decision.enabled),
+      evaluatedAt,
+      validUntil: effective.validUntil,
+    };
+  }
+
+  private async resolveEffectiveEntitlements(
+    tenantId: string,
+    evaluatedAt: Date,
+  ): Promise<EffectiveEntitlementResolution> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
       include: {
@@ -58,7 +126,8 @@ export class EntitlementsService {
       effective.set(featureKey, true);
     }
 
-    const now = Date.now();
+    const now = evaluatedAt.getTime();
+    const validityCandidates: Date[] = [];
 
     if (
       tenant.status === 'trial' &&
@@ -66,6 +135,7 @@ export class EntitlementsService {
       tenant.trialEndsAt !== null &&
       tenant.trialEndsAt.getTime() > now
     ) {
+      validityCandidates.push(tenant.trialEndsAt);
       for (const featureKey of MAYA_FEATURE_KEYS) {
         if (this.registry.platformAvailable(featureKey)) {
           effective.set(featureKey, true);
@@ -79,6 +149,10 @@ export class EntitlementsService {
         (override.expiresAt && override.expiresAt.getTime() <= now)
       ) {
         continue;
+      }
+
+      if (override.expiresAt) {
+        validityCandidates.push(override.expiresAt);
       }
 
       for (const featureKey of expandFeatureKeys([override.featureKey])) {
@@ -99,6 +173,10 @@ export class EntitlementsService {
         featureKeys.map((featureKey) => [featureKey, true]),
       ),
       featureKeys,
+      validUntil:
+        validityCandidates.sort(
+          (left, right) => left.getTime() - right.getTime(),
+        )[0] ?? null,
     };
   }
 

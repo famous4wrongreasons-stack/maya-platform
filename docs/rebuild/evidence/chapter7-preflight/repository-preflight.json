@@ -1,0 +1,14 @@
+{
+  "observedAt": "2026-09-08T13:55:35.290084+00:00",
+  "acceptedCheckpoint": "9feff8dbb7aa66a1694fac0acfbf2cfc0812d8ed",
+  "canonicalBranch": "codex/maya-brain-systemic-release-20260815",
+  "isolatedBranch": "contour/b29-remediation",
+  "isolatedWorktree": "/tmp/maya-b29-contour",
+  "origin": "9feff8dbb7aa66a1694fac0acfbf2cfc0812d8ed",
+  "aheadBehind": "0\t0",
+  "lateCommits": [],
+  "entryWorktreeClean": true,
+  "entryUnpushedCommits": 0,
+  "fetchCompleted": true,
+  "mainWorktreeTouched": false
+}

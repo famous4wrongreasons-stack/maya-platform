@@ -1,0 +1,22 @@
+{
+  "bot.py": {
+    "before": "80f919e21eba206637f98003f31b77cda267b29671771444f95f50daade9725e",
+    "after": "425c886e4a832641951998a08e9979445afdc7f15100fbe9cd26271fffa6099d"
+  },
+  "legacy_marketing_bulk_bridge.py": {
+    "before": null,
+    "after": "86f82322906451958ef5dc7a8f29c76f745c4ca53438ad9d65b2087f8e910aad"
+  },
+  "package5_bulk_runtime_guard.py": {
+    "before": null,
+    "after": "f52fb182dab9f975a67fc57962ae36477ee7ee7fee669ab154107034bb0a9d5b"
+  },
+  "package5_control_plane_runtime_guard.py": {
+    "before": "cc9764778c72c564f8da2ade520a813f9252e0adec2bd83736e6698650be901c",
+    "after": "3f08cf3be6d91b471e65e0051c073f52039a3a916402d41dc4bcc2f385cbd648"
+  },
+  "webhook_server.py": {
+    "before": "56e615d48dfd019ce22e6a79a706996927c7cbb888140f98ccc4ca64d7b48e33",
+    "after": "5568115de0a39e0b99f50fa7b811eab086f446dc9f6071883717281841146ee3"
+  }
+}

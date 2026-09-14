@@ -1,0 +1,13 @@
+[Nest] 18189  - 09/08/2026, 2:46:17 PM    WARN [OwnerReportsService] daily_report slot unresolved run=bbe06ff6-dea1-484b-b129-f9096aa70703 slot=442f0b0a7555e22553a23a18d80639ad21be5afe68c312eb34ec45ab85208ebd
+[Nest] 18189  - 09/08/2026, 2:46:17 PM    WARN [OwnerReportsService] daily_report slot unresolved run=bbe06ff6-dea1-484b-b129-f9096aa70703 slot=442f0b0a7555e22553a23a18d80639ad21be5afe68c312eb34ec45ab85208ebd
+{
+  "status": "PASS",
+  "checks": [
+    "actual process/PostgreSQL restart resumes four original sibling slots in order",
+    "same UNKNOWN execution reconciles without any repeat/provider/APNS effect",
+    "no new device/recipient/slot/content after restart"
+  ],
+  "syntheticTransportEffects": 4,
+  "productionMessages": 0,
+  "productionProviderMutations": 0
+}

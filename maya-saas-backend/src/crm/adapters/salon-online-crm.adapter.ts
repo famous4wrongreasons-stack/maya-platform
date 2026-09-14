@@ -1,101 +1,20 @@
-import {
-  AvailableSlot,
-  CancelledAppointment,
-  ClientLoyaltySnapshot,
-  CRMAdapter,
-  CreatedAppointment,
-  CrmAdapterConfig,
-  CreateAppointmentParams,
-  RescheduledAppointment,
-  ServiceItem,
-  StaffMember,
-} from '../crm-adapter.interface';
+import type { CrmAdapterConfig } from '../crm-adapter.interface';
+import { ScaffoldedCrmAdapter } from './scaffolded-crm.adapter';
 
-export class SalonOnlineCRMAdapter implements CRMAdapter {
-  constructor(private readonly config: CrmAdapterConfig) {}
-
-  getServices(tenantId: string): Promise<ServiceItem[]> {
-    void tenantId;
-    return Promise.reject(
-      new Error('Salon Online adapter is scaffolded but not implemented yet'),
-    );
-  }
-
-  getStaff(tenantId: string): Promise<StaffMember[]> {
-    void tenantId;
-    return Promise.reject(
-      new Error('Salon Online adapter is scaffolded but not implemented yet'),
-    );
-  }
-
-  getAvailableSlots(params: {
-    tenantId: string;
-    date: string;
-    staffId?: string;
-    serviceIds?: string[];
-    branchId?: string;
-  }): Promise<AvailableSlot[]> {
-    void params;
-    return Promise.reject(
-      new Error('Salon Online adapter is scaffolded but not implemented yet'),
-    );
-  }
-
-  createAppointment(
-    params: CreateAppointmentParams,
-  ): Promise<CreatedAppointment> {
-    void params;
-    return Promise.reject(
-      new Error('Salon Online adapter is scaffolded but not implemented yet'),
-    );
-  }
-
-  cancelAppointment(params: {
-    tenantId: string;
-    externalId: string;
-  }): Promise<CancelledAppointment> {
-    void params;
-    return Promise.reject(
-      new Error('Salon Online adapter is scaffolded but not implemented yet'),
-    );
-  }
-
-  rescheduleAppointment(params: {
-    tenantId: string;
-    externalId: string;
-    start: string;
-    staffId?: string;
-    serviceIds?: string[];
-    notes?: string | null;
-  }): Promise<RescheduledAppointment> {
-    void params;
-    return Promise.reject(
-      new Error('Salon Online adapter is scaffolded but not implemented yet'),
-    );
-  }
-
-  getClientAppointments(clientId: string): Promise<CreatedAppointment[]> {
-    void clientId;
-    return Promise.resolve([]);
-  }
-
-  getClientLoyalty(params: {
-    tenantId: string;
-    phone: string;
-  }): Promise<ClientLoyaltySnapshot | null> {
-    void params;
-    return Promise.reject(
-      new Error('Salon Online adapter is scaffolded but not implemented yet'),
-    );
-  }
-
-  testConnection(tenantId: string) {
-    void tenantId;
-    return Promise.resolve({
-      ok: false,
-      provider: this.config.provider,
-      message:
-        'Salon Online adapter placeholder is present but real API calls are not implemented yet',
-    });
+/**
+ * Каркас провайдера Salon Online: объявлен, но не реализован.
+ *
+ * 🔴 Тело жило копией на 104 строки в каждом из трёх каркасов. Одинаковый код
+ * в трёх местах расходится поодиночке — так один из них и стал единственным,
+ * кто на `getClientAppointments` возвращал пустой массив вместо отказа.
+ *
+ * Поведение сохранено дословно, кроме этой единственной лжи: теперь любая
+ * необъявленная обязательная возможность отвечает явным
+ * `CrmUnsupportedCapabilityError`, а `testConnection` по-прежнему честно
+ * отдаёт `ok: false` с прежним текстом.
+ */
+export class SalonOnlineCRMAdapter extends ScaffoldedCrmAdapter {
+  constructor(config: CrmAdapterConfig) {
+    super(config, 'Salon Online');
   }
 }

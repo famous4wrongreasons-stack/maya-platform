@@ -1,0 +1,17 @@
+
+### 1/10 шлюз: чистое дерево, линт, типизация, тесты, схема
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+The schema at prisma/schema.prisma is valid 🚀
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+/private/tmp/maya-b29-contour/maya-saas-backend/scripts/chapter7-outcomes-proof.ts
+  279:14  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+✖ 1 problem (1 error, 0 warnings)
+
+ПРОВАЛ: шлюз не пройден — на сервер ничего не заливалось — боевой релиз не тронут

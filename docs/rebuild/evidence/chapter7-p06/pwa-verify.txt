@@ -1,0 +1,3 @@
+Welcome to LTD BeGet SSH Server 'prime'
+{"status":"PASS","scriptsParsed":25,"sha256":"204daaf2ce452ba5e1383750bded372683596cceade4c9f0f33dade3831b862a"}
+{"phase": "verify", "status": "PASS", "target": "/var/www/maya-platform/app.html", "sha256": "204daaf2ce452ba5e1383750bded372683596cceade4c9f0f33dade3831b862a", "backendRelease": "20260912-c7-p06-4058cd8c", "maintenanceFilesChanged": 0, "businessEffects": 0, "providerEffects": 0}

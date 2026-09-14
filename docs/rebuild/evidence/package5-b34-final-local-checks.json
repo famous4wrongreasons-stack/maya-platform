@@ -1,0 +1,218 @@
+{
+  "afterProductionPass": true,
+  "waves": [
+    {
+      "wave": 1,
+      "database": "maya_c06_p5_wave1_b34_final_20260906",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 1.83
+    },
+    {
+      "wave": 2,
+      "database": "maya_c06_p5_wave2_b34_final_20260906",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 2.13
+    },
+    {
+      "wave": 3,
+      "database": "maya_c06_p5_wave3_b34_final_20260906",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 1.92
+    },
+    {
+      "wave": 4,
+      "database": "maya_c06_p5_wave4_b34_final_20260906",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 2.01
+    },
+    {
+      "wave": 5,
+      "database": "maya_c06_p5_wave5_b34_final_20260906",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 1.77
+    },
+    {
+      "wave": 6,
+      "database": "maya_c06_p5_wave6_b34_final_20260906",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 1.57
+    }
+  ],
+  "waveProofs": [
+    {
+      "wave": 1,
+      "proof": {
+        "package5Wave1ShadowActionClasses": "6/6",
+        "shadowDivergences": 0,
+        "executableActionClasses": "6/6",
+        "settingMutationOneTime": true,
+        "taskCreateCompleteOneTime": true,
+        "concurrentDuplicateWorkItemPossible": false,
+        "tenantIsolation": true,
+        "serverDerivedAuthority": true,
+        "package2ProjectionPreserved": true,
+        "unknownRequired": false,
+        "providerWrites": 0,
+        "productionMutations": 0,
+        "counts": {
+          "actionClasses": 6,
+          "targetMutations": 7,
+          "workItems": 3,
+          "inboxItems": 0,
+          "unknownExecutions": 0
+        }
+      }
+    },
+    {
+      "wave": 2,
+      "proof": {
+        "shadowActionClasses": "13/13",
+        "shadowDivergences": 0,
+        "executableActionClasses": "13/13",
+        "actionTargetMutations": 14,
+        "duplicateBusinessMutationPossible": false,
+        "restartRebuildConverges": true,
+        "tenantAuthorityIsolation": true,
+        "serverDerivedPolicyAuthority": true,
+        "trialActivationAtomic": true,
+        "currentLogoutProtocolPreserved": true,
+        "crmProjectionBoundaryPreserved": true,
+        "objectDispatches": 1,
+        "providerUnknownReconciled": true,
+        "blindRetryAfterUnknown": false,
+        "productionBusinessMutations": 0,
+        "productionProviderWrites": 0
+      }
+    },
+    {
+      "wave": 3,
+      "proof": {
+        "contract": "package5.wave3.all8-executable-proof/1",
+        "actionClasses": 8,
+        "shadows": 8,
+        "shadowDivergences": 0,
+        "mutationFacts": 9,
+        "providerDispatches": 1,
+        "providerReconciliation": true,
+        "duplicateBusinessMutationPossible": false,
+        "tenantIsolation": true,
+        "p02p03Hold": true,
+        "rawCredentialOrNotesInActionEvidence": false
+      }
+    },
+    {
+      "wave": 4,
+      "proof": {
+        "contract": "package5.wave4.all12-executable-proof/1",
+        "families": [
+          "A27",
+          "A28"
+        ],
+        "actionClasses": 12,
+        "shadows": 12,
+        "shadowDivergences": 0,
+        "mutationFacts": 13,
+        "providerDispatches": 1,
+        "providerReconciliation": true,
+        "pendingIsNotUnknown": true,
+        "duplicateBusinessMutationPossible": false,
+        "tenantAuthorityIsolation": true,
+        "frozenAppointmentsPreserved": true,
+        "p409OfferAuthorityPreserved": true,
+        "reviewFactReplaySafe": true,
+        "realProductionBusinessMutations": 0
+      }
+    },
+    {
+      "wave": 5,
+      "proof": {
+        "contract": "package5.wave5.all1-executable-proof/1",
+        "families": [
+          "A29",
+          "A31"
+        ],
+        "actionClasses": [
+          "correct_recovery_attribution"
+        ],
+        "shadows": 1,
+        "shadowDivergences": 0,
+        "factPlaneActionExecutions": 0,
+        "touchpointDeduplication": true,
+        "bookingDeduplication": true,
+        "immutableSourceFacts": true,
+        "correctionOwnerApproval": true,
+        "correctionConcurrencyWinnerCount": 1,
+        "a31EventDeduplication": true,
+        "a31SingleLiveLease": true,
+        "providerOperation": "READ_ONLY",
+        "unknownRequired": false,
+        "duplicateBusinessMutationPossible": false,
+        "tenantAuthorityIsolation": true,
+        "realProductionBusinessMutations": 0,
+        "providerWrites": 0
+      }
+    },
+    {
+      "wave": 6,
+      "proof": {
+        "status": "PASS",
+        "shadowActionClasses": "6/6",
+        "shadowDivergences": 0,
+        "negativeAssertions": 53,
+        "durableRuns": 13,
+        "concurrentPrepare": "ONE RUN",
+        "sameRunLease": "ONE WINNER",
+        "crossRunDelete": "ONE EFFECT",
+        "crashRollback": "PASS",
+        "restartFence": "PASS",
+        "terminalAndBoundaryProtection": "PASS",
+        "cascadeBound": "PASS",
+        "tenantIsolation": "PASS",
+        "immutableAudit": "PASS",
+        "rawPiiInAudit": 0,
+        "fabricatedActionExecutions": 0,
+        "productionBusinessProviderMutations": 0
+      }
+    }
+  ],
+  "crossBoundary": {
+    "success": true,
+    "suites": 111,
+    "tests": 762
+  },
+  "aggregateStages": [
+    {
+      "stage": "cross-boundary",
+      "exitCode": 0,
+      "seconds": 200.0
+    },
+    {
+      "stage": "lint",
+      "exitCode": -15,
+      "seconds": 9.56
+    }
+  ],
+  "stop": {
+    "reason": "B35 independently reproduced and all 22 production function hashes matched; remaining aggregate stages stopped by user rule",
+    "interruptedStage": "lint",
+    "countsAsPass": false,
+    "finalMandatoryRun": false,
+    "ownedProcessIds": [
+      71634,
+      72703,
+      72722
+    ],
+    "crossBoundary": {
+      "suites": 111,
+      "tests": 762,
+      "success": true
+    }
+  },
+  "aggregateVerdict": "FAIL — B35; final mandatory not run after confirmed blocker"
+}

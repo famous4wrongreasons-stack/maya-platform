@@ -1,0 +1,565 @@
+{
+  "boundary": [
+    ".maya-b22-daa7f91a",
+    "security-backup-2026-06-22",
+    "deploy-backups",
+    ".codex-package5-b7-b8-4b96b546",
+    ".maya-release-evidence",
+    ".maya-b23-candidate",
+    "backups",
+    "landing_bak",
+    ".codex-package5-remediation-94543056",
+    ".p5-b21-dc266820",
+    "site-community-stage-20260904",
+    "p5-b14-7260a5a4-backup",
+    ".codex-package5-b5-b6-fb820b3b",
+    ".maya-b24-candidate",
+    "api-proxy-backups",
+    "site-community-proxy-backup-1788517921",
+    "app",
+    "mayaos-staging-20260806-210634",
+    "muzhskayaestetika.rf/backups",
+    "muzhskayaestetika.rf/deploy-staging"
+  ],
+  "files": [
+    {
+      "path": "/home/m/mocine3388/.codex-package5-b5-b6-fb820b3b/backup/api-proxy.php",
+      "sha256": "806b0246027cef12e35de3b529ea41af28ee60129e11cade50c0542385a7eba3",
+      "bytes": 146402,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-b5-b6-fb820b3b/backup/package5-client-consent-proxy.php",
+      "sha256": "583916e8309ea616b851fb19348aaa27df7523337cc66eb3bca660e11745df68",
+      "bytes": 2597,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-b5-b6-fb820b3b/beget-cutover.php",
+      "sha256": "213a82b23339dd3c8dc6305ad631615032da4cc0ed25202964544f313e572bf8",
+      "bytes": 1774,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-b5-b6-fb820b3b/candidate-api-proxy.php",
+      "sha256": "a46bc246359691233ad7414f6c3928472d5149b3eeef43c571f3ce29761cd306",
+      "bytes": 144177,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-b5-b6-fb820b3b/package5-client-consent-proxy.php",
+      "sha256": "31333596cf8e0356c0aaffbd313d4577534b9ff0f52d45829522ad7c7525d76a",
+      "bytes": 2881,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-b7-b8-4b96b546/backup/api-proxy.php",
+      "sha256": "a46bc246359691233ad7414f6c3928472d5149b3eeef43c571f3ce29761cd306",
+      "bytes": 144177,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-b7-b8-4b96b546/backup/package5-client-consent-proxy.php",
+      "sha256": "31333596cf8e0356c0aaffbd313d4577534b9ff0f52d45829522ad7c7525d76a",
+      "bytes": 2881,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-b7-b8-4b96b546/beget-cutover.php",
+      "sha256": "4fcdb782a028c0b25064d7951ded5e27dbec75df6e0a4a18c38bb09706d058e0",
+      "bytes": 1774,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-b7-b8-4b96b546/candidate-api-proxy.php",
+      "sha256": "df2749fb1f85e33787ac1d01b2f7542ae9d85a986dad80c21c552145386afed5",
+      "bytes": 142938,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-b7-b8-4b96b546/package5-client-consent-proxy.php",
+      "sha256": "e650bc0f2dd73958607c864f06c2c20a61a76d00b45673ecf2a14e6c22381710",
+      "bytes": 3008,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-remediation-94543056/backup/api-proxy.php",
+      "sha256": "ef9599bc0ed48fff38dcc0e195743d57404e7d99f74e68a0465c78cbe8fc7596",
+      "bytes": 147697,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-remediation-94543056/beget-cutover.php",
+      "sha256": "5db658c059502656d96b39325bf06fe5b4fb461b9c0b5132dc4bd0b4e829a759",
+      "bytes": 1790,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-remediation-94543056/candidate-api-proxy.php",
+      "sha256": "806b0246027cef12e35de3b529ea41af28ee60129e11cade50c0542385a7eba3",
+      "bytes": 146402,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.codex-package5-remediation-94543056/package5-client-consent-proxy.php",
+      "sha256": "583916e8309ea616b851fb19348aaa27df7523337cc66eb3bca660e11745df68",
+      "bytes": 2597,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-b22-daa7f91a/api-proxy.php.before",
+      "sha256": "37d14444c195a7bfa5b035669a9add067795050bef945212a609a4b60cdb5fc6",
+      "bytes": 144703,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-b23-candidate/api-proxy.php.before",
+      "sha256": "f6abd0971723c331dc1c8b3607a5aa3f5cb015ac784f47700cd2f2ca25f79285",
+      "bytes": 143857,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-b24-candidate/api-proxy.php.before",
+      "sha256": "70784f765bd35056a9937974510ec1c427b77527154ed0c082db1645243a07a8",
+      "bytes": 142440,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-release-evidence/wave-rc-8bc03454/before/candidate-5.php",
+      "sha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+      "bytes": 142374,
+      "bookRecord": false,
+      "providerWriteCandidate": true,
+      "refusal": true
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-release-evidence/wave-rc-8bc03454/before/candidate-6.php",
+      "sha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+      "bytes": 147943,
+      "bookRecord": false,
+      "providerWriteCandidate": true,
+      "refusal": true
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-release-evidence/wave-rc-8bc03454/before/package5-client-consent-proxy.php",
+      "sha256": "e650bc0f2dd73958607c864f06c2c20a61a76d00b45673ecf2a14e6c22381710",
+      "bytes": 3008,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-release-evidence/wave-rc-8bc03454/before/site-community-proxy.php",
+      "sha256": "94e8960b5fd9d3b9148cca65e72286a3565fb102348aa97f29aa2fae352d8bf0",
+      "bytes": 3281,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-release-evidence/wave-rc-8bc03454/candidate-5.php",
+      "sha256": "b1006160a28e66448886bdc4b520a2d94021121748259c2cd1aeefda5f1aaaa0",
+      "bytes": 116748,
+      "bookRecord": false,
+      "providerWriteCandidate": true,
+      "refusal": true
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-release-evidence/wave-rc-8bc03454/candidate-6.php",
+      "sha256": "1460bc8d30b5eea2b8347ed8b3f60fae1c545669d980d58394e77b5b99d40ac6",
+      "bytes": 122317,
+      "bookRecord": false,
+      "providerWriteCandidate": true,
+      "refusal": true
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-release-evidence/wave-rc-8bc03454/candidate-7.php",
+      "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "bytes": 6662,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-release-evidence/wave-rc-8bc03454/candidate-8.php",
+      "sha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+      "bytes": 6580,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-release-evidence/wave-rc-8bc03454/package5-client-consent-proxy.php",
+      "sha256": "267383a99603957efce1d515346a0c32760847f341e1f85181859384cd883c69",
+      "bytes": 3120,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/.maya-release-evidence/wave-rc-8bc03454/site-community-proxy.php",
+      "sha256": "bc2540b99d9b59c6bf09dd9f7f9c56b59c3a5f71c72c44c590182a570aa52a16",
+      "bytes": 3460,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/api-proxy-backups/api-proxy.php.20260708175259",
+      "sha256": "eb058b6c9d37a6adcdb8e37d8a94309552a106a9f899f4f10e46f0b199fe4201",
+      "bytes": 134446,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/api-proxy-codex-lint.php",
+      "sha256": "74389d5884886ef9f3943ca4230ad5b58be3cce578b15168380326b8d09e8718",
+      "bytes": 112048,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/api-proxy.chat-history.tmp",
+      "sha256": "13fc61822d83de7241eab92e61e738b22b26aa8598bfd5e33078029c97ef5840",
+      "bytes": 131549,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/backups/maya-web/booking-fix-20260912_165513/api-proxy.php",
+      "sha256": "b1006160a28e66448886bdc4b520a2d94021121748259c2cd1aeefda5f1aaaa0",
+      "bytes": 116748,
+      "bookRecord": false,
+      "providerWriteCandidate": true,
+      "refusal": true
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/api-proxy-booking-prefill-20260630_181233/api-proxy.php",
+      "sha256": "30cbb7d768fa0f7b6a20ae594a7408fe0de4ba28367951b66bdc0253fb13cd29",
+      "bytes": 104518,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/chat-widgets-20260719_193139/api-proxy.php",
+      "sha256": "b45ed247f6deadcbb1370e2a48a39c389fc81e88e500da6220496fd6d891e36d",
+      "bytes": 142617,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/api-proxy.php",
+      "sha256": "3594ce450b5d0f5721f906f634ba50011ffc9a361fe7d89a8493d0dca8060c23",
+      "bytes": 6589,
+      "bookRecord": false,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/app/api-proxy.php",
+      "sha256": "71d45ee804427b7ce56083cca86ac5fdebea8a167614f5c4a32ccd7e26e16861",
+      "bytes": 110362,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/app/api-proxy.php.bak-20260623_234122",
+      "sha256": "b8b07a96cd6b0cae3479622da865e6bea0d4ec0d5f814d7aa5964bbe3c3e1aa8",
+      "bytes": 88209,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/app/api-proxy.php.bak-20260626_143143",
+      "sha256": "289737e4635c27161d7f990731eaf6929c7206981338c61805637c9dca0f351c",
+      "bytes": 90297,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/app/api-proxy.php.bak-20260628_010858",
+      "sha256": "dbbccc87314bde1832593c0ab1d41b4f9a4f376def9d0c5ae9a060514fcea4a8",
+      "bytes": 91837,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/app/api-proxy.php.bak-20260628_102819",
+      "sha256": "e1973b9aed153e3cec2b213f4d177c12457e0c913f65ba786f0c4d432f0def9e",
+      "bytes": 94355,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/app/api-proxy.php.bak-20260628_112111",
+      "sha256": "b7518f0056d00b02f5afcada8231374d340132f31f0fa814fc1a7fff439a76f2",
+      "bytes": 99346,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/app/api-proxy.php.bak-team-delete-20260630_235912",
+      "sha256": "4dad3da5255813d27423898600d6810881058b8da543fef29385e43c01321800",
+      "bytes": 108611,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/app/api-proxy.php.bak-voice-normalize-20260630_215922",
+      "sha256": "03bf7cd55781626958808a6650be4aea851b961daab3e3da9af0d77516541a7e",
+      "bytes": 106178,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/app/tg-config.php",
+      "sha256": "e1eb7682465db98d6ffdd2ca2776fcc193926ef92316ed113b3245925402a8f9",
+      "bytes": 1004,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/gateway.php",
+      "sha256": "90b68e1c23f32da4d17b215c1c6c3f7d946674e00b07fb86e821b73da50b0f47",
+      "bytes": 7353,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/test.php",
+      "sha256": "0f8d1c3d3f1e8271021087909a1052890a01cc226742487676d98de8632a207a",
+      "bytes": 19,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/deploy-backups/personal-data-20260701_142503/yclients-webhook.php",
+      "sha256": "f184413c2edafd22c9ed50d2779fbabc6942efe33b69c9732e64708f4ff845d8",
+      "bytes": 4702,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos-staging-20260806-210634/maya-platform-api.php",
+      "sha256": "cc9c7ca4f3f95428b62877bf5799190277f4fa1f007cdbc0ae21086f1611476f",
+      "bytes": 5082,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/p5-b14-7260a5a4-backup/api-proxy.php",
+      "sha256": "984a5d383c6412a3143f5a921c0079044e1f43e4acee21bf0efdd163b735f224",
+      "bytes": 143451,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/app/debug-tg.php",
+      "sha256": "42437ef75e11e0b18b251335135f1292c0050953415c54cfbcff7a08639ecfda",
+      "bytes": 1890,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/pulled-from-docroot-20260623_032333/api-proxy.php.bak-20260615_204559",
+      "sha256": "8eca6f769a00984eb969c8e96739476ef052e300b95861ab06045cc291456640",
+      "bytes": 78177,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/pulled-from-docroot-20260623_032333/api-proxy.php.bak-20260616_002219",
+      "sha256": "b9303c8cb538a3a546106a0251bb71388aa5f14fa3ad7cb7f5e6f8e6f8eb6481",
+      "bytes": 81036,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/pulled-from-docroot-20260623_032333/api-proxy.php.bak-20260616_172953",
+      "sha256": "0a8d5bfd2a80fe58ce90f5a2bfa2c848c525027f76f615c7afa06c400aa651a5",
+      "bytes": 83008,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/pulled-from-docroot-20260623_032333/api-proxy.php.bak-20260616_235722",
+      "sha256": "935ad5818b47508e81d9ca173c8ccdb8b2f6ebe1dc70afc4b9553d1a72445949",
+      "bytes": 84574,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/pulled-from-docroot-20260623_032333/api-proxy.php.bak-20260618_230717",
+      "sha256": "d969ae5ee896d0191f1852063cceba7481b869fa82d80b7cd60cf573f09558df",
+      "bytes": 85424,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/pulled-from-docroot-20260623_032333/api-proxy.php.bak-20260620_124335",
+      "sha256": "d53dbace290eb92e7aba6d690e5c2f2f0938205fae614714d4b06b22786e52d2",
+      "bytes": 85560,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/pulled-from-docroot-20260623_032333/tg-config.php.bak-tg",
+      "sha256": "fa7e85df4ca944e3eee57086eea5545b7bffc8c45dfa287a6d21760abf36a851",
+      "bytes": 1004,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/pulled-from-docroot-20260623_032333/yclients-webhook.php.bak-rotate",
+      "sha256": "ba8ef9653a29a36a6a0f713d20368726c5f605a03d50f57eb640a13e1522bad9",
+      "bytes": 4702,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/tls-cutover-20260623_144810/api-proxy.php",
+      "sha256": "662ee5c0194d4bb9c61c8a58a58286e42ff375d84d52f7c1821dd5e44e353388",
+      "bytes": 88209,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/tls-cutover-20260623_144810/tg-config.php",
+      "sha256": "fa8aa444f53425da47a9be11c91db8c67f1a76a8f0c0db1e8225f039424c28e6",
+      "bytes": 1004,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/tls-cutover-20260623_144810/yclients-webhook.php",
+      "sha256": "ba8ef9653a29a36a6a0f713d20368726c5f605a03d50f57eb640a13e1522bad9",
+      "bytes": 4702,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/tls-cutover-20260623_145052/api-proxy.php",
+      "sha256": "662ee5c0194d4bb9c61c8a58a58286e42ff375d84d52f7c1821dd5e44e353388",
+      "bytes": 88209,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/tls-cutover-20260623_145052/tg-config.php",
+      "sha256": "fa8aa444f53425da47a9be11c91db8c67f1a76a8f0c0db1e8225f039424c28e6",
+      "bytes": 1004,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/security-backup-2026-06-22/tls-cutover-20260623_145052/yclients-webhook.php",
+      "sha256": "ba8ef9653a29a36a6a0f713d20368726c5f605a03d50f57eb640a13e1522bad9",
+      "bytes": 4702,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/site-community-proxy-backup-1788517921/api-proxy.php",
+      "sha256": "2860054722f74d34d93ffdf64a58398ecfa250f5bf29e906959851fd87abbbe0",
+      "bytes": 146896,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/site-community-stage-20260904/api-proxy.php",
+      "sha256": "ef9599bc0ed48fff38dcc0e195743d57404e7d99f74e68a0465c78cbe8fc7596",
+      "bytes": 147697,
+      "bookRecord": true,
+      "providerWriteCandidate": true,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/site-community-stage-20260904/site-community-proxy.php",
+      "sha256": "94e8960b5fd9d3b9148cca65e72286a3565fb102348aa97f29aa2fae352d8bf0",
+      "bytes": 3281,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    },
+    {
+      "path": "/home/m/mocine3388/site-community-stage-20260904/site-publications-proxy.php",
+      "sha256": "e0c930b3e4bb6ee35289c075097a5e9b6a5ab179a5e1f10fc00f4fbbd0071f97",
+      "bytes": 3117,
+      "bookRecord": false,
+      "providerWriteCandidate": false,
+      "refusal": false
+    }
+  ],
+  "symlinks": [],
+  "errors": [],
+  "publicReachability": "UNPROVEN until effective virtual-host/alias mapping is available"
+}

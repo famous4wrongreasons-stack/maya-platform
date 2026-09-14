@@ -1,0 +1,74 @@
+{
+  "package": "R01",
+  "exclusiveFiles": [
+    "ai администратор/legacy_client_entry.py",
+    "ai администратор/test_r01_client_entry.py",
+    "ai администратор/legacy_appointment_bridge.py",
+    "сайт и приложение/maya-native-api.php",
+    "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+    "maya-saas-backend/deploy/platform/beget-edge/retire-legacy-client-create.cjs",
+    "maya-saas-backend/deploy/platform/beget-edge/client-initiator-boundary.cjs",
+    "maya-saas-backend/scripts/package5-wave-ra-r01-booking-proof.cjs",
+    "maya-saas-backend/scripts/package5-wave-ra-r01-php-proof.cjs",
+    "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts",
+    "maya-saas-backend/src/crm/legacy-appointment-bridge.service.ts",
+    "maya-saas-backend/src/crm/legacy-appointment-bridge.service.spec.ts",
+    "docs/rebuild/evidence/package5-wave-ra-r01-overlay-manifest.json",
+    "docs/rebuild/evidence/package5-wave-ra-r01-implementation-proof.json",
+    "docs/rebuild/evidence/package5-wave-ra-r01-hunk-ownership.json",
+    "docs/rebuild/package5-wave-ra-r01-local-acceptance.md"
+  ],
+  "exclusiveDirectory": "maya-saas-backend/deploy/platform/beget-edge/r01/",
+  "sharedFiles": {
+    "ai администратор/bot.py": {
+      "exclusiveFunctions": [
+        "cmd_start",
+        "cmd_client",
+        "handle_contact",
+        "_request_contact_share",
+        "_start_contact_flow",
+        "_handle_contact_input",
+        "_show_confirm",
+        "_finalize_booking",
+        "_show_my_bookings",
+        "_handle_cancel_record_request",
+        "_handle_cancel_record_confirm",
+        "_handle_freed_slot_accept",
+        "_handle_freed_slot_decline",
+        "_build_dossier",
+        "_dossier_chat_id",
+        "_get_ai_response_async"
+      ],
+      "sharedFunctionHunks": {
+        "process_message": "Replace tail after MASTER_MENU_BUTTONS branch with verified-app handoff; preserve baseline staff prefix for R01-only staging",
+        "handle_callback": "Insert is_retired_client_callback guard immediately after chat_id=query.from_user.id; R02 staff prefix/role changes excluded"
+      },
+      "imports": [
+        "add legacy_client_entry client_handoff_message/is_retired_client_callback",
+        "remove get_ai_response import",
+        "remove warm_client_history_cache_for_phone import"
+      ],
+      "independentStagingSource": "external owned r01/staging/bot.py",
+      "sha256": "b8eac1051fb20aeafcb83e9da8248524dd121483cf1c25200a1abbb948560814"
+    },
+    "сайт и приложение/app.html": {
+      "hunks": [
+        "guest submit fetch -> handoff refusal",
+        "afLegacy appointments/preview entire branch -> refusal before contact lookup"
+      ],
+      "excludedR02": [
+        "authReq",
+        "authPayload"
+      ],
+      "independentStagingSource": "external owned r01/staging/app.html",
+      "sha256": "34193f8da4201846729001ce13959a058759914e70188c06e0b816817fbf5157"
+    }
+  },
+  "explicitlyNotEdited": [
+    "ai администратор/claude_ai.py",
+    "ai администратор/database.py",
+    "ai администратор/memory.py",
+    "ai администратор/webhook_server.py"
+  ],
+  "noCommitByAgent": true
+}

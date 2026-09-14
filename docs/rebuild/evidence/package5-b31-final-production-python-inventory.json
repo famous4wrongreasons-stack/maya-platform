@@ -1,0 +1,63 @@
+{
+  "inspection": "read-only AST; no Python runtime modules imported",
+  "rootPythonFiles": 90,
+  "nonTestRootPythonFiles": 70,
+  "launcherReferencesWebhook": true,
+  "functions": {
+    "_finalize_booking_for_chat": {
+      "line": 6319,
+      "sourceSha256": "6dc2cbce9c3cb676f2c9b7b52b5b246010f6cacaf244cd358426b3aa4547d549",
+      "astSha256": "4f75a206f1bcaec3595a21c447fb75fe993567478f884b9d75b07559076a34b5",
+      "usesCanonicalAppointmentCommand": true,
+      "referencesSharedFinalizer": true,
+      "repositorySourceSegmentMatch": true
+    },
+    "chat_handler": {
+      "line": 8358,
+      "sourceSha256": "c98ee0a6f89762c12a34d837252cfcd5faeaf8481784620b64e97cb7219e9e22",
+      "astSha256": "4997a8ff8ec5359dfdd143d3556ed846b92e5db9665e72028c29c3c166766580",
+      "usesCanonicalAppointmentCommand": false,
+      "referencesSharedFinalizer": true,
+      "repositorySourceSegmentMatch": true
+    },
+    "chat_stream_handler": {
+      "line": 8930,
+      "sourceSha256": "c44f21a15895cae9f8205365f252621e89a9f59ff8ceb0995a226f83ec40fa27",
+      "astSha256": "4044eaa30305455b011381920b4c369d5a21ce7192d336c215f1686a7678068c",
+      "usesCanonicalAppointmentCommand": false,
+      "referencesSharedFinalizer": true,
+      "repositorySourceSegmentMatch": true
+    }
+  },
+  "publishedBackendChatRoutes": [
+    {
+      "line": 12118,
+      "sourceSha256": "c44f21a15895cae9f8205365f252621e89a9f59ff8ceb0995a226f83ec40fa27",
+      "call": "web_app.router.add_post",
+      "route": "/api/chat",
+      "handler": "chat_handler"
+    },
+    {
+      "line": 12119,
+      "sourceSha256": "c44f21a15895cae9f8205365f252621e89a9f59ff8ceb0995a226f83ec40fa27",
+      "call": "web_app.router.add_options",
+      "route": "/api/chat",
+      "handler": "chat_options_handler"
+    },
+    {
+      "line": 12120,
+      "sourceSha256": "c44f21a15895cae9f8205365f252621e89a9f59ff8ceb0995a226f83ec40fa27",
+      "call": "web_app.router.add_post",
+      "route": "/api/chat/stream",
+      "handler": "chat_stream_handler"
+    },
+    {
+      "line": 12121,
+      "sourceSha256": "c44f21a15895cae9f8205365f252621e89a9f59ff8ceb0995a226f83ec40fa27",
+      "call": "web_app.router.add_options",
+      "route": "/api/chat/stream",
+      "handler": "chat_options_handler"
+    }
+  ],
+  "note": "AST hashes use production Python; source-segment hashes are version-independent. Full deployed Python file hashes match the accepted B30 baseline."
+}

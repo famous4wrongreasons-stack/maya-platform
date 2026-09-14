@@ -19,7 +19,12 @@ import logging
 from datetime import date, timedelta
 
 from yclients import YClientsAPI
-from business_rules import OWNER_STAFF_ID, salary_percent
+from business_rules import (
+    ANTON_STAFF_ID,
+    OWNER_STAFF_ID,
+    anton_salary_for_period,
+    salary_percent,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +77,8 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
     include_top=True добавляет топ услуг (из уже загруженных записей, бесплатно)."""
     transactions_available = True
     records_available = True
+    records_complete = True
+    records_error = None
     try:
         txs = _yc.get_company_transactions(from_iso, to_iso)
     except Exception as e:
@@ -79,11 +86,27 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
         transactions_available = False
         txs = []
     try:
-        recs = _yc.get_company_records(from_iso, to_iso)
+        if hasattr(_yc, "get_company_records_snapshot"):
+            records_snapshot = _yc.get_company_records_snapshot(from_iso, to_iso)
+            recs = records_snapshot.get("records") or []
+            records_complete = bool(records_snapshot.get("complete"))
+            records_error = records_snapshot.get("error")
+            records_available = bool(records_snapshot.get("success")) or bool(recs)
+        else:
+            recs = _yc.get_company_records(from_iso, to_iso)
     except Exception as e:
         logger.error(f"business_summary records: {e}")
         records_available = False
+        records_complete = False
+        records_error = "yclients_records_unavailable"
         recs = []
+    try:
+        anton_payroll = _yc.get_staff_payroll_summary(ANTON_STAFF_ID, from_iso, to_iso)
+        anton_payroll_available = True
+    except Exception as e:
+        logger.error(f"business_summary anton payroll: {e}")
+        anton_payroll_available = False
+        anton_payroll = None
 
     # record_id -> staff_id (если в транзакции мастер не указан)
     rec_staff = {}
@@ -185,15 +208,19 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
         daily = []
 
     attended = missed = service_visits = multi_service_visits = 0
+    appointment_active = appointment_upcoming = appointment_pending = 0
+    appointment_cancelled = 0
     addon_total = 0.0
     today = date.today()
     for record in recs:
-        if not isinstance(record, dict) or record.get("deleted") or record.get("is_deleted"):
+        if not isinstance(record, dict):
             continue
+        if record.get("deleted") or record.get("is_deleted"):
+            appointment_cancelled += 1
+            continue
+        appointment_active += 1
         services = [row for row in (record.get("services") or []) if isinstance(row, dict)]
         client_id = (record.get("client") or {}).get("id") if isinstance(record.get("client"), dict) else None
-        if not client_id and not services:
-            continue
         record_day_raw = _date_key(record.get("datetime") or record.get("date"))
         try:
             record_day = date.fromisoformat(record_day_raw) if record_day_raw else None
@@ -204,6 +231,12 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
             attended += 1
         elif attendance == -1 and (record_day is None or record_day <= today):
             missed += 1
+        elif record_day is not None and record_day > today:
+            appointment_upcoming += 1
+        else:
+            appointment_pending += 1
+        if not client_id and not services:
+            continue
         if attendance != 1:
             continue
         costs = []
@@ -226,12 +259,29 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
     attach_rate_pct = round(multi_service_visits * 100 / service_visits) if service_visits else None
     avg_addon_rub = round(addon_total / multi_service_visits) if multi_service_visits else 0
 
+    records_status = (
+        "ok" if records_available and records_complete
+        else ("partial" if records_available else "unavailable")
+    )
+    appointment_counts = {
+        "loaded_from_yclients": len([row for row in recs if isinstance(row, dict)]),
+        "active": appointment_active,
+        "attended": attended,
+        "missed": missed,
+        "upcoming": appointment_upcoming,
+        "pending_status": appointment_pending,
+        "cancelled_returned_by_api": appointment_cancelled,
+    }
+    if not records_available:
+        appointment_counts = {key: None for key in appointment_counts}
+
     result = {
         "from": from_iso,
         "to": to_iso,
         "source_status": {
             "transactions": "ok" if transactions_available else "unavailable",
-            "records": "ok" if records_available else "unavailable",
+            "records": records_status,
+            "anton_salary": "ok" if anton_payroll_available else "unavailable",
         },
         "total_gross": total_gross,
         "cash": {"count": len(cash_recs), "sum": round(cash_sum)},
@@ -244,6 +294,16 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
             "missed": missed,
             "show_rate_pct": show_rate_pct,
         },
+        "appointments": {
+            "available": records_available,
+            "complete": records_complete,
+            "error": records_error,
+            **appointment_counts,
+            "definition": (
+                "All records returned by YClients for the requested period. "
+                "Cancelled count includes only deleted records still returned by the API."
+            ),
+        },
         "service_mix": {
             "visits_with_priced_services": service_visits,
             "multi_service_visits": multi_service_visits,
@@ -252,6 +312,7 @@ def business_summary(from_iso: str, to_iso: str, include_top: bool = False) -> d
         },
         "masters": masters,
         "salary_total": salary_total,         # сумма к выплате мастерам (без владельца)
+        "anton": anton_salary_for_period(from_iso, to_iso, anton_payroll),
         "note": (
             "Не удалось получить финансовые операции из YClients."
             if not transactions_available

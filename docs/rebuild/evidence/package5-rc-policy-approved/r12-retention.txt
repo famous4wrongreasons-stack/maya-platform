@@ -1,0 +1,1 @@
+{"package":"R12","proof":"actual scoped AC6 storage/text disposal","result":"PASS","attachmentPayloads":2,"messagePayloads":1,"claimedCrashResumed":true,"unknownStorageHeld":true,"unclaimedEraseDenied":true,"readSideEffects":0,"historyRetained":true,"productionEffects":0}

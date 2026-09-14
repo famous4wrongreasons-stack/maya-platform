@@ -1,0 +1,45 @@
+--- a/mayaos/app/index.html
++++ b/mayaos/app/index.html
+@@ -13542,27 +13542,4 @@
+-    fetch(BF_PROXY + '?action=create_record', {
+-      method: 'POST',
+-      headers: {
+-        'Content-Type': 'application/json'
+-      },
+-      body: JSON.stringify({
+-        company_id: BF_COMPANY,
+-        staff_id: master.id,
+-        service_id: svcs.map(function (x) { return x.id; }).join(','),
+-        date: date,
+-        time: time,
+-        user_token: '',
+-        phone: ph,
+-        fullname: nm
+-      })
+-    }).then(r => r.json()).then(j => {
+-      submittingRef.current = false;
+-      setSubmitting(false);
+-      if (j && (j.success || j.data)) {
+-        setDone(true);
+-        saveMood(extractRecordId(j)); // привязать выбранную пилюлю к созданной записи
+-      } else setErr(j && (j.error || j.message) || 'Не удалось создать запись. Попробуйте другое время.');
+-    }).catch(() => {
+-      submittingRef.current = false;
+-      setSubmitting(false);
+-      setErr('Ошибка сети. Повторите.');
+-    });
++    // R01 canonical Client entry: retired raw provider create.
++    submittingRef.current = false;
++    setSubmitting(false);
++    setErr("Для записи откройте MAYA в приложении и подтвердите привязку клиента.");
+@@ -15278,8 +15255,2 @@
+-      var b = {}; try { b = JSON.parse((init && init.body) || '{}'); } catch (eB) {}
+-      var start = String(b.start || ''); var day2 = start.slice(0, 10); var time = start.slice(11, 16);
+-      var cab = (window.APP_DATA && window.APP_DATA.cabinet) || {};
+-      var nm = String(b.clientName || cab.fullName || cab.name || '').trim();
+-      var ph = String(b.clientPhone || cab.bookingPhone || '').replace(/\D/g, '');
+-      if (ph.length < 11) { var eP = new Error('client_phone_required'); eP.code = 'client_phone_required'; eP.status = 400; return Promise.reject(eP); }
+-      return fetch(BF + '?action=create_record', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ company_id: CO, staff_id: b.staffId, service_id: (b.serviceIds || []).join(','), date: day2, time: time, user_token: '', phone: ph, fullname: nm }) })
+-        .then(function (r) { return r.json(); }).then(function (j) { if (j && (j.success || j.data)) return j; var eF = new Error('book_failed'); eF.code = 'book_failed'; throw eF; });
++      // R01 canonical Client entry: retired raw provider create.
++      var refusal = new Error("Для записи откройте MAYA в приложении и подтвердите привязку клиента."); refusal.code = 'verified_client_channel_required'; refusal.retry_allowed = false; return Promise.reject(refusal);

@@ -1,0 +1,14 @@
+PASS live source projection creates no MeasurementRevision or ActionExecution
+PASS Client without Maya User remains canonical source
+PASS unknown cash/refunds/net not zero; observed booked value remains separate
+PASS wrong tenant rejected before source read/admission
+PASS report pins exact published revision and original 365-day expiry
+PASS restart/retry of report reuses original asOf, identity, hash and expiry
+PASS same report identity with changed period conflicts
+PASS concurrent report admission has one immutable logical outcome
+PASS late source correction changes live facts, never the as-reported snapshot
+PASS AI/HTTP/report use identical fact values with safe AI projection
+PASS tenant audit excludes platform/foreign/raw payload and paginates timestamp ties
+PASS audit rejects unbounded range and cross-window cursor
+PASS revoked membership cannot read live, historical snapshot, or audit
+{"status":"PASS","checks":13,"names":["live source projection creates no MeasurementRevision or ActionExecution","Client without Maya User remains canonical source","unknown cash/refunds/net not zero; observed booked value remains separate","wrong tenant rejected before source read/admission","report pins exact published revision and original 365-day expiry","restart/retry of report reuses original asOf, identity, hash and expiry","same report identity with changed period conflicts","concurrent report admission has one immutable logical outcome","late source correction changes live facts, never the as-reported snapshot","AI/HTTP/report use identical fact values with safe AI projection","tenant audit excludes platform/foreign/raw payload and paginates timestamp ties","audit rejects unbounded range and cross-window cursor","revoked membership cannot read live, historical snapshot, or audit"],"productionEffects":0,"preExistingDatabasesTouched":0}

@@ -1,0 +1,142 @@
+{
+  "contract": "chapter6.final-completion-acceptance/1",
+  "status": "PASS",
+  "completedAt": "2026-09-08T13:28:42.919984+00:00",
+  "acceptedBaseline": "438260714da5d150adfb6f692072defda430d5b7",
+  "runtimeSource": "8bc0345472254db2051e9a8c32120b245e28d57b",
+  "productionRelease": "20260908-p5-rc-8bc03454",
+  "requirementsCoveragePercent": 100,
+  "traceability": {
+    "sharedContractRows": 12,
+    "originalNormalizedActionClassRows": 32,
+    "mandatoryRowsVerified": 43,
+    "approvedDeferredDisabledRows": 1,
+    "missingRequirements": 0
+  },
+  "package4Complete": true,
+  "package5Complete": true,
+  "package5FinalGate": "PASS \u2014 PRESERVED",
+  "familyCoverage": "13/13",
+  "productionSurfaceCoverage": "32/32",
+  "blockersRemediated": "24/24",
+  "remediationPackagesComplete": "14/14",
+  "knownRemainderBlockers": 0,
+  "mandatoryBackend": {
+    "status": "PASS",
+    "suites": 411,
+    "tests": 3370,
+    "pendingSuites": 0,
+    "pendingTests": 0
+  },
+  "finalArchitecturalRatchets": {
+    "status": "PASS",
+    "suites": 93,
+    "tests": 515,
+    "executedWithinMandatoryBackend": true,
+    "wiredIntoReleaseGates": true
+  },
+  "pythonRuntimeGuards": {
+    "status": "PASS",
+    "guards": 15,
+    "r05AdditionalTests": 2
+  },
+  "lint": "PASS",
+  "applicationTypecheck": "PASS",
+  "scriptsTypecheck": "PASS",
+  "build": "PASS",
+  "prismaValidate": "PASS",
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "chapter6SchemaIntegrity": "PASS",
+  "approvedHistoricalNotValidConstraints": 5,
+  "unapprovedUnvalidatedConstraints": 0,
+  "repositoryMigrationChecksumsMatched": 93,
+  "recognizedHistoricalLedgerEntries": 3,
+  "health": "PASS",
+  "readiness": "PASS",
+  "productionBaselineCertified": true,
+  "newUnaccountedProductionSurfaces": 0,
+  "inventoryReopened": false,
+  "unresolvedBusinessDecisions": 0,
+  "unresolvedSchemaDecisions": 0,
+  "unresolvedWIP": 0,
+  "newRuntimeOrSchemaImplementation": false,
+  "newDeployment": false,
+  "productionProofMutations": 0,
+  "productionProofMessages": 0,
+  "productionProofProviderEffects": 0,
+  "previousSecurityRemediationRepeated": false,
+  "chapter6Complete": true,
+  "chapter7Started": false,
+  "nextChapterRequiresSeparateUserInstruction": true,
+  "processHygiene": 0,
+  "reusedEvidence": [
+    "../package5-rc-final/manifest.json",
+    "../package5-rc-policy-approved/manifest.json"
+  ],
+  "reusedPostgreSQLProofsRerunInThisAcceptance": false,
+  "schemaDiagnostic": "Initial all-historical-constraints-validated assertion rejected; exact five approved NOT VALID migration clauses classified. No schema change, no unapproved constraint. See schema-integrity.json.",
+  "files": {
+    "application-typecheck.txt": "4e3c5cfe91d4d4aea93954da8746bfe7d55d33a8b5a27fc27624a13ca793bcd4",
+    "baseline-certification.json": "1b3901ba7f9291e43b9577a6dd3cc784b45a8fcd1f2df613a67eec033fc1a9dc",
+    "build-artifact-comparison.json": "03f4751655f8ab49fb723aa4d190f48c11f2a9ee162a80ab8f018a46f2c5ee4e",
+    "build.txt": "5a0d1e23f696ad7a8be8c3ee659ced980fc09ad2d46786e3e742b23ca2d90f41",
+    "canonical-source-index.json": "d1944771c4a95fe1ac8b76b63f12d8a8d0ad46684ac455035e0889272f63d2b9",
+    "edge-manifest-verify.json": "2ffae30bce9680fb1149cecb280a99326efd5c09de1c918d611e2b8db0f6f3cb",
+    "full-schema-integrity.stderr.txt": "4a3b1981cd5154e798b0b2cc2abf0c13c72181f5e3a618d79cc844730589ce45",
+    "health-readiness.txt": "ac4444e819a551425f911f0b132f655abf105f78d633ed8fa8ad393003b1ec25",
+    "hygiene.json": "f0292c1c1ed21e0c70ba44b15240995d5c2d71ee3100c8654a0b8c3ac87dc078",
+    "lint.txt": "d007f4fc0c01ab1d96707b5f194a22aa046639a3cb2dc708ab288b40b8471488",
+    "live-config.txt": "744878cade8799aed107e7bee9705769854813bedc50fcf70973603a0285b034",
+    "local-gates.json": "1209f2e217665bdbfc07c30411a65dbaf51ea1c2c7063085637c780db76a4b74",
+    "mandatory-backend.json": "af9ae13456825bdf671ffd2918e5012a934eaffcc0581fb81b584f7ca3d4304f",
+    "mandatory-backend.txt": "052b5e8527ff198b598e65c324ef0f5cb470c252a6f2fa64359aac215f511033",
+    "prisma-validate.txt": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+    "production-probes.json": "e9a696af8adf4ac33514a1d5d257d267aca8ed82df11caf7213831105e8b969a",
+    "protected-state.json": "dd65dcba8ad9ecafd00125d646fdd2ff25a070afaa5d9652e3040a35aa69c680",
+    "python-manifest-verify.json": "8d349dd6fb878d4ede667cdbd5961f31a5739eccbf6173027df05fc7d3664d0a",
+    "python-runtime-guards.json": "f613ee3754f081647a6f865b3396378a6cf8eea0755adc2e91f436bf079585ee",
+    "r05-python-guard.txt": "5a76274a1665c53b667fbf35d7ad8f3fada50b20f682224c7ddfff8bb9ac87bc",
+    "ratchet-acceptance.json": "794b16f55d1361fd1114200fdb960106b072be5f48aba4bc7ad6395f24f7cc5c",
+    "read-only-probe-receipts.json": "9220edc0b8bda99cfb15ab0ddffed1b5192793ad3c61a58435522d4453ae498c",
+    "release-gate-wiring.json": "79b76d8cf9c444e4eb33ccc46ac3058cc43d12e32f60de9e2f00c3cf6bee4b8d",
+    "repository-preflight.json": "da82e9e3fade9df5cd469cb573a0a40f28831d897b7348f1289c0b3d68b36dba",
+    "requirements.json": "828e37cff84e77ebdd3592fcbe5f3ac4c17d3efd43eb69bde0a17ee0c6a1e4c7",
+    "schema-catalog-acceptance.json": "8edd7aa5fb1686cd7632c369373ab8d5aa9b418b2a45e0347d721f0d5867785d",
+    "schema-catalog-initial-diagnostic.probe.cjs": "59a835059cd617df5e347bc9a270a8ffb4d270d0bf6bda029ffc49f563cedc5d",
+    "schema-catalog-observation.json": "c909834eb00d4f69ce0f680e7e47c36f15de08b67ca0da4710b3fff45308b7b8",
+    "schema-catalog-observation.stderr.txt": "062e1cc066275b559463e674297b297cd61230ade9f39db573a576eeb2910a97",
+    "schema-catalog.probe.cjs": "1e2abdaaf622780071b970ec7fb45b201be967ebc27d1f0971bad2e680e0b297",
+    "schema-integrity.json": "986961c907dfe5c2d8febbef61a37f550225895cfa8cd5505e9ff3b5e5a997e8",
+    "schema-preflight.txt": "a7a60578ec30b7351af3503a47d600d1d7f098aec940fa84cda3abe7b19ca533",
+    "scripts-typecheck.txt": "e98505712101178e5d3e53188c5d9eaa2ca910b780c22d04309d91caca226d20",
+    "surface-ratchet-coverage.json": "0541356f8f9789c55c65f0c704af88cafa4c29924e063547cb771ed11b38dc43"
+  },
+  "exactApprovedSchemaCatalogExecutableProof": "PASS",
+  "transcriptFormatting": {
+    "full-schema-integrity.stderr.txt": {
+      "rawSha256": "126a55e7e4d7e306b0fdc31a2305075617d6bf160246454e801dc0523db745c9",
+      "change": "Trailing blank lines only; original raw output retained in acceptance workspace"
+    },
+    "application-typecheck.txt": {
+      "rawSha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "change": "Trailing blank lines only; original raw output retained in acceptance workspace"
+    },
+    "build.txt": {
+      "rawSha256": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+      "change": "Trailing blank lines only; original raw output retained in acceptance workspace"
+    },
+    "schema-preflight.txt": {
+      "rawSha256": "5779f24e8861b38c1a4e84350f11ab321e882227c7133d7dde1b934faf47e7e2",
+      "change": "Trailing blank lines only; original raw output retained in acceptance workspace"
+    },
+    "lint.txt": {
+      "rawSha256": "80f5295fdc4b3e55d92f2aa33e3773ba6f2b9305c454e513f870e95ae3fa198d",
+      "change": "Trailing blank lines only; original raw output retained in acceptance workspace"
+    },
+    "scripts-typecheck.txt": {
+      "rawSha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "change": "Trailing blank lines only; original raw output retained in acceptance workspace"
+    }
+  }
+}

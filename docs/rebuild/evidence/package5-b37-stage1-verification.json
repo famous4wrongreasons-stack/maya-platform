@@ -1,0 +1,32 @@
+{
+  "status": "PASS_STAGE1_DOCUMENTATION_AND_DIAGNOSTIC_ONLY",
+  "verifiedAt": "2026-09-07T15:02:06.526425+00:00",
+  "acceptedSourceCheckpoint": "7201f7bd",
+  "initialFetch": "PASS",
+  "initialHeadEqualsCanonicalOrigin": true,
+  "initialAheadBehind": [
+    0,
+    0
+  ],
+  "initialUnpushedCommits": 0,
+  "initialWorktreeDirtyEntries": 0,
+  "scope": "B37-A reminder and B37-B expense intent, no runtime/schema/migration implementation",
+  "sourceMethodDiagnostic": "PASS, confirms gaps; not runtime or PostgreSQL proof",
+  "diagnosticCorrection": "Initial display-message assertion replaced with exact ai_approval_idempotency_conflict code; no runtime change",
+  "linksAndSourceHashes": "PASS",
+  "runtimeSchemaMigrationFilesChanged": 0,
+  "productionConnections": 0,
+  "productionMessages": 0,
+  "productionExpenseMutations": 0,
+  "databasesOpened": 0,
+  "oldDatabasesTouched": 0,
+  "oldDatabasesProtected": 17,
+  "mainDirtyEntriesPreserved": 24,
+  "mainContentHashesPreserved": 22,
+  "mainStatusSha256": "c28307f97e02975799f0cd9fcbe854d97285a5c344e25af50c67f60fbfca2c25",
+  "ownedServersAndDatabasesCreated": 0,
+  "processHygiene": 0,
+  "b36RuntimeProof": "FAIL: idempotency key and concurrent write conflict remain",
+  "b36RuntimeDeployment": "NOT STARTED",
+  "package5Complete": false
+}

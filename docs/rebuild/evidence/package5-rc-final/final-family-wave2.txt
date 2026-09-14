@@ -1,0 +1,18 @@
+{
+  "shadowActionClasses": "13/13",
+  "shadowDivergences": 0,
+  "executableActionClasses": "13/13",
+  "actionTargetMutations": 14,
+  "duplicateBusinessMutationPossible": false,
+  "restartRebuildConverges": true,
+  "tenantAuthorityIsolation": true,
+  "serverDerivedPolicyAuthority": true,
+  "trialActivationAtomic": true,
+  "currentLogoutProtocolPreserved": true,
+  "crmProjectionBoundaryPreserved": true,
+  "objectDispatches": 1,
+  "providerUnknownReconciled": true,
+  "blindRetryAfterUnknown": false,
+  "productionBusinessMutations": 0,
+  "productionProviderWrites": 0
+}

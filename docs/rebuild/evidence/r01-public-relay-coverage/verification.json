@@ -1,0 +1,91 @@
+{
+  "at": "2026-09-12T16:50:53.430156+00:00",
+  "harnessBefore": {
+    "isolatedRatchet": "9/9 PASS",
+    "isolatedPipeFirstStalledTrial": 85,
+    "isolatedPipeRepeatStalledTrial": 64,
+    "inputBytesAtBothStalls": 183648,
+    "reader": "json.load(sys.stdin) -> TextIOWrapper.read -> FileIO.readall",
+    "parent": "Node 22.23.2 synchronous child_process pipe",
+    "python": "3.14.6",
+    "classification": "Reproduced synchronous pipe/EOF transport stall outside Jest; not Maya runtime/guard logic and not a demonstrated descendant process leak",
+    "lowLevelKernelOrLibuvRootCauseProven": false
+  },
+  "harnessAfter": {
+    "transport": "same JSON on private regular-file stdin; close/unlink in finally",
+    "guardAndAssertionsUnchanged": true,
+    "timeoutsInGuardAddedOrChanged": 0,
+    "pipeReadLoopDiagnosticPasses": 150,
+    "framedReadDiagnosticPasses": 300,
+    "regularFileStressPasses": 300,
+    "firstFullMandatory": {
+      "suites": 429,
+      "tests": 3604,
+      "exitCode": 0,
+      "seconds": 345.78287172317505,
+      "normalTermination": true
+    }
+  },
+  "latestGates": [
+    {
+      "gate": "owned-final",
+      "exitCode": 0,
+      "seconds": 2.827881097793579,
+      "normalTermination": true
+    },
+    {
+      "gate": "lint-final",
+      "exitCode": 0,
+      "seconds": 45.088090896606445,
+      "normalTermination": true
+    },
+    {
+      "gate": "application-typecheck-final",
+      "exitCode": 0,
+      "seconds": 6.567306041717529,
+      "normalTermination": true
+    },
+    {
+      "gate": "scripts-typecheck-final",
+      "exitCode": 0,
+      "seconds": 15.503784894943237,
+      "normalTermination": true
+    },
+    {
+      "gate": "build-final",
+      "exitCode": 0,
+      "seconds": 18.68135690689087,
+      "normalTermination": true
+    },
+    {
+      "gate": "prisma-final",
+      "exitCode": 0,
+      "seconds": 0.6589431762695312,
+      "normalTermination": true
+    },
+    {
+      "gate": "mandatory-final",
+      "exitCode": 0,
+      "seconds": 344.0986008644104,
+      "normalTermination": true
+    }
+  ],
+  "productionChanges": 0,
+  "publicRootCoverageComplete": false,
+  "mandatoryFinal": {
+    "suites": 430,
+    "passedSuites": 430,
+    "tests": 3607,
+    "passedTests": 3607,
+    "success": true,
+    "gate": "mandatory-final",
+    "exitCode": 0,
+    "seconds": 344.0986008644104,
+    "normalTermination": true
+  },
+  "architecturalSubsetInMandatory": {
+    "suites": 95,
+    "tests": 523,
+    "allPass": true
+  }
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "artifact": "/var/www/maya-platform/app.html",
+    "status": "PASS",
+    "scriptsParsed": 25,
+    "sha256": "204daaf2ce452ba5e1383750bded372683596cceade4c9f0f33dade3831b862a",
+    "businessEffects": 0
+  },
+  {
+    "artifact": "/var/www/maya-platform/app.html",
+    "status": "PASS",
+    "scriptsParsed": 25,
+    "sha256": "204daaf2ce452ba5e1383750bded372683596cceade4c9f0f33dade3831b862a",
+    "businessEffects": 0
+  },
+  {
+    "artifact": "/var/www/maya-platform/app.html",
+    "status": "PASS",
+    "scriptsParsed": 25,
+    "sha256": "204daaf2ce452ba5e1383750bded372683596cceade4c9f0f33dade3831b862a",
+    "businessEffects": 0
+  }
+]

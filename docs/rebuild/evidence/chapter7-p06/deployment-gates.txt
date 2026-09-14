@@ -1,0 +1,21 @@
+### 1/10 шлюз: чистое дерево, линт, типизация, тесты, схема
+Test Suites: 435 passed, 435 total
+Tests:       3653 passed, 3653 total
+Snapshots:   0 total
+Time:        353.347 s
+### 2/10 локальная сборка dist
+### 3/10 каталог релиза
+### 4/10 заливка сборки
+### 5/10 установка зависимостей (npm ci, без dev)
+### 6/10 release:preflight (блокирующий, до базы)
+### 7/10 миграция базы (до переключения)
+No pending migrations to apply.
+No difference detected.
+### 8/10 клиент базы под свежую схему
+### 9/10 смоук на запасном порту 3199
+смоук пройден; процесс завершён и reap выполнен
+### 10/10 переключение, проверка, уборка
+здоровье: {"status":"ok","service":"maya-saas-backend","release":"20260912-c7-p06-4058cd8c","started_at":"2026-09-12T20:09:10.635Z","timestamp":"2026-09-12T20:09:11.394Z"}
+{"status":"ready","service":"maya-saas-backend","checks":{"database":"ready"},"timestamp":"2026-09-12T20:09:11.440Z"}
+-- No entries --
+### ГОТОВО: 20260912-c7-p06-4058cd8c

@@ -1,3 +1,7 @@
+import { ForbiddenException } from '@nestjs/common';
+import { CurrentUser } from '../decorators/current-user.decorator';
+import { TenantScoped } from '../decorators/tenant-scoped.decorator';
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import {
   Body,
   Controller,
@@ -18,6 +22,8 @@ import {
   ConfirmAiOnboardingDraftDto,
   ContinueAiOnboardingDraftDto,
   CreateAiOnboardingDraftDto,
+  DiscoverAiOnboardingCrmDto,
+  ImportAiOnboardingCrmDto,
   ReadAiOnboardingDraftDto,
 } from './dto/ai-onboarding.dto';
 import { AiOnboardingService } from './ai-onboarding.service';
@@ -98,6 +104,44 @@ export class OnboardingController {
   }
 
   @Public()
+  @Post('ai/drafts/:draftId/crm/discover')
+  @HttpCode(200)
+  @ApiOperation({
+    summary:
+      'Discover owner-managed CRM companies without persisting the credential',
+  })
+  discoverAiDraftCrm(
+    @Param('draftId') draftId: string,
+    @Body() dto: DiscoverAiOnboardingCrmDto,
+    @Req() request: Request,
+  ) {
+    return this.aiOnboardingService.discoverDraftCrm(
+      draftId,
+      dto,
+      resolveAuthClientMetadata(request),
+    );
+  }
+
+  @Public()
+  @Post('ai/drafts/:draftId/crm/import')
+  @HttpCode(200)
+  @ApiOperation({
+    summary:
+      'Verify the selected CRM company and import a safe onboarding preview',
+  })
+  importAiDraftCrm(
+    @Param('draftId') draftId: string,
+    @Body() dto: ImportAiOnboardingCrmDto,
+    @Req() request: Request,
+  ) {
+    return this.aiOnboardingService.importDraftCrm(
+      draftId,
+      dto,
+      resolveAuthClientMetadata(request),
+    );
+  }
+
+  @Public()
   @Post('ai/drafts/:draftId/confirm')
   @ApiOperation({
     summary: 'Confirm a blueprint and create the trial business',
@@ -111,6 +155,33 @@ export class OnboardingController {
       draftId,
       dto,
       resolveAuthClientMetadata(request),
+    );
+  }
+
+  @Get('ai/confirmations/pending')
+  @TenantScoped()
+  pendingAiConfirmations(@CurrentUser() actor: AuthenticatedUser) {
+    if (!actor.tenantId)
+      throw new ForbiddenException('Tenant owner session required');
+    return this.aiOnboardingService.pendingConfirmations(
+      actor.tenantId,
+      actor.userId,
+    );
+  }
+
+  @Post('ai/drafts/:draftId/resume')
+  @TenantScoped()
+  @HttpCode(200)
+  resumeAiDraft(
+    @Param('draftId') draftId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    if (!actor.tenantId)
+      throw new ForbiddenException('Tenant owner session required');
+    return this.aiOnboardingService.resumeConfirmation(
+      draftId,
+      actor.tenantId,
+      actor.userId,
     );
   }
 

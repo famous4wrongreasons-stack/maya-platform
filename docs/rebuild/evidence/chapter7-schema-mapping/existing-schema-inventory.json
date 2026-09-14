@@ -1,0 +1,5497 @@
+[
+  {
+    "model": "Tenant",
+    "line": 170,
+    "fields": [
+      {
+        "name": "consentInvalidations",
+        "type": "ClientConsentInvalidation[]",
+        "declaration": "consentInvalidations ClientConsentInvalidation[]"
+      },
+      {
+        "name": "ownerReportRuns",
+        "type": "OwnerReportRun[]",
+        "declaration": "ownerReportRuns OwnerReportRun[]"
+      },
+      {
+        "name": "bookingConfirmations",
+        "type": "ClientBookingConfirmation[]",
+        "declaration": "bookingConfirmations ClientBookingConfirmation[]"
+      },
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                             String                          @id @default(cuid())"
+      },
+      {
+        "name": "name",
+        "type": "String",
+        "declaration": "name                           String"
+      },
+      {
+        "name": "slug",
+        "type": "String",
+        "declaration": "slug                           String                          @unique"
+      },
+      {
+        "name": "status",
+        "type": "TenantStatus",
+        "declaration": "status                         TenantStatus                    @default(trial)"
+      },
+      {
+        "name": "planId",
+        "type": "String?",
+        "declaration": "planId                         String?"
+      },
+      {
+        "name": "industryPresetId",
+        "type": "String?",
+        "declaration": "industryPresetId               String?"
+      },
+      {
+        "name": "calendarSource",
+        "type": "CalendarSource",
+        "declaration": "calendarSource                 CalendarSource                  @default(external)"
+      },
+      {
+        "name": "defaultCurrency",
+        "type": "String",
+        "declaration": "defaultCurrency                String                          @default(\"RUB\")"
+      },
+      {
+        "name": "defaultTimezone",
+        "type": "String",
+        "declaration": "defaultTimezone                String                          @default(\"Europe/Moscow\")"
+      },
+      {
+        "name": "defaultLocale",
+        "type": "String",
+        "declaration": "defaultLocale                  String                          @default(\"ru-RU\")"
+      },
+      {
+        "name": "customDomain",
+        "type": "String?",
+        "declaration": "customDomain                   String?                         @unique"
+      },
+      {
+        "name": "subdomain",
+        "type": "String?",
+        "declaration": "subdomain                      String?                         @unique"
+      },
+      {
+        "name": "trialEndsAt",
+        "type": "DateTime?",
+        "declaration": "trialEndsAt                    DateTime?"
+      },
+      {
+        "name": "currentPeriodStart",
+        "type": "DateTime?",
+        "declaration": "currentPeriodStart             DateTime?"
+      },
+      {
+        "name": "currentPeriodEnd",
+        "type": "DateTime?",
+        "declaration": "currentPeriodEnd               DateTime?"
+      },
+      {
+        "name": "pastDueAt",
+        "type": "DateTime?",
+        "declaration": "pastDueAt                      DateTime?"
+      },
+      {
+        "name": "graceEndsAt",
+        "type": "DateTime?",
+        "declaration": "graceEndsAt                    DateTime?"
+      },
+      {
+        "name": "billingMethodId",
+        "type": "String?",
+        "declaration": "billingMethodId                String?"
+      },
+      {
+        "name": "trialFullAccess",
+        "type": "Boolean",
+        "declaration": "trialFullAccess                Boolean                         @default(false)"
+      },
+      {
+        "name": "allowSelfRegistration",
+        "type": "Boolean",
+        "declaration": "allowSelfRegistration          Boolean                         @default(true)"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                      DateTime                        @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt                      DateTime                        @updatedAt"
+      },
+      {
+        "name": "plan",
+        "type": "SubscriptionPlan?",
+        "declaration": "plan                           SubscriptionPlan?               @relation(fields: [planId], references: [id])"
+      },
+      {
+        "name": "brandingSettings",
+        "type": "BrandingSettings?",
+        "declaration": "brandingSettings               BrandingSettings?"
+      },
+      {
+        "name": "branches",
+        "type": "Branch[]",
+        "declaration": "branches                       Branch[]"
+      },
+      {
+        "name": "users",
+        "type": "User[]",
+        "declaration": "users                          User[]"
+      },
+      {
+        "name": "crmIntegration",
+        "type": "CrmIntegration?",
+        "declaration": "crmIntegration                 CrmIntegration?"
+      },
+      {
+        "name": "commerceIntegration",
+        "type": "CommerceIntegration?",
+        "declaration": "commerceIntegration            CommerceIntegration?"
+      },
+      {
+        "name": "auditLogs",
+        "type": "AuditLog[]",
+        "declaration": "auditLogs                      AuditLog[]"
+      },
+      {
+        "name": "appointments",
+        "type": "Appointment[]",
+        "declaration": "appointments                   Appointment[]"
+      },
+      {
+        "name": "phoneAuthCodes",
+        "type": "PhoneAuthCode[]",
+        "declaration": "phoneAuthCodes                 PhoneAuthCode[]"
+      },
+      {
+        "name": "emailAuthCodes",
+        "type": "EmailAuthCode[]",
+        "declaration": "emailAuthCodes                 EmailAuthCode[]"
+      },
+      {
+        "name": "authIdentities",
+        "type": "AuthIdentity[]",
+        "declaration": "authIdentities                 AuthIdentity[]"
+      },
+      {
+        "name": "clientChannelLinks",
+        "type": "ClientChannelLink[]",
+        "declaration": "clientChannelLinks             ClientChannelLink[]"
+      },
+      {
+        "name": "authFlowStates",
+        "type": "AuthFlowState[]",
+        "declaration": "authFlowStates                 AuthFlowState[]"
+      },
+      {
+        "name": "authSessions",
+        "type": "AuthSession[]",
+        "declaration": "authSessions                   AuthSession[]"
+      },
+      {
+        "name": "authRateLimitBuckets",
+        "type": "AuthRateLimitBucket[]",
+        "declaration": "authRateLimitBuckets           AuthRateLimitBucket[]"
+      },
+      {
+        "name": "billingPayments",
+        "type": "BillingPayment[]",
+        "declaration": "billingPayments                BillingPayment[]"
+      },
+      {
+        "name": "memberships",
+        "type": "Membership[]",
+        "declaration": "memberships                    Membership[]"
+      },
+      {
+        "name": "entitlements",
+        "type": "TenantEntitlement[]",
+        "declaration": "entitlements                   TenantEntitlement[]"
+      },
+      {
+        "name": "internalServices",
+        "type": "InternalService[]",
+        "declaration": "internalServices               InternalService[]"
+      },
+      {
+        "name": "internalProviders",
+        "type": "InternalProvider[]",
+        "declaration": "internalProviders              InternalProvider[]"
+      },
+      {
+        "name": "availabilityRules",
+        "type": "InternalAvailabilityRule[]",
+        "declaration": "availabilityRules              InternalAvailabilityRule[]"
+      },
+      {
+        "name": "availabilityExceptions",
+        "type": "InternalAvailabilityException[]",
+        "declaration": "availabilityExceptions         InternalAvailabilityException[]"
+      },
+      {
+        "name": "aiOnboardingDrafts",
+        "type": "AiOnboardingDraft[]",
+        "declaration": "aiOnboardingDrafts             AiOnboardingDraft[]             @relation(\"AiOnboardingConfirmedTenant\")"
+      },
+      {
+        "name": "trialActivation",
+        "type": "TrialActivation?",
+        "declaration": "trialActivation                TrialActivation?"
+      },
+      {
+        "name": "customerProfiles",
+        "type": "CustomerProfile[]",
+        "declaration": "customerProfiles               CustomerProfile[]"
+      },
+      {
+        "name": "loyaltyAccounts",
+        "type": "LoyaltyAccount[]",
+        "declaration": "loyaltyAccounts                LoyaltyAccount[]"
+      },
+      {
+        "name": "loyaltyTransactions",
+        "type": "LoyaltyTransaction[]",
+        "declaration": "loyaltyTransactions            LoyaltyTransaction[]"
+      },
+      {
+        "name": "loyaltyRedemptionGrants",
+        "type": "LoyaltyRedemptionGrant[]",
+        "declaration": "loyaltyRedemptionGrants        LoyaltyRedemptionGrant[]"
+      },
+      {
+        "name": "loyaltyRedemptions",
+        "type": "LoyaltyRedemption[]",
+        "declaration": "loyaltyRedemptions             LoyaltyRedemption[]"
+      },
+      {
+        "name": "loyaltyGrantRevocations",
+        "type": "LoyaltyRedemptionGrantRevocation[]",
+        "declaration": "loyaltyGrantRevocations        LoyaltyRedemptionGrantRevocation[]"
+      },
+      {
+        "name": "unresolvedClientIdentityHolds",
+        "type": "UnresolvedClientIdentityHold[]",
+        "declaration": "unresolvedClientIdentityHolds  UnresolvedClientIdentityHold[]"
+      },
+      {
+        "name": "expenses",
+        "type": "Expense[]",
+        "declaration": "expenses                       Expense[]"
+      },
+      {
+        "name": "expensePeriodDeclarations",
+        "type": "ExpensePeriodDeclaration[]",
+        "declaration": "expensePeriodDeclarations      ExpensePeriodDeclaration[]"
+      },
+      {
+        "name": "expensePeriodDeclarationInvalidations",
+        "type": "ExpensePeriodDeclarationInvalidation[]",
+        "declaration": "expensePeriodDeclarationInvalidations ExpensePeriodDeclarationInvalidation[]"
+      },
+      {
+        "name": "aiApprovalRequests",
+        "type": "AiApprovalRequest[]",
+        "declaration": "aiApprovalRequests             AiApprovalRequest[]"
+      },
+      {
+        "name": "aiToolExecutions",
+        "type": "AiToolExecution[]",
+        "declaration": "aiToolExecutions               AiToolExecution[]"
+      },
+      {
+        "name": "aiBrainSessions",
+        "type": "AiBrainSession[]",
+        "declaration": "aiBrainSessions                AiBrainSession[]"
+      },
+      {
+        "name": "aiMemoryFacts",
+        "type": "AiMemoryFact[]",
+        "declaration": "aiMemoryFacts                  AiMemoryFact[]"
+      },
+      {
+        "name": "aiKnowledgeSources",
+        "type": "AiKnowledgeSource[]",
+        "declaration": "aiKnowledgeSources             AiKnowledgeSource[]"
+      },
+      {
+        "name": "aiKnowledgeChunks",
+        "type": "AiKnowledgeChunk[]",
+        "declaration": "aiKnowledgeChunks              AiKnowledgeChunk[]"
+      },
+      {
+        "name": "crmStaffAccesses",
+        "type": "CrmStaffAccess[]",
+        "declaration": "crmStaffAccesses               CrmStaffAccess[]"
+      },
+      {
+        "name": "dashboardPreferences",
+        "type": "DashboardPreference[]",
+        "declaration": "dashboardPreferences           DashboardPreference[]"
+      },
+      {
+        "name": "userMerges",
+        "type": "UserMerge[]",
+        "declaration": "userMerges                     UserMerge[]"
+      },
+      {
+        "name": "inboxItems",
+        "type": "InboxItem[]",
+        "declaration": "inboxItems                     InboxItem[]"
+      },
+      {
+        "name": "domainEvents",
+        "type": "DomainEvent[]",
+        "declaration": "domainEvents                   DomainEvent[]"
+      },
+      {
+        "name": "ingestionQuarantine",
+        "type": "IngestionQuarantine[]",
+        "declaration": "ingestionQuarantine            IngestionQuarantine[]"
+      },
+      {
+        "name": "reconciliationRuns",
+        "type": "ReconciliationRun[]",
+        "declaration": "reconciliationRuns             ReconciliationRun[]"
+      },
+      {
+        "name": "devicePushTokens",
+        "type": "DevicePushToken[]",
+        "declaration": "devicePushTokens               DevicePushToken[]"
+      },
+      {
+        "name": "recoveryTouchpoints",
+        "type": "RecoveryTouchpoint[]",
+        "declaration": "recoveryTouchpoints            RecoveryTouchpoint[]"
+      },
+      {
+        "name": "recoveryConversions",
+        "type": "RecoveryConversion[]",
+        "declaration": "recoveryConversions            RecoveryConversion[]"
+      },
+      {
+        "name": "marketingAudiences",
+        "type": "MarketingAudience[]",
+        "declaration": "marketingAudiences             MarketingAudience[]"
+      },
+      {
+        "name": "marketingCampaigns",
+        "type": "MarketingCampaign[]",
+        "declaration": "marketingCampaigns             MarketingCampaign[]"
+      },
+      {
+        "name": "appointmentNotificationSetting",
+        "type": "AppointmentNotificationSetting?",
+        "declaration": "appointmentNotificationSetting AppointmentNotificationSetting?"
+      },
+      {
+        "name": "catalogItems",
+        "type": "TenantCatalogItem[]",
+        "declaration": "catalogItems                   TenantCatalogItem[]"
+      },
+      {
+        "name": "catalogItemValueVersions",
+        "type": "TenantCatalogItemValueVersion[]",
+        "declaration": "catalogItemValueVersions       TenantCatalogItemValueVersion[]"
+      },
+      {
+        "name": "referralProgram",
+        "type": "ReferralProgram?",
+        "declaration": "referralProgram                ReferralProgram?"
+      },
+      {
+        "name": "referralProgramValueVersions",
+        "type": "ReferralProgramValueVersion[]",
+        "declaration": "referralProgramValueVersions   ReferralProgramValueVersion[]"
+      },
+      {
+        "name": "customerReferrals",
+        "type": "CustomerReferral[]",
+        "declaration": "customerReferrals              CustomerReferral[]"
+      },
+      {
+        "name": "referralRewardIssuances",
+        "type": "ReferralRewardIssuance[]",
+        "declaration": "referralRewardIssuances        ReferralRewardIssuance[]"
+      },
+      {
+        "name": "referralRewards",
+        "type": "ReferralReward[]",
+        "declaration": "referralRewards                ReferralReward[]"
+      },
+      {
+        "name": "referralRewardFulfillments",
+        "type": "ReferralRewardFulfillment[]",
+        "declaration": "referralRewardFulfillments     ReferralRewardFulfillment[]"
+      },
+      {
+        "name": "customerSubscriptions",
+        "type": "CustomerSubscription[]",
+        "declaration": "customerSubscriptions          CustomerSubscription[]"
+      },
+      {
+        "name": "customerSubscriptionUsages",
+        "type": "CustomerSubscriptionUsage[]",
+        "declaration": "customerSubscriptionUsages     CustomerSubscriptionUsage[]"
+      },
+      {
+        "name": "giftCertificates",
+        "type": "GiftCertificate[]",
+        "declaration": "giftCertificates               GiftCertificate[]"
+      },
+      {
+        "name": "giftCertificateRedemptions",
+        "type": "GiftCertificateRedemption[]",
+        "declaration": "giftCertificateRedemptions     GiftCertificateRedemption[]"
+      },
+      {
+        "name": "businessReviews",
+        "type": "BusinessReview[]",
+        "declaration": "businessReviews                BusinessReview[]"
+      },
+      {
+        "name": "clients",
+        "type": "Client[]",
+        "declaration": "clients                        Client[]"
+      },
+      {
+        "name": "crmClientLinks",
+        "type": "CrmClientLink[]",
+        "declaration": "crmClientLinks                 CrmClientLink[]"
+      },
+      {
+        "name": "staff",
+        "type": "Staff[]",
+        "declaration": "staff                          Staff[]"
+      },
+      {
+        "name": "staffProviderLinks",
+        "type": "StaffProviderLink[]",
+        "declaration": "staffProviderLinks             StaffProviderLink[]"
+      },
+      {
+        "name": "marketingPolicy",
+        "type": "MarketingPolicy?",
+        "declaration": "marketingPolicy                MarketingPolicy?"
+      },
+      {
+        "name": "marketingAudienceRecipients",
+        "type": "MarketingAudienceRecipient[]",
+        "declaration": "marketingAudienceRecipients    MarketingAudienceRecipient[]"
+      },
+      {
+        "name": "marketingCampaignRecipients",
+        "type": "MarketingCampaignRecipient[]",
+        "declaration": "marketingCampaignRecipients    MarketingCampaignRecipient[]"
+      },
+      {
+        "name": "marketingConsentEvidence",
+        "type": "MarketingConsentEvidence[]",
+        "declaration": "marketingConsentEvidence       MarketingConsentEvidence[]"
+      },
+      {
+        "name": "marketingDeliveryAttempts",
+        "type": "MarketingDeliveryAttempt[]",
+        "declaration": "marketingDeliveryAttempts      MarketingDeliveryAttempt[]"
+      },
+      {
+        "name": "opportunities",
+        "type": "Opportunity[]",
+        "declaration": "opportunities                  Opportunity[]"
+      },
+      {
+        "name": "agentTasks",
+        "type": "AgentTask[]",
+        "declaration": "agentTasks                     AgentTask[]"
+      },
+      {
+        "name": "actionExecutions",
+        "type": "ActionExecution[]",
+        "declaration": "actionExecutions               ActionExecution[]"
+      },
+      {
+        "name": "actionIdempotencyBindings",
+        "type": "ActionExecutionIdempotencyBinding[]",
+        "declaration": "actionIdempotencyBindings       ActionExecutionIdempotencyBinding[]"
+      },
+      {
+        "name": "actionAttempts",
+        "type": "ActionAttempt[]",
+        "declaration": "actionAttempts                 ActionAttempt[]"
+      },
+      {
+        "name": "actionTargetMutations",
+        "type": "ActionTargetMutation[]",
+        "declaration": "actionTargetMutations          ActionTargetMutation[]"
+      },
+      {
+        "name": "operationalWorkItems",
+        "type": "OperationalWorkItem[]",
+        "declaration": "operationalWorkItems           OperationalWorkItem[]"
+      },
+      {
+        "name": "clientConsentFacts",
+        "type": "ClientConsentFact[]",
+        "declaration": "clientConsentFacts             ClientConsentFact[]"
+      },
+      {
+        "name": "clientLinkChallenges",
+        "type": "ClientLinkChallenge[]",
+        "declaration": "clientLinkChallenges           ClientLinkChallenge[]"
+      },
+      {
+        "name": "clientWantedSlotInterests",
+        "type": "ClientWantedSlotInterest[]",
+        "declaration": "clientWantedSlotInterests       ClientWantedSlotInterest[]"
+      },
+      {
+        "name": "clientWebPushEndpoints",
+        "type": "ClientWebPushEndpoint[]",
+        "declaration": "clientWebPushEndpoints          ClientWebPushEndpoint[]"
+      },
+      {
+        "name": "maintenanceRuns",
+        "type": "MaintenanceRun[]",
+        "declaration": "maintenanceRuns                MaintenanceRun[]"
+      },
+      {
+        "name": "nativeFeedbackRequests",
+        "type": "NativeFeedbackRequest[]",
+        "declaration": "nativeFeedbackRequests NativeFeedbackRequest[] @relation(\"R08_NativeFeedbackRequest_tenant\")"
+      },
+      {
+        "name": "nativeFeedbackRevisions",
+        "type": "NativeFeedbackRevision[]",
+        "declaration": "nativeFeedbackRevisions NativeFeedbackRevision[] @relation(\"R08_NativeFeedbackRevision_tenant\")"
+      },
+      {
+        "name": "publicCommunityComments",
+        "type": "PublicCommunityComment[]",
+        "declaration": "publicCommunityComments PublicCommunityComment[] @relation(\"R09_PublicCommunityComment_tenant\")"
+      },
+      {
+        "name": "publicCommunityInteractions",
+        "type": "PublicCommunityInteraction[]",
+        "declaration": "publicCommunityInteractions PublicCommunityInteraction[] @relation(\"R09_PublicCommunityInteraction_tenant\")"
+      },
+      {
+        "name": "teamMessages",
+        "type": "TeamMessage[]",
+        "declaration": "teamMessages TeamMessage[] @relation(\"R12_TeamMessage_tenant\")"
+      },
+      {
+        "name": "teamAttachments",
+        "type": "TeamAttachment[]",
+        "declaration": "teamAttachments TeamAttachment[] @relation(\"R12_TeamAttachment_tenant\")"
+      },
+      {
+        "name": "businessConfigurationRevisions",
+        "type": "TenantBusinessConfigurationRevision[]",
+        "declaration": "businessConfigurationRevisions TenantBusinessConfigurationRevision[] @relation(\"R11_TenantBusinessConfigurationRevision_tenant\")"
+      },
+      {
+        "name": "cashDeclarations",
+        "type": "CashDeclaration[]",
+        "declaration": "cashDeclarations CashDeclaration[] @relation(\"R14_CashDeclaration_tenant\")"
+      },
+      {
+        "name": "expenseReminderRuns",
+        "type": "ExpenseReminderRun[]",
+        "declaration": "expenseReminderRuns ExpenseReminderRun[] @relation(\"R13_ExpenseReminderRun_tenant\")"
+      },
+      {
+        "name": "expenseIntakeBindings",
+        "type": "ExpenseIntakeBinding[]",
+        "declaration": "expenseIntakeBindings ExpenseIntakeBinding[] @relation(\"R13_ExpenseIntakeBinding_tenant\")"
+      },
+      {
+        "name": "operationalAlertRuns",
+        "type": "OperationalAlertRun[]",
+        "declaration": "operationalAlertRuns OperationalAlertRun[] @relation(\"R06_OperationalAlertRun_tenant\")"
+      }
+    ],
+    "constraints": [
+      "@@index([status, graceEndsAt])"
+    ],
+    "sha256": "c8a8410caa2a4be0bc4b43c7e176a47db84b64c255df3d03a847e5dd6c64b333"
+  },
+  {
+    "model": "Client",
+    "line": 2148,
+    "fields": [
+      {
+        "name": "consentInvalidations",
+        "type": "ClientConsentInvalidation[]",
+        "declaration": "consentInvalidations ClientConsentInvalidation[]"
+      },
+      {
+        "name": "bulkAudienceMembers",
+        "type": "MarketingAudienceRecipient[]",
+        "declaration": "bulkAudienceMembers MarketingAudienceRecipient[]"
+      },
+      {
+        "name": "bulkRecipients",
+        "type": "MarketingCampaignRecipient[]",
+        "declaration": "bulkRecipients MarketingCampaignRecipient[]"
+      },
+      {
+        "name": "bookingConfirmations",
+        "type": "ClientBookingConfirmation[]",
+        "declaration": "bookingConfirmations ClientBookingConfirmation[]"
+      },
+      {
+        "name": "actionIdempotencyBindings",
+        "type": "ActionExecutionIdempotencyBinding[]",
+        "declaration": "actionIdempotencyBindings ActionExecutionIdempotencyBinding[]"
+      },
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                 String   @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId           String"
+      },
+      {
+        "name": "userId",
+        "type": "String?",
+        "declaration": "userId             String?"
+      },
+      {
+        "name": "phoneHash",
+        "type": "String?",
+        "declaration": "phoneHash          String?"
+      },
+      {
+        "name": "mergedIntoClientId",
+        "type": "String?",
+        "declaration": "mergedIntoClientId String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt          DateTime @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt          DateTime @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant       Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "user",
+        "type": "User?",
+        "declaration": "user         User?           @relation(fields: [userId], references: [id], onDelete: SetNull)"
+      },
+      {
+        "name": "mergedInto",
+        "type": "Client?",
+        "declaration": "mergedInto   Client?         @relation(\"ClientMerge\", fields: [mergedIntoClientId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction)"
+      },
+      {
+        "name": "mergedFrom",
+        "type": "Client[]",
+        "declaration": "mergedFrom   Client[]        @relation(\"ClientMerge\")"
+      },
+      {
+        "name": "crmLinks",
+        "type": "CrmClientLink[]",
+        "declaration": "crmLinks     CrmClientLink[]"
+      },
+      {
+        "name": "appointments",
+        "type": "Appointment[]",
+        "declaration": "appointments Appointment[]"
+      },
+      {
+        "name": "loyaltyAccounts",
+        "type": "LoyaltyAccount[]",
+        "declaration": "loyaltyAccounts LoyaltyAccount[]"
+      },
+      {
+        "name": "loyaltyRedemptionGrants",
+        "type": "LoyaltyRedemptionGrant[]",
+        "declaration": "loyaltyRedemptionGrants LoyaltyRedemptionGrant[]"
+      },
+      {
+        "name": "referralsAsReferrer",
+        "type": "CustomerReferral[]",
+        "declaration": "referralsAsReferrer CustomerReferral[] @relation(\"ReferralReferrer\")"
+      },
+      {
+        "name": "referralsAsReferred",
+        "type": "CustomerReferral[]",
+        "declaration": "referralsAsReferred CustomerReferral[] @relation(\"ReferralReferredClient\")"
+      },
+      {
+        "name": "referralRewards",
+        "type": "ReferralReward[]",
+        "declaration": "referralRewards ReferralReward[] @relation(\"ReferralRewardRecipient\")"
+      },
+      {
+        "name": "customerSubscriptions",
+        "type": "CustomerSubscription[]",
+        "declaration": "customerSubscriptions CustomerSubscription[]"
+      },
+      {
+        "name": "customerProfiles",
+        "type": "CustomerProfile[]",
+        "declaration": "customerProfiles CustomerProfile[]"
+      },
+      {
+        "name": "consentFacts",
+        "type": "ClientConsentFact[]",
+        "declaration": "consentFacts ClientConsentFact[]"
+      },
+      {
+        "name": "channelLinks",
+        "type": "ClientChannelLink[]",
+        "declaration": "channelLinks ClientChannelLink[]"
+      },
+      {
+        "name": "linkChallenges",
+        "type": "ClientLinkChallenge[]",
+        "declaration": "linkChallenges ClientLinkChallenge[]"
+      },
+      {
+        "name": "wantedSlotInterests",
+        "type": "ClientWantedSlotInterest[]",
+        "declaration": "wantedSlotInterests ClientWantedSlotInterest[]"
+      },
+      {
+        "name": "webPushEndpoints",
+        "type": "ClientWebPushEndpoint[]",
+        "declaration": "webPushEndpoints ClientWebPushEndpoint[]"
+      },
+      {
+        "name": "nativeFeedbackRequests",
+        "type": "NativeFeedbackRequest[]",
+        "declaration": "nativeFeedbackRequests NativeFeedbackRequest[] @relation(\"R08_request_client\")"
+      },
+      {
+        "name": "nativeFeedbackRevisions",
+        "type": "NativeFeedbackRevision[]",
+        "declaration": "nativeFeedbackRevisions NativeFeedbackRevision[] @relation(\"R08_revision_client\")"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@index([tenantId, phoneHash])",
+      "@@index([tenantId, userId])"
+    ],
+    "sha256": "3fba2802c9e2a4c40c21259efab4bcefed290a21264020014d292a1b0de51f80"
+  },
+  {
+    "model": "CrmClientLink",
+    "line": 2203,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id         String    @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId   String"
+      },
+      {
+        "name": "clientId",
+        "type": "String",
+        "declaration": "clientId   String"
+      },
+      {
+        "name": "provider",
+        "type": "String",
+        "declaration": "provider   String"
+      },
+      {
+        "name": "externalId",
+        "type": "String",
+        "declaration": "externalId String"
+      },
+      {
+        "name": "syncedAt",
+        "type": "DateTime",
+        "declaration": "syncedAt   DateTime  @default(now())"
+      },
+      {
+        "name": "unlinkedAt",
+        "type": "DateTime?",
+        "declaration": "unlinkedAt DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt  DateTime  @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt  DateTime  @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "client",
+        "type": "Client",
+        "declaration": "client Client @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Cascade)"
+      }
+    ],
+    "constraints": [
+      "@@unique([tenantId, provider, externalId])",
+      "@@index([tenantId, clientId])",
+      "@@index([tenantId, provider, syncedAt])"
+    ],
+    "sha256": "6b923de7de453b165f1db996eb4a3e75b9a799731b769a99f1b8a5ee92047877"
+  },
+  {
+    "model": "ClientChannelLink",
+    "line": 2230,
+    "fields": [
+      {
+        "name": "consentInvalidations",
+        "type": "ClientConsentInvalidation[]",
+        "declaration": "consentInvalidations ClientConsentInvalidation[]"
+      },
+      {
+        "name": "bookingConfirmations",
+        "type": "ClientBookingConfirmation[]",
+        "declaration": "bookingConfirmations ClientBookingConfirmation[]"
+      },
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                       String   @id @default(uuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                 String"
+      },
+      {
+        "name": "clientId",
+        "type": "String",
+        "declaration": "clientId                 String"
+      },
+      {
+        "name": "provider",
+        "type": "String",
+        "declaration": "provider                 String"
+      },
+      {
+        "name": "providerSubjectHash",
+        "type": "String",
+        "declaration": "providerSubjectHash      String"
+      },
+      {
+        "name": "deliveryAddressEncrypted",
+        "type": "String?",
+        "declaration": "deliveryAddressEncrypted String?"
+      },
+      {
+        "name": "subjectHashVersion",
+        "type": "Int",
+        "declaration": "subjectHashVersion       Int      @default(1)"
+      },
+      {
+        "name": "verificationMethod",
+        "type": "String",
+        "declaration": "verificationMethod       String"
+      },
+      {
+        "name": "verificationVersion",
+        "type": "Int",
+        "declaration": "verificationVersion      Int      @default(1)"
+      },
+      {
+        "name": "verificationIdentityHash",
+        "type": "String",
+        "declaration": "verificationIdentityHash String"
+      },
+      {
+        "name": "verificationEvidenceJson",
+        "type": "Json",
+        "declaration": "verificationEvidenceJson Json"
+      },
+      {
+        "name": "verificationEvidenceHash",
+        "type": "String",
+        "declaration": "verificationEvidenceHash String"
+      },
+      {
+        "name": "verifiedAt",
+        "type": "DateTime",
+        "declaration": "verifiedAt               DateTime @default(dbgenerated(\"timezone('UTC'::text, CURRENT_TIMESTAMP)\"))"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                DateTime @default(dbgenerated(\"timezone('UTC'::text, CURRENT_TIMESTAMP)\"))"
+      },
+      {
+        "name": "supersedesLinkId",
+        "type": "String?",
+        "declaration": "supersedesLinkId          String?  @unique"
+      },
+      {
+        "name": "revokedAt",
+        "type": "DateTime?",
+        "declaration": "revokedAt                DateTime?"
+      },
+      {
+        "name": "revocationIdentityHash",
+        "type": "String?",
+        "declaration": "revocationIdentityHash   String?"
+      },
+      {
+        "name": "revocationEvidenceJson",
+        "type": "Json?",
+        "declaration": "revocationEvidenceJson   Json?"
+      },
+      {
+        "name": "revocationEvidenceHash",
+        "type": "String?",
+        "declaration": "revocationEvidenceHash   String?"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)"
+      },
+      {
+        "name": "client",
+        "type": "Client",
+        "declaration": "client     Client             @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)"
+      },
+      {
+        "name": "predecessor",
+        "type": "ClientChannelLink?",
+        "declaration": "predecessor ClientChannelLink? @relation(\"ClientChannelLinkHistory\", fields: [supersedesLinkId, tenantId, provider, providerSubjectHash], references: [id, tenantId, provider, providerSubjectHash], onDelete: Restrict, onUpdate: Restrict, map: \"ClientChannelLink_predecessor_fkey\")"
+      },
+      {
+        "name": "successors",
+        "type": "ClientChannelLink[]",
+        "declaration": "successors ClientChannelLink[] @relation(\"ClientChannelLinkHistory\")"
+      },
+      {
+        "name": "consumedChallenges",
+        "type": "ClientLinkChallenge[]",
+        "declaration": "consumedChallenges ClientLinkChallenge[] @relation(\"ClientLinkChallengeOutcome\")"
+      },
+      {
+        "name": "wantedSlotInterests",
+        "type": "ClientWantedSlotInterest[]",
+        "declaration": "wantedSlotInterests ClientWantedSlotInterest[]"
+      },
+      {
+        "name": "webPushEndpoints",
+        "type": "ClientWebPushEndpoint[]",
+        "declaration": "webPushEndpoints ClientWebPushEndpoint[]"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([id, tenantId, clientId], map: \"ClientChannelLink_client_reference_key\")",
+      "@@unique([id, tenantId, provider, providerSubjectHash], map: \"ClientChannelLink_identity_reference_key\")",
+      "@@unique([tenantId, verificationIdentityHash], map: \"ClientChannelLink_verification_identity_key\")",
+      "@@unique([tenantId, revocationIdentityHash], map: \"ClientChannelLink_revocation_identity_key\")",
+      "@@index([tenantId, clientId])"
+    ],
+    "sha256": "119d3aa9e7bfed7bca8d87fef12af5a1474b37d2860378bffe6f84a1742ba242"
+  },
+  {
+    "model": "Appointment",
+    "line": 2657,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                String   @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId          String"
+      },
+      {
+        "name": "clientId",
+        "type": "String?",
+        "declaration": "clientId          String?"
+      },
+      {
+        "name": "mayaClientId",
+        "type": "String?",
+        "declaration": "mayaClientId      String?"
+      },
+      {
+        "name": "clientVisitMood",
+        "type": "String?",
+        "declaration": "clientVisitMood   String?"
+      },
+      {
+        "name": "branchId",
+        "type": "String?",
+        "declaration": "branchId          String?"
+      },
+      {
+        "name": "crmExternalId",
+        "type": "String?",
+        "declaration": "crmExternalId     String?"
+      },
+      {
+        "name": "crmProvider",
+        "type": "String?",
+        "declaration": "crmProvider       String?"
+      },
+      {
+        "name": "source",
+        "type": "String",
+        "declaration": "source            String   @default(\"external\")"
+      },
+      {
+        "name": "staffExternalId",
+        "type": "String",
+        "declaration": "staffExternalId   String"
+      },
+      {
+        "name": "serviceIds",
+        "type": "Json",
+        "declaration": "serviceIds        Json"
+      },
+      {
+        "name": "startAt",
+        "type": "DateTime",
+        "declaration": "startAt           DateTime"
+      },
+      {
+        "name": "endAt",
+        "type": "DateTime",
+        "declaration": "endAt             DateTime"
+      },
+      {
+        "name": "blockedStartAt",
+        "type": "DateTime",
+        "declaration": "blockedStartAt    DateTime"
+      },
+      {
+        "name": "blockedEndAt",
+        "type": "DateTime",
+        "declaration": "blockedEndAt      DateTime"
+      },
+      {
+        "name": "status",
+        "type": "String",
+        "declaration": "status            String   @default(\"confirmed\")"
+      },
+      {
+        "name": "attendance",
+        "type": "String?",
+        "declaration": "attendance        String?"
+      },
+      {
+        "name": "notes",
+        "type": "String?",
+        "declaration": "notes             String?"
+      },
+      {
+        "name": "totalPriceKopecks",
+        "type": "Int?",
+        "declaration": "totalPriceKopecks Int?"
+      },
+      {
+        "name": "currency",
+        "type": "String",
+        "declaration": "currency          String   @default(\"RUB\")"
+      },
+      {
+        "name": "providerPayload",
+        "type": "Json?",
+        "declaration": "providerPayload   Json?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt         DateTime @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt         DateTime @updatedAt"
+      },
+      {
+        "name": "staffId",
+        "type": "String?",
+        "declaration": "staffId           String?"
+      },
+      {
+        "name": "staff",
+        "type": "Staff?",
+        "declaration": "staff             Staff?   @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "client",
+        "type": "User?",
+        "declaration": "client            User?    @relation(\"ClientAppointments\", fields: [clientId], references: [id], onDelete: SetNull)"
+      },
+      {
+        "name": "mayaClient",
+        "type": "Client?",
+        "declaration": "mayaClient        Client?  @relation(fields: [mayaClientId, tenantId], references: [id, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "branch",
+        "type": "Branch?",
+        "declaration": "branch            Branch?  @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "referralRewardFulfillments",
+        "type": "ReferralRewardFulfillment[]",
+        "declaration": "referralRewardFulfillments ReferralRewardFulfillment[]"
+      },
+      {
+        "name": "nativeFeedbackRequests",
+        "type": "NativeFeedbackRequest[]",
+        "declaration": "nativeFeedbackRequests NativeFeedbackRequest[] @relation(\"R08_request_appointment\")"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([id, tenantId, clientId])",
+      "@@unique([tenantId, crmProvider, crmExternalId])",
+      "@@index([tenantId, mayaClientId])",
+      "@@index([tenantId, staffId, startAt])",
+      "@@index([tenantId])",
+      "@@index([clientId])",
+      "@@index([branchId])",
+      "@@index([tenantId, staffExternalId, startAt])",
+      "@@index([tenantId, startAt])",
+      "@@unique([id, tenantId, mayaClientId], map: \"Appointment_id_tenantId_mayaClientId_key\")"
+    ],
+    "sha256": "a4551c2e315e6c87a72ee6adde9aec539878d1638a2f9e089ce267623dbbca7e"
+  },
+  {
+    "model": "Staff",
+    "line": 2342,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                   String   @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId             String"
+      },
+      {
+        "name": "userId",
+        "type": "String?",
+        "declaration": "userId               String?"
+      },
+      {
+        "name": "branchId",
+        "type": "String?",
+        "declaration": "branchId             String?"
+      },
+      {
+        "name": "encryptedDisplayName",
+        "type": "String?",
+        "declaration": "encryptedDisplayName String?"
+      },
+      {
+        "name": "title",
+        "type": "String?",
+        "declaration": "title                String?"
+      },
+      {
+        "name": "specialization",
+        "type": "String?",
+        "declaration": "specialization       String?"
+      },
+      {
+        "name": "avatarUrl",
+        "type": "String?",
+        "declaration": "avatarUrl            String?"
+      },
+      {
+        "name": "active",
+        "type": "Boolean",
+        "declaration": "active               Boolean  @default(true)"
+      },
+      {
+        "name": "slotIntervalMinutes",
+        "type": "Int",
+        "declaration": "slotIntervalMinutes  Int      @default(30)"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt            DateTime @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt            DateTime @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant        Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "user",
+        "type": "User?",
+        "declaration": "user          User?               @relation(fields: [userId], references: [id], onDelete: SetNull)"
+      },
+      {
+        "name": "branch",
+        "type": "Branch?",
+        "declaration": "branch        Branch?             @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "providerLinks",
+        "type": "StaffProviderLink[]",
+        "declaration": "providerLinks StaffProviderLink[]"
+      },
+      {
+        "name": "accessGrant",
+        "type": "CrmStaffAccess?",
+        "declaration": "accessGrant   CrmStaffAccess?"
+      },
+      {
+        "name": "appointments",
+        "type": "Appointment[]",
+        "declaration": "appointments  Appointment[]"
+      },
+      {
+        "name": "wantedSlotInterests",
+        "type": "ClientWantedSlotInterest[]",
+        "declaration": "wantedSlotInterests ClientWantedSlotInterest[]"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([tenantId, userId])",
+      "@@index([tenantId, active])",
+      "@@index([branchId])"
+    ],
+    "sha256": "d881b29fb83e87ddfb69dbd15f760f6f40b79b7a1905b752b81f180d047ec5c2"
+  },
+  {
+    "model": "Branch",
+    "line": 675,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                String             @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId          String"
+      },
+      {
+        "name": "name",
+        "type": "String",
+        "declaration": "name              String"
+      },
+      {
+        "name": "address",
+        "type": "String?",
+        "declaration": "address           String?"
+      },
+      {
+        "name": "phone",
+        "type": "String?",
+        "declaration": "phone             String?"
+      },
+      {
+        "name": "timezone",
+        "type": "String?",
+        "declaration": "timezone          String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt         DateTime           @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt         DateTime           @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "users",
+        "type": "User[]",
+        "declaration": "users             User[]"
+      },
+      {
+        "name": "appointments",
+        "type": "Appointment[]",
+        "declaration": "appointments      Appointment[]"
+      },
+      {
+        "name": "internalProviders",
+        "type": "InternalProvider[]",
+        "declaration": "internalProviders InternalProvider[]"
+      },
+      {
+        "name": "staff",
+        "type": "Staff[]",
+        "declaration": "staff             Staff[]"
+      },
+      {
+        "name": "expenses",
+        "type": "Expense[]",
+        "declaration": "expenses          Expense[]"
+      },
+      {
+        "name": "memberships",
+        "type": "Membership[]",
+        "declaration": "memberships       Membership[]"
+      },
+      {
+        "name": "wantedSlotInterests",
+        "type": "ClientWantedSlotInterest[]",
+        "declaration": "wantedSlotInterests ClientWantedSlotInterest[]"
+      },
+      {
+        "name": "cashDeclarations",
+        "type": "CashDeclaration[]",
+        "declaration": "cashDeclarations CashDeclaration[] @relation(\"R14_cash_branch\")"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@index([tenantId])"
+    ],
+    "sha256": "7acf2ed9b43b709bffdc8ee699e88ba552ce2dba1943b16d639e8195992f0c28"
+  },
+  {
+    "model": "Membership",
+    "line": 779,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                             String                       @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                       String"
+      },
+      {
+        "name": "userId",
+        "type": "String",
+        "declaration": "userId                         String"
+      },
+      {
+        "name": "branchId",
+        "type": "String?",
+        "declaration": "branchId                       String?"
+      },
+      {
+        "name": "role",
+        "type": "UserRole",
+        "declaration": "role                           UserRole"
+      },
+      {
+        "name": "status",
+        "type": "MembershipStatus",
+        "declaration": "status                         MembershipStatus             @default(active)"
+      },
+      {
+        "name": "invitedAt",
+        "type": "DateTime?",
+        "declaration": "invitedAt                      DateTime?"
+      },
+      {
+        "name": "joinedAt",
+        "type": "DateTime?",
+        "declaration": "joinedAt                       DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                      DateTime                     @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt                      DateTime                     @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                         Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "user",
+        "type": "User",
+        "declaration": "user                           User                         @relation(fields: [userId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "branch",
+        "type": "Branch?",
+        "declaration": "branch                         Branch?                      @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "authIdentities",
+        "type": "AuthIdentity[]",
+        "declaration": "authIdentities                 AuthIdentity[]               @relation(\"AuthIdentityMembership\")"
+      },
+      {
+        "name": "authSessions",
+        "type": "AuthSession[]",
+        "declaration": "authSessions                   AuthSession[]                @relation(\"AuthSessionMembership\")"
+      },
+      {
+        "name": "internalProviders",
+        "type": "InternalProvider[]",
+        "declaration": "internalProviders              InternalProvider[]           @relation(\"InternalProviderMembership\")"
+      },
+      {
+        "name": "customerProfile",
+        "type": "CustomerProfile?",
+        "declaration": "customerProfile                CustomerProfile?             @relation(\"CustomerProfileMembership\")"
+      },
+      {
+        "name": "loyaltyAccount",
+        "type": "LoyaltyAccount?",
+        "declaration": "loyaltyAccount                 LoyaltyAccount?              @relation(\"LoyaltyAccountMembership\")"
+      },
+      {
+        "name": "dashboardPreferences",
+        "type": "DashboardPreference[]",
+        "declaration": "dashboardPreferences           DashboardPreference[]"
+      },
+      {
+        "name": "aiBrainSessions",
+        "type": "AiBrainSession[]",
+        "declaration": "aiBrainSessions                AiBrainSession[]"
+      },
+      {
+        "name": "aiMemoryFacts",
+        "type": "AiMemoryFact[]",
+        "declaration": "aiMemoryFacts                  AiMemoryFact[]"
+      },
+      {
+        "name": "actionExecutionsAsActor",
+        "type": "ActionExecution[]",
+        "declaration": "actionExecutionsAsActor        ActionExecution[]            @relation(\"ActionActor\")"
+      },
+      {
+        "name": "actionExecutionsAsApprover",
+        "type": "ActionExecution[]",
+        "declaration": "actionExecutionsAsApprover     ActionExecution[]            @relation(\"ActionApprover\")"
+      },
+      {
+        "name": "communicationCampaignsCreated",
+        "type": "MarketingCampaign[]",
+        "declaration": "communicationCampaignsCreated  MarketingCampaign[]          @relation(\"CommunicationCreator\")"
+      },
+      {
+        "name": "communicationCampaignsApproved",
+        "type": "MarketingCampaign[]",
+        "declaration": "communicationCampaignsApproved MarketingCampaign[]          @relation(\"CommunicationApprover\")"
+      },
+      {
+        "name": "communicationRecipients",
+        "type": "MarketingCampaignRecipient[]",
+        "declaration": "communicationRecipients        MarketingCampaignRecipient[] @relation(\"CommunicationRecipientMembership\")"
+      },
+      {
+        "name": "operationalWorkItemsAssigned",
+        "type": "OperationalWorkItem[]",
+        "declaration": "operationalWorkItemsAssigned   OperationalWorkItem[] @relation(\"OperationalWorkItemAssignee\")"
+      },
+      {
+        "name": "operationalWorkItemsCreated",
+        "type": "OperationalWorkItem[]",
+        "declaration": "operationalWorkItemsCreated    OperationalWorkItem[] @relation(\"OperationalWorkItemCreator\")"
+      },
+      {
+        "name": "clientConsentFactsAsActor",
+        "type": "ClientConsentFact[]",
+        "declaration": "clientConsentFactsAsActor      ClientConsentFact[] @relation(\"ClientConsentActor\")"
+      },
+      {
+        "name": "nativeFeedbackRequests",
+        "type": "NativeFeedbackRequest[]",
+        "declaration": "nativeFeedbackRequests NativeFeedbackRequest[] @relation(\"R08_request_member\")"
+      },
+      {
+        "name": "businessConfigurationRevisions",
+        "type": "TenantBusinessConfigurationRevision[]",
+        "declaration": "businessConfigurationRevisions TenantBusinessConfigurationRevision[] @relation(\"R11_config_member\")"
+      },
+      {
+        "name": "teamAttachments",
+        "type": "TeamAttachment[]",
+        "declaration": "teamAttachments TeamAttachment[] @relation(\"R12_attachment_member\")"
+      },
+      {
+        "name": "sentTeamMessages",
+        "type": "TeamMessage[]",
+        "declaration": "sentTeamMessages TeamMessage[] @relation(\"R12_message_sender\")"
+      },
+      {
+        "name": "withdrawnTeamMessages",
+        "type": "TeamMessage[]",
+        "declaration": "withdrawnTeamMessages TeamMessage[] @relation(\"R12_message_withdrawer\")"
+      },
+      {
+        "name": "expenseIntakeBindings",
+        "type": "ExpenseIntakeBinding[]",
+        "declaration": "expenseIntakeBindings ExpenseIntakeBinding[] @relation(\"R13_intake_member\")"
+      },
+      {
+        "name": "cashDeclarations",
+        "type": "CashDeclaration[]",
+        "declaration": "cashDeclarations CashDeclaration[] @relation(\"R14_cash_member\")"
+      }
+    ],
+    "constraints": [
+      "@@unique([userId, tenantId])",
+      "@@index([tenantId, status])",
+      "@@index([userId, status])",
+      "@@index([tenantId, branchId])",
+      "@@unique([id, tenantId], map: \"Membership_id_tenantId_key\")"
+    ],
+    "sha256": "04dce2c24bf533eeb168deb8101c8285baae88ed84a8ac0fa09d6f51fc48356d"
+  },
+  {
+    "model": "Opportunity",
+    "line": 303,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                          String                     @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                    String"
+      },
+      {
+        "name": "type",
+        "type": "String",
+        "declaration": "type                        String"
+      },
+      {
+        "name": "identityVersion",
+        "type": "Int",
+        "declaration": "identityVersion             Int                        @default(1)"
+      },
+      {
+        "name": "semanticKey",
+        "type": "String",
+        "declaration": "semanticKey                 String"
+      },
+      {
+        "name": "identityFingerprint",
+        "type": "String",
+        "declaration": "identityFingerprint         String"
+      },
+      {
+        "name": "revision",
+        "type": "Int",
+        "declaration": "revision                    Int"
+      },
+      {
+        "name": "affectedEntityKind",
+        "type": "String?",
+        "declaration": "affectedEntityKind          String?"
+      },
+      {
+        "name": "affectedEntityRef",
+        "type": "String?",
+        "declaration": "affectedEntityRef           String?"
+      },
+      {
+        "name": "evidenceFingerprint",
+        "type": "String",
+        "declaration": "evidenceFingerprint         String"
+      },
+      {
+        "name": "evidenceRefsJson",
+        "type": "Json",
+        "declaration": "evidenceRefsJson            Json"
+      },
+      {
+        "name": "evidenceObservedAt",
+        "type": "DateTime",
+        "declaration": "evidenceObservedAt          DateTime"
+      },
+      {
+        "name": "limitationsJson",
+        "type": "Json",
+        "declaration": "limitationsJson             Json"
+      },
+      {
+        "name": "policyKey",
+        "type": "String",
+        "declaration": "policyKey                   String"
+      },
+      {
+        "name": "policyVersion",
+        "type": "Int",
+        "declaration": "policyVersion               Int"
+      },
+      {
+        "name": "recommendedAgentDomain",
+        "type": "OpportunityAgentDomain",
+        "declaration": "recommendedAgentDomain      OpportunityAgentDomain"
+      },
+      {
+        "name": "outcome",
+        "type": "OpportunityOutcome",
+        "declaration": "outcome                     OpportunityOutcome"
+      },
+      {
+        "name": "status",
+        "type": "OpportunityLifecycleStatus",
+        "declaration": "status                      OpportunityLifecycleStatus @default(active)"
+      },
+      {
+        "name": "firstDetectedAt",
+        "type": "DateTime",
+        "declaration": "firstDetectedAt             DateTime"
+      },
+      {
+        "name": "lastValidatedAt",
+        "type": "DateTime",
+        "declaration": "lastValidatedAt             DateTime"
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "declaration": "expiresAt                   DateTime"
+      },
+      {
+        "name": "terminalAt",
+        "type": "DateTime?",
+        "declaration": "terminalAt                  DateTime?"
+      },
+      {
+        "name": "terminalReasonCode",
+        "type": "String?",
+        "declaration": "terminalReasonCode          String?"
+      },
+      {
+        "name": "terminalEvidenceFingerprint",
+        "type": "String?",
+        "declaration": "terminalEvidenceFingerprint String?"
+      },
+      {
+        "name": "terminalEvidenceRefsJson",
+        "type": "Json?",
+        "declaration": "terminalEvidenceRefsJson    Json?"
+      },
+      {
+        "name": "supersedesOpportunityId",
+        "type": "String?",
+        "declaration": "supersedesOpportunityId     String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                   DateTime                   @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt                   DateTime                   @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                      Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "supersedes",
+        "type": "Opportunity?",
+        "declaration": "supersedes                  Opportunity?               @relation(\"OpportunitySupersession\", fields: [supersedesOpportunityId, tenantId, semanticKey], references: [id, tenantId, semanticKey], onDelete: Restrict)"
+      },
+      {
+        "name": "supersededBy",
+        "type": "Opportunity[]",
+        "declaration": "supersededBy                Opportunity[]              @relation(\"OpportunitySupersession\")"
+      },
+      {
+        "name": "agentTasks",
+        "type": "AgentTask[]",
+        "declaration": "agentTasks                  AgentTask[]"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([id, tenantId, semanticKey])",
+      "@@unique([tenantId, identityFingerprint])",
+      "@@unique([tenantId, semanticKey, revision])",
+      "@@unique([tenantId, supersedesOpportunityId])",
+      "@@index([tenantId, status, expiresAt])",
+      "@@index([tenantId, type, status])",
+      "@@index([tenantId, semanticKey, revision])"
+    ],
+    "sha256": "00298883bbb78b9d4aad668f0bb8072215cce26e09e4c17ca0cf48645262649d"
+  },
+  {
+    "model": "AgentTask",
+    "line": 349,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                      String                   @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                String"
+      },
+      {
+        "name": "opportunityId",
+        "type": "String",
+        "declaration": "opportunityId           String"
+      },
+      {
+        "name": "semanticKey",
+        "type": "String",
+        "declaration": "semanticKey             String"
+      },
+      {
+        "name": "taskFingerprint",
+        "type": "String",
+        "declaration": "taskFingerprint         String"
+      },
+      {
+        "name": "agentDomain",
+        "type": "OpportunityAgentDomain",
+        "declaration": "agentDomain             OpportunityAgentDomain"
+      },
+      {
+        "name": "objectiveKey",
+        "type": "String",
+        "declaration": "objectiveKey            String"
+      },
+      {
+        "name": "allowedReadCapabilities",
+        "type": "Json",
+        "declaration": "allowedReadCapabilities Json"
+      },
+      {
+        "name": "allowedActionClasses",
+        "type": "Json",
+        "declaration": "allowedActionClasses    Json"
+      },
+      {
+        "name": "autonomyLevel",
+        "type": "String",
+        "declaration": "autonomyLevel           String                   @default(\"L2_5_SHADOW\")"
+      },
+      {
+        "name": "status",
+        "type": "AgentTaskLifecycleStatus",
+        "declaration": "status                  AgentTaskLifecycleStatus @default(current)"
+      },
+      {
+        "name": "requestedAt",
+        "type": "DateTime",
+        "declaration": "requestedAt             DateTime"
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "declaration": "expiresAt               DateTime"
+      },
+      {
+        "name": "invalidatedAt",
+        "type": "DateTime?",
+        "declaration": "invalidatedAt           DateTime?"
+      },
+      {
+        "name": "invalidationReasonCode",
+        "type": "String?",
+        "declaration": "invalidationReasonCode  String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt               DateTime                 @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt               DateTime                 @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                  Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "opportunity",
+        "type": "Opportunity",
+        "declaration": "opportunity             Opportunity              @relation(fields: [opportunityId, tenantId, semanticKey], references: [id, tenantId, semanticKey], onDelete: Restrict)"
+      },
+      {
+        "name": "actionExecutions",
+        "type": "ActionExecution[]",
+        "declaration": "actionExecutions        ActionExecution[]"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([tenantId, taskFingerprint])",
+      "@@unique([tenantId, opportunityId, agentDomain])",
+      "@@index([tenantId, status, expiresAt])",
+      "@@index([tenantId, semanticKey, agentDomain, status])"
+    ],
+    "sha256": "4f1216ebd842834e8cf0aeaba61893200a57998da70c8a070ac5ac92a53ae727"
+  },
+  {
+    "model": "ActionExecution",
+    "line": 381,
+    "fields": [
+      {
+        "name": "consentInvalidations",
+        "type": "ClientConsentInvalidation[]",
+        "declaration": "consentInvalidations ClientConsentInvalidation[]"
+      },
+      {
+        "name": "ownerReportRunId",
+        "type": "String?",
+        "declaration": "ownerReportRunId String?"
+      },
+      {
+        "name": "ownerReportSlotKey",
+        "type": "String?",
+        "declaration": "ownerReportSlotKey String?"
+      },
+      {
+        "name": "ownerReportRun",
+        "type": "OwnerReportRun?",
+        "declaration": "ownerReportRun OwnerReportRun? @relation(fields: [ownerReportRunId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"B36_execution_run_fkey\")"
+      },
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                        String  @id @default(uuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                  String"
+      },
+      {
+        "name": "identityVersion",
+        "type": "Int",
+        "declaration": "identityVersion           Int"
+      },
+      {
+        "name": "identityFingerprint",
+        "type": "String",
+        "declaration": "identityFingerprint       String"
+      },
+      {
+        "name": "idempotencyScope",
+        "type": "String?",
+        "declaration": "idempotencyScope          String?"
+      },
+      {
+        "name": "requestIdempotencyKeyHash",
+        "type": "String?",
+        "declaration": "requestIdempotencyKeyHash String?"
+      },
+      {
+        "name": "bookingIntentContract",
+        "type": "String?",
+        "declaration": "bookingIntentContract    String?"
+      },
+      {
+        "name": "bookingIntentHash",
+        "type": "String?",
+        "declaration": "bookingIntentHash        String?"
+      },
+      {
+        "name": "bookingIntentEncrypted",
+        "type": "String?",
+        "declaration": "bookingIntentEncrypted   String?"
+      },
+      {
+        "name": "sourceType",
+        "type": "String",
+        "declaration": "sourceType  String"
+      },
+      {
+        "name": "sourceRef",
+        "type": "String?",
+        "declaration": "sourceRef   String?"
+      },
+      {
+        "name": "agentTaskId",
+        "type": "String?",
+        "declaration": "agentTaskId String?"
+      },
+      {
+        "name": "actorUserId",
+        "type": "String?",
+        "declaration": "actorUserId String?"
+      },
+      {
+        "name": "actionClass",
+        "type": "String",
+        "declaration": "actionClass              String"
+      },
+      {
+        "name": "capability",
+        "type": "String",
+        "declaration": "capability               String"
+      },
+      {
+        "name": "capabilityVersion",
+        "type": "Int",
+        "declaration": "capabilityVersion        Int"
+      },
+      {
+        "name": "targetKind",
+        "type": "String",
+        "declaration": "targetKind               String"
+      },
+      {
+        "name": "targetRef",
+        "type": "String",
+        "declaration": "targetRef                String"
+      },
+      {
+        "name": "normalizedInputContract",
+        "type": "String",
+        "declaration": "normalizedInputContract  String"
+      },
+      {
+        "name": "normalizedInputHash",
+        "type": "String",
+        "declaration": "normalizedInputHash      String"
+      },
+      {
+        "name": "normalizedInputEncrypted",
+        "type": "String?",
+        "declaration": "normalizedInputEncrypted String?"
+      },
+      {
+        "name": "evidenceRefsJson",
+        "type": "Json",
+        "declaration": "evidenceRefsJson         Json"
+      },
+      {
+        "name": "intentExpiresAt",
+        "type": "DateTime?",
+        "declaration": "intentExpiresAt          DateTime?"
+      },
+      {
+        "name": "dryRun",
+        "type": "Boolean",
+        "declaration": "dryRun                   Boolean   @default(false)"
+      },
+      {
+        "name": "riskProfileVersion",
+        "type": "Int",
+        "declaration": "riskProfileVersion    Int"
+      },
+      {
+        "name": "riskFacetsJson",
+        "type": "Json",
+        "declaration": "riskFacetsJson        Json"
+      },
+      {
+        "name": "policyKey",
+        "type": "String",
+        "declaration": "policyKey             String"
+      },
+      {
+        "name": "policyVersion",
+        "type": "Int",
+        "declaration": "policyVersion         Int"
+      },
+      {
+        "name": "policyDecision",
+        "type": "ActionPolicyDecision",
+        "declaration": "policyDecision        ActionPolicyDecision"
+      },
+      {
+        "name": "autonomyLevel",
+        "type": "String",
+        "declaration": "autonomyLevel         String"
+      },
+      {
+        "name": "policyDecidedBy",
+        "type": "String",
+        "declaration": "policyDecidedBy       String"
+      },
+      {
+        "name": "policyContextContract",
+        "type": "String?",
+        "declaration": "policyContextContract String?"
+      },
+      {
+        "name": "policyContextHash",
+        "type": "String?",
+        "declaration": "policyContextHash     String?"
+      },
+      {
+        "name": "policyEvidenceJson",
+        "type": "Json?",
+        "declaration": "policyEvidenceJson    Json?"
+      },
+      {
+        "name": "policyEvaluatedAt",
+        "type": "DateTime?",
+        "declaration": "policyEvaluatedAt     DateTime?"
+      },
+      {
+        "name": "policyValidUntil",
+        "type": "DateTime?",
+        "declaration": "policyValidUntil      DateTime?"
+      },
+      {
+        "name": "approvalRequirement",
+        "type": "String",
+        "declaration": "approvalRequirement     String"
+      },
+      {
+        "name": "approvalDecision",
+        "type": "ActionApprovalDecision",
+        "declaration": "approvalDecision        ActionApprovalDecision"
+      },
+      {
+        "name": "approvalInputHash",
+        "type": "String?",
+        "declaration": "approvalInputHash       String?"
+      },
+      {
+        "name": "approvalBindingHash",
+        "type": "String?",
+        "declaration": "approvalBindingHash     String?"
+      },
+      {
+        "name": "approvalRequestedAt",
+        "type": "DateTime?",
+        "declaration": "approvalRequestedAt     DateTime?"
+      },
+      {
+        "name": "approvalExpiresAt",
+        "type": "DateTime?",
+        "declaration": "approvalExpiresAt       DateTime?"
+      },
+      {
+        "name": "approvalDecidedAt",
+        "type": "DateTime?",
+        "declaration": "approvalDecidedAt       DateTime?"
+      },
+      {
+        "name": "approvalDecidedByUserId",
+        "type": "String?",
+        "declaration": "approvalDecidedByUserId String?"
+      },
+      {
+        "name": "state",
+        "type": "ActionExecutionState",
+        "declaration": "state                       ActionExecutionState"
+      },
+      {
+        "name": "notExecutedReasonCode",
+        "type": "String?",
+        "declaration": "notExecutedReasonCode       String?"
+      },
+      {
+        "name": "retryPolicyKey",
+        "type": "String",
+        "declaration": "retryPolicyKey              String"
+      },
+      {
+        "name": "retryPolicyVersion",
+        "type": "Int",
+        "declaration": "retryPolicyVersion          Int"
+      },
+      {
+        "name": "maxExecutionAttempts",
+        "type": "Int",
+        "declaration": "maxExecutionAttempts        Int"
+      },
+      {
+        "name": "executionAttemptCount",
+        "type": "Int",
+        "declaration": "executionAttemptCount       Int                       @default(0)"
+      },
+      {
+        "name": "nextExecutionAttemptAt",
+        "type": "DateTime?",
+        "declaration": "nextExecutionAttemptAt      DateTime?"
+      },
+      {
+        "name": "reconciliationPolicyKey",
+        "type": "String",
+        "declaration": "reconciliationPolicyKey     String"
+      },
+      {
+        "name": "reconciliationPolicyVersion",
+        "type": "Int",
+        "declaration": "reconciliationPolicyVersion Int"
+      },
+      {
+        "name": "reconciliationState",
+        "type": "ActionReconciliationState",
+        "declaration": "reconciliationState         ActionReconciliationState"
+      },
+      {
+        "name": "leaseOwner",
+        "type": "String?",
+        "declaration": "leaseOwner     String?"
+      },
+      {
+        "name": "leaseTokenHash",
+        "type": "String?",
+        "declaration": "leaseTokenHash String?"
+      },
+      {
+        "name": "leaseExpiresAt",
+        "type": "DateTime?",
+        "declaration": "leaseExpiresAt DateTime?"
+      },
+      {
+        "name": "revision",
+        "type": "Int",
+        "declaration": "revision       Int       @default(0)"
+      },
+      {
+        "name": "transportIdentityVersion",
+        "type": "Int",
+        "declaration": "transportIdentityVersion  Int"
+      },
+      {
+        "name": "transportIdempotencyKey",
+        "type": "String",
+        "declaration": "transportIdempotencyKey   String"
+      },
+      {
+        "name": "finalOutcomeCode",
+        "type": "String?",
+        "declaration": "finalOutcomeCode          String?"
+      },
+      {
+        "name": "safeResultSummaryJson",
+        "type": "Json?",
+        "declaration": "safeResultSummaryJson     Json?"
+      },
+      {
+        "name": "userExplanationCode",
+        "type": "String?",
+        "declaration": "userExplanationCode       String?"
+      },
+      {
+        "name": "userExplanationParamsJson",
+        "type": "Json?",
+        "declaration": "userExplanationParamsJson Json?"
+      },
+      {
+        "name": "firstAttemptedAt",
+        "type": "DateTime?",
+        "declaration": "firstAttemptedAt          DateTime?"
+      },
+      {
+        "name": "finalizedAt",
+        "type": "DateTime?",
+        "declaration": "finalizedAt               DateTime?"
+      },
+      {
+        "name": "payloadRetentionUntil",
+        "type": "DateTime?",
+        "declaration": "payloadRetentionUntil     DateTime?"
+      },
+      {
+        "name": "auditRetentionUntil",
+        "type": "DateTime?",
+        "declaration": "auditRetentionUntil       DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                 DateTime  @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt                 DateTime  @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "agentTask",
+        "type": "AgentTask?",
+        "declaration": "agentTask             AgentTask?         @relation(fields: [agentTaskId, tenantId], references: [id, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "actorMembership",
+        "type": "Membership?",
+        "declaration": "actorMembership       Membership?        @relation(\"ActionActor\", fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "approverMembership",
+        "type": "Membership?",
+        "declaration": "approverMembership    Membership?        @relation(\"ActionApprover\", fields: [approvalDecidedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "attempts",
+        "type": "ActionAttempt[]",
+        "declaration": "attempts              ActionAttempt[]"
+      },
+      {
+        "name": "communicationCampaign",
+        "type": "MarketingCampaign?",
+        "declaration": "communicationCampaign MarketingCampaign?"
+      },
+      {
+        "name": "billingPayment",
+        "type": "BillingPayment?",
+        "declaration": "billingPayment        BillingPayment?    @relation(\"BillingPaymentActionExecution\")"
+      },
+      {
+        "name": "loyaltyTransactions",
+        "type": "LoyaltyTransaction[]",
+        "declaration": "loyaltyTransactions   LoyaltyTransaction[] @relation(\"LoyaltyTransactionActionExecution\")"
+      },
+      {
+        "name": "issuedLoyaltyRedemptionGrant",
+        "type": "LoyaltyRedemptionGrant?",
+        "declaration": "issuedLoyaltyRedemptionGrant LoyaltyRedemptionGrant? @relation(\"LoyaltyRedemptionGrantIssueExecution\")"
+      },
+      {
+        "name": "loyaltyRedemption",
+        "type": "LoyaltyRedemption?",
+        "declaration": "loyaltyRedemption     LoyaltyRedemption? @relation(\"LoyaltyRedemptionActionExecution\")"
+      },
+      {
+        "name": "loyaltyGrantRevocation",
+        "type": "LoyaltyRedemptionGrantRevocation?",
+        "declaration": "loyaltyGrantRevocation LoyaltyRedemptionGrantRevocation? @relation(\"LoyaltyRedemptionGrantRevocationActionExecution\")"
+      },
+      {
+        "name": "resolvedClientIdentityHolds",
+        "type": "UnresolvedClientIdentityHold[]",
+        "declaration": "resolvedClientIdentityHolds UnresolvedClientIdentityHold[] @relation(\"UnresolvedClientIdentityHoldResolutionExecution\")"
+      },
+      {
+        "name": "createdCustomerReferral",
+        "type": "CustomerReferral?",
+        "declaration": "createdCustomerReferral CustomerReferral? @relation(\"CustomerReferralCreateExecution\")"
+      },
+      {
+        "name": "resolvedCustomerReferral",
+        "type": "CustomerReferral?",
+        "declaration": "resolvedCustomerReferral CustomerReferral? @relation(\"CustomerReferralResolutionExecution\")"
+      },
+      {
+        "name": "referralRewardIssuance",
+        "type": "ReferralRewardIssuance?",
+        "declaration": "referralRewardIssuance ReferralRewardIssuance? @relation(\"ReferralRewardIssuanceActionExecution\")"
+      },
+      {
+        "name": "referralRewardFulfillment",
+        "type": "ReferralRewardFulfillment?",
+        "declaration": "referralRewardFulfillment ReferralRewardFulfillment? @relation(\"ReferralRewardFulfillmentActionExecution\")"
+      },
+      {
+        "name": "activatedCustomerSubscription",
+        "type": "CustomerSubscription?",
+        "declaration": "activatedCustomerSubscription CustomerSubscription? @relation(\"CustomerSubscriptionActivationExecution\")"
+      },
+      {
+        "name": "endedCustomerSubscription",
+        "type": "CustomerSubscription?",
+        "declaration": "endedCustomerSubscription CustomerSubscription? @relation(\"CustomerSubscriptionEndExecution\")"
+      },
+      {
+        "name": "customerSubscriptionUsages",
+        "type": "CustomerSubscriptionUsage[]",
+        "declaration": "customerSubscriptionUsages CustomerSubscriptionUsage[] @relation(\"CustomerSubscriptionUsageActionExecution\")"
+      },
+      {
+        "name": "issuedGiftCertificate",
+        "type": "GiftCertificate?",
+        "declaration": "issuedGiftCertificate GiftCertificate? @relation(\"GiftCertificateIssueExecution\")"
+      },
+      {
+        "name": "giftCertificateRedemption",
+        "type": "GiftCertificateRedemption?",
+        "declaration": "giftCertificateRedemption GiftCertificateRedemption? @relation(\"GiftCertificateRedemptionActionExecution\")"
+      },
+      {
+        "name": "expense",
+        "type": "Expense?",
+        "declaration": "expense               Expense?           @relation(\"ExpenseActionExecution\")"
+      },
+      {
+        "name": "expensePeriodDeclaration",
+        "type": "ExpensePeriodDeclaration?",
+        "declaration": "expensePeriodDeclaration ExpensePeriodDeclaration? @relation(\"ExpensePeriodDeclarationActionExecution\")"
+      },
+      {
+        "name": "invalidatedExpensePeriodDeclarations",
+        "type": "ExpensePeriodDeclarationInvalidation[]",
+        "declaration": "invalidatedExpensePeriodDeclarations ExpensePeriodDeclarationInvalidation[] @relation(\"ExpensePeriodInvalidatedDeclarationExecution\")"
+      },
+      {
+        "name": "expensePeriodDeclarationInvalidations",
+        "type": "ExpensePeriodDeclarationInvalidation[]",
+        "declaration": "expensePeriodDeclarationInvalidations ExpensePeriodDeclarationInvalidation[] @relation(\"ExpensePeriodInvalidationExecution\")"
+      },
+      {
+        "name": "tenantCatalogItemValueVersion",
+        "type": "TenantCatalogItemValueVersion?",
+        "declaration": "tenantCatalogItemValueVersion TenantCatalogItemValueVersion? @relation(\"TenantCatalogItemValueVersionActionExecution\")"
+      },
+      {
+        "name": "referralProgramValueVersion",
+        "type": "ReferralProgramValueVersion?",
+        "declaration": "referralProgramValueVersion ReferralProgramValueVersion? @relation(\"ReferralProgramValueVersionActionExecution\")"
+      },
+      {
+        "name": "actionTargetMutations",
+        "type": "ActionTargetMutation[]",
+        "declaration": "actionTargetMutations       ActionTargetMutation[]"
+      },
+      {
+        "name": "operationalWorkItemsCreated",
+        "type": "OperationalWorkItem[]",
+        "declaration": "operationalWorkItemsCreated OperationalWorkItem[] @relation(\"OperationalWorkItemCreateExecution\")"
+      },
+      {
+        "name": "operationalWorkItemsCompleted",
+        "type": "OperationalWorkItem[]",
+        "declaration": "operationalWorkItemsCompleted OperationalWorkItem[] @relation(\"OperationalWorkItemCompleteExecution\")"
+      },
+      {
+        "name": "clientConsentFacts",
+        "type": "ClientConsentFact[]",
+        "declaration": "clientConsentFacts          ClientConsentFact[]"
+      },
+      {
+        "name": "wantedSlotInterestsCreated",
+        "type": "ClientWantedSlotInterest[]",
+        "declaration": "wantedSlotInterestsCreated  ClientWantedSlotInterest[] @relation(\"ClientWantedSlotCreateExecution\")"
+      },
+      {
+        "name": "wantedSlotInterestsMutated",
+        "type": "ClientWantedSlotInterest[]",
+        "declaration": "wantedSlotInterestsMutated  ClientWantedSlotInterest[] @relation(\"ClientWantedSlotMutationExecution\")"
+      },
+      {
+        "name": "maintenanceRuns",
+        "type": "MaintenanceRun[]",
+        "declaration": "maintenanceRuns             MaintenanceRun[]"
+      },
+      {
+        "name": "idempotencyBindings",
+        "type": "ActionExecutionIdempotencyBinding[]",
+        "declaration": "idempotencyBindings          ActionExecutionIdempotencyBinding[]"
+      },
+      {
+        "name": "operationalAlertRunId",
+        "type": "String?",
+        "declaration": "operationalAlertRunId String?"
+      },
+      {
+        "name": "operationalAlertSlotKey",
+        "type": "String?",
+        "declaration": "operationalAlertSlotKey String?"
+      },
+      {
+        "name": "nativeFeedbackRequestId",
+        "type": "String?",
+        "declaration": "nativeFeedbackRequestId String?"
+      },
+      {
+        "name": "nativeFeedbackRevisionId",
+        "type": "String?",
+        "declaration": "nativeFeedbackRevisionId String?"
+      },
+      {
+        "name": "nativeFeedbackSlotKey",
+        "type": "String?",
+        "declaration": "nativeFeedbackSlotKey String?"
+      },
+      {
+        "name": "teamMessageId",
+        "type": "String?",
+        "declaration": "teamMessageId String?"
+      },
+      {
+        "name": "teamMessageSlotKey",
+        "type": "String?",
+        "declaration": "teamMessageSlotKey String?"
+      },
+      {
+        "name": "expenseReminderRunId",
+        "type": "String?",
+        "declaration": "expenseReminderRunId String?"
+      },
+      {
+        "name": "expenseReminderSlotKey",
+        "type": "String?",
+        "declaration": "expenseReminderSlotKey String?"
+      },
+      {
+        "name": "operationalAlertRun",
+        "type": "OperationalAlertRun?",
+        "declaration": "operationalAlertRun OperationalAlertRun? @relation(\"R06_execution_run\", fields: [operationalAlertRunId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R06_execution_run_fk\")"
+      },
+      {
+        "name": "ownedNativeFeedbackRequests",
+        "type": "NativeFeedbackRequest[]",
+        "declaration": "ownedNativeFeedbackRequests NativeFeedbackRequest[] @relation(\"R08_request_execution\")"
+      },
+      {
+        "name": "ownedNativeFeedbackRevisions",
+        "type": "NativeFeedbackRevision[]",
+        "declaration": "ownedNativeFeedbackRevisions NativeFeedbackRevision[] @relation(\"R08_revision_execution\")"
+      },
+      {
+        "name": "nativeFeedbackRequest",
+        "type": "NativeFeedbackRequest?",
+        "declaration": "nativeFeedbackRequest NativeFeedbackRequest? @relation(\"R08_execution_request\", fields: [nativeFeedbackRequestId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R08_execution_request_fk\")"
+      },
+      {
+        "name": "nativeFeedbackRevision",
+        "type": "NativeFeedbackRevision?",
+        "declaration": "nativeFeedbackRevision NativeFeedbackRevision? @relation(\"R08_execution_revision\", fields: [nativeFeedbackRevisionId, tenantId, nativeFeedbackRequestId], references: [id, tenantId, requestId], onDelete: Restrict, onUpdate: Restrict, map: \"R08_execution_revision_fk\")"
+      },
+      {
+        "name": "communityReplies",
+        "type": "PublicCommunityComment[]",
+        "declaration": "communityReplies PublicCommunityComment[] @relation(\"R09_comment_creation\")"
+      },
+      {
+        "name": "moderatedCommunityComments",
+        "type": "PublicCommunityComment[]",
+        "declaration": "moderatedCommunityComments PublicCommunityComment[] @relation(\"R09_comment_moderation\")"
+      },
+      {
+        "name": "businessConfigurationRevision",
+        "type": "TenantBusinessConfigurationRevision[]",
+        "declaration": "businessConfigurationRevision TenantBusinessConfigurationRevision[] @relation(\"R11_config_execution\")"
+      },
+      {
+        "name": "reservedTeamAttachments",
+        "type": "TeamAttachment[]",
+        "declaration": "reservedTeamAttachments TeamAttachment[] @relation(\"R12_attachment_reserve\")"
+      },
+      {
+        "name": "finalizedTeamAttachments",
+        "type": "TeamAttachment[]",
+        "declaration": "finalizedTeamAttachments TeamAttachment[] @relation(\"R12_attachment_finalize\")"
+      },
+      {
+        "name": "sentTeamMessage",
+        "type": "TeamMessage[]",
+        "declaration": "sentTeamMessage TeamMessage[] @relation(\"R12_message_send\")"
+      },
+      {
+        "name": "withdrawnTeamMessage",
+        "type": "TeamMessage[]",
+        "declaration": "withdrawnTeamMessage TeamMessage[] @relation(\"R12_message_withdraw\")"
+      },
+      {
+        "name": "teamMessage",
+        "type": "TeamMessage?",
+        "declaration": "teamMessage TeamMessage? @relation(\"R12_execution_message\", fields: [teamMessageId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R12_execution_message_fk\")"
+      },
+      {
+        "name": "expenseReminderRun",
+        "type": "ExpenseReminderRun?",
+        "declaration": "expenseReminderRun ExpenseReminderRun? @relation(\"R13_execution_reminder\", fields: [expenseReminderRunId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R13_execution_reminder_fk\")"
+      },
+      {
+        "name": "expenseIntakeBindings",
+        "type": "ExpenseIntakeBinding[]",
+        "declaration": "expenseIntakeBindings ExpenseIntakeBinding[] @relation(\"R13_intake_slot\")"
+      },
+      {
+        "name": "cashDeclaration",
+        "type": "CashDeclaration[]",
+        "declaration": "cashDeclaration CashDeclaration[] @relation(\"R14_cash_execution\")"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([tenantId, identityFingerprint])",
+      "@@unique([tenantId, idempotencyScope, requestIdempotencyKeyHash], map: \"ActionExecution_tenant_idempotency_key\")",
+      "@@unique([tenantId, ownerReportRunId, ownerReportSlotKey], map: \"B36_execution_slot_key\")",
+      "@@index([tenantId, state, nextExecutionAttemptAt])",
+      "@@index([tenantId, reconciliationState, leaseExpiresAt])",
+      "@@index([tenantId, agentTaskId])",
+      "@@index([tenantId, createdAt])",
+      "@@unique([tenantId, operationalAlertRunId, operationalAlertSlotKey], map: \"R06_execution_slot_uq\")",
+      "@@unique([tenantId, nativeFeedbackRequestId, nativeFeedbackSlotKey], map: \"R08_execution_slot_uq\")",
+      "@@unique([tenantId, teamMessageId, teamMessageSlotKey], map: \"R12_execution_slot_uq\")",
+      "@@unique([tenantId, expenseReminderRunId, expenseReminderSlotKey], map: \"R13_execution_slot_uq\")"
+    ],
+    "sha256": "d83cd3321ad27114abf7e4cd1e6a02cbf536447372f192d9c6c754dd9a6c900e"
+  },
+  {
+    "model": "ActionAttempt",
+    "line": 562,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                          String                @id @default(uuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                    String"
+      },
+      {
+        "name": "actionExecutionId",
+        "type": "String",
+        "declaration": "actionExecutionId           String"
+      },
+      {
+        "name": "attemptNumber",
+        "type": "Int",
+        "declaration": "attemptNumber               Int"
+      },
+      {
+        "name": "kind",
+        "type": "ActionAttemptKind",
+        "declaration": "kind                        ActionAttemptKind"
+      },
+      {
+        "name": "state",
+        "type": "ActionAttemptState",
+        "declaration": "state                       ActionAttemptState"
+      },
+      {
+        "name": "executorKey",
+        "type": "String",
+        "declaration": "executorKey                 String"
+      },
+      {
+        "name": "executorVersion",
+        "type": "Int",
+        "declaration": "executorVersion             Int"
+      },
+      {
+        "name": "externalDispatchState",
+        "type": "ExternalDispatchState",
+        "declaration": "externalDispatchState       ExternalDispatchState"
+      },
+      {
+        "name": "providerRequestIdentityHash",
+        "type": "String?",
+        "declaration": "providerRequestIdentityHash String?"
+      },
+      {
+        "name": "providerReferenceEncrypted",
+        "type": "String?",
+        "declaration": "providerReferenceEncrypted  String?"
+      },
+      {
+        "name": "providerReferenceHash",
+        "type": "String?",
+        "declaration": "providerReferenceHash       String?"
+      },
+      {
+        "name": "transportCode",
+        "type": "String?",
+        "declaration": "transportCode               String?"
+      },
+      {
+        "name": "httpStatus",
+        "type": "Int?",
+        "declaration": "httpStatus                  Int?"
+      },
+      {
+        "name": "errorClass",
+        "type": "String?",
+        "declaration": "errorClass                  String?"
+      },
+      {
+        "name": "outcomeCode",
+        "type": "String?",
+        "declaration": "outcomeCode                 String?"
+      },
+      {
+        "name": "safeResultJson",
+        "type": "Json?",
+        "declaration": "safeResultJson              Json?"
+      },
+      {
+        "name": "retryDecisionCode",
+        "type": "String?",
+        "declaration": "retryDecisionCode           String?"
+      },
+      {
+        "name": "reconciliationRequired",
+        "type": "Boolean",
+        "declaration": "reconciliationRequired      Boolean               @default(false)"
+      },
+      {
+        "name": "startedAt",
+        "type": "DateTime",
+        "declaration": "startedAt                   DateTime              @default(now())"
+      },
+      {
+        "name": "finishedAt",
+        "type": "DateTime?",
+        "declaration": "finishedAt                  DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                   DateTime              @default(now())"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "execution",
+        "type": "ActionExecution",
+        "declaration": "execution ActionExecution @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Cascade)"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([tenantId, actionExecutionId, attemptNumber])",
+      "@@index([tenantId, state, startedAt])",
+      "@@index([tenantId, providerReferenceHash])"
+    ],
+    "sha256": "8a160cb2384369a2ea272533c7bb092f1617dca2dde4b5c42a7b0bcc867130b1"
+  },
+  {
+    "model": "ActionTargetMutation",
+    "line": 599,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                String   @id @default(uuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId          String"
+      },
+      {
+        "name": "actionExecutionId",
+        "type": "String",
+        "declaration": "actionExecutionId String"
+      },
+      {
+        "name": "mutationKey",
+        "type": "String",
+        "declaration": "mutationKey       String"
+      },
+      {
+        "name": "targetKind",
+        "type": "String",
+        "declaration": "targetKind        String"
+      },
+      {
+        "name": "targetRef",
+        "type": "String",
+        "declaration": "targetRef         String"
+      },
+      {
+        "name": "mutationKind",
+        "type": "String",
+        "declaration": "mutationKind      String"
+      },
+      {
+        "name": "targetGeneration",
+        "type": "Int",
+        "declaration": "targetGeneration  Int"
+      },
+      {
+        "name": "beforeStateHash",
+        "type": "String?",
+        "declaration": "beforeStateHash   String?"
+      },
+      {
+        "name": "afterStateHash",
+        "type": "String?",
+        "declaration": "afterStateHash    String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt         DateTime @default(now())"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "execution",
+        "type": "ActionExecution",
+        "declaration": "execution ActionExecution @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([tenantId, actionExecutionId, mutationKey])",
+      "@@unique([tenantId, targetKind, targetRef, targetGeneration])",
+      "@@index([tenantId, targetKind, targetRef, createdAt])",
+      "@@index([tenantId, actionExecutionId])"
+    ],
+    "sha256": "d01c2c766c27c8d38d23b99883a115c1099db12a3313f3e92a1b5e5d327f3a83"
+  },
+  {
+    "model": "DomainEvent",
+    "line": 2769,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id       String @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId String"
+      },
+      {
+        "name": "type",
+        "type": "String",
+        "declaration": "type    String"
+      },
+      {
+        "name": "version",
+        "type": "Int",
+        "declaration": "version Int    @default(1)"
+      },
+      {
+        "name": "entityType",
+        "type": "String",
+        "declaration": "entityType     String"
+      },
+      {
+        "name": "entityId",
+        "type": "String",
+        "declaration": "entityId       String"
+      },
+      {
+        "name": "entitySequence",
+        "type": "Int?",
+        "declaration": "entitySequence Int?"
+      },
+      {
+        "name": "occurredAt",
+        "type": "DateTime",
+        "declaration": "occurredAt  DateTime"
+      },
+      {
+        "name": "receivedAt",
+        "type": "DateTime",
+        "declaration": "receivedAt  DateTime  @default(now())"
+      },
+      {
+        "name": "processedAt",
+        "type": "DateTime?",
+        "declaration": "processedAt DateTime?"
+      },
+      {
+        "name": "source",
+        "type": "String",
+        "declaration": "source          String"
+      },
+      {
+        "name": "ingestionMethod",
+        "type": "String",
+        "declaration": "ingestionMethod String  @default(\"webhook\")"
+      },
+      {
+        "name": "sourceRef",
+        "type": "String?",
+        "declaration": "sourceRef       String?"
+      },
+      {
+        "name": "observation",
+        "type": "String",
+        "declaration": "observation     String  @default(\"after_watch_started\")"
+      },
+      {
+        "name": "dedupFingerprint",
+        "type": "String",
+        "declaration": "dedupFingerprint String"
+      },
+      {
+        "name": "payload",
+        "type": "Json",
+        "declaration": "payload          Json"
+      },
+      {
+        "name": "status",
+        "type": "String",
+        "declaration": "status     String    @default(\"pending\")"
+      },
+      {
+        "name": "attempts",
+        "type": "Int",
+        "declaration": "attempts   Int       @default(0)"
+      },
+      {
+        "name": "leaseUntil",
+        "type": "DateTime?",
+        "declaration": "leaseUntil DateTime?"
+      },
+      {
+        "name": "lastError",
+        "type": "String?",
+        "declaration": "lastError  String?"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      }
+    ],
+    "constraints": [
+      "@@unique([tenantId, dedupFingerprint])",
+      "@@index([tenantId, entityType, entityId, occurredAt])",
+      "@@index([status, leaseUntil])",
+      "@@index([tenantId, type, occurredAt])",
+      "@@index([tenantId, receivedAt])"
+    ],
+    "sha256": "905435aca45cfdb1dfe395cfe6bba140418e3bd48d3ea47311c7b58b85c20754"
+  },
+  {
+    "model": "ReconciliationRun",
+    "line": 2892,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id       String @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId String"
+      },
+      {
+        "name": "provider",
+        "type": "String",
+        "declaration": "provider String"
+      },
+      {
+        "name": "windowFrom",
+        "type": "DateTime",
+        "declaration": "windowFrom DateTime"
+      },
+      {
+        "name": "windowTo",
+        "type": "DateTime",
+        "declaration": "windowTo   DateTime"
+      },
+      {
+        "name": "startedAt",
+        "type": "DateTime",
+        "declaration": "startedAt  DateTime  @default(now())"
+      },
+      {
+        "name": "finishedAt",
+        "type": "DateTime?",
+        "declaration": "finishedAt DateTime?"
+      },
+      {
+        "name": "completeness",
+        "type": "String?",
+        "declaration": "completeness     String?"
+      },
+      {
+        "name": "truncationReason",
+        "type": "String?",
+        "declaration": "truncationReason String?"
+      },
+      {
+        "name": "fetched",
+        "type": "Int",
+        "declaration": "fetched       Int @default(0)"
+      },
+      {
+        "name": "created",
+        "type": "Int",
+        "declaration": "created       Int @default(0)"
+      },
+      {
+        "name": "updated",
+        "type": "Int",
+        "declaration": "updated       Int @default(0)"
+      },
+      {
+        "name": "unchanged",
+        "type": "Int",
+        "declaration": "unchanged     Int @default(0)"
+      },
+      {
+        "name": "eventsEmitted",
+        "type": "Int",
+        "declaration": "eventsEmitted Int @default(0)"
+      },
+      {
+        "name": "failureCode",
+        "type": "String?",
+        "declaration": "failureCode    String?"
+      },
+      {
+        "name": "failureMessage",
+        "type": "String?",
+        "declaration": "failureMessage String?"
+      },
+      {
+        "name": "leaseUntil",
+        "type": "DateTime?",
+        "declaration": "leaseUntil DateTime?"
+      },
+      {
+        "name": "holderId",
+        "type": "String?",
+        "declaration": "holderId   String?"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      }
+    ],
+    "constraints": [
+      "@@index([tenantId, startedAt])",
+      "@@index([tenantId, completeness, finishedAt])"
+    ],
+    "sha256": "a2784c5a4e7e898982a432a8839cef33d20b47d1153d1e29950d651698ec6b6a"
+  },
+  {
+    "model": "RecoveryTouchpoint",
+    "line": 3014,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                    String               @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId              String"
+      },
+      {
+        "name": "externalEventId",
+        "type": "String",
+        "declaration": "externalEventId       String"
+      },
+      {
+        "name": "subjectRef",
+        "type": "String",
+        "declaration": "subjectRef            String"
+      },
+      {
+        "name": "kind",
+        "type": "String",
+        "declaration": "kind                  String"
+      },
+      {
+        "name": "channel",
+        "type": "String",
+        "declaration": "channel               String"
+      },
+      {
+        "name": "status",
+        "type": "String",
+        "declaration": "status                String"
+      },
+      {
+        "name": "occurredAt",
+        "type": "DateTime",
+        "declaration": "occurredAt            DateTime"
+      },
+      {
+        "name": "attributionWindowDays",
+        "type": "Int",
+        "declaration": "attributionWindowDays Int                  @default(30)"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt             DateTime             @default(now())"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "conversions",
+        "type": "RecoveryConversion[]",
+        "declaration": "conversions           RecoveryConversion[]"
+      }
+    ],
+    "constraints": [
+      "@@unique([tenantId, externalEventId])",
+      "@@index([tenantId, occurredAt])",
+      "@@index([tenantId, subjectRef, occurredAt])"
+    ],
+    "sha256": "f10174c0b3f2f8e204a8b7ead377c309da657d6b28e51c4ec3575f2ecae1b460"
+  },
+  {
+    "model": "RecoveryConversion",
+    "line": 3036,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                      String             @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                String"
+      },
+      {
+        "name": "touchpointId",
+        "type": "String",
+        "declaration": "touchpointId            String"
+      },
+      {
+        "name": "externalBookingRef",
+        "type": "String",
+        "declaration": "externalBookingRef      String"
+      },
+      {
+        "name": "crmExternalId",
+        "type": "String?",
+        "declaration": "crmExternalId           String?"
+      },
+      {
+        "name": "subjectRef",
+        "type": "String",
+        "declaration": "subjectRef              String"
+      },
+      {
+        "name": "bookedAt",
+        "type": "DateTime",
+        "declaration": "bookedAt                DateTime"
+      },
+      {
+        "name": "visitAt",
+        "type": "DateTime?",
+        "declaration": "visitAt                 DateTime?"
+      },
+      {
+        "name": "status",
+        "type": "String",
+        "declaration": "status                  String             @default(\"booked\")"
+      },
+      {
+        "name": "filledWindow",
+        "type": "Boolean",
+        "declaration": "filledWindow            Boolean            @default(false)"
+      },
+      {
+        "name": "bookedValueKopecks",
+        "type": "Int?",
+        "declaration": "bookedValueKopecks      Int?"
+      },
+      {
+        "name": "confirmedRevenueKopecks",
+        "type": "Int?",
+        "declaration": "confirmedRevenueKopecks Int?"
+      },
+      {
+        "name": "currency",
+        "type": "String",
+        "declaration": "currency                String             @default(\"RUB\")"
+      },
+      {
+        "name": "confirmedAt",
+        "type": "DateTime?",
+        "declaration": "confirmedAt             DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt               DateTime           @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt               DateTime           @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                  Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "touchpoint",
+        "type": "RecoveryTouchpoint",
+        "declaration": "touchpoint              RecoveryTouchpoint @relation(fields: [touchpointId], references: [id], onDelete: Cascade)"
+      }
+    ],
+    "constraints": [
+      "@@unique([tenantId, externalBookingRef])",
+      "@@index([tenantId, bookedAt])",
+      "@@index([tenantId, crmExternalId])",
+      "@@index([tenantId, subjectRef, bookedAt])"
+    ],
+    "sha256": "893f84bc1859383e11ae6c7b6d59767153b3d8f0f5563247e3a8fd9e1993d22e"
+  },
+  {
+    "model": "MarketingCampaign",
+    "line": 3094,
+    "fields": [
+      {
+        "name": "bulkIntentContract",
+        "type": "String?",
+        "declaration": "bulkIntentContract String?"
+      },
+      {
+        "name": "bulkIntentHash",
+        "type": "String?",
+        "declaration": "bulkIntentHash String?"
+      },
+      {
+        "name": "parentRecipientId",
+        "type": "String?",
+        "declaration": "parentRecipientId String?"
+      },
+      {
+        "name": "bulkSlotKey",
+        "type": "String?",
+        "declaration": "bulkSlotKey String?"
+      },
+      {
+        "name": "parentRecipient",
+        "type": "MarketingCampaignRecipient?",
+        "declaration": "parentRecipient MarketingCampaignRecipient? @relation(\"B35TransportParent\", fields: [parentRecipientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"B35_transport_parent_fkey\")"
+      },
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                          String                      @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                    String"
+      },
+      {
+        "name": "createdByUserId",
+        "type": "String?",
+        "declaration": "createdByUserId             String?"
+      },
+      {
+        "name": "audienceId",
+        "type": "String?",
+        "declaration": "audienceId                  String?"
+      },
+      {
+        "name": "channel",
+        "type": "String?",
+        "declaration": "channel                     String?                     @default(\"app\")"
+      },
+      {
+        "name": "status",
+        "type": "String",
+        "declaration": "status                      String                      @default(\"draft\")"
+      },
+      {
+        "name": "message",
+        "type": "String",
+        "declaration": "message                     String"
+      },
+      {
+        "name": "recipientUserIdsJson",
+        "type": "Json",
+        "declaration": "recipientUserIdsJson        Json"
+      },
+      {
+        "name": "recipientCount",
+        "type": "Int",
+        "declaration": "recipientCount              Int"
+      },
+      {
+        "name": "sentCount",
+        "type": "Int",
+        "declaration": "sentCount                   Int                         @default(0)"
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "String?",
+        "declaration": "idempotencyKey              String?"
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "declaration": "expiresAt                   DateTime"
+      },
+      {
+        "name": "sentAt",
+        "type": "DateTime?",
+        "declaration": "sentAt                      DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                   DateTime                    @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt                   DateTime                    @updatedAt"
+      },
+      {
+        "name": "provider",
+        "type": "String?",
+        "declaration": "provider                    String?                     @default(\"yclients_sms\")"
+      },
+      {
+        "name": "audienceSnapshotHash",
+        "type": "String",
+        "declaration": "audienceSnapshotHash        String                      @default(\"\")"
+      },
+      {
+        "name": "messageSnapshotHash",
+        "type": "String",
+        "declaration": "messageSnapshotHash         String                      @default(\"\")"
+      },
+      {
+        "name": "confirmationHash",
+        "type": "String?",
+        "declaration": "confirmationHash            String?"
+      },
+      {
+        "name": "confirmedAt",
+        "type": "DateTime?",
+        "declaration": "confirmedAt                 DateTime?"
+      },
+      {
+        "name": "confirmedByUserId",
+        "type": "String?",
+        "declaration": "confirmedByUserId           String?"
+      },
+      {
+        "name": "costEstimateKopecks",
+        "type": "Int?",
+        "declaration": "costEstimateKopecks         Int?"
+      },
+      {
+        "name": "costEstimateStatus",
+        "type": "String",
+        "declaration": "costEstimateStatus          String                      @default(\"unavailable\")"
+      },
+      {
+        "name": "costCurrency",
+        "type": "String",
+        "declaration": "costCurrency                String                      @default(\"RUB\")"
+      },
+      {
+        "name": "scheduledFor",
+        "type": "DateTime?",
+        "declaration": "scheduledFor                DateTime?"
+      },
+      {
+        "name": "queuedAt",
+        "type": "DateTime?",
+        "declaration": "queuedAt                    DateTime?"
+      },
+      {
+        "name": "startedAt",
+        "type": "DateTime?",
+        "declaration": "startedAt                   DateTime?"
+      },
+      {
+        "name": "completedAt",
+        "type": "DateTime?",
+        "declaration": "completedAt                 DateTime?"
+      },
+      {
+        "name": "cancelledAt",
+        "type": "DateTime?",
+        "declaration": "cancelledAt                 DateTime?"
+      },
+      {
+        "name": "leaseOwner",
+        "type": "String?",
+        "declaration": "leaseOwner                  String?"
+      },
+      {
+        "name": "leaseExpiresAt",
+        "type": "DateTime?",
+        "declaration": "leaseExpiresAt              DateTime?"
+      },
+      {
+        "name": "retryCount",
+        "type": "Int",
+        "declaration": "retryCount                  Int                         @default(0)"
+      },
+      {
+        "name": "lastErrorCode",
+        "type": "String?",
+        "declaration": "lastErrorCode               String?"
+      },
+      {
+        "name": "acceptedCount",
+        "type": "Int",
+        "declaration": "acceptedCount               Int                         @default(0)"
+      },
+      {
+        "name": "failedCount",
+        "type": "Int",
+        "declaration": "failedCount                 Int                         @default(0)"
+      },
+      {
+        "name": "skippedCount",
+        "type": "Int",
+        "declaration": "skippedCount                Int                         @default(0)"
+      },
+      {
+        "name": "unknownCount",
+        "type": "Int",
+        "declaration": "unknownCount                Int                         @default(0)"
+      },
+      {
+        "name": "lifecycleVersion",
+        "type": "Int",
+        "declaration": "lifecycleVersion            Int                         @default(0)"
+      },
+      {
+        "name": "scope",
+        "type": "CommunicationScope?",
+        "declaration": "scope                       CommunicationScope?"
+      },
+      {
+        "name": "actionExecutionId",
+        "type": "String?",
+        "declaration": "actionExecutionId           String?"
+      },
+      {
+        "name": "aggregateState",
+        "type": "CommunicationCampaignState?",
+        "declaration": "aggregateState              CommunicationCampaignState?"
+      },
+      {
+        "name": "contentRef",
+        "type": "String?",
+        "declaration": "contentRef                  String?"
+      },
+      {
+        "name": "deliveryCapabilityKey",
+        "type": "String?",
+        "declaration": "deliveryCapabilityKey       String?"
+      },
+      {
+        "name": "deliveryCapabilityVersion",
+        "type": "Int?",
+        "declaration": "deliveryCapabilityVersion   Int?"
+      },
+      {
+        "name": "retryPolicyKey",
+        "type": "String?",
+        "declaration": "retryPolicyKey              String?"
+      },
+      {
+        "name": "retryPolicyVersion",
+        "type": "Int?",
+        "declaration": "retryPolicyVersion          Int?"
+      },
+      {
+        "name": "reconciliationPolicyKey",
+        "type": "String?",
+        "declaration": "reconciliationPolicyKey     String?"
+      },
+      {
+        "name": "reconciliationPolicyVersion",
+        "type": "Int?",
+        "declaration": "reconciliationPolicyVersion Int?"
+      },
+      {
+        "name": "leaseTokenHash",
+        "type": "String?",
+        "declaration": "leaseTokenHash              String?"
+      },
+      {
+        "name": "revision",
+        "type": "Int",
+        "declaration": "revision                    Int                         @default(0)"
+      },
+      {
+        "name": "payloadRetentionUntil",
+        "type": "DateTime?",
+        "declaration": "payloadRetentionUntil       DateTime?"
+      },
+      {
+        "name": "auditRetentionUntil",
+        "type": "DateTime?",
+        "declaration": "auditRetentionUntil         DateTime?"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                      Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "actionExecution",
+        "type": "ActionExecution?",
+        "declaration": "actionExecution             ActionExecution?            @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "audience",
+        "type": "MarketingAudience?",
+        "declaration": "audience                    MarketingAudience?          @relation(fields: [audienceId, tenantId], references: [id, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "creatorMembership",
+        "type": "Membership?",
+        "declaration": "creatorMembership           Membership?                 @relation(\"CommunicationCreator\", fields: [createdByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "approverMembership",
+        "type": "Membership?",
+        "declaration": "approverMembership          Membership?                 @relation(\"CommunicationApprover\", fields: [confirmedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "recipients",
+        "type": "MarketingCampaignRecipient[]",
+        "declaration": "recipients MarketingCampaignRecipient[]"
+      },
+      {
+        "name": "deliveryAttempts",
+        "type": "MarketingDeliveryAttempt[]",
+        "declaration": "deliveryAttempts MarketingDeliveryAttempt[]"
+      }
+    ],
+    "constraints": [
+      "@@unique([tenantId, parentRecipientId, bulkSlotKey], map: \"B35_recipient_slot_key\")",
+      "@@unique([tenantId, idempotencyKey])",
+      "@@unique([id, tenantId])",
+      "@@unique([actionExecutionId, tenantId])",
+      "@@index([tenantId, status, createdAt])",
+      "@@index([tenantId, audienceId])",
+      "@@index([tenantId, aggregateState, scheduledFor, leaseExpiresAt])",
+      "@@index([status, leaseExpiresAt, queuedAt])",
+      "@@index([status, scheduledFor, leaseExpiresAt])"
+    ],
+    "sha256": "796b1b51fed40e48812ad52ba1863e4643a0374552985c7eedcfae9a74ac1558"
+  },
+  {
+    "model": "MarketingCampaignRecipient",
+    "line": 2499,
+    "fields": [
+      {
+        "name": "clientId",
+        "type": "String?",
+        "declaration": "clientId String?"
+      },
+      {
+        "name": "routePlanJson",
+        "type": "Json?",
+        "declaration": "routePlanJson Json?"
+      },
+      {
+        "name": "contentEncrypted",
+        "type": "String?",
+        "declaration": "contentEncrypted String?"
+      },
+      {
+        "name": "aggregateState",
+        "type": "CommunicationCampaignState?",
+        "declaration": "aggregateState CommunicationCampaignState?"
+      },
+      {
+        "name": "client",
+        "type": "Client?",
+        "declaration": "client Client? @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"B35_recipient_client_fkey\")"
+      },
+      {
+        "name": "transportSlots",
+        "type": "MarketingCampaign[]",
+        "declaration": "transportSlots MarketingCampaign[] @relation(\"B35TransportParent\")"
+      },
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                       String                      @id"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                 String"
+      },
+      {
+        "name": "campaignId",
+        "type": "String",
+        "declaration": "campaignId               String"
+      },
+      {
+        "name": "externalClientId",
+        "type": "String",
+        "declaration": "externalClientId         String"
+      },
+      {
+        "name": "internalUserId",
+        "type": "String?",
+        "declaration": "internalUserId           String?"
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "String",
+        "declaration": "idempotencyKey           String"
+      },
+      {
+        "name": "status",
+        "type": "String",
+        "declaration": "status                   String                      @default(\"QUEUED\")"
+      },
+      {
+        "name": "attemptCount",
+        "type": "Int",
+        "declaration": "attemptCount             Int                         @default(0)"
+      },
+      {
+        "name": "nextAttemptAt",
+        "type": "DateTime?",
+        "declaration": "nextAttemptAt            DateTime?"
+      },
+      {
+        "name": "acceptedAt",
+        "type": "DateTime?",
+        "declaration": "acceptedAt               DateTime?"
+      },
+      {
+        "name": "deliveredAt",
+        "type": "DateTime?",
+        "declaration": "deliveredAt              DateTime?"
+      },
+      {
+        "name": "failedAt",
+        "type": "DateTime?",
+        "declaration": "failedAt                 DateTime?"
+      },
+      {
+        "name": "providerMessageId",
+        "type": "String?",
+        "declaration": "providerMessageId        String?"
+      },
+      {
+        "name": "providerStatus",
+        "type": "String?",
+        "declaration": "providerStatus           String?"
+      },
+      {
+        "name": "lastErrorCode",
+        "type": "String?",
+        "declaration": "lastErrorCode            String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                DateTime                    @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt                DateTime"
+      },
+      {
+        "name": "lifecycleVersion",
+        "type": "Int",
+        "declaration": "lifecycleVersion         Int                         @default(0)"
+      },
+      {
+        "name": "identityVersion",
+        "type": "Int?",
+        "declaration": "identityVersion          Int?"
+      },
+      {
+        "name": "recipientKind",
+        "type": "String?",
+        "declaration": "recipientKind            String?"
+      },
+      {
+        "name": "recipientRefHash",
+        "type": "String?",
+        "declaration": "recipientRefHash         String?"
+      },
+      {
+        "name": "contentIdentityHash",
+        "type": "String?",
+        "declaration": "contentIdentityHash      String?"
+      },
+      {
+        "name": "deliveryState",
+        "type": "CommunicationDeliveryState?",
+        "declaration": "deliveryState            CommunicationDeliveryState?"
+      },
+      {
+        "name": "externalDispatchState",
+        "type": "ExternalDispatchState?",
+        "declaration": "externalDispatchState    ExternalDispatchState?"
+      },
+      {
+        "name": "reconciliationState",
+        "type": "ActionReconciliationState?",
+        "declaration": "reconciliationState      ActionReconciliationState?"
+      },
+      {
+        "name": "eligibilityBasis",
+        "type": "String?",
+        "declaration": "eligibilityBasis         String?"
+      },
+      {
+        "name": "eligibilityDecision",
+        "type": "String?",
+        "declaration": "eligibilityDecision      String?"
+      },
+      {
+        "name": "eligibilityPolicyVersion",
+        "type": "Int?",
+        "declaration": "eligibilityPolicyVersion Int?"
+      },
+      {
+        "name": "eligibilityEvidenceRef",
+        "type": "String?",
+        "declaration": "eligibilityEvidenceRef   String?"
+      },
+      {
+        "name": "eligibilityEvidenceHash",
+        "type": "String?",
+        "declaration": "eligibilityEvidenceHash  String?"
+      },
+      {
+        "name": "eligibilityCheckedAt",
+        "type": "DateTime?",
+        "declaration": "eligibilityCheckedAt     DateTime?"
+      },
+      {
+        "name": "consentEvidenceId",
+        "type": "String?",
+        "declaration": "consentEvidenceId        String?"
+      },
+      {
+        "name": "leaseOwner",
+        "type": "String?",
+        "declaration": "leaseOwner               String?"
+      },
+      {
+        "name": "leaseTokenHash",
+        "type": "String?",
+        "declaration": "leaseTokenHash           String?"
+      },
+      {
+        "name": "leaseExpiresAt",
+        "type": "DateTime?",
+        "declaration": "leaseExpiresAt           DateTime?"
+      },
+      {
+        "name": "revision",
+        "type": "Int",
+        "declaration": "revision                 Int                         @default(0)"
+      },
+      {
+        "name": "dispatchedAt",
+        "type": "DateTime?",
+        "declaration": "dispatchedAt             DateTime?"
+      },
+      {
+        "name": "responseReceivedAt",
+        "type": "DateTime?",
+        "declaration": "responseReceivedAt       DateTime?"
+      },
+      {
+        "name": "unknownAt",
+        "type": "DateTime?",
+        "declaration": "unknownAt                DateTime?"
+      },
+      {
+        "name": "terminalAt",
+        "type": "DateTime?",
+        "declaration": "terminalAt               DateTime?"
+      },
+      {
+        "name": "terminalReasonCode",
+        "type": "String?",
+        "declaration": "terminalReasonCode       String?"
+      },
+      {
+        "name": "payloadRetentionUntil",
+        "type": "DateTime?",
+        "declaration": "payloadRetentionUntil    DateTime?"
+      },
+      {
+        "name": "auditRetentionUntil",
+        "type": "DateTime?",
+        "declaration": "auditRetentionUntil      DateTime?"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                   Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "campaign",
+        "type": "MarketingCampaign",
+        "declaration": "campaign                 MarketingCampaign           @relation(fields: [campaignId, tenantId], references: [id, tenantId], onDelete: Cascade)"
+      },
+      {
+        "name": "internalMembership",
+        "type": "Membership?",
+        "declaration": "internalMembership       Membership?                 @relation(\"CommunicationRecipientMembership\", fields: [internalUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "consentEvidence",
+        "type": "MarketingConsentEvidence?",
+        "declaration": "consentEvidence          MarketingConsentEvidence?   @relation(fields: [consentEvidenceId, tenantId], references: [id, tenantId], onDelete: Restrict)"
+      },
+      {
+        "name": "deliveryAttempts",
+        "type": "MarketingDeliveryAttempt[]",
+        "declaration": "deliveryAttempts         MarketingDeliveryAttempt[]"
+      }
+    ],
+    "constraints": [
+      "@@unique([tenantId, campaignId, clientId], map: \"B35_bulk_client_key\")",
+      "@@index([tenantId, clientId, createdAt, id], map: \"B35_recipient_client_history_idx\")",
+      "@@unique([id, tenantId])",
+      "@@unique([id, tenantId, campaignId])",
+      "@@unique([tenantId, idempotencyKey])",
+      "@@unique([tenantId, campaignId, externalClientId], map: \"MarketingCampaignRecipient_tenantId_campaignId_externalClientId\")",
+      "@@index([tenantId, campaignId, status, nextAttemptAt], map: \"MarketingCampaignRecipient_tenantId_campaignId_status_nextAttem\")",
+      "@@index([tenantId, campaignId, deliveryState, nextAttemptAt])",
+      "@@index([tenantId, reconciliationState, leaseExpiresAt])"
+    ],
+    "sha256": "3e75128d11bd6252219508cfb7de77ac432ad8a5e2246f4af7417fdcfe5cdaa5"
+  },
+  {
+    "model": "MarketingDeliveryAttempt",
+    "line": 2589,
+    "fields": [
+      {
+        "name": "dispatchEligibilityJson",
+        "type": "Json?",
+        "declaration": "dispatchEligibilityJson Json?"
+      },
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                          String                      @id"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                    String"
+      },
+      {
+        "name": "campaignId",
+        "type": "String",
+        "declaration": "campaignId                  String"
+      },
+      {
+        "name": "recipientId",
+        "type": "String?",
+        "declaration": "recipientId                 String?"
+      },
+      {
+        "name": "batchKey",
+        "type": "String",
+        "declaration": "batchKey                    String"
+      },
+      {
+        "name": "attemptNumber",
+        "type": "Int",
+        "declaration": "attemptNumber               Int"
+      },
+      {
+        "name": "status",
+        "type": "String",
+        "declaration": "status                      String"
+      },
+      {
+        "name": "httpStatus",
+        "type": "Int?",
+        "declaration": "httpStatus                  Int?"
+      },
+      {
+        "name": "providerResponseCode",
+        "type": "String?",
+        "declaration": "providerResponseCode        String?"
+      },
+      {
+        "name": "errorCode",
+        "type": "String?",
+        "declaration": "errorCode                   String?"
+      },
+      {
+        "name": "startedAt",
+        "type": "DateTime",
+        "declaration": "startedAt                   DateTime                    @default(now())"
+      },
+      {
+        "name": "completedAt",
+        "type": "DateTime?",
+        "declaration": "completedAt                 DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                   DateTime                    @default(now())"
+      },
+      {
+        "name": "lifecycleVersion",
+        "type": "Int",
+        "declaration": "lifecycleVersion            Int                         @default(0)"
+      },
+      {
+        "name": "kind",
+        "type": "ActionAttemptKind?",
+        "declaration": "kind                        ActionAttemptKind?"
+      },
+      {
+        "name": "state",
+        "type": "ActionAttemptState?",
+        "declaration": "state                       ActionAttemptState?"
+      },
+      {
+        "name": "externalDispatchState",
+        "type": "ExternalDispatchState?",
+        "declaration": "externalDispatchState       ExternalDispatchState?"
+      },
+      {
+        "name": "providerRequestIdentityHash",
+        "type": "String?",
+        "declaration": "providerRequestIdentityHash String?"
+      },
+      {
+        "name": "providerIdempotencyKeyHash",
+        "type": "String?",
+        "declaration": "providerIdempotencyKeyHash  String?"
+      },
+      {
+        "name": "providerReferenceEncrypted",
+        "type": "String?",
+        "declaration": "providerReferenceEncrypted  String?"
+      },
+      {
+        "name": "providerReferenceHash",
+        "type": "String?",
+        "declaration": "providerReferenceHash       String?"
+      },
+      {
+        "name": "outcomeCode",
+        "type": "String?",
+        "declaration": "outcomeCode                 String?"
+      },
+      {
+        "name": "retryDecisionCode",
+        "type": "String?",
+        "declaration": "retryDecisionCode           String?"
+      },
+      {
+        "name": "reconciliationRequired",
+        "type": "Boolean?",
+        "declaration": "reconciliationRequired      Boolean?"
+      },
+      {
+        "name": "dispatchedAt",
+        "type": "DateTime?",
+        "declaration": "dispatchedAt                DateTime?"
+      },
+      {
+        "name": "responseReceivedAt",
+        "type": "DateTime?",
+        "declaration": "responseReceivedAt          DateTime?"
+      },
+      {
+        "name": "payloadRetentionUntil",
+        "type": "DateTime?",
+        "declaration": "payloadRetentionUntil       DateTime?"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                      Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "campaign",
+        "type": "MarketingCampaign",
+        "declaration": "campaign                    MarketingCampaign           @relation(fields: [campaignId, tenantId], references: [id, tenantId], onDelete: Cascade)"
+      },
+      {
+        "name": "recipient",
+        "type": "MarketingCampaignRecipient?",
+        "declaration": "recipient                   MarketingCampaignRecipient? @relation(fields: [recipientId, tenantId, campaignId], references: [id, tenantId, campaignId], onDelete: Cascade)"
+      }
+    ],
+    "constraints": [
+      "@@unique([tenantId, recipientId, attemptNumber])",
+      "@@index([tenantId, campaignId, createdAt])",
+      "@@index([tenantId, recipientId, attemptNumber])",
+      "@@index([tenantId, state, startedAt])",
+      "@@index([tenantId, providerReferenceHash])"
+    ],
+    "sha256": "7c916db1c9310861548b7efd71b74dd2c4822816ea185a787135e84177f0cbd5"
+  },
+  {
+    "model": "Expense",
+    "line": 1747,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                String           @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId          String"
+      },
+      {
+        "name": "actionExecutionId",
+        "type": "String?",
+        "declaration": "actionExecutionId String?"
+      },
+      {
+        "name": "branchId",
+        "type": "String?",
+        "declaration": "branchId          String?"
+      },
+      {
+        "name": "branchTenantId",
+        "type": "String?",
+        "declaration": "branchTenantId    String?"
+      },
+      {
+        "name": "createdById",
+        "type": "String?",
+        "declaration": "createdById       String?"
+      },
+      {
+        "name": "createdByTenantId",
+        "type": "String?",
+        "declaration": "createdByTenantId String?"
+      },
+      {
+        "name": "category",
+        "type": "String",
+        "declaration": "category          String"
+      },
+      {
+        "name": "amountKopecks",
+        "type": "Int",
+        "declaration": "amountKopecks     Int"
+      },
+      {
+        "name": "currency",
+        "type": "String",
+        "declaration": "currency          String           @default(\"RUB\")"
+      },
+      {
+        "name": "occurredAt",
+        "type": "DateTime",
+        "declaration": "occurredAt        DateTime"
+      },
+      {
+        "name": "encryptedNote",
+        "type": "String?",
+        "declaration": "encryptedNote     String?"
+      },
+      {
+        "name": "source",
+        "type": "String",
+        "declaration": "source            String           @default(\"manual\")"
+      },
+      {
+        "name": "externalId",
+        "type": "String?",
+        "declaration": "externalId        String?"
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "String?",
+        "declaration": "idempotencyKey    String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt         DateTime         @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt         DateTime         @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "branch",
+        "type": "Branch?",
+        "declaration": "branch            Branch?          @relation(fields: [branchId, branchTenantId], references: [id, tenantId], onDelete: SetNull)"
+      },
+      {
+        "name": "createdBy",
+        "type": "User?",
+        "declaration": "createdBy         User?            @relation(\"ExpenseCreator\", fields: [createdById], references: [id], onDelete: SetNull)"
+      },
+      {
+        "name": "actionExecution",
+        "type": "ActionExecution?",
+        "declaration": "actionExecution   ActionExecution? @relation(\"ExpenseActionExecution\", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([actionExecutionId, tenantId])",
+      "@@unique([tenantId, externalId])",
+      "@@unique([tenantId, idempotencyKey])",
+      "@@index([tenantId, occurredAt])",
+      "@@index([tenantId, branchId, occurredAt])",
+      "@@index([tenantId, source, occurredAt])"
+    ],
+    "sha256": "70101b87649b66405f3780069739e76323fa598e296565d80d5f8fcd1ddfeffc"
+  },
+  {
+    "model": "ExpensePeriodDeclaration",
+    "line": 1782,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                String           @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId          String"
+      },
+      {
+        "name": "actionExecutionId",
+        "type": "String?",
+        "declaration": "actionExecutionId String?"
+      },
+      {
+        "name": "declaredById",
+        "type": "String?",
+        "declaration": "declaredById      String?"
+      },
+      {
+        "name": "periodFromDay",
+        "type": "String",
+        "declaration": "periodFromDay     String"
+      },
+      {
+        "name": "periodToDay",
+        "type": "String",
+        "declaration": "periodToDay       String"
+      },
+      {
+        "name": "declarationEpoch",
+        "type": "Int?",
+        "declaration": "declarationEpoch  Int?"
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "String?",
+        "declaration": "idempotencyKey    String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt         DateTime         @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt         DateTime         @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "declaredBy",
+        "type": "User?",
+        "declaration": "declaredBy        User?            @relation(\"ExpensePeriodDeclarer\", fields: [declaredById], references: [id], onDelete: SetNull)"
+      },
+      {
+        "name": "actionExecution",
+        "type": "ActionExecution?",
+        "declaration": "actionExecution   ActionExecution? @relation(\"ExpensePeriodDeclarationActionExecution\", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)"
+      }
+    ],
+    "constraints": [
+      "@@unique([actionExecutionId, tenantId])",
+      "@@unique([tenantId, periodFromDay, periodToDay])",
+      "@@unique([tenantId, idempotencyKey])",
+      "@@index([tenantId, periodFromDay, periodToDay])"
+    ],
+    "sha256": "8b95f8efc6e85cde7cbaa68133914a55a43f1e0bc8764da389e92915038bd41c"
+  },
+  {
+    "model": "ExpensePeriodDeclarationInvalidation",
+    "line": 1806,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                                      String   @id @default(uuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                                String"
+      },
+      {
+        "name": "periodFromDay",
+        "type": "String",
+        "declaration": "periodFromDay                           String"
+      },
+      {
+        "name": "periodToDay",
+        "type": "String",
+        "declaration": "periodToDay                             String"
+      },
+      {
+        "name": "invalidatedDeclarationId",
+        "type": "String",
+        "declaration": "invalidatedDeclarationId                String"
+      },
+      {
+        "name": "invalidatedDeclarationActionExecutionId",
+        "type": "String",
+        "declaration": "invalidatedDeclarationActionExecutionId String"
+      },
+      {
+        "name": "invalidationActionExecutionId",
+        "type": "String",
+        "declaration": "invalidationActionExecutionId           String"
+      },
+      {
+        "name": "previousDeclarationEpoch",
+        "type": "Int",
+        "declaration": "previousDeclarationEpoch                Int"
+      },
+      {
+        "name": "nextDeclarationEpoch",
+        "type": "Int",
+        "declaration": "nextDeclarationEpoch                    Int"
+      },
+      {
+        "name": "reasonCode",
+        "type": "String",
+        "declaration": "reasonCode                              String"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                               DateTime @default(now())"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                                Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: \"ExpensePeriodInvalidation_tenant_fkey\")"
+      },
+      {
+        "name": "invalidatedDeclarationActionExecution",
+        "type": "ActionExecution",
+        "declaration": "invalidatedDeclarationActionExecution ActionExecution @relation(\"ExpensePeriodInvalidatedDeclarationExecution\", fields: [invalidatedDeclarationActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"ExpensePeriodInvalidation_decl_exec_fkey\")"
+      },
+      {
+        "name": "invalidationActionExecution",
+        "type": "ActionExecution",
+        "declaration": "invalidationActionExecution           ActionExecution @relation(\"ExpensePeriodInvalidationExecution\", fields: [invalidationActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"ExpensePeriodInvalidation_action_exec_fkey\")"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId], map: \"ExpensePeriodInvalidation_id_tenant_key\")",
+      "@@unique([tenantId, invalidatedDeclarationActionExecutionId], map: \"ExpensePeriodInvalidation_decl_exec_key\")",
+      "@@unique([tenantId, periodFromDay, periodToDay, nextDeclarationEpoch], map: \"ExpensePeriodInvalidation_period_epoch_key\")",
+      "@@unique([tenantId, invalidationActionExecutionId, invalidatedDeclarationId], map: \"ExpensePeriodInvalidation_action_decl_key\")",
+      "@@index([tenantId, periodFromDay, periodToDay, nextDeclarationEpoch], map: \"ExpensePeriodInvalidation_period_epoch_idx\")"
+    ],
+    "sha256": "6500a103d6e911ceac72b5ecae5f83d12e6986dee0468f02a2caa76c70dd42c3"
+  },
+  {
+    "model": "DashboardPreference",
+    "line": 828,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id         String     @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId   String"
+      },
+      {
+        "name": "userId",
+        "type": "String",
+        "declaration": "userId     String"
+      },
+      {
+        "name": "section",
+        "type": "String",
+        "declaration": "section    String     @default(\"finance\")"
+      },
+      {
+        "name": "configJson",
+        "type": "Json",
+        "declaration": "configJson Json       @default(\"{}\")"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt  DateTime   @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt  DateTime   @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "membership",
+        "type": "Membership",
+        "declaration": "membership Membership @relation(fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)"
+      }
+    ],
+    "constraints": [
+      "@@unique([userId, tenantId, section])",
+      "@@index([tenantId, section])"
+    ],
+    "sha256": "a9aa2051b8a74fd3b9bea31b39751aa61e45773020aa8b897961a4b412410d9c"
+  },
+  {
+    "model": "TenantBusinessConfigurationRevision",
+    "line": 3498,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id String @id @default(uuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId String"
+      },
+      {
+        "name": "namespace",
+        "type": "String",
+        "declaration": "namespace String"
+      },
+      {
+        "name": "revision",
+        "type": "Int",
+        "declaration": "revision Int"
+      },
+      {
+        "name": "previousRevisionId",
+        "type": "String?",
+        "declaration": "previousRevisionId String?"
+      },
+      {
+        "name": "actionExecutionId",
+        "type": "String",
+        "declaration": "actionExecutionId String"
+      },
+      {
+        "name": "actorUserId",
+        "type": "String",
+        "declaration": "actorUserId String"
+      },
+      {
+        "name": "actorMembershipId",
+        "type": "String",
+        "declaration": "actorMembershipId String"
+      },
+      {
+        "name": "contractVersion",
+        "type": "Int",
+        "declaration": "contractVersion Int"
+      },
+      {
+        "name": "contentHash",
+        "type": "String",
+        "declaration": "contentHash String @db.Char(64)"
+      },
+      {
+        "name": "encryptedContent",
+        "type": "String?",
+        "declaration": "encryptedContent String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt DateTime @db.Timestamptz(3)"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant Tenant @relation(\"R11_TenantBusinessConfigurationRevision_tenant\", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: \"R11_TenantBusinessConfigurationRevision_tenant_fk\")"
+      },
+      {
+        "name": "actorMembership",
+        "type": "Membership",
+        "declaration": "actorMembership Membership @relation(\"R11_config_member\", fields: [actorMembershipId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R11_config_member_fk\")"
+      },
+      {
+        "name": "execution",
+        "type": "ActionExecution",
+        "declaration": "execution ActionExecution @relation(\"R11_config_execution\", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R11_config_execution_fk\")"
+      },
+      {
+        "name": "previousRevision",
+        "type": "TenantBusinessConfigurationRevision?",
+        "declaration": "previousRevision TenantBusinessConfigurationRevision? @relation(\"R11_config_previous\", fields: [previousRevisionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R11_config_previous_fk\")"
+      },
+      {
+        "name": "nextRevisions",
+        "type": "TenantBusinessConfigurationRevision[]",
+        "declaration": "nextRevisions TenantBusinessConfigurationRevision[] @relation(\"R11_config_previous\")"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId], map: \"R11_TenantBusinessConfigurationRevision_tenant_uq\")",
+      "@@unique([tenantId, namespace, revision], map: \"R11_config_version_uq\")",
+      "@@unique([tenantId, actionExecutionId], map: \"R11_config_execution_uq\")"
+    ],
+    "sha256": "8a343ef2df6733db1b80eab570235e26bc64a02e84d98ce31b3b7d7e6cfac75c"
+  },
+  {
+    "model": "BusinessReview",
+    "line": 1434,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id              String   @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId        String"
+      },
+      {
+        "name": "externalRef",
+        "type": "String?",
+        "declaration": "externalRef     String?"
+      },
+      {
+        "name": "source",
+        "type": "String",
+        "declaration": "source          String"
+      },
+      {
+        "name": "rating",
+        "type": "Int",
+        "declaration": "rating          Int"
+      },
+      {
+        "name": "occurredAt",
+        "type": "DateTime",
+        "declaration": "occurredAt      DateTime"
+      },
+      {
+        "name": "encryptedText",
+        "type": "String?",
+        "declaration": "encryptedText   String?"
+      },
+      {
+        "name": "topicTagsJson",
+        "type": "Json?",
+        "declaration": "topicTagsJson   Json?"
+      },
+      {
+        "name": "branchId",
+        "type": "String?",
+        "declaration": "branchId        String?"
+      },
+      {
+        "name": "staffExternalId",
+        "type": "String?",
+        "declaration": "staffExternalId String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt       DateTime @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt       DateTime @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      }
+    ],
+    "constraints": [
+      "@@unique([tenantId, source, externalRef])",
+      "@@index([tenantId, occurredAt])",
+      "@@index([tenantId, rating, occurredAt])"
+    ],
+    "sha256": "bc4646f398a74e8ac7758e050f4156076595bc00f10da5f57705ccdd281b46d2"
+  },
+  {
+    "model": "NativeFeedbackRequest",
+    "line": 3297,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id String @id @default(uuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId String"
+      },
+      {
+        "name": "clientId",
+        "type": "String",
+        "declaration": "clientId String"
+      },
+      {
+        "name": "appointmentId",
+        "type": "String",
+        "declaration": "appointmentId String"
+      },
+      {
+        "name": "requestedByUserId",
+        "type": "String",
+        "declaration": "requestedByUserId String"
+      },
+      {
+        "name": "requestExecutionId",
+        "type": "String",
+        "declaration": "requestExecutionId String"
+      },
+      {
+        "name": "requestIdentityHash",
+        "type": "String",
+        "declaration": "requestIdentityHash String @db.Char(64)"
+      },
+      {
+        "name": "intentHash",
+        "type": "String",
+        "declaration": "intentHash String @db.Char(64)"
+      },
+      {
+        "name": "contractVersion",
+        "type": "Int",
+        "declaration": "contractVersion Int"
+      },
+      {
+        "name": "eligibleAt",
+        "type": "DateTime",
+        "declaration": "eligibleAt DateTime @db.Timestamptz(3)"
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "declaration": "expiresAt DateTime @db.Timestamptz(3)"
+      },
+      {
+        "name": "contentHash",
+        "type": "String",
+        "declaration": "contentHash String @db.Char(64)"
+      },
+      {
+        "name": "contentEncrypted",
+        "type": "String?",
+        "declaration": "contentEncrypted String?"
+      },
+      {
+        "name": "planHash",
+        "type": "String",
+        "declaration": "planHash String @db.Char(64)"
+      },
+      {
+        "name": "planEncrypted",
+        "type": "String?",
+        "declaration": "planEncrypted String?"
+      },
+      {
+        "name": "state",
+        "type": "String",
+        "declaration": "state String"
+      },
+      {
+        "name": "revision",
+        "type": "Int",
+        "declaration": "revision Int"
+      },
+      {
+        "name": "latestResponseVersion",
+        "type": "Int",
+        "declaration": "latestResponseVersion Int"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt DateTime @db.Timestamptz(3)"
+      },
+      {
+        "name": "closedAt",
+        "type": "DateTime?",
+        "declaration": "closedAt DateTime? @db.Timestamptz(3)"
+      },
+      {
+        "name": "payloadErasedAt",
+        "type": "DateTime?",
+        "declaration": "payloadErasedAt DateTime? @db.Timestamptz(3)"
+      },
+      {
+        "name": "retentionUntil",
+        "type": "DateTime",
+        "declaration": "retentionUntil DateTime @db.Timestamptz(3)"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant Tenant @relation(\"R08_NativeFeedbackRequest_tenant\", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: \"R08_NativeFeedbackRequest_tenant_fk\")"
+      },
+      {
+        "name": "client",
+        "type": "Client",
+        "declaration": "client Client @relation(\"R08_request_client\", fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R08_request_client_fk\")"
+      },
+      {
+        "name": "appointment",
+        "type": "Appointment",
+        "declaration": "appointment Appointment @relation(\"R08_request_appointment\", fields: [appointmentId, tenantId, clientId], references: [id, tenantId, mayaClientId], onDelete: Restrict, onUpdate: Restrict, map: \"R08_request_appointment_fk\")"
+      },
+      {
+        "name": "requesterMembership",
+        "type": "Membership",
+        "declaration": "requesterMembership Membership @relation(\"R08_request_member\", fields: [requestedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R08_request_member_fk\")"
+      },
+      {
+        "name": "requestExecution",
+        "type": "ActionExecution",
+        "declaration": "requestExecution ActionExecution @relation(\"R08_request_execution\", fields: [requestExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R08_request_execution_fk\")"
+      },
+      {
+        "name": "revisions",
+        "type": "NativeFeedbackRevision[]",
+        "declaration": "revisions NativeFeedbackRevision[] @relation(\"R08_revision_request\")"
+      },
+      {
+        "name": "deliveries",
+        "type": "ActionExecution[]",
+        "declaration": "deliveries ActionExecution[] @relation(\"R08_execution_request\")"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId], map: \"R08_NativeFeedbackRequest_tenant_uq\")",
+      "@@unique([tenantId, requestIdentityHash], map: \"R08_request_identity_uq\")",
+      "@@unique([tenantId, appointmentId, clientId], map: \"R08_request_appointment_uq\")",
+      "@@unique([id, tenantId, clientId], map: \"R08_request_client_uq\")",
+      "@@index([tenantId, retentionUntil], map: \"R08_request_retention_idx\")"
+    ],
+    "sha256": "91cbbd228f9bf6424cb69e95f74eb590cf27adea5658f72d8cf34558aa27d342"
+  },
+  {
+    "model": "NativeFeedbackRevision",
+    "line": 3335,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id String @id @default(uuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId String"
+      },
+      {
+        "name": "requestId",
+        "type": "String",
+        "declaration": "requestId String"
+      },
+      {
+        "name": "clientId",
+        "type": "String",
+        "declaration": "clientId String"
+      },
+      {
+        "name": "executionId",
+        "type": "String",
+        "declaration": "executionId String"
+      },
+      {
+        "name": "identityHash",
+        "type": "String",
+        "declaration": "identityHash String @db.Char(64)"
+      },
+      {
+        "name": "intentHash",
+        "type": "String",
+        "declaration": "intentHash String @db.Char(64)"
+      },
+      {
+        "name": "version",
+        "type": "Int",
+        "declaration": "version Int"
+      },
+      {
+        "name": "kind",
+        "type": "String",
+        "declaration": "kind String"
+      },
+      {
+        "name": "rating",
+        "type": "Int?",
+        "declaration": "rating Int?"
+      },
+      {
+        "name": "commentEncrypted",
+        "type": "String?",
+        "declaration": "commentEncrypted String?"
+      },
+      {
+        "name": "contentHash",
+        "type": "String",
+        "declaration": "contentHash String @db.Char(64)"
+      },
+      {
+        "name": "planHash",
+        "type": "String",
+        "declaration": "planHash String @db.Char(64)"
+      },
+      {
+        "name": "planEncrypted",
+        "type": "String?",
+        "declaration": "planEncrypted String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt DateTime @db.Timestamptz(3)"
+      },
+      {
+        "name": "payloadErasedAt",
+        "type": "DateTime?",
+        "declaration": "payloadErasedAt DateTime? @db.Timestamptz(3)"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant Tenant @relation(\"R08_NativeFeedbackRevision_tenant\", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: \"R08_NativeFeedbackRevision_tenant_fk\")"
+      },
+      {
+        "name": "request",
+        "type": "NativeFeedbackRequest",
+        "declaration": "request NativeFeedbackRequest @relation(\"R08_revision_request\", fields: [requestId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict, map: \"R08_revision_request_fk\")"
+      },
+      {
+        "name": "client",
+        "type": "Client",
+        "declaration": "client Client @relation(\"R08_revision_client\", fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R08_revision_client_fk\")"
+      },
+      {
+        "name": "execution",
+        "type": "ActionExecution",
+        "declaration": "execution ActionExecution @relation(\"R08_revision_execution\", fields: [executionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: \"R08_revision_execution_fk\")"
+      },
+      {
+        "name": "deliveries",
+        "type": "ActionExecution[]",
+        "declaration": "deliveries ActionExecution[] @relation(\"R08_execution_revision\")"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId], map: \"R08_NativeFeedbackRevision_tenant_uq\")",
+      "@@unique([tenantId, requestId, version], map: \"R08_revision_version_uq\")",
+      "@@unique([tenantId, requestId, identityHash], map: \"R08_revision_identity_uq\")",
+      "@@unique([id, tenantId, requestId], map: \"R08_revision_request_uq\")"
+    ],
+    "sha256": "e26f6a26ef6e6fcc08fad2f851915aca8ea6c2b065f8986662aeb5a8065aaf1f"
+  },
+  {
+    "model": "LoyaltyAccount",
+    "line": 1606,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                String               @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId          String"
+      },
+      {
+        "name": "clientId",
+        "type": "String?",
+        "declaration": "clientId          String?"
+      },
+      {
+        "name": "userId",
+        "type": "String?",
+        "declaration": "userId            String?"
+      },
+      {
+        "name": "source",
+        "type": "String",
+        "declaration": "source            String               @default(\"internal\")"
+      },
+      {
+        "name": "balance",
+        "type": "Int",
+        "declaration": "balance           Int                  @default(0)"
+      },
+      {
+        "name": "externalReference",
+        "type": "String?",
+        "declaration": "externalReference String?"
+      },
+      {
+        "name": "syncedAt",
+        "type": "DateTime?",
+        "declaration": "syncedAt          DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt         DateTime             @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt         DateTime             @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant            Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "client",
+        "type": "Client?",
+        "declaration": "client            Client?              @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)"
+      },
+      {
+        "name": "user",
+        "type": "User?",
+        "declaration": "user              User?                @relation(fields: [userId], references: [id], onDelete: SetNull)"
+      },
+      {
+        "name": "membership",
+        "type": "Membership?",
+        "declaration": "membership        Membership?          @relation(\"LoyaltyAccountMembership\", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)"
+      },
+      {
+        "name": "transactions",
+        "type": "LoyaltyTransaction[]",
+        "declaration": "transactions      LoyaltyTransaction[]"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([userId, tenantId])",
+      "@@unique([tenantId, clientId])",
+      "@@index([tenantId, source, updatedAt])"
+    ],
+    "sha256": "652e3ea17e03a9a7ee7327bcfbc730f6b63953a2863edb8c2a499fc6598dbf37"
+  },
+  {
+    "model": "LoyaltyTransaction",
+    "line": 1629,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                String           @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId          String"
+      },
+      {
+        "name": "actionExecutionId",
+        "type": "String?",
+        "declaration": "actionExecutionId String?"
+      },
+      {
+        "name": "accountId",
+        "type": "String",
+        "declaration": "accountId         String"
+      },
+      {
+        "name": "actorUserId",
+        "type": "String?",
+        "declaration": "actorUserId       String?"
+      },
+      {
+        "name": "actorTenantId",
+        "type": "String?",
+        "declaration": "actorTenantId     String?"
+      },
+      {
+        "name": "kind",
+        "type": "String",
+        "declaration": "kind              String"
+      },
+      {
+        "name": "delta",
+        "type": "Int",
+        "declaration": "delta             Int"
+      },
+      {
+        "name": "balanceAfter",
+        "type": "Int",
+        "declaration": "balanceAfter      Int"
+      },
+      {
+        "name": "encryptedReason",
+        "type": "String",
+        "declaration": "encryptedReason   String"
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "String",
+        "declaration": "idempotencyKey    String"
+      },
+      {
+        "name": "externalRef",
+        "type": "String?",
+        "declaration": "externalRef       String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt         DateTime         @default(now())"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "account",
+        "type": "LoyaltyAccount",
+        "declaration": "account           LoyaltyAccount   @relation(fields: [accountId, tenantId], references: [id, tenantId], onDelete: Cascade)"
+      },
+      {
+        "name": "actor",
+        "type": "User?",
+        "declaration": "actor             User?            @relation(\"LoyaltyTransactionActor\", fields: [actorUserId], references: [id], onDelete: SetNull)"
+      },
+      {
+        "name": "actionExecution",
+        "type": "ActionExecution?",
+        "declaration": "actionExecution   ActionExecution? @relation(\"LoyaltyTransactionActionExecution\", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)"
+      }
+    ],
+    "constraints": [
+      "@@unique([tenantId, idempotencyKey])",
+      "@@index([tenantId, actionExecutionId])",
+      "@@index([tenantId, accountId, createdAt])",
+      "@@index([tenantId, actorUserId, createdAt])"
+    ],
+    "sha256": "6d6fcb4af9be80c4a17c4ad9e2944e06c6beeed0ac7e65b0531cf6f6380a904c"
+  },
+  {
+    "model": "GiftCertificate",
+    "line": 1372,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                       String                     @id @default(cuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId                 String"
+      },
+      {
+        "name": "issueExecutionId",
+        "type": "String?",
+        "declaration": "issueExecutionId         String?"
+      },
+      {
+        "name": "issuanceIdentityHash",
+        "type": "String",
+        "declaration": "issuanceIdentityHash     String"
+      },
+      {
+        "name": "codeHash",
+        "type": "String",
+        "declaration": "codeHash                 String"
+      },
+      {
+        "name": "presentationKeyVersion",
+        "type": "String?",
+        "declaration": "presentationKeyVersion   String?"
+      },
+      {
+        "name": "recipientSubjectHash",
+        "type": "String",
+        "declaration": "recipientSubjectHash     String"
+      },
+      {
+        "name": "offerSnapshotHash",
+        "type": "String",
+        "declaration": "offerSnapshotHash        String"
+      },
+      {
+        "name": "nominalAmountKopecks",
+        "type": "Int",
+        "declaration": "nominalAmountKopecks     Int"
+      },
+      {
+        "name": "currency",
+        "type": "String",
+        "declaration": "currency                 String"
+      },
+      {
+        "name": "paymentStatus",
+        "type": "String",
+        "declaration": "paymentStatus            String                     @default(\"pending_payment\")"
+      },
+      {
+        "name": "provider",
+        "type": "String?",
+        "declaration": "provider                 String?"
+      },
+      {
+        "name": "providerPaymentRefHash",
+        "type": "String?",
+        "declaration": "providerPaymentRefHash   String?"
+      },
+      {
+        "name": "issuedAt",
+        "type": "DateTime",
+        "declaration": "issuedAt                 DateTime"
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "declaration": "expiresAt                DateTime"
+      },
+      {
+        "name": "paidAt",
+        "type": "DateTime?",
+        "declaration": "paidAt                   DateTime?"
+      },
+      {
+        "name": "canceledAt",
+        "type": "DateTime?",
+        "declaration": "canceledAt               DateTime?"
+      },
+      {
+        "name": "legacySourceRef",
+        "type": "String?",
+        "declaration": "legacySourceRef          String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt                DateTime                   @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt                DateTime                   @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant                   Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "issueExecution",
+        "type": "ActionExecution?",
+        "declaration": "issueExecution           ActionExecution?           @relation(\"GiftCertificateIssueExecution\", fields: [issueExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)"
+      },
+      {
+        "name": "redemption",
+        "type": "GiftCertificateRedemption?",
+        "declaration": "redemption               GiftCertificateRedemption?"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, tenantId])",
+      "@@unique([tenantId, issuanceIdentityHash])",
+      "@@unique([tenantId, codeHash])",
+      "@@unique([issueExecutionId, tenantId])",
+      "@@unique([tenantId, provider, providerPaymentRefHash])",
+      "@@unique([tenantId, legacySourceRef])",
+      "@@index([tenantId, paymentStatus, expiresAt])",
+      "@@index([tenantId, recipientSubjectHash, expiresAt])"
+    ],
+    "sha256": "35fc91fa738156c8346680ce1b7fe4da24a1fd47d95fe4171134c49d7c77a0a8"
+  },
+  {
+    "model": "AuditLog",
+    "line": 2629,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id           String     @id @default(cuid())"
+      },
+      {
+        "name": "scope",
+        "type": "AuditScope",
+        "declaration": "scope        AuditScope @default(tenant)"
+      },
+      {
+        "name": "tenantId",
+        "type": "String?",
+        "declaration": "tenantId     String?"
+      },
+      {
+        "name": "userId",
+        "type": "String?",
+        "declaration": "userId       String?"
+      },
+      {
+        "name": "action",
+        "type": "String",
+        "declaration": "action       String"
+      },
+      {
+        "name": "entityType",
+        "type": "String",
+        "declaration": "entityType   String"
+      },
+      {
+        "name": "entityId",
+        "type": "String",
+        "declaration": "entityId     String"
+      },
+      {
+        "name": "metadataJson",
+        "type": "Json?",
+        "declaration": "metadataJson Json?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt    DateTime   @default(now())"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant?",
+        "declaration": "tenant       Tenant?    @relation(fields: [tenantId], references: [id], onDelete: Cascade)"
+      },
+      {
+        "name": "user",
+        "type": "User?",
+        "declaration": "user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)"
+      }
+    ],
+    "constraints": [
+      "@@index([tenantId])",
+      "@@index([userId])",
+      "@@index([scope, createdAt])",
+      "@@index([tenantId, createdAt])"
+    ],
+    "sha256": "b3630f6d7bc6e1eaabf2582f99a03b8e4051adfc096b49acde0736bf7ed02c62"
+  },
+  {
+    "model": "OwnerReportRun",
+    "line": 3273,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id String @id @default(uuid())"
+      },
+      {
+        "name": "tenantId",
+        "type": "String",
+        "declaration": "tenantId String"
+      },
+      {
+        "name": "reportType",
+        "type": "String",
+        "declaration": "reportType String"
+      },
+      {
+        "name": "periodLocalDate",
+        "type": "String",
+        "declaration": "periodLocalDate String"
+      },
+      {
+        "name": "reportVersion",
+        "type": "Int",
+        "declaration": "reportVersion Int"
+      },
+      {
+        "name": "timezone",
+        "type": "String",
+        "declaration": "timezone String"
+      },
+      {
+        "name": "intentHash",
+        "type": "String",
+        "declaration": "intentHash String"
+      },
+      {
+        "name": "intentEncrypted",
+        "type": "String?",
+        "declaration": "intentEncrypted String?"
+      },
+      {
+        "name": "admittedAt",
+        "type": "DateTime",
+        "declaration": "admittedAt DateTime"
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "declaration": "expiresAt DateTime"
+      },
+      {
+        "name": "payloadRetentionUntil",
+        "type": "DateTime",
+        "declaration": "payloadRetentionUntil DateTime"
+      },
+      {
+        "name": "auditRetentionUntil",
+        "type": "DateTime",
+        "declaration": "auditRetentionUntil DateTime"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant",
+        "declaration": "tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: \"B36_report_tenant_fkey\")"
+      },
+      {
+        "name": "executions",
+        "type": "ActionExecution[]",
+        "declaration": "executions ActionExecution[]"
+      }
+    ],
+    "constraints": [
+      "@@unique([tenantId, reportType, periodLocalDate, reportVersion], map: \"B36_report_identity_key\")",
+      "@@unique([id, tenantId], map: \"B36_report_tenant_key\")",
+      "@@index([tenantId, expiresAt], map: \"B36_report_resume_idx\")",
+      "@@index([payloadRetentionUntil], map: \"B36_report_payload_retention_idx\")",
+      "@@index([auditRetentionUntil], map: \"B36_report_audit_retention_idx\")"
+    ],
+    "sha256": "6220331868a227d21e8736bf8de3a10c88f126523b968e81e3854358a7044b71"
+  },
+  {
+    "model": "MaintenanceRun",
+    "line": 2947,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                     String    @id @default(uuid())"
+      },
+      {
+        "name": "scope",
+        "type": "String",
+        "declaration": "scope                  String"
+      },
+      {
+        "name": "tenantId",
+        "type": "String?",
+        "declaration": "tenantId               String?"
+      },
+      {
+        "name": "runIdentityVersion",
+        "type": "Int",
+        "declaration": "runIdentityVersion     Int"
+      },
+      {
+        "name": "runIdentityFingerprint",
+        "type": "String",
+        "declaration": "runIdentityFingerprint String    @unique"
+      },
+      {
+        "name": "maintenanceKind",
+        "type": "String",
+        "declaration": "maintenanceKind        String"
+      },
+      {
+        "name": "subjectClass",
+        "type": "String",
+        "declaration": "subjectClass           String"
+      },
+      {
+        "name": "policyKey",
+        "type": "String",
+        "declaration": "policyKey              String"
+      },
+      {
+        "name": "policyVersion",
+        "type": "Int",
+        "declaration": "policyVersion          Int"
+      },
+      {
+        "name": "cutoffAt",
+        "type": "DateTime",
+        "declaration": "cutoffAt               DateTime"
+      },
+      {
+        "name": "maxItems",
+        "type": "Int",
+        "declaration": "maxItems               Int"
+      },
+      {
+        "name": "batchSize",
+        "type": "Int",
+        "declaration": "batchSize              Int"
+      },
+      {
+        "name": "cursorHash",
+        "type": "String?",
+        "declaration": "cursorHash             String?"
+      },
+      {
+        "name": "state",
+        "type": "String",
+        "declaration": "state                  String    @default(\"PLANNED\")"
+      },
+      {
+        "name": "leaseOwner",
+        "type": "String?",
+        "declaration": "leaseOwner             String?"
+      },
+      {
+        "name": "leaseTokenHash",
+        "type": "String?",
+        "declaration": "leaseTokenHash         String?"
+      },
+      {
+        "name": "leaseExpiresAt",
+        "type": "DateTime?",
+        "declaration": "leaseExpiresAt         DateTime?"
+      },
+      {
+        "name": "authorityType",
+        "type": "String",
+        "declaration": "authorityType          String"
+      },
+      {
+        "name": "requestedByUserId",
+        "type": "String?",
+        "declaration": "requestedByUserId      String?"
+      },
+      {
+        "name": "approvedByUserId",
+        "type": "String?",
+        "declaration": "approvedByUserId       String?"
+      },
+      {
+        "name": "approvalBindingHash",
+        "type": "String?",
+        "declaration": "approvalBindingHash    String?"
+      },
+      {
+        "name": "actionExecutionId",
+        "type": "String?",
+        "declaration": "actionExecutionId      String?"
+      },
+      {
+        "name": "attemptedCount",
+        "type": "Int",
+        "declaration": "attemptedCount         Int       @default(0)"
+      },
+      {
+        "name": "succeededCount",
+        "type": "Int",
+        "declaration": "succeededCount         Int       @default(0)"
+      },
+      {
+        "name": "failedCount",
+        "type": "Int",
+        "declaration": "failedCount            Int       @default(0)"
+      },
+      {
+        "name": "startedAt",
+        "type": "DateTime?",
+        "declaration": "startedAt              DateTime?"
+      },
+      {
+        "name": "finishedAt",
+        "type": "DateTime?",
+        "declaration": "finishedAt             DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt              DateTime  @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt              DateTime  @updatedAt"
+      },
+      {
+        "name": "tenant",
+        "type": "Tenant?",
+        "declaration": "tenant       Tenant?          @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)"
+      },
+      {
+        "name": "requestedBy",
+        "type": "User?",
+        "declaration": "requestedBy  User?            @relation(\"MaintenanceRunRequester\", fields: [requestedByUserId], references: [id], onDelete: Restrict, onUpdate: Restrict)"
+      },
+      {
+        "name": "approvedBy",
+        "type": "User?",
+        "declaration": "approvedBy   User?            @relation(\"MaintenanceRunApprover\", fields: [approvedByUserId], references: [id], onDelete: Restrict, onUpdate: Restrict)"
+      },
+      {
+        "name": "execution",
+        "type": "ActionExecution?",
+        "declaration": "execution    ActionExecution? @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)"
+      },
+      {
+        "name": "itemClaims",
+        "type": "MaintenanceItemClaim[]",
+        "declaration": "itemClaims   MaintenanceItemClaim[]"
+      }
+    ],
+    "constraints": [
+      "@@unique([id, scope])",
+      "@@index([tenantId, maintenanceKind, state, createdAt])",
+      "@@index([scope, state, leaseExpiresAt])",
+      "@@index([tenantId, actionExecutionId])"
+    ],
+    "sha256": "8667c9b39d3a910993e0fa0e0a13971d0f18934ee1c72ab0788e61c56b64bbbb"
+  },
+  {
+    "model": "MaintenanceItemClaim",
+    "line": 2992,
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "declaration": "id                String    @id @default(uuid())"
+      },
+      {
+        "name": "maintenanceRunId",
+        "type": "String",
+        "declaration": "maintenanceRunId  String"
+      },
+      {
+        "name": "itemKind",
+        "type": "String",
+        "declaration": "itemKind          String"
+      },
+      {
+        "name": "itemRefHash",
+        "type": "String",
+        "declaration": "itemRefHash       String"
+      },
+      {
+        "name": "claimGeneration",
+        "type": "Int",
+        "declaration": "claimGeneration   Int       @default(0)"
+      },
+      {
+        "name": "state",
+        "type": "String",
+        "declaration": "state             String    @default(\"CLAIMED\")"
+      },
+      {
+        "name": "outcomeCode",
+        "type": "String?",
+        "declaration": "outcomeCode       String?"
+      },
+      {
+        "name": "claimedAt",
+        "type": "DateTime",
+        "declaration": "claimedAt         DateTime  @default(now())"
+      },
+      {
+        "name": "finishedAt",
+        "type": "DateTime?",
+        "declaration": "finishedAt        DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "declaration": "createdAt         DateTime  @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "declaration": "updatedAt         DateTime  @updatedAt"
+      },
+      {
+        "name": "run",
+        "type": "MaintenanceRun",
+        "declaration": "run MaintenanceRun @relation(fields: [maintenanceRunId], references: [id], onDelete: Restrict, onUpdate: Restrict)"
+      }
+    ],
+    "constraints": [
+      "@@unique([maintenanceRunId, itemKind, itemRefHash])",
+      "@@index([maintenanceRunId, state, claimedAt])"
+    ],
+    "sha256": "871877011a75c6256d2e6c0fd2b4fb571b53327073525522b67e18b24322e408"
+  }
+]

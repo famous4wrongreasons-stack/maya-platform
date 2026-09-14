@@ -1,0 +1,72 @@
+{
+  "b29CancelNowRejectsUnauthorizedTarget": true,
+  "b30RescheduleStillAcceptsUnauthorizedTarget": true,
+  "cancelCases": [
+    {
+      "mode": "missing",
+      "cancelAccepted": false,
+      "statusAfter": "confirmed",
+      "error": "client_link_required",
+      "newActionExecutions": 0,
+      "actionEngineCancelCalls": 0
+    },
+    {
+      "mode": "revoked",
+      "cancelAccepted": false,
+      "statusAfter": "confirmed",
+      "error": "client_link_required",
+      "newActionExecutions": 0,
+      "actionEngineCancelCalls": 0
+    },
+    {
+      "mode": "verified_to_other_client",
+      "cancelAccepted": false,
+      "statusAfter": "confirmed",
+      "error": "not_found",
+      "newActionExecutions": 0,
+      "actionEngineCancelCalls": 0
+    }
+  ],
+  "rescheduleCases": [
+    {
+      "mode": "missing",
+      "verifiedReaderDisclosesTarget": false,
+      "rescheduleAccepted": true,
+      "targetClientIsOtherThanVerifiedOrAccountAssociatedClient": true,
+      "statusAfter": "confirmed",
+      "newActionExecutions": 0,
+      "clientLinkProfileConsentStateUnchanged": true
+    },
+    {
+      "mode": "revoked",
+      "verifiedReaderDisclosesTarget": false,
+      "rescheduleAccepted": true,
+      "targetClientIsOtherThanVerifiedOrAccountAssociatedClient": true,
+      "statusAfter": "confirmed",
+      "newActionExecutions": 0,
+      "clientLinkProfileConsentStateUnchanged": true
+    },
+    {
+      "mode": "verified_to_other_client",
+      "verifiedReaderDisclosesTarget": false,
+      "rescheduleAccepted": true,
+      "targetClientIsOtherThanVerifiedOrAccountAssociatedClient": true,
+      "statusAfter": "confirmed",
+      "newActionExecutions": 0,
+      "clientLinkProfileConsentStateUnchanged": true
+    }
+  ],
+  "route": "POST /api/appointments/:id/reschedule",
+  "testedCalendarSource": "internal",
+  "compiledControllerServiceRepositoryCanceler": true,
+  "realPostgresql": true,
+  "syntheticFixturesOnly": true,
+  "httpAuthenticationBypassClaimed": false,
+  "requiresAuthenticatedTenantMemberAndBookingFeature": true,
+  "actionEngineExecutionsCreated": 0,
+  "providerCalls": 0,
+  "inboxRequestsIntercepted": 3,
+  "realProductionMutations": 0,
+  "realProductionPrivateReads": 0,
+  "limitations": "Does not execute external CRM cancellation, rescheduling, creation, or production HTTP."
+}

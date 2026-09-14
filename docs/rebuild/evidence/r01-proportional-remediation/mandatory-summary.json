@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "mandatorySuites": 431,
+  "mandatoryTests": 3609,
+  "ratchetSuites": 102,
+  "ratchetTests": 573,
+  "fullResultSha256": "af3c10f679a47acc60b02d648c81eb2dd4f362621408c5772c240dbcd05f0284",
+  "schemaChanges": 0,
+  "migrations": 0,
+  "productionChangesBeforeGate": 0,
+  "ratchetSelection": "*.architecture.spec.ts OR *ratchet.spec.ts",
+  "architectureOnlySuites": 94,
+  "architectureOnlyTests": 517
+}

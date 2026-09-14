@@ -1,0 +1,17 @@
+{
+  "acceptedCheckpoint": "7ed07b6c",
+  "ownerDecisionsApproved": "D1–D13 A",
+  "schemaActionEnvelopeApproved": true,
+  "fields": 37,
+  "newModels": [
+    "MeasurementRevision"
+  ],
+  "newBusinessActions": 0,
+  "newAc6Classes": [
+    "expire_measurement_revisions"
+  ],
+  "migrations": 1,
+  "backfill": 0,
+  "authorization": "P01 implementation and gated production cutover; automatically P02+P05, P03+P04, then P06/final gate. Latest owner execution order supersedes prior mapping document final-only cutover wording.",
+  "productionProofBusinessProviderMessageEffects": 0
+}

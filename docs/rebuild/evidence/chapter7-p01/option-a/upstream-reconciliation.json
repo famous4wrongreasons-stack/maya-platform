@@ -1,0 +1,27 @@
+{
+  "upstream": "33396c1600c936188fe67dbc7e25e7e1144ee48b",
+  "prior": "f90cd622",
+  "files": [
+    "\u0441\u0430\u0439\u0442 \u0438 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435/app.html",
+    "maya-saas-backend/src/users/app-access-pwa.spec.ts"
+  ],
+  "surface": "S02 active PWA (existing inventory)",
+  "behavior": "unlinked Client mode downgraded to preview; business account retains only server-granted modes; preview skips consent bootstrap UI",
+  "newAuthority": false,
+  "newBusinessWriters": 0,
+  "newProviderCalls": 0,
+  "newRoutes": 0,
+  "schemaDelta": 0,
+  "c7ProofsInvalidated": [],
+  "contractsReopened": false,
+  "inventoryDefect": false,
+  "targetedSuites": 7,
+  "targetedTests": 40,
+  "inlineScriptsParsed": 28,
+  "combinedBaselineCompatible": true,
+  "interruptedCutover": "after build/upload/npm ci; before migration; parent terminated and reaped",
+  "productionRelease": "20260908-p5-rc-8bc03454",
+  "productionC7MigrationApplied": false,
+  "productionProofEffects": 0,
+  "upstreamPreserved": "fast-forward, no revert/force push"
+}

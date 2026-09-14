@@ -1,0 +1,9 @@
+{
+  "ownedCluster": "/tmp/maya-rc-resume-pg-20260908",
+  "port": 55509,
+  "pidBefore": 94619,
+  "pidAfter": 2668,
+  "actualPostgreSQLRestart": true,
+  "productionEffects": 0,
+  "preExistingDatabasesTouched": 0
+}

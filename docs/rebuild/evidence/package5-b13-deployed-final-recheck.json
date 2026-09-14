@@ -1,0 +1,165 @@
+{
+  "acceptedOwnerCheckpoint": "a9a5ff24",
+  "runtimeCommits": [
+    "e3aec34abf0e4c7777fe3346c86276d382170bcd",
+    "031977e4a040fac4cfd75baff9aa058bb65a5cbe"
+  ],
+  "productionRelease": "/opt/maya-saas/releases/20260905-p5-b13-031977e4",
+  "b13TargetProductionRemediation": "PASS",
+  "b13TargetPaths": [
+    {
+      "path": "POST /api/panel/team",
+      "result": "legacy bind/reset/cashier mutations retired; compatibility projection only",
+      "canonicalOwner": "A16 configure_crm_staff_access / Package 4 value owner"
+    },
+    {
+      "path": "POST /api/panel/managers",
+      "result": "raw Telegram manager mutations retired; compatibility projection only",
+      "canonicalOwner": "A16 administrator access"
+    },
+    {
+      "path": "POST /api/panel/plan_target",
+      "result": "daily/growth/capacity mutations retired",
+      "canonicalOwner": "A22 update_finance_dashboard_preferences for monthly target"
+    },
+    {
+      "path": "POST /api/god/subscribers",
+      "result": "canonical read-only projection; all mutations retired",
+      "canonicalOwners": "TrialActivation / A26 / Package 4"
+    },
+    {
+      "path": "active generate_bind_codes.py",
+      "result": "legacy helper retired as mutation-free tombstone and included in permanent runtime guard",
+      "canonicalOwner": "A16 configure_crm_staff_access"
+    }
+  ],
+  "productionStructuralReadOnlyVerification": {
+    "backendHealth": "PASS",
+    "backendReadiness": "PASS",
+    "activePwa": "PASS",
+    "package4ActivePwaGuard": "PASS",
+    "package5B13ActivePwaGuard": "PASS",
+    "publishedPhpSyntax": "PASS",
+    "publishedApp": "PASS",
+    "backendErrorPriorityLogs": 0,
+    "pwaErrorPriorityLogs": 0,
+    "candidatePort3199": "CLOSED"
+  },
+  "artifactHashes": {
+    "publishedApp": "b8d011fa54977013fc2f6def2b9015115e22507be4de4405923bdcd028d0c3ca",
+    "publishedProxy": "984a5d383c6412a3143f5a921c0079044e1f43e4acee21bf0efdd163b735f224",
+    "activeWebhookServer": "3f224f6fe4251a879bcf95c07266b48d5989a14add21fa0431e8c06f15803757c3",
+    "activeB13Guard": "16212ea064572b0f6ed6f0d47ed74e185385ff09a411e9bb070d6242facc3af4",
+    "activeBindCliTombstone": "32a20af2254fea27419351426137f9f73c42a048b226f4e0a5277d1eaf974aee"
+  },
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "proofs": {
+    "targetedPythonB13": "PASS — 13/13",
+    "b13ArchitectureRatchet": "PASS — 6/6",
+    "mandatoryLint": "PASS",
+    "mandatoryTypecheck": "PASS",
+    "mandatoryScriptTypecheck": "PASS",
+    "mandatoryBuild": "PASS",
+    "deploymentRegression": "PASS — 338 suites / 2787 tests",
+    "package4CrossPackageGuard": "PASS",
+    "finalAggregateRegression": "NOT RUN — mandatory STOP at new B14 production-reachable inventory blocker"
+  },
+  "freshFinalGateStartedFromScratch": true,
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "wavesAccepted": "6/6",
+  "familySetCoverage": "13/13",
+  "familyInventory": [
+    {"family": "A15", "canonicalFoundation": "Wave 3 AC2 staff-day executor", "result": "registered; aggregate certification stopped at B14"},
+    {"family": "A16", "canonicalFoundation": "Wave 2 AC1 access commands and AC5 reducer", "result": "registered; B13 target remediation verified"},
+    {"family": "A17", "canonicalFoundation": "Wave 3 CRM connection/import and AC3/AC4/AC5 facts", "result": "registered; aggregate certification stopped at B14"},
+    {"family": "A18", "canonicalFoundation": "Client-owned profile, consent, preferences and verified channel foundations", "result": "registered; aggregate certification stopped at B14"},
+    {"family": "A22", "canonicalFoundation": "Wave 1 governed settings/preferences", "result": "B14 direct GOD billing settings writer found"},
+    {"family": "A23", "canonicalFoundation": "Wave 1 OperationalWorkItem and approved protocol state", "result": "registered; aggregate certification stopped at B14"},
+    {"family": "A25", "canonicalFoundation": "Wave 2 security commands and AC3 auth protocol", "result": "registered; aggregate certification stopped at B14"},
+    {"family": "A26", "canonicalFoundation": "Canonical TrialActivation and Wave 2 lifecycle commands", "result": "B14 legacy subscriber projection fallback found"},
+    {"family": "reduced A27", "canonicalFoundation": "Wave 4 inventory and AC4 review ingestion", "result": "registered; aggregate certification stopped at B14"},
+    {"family": "A28", "canonicalFoundation": "Wave 4 prospective calendar actions and immutable AI receipt children", "result": "registered; aggregate certification stopped at B14"},
+    {"family": "A29", "canonicalFoundation": "Wave 5 recovery correction and immutable evidence", "result": "registered; aggregate certification stopped at B14"},
+    {"family": "A30", "canonicalFoundation": "AC6 coordinator, MaintenanceRun/ItemClaim and Policy V1", "result": "registered; aggregate certification stopped at B14"},
+    {"family": "A31", "canonicalFoundation": "AC4/AC5 event, ingestion and reconciliation facts", "result": "registered; aggregate certification stopped at B14"}
+  ],
+  "sourceInventory": {
+    "productionTypescriptFiles": 537,
+    "typescriptHttpRouteDecorators": 218,
+    "typescriptMutationLikeCalls": 500,
+    "activeRootPythonFiles": 88,
+    "activeProductionRootPythonFiles": 68,
+    "activePythonHttpRoutes": 99,
+    "publishedProxySha256": "984a5d383c6412a3143f5a921c0079044e1f43e4acee21bf0efdd163b735f224",
+    "activeWebhookServerSha256": "3f224f6fe4251a879bcf95c07266b48d5989a14add21fa0431e8c06f15803757c3"
+  },
+  "newBlocker": {
+    "id": "B14-GOD-BILLING-SETTINGS-AND-LEGACY-SUBSCRIBER-PROJECTION",
+    "summary": "Published GOD control-plane routes directly mutate global SQLite billing settings and use legacy subscriber rows as current projection authority outside accepted A22/A26 owners.",
+    "publishedPaths": [
+      {
+        "family": "A22",
+        "endpoint": "POST /api/god/billing",
+        "proxyLine": 1327,
+        "uiMutationLines": [23800, 23803],
+        "function": {
+          "line": 5413,
+          "end": 5467,
+          "sha256": "ac1d51f9d417acd061aaf2682ecb95efbaa89117b5e1e87a08d06108e4e84be3",
+          "selectedCalls": [
+            {"line": 5447, "call": "_god_set_renewals(items) -> database.set_setting(\"god_renewals\", ...)"},
+            {"line": 5450, "call": "database.set_setting(\"god_ai_budget_usd\", caller supplied usd)"}
+          ]
+        },
+        "effects": [
+          "direct global renewal configuration UPSERT from caller supplied key/label/date/amount",
+          "direct global AI budget UPSERT from caller supplied usd"
+        ]
+      },
+      {
+        "family": "A26",
+        "endpoint": "POST /api/god/overview",
+        "function": {
+          "line": 5348,
+          "end": 5397,
+          "sha256": "287fd0cd9e1456ea2c6dd4e92d2a0b06db01a8282cfb13a38c544bc94e6bc878",
+          "selectedCalls": [
+            {"line": 5380, "call": "database.list_maya_tenants()"}
+          ]
+        },
+        "effects": [
+          "legacy maya_tenants rows used as current subscriber count/status projection",
+          "approved canonical Tenant/TrialActivation/subscription projection bypassed"
+        ]
+      }
+    ],
+    "ownerDecisionsRequired": [
+      "canonical owner and scope of platform AI budget",
+      "canonical meaning and owner of renewal key/label/date/amount records",
+      "retain as canonical capability or retire each mutation in Chapter 6"
+    ],
+    "implementationAttempted": false,
+    "productionEndpointsInvoked": false
+  },
+  "b13TargetLegacyControlPlaneOwners": 0,
+  "productionDirectBusinessValueMutationBypasses": "PRESENT — B14",
+  "legacyMutatingOwnersActive": "PRESENT — B14",
+  "legacyFallbacks": "PRESENT — B14",
+  "realProductionMutationsForProof": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}

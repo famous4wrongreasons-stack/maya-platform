@@ -28,6 +28,16 @@ export class FeaturesController {
     };
   }
 
+  @Public()
+  @Get('add-ons')
+  @ApiOperation({ summary: 'List separately billed MAYA add-ons' })
+  listAddOns() {
+    return {
+      schema_version: 1,
+      add_ons: this.registry.listAddOns(),
+    };
+  }
+
   @Get('effective')
   @ApiBearerAuth()
   @TenantScoped()

@@ -153,7 +153,7 @@ BARBERSHOP_HOURS = "Пн–Вс: 10:00–21:00"
 
 # Сайт и приложение (Punycode-домен для Telegram-кнопок) — не секрет
 SITE_URL = "https://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai"        # www.мужскаяэстетика.рф
-APP_URL  = "https://www.xn--80aaocmjdk0cclbf8l3a.xn--p1ai/app"    # www.мужскаяэстетика.рф/app
+APP_URL  = "https://mayaos.ru/app/?booking_tenant=muzhskaya-estetika-3"  # canonical tenant login/client entry
 
 # ── VK ID (вход через ВКонтакте) ──────────────────────────────────────────────
 VK_APP_ID = 54620400                       # публичный id приложения — не секрет

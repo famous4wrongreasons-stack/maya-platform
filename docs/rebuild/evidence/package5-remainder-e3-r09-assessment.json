@@ -1,0 +1,254 @@
+{
+  "package": "R09",
+  "blockers": [
+    "B52"
+  ],
+  "stage": "E3 / Stage 1, proposal only",
+  "baseline": "60e82664",
+  "productionRuntime": "42962475",
+  "recommendedOption": "A",
+  "canonicalOwner": "Anonymous public source-fact acceptance and tenant moderation owner, distinct from Client and external review",
+  "existingFoundationSufficient": false,
+  "businessDecisionRequired": true,
+  "schemaRequired": true,
+  "newModels": 2,
+  "newFields": 36,
+  "newActionClasses": 3,
+  "newAeActionClasses": 2,
+  "newAc6RetentionClasses": 1,
+  "migrationRequired": true,
+  "backfillRequired": false,
+  "runtimeOnly": false,
+  "models": {
+    "PublicCommunityComment": [
+      {
+        "name": "id",
+        "type": "text"
+      },
+      {
+        "name": "tenantId",
+        "type": "text"
+      },
+      {
+        "name": "publicationKey",
+        "type": "text"
+      },
+      {
+        "name": "parentCommentId",
+        "type": "text?"
+      },
+      {
+        "name": "sourceKind",
+        "type": "text"
+      },
+      {
+        "name": "visitorSubjectHash",
+        "type": "char64?"
+      },
+      {
+        "name": "identityHash",
+        "type": "char64"
+      },
+      {
+        "name": "intentHash",
+        "type": "char64"
+      },
+      {
+        "name": "authorEncrypted",
+        "type": "text?"
+      },
+      {
+        "name": "textEncrypted",
+        "type": "text?"
+      },
+      {
+        "name": "contentHash",
+        "type": "char64"
+      },
+      {
+        "name": "consentPolicyVersion",
+        "type": "text?"
+      },
+      {
+        "name": "consentAcceptedAt",
+        "type": "timestamptz?"
+      },
+      {
+        "name": "status",
+        "type": "text"
+      },
+      {
+        "name": "revision",
+        "type": "int"
+      },
+      {
+        "name": "createdAt",
+        "type": "timestamptz"
+      },
+      {
+        "name": "retentionUntil",
+        "type": "timestamptz"
+      },
+      {
+        "name": "payloadErasedAt",
+        "type": "timestamptz?"
+      },
+      {
+        "name": "creationExecutionId",
+        "type": "text?"
+      },
+      {
+        "name": "sourceGatewayId",
+        "type": "text"
+      },
+      {
+        "name": "lastModerationExecutionId",
+        "type": "text?"
+      }
+    ],
+    "PublicCommunityInteraction": [
+      {
+        "name": "id",
+        "type": "text"
+      },
+      {
+        "name": "tenantId",
+        "type": "text"
+      },
+      {
+        "name": "publicationKey",
+        "type": "text"
+      },
+      {
+        "name": "kind",
+        "type": "text"
+      },
+      {
+        "name": "visitorSubjectHash",
+        "type": "char64"
+      },
+      {
+        "name": "identityHash",
+        "type": "char64"
+      },
+      {
+        "name": "intentHash",
+        "type": "char64"
+      },
+      {
+        "name": "expectedVersion",
+        "type": "int"
+      },
+      {
+        "name": "version",
+        "type": "int"
+      },
+      {
+        "name": "desiredValue",
+        "type": "boolean?"
+      },
+      {
+        "name": "viewDay",
+        "type": "date?"
+      },
+      {
+        "name": "receivedAt",
+        "type": "timestamptz"
+      },
+      {
+        "name": "sourceGatewayId",
+        "type": "text"
+      },
+      {
+        "name": "contractVersion",
+        "type": "int"
+      },
+      {
+        "name": "payloadHash",
+        "type": "char64"
+      }
+    ]
+  },
+  "countingConvention": "NEW FIELDS counts persisted DB columns in new models plus listed existing-model columns. Virtual Prisma relations are not columns. Headline new action classes = enumerated AE classes + enumerated AC6 extensions; no new engine.",
+  "existingModelColumnChanges": [],
+  "integrationDependencies": [
+    "R02 production PASS"
+  ],
+  "integrationDependenciesSatisfied": true,
+  "dependenciesSatisfied": false,
+  "outstandingDependency": "Owner approval of this entire package Option A and exact schema/lifecycle mapping",
+  "subscopes": {},
+  "readyForImplementation": false,
+  "readyForProduction": false,
+  "runtimeSchemaMigrationChanges": 0,
+  "testsExecuted": 0,
+  "databaseConnections": 0,
+  "productionCalls": 0,
+  "productionMutationsMessages": 0,
+  "inventoryReopened": false,
+  "newBlockers": 0,
+  "fakeHistoricalBackfill": false,
+  "processHygiene": 0,
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "optionB": {
+    "direction": "Retire package writes/notifications; preserve historical data without manufacturing authority",
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "businessDecisionRequired": true,
+    "runtimeOnlyAfterApproval": true
+  },
+  "newActionClassNames": {
+    "AE": [
+      "moderate_public_community_comment",
+      "publish_public_community_reply"
+    ],
+    "AC6": [
+      "purge_public_community_payloads"
+    ]
+  },
+  "proposalFile": "package5-remainder-e3-r09-decision-sheet.md",
+  "canonicalFingerprint": "Canonical hash contract for this proposal: a versioned, explicitly named object; recursive sorted object keys and UTF-8; Unicode NFC text with CRLF→LF and trimmed outer whitespace; opaque IDs are exact, not lowercased; dates are UTC ISO milliseconds; absent optional business values become explicit null; arrays retain specified order or are sorted/deduplicated only where declared sets. No raw JSON serialization contract, random encryption bytes, HTTP headers, retry time, worker ID or transport metadata. Caller intent hash is separate from immutable admission-plan hash: retries first match the original command, then reuse the original plan, never recompute recipients/routes from current discovery. Current eligibility is a dispatch check, not permission to rewrite that plan.\n\nExact intent inputs: guest comment = `{contractVersion,sourceGatewayId,tenantId,visitorSubjectHash,publicationKey,normalizedAuthor,normalizedText,publicationConsent:true,consentPolicyVersion}`; key itself is the separate source identity. Brand reply substitutes current canonical actor and exact parent/content hash; no guest authority. Moderation = `{contractVersion,tenantId,actorUserId,commentId,contentHash,expectedRevision,decision,reasonCode}`. Like observation = `{contractVersion,sourceGatewayId,tenantId,visitorSubjectHash,publicationKey,desiredLiked,expectedVersion}`. View = same source/publication/visitor scope plus server UTC viewDay; retry lookup reuses the originally admitted day, not the retry clock. Consent acceptedAt/receivedAt are stored audit timestamps, excluded from retry comparison.\n\n",
+  "approvalIncludes": "Exact bounded contract, changed business behavior, normalized intent/plan fields, model/column/index/FK mapping and explicitly enumerated new AE/AC6 classes. No implementation approval inferred from proposal.",
+  "businessLosses": [
+    "No automatic model publication or brand reply",
+    "No direct owner notification; canonical manual queue only",
+    "No anonymous self-edit/delete by visitor cookie",
+    "Historical legacy discussions/counters excluded from new canonical public feed"
+  ],
+  "sourceEvidence": [
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/production-python-baseline/site_community.py",
+      "sha256": "f631935b676ac26614206b91d8448e415b1db6883e11fcea445e103d731fba65",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rb-implementation/production-python-baseline/site_engagement.py",
+      "sha256": "96bc5a18df899670746ea2dcc3055c6cd7a5feb21885ebc2b5da26a5327ea6ac",
+      "scope": "existing inventoried source; local read only"
+    },
+    {
+      "path": "/tmp/maya-b29-contour/maya-saas-backend/src/auth/legacy-staff-principal.controller.ts",
+      "sha256": "ab39b9fe1c7ac954991f47cc53b71663a4f9c03d7330a8845d899441a181c113",
+      "scope": "existing inventoried source; local read only"
+    }
+  ],
+  "minimality": "Reuse existing ActionExecution normalized input/receipt and ActionTargetMutation tenant/target/generation uniqueness. One lastModerationExecutionId column on the new comment binds its current moderated state. No second moderation execution journal.",
+  "proposalSha256": "7b7e76bff69ac021203d7418793248c331530d1c53a7b139a7b988e7d9329420",
+  "documentationChecks": {
+    "modelColumnCounts": "PASS",
+    "classCounts": "PASS",
+    "sheetJsonMapping": "PASS",
+    "schemaPlaceholdersRemaining": 0,
+    "runtimeTestsExecuted": 0
+  },
+  "genuineLimits": [
+    "No implementation/schema feasibility proof or production calls executed at Stage 1.",
+    "Exact business constraints and AC6 extensions remain owner proposals, not existing approvals.",
+    "Historical canonical attribution is not proved and backfill is explicitly prohibited.",
+    "Known production-only/captured variants must be verified and overlaid during an authorized implementation; no source beyond closed inventory was discovered."
+  ]
+}

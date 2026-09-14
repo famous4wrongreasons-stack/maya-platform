@@ -1,0 +1,27 @@
+{
+  "upstream": "31126aa5e87885d8d3193a5e0df5fc71ac14e0d1",
+  "files": [
+    "ai администратор/bot.py",
+    "ai администратор/test_r01_client_entry.py",
+    "maya-saas-backend/src/crm/client-initiator-boundary.architecture.spec.ts"
+  ],
+  "productionBackend": "20260908-c7-p01-7623cac4",
+  "productionPythonBaseHash": "752c3dd6110ff86f713dc7705e3988a732e7c20c019e8655c016c7acc4182e79",
+  "productionPythonObservedHash": "3a768fe44923aef381e8e0019bb64d870f875e8319c3300b8b9908e3638dc1ac",
+  "productionPythonMatchesCertifiedBasePlusUpstreamAST": true,
+  "databasePyHashUnchanged": "edf1a6233ff798b1e24cef49b6d8b21eca6f74e64cb80bcca59297dc3e443029",
+  "webAuthPyHashUnchanged": "d7d1163e80c36d8d731c52b4c893ea23db8591ab25302db2defd4ec62adc7d6c",
+  "newSurfaceGroups": 0,
+  "affectedSurfaceGroups": [
+    "S02",
+    "S04",
+    "S16",
+    "S28"
+  ],
+  "measurementSchemaImpact": false,
+  "measurementRuntimeOverlap": false,
+  "authority": "legacy web session is not accepted by channel_proof or canonical Staff session adapter",
+  "consent": "keyed canonical consent command and verified ClientChannelLink unchanged",
+  "productionProofEffects": 0,
+  "runtimeAuthProof": "upstream-auth-targeted.txt"
+}

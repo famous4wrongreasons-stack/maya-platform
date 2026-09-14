@@ -1,0 +1,57 @@
+{
+  "verdict": "CONFIRMED_BLOCKER_B32",
+  "scope": "published chat appointment-create / actual compiled LegacyClientChannelController",
+  "realPostgresql": true,
+  "actualBridgeResolver": true,
+  "actualSignedChannelAuthenticator": true,
+  "actualVerifiedClientResolver": true,
+  "actualCanonicalPolicyAndKernel": true,
+  "syntheticOnly": true,
+  "realProductionMutations": 0,
+  "results": {
+    "verified": {
+      "signedTelegramAuthentication": "PASS",
+      "bridgeSecretAndExactIntegrationResolution": "PASS",
+      "verifiedCanonicalClientResolution": "PASS",
+      "clientHasMayaUser": true,
+      "canonicalConsentPresent": true,
+      "activeTenantAndEntitlements": "PASS",
+      "publicTenantContext": true,
+      "requestSource": "authenticated_request",
+      "actorUserId": null,
+      "returnedAccepted": true,
+      "executionState": "NOT_EXECUTED",
+      "policyDecision": "DENY",
+      "reasonCodes": [
+        "actor_required"
+      ],
+      "retrySameDeniedExecution": true,
+      "actionExecutions": 1,
+      "appointments": 0,
+      "providerCalls": 0,
+      "immutableBindings": 0
+    },
+    "no_user": {
+      "signedTelegramAuthentication": "PASS",
+      "bridgeSecretAndExactIntegrationResolution": "PASS",
+      "verifiedCanonicalClientResolution": "PASS",
+      "clientHasMayaUser": false,
+      "canonicalConsentPresent": true,
+      "activeTenantAndEntitlements": "PASS",
+      "publicTenantContext": true,
+      "requestSource": "authenticated_request",
+      "actorUserId": null,
+      "returnedAccepted": true,
+      "executionState": "NOT_EXECUTED",
+      "policyDecision": "DENY",
+      "reasonCodes": [
+        "actor_required"
+      ],
+      "retrySameDeniedExecution": true,
+      "actionExecutions": 1,
+      "appointments": 0,
+      "providerCalls": 0,
+      "immutableBindings": 0
+    }
+  }
+}

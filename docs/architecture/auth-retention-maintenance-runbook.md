@@ -1,139 +1,96 @@
 # Authentication Retention Maintenance Runbook
 
-## Scope
+## Canonical Policy V1
 
-This slice adds an explicit maintenance command for stale authentication security records in the NestJS/PostgreSQL platform backend. It does not add an HTTP endpoint, change frontend contracts, enable a scheduler, touch the Python/SQLite production runtime or deploy anything.
+Package 5 Wave 6 implements the explicitly approved central policy
+`package5.a30.auth-retention`, version 1. It is a bounded AC6 maintenance
+operation with durable MaintenanceRun / MaintenanceItemClaim audit. Automatic
+runs do not fabricate ActionExecution records.
 
-The command is platform maintenance rather than a tenant action. It intentionally evaluates eligible rows across all tenants, accepts no tenant selector and returns aggregate counts only. Callers cannot use it to inspect or delete one chosen tenant's authentication data.
+| Class | Eligible at frozen server evaluation time T |
+| --- | --- |
+| AuthSession | expiresAt < T − 30 days OR revokedAt < T − 30 days |
+| PhoneAuthCode, EmailAuthCode, AuthFlowState | expiresAt < T − 24 hours OR consumedAt < T − 24 hours |
+| AuthRateLimitBucket | windowEndsAt < T − 24 hours |
+| AuthRefreshToken | Never independently selected; only a claimed eligible parent session's cascade |
 
-## Retention policy
+Null terminal timestamps and exact-boundary timestamps do not qualify. Old
+creation time alone does not qualify an active record. Consumed refresh-token
+history belonging to an active session remains intact for replay detection.
+No users, memberships, tenants, provider identities, consent or business audit
+facts are deleted. Quarantine is a separate AC6 class using its declared expiry.
 
-| Record                | Default eligibility                                   | Delete behavior                                            |
-| --------------------- | ----------------------------------------------------- | ---------------------------------------------------------- |
-| `AuthSession`         | `revokedAt` or `expiresAt` is more than 30 days old   | Delete a bounded set of inactive sessions                  |
-| `AuthRefreshToken`    | Never selected independently                          | Delete only through the parent session foreign-key cascade |
-| `PhoneAuthCode`       | `expiresAt` or `consumedAt` is more than 24 hours old | Delete a bounded set of stale challenges                   |
-| `AuthFlowState`       | `expiresAt` or `consumedAt` is more than 24 hours old | Delete a bounded set of stale OAuth states                 |
-| `AuthRateLimitBucket` | `windowEndsAt` is more than 24 hours old              | Delete a bounded set of closed windows                     |
+The policy is fixed in reviewed versioned code. AUTH_RETENTION_SESSION_DAYS,
+AUTH_RETENTION_CHALLENGE_HOURS, AUTH_RETENTION_RATE_LIMIT_HOURS and the former
+environment batch override no longer choose policy. Changes require a reviewed
+new policy version; tenant-specific overrides are outside Chapter 6.
 
-Consumed refresh-token history belonging to an active session is deliberately retained, even when the token itself is old. Session rotation uses that history to detect replay and revoke the whole token family. There is no direct refresh-token purge query.
+## Bounded operation
 
-The command does not delete users, memberships, tenants, provider identities, audit records or business data.
+The CLI accepts no tenant, target, clock, cutoff or predicate selector. It is a
+trusted platform initiator across tenant and legitimate null-tenant protocol
+rows. Each class receives a separate durable run. Batch default is 1,000;
+`--batch-size` may reduce it to 1–1,000. Each session AND each cascaded token
+consumes a physical row slot. Oversized or unclaimed cascades fail closed.
 
-## Safety model
+Preparation commits only a bounded, hashed manifest and immutable run policy.
+The executor claims a fenced lease, rechecks current eligibility under row
+locks and commits deletion, terminal item outcomes and run finalization
+atomically. Retry returns the same outcome. A process restart resumes a pending
+older window using its frozen manifest, cutoff and limits. A changed batch
+request cannot change an existing unfinished run's budget.
 
-- Dry-run is the default. Deletion requires the explicit `--execute` flag.
-- One PostgreSQL transaction-level advisory lock prevents concurrent cleanup jobs.
-- Every table is processed in a bounded batch using server-selected IDs and `FOR UPDATE SKIP LOCKED`.
-- The fixed cutoff timestamps are calculated once at the start of a run.
-- Any database error rolls back the entire run; cleanup does not continue partially.
-- Output contains timestamps and aggregate counts, never phones, emails, OAuth states, token hashes or other record values.
-- The command uses only `DATABASE_URL` and the four retention settings; it never prints or sends provider/application secrets.
+A crash before commit rolls back deletion. After lease expiry, another worker
+may resume; the old token is fenced. A renewed/absent target is SKIPPED. There
+is no legacy delete fallback and no provider mutation or UNKNOWN outcome.
 
-One execute pass can delete up to `batchSize` rows from each parent table. Refresh-token count reports rows removed by session cascade and does not enlarge the session batch.
+## Commands and output
 
-## Configuration
+The deployed release includes a compiled entrypoint and does not require
+ts-node or development dependencies. Production read-only invocation:
 
-| Variable                          |         Default |     Accepted range |
-| --------------------------------- | --------------: | -----------------: |
-| `AUTH_RETENTION_SESSION_DAYS`     |         30 days |         7-365 days |
-| `AUTH_RETENTION_CHALLENGE_HOURS`  |        24 hours |        1-168 hours |
-| `AUTH_RETENTION_RATE_LIMIT_HOURS` |        24 hours |        1-720 hours |
-| `AUTH_RETENTION_BATCH_SIZE`       | 1000 rows/table | 1-10000 rows/table |
+```bash
+node dist/scripts/auth-retention-cleanup.js --dry-run --batch-size 100
+```
 
-Missing, non-integer or out-of-range environment values fail back to the conservative defaults. A valid `--batch-size` argument overrides only the configured batch size for that run.
-
-## Commands
-
-Run from `maya-saas-backend` after applying migrations:
+For a source checkout with development dependencies:
 
 ```bash
 npm run auth:cleanup
+npm run auth:cleanup -- --dry-run --batch-size 100
 ```
 
-The default command is equivalent to an explicit dry-run:
+Dry-run is the default. It uses a read-only transaction and returns bounded
+hash manifests, policy/version and cutoff metadata without creating runs,
+claims or business effects. Do not interpret a bounded manifest as a total
+backlog count.
 
-```bash
-npm run auth:cleanup -- --dry-run
-```
-
-Execute one bounded deletion pass only after reviewing the dry-run:
-
-```bash
-npm run auth:cleanup -- --execute
-```
-
-Use a smaller temporary batch during rollout when needed:
+A separately authorized destructive operation may use:
 
 ```bash
 npm run auth:cleanup -- --execute --batch-size 100
 ```
 
-`--execute` and `--dry-run` are mutually exclusive. Unknown options and invalid batch sizes fail before connecting to PostgreSQL.
+The equivalent compiled production command is
+`node dist/scripts/auth-retention-cleanup.js --execute --batch-size 100`.
+Never use either execute command for deployment smoke.
 
-## Result contract
+Output contains `policyVersion`, `dryRun` and five `runs`. Execution results
+contain durable run id/state, deleted/skipped counts, per-kind counts and
+`replayed`. Replayed counts describe the original outcome, not another deletion.
+A RUNNING result means another worker owns the current lease. No unbounded
+retry loop is enabled. Errors fail closed and exit nonzero.
 
-Successful output is JSON with:
+## Production boundary
 
-- `status`: `dry_run`, `completed` or `skipped_locked`;
-- `now` and the three calculated cutoffs;
-- `eligible`: all currently eligible rows by category;
-- `deleted`: rows deleted in this pass by category;
-- `batchSize`, `dryRun` and `hasMore`.
+Wave 6 production runtime cutover completed on 2026-09-04 in release
+`20260904-c06-p5-wave6-cutover-3b545671`, using the proven AC6 maintenance
+coordinator and the approved central Policy V1. The user explicitly retained
+AC6 ownership; no Action Engine ingress is required for automatic maintenance.
+Do not run execute to prove deployment. Use read-only structural checks and
+health/readiness for cutover verification. The 17 historical Chapter 6 test
+DBs are unrelated to runtime retention and must not be removed by this command.
 
-`skipped_locked` is a successful no-op because another maintenance run owns the lock. `hasMore: true` means at least one category still had eligible rows beyond this pass. Let the next scheduled run continue cleanup, or repeat manually after checking database load. Do not create an unbounded retry loop.
-
-Failures write a stable `auth_retention_failed` JSON error to stderr, set a non-zero exit code and delete nothing from the rolled-back transaction.
-
-## Rollout and scheduling
-
-1. Apply migration `20260711234500_auth_retention_maintenance`.
-2. Run Prisma validation and the full backend quality gate.
-3. Rehearse dry-run and execute against a sanitized production-shaped snapshot.
-4. Take or verify a restorable database backup before the first production execute.
-5. Run dry-run in production and sanity-check counts against expected auth traffic and retention windows.
-6. Start with a conservative batch and inspect duration, row locks and database load.
-7. Only after the first reviewed execute, schedule one daily run with an explicit `--execute` flag.
-8. Alert on non-zero exit, repeated `skipped_locked`, unexpected count spikes and a persistent `hasMore` backlog.
-
-No scheduler, cron entry, Kubernetes job or production configuration is included in this slice. Scheduler activation is a separate infrastructure change and cutover decision.
-
-## Migration and recovery
-
-Migration `20260711234500_auth_retention_maintenance` adds global scan indexes for OAuth expiry/consumption, phone challenge expiry/consumption and session revocation. It does not update or delete rows.
-
-If an index causes an operational issue, remove it with a reviewed forward migration. Do not edit an already-applied migration. Rows removed by `--execute` cannot be reconstructed by the application; restore them from backup if recovery is legally and operationally required.
-
-## Verification checklist
-
-```bash
-cd maya-saas-backend
-npm run prisma:generate
-npx prisma validate
-npm run typecheck
-npm run typecheck:scripts
-npm run lint
-npm test -- --runInBand
-npm run test:e2e -- --runInBand
-npm run build
-```
-
-Disposable PostgreSQL verification must prove:
-
-- fresh migration and upgrade migration paths have no Prisma schema drift;
-- dry-run changes no row;
-- a second cleanup process returns `skipped_locked`;
-- small batches report `hasMore` and eventually drain eligible rows;
-- a repeated execute is idempotent;
-- stale records are cleaned across multiple tenants while recent records remain isolated;
-- an active session's consumed refresh-token history survives cleanup;
-- refresh-token rows disappear only when their eligible parent session is deleted.
-
-## Remaining work
-
-- Add the production scheduler only after deployment topology, database load and alert routing are approved.
-- Export privacy-safe cleanup duration/backlog metrics without record values.
-- Minimize or encrypt provider profile and phone challenge PII under a separately reviewed data migration.
-- Define legal retention and deletion workflows for users, audit records and tenant closure independently from this technical auth cleanup.
-
-Production remains unchanged until a separately reviewed migration and cutover is approved.
+See the Wave 6 approved Runtime Contract Gate, Safe Local Convergence Report,
+A30 Completion Report and POST-WAVE-6 REMAINDER CHECKPOINT. All six waves are
+complete; Package 5 still requires its separate final adversarial gate.

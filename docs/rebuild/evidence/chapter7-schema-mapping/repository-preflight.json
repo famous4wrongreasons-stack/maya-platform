@@ -1,0 +1,12 @@
+{
+  "entryAndBeforeCommitHead": "4d6283871a7abf9d827b9b1262cc1e8ef4e21506",
+  "canonicalOriginBeforeCommit": "4d6283871a7abf9d827b9b1262cc1e8ef4e21506",
+  "headEqualsOriginBeforeCommit": true,
+  "branch": "contour/b29-remediation",
+  "worktree": "/tmp/maya-b29-contour",
+  "canonicalBranch": "codex/maya-brain-systemic-release-20260815",
+  "lateCommitsAfterAcceptedCheckpoint": 0,
+  "entryDirtyFiles": 0,
+  "changesOwned": "documentation/evidence only",
+  "fetchPerformed": true
+}

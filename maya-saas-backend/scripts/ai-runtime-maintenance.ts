@@ -101,6 +101,8 @@ async function main(): Promise<void> {
     printHelp();
     return;
   }
+  if (!options.dryRun)
+    throw new Error('package5_a30_ai_cleanup_not_allowlisted');
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error('DATABASE_URL is required');
@@ -184,76 +186,36 @@ async function main(): Promise<void> {
         take: options.batchSize,
       })
     ).map((row) => row.id);
+    const brainSessionIds = (
+      await prisma.aiBrainSession.findMany({
+        where: { expiresAt: { lte: now } },
+        select: { id: true },
+        orderBy: { expiresAt: 'asc' },
+        take: options.batchSize,
+      })
+    ).map((row) => row.id);
+    const memoryFactIds = (
+      await prisma.aiMemoryFact.findMany({
+        where: {
+          OR: [{ expiresAt: { lte: now } }, { deletedAt: { not: null } }],
+        },
+        select: { id: true },
+        orderBy: { expiresAt: 'asc' },
+        take: options.batchSize,
+      })
+    ).map((row) => row.id);
     const candidates = {
       expired_pending_approvals: expiredPending,
       stale_approvals: staleApprovals,
       stale_executions: staleExecutions,
       retained_executions_selected: executionIds.length,
       retained_approvals_selected: approvalIds.length,
+      expired_brain_sessions_selected: brainSessionIds.length,
+      expired_or_forgotten_memory_selected: memoryFactIds.length,
     };
 
-    if (options.dryRun) {
-      process.stdout.write(
-        JSON.stringify({ ok: true, dry_run: true, candidates }, null, 2) + '\n',
-      );
-      return;
-    }
-
-    const [expiredResult, staleApprovalResult, staleExecutionResult] =
-      await prisma.$transaction([
-        prisma.aiApprovalRequest.updateMany({
-          where: { status: 'pending', expiresAt: { lte: now } },
-          data: { status: 'expired', errorCode: 'ai_approval_expired' },
-        }),
-        prisma.aiApprovalRequest.updateMany({
-          where: {
-            status: { in: ['approved', 'executing'] },
-            updatedAt: { lte: staleBefore },
-          },
-          data: {
-            status: 'failed',
-            errorCode: 'ai_tool_execution_stale_unknown',
-          },
-        }),
-        prisma.aiToolExecution.updateMany({
-          where: {
-            status: 'executing',
-            startedAt: { lte: staleBefore },
-          },
-          data: {
-            status: 'failed',
-            errorCode: 'ai_tool_execution_stale_unknown',
-            completedAt: now,
-          },
-        }),
-      ]);
-    const deletedExecutions = executionIds.length
-      ? await prisma.aiToolExecution.deleteMany({
-          where: { id: { in: executionIds } },
-        })
-      : { count: 0 };
-    const deletedApprovals = approvalIds.length
-      ? await prisma.aiApprovalRequest.deleteMany({
-          where: { id: { in: approvalIds }, execution: null },
-        })
-      : { count: 0 };
-
     process.stdout.write(
-      JSON.stringify(
-        {
-          ok: true,
-          dry_run: false,
-          changed: {
-            expired_pending_approvals: expiredResult.count,
-            stale_approvals: staleApprovalResult.count,
-            stale_executions: staleExecutionResult.count,
-            deleted_executions: deletedExecutions.count,
-            deleted_approvals: deletedApprovals.count,
-          },
-        },
-        null,
-        2,
-      ) + '\n',
+      JSON.stringify({ ok: true, dry_run: true, candidates }, null, 2) + '\n',
     );
   } finally {
     if (locked) {

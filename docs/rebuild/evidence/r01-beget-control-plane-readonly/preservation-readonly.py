@@ -1,0 +1,13 @@
+import pathlib,json,hashlib,datetime,os,re
+paths=['/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html', '/home/m/mocine3388/mayaos.ru/public_html/app/index.html', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.codex-loyalty-20260721.html', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.backup-20260731-anton-analytics.html', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-test.html', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.codex-loyalty-20260721.php', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php', '/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html.pre-maintenance-20260908-211040', '/home/m/mocine3388/mayaos.ru/public_html/app/index.html.pre-maintenance-20260908-211040', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260704_230004', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.pre-b13-031977e4', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak.staff_tasks_retry_20260709230808', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260705_235508', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260704_223539', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.20260708211912.bak', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-221742', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260702-1305', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak.staff_tasks_20260709230559', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-221534', '/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-213132', '/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php.pre-php56-hotfix-20260908']
+rows=[]
+for name in paths:
+ p=pathlib.Path(name);b=p.read_bytes(); rows.append(dict(path=name,sha256=hashlib.sha256(b).hexdigest(),bytes=len(b)))
+alt=[]
+for site in ['mayaos.ru','mocine3388.beget.tech','muzhskayaestetik.rf','muzhskayaestetika.rf']:
+ root=pathlib.Path('/home/m/mocine3388')/site/'public_html'
+ if not root.exists():continue
+ for d,dirs,files in os.walk(root,followlinks=False):
+  for f in files:
+   if re.search(r'\.(phtm|phtml|php[0-9]+|phar)(?:\.|$)',f,re.I):alt.append(str(pathlib.Path(d)/f))
+print(json.dumps(dict(observedAt=datetime.datetime.now(datetime.timezone.utc).isoformat(),protected=rows,alternatePhpExtensionFiles=alt),indent=2))

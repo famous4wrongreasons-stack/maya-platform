@@ -7,11 +7,13 @@ import {
 
 import { CalendarSource } from '../common/domain.enums';
 import { getIndustryPreset } from '../common/industry-presets';
-import type {
-  AvailableSlot,
-  ServiceItem,
-  StaffMember,
-} from '../crm/crm-adapter.interface';
+// 🔴 Внутренний календарь НЕ импортирует границу CRM. Собственные данные Maya
+// одевались в типы, форму которых задал адаптер YCLIENTS: `category` и
+// `duration_minutes` рождались из `price_min`/`seance_length`, а `rating` — из
+// `staff.rating`, из-за чего календарь подставлял чужие заглушки. Канон лежит
+// ниже обоих источников — см. `src/domain/catalog.ts`.
+import { CANCELED_STATUS_VALUES } from '../domain';
+import type { BookableSlot, Practitioner, ServiceOffering } from '../domain';
 import { PrismaService } from '../prisma/prisma.service';
 import { QuotaResource } from '../quotas/quota-resource';
 import { QuotaService } from '../quotas/quota.service';
@@ -19,11 +21,9 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UsersService } from '../users/users.service';
 import { CreateInternalServiceDto } from './dto/create-internal-service.dto';
 import { CreateInternalProviderDto } from './dto/create-internal-provider.dto';
-import { CreateTimeOffDto } from './dto/create-time-off.dto';
 import type { ListCalendarJournalDto } from './dto/list-calendar-journal.dto';
 import type { WeeklyAvailabilityRuleDto } from './dto/replace-weekly-availability.dto';
 import { UpdateInternalProviderDto } from './dto/update-internal-provider.dto';
-import { UpdateInternalServiceDto } from './dto/update-internal-service.dto';
 import {
   localDateMinuteToUtc,
   localWeekday,
@@ -35,7 +35,8 @@ import {
 const DEFAULT_WEEKLY_RULES: WeeklyAvailabilityRuleDto[] = [1, 2, 3, 4, 5].map(
   (weekday) => ({ weekday, startTime: '09:00', endTime: '18:00' }),
 );
-const CANCELLED_STATUSES = ['canceled', 'cancelled'];
+// Написания «отменено», лежащие В БАЗЕ. Состав менять нельзя — изменится выборка.
+const CANCELLED_STATUSES = [...CANCELED_STATUS_VALUES];
 const JOURNAL_MAX_RANGE_DAYS = 31;
 
 interface InternalServiceTiming {
@@ -53,81 +54,17 @@ export class InternalCalendarService {
     private readonly quotas: QuotaService,
   ) {}
 
-  async ensureProviderForUser(
-    tenantId: string,
-    userId: string,
-    options: { displayName?: string | null; branchId?: string | null } = {},
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.assertInternalSource(scopedTenantId);
-    const user = await this.usersService.getTenantUserOrThrow(
-      userId,
-      scopedTenantId,
+  bootstrapEnsureProviderForUser(
+    _tenantId: string,
+    _userId: string,
+    _options?: { displayName?: string | null; branchId?: string | null },
+  ): Promise<never> {
+    void [_tenantId, _userId, _options];
+    return Promise.reject(
+      new BadRequestException(
+        'Initial owner provider requires canonical TrialActivation',
+      ),
     );
-    const branchId =
-      options.branchId ??
-      user.branchId ??
-      (await this.findFirstBranchId(scopedTenantId));
-    const displayName =
-      options.displayName?.trim() ||
-      this.usersService.getUserName(user) ||
-      user.email.split('@')[0] ||
-      'Специалист';
-    const provider = await this.prisma.internalProvider.upsert({
-      where: {
-        tenantId_userId: {
-          tenantId: scopedTenantId,
-          userId,
-        },
-      },
-      update: {
-        branchId,
-        displayName,
-        active: true,
-      },
-      create: {
-        tenantId: scopedTenantId,
-        userId,
-        branchId,
-        displayName,
-        title: 'Специалист',
-      },
-    });
-
-    const [ruleCount, services] = await Promise.all([
-      this.prisma.internalAvailabilityRule.count({
-        where: { tenantId: scopedTenantId, providerId: provider.id },
-      }),
-      this.prisma.internalService.findMany({
-        where: { tenantId: scopedTenantId, active: true },
-        select: { id: true },
-      }),
-    ]);
-
-    if (ruleCount === 0) {
-      await this.prisma.internalAvailabilityRule.createMany({
-        data: DEFAULT_WEEKLY_RULES.map((rule) => ({
-          tenantId: scopedTenantId,
-          providerId: provider.id,
-          weekday: rule.weekday,
-          startMinute: parseTimeToMinute(rule.startTime),
-          endMinute: parseTimeToMinute(rule.endTime),
-        })),
-      });
-    }
-
-    if (services.length > 0) {
-      await this.prisma.internalProviderService.createMany({
-        data: services.map((service) => ({
-          tenantId: scopedTenantId,
-          providerId: provider.id,
-          serviceId: service.id,
-        })),
-        skipDuplicates: true,
-      });
-    }
-
-    return this.getProvider(scopedTenantId, provider.id);
   }
 
   async getSetup(tenantId: string) {
@@ -257,8 +194,14 @@ export class InternalCalendarService {
       return {
         id: appointment.id,
         client: {
-          id: appointment.client.id,
-          name: this.usersService.getUserName(appointment.client) ?? 'Клиент',
+          // 🔴 Аккаунт стал необязательным (B3.1). Во внутреннем календаре он
+          // всегда есть — запись создаётся зарегистрированным клиентом, — но
+          // тип это больше не гарантирует, и падать на чужой записи журнал не
+          // должен.
+          id: appointment.client?.id ?? null,
+          name: appointment.client
+            ? (this.usersService.getUserName(appointment.client) ?? 'Клиент')
+            : 'Клиент',
         },
         provider:
           providersById.get(appointment.staffExternalId) ??
@@ -297,7 +240,7 @@ export class InternalCalendarService {
     };
   }
 
-  async listServices(tenantId: string): Promise<ServiceItem[]> {
+  async listServices(tenantId: string): Promise<ServiceOffering[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const services = await this.prisma.internalService.findMany({
       where: { tenantId: scopedTenantId, active: true },
@@ -307,7 +250,10 @@ export class InternalCalendarService {
     return services.map((service) => this.serializeService(service));
   }
 
-  async createService(tenantId: string, dto: CreateInternalServiceDto) {
+  async bootstrapCreateService(
+    tenantId: string,
+    dto: CreateInternalServiceDto,
+  ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertInternalSource(scopedTenantId);
     const providerIds = await this.prisma.internalProvider.findMany({
@@ -345,46 +291,7 @@ export class InternalCalendarService {
     return this.serializeService(created);
   }
 
-  async updateService(
-    tenantId: string,
-    serviceId: string,
-    dto: UpdateInternalServiceDto,
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.assertInternalSource(scopedTenantId);
-    const result = await this.prisma.internalService.updateMany({
-      where: { id: serviceId, tenantId: scopedTenantId },
-      data: {
-        name: dto.name?.trim(),
-        description:
-          dto.description === undefined
-            ? undefined
-            : dto.description.trim() || null,
-        price: dto.price,
-        currency: dto.currency,
-        durationMinutes: dto.durationMinutes,
-        bufferBeforeMinutes: dto.bufferBeforeMinutes,
-        bufferAfterMinutes: dto.bufferAfterMinutes,
-        sortOrder: dto.sortOrder,
-        active: dto.active,
-      },
-    });
-
-    if (result.count !== 1) {
-      throw new NotFoundException('Internal service not found');
-    }
-
-    const service = await this.prisma.internalService.findFirstOrThrow({
-      where: { id: serviceId, tenantId: scopedTenantId },
-    });
-    return this.serializeService(service);
-  }
-
-  async deactivateService(tenantId: string, serviceId: string) {
-    return this.updateService(tenantId, serviceId, { active: false });
-  }
-
-  async listStaff(tenantId: string): Promise<StaffMember[]> {
+  async listStaff(tenantId: string): Promise<Practitioner[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const providers = await this.prisma.internalProvider.findMany({
       where: { tenantId: scopedTenantId, active: true },
@@ -395,7 +302,10 @@ export class InternalCalendarService {
     return providers.map((provider) => this.serializeProvider(provider));
   }
 
-  async createProvider(tenantId: string, dto: CreateInternalProviderDto) {
+  async bootstrapCreateProvider(
+    tenantId: string,
+    dto: CreateInternalProviderDto,
+  ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertInternalSource(scopedTenantId);
     await this.quotas.assertCanCreate(scopedTenantId, QuotaResource.STAFF);
@@ -457,7 +367,7 @@ export class InternalCalendarService {
     return this.getProvider(scopedTenantId, provider.id);
   }
 
-  async updateProvider(
+  async bootstrapUpdateProvider(
     tenantId: string,
     providerId: string,
     dto: UpdateInternalProviderDto,
@@ -548,7 +458,7 @@ export class InternalCalendarService {
     };
   }
 
-  async replaceWeeklyAvailability(
+  async bootstrapReplaceWeeklyAvailability(
     tenantId: string,
     providerId: string,
     rules: WeeklyAvailabilityRuleDto[],
@@ -576,58 +486,6 @@ export class InternalCalendarService {
     });
 
     return this.getProviderSchedule(scopedTenantId, providerId);
-  }
-
-  async createTimeOff(
-    tenantId: string,
-    providerId: string,
-    dto: CreateTimeOffDto,
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.assertInternalSource(scopedTenantId);
-    await this.getProvider(scopedTenantId, providerId);
-    const startAt = new Date(dto.startAt);
-    const endAt = new Date(dto.endAt);
-
-    if (startAt.getTime() >= endAt.getTime()) {
-      throw new BadRequestException('Time off end must be after start');
-    }
-
-    const created = await this.prisma.internalAvailabilityException.create({
-      data: {
-        tenantId: scopedTenantId,
-        providerId,
-        startAt,
-        endAt,
-        note: dto.note?.trim() || null,
-      },
-    });
-
-    return {
-      id: created.id,
-      provider_id: created.providerId,
-      start_at: created.startAt,
-      end_at: created.endAt,
-      note: created.note,
-    };
-  }
-
-  async deleteTimeOff(
-    tenantId: string,
-    providerId: string,
-    exceptionId: string,
-  ) {
-    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.assertInternalSource(scopedTenantId);
-    const result = await this.prisma.internalAvailabilityException.deleteMany({
-      where: { id: exceptionId, tenantId: scopedTenantId, providerId },
-    });
-
-    if (result.count !== 1) {
-      throw new NotFoundException('Time off entry not found');
-    }
-
-    return { ok: true };
   }
 
   async getServiceTiming(
@@ -681,7 +539,7 @@ export class InternalCalendarService {
     staffId?: string;
     serviceIds?: string[];
     branchId?: string;
-  }): Promise<AvailableSlot[]> {
+  }): Promise<BookableSlot[]> {
     const scopedTenantId = this.tenantContext.assertTenantId(params.tenantId);
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: scopedTenantId },
@@ -718,7 +576,7 @@ export class InternalCalendarService {
       orderBy: { createdAt: 'asc' },
     });
     const selectedServiceIds = params.serviceIds ?? [];
-    const slots: AvailableSlot[] = [];
+    const slots: BookableSlot[] = [];
     const minimumNoticeMs =
       getIndustryPreset(tenant.industryPresetId).defaultBookingSettings
         .minimumNoticeMinutes *

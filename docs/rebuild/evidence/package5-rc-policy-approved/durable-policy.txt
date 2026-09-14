@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "checks": [
+    "immediate ALLOW; atomic claim audit; original admission preserved",
+    "delayed >15 minutes ALLOW; same execution; terminal success cannot replay",
+    "delayed current DENY has no claim/effect; old ALLOW cannot override",
+    "recipient Membership revoked before delayed claim: no effect",
+    "exact planned Telegram identity revoked: no fallback/reselection",
+    "business intent expiry cannot be renewed by fresh ALLOW",
+    "concurrent delayed claims: one original execution/attempt/audit winner",
+    "audit unavailable: claim/attempt roll back together before effect",
+    "policy revoked between claim and dispatch: dispatch remains NOT_CROSSED",
+    "expired claim evidence/lease never grants delayed effect",
+    "UNKNOWN cannot use policy refresh as a new claim or channel escape",
+    "deterministic terminal failure cannot revive"
+  ],
+  "immutableAdmissionsPreserved": true,
+  "originalPolicyTtlMs": 60000,
+  "controlledDelayedMs": 960000,
+  "productionEffects": 0
+}

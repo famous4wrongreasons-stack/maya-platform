@@ -1,0 +1,12 @@
+{
+  "target": "/var/www/maya-platform/app.html",
+  "before": "46e713c6cca82817b07697bdede877cd5e85ca940667299bab8db3a819360527",
+  "after": "204daaf2ce452ba5e1383750bded372683596cceade4c9f0f33dade3831b862a",
+  "allowedBackendReleases": [
+    "20260912-c7-wave3-76916297",
+    "20260912-c7-p06-4058cd8c"
+  ],
+  "candidateCommit": "4058cd8c",
+  "maintenanceWrites": 0,
+  "proofBusinessEffects": 0
+}

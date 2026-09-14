@@ -1,0 +1,20 @@
+{
+  "fixtureSha256": "953745dfe1f01f7e4daae338d789132b2e0b5d627af8cdc67502c83c509fb4c9",
+  "expectedChecks": 15,
+  "candidates": [
+    {
+      "target": "salon/app/api-proxy.php",
+      "sha256": "2975dbe637fdd0e4d0433066297e3e17948e758ef21fe8d37437a7ff6c1b0c70",
+      "helperSha256": "d76676f4df79c8ad93e0bdca13bf2feda542544c30a1335c3a91bbc7e6ab3862",
+      "internalForwardTargets": 41,
+      "providerForwardTargets": 0
+    },
+    {
+      "target": "salon/app/api-proxy.codex-loyalty-20260721.php",
+      "sha256": "0f97f76f3de0e072f4e069b72571e52a9137d6a92b86e4d1933a9d228c222b9c",
+      "helperSha256": "d76676f4df79c8ad93e0bdca13bf2feda542544c30a1335c3a91bbc7e6ab3862",
+      "internalForwardTargets": 43,
+      "providerForwardTargets": 0
+    }
+  ]
+}

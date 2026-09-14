@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -25,11 +25,13 @@ export class AppointmentsController {
   createAppointment(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateAppointmentDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.appointmentsService.createForClient(
       user.tenantId!,
       user.userId,
       dto,
+      this.actionInvocation('appointments.http.create', idempotencyKey),
     );
   }
 
@@ -49,7 +51,9 @@ export class AppointmentsController {
   }
 
   @Get('my')
-  @ApiOperation({ summary: 'List appointments for the current client user' })
+  @ApiOperation({
+    summary: 'Read canonical appointments for the verified Client binding',
+  })
   listMyAppointments(@CurrentUser() user: AuthenticatedUser) {
     return this.appointmentsService.listClientAppointments(
       user.tenantId!,
@@ -58,30 +62,44 @@ export class AppointmentsController {
   }
 
   @Post(':id/cancel')
-  @ApiOperation({ summary: 'Cancel a client appointment' })
+  @ApiOperation({
+    summary: 'Cancel a verified Client appointment through the Action Engine',
+  })
   cancelAppointment(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') appointmentId: string,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.appointmentsService.cancelForClient(
       user.tenantId!,
       user.userId,
       appointmentId,
+      this.actionInvocation('appointments.http.cancel', idempotencyKey),
     );
   }
 
   @Post(':id/reschedule')
-  @ApiOperation({ summary: 'Reschedule a client appointment' })
+  @ApiOperation({
+    summary:
+      'Reschedule a verified Client appointment through the Action Engine',
+  })
   rescheduleAppointment(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') appointmentId: string,
     @Body() dto: RescheduleAppointmentDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.appointmentsService.rescheduleForClient(
       user.tenantId!,
       user.userId,
       appointmentId,
       dto,
+      this.actionInvocation('appointments.http.reschedule', idempotencyKey),
     );
+  }
+
+  private actionInvocation(scope: string, idempotencyKey?: string) {
+    const key = idempotencyKey?.trim();
+    return key ? { callerIdempotency: { scope, key } } : {};
   }
 }

@@ -1,0 +1,142 @@
+{
+  "method": "Independently enumerate SQL/Prisma, provider transports, delivery methods, persistent file writes and raw identity selectors; walk backwards to source-matched active routes/commands/schedulers and record tombstone/unreachable/AC3/AC4/AC5/AC6 exclusions. No app import or effects. Not a second agent.",
+  "pass1Count": 20,
+  "pass2NewBlockers": [
+    "B56",
+    "B57",
+    "B58",
+    "B59"
+  ],
+  "pass2AdditionalPathGroups": [
+    {
+      "id": "B38",
+      "kind": "additional_public_entry_paths",
+      "paths": [
+        "mayaos/app/index.html",
+        "salon/app/index.codex-loyalty-20260721.html",
+        "salon/app/index.backup-20260731-anton-analytics.html",
+        "salon/app/tenant-test.html"
+      ],
+      "evidence": "package5-exhaustive-public-index.json; package5-exhaustive-edge-access.json",
+      "detail": "AST/token closure found create_record branches in additional publicly served bundles; archived name alone is not a deny rule."
+    },
+    {
+      "id": "B43",
+      "kind": "additional_report_initiator",
+      "paths": [
+        "bot.cmd_admin_pdf"
+      ],
+      "evidence": "PY:bot.py:5872",
+      "detail": "Native admin PDF command sends report document directly, same missing non-daily report plan contract."
+    },
+    {
+      "id": "B39",
+      "kind": "additional_legacy_callback",
+      "paths": [
+        "bot._handle_freed_slot_accept",
+        "bot._handle_freed_slot_decline"
+      ],
+      "evidence": "PY:bot.py:4770; PY:bot.py:4834; PY:database.py:2818",
+      "detail": "Legacy freed-slot callback logs accepted by raw Client and synthesizes a new booking turn; it does not prove the admitted canonical wanted-slot/Client identity."
+    }
+  ],
+  "secondPassNewFindings": 7,
+  "finalKnownSourceCrossCheckNewFindings": 0,
+  "closureQualification": "Final cross-check only covers acquired source; unavailable Beget task inventory prevents an exhaustive closure claim. Second pass did add findings and is NOT reported as zero.",
+  "compiledArtifactsMatched": 587,
+  "compiledArtifactsExpected": 587,
+  "typescriptParseErrors": 0,
+  "publicFilesParsed": 208,
+  "publicParseErrors": 0,
+  "publicNonJavaScriptImportMapExcluded": true,
+  "pythonSourceFiles": 71,
+  "pythonRootMetadataEntries": 72,
+  "pythonArchivedMetadataEntries": 24,
+  "sqlCandidateFunctions": 106,
+  "allPythonCallSites": 22178,
+  "unclassifiedSqlCandidates": 0,
+  "operators": [
+    {
+      "path": "dist/scripts/action-engine-kernel-proof.js",
+      "sha256": "6a62ce2046d715a31b4907d81abad4cd62ff876c691475bbcea44b246888eb72",
+      "disposition": "Synthetic proof CLI, explicit isolated DB safeguard; not registered runtime/cron; NOT executed"
+    },
+    {
+      "path": "dist/scripts/ai-runtime-maintenance.js",
+      "sha256": "df33897aba277be5cf94172a9634ba801c6eb9157e893bd52ab0c7d5757620ad",
+      "disposition": "Execute path throws package5_a30_ai_cleanup_not_allowlisted before DB; read-only dry-run remains"
+    },
+    {
+      "path": "dist/scripts/appointment-mirror-bootstrap.js",
+      "sha256": "3fdaa2199cf3ed5679720352c33932befacd78b1c71f6123bf242259a9775a28",
+      "disposition": "Approved AC4/AC5 bootstrap/reconciliation/quarantine/opportunity projection; explicit CLI invocation, no new business delivery owner"
+    },
+    {
+      "path": "dist/scripts/appointment-reconciliation-run.js",
+      "sha256": "a08a45479694069d5f12428c9a1e17176b1f99219349ac25c295a649be81625f",
+      "disposition": "Approved AC4/AC5 bootstrap/reconciliation/quarantine/opportunity projection; explicit CLI invocation, no new business delivery owner"
+    },
+    {
+      "path": "dist/scripts/auth-retention-cleanup.js",
+      "sha256": "e5e564cf9a10f2d81618a9adcf3d68916201d088c197a33625bc3dc2ab049d92",
+      "disposition": "Approved Wave6 maintenance coordinator/claims, explicit execute mode; no active cron found"
+    },
+    {
+      "path": "dist/scripts/communication-delivery-foundation-proof.js",
+      "sha256": "e679d6aedb0a83cade5651e3cd93027ad2904fce17f0f753f858db4cd4a5a8c8",
+      "disposition": "Synthetic proof CLI, explicit isolated DB safeguard; not registered runtime/cron; NOT executed"
+    },
+    {
+      "path": "dist/scripts/communication-shadow-migration-proof.js",
+      "sha256": "577ee7cefa21e31adf0a05b45c4a4a73a1b98a6b47185db5f10c7989c38429a7",
+      "disposition": "Synthetic proof CLI, explicit isolated DB safeguard; not registered runtime/cron; NOT executed"
+    },
+    {
+      "path": "dist/scripts/opportunity-lifecycle-proof.js",
+      "sha256": "5c0c93d26588a77d53406be603d7e3f4ca9c4635f1d74b4bcee90bbff74472c5",
+      "disposition": "Synthetic proof CLI, explicit isolated DB safeguard; not registered runtime/cron; NOT executed"
+    },
+    {
+      "path": "dist/scripts/opportunity-lifecycle-run.js",
+      "sha256": "4124314f13edd738d988ecc0d0695cce3ee19a39c28e6d660c767e1a058f940c",
+      "disposition": "Approved AC4/AC5 bootstrap/reconciliation/quarantine/opportunity projection; explicit CLI invocation, no new business delivery owner"
+    },
+    {
+      "path": "dist/scripts/opportunity-lifecycle-shadow.js",
+      "sha256": "4763d7dd782a04a443d87ddd6a9d74d94f464e4d5c8a4e8553570e3603e614ce",
+      "disposition": "Approved AC4/AC5 bootstrap/reconciliation/quarantine/opportunity projection; explicit CLI invocation, no new business delivery owner"
+    },
+    {
+      "path": "dist/scripts/opportunity-shadow.js",
+      "sha256": "fbce4c3c26afda610b77c206754d99e772dd900c69e6c2e512407599942e5675",
+      "disposition": "Approved AC4/AC5 bootstrap/reconciliation/quarantine/opportunity projection; explicit CLI invocation, no new business delivery owner"
+    },
+    {
+      "path": "dist/scripts/package5-b35-history-cutover.js",
+      "sha256": "06c21876685962dae21eb6b72ef0fea82fd1820b976277c5e612c022fcb9fc97",
+      "disposition": "Approved B35 one-time policy/history cutover, evidence-bound; not a new bulk sender"
+    },
+    {
+      "path": "dist/scripts/quarantine-catchup-run.js",
+      "sha256": "4f7d7216d7abad2f88e05430a1b78e167e746c057290273566d364c54ab9b101",
+      "disposition": "Approved AC4/AC5 bootstrap/reconciliation/quarantine/opportunity projection; explicit CLI invocation, no new business delivery owner"
+    },
+    {
+      "path": "dist/scripts/release-preflight.js",
+      "sha256": "fdc9c04b535d336bf6443198e6e4baa4b87cbe9c438ad8a3bfe1127854e71288",
+      "disposition": "Read-only migration/release metadata"
+    },
+    {
+      "path": "dist/scripts/staff-identity-backfill.js",
+      "sha256": "c8d0fdf0d5ffacf0267ec1fbb2d032c4af1ace7d23574ea28f3fbb89484d348b",
+      "disposition": "Explicit approved Cycle02 identity projection backfill, default dry-run; does not change authorizing fields; no active launcher"
+    },
+    {
+      "path": "dist/prisma/seed.js",
+      "sha256": "89fc672a1263d16882ec8f10b8e2f5f7a5cbb0e8ba0c26f151bdcf2b955d663e",
+      "disposition": "Explicit initial environment bootstrap CLI; installed but not referenced by active launchers or documented ordinary deploy. Not permission to re-seed production; no request/cron reachability found."
+    }
+  ],
+  "businessProviderMessagesForProof": 0,
+  "databaseConnections": 0
+}

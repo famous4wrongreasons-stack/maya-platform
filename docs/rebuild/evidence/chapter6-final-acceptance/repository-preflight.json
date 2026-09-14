@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "baselineCheckpoint": "438260714da5d150adfb6f692072defda430d5b7",
+  "canonicalBranch": "codex/maya-brain-systemic-release-20260815",
+  "isolatedBranch": "contour/b29-remediation",
+  "isolatedWorktree": "/tmp/maya-b29-contour",
+  "upstream": "438260714da5d150adfb6f692072defda430d5b7",
+  "lateUpstreamCommits": [],
+  "initialWorktreeClean": true,
+  "scope": "Documentation/evidence only; post-push equality verified separately"
+}

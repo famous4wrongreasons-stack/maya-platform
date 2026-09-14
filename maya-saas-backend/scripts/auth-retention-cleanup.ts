@@ -1,6 +1,5 @@
 import 'dotenv/config';
 
-import { ConfigService } from '@nestjs/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 
@@ -49,9 +48,9 @@ function parseArgs(argv: string[]): CliOptions {
         !rawValue ||
         !Number.isInteger(batchSize) ||
         batchSize < 1 ||
-        batchSize > 10_000
+        batchSize > 1_000
       ) {
-        throw new Error('--batch-size requires an integer from 1 to 10000');
+        throw new Error('--batch-size requires an integer from 1 to 1000');
       }
 
       options.batchSize = batchSize;
@@ -97,13 +96,10 @@ async function main(): Promise<void> {
   const prisma = new PrismaClient({
     adapter: new PrismaPg({ connectionString }),
   });
-  const configService = {
-    get: (key: string) => process.env[key],
-  } as unknown as ConfigService;
   const repository = new AuthRetentionRepository(
     prisma as unknown as PrismaService,
   );
-  const service = new AuthRetentionService(configService, repository);
+  const service = new AuthRetentionService(repository);
 
   try {
     const result = await service.run({

@@ -1,0 +1,76 @@
+{
+  "historicalFindingCount": 21,
+  "findings": {
+    "3.10": [
+      "Q05"
+    ],
+    "4.0": [
+      "Q05"
+    ],
+    "4.1": [
+      "Q05",
+      "Q04"
+    ],
+    "4.2": [
+      "Q07",
+      "Q16"
+    ],
+    "4.3": [
+      "Q06"
+    ],
+    "4.6": [
+      "Q03"
+    ],
+    "4.13": [
+      "Q08"
+    ],
+    "4.20": [
+      "Q07",
+      "Q16"
+    ],
+    "4.21": [
+      "Q07"
+    ],
+    "4.22": [
+      "Q08"
+    ],
+    "4.24": [
+      "Q09"
+    ],
+    "4.26": [
+      "Q07"
+    ],
+    "4.42": [
+      "Q10"
+    ],
+    "4.51": [
+      "Q01",
+      "Q05"
+    ],
+    "4.66": [
+      "Q06"
+    ],
+    "4.67": [
+      "Q06"
+    ],
+    "4.79": [
+      "Q08"
+    ],
+    "6.4": [
+      "Q11"
+    ],
+    "7.1": [
+      "Q04",
+      "Q12"
+    ],
+    "C1.audit-read": [
+      "Q21",
+      "Q17"
+    ],
+    "C1.bridge-source": [
+      "Q22",
+      "Q02"
+    ]
+  },
+  "warning": "Finding IDs identify documented C7 scope, not newly discovered C6 regressions. Already-canonical subparts are reused; no old blocker is reopened."
+}

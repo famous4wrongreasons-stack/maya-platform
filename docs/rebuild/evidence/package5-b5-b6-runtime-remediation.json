@@ -1,0 +1,152 @@
+{
+  "acceptedCheckpoint": "cdd97012",
+  "schemaSource": "b152bf095d5d227962146a5c7264a2ffc14768d5",
+  "schemaApplied": true,
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "fakeHistoricalBackfill": 0,
+  "proof": {
+    "executableProof": "PASS",
+    "passed": 28,
+    "cases": [
+      "guest Client read/empty/effective-neutral no-op creates no business or execution facts",
+      "matching explicit inherited policy is no-op; no hidden three-hour default",
+      "invalid/contradictory preference patch rejected",
+      "invalid/contradictory preference patch rejected",
+      "invalid/contradictory preference patch rejected",
+      "invalid/contradictory preference patch rejected",
+      "invalid/contradictory preference patch rejected",
+      "invalid/contradictory preference patch rejected",
+      "invalid/contradictory preference patch rejected",
+      "invalid/contradictory preference patch rejected",
+      "consumer Client override rejected",
+      "phone cannot authorize preference mutation",
+      "unlinked authenticated channel read fails closed",
+      "unlinked no-op cannot create Client",
+      "duplicate and restarted executor reuse one durable result",
+      "changed material cannot reuse source identity",
+      "four concurrent retries produce one target generation/effect",
+      "different concurrent commands at one generation have one winner",
+      "crash before business mutation",
+      "restart resumes admitted command and commits one effect",
+      "another Client cannot change appointment mood",
+      "other tenant cannot change appointment mood",
+      "crash between profile and appointment rolls back both business writes",
+      "same admitted mood command resumes after atomic rollback",
+      "exact visit choice stays independent from prospective default; retries and no-op safe",
+      "historical appointment mutation rejected",
+      "same external id in another provider is not a target",
+      "no consent mutation, hidden Client creation or cross-Client state"
+    ],
+    "productionBusinessProviderMutations": 0
+  },
+  "fullRegression": {
+    "suites": 329,
+    "tests": 2742,
+    "result": "PASS"
+  },
+  "typecheck": "PASS",
+  "scriptsTypecheck": "PASS",
+  "projectLint": "PASS",
+  "buildAndPreflight": "PASS",
+  "pythonBridgeTests": "18/18 PASS",
+  "liveCandidatePythonTests": "10/10 PASS",
+  "phpTransportTests": "13/13 PASS",
+  "frontendSourceAndCandidateParse": "PASS",
+  "nativeSync": "PASS",
+  "productionRuntimeDeployed": true,
+  "fullFinalGateRerun": true,
+  "productionBusinessProviderProofMutations": 0,
+  "pythonCandidates": {
+    "webhook_server.py": {
+      "before": "6408c9a21d9fbfedb28b1886ddeee59da33f5426a8cfa97fbce135c486430010",
+      "after": "25a285d9f693b0b0fc15f7c6d7bf379176436c477741446c4dc057fcc7ca6a78",
+      "functions": [
+        "_apply_client_reminder_pref",
+        "client_book_with_loyalty_handler",
+        "notify_prefs_handler",
+        "_finalize_booking_for_chat",
+        "set_visit_mood_handler"
+      ]
+    },
+    "bot.py": {
+      "before": "3f99c3c4e22a89a0bd13fb66c73dec29fa62355abf2eb402ed3e89857dc9b18d",
+      "after": "80f919e21eba206637f98003f31b77cda267b29671771444f95f50daade9725e",
+      "functions": [
+        "_handle_visit_mood_callback",
+        "_finalize_booking"
+      ]
+    },
+    "database.py": {
+      "before": "7748e34f82e2eddb9010407cfa9229db32a47c7e6f7645d71a1334266bb692f8",
+      "after": "ba1cb1e6926f2f885678b655913c1a02a2c5da5dc934b6d807de96dfa723bdd2",
+      "functions": [
+        "_preference_delivery_subject",
+        "get_notify_prefs",
+        "get_notify_prefs_by_chat_id",
+        "set_notify_prefs",
+        "get_maya_audience_stats",
+        "in_quiet_hours",
+        "has_saved_notify_prefs",
+        "set_visit_mood",
+        "get_visit_mood",
+        "get_visit_moods",
+        "get_default_visit_mood"
+      ]
+    },
+    "yclients.py": {
+      "before": "b1f4a28d0032c42a87a06e79aed91394613c2f433dba435eb007c95493ddba6a",
+      "after": "31ba0990ed39929b068017fa71c6749043dc54f6887d60bf00cb72d114ccd876",
+      "functions": [
+        "YClientsAPI.create_booking"
+      ]
+    },
+    "legacy_client_preferences_bridge.py": {
+      "before": null,
+      "after": "e5b380291685d2a4c467f94560035a5e65f40d26b2ca22c15f78ef8a87b2b720",
+      "functions": "new bounded transport only"
+    }
+  },
+  "htmlCandidates": {
+    "live-mayaos-app.html": {
+      "before": "cdf681dde560979341db16206261b475f19104709e48adde0c22c768a3465f04",
+      "after": "45caff9c53d1b422e1b261e8e39660adf9daafbf62481f0b1019908dece6b064"
+    },
+    "live-legacy-app.html": {
+      "before": "51096ad841a7de03005fd6e41ece4320eb877d4fe3ae73f30d30ceed21f1fa18",
+      "after": "15b8855e1363dece68854f859222ed18425963fc94bae70130e8b367f8d97887"
+    },
+    "live-vps-app.html": {
+      "before": "fbf776237f867c8958e1b2e870ff6e13772a3f0f7a3f295bb7fc1496970a60c5",
+      "after": "2e23492b81801b293edb215ed188bb9af26a91cc2cd17d566c5d503e24dc431c"
+    },
+    "api-proxy.php": {
+      "before": "806b0246027cef12e35de3b529ea41af28ee60129e11cade50c0542385a7eba3",
+      "after": "a46bc246359691233ad7414f6c3928472d5149b3eeef43c571f3ce29761cd306"
+    },
+    "package5-client-consent-proxy.php": {
+      "before": "583916e8309ea616b851fb19348aaa27df7523337cc66eb3bca660e11745df68",
+      "after": "31333596cf8e0356c0aaffbd313d4577534b9ff0f52d45829522ad7c7525d76a"
+    }
+  },
+  "deployedSource": "fb820b3bbdaacd07394ca494b630b771697254bc",
+  "deployedRelease": "/opt/maya-saas/releases/20260904-p5-b5-b6-fb820b3b",
+  "productionStructuralReadOnlyVerification": "PASS",
+  "finalGate": "FAIL — mandatory STOP after B7/B8 production-reachable inventory blockers",
+  "hygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "unrelatedDirtyFilesPreserved": 30,
+    "mixedFilesTaskDeltaOnly": [
+      "ai администратор/bot.py",
+      "ai администратор/webhook_server.py",
+      "maya-os-site/index.html"
+    ],
+    "nativeMirrorGeneratedCopyMatches": true,
+    "proofPort55487Listening": false
+  }
+}

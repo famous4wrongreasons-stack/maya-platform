@@ -1,0 +1,358 @@
+{
+  "acceptedCheckpoint": "866181f7",
+  "runtimeCommits": [
+    "80b6d81b173ddcc3f66b6cfefe08ec2409eb4eec",
+    "c738bc1b2b5345494088ff70d63d0576ee341352"
+  ],
+  "release": "/opt/maya-saas/releases/20260906-p5-b28-c738bc1b",
+  "b28ProductionRemediation": "PASS",
+  "schemaChanges": 0,
+  "newModels": 0,
+  "newActionClasses": 0,
+  "localPostgresProof": {
+    "cases": 27,
+    "verdict": "PASS"
+  },
+  "targeted": {
+    "suites": 5,
+    "tests": 52,
+    "verdict": "PASS"
+  },
+  "deploymentGate": {
+    "suites": 362,
+    "tests": 2952,
+    "verdict": "PASS",
+    "prismaValidate": "PASS",
+    "projectLint": "PASS",
+    "productionAndScriptTypechecks": "PASS",
+    "build": "PASS",
+    "initialAttempt": "Stopped at eight formatting diagnostics in two test fixtures; fixed narrowly in c738bc1b before successful complete rerun"
+  },
+  "productionVerification": {
+    "health": {
+      "status": "ok",
+      "service": "maya-saas-backend",
+      "release": "20260906-p5-b28-c738bc1b",
+      "started_at": "2026-09-06T11:05:20.134Z",
+      "timestamp": "2026-09-06T11:06:10.345Z"
+    },
+    "readiness": {
+      "status": "ready",
+      "service": "maya-saas-backend",
+      "checks": {
+        "database": "ready"
+      },
+      "timestamp": "2026-09-06T11:06:10.358Z"
+    },
+    "maya-saas": "active",
+    "barbershop-pwa": "active",
+    "barbershop-bot": "inactive",
+    "pwaPortListening": true,
+    "maya-saasErrorCount": 0,
+    "barbershop-pwaErrorCount": 0,
+    "pwaRequestOnly": true,
+    "spareSmokePortListening": false,
+    "hashes": {
+      "webhook_server.py": "e7d426d284d3fd0b817e51f33b3b958ea14e0eac56763599d8ff113404e5cdb1",
+      "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+      "package5_control_plane_runtime_guard.py": "7e23a8adb5afa48417bf2eba0928a7b7a5d386113093c9706a1d07e9c438a262",
+      "realtime_bridge.py": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+      "legacy_client_command_bridge.py": "c539c3176bd26cda723a79d7ec7f0a5ef1032127809b6dac41d019009a87837e",
+      "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "claude_ai.py": "d70e49ddbbf6880d5f7ad931709c1b1c04cdd6d0908ea7fbd737f86a1e525a59",
+      "package5_loyalty_read_guard.py": "09df868144ae2c5d828a4a55a4efdb769fa84663c365e4b6d79669426f2c4fd9"
+    }
+  },
+  "migrationState": {
+    "pending": 0,
+    "drift": "NONE",
+    "repositoryMigrations": 79,
+    "accountedHistoricalMigrations": 82
+  },
+  "productionReadOnlyPreflight": "Welcome to LTD BeGet SSH Server 'prime'\nLoaded Prisma config from prisma.config.ts.\n\n{\n  \"ok\": true,\n  \"environment\": \"production\",\n  \"config\": \"safe\",\n  \"local_migrations\": 79,\n  \"database\": {\n    \"status\": \"ready\",\n    \"applied_migrations\": 82,\n    \"pending_migrations\": 0\n  }\n}\nNo difference detected.\n\n{\"status\":\"ok\",\"service\":\"maya-saas-backend\",\"release\":\"20260906-p5-b28-c738bc1b\",\"started_at\":\"2026-09-06T11:05:20.134Z\",\"timestamp\":\"2026-09-06T11:06:12.524Z\"}{\"status\":\"ready\",\"service\":\"maya-saas-backend\",\"checks\":{\"database\":\"ready\"},\"timestamp\":\"2026-09-06T11:06:12.532Z\"}active\nactive\nPackage 4 active PWA runtime guard: PASS\n{\"activePwaIncluded\": true, \"b13LegacyControlPlaneOwners\": 0, \"b14LegacyGodOwners\": 0, \"b15ChatHistoryReadOwners\": 0, \"b16BookingPrefillLegacyIdentityOwners\": 0, \"b17ClientAppointmentLegacyIdentityOwners\": 0, \"b18ActiveLegacyProviderMutationOwners\": 0, \"b18AppointmentSitesMapped\": \"6/6\", \"b18LegacyAppointmentAuthorityBypasses\": 0, \"b19ChatBookingInventoryCoverage\": \"3/3\", \"b19ChatBookingLegacyWriteSites\": 0, \"b19ChatStreamAuthorityParity\": true, \"b19ChatStreamMutationOwnerParity\": true, \"b20CabinetEndpointIdentityParity\": true, \"b20CabinetEndpointReadOnlyParity\": true, \"b20CabinetLegacyIdentityOwners\": 0, \"b20CabinetReadSurfaceWriters\": 0, \"b21RealtimeLegacyHistoryWriters\": 0, \"b21RealtimeLegacyIdentityOwners\": 0, \"b21RealtimePreReadyBypasses\": 0, \"b22UnverifiedTipOwners\": 0, \"b23LegacyHistoryDeleteOwners\": 0, \"b24LegacyWebPushOwners\": 0, \"findings\": [], \"pass\": true}\n\n",
+  "package4CrossPackageGuards": "PASS",
+  "acceptedRuntimePreservation": [
+    {
+      "path": "maya-saas-backend/src/loyalty/loyalty.service.ts",
+      "sha256": "9e4ea06033cab1fa0a1a32f5bce0e352010f6de9b1af7cb0422a4e967b487e70",
+      "unchanged": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-loyalty-read.service.ts",
+      "sha256": "89aed0be1715a3da725256d28f2fab06b9c82f1ed4f7dd929d0c187f0c6d26e1",
+      "unchanged": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-appointment-read.service.ts",
+      "sha256": "aaaf43f1451cef394203cfe96ff11f5604a9e600ec27f30ea3d2287909b08437",
+      "unchanged": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-habits.service.ts",
+      "sha256": "fd5a1e2c470e64a4658d4552ddc2ae168abb78e10965cb261cc7ce9fb1e6c6ef",
+      "unchanged": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-preferences.service.ts",
+      "sha256": "b7ff791b9b0137c758638561a25a36228e95b300624c2368bb71a19943a7b7e8",
+      "unchanged": true
+    }
+  ],
+  "inventorySummary": {
+    "release": "/opt/maya-saas/releases/20260906-p5-b28-c738bc1b",
+    "pythonFiles": 90,
+    "productionPythonFiles": 70,
+    "pythonRoutes": 100,
+    "pythonMutationLikeSites": 619,
+    "backendJs": 556,
+    "backendScripts": 14,
+    "sourceTs": 556,
+    "tsRoutes": 224,
+    "tsMutationLikeSites": 517,
+    "freshSurfaceHashes": {
+      "api-proxy.php": "df803a6455b186ec37db426250205107b8501afbb6192e22b67238e70c87fe66",
+      "pwa_api.py": "3062eddd6091eea995ef7f9c938f54b181a7bebad8c2cbf32deaae92e503a74d",
+      "package5_control_plane_runtime_guard.py": "7e23a8adb5afa48417bf2eba0928a7b7a5d386113093c9706a1d07e9c438a262",
+      "database.py": "1ab7e5c5c3f3205a9278917f7826808b5b9ba4c8c7a503e68057d58d9d5cee63",
+      "maya-app.html": "d0d24628674a1b76a838d2200e1865ba7dad0c334371a2b0d2c517544f00cd6e",
+      "app.html": "4db1416d2bb6dbd72ec7801552c6f4f3084252bd28464f76b47d1679c3d60e53",
+      "webhook_server.py": "e7d426d284d3fd0b817e51f33b3b958ea14e0eac56763599d8ff113404e5cdb1"
+    }
+  },
+  "familyInventoryCoverage": "13/13",
+  "foundationHashes": {
+    "compiledArtifactsMatched": 556,
+    "compiledScriptsMatched": 14,
+    "familyInventory": [
+      {
+        "family": "A15",
+        "acceptedWave": 3,
+        "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+        "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+        "deployedFoundation": {
+          "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+          "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A16",
+        "acceptedWave": 2,
+        "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+        "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+        "deployedFoundation": {
+          "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+          "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A17",
+        "acceptedWave": 3,
+        "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+        "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+        "deployedFoundation": {
+          "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+          "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A18",
+        "acceptedWave": 3,
+        "foundationSource": "package5-wave3/package5-wave3-canonical-cutover.service.ts",
+        "sourceSha256": "991a5a772c056a60eed18f727698f86ec268139efb62be2660c40bae4eabdcd7",
+        "deployedFoundation": {
+          "file": "package5-wave3/package5-wave3-canonical-cutover.service.js",
+          "sha256": "cdd23b3141daf9fd4da6f7983d713c99a4f08a8e385aa44506fc22273c29fde9"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A22",
+        "acceptedWave": 1,
+        "foundationSource": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+        "sourceSha256": "1cee4166d218a0748dcab14560aef6c489a1d246dc3aa92296ab6da1cc4b4c25",
+        "deployedFoundation": {
+          "file": "package5-wave1/package5-wave1-canonical-cutover.service.js",
+          "sha256": "727cca98d82deef7760d36788441c733c86fae82a2f0a96fb0654f90ac038482"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A23",
+        "acceptedWave": 1,
+        "foundationSource": "package5-wave1/package5-wave1-canonical-cutover.service.ts",
+        "sourceSha256": "1cee4166d218a0748dcab14560aef6c489a1d246dc3aa92296ab6da1cc4b4c25",
+        "deployedFoundation": {
+          "file": "package5-wave1/package5-wave1-canonical-cutover.service.js",
+          "sha256": "727cca98d82deef7760d36788441c733c86fae82a2f0a96fb0654f90ac038482"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A25",
+        "acceptedWave": 2,
+        "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+        "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+        "deployedFoundation": {
+          "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+          "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A26",
+        "acceptedWave": 2,
+        "foundationSource": "package5-wave2/package5-wave2-canonical-cutover.service.ts",
+        "sourceSha256": "3196c06bc497f9ea7b3e42e67f8c964910b5f30dcf9096b68d69336c2009f564",
+        "deployedFoundation": {
+          "file": "package5-wave2/package5-wave2-canonical-cutover.service.js",
+          "sha256": "f37667aa0b731816e1444dfa040acfdd79ce7139a4c1e80ec9f8a5185321b12f"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A27",
+        "acceptedWave": 4,
+        "foundationSource": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+        "sourceSha256": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+        "deployedFoundation": {
+          "file": "package5-wave4/package5-wave4-canonical-cutover.service.js",
+          "sha256": "d5eab02857a3b017dd739077049722204457d96d5f47ef4e2e71ff3a57231d6f"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A28",
+        "acceptedWave": 4,
+        "foundationSource": "package5-wave4/package5-wave4-canonical-cutover.service.ts",
+        "sourceSha256": "bc25be99f4eb38b039546724a53137eae532ef5288d7d04d65a48df02815af4a",
+        "deployedFoundation": {
+          "file": "package5-wave4/package5-wave4-canonical-cutover.service.js",
+          "sha256": "d5eab02857a3b017dd739077049722204457d96d5f47ef4e2e71ff3a57231d6f"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A29",
+        "acceptedWave": 5,
+        "foundationSource": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+        "sourceSha256": "fb3e3ef76153d3f880936c950175de53dee18f519d74218cc46b79ca003e2bc4",
+        "deployedFoundation": {
+          "file": "package5-wave5/package5-wave5-canonical-cutover.service.js",
+          "sha256": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A30",
+        "acceptedWave": 6,
+        "foundationSource": "package5-wave6/package5-wave6.service.ts",
+        "sourceSha256": "9c87dbf0db375ee48c55ecf6ca26225577ce6d0cef5a96463d4f2d0d8f9bfe08",
+        "deployedFoundation": {
+          "file": "package5-wave6/package5-wave6.service.js",
+          "sha256": "cc8a10e97b30e1c44a0d924afd83527768cce293e7f85bda68e6707fc8cbcd02"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      },
+      {
+        "family": "A31",
+        "acceptedWave": 5,
+        "foundationSource": "package5-wave5/package5-wave5-canonical-cutover.service.ts",
+        "sourceSha256": "fb3e3ef76153d3f880936c950175de53dee18f519d74218cc46b79ca003e2bc4",
+        "deployedFoundation": {
+          "file": "package5-wave5/package5-wave5-canonical-cutover.service.js",
+          "sha256": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d"
+        },
+        "acceptedFoundationUnchanged": true,
+        "verdict": "freshly inventoried; aggregate verdict recorded separately"
+      }
+    ],
+    "familyInventoryCoverage": "13/13",
+    "acceptedWaveFoundationsUnchanged": true
+  },
+  "finalGate": "FAIL",
+  "package5Complete": false,
+  "finalAggregateRegression": "NOT RUN — STOP at new inventory blocker B29",
+  "blocker": {
+    "id": "B29 / A18",
+    "route": "POST /api/appointments/:id/cancel",
+    "authority": "Appointment.clientId is optional User association, not canonical Client; actual Client is Appointment.mayaClientId",
+    "actualFlow": "Authenticated User → findForClient by User/tenant → direct updateForClient; no verified ClientChannelLink/exact mayaClientId check",
+    "proof": "package5-b29-appointment-command-authority.proof.json",
+    "tested": "Actual compiled controller/service/repository against synthetic PostgreSQL, internal appointment cancellation",
+    "limitations": "No external CRM cancellation/creation/rescheduling executed. Normal authenticated membership and booking feature prerequisites remain. No claim about real affected population.",
+    "remediationStarted": false
+  },
+  "sourceAnchors": [
+    {
+      "source": "maya-saas-backend/src/appointments/appointments.controller.ts",
+      "sourceSha256": "b20f0e236d37e47d43fa04304af5f043dd443c1d1ffa47b5bd15625d9309f044",
+      "compiled": "maya-saas-backend/dist/src/appointments/appointments.controller.js",
+      "compiledSha256": "8c8a24d8dafb7199826bfc0010588be544936154685d62679d76e299a3b89934"
+    },
+    {
+      "source": "maya-saas-backend/src/appointments/appointments.service.ts",
+      "sourceSha256": "b9df5f6a91aee2344c2dd54c8735c9bb79b4e3617eb2fbdfea4a9314f3530bb9",
+      "compiled": "maya-saas-backend/dist/src/appointments/appointments.service.js",
+      "compiledSha256": "76e91d7bd515709445e9bf3a7d5319f71c6fc511e7e1d52919c2d9c3cd8ff63c"
+    },
+    {
+      "source": "maya-saas-backend/src/appointments/tenant-appointment.repository.ts",
+      "sourceSha256": "1b781595ecf21ab88c44c1efc40825733c045ee3f7a8c8e823c72b69edb2e774",
+      "compiled": "maya-saas-backend/dist/src/appointments/tenant-appointment.repository.js",
+      "compiledSha256": "6175c3c9f379a4e8a89ed05775e806d3ed4b95579e224d67f33a374832175ff8"
+    },
+    {
+      "source": "maya-saas-backend/src/appointments/appointments.module.ts",
+      "sourceSha256": "b3c8ac198f47003139442b0811c564eaf1a314ff118c5e6f24a2904fb3e7a284",
+      "compiled": "maya-saas-backend/dist/src/appointments/appointments.module.js",
+      "compiledSha256": "f68460f06e0898f10358e3034f145fbb3ddf3ce07d9dfa43dad8dbed1c135d5a"
+    },
+    {
+      "source": "maya-saas-backend/src/crm/client-appointment-read.service.ts",
+      "sourceSha256": "aaaf43f1451cef394203cfe96ff11f5604a9e600ec27f30ea3d2287909b08437",
+      "compiled": "maya-saas-backend/dist/src/crm/client-appointment-read.service.js",
+      "compiledSha256": "17e98c841a11c533a3403ff6b56c83f186c45a2ed686776771303ffc2ddcc52c"
+    },
+    {
+      "source": "maya-saas-backend/src/crm/client-profile-read.service.ts",
+      "sourceSha256": "cf02c7b853480055504d0259651716b60ca7e0c819bd482184cc7e14f920b7d1",
+      "compiled": "maya-saas-backend/dist/src/crm/client-profile-read.service.js",
+      "compiledSha256": "93450e0b4a4b930b93e79316aff5084f6121a113871a22746cbe8211de3f8bf4"
+    }
+  ],
+  "realProductionMutationsForProof": 0,
+  "productionPrivateEndpointsInvokedForSmoke": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6DeclaredComplete": false,
+  "processHygiene": {
+    "checkedAt": "2026-09-06T11:15:03.395914+00:00",
+    "ownedDatabaseDropped": "maya_c06_b28_owned",
+    "ownedPostgresPidStopped": 41079,
+    "ownedDataDirectoryRemoved": true,
+    "port55498Closed": true,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "preExistingDatabaseBaseline": 17,
+    "preExistingDatabasesTouched": 0,
+    "browserOrWatcherStarted": false
+  }
+}

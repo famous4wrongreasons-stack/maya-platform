@@ -1,0 +1,4 @@
+Welcome to LTD BeGet SSH Server 'prime'
+/opt/maya-saas/releases/20260908-a18-security-consent-0867ecea
+active
+{"status":"ok","service":"maya-saas-backend","release":"20260908-a18-security-consent-0867ecea","started_at":"2026-09-08T10:11:27.588Z","timestamp":"2026-09-08T10:49:05.947Z"}{"status":"ready","service":"maya-saas-backend","checks":{"database":"ready"},"timestamp":"2026-09-08T10:49:05.961Z"}

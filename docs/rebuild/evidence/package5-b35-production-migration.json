@@ -1,0 +1,21 @@
+{
+  "gate": "PASS",
+  "pending": 0,
+  "postApplyDrift": "NONE",
+  "migration": "20260907120000_b35_canonical_bulk_foundation",
+  "migrationChecksum": "973bf4797fcc50d13365cca1c088c342a25bbee2d37e0c20428529348a06206c",
+  "newColumns": 12,
+  "alteredNullabilityColumns": 2,
+  "newForeignKeys": 3,
+  "newPhysicalIndexes": 5,
+  "guards": 11,
+  "populatedNewFields": 0,
+  "fakeHistoricalBackfill": 0,
+  "release": "/opt/maya-saas/releases/20260906-p5-b34-6f6745f2",
+  "health": 200,
+  "readiness": 200,
+  "runtimeSwitched": false,
+  "b35BulkFoundationDurableInProduction": true,
+  "productionMessages": 0,
+  "productionBusinessProofMutations": 0
+}

@@ -48,6 +48,7 @@ import config
 import cutmatch
 import cycle_reminder
 import database
+import canonical_staff_access
 import growth_planner
 import lead_alerts
 import master_briefing
@@ -55,6 +56,7 @@ import masters_ai
 import maya_capabilities
 import memory
 import owner_ai
+from privacy_policy import PRIVACY_TEXT
 import reputation
 import subscriptions
 import web_auth
@@ -65,6 +67,10 @@ from chat_widgets import (
     normalize_chat_widget_data,
     widget_for_action,
     widget_from_signal,
+)
+from business_rules import (
+    ANTON_STAFF_ID,
+    anton_salary_for_period,
 )
 from identity_utils import normalize_tg_user, panel_permissions, resolve_panel_role, session_tg_user
 from maya_roles import (
@@ -78,6 +84,9 @@ from voice_guard import CLARIFY_REPEAT_TEXT, should_clarify_transcript
 from yclients import YClientsAPI
 
 logger = logging.getLogger(__name__)
+
+_MAYA_LEGACY_BRIDGE_TOKEN = os.getenv("MAYA_LEGACY_BRIDGE_TOKEN", "").strip()
+_MAYA_INBOX_BRIDGE_TOKEN = os.getenv("MAYA_INBOX_BRIDGE_TOKEN", "").strip()
 
 try:
     from config import WEBPUSH_VAPID_PRIVATE_KEY, WEBPUSH_VAPID_CLAIMS
@@ -350,109 +359,14 @@ def _master_by_tip_key(key: Any, master_id: Any = None) -> dict | None:
     return None
 
 
-def _push_db_path() -> str:
-    return os.environ.get(
-        "MASTER_PUSH_DB",
-        os.path.join(os.path.dirname(__file__), "master_push_subscriptions.sqlite3"),
-    )
 
 
-def _push_db() -> sqlite3.Connection:
-    conn = sqlite3.connect(_push_db_path())
-    conn.row_factory = sqlite3.Row
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS master_push_subscriptions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            staff_id INTEGER,
-            telegram_chat_id INTEGER NOT NULL,
-            endpoint TEXT NOT NULL UNIQUE,
-            subscription_json TEXT NOT NULL,
-            user_agent TEXT,
-            created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
-        )
-    """)
-    conn.execute("""
-        CREATE INDEX IF NOT EXISTS idx_master_push_staff
-        ON master_push_subscriptions(staff_id)
-    """)
-    conn.execute("""
-        CREATE INDEX IF NOT EXISTS idx_master_push_chat
-        ON master_push_subscriptions(telegram_chat_id)
-    """)
-    conn.commit()
-    return conn
 
 
-def _save_master_push_subscription_sqlite(
-    staff_id: int | None,
-    chat_id: int,
-    subscription: dict,
-    user_agent: str = "",
-) -> bool:
-    endpoint = subscription.get("endpoint")
-    if not endpoint:
-        return False
-    now_s = datetime.now().isoformat(timespec="seconds")
-    with _push_db() as conn:
-        conn.execute("""
-            INSERT INTO master_push_subscriptions
-                (staff_id, telegram_chat_id, endpoint, subscription_json, user_agent, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(endpoint) DO UPDATE SET
-                staff_id=excluded.staff_id,
-                telegram_chat_id=excluded.telegram_chat_id,
-                subscription_json=excluded.subscription_json,
-                user_agent=excluded.user_agent,
-                updated_at=excluded.updated_at
-        """, (
-            staff_id,
-            int(chat_id),
-            endpoint,
-            _json.dumps(subscription, ensure_ascii=False),
-            user_agent or "",
-            now_s,
-            now_s,
-        ))
-        conn.commit()
-    return True
 
 
-def _list_master_push_subscriptions_sqlite(staff_id: int | None, chat_id: int | None) -> list[dict]:
-    where = []
-    params = []
-    if staff_id:
-        where.append("staff_id = ?")
-        params.append(int(staff_id))
-    if chat_id:
-        where.append("telegram_chat_id = ?")
-        params.append(int(chat_id))
-    if not where:
-        return []
-    sql = (
-        "SELECT subscription_json FROM master_push_subscriptions "
-        "WHERE " + " OR ".join(where)
-    )
-    with _push_db() as conn:
-        rows = conn.execute(sql, params).fetchall()
-    out = []
-    for row in rows:
-        try:
-            out.append(_json.loads(row["subscription_json"]))
-        except Exception:
-            pass
-    return out
 
 
-def _delete_master_push_subscription_sqlite(endpoint: str):
-    if not endpoint:
-        return
-    try:
-        with _push_db() as conn:
-            conn.execute("DELETE FROM master_push_subscriptions WHERE endpoint = ?", (endpoint,))
-            conn.commit()
-    except Exception as e:
-        logger.error(f"push sqlite delete failed: {e}")
 
 
 def _record_push_body(record: dict) -> str:
@@ -469,60 +383,11 @@ def _record_push_body(record: dict) -> str:
     return f"{when} · {client_name}"
 
 
-def _save_master_push_subscription(master: dict, chat_id: int, subscription: dict, user_agent: str = "") -> bool:
-    staff_id = _master_staff_id(master)
-    for name in ("save_master_push_subscription", "upsert_master_push_subscription", "save_push_subscription"):
-        fn = getattr(database, name, None)
-        if not callable(fn):
-            continue
-        try:
-            fn(
-                staff_id=staff_id,
-                telegram_chat_id=int(chat_id),
-                subscription=subscription,
-                user_agent=user_agent,
-            )
-            return True
-        except TypeError:
-            try:
-                fn(staff_id, int(chat_id), subscription)
-                return True
-            except Exception as e:
-                logger.error(f"{name}: {e}")
-        except Exception as e:
-            logger.error(f"{name}: {e}")
-    try:
-        return _save_master_push_subscription_sqlite(staff_id, int(chat_id), subscription, user_agent)
-    except Exception as e:
-        logger.error(f"push sqlite save failed: {e}")
-        return False
 
 
 def _push_subscriptions_for_master(master: dict) -> list[dict]:
-    staff_id = _master_staff_id(master)
-    chat_id = master.get("telegram_chat_id") if master else None
-    for name in ("list_master_push_subscriptions", "get_master_push_subscriptions", "list_push_subscriptions_for_master"):
-        fn = getattr(database, name, None)
-        if not callable(fn):
-            continue
-        try:
-            rows = fn(staff_id=staff_id, telegram_chat_id=chat_id)
-        except TypeError:
-            try:
-                rows = fn(staff_id)
-            except Exception as e:
-                logger.error(f"{name}: {e}")
-                rows = []
-        except Exception as e:
-            logger.error(f"{name}: {e}")
-            rows = []
-        if rows:
-            return list(rows)
-    try:
-        return _list_master_push_subscriptions_sqlite(staff_id, chat_id)
-    except Exception as e:
-        logger.error(f"push sqlite list failed: {e}")
-        return []
+    """B24: legacy raw-identity push has no canonical delivery authority."""
+    return []
 
 
 async def _send_master_push(
@@ -533,56 +398,8 @@ async def _send_master_push(
     tag: str = "",
     data: dict | None = None,
 ) -> int:
-    if not master or not WEBPUSH_VAPID_PRIVATE_KEY:
-        return 0
-    rows = _push_subscriptions_for_master(master)
-    if not rows:
-        return 0
-    try:
-        from pywebpush import WebPushException, webpush
-    except Exception as e:
-        logger.error(f"Web Push отключён: установите pywebpush ({e})")
-        return 0
-
-    payload = _json.dumps({
-        "title": title,
-        "body": body,
-        "url": url,
-        "tag": tag or f"master-{_master_staff_id(master) or 'notice'}",
-        **(data or {}),
-    }, ensure_ascii=False)
-
-    sent = 0
-    for row in rows:
-        sub = row
-        if isinstance(row, dict):
-            sub = row.get("subscription") or row.get("subscription_json") or row
-        endpoint = sub.get("endpoint") if isinstance(sub, dict) else ""
-        if isinstance(sub, str):
-            try:
-                sub = _json.loads(sub)
-                endpoint = sub.get("endpoint") if isinstance(sub, dict) else endpoint
-            except Exception:
-                continue
-        try:
-            await asyncio.to_thread(
-                webpush,
-                subscription_info=sub,
-                data=payload,
-                vapid_private_key=WEBPUSH_VAPID_PRIVATE_KEY,
-                vapid_claims=WEBPUSH_VAPID_CLAIMS,
-            )
-            sent += 1
-        except WebPushException as e:
-            status = getattr(getattr(e, "response", None), "status_code", None)
-            if status in (403, 404, 410):
-                _delete_master_push_subscription_sqlite(endpoint)
-                logger.info(f"master push stale subscription removed status={status}")
-                continue
-            logger.error(f"master push failed: {e}")
-        except Exception as e:
-            logger.error(f"master push failed: {e}")
-    return sent
+    """B24: legacy raw-identity push has no canonical delivery authority."""
+    return 0
 
 
 async def _send_client_push(chat_id, title: str, body: str,
@@ -596,76 +413,8 @@ async def _send_client_push(chat_id, title: str, body: str,
                             chat_link=None,
                             chat_mode: str = "client",
                             chat_dedupe_key: str = "") -> int:
-    """Push конкретному КЛИЕНТУ (по telegram_chat_id) — напр. предложение оставить чай
-    после визита. Подписки клиента лежат в той же таблице (staff_id NULL)."""
-    if persist_in_chat and chat_id:
-        try:
-            text_for_chat = (chat_text or "").strip()
-            if not text_for_chat:
-                text_for_chat = (f"{title}\n\n{body}" if body else title).strip()
-            _store_assistant_message_in_chat(
-                int(chat_id),
-                text_for_chat,
-                mode=chat_mode,
-                action=chat_action,
-                widget=chat_widget,
-                widget_data=chat_widget_data,
-                link=chat_link,
-                dedupe_key=chat_dedupe_key or tag or "",
-            )
-        except Exception as e:
-            logger.error(f"client push chat mirror {chat_id}: {e}")
-    if not chat_id or not WEBPUSH_VAPID_PRIVATE_KEY:
-        return 0
-    try:
-        rows = _list_master_push_subscriptions_sqlite(None, int(chat_id))
-    except Exception as e:
-        logger.error(f"client push list: {e}")
-        return 0
-    if not rows:
-        return 0
-    try:
-        from pywebpush import WebPushException, webpush
-    except Exception as e:
-        logger.error(f"Web Push отключён: {e}")
-        return 0
-    push_data = dict(data or {})
-    widget = normalize_chat_widget(chat_widget)
-    push_data.pop("widget_data", None)
-    if widget:
-        push_data["widget"] = widget
-        widget_data = normalize_chat_widget_data(widget, chat_widget_data)
-        if widget_data:
-            push_data["widget_data"] = widget_data
-    payload = _json.dumps({
-        "title": title, "body": body, "url": url,
-        "tag": tag or f"client-{chat_id}", **push_data,
-    }, ensure_ascii=False)
-    sent = 0
-    for row in rows:
-        sub = row.get("subscription") or row.get("subscription_json") or row if isinstance(row, dict) else row
-        endpoint = sub.get("endpoint") if isinstance(sub, dict) else ""
-        if isinstance(sub, str):
-            try:
-                sub = _json.loads(sub)
-                endpoint = sub.get("endpoint") if isinstance(sub, dict) else endpoint
-            except Exception:
-                continue
-        try:
-            await asyncio.to_thread(
-                webpush, subscription_info=sub, data=payload,
-                vapid_private_key=WEBPUSH_VAPID_PRIVATE_KEY, vapid_claims=WEBPUSH_VAPID_CLAIMS)
-            sent += 1
-        except WebPushException as e:
-            status = getattr(getattr(e, "response", None), "status_code", None)
-            if status in (403, 404, 410):
-                _delete_master_push_subscription_sqlite(endpoint)
-                logger.info(f"client push stale subscription removed status={status}")
-                continue
-            logger.error(f"client push failed: {e}")
-        except Exception as e:
-            logger.error(f"client push failed: {e}")
-    return sent
+    """B24: legacy raw-identity push has no canonical delivery authority."""
+    return 0
 
 
 def _tip_offer_details(record: dict, master_name: str = "") -> tuple[str, int]:
@@ -801,56 +550,9 @@ async def _notify_client_record(record: dict, record_id: int, kind: str) -> None
 
 
 async def _apply_client_reminder_pref(record: dict, record_id: int) -> None:
-    """
-    Уважает выбор клиента «Напоминание перед визитом» (раздел «Настройки» в
-    приложении) для ЛЮБОЙ его записи — не только созданной через наше приложение.
+    """B6 V1 is local policy. Webhook observations never synchronize Client preferences to CRM."""
+    return None
 
-    Наш бот шлёт ТОЛЬКО Telegram; SMS/WhatsApp-напоминание шлёт YClients по полю
-    записи `notify_by_sms` (часы до визита, 0 = не напоминать). При записи ЧЕРЕЗ
-    приложение мы уже проставляем его в create_booking. Здесь — дотягиваем выбор
-    клиента до записей, созданных админом / по телефону / онлайн-виджетом.
-
-    Действуем ТОЛЬКО если клиент сам открывал настройки (has_saved_notify_prefs),
-    иначе не трогаем дефолт салона. Меняем неразрушающе и идемпотентно:
-      • reminder == False           → 0 (не напоминать);
-      • reminder == True            → reminder_hours (за сколько часов).
-    """
-    try:
-        client = record.get("client") or {}
-        phone = client.get("phone")
-        if not phone:
-            return
-        our = database.find_client_by_phone(phone)
-        if not our or not our.get("id"):
-            return
-        cid = int(our["id"])
-        # Клиент не открывал настройки → оставляем поведение салона как есть.
-        if not database.has_saved_notify_prefs(cid):
-            return
-        prefs = database.get_notify_prefs(cid)
-        if prefs.get("reminder") is False:
-            target = 0
-        else:
-            try:
-                target = int(prefs.get("reminder_hours", 3) or 0)
-            except (TypeError, ValueError):
-                target = 3
-            if target <= 0:       # напоминание включено, но час не задан — не выключаем
-                target = 3
-        res = await asyncio.to_thread(_yc.set_record_notify_by_sms, record_id, target)
-        if res.get("success"):
-            if not res.get("noop"):
-                logger.info(
-                    f"Webhook: notify_by_sms={target} применён к записи {record_id} "
-                    f"по настройке клиента"
-                )
-        else:
-            logger.warning(
-                f"Webhook: не удалось применить notify_by_sms к {record_id}: "
-                f"{res.get('error')}"
-            )
-    except Exception as e:
-        logger.error(f"_apply_client_reminder_pref {record_id}: {e}")
 
 
 async def enrich_record_with_client(record: dict) -> dict:
@@ -999,9 +701,47 @@ def _close_local_booking_intent(record: dict, record_id: int):
         logger.error(f"Webhook: close local booking intent record {record_id}: {e}")
 
 
+_ACTION_OUTCOME_UNKNOWN_CODES = frozenset({
+    "action_in_progress",
+    "bridge_outcome_unknown",
+    "legacy_appointment_bridge_response_invalid",
+    "legacy_appointment_bridge_status_unavailable",
+    "legacy_appointment_bridge_transport_error",
+    "outcome_unknown",
+})
+
+
+def _action_outcome_unknown(result: dict | None) -> bool:
+    value = result or {}
+    return value.get("unknown") is True or str(value.get("code") or "") in _ACTION_OUTCOME_UNKNOWN_CODES
+
+
+def _action_unknown_payload(result: dict | None, message: str) -> dict:
+    value = result or {}
+    payload = {
+        "success": False,
+        "ok": False,
+        "accepted": value.get("accepted"),
+        "unknown": True,
+        "retry_allowed": False,
+        "error": "outcome_unknown",
+        "code": "outcome_unknown",
+        "message": message,
+    }
+    execution_id = str(value.get("execution_id") or "").strip()
+    if execution_id:
+        payload["execution_id"] = execution_id
+    return payload
+
+
 def _booking_failure_reply(result: dict) -> str:
     """Короткое понятное объяснение клиенту, почему запись не дошла до YClients."""
     code = (result or {}).get("code") or ""
+    if _action_outcome_unknown(result):
+        return (
+            "Результат записи уточняется. Не отправляйте заявку повторно, "
+            "чтобы не создать дубль. Проверьте «Мои записи» через минуту."
+        )
     if code == "slot_taken":
         return (
             "Это время уже заняли или оно стало недоступно. "
@@ -1030,523 +770,21 @@ def _booking_failure_reply(result: dict) -> str:
 
 
 async def _process_record_create(app: Application, record_id: int) -> dict:
-    """
-    Главная бизнес-логика обработки события «новая запись».
-    Возвращает dict с результатом для логов.
-    """
-    # 1. Дедупликация — если событие уже обработано, выходим тихо
-    if not database.mark_record_processed(record_id, "record.create"):
-        return {"status": "duplicate", "record_id": record_id}
-
-    # 2. Получаем детали записи через YClients API
-    record = _yc.get_record(record_id)
-    if not record:
-        logger.error(f"Webhook: запись {record_id} не найдена в YClients")
-        return {"status": "record_not_found", "record_id": record_id}
-
-    # 2.1 Пропускаем продажу сертификатов/абонементов
-    if _is_gift_cert_record(record):
-        logger.info(f"Webhook: запись {record_id} — сертификат/абонемент, пропускаем")
-        return {"status": "skipped_gift_cert", "record_id": record_id}
-
-    # 2.2 Сохраняем снимок состояния — нужен для детекции изменений на update,
-    # даже если мастер не привязан (запись может позже к нему переехать).
-    _save_record_state(record, record_id)
-
-    # 2.3 Уважаем выбор клиента «Напоминание перед визитом» из настроек приложения.
-    # ДО проверки мастера — чтобы сработало для ЛЮБОЙ записи (в т.ч. когда мастер
-    # не привязан у нас или запись создана админом/виджетом, а не приложением).
-    try:
-        await _apply_client_reminder_pref(record, record_id)
-    except Exception as e:
-        logger.error(f"Webhook: notify-pref к записи {record_id}: {e}")
-
-    # 3. Кто мастер?
-    staff = record.get("staff") or {}
-    staff_id = staff.get("id") or record.get("staff_id")
-    if not staff_id:
-        logger.error(f"Webhook: у записи {record_id} нет staff_id")
-        return {"status": "no_staff", "record_id": record_id}
-
-    master = database.get_master_by_staff_id(int(staff_id))
-    if not master:
-        logger.info(f"Webhook: мастер {staff_id} не в системе — пропускаем")
-        return {"status": "master_not_bound", "staff_id": staff_id}
-
-    # Telegram-канал есть не у всех: мастер может быть зарегистрирован ТОЛЬКО в
-    # приложении (web-push), без запуска бота. Тогда Telegram пропускаем, но
-    # пуш в приложение всё равно шлём (это и есть «пуши членам команды»).
-    has_tg = bool(master.get("telegram_chat_id"))
-
-    # 4. Mute — про Telegram-уведомления. Замьютивший мастер не получит Telegram,
-    # но запись в приложении (web-push) всё равно увидит.
-    if has_tg and database.is_master_muted(master["telegram_chat_id"]):
-        logger.info(f"Webhook: мастер {staff_id} в mute — Telegram пропускаем (web-push идёт)")
-        has_tg = False
-
-    # 5. В record.client от webhook'а только id/имя/телефон — без visits/birth_date.
-    # Догружаем полный профиль клиента, чтобы корректно показать «N-й визит»
-    # и дать AI его историю предпочтений.
-    advice, ai_provider = None, "fallback"
-    money_full, money_short = "", ""     # денежная мотивация мастеру (цифры)
-    client = record.get("client") or {}
-    client_id = client.get("id")
-    if client_id:
-        try:
-            full_client = await asyncio.to_thread(_yc.get_client, int(client_id))
-            if full_client:
-                # Мерджим — приоритет полному профилю, имя/телефон оставляем
-                # как пришло в webhook (на случай если только что обновили в YClients)
-                merged = {**full_client, **{k: v for k, v in client.items() if v}}
-                record["client"] = merged
-                client = merged
-        except Exception as e:
-            logger.error(f"Webhook: не получили full client {client_id}: {e}")
-
-        try:
-            history = await _fetch_client_history(int(client_id))
-            advice, ai_provider = await masters_ai.generate_upsell_advice(
-                history=history, current_record=record
-            )
-            logger.info(
-                f"Webhook: AI ({ai_provider}) сгенерировал совет "
-                f"({len(advice) if advice else 0} символов) для записи {record_id}"
-            )
-            try:
-                money_full, money_short = masters_ai.money_pitch(int(staff_id), history, record)
-            except Exception as e:
-                logger.error(f"Webhook: money_pitch для записи {record_id}: {e}")
-        except Exception as e:
-            logger.error(f"Webhook: ошибка получения совета AI: {e}")
-
-    _close_local_booking_intent(record, record_id)
-
-    # 6. Лог в БД — будет нужен для статистики «зашёл / не зашёл совет»
-    try:
-        initial_services = [
-            (s.get("title") or "").strip()
-            for s in (record.get("services") or [])
-            if isinstance(s, dict) and s.get("title")
-        ]
-        database.log_ai_advice(
-            record_id=record_id,
-            client_id=int(client_id) if client_id else None,
-            staff_id=int(staff_id),
-            ai_provider=ai_provider,
-            advice_text=advice,
-            initial_services=initial_services,
-        )
-    except Exception as e:
-        logger.error(f"Webhook: не записали в ai_advice_log: {e}")
-
-    # 7. Готовим текст уведомления (с советом, если AI вернул что-то)
-    text = _build_notification_text(record, advice=advice)
-    # Денежная мотивация мастеру: конкретные цифры (обычно/можешь, в мес, в год).
-    if money_full:
-        text = f"{text}\n\n{money_full}"
-
-    # Inline-кнопки оплаты: 💵 Наличные / 💳 Карта.
-    # callback_data: pay_<method>_<record_id> — record_id даёт идемпотентность.
-    keyboard = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("💵 Наличные", callback_data=f"pay_cash_{record_id}"),
-            InlineKeyboardButton("💳 Карта",    callback_data=f"pay_card_{record_id}"),
-        ]
-    ])
-
-    # 8. Telegram мастеру (если запустил бота и не в mute) — в своём try.
-    tg_sent = False
-    if has_tg:
-        try:
-            await app.bot.send_message(
-                chat_id=master["telegram_chat_id"], text=text,
-                parse_mode="Markdown", reply_markup=keyboard,
-            )
-            tg_sent = True
-        except Exception as e:
-            logger.error(f"Webhook: Telegram мастеру {staff_id} не ушёл: {e}")
-
-    # 9. Web-push мастеру В ПРИЛОЖЕНИЕ — НЕЗАВИСИМО от Telegram (мастер мог не
-    #    запускать бота, или Telegram не ушёл). Включает AI-совет по апселлу.
-    try:
-        _push_body = _record_push_body(record)
-        if advice and isinstance(advice, str) and advice.strip():
-            _adv = advice.strip()
-            if len(_adv) > 220:
-                _adv = _adv[:219].rstrip() + "…"
-            _push_body = f"{_push_body}\n💡 {_adv}"
-        if money_short:                       # короткая денежная строка в пуш
-            _push_body = f"{_push_body}\n{money_short}"
-        await _send_master_push(
-            master, title="Новая запись", body=_push_body,
-            url="/app/?panel=schedule", tag=f"record-create-{record_id}",
-            data={"record_id": record_id, "event": "record.create", "advice": (advice or "")},
-        )
-    except Exception as e:
-        logger.error(f"Webhook: web-push мастеру {staff_id} не ушёл: {e}")
-
-    # 10. Пуш клиенту «вы записаны» — тоже независимо.
-    try:
-        await _notify_client_record(record, record_id, "create")
-    except Exception as e:
-        logger.error(f"Webhook: пуш клиенту записи {record_id} не ушёл: {e}")
-
-    logger.info(f"Webhook: запись {record_id} → мастер {master.get('full_name')} "
-                f"(telegram={tg_sent}, web-push отправлен)")
-    return {
-        "status": "sent" if tg_sent else "push_only",
-        "record_id": record_id, "staff_id": staff_id, "ai_provider": ai_provider,
-    }
+    from canonical_operational_alerts import trigger
+    await trigger()
+    return {'status':'canonical_event_owner_pending','record_id':record_id}
 
 
 async def _process_record_update(app: Application, record_id: int) -> dict:
-    """
-    Обработка webhook'а record.update.
-
-    YClients шлёт update на ЛЮБОЕ касание записи: перенос времени, смену
-    мастера, изменение услуг, а ТАКЖЕ на закрытие оплаты (attendance=1) и
-    финансовые операции. Чтобы не спамить мастера, сравниваем свежее
-    состояние со снимком в record_state и уведомляем ТОЛЬКО при значимом
-    изменении:
-      • сменился мастер  → старому «запись ушла», новому «вам передали»
-      • сменилось время  → текущему мастеру «запись перенесена»
-      • сменились услуги → текущему мастеру «состав услуг изменён»
-      • только attendance/финансы → молча обновляем снимок, не шлём
-    """
-    record = _yc.get_record(record_id)
-    if not record:
-        logger.info(
-            f"Webhook update: запись {record_id} не найдена — "
-            f"возможно удалена сразу после изменения"
-        )
-        return {"status": "record_not_found", "record_id": record_id}
-
-    if _is_gift_cert_record(record):
-        return {"status": "skipped_gift_cert", "record_id": record_id}
-
-    # Новое состояние
-    staff = record.get("staff") or {}
-    new_staff_id_raw = staff.get("id") or record.get("staff_id")
-    if not new_staff_id_raw:
-        logger.error(f"Webhook update: у записи {record_id} нет staff_id")
-        return {"status": "no_staff", "record_id": record_id}
-    new_staff_id = int(new_staff_id_raw)
-    new_dt = _record_datetime(record)
-    new_sig = _services_signature(record)
-
-    # Старое состояние из снимка
-    old_state = database.get_record_state(record_id)
-
-    # Всегда обновляем снимок в конце — делаем это через try/finally-стиль:
-    # сохраним прямо сейчас новое состояние, чтобы повторные дубль-вебхуки
-    # уже видели «ничего не изменилось».
-    def _persist():
-        _save_record_state(record, record_id)
-
-    # Нет снимка (запись создана до фичи или мимо нас) — не можем понять, что
-    # изменилось. Молча фиксируем снимок и выходим, чтобы не слать ложное.
-    if not old_state:
-        _persist()
-        logger.info(
-            f"Webhook update: запись {record_id} без снимка — "
-            f"зафиксировал состояние, уведомление не шлём"
-        )
-        return {"status": "snapshot_initialized", "record_id": record_id}
-
-    old_staff_id = old_state.get("staff_id")
-    old_dt = old_state.get("datetime")
-    old_sig = old_state.get("services_sig")
-
-    transferred = bool(old_staff_id and old_staff_id != new_staff_id)
-    time_changed = bool(old_dt and new_dt and old_dt != new_dt)
-    services_changed = (old_sig or "") != (new_sig or "")
-
-    if _visit_just_completed(record, old_state):
-        try:
-            await _offer_tip_to_client(record, record_id)
-        except Exception as e:
-            logger.error(f"tip-offer trigger {record_id}: {e}")
-
-    # Если значимых изменений нет (только attendance/финансы) — тихо обновляем.
-    if not (transferred or time_changed or services_changed):
-        _persist()
-        return {"status": "no_meaningful_change", "record_id": record_id}
-
-    # Обогащаем клиента для карточки
-    client = record.get("client") or {}
-    client_id = client.get("id")
-    if client_id:
-        try:
-            full_client = await asyncio.to_thread(_yc.get_client, int(client_id))
-            if full_client:
-                merged = {**full_client, **{k: v for k, v in client.items() if v}}
-                record["client"] = merged
-                client = merged
-        except Exception as e:
-            logger.error(f"Webhook update: full client {client_id}: {e}")
-
-    # AI-совет из кэша (не перегенерируем — экономия)
-    prev_advice = database.get_ai_advice_for_record(record_id) or {}
-    advice_to_show = prev_advice.get("advice_text")
-
-    new_master = database.get_master_by_staff_id(new_staff_id)
-    old_master = (
-        database.get_master_by_staff_id(int(old_staff_id))
-        if transferred and old_staff_id else None
-    )
-
-    results = {
-        "status": "updated", "record_id": record_id,
-        "transferred": transferred, "time_changed": time_changed,
-        "services_changed": services_changed,
-        "sent_to_new": False, "sent_to_old": False,
-    }
-
-    # Заголовок (Telegram) + заголовок web-push для текущего/нового мастера.
-    if transferred:
-        header = "📨 *Тебе передали запись от другого мастера*"
-        push_title = "Запись передана"
-    elif time_changed:
-        # Кто перенёс: метку ставит НАШ код. Клиент через бота MAYA → 'client';
-        # владелец/мастер (бот-админ или панель) либо правка прямо в YClients →
-        # 'staff'/нет метки → «администратором».
-        if database.pop_recent_reschedule_actor(record_id) == "client":
-            header = "🔁 *Клиент перенёс свою запись сам*"
-            push_title = "Клиент перенёс запись"
-        else:
-            header = "🔁 *Запись перенесена администратором*"
-            push_title = "Запись перенесена"
-    else:
-        header = "✏️ *Изменён состав услуг записи*"
-        push_title = "Изменены услуги"
-
-    # ── Уведомление новому/текущему мастеру ────────────────────────────
-    if new_master:
-        _new_tg = bool(new_master.get("telegram_chat_id"))
-        _new_muted = _new_tg and database.is_master_muted(new_master["telegram_chat_id"])
-        # Telegram новому мастеру (если есть канал и не в mute) — в своём try
-        if _new_tg and not _new_muted:
-            try:
-                body = _build_notification_text(record, advice=advice_to_show)
-                text = f"{header}\n\n{body}"
-                # Закрыта по оплате — без кнопок
-                if prev_advice.get("button_pressed"):
-                    method = prev_advice.get("payment_method") or prev_advice.get("button_pressed")
-                    emoji = "💵" if method == "cash" else "💳"
-                    label = "наличными" if method == "cash" else "картой"
-                    text += f"\n\n✅ {emoji} Закрыто {label}"
-                    reply_markup = None
-                else:
-                    reply_markup = InlineKeyboardMarkup([[
-                        InlineKeyboardButton("💵 Наличные", callback_data=f"pay_cash_{record_id}"),
-                        InlineKeyboardButton("💳 Карта",    callback_data=f"pay_card_{record_id}"),
-                    ]])
-                await app.bot.send_message(
-                    chat_id=new_master["telegram_chat_id"],
-                    text=text, parse_mode="Markdown", reply_markup=reply_markup,
-                )
-                results["sent_to_new"] = True
-            except Exception as e:
-                logger.error(f"Webhook update: Telegram мастеру {new_staff_id} не ушёл: {e}")
-        elif _new_muted:
-            logger.info(f"Webhook update: мастер {new_staff_id} в mute — Telegram пропускаем (web-push идёт)")
-        # Web-push новому мастеру В ПРИЛОЖЕНИЕ — независимо от Telegram
-        try:
-            await _send_master_push(
-                new_master,
-                title=push_title,
-                body=_record_push_body(record),
-                url="/app/?panel=schedule",
-                tag=f"record-update-{record_id}",
-                data={"record_id": record_id, "event": "record.update"},
-            )
-        except Exception as e:
-            logger.error(f"Webhook update: web-push мастеру {new_staff_id} не ушёл: {e}")
-        logger.info(f"Webhook update: запись {record_id} → {new_master.get('full_name')} "
-                    f"(transfer={transferred}, time={time_changed}, svc={services_changed})")
-    else:
-        logger.info(f"Webhook update: мастер {new_staff_id} не в системе — пропускаем")
-
-    # ── Уведомление старому мастеру (только при передаче) ──────────────
-    if transferred and old_master:
-        client_name = _truncate_name(client.get("name"))
-        when = _format_datetime(record.get("date") or record.get("datetime"))
-        _old_tg = bool(old_master.get("telegram_chat_id"))
-        _old_muted = _old_tg and database.is_master_muted(old_master["telegram_chat_id"])
-        # Telegram старому мастеру — best-effort, в своём try
-        if _old_tg and not _old_muted:
-            try:
-                await app.bot.send_message(
-                    chat_id=old_master["telegram_chat_id"],
-                    text=(
-                        f"❌ *Запись передана другому мастеру*\n\n"
-                        f"Клиент: {client_name}\n"
-                        f"Было время: {when}\n\n"
-                        f"_Администратор переназначил эту запись._"
-                    ),
-                    parse_mode="Markdown",
-                )
-                results["sent_to_old"] = True
-            except Exception as e:
-                logger.error(f"Webhook update: Telegram старому мастеру {old_staff_id} не ушёл: {e}")
-        elif _old_muted:
-            logger.info(f"Webhook update: старый мастер {old_staff_id} в mute — Telegram пропускаем (web-push идёт)")
-        # Web-push старому мастеру В ПРИЛОЖЕНИЕ — независимо от Telegram
-        try:
-            await _send_master_push(
-                old_master,
-                title="Запись передана другому мастеру",
-                body=f"{when} · {client_name}",
-                url="/app/?panel=schedule",
-                tag=f"record-transfer-old-{record_id}",
-                data={"record_id": record_id, "event": "record.transfer"},
-            )
-        except Exception as e:
-            logger.error(f"Webhook update: web-push старому мастеру {old_staff_id} не ушёл: {e}")
-
-    # Пуш клиенту о переносе времени его записи (если зарегистрирован + подписан)
-    if time_changed:
-        await _notify_client_record(record, record_id, "reschedule")
-
-    # Фиксируем новое состояние (после уведомлений)
-    _persist()
-    return results
+    from canonical_operational_alerts import trigger
+    await trigger()
+    return {'status':'canonical_event_owner_pending','record_id':record_id}
 
 
 async def _process_record_delete(app: Application, record_id: int, payload: dict) -> dict:
-    """
-    Обработка отмены записи. Пытаемся вытащить из payload (или из YClients)
-    мастера и время освободившегося слота, и предлагаем его кандидатам.
-    """
-    import freed_slot
-
-    # YClients в webhook delete обычно кладёт снимок удалённой записи в data.
-    # Если не нашли — пробуем дёрнуть API (может ещё отдаст), потом сдаёмся.
-    data = payload.get("data") or {}
-    if not data and "resource_id" in payload:
-        # Variant 1: пытаемся получить из API
-        try:
-            data = _yc.get_record(record_id) or {}
-        except Exception as e:
-            logger.warning(f"freed_slot: не дотянули запись {record_id}: {e}")
-            data = {}
-
-    # staff_id: либо в data.staff.id, либо в data.staff_id
-    staff = data.get("staff") or {}
-    staff_id = staff.get("id") or data.get("staff_id")
-    dt_str = data.get("date") or data.get("datetime")
-
-    if not staff_id or not dt_str:
-        logger.info(
-            f"freed_slot: для отменённой записи {record_id} нет staff/date "
-            f"(staff_id={staff_id}, dt={dt_str}) — пропускаем"
-        )
-        return {"status": "no_slot_data", "record_id": record_id}
-
-    try:
-        # YClients шлёт время с таймзоной типа '+03:00' или 'Z', и иногда с пробелом
-        # вместо 'T' ('2026-05-31 15:00:00'). Нормализуем устойчиво.
-        clean = dt_str.replace("Z", "+00:00").split("+")[0].split(".")[0].strip()
-        clean = clean.replace(" ", "T")
-        slot_dt = datetime.strptime(clean[:19], "%Y-%m-%dT%H:%M:%S")
-    except Exception as e:
-        logger.error(f"freed_slot: не распарсили дату '{dt_str}': {e}")
-        slot_dt = None
-
-    # ── Уведомляем мастера, чью запись отменили ────────────────────────
-    # Только если запись была В БУДУЩЕМ (отмена прошедшего визита мастеру
-    # не интересна) и мастер привязан + не в mute.
-    master_notified = False
-    try:
-        notify = slot_dt is None or slot_dt > datetime.now()
-        master = database.get_master_by_staff_id(int(staff_id))
-        if notify and master:
-            client = data.get("client") or {}
-            client_name = _truncate_name(client.get("name")) if client else "клиент"
-            when = _format_datetime(dt_str)
-            # Кто отменил: метку ставит наш код при КЛИЕНТСКОЙ отмене (бот/MAYA);
-            # нет метки (отмена админом/в YClients) → обезличенное «Запись отменена».
-            _cancel_by_client = False
-            try:
-                _cancel_by_client = database.pop_recent_cancel_actor(record_id) == "client"
-            except Exception:
-                pass
-            _cancel_word = "Запись отменена клиентом" if _cancel_by_client else "Запись отменена"
-            _del_tg = bool(master.get("telegram_chat_id"))
-            _del_muted = _del_tg and database.is_master_muted(master["telegram_chat_id"])
-            # Telegram (если есть канал и не в mute) — в своём try
-            if _del_tg and not _del_muted:
-                try:
-                    await app.bot.send_message(
-                        chat_id=master["telegram_chat_id"],
-                        text=(
-                            f"❌ *{_cancel_word}*\n\n"
-                            f"Клиент: {client_name}\n"
-                            f"Было время: {when}\n\n"
-                            f"_Слот освободился. Если кто-то ждал — самое время "
-                            f"предложить._"
-                        ),
-                        parse_mode="Markdown",
-                    )
-                    master_notified = True
-                except Exception as e:
-                    logger.error(f"Webhook delete: Telegram мастеру {staff_id} не ушёл: {e}")
-            elif _del_muted:
-                logger.info(f"Webhook delete: мастер {staff_id} в mute — Telegram пропускаем (web-push идёт)")
-            # Web-push мастеру В ПРИЛОЖЕНИЕ — независимо от Telegram
-            try:
-                await _send_master_push(
-                    master,
-                    title=_cancel_word,
-                    body=f"{when} · {client_name}",
-                    url="/app/?panel=schedule",
-                    tag=f"record-delete-{record_id}",
-                    data={"record_id": record_id, "event": "record.delete"},
-                )
-            except Exception as e:
-                logger.error(f"Webhook delete: web-push мастеру {staff_id} не ушёл: {e}")
-            logger.info(f"Webhook delete: отмена записи {record_id} → мастер {master.get('full_name')}")
-    except Exception as e:
-        logger.error(f"Webhook delete: уведомление мастеру по {record_id}: {e}")
-
-    # Пуш клиенту об отмене его записи (если зарегистрирован + подписан)
-    try:
-        if isinstance(data, dict) and data.get("client"):
-            await _notify_client_record(data, record_id, "cancel")
-    except Exception as e:
-        logger.error(f"Webhook delete: пуш клиенту по {record_id}: {e}")
-
-    # Чистим снимок состояния — записи больше нет
-    try:
-        database.delete_record_state(record_id)
-    except Exception:
-        pass
-
-    # Возврат баллов, если за эту запись списывали баллы лояльности
-    try:
-        import loyalty
-        refund = loyalty.refund_for_cancelled_record(record_id)
-        if refund.get("refunded"):
-            logger.info(
-                f"🪙 loyalty refund по отменённой записи {record_id}: "
-                f"+{refund['refunded']} баллов"
-            )
-    except Exception as e:
-        logger.error(f"loyalty refund на отмене записи {record_id}: {e}")
-
-    # Если дату не распарсили — оффер слота другим невозможен, но мастера
-    # мы уже уведомили; выходим.
-    if slot_dt is None:
-        return {
-            "status": "master_notified_no_slot",
-            "record_id": record_id,
-            "master_notified": master_notified,
-        }
-
-    freed_result = await freed_slot.offer_freed_slot(app, int(staff_id), slot_dt)
-    if isinstance(freed_result, dict):
-        freed_result["master_notified"] = master_notified
-    return freed_result
+    from canonical_operational_alerts import trigger
+    await trigger()
+    return {'status':'canonical_event_owner_pending','record_id':record_id}
 
 
 def _webhook_secret_ok(request: web.Request) -> bool:
@@ -1576,6 +814,20 @@ async def handle_yclients_webhook(request: web.Request) -> web.Response:
     # Извлекаем record_id и тип события
     record_id, event_type = _extract_record_event(payload)
     logger.info("Webhook: event=%s record_id=%s", event_type, record_id)  # без ПД: имя/телефон клиента не логируем
+
+    # 🔴 Теневая копия конверта в Maya OS — ДО любых ранних выходов, потому что
+    # именно нераспознанные доставки (треть потока) и надо наконец увидеть.
+    # Пересылка ничего не решает и ничего не делает: отказ теневого пути не
+    # влияет на боевую обработку ниже.
+    try:
+        import maya_shadow_bridge
+
+        await maya_shadow_bridge.forward_delivery(
+            payload, event_type=event_type, record_id=record_id
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("shadow bridge unavailable: %s", exc)
+
     if not record_id:
         return web.json_response({"status": "ignored", "reason": "no_record_id"})
 
@@ -1802,24 +1054,171 @@ def _load_cabinet_yclients(phone: str) -> dict:
     }
 
 
+
 async def cabinet_me_handler(request: web.Request) -> web.Response:
-    """
-    GET /api/cabinet/me
-    Заголовок: X-Telegram-InitData: <строка от Telegram WebApp>
-    Возвращает данные клиента: имя, баллы, визиты, записи, абонемент, рефералка.
-    """
-    init_data = request.headers.get("X-Telegram-InitData", "")
-    tg_user = _verify_telegram_init_data(init_data, TELEGRAM_TOKEN)
-    if not tg_user:
-        return _cabinet_response(
-            {"error": "invalid_init_data",
-             "message": "Подпись Telegram WebApp невалидна или устарела."},
-            status=401,
+    """GET /api/cabinet/me — B20 canonical read-only Client projection."""
+    return await _build_full_cabinet(request, {})
+
+
+async def internal_loyalty_snapshot_handler(request):
+    """B27: raw Telegram identity is not a Client/value read authority."""
+    return web.json_response({"error": "FEATURE_NOT_AVAILABLE"}, status=410)
+
+
+async def internal_privacy_telegram_handler(request: web.Request) -> web.Response:
+    """Execute the fixed /privacy Telegram response for Action Engine only."""
+    supplied_token = request.headers.get("X-Maya-Inbox-Bridge", "").strip()
+    if (
+        not _MAYA_INBOX_BRIDGE_TOKEN
+        or not supplied_token
+        or not hmac.compare_digest(supplied_token, _MAYA_INBOX_BRIDGE_TOKEN)
+    ):
+        raise web.HTTPNotFound()
+
+    try:
+        body = await request.json()
+        telegram_chat_id = int(body.get("telegram_chat_id", 0))
+        source_event_id = str(body.get("source_event_id", "")).strip()
+    except (AttributeError, TypeError, ValueError, _json.JSONDecodeError):
+        return web.json_response({"error": "invalid_request"}, status=400)
+
+    if telegram_chat_id <= 0 or not source_event_id or len(source_event_id) > 160:
+        return web.json_response({"error": "invalid_request"}, status=400)
+
+    bot_app = request.app.get("bot_app")
+    bot = getattr(bot_app, "bot", None)
+    original = getattr(
+        getattr(bot, "__class__", object),
+        "_maya_original_send_message_for_chat_mirror",
+        None,
+    )
+    if bot is None or not callable(original):
+        return web.json_response({"error": "executor_unavailable"}, status=503)
+
+    sent_message = await original(
+        bot,
+        chat_id=telegram_chat_id,
+        text=PRIVACY_TEXT,
+        parse_mode="Markdown",
+    )
+    message_id = getattr(sent_message, "message_id", None)
+    if message_id is None:
+        return web.json_response({"error": "provider_reference_missing"}, status=502)
+    return web.json_response({"message_id": str(message_id)})
+
+
+_PACKAGE2_TELEGRAM_MESSAGE_TYPES = frozenset({
+    "native_feedback_invitation",
+    "weekly_expense_reminder",
+    "appointment_reminder",
+    "shift_reminder",
+    "daily_report",
+    "morning_brief",
+    "growth_plan",
+    "hanging_lead",
+    "owner_alert",
+    "birthday_alert",
+    "review_alert",
+    "marketing_broadcast",
+})
+_PACKAGE2_TELEGRAM_PARSE_MODES = frozenset({"Markdown", "MarkdownV2", "HTML"})
+
+
+async def internal_package2_telegram_handler(request: web.Request) -> web.Response:
+    """Execute one Package 2 Telegram delivery owned by Action Engine."""
+    supplied_token = request.headers.get("X-Maya-Inbox-Bridge", "").strip()
+    if (
+        not _MAYA_INBOX_BRIDGE_TOKEN
+        or not supplied_token
+        or not hmac.compare_digest(supplied_token, _MAYA_INBOX_BRIDGE_TOKEN)
+    ):
+        raise web.HTTPNotFound()
+
+    try:
+        body = await request.json()
+        telegram_chat_id = int(body.get("telegram_chat_id", 0))
+        message_type = str(body.get("message_type", "")).strip()
+        source_event_id = str(body.get("source_event_id", "")).strip()
+        title = str(body.get("title", "")).strip()
+        body_text = str(body.get("body_text", "")).strip()
+        parse_mode = body.get("parse_mode")
+        raw_buttons = body.get("buttons", [])
+    except (AttributeError, TypeError, ValueError, _json.JSONDecodeError):
+        return web.json_response({"error": "invalid_request"}, status=400)
+
+    if (
+        telegram_chat_id <= 0
+        or message_type not in _PACKAGE2_TELEGRAM_MESSAGE_TYPES
+        or not source_event_id
+        or len(source_event_id) > 160
+        or not title
+        or len(title) > 160
+        or not body_text
+        or len(body_text) > 4096
+    ):
+        return web.json_response({"error": "invalid_request"}, status=400)
+    if message_type == "marketing_broadcast" and (
+        body.get("contract") != "maya.bulk-telegram-transport/1"
+        or not source_event_id.startswith("b35:") or parse_mode is not None or raw_buttons
+    ):
+        return web.json_response({"error": "invalid_bulk_transport"}, status=400)
+    if parse_mode is not None and parse_mode not in _PACKAGE2_TELEGRAM_PARSE_MODES:
+        return web.json_response({"error": "invalid_parse_mode"}, status=400)
+    if not isinstance(raw_buttons, list) or len(raw_buttons) > 4:
+        return web.json_response({"error": "invalid_buttons"}, status=400)
+
+    buttons = []
+    for raw_button in raw_buttons:
+        if not isinstance(raw_button, dict):
+            return web.json_response({"error": "invalid_buttons"}, status=400)
+        text = str(raw_button.get("text", "")).strip()
+        callback_data = str(raw_button.get("callback_data", "")).strip()
+        url = str(raw_button.get("url", "")).strip()
+        if (
+            not text
+            or len(text) > 64
+            or bool(callback_data) == bool(url)
+            or len(callback_data) > 64
+            or (url and not re.match(r"^https?://", url, flags=re.IGNORECASE))
+        ):
+            return web.json_response({"error": "invalid_buttons"}, status=400)
+        buttons.append(
+            InlineKeyboardButton(
+                text,
+                callback_data=callback_data or None,
+                url=url or None,
+            )
         )
-    chat_id = tg_user.get("id")
-    if not chat_id:
-        return _cabinet_response({"error": "no_user_id"}, status=400)
-    return await _build_full_cabinet(int(chat_id), tg_user)
+
+    bot_app = request.app.get("bot_app")
+    bot = getattr(bot_app, "bot", None)
+    original = getattr(
+        getattr(bot, "__class__", object),
+        "_maya_original_send_message_for_chat_mirror",
+        None,
+    )
+    if bot is None or not callable(original):
+        return web.json_response({"error": "executor_unavailable"}, status=503)
+
+    try:
+        sent_message = await original(
+            bot,
+            chat_id=telegram_chat_id,
+            text=body_text,
+            parse_mode=parse_mode,
+            reply_markup=InlineKeyboardMarkup([[button] for button in buttons]) if buttons else None,
+        )
+    except Exception as error:
+        if message_type == "marketing_broadcast":
+            from telegram.error import BadRequest, Forbidden
+            if isinstance(error, (BadRequest, Forbidden)):
+                return web.json_response({"error": "B35_TELEGRAM_REJECTED"}, status=400)
+        # A timeout/lost response never proves that the provider did not send.
+        raise
+    message_id = getattr(sent_message, "message_id", None)
+    if message_id is None:
+        return web.json_response({"error": "provider_reference_missing"}, status=502)
+    return web.json_response({"message_id": str(message_id)})
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -1874,333 +1273,99 @@ def _verify_telegram_login_widget(auth_data: dict, bot_token: str,
     }
 
 
-async def cabinet_me_via_login_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/cabinet/me-via-login
-    Body: { "auth_data": { id, first_name, ..., hash, auth_date } }
 
-    Авторизация через Telegram Login Widget (для PWA в браузере, не Mini App).
-    Логика fetch'а данных ЛК — копия cabinet_me_handler с подменой источника auth.
-    """
+async def cabinet_me_via_login_handler(request: web.Request) -> web.Response:
+    """Telegram Login Widget is channel proof, never raw Client authority."""
     try:
         body = await request.json()
     except Exception:
         return _cabinet_response({"error": "invalid_json"}, status=400)
+    if not isinstance(body, dict) or set(body) != {"auth_data"} or not isinstance(body.get("auth_data"), dict):
+        return _cabinet_response({"error": "invalid_login_proof"}, status=400)
+    return await _build_full_cabinet(request, body)
 
-    auth_data = body.get("auth_data") if isinstance(body, dict) else None
-    tg_user = _verify_telegram_login_widget(auth_data or {}, TELEGRAM_TOKEN)
-    if not tg_user:
+
+
+def _unlinked_cabinet_projection(*, needs_consent: bool = False) -> dict:
+    """No stored Client PII is present in an unverified projection."""
+    return {
+        "linked": needs_consent,
+        "known": False,
+        "needs_consent": needs_consent,
+        "has_phone": False,
+        "needs_phone": True,
+        "name": "",
+        "full_name": "",
+        "phone_tail": "",
+        "booking_phone": "",
+        "loyalty": None,
+        "visits": {"total": 0, "last_year": 0, "last_visit": None},
+        "client_card": None,
+        "client_note": "",
+        "usual_master": None,
+        "upcoming": [],
+        "history": [],
+        "subscription": None,
+        "referral": {"code": None, "link": None, "invited": 0, "pending": 0},
+        "tg_user": {},
+        "client_link_required": not needs_consent,
+        "business_mutations": 0,
+    }
+
+
+async def _build_full_cabinet(request: web.Request, body: dict) -> web.Response:
+    """p5_b20_verified_client_cabinet_read_only.
+
+    All cabinet routes share this boundary. The original signed channel proof
+    is authenticated again by Maya OS, and its active tenant-qualified
+    ClientChannelLink selects the Client. A raw chat id, legacy web session,
+    phone, consent row or caller Client id is never accepted. The projection
+    performs no cache warm, lazy migration or business write.
+    """
+    import legacy_client_command_bridge as client_commands
+
+    try:
+        proof = client_commands.channel_proof(request.headers, body)
+    except ValueError:
+        return _cabinet_response(_unlinked_cabinet_projection())
+
+    try:
+        result = await asyncio.to_thread(
+            client_commands.command, "cabinet-projection", proof, {}
+        )
+    except ValueError:
+        return _cabinet_response(_unlinked_cabinet_projection())
+    except Exception:
         return _cabinet_response(
-            {"error": "invalid_login_signature",
-             "message": "Подпись Telegram Login невалидна или устарела."},
-            status=401,
+            {"error": "cabinet_projection_unavailable", "business_mutations": 0},
+            status=503,
         )
 
-    chat_id = tg_user.get("id")
-    if not chat_id:
-        return _cabinet_response({"error": "no_user_id"}, status=400)
+    if not isinstance(result, dict) or not result.get("linked"):
+        return _cabinet_response(_unlinked_cabinet_projection())
+    if result.get("needs_consent"):
+        return _cabinet_response(
+            _unlinked_cabinet_projection(needs_consent=True), status=403
+        )
+    if not result.get("known"):
+        return _cabinet_response(_unlinked_cabinet_projection())
 
-    # Дальше — идентичная логика что и в cabinet_me_handler.
-    # Чтобы не дублировать ~200 строк — переиспользуем приватный helper.
-    return await _build_full_cabinet(int(chat_id), tg_user)
+    # The internal bridge is the only projection source. No legacy enrichment
+    # is permitted here because it would reintroduce a second Client/PII owner.
+    return _cabinet_response(result)
 
-
-async def _build_full_cabinet(chat_id: int, tg_user: dict) -> web.Response:
-    """
-    Общая логика построения ответа ЛК — используется и cabinet_me_handler,
-    и cabinet_me_via_login_handler. Возвращает ту же структуру что ждёт фронт.
-    """
-    tg_profile = normalize_tg_user(tg_user)
-    client = database.get_client(int(chat_id))
-    if not client:
-        return _cabinet_response({
-            "known": False,
-            "tg_user": {
-                "first_name": tg_profile.get("first_name", ""),
-                "last_name": tg_profile.get("last_name", ""),
-                "full_name": tg_profile.get("full_name", ""),
-                "username": tg_profile.get("username", ""),
-                "photo_url": tg_profile.get("photo_url", ""),
-            },
-            "message": "Сначала запишись через бот — после первой записи мы будем знать тебя.",
-        })
-
-    if not database.has_valid_consent_by_chat_id(int(chat_id)):
-        return _cabinet_response({
-            "known": False,
-            "needs_consent": True,
-            "message": (
-                "Чтобы открыть личный кабинет, подпишите согласие на обработку "
-                "персональных данных. Откройте бот @malesthetic_bot и нажмите /start."
-            ),
-        }, status=403)
-
-    client_id = client["id"]
-    phone = client.get("phone") or ""
-    # Телефон известен → идемпотентно начисляем welcome-баллы за прошлые визиты,
-    # чтобы баллы были видны сразу после привязки номера (как в cabinet_me_handler).
-    if phone:
-        try:
-            import loyalty as _loy
-            await asyncio.to_thread(_loy.lazy_backfill_for_client, client_id, phone)
-        except Exception as e:
-            logger.error(f"_build_full_cabinet: lazy_backfill {client_id}: {e}")
-    # YClients card is imported into the MAYA ledger once. From that moment
-    # the ledger is authoritative: otherwise every cabinet refresh would put
-    # already-spent points back by overwriting the balance with the old card.
-    balance = database.loyalty_balance(client_id)
-    loyalty_source = (
-        "yclients_import"
-        if database.client_has_loyalty_yclients_import(client_id)
-        else "maya_ledger"
-    )
-
-    bookings = []
-    yc_client_id = None
-    yc_client_card = None
-    phone_digits = "".join(ch for ch in phone if ch.isdigit())
-    has_valid_phone = len(phone_digits) >= 10
-    if has_valid_phone:
-        try:
-            yc_payload = await asyncio.to_thread(_load_cabinet_yclients, phone)
-            yc_client_id = yc_payload.get("yc_client_id")
-            yc_client_card = yc_payload.get("client_card")
-            bookings = yc_payload.get("bookings") or []
-        except Exception as e:
-            logger.error(f"cabinet_via_login: yc bookings err: {e}")
-            bookings = []
-
-    today_str = date.today().isoformat()
-    upcoming = []
-    history = []
-    history_cache = []
-    visits_total = 0
-    visits_last_year = 0
-    year_ago = (date.today() - timedelta(days=365)).isoformat()
-    last_visit = None
-
-    for b in bookings:
-        if not isinstance(b, dict):
-            continue
-        record_id = b.get("id") or b.get("record_id")
-        if not record_id:
-            continue
-        dt = (b.get("datetime") or b.get("date") or "")[:10]
-        attended = b.get("attendance") == 1 or b.get("visit_attendance") == 1
-        services = []
-        total_cost = 0
-        for svc in (b.get("services") or []):
-            if isinstance(svc, dict):
-                title = str(svc.get("title") or "").strip()
-                if not title:
-                    continue
-                cost = svc.get("cost")
-                if cost in (None, ""):
-                    cost = svc.get("price")
-                try:
-                    total_cost += int(float(cost or 0))
-                except (TypeError, ValueError):
-                    pass
-                normalized_service = {"title": title, "cost": cost or 0}
-                service_id = svc.get("id", svc.get("service_id"))
-                if isinstance(service_id, (str, int)) and str(service_id).strip():
-                    normalized_service["id"] = service_id
-                services.append(normalized_service)
-            elif str(svc or "").strip():
-                services.append({"title": str(svc).strip(), "cost": 0})
-        service_titles = [svc["title"] for svc in services if svc.get("title")]
-        master = b.get("master") or (b.get("staff") or {}).get("name") or ""
-        master_id = _norm_id((b.get("staff") or {}).get("id") or b.get("staff_id"))
-        item = {
-            "record_id": int(record_id),
-            "date": b.get("date") or b.get("datetime", ""),
-            "services": service_titles,
-            "master": master,
-            "master_id": master_id,
-            "cost": total_cost or None,
-        }
-        if not attended and dt >= today_str:
-            upcoming.append(item)
-        elif attended:
-            history.append(item)
-            history_cache.append(memory.normalize_history_visit({
-                "date": b.get("date") or b.get("datetime", ""),
-                "services": services,
-                "staff": {"id": master_id, "name": master},
-                "master_id": master_id,
-                "master": master,
-            }))
-            visits_total += 1
-            if dt >= year_ago:
-                visits_last_year += 1
-            if last_visit is None or dt > last_visit.get("date_short", ""):
-                last_visit = {**item, "date_short": dt}
-
-    upcoming.sort(key=lambda x: x["date"])
-    history.sort(key=lambda x: x["date"], reverse=True)
-    history_cache.sort(key=lambda x: str(x.get("date") or ""), reverse=True)
-
-    if has_valid_phone:
-        try:
-            database.set_client_history_cache(client_id, history_cache[:30])
-        except Exception as e:
-            logger.error(f"_build_full_cabinet: cache warm {client_id}: {e}")
-
-    sub = database.get_active_subscription_for_client(client_id)
-    sub_info = None
-    if sub:
-        try:
-            import subscriptions as _subs
-            plan = _subs.get_plan(sub["plan_code"])
-            if plan:
-                tier = (sub.get("tier") or "top").lower()
-                sub_info = {
-                    "title": plan["title"],
-                    "tier_label": _subs.TIER_LABELS.get(tier, ""),
-                    "used": sub.get("visits_used", 0),
-                    "total": sub["visits_included"],
-                    "expires_at": sub["expires_at"][:10],
-                    "services_included": plan["services_included"],
-                }
-        except Exception:
-            pass
-
-    ref_code, ref_link, ref_stats = None, None, {}
-    try:
-        import referral as _ref
-        ref_code = _ref.get_or_create_ref_code(client_id)
-        ref_link = _ref.build_ref_link(ref_code, "malesthetic_bot")
-        ref_stats = database.referral_stats_for_client(client_id)
-    except Exception as e:
-        logger.error(f"cabinet_via_login: ref err: {e}")
-
-    client_card = _client_card_view(yc_client_card, visits_total)
-    client_note = (client_card or {}).get("comment") or ""
-    client_card_name = (client_card or {}).get("name") or client.get("name") or ""
-    full_name = (
-        tg_profile.get("full_name")
-        or client_card_name
-        or tg_profile.get("first_name")
-        or ""
-    )
-    first_name = tg_profile.get("first_name") or (full_name.split() or [""])[0]
-
-    loyalty_details = {
-        "balance": balance,
-        "source": loyalty_source,
-        "care_services": [],
-        "affordable_services": [],
-        "best_service": None,
-        "next_service": None,
-        "redemption_rule": "one_care_service_per_visit",
-    }
-    try:
-        import loyalty as _loy
-
-        spend = await asyncio.to_thread(_loy.loyalty_spend_summary, balance)
-        loyalty_details.update({
-            "care_services": spend.get("care_services") or [],
-            "affordable_services": spend.get("affordable_services") or [],
-            "best_service": spend.get("best_service"),
-            "next_service": spend.get("next_service"),
-            "redemption_rule": spend.get("redemption_rule"),
-        })
-    except Exception as e:
-        logger.error(f"_build_full_cabinet: loyalty spend options {client_id}: {e}")
-
-    return _cabinet_response({
-        "known": True,
-        "has_phone": has_valid_phone,
-        "needs_phone": not has_valid_phone,
-        "name": first_name,
-        "full_name": full_name,
-        "phone_tail": phone[-4:] if has_valid_phone else "",
-        "booking_phone": phone if has_valid_phone else "",
-        "loyalty": loyalty_details,
-        "visits": {
-            "total": visits_total,
-            "last_year": visits_last_year,
-            "last_visit": last_visit,
-        },
-        "yc_client_id": yc_client_id,
-        "client_card": client_card,
-        "client_note": client_note,
-        "usual_master": _usual_master(history),
-        "upcoming": upcoming,
-        "history": history[:30],
-        "subscription": sub_info,
-        "referral": {
-            "code": ref_code,
-            "link": ref_link,
-            "invited": ref_stats.get("granted", 0),
-            "pending": ref_stats.get("pending", 0),
-        },
-        "tg_user": {
-            "id": tg_profile.get("id"),
-            "first_name": tg_profile.get("first_name", ""),
-            "last_name": tg_profile.get("last_name", ""),
-            "full_name": tg_profile.get("full_name", ""),
-            "username": tg_profile.get("username", ""),
-            "photo_url": tg_profile.get("photo_url", ""),
-        },
-    })
-
-
-# ─────────────────────────────────────────────────────────────────────
-# ПАНЕЛЬ УПРАВЛЕНИЯ (ролевой интерфейс в приложении)
-# Роли: owner (полный доступ) / manager (аналитика + операционка, без
-# управления правами и выгрузки ПД) / master (свои инструменты, +кассир).
-# Роль и права определяются ТОЛЬКО на сервере — фронт ничего не решает.
-# ─────────────────────────────────────────────────────────────────────
 
 def _panel_resolve_role(tg_id: int) -> dict:
-    """Возвращает роль, права и признак привязанного мастера по Telegram-id."""
-    managers = set()
-    try:
-        raw = database.get_setting("panel_manager_ids") or ""
-        for x in raw.replace(" ", "").split(","):
-            x = x.strip()
-            if x.lstrip("-").isdigit():
-                managers.add(int(x))
-    except Exception:
-        managers = set()
+    """R02: exact current canonical principal; no raw-role fallback."""
+    return canonical_staff_access.panel_role(tg_id)
 
-    # Привязанный мастер (бывает и у владельца, если он сам стрижёт)
-    master_row = None
-    try:
-        master_row = database.get_master_by_chat_id(int(tg_id))
-    except Exception:
-        master_row = None
-    is_master = bool(master_row)
-    staff_id = master_row.get("yclients_staff_id") if master_row else None
-    master_name = (master_row.get("full_name") if master_row else "") or ""
-    is_cashier = bool(master_row.get("can_redeem")) if master_row else False
-    try:
-        from config import FOUNDER_IDS as _FIDS
-        founders = {int(x) for x in _FIDS}
-    except Exception:
-        founders = set()
-    is_founder = int(tg_id) in founders
-    is_admin = bool(database.is_admin(int(tg_id)))
-
-    role = resolve_panel_role(
-        tg_id=int(tg_id),
-        is_founder=is_founder,
-        is_admin=is_admin,
-        is_master=is_master,
-        manager_ids=managers,
-    )
-
-    perms = panel_permissions(role, is_master=is_master, is_cashier=is_cashier)
-    return {"role": role, "is_cashier": is_cashier, "is_master": is_master,
-            "staff_id": staff_id, "master_name": master_name, "permissions": perms,
-            "is_founder": is_founder, "is_admin": is_admin}
 
 
 def _panel_auth(body: dict, init_data_header: str):
-    """tg_user из initData (Mini App) ИЛИ auth_data (Login Widget) ИЛИ веб-сессии
-    (вход через ВК/телефон без Telegram: body.session_token → resolve → chat_id).
-    Иначе None."""
+    """Canonical staff context first; remaining channel proof is Client-only."""
+    current = canonical_staff_access.panel_user()
+    if current:
+        return current
     if init_data_header:
         u = _verify_telegram_init_data(init_data_header, TELEGRAM_TOKEN)
         if u:
@@ -2210,7 +1375,7 @@ def _panel_auth(body: dict, init_data_header: str):
         u = _verify_telegram_login_widget(auth_data, TELEGRAM_TOKEN)
         if u:
             return u
-    # Веб-сессия (ВК/телефон-вход без VPN): токен → chat_id известного сотрудника.
+    # Historical compatibility session is never a staff authority source.
     tok = (body or {}).get("session_token")
     if tok:
         try:
@@ -2224,88 +1389,21 @@ async def panel_options_handler(request: web.Request) -> web.Response:
     return _cabinet_response({"ok": True})
 
 
-GIFT_PROMO_PERCENT = 20
-GIFT_PROMO_VALID_DAYS = 14
-
-
-async def _promo_gift_notify(app, chat_id: int, code: str, pct: int, until_str: str = "") -> None:
-    """Шлём клиенту промокод в Telegram (+ web-push). Ошибки доставки глотаем —
-    код всё равно создан и возвращается фронту для показа прямо в приложении."""
-    date_line = ""
-    if until_str:
-        try:
-            d = date.fromisoformat(str(until_str)[:10])
-            date_line = f"Действует до {d.strftime('%d.%m.%Y')}.\n"
-        except Exception:
-            date_line = ""
-    text = (
-        "🎁 Ваш подарок от «Мужской Эстетики»!\n\n"
-        f"Промокод *{code}* — *скидка {pct}%* на первое посещение.\n"
-        f"{date_line}\n"
-        "Назовите код мастеру при оплате. Хорошей стрижки! 💈"
-    )
-    try:
-        await app["bot_app"].bot.send_message(chat_id=chat_id, text=text, parse_mode="Markdown")
-    except Exception as e:
-        logger.error(f"promo_gift tg send {chat_id}: {e}")
-    try:
-        await _send_client_push(chat_id, title=f"Ваш промокод −{pct}% 🎁",
-                                body=f"{code} — скидка {pct}% на первое посещение.", url="/app/",
-                                tag="promo-gift",
-                                persist_in_chat=True,
-                                chat_text=(
-                                    "🎁 Для вас готов промокод на первое посещение.\n\n"
-                                    f"{code} — скидка {pct}%.\n"
-                                    + (f"Действует до {until_str[:10]}.\n" if until_str else "")
-                                    + "Когда будете готовы, откройте запись в приложении."
-                                ),
-                                chat_action={
-                                    "type": "open_booking",
-                                    "label": "Записаться",
-                                    "screen": "book",
-                                },
-                                chat_dedupe_key=f"promo-gift:{code}",
-                                )
-    except Exception:
-        pass
+PROMO_GIFT_RETIRED_CODE = "legacy_promo_issuance_retired"
 
 
 async def promo_gift_handler(request: web.Request) -> web.Response:
-    """POST /api/promo_gift — клиент в баннере дошёл до «−20%» и нажал «Записаться».
-    Создаём/находим промокод −20% на первое посещение и шлём его клиенту в Telegram
-    (+ web-push). Код тот же, что AI проверяет при записи (таблица birthday_promo)."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    chat_id = tg_user.get("id") if tg_user else None
-    if not chat_id:
-        return _cabinet_response({"ok": False, "needs_telegram": True,
-                                  "message": "Промокод приходит в Telegram-бот — зайдите через него."})
-    chat_id = int(chat_id)
-    # Идемпотентность: уже есть активный −20%-код → отдаём его, не плодим и не спамим.
-    try:
-        existing = database.get_active_birthday_promo(chat_id)
-    except Exception:
-        existing = None
-    if existing and existing.get("code"):
-        # Код уже есть — отдаём его (приложение покажет чип из JSON). Telegram повторно
-        # НЕ дёргаем: иначе на каждый повторный тап/переоткрытие баннера летит дубль
-        # «🎁 Ваш подарок». Доставку клиенту уже обеспечивает чип в приложении.
-        return _cabinet_response({"ok": True, "code": existing["code"],
-                                  "percent": existing.get("percent") or GIFT_PROMO_PERCENT, "new": False})
-    # Новый «подарочный» код
-    code = "GIFT-" + database.new_birthday_promo_code().split("-", 1)[-1]
-    until = (date.today() + timedelta(days=GIFT_PROMO_VALID_DAYS))
-    try:
-        client_id = database.get_or_create_client(chat_id)
-        database.save_birthday_promo(client_id, code, GIFT_PROMO_PERCENT, date.today().year, until.isoformat())
-    except Exception as e:
-        logger.error(f"promo_gift save chat={chat_id}: {e}")
-        return _cabinet_response({"ok": False, "message": "Не удалось создать промокод."}, status=500)
-    await _promo_gift_notify(request.app, chat_id, code, GIFT_PROMO_PERCENT, until.isoformat())
-    return _cabinet_response({"ok": True, "code": code, "percent": GIFT_PROMO_PERCENT, "new": True})
+    """Compatibility response for the retired legacy 20% promo issuer.
+
+    Historical promo rows remain untouched. This read-compatible endpoint never
+    resolves or creates a Client, grants value, or attempts delivery.
+    """
+    return _cabinet_response({
+        "ok": False,
+        "error": PROMO_GIFT_RETIRED_CODE,
+        "message": "Выдача этого промокода завершена.",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_me_handler(request: web.Request) -> web.Response:
@@ -2580,11 +1678,16 @@ async def panel_command_center_handler(request: web.Request) -> web.Response:
             "error": "server_error",
             "message": "Не удалось собрать Owner Command Center.",
         }, status=500)
+    import canonical_work_entry
+    tasks = await canonical_work_entry.canonical_request(request, 'list')
+    payload['canonical_tasks'] = tasks.get('tasks', [])
+    payload['current_user_id'] = tasks.get('current_user_id')
+    payload['canonical_task_error'] = tasks.get('error')
     return _cabinet_response({"role": info["role"], **payload})
 
 
 async def panel_plan_target_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/plan_target — daily target or strategic growth goal."""
+    """Retired daily/growth/capacity writer; monthly target is canonical A22."""
     try:
         body = await request.json()
     except Exception:
@@ -2592,91 +1695,22 @@ async def panel_plan_target_handler(request: web.Request) -> web.Response:
     tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
     if not tg_user:
         return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Настройка плана доступна только владельцу.",
-        }, status=403)
-    if body.get("mode") == "growth" or body.get("growth_target_rub") is not None:
-        raw_growth = body.get("growth_target_rub", body.get("target_rub"))
-        try:
-            growth_target = int(round(float(str(raw_growth).replace(" ", "").replace(",", ".") or 0)))
-            workstations = body.get("workstations_count")
-            workstations = int(workstations) if workstations not in (None, "") else None
-        except Exception:
-            return _cabinet_response({
-                "error": "bad_request",
-                "message": "Цель и количество рабочих мест должны быть числами.",
-            }, status=400)
-        try:
-            result = await asyncio.to_thread(
-                growth_planner.set_growth_goal,
-                target_rub=growth_target,
-                deadline=body.get("deadline"),
-                workstations_count=workstations,
-                created_by=tg_id,
-            )
-        except Exception as e:
-            logger.error(f"panel growth target error: {e}")
-            return _cabinet_response({
-                "error": "server_error",
-                "message": "Не удалось рассчитать план роста.",
-            }, status=500)
-        if not result.get("ok"):
-            return _cabinet_response(result, status=400)
-        return _cabinet_response({"role": info["role"], **result})
-    raw = body.get("target_rub", body.get("daily_target_rub", 0))
-    try:
-        target = int(round(float(str(raw).replace(" ", "").replace(",", ".") or 0)))
-    except Exception:
-        return _cabinet_response({"error": "bad_request", "message": "target_rub должен быть числом."}, status=400)
-    if target < 0 or target > 5000000:
-        return _cabinet_response({"error": "bad_request", "message": "План должен быть от 0 до 5 000 000 ₽."}, status=400)
-    try:
-        database.set_setting("owner_daily_target_rub", str(target))
-        payload = await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_plan_target error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось сохранить план."}, status=500)
-    return _cabinet_response({"ok": True, "role": info["role"], **payload})
+    return _cabinet_response({
+        "ok": False,
+        "error": "legacy_business_goal_mutation_retired",
+        "canonical_action": "update_finance_dashboard_preferences",
+        "canonical_endpoint": "/api/me/dashboard/finance",
+        "supported_goal": "monthly_financial_target",
+        "daily_revenue_goal": "retired",
+        "dated_growth_goal": "retired",
+        "workstation_capacity_goal": "retired",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_action_evaluate_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/action/evaluate — проверить результат owner action."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Проверка результата доступна только владельцу.",
-        }, status=403)
-    try:
-        action_id = int(body.get("action_id") or 0)
-    except Exception:
-        action_id = 0
-    if not action_id:
-        return _cabinet_response({"error": "bad_request", "message": "action_id обязателен."}, status=400)
-    try:
-        item = await asyncio.to_thread(
-            database.evaluate_owner_action,
-            action_id,
-            force=bool(body.get("force")),
-        )
-    except Exception as e:
-        logger.error(f"panel_action_evaluate error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось проверить результат."}, status=500)
-    if not item:
-        return _cabinet_response({"error": "not_found"}, status=404)
-    return _cabinet_response({"ok": True, "action": item})
+    import canonical_work_entry
+    return _cabinet_response(canonical_work_entry.owner_required(), status=410)
 
 
 def _owner_assignment_due_label(raw: str | None = "") -> str:
@@ -2726,342 +1760,43 @@ def _owner_assignment_message(task: dict | None) -> str:
 
 
 async def _deliver_owner_control_assignment(request: web.Request, task: dict | None) -> dict:
-    """Доставляет назначенную owner_control задачу в рабочий контур без лишней аналитики."""
-    if not isinstance(task, dict):
-        return {"ok": False, "skipped": True, "reason": "empty_task"}
-    payload = task.get("payload") if isinstance(task.get("payload"), dict) else {}
-    assigned_to = str(payload.get("assigned_to") or "owner").strip().lower()
-    if assigned_to not in ("admin", "master", "team"):
-        return {"ok": True, "skipped": True, "reason": "internal_assignment"}
-    state = str(payload.get("assignment_delivery_state") or "").strip().lower()
-    if state == "delivered" and int(payload.get("assignment_delivery_message_id") or 0):
-        return {"ok": True, "skipped": True, "reason": "already_delivered"}
-    try:
-        action_id = int(task.get("id") or 0)
-    except Exception:
-        action_id = 0
-    if not action_id:
-        return {"ok": False, "skipped": True, "reason": "no_action_id"}
-    text = _owner_assignment_message(task)
-    try:
-        msg_id = await asyncio.to_thread(
-            database.add_staff_message,
-            0,
-            "MAYA · задачи",
-            text,
-            "", "", "", "", 0, 0,
-        )
-    except Exception as e:
-        logger.error(f"owner assignment team chat save: {e}")
-        marked = await asyncio.to_thread(
-            database.mark_owner_control_task_delivery,
-            action_id,
-            state="failed",
-            channel="team_chat",
-            error="team_chat_save_failed",
-        )
-        return {"ok": False, "state": "failed", "task": marked}
-    try:
-        await _push_team_message(request.app["bot_app"], 0, "MAYA · задачи", text, "")
-    except Exception as e:
-        logger.error(f"owner assignment team chat push: {e}")
-    marked = await asyncio.to_thread(
-        database.mark_owner_control_task_delivery,
-        action_id,
-        state="delivered",
-        channel="team_chat",
-        message_id=msg_id,
-    )
-    return {"ok": True, "state": "delivered", "message_id": msg_id, "task": marked}
+    import canonical_work_entry
+    return canonical_work_entry.owner_required()
 
 
 async def panel_control_update_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/control/update — lifecycle ручной контрольной задачи."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Контрольные задачи доступны только владельцу.",
-        }, status=403)
-    try:
-        task_id = int(body.get("task_id") or body.get("action_id") or 0)
-    except Exception:
-        task_id = 0
-    action = str(body.get("action") or "").strip().lower()
-    if not task_id or action not in ("complete", "cancel", "postpone", "reopen", "assign", "revision"):
-        return _cabinet_response({"error": "bad_request", "message": "Нужны task_id и action."}, status=400)
-    try:
-        updated = await asyncio.to_thread(
-            owner_ai.update_control_task,
-            task_id=task_id,
-            action=action,
-            note=body.get("note") or "",
-            due_at=body.get("due_at"),
-            due_in_days=body.get("due_in_days"),
-            assigned_to=body.get("assigned_to") or "",
-            assignee_name=body.get("assignee_name") or "",
-        )
-        if not updated.get("ok"):
-            status = 404 if updated.get("error") == "not_found" else 400
-            return _cabinet_response(updated, status=status)
-        delivery = await _deliver_owner_control_assignment(request, updated.get("task"))
-        if isinstance(delivery, dict) and isinstance(delivery.get("task"), dict):
-            updated["task"] = delivery["task"]
-        updated["assignment_delivery"] = delivery
-        center = await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_control_update error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось обновить задачу."}, status=500)
-    return _cabinet_response({"ok": True, "role": info["role"], "updated": updated.get("task"), **center})
+    import canonical_work_entry
+    return await canonical_work_entry.handle(request, 'complete')
 
 
 async def panel_control_create_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/control/create — создать ручной контроль из owner-сигнала."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Контрольные задачи доступны только владельцу.",
-        }, status=403)
-    title = str(body.get("title") or "").strip()
-    if not title:
-        return _cabinet_response({"error": "bad_request", "message": "title обязателен."}, status=400)
-    try:
-        created = await asyncio.to_thread(
-            owner_ai.create_control_task,
-            title=title,
-            detail=body.get("detail") or "",
-            priority=body.get("priority") or "medium",
-            due_at=body.get("due_at"),
-            due_in_days=body.get("due_in_days"),
-            potential_rub=body.get("potential_rub"),
-            owner_next_step=body.get("owner_next_step") or "",
-            signal_key=body.get("signal_key") or "",
-            signal_kind=body.get("signal_kind") or "",
-            signal_source=body.get("signal_source") or "",
-            action_job=body.get("action_job") or "",
-            assigned_to=body.get("assigned_to") or "owner",
-            assignee_name=body.get("assignee_name") or "",
-            created_by=tg_id,
-        )
-        if not created.get("ok"):
-            return _cabinet_response(created, status=400)
-        delivery = await _deliver_owner_control_assignment(request, created.get("task"))
-        if isinstance(delivery, dict) and isinstance(delivery.get("task"), dict):
-            created["task"] = delivery["task"]
-        created["assignment_delivery"] = delivery
-        center = await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_control_create error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось создать задачу."}, status=500)
-    return _cabinet_response({"ok": True, "role": info["role"], "created": created, **center})
+    import canonical_work_entry
+    return await canonical_work_entry.handle(request, 'create')
 
 
 async def panel_autonomy_tick_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/autonomy/tick — безопасный автопилот Maya OS v2."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Автопилот Maya OS доступен только владельцу.",
-        }, status=403)
-    try:
-        limit = int(body.get("limit") or 5)
-    except Exception:
-        limit = 5
-    try:
-        result = await asyncio.to_thread(
-            owner_ai.run_autonomous_director_tick,
-            created_by=tg_id,
-            limit=limit,
-        )
-        deliveries = []
-        for item in result.get("created") or []:
-            task = item.get("task")
-            if isinstance(task, dict):
-                deliveries.append(await _deliver_owner_control_assignment(request, task))
-        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_autonomy_tick error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось запустить автопилот."}, status=500)
-    return _cabinet_response({
-        "ok": True,
-        "role": info["role"],
-        "autopilot": result,
-        "deliveries": deliveries,
-        **center,
-    })
+    import canonical_work_entry
+    return _cabinet_response(canonical_work_entry.owner_required(), status=410)
 
 
 async def panel_autopilot_supervision_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/autopilot/supervise — контроль исполнения Autopilot 2.1."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Контроль исполнения Maya OS доступен только владельцу.",
-        }, status=403)
-    try:
-        limit = int(body.get("limit") or 8)
-    except Exception:
-        limit = 8
-    try:
-        result = await asyncio.to_thread(
-            owner_ai.run_autopilot_supervision_tick,
-            created_by=tg_id,
-            limit=limit,
-        )
-        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_autopilot_supervision error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось провести контроль исполнения."}, status=500)
-    return _cabinet_response({
-        "ok": True,
-        "role": info["role"],
-        "supervision": result,
-        **center,
-    })
+    import canonical_work_entry
+    return _cabinet_response(canonical_work_entry.owner_required(), status=410)
 
 
 async def panel_execution_loop_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/execution/loop — замкнутый цикл исполнения Maya OS v3."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"role": None, "permissions": {}}
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Замкнутый цикл Maya OS доступен только владельцу.",
-        }, status=403)
-    try:
-        limit = int(body.get("limit") or 6)
-    except Exception:
-        limit = 6
-    try:
-        result = await asyncio.to_thread(
-            owner_ai.run_execution_loop_tick,
-            created_by=tg_id,
-            limit=limit,
-        )
-        center = result.get("center") or await asyncio.to_thread(owner_ai.command_center)
-    except Exception as e:
-        logger.error(f"panel_execution_loop error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось замкнуть цикл исполнения."}, status=500)
-    return _cabinet_response({
-        "ok": True,
-        "role": info["role"],
-        "execution_loop_tick": result,
-        **center,
-    })
+    import canonical_work_entry
+    return _cabinet_response(canonical_work_entry.owner_required(), status=410)
 
 
 async def panel_staff_tasks_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/staff_tasks — безопасная очередь поручений для рабочих кабинетов."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = int(tg_user["id"])
-    info = _panel_resolve_role(tg_id)
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        payload = await asyncio.to_thread(
-            owner_ai.staff_task_inbox,
-            viewer_role=info.get("role") or "",
-            limit=int(body.get("limit") or 12),
-        )
-    except Exception as e:
-        logger.error(f"panel_staff_tasks error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось загрузить задачи."}, status=500)
-    return _cabinet_response({"ok": True, "role": info.get("role"), **payload})
+    import canonical_work_entry
+    return await canonical_work_entry.handle(request, 'list')
 
 
 async def panel_staff_task_update_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/staff_task/update — исполнитель отмечает ход поручения."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = int(tg_user["id"])
-    info = _panel_resolve_role(tg_id)
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        task_id = int(body.get("task_id") or body.get("action_id") or 0)
-    except Exception:
-        task_id = 0
-    action = str(body.get("action") or "").strip().lower()
-    if not task_id or action not in ("accept", "accepted", "start", "run", "running", "done", "complete", "finish", "blocked"):
-        return _cabinet_response({"error": "bad_request", "message": "Нужны task_id и action."}, status=400)
-    actor_name = (
-        info.get("master_name")
-        or tg_user.get("full_name")
-        or " ".join([str(tg_user.get("first_name") or ""), str(tg_user.get("last_name") or "")]).strip()
-        or tg_user.get("username")
-        or "Сотрудник"
-    )
-    try:
-        updated = await asyncio.to_thread(
-            owner_ai.update_staff_task,
-            task_id=task_id,
-            viewer_role=info.get("role") or "",
-            actor_name=actor_name,
-            actor_chat_id=tg_id,
-            action=action,
-            note=body.get("note") or "",
-        )
-    except Exception as e:
-        logger.error(f"panel_staff_task_update error: {e}")
-        return _cabinet_response({"error": "server_error", "message": "Не удалось обновить задачу."}, status=500)
-    if not updated.get("ok"):
-        status = 403 if updated.get("error") == "forbidden" else (404 if updated.get("error") == "not_found" else 400)
-        return _cabinet_response(updated, status=status)
-    return _cabinet_response({"ok": True, "role": info.get("role"), **updated})
+    import canonical_work_entry
+    return await canonical_work_entry.handle(request, 'complete')
 
 
 def _build_master_overview(staff_id: int, pp: dict, master_name: str) -> web.Response:
@@ -3383,8 +2118,7 @@ async def panel_master_day_handler(request: web.Request) -> web.Response:
 
 
 async def panel_redeem_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/redeem — погашение кода лояльности или сертификата (кассир/владелец).
-    body: {code, mode:'lookup'|'confirm'}. lookup только показывает данные, confirm — гасит."""
+    """Read legacy claims only; every value redemption fails closed."""
     try:
         body = await request.json()
     except Exception:
@@ -3395,15 +2129,26 @@ async def panel_redeem_handler(request: web.Request) -> web.Response:
     tg_id = tg_user.get("id")
     info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
     if not info.get("permissions", {}).get("redeem"):
-        return _cabinet_response({"error": "forbidden",
-                                  "message": "Гасить коды могут кассиры или владелец."}, status=403)
+        return _cabinet_response({
+            "error": "forbidden",
+            "message": "Гасить коды могут кассиры или владелец.",
+        }, status=403)
 
     code = str(body.get("code") or "").strip().upper()
     mode = str(body.get("mode") or "lookup")
     if not code:
         return _cabinet_response({"ok": False, "reason": "Введите код."}, status=400)
+    if mode not in {"lookup", "confirm"}:
+        return _cabinet_response({"ok": False, "reason": "Некорректный режим."}, status=400)
+    if mode == "confirm":
+        logger.warning("p4_06_legacy_mutation_disabled:redeem_gift_certificate")
+        logger.warning("p4_03_legacy_mutation_disabled:consume_loyalty_redemption_grant")
+        return _cabinet_response({
+            "ok": False,
+            "error": "canonical_value_ingress_required",
+            "reason": "Погашение через старый контур отключено.",
+        }, status=409)
 
-    # 1) Подарочный сертификат?
     try:
         cert = database.get_gift_certificate(code)
     except Exception:
@@ -3412,62 +2157,58 @@ async def panel_redeem_handler(request: web.Request) -> web.Response:
         if cert.get("payment_status") != "paid":
             return _cabinet_response({"ok": False, "type": "cert", "reason": "Сертификат ещё не оплачен."})
         if cert.get("used_at"):
-            return _cabinet_response({"ok": False, "type": "cert", "reason": "Сертификат уже погашен",
-                                      "used_at": cert["used_at"][:10]})
+            return _cabinet_response({
+                "ok": False, "type": "cert", "reason": "Сертификат уже погашен",
+                "used_at": cert["used_at"][:10],
+            })
         try:
             if datetime.fromisoformat(cert["expires_at"]) < datetime.now():
                 return _cabinet_response({"ok": False, "type": "cert", "reason": "Срок действия истёк."})
         except Exception:
             pass
-        details = {
-            "type": "cert", "code": cert["code"], "amount": cert.get("amount"),
-            "recipient_name": cert.get("recipient_name", ""),
-            "recipient_phone": cert.get("recipient_phone", ""),
-            "expires_at": (cert.get("expires_at") or "")[:10],
-        }
-        if mode != "confirm":
-            return _cabinet_response({"ok": True, "type": "cert", "valid": True, "details": details})
-        try:
-            database.mark_cert_used(code, int(tg_id))
-        except Exception as e:
-            logger.error(f"panel redeem cert: {e}")
-            return _cabinet_response({"ok": False, "type": "cert", "reason": "Ошибка при погашении."}, status=500)
-        return _cabinet_response({"ok": True, "type": "cert", "redeemed": True, "details": details})
+        return _cabinet_response({
+            "ok": True,
+            "type": "cert",
+            "valid": True,
+            "details": {
+                "type": "cert",
+                "code": cert["code"],
+                "amount": cert.get("amount"),
+                "recipient_name": cert.get("recipient_name", ""),
+                "recipient_phone": cert.get("recipient_phone", ""),
+                "expires_at": (cert.get("expires_at") or "")[:10],
+            },
+        })
 
-    # 2) Код лояльности?
     try:
-        lc = database.get_loyalty_code(code)
+        loyalty_claim = database.get_loyalty_code(code)
     except Exception:
-        lc = None
-    if lc:
-        if mode != "confirm":
-            valid = True
-            reason = ""
-            if lc.get("used_at"):
-                valid, reason = False, "Код уже погашен"
-            else:
-                try:
-                    if datetime.fromisoformat(lc["expires_at"]) < datetime.now():
-                        valid, reason = False, "Срок действия истёк"
-                except Exception:
-                    pass
-            return _cabinet_response({"ok": True, "type": "loyalty", "valid": valid, "reason": reason,
-                                      "details": {"type": "loyalty", "code": code,
-                                                  "points": lc.get("points"),
-                                                  "service_title": lc.get("service_title", "")}})
-        try:
-            import loyalty as _loy
-            res = _loy.consume_redeem_code(code, int(tg_id))
-        except Exception as e:
-            logger.error(f"panel redeem loyalty: {e}")
-            return _cabinet_response({"ok": False, "type": "loyalty", "reason": "Ошибка при погашении."}, status=500)
-        res = dict(res or {})
-        res["type"] = "loyalty"
-        if res.get("ok"):
-            res["redeemed"] = True
-        return _cabinet_response(res)
-
+        loyalty_claim = None
+    if loyalty_claim:
+        valid = True
+        reason = ""
+        if loyalty_claim.get("used_at"):
+            valid, reason = False, "Код уже погашен"
+        else:
+            try:
+                if datetime.fromisoformat(loyalty_claim["expires_at"]) < datetime.now():
+                    valid, reason = False, "Срок действия истёк"
+            except Exception:
+                pass
+        return _cabinet_response({
+            "ok": True,
+            "type": "loyalty",
+            "valid": valid,
+            "reason": reason,
+            "details": {
+                "type": "loyalty",
+                "code": code,
+                "points": loyalty_claim.get("points"),
+                "service_title": loyalty_claim.get("service_title", ""),
+            },
+        })
     return _cabinet_response({"ok": False, "reason": "Код не найден."})
+
 
 
 _panel_bg_tasks = set()
@@ -3683,216 +2424,28 @@ def _owner_job_chat_response(chat_id: int, user_text: str, reply: str) -> web.Re
 
 
 async def panel_job_run_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/job/run — ручной запуск фоновой задачи (owner/manager)."""
+    import canonical_staff_access
+    import canonical_work_entry
+    from canonical_retention_entry import retention_owner_required
+    if not canonical_staff_access.current():
+        return _cabinet_response({'error': 'canonical_staff_session_required'}, status=403)
     try:
         body = await request.json()
     except Exception:
         body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
-    if not info.get("permissions", {}).get("jobs"):
-        return _cabinet_response({"error": "forbidden", "message": "Недостаточно прав."}, status=403)
-
-    job = str(body.get("job") or "")
-    spec = _PANEL_JOBS.get(job)
-    if not spec:
-        return _cabinet_response({"ok": False, "reason": "Неизвестная задача."}, status=400)
-    mod_name, fn_name, label, kind = spec
-    dedupe_key = f"panel_job_last:{int(tg_id) if tg_id else 0}:{job}"
-    try:
-        last = float(database.get_setting(dedupe_key) or 0)
-    except Exception:
-        last = 0.0
-    now = time.time()
-    if last and now - last < 60:
-        return _cabinet_response({
-            "ok": False,
-            "duplicate": True,
-            "job": job,
-            "label": label,
-            "cooldown_seconds_left": int(max(1, 60 - (now - last))),
-            "reason": f"«{label}» уже запускалась меньше минуты назад. Подождите, чтобы не отправить дубли.",
-        })
-    try:
-        mod = __import__(mod_name)
-        fn = getattr(mod, fn_name)
-    except Exception as e:
-        logger.error(f"panel job import {job}: {e}")
-        return _cabinet_response({"ok": False, "reason": "Задача недоступна."}, status=500)
-    try:
-        database.set_setting(dedupe_key, str(now))
-    except Exception:
-        pass
-
-    action_id = None
-    source_control_id = 0
-    source_signal_key = ""
-    try:
-        journal_payload = {"label": label, "kind": kind}
-        try:
-            source_control_id = int(body.get("source_control_id") or 0)
-        except Exception:
-            source_control_id = 0
-        if source_control_id:
-            journal_payload["source_control_id"] = source_control_id
-        source_signal_key = str(body.get("source_signal_key") or "").strip()[:180]
-        if source_signal_key:
-            journal_payload["source_signal_key"] = source_signal_key
-        action_id = database.create_owner_action(
-            job,
-            title=str(body.get("title") or label),
-            source=str(body.get("source") or "panel_jobs"),
-            created_by=int(tg_id) if tg_id else None,
-            payload=journal_payload,
-        )
-        if action_id and source_control_id:
-            database.link_owner_control_task_action(
-                source_control_id,
-                action_id,
-                job,
-                action_status="running",
-                note="Действие запущено из очереди контроля.",
-            )
-    except Exception as e:
-        logger.warning(f"panel job journal create {job}: {e}")
-
-    app = request.app["bot_app"]
-    task = asyncio.create_task(fn(app))
-    _panel_bg_tasks.add(task)
-    task.add_done_callback(_panel_bg_tasks.discard)
-
-    def _finish_journal(t: asyncio.Task) -> None:
-        if not action_id:
-            return
-        try:
-            summary = t.result()
-            database.finish_owner_action(
-                action_id,
-                "done",
-                summary=summary if isinstance(summary, dict) else {},
-            )
-        except Exception as e:
-            database.finish_owner_action(action_id, "failed", error=str(e)[:200])
-
-    task.add_done_callback(_finish_journal)
-
-    # Быстрые задачи вернут результат сразу; долгие (массовые отправки) продолжат в фоне.
-    try:
-        summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
-        return _cabinet_response({"ok": True, "done": True, "job": job, "label": label,
-                                  "action_id": action_id,
-                                  "summary": summary if isinstance(summary, dict) else {}})
-    except asyncio.TimeoutError:
-        return _cabinet_response({"ok": True, "started": True, "running": True,
-                                  "job": job, "label": label, "action_id": action_id})
-    except Exception as e:
-        logger.error(f"panel job run {job}: {e}")
-        if action_id:
-            database.finish_owner_action(action_id, "failed", error=str(e)[:200])
-        return _cabinet_response({"ok": False, "job": job, "reason": "Ошибка при выполнении."}, status=500)
+    job = body.get('job') if isinstance(body, dict) else None
+    value = retention_owner_required(job) if job in {'reactivation', 'cycle', 'subscriptions'} else canonical_work_entry.owner_required()
+    return _cabinet_response(value, status=410)
 
 
 async def _run_owner_job_from_chat(request: web.Request, chat_id: int, job: str) -> web.Response:
-    """Запуск салонной задачи по подтверждению из чата AI-директора (нажата кнопка
-    карточки → фронт прислал __runjob:<job>). Детерминированно, БЕЗ LLM. Только
-    владелец/founder; те же задачи и исполнитель, что в /api/panel/job/run."""
-    job = (job or "").strip().lower()
-    _clear_pending_owner_job(chat_id)
-    spec = _PANEL_JOBS.get(job)
-    info = _panel_resolve_role(int(chat_id)) if chat_id else {"permissions": {}}
-    role = info.get("role") or ""
-
-    def audit(allowed: bool, reason: str = "") -> None:
-        try:
-            database.log_tool_call(chat_id, role, f"run_job:{job or '?'}", "write", allowed, reason)
-        except Exception:
-            pass
-
-    if not spec:
-        audit(False, "unknown_job")
-        return _owner_job_chat_response(
-            chat_id, job, "Не нашла такую задачу. Откройте Панель и запустите вручную."
-        )
-    if role != "owner":
-        audit(False, "owner_only")
-        return _owner_job_chat_response(
-            chat_id, job, "Эта задача доступна только владельцу."
-        )
-    mod_name, fn_name, label, _kind = spec
-    # Защита от двойного тапа/повторной отправки action-card: тот же job не
-    # запускается повторно из чата чаще одного раза в минуту.
-    dedupe_key = f"owner_chat_job_last:{int(chat_id)}:{job}"
-    try:
-        last = float(database.get_setting(dedupe_key) or 0)
-    except Exception:
-        last = 0.0
-    now = time.time()
-    if last and now - last < 60:
-        audit(False, "duplicate_60s")
-        return _owner_job_chat_response(
-            chat_id,
-            label,
-            f"«{label}» уже запущена. Дайте ей минуту, чтобы не отправить дубли.",
-        )
-    try:
-        database.set_setting(dedupe_key, str(now))
-    except Exception:
-        pass
-    action_id = None
-    try:
-        mod = __import__(mod_name)
-        fn = getattr(mod, fn_name)
-        app = request.app["bot_app"]
-        try:
-            action_id = database.create_owner_action(
-                job,
-                title=label,
-                source="chat_action_card",
-                created_by=int(chat_id) if chat_id else None,
-                payload={"label": label},
-            )
-        except Exception as e:
-            logger.warning(f"chat run_job journal create {job}: {e}")
-        task = asyncio.create_task(fn(app))
-        _panel_bg_tasks.add(task)
-        task.add_done_callback(_panel_bg_tasks.discard)
-
-        def _finish_chat_journal(t: asyncio.Task) -> None:
-            if not action_id:
-                return
-            try:
-                summary = t.result()
-                database.finish_owner_action(
-                    action_id,
-                    "done",
-                    summary=summary if isinstance(summary, dict) else {},
-                )
-            except Exception as exc:
-                database.finish_owner_action(action_id, "failed", error=str(exc)[:200])
-
-        task.add_done_callback(_finish_chat_journal)
-        audit(True, "started")
-        try:
-            summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
-            reply = _owner_job_result_reply(job, label, summary)
-        except asyncio.TimeoutError:
-            reply = (
-                f"Запустила «{label}». Задача ещё выполняется; "
-                "точное число отправок будет в журнале после завершения."
-            )
-    except Exception as e:
-        logger.error(f"chat run_job {job}: {e}")
-        audit(False, "run_error")
-        try:
-            if action_id:
-                database.finish_owner_action(action_id, "failed", error=str(e)[:200])
-        except Exception:
-            pass
-        reply = "Не получилось запустить задачу — попробуйте из Панели."
-    return _owner_job_chat_response(chat_id, label, reply)
+    import canonical_staff_access
+    import canonical_work_entry
+    from canonical_retention_entry import retention_owner_required
+    if not canonical_staff_access.current(chat_id):
+        return _cabinet_response({'error': 'canonical_staff_session_required'}, status=403)
+    value = retention_owner_required(job) if job in {'reactivation', 'cycle', 'subscriptions'} else canonical_work_entry.owner_required()
+    return _cabinet_response(value, status=410)
 
 
 async def panel_reviews_handler(request: web.Request) -> web.Response:
@@ -3948,216 +2501,49 @@ async def panel_reviews_handler(request: web.Request) -> web.Response:
 
 
 async def panel_external_reviews_import_handler(request: web.Request) -> web.Response:
-    """Owner-only разрешённый импорт отзывов/снимка рейтинга с карт."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") != "owner":
-        return _cabinet_response({
-            "error": "forbidden",
-            "message": "Импорт внешних отзывов доступен только владельцу.",
-        }, status=403)
-    source = str(body.get("source") or "").strip().lower()
-    imported = await asyncio.to_thread(
-        reputation.import_reviews,
-        source,
-        body.get("reviews") or [],
-    )
-    if not imported.get("ok"):
-        return _cabinet_response(imported, status=400)
-    source_snapshot = None
-    if body.get("rating") is not None or body.get("reviews_count") is not None:
-        source_snapshot = await asyncio.to_thread(
-            reputation.save_source_snapshot,
-            source,
-            rating=body.get("rating"),
-            reviews_count=body.get("reviews_count"),
-            observed_at=body.get("observed_at") or "",
-            origin="owner_authorized_import",
-        )
-    snapshot = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=False)
-    return _cabinet_response({
-        "ok": True,
-        "import": imported,
-        "source_snapshot": source_snapshot,
-        "reputation": snapshot,
-    })
+    """B34: legacy review ingestion/sync is retired without side effects."""
+    return _cabinet_response(reputation.retired_review_source(), status=410)
 
 
 async def panel_reputation_refresh_handler(request: web.Request) -> web.Response:
-    """Owner-only обновление официальной статистики подключённых площадок."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") != "owner":
-        return _cabinet_response({"error": "forbidden"}, status=403)
-    public_refresh = await asyncio.to_thread(reputation.refresh_public_reviews)
-    pending = await asyncio.to_thread(database.list_unalerted_external_reviews, 20)
-    notification = {"delivered": False, "count": 0}
-    if pending:
-        notification = await _notify_owner_reputation(request.app["bot_app"], pending)
-        if notification.get("delivered"):
-            await asyncio.to_thread(
-                database.mark_external_reviews_alerted,
-                [row.get("id") for row in pending if row.get("id")],
-            )
-    snapshot = await asyncio.to_thread(reputation.reputation_snapshot, force_refresh=True)
-    return _cabinet_response({
-        "ok": True,
-        "public_refresh": public_refresh,
-        "notification": notification,
-        "reputation": snapshot,
-    })
+    """B34: legacy review ingestion/sync is retired without side effects."""
+    return _cabinet_response(reputation.retired_review_source(), status=410)
 
 
 async def broadcast_send_to_base(bot, text: str) -> dict:
-    """Единый цикл рассылки по клиентам с маркетинговым согласием (152-ФЗ + ст.18
-    Закона о рекламе). Источник истины и для бота (/broadcast), и для панели.
-    Антиспам: ~30 сообщений/сек. {name} подставляется, если есть в тексте."""
-    from telegram.error import Forbidden, BadRequest
-    import broadcast_templates as _bt
-    sent = blocked = errors = skipped_no_consent = skipped_opt_out = skipped_too_soon = 0
-    has_placeholder = "{name}" in (text or "")
-    for c in database.list_telegram_clients():
-        chat_id = c.get("telegram_chat_id")
-        if not chat_id:
-            continue
-        if not database.has_marketing_consent(c["id"]):
-            skipped_no_consent += 1
-            continue
-        # Персональные настройки клиента: (1) явный opt-out от акций; (2) частотный
-        # троттл — но ТОЛЬКО для тех, кто сам выбрал частоту в настройках, иначе
-        # дефолтный недельный кап молча резал бы рассылку всей ненастроенной базе.
-        _prefs = database.get_notify_prefs(c["id"])
-        if _prefs.get("marketing") is False:
-            skipped_opt_out += 1
-            continue
-        if database.has_saved_notify_prefs(c["id"]):
-            _min_days = database.MARKETING_FREQ_DAYS.get(_prefs.get("marketing_freq", "week"), 7)
-            if database.marketing_sent_within(c["id"], _min_days):
-                skipped_too_soon += 1
-                continue
-        personalized = _bt.render(text, client_name=c.get("name")) if has_placeholder else text
-        push_body = _push_preview_body(personalized) or "Откройте MAYA — внутри новое сообщение."
-        try:
-            await bot.send_message(chat_id, personalized, parse_mode="Markdown")
-            sent += 1
-            database.set_marketing_last_sent(c["id"])
-            await asyncio.sleep(0.035)
-        except Forbidden:
-            blocked += 1
-        except BadRequest:
-            try:
-                await bot.send_message(chat_id, personalized)
-                sent += 1
-                database.set_marketing_last_sent(c["id"])
-                await asyncio.sleep(0.035)
-            except Exception:
-                errors += 1
-        except Exception as e:
-            errors += 1
-            logger.error(f"broadcast → {chat_id}: {e}")
-        try:
-            await _send_client_push(
-                int(chat_id),
-                title="Сообщение от MAYA",
-                body=push_body,
-                url="/app/",
-                tag="marketing-broadcast",
-                data={"event": "marketing.broadcast"},
-                persist_in_chat=True,
-                chat_text=personalized,
-            )
-        except Exception as e:
-            logger.error(f"broadcast push/chat → {chat_id}: {e}")
-    return {"sent": sent, "blocked": blocked, "errors": errors,
-            "skipped_no_consent": skipped_no_consent,
-            "skipped_opt_out": skipped_opt_out, "skipped_too_soon": skipped_too_soon}
-
-
-def _panel_broadcast_recipients():
-    """Сколько клиентов получит рассылку (с согласием) и сколько всего с Telegram."""
-    total = consented = 0
-    try:
-        for c in database.list_telegram_clients():
-            if not c.get("telegram_chat_id"):
-                continue
-            total += 1
-            if database.has_marketing_consent(c["id"]):
-                consented += 1
-    except Exception as e:
-        logger.error(f"panel broadcast recipients: {e}")
-    return consented, total
+    """B35 retired: a legacy chat-id list is never a bulk delivery authority."""
+    raise RuntimeError("B35_CANONICAL_OWNER_APPROVAL_REQUIRED_USE_PANEL")
 
 
 async def panel_broadcast_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/broadcast — конструктор рассылки (owner/manager, право marketing).
-    body: {mode:'templates'|'preview'|'send', text?, code?}."""
+    """B35 initiator only. No recipient enumeration, consent inference or send."""
     try:
         body = await request.json()
+        if not isinstance(body, dict):
+            raise ValueError("B35_INVALID_REQUEST")
+        mode = body.get("mode", "preview")
+        if mode == "templates":
+            import broadcast_templates as templates
+            return _cabinet_response({"categories": [{"code": c, "label": label} for c, label in templates.CATEGORIES],
+                                      "templates": templates.TEMPLATES})
+        from legacy_client_command_bridge import channel_proof
+        from legacy_marketing_bulk_bridge import command
+        proof = channel_proof(request.headers, body)
+        if mode == "preview":
+            payload = {"bulkIdentity": body.get("bulkIdentity"), "text": body.get("text")}
+        elif mode in {"confirm", "resume"}:
+            payload = {"campaignId": body.get("campaignId"), "intentHash": body.get("intentHash")}
+        elif mode == "status":
+            payload = {"campaignId": body.get("campaignId")}
+        else:
+            raise ValueError("B35_OPERATION_UNSUPPORTED")
+        result = await asyncio.to_thread(command, mode, proof, payload)
+        return _cabinet_response({"ok": True, **result})
+    except ValueError as error:
+        code = str(error) if str(error).startswith(("B35_", "IDEMPOTENCY_CONFLICT")) else "B35_AUTHORITY_OR_REQUEST_REJECTED"
+        return _cabinet_response({"ok": False, "error": code}, status=409 if code == "IDEMPOTENCY_CONFLICT" else 403)
     except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
-    if not info.get("permissions", {}).get("marketing"):
-        return _cabinet_response({"error": "forbidden", "message": "Недостаточно прав."}, status=403)
-
-    import broadcast_templates as _bt
-    mode = str(body.get("mode") or "preview")
-
-    if mode == "templates":
-        cats = [{"code": code, "label": label} for code, label in _bt.CATEGORIES]
-        tpls = [{"code": t["code"], "category": t["category"], "title": t["title"],
-                 "emoji": t.get("emoji", ""), "body": t["body"]} for t in _bt.TEMPLATES]
-        return _cabinet_response({"categories": cats, "templates": tpls})
-
-    text = str(body.get("text") or "").strip()
-    if not text and body.get("code"):
-        for t in _bt.TEMPLATES:
-            if t["code"] == body["code"]:
-                text = t["body"]
-                break
-    if not text:
-        return _cabinet_response({"ok": False, "reason": "Пустой текст рассылки."}, status=400)
-
-    consented, total = _panel_broadcast_recipients()
-
-    if mode == "preview":
-        return _cabinet_response({"ok": True, "text": text, "recipients": consented,
-                                  "total": total, "excluded": total - consented})
-
-    if mode == "send":
-        if consented <= 0:
-            return _cabinet_response({"ok": False, "reason": "Нет получателей с согласием на рассылку."})
-        app = request.app["bot_app"]
-        task = asyncio.create_task(broadcast_send_to_base(app.bot, text))
-        _panel_bg_tasks.add(task)
-        task.add_done_callback(_panel_bg_tasks.discard)
-        try:
-            summary = await asyncio.wait_for(asyncio.shield(task), timeout=12)
-            return _cabinet_response({"ok": True, "done": True, "recipients": consented,
-                                      "summary": summary if isinstance(summary, dict) else {}})
-        except asyncio.TimeoutError:
-            return _cabinet_response({"ok": True, "started": True, "running": True,
-                                      "recipients": consented})
-        except Exception as e:
-            logger.error(f"panel broadcast send: {e}")
-            return _cabinet_response({"ok": False, "reason": "Ошибка при отправке."}, status=500)
-
-    return _cabinet_response({"ok": False, "reason": "Неизвестный режим."}, status=400)
+        return _cabinet_response({"ok": False, "error": "B35_OUTCOME_UNKNOWN_RESUME_SAME_CAMPAIGN"}, status=503)
 
 
 def _panel_record_seen(tg_id: int, name: str) -> None:
@@ -4201,15 +2587,13 @@ def _panel_get_manager_ids() -> list:
 
 
 def _panel_set_manager_ids(ids: list) -> None:
-    uniq = []
-    for i in ids:
-        if i not in uniq:
-            uniq.append(i)
-    database.set_setting("panel_manager_ids", ",".join(str(i) for i in uniq))
+    """Historical panel_manager_ids are read-only and grant no authority."""
+    del ids
+    raise RuntimeError("canonical_crm_staff_access_required")
 
 
 async def panel_team_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team — мастера: ростер, bind-коды, роль кассира (owner)."""
+    """Compatibility boundary; canonical staff access is owned by A16."""
     try:
         body = await request.json()
     except Exception:
@@ -4217,80 +2601,27 @@ async def panel_team_handler(request: web.Request) -> web.Response:
     tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
     if not tg_user:
         return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
-    if not info.get("permissions", {}).get("staff"):
-        return _cabinet_response({"error": "forbidden", "message": "Недостаточно прав."}, status=403)
-
     mode = str(body.get("mode") or "list")
-
     if mode == "list":
-        try:
-            roster = _yc.get_masters() or []
-        except Exception:
-            roster = []
-        mt = {}
-        try:
-            for m in database.list_masters():
-                mt[m.get("yclients_staff_id")] = m
-        except Exception:
-            mt = {}
-        out = []
-        for r in roster:
-            if not isinstance(r, dict) or r.get("error"):
-                continue
-            sid = r.get("id")
-            row = mt.get(sid)
-            bound = bool(row and row.get("telegram_chat_id"))
-            out.append({
-                "staff_id": sid,
-                "name": r.get("name", ""),
-                "specialization": r.get("specialization", ""),
-                "registered": bool(row),
-                "bound": bound,
-                "code": (row.get("bind_code") if (row and not bound) else None),
-                "cashier": bool(row and row.get("can_redeem")),
-            })
-        return _cabinet_response({"masters": out})
-
-    if mode == "bind_code":
-        try:
-            sid = int(body.get("staff_id") or 0)
-        except Exception:
-            sid = 0
-        name = str(body.get("name") or "").strip() or f"staff_{sid}"
-        if not sid:
-            return _cabinet_response({"ok": False, "reason": "Не указан мастер."}, status=400)
-        try:
-            if bool(body.get("reset")):
-                code = database.reset_master_bind_code(sid, name)
-            else:
-                code = database.create_master_with_bind_code(sid, name)
-        except Exception as e:
-            logger.error(f"panel team bind_code: {e}")
-            return _cabinet_response({"ok": False, "reason": "Ошибка генерации кода."}, status=500)
-        if code is None:
-            return _cabinet_response({"ok": False, "reason": "Мастер уже привязан. Нажмите «Новый код», чтобы сбросить привязку."})
-        return _cabinet_response({"ok": True, "code": code})
-
-    if mode == "cashier":
-        try:
-            sid = int(body.get("staff_id") or 0)
-        except Exception:
-            sid = 0
-        on = bool(body.get("on"))
-        if not sid:
-            return _cabinet_response({"ok": False, "reason": "Не указан мастер."}, status=400)
-        ok = database.set_cashier_role(sid, on)
-        if not ok:
-            return _cabinet_response({"ok": False, "reason": "Сначала выдайте мастеру код — после этого он появится в системе."})
-        return _cabinet_response({"ok": True, "cashier": on})
-
-    return _cabinet_response({"ok": False, "reason": "Неизвестный режим."}, status=400)
+        return _cabinet_response({
+            "masters": [],
+            "authority": "CrmStaffAccess",
+            "canonical_action": "configure_crm_staff_access",
+            "legacy_telegram_bind_code": "retired",
+            "legacy_cashier_flag": "retired",
+            "business_mutations": 0,
+        })
+    return _cabinet_response({
+        "ok": False,
+        "error": "legacy_staff_authority_retired",
+        "authority": "CrmStaffAccess",
+        "canonical_action": "configure_crm_staff_access",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_managers_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/managers — назначение управляющих (owner, право roles)."""
+    """Compatibility boundary; manager access is canonical A16 administrator."""
     try:
         body = await request.json()
     except Exception:
@@ -4298,69 +2629,30 @@ async def panel_managers_handler(request: web.Request) -> web.Response:
     tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
     if not tg_user:
         return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
-    if not info.get("permissions", {}).get("roles"):
-        return _cabinet_response({"error": "forbidden", "message": "Недостаточно прав."}, status=403)
-
     mode = str(body.get("mode") or "list")
-
     if mode == "list":
-        out = []
-        for i in _panel_get_manager_ids():
-            name = ""
-            try:
-                m = database.get_master_by_chat_id(i)
-                if m:
-                    name = m.get("full_name") or ""
-            except Exception:
-                pass
-            out.append({"id": i, "name": name})
-        return _cabinet_response({"managers": out})
-
-    if mode == "add":
-        try:
-            new_id = int(body.get("tg_id"))
-        except Exception:
-            return _cabinet_response({"ok": False, "reason": "Введите числовой Telegram ID."}, status=400)
-        if database.is_admin(new_id):
-            return _cabinet_response({"ok": False, "reason": "Это владелец — у него уже полный доступ."})
-        ids = _panel_get_manager_ids()
-        if new_id not in ids:
-            ids.append(new_id)
-        _panel_set_manager_ids(ids)
-        return _cabinet_response({"ok": True})
-
-    if mode == "remove":
-        try:
-            rid = int(body.get("tg_id"))
-        except Exception:
-            return _cabinet_response({"ok": False, "reason": "Некорректный ID."}, status=400)
-        _panel_set_manager_ids([i for i in _panel_get_manager_ids() if i != rid])
-        return _cabinet_response({"ok": True})
-
+        return _cabinet_response({
+            "managers": [],
+            "authority": "CrmStaffAccess",
+            "canonical_role": "administrator",
+            "canonical_action": "configure_crm_staff_access",
+            "historical_panel_manager_ids_authoritative": False,
+            "business_mutations": 0,
+        })
     if mode == "recent":
-        # Недавно заходившие — кандидаты в управляющие (исключаем владельцев, текущих управляющих, мастеров)
-        mgr_ids = set(_panel_get_manager_ids())
-        out = []
-        for s in _panel_get_seen():
-            sid = s.get("id")
-            if not sid or sid in mgr_ids:
-                continue
-            try:
-                if database.is_admin(int(sid)):
-                    continue
-            except Exception:
-                pass
-            is_m = False
-            try:
-                is_m = bool(database.get_master_by_chat_id(int(sid)))
-            except Exception:
-                pass
-            out.append({"id": sid, "name": s.get("name", ""), "is_master": is_m})
-        return _cabinet_response({"recent": out[:20]})
-
-    return _cabinet_response({"ok": False, "reason": "Неизвестный режим."}, status=400)
+        return _cabinet_response({
+            "recent": [],
+            "authority": "CrmStaffAccess",
+            "business_mutations": 0,
+        })
+    return _cabinet_response({
+        "ok": False,
+        "error": "legacy_manager_authority_retired",
+        "authority": "CrmStaffAccess",
+        "canonical_role": "administrator",
+        "canonical_action": "configure_crm_staff_access",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_masters_stats_handler(request: web.Request) -> web.Response:
@@ -4458,13 +2750,9 @@ MASTER_SALARY_PCT = {1460233: 0.60}   # Илья Третьяков — 60%
 MASTER_SALARY_DEFAULT = 0.50
 OWNER_STAFF_ID = 1461615              # Стас — владелец
 
-# ── Антон (ассистент): фикс по дням недели ──────────────────────────────────
-# Вс и Пн — выходной, платим 2000₽. Вт–Сб — ставка 1500₽ + 5% от валовой
+# ── Антон (администратор): фикс по дням недели ──────────────────────────────
+# Вс и Пн — выходной, платим 1000₽. Вт–Сб — ставка 1500₽ + 5% от валовой
 # выручки салона за день. (weekday(): Пн=0 … Вс=6.)
-ANTON_WEEKEND_PAY  = 2000   # вс/пн — выходной
-ANTON_WORKDAY_BASE = 1500   # вт–сб — ставка за выход
-ANTON_GROSS_PCT    = 0.05   # + 5% от валовой выручки за день
-ANTON_DAYS_OFF     = (6, 0) # вс, пн
 # Telegram-id ассистента Антона: только ему бот шлёт напоминания о расходах,
 # и только он (помимо владельца) видит аналитику/отчёт. Переопределяется настройкой.
 def _anton_chat_id() -> int:
@@ -4476,11 +2764,7 @@ def _anton_chat_id() -> int:
         pass
     return 339683535
 ANTON_CHAT_ID = _anton_chat_id()
-# Дополнительные расходы — учитываем КАЖДЫЙ день (включая выходные Антона).
-DAILY_EXTRA_EXPENSES = [
-    {"label": "Доп. расход 1", "amount": 1800},
-    {"label": "Доп. расход 2", "amount": 600},
-]
+# R13: unconfirmed fixed daily expense constants retired.
 
 _SALARY_YEAR_CACHE = {"date": None, "rev": {}}   # {staff_id: выручка за год}, кеш на день
 
@@ -4535,6 +2819,20 @@ def _pay_week() -> dict:
     end = start + timedelta(days=6)
     return {"start": start.isoformat(), "end": end.isoformat(),
             "pay_date": (end + timedelta(days=1)).isoformat()}
+
+
+def _anton_payroll(from_iso: str, to_iso: str) -> dict:
+    """Подтверждённые начисления Антона из взаиморасчётов YClients.
+
+    При сбое не используем календарный прогноз: финансовый отчёт должен явно
+    показать отсутствие данных, а не правдоподобную, но неверную сумму.
+    """
+    try:
+        payroll = _yc.get_staff_payroll_summary(ANTON_STAFF_ID, from_iso, to_iso)
+    except Exception as exc:
+        logger.error("anton payroll %s..%s: %s", from_iso, to_iso, exc)
+        payroll = None
+    return anton_salary_for_period(from_iso, to_iso, payroll)
 
 
 async def _yearly_gross_refresh():
@@ -4988,43 +3286,18 @@ async def panel_master_clients_handler(request: web.Request) -> web.Response:
 #  GOD-режим: закрытый founder-кабинет MAYA (только основатель, FOUNDER_IDS)
 # ════════════════════════════════════════════════════════════════════════════
 def _god_gate(request: web.Request, body: dict):
-    """(tg_id, None) если запрос от основателя; иначе (None, error_response)."""
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return None, _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    if not tg_id:
-        return None, _cabinet_response({"error": "no_user_id"}, status=400)
-    info = _panel_resolve_role(int(tg_id))
-    if not info.get("is_founder"):
-        return None, _cabinet_response(
-            {"error": "forbidden", "message": "Раздел доступен только основателю MAYA."},
-            status=403)
-    return int(tg_id), None
+    """Canonical platform access is distinct from tenant ownership."""
+    principal = canonical_staff_access.current()
+    if not principal or not canonical_staff_access.is_platform():
+        return None, _cabinet_response({"error": "canonical_platform_authority_required"}, status=403)
+    return principal["userId"], None
 
 
-def _god_get_renewals() -> list:
-    raw = database.get_setting("god_renewals")
-    if raw:
-        try:
-            data = _json.loads(raw)
-            if isinstance(data, list):
-                return data
-        except Exception:
-            pass
-    return [dict(r) for r in getattr(config, "GOD_DEFAULT_RENEWALS", [])]
 
 
-def _god_set_renewals(items: list):
-    database.set_setting("god_renewals", _json.dumps(items, ensure_ascii=False))
 
 
-def _god_ai_budget_usd() -> float:
-    raw = database.get_setting("god_ai_budget_usd")
-    try:
-        return float(raw) if raw else float(getattr(config, "GOD_AI_BUDGET_USD", 50.0))
-    except Exception:
-        return 50.0
+
 
 
 def _god_ai_spent_usd(days: int = 30) -> float:
@@ -5035,26 +3308,9 @@ def _god_ai_spent_usd(days: int = 30) -> float:
 
 
 def _god_renewals_view() -> list:
-    """Оплаты к продлению с обратным отсчётом и статусом (overdue/soon/ok/unset)."""
-    warn = int(getattr(config, "GOD_RENEWAL_WARN_DAYS", 7))
-    today = date.today()
-    out = []
-    for r in _god_get_renewals():
-        due = str(r.get("due_date") or "").strip()
-        days_left, status = None, "unset"
-        if due:
-            try:
-                d = date.fromisoformat(due[:10])
-                days_left = (d - today).days
-                status = "overdue" if days_left < 0 else ("soon" if days_left <= warn else "ok")
-            except Exception:
-                status = "unset"  # кривая дата — честно показываем «не задана», не маскируем под ok
-        out.append({"key": r.get("key"), "label": r.get("label"),
-                    "amount": int(r.get("amount") or 0), "due_date": due,
-                    "days_left": days_left, "status": status})
-    out.sort(key=lambda x: (x["days_left"] is None,
-                            x["days_left"] if x["days_left"] is not None else 99999))
-    return out
+    """B14 tombstone: legacy renewal settings are not current authority."""
+    # p5_b14_legacy_renewal_tracker_retired
+    return []
 
 
 def _god_health_checks() -> dict:
@@ -5094,12 +3350,10 @@ def _god_health_checks() -> dict:
     else:
         add("ai_keys", "Ключи ИИ (OpenAI/fal)", "ok", "Все ключи на месте")
 
-    # 3) База данных пишется
+    # 3) Read-only database availability. A health read must not create facts.
     try:
-        database.set_setting("god_probe_ts", date.today().isoformat())
-        rb = database.get_setting("god_probe_ts")
-        add("db", "База данных", "ok" if rb else "fail",
-            "Запись и чтение успешны" if rb else "Чтение вернуло пусто")
+        database.get_setting("last_daily_report_at")
+        add("db", "База данных", "ok", "Чтение доступно")
     except Exception as e:
         add("db", "База данных", "fail", str(e)[:90])
 
@@ -5127,31 +3381,17 @@ def _god_health_checks() -> dict:
     except Exception:
         add("daily_report", "Дневной отчёт владельцу", "warn", "Нет данных")
 
-    # 6) Бюджет ИИ за месяц
+    # 6) Measured AI usage is a read-only projection, not a mutable budget.
     try:
         spent = _god_ai_spent_usd(30)
-        budget = _god_ai_budget_usd()
-        st = "ok" if spent <= budget else "warn"
-        add("ai_budget", "Бюджет ИИ (месяц)", st, "$%.2f из $%.0f" % (spent, budget))
+        add("ai_usage", "Расход ИИ (30 дней)", "ok", "$%.2f" % spent)
     except Exception:
-        add("ai_budget", "Бюджет ИИ (месяц)", "ok", "")
+        add("ai_usage", "Расход ИИ (30 дней)", "warn", "Данные недоступны")
 
-    # 7) Предстоящие оплаты
+    # 7) Dual-role audit is diagnostic only; repair belongs to an explicit job.
     try:
-        soon = [r for r in _god_renewals_view() if r["status"] in ("soon", "overdue")]
-        if soon:
-            n = soon[0]
-            add("renewals", "Предстоящие оплаты", "warn",
-                n["label"] + ": " + ("просрочено" if n["status"] == "overdue"
-                                      else "через %s дн." % n["days_left"]))
-        else:
-            add("renewals", "Предстоящие оплаты", "ok", "В ближайшее время нет")
-    except Exception:
-        add("renewals", "Предстоящие оплаты", "ok", "")
-
-    # 8) Dual-role аккаунты (мастер + клиент): контекст не должен теряться.
-    try:
-        audit = memory.audit_dual_role_client_context(yc=_yc, repair=True, limit=20)
+        # p5_b14_god_health_read_only
+        audit = memory.audit_dual_role_client_context(yc=_yc, repair=False, limit=20)
         issues = audit.get("issues") or []
         repaired = audit.get("repaired") or []
         dual_role = int(audit.get("dual_role") or 0)
@@ -5181,7 +3421,7 @@ def _god_health_checks() -> dict:
     except Exception as e:
         add("dual_role", "Dual-role аккаунты", "warn", str(e)[:90])
 
-    # 9) Ролевая матрица: founder=owner, прочие админы=manager, мастера не теряются.
+    # 8) Ролевая матрица: founder=owner, прочие админы=manager, мастера не теряются.
     try:
         role_issues = []
         admin_ids = [int(x) for x in (database.list_admins() or [])]
@@ -5230,8 +3470,7 @@ def _god_health_checks() -> dict:
 
 
 async def god_overview_handler(request: web.Request) -> web.Response:
-    """POST /api/god/overview — витрина основателя: пульс салона + расход ИИ +
-    сводка здоровья + ближайшая оплата + кол-во подписчиков."""
+    """Read-only founder projection without legacy subscriber authority."""
     try:
         body = await request.json()
     except Exception:
@@ -5258,12 +3497,15 @@ async def god_overview_handler(request: web.Request) -> web.Response:
     except Exception:
         cost = {}
     health = await asyncio.to_thread(_god_health_checks)
-    renewals = _god_renewals_view()
-    nearest = next((r for r in renewals if r["days_left"] is not None), None)
-    try:
-        subs = database.list_maya_tenants()
-    except Exception:
-        subs = []
+    # p5_b14_god_overview_canonical_projection_only
+    subscribers = {
+        "total": None,
+        "active": None,
+        "pending": None,
+        "status": "unavailable",
+        "projection": "canonical_admin_tenants",
+        "read_only": True,
+    }
     return _cabinet_response({
         "period_label": pp["label"],
         "salon": {
@@ -5274,10 +3516,9 @@ async def god_overview_handler(request: web.Request) -> web.Response:
         "ai_cost": {"ai_rub": cost.get("ai_rub"), "ai_usd": cost.get("ai_usd"),
                     "servers_rub": cost.get("servers_rub"), "total_rub": cost.get("total_rub")},
         "health": health["summary"],
-        "nearest_renewal": nearest,
-        "subscribers": {"total": len(subs),
-                        "active": sum(1 for s in subs if s.get("status") == "active"),
-                        "pending": sum(1 for s in subs if s.get("status") == "pending")},
+        "nearest_renewal": None,
+        "subscribers": subscribers,
+        "business_mutations": 0,
     })
 
 
@@ -5295,8 +3536,7 @@ async def god_health_handler(request: web.Request) -> web.Response:
 
 
 async def god_billing_handler(request: web.Request) -> web.Response:
-    """POST /api/god/billing — расходы ИИ+серверы, оплаты к продлению, бюджет ИИ.
-    action: view (по умолч.) | set_renewal {key,label,due_date,amount} | set_budget {usd}."""
+    """Read-only measured cost projection; legacy billing controls are retired."""
     try:
         body = await request.json()
     except Exception:
@@ -5305,35 +3545,15 @@ async def god_billing_handler(request: web.Request) -> web.Response:
     if err:
         return err
     action = str(body.get("action") or "view")
-    if action == "set_renewal":
-        key = str(body.get("key") or "").strip()
-        if not key:
-            return _cabinet_response({"error": "bad_request"}, status=400)
-        items = _god_get_renewals()
-        found = False
-        for it in items:
-            if it.get("key") == key:
-                if "due_date" in body:
-                    it["due_date"] = str(body.get("due_date") or "")[:10]
-                if "amount" in body:
-                    try:
-                        it["amount"] = int(body.get("amount") or 0)
-                    except Exception:
-                        pass
-                if body.get("label"):
-                    it["label"] = str(body.get("label"))[:60]
-                found = True
-                break
-        if not found:
-            items.append({"key": key, "label": str(body.get("label") or key)[:60],
-                          "amount": int(body.get("amount") or 0),
-                          "due_date": str(body.get("due_date") or "")[:10]})
-        _god_set_renewals(items)
-    elif action == "set_budget":
-        try:
-            database.set_setting("god_ai_budget_usd", str(float(body.get("usd") or 0)))
-        except Exception:
-            return _cabinet_response({"error": "bad_request"}, status=400)
+    if action != "view":
+        # p5_b14_legacy_god_billing_mutations_retired
+        return _cabinet_response({
+            "ok": False,
+            "error": "god_billing_controls_retired",
+            "retired_controls": ["legacy_renewal_tracker", "editable_ai_budget"],
+            "measured_cost_projection": "read_only",
+            "business_mutations": 0,
+        }, status=410)
     cost = {}
     try:
         cost = ai_billing.build_cost_data(30) or {}
@@ -5345,62 +3565,87 @@ async def god_billing_handler(request: web.Request) -> web.Response:
         "servers": {"servers_rub": cost.get("servers_rub"),
                     "breakdown": cost.get("servers_breakdown", {})},
         "total_rub": cost.get("total_rub"),
-        "renewals": _god_renewals_view(),
-        "ai_budget_usd": _god_ai_budget_usd(),
+        "renewals": [],
+        "renewal_tracker_status": "retired",
+        "ai_budget_usd": None,
+        "ai_budget_status": "retired",
         "ai_spent_usd": _god_ai_spent_usd(30),
+        "read_only": True,
+        "business_mutations": 0,
+        "historical_legacy_settings_authoritative": False,
     })
 
 
 async def god_subscribers_handler(request: web.Request) -> web.Response:
-    """POST /api/god/subscribers — реестр салонов-подписчиков MAYA.
-    action: list (по умолч.) | add {name,city,plan,owner,phone,mrr,status} |
-            set_status {id, status:active|suspended|pending}."""
+    """Read-only projection of canonical tenants for a platform-owner bearer."""
     try:
         body = await request.json()
     except Exception:
         body = {}
-    _tg, err = _god_gate(request, body)
-    if err:
-        return err
     action = str(body.get("action") or "list")
-    if action == "add":
-        name = str(body.get("name") or "").strip()
-        if not name:
-            return _cabinet_response({"error": "bad_request",
-                                      "message": "Укажите название салона."}, status=400)
-        _st = str(body.get("status") or "pending")
-        if _st not in ("active", "suspended", "pending"):
-            _st = "pending"
+    if action != "list":
+        return _cabinet_response({
+            "ok": False,
+            "error": "god_subscriber_mutation_retired",
+            "canonical_tenant_creation": "TrialActivation",
+            "canonical_tenant_configuration": "A26",
+            "canonical_plan_entitlement": "Package4",
+            "business_mutations": 0,
+        }, status=410)
+    authorization = str(request.headers.get("Authorization") or "").strip()
+    if not authorization.startswith("Bearer "):
+        return _cabinet_response({
+            "error": "canonical_platform_authority_required",
+            "projection": "canonical_admin_tenants",
+        }, status=401)
+
+    # p5_b13_god_subscribers_read_only_canonical_projection
+    import urllib.error
+    import urllib.request
+
+    url = os.getenv(
+        "MAYA_CANONICAL_TENANT_PROJECTION_URL",
+        "http://127.0.0.1:3107/api/admin/tenants",
+    ).strip()
+
+    def _load_projection() -> tuple[int, object]:
+        req = urllib.request.Request(
+            url,
+            method="GET",
+            headers={"Accept": "application/json", "Authorization": authorization},
+        )
         try:
-            database.add_maya_tenant(
-                name=name, city=str(body.get("city") or ""),
-                plan=str(body.get("plan") or ""), owner_name=str(body.get("owner") or ""),
-                phone=str(body.get("phone") or ""), mrr=int(body.get("mrr") or 0),
-                status=_st)
-        except Exception as e:
-            logger.error(f"god add tenant: {e}")
-            return _cabinet_response({"error": "server_error"}, status=500)
-    elif action == "set_status":
-        tid = body.get("id")
-        status = str(body.get("status") or "")
-        if not tid or status not in ("active", "suspended", "pending"):
-            return _cabinet_response({"error": "bad_request"}, status=400)
-        try:
-            database.set_maya_tenant_status(int(tid), status)
-        except Exception as e:
-            logger.error(f"god set tenant status: {e}")
-            return _cabinet_response({"error": "server_error"}, status=500)
+            with urllib.request.urlopen(req, timeout=10) as response:
+                return int(response.status), _json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            try:
+                payload = _json.loads(exc.read().decode("utf-8"))
+            except Exception:
+                payload = {"error": "canonical_projection_rejected"}
+            return int(exc.code), payload
+
     try:
-        items = database.list_maya_tenants()
-    except Exception:
-        items = []
+        status, payload = await asyncio.to_thread(_load_projection)
+    except Exception as exc:
+        logger.error("canonical tenant projection unavailable: %s", exc)
+        return _cabinet_response({"error": "canonical_projection_unavailable"}, status=502)
+    if status != 200:
+        return _cabinet_response(
+            payload if isinstance(payload, dict) else {"error": "canonical_projection_rejected"},
+            status=status,
+        )
+    tenants = payload if isinstance(payload, list) else []
     return _cabinet_response({
-        "subscribers": items,
-        "summary": {"total": len(items),
-                    "active": sum(1 for s in items if s.get("status") == "active"),
-                    "pending": sum(1 for s in items if s.get("status") == "pending"),
-                    "suspended": sum(1 for s in items if s.get("status") == "suspended"),
-                    "mrr": sum(int(s.get("mrr") or 0) for s in items if s.get("status") == "active")},
+        "subscribers": tenants,
+        "summary": {
+            "total": len(tenants),
+            "active": sum(1 for item in tenants if str(item.get("status") or "").lower() == "active"),
+            "suspended": sum(1 for item in tenants if str(item.get("status") or "").lower() == "suspended"),
+            "mrr": None,
+        },
+        "projection": "canonical_admin_tenants",
+        "read_only": True,
+        "business_mutations": 0,
     })
 
 
@@ -5408,7 +3653,7 @@ def _preliminary_payout() -> dict:
     """Предварительная выплата за ТЕКУЩУЮ расчётную неделю (Чт→Ср, до сегодня)
     для ВСЕХ, кроме Стаса-владельца:
       • каждый мастер = его валовая за неделю × его доля,
-      • Антон = фикс по дням недели (вс/пн=2000, вт–сб=1500) + 5% от валовой за каждый рабочий день.
+      • Антон = фактически начислено в YClients за тот же период.
     Кладётся в дневной отчёт, чтобы владелец каждый день видел накопленную сумму к выплате."""
     pw = _pay_week()
     start = pw["start"]
@@ -5426,7 +3671,6 @@ def _preliminary_payout() -> dict:
     rec_staff = {r.get("id"): r.get("staff_id") for r in recs
                  if isinstance(r, dict) and r.get("id") is not None and r.get("staff_id") is not None}
     by_master = {}                 # staff_id -> валовая за неделю (услуги)
-    by_day = {}                    # 'YYYY-MM-DD' -> валовая салона за день (услуги)
     for t in txs:
         if not isinstance(t, dict) or t.get("sold_item_type") != "service":
             continue
@@ -5444,9 +3688,6 @@ def _preliminary_payout() -> dict:
             sid = rec_staff.get(t.get("record_id"))
         if sid is not None:
             by_master[sid] = by_master.get(sid, 0.0) + a
-        day = str(t.get("date") or "")[:10]
-        if day:
-            by_day[day] = by_day.get(day, 0.0) + a
     try:
         roster = _yc.get_masters() or []
     except Exception:
@@ -5466,23 +3707,14 @@ def _preliminary_payout() -> dict:
                      "gross_week": round(g), "percent": int(round(pct * 100)), "salary": sal})
         masters_total += sal
     rows.sort(key=lambda x: x["salary"], reverse=True)
-    # Антон — суммируем по каждому дню недели от start до end включительно
-    anton_total = 0
-    d = date.fromisoformat(start)
-    last = date.fromisoformat(end)
-    while d <= last:
-        if d.weekday() in ANTON_DAYS_OFF:
-            anton_total += ANTON_WEEKEND_PAY
-        else:
-            anton_total += ANTON_WORKDAY_BASE + round(ANTON_GROSS_PCT * by_day.get(d.isoformat(), 0.0))
-        d += timedelta(days=1)
-    anton_total = round(anton_total)
+    anton = _anton_payroll(start, end)
+    anton_total = anton["total"]
     return {
         "week": {"start": start, "end": pw["end"], "through": end, "pay_date": pw.get("pay_date")},
         "masters": rows,
-        "anton": {"name": "Антон", "salary": anton_total},
+        "anton": {**anton, "salary": anton_total},
         "masters_total": masters_total,
-        "total": masters_total + anton_total,
+        "total": (masters_total + anton_total) if anton_total is not None else None,
     }
 
 
@@ -5595,33 +3827,16 @@ def _daily_report(date_iso: str) -> dict:
     total_gross_val = round(sum(rev.values()))
     salary_total_val = round(sum(m["salary"] for m in masters if not m.get("is_owner")))
 
-    # ── Антон (ассистент): фикс по дню недели + % от выручки ──
-    try:
-        wd = date.fromisoformat(date_iso).weekday()   # Пн=0 … Вс=6
-    except Exception:
-        wd = 0
-    anton_off = wd in ANTON_DAYS_OFF                   # вс/пн — выходной
-    if anton_off:
-        anton_base = ANTON_WEEKEND_PAY
-        anton_pct_amount = 0
-    else:
-        anton_base = ANTON_WORKDAY_BASE
-        anton_pct_amount = round(ANTON_GROSS_PCT * total_gross_val)
-    anton_total = anton_base + anton_pct_amount
+    anton = _anton_payroll(date_iso, date_iso)
+    anton_total = anton.get("total")
 
-    # ── Дополнительные расходы (каждый день) ──
-    extra_items = [{"label": e["label"], "amount": e["amount"]} for e in DAILY_EXTRA_EXPENSES]
-    extra_total = sum(e["amount"] for e in DAILY_EXTRA_EXPENSES)
-
-    # ── Расходы по салону от Антона за этот день (кофе, уборщица, лента…) ──
-    try:
-        salon_exp_items = database.get_salon_expenses(date_iso)
-    except Exception as e:
-        logger.error(f"_daily_report salon_expenses: {e}")
-        salon_exp_items = []
-    salon_exp_total = sum(int(x.get("amount") or 0) for x in salon_exp_items)
-
-    expenses_total = salary_total_val + anton_total + extra_total + salon_exp_total
+    # R13: canonical recorded Expense totals and explicit period declaration.
+    from canonical_expense_intake import expense_report
+    expense_projection = expense_report(date_iso)
+    salon_exp_items = expense_projection['items']
+    salon_exp_total = expense_projection['total']
+    expenses_total = (salary_total_val + anton_total + salon_exp_total
+                      if salon_exp_total is not None and anton_total is not None else None)
 
     # Предварительная выплата за неделю (Чт→Ср до сегодня) — все, кроме Стаса (#11)
     try:
@@ -5636,59 +3851,21 @@ def _daily_report(date_iso: str) -> dict:
     owner_gross = round(sum(m["gross"] for m in masters if m.get("is_owner")))
     employees_gross = max(0, total_gross_val - owner_gross)
     employees_margin = employees_gross - salary_total_val
-    owner_net = {
+    owner_net = ({
         "own": owner_gross,                       # заработал сам (свои услуги, 100%)
         "employees_gross": employees_gross,       # валовая сотрудников
         "employees_salary": salary_total_val,     # − их зарплаты
         "employees_margin": employees_margin,     # = доля с сотрудников
         "anton": anton_total,                     # − ЗП Антона
         "purchases": salon_exp_total,             # − покупки (внёс Антон)
-        "extra": extra_total,                     # − фикс. доп.расходы
         "net": total_gross_val - expenses_total,  # = чистыми
-    }
+    } if expenses_total is not None else None)
 
     # ── Касса со слов Антона + сверка с расчётной наличкой YClients ──
-    try:
-        _cl = database.get_cash_log(date_iso)
-    except Exception:
-        _cl = None
+    # R14: this legacy report has no confirmed canonical branch scope.
     cash_reported = None
-    if _cl:
-        # 🔴 Ожидаемая наличка за день = пришло налом − наличные расходы за день
-        # (закупки, которые Антон вносит и оплачивает ИЗ КАССЫ). Без вычета расходов
-        # сверка показывала ложную «недостачу» ровно на сумму дневных закупок.
-        _cash_rev = round(cash_sum)                 # пришло налом по YClients
-        # Наличные расходы за день = закупки Антона + фикс. доп.расходы (Стас: доп.расходы
-        # тоже идут наличкой из кассы каждый день).
-        _cash_exp = salon_exp_total + extra_total
-        _computed = _cash_rev - _cash_exp            # сколько НАЛИЧКИ должно остаться за день
-        # кто вносил кассу: Антон / Стас / иной админ
-        _eb = _cl.get("entered_by")
-        try:
-            from config import FOUNDER_IDS as _FIDS
-        except Exception:
-            _FIDS = {948205934}
-        if _eb == ANTON_CHAT_ID:
-            _by = "Антон"
-        elif _eb and int(_eb) in _FIDS:
-            _by = "Стас"
-        elif _eb:
-            try:
-                _m = database.get_master_by_chat_id(int(_eb)) or {}
-                _by = _m.get("full_name") or "администратор"
-            except Exception:
-                _by = "администратор"
-        else:
-            _by = ""
-        cash_reported = {
-            "total_till": _cl["total_till"],
-            "day_cash": _cl["day_cash"],
-            "cash_revenue": _cash_rev,                 # пришло налом (YClients)
-            "day_expenses": _cash_exp,                 # − наличные расходы за день (закупки)
-            "computed_day_cash": _computed,            # = ожидаемая наличка (выручка − расходы)
-            "diff": _cl["day_cash"] - _computed,       # >0 излишек, <0 недостача
-            "by": _by,                                  # кто внёс кассу
-        }
+    from canonical_cash_declaration import report_unavailable
+    cash_declaration = report_unavailable()
 
     return {
         "date": date_iso,
@@ -5697,18 +3874,13 @@ def _daily_report(date_iso: str) -> dict:
         "card": {"count": len(card_recs), "sum": round(card_sum)},
         "total_gross": total_gross_val,
         "salary_total": salary_total_val,
-        "anton": {
-            "day_off": anton_off,
-            "base": anton_base,
-            "pct": int(round(ANTON_GROSS_PCT * 100)),
-            "pct_amount": anton_pct_amount,
-            "total": anton_total,
-        },
-        "extra_expenses": {"items": extra_items, "total": extra_total},
-        "salon_expenses": {"items": salon_exp_items, "total": salon_exp_total},
+        "anton": anton,
+        "extra_expenses": {"items": [], "total": None, "source": "retired_fixed_constants"},
+        "salon_expenses": expense_projection,
         "expenses_total": expenses_total,
         "owner_net": owner_net,           # owner-only окно «чистая прибыль Стаса»
-        "cash_reported": cash_reported,   # касса со слов Антона + сверка
+        "cash_reported": cash_reported,
+        "cash_declaration": cash_declaration,   # касса со слов Антона + сверка
         "prelim_payout": prelim,
         "note": ("" if txs else "Пока нет проведённых оплат за день — касса появится "
                  "после первых закрытых визитов в YClients."),
@@ -5785,6 +3957,7 @@ def _period_report(from_iso: str, to_iso: str) -> dict:
     masters.sort(key=lambda x: x["salary"], reverse=True)
     total_gross_val = round(sum(rev.values()))
     salary_total_val = round(sum(m["salary"] for m in masters if not m.get("is_owner")))
+    anton = _anton_payroll(from_iso, to_iso)
     return {
         "from": from_iso, "to": to_iso, "range": True,
         "masters": masters,
@@ -5792,6 +3965,7 @@ def _period_report(from_iso: str, to_iso: str) -> dict:
         "card": {"count": len(card_recs), "sum": round(card_sum)},
         "total_gross": total_gross_val,
         "salary_total": salary_total_val,
+        "anton": anton,
         "note": "" if txs else "За период нет проведённых оплат.",
     }
 
@@ -5817,16 +3991,12 @@ async def panel_daily_report_handler(request: web.Request) -> web.Response:
             f_iso, _, t_iso = d.partition("..")
             rep = await asyncio.to_thread(_period_report, f_iso.strip(), t_iso.strip())
         else:
-            rep = await asyncio.to_thread(_daily_report, d)
+            rep = await asyncio.to_thread(canonical_staff_access.synchronous_request_callback(lambda: _daily_report(d)))
     except Exception as e:
         logger.error(f"panel_daily_report: {e}")
         return _cabinet_response({"error": "report_failed", "message": "Не удалось собрать отчёт."}, status=502)
     # «Чистая прибыль Стаса» и касса — ТОЛЬКО основателю (не другим owner, не Антону).
-    try:
-        from config import FOUNDER_IDS as _FIDS
-    except Exception:
-        _FIDS = {948205934}
-    if isinstance(rep, dict) and int(tg_id) not in _FIDS:
+    if isinstance(rep, dict) and not canonical_staff_access.is_platform(tg_id):
         rep.pop("owner_net", None)
         rep.pop("cash_reported", None)
     return _cabinet_response(rep)
@@ -5892,34 +4062,29 @@ def _build_analytics_pdf(metrics: dict, period_label: str) -> bytes:
 
 
 async def panel_report_pdf_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/report_pdf — PDF-отчёт за период, отправляется владельцу в Telegram."""
+    """R05 authenticated download: one admitted own snapshot, never a provider document."""
+    import canonical_report_download
     try:
         body = await request.json()
+        credential = canonical_staff_access.bearer(request.headers, body)
+        if not canonical_staff_access.current():
+            raise ValueError("canonical_staff_session_required")
+        if not isinstance(body, dict) or set(body) - {"maya_token", "run_id", "kind"}:
+            raise ValueError("canonical_report_snapshot_required")
+        if body.get("kind") == "admin-help" and "run_id" not in body:
+            if canonical_staff_access.current().get("role") not in {
+                "tenant_owner", "business_owner", "tenant_admin", "administrator", "platform_owner"}:
+                raise ValueError("canonical_help_authority_required")
+            result = await asyncio.to_thread(canonical_report_download.static_help)
+        elif "kind" not in body and isinstance(body.get("run_id"), str):
+            result = await canonical_report_download.report_snapshot(credential, body["run_id"])
+        else:
+            raise ValueError("canonical_report_snapshot_required")
+        return _cabinet_response(result)
+    except ValueError as error:
+        return _cabinet_response({"error": str(error), "business_mutations": 0}, status=403)
     except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = tg_user.get("id")
-    info = _panel_resolve_role(int(tg_id)) if tg_id else {"permissions": {}}
-    if not info.get("permissions", {}).get("analytics"):
-        return _cabinet_response({"error": "forbidden", "message": "Недостаточно прав."}, status=403)
-    pp = _panel_period(body)
-    try:
-        from telegram import InputFile
-        import io as _io
-        metrics = database.dashboard_metrics(from_iso=pp["from_iso"], to_iso=pp["to_iso"])
-        pdf_bytes = await asyncio.to_thread(_build_analytics_pdf, metrics, pp["label"])
-        bot = request.app["bot_app"].bot
-        await bot.send_document(
-            chat_id=int(tg_id),
-            document=InputFile(_io.BytesIO(pdf_bytes), filename=f"analytics_{pp['period']}.pdf"),
-            caption=f"📊 Аналитика · {pp['label']} ({pp['start']} – {pp['end']})",
-        )
-    except Exception as e:
-        logger.error(f"panel report_pdf: {e}")
-        return _cabinet_response({"ok": False, "reason": "Не удалось сформировать отчёт."}, status=500)
-    return _cabinet_response({"ok": True, "sent": True})
+        return _cabinet_response({"error": "canonical_report_download_unavailable", "business_mutations": 0}, status=503)
 
 
 async def panel_salon_stats_handler(request: web.Request) -> web.Response:
@@ -6312,18 +4477,26 @@ def _client_record_response(payload: dict, status: int = 200) -> web.Response:
 
 
 def _client_record_failure(error: client_record_actions.ClientRecordError) -> web.Response:
-    return _client_record_response({
+    payload = {
         "success": False,
         "ok": False,
         "error": error.code,
         "code": error.code,
         "message": error.message,
-    }, status=error.status)
+    }
+    if error.code == "outcome_unknown":
+        payload.update({"unknown": True, "retry_allowed": False})
+    if error.reference:
+        payload["execution_id"] = error.reference
+    return _client_record_response(payload, status=error.status)
 
 
 async def _client_record_request_context(
     request: web.Request,
-) -> tuple[dict | None, dict | None, int | None, web.Response | None]:
+) -> tuple[dict | None, str | None, int | None, web.Response | None]:
+    """B17 transport parsing only; verified channel identity lives in backend."""
+    import legacy_client_command_bridge as client_commands
+
     try:
         body = await request.json()
     except Exception:
@@ -6335,390 +4508,187 @@ async def _client_record_request_context(
             "success": False, "error": "invalid_json", "code": "invalid_json",
         }, status=400)
 
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
+    # p5_b17_verified_client_appointment_authority: caller fields never select
+    # a Client or appointment owner. Even legacy session_token is only ignored
+    # compatibility input; channel_proof requires a trusted signed channel.
+    allowed = {"record_id", "date", "time", "datetime", "auth_data", "session_token"}
+    if set(body) - allowed:
         return body, None, None, _client_record_response({
-            "success": False, "error": "unauthorized", "code": "unauthorized",
-        }, status=401)
-    if not database.has_valid_consent_by_chat_id(int(chat_id)):
-        return body, None, None, _client_record_response({
-            "success": False, "error": "needs_consent", "code": "needs_consent",
+            "success": False,
+            "error": "client_link_required",
+            "code": "client_link_required",
         }, status=403)
-
-    client = database.get_client(int(chat_id))
-    if not client:
-        return body, None, None, _client_record_response({
-            "success": False, "error": "client_not_found", "code": "client_not_found",
-        }, status=404)
-    phone = str(client.get("phone") or "").strip()
-    if len("".join(ch for ch in phone if ch.isdigit())) < 10:
-        return body, client, None, _client_record_response({
-            "success": False, "error": "phone_required", "code": "phone_required",
-        }, status=409)
     try:
         record_id = int(body.get("record_id") or 0)
     except (TypeError, ValueError):
         record_id = 0
     if record_id <= 0:
-        return body, client, None, _client_record_response({
+        return body, None, None, _client_record_response({
             "success": False, "error": "not_found", "code": "not_found",
             "message": "Запись не найдена.",
         }, status=404)
-    return body, client, record_id, None
+    try:
+        proof = client_commands.channel_proof(request.headers, body)
+    except ValueError:
+        return body, None, None, _client_record_response({
+            "success": False,
+            "error": "client_link_required",
+            "code": "client_link_required",
+            "message": "Подтвердите связь с клиентом.",
+        }, status=403)
+    return body, proof, record_id, None
+
+
+def _client_appointment_command_response(result: dict, record_id: int, **extra) -> web.Response:
+    execution = result.get("execution") if isinstance(result, dict) else None
+    execution = execution if isinstance(execution, dict) else {}
+    state = str(execution.get("state") or "")
+    execution_id = str(execution.get("executionId") or "")
+    if state == "SUCCEEDED":
+        return _client_record_response({
+            "success": True,
+            "ok": True,
+            "record_id": record_id,
+            "widget": "mybookings",
+            **extra,
+        })
+    if state == "UNKNOWN":
+        return _client_record_response({
+            "success": False,
+            "ok": False,
+            "error": "outcome_unknown",
+            "code": "outcome_unknown",
+            "message": "Результат операции уточняется. Не повторяйте действие.",
+            "unknown": True,
+            "retry_allowed": False,
+            **({"execution_id": execution_id} if execution_id else {}),
+        }, status=202)
+    if state in {"PENDING", "CLAIMED", "DISPATCHING", "RECONCILING"}:
+        return _client_record_response({
+            "success": False,
+            "ok": False,
+            "error": "action_in_progress",
+            "code": "action_in_progress",
+            "message": "Операция уже принята в работу.",
+            "retry_allowed": False,
+            **({"execution_id": execution_id} if execution_id else {}),
+        }, status=202)
+    return _client_record_response({
+        "success": False,
+        "ok": False,
+        "error": "appointment_change_rejected",
+        "code": "appointment_change_rejected",
+        "message": str(result.get("safe_explanation") or "Операция не выполнена."),
+        **({"execution_id": execution_id} if execution_id else {}),
+    }, status=409)
+
+
+async def client_native_feedback_handler(request: web.Request) -> web.Response:
+    """R08 verified-channel initiator. No local request/revision/send owner."""
+    import legacy_client_command_bridge as client_commands
+    try:
+        body = await request.json()
+        if not isinstance(body, dict) or set(body) - {'operation', 'command', 'idempotencyKey', 'auth_data', 'maya_token'}:
+            raise ValueError('invalid_feedback_envelope')
+        operation = body.get('operation')
+        if operation not in {'projection', 'response', 'withdraw'}:
+            raise ValueError('invalid_feedback_operation')
+        proof = client_commands.channel_proof(request.headers, body)
+        if operation == 'projection':
+            if 'command' in body or 'idempotencyKey' in body:
+                raise ValueError('feedback_read_has_no_command')
+            payload = {}
+        else:
+            payload = {'command': body.get('command'), 'idempotencyKey': body.get('idempotencyKey')}
+        result = await asyncio.to_thread(client_commands.command, 'feedback-' + operation, proof, payload)
+        return _cabinet_response(result)
+    except ValueError as error:
+        code = str(error)
+        return _cabinet_response({'error': 'IDEMPOTENCY_CONFLICT' if code == 'IDEMPOTENCY_CONFLICT' else 'feedback_identity_or_command_rejected'}, status=409 if code == 'IDEMPOTENCY_CONFLICT' else 403)
+    except Exception:
+        return _cabinet_response({'error':'feedback_outcome_unconfirmed','retry':'same_command_identity'}, status=503)
 
 
 async def client_cancel_record_handler(request: web.Request) -> web.Response:
-    """Cancel only the authenticated client's future YClients record."""
-    body, client, record_id, error_response = await _client_record_request_context(request)
+    """B17 verified Client -> canonical cancel_appointment Action Engine."""
+    import legacy_client_command_bridge as client_commands
+
+    body, proof, record_id, error_response = await _client_record_request_context(request)
     if error_response is not None:
         return error_response
-
-    marker_set = False
-
-    def _mark_authorized(rid: int) -> None:
-        nonlocal marker_set
-        database.mark_cancel_actor(rid, "client")
-        marker_set = True
-
     try:
         result = await asyncio.to_thread(
-            client_record_actions.cancel_for_client,
-            _yc,
-            int(record_id),
-            str(client.get("phone") or ""),
-            before_write=_mark_authorized,
+            client_commands.command,
+            "appointment-cancel",
+            proof,
+            {"recordId": str(record_id)},
         )
-    except client_record_actions.ClientRecordError as exc:
-        if marker_set:
-            database.pop_recent_cancel_actor(int(record_id), max_age=3600)
-        return _client_record_failure(exc)
+    except ValueError:
+        return _client_record_response({
+            "success": False, "error": "client_link_required",
+            "code": "client_link_required",
+        }, status=403)
     except Exception as exc:
-        if marker_set:
-            database.pop_recent_cancel_actor(int(record_id), max_age=3600)
-        logger.error("client cancel record_id=%s: %s", record_id, exc)
+        logger.error("canonical client cancel unavailable record_id=%s: %s", record_id, exc)
         return _client_record_response({
             "success": False,
-            "error": "yclients_unavailable",
-            "code": "yclients_unavailable",
+            "error": "appointment_command_unavailable",
+            "code": "appointment_command_unavailable",
             "message": "Не удалось связаться с системой записи.",
-        }, status=502)
-    return _client_record_response({
-        "success": True,
-        "ok": True,
-        "record_id": result["record_id"],
-        "widget": "mybookings",
-    })
+        }, status=503)
+    return _client_appointment_command_response(result, int(record_id))
 
 
 async def client_reschedule_record_handler(request: web.Request) -> web.Response:
-    """Reschedule only the authenticated client's future record via PUT."""
-    body, client, record_id, error_response = await _client_record_request_context(request)
+    """B17 verified Client -> canonical reschedule_appointment Action Engine."""
+    import legacy_client_command_bridge as client_commands
+
+    body, proof, record_id, error_response = await _client_record_request_context(request)
     if error_response is not None:
         return error_response
-
-    marker_set = False
-
-    def _mark_authorized(rid: int) -> None:
-        nonlocal marker_set
-        database.mark_reschedule_actor(rid, "client")
-        marker_set = True
-
     try:
+        new_datetime = client_record_actions.parse_new_datetime(body)
         result = await asyncio.to_thread(
-            client_record_actions.reschedule_for_client,
-            _yc,
-            int(record_id),
-            str(client.get("phone") or ""),
-            body,
-            before_write=_mark_authorized,
+            client_commands.command,
+            "appointment-reschedule",
+            proof,
+            {"recordId": str(record_id), "start": new_datetime},
         )
     except client_record_actions.ClientRecordError as exc:
-        if marker_set:
-            database.pop_recent_reschedule_actor(int(record_id), max_age=3600)
         return _client_record_failure(exc)
+    except ValueError:
+        return _client_record_response({
+            "success": False, "error": "client_link_required",
+            "code": "client_link_required",
+        }, status=403)
     except Exception as exc:
-        if marker_set:
-            database.pop_recent_reschedule_actor(int(record_id), max_age=3600)
-        logger.error("client reschedule record_id=%s: %s", record_id, exc)
+        logger.error("canonical client reschedule unavailable record_id=%s: %s", record_id, exc)
         return _client_record_response({
             "success": False,
-            "error": "yclients_unavailable",
-            "code": "yclients_unavailable",
+            "error": "appointment_command_unavailable",
+            "code": "appointment_command_unavailable",
             "message": "Не удалось связаться с системой записи.",
-        }, status=502)
-    return _client_record_response({
-        "success": True,
-        "ok": True,
-        "record_id": result["record_id"],
-        "datetime": result["datetime"],
-        "widget": "mybookings",
-    })
+        }, status=503)
+    return _client_appointment_command_response(
+        result, int(record_id), datetime=new_datetime,
+    )
 
 
 async def client_book_with_loyalty_handler(request: web.Request) -> web.Response:
-    """Create the authenticated client's booking and redeem one care service.
-
-    Nothing monetary is trusted from the browser. The service, current price,
-    balance and exact slot for the combined duration are rechecked server-side.
-    """
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _client_record_response({
-            "success": False, "error": "unauthorized", "code": "unauthorized",
-        }, status=401)
-    if not database.has_valid_consent_by_chat_id(int(chat_id)):
-        return _client_record_response({
-            "success": False, "error": "needs_consent", "code": "needs_consent",
-        }, status=403)
-    client = database.get_client(int(chat_id))
-    if not client:
-        return _client_record_response({
-            "success": False, "error": "client_not_found", "code": "client_not_found",
-        }, status=404)
-    phone = str(client.get("phone") or "").strip()
-    if len("".join(ch for ch in phone if ch.isdigit())) < 10:
-        return _client_record_response({
-            "success": False, "error": "phone_required", "code": "phone_required",
-        }, status=409)
-
-    try:
-        staff_id = int(body.get("staff_id") or 0)
-        service_ids = list(dict.fromkeys(
-            int(item) for item in (body.get("service_ids") or []) if int(item) > 0
-        ))
-    except (TypeError, ValueError):
-        staff_id, service_ids = 0, []
-    if staff_id <= 0 or not service_ids or len(service_ids) > 8:
-        return _client_record_response({
-            "success": False, "error": "invalid_booking", "code": "invalid_booking",
-        }, status=400)
-    try:
-        active_ids = {int(item) for item in getattr(config, "ACTIVE_MASTER_IDS", [])}
-    except Exception:
-        active_ids = set()
-    if active_ids and staff_id not in active_ids:
-        return _client_record_response({
-            "success": False, "error": "staff_unavailable", "code": "staff_unavailable",
-        }, status=409)
-
-    start_raw = str(body.get("datetime") or body.get("start") or "").strip()
-    start_match = re.match(r"^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(?::\d{2})?", start_raw)
-    if not start_match:
-        return _client_record_response({
-            "success": False, "error": "invalid_datetime", "code": "invalid_datetime",
-        }, status=400)
-    date_value, time_value = start_match.group(1), start_match.group(2)
-    try:
-        booking_dt = datetime.strptime(f"{date_value} {time_value}", "%Y-%m-%d %H:%M")
-    except ValueError:
-        return _client_record_response({
-            "success": False, "error": "invalid_datetime", "code": "invalid_datetime",
-        }, status=400)
-    if booking_dt < datetime.now() - timedelta(minutes=2) or booking_dt > datetime.now() + timedelta(days=90):
-        return _client_record_response({
-            "success": False, "error": "invalid_datetime", "code": "invalid_datetime",
-        }, status=400)
-
-    request_id = str(body.get("request_id") or "").strip()
-    if not re.fullmatch(r"[A-Za-z0-9_-]{8,80}", request_id):
-        return _client_record_response({
-            "success": False, "error": "invalid_request_id", "code": "invalid_request_id",
-        }, status=400)
-    requested_care_title = str(body.get("loyalty_service_title") or "").strip()
-    try:
-        requested_care_id = int(body.get("loyalty_service_id") or 0)
-    except (TypeError, ValueError):
-        requested_care_id = 0
-
-    try:
-        catalog = await asyncio.to_thread(_yc.get_services, staff_id)
-    except Exception as exc:
-        logger.error("loyalty booking catalog staff_id=%s: %s", staff_id, exc)
-        catalog = []
-    catalog = [row for row in (catalog or []) if isinstance(row, dict) and not row.get("error")]
-    catalog_by_id = {
-        int(row["id"]): row for row in catalog
-        if str(row.get("id") or "").isdigit()
-    }
-    if any(service_id not in catalog_by_id for service_id in service_ids):
-        return _client_record_response({
-            "success": False, "error": "service_not_found", "code": "service_not_found",
-        }, status=409)
-
-    import loyalty as _loy
-
-    care = _loy.current_care_service(requested_care_title, catalog)
-    if not care:
-        return _client_record_response({
-            "success": False, "error": "loyalty_service_unavailable",
-            "code": "loyalty_service_unavailable",
-        }, status=409)
-    care_id = int(care.get("id") or 0)
-    if care_id <= 0 or care_id not in service_ids or (requested_care_id and requested_care_id != care_id):
-        return _client_record_response({
-            "success": False, "error": "loyalty_service_mismatch",
-            "code": "loyalty_service_mismatch",
-        }, status=400)
-
-    try:
-        await asyncio.to_thread(
-            _loy.lazy_backfill_for_client,
-            int(client["id"]),
-            phone,
-        )
-    except Exception as exc:
-        logger.error("loyalty booking import client_id=%s: %s", client.get("id"), exc)
-
-    # Reserve before checking the live slot so a retry can return the already
-    # finalized booking even though that booking has made the slot unavailable.
-    # Invalid/taken slots release the temporary hold immediately below.
-    reservation = database.reserve_loyalty_points(
-        client_id=int(client["id"]),
-        points=int(care["price"]),
-        request_id=request_id,
-    )
-    if reservation.get("state") == "finalized":
-        return _client_record_response({
-            "success": True,
-            "ok": True,
-            "record_id": reservation.get("record_id"),
-            "spent_points": int(reservation.get("points") or care["price"]),
-            "remaining_points": int(reservation.get("balance") or 0),
-            "loyalty_service": care["title"],
-            "idempotent": True,
-        })
-    if reservation.get("state") == "in_progress":
-        return _client_record_response({
-            "success": False, "error": "booking_in_progress", "code": "booking_in_progress",
-        }, status=409)
-    if not reservation.get("ok"):
-        return _client_record_response({
-            "success": False, "error": "insufficient_points", "code": "insufficient_points",
-            "balance": int(reservation.get("balance") or 0),
-        }, status=409)
-
-    try:
-        slots = await asyncio.to_thread(
-            _yc.get_available_slots,
-            staff_id,
-            date_value,
-            service_ids,
-        )
-    except Exception as exc:
-        logger.error("loyalty booking slots staff_id=%s: %s", staff_id, exc)
-        slots = [{"error": "yclients_unavailable"}]
-    if slots and isinstance(slots[0], dict) and slots[0].get("error"):
-        database.release_loyalty_reservation(
-            client_id=int(client["id"]), request_id=request_id,
-        )
-        return _client_record_response({
-            "success": False, "error": "yclients_unavailable", "code": "yclients_unavailable",
-        }, status=502)
-
-    def _slot_time(slot: dict) -> str:
-        raw = str((slot or {}).get("time") or (slot or {}).get("datetime") or "")
-        match = re.search(r"(?:T|\s)(\d{2}:\d{2})", raw)
-        return match.group(1) if match else raw[:5]
-
-    if not any(_slot_time(slot) == time_value for slot in (slots or [])):
-        database.release_loyalty_reservation(
-            client_id=int(client["id"]), request_id=request_id,
-        )
-        return _client_record_response({
-            "success": False, "error": "slot_taken", "code": "slot_taken",
-            "message": "Это время уже недоступно. Выберите другое.",
-        }, status=409)
-
-    try:
-        prefs = database.get_notify_prefs_by_chat_id(int(chat_id))
-        notify_hours = int(prefs.get("reminder_hours") or 0) if prefs.get("reminder") else 0
-    except Exception:
-        notify_hours = 3
-    booking_result = await asyncio.to_thread(
-        _yc.create_booking,
-        staff_id=staff_id,
-        service_ids=service_ids,
-        datetime_str=f"{date_value}T{time_value}:00",
-        client_name=str(client.get("name") or "Клиент"),
-        client_phone=phone,
-        notify_by_sms=notify_hours,
-    )
-    if not booking_result.get("success"):
-        database.release_loyalty_reservation(
-            client_id=int(client["id"]), request_id=request_id,
-        )
-        code = str(booking_result.get("code") or "booking_failed")
-        status = 409 if code in {"slot_taken", "staff_unavailable"} else 502
-        return _client_record_response({
-            "success": False,
-            "error": code,
-            "code": code,
-            "message": _booking_failure_reply(booking_result),
-        }, status=status)
-
-    record_id = int(booking_result.get("record_id") or 0)
-    service_names = [
-        str(catalog_by_id[service_id].get("title") or "Услуга")
-        for service_id in service_ids
-    ]
-    if record_id <= 0:
-        database.release_loyalty_reservation(
-            client_id=int(client["id"]), request_id=request_id,
-        )
-        return _client_record_response({
-            "success": True,
-            "ok": True,
-            "record_id": None,
-            "loyalty_applied": False,
-            "warning": "booking_created_loyalty_needs_admin",
-        })
-
-    redemption = await asyncio.to_thread(
-        _loy.apply_redemption_for_booking,
-        client_id=int(client["id"]),
-        record_id=record_id,
-        service_titles=[care["title"]],
-        service_quotes=[care],
-        reservation_id=request_id,
-    )
-    if int(redemption.get("total_points") or 0) <= 0:
-        database.release_loyalty_reservation(
-            client_id=int(client["id"]), request_id=request_id,
-        )
-    try:
-        database.save_booking(
-            int(client["id"]),
-            service=", ".join(service_names),
-            master=str(catalog_by_id.get(care_id, {}).get("staff_name") or ""),
-            datetime_str=f"{date_value}T{time_value}:00",
-            yclients_record_id=record_id,
-        )
-    except Exception as exc:
-        logger.error("loyalty booking save record_id=%s: %s", record_id, exc)
+    """Retired P4-03 legacy writer; canonical loyalty owns all value changes."""
+    logger.warning("p4_03_legacy_mutation_disabled:redeem_legacy_loyalty")
     return _client_record_response({
-        "success": True,
-        "ok": True,
-        "record_id": record_id,
-        "loyalty_applied": int(redemption.get("total_points") or 0) > 0,
-        "spent_points": int(redemption.get("total_points") or 0),
-        "remaining_points": int(redemption.get("remaining") or 0),
-        "loyalty_service": care["title"],
-        "datetime": f"{date_value}T{time_value}:00",
-        "services": service_names,
-    })
+        "success": False,
+        "error": "p4_03_canonical_loyalty_ingress_required",
+        "code": "p4_03_canonical_loyalty_ingress_required",
+        "message": "Оплата баллами временно недоступна. Выберите обычную запись.",
+    }, status=409)
+
 
 
 async def booking_prefill_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/booking/prefill — имя и телефон для финального шага онлайн-записи.
-    Отдаём полный телефон только авторизованному клиенту с действующим согласием.
-    """
+    """B16 read-only PII projection through a verified ClientChannelLink."""
+    import legacy_client_command_bridge as client_commands
     try:
         body = await request.json()
     except Exception:
@@ -6731,114 +4701,121 @@ async def booking_prefill_handler(request: web.Request) -> web.Response:
         resp.headers["Cache-Control"] = "no-store"
         return resp
 
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _booking_response({"success": False, "error": "unauthorized"}, status=401)
-
     try:
-        client = database.get_client(int(chat_id))
-    except Exception as e:
-        logger.error(f"booking_prefill: get_client {chat_id}: {e}")
-        return _booking_response({"success": False, "error": "internal"}, status=500)
-
-    if not client:
+        # p5_b16_booking_prefill_read_only: the original authenticated channel
+        # is authoritative; body chat_id, phone and clientId are never read.
+        if set(body) - {"auth_data", "session_token"}:
+            raise ValueError("invalid_booking_prefill_request")
+        proof = client_commands.channel_proof(request.headers, body)
+        result = await asyncio.to_thread(
+            client_commands.command, "booking-prefill", proof, {}
+        )
+    except ValueError:
         return _booking_response({
             "success": True,
             "known": False,
             "has_phone": False,
             "name": "",
             "phone": "",
+            "client_link_required": True,
         })
+    except Exception:
+        logger.error("canonical booking prefill unavailable")
+        return _booking_response({
+            "success": False, "error": "booking_prefill_unavailable"
+        }, status=503)
 
-    if not database.has_valid_consent_by_chat_id(int(chat_id)):
+    if not result.get("linked") or result.get("client_link_required"):
+        return _booking_response({
+            "success": True,
+            "known": False,
+            "has_phone": False,
+            "name": "",
+            "phone": "",
+            "client_link_required": True,
+        })
+    if result.get("needs_consent"):
         return _booking_response({
             "success": True,
             "known": True,
             "needs_consent": True,
             "has_phone": False,
-            "name": client.get("name") or "",
+            "name": "",
             "phone": "",
+            "client_link_required": False,
         })
-
-    phone = (client.get("phone") or "").strip()
-    phone_digits = "".join(ch for ch in phone if ch.isdigit())
-    has_phone = len(phone_digits) >= 10
+    phone = result.get("phone") if isinstance(result.get("phone"), str) else ""
+    name = result.get("name") if isinstance(result.get("name"), str) else ""
     return _booking_response({
         "success": True,
         "known": True,
-        "has_phone": has_phone,
-        "name": client.get("name") or "",
-        "phone": phone if has_phone else "",
+        "has_phone": bool(result.get("has_phone")) and bool(phone),
+        "name": name,
+        "phone": phone if result.get("has_phone") else "",
+        "client_link_required": False,
     })
+
+
+async def client_link_consume_handler(request: web.Request) -> web.Response:
+    """Present a server-issued challenge using the original authenticated channel."""
+    import legacy_client_command_bridge as client_commands
+    try:
+        body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"auth_data", "session_token", "token"} or not isinstance(body.get("token"), str):
+            raise ValueError("invalid_client_link_request")
+        proof = client_commands.channel_proof(request.headers, body)
+        await asyncio.to_thread(client_commands.command, "consume", proof, {"token": body["token"]})
+        return _cabinet_response({"linked": True})
+    except ValueError:
+        return _cabinet_response({"error": "verified_client_link_required"}, status=403)
+    except Exception:
+        logger.error("canonical client linking unavailable")
+        return _cabinet_response({"error": "client_link_unavailable"}, status=503)
 
 
 async def consent_status_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/consent/status — какие согласия нужны клиенту?
-    Возвращает: { status: 'pass'|'need_pdn'|'need_marketing', privacy_text, version }
-    """
+    """Canonical read: never create a Client, link, profile or consent fact."""
+    import legacy_client_command_bridge as client_commands
     try:
         body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"auth_data", "session_token"}:
+            raise ValueError("invalid_consent_request")
+        proof = client_commands.channel_proof(request.headers, body)
+        result = await asyncio.to_thread(client_commands.command, "status", proof, {})
+        return _cabinet_response({"status": client_commands.consent_status(result),
+            "privacy_text": _PRIVACY_SHORT, "version": database.CONSENT_VERSION,
+            "client_link_required": result.get("client_link_required", False)})
+    except ValueError:
+        return _cabinet_response({"error": "verified_client_link_required",
+            "message": "Подтвердите привязку клиента к этому каналу."}, status=403)
     except Exception:
-        body = {}
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    try:
-        status = database.consent_gate_status(chat_id)
-    except Exception as e:
-        logger.error(f"consent_status: {e}")
-        return _cabinet_response({"error": "internal"}, status=500)
-    return _cabinet_response({
-        "status": status,            # 'pass' | 'need_pdn' | 'need_marketing'
-        "privacy_text": _PRIVACY_SHORT,
-        "version": database.CONSENT_VERSION,
-    })
+        logger.error("canonical consent status unavailable")
+        return _cabinet_response({"error": "consent_unavailable"}, status=503)
 
 
 async def consent_submit_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/consent/submit — клиент подписывает согласия.
-    Body: { accept_pdn: bool, accept_marketing: bool, auth_data?: ... }
-    Возвращает новый статус (должен стать 'pass').
-    """
+    """A18 initiator: backend independently authenticates the original channel."""
+    import legacy_client_command_bridge as client_commands
     try:
         body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"auth_data", "session_token", "accept_pdn", "accept_marketing", "idempotency_key"}:
+            raise ValueError("invalid_consent_request")
+        if type(body.get("accept_pdn")) is not bool or type(body.get("accept_marketing")) is not bool:
+            raise ValueError("explicit_consent_decisions_required")
+        proof = client_commands.channel_proof(request.headers, body)
+        await asyncio.to_thread(client_commands.command, "consent", proof, {
+            "privacy": body["accept_pdn"], "marketing": body["accept_marketing"],
+            "idempotencyKey": body.get("idempotency_key"),
+        })
+        result = await asyncio.to_thread(client_commands.command, "status", proof, {})
+        return _cabinet_response({"status": client_commands.consent_status(result), "marketing": result.get("marketing", False)})
+    except ValueError:
+        return _cabinet_response({"error": "verified_client_link_required",
+            "message": "Подтвердите привязку клиента и повторите тот же запрос."}, status=403)
     except Exception:
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-    if not isinstance(body, dict):
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-
-    accept_pdn = bool(body.get("accept_pdn"))
-    accept_marketing = bool(body.get("accept_marketing"))
-
-    # ПДн обязателен — без него отказ
-    if not accept_pdn:
-        return _cabinet_response({
-            "error": "pdn_required",
-            "message": "Для общения с ассистентом нужно согласие на обработку персональных данных.",
-        }, status=400)
-
-    try:
-        client_id = database.get_or_create_client(chat_id)
-        # ПДн — записываем (если уже подписано в Telegram, save_consent просто добавит ещё
-        # одну запись с source='app'; журнал согласий по 152-ФЗ хранит всю историю)
-        if not database.has_valid_consent_by_chat_id(chat_id):
-            database.save_consent(client_id, True, source="app")
-        # Маркетинг — явный выбор клиента (Да/Нет)
-        database.set_marketing_consent(client_id, accept_marketing)
-    except Exception as e:
-        logger.error(f"consent_submit chat_id={chat_id}: {e}")
-        return _cabinet_response({"error": "save_failed"}, status=500)
-
-    return _cabinet_response({
-        "status": database.consent_gate_status(chat_id),
-        "marketing": accept_marketing,
-    })
+        logger.error("canonical consent command unavailable; no local fallback")
+        return _cabinet_response({"error": "consent_unavailable",
+            "message": "Не удалось получить результат. Повторите тот же запрос."}, status=503)
 
 
 def _applogin_nonce_ok(n) -> bool:
@@ -6897,171 +4874,38 @@ async def applogin_poll_handler(request: web.Request) -> web.Response:
 
 
 async def notify_prefs_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/cabinet/notify-prefs — персональные настройки уведомлений клиента.
-    Body: { prefs?: {...} }  (+ auth: auth_data / session_token / X-Telegram-InitData)
-    Если prefs передан — частично обновляем; всегда возвращаем актуальный полный набор.
-    """
+    """Verified Client preferences; an empty request is strictly read-only."""
+    from legacy_client_command_bridge import channel_proof
+    from legacy_client_preferences_bridge import command
     try:
         body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"prefs", "expectedGeneration", "idempotencyKey", "auth_data", "session_token"}:
+            raise ValueError("invalid_preference_request")
+        proof = channel_proof(request.headers, body)
+        if "prefs" in body and body["prefs"] != {}:
+            payload = {key: body.get(key) for key in ("prefs", "expectedGeneration", "idempotencyKey")}
+            await asyncio.to_thread(command, "notifications", proof, payload)
+        elif "prefs" in body and not isinstance(body["prefs"], dict):
+            raise ValueError("invalid_preference_patch")
+        result = await asyncio.to_thread(command, "read", proof, {})
+        return _cabinet_response(result)
     except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    try:
-        client_id = database.get_or_create_client(chat_id)
-        patch = body.get("prefs")
-        if isinstance(patch, dict) and patch:
-            prefs = database.set_notify_prefs(client_id, patch)
-        else:
-            prefs = database.get_notify_prefs(client_id)
-    except Exception as e:
-        logger.error(f"notify_prefs chat_id={chat_id}: {e}")
-        return _cabinet_response({"error": "prefs_failed"}, status=500)
-    return _cabinet_response({"prefs": prefs})
+        return _cabinet_response({"error": "preference_request_rejected", "client_link_required": True}, status=409)
+
 
 
 async def cert_create_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/cert/create — покупка подарочного сертификата картой прямо в приложении.
-
-    Body: { amount: 2000|3000|5000, auth_data?: {...} }  (+ заголовок X-Telegram-InitData)
-
-    Создаёт сертификат (pending) и платёж ЮKassa, возвращает confirmation_url —
-    приложение открывает страницу оплаты ЮKassa внутри себя. После успешной оплаты
-    фоновый _poll_payment (внедрён из бота) помечает сертификат paid и присылает
-    PDF покупателю в его Telegram-чат с ботом.
-
-    Получатель по умолчанию — сам покупатель (имя/телефон из БД); полученный PDF
-    он может переслать тому, кому дарит. Реквизиты карты в приложение НЕ вводятся —
-    оплата проходит на стороне ЮKassa.
-    """
-    try:
-        body = await request.json()
-    except Exception:
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-    if not isinstance(body, dict):
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-
-    try:
-        amount = int(body.get("amount") or 0)
-    except (TypeError, ValueError):
-        amount = 0
-    if amount not in _CERT_AMOUNTS:
-        return _cabinet_response({
-            "error": "bad_amount",
-            "message": "Доступны сертификаты на 2 000, 3 000 и 5 000 ₽.",
-        }, status=400)
-
-    # Получатель: либо явно заданный (режим «в подарок»), либо сам покупатель («себе»).
-    # Телефон проверяем тем же валидатором, что и бот; hash_phone берёт последние
-    # 10 цифр, поэтому любой формат (+7 / 8 / без префикса) ищется одинаково.
-    raw_phone = (body.get("recipient_phone") or "").strip()
-    raw_name = (body.get("recipient_name") or "").strip()
-    if raw_phone:
-        if not anonymizer.is_valid_phone(raw_phone):
-            return _cabinet_response({
-                "error": "bad_phone",
-                "message": "Проверьте номер телефона получателя.",
-            }, status=400)
-        recipient_phone = raw_phone
-        recipient_name = raw_name or "Получатель"
-    else:
-        # «Себе» — имя/телефон покупателя из БД (клиент известен по Telegram-id)
-        client = database.get_client(chat_id)
-        recipient_name = (client or {}).get("name") or "Клиент"
-        recipient_phone = (client or {}).get("phone") or ""
-        if not recipient_phone:
-            return _cabinet_response({
-                "error": "no_phone",
-                "message": ("Укажите получателя (имя и телефон) — либо оформите одну запись "
-                            "через @malesthetic_bot, чтобы покупка «себе» заработала. "
-                            "Телефон: 8-962-447-67-47."),
-            }, status=400)
-
-    code = database.new_cert_code(amount)
-    expires_at = (datetime.now() + timedelta(days=365)).isoformat(timespec="seconds")
-    try:
-        database.save_gift_certificate(
-            code=code,
-            amount=amount,
-            recipient_phone=recipient_phone,
-            recipient_name=recipient_name,
-            buyer_chat_id=chat_id,
-            expires_at=expires_at,
-            payment_status="pending",
-        )
-    except Exception as e:
-        logger.error(f"cert_create save chat_id={chat_id} code={code}: {e}")
-        return _cabinet_response({
-            "error": "save_failed",
-            "message": "Не удалось создать сертификат. Попробуйте позже.",
-        }, status=500)
-
-    description = (
-        f"Подарочный сертификат {amount} ₽ — «Мужская Эстетика». "
-        f"Срок действия 12 месяцев."
-    )
-    return_url = "https://t.me/malesthetic_bot"
-
-    try:
-        payment = await yukassa_api.create_payment(
-            amount_rub=amount,
-            description=description,
-            return_url=return_url,
-            metadata={"cert_code": code, "buyer_chat_id": chat_id},
-            customer_phone=recipient_phone,
-            idempotence_key=f"cert-{code}",
-        )
-    except Exception as e:
-        logger.error(f"cert_create payment chat_id={chat_id} code={code}: {e}")
-        return _cabinet_response({
-            "error": "payment_failed",
-            "message": ("Не получилось создать оплату. Попробуйте позже или "
-                        "позвоните 8-962-447-67-47."),
-        }, status=502)
-
-    try:
-        database.set_cert_payment_id(code, payment["id"])
-    except Exception as e:
-        logger.error(f"cert_create set_payment_id code={code}: {e}")
-
-    # Фоновый опрос статуса + выдача PDF покупателю в Telegram — переиспользуем
-    # протестированную _poll_payment бота (внедрена через register_payment_poller).
-    if _poll_payment_fn is not None:
-        try:
-            asyncio.create_task(_poll_payment_fn(request.app["bot_app"], code, payment["id"]))
-        except Exception as e:
-            logger.error(f"cert_create poll start code={code}: {e}")
-    else:
-        logger.error(f"cert_create: _poll_payment_fn не внедрён — PDF для {code} не уйдёт автоматически")
-
+    """Retired P4-06 writer; canonical purchase/activation owns certificate value."""
+    logger.warning("p4_06_legacy_mutation_disabled:initiate_gift_certificate_purchase")
     return _cabinet_response({
-        "ok": True,
-        "code": code,
-        "amount": amount,
-        "confirmation_url": payment.get("confirmation_url"),
-    })
+        "error": "canonical_gift_certificate_ingress_required",
+        "message": "Покупка сертификата временно недоступна. Попробуйте позже.",
+    }, status=503)
+
 
 
 async def sub_create_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/sub/create — покупка абонемента картой прямо в приложении.
-
-    Body: { plan: 'haircut'|'complex'|'beard', tier: 'senior'|'top', auth_data?: {...} }
-
-    Создаёт pending-подписку и платёж ЮKassa, возвращает confirmation_url
-    (страница оплаты открывается внутри приложения). После оплаты фоновый поллер
-    (внедрён из бота) активирует абонемент и уведомляет покупателя в Telegram.
-    Абонемент личный — получателя не спрашиваем; телефон для чека 54-ФЗ берём из БД.
-    """
+    """Verified Client initiator for canonical P4-05 subscription checkout."""
     try:
         body = await request.json()
     except Exception:
@@ -7069,223 +4913,118 @@ async def sub_create_handler(request: web.Request) -> web.Response:
     if not isinstance(body, dict):
         return _cabinet_response({"error": "invalid_json"}, status=400)
 
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-
-    plan_code = (body.get("plan") or "").strip()
-    tier = (body.get("tier") or "").strip()
-    plan = subscriptions.get_plan(plan_code)
-    if not plan or tier not in ("senior", "top"):
+    plan_code = str(body.get("plan") or "").strip().lower()
+    tier = str(body.get("tier") or "").strip().lower()
+    if plan_code not in ("haircut", "complex", "beard") or tier not in ("senior", "top"):
         return _cabinet_response({
             "error": "bad_plan",
             "message": "Тариф не найден. Обновите приложение и попробуйте снова.",
         }, status=400)
 
-    # Телефон обязателен для чека 54-ФЗ — берём из БД (появляется после первой записи)
-    client_id = database.get_or_create_client(chat_id)
-    client_row = database.get_client(chat_id)
-    customer_phone = (client_row or {}).get("phone")
-    if not customer_phone:
-        return _cabinet_response({
-            "error": "no_phone",
-            "message": ("Чтобы оформить абонемент, нужен ваш телефон для чека. Оформите одну "
-                        "запись через @malesthetic_bot (я попрошу телефон) — после этого покупка "
-                        "в приложении заработает. Или позвоните: 8-962-447-67-47."),
-        }, status=400)
-
-    # Не плодим вторую активную подписку (как в боте)
-    active = database.get_active_subscription_for_client(client_id)
-    if active:
-        try:
-            days_left = (datetime.fromisoformat(active["expires_at"]).date() - datetime.now().date()).days
-        except Exception:
-            days_left = 999
-        if days_left > subscriptions.RENEW_PUSH_DAYS_BEFORE:
-            try:
-                expires = datetime.fromisoformat(active["expires_at"]).strftime("%d.%m")
-            except Exception:
-                expires = "—"
-            return _cabinet_response({
-                "error": "already_active",
-                "message": (f"У вас уже активный абонемент до {expires}. Новый можно будет купить, "
-                            f"когда останется ≤ {subscriptions.RENEW_PUSH_DAYS_BEFORE} дней."),
-            }, status=400)
-
-    price = subscriptions.get_plan_price(plan, tier)
-    tier_label = subscriptions.TIER_LABELS.get(tier, "")
-    started_at = datetime.now().isoformat(timespec="seconds")
-    expires_at = (datetime.now() + timedelta(days=subscriptions.SUBSCRIPTION_DURATION_DAYS)).isoformat(timespec="seconds")
-
     try:
-        sub_id = database.create_subscription(
-            client_id=client_id, plan_code=plan_code, tier=tier,
-            price_rub=price, visits_included=plan["visits_per_month"],
-            started_at=started_at, expires_at=expires_at,
+        import legacy_client_command_bridge as client_commands
+        import maya_subscription_purchase_bridge as purchase_bridge
+
+        proof = client_commands.channel_proof(request.headers, body)
+        explicit_intent = str(body.get("idempotency_key") or "").strip()
+        if explicit_intent:
+            if not re.fullmatch(r"[A-Za-z0-9._:-]{8,180}", explicit_intent):
+                return _cabinet_response({"error": "invalid_idempotency_key"}, status=400)
+            purchase_intent_ref = explicit_intent
+        else:
+            purchase_intent_ref = "pwa-sub:" + hashlib.sha256(
+                f"{proof}|{plan_code}.{tier}".encode("utf-8")
+            ).hexdigest()
+        result = await asyncio.to_thread(
+            purchase_bridge.initiate_purchase,
+            channel_proof=proof,
+            purchase_intent_ref=purchase_intent_ref,
+            offer_code=f"{plan_code}.{tier}",
         )
-    except Exception as e:
-        logger.error(f"sub_create save chat_id={chat_id} plan={plan_code}: {e}")
+    except ValueError as exc:
+        code = str(exc)
+        status = 401 if code == "verified_channel_required" else 403
         return _cabinet_response({
-            "error": "save_failed",
-            "message": "Не удалось создать абонемент. Попробуйте позже.",
-        }, status=500)
-
-    description = (
-        f"Абонемент «{plan['title']} ({tier_label})» — «Мужская Эстетика». "
-        f"{plan['visits_per_month']} визита: {', '.join(plan['services_included'])}. "
-        f"Срок действия 30 дней."
-    )
-    return_url = "https://t.me/malesthetic_bot"
-
-    try:
-        payment = await yukassa_api.create_payment(
-            amount_rub=price,
-            description=description,
-            return_url=return_url,
-            metadata={"subscription_id": sub_id, "plan_code": plan_code, "tier": tier},
-            customer_phone=customer_phone,
-            idempotence_key=f"sub-{sub_id}",
-        )
-    except Exception as e:
-        logger.error(f"sub_create payment chat_id={chat_id} sub={sub_id}: {e}")
-        try:
-            database.update_subscription_status(sub_id, "refunded")
-        except Exception:
-            pass
+            "error": "verified_client_required",
+            "message": "Сначала подтвердите связь профиля с клиентом.",
+        }, status=status)
+    except Exception as exc:
+        logger.error("canonical subscription purchase unavailable: %s", type(exc).__name__)
         return _cabinet_response({
-            "error": "payment_failed",
-            "message": ("Не получилось создать оплату. Попробуйте позже или "
-                        "позвоните 8-962-447-67-47."),
-        }, status=502)
-
-    try:
-        database.set_subscription_payment_id(sub_id, payment["id"])
-    except Exception as e:
-        logger.error(f"sub_create set_payment_id sub={sub_id}: {e}")
-
-    # Фоновый опрос статуса + активация + уведомление в Telegram — переиспользуем
-    # протестированный _poll_subscription_payment бота (внедрён при старте).
-    if _poll_sub_payment_fn is not None:
-        try:
-            asyncio.create_task(_poll_sub_payment_fn(request.app["bot_app"], sub_id, payment["id"]))
-        except Exception as e:
-            logger.error(f"sub_create poll start sub={sub_id}: {e}")
-    else:
-        logger.error(f"sub_create: _poll_sub_payment_fn не внедрён — sub#{sub_id} не активируется автоматически")
+            "error": "canonical_subscription_unavailable",
+            "message": "Покупка абонемента временно недоступна. Попробуйте позже.",
+        }, status=503)
 
     return _cabinet_response({
         "ok": True,
-        "subscription_id": sub_id,
-        "plan": plan_code,
-        "tier": tier,
-        "amount": price,
-        "confirmation_url": payment.get("confirmation_url"),
+        "action_execution_id": result.get("actionExecutionId"),
+        "plan": result.get("plan"),
+        "tier": result.get("tier"),
+        "amount_kopecks": result.get("amount"),
+        "currency": result.get("currency"),
+        "confirmation_url": result.get("confirmation_url"),
+        "provider_state": result.get("providerState"),
     })
 
 
-def _finalize_booking_for_chat(chat_id: int, cr: dict) -> str | None:
+def _finalize_booking_for_chat(command_context, cr: dict) -> str | None:
+    """B19: verified Client initiator -> canonical create_appointment only.
+
+    Chat never resolves a Client from raw chat_id/phone, writes the retired
+    SQLite booking cache, or enters a Package 4 loyalty mutation. The durable
+    ActionExecution owns retry/UNKNOWN/reconciliation and is the only source of
+    the booking result used by this response projection.
     """
-    Оформляет запись для авторизованного клиента приложения. Имя/телефон берём из
-    БД (клиент известен по Telegram-id), создаём запись в YClients и сохраняем —
-    как делает бот в _finalize_booking, но без Telegram-UI (контакт уже есть).
-    Возвращает текст-подтверждение, либо None (тогда оставим исходный текст ИИ).
-    """
+    import legacy_client_command_bridge as client_commands
+
+    if command_context is None:
+        return ("Чтобы оформить запись, подтвердите связь этого канала с вашей "
+                "клиентской карточкой. Я ничего не создала и не изменила.")
     try:
-        client = database.get_client(chat_id)
-        name = (client or {}).get("name") or "Клиент"
-        phone = (client or {}).get("phone") or ""
-        if not phone:
-            return ("Почти готово! Для записи нужен ваш номер телефона. Оформите эту запись "
-                    "один раз через @malesthetic_bot (я попрошу телефон) — дальше всё будет "
-                    "автоматически. Или позвоните: 8-962-447-67-47.")
-        loyalty_quote = None
-        requested_points = list(cr.get("pay_with_points") or [])
-        if requested_points and client and client.get("id"):
-            try:
-                import loyalty as _loy
-
-                _loy.lazy_backfill_for_client(int(client["id"]), phone)
-                balance = int(database.loyalty_balance(int(client["id"])))
-                in_order = {
-                    _loy._normalize_service_title(title)
-                    for title in (cr.get("service_names") or [])
-                }
-                candidates = [
-                    care for care in _loy.current_care_services()
-                    if _loy._normalize_service_title(care.get("title")) in in_order
-                    and _loy._normalize_service_title(care.get("title")) in {
-                        _loy._normalize_service_title(title) for title in requested_points
-                    }
-                    and int(care.get("price") or 0) <= balance
-                ]
-                if candidates:
-                    loyalty_quote = max(candidates, key=lambda care: int(care["price"]))
-            except Exception as exc:
-                logger.error("chat loyalty validation client_id=%s: %s", client.get("id"), exc)
-        # YClients SMS/WhatsApp-напоминание — по персональной настройке клиента:
-        # выключил напоминание → notify_by_sms=0 (YClients молчит); иначе за reminder_hours.
-        try:
-            _np = database.get_notify_prefs_by_chat_id(chat_id)
-            _nbs = int(_np.get("reminder_hours") or 0) if _np.get("reminder") else 0
-        except Exception:
-            _nbs = 3
-        result = _yc.create_booking(
-            staff_id=cr["staff_id"],
-            service_ids=cr["service_ids"],
-            datetime_str=cr["datetime_str"],
-            client_name=name,
-            client_phone=phone,
-            notify_by_sms=_nbs,
-        )
-        if not result.get("success"):
-            logger.error(
-                "chat booking failed chat_id=%s code=%s status=%s error=%s",
-                chat_id,
-                result.get("code"),
-                result.get("http_status"),
-                result.get("error"),
-            )
-            return _booking_failure_reply(result)
-        try:
-            if client and client.get("id"):
-                database.save_booking(
-                    client["id"],
-                    service=", ".join(cr["service_names"]),
-                    master=cr["staff_name"],
-                    datetime_str=cr["datetime_str"],
-                    yclients_record_id=result.get("record_id"),
-                )
-        except Exception as e:
-            logger.error(f"chat save_booking chat_id={chat_id}: {e}")
-        redemption = None
-        record_id = result.get("record_id")
-        if loyalty_quote and record_id and client and client.get("id"):
-            try:
-                import loyalty as _loy
-
-                redemption = _loy.apply_redemption_for_booking(
-                    client_id=int(client["id"]),
-                    record_id=int(record_id),
-                    service_titles=[loyalty_quote["title"]],
-                    service_quotes=[loyalty_quote],
-                )
-            except Exception as exc:
-                logger.error("chat loyalty redemption record_id=%s: %s", record_id, exc)
-        dt = str(cr["datetime_str"]).replace("T", " ")[:16]
-        reply = ("Готово, записала вас! ✅\n\n"
-                 "✂️ " + ", ".join(cr["service_names"]) + "\n"
-                 "💈 " + cr["staff_name"] + "\n"
-                 "📅 " + dt)
-        if redemption and int(redemption.get("total_points") or 0) > 0:
-            reply += (
-                f"\n🪙 {int(redemption['total_points'])} баллов списано за "
-                f"{loyalty_quote['title']}. Осталось "
-                f"{int(redemption.get('remaining') or 0)} баллов."
-            )
-        return reply + "\n\nЖдём вас в «Мужской Эстетике»! 💈"
-    except Exception as e:
-        logger.error(f"_finalize_booking_for_chat chat_id={chat_id}: {e}")
-        return None
+        staff_id = str(cr["staff_id"])
+        service_ids = [str(value) for value in cr["service_ids"]]
+        start = str(cr["datetime_str"])
+        if not command_context.confirmation_id:
+            return ("Подтвердите запись отдельным действием:\n\n"
+                    "✂️ " + ", ".join(cr["service_names"]) + "\n"
+                    "💈 " + cr["staff_name"] + "\n"
+                    "📅 " + start + "\n\nНажмите «Подтверждаю запись».")
+        result = client_commands.command("chat-appointment-create", command_context.proof, {
+            "confirmationId": command_context.confirmation_id,
+            "staffId": staff_id,
+            "serviceIds": service_ids,
+            "start": start,
+        })
+        execution = result.get("execution") if isinstance(result, dict) else None
+        if not isinstance(execution, dict):
+            raise RuntimeError("canonical_booking_result_missing")
+        state = str(execution.get("state") or "").upper()
+        if state == "UNKNOWN":
+            return ("Результат записи уточняется. Не повторяйте действие — MAYA "
+                    "сверит результат с системой записи.")
+        if state in {"READY", "EXECUTING", "PENDING_APPROVAL"}:
+            return "Запись принята в обработку. Не отправляйте её повторно."
+        if state != "SUCCEEDED":
+            return str(result.get("safe_explanation") or "Запись не выполнена.")
+        dt = start.replace("T", " ")[:16]
+        return ("Готово, записала вас! ✅\n\n"
+                "✂️ " + ", ".join(cr["service_names"]) + "\n"
+                "💈 " + cr["staff_name"] + "\n"
+                "📅 " + dt + "\n\nЖдём вас в «Мужской Эстетике»! 💈")
+    except ValueError as exc:
+        if str(exc) == "IDEMPOTENCY_CONFLICT":
+            return "Это подтверждение уже связано с другими параметрами записи. Новая запись не создана."
+        return ("Чтобы оформить запись, нужна подтверждённая связь с клиентской "
+                "карточкой. Я ничего не создала и не изменила.")
+    except RuntimeError as exc:
+        if str(exc) == "client_command_outcome_unknown":
+            return ("Результат записи уточняется. Не повторяйте действие — MAYA "
+                    "сверит результат с системой записи.")
+        logger.error("B19 canonical chat booking unavailable: RuntimeError")
+        return "Не удалось безопасно оформить запись. Попробуйте позже."
+    except Exception as exc:
+        logger.error("B19 canonical chat booking unavailable: %s", type(exc).__name__)
+        return "Не удалось безопасно оформить запись. Ничего не создано; попробуйте позже."
 
 
 async def chat_options_handler(request: web.Request) -> web.Response:
@@ -7307,7 +5046,7 @@ def _master_chat_shortcut(chat_id: int, message: str) -> str | None:
     text = (message or "").lower()
     master = None
     try:
-        master = database.get_master_by_chat_id(int(chat_id))
+        master = canonical_staff_access.master_projection(int(chat_id))
     except Exception:
         master = None
     master_name = info.get("master_name") or (master or {}).get("full_name") or "мастер"
@@ -8116,67 +5855,10 @@ def _founder_rule_command(message: str) -> tuple[str, str | int | None] | None:
     return None
 
 
-def _founder_learning_reply(chat_id: int, message: str, mode: str = "staff") -> str | None:
-    """Founder-only procedural memory available without an LLM round-trip."""
-    command = _founder_rule_command(message)
-    if not command:
-        return None
-    try:
-        info = _panel_resolve_role(int(chat_id))
-    except Exception:
-        info = {}
-    if not info.get("is_founder"):
-        logger.warning("Founder memory command denied for chat_id=%s", chat_id)
-        return "Постоянные правила MAYA может менять только основатель."
-    if str(mode or "").strip().lower() != "staff":
-        return "Чтобы изменить постоянные правила MAYA, откройте рабочий чат."
+def _founder_learning_reply(chat_id: int, message: str, mode: str = 'staff') -> str | None:
+    from canonical_governed_settings import owner_command_reply
+    return owner_command_reply('rules', _founder_rule_command(message)) if mode == 'staff' else None
 
-    action, value = command
-    if action == "usage":
-        return "Напишите правило полностью: «Майя, запомни правило: …»."
-    if action == "list":
-        rules = database.list_salon_rules(active_only=True, limit=40)
-        if not rules:
-            return "Постоянных правил пока нет."
-        lines = [f"{row['id']}. {row['rule_text']}" for row in rules]
-        return "Постоянные правила MAYA:\n" + "\n".join(lines)
-    if action == "delete":
-        deleted = database.deactivate_salon_rule(int(value))
-        if deleted:
-            return f"Удалила правило [{int(value)}]. Со следующего сообщения оно не действует."
-        return f"Действующего правила [{int(value)}] нет."
-
-    rule = str(value or "").strip()
-    if len(rule) < 8:
-        return "Правило слишком короткое. Уточните, что именно MAYA должна делать."
-    if len(rule) > 500:
-        return "Правило длиннее 500 символов. Сформулируйте его короче и конкретнее."
-    redacted = anonymizer.redact_pii(rule)
-    if redacted != rule:
-        return "Не сохранила правило: постоянная память не должна содержать персональные данные."
-    if _FOUNDER_RULE_UNSAFE_RE.search(rule):
-        return "Не сохранила правило: оно пытается отменить серверные ограничения безопасности."
-    if _FOUNDER_RULE_PERMISSION_RE.search(rule):
-        return (
-            "Не сохранила правило: разрешения меняются только прямой "
-            "командой из безопасного каталога. Например: «Майя, разреши всем "
-            "клиентам видеть свою историю посещений»."
-        )
-
-    rules = database.list_salon_rules(active_only=True, limit=100)
-    normalized = re.sub(r"\s+", " ", rule).strip().lower().replace("ё", "е")
-    for row in rules:
-        current = re.sub(r"\s+", " ", str(row.get("rule_text") or "")).strip().lower().replace("ё", "е")
-        if current == normalized:
-            return f"Это правило уже сохранено под номером [{row['id']}]."
-    if len(rules) >= 40:
-        return "Активных правил уже 40. Сначала удалите ненужное командой «Майя, удали правило N»."
-
-    rule_id = database.add_salon_rule(rule, created_by=int(chat_id))
-    return (
-        f"Запомнила правило [{rule_id}]: {rule}\n"
-        "Оно начнёт действовать со следующего сообщения во всех чатах MAYA."
-    )
 
 
 def _founder_permission_command(message: str) -> tuple[str, bool | None] | None:
@@ -8215,50 +5897,10 @@ def _founder_permission_command(message: str) -> tuple[str, bool | None] | None:
     return None
 
 
-def _founder_permission_reply(
-    chat_id: int,
-    message: str,
-    mode: str = "staff",
-) -> str | None:
-    command = _founder_permission_command(message)
-    if not command:
-        return None
-    try:
-        info = _panel_resolve_role(int(chat_id))
-    except Exception:
-        info = {}
-    if not info.get("is_founder"):
-        logger.warning("Founder capability command denied for chat_id=%s", chat_id)
-        return "Глобальные разрешения MAYA может менять только основатель."
-    if str(mode or "").strip().lower() != "staff":
-        return "Чтобы изменить разрешения MAYA, откройте рабочий чат."
+def _founder_permission_reply(chat_id: int, message: str, mode: str = 'staff') -> str | None:
+    from canonical_governed_settings import owner_command_reply
+    return owner_command_reply('capability', _founder_permission_command(message)) if mode == 'staff' else None
 
-    capability, enabled = command
-    if capability == "list":
-        rows = maya_capabilities.list_capabilities()
-        lines = ["Разрешения MAYA для клиентов:"]
-        for row in rows:
-            status = "включено" if row["enabled"] else "отключено"
-            lines.append(f"• {row['label']}: {status}")
-        return "\n".join(lines)
-
-    try:
-        result = maya_capabilities.set_enabled(
-            capability,
-            bool(enabled),
-            actor_id=int(chat_id),
-        )
-    except (KeyError, PermissionError):
-        return "Такого безопасного разрешения нет в каталоге MAYA."
-    if result["enabled"]:
-        return (
-            "Разрешила всем авторизованным клиентам видеть в чате только свою "
-            "историю посещений. Доступ к чужим карточкам остаётся закрыт."
-        )
-    return (
-        "Отключила клиентам просмотр истории посещений через чат. "
-        "Данные в YClients не изменены."
-    )
 
 
 _OWN_VISIT_HISTORY_RE = re.compile(
@@ -8900,6 +6542,8 @@ async def knowledge_image_handler(request: web.Request) -> web.Response:
 
 
 def _resolve_chat_tg_user(request: web.Request, body: dict) -> dict | None:
+    if _chat_request_mode(body) == "staff":
+        return canonical_staff_access.panel_user()
     """Resolve the app chat identity from Telegram initData, widget auth, or web session."""
     init_data = request.headers.get("X-Telegram-InitData", "")
     tg_user = _verify_telegram_init_data(init_data, TELEGRAM_TOKEN) if init_data else None
@@ -9101,121 +6745,19 @@ def _store_assistant_message_in_chat(
 
 
 def _ensure_client_loyalty_chat_offer(chat_id: int) -> bool:
-    """Invite a client into the slot-aware loyalty booking flow once per balance."""
-    try:
-        client = database.get_client(int(chat_id))
-    except Exception:
-        client = None
-    if not isinstance(client, dict):
-        return False
-    client_id = int(client.get("id") or 0)
-    phone = str(client.get("phone") or "").strip()
-    if not client_id or len("".join(ch for ch in phone if ch.isdigit())) < 10:
-        return False
-    try:
-        import loyalty as _loy
-
-        _loy.lazy_backfill_for_client(client_id, phone)
-        balance = int(database.loyalty_balance(client_id))
-        spend = _loy.loyalty_spend_summary(balance)
-    except Exception as exc:
-        logger.error("client loyalty offer lookup %s: %s", client_id, exc)
-        return False
-    affordable = list(spend.get("affordable_services") or [])
-    if balance <= 0 or not affordable:
-        return False
-    text = (
-        f"У вас {balance} баллов — ими уже можно оплатить дополнительный уход. "
-        "Выберите мастера, услугу и время: я проверю оставшееся окно и предложу "
-        "только тот уход, который мастер действительно успеет сделать."
-    )
-    signature = "|".join(
-        f'{item.get("id") or item.get("title")}:{item.get("price")}'
-        for item in affordable
-    )
-    return _store_assistant_message_in_chat(
-        int(chat_id),
-        text,
-        mode="client",
-        action={
-            "type": "open_booking",
-            "label": "Подобрать по времени",
-            "screen": "book",
-        },
-        widget="book",
-        dedupe_key=f"loyalty-spend:{client_id}:{balance}:{signature}"[:160],
-    )
+    """Retired B15 hook: a history read cannot create loyalty communication."""
+    _ = chat_id
+    return False
 
 
 def _ensure_client_repeat_booking_offer(chat_id: int) -> bool:
-    """Offer one-click repeat booking from confirmed visit history."""
-    try:
-        client = database.get_client(int(chat_id))
-    except Exception:
-        client = None
-    if not isinstance(client, dict):
-        return False
-    client_id = int(client.get("id") or 0)
-    phone = str(client.get("phone") or "").strip()
-    if not client_id or len("".join(ch for ch in phone if ch.isdigit())) < 10:
-        return False
-    try:
-        usual = memory.get_usual_booking(int(chat_id), warm=True)
-    except Exception as exc:
-        logger.error("client repeat offer lookup %s: %s", client_id, exc)
-        return False
-    if not isinstance(usual, dict) or usual.get("source") != "yclients_history":
-        return False
-    widget_data = _repeat_booking_widget_data(usual)
-    if not widget_data:
-        return False
-
-    signature = "|".join([
-        str(usual.get("visit_date") or "")[:19],
-        str(usual.get("master_id") or usual.get("master_name") or ""),
-        ",".join(widget_data.get("service_ids") or widget_data.get("service_names") or []),
-    ])
-    dedupe_key = f"repeat-booking:{client_id}:{signature}"[:160]
-    if _chat_has_assistant_dedupe_key(int(chat_id), "client", dedupe_key):
-        return False
-
-    # Do not push a new repeat offer while the client already has an active visit.
-    try:
-        today = date.today().isoformat()
-        for booking in _yc.get_client_bookings(phone, days_back=1, days_ahead=90) or []:
-            if not isinstance(booking, dict) or booking.get("error") or booking.get("message"):
-                continue
-            visit_day = str(booking.get("datetime") or booking.get("date") or "")[:10]
-            attendance = booking.get("attendance", booking.get("status"))
-            try:
-                attendance = int(attendance)
-            except (TypeError, ValueError):
-                attendance = 0
-            if visit_day >= today and attendance not in (-1, 1):
-                return False
-    except Exception as exc:
-        # The attended-history result is still authoritative. A temporary CRM
-        # error must not make MAYA invent data, but it need not disable repeat.
-        logger.warning("client repeat upcoming lookup %s: %s", client_id, exc)
-
-    service_text = str(usual.get("service_text") or "").strip()
-    text = (
-        f"Вам как в прошлый раз: к {usual['master_name']}"
-        f"{f' на {service_text}' if service_text else ''}?"
-    )
-    return _store_assistant_message_in_chat(
-        int(chat_id),
-        text,
-        mode="client",
-        action={
-            "type": "repeat_booking",
-            "label": "Да, как в прошлый раз",
-        },
-        dedupe_key=dedupe_key,
-    )
+    """Retired B15 hook: a history read cannot create repeat communication."""
+    _ = chat_id
+    return False
 
 
 _TELEGRAM_CHAT_MIRROR_BOT_IDS: set[int] = set()
+_COMMUNICATION_SHADOW_TASKS: set[asyncio.Task] = set()
 
 
 def _telegram_chat_mirror_dedupe_key(chat_id: int, text: str) -> str:
@@ -9240,12 +6782,12 @@ def _chat_has_assistant_dedupe_key(chat_id: int, mode: str, dedupe_key: str) -> 
 
 def _is_staff_chat_recipient(chat_id: int) -> bool:
     try:
-        if database.get_master_by_chat_id(int(chat_id)):
+        if canonical_staff_access.master_projection(int(chat_id)):
             return True
     except Exception:
         pass
     try:
-        return bool(database.is_admin(int(chat_id)))
+        return bool(canonical_staff_access.is_admin(int(chat_id)))
     except Exception:
         return False
 
@@ -9271,6 +6813,21 @@ def install_staff_telegram_chat_mirror(bot) -> bool:
                 chat_id = kwargs.get("chat_id", args[0] if args else None)
                 text = kwargs.get("text", args[1] if len(args) > 1 else "")
                 chat_id = int(chat_id)
+                message_id = getattr(sent_message, "message_id", None)
+                if text and message_id is not None:
+                    import maya_inbox_bridge
+
+                    shadow_task = asyncio.create_task(
+                        maya_inbox_bridge.observe_legacy_telegram_send(
+                            telegram_chat_id=chat_id,
+                            message_id=message_id,
+                            body_text=str(text),
+                        )
+                    )
+                    _COMMUNICATION_SHADOW_TASKS.add(shadow_task)
+                    shadow_task.add_done_callback(
+                        _COMMUNICATION_SHADOW_TASKS.discard
+                    )
                 if text and _is_staff_chat_recipient(chat_id):
                     _store_assistant_message_in_chat(
                         chat_id,
@@ -9289,8 +6846,8 @@ def install_staff_telegram_chat_mirror(bot) -> bool:
 
 
 async def chat_history_handler(request: web.Request) -> web.Response:
-    """POST /api/chat/history — return the saved MAYA chat history for the logged-in user."""
-    from memory import load_conversations, save_conversations
+    """B15 read-only projection: verified channel history without side effects."""
+    from memory import load_conversations
 
     try:
         body = await request.json()
@@ -9311,127 +6868,47 @@ async def chat_history_handler(request: web.Request) -> web.Response:
         return _cabinet_response({"error": "no_user_id"}, status=400)
     chat_id = int(chat_id)
 
-    if not database.has_valid_consent_by_chat_id(chat_id):
-        return _cabinet_response({
-            "error": "needs_consent",
-            "message": ("Чтобы общаться с ассистентом, подпишите согласие на обработку "
-                        "персональных данных: откройте @malesthetic_bot и нажмите /start."),
-        }, status=403)
-
     chat_mode = _chat_effective_mode(body, chat_id)
-    history_key = _chat_history_key(chat_id, chat_mode)
     if chat_mode == "client":
-        await asyncio.to_thread(_ensure_client_loyalty_chat_offer, chat_id)
-        await asyncio.to_thread(_ensure_client_repeat_booking_offer, chat_id)
+        import legacy_client_command_bridge as client_commands
+
+        try:
+            proof = client_commands.channel_proof(request.headers, body)
+            status = await asyncio.to_thread(
+                client_commands.command, "status", proof, {}
+            )
+        except ValueError:
+            return _cabinet_response(
+                {"error": "verified_client_link_required"}, status=403
+            )
+        except Exception:
+            logger.error("canonical chat history identity unavailable")
+            return _cabinet_response({"error": "chat_history_unavailable"}, status=503)
+        if status.get("client_link_required") or not status.get("linked"):
+            return _cabinet_response(
+                {"error": "verified_client_link_required"}, status=403
+            )
+        if not status.get("privacy"):
+            return _cabinet_response({
+                "error": "needs_consent",
+                "message": ("Чтобы общаться с ассистентом, подпишите согласие на обработку "
+                            "персональных данных: откройте @malesthetic_bot и нажмите /start."),
+            }, status=403)
+
+    # p5_b15_chat_history_read_only: authenticated channel selects a legacy
+    # presentation key only after canonical Client authority has been verified.
+    history_key = _chat_history_key(chat_id, chat_mode)
     conversations = load_conversations()
-    full_history, migrated = _ensure_chat_history_ids(
-        list(conversations.get(history_key) or [])
-    )
-    if migrated:
-        conversations[history_key] = full_history
-        save_conversations(conversations)
+    full_history = list(conversations.get(history_key) or [])
     messages = _chat_history_payload(full_history)
 
     return _cabinet_response({"messages": messages})
 
 
 async def chat_delete_handler(request: web.Request) -> web.Response:
-    """POST /api/chat/delete — delete one MAYA message or clear the whole chat history."""
-    from memory import load_conversations, save_conversations
-
-    try:
-        body = await request.json()
-    except Exception:
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-    if not isinstance(body, dict):
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-
-    tg_user = _resolve_chat_tg_user(request, body)
-    if not tg_user:
-        return _cabinet_response(
-            {"error": "unauthorized", "message": "Войдите через Telegram, ВКонтакте или по номеру."},
-            status=401,
-        )
-
-    chat_id = tg_user.get("id")
-    if not chat_id:
-        return _cabinet_response({"error": "no_user_id"}, status=400)
-    chat_id = int(chat_id)
-
-    chat_mode = _chat_effective_mode(body, chat_id)
-    history_key = _chat_history_key(chat_id, chat_mode)
-    conversations = load_conversations()
-    history = list(conversations.get(history_key) or [])
-    history, _ = _ensure_chat_history_ids(history)
-    delete_mode = str(body.get("delete_mode") or body.get("delete") or "").strip().lower()
-    if not delete_mode:
-        legacy_mode = str(body.get("mode") or "").strip().lower()
-        if legacy_mode in ("all", "clear", "reset", "one"):
-            delete_mode = legacy_mode
-
-    if delete_mode in ("all", "clear", "reset"):
-        conversations.pop(history_key, None)
-        save_conversations(conversations)
-        return _cabinet_response({"ok": True, "deleted": "all", "messages": []})
-
-    deleted = False
-    deleted_id = None
-    want_role = str(body.get("role") or "").strip().lower()
-    if want_role == "bot":
-        want_role = "assistant"
-    want_text = _plain_maya_text(str(body.get("text") or ""))
-    raw_id = body.get("message_id", body.get("id"))
-    server_id = str(raw_id or "").strip()
-    if _is_chat_message_id(server_id):
-        for idx, item in enumerate(history):
-            if isinstance(item, dict) and item.get("id") == server_id:
-                deleted_id = server_id
-                del history[idx]
-                deleted = True
-                break
-    else:
-        try:
-            legacy_index = int(raw_id)
-        except Exception:
-            legacy_index = None
-        if legacy_index is not None and 0 <= legacy_index < len(history):
-            item = history[legacy_index]
-            role_matches = not want_role or (
-                isinstance(item, dict) and item.get("role") == want_role
-            )
-            text_matches = not want_text or (
-                isinstance(item, dict)
-                and _plain_maya_text(_history_text(item)) == want_text
-            )
-            if role_matches and text_matches:
-                deleted_id = item.get("id") if isinstance(item, dict) else None
-                del history[legacy_index]
-                deleted = True
-
-    if not deleted:
-        if want_role in ("user", "assistant") and want_text:
-            for idx in range(len(history) - 1, -1, -1):
-                item = history[idx]
-                if not isinstance(item, dict) or item.get("role") != want_role:
-                    continue
-                if _plain_maya_text(_history_text(item)) == want_text:
-                    deleted_id = item.get("id")
-                    del history[idx]
-                    deleted = True
-                    break
-
-    if history:
-        conversations[history_key] = history
-    else:
-        conversations.pop(history_key, None)
-    save_conversations(conversations)
-    messages = _chat_history_payload(conversations.get(history_key) or [])
-    return _cabinet_response({
-        "ok": True,
-        "deleted": bool(deleted),
-        "deleted_id": deleted_id,
-        "messages": messages,
-    })
+    """B23: server history erasure awaits an approved conversation lifecycle."""
+    # p5_b23_server_history_delete_retired: identical outcome without reading input/state.
+    return _cabinet_response({"ok": False, "error": "FEATURE_NOT_AVAILABLE"}, status=410)
 
 
 async def chat_handler(request: web.Request) -> web.Response:
@@ -9469,6 +6946,8 @@ async def chat_handler(request: web.Request) -> web.Response:
             tg_user = session_tg_user(web_auth.resolve_session(body.get("session_token")))
         except Exception:
             pass
+    if chat_mode == "staff":
+        tg_user = canonical_staff_access.panel_user()
     if not tg_user:
         return _cabinet_response(
             {"error": "unauthorized", "message": "Войдите через Telegram, ВКонтакте или по номеру."},
@@ -9830,8 +7309,18 @@ async def chat_handler(request: web.Request) -> web.Response:
         from claude_ai import _resolve_role
         _vmodel = None if _resolve_role(chat_id) == "founder" else VOICE_CLAUDE_MODEL
     try:
+        from legacy_client_habits_bridge import request_context
+        _client_command_context=request_context(
+            request.headers, body, safe_message, chat_mode
+        )
+        if _client_command_context and _client_command_context.confirmation_id:
+            llm_history = [
+                {"role": "assistant", "content": anonymizer.redact_pii(body["booking_confirmation"]["sourceContext"])},
+                {"role": "user", "content": safe_message},
+            ]
         response_text, contact_request, gift_cert_action = get_ai_response(
             llm_history,
+            _client_command_context=_client_command_context,
             user_id=chat_id,
             model=_vmodel,
             disabled_tools=_chat_disabled_tools(chat_mode),
@@ -9862,7 +7351,9 @@ async def chat_handler(request: web.Request) -> web.Response:
             response_text = STAFF_BOOKING_SCOPE_REPLY
             contact_request = None
         else:
-            booking_msg = _finalize_booking_for_chat(chat_id, contact_request)
+            booking_msg = _finalize_booking_for_chat(
+                _client_command_context, contact_request
+            )
             if booking_msg:
                 response_text = booking_msg
 
@@ -10043,6 +7534,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
             tg_user = session_tg_user(web_auth.resolve_session(body.get("session_token")))
         except Exception:
             pass
+    if chat_mode == "staff":
+        tg_user = canonical_staff_access.panel_user()
     if not tg_user:
         return _cabinet_response(
             {"error": "unauthorized", "message": "Войдите через Telegram, ВКонтакте или по номеру."},
@@ -10415,10 +7908,21 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
     queue: asyncio.Queue = asyncio.Queue()
     SENTINEL = object()
 
+    from legacy_client_habits_bridge import request_context
+    _client_command_context=request_context(
+        request.headers, body, safe_message, chat_mode
+    )
+    if _client_command_context and _client_command_context.confirmation_id:
+        llm_history = [
+            {"role": "assistant", "content": anonymizer.redact_pii(body["booking_confirmation"]["sourceContext"])},
+            {"role": "user", "content": safe_message},
+        ]
+
     def _producer() -> None:
         try:
             for ev in get_ai_response_stream(
                 llm_history,
+                _client_command_context=_client_command_context,
                 user_id=chat_id,
                 model=model_override,
                 disabled_tools=_chat_disabled_tools(chat_mode),
@@ -10439,7 +7943,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         finally:
             loop.call_soon_threadsafe(queue.put_nowait, SENTINEL)
 
-    loop.run_in_executor(None, _producer)
+    loop.run_in_executor(None, canonical_staff_access.synchronous_request_callback(_producer))
 
     streamed_parts: list[str] = []   # что реально настримили (для финального reply)
     contact_request = None
@@ -10566,7 +8070,8 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
         else:
             try:
                 booking_msg = await loop.run_in_executor(
-                    None, _finalize_booking_for_chat, chat_id, contact_request)
+                    None, _finalize_booking_for_chat,
+                    _client_command_context, contact_request)
             except Exception as e:
                 logger.error(f"chat_stream: booking finalize: {e}")
                 booking_msg = None
@@ -10648,7 +8153,7 @@ async def chat_stream_handler(request: web.Request) -> web.Response:
 async def realtime_handler(request: web.Request) -> web.Response:
     """
     GET /api/realtime — голосовой мост «как ChatGPT» (WebSocket).
-    Авторизация первым сообщением {type:"auth", session_token|auth_data|init_data}
+    B21: авторизация первым сообщением только canonical channel proof.
     (браузерный WS не умеет кастомные заголовки). Дальше — realtime_bridge.run_session.
     Наружу открыт только этот путь (nginx), мост сам гоняет звук realtime↔OpenAI tool-loop.
     """
@@ -10678,34 +8183,33 @@ async def realtime_handler(request: web.Request) -> web.Response:
     except Exception:
         auth = {}
 
-    tg_user = None
-    init_data = auth.get("init_data") or request.headers.get("X-Telegram-InitData", "")
-    if init_data:
-        tg_user = _verify_telegram_init_data(init_data, TELEGRAM_TOKEN)
-    if not tg_user and isinstance(auth.get("auth_data"), dict):
-        tg_user = _verify_telegram_login_widget(auth["auth_data"], TELEGRAM_TOKEN)
-    if not tg_user and auth.get("session_token"):
-        try:
-            tg_user = session_tg_user(web_auth.resolve_session(auth.get("session_token")))
-        except Exception:
-            pass
-    chat_id = int(tg_user["id"]) if (tg_user and tg_user.get("id")) else None
-    if not chat_id:
-        await ws.send_json({"type": "error", "message": "unauthorized"})
-        await ws.close()
-        return ws
-    if not database.has_valid_consent_by_chat_id(chat_id):
-        await ws.send_json({"type": "error", "message": "needs_consent"})
-        await ws.close()
-        return ws
-
-    # Режим страницы: 'staff' (рабочий кабинет сотрудника) или 'client' (по умолч.).
-    # Мост сам проверит серверную роль — клиент не получит staff-Майю.
+    # p5_b21_verified_realtime_authority: mode is only a requested authority
+    # plane. The backend proves the exact ClientChannelLink or Maya
+    # AuthIdentity+Membership+A16 access before any ready/OpenAI/tool capability.
     mode = "staff" if str(auth.get("mode") or "").lower() == "staff" else "client"
-
-    await ws.send_json({"type": "ready"})
     try:
-        await realtime_bridge.run_session(ws, chat_id, mode=mode)
+        from legacy_client_command_bridge import channel_proof, command as client_command
+        verified_channel_proof = channel_proof({}, auth)
+        authority = await asyncio.to_thread(
+            client_command, "realtime-authority", verified_channel_proof, {"mode": mode}
+        )
+        if authority.get("ready") is not True or authority.get("authority") != mode:
+            raise ValueError("realtime_authority_required")
+    except ValueError:
+        await ws.send_json({"type": "error", "message": "client_link_or_staff_access_required"})
+        await ws.close()
+        return ws
+    except Exception:
+        await ws.send_json({"type": "error", "message": "realtime_authority_unavailable"})
+        await ws.close()
+        return ws
+
+    await ws.send_json({"type": "ready", "authority": mode})
+    try:
+        await realtime_bridge.run_session(
+            ws, authority=authority, mode=mode,
+            client_channel_proof=verified_channel_proof,
+        )
     except Exception as e:
         logger.error(f"realtime_handler: {e}")
     if not ws.closed:
@@ -10804,40 +8308,35 @@ async def auth_phone_verify_handler(request: web.Request) -> web.Response:
 
 
 async def cabinet_link_phone_handler(request: web.Request) -> web.Response:
-    """POST /api/cabinet/link-phone  Body: {phone, code} (+ авторизация:
-    X-Telegram-InitData / auth_data / session_token).
-
-    Привязывает ПОДТВЕРЖДЁННЫЙ по SMS-коду YClients телефон к уже залогиненному
-    через Telegram клиенту. Это закрывает кейс «скачал приложение, вошёл через
-    Telegram, но кабинет пустой»: после привязки cabinet_me/_build_full_cabinet
-    видят телефон и подтягивают карточку, визиты и баллы из YClients —
-    без захода в чат-бота. Владение номером доказывается кодом из SMS YClients."""
+    """B8 linking only: SMS evidence never chooses, creates or updates Client."""
+    from legacy_client_command_bridge import channel_proof, command as client_command
+    from legacy_client_habits_bridge import command as habits_command
     try:
         body = await request.json()
-    except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"ok": False, "error": "unauthorized"}, status=401)
-    phone = body.get("phone", "")
-    code = body.get("code", "")
-    if not phone or not code:
+        if not isinstance(body, dict):
+            raise ValueError("bad_input")
+        if any(key in body for key in ("clientId", "client_id", "tenantId", "userId")):
+            raise ValueError("consumer_identity_forbidden")
+        proof = channel_proof(request.headers, body)
+    except (ValueError, TypeError):
+        return _cabinet_response({"ok": False, "error": "verified_client_linking_required"}, status=403)
+    phone, code = body.get("phone"), body.get("code")
+    if not isinstance(phone, str) or not isinstance(code, str) or not phone or not code:
         return _cabinet_response({"ok": False, "error": "bad_input"}, status=400)
-    # Подтверждаем владение номером кодом из SMS (через YClients /user/auth).
-    res = await web_auth.verify_phone_login(phone, code)
-    if not res.get("ok"):
-        return _cabinet_response({"ok": False, "error": res.get("error") or "wrong_code"}, status=400)
-    # Пишем номер в строку этого Telegram-клиента (шифрование + HMAC внутри).
+    result = await web_auth.verify_phone_evidence(phone, code)
+    if not result.get("ok"):
+        return _cabinet_response({"ok": False, "error": result.get("error") or "wrong_code"}, status=400)
     try:
-        client_id = database.get_or_create_client(int(chat_id))
-        database.update_client(client_id, phone=web_auth.normalize_phone(phone) or phone)
-    except Exception as e:
-        logger.error(f"cabinet/link-phone: привязка для chat_id={chat_id} не удалась: {e}")
-        return _cabinet_response({"ok": False, "error": "bind_failed"}, status=500)
-    logger.info(f"cabinet/link-phone: телефон привязан к chat_id={chat_id}")
-    return _cabinet_response({"ok": True})
+        token = body.get("linking_token")
+        if token is not None:
+            if not isinstance(token, str) or not token:
+                raise ValueError("invalid_linking_token")
+            await asyncio.to_thread(client_command, "consume", proof, {"token": token})
+        await asyncio.to_thread(habits_command, "binding", proof, {})
+    except Exception:
+        return _cabinet_response({"ok": False, "error": "verified_client_linking_required",
+                                 "message": "Нужна подтверждённая привязка клиента. SMS-кода недостаточно."}, status=403)
+    return _cabinet_response({"ok": True, "client_link_verified": True, "phone_saved": False})
 
 
 async def auth_vk_handler(request: web.Request) -> web.Response:
@@ -10922,144 +8421,68 @@ async def auth_yandex_handler(request: web.Request) -> web.Response:
     return _cabinet_response(res)
 
 
+
 async def cabinet_me_via_session_handler(request: web.Request) -> web.Response:
-    """POST /api/cabinet/me-via-session  Header: X-Session-Token.
-    Кабинет для входа без Telegram. Если телефон сматчился с Telegram-клиентом —
-    полный кабинет; иначе мягко зовём записаться (YClients-only кабинет — следующий шаг)."""
-    sess = web_auth.resolve_session(request.headers.get("X-Session-Token", ""))
-    if not sess:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_user = session_tg_user(sess)
-    chat_id = tg_user.get("id") if tg_user else None
-    if chat_id:
-        return await _build_full_cabinet(int(chat_id), tg_user)
-    sess_profile = normalize_tg_user({"full_name": sess.get("display_name")})
-    return _cabinet_response({
-        "known": False,
-        "needs_booking": True,
-        "has_phone": bool(sess.get("phone_hash")),
-        "name": sess_profile.get("display_name", ""),
-        "message": "Запишись на первую стрижку — и здесь появятся твой кабинет, баллы и история.",
-    })
+    """B20 session parity: only a Maya JWT with an active maya_user link works.
+
+    X-Session-Token remains a legacy compatibility credential and deliberately
+    resolves to the unlinked projection; it is never reduced to chat_id/phone.
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict) or body:
+        return _cabinet_response({"error": "invalid_request"}, status=400)
+    return await _build_full_cabinet(request, {})
 
 
 async def push_subscribe_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/push/subscribe
-    Сохраняет Web Push subscription только для распознанного мастера/сотрудника.
-    """
+    """B24 AC3: verified Client registration only; no send or legacy store."""
+    from legacy_client_command_bridge import channel_proof, command
     try:
         body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"subscription", "expectedEndpointId", "auth_data", "session_token", "maya_token"}:
+            raise ValueError("invalid_push_request")
+        proof = channel_proof(request.headers, body)
+        payload = {"subscription": body.get("subscription")}
+        if "expectedEndpointId" in body:
+            payload["expectedEndpointId"] = body["expectedEndpointId"]
+        result = await asyncio.to_thread(command, "push-subscribe", proof, payload)
+        return _cabinet_response({"ok": True, **result})
+    except ValueError as exc:
+        code = "CLIENT_WEB_PUSH_LIMIT_EXCEEDED" if str(exc) == "CLIENT_WEB_PUSH_LIMIT_EXCEEDED" else "verified_client_push_required"
+        return _cabinet_response({"ok": False, "error": code}, status=409)
     except Exception:
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-    if not isinstance(body, dict):
-        return _cabinet_response({"error": "invalid_json"}, status=400)
+        return _cabinet_response({"ok": False, "error": "push_registration_unavailable"}, status=503)
 
-    chat_id = _authed_chat_id(request, body)
-    if not chat_id:
-        return _cabinet_response({"error": "unauthorized"}, status=401)
 
-    subscription = body.get("subscription")
-    if not isinstance(subscription, dict) or not subscription.get("endpoint"):
-        return _cabinet_response({"error": "bad_subscription"}, status=400)
-
-    ua = request.headers.get("User-Agent", "")
-    master = _master_by_chat_id(chat_id)
-    if master:
-        # Мастер/сотрудник — подписка с staff_id (записи/переносы/отмены/чаевые)
-        saved = _save_master_push_subscription(
-            master=master, chat_id=chat_id, subscription=subscription, user_agent=ua)
-        staff_id = _master_staff_id(master)
-        role = "master"
-    else:
-        # Клиент — подписка по chat_id (staff_id NULL): напоминания + предложение чаевых после визита
-        saved = _save_master_push_subscription_sqlite(None, chat_id, subscription, ua)
-        staff_id = None
-        role = "client"
-    if not saved:
-        return _cabinet_response({
-            "error": "push_storage_not_configured",
-            "message": "Не удалось сохранить push-подписку.",
-        }, status=501)
-
-    return _cabinet_response({
-        "ok": True,
-        "role": role,
-        "staff_id": staff_id,
-        "push_enabled": bool(WEBPUSH_VAPID_PRIVATE_KEY),
-    })
+async def push_unsubscribe_handler(request: web.Request) -> web.Response:
+    """Exact verified owner may terminate only its own endpoint episode."""
+    from legacy_client_command_bridge import channel_proof, command
+    try:
+        body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"endpointId", "auth_data", "session_token", "maya_token"}:
+            raise ValueError("invalid_push_request")
+        proof = channel_proof(request.headers, body)
+        result = await asyncio.to_thread(command, "push-unsubscribe", proof, {"endpointId": body.get("endpointId")})
+        return _cabinet_response({"ok": True, **result})
+    except ValueError:
+        return _cabinet_response({"ok": False, "error": "verified_client_push_required"}, status=409)
+    except Exception:
+        return _cabinet_response({"ok": False, "error": "push_unsubscribe_unavailable"}, status=503)
 
 
 async def tip_sent_handler(request: web.Request) -> web.Response:
-    """
-    POST /api/tips/sent
-    Клиент нажал «Я перевёл» на экране чаевых. Это служебный сигнал мастеру,
-    не банковское подтверждение поступления денег.
-    """
-    try:
-        body = await request.json()
-    except Exception:
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-    if not isinstance(body, dict):
-        return _cabinet_response({"error": "invalid_json"}, status=400)
-
-    master = _master_by_tip_key(body.get("master"), body.get("master_id"))
-    if not master:
-        return _cabinet_response({"error": "master_not_found"}, status=404)
-
-    amount = body.get("amount") or 0
-    try:
-        amount_i = int(float(amount))
-    except (TypeError, ValueError):
-        amount_i = 0
-    record_id = body.get("record_id")
-    note = _plain_maya_text(str(body.get("note") or "")).strip()[:240]
-    # Записываем чаевые для аналитики по каждому мастеру (служебный сигнал, не банк. подтверждение)
-    try:
-        database.save_tip(
-            master_id=body.get("master_id") or master.get("id") or master.get("staff_id"),
-            master_slug=body.get("master") or master.get("slug", ""),
-            master_name=master.get("name", ""),
-            amount=amount_i, record_id=record_id, note=note,
-        )
-    except Exception as e:
-        logger.error(f"tip_sent: save_tip failed: {e}")
-    record_part = f"\nЗапись: #{record_id}" if record_id else ""
-    note_part = f"\nСообщение: {note.replace('[', '(').replace(']', ')')}" if note else ""
-    text = (
-        "💸 *Клиент отметил перевод чаевых*\n\n"
-        f"Сумма: *{amount_i:,} ₽*".replace(",", " ")
-        + record_part + note_part +
-        "\n\n_Проверь поступление в банковском приложении._"
-    )
-
-    sent_tg = False
-    if master.get("telegram_chat_id") and not database.is_master_muted(master["telegram_chat_id"]):
-        try:
-            await request.app["bot_app"].bot.send_message(
-                chat_id=master["telegram_chat_id"],
-                text=text,
-                parse_mode="Markdown",
-            )
-            sent_tg = True
-        except Exception as e:
-            logger.error(f"tip_sent: Telegram send failed: {e}")
-
-    sent_push = await _send_master_push(
-        master,
-        title="Вам оставили чай",
-        body="Вам оставили чай" + (" и сообщение" if note else ""),
-        url="/app/?panel=schedule",
-        tag=f"tip-{record_id or _master_staff_id(master) or 'master'}",
-        data={"record_id": record_id, "event": "tip.sent", "amount": amount_i},
-    )
-
+    """B22: opening external payment is not a verified tip/payment outcome."""
+    # p5_b22_unverified_tip_signal_retired: never parse or forward the payload.
     return _cabinet_response({
-        "ok": True,
-        "telegram": sent_tg,
-        "push_sent": sent_push,
-        "note_saved": bool(note),
-    })
+        "ok": False,
+        "error": "tip_signal_retired",
+        "payment_confirmed": False,
+        "external_payment_available": True,
+        "business_mutations": 0,
+    }, status=410)
 
 
 _SHIFT_REMINDER_OFFSETS = (60, 30)
@@ -11078,90 +8501,23 @@ def _master_day_brief_send_hour() -> int:
 
 
 def _growth_role_recipients() -> dict[str, set[int]]:
-    """Resolve owner and manager recipients from server-side role sources."""
+    """Legacy raw Telegram manager lists never grant brief access."""
+    # p5_b13_raw_telegram_manager_brief_authority_disabled
     try:
         founders = {int(value) for value in (getattr(config, "FOUNDER_IDS", []) or [])}
     except Exception:
         founders = set()
-    try:
-        admins = {int(value) for value in (database.list_admins() or [])}
-    except Exception:
-        admins = set()
-    managers = set(admins) - founders
-    try:
-        raw = database.get_setting("panel_manager_ids") or ""
-        managers.update(
-            int(value) for value in raw.replace(" ", "").split(",")
-            if value.strip().lstrip("-").isdigit()
-        )
-    except Exception:
-        pass
-    managers.difference_update(founders)
-    return {"owner": founders, "manager": managers}
+    return {"owner": founders, "manager": set()}
 
 
-async def _send_growth_role_briefs_once(
-    app: Application,
-    *,
-    now: datetime | None = None,
-    target_date: str | None = None,
-    force: bool = False,
-) -> dict:
-    """Deliver one aggregate morning brief to owner and manager roles."""
-    now = now or datetime.now()
-    date_s = target_date or master_briefing.scheduled_brief_date(
-        now,
-        send_hour=_master_day_brief_send_hour(),
-    )
-    if not date_s:
-        return {"ok": True, "skipped": True, "reason": "outside_send_window", "sent": 0}
-    owner_plan = await asyncio.to_thread(growth_planner.get_growth_plan, role="owner")
-    manager_plan = growth_planner.manager_view(owner_plan)
-    payloads = {
-        "owner": {
-            "message": growth_planner.render_owner_morning_message(owner_plan),
-            "url": "https://malesthetic.pro/app/?panel=os",
-            "button": "Открыть план MAYA",
-        },
-        "manager": {
-            "message": growth_planner.render_manager_morning_message(manager_plan),
-            "url": "https://malesthetic.pro/app/?panel=analytics",
-            "button": "Открыть план мастеров",
-        },
-    }
-    sent = 0
-    skipped = 0
-    deliveries = []
-    for role, chat_ids in _growth_role_recipients().items():
-        payload = payloads[role]
-        for chat_id in sorted(chat_ids):
-            delivery_key = f"growth_role_brief_sent:{date_s}:{role}:{chat_id}"
-            if not force and database.get_setting(delivery_key):
-                skipped += 1
-                deliveries.append({"role": role, "state": "skipped", "reason": "already_sent"})
-                continue
-            try:
-                markup = InlineKeyboardMarkup([[
-                    InlineKeyboardButton(payload["button"], url=payload["url"]),
-                ]])
-                await app.bot.send_message(
-                    chat_id=int(chat_id),
-                    text=payload["message"],
-                    reply_markup=markup,
-                )
-                database.set_setting(delivery_key, now.isoformat(timespec="seconds"))
-                sent += 1
-                deliveries.append({"role": role, "state": "sent"})
-            except Exception as e:
-                logger.error(f"growth role brief {role}: {e}")
-                deliveries.append({"role": role, "state": "failed"})
-    return {
-        "ok": True,
-        "date": date_s,
-        "sent": sent,
-        "skipped_count": skipped,
-        "deliveries": deliveries,
-    }
+async def _send_growth_role_briefs_once(app: Application, *, now: datetime | None = None,
+    target_date: str | None = None,  force: bool = False) -> dict:
+    """R05: initiator of the immutable canonical tenant-day report."""
+    if target_date is not None or force:
+        return {"ok": False, "reason": "canonical_report_controls_forbidden", "sent": 0}
+    import maya_inbox_bridge
+    accepted = await maya_inbox_bridge.trigger_owner_report("morning_owner")
+    return {"ok": accepted, "status": "trigger_accepted" if accepted else "unresolved", "sent": 0}
 
 
 async def _collect_master_day_forecasts(
@@ -11318,203 +8674,14 @@ async def _collect_master_day_forecasts(
     return forecasts
 
 
-async def _send_master_day_briefs_once(
-    app: Application,
-    *,
-    now: datetime | None = None,
-    target_date: str | None = None,
-    only_staff_id: int | None = None,
-    force: bool = False,
-) -> dict:
-    """Send each scheduled master one role-safe plan for the target workday."""
-    now = now or datetime.now()
-    date_s = target_date or master_briefing.scheduled_brief_date(
-        now,
-        send_hour=_master_day_brief_send_hour(),
-    )
-    if not date_s:
-        return {"ok": True, "skipped": True, "reason": "outside_send_window", "sent": 0}
-    forecasts = await _collect_master_day_forecasts(
-        date_s,
-        only_staff_id=only_staff_id,
-    )
-    sent = 0
-    skipped = 0
-    deliveries = []
-    for forecast in forecasts:
-        staff_id = int(forecast.get("staff_id") or 0)
-        master = forecast.pop("delivery_master", {})
-        if forecast.get("schedule_known") and not forecast.get("is_working"):
-            skipped += 1
-            deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "day_off"})
-            continue
-        compact_forecast = master_briefing.compact_forecast_snapshot(forecast)
-        try:
-            database.set_setting(
-                f"master_growth_day_plan:{date_s}:{staff_id}",
-                _json.dumps(compact_forecast, ensure_ascii=False),
-            )
-        except Exception as e:
-            logger.error(f"master day brief snapshot staff={staff_id}: {e}")
-        delivery_key = f"master_day_brief_delivery:{date_s}:{staff_id}"
-        try:
-            delivery_state = _json.loads(database.get_setting(delivery_key) or "{}")
-            if not isinstance(delivery_state, dict):
-                delivery_state = {}
-        except Exception:
-            delivery_state = {}
-        chat_id = master.get("telegram_chat_id")
-        message = master_briefing.render_master_day_message(forecast)
-        push_body = master_briefing.render_master_day_push(forecast)
-        has_chat = bool(chat_id)
-        has_telegram = bool(
-            chat_id and not database.is_master_muted(int(chat_id))
-        )
-        try:
-            has_push = bool(
-                WEBPUSH_VAPID_PRIVATE_KEY
-                and _push_subscriptions_for_master(master)
-            )
-        except Exception as e:
-            logger.error(f"master day brief push lookup staff={staff_id}: {e}")
-            has_push = False
-        telegram_done = bool(delivery_state.get("telegram"))
-        push_done = bool(delivery_state.get("push"))
-        chat_done = bool(delivery_state.get("chat"))
-        chat_stored = False
-        chat_dedupe_key = ""
-        if has_chat and (force or not chat_done):
-            chat_dedupe_key = _telegram_chat_mirror_dedupe_key(int(chat_id), message)
-            chat_stored = _store_assistant_message_in_chat(
-                int(chat_id),
-                message,
-                mode="staff",
-                dedupe_key=chat_dedupe_key,
-                protect_content=True,
-            )
-            chat_done = bool(
-                chat_done
-                or chat_stored
-                or _chat_has_assistant_dedupe_key(int(chat_id), "staff", chat_dedupe_key)
-            )
-        delivery_complete = master_briefing.delivery_is_complete(
-            delivery_state,
-            has_telegram=has_telegram,
-            has_push=has_push,
-            has_chat=has_chat,
-        )
-        if chat_done and not delivery_state.get("chat"):
-            delivery_state["chat"] = True
-            delivery_complete = master_briefing.delivery_is_complete(
-                delivery_state,
-                has_telegram=has_telegram,
-                has_push=has_push,
-                has_chat=has_chat,
-            )
-        if not force and delivery_complete:
-            database.set_setting(
-                delivery_key,
-                _json.dumps({
-                    **delivery_state,
-                    "updated_at": now.isoformat(timespec="seconds"),
-                }, ensure_ascii=False),
-            )
-            if chat_stored:
-                sent += 1
-                deliveries.append({"staff_id": staff_id, "state": "sent", "channels": ["chat"]})
-            else:
-                skipped += 1
-                deliveries.append({"staff_id": staff_id, "state": "skipped", "reason": "already_sent"})
-            continue
-        telegram_sent = False
-        if has_telegram and (force or not telegram_done):
-            try:
-                await app.bot.send_message(chat_id=int(chat_id), text=message)
-                telegram_sent = True
-            except Exception as e:
-                logger.error(f"master day brief Telegram staff={staff_id}: {e}")
-        push_sent = 0
-        if has_push and (force or not push_done):
-            try:
-                target_label = "сегодня" if date_s == now.date().isoformat() else "завтра"
-                push_sent = await _send_master_push(
-                    master,
-                    title=f"MAYA · план на {target_label}",
-                    body=push_body,
-                    url="/app/?panel=schedule",
-                    tag=f"master-day-plan-{staff_id}-{date_s}",
-                    data={
-                        "event": "master.day_plan",
-                        "date": date_s,
-                        "staff_id": staff_id,
-                    },
-                )
-            except Exception as e:
-                logger.error(f"master day brief push staff={staff_id}: {e}")
-        telegram_done = telegram_done or telegram_sent
-        push_done = push_done or bool(push_sent)
-        delivery_complete = master_briefing.delivery_is_complete(
-            {"telegram": telegram_done, "push": push_done, "chat": chat_done},
-            has_telegram=has_telegram,
-            has_push=has_push,
-            has_chat=has_chat,
-        )
-        if telegram_done or push_done or chat_done:
-            database.set_setting(
-                delivery_key,
-                _json.dumps({
-                    "telegram": telegram_done,
-                    "push": push_done,
-                    "chat": chat_done,
-                    "updated_at": now.isoformat(timespec="seconds"),
-                }, ensure_ascii=False),
-            )
-        if telegram_sent or push_sent or chat_stored:
-            sent += 1
-            if delivery_complete:
-                database.set_setting(
-                    f"master_day_brief_sent:{date_s}:{staff_id}",
-                    now.isoformat(timespec="seconds"),
-                )
-            database.set_setting(
-                f"master_day_brief_last:{staff_id}",
-                _json.dumps({
-                    "date": date_s,
-                    "sent_at": now.isoformat(timespec="seconds"),
-                    "records_count": forecast.get("records_count"),
-                    "booked_revenue_rub": forecast.get("booked_revenue_rub"),
-                    "potential_total_revenue_rub": forecast.get("potential_total_revenue_rub"),
-                    "primary_daily_target_rub": forecast.get("primary_daily_target_rub"),
-                    "primary_target_progress_pct": forecast.get("primary_target_progress_pct"),
-                    "potential_target_progress_pct": forecast.get("potential_target_progress_pct"),
-                    "opportunities_count": forecast.get("opportunities_count"),
-                }, ensure_ascii=False),
-            )
-            deliveries.append({
-                "staff_id": staff_id,
-                "state": "sent" if delivery_complete else "partial",
-                "telegram": telegram_done,
-                "push": push_done,
-                "new_telegram": telegram_sent,
-                "new_push": int(push_sent or 0),
-            })
-        elif telegram_done or push_done:
-            deliveries.append({
-                "staff_id": staff_id,
-                "state": "partial",
-                "telegram": telegram_done,
-                "push": push_done,
-            })
-        else:
-            deliveries.append({"staff_id": staff_id, "state": "failed", "reason": "no_delivery_channel"})
-    return {
-        "ok": True,
-        "date": date_s,
-        "sent": sent,
-        "skipped_count": skipped,
-        "forecast_count": len(forecasts),
-        "deliveries": deliveries,
-    }
+async def _send_master_day_briefs_once(app: Application, *, now: datetime | None = None,
+    target_date: str | None = None, only_staff_id: int | None = None, force: bool = False) -> dict:
+    """R05: initiator of the immutable canonical tenant-day report."""
+    if target_date is not None or force or only_staff_id is not None:
+        return {"ok": False, "reason": "canonical_report_controls_forbidden", "sent": 0}
+    import maya_inbox_bridge
+    accepted = await maya_inbox_bridge.trigger_owner_report("morning_staff")
+    return {"ok": accepted, "status": "trigger_accepted" if accepted else "unresolved", "sent": 0}
 
 
 async def panel_master_day_brief_handler(request: web.Request) -> web.Response:
@@ -11619,54 +8786,9 @@ def _master_work_start(master: dict, day: date) -> datetime | None:
 
 
 async def _send_shift_reminders_once(app: Application) -> int:
-    try:
-        masters = list(database.list_masters())
-    except Exception as e:
-        logger.error(f"shift reminders: list_masters failed: {e}")
-        return 0
-
-    now = datetime.now()
-    sent = 0
-    for master in masters:
-        staff_id = _master_staff_id(master)
-        if not staff_id:
-            continue
-        start = await asyncio.to_thread(_master_work_start, master, now.date())
-        if not start:
-            continue
-        minutes_left = int((start - now).total_seconds() // 60)
-        for offset in _SHIFT_REMINDER_OFFSETS:
-            if minutes_left < offset or minutes_left > offset + 4:
-                continue
-            key = (staff_id, now.date().isoformat(), offset)
-            if key in _SHIFT_REMINDERS_SENT:
-                continue
-            _SHIFT_REMINDERS_SENT.add(key)
-            label = "1 час" if offset == 60 else "30 минут"
-            text = (
-                f"⏰ *До начала рабочего дня осталось {label}*\n\n"
-                f"Старт смены: {start.strftime('%H:%M')}\n"
-                "Открой приложение, чтобы проверить расписание."
-            )
-            if master.get("telegram_chat_id") and not database.is_master_muted(master["telegram_chat_id"]):
-                try:
-                    await app.bot.send_message(
-                        chat_id=master["telegram_chat_id"],
-                        text=text,
-                        parse_mode="Markdown",
-                    )
-                    sent += 1
-                except Exception as e:
-                    logger.error(f"shift reminder Telegram failed: {e}")
-            sent += await _send_master_push(
-                master,
-                title=f"До рабочего дня {label}",
-                body=f"Старт смены в {start.strftime('%H:%M')}",
-                url="/app/?panel=schedule",
-                tag=f"shift-{staff_id}-{now.date().isoformat()}-{offset}",
-                data={"event": "shift.reminder", "minutes": offset},
-            )
-    return sent
+    from canonical_operational_alerts import trigger
+    await trigger()
+    return 0
 
 
 async def master_shift_reminder_loop(app: Application):
@@ -11709,21 +8831,8 @@ async def master_day_brief_loop(app: Application):
 
 
 async def client_retention_refresh_loop(app: Application):
-    """Обновляет тяжёлый когортный снимок отдельно от запросов Command Center."""
-    await asyncio.sleep(120)
-    while True:
-        try:
-            result = await asyncio.to_thread(owner_ai.client_retention, force=True)
-            summary = (result or {}).get("summary") or {}
-            logger.info(
-                "client retention refreshed: cohort=%s returned=%s forward=%s%%",
-                summary.get("previous_cohort_clients"),
-                summary.get("returned_clients"),
-                summary.get("forward_booking_pct"),
-            )
-        except Exception as e:
-            logger.error(f"client retention refresh loop: {e}")
-        await asyncio.sleep(21600)
+    """C8: legacy scorer retired; no qualified canonical tenant evidence here."""
+    return
 
 
 def _owner_reputation_ids() -> list[int]:
@@ -11737,110 +8846,43 @@ def _owner_reputation_ids() -> list[int]:
 
 
 async def notify_owner_cycle_candidates(snapshot: dict) -> dict:
-    """Sends one PII-free Web Push for a newly changed return queue."""
+    """Submit one PII-free return-queue alert to its canonical executor."""
     payload = cycle_reminder.owner_alert_push_payload(snapshot)
     if not payload:
         return {"attempted": False, "owners": 0, "push": 0}
     owner_ids = _owner_reputation_ids()
-    push_sent = 0
-    for owner_id in owner_ids:
-        try:
-            push_sent += await _send_client_push(
-                owner_id,
-                payload["title"],
-                payload["body"],
-                url=payload["url"],
-                tag=payload["tag"],
-                data=payload["data"],
-            )
-        except Exception as exc:
-            logger.error("cycle owner push delivery: %s", exc)
+    try:
+        import maya_inbox_bridge
+
+        accepted = await maya_inbox_bridge.publish_inbox_item(
+            type="owner_alert",
+            title=payload["title"],
+            body_text=payload["body"],
+            source_seed=str(payload["data"]["event_id"]),
+            telegram_chat_ids=owner_ids,
+            deep_link=payload["url"],
+            payload={"event": "cycle.candidates", "event_id": payload["data"]["event_id"]},
+            fanout_owners=True,
+        )
+    except Exception as exc:
+        logger.error("cycle owner Action Engine delivery: %s", exc)
+        accepted = False
     return {
-        "attempted": True,
+        "attempted": bool(accepted),
         "owners": len(owner_ids),
-        "push": push_sent,
+        "accepted": bool(accepted),
         "event_id": payload["data"]["event_id"],
     }
 
 
 async def _notify_owner_reputation(app: Application, rows: list[dict]) -> dict:
-    alert = reputation.build_owner_review_alert(rows)
-    if not alert.get("text"):
-        return {"delivered": False, "count": 0, "owners": 0}
-    owner_ids = _owner_reputation_ids()
-    if not owner_ids:
-        return {"delivered": False, "count": alert.get("count", 0), "owners": 0}
-
-    delivered = False
-    try:
-        for owner_id in owner_ids:
-            delivered = _store_assistant_message_in_chat(
-                owner_id,
-                alert["text"],
-                mode="staff",
-                dedupe_key=_telegram_chat_mirror_dedupe_key(owner_id, alert["text"]),
-                protect_content=True,
-            ) or delivered
-    except Exception as e:
-        logger.error(f"reputation owner in-app delivery: {e}")
-
-    telegram_sent = 0
-    push_sent = 0
-    for owner_id in owner_ids:
-        try:
-            await app.bot.send_message(chat_id=owner_id, text=alert["text"])
-            telegram_sent += 1
-            delivered = True
-        except Exception as e:
-            logger.error(f"reputation owner Telegram delivery: {e}")
-        try:
-            push_sent += await _send_client_push(
-                owner_id,
-                alert["push_title"],
-                alert["push_body"],
-                url="/app/?god=1",
-                tag="maya-reputation-new",
-                data={"event": "reputation.new_review"},
-            )
-            if push_sent:
-                delivered = True
-        except Exception as e:
-            logger.error(f"reputation owner push delivery: {e}")
-    return {
-        "delivered": delivered,
-        "count": alert.get("count", 0),
-        "positive": alert.get("positive", 0),
-        "negative": alert.get("negative", 0),
-        "owners": len(owner_ids),
-        "telegram": telegram_sent,
-        "push": push_sent,
-    }
+    """B34: unverified legacy review evidence cannot initiate delivery."""
+    return {"delivered": False, "count": 0, "owners": 0, "error": "LEGACY_REVIEW_SOURCE_RETIRED"}
 
 
 async def reputation_monitor_loop(app: Application):
-    """Раз в час проверяет публичные карточки и сообщает только о новых отзывах."""
-    await asyncio.sleep(150)
-    while True:
-        try:
-            refresh = await asyncio.to_thread(reputation.refresh_public_reviews)
-            pending = await asyncio.to_thread(database.list_unalerted_external_reviews, 20)
-            notification = {"delivered": False, "count": 0}
-            if pending:
-                notification = await _notify_owner_reputation(app, pending)
-                if notification.get("delivered"):
-                    await asyncio.to_thread(
-                        database.mark_external_reviews_alerted,
-                        [row.get("id") for row in pending if row.get("id")],
-                    )
-            logger.info(
-                "reputation monitor: sources=%s new=%s notified=%s",
-                refresh.get("sources_ready"),
-                refresh.get("new"),
-                notification.get("count"),
-            )
-        except Exception as e:
-            logger.error(f"reputation monitor loop: {e}")
-        await asyncio.sleep(3600)
+    """B34: retired job, including direct calls and alternative launchers."""
+    return None
 
 
 async def waitlist_admin_alert_loop(app: Application):
@@ -11855,26 +8897,8 @@ async def waitlist_admin_alert_loop(app: Application):
 
 
 async def maya_operating_rhythm_loop(app: Application):
-    """Безопасный rhythm-loop Maya OS: внутренние задачи, контроль и замыкание циклов."""
-    await asyncio.sleep(60)
-    while True:
-        try:
-            result = await asyncio.to_thread(
-                owner_ai.run_operating_rhythm_tick,
-                created_by="maya_os_scheduler",
-                force=False,
-            )
-            if result and not result.get("skipped"):
-                summary = result.get("summary") or {}
-                logger.info(
-                    "maya operating rhythm tick: created=%s updated=%s skipped=%s",
-                    summary.get("created_count"),
-                    summary.get("updated_count"),
-                    summary.get("skipped_count"),
-                )
-        except Exception as e:
-            logger.error(f"maya operating rhythm loop: {e}")
-        await asyncio.sleep(900)
+    # R04: scheduling does not supply a canonical command or actor.
+    return None
 
 
 async def usage_fal_handler(request: web.Request) -> web.Response:
@@ -11931,7 +8955,7 @@ async def analyze_face_handler(request: web.Request) -> web.Response:
     # Сотрудники (владелец/админы) — без лимита: они показывают приложение клиентам.
     is_staff = False
     try:
-        is_staff = bool(database.is_admin(uid))
+        is_staff = bool(canonical_staff_access.is_admin(uid))
     except Exception:
         is_staff = False
 
@@ -12052,62 +9076,23 @@ async def me_photo_handler(request: web.Request) -> web.Response:
 
 
 async def set_visit_mood_handler(request: web.Request) -> web.Response:
-    """POST /api/set-visit-mood {record_id, mood} — клиент из приложения выбрал
-    «настроение визита» (🔴 red — тишина / 🔵 blue — общение). Сохраняем на
-    конкретную запись + дописываем пометку в комментарий записи YClients,
-    чтобы барбер видел выбор. Авторизация — личность клиента (initData/сессия)."""
+    """Maya-local Client/Appointment command. No phone authority or CRM sync."""
+    from legacy_client_command_bridge import channel_proof
+    from legacy_client_preferences_bridge import command
     try:
         body = await request.json()
+        if not isinstance(body, dict) or set(body) - {"record_id", "mood", "expectedGeneration", "idempotencyKey", "auth_data", "session_token"}:
+            raise ValueError("invalid_mood_request")
+        proof = channel_proof(request.headers, body)
+        result = await asyncio.to_thread(command, "visit-mood", proof, {
+            "provider": "yclients", "recordId": str(body.get("record_id", "")),
+            "mood": body.get("mood"), "expectedGeneration": body.get("expectedGeneration"),
+            "idempotencyKey": body.get("idempotencyKey"),
+        })
+        return _cabinet_response({"ok": True, "mood": body["mood"], **result})
     except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    mood = (body.get("mood") or "").strip().lower()
-    if mood not in ("red", "blue"):
-        return _cabinet_response({"error": "bad_mood"}, status=400)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    if not record_id:
-        return _cabinet_response({"error": "no_record"}, status=400)
-    client_id = None
-    caller_phone = ""
-    try:
-        dbc = await asyncio.to_thread(database.get_client, int(tg_user["id"]))
-        if dbc:
-            client_id = dbc.get("id")
-            caller_phone = dbc.get("phone") or ""
-    except Exception:
-        client_id = None
+        return _cabinet_response({"error": "preference_request_rejected", "client_link_required": True}, status=409)
 
-    # Защита от IDOR: настроение можно ставить ТОЛЬКО на СВОЮ запись. record_id у
-    # YClients последовательны и легко перебираются — без проверки любой
-    # авторизованный клиент мог бы менять настроение/комментарий чужих записей.
-    # Сверяем телефон записи с телефоном профиля звонящего.
-    def _digits10(p):
-        return "".join(ch for ch in str(p or "") if ch.isdigit())[-10:]
-    try:
-        rec = await asyncio.to_thread(_yc.get_record, record_id)
-    except Exception:
-        rec = None
-    rec_phone = ((rec or {}).get("client") or {}).get("phone") if rec else None
-    if not rec or not _digits10(caller_phone) or _digits10(rec_phone) != _digits10(caller_phone):
-        return _cabinet_response({"error": "forbidden", "message": "Это не ваша запись."}, status=403)
-
-    ok = await asyncio.to_thread(database.set_visit_mood, record_id, mood, "app", client_id)
-    if not ok:
-        return _cabinet_response({"error": "bad_mood"}, status=400)
-    note = "🔴 Просит тишину" if mood == "red" else "🔵 Настроен общаться"
-    try:
-        await asyncio.to_thread(
-            _yc.append_record_comment, record_id, note,
-            ["🔴 Просит тишину", "🔵 Настроен общаться"],
-        )
-    except Exception as e:
-        logger.error("set_visit_mood comment record_id=%s: %s", record_id, e)
-    return _cabinet_response({"ok": True, "mood": mood})
 
 
 _NEAREST_SLOT_CACHE = {"ts": 0.0, "data": None}
@@ -12333,12 +9318,18 @@ async def panel_journal_create_handler(request: web.Request) -> web.Response:
         # Админский эндпоинт — владелец может поставить запись на любой день/время
         # (book_record отклонял бы нерабочее время мастера).
         result = await asyncio.to_thread(
-            _yc.create_record_admin, staff_id, service_ids, dt, name, phone, seance_length)
+            _yc.create_record_admin, staff_id, service_ids, dt, name, phone,
+            seance_length, bridge_origin="webhook.panel")
     except Exception as e:
         logger.error("journal_create: %s", e)
         return _cabinet_response({"error": "yclients", "message": "Не удалось создать запись."}, status=502)
     if result.get("success"):
         return _cabinet_response({"ok": True, "record_id": result.get("record_id")})
+    if _action_outcome_unknown(result):
+        return _cabinet_response(_action_unknown_payload(
+            result,
+            "Результат создания записи уточняется. Не повторяйте действие.",
+        ), status=202)
     return _cabinet_response({"error": "create_failed", "message": result.get("error") or "YClients отклонил запись."}, status=400)
 
 
@@ -12502,7 +9493,10 @@ async def panel_journal_reschedule_handler(request: web.Request) -> web.Response
     if _gerr:
         return _gerr
     try:
-        result = await asyncio.to_thread(_yc.reschedule_booking, record_id, dt, None, staff_id)
+        result = await asyncio.to_thread(
+            _yc.reschedule_booking, record_id, dt, None, staff_id,
+            bridge_origin="webhook.panel",
+        )
     except Exception as e:
         logger.error("journal_reschedule: %s", e)
         return _cabinet_response({"error": "yclients", "message": "Не удалось перенести запись."}, status=502)
@@ -12514,6 +9508,11 @@ async def panel_journal_reschedule_handler(request: web.Request) -> web.Response
         except Exception:
             pass
         return _cabinet_response({"ok": True, "record_id": result.get("record_id")})
+    if _action_outcome_unknown(result):
+        return _cabinet_response(_action_unknown_payload(
+            result,
+            "Результат переноса уточняется. Не повторяйте действие.",
+        ), status=202)
     return _cabinet_response({"error": "reschedule_failed", "message": result.get("error") or "YClients отклонил перенос."}, status=400)
 
 
@@ -12540,12 +9539,19 @@ async def panel_journal_cancel_handler(request: web.Request) -> web.Response:
     if _gerr:
         return _gerr
     try:
-        result = await asyncio.to_thread(_yc.cancel_booking, record_id)
+        result = await asyncio.to_thread(
+            _yc.cancel_booking, record_id, bridge_origin="webhook.panel",
+        )
     except Exception as e:
         logger.error("journal_cancel: %s", e)
         return _cabinet_response({"error": "yclients", "message": "Не удалось отменить запись."}, status=502)
     if result.get("success"):
         return _cabinet_response({"ok": True, "record_id": result.get("record_id")})
+    if _action_outcome_unknown(result):
+        return _cabinet_response(_action_unknown_payload(
+            result,
+            "Результат отмены уточняется. Не повторяйте действие.",
+        ), status=202)
     return _cabinet_response({"error": "cancel_failed", "message": result.get("error") or "YClients отклонил отмену."}, status=400)
 
 
@@ -12556,21 +9562,9 @@ TEAM_MEDIA_URL_PREFIX = "https://malesthetic.pro/app/media/team/"
 TEAM_MEDIA_TTL_SECONDS = 2 * 24 * 60 * 60
 
 
-def _team_chat_mark_media_expiry(messages: list[dict]) -> list[dict]:
-    for msg in messages:
-        if not (msg.get("media_kind") and msg.get("media_url")):
-            continue
-        created_raw = str(msg.get("created_at") or "")
-        try:
-            created_at = datetime.fromisoformat(created_raw)
-        except Exception:
-            continue
-        now = datetime.now(created_at.tzinfo) if created_at.tzinfo else datetime.now()
-        expires_at = created_at + timedelta(seconds=TEAM_MEDIA_TTL_SECONDS)
-        msg["media_expires_at"] = expires_at.isoformat(timespec="seconds")
-        if (now - created_at).total_seconds() >= TEAM_MEDIA_TTL_SECONDS:
-            msg["media_expired"] = True
-    return messages
+def _team_chat_mark_media_expiry(messages):
+    raise PermissionError('canonical_private_team_media_required')
+
 
 # ── Присутствие в чате команды (эфемерно, в памяти процесса) ──────────────
 # Кто онлайн (держит чат открытым) и кто печатает. Обновляется на каждом
@@ -12665,329 +9659,51 @@ def _normalize_team_voice_bytes(raw: bytes) -> tuple[bytes, float]:
 
 
 async def team_chat_normalize_voice_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team_chat/normalize_voice — prepare voice media for iOS-safe playback."""
-    import base64 as _b64
-
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if not _is_staff_info(info):
-        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
-    b64 = str(body.get("media_b64") or "")
-    if "," in b64 and b64[:64].lower().startswith("data:"):
-        b64 = b64.split(",", 1)[1]
-    if not b64:
-        return _cabinet_response({"error": "empty", "message": "Пустое голосовое."}, status=400)
-    if len(b64) > 11 * 1024 * 1024:
-        return _cabinet_response({"error": "too_large", "message": "Голосовое слишком большое."}, status=413)
-    try:
-        raw = _b64.b64decode(b64, validate=True)
-    except Exception:
-        return _cabinet_response({"error": "bad_base64", "message": "Не удалось прочитать голосовое."}, status=400)
-    try:
-        out, dur = await asyncio.to_thread(_normalize_team_voice_bytes, raw)
-    except Exception as e:
-        logger.warning("team voice normalize failed: %s", e)
-        return _cabinet_response({"error": "normalize_failed", "message": "Не удалось подготовить голосовое."}, status=422)
-    return _cabinet_response({
-        "ok": True,
-        "media_b64": _b64.b64encode(out).decode("ascii"),
-        "media_name": "voice.m4a",
-        "media_mime": "audio/mp4",
-        "media_ext": "m4a",
-        "media_size": len(out),
-        "media_dur": dur,
-    })
+    from canonical_team_communications import retired
+    return _cabinet_response(retired(), status=410)
 
 
-async def _push_team_message(app, sender_chat_id: int, sender_name: str, text: str,
-                             media_kind: str = "") -> None:
-    """Новое сообщение команды → всем сотрудникам, кроме отправителя:
-    Telegram (у каждого привязан chat_id — доходит всегда) + Web Push (best-effort)."""
-    # Текст уведомления: если есть подпись — её (с эмодзи-префиксом вложения),
-    # иначе человекочитаемый ярлык вложения («Голосовое сообщение» и т.п.).
-    label = (text or "").strip()
-    if not label:
-        label = _TEAM_MEDIA_LABEL.get(media_kind, "Вложение")
-    elif media_kind:
-        label = _TEAM_MEDIA_PREFIX.get(media_kind, "") + label
-    recips: dict = {}  # chat_id -> master_dict | None
-    try:
-        for m in database.list_masters():
-            cid = m.get("telegram_chat_id")
-            if cid:
-                recips[int(cid)] = m
-    except Exception as e:
-        logger.error(f"team_chat recips masters: {e}")
-    try:
-        for aid in database.list_admins():
-            if int(aid) not in recips:
-                recips[int(aid)] = None
-    except Exception as e:
-        logger.error(f"team_chat recips admins: {e}")
-    recips.pop(int(sender_chat_id), None)
-    snippet = label if len(label) <= 140 else label[:139] + "…"
-    for cid, m in recips.items():
-        try:
-            await app.bot.send_message(
-                chat_id=cid,
-                text=(f"💬 *{sender_name}* — команда:\n{label}\n\n"
-                      f"_Ответить — в приложении, вкладка «Чат»._"),
-                parse_mode="Markdown",
-            )
-        except Exception as e:
-            logger.info(f"team_chat tg → {cid}: {e}")
-        try:
-            if m is not None:
-                await _send_master_push(m, title=f"💬 {sender_name}", body=snippet,
-                                        url="/app/?team=1", tag="team-chat",
-                                        data={"event": "team_chat"})
-            else:
-                await _send_client_push(cid, title=f"💬 {sender_name}", body=snippet,
-                                        url="/app/?team=1", tag="team-chat",
-                                        data={"event": "team_chat"})
-        except Exception:
-            pass
+
+async def _push_team_message(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_Communication_Delivery_required')
+
 
 
 async def team_chat_send_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team_chat/send — отправить сообщение во внутренний чат команды."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = int(tg_user["id"])
-    info = _panel_resolve_role(tg_id)
-    if not _is_staff_info(info):
-        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
-    text = (body.get("text") or "").strip()[:2000]
-    # Вложение (фото/видео/голос/файл). Байты сюда НЕ приходят — прокси на Beget
-    # уже записал файл и прислал только готовый media_url + метаданные.
-    media_kind = (body.get("media_kind") or "").strip()[:16]
-    media_url = (body.get("media_url") or "").strip()[:512]
-    media_name = (body.get("media_name") or "").strip()[:200]
-    media_mime = (body.get("media_mime") or "").strip()[:80]
-    try:
-        media_size = int(body.get("media_size") or 0)
-    except Exception:
-        media_size = 0
-    try:
-        media_dur = float(body.get("media_dur") or 0)
-    except Exception:
-        media_dur = 0
-    # Анти-инъекция: ссылка обязана быть из нашего media-каталога (защита от
-    # прямого POST в обход прокси с произвольным внешним URL).
-    if media_url and not media_url.startswith(TEAM_MEDIA_URL_PREFIX):
-        return _cabinet_response({"error": "bad_media", "message": "Недопустимое вложение."}, status=400)
-    has_media = bool(media_kind and media_url)
-    if not has_media:
-        media_kind = media_url = media_name = media_mime = ""
-        media_size = 0
-        media_dur = 0
-    if not text and not has_media:
-        return _cabinet_response({"error": "empty", "message": "Пустое сообщение."}, status=400)
-    sender_name = (info.get("master_name") or info.get("name")
-                   or tg_user.get("first_name") or "Сотрудник")
-    _presence_touch(tg_id, sender_name, sending=True)
-    msg_id = await asyncio.to_thread(
-        database.add_staff_message, tg_id, sender_name, text,
-        media_kind, media_url, media_name, media_mime, media_size, media_dur)
-    maya_query = ""
-    if text and not has_media:
-        try:
-            import barber_knowledge
-            maya_query = barber_knowledge.extract_team_query(text)
-        except Exception as e:
-            logger.error(f"team_chat maya extract: {e}")
+    from canonical_team_communications import handle
+    return await handle(request, 'send')
 
-    async def _maya_bg(query: str):
-        try:
-            import barber_knowledge
-            payload = await asyncio.to_thread(barber_knowledge.answer_payload, query)
-            reply = (payload.get("text") or "").strip()
-            images = payload.get("images") or []
-            if reply:
-                await asyncio.to_thread(
-                    database.add_staff_message,
-                    0,
-                    "MAYA · наставник",
-                    reply,
-                    "", "", "", "", 0, 0,
-                )
-            for img in images[:2]:
-                url = (img.get("url") or "").strip()
-                if not url:
-                    continue
-                await asyncio.to_thread(
-                    database.add_staff_message,
-                    0,
-                    "MAYA · наставник",
-                    img.get("title") or "Схема из базы знаний",
-                    "image",
-                    url,
-                    img.get("name") or "",
-                    "image/jpeg",
-                    0,
-                    0,
-                )
-        except Exception as e:
-            logger.error(f"team_chat maya reply: {e}")
-
-    if maya_query:
-        _mt = asyncio.create_task(_maya_bg(maya_query))
-        _panel_bg_tasks.add(_mt)
-        _mt.add_done_callback(_panel_bg_tasks.discard)
-    # Пуши шлём в фоне (fire-and-forget). Telegram идёт через единый прокси и может
-    # тормозить × N получателей — нельзя держать ответ синхронно: Beget-прокси ждёт
-    # max 25с, по таймауту считает медиафайл «осиротевшим» и удаляет его (@unlink),
-    # хотя сообщение уже сохранено выше → потом голосовое отдаёт 404. Отвечаем сразу.
-    async def _push_bg():
-        try:
-            await _push_team_message(request.app["bot_app"], tg_id, sender_name, text, media_kind)
-        except Exception as e:
-            logger.error(f"team_chat push: {e}")
-    _pt = asyncio.create_task(_push_bg())
-    _panel_bg_tasks.add(_pt)
-    _pt.add_done_callback(_panel_bg_tasks.discard)
-    return _cabinet_response({"ok": True, "id": msg_id})
 
 
 async def team_chat_upload_auth_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team_chat/upload_auth — lightweight staff auth before large media upload."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if not _is_staff_info(info):
-        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
-    return _cabinet_response({"ok": True})
+    from canonical_team_communications import handle
+    return await handle(request, 'reserve')
+
 
 
 async def team_chat_delete_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team_chat/delete — удалить своё сообщение из чата команды."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = int(tg_user["id"])
-    info = _panel_resolve_role(tg_id)
-    if not _is_staff_info(info):
-        return _cabinet_response({"error": "forbidden", "message": "Только для сотрудников."}, status=403)
-    try:
-        msg_id = int(body.get("id") or body.get("message_id") or 0)
-    except Exception:
-        msg_id = 0
-    if msg_id <= 0:
-        return _cabinet_response({"error": "bad_id", "message": "Не найдено сообщение."}, status=400)
+    from canonical_team_communications import handle
+    return await handle(request, 'withdraw')
 
-    result = await asyncio.to_thread(database.delete_staff_message, msg_id, tg_id)
-    if not result.get("ok"):
-        reason = result.get("reason")
-        if reason == "forbidden":
-            return _cabinet_response({"error": "forbidden", "message": "Можно удалить только своё сообщение."}, status=403)
-        return _cabinet_response({"error": "not_found", "message": "Сообщение уже удалено."}, status=404)
-    msg = result.get("message") or {}
-    return _cabinet_response({
-        "ok": True,
-        "id": msg_id,
-        "media_url": msg.get("media_url") or "",
-    })
 
 
 async def team_chat_fetch_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/team_chat/fetch — забрать сообщения. Тело: {since_id?}.
-    since_id=0 → последние 50, если не передан session_only=1.
-    session_only=1 → начать новую пустую сессию и читать только новые сообщения."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    tg_id = int(tg_user["id"])
-    info = _panel_resolve_role(tg_id)
-    if not _is_staff_info(info):
-        return _cabinet_response({"error": "forbidden"}, status=403)
-    try:
-        since_id = int(body.get("since_id") or 0)
-    except Exception:
-        since_id = 0
-    session_only = bool(body.get("session_only"))
-    sender_name = (info.get("master_name") or info.get("name")
-                   or tg_user.get("first_name") or "Сотрудник")
-    if since_id <= 0 and session_only:
-        latest_id = await asyncio.to_thread(database.get_staff_latest_message_id)
-        _presence_touch(tg_id, sender_name, typing=bool(body.get("typing")))
-        online, typing = _presence_snapshot(tg_id)
-        return _cabinet_response({
-            "messages": [],
-            "me": tg_id,
-            "online": online,
-            "typing": typing,
-            "latest_id": latest_id,
-            "session_only": True,
-        })
-    if since_id > 0:
-        msgs = await asyncio.to_thread(database.get_staff_messages_since, since_id, 100)
-    else:
-        msgs = await asyncio.to_thread(database.get_staff_messages_recent, 50)
-    msgs = _team_chat_mark_media_expiry(msgs)
-    # присутствие: сам факт поллинга = «я онлайн»; флаг typing — что сейчас набираю
-    _presence_touch(tg_id, sender_name, typing=bool(body.get("typing")))
-    online, typing = _presence_snapshot(tg_id)
-    return _cabinet_response({"messages": msgs, "me": tg_id, "online": online, "typing": typing})
+    from canonical_team_communications import handle
+    return await handle(request, 'feed')
+
 
 
 async def panel_journal_attendance_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_attendance — статус визита (только ВЛАДЕЛЕЦ).
-    Тело: {record_id, attendance}. attendance: -1 не пришёл, 0 ожидание, 1 пришёл, 2 подтвердил."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    try:
-        attendance = int(body.get("attendance"))
-    except Exception:
-        attendance = None
-    if not record_id or attendance not in (-1, 0, 1, 2):
-        return _cabinet_response({"error": "missing", "message": "Нужны запись и корректный статус."}, status=400)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    try:
-        result = await asyncio.to_thread(_yc.set_record_attendance, record_id, attendance)
-    except Exception as e:
-        logger.error("journal_attendance: %s", e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось обновить статус."}, status=502)
-    if result.get("success"):
-        return _cabinet_response({"ok": True, "record_id": result.get("record_id"), "attendance": attendance})
-    return _cabinet_response({"error": "attendance_failed", "message": result.get("error") or "YClients отклонил статус."}, status=400)
+    """B18: legacy journal write retired; use authenticated SaaS CRM journal."""
+    del request
+    return _cabinet_response({
+        "ok": False,
+        "error": "canonical_staff_session_required",
+        "message": "Войдите в рабочий кабинет, чтобы изменить статус визита.",
+        "canonical_authority": "CrmStaffAccess",
+        "canonical_action": "set_appointment_attendance",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_journal_record_handler(request: web.Request) -> web.Response:
@@ -13108,18 +9824,8 @@ async def panel_journal_record_handler(request: web.Request) -> web.Response:
     })
 
 
-# Сериализация оплаты по record_id: два параллельных «закрыть оплатой» (двойной тап)
-# не должны создать две кассовые операции. Три рубежа: (1) durable-флаг в БД
-# (payment_idempotency) — переживает рестарт; (2) in-process lock на record_id; (3)
-# сам set_record_paid сверяется с истиной YClients (paid_full + поиск существующей
-# транзакции) и вернёт already_paid. У YClients своего ключа идемпотентности нет.
-_pay_locks: dict = {}
-
-
 async def panel_journal_pay_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_pay {record_id, method} — закрыть визит оплатой
-    из карточки журнала. method: cash|card. Реюзает set_record_paid:
-    кассовая транзакция + PUT attendance=1/paid_full=1."""
+    """POST /api/panel/journal_pay — disabled until the provider gate is reopened."""
     try:
         body = await request.json()
     except Exception:
@@ -13134,218 +9840,73 @@ async def panel_journal_pay_handler(request: web.Request) -> web.Response:
         record_id = int(body.get("record_id") or 0)
     except Exception:
         record_id = 0
-    method = (body.get("method") or "").strip().lower()
-    if method not in ("cash", "card"):
-        method = "cash"
     if not record_id:
         return _cabinet_response({"error": "missing", "message": "Нужен ID записи."}, status=400)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-
-    def _already_resp(prev):
-        return _cabinet_response({
-            "ok": True, "record_id": record_id,
-            "method": (prev.get("method") if prev else None) or method,
-            "paid": True, "attendance": 1,
-            "amount": prev.get("amount") if prev else None,
-            "already_paid": True,
-        })
-
-    # Durable-идемпотентность: этот визит уже оплачивали → не дёргаем YClients повторно
-    # (защита от двойного тапа/ретрая даже после рестарта процесса).
-    prev = database.payment_already_done(record_id)
-    if prev:
-        return _already_resp(prev)
-
-    if len(_pay_locks) > 512:        # не течём памятью на долгоживущем процессе
-        _pay_locks.clear()
-    lock = _pay_locks.setdefault(record_id, asyncio.Lock())
-    try:
-        async with lock:
-            # повторная проверка под локом — параллельный запрос мог успеть зафиксировать
-            prev = database.payment_already_done(record_id)
-            if prev:
-                return _already_resp(prev)
-            result = await asyncio.to_thread(_yc.set_record_paid, record_id, True, method)
-    except Exception as e:
-        logger.error("journal_pay %s: %s", record_id, e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось провести оплату."}, status=502)
-    if result.get("success"):
-        # фиксируем durable-флаг (INSERT OR IGNORE — повтор не перезатирает первую оплату)
-        database.mark_payment_done(record_id, method, result.get("amount"))
-        return _cabinet_response({
-            "ok": True,
+    return _cabinet_response(
+        {
+            "error": "visit_payment_write_provider_contract_deferred",
+            "message": (
+                "Проведение оплаты временно доступно только вручную в YClients. "
+                "MAYA продолжает показывать текущий статус оплаты визита."
+            ),
             "record_id": record_id,
-            "method": method,
-            "paid": True,
-            "attendance": 1,
-            "amount": result.get("amount"),
-            "already_paid": bool(result.get("already_paid")),
-            "transaction": result.get("transaction"),
-        })
-    return _cabinet_response({"error": "pay_failed", "message": result.get("error") or "YClients отклонил оплату."}, status=400)
+            "manual_handoff": "yclients",
+            "retry_allowed": False,
+        },
+        status=503,
+    )
 
 
 async def panel_journal_add_service_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_add_service {record_id, service_ids[]} — добавить
-    услугу(и) к визиту (только ВЛАДЕЛЕЦ)."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    add_ids = []
-    for x in (body.get("service_ids") or []):
-        try:
-            add_ids.append(int(x))
-        except Exception:
-            pass
-    if not record_id or not add_ids:
-        return _cabinet_response({"error": "missing", "message": "Нужны запись и услуга."}, status=400)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    try:
-        result = await asyncio.to_thread(_yc.add_services_to_record, record_id, add_ids)
-    except Exception as e:
-        logger.error("journal_add_service %s: %s", record_id, e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось добавить услугу."}, status=502)
-    if result.get("success"):
-        return _cabinet_response({"ok": True, "record_id": record_id})
-    return _cabinet_response({"error": "add_failed", "message": result.get("error") or "YClients отклонил добавление."}, status=400)
+    """B18: legacy journal service mutation retired."""
+    del request
+    return _cabinet_response({
+        "ok": False,
+        "error": "canonical_staff_session_required",
+        "message": "Войдите в рабочий кабинет, чтобы изменить услуги визита.",
+        "canonical_authority": "CrmStaffAccess",
+        "canonical_action": "set_appointment_services",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_journal_set_services_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_set_services {record_id, service_ids[]} — задать
-    полный список услуг визита (добавить/удалить/заменить). Персонал.
-    Длительность визита пересчитывается = сумме длительностей услуг."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    ids = []
-    for x in (body.get("service_ids") or []):
-        try:
-            ids.append(int(x))
-        except Exception:
-            pass
-    if not record_id:
-        return _cabinet_response({"error": "missing", "message": "Нужен ID записи."}, status=400)
-    if not ids:
-        return _cabinet_response({"error": "missing", "message": "В визите должна остаться хотя бы одна услуга."}, status=400)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    try:
-        result = await asyncio.to_thread(_yc.set_record_services, record_id, ids)
-    except Exception as e:
-        logger.error("journal_set_services %s: %s", record_id, e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось изменить услуги."}, status=502)
-    if result.get("success"):
-        return _cabinet_response({"ok": True, "record_id": record_id})
-    return _cabinet_response({"error": "set_failed", "message": result.get("error") or "YClients отклонил изменение."}, status=400)
+    """B18: legacy journal service mutation retired."""
+    del request
+    return _cabinet_response({
+        "ok": False,
+        "error": "canonical_staff_session_required",
+        "message": "Войдите в рабочий кабинет, чтобы изменить услуги визита.",
+        "canonical_authority": "CrmStaffAccess",
+        "canonical_action": "set_appointment_services",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_journal_set_duration_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_set_duration {record_id, duration_minutes} — изменить
-    длительность визита («стянуть»/растянуть запись в журнале). Персонал.
-    Время начала, услуги, цены и клиент не меняются."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    try:
-        minutes = int(body.get("duration_minutes") or 0)
-    except Exception:
-        minutes = 0
-    if not record_id:
-        return _cabinet_response({"error": "missing", "message": "Нужен ID записи."}, status=400)
-    if not (5 <= minutes <= 720):
-        return _cabinet_response({"error": "bad_duration", "message": "Длительность — от 5 минут до 12 часов."}, status=400)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    try:
-        result = await asyncio.to_thread(_yc.set_record_duration, record_id, minutes * 60)
-    except Exception as e:
-        logger.error("journal_set_duration %s: %s", record_id, e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось изменить длительность."}, status=502)
-    if result.get("success"):
-        return _cabinet_response({"ok": True, "record_id": record_id, "duration_minutes": minutes})
-    return _cabinet_response({"error": "set_failed", "message": result.get("error") or "YClients отклонил изменение."}, status=400)
+    """B18: legacy journal duration mutation retired."""
+    del request
+    return _cabinet_response({
+        "ok": False,
+        "error": "canonical_staff_session_required",
+        "message": "Войдите в рабочий кабинет, чтобы изменить длительность визита.",
+        "canonical_authority": "CrmStaffAccess",
+        "canonical_action": "set_appointment_duration",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def panel_journal_set_client_name_handler(request: web.Request) -> web.Response:
-    """POST /api/panel/journal_set_client_name {record_id, client_name?, client_phone?} —
-    обновить имя и/или телефон клиента в карточке записи. Персонал."""
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    tg_user = _panel_auth(body, request.headers.get("X-Telegram-InitData", ""))
-    if not tg_user or not tg_user.get("id"):
-        return _cabinet_response({"error": "unauthorized"}, status=401)
-    info = _panel_resolve_role(int(tg_user["id"]))
-    if info.get("role") not in ("owner", "manager", "master"):
-        return _cabinet_response({"error": "forbidden", "message": "Доступно только персоналу."}, status=403)
-    try:
-        record_id = int(body.get("record_id") or 0)
-    except Exception:
-        record_id = 0
-    name = str(body.get("client_name") or body.get("name") or "").strip()
-    phone = str(body.get("client_phone") or body.get("phone") or "").strip()
-    if not record_id:
-        return _cabinet_response({"error": "missing", "message": "Нужен ID записи."}, status=400)
-    if not name and not phone:
-        return _cabinet_response({"error": "missing", "message": "Введите имя или телефон клиента."}, status=400)
-    if phone and info.get("role") != "owner":
-        return _cabinet_response({"error": "forbidden", "message": "Телефон клиента может менять только владелец."}, status=403)
-    _grec, _gerr = await _panel_record_guard(info, record_id)
-    if _gerr:
-        return _gerr
-    try:
-        result = await asyncio.to_thread(_yc.set_record_client_name, record_id, name or None, phone or None)
-    except Exception as e:
-        logger.error("journal_set_client_name %s: %s", record_id, e)
-        return _cabinet_response({"error": "yclients", "message": "Не удалось сохранить данные клиента."}, status=502)
-    if result.get("success"):
-        return _cabinet_response({
-            "ok": True,
-            "record_id": record_id,
-            "client": result.get("client") or name,
-            "phone": result.get("phone") or phone,
-        })
-    return _cabinet_response({"error": "set_failed", "message": result.get("error") or "YClients отклонил изменение."}, status=400)
+    """B18: legacy journal Client-field mutation retired."""
+    del request
+    return _cabinet_response({
+        "ok": False,
+        "error": "canonical_staff_session_required",
+        "message": "Это действие доступно только через подтверждённый рабочий кабинет.",
+        "canonical_authority": "CrmStaffAccess",
+        "canonical_action": "set_appointment_fields",
+        "business_mutations": 0,
+    }, status=410)
 
 
 async def start_webhook_server(bot_app: Application):
@@ -13360,7 +9921,7 @@ async def start_webhook_server(bot_app: Application):
     # как base64-data-url; в нативном iOS-WKWebView (нет MediaRecorder) запись идёт
     # несжатым WAV (PCM) — крупнее webm/opus. Поднимаем лимит до 10 МБ, иначе запись
     # голоса с iPhone отбивается 413 ещё до распознавания.
-    web_app = web.Application(client_max_size=10 * 1024 * 1024)
+    web_app = web.Application(client_max_size=10 * 1024 * 1024, middlewares=[canonical_staff_access.middleware])
     web_app["bot_app"] = bot_app
 
     web_app.router.add_post("/yclients-webhook", handle_yclients_webhook)
@@ -13369,6 +9930,17 @@ async def start_webhook_server(bot_app: Application):
     # API для Mini App / PWA — личный кабинет
     web_app.router.add_get("/api/cabinet/me", cabinet_me_handler)
     web_app.router.add_options("/api/cabinet/me", cabinet_options_handler)
+    web_app.router.add_post(
+        "/api/internal/loyalty-snapshot", internal_loyalty_snapshot_handler
+    )
+    web_app.router.add_post(
+        "/api/internal/action-engine/privacy-telegram",
+        internal_privacy_telegram_handler,
+    )
+    web_app.router.add_post(
+        "/api/internal/action-engine/package2-telegram",
+        internal_package2_telegram_handler,
+    )
 
     # API для PWA через Telegram Login Widget (когда PWA открыта в браузере)
     web_app.router.add_post("/api/cabinet/me-via-login", cabinet_me_via_login_handler)
@@ -13393,6 +9965,8 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/cabinet/link-phone", cabinet_options_handler)
     web_app.router.add_post("/api/booking/prefill", booking_prefill_handler)
     web_app.router.add_options("/api/booking/prefill", cabinet_options_handler)
+    web_app.router.add_post("/api/client/feedback", client_native_feedback_handler)
+    web_app.router.add_options("/api/client/feedback", cabinet_options_handler)
     web_app.router.add_post("/api/client/cancel-record", client_cancel_record_handler)
     web_app.router.add_options("/api/client/cancel-record", cabinet_options_handler)
     web_app.router.add_post("/api/client/reschedule-record", client_reschedule_record_handler)
@@ -13427,6 +10001,7 @@ async def start_webhook_server(bot_app: Application):
 
     # API push-уведомлений для мастеров
     web_app.router.add_post("/api/push/subscribe", push_subscribe_handler)
+    web_app.router.add_post("/api/push/unsubscribe", push_unsubscribe_handler)
     web_app.router.add_options("/api/push/subscribe", chat_options_handler)
 
     # API события чаевых с внутреннего экрана приложения
@@ -13434,6 +10009,7 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/tips/sent", chat_options_handler)
 
     # API согласий 152-ФЗ для приложения (та же БД и логика, что у бота)
+    web_app.router.add_post("/api/client-link/consume", client_link_consume_handler)
     web_app.router.add_post("/api/consent/status", consent_status_handler)
     web_app.router.add_options("/api/consent/status", chat_options_handler)
     web_app.router.add_post("/api/consent/submit", consent_submit_handler)
@@ -13582,7 +10158,6 @@ async def start_webhook_server(bot_app: Application):
     globals()["_WEBHOOK_SITE"] = site
     asyncio.create_task(master_day_brief_loop(bot_app))
     asyncio.create_task(client_retention_refresh_loop(bot_app))
-    asyncio.create_task(reputation_monitor_loop(bot_app))
     asyncio.create_task(master_shift_reminder_loop(bot_app))
     asyncio.create_task(waitlist_admin_alert_loop(bot_app))
     asyncio.create_task(maya_operating_rhythm_loop(bot_app))

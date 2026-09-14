@@ -1,0 +1,51 @@
+{
+  "base": "2ba294d5",
+  "stages": [
+    {
+      "name": "targeted",
+      "exitCode": 0,
+      "seconds": 1.51
+    },
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "seconds": 31.77
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "seconds": 5.23
+    },
+    {
+      "name": "typecheck-scripts",
+      "exitCode": 0,
+      "seconds": 11.08
+    },
+    {
+      "name": "build",
+      "exitCode": 0,
+      "seconds": 14.95
+    },
+    {
+      "name": "schema-validate",
+      "exitCode": 0,
+      "seconds": 0.46
+    },
+    {
+      "name": "schema-status",
+      "exitCode": 0,
+      "seconds": 0.42
+    },
+    {
+      "name": "schema-diff",
+      "exitCode": 0,
+      "seconds": 0.51
+    },
+    {
+      "name": "mandatory",
+      "exitCode": 0,
+      "seconds": 275.42
+    }
+  ],
+  "status": "PASS"
+}

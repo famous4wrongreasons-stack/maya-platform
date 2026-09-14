@@ -108,7 +108,9 @@ describe('InternalCalendarService provider creation', () => {
       createService();
 
     const result = await tenantContext.runAsSystemTenant('tenant-a', () =>
-      service.createProvider('tenant-a', { displayName: 'Специалист 2' }),
+      service.bootstrapCreateProvider('tenant-a', {
+        displayName: 'Специалист 2',
+      }),
     );
 
     expect(result).toMatchObject({
@@ -150,7 +152,9 @@ describe('InternalCalendarService provider creation', () => {
 
     await expect(
       tenantContext.runAsSystemTenant('tenant-a', () =>
-        service.createProvider('tenant-b', { displayName: 'Чужой мастер' }),
+        service.bootstrapCreateProvider('tenant-b', {
+          displayName: 'Чужой мастер',
+        }),
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(prisma.tenant.findUnique).not.toHaveBeenCalled();
@@ -164,7 +168,9 @@ describe('InternalCalendarService provider creation', () => {
 
     await expect(
       tenantContext.runAsSystemTenant('tenant-a', () =>
-        service.createProvider('tenant-a', { displayName: 'Blocked' }),
+        service.bootstrapCreateProvider('tenant-a', {
+          displayName: 'Blocked',
+        }),
       ),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(tx.internalProvider.create).not.toHaveBeenCalled();
@@ -184,7 +190,9 @@ describe('InternalCalendarService provider creation', () => {
     });
 
     await tenantContext.runAsSystemTenant('tenant-a', () =>
-      service.updateProvider('tenant-a', 'provider-2', { active: true }),
+      service.bootstrapUpdateProvider('tenant-a', 'provider-2', {
+        active: true,
+      }),
     );
 
     expect(assertCanCreateMock).toHaveBeenCalledWith('tenant-a', 'staff');

@@ -1,0 +1,32 @@
+{
+  "reason": "STOP_PRODUCTION_BASELINE_DIVERGENCE",
+  "backups": [
+    {
+      "database": "maya_rc_replay",
+      "backup": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/stop-synthetic-db-backups/maya_rc_replay.dump",
+      "sha256": "01971b0242843d580b67b9a4cfb032b4de931560875eaca25d99a532007af15d",
+      "bytes": 862913
+    },
+    {
+      "database": "maya_rc_b36_runtime",
+      "backup": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/stop-synthetic-db-backups/maya_rc_b36_runtime.dump",
+      "sha256": "a6c8370cf89c73b310a05780b8fc81e5c32b96bb8e7e75bb20efec9e1531e0b9",
+      "bytes": 972688
+    },
+    {
+      "database": "maya_rc_clean_replay",
+      "backup": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-wave-rc-implementation/stop-synthetic-db-backups/maya_rc_clean_replay.dump",
+      "sha256": "7eca21f93c81f52f5263a4fd5c6012d2728a9cf86766fa01fe04dfd48c707833",
+      "bytes": 1924418
+    }
+  ],
+  "ownedTemporaryDatabasesRemaining": 0,
+  "ownedPostgresProcessesRemaining": 0,
+  "preExistingDatabasesTouched": 0,
+  "ownedPort": 55509,
+  "ownedClusterStopped": true,
+  "ownedWatchersRemaining": 0,
+  "ownedBrowsersRemaining": 0,
+  "ownedPortListenerRemaining": 0,
+  "ownedTempProcessesRemaining": 0
+}

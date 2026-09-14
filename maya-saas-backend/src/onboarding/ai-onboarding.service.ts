@@ -1,3 +1,5 @@
+import { AiConfirmationCoordinatorService } from './ai-confirmation-coordinator.service';
+import { CanonicalTrialOnboardingService } from './canonical-trial-onboarding.service';
 import {
   BadRequestException,
   ConflictException,
@@ -11,10 +13,9 @@ import { createHash, randomBytes, timingSafeEqual } from 'crypto';
 
 import type { AuthClientMetadata } from '../auth/auth-client-metadata';
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
-import { CalendarSource } from '../common/domain.enums';
-import { InternalCalendarService } from '../internal-calendar/internal-calendar.service';
+import { CalendarSource, CrmProvider } from '../common/domain.enums';
+import { CrmService } from '../crm/crm.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { TenantContextService } from '../tenancy/tenant-context.service';
 import type {
   AiOnboardingBlueprint,
   AiOnboardingInterpretation,
@@ -32,22 +33,24 @@ import {
   ConfirmAiOnboardingDraftDto,
   ContinueAiOnboardingDraftDto,
   CreateAiOnboardingDraftDto,
+  DiscoverAiOnboardingCrmDto,
+  ImportAiOnboardingCrmDto,
 } from './dto/ai-onboarding.dto';
-import { OnboardingService } from './onboarding.service';
 import { ConversationalOnboardingInterpreter } from './conversational-onboarding-interpreter';
 import { TrialActivationService } from './trial-activation.service';
 
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
+const RELEASE_CATEGORY_IDS = new Set(['solo_barber', 'business_barbershop']);
 
 @Injectable()
 export class AiOnboardingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly interpreter: ConversationalOnboardingInterpreter,
-    private readonly onboardingService: OnboardingService,
-    private readonly internalCalendarService: InternalCalendarService,
+    private readonly canonicalTrial: CanonicalTrialOnboardingService,
+    private readonly confirmation: AiConfirmationCoordinatorService,
+    private readonly crmService: CrmService,
     private readonly rateLimitService: AuthRateLimitService,
-    private readonly tenantContext: TenantContextService,
     private readonly trialActivationService: TrialActivationService,
   ) {}
 
@@ -70,6 +73,10 @@ export class AiOnboardingService {
         industry_preset_id: category.industryPresetId,
         provider_title: category.providerTitle,
         suggested_services: category.suggestedServices,
+        available: RELEASE_CATEGORY_IDS.has(category.id),
+        unavailable_reason: RELEASE_CATEGORY_IDS.has(category.id)
+          ? null
+          : 'Скоро. На первом этапе MAYA OS подключает только барберов и барбершопы.',
       })),
       templates: listBusinessTemplates().map((template) => ({
         id: template.id,
@@ -102,10 +109,8 @@ export class AiOnboardingService {
         error: { code: 'trial_activation_draft_exists' },
       });
     }
-    const interpretation = await this.interpreter.interpret(
-      dto.message,
-      undefined,
-      dto.templateId,
+    const interpretation = this.applyReleasePolicy(
+      await this.interpreter.interpret(dto.message, undefined, dto.templateId),
     );
     const token = randomBytes(32).toString('base64url');
     const draft = await this.prisma.aiOnboardingDraft.create({
@@ -139,13 +144,16 @@ export class AiOnboardingService {
     });
     const draft = await this.getAuthorizedDraft(draftId, dto.draftToken);
     this.assertEditable(draft);
-    const interpretation = await this.interpreter.interpret(
-      dto.message,
-      this.readBlueprint(draft.blueprintJson),
+    const interpretation = this.applyReleasePolicy(
+      await this.interpreter.interpret(
+        dto.message,
+        this.readBlueprint(draft.blueprintJson),
+      ),
     );
     const updated = await this.prisma.aiOnboardingDraft.update({
-      where: { id: draft.id },
+      where: { id: draft.id, revision: draft.revision, status: 'draft' },
       data: {
+        revision: { increment: 1 },
         templateId: interpretation.blueprint.templateId,
         blueprintJson: this.asJson(interpretation.blueprint),
         missingFieldsJson: interpretation.missingFields,
@@ -168,13 +176,161 @@ export class AiOnboardingService {
     return this.serializeDraft(draft);
   }
 
+  async discoverDraftCrm(
+    draftId: string,
+    dto: DiscoverAiOnboardingCrmDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
+    await this.rateLimitService.assertPreflight('ai_onboarding', {
+      clientIp: metadata.clientIp,
+      identity: this.hashToken(dto.draftToken),
+    });
+    const draft = await this.getAuthorizedDraft(draftId, dto.draftToken);
+    this.assertEditable(draft);
+    this.assertCrmOnboardingReady(this.readBlueprint(draft.blueprintJson));
+    this.assertReleaseCrmProvider(dto.provider);
+
+    return this.crmService.discoverCompaniesForCredential({
+      provider: dto.provider,
+      apiToken: dto.apiToken,
+    });
+  }
+
+  async importDraftCrm(
+    draftId: string,
+    dto: ImportAiOnboardingCrmDto,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
+    await this.rateLimitService.assertPreflight('ai_onboarding', {
+      clientIp: metadata.clientIp,
+      identity: this.hashToken(dto.draftToken),
+    });
+    const draft = await this.getAuthorizedDraft(draftId, dto.draftToken);
+    this.assertEditable(draft);
+    const current = this.readBlueprint(draft.blueprintJson);
+    this.assertCrmOnboardingReady(current);
+    this.assertReleaseCrmProvider(dto.provider);
+
+    const companyId = dto.companyId.trim();
+    const numericCompanyId = Number(companyId);
+    const preview = await this.crmService.previewCredentials(
+      dto.provider,
+      dto.apiToken,
+      {
+        companyId:
+          Number.isFinite(numericCompanyId) && numericCompanyId > 0
+            ? numericCompanyId
+            : companyId,
+      },
+    );
+    const company = preview.company;
+
+    if (!company) {
+      throw new BadRequestException({
+        message: 'CRM did not return the selected business profile',
+        error: {
+          code: 'crm_company_profile_missing',
+          message:
+            'Не удалось загрузить данные выбранного филиала. Выберите его ещё раз.',
+        },
+      });
+    }
+
+    const blueprint: AiOnboardingBlueprint = {
+      ...current,
+      templateId: 'barbershop',
+      businessName: company.title,
+      businessNameDeferred: false,
+      businessNameGenerated: false,
+      summary: `Барбершоп «${company.title}» подключается к MAYA через CRM`,
+      industryPresetId: 'barbershop',
+      calendarSource: CalendarSource.EXTERNAL,
+      calendarSourceConfirmed: true,
+      providerCount: Math.max(1, preview.staff.count),
+      providerTitle: 'Барбер',
+      services: preview.services.items.map((service) => ({
+        name: service.name,
+        price: service.price,
+        durationMinutes: service.duration_minutes,
+      })),
+      servicesDeferred: preview.services.count === 0,
+      scheduleAssumed: false,
+      crmImported: true,
+      crmProvider: dto.provider,
+      crmCompanyId: String(preview.company_id ?? company.id),
+      crmLogoUrl: this.safeRemoteLogoUrl(company.logo_url),
+      crmAddress: company.address,
+      crmTimezone: company.timezone,
+      crmScheduleLabel: company.schedule,
+      crmServiceCount: preview.services.count,
+      crmStaffCount: preview.staff.count,
+      crmStaffIdentityHashes: preview.team.items.map((staff) =>
+        this.crmStaffIdentityHash(
+          dto.provider,
+          String(preview.company_id ?? company.id),
+          staff.id,
+        ),
+      ),
+    };
+    const missingFields = this.getMissingFields(blueprint);
+    const interpretation: AiOnboardingInterpretation = {
+      assistantMessage:
+        `Я проверила CRM и подтянула «${company.title}»: ` +
+        `${preview.staff.count} специалистов, ${preview.services.count} услуг` +
+        `${blueprint.crmLogoUrl ? ' и логотип' : ''}. Проверьте данные и укажите контакты владельца.`,
+      blueprint,
+      confidence: 1,
+      missingFields,
+      needsClarification: missingFields.length > 0,
+      quickReplies:
+        missingFields.length === 0
+          ? [
+              {
+                label: 'Проверить и продолжить',
+                message: '',
+                action: 'confirm',
+              },
+            ]
+          : [],
+      source: 'safe_fallback',
+    };
+    const updated = await this.prisma.aiOnboardingDraft.update({
+      where: { id: draft.id, revision: draft.revision, status: 'draft' },
+      data: {
+        revision: { increment: 1 },
+        templateId: blueprint.templateId,
+        blueprintJson: this.asJson(blueprint),
+        missingFieldsJson: missingFields,
+        inputDigest: this.digestInput(`${dto.provider}:${companyId}`),
+        lastAssistantMessage: interpretation.assistantMessage,
+        quickRepliesJson: this.asJson(interpretation.quickReplies),
+        lastConfidence: interpretation.confidence,
+        needsClarification: interpretation.needsClarification,
+        interpreterSource: interpretation.source,
+        turnCount: { increment: 1 },
+      },
+    });
+
+    return {
+      ...this.serializeDraft(updated, undefined, interpretation),
+      crm_staff: preview.team.items.map((staff) => ({
+        external_staff_id: staff.id,
+        display_name: staff.name,
+        title: staff.title ?? staff.specialization ?? null,
+        avatar_url: this.safeRemoteLogoUrl(staff.avatar_url ?? null),
+        bookable: staff.bookable,
+        suggested_role: staff.suggested_role,
+      })),
+    };
+  }
+
   async confirmDraft(
     draftId: string,
     dto: ConfirmAiOnboardingDraftDto,
     metadata: Partial<AuthClientMetadata> = {},
   ) {
     const draft = await this.getAuthorizedDraft(draftId, dto.draftToken);
-    this.assertEditable(draft);
+    this.assertNotExpired(draft);
     let blueprint = this.applyConfirmationOverrides(
       this.readBlueprint(draft.blueprintJson),
       dto,
@@ -192,140 +348,91 @@ export class AiOnboardingService {
         },
       });
     }
+    this.assertCrmTeamAssignments(blueprint, dto);
 
-    const claimed = await this.prisma.aiOnboardingDraft.updateMany({
-      where: {
-        id: draft.id,
-        status: 'draft',
-        expiresAt: { gt: new Date() },
-      },
-      data: {
-        status: 'confirming',
-        blueprintJson: this.asJson(blueprint),
-        missingFieldsJson: [],
-      },
-    });
-    if (claimed.count !== 1) {
-      throw new ConflictException({
-        message: 'AI onboarding draft is already being confirmed',
-        error: { code: 'ai_onboarding_confirmation_in_progress' },
-      });
-    }
-
-    let createdTenantId: string | null = null;
-    try {
-      const businessName = blueprint.businessName!;
-      const signup = await this.onboardingService.createTrialSignup(
-        {
-          name: businessName,
-          slug: await this.createAvailableSlug(businessName),
-          ownerEmail: dto.ownerEmail,
-          ownerName: dto.ownerName,
-          ownerPhone: dto.ownerPhone,
-          password: dto.password,
-          trialActivationToken: dto.trialActivationToken,
-          industryPresetId: blueprint.industryPresetId,
-          calendarSource: blueprint.calendarSource,
-          branchName: businessName,
-        },
+    const result = await this.confirmation.confirm(
+      draft.id,
+      dto,
+      blueprint,
+      `${this.slugify(blueprint.businessName!) || 'maya'}-${this.hashToken(draft.id).slice(0, 12)}`,
+    );
+    return {
+      ...(await this.canonicalTrial.ownerSession(
+        result.tenantId,
+        result.ownerUserId,
         metadata,
-        { expectedActivationId: draft.trialActivationId },
-      );
-      createdTenantId = signup.tenant.id;
-
-      if (blueprint.calendarSource === CalendarSource.INTERNAL) {
-        await this.tenantContext.runAsSystemTenant(createdTenantId, () =>
-          this.provisionInternalCalendar(createdTenantId!, blueprint),
-        );
-      }
-
-      await this.prisma.aiOnboardingDraft.update({
-        where: { id: draft.id },
-        data: {
-          status: 'confirmed',
-          confirmedTenantId: createdTenantId,
-          blueprintJson: this.asJson(blueprint),
-        },
-      });
-
-      return {
-        ...signup,
-        ai_onboarding: {
-          draft_id: draft.id,
-          template_id: blueprint.templateId,
-          blueprint,
-        },
-        branding_mode: 'logo_only',
-        next_step:
-          blueprint.calendarSource === CalendarSource.EXTERNAL
-            ? 'connect_crm'
-            : 'upload_logo_or_open_app',
-      };
-    } catch (error) {
-      if (createdTenantId) {
-        await this.trialActivationService.releaseCompletedTenant(
-          createdTenantId,
-        );
-        await this.prisma.tenant.delete({
-          where: { id: createdTenantId },
-        });
-      }
-      await this.prisma.aiOnboardingDraft.updateMany({
-        where: { id: draft.id, status: 'confirming' },
-        data: { status: 'draft', confirmedTenantId: null },
-      });
-      throw error;
-    }
+      )),
+      ai_onboarding: result.ai_onboarding,
+      branding_mode: 'logo_only',
+      next_step: result.ai_onboarding.next_step,
+    };
   }
 
-  private async provisionInternalCalendar(
-    tenantId: string,
-    blueprint: AiOnboardingBlueprint,
-  ) {
-    const setup = await this.internalCalendarService.getSetup(tenantId);
-    const ownerProvider = setup.providers[0];
-    if (!ownerProvider) {
-      throw new ConflictException('Owner provider was not created');
-    }
-
-    await this.internalCalendarService.updateProvider(
-      tenantId,
-      ownerProvider.id,
-      {
-        title: blueprint.providerTitle,
+  async pendingConfirmations(tenantId: string, ownerUserId: string) {
+    const member = await this.prisma.membership.findUnique({
+      where: { userId_tenantId: { tenantId, userId: ownerUserId } },
+      include: { user: true },
+    });
+    if (
+      !member ||
+      member.status !== 'active' ||
+      member.user.status !== 'active' ||
+      !['tenant_owner', 'business_owner'].includes(member.role)
+    )
+      throw new UnauthorizedException('Exact active owner required');
+    const drafts = await this.prisma.aiOnboardingDraft.findMany({
+      where: {
+        status: 'confirming',
+        AND: [
+          {
+            confirmationReceiptJson: {
+              path: ['expectedTenantId'],
+              equals: tenantId,
+            },
+          },
+          {
+            confirmationReceiptJson: {
+              path: ['ownerUserId'],
+              equals: ownerUserId,
+            },
+          },
+        ],
+        trialActivation: { tenantId, status: 'completed' },
       },
+      select: { id: true, revision: true },
+      take: 2,
+    });
+    if (drafts.length > 1)
+      throw new ConflictException(
+        'Ambiguous confirmation requires explicit review',
+      );
+    return { confirmations: drafts };
+  }
+
+  async resumeConfirmation(
+    draftId: string,
+    tenantId: string,
+    ownerUserId: string,
+  ) {
+    const result = await this.confirmation.resume(
+      draftId,
+      tenantId,
+      ownerUserId,
     );
-    const providers = [ownerProvider];
-    for (let index = 1; index < blueprint.providerCount!; index += 1) {
-      providers.push(
-        await this.internalCalendarService.createProvider(tenantId, {
-          displayName: `${blueprint.providerTitle} ${index + 1}`,
-          title: blueprint.providerTitle,
-        }),
-      );
-    }
-
-    for (const service of blueprint.services) {
-      await this.internalCalendarService.createService(tenantId, {
-        name: service.name,
-        price: service.price,
-        durationMinutes: service.durationMinutes,
-      });
-    }
-
-    for (const provider of providers) {
-      await this.internalCalendarService.replaceWeeklyAvailability(
-        tenantId,
-        provider.id,
-        blueprint.weeklyRules,
-      );
-    }
+    return {
+      ai_onboarding: result.ai_onboarding,
+      next_step: result.ai_onboarding.next_step,
+    };
   }
 
   private applyConfirmationOverrides(
     current: AiOnboardingBlueprint,
     dto: ConfirmAiOnboardingDraftDto,
   ): AiOnboardingBlueprint {
+    if (current.crmImported) {
+      return current;
+    }
+
     const template = getBusinessTemplate(dto.templateId ?? current.templateId);
     const category = getOnboardingCategory(current.categoryId);
     const businessName = dto.businessName?.trim() || current.businessName;
@@ -361,6 +468,69 @@ export class AiOnboardingService {
     };
   }
 
+  private assertCrmTeamAssignments(
+    blueprint: AiOnboardingBlueprint,
+    dto: ConfirmAiOnboardingDraftDto,
+  ): void {
+    const ownerExternalStaffId = dto.ownerExternalStaffId?.trim() || null;
+    const verifiedHashes = new Set(blueprint.crmStaffIdentityHashes ?? []);
+    if (
+      blueprint.crmImported &&
+      verifiedHashes.size > 0 &&
+      !ownerExternalStaffId
+    ) {
+      throw new BadRequestException({
+        message:
+          'Select your CRM employee profile before creating the business.',
+        error: { code: 'crm_team_owner_required' },
+      });
+    }
+
+    const requestedIds = [
+      ...(ownerExternalStaffId ? [ownerExternalStaffId] : []),
+      ...(dto.teamMembers ?? []).map((member) => member.externalStaffId),
+    ];
+    if (requestedIds.length === 0) return;
+    if (
+      !blueprint.crmImported ||
+      !blueprint.crmProvider ||
+      !blueprint.crmCompanyId
+    ) {
+      throw new BadRequestException({
+        message: 'CRM team roles require a verified CRM import.',
+        error: { code: 'crm_team_requires_verified_import' },
+      });
+    }
+
+    const invalid = requestedIds.find(
+      (externalStaffId) =>
+        !verifiedHashes.has(
+          this.crmStaffIdentityHash(
+            blueprint.crmProvider!,
+            blueprint.crmCompanyId!,
+            externalStaffId,
+          ),
+        ),
+    );
+    if (invalid) {
+      throw new BadRequestException({
+        message:
+          'A selected team member is not part of the verified CRM branch.',
+        error: { code: 'crm_team_member_not_verified' },
+      });
+    }
+  }
+
+  private crmStaffIdentityHash(
+    provider: string,
+    companyId: string,
+    externalStaffId: string,
+  ): string {
+    return createHash('sha256')
+      .update(`${provider}:${companyId}:${externalStaffId.trim()}`)
+      .digest('hex');
+  }
+
   private materializeDeferredBusinessName(
     blueprint: AiOnboardingBlueprint,
     ownerName: string,
@@ -385,18 +555,229 @@ export class AiOnboardingService {
   private getMissingFields(
     blueprint: AiOnboardingBlueprint,
   ): AiOnboardingMissingField[] {
+    if (this.legacyHttpSmokeEnabled()) {
+      const missing: AiOnboardingMissingField[] = [];
+      if (!blueprint.workMode) missing.push('work_mode');
+      if (!blueprint.categoryId) missing.push('category');
+      if (!blueprint.businessName?.trim() && !blueprint.businessNameDeferred) {
+        missing.push('business_name');
+      }
+      if (!blueprint.providerCount) missing.push('provider_count');
+      if (blueprint.services.length === 0 && !blueprint.servicesDeferred) {
+        missing.push('services');
+      }
+      if (!blueprint.calendarSourceConfirmed) missing.push('calendar_source');
+      return missing;
+    }
+
     const missing: AiOnboardingMissingField[] = [];
     if (!blueprint.workMode) missing.push('work_mode');
-    if (!blueprint.categoryId) missing.push('category');
+    if (
+      !blueprint.categoryId ||
+      !RELEASE_CATEGORY_IDS.has(blueprint.categoryId)
+    ) {
+      missing.push('category');
+    }
+    if (!blueprint.calendarSourceConfirmed) {
+      missing.push('calendar_source');
+      return missing;
+    }
+    if (
+      blueprint.calendarSource !== CalendarSource.EXTERNAL ||
+      !blueprint.crmImported
+    ) {
+      missing.push('crm_import');
+      return missing;
+    }
     if (!blueprint.businessName?.trim() && !blueprint.businessNameDeferred) {
       missing.push('business_name');
     }
-    if (!blueprint.providerCount) missing.push('provider_count');
-    if (blueprint.services.length === 0 && !blueprint.servicesDeferred) {
-      missing.push('services');
-    }
-    if (!blueprint.calendarSourceConfirmed) missing.push('calendar_source');
     return missing;
+  }
+
+  private applyReleasePolicy(
+    interpretation: AiOnboardingInterpretation,
+  ): AiOnboardingInterpretation {
+    if (this.legacyHttpSmokeEnabled()) {
+      return interpretation;
+    }
+
+    let blueprint = { ...interpretation.blueprint };
+
+    if (!blueprint.workMode) {
+      return interpretation;
+    }
+
+    const category = getOnboardingCategory(blueprint.categoryId);
+    if (!category || !RELEASE_CATEGORY_IDS.has(category.id)) {
+      const unsupportedSelected = Boolean(blueprint.categoryId);
+      blueprint = {
+        ...blueprint,
+        categoryId: null,
+        crmImported: false,
+        crmCompanyId: null,
+        crmLogoUrl: null,
+      };
+      const options = listOnboardingCategories()
+        .filter((item) => item.workMode === blueprint.workMode)
+        .map((item) => ({
+          label: RELEASE_CATEGORY_IDS.has(item.id)
+            ? item.label
+            : `${item.label} · Скоро`,
+          message: item.selectionMessage,
+          action: RELEASE_CATEGORY_IDS.has(item.id)
+            ? undefined
+            : ('disabled' as const),
+          templateId: item.templateId,
+        }));
+
+      return {
+        ...interpretation,
+        assistantMessage: unsupportedSelected
+          ? 'Эта сфера появится позже. Сейчас тестовая версия MAYA OS подключает только барберов и барбершопы.'
+          : blueprint.workMode === 'solo'
+            ? 'Чем вы занимаетесь? На первом этапе доступен барбер, остальные профессии появятся позже.'
+            : 'Какой у вас бизнес? На первом этапе доступен барбершоп, остальные сферы появятся позже.',
+        blueprint,
+        missingFields: ['category'],
+        needsClarification: true,
+        quickReplies: options,
+      };
+    }
+
+    blueprint = {
+      ...blueprint,
+      templateId: 'barbershop',
+      industryPresetId: 'barbershop',
+      providerTitle: 'Барбер',
+      services: blueprint.crmImported ? blueprint.services : [],
+      servicesDeferred: blueprint.crmImported
+        ? blueprint.servicesDeferred
+        : true,
+      providerCount: blueprint.crmImported ? blueprint.providerCount : null,
+    };
+
+    if (
+      !blueprint.calendarSourceConfirmed ||
+      blueprint.calendarSource !== CalendarSource.EXTERNAL
+    ) {
+      blueprint = {
+        ...blueprint,
+        calendarSource: CalendarSource.EXTERNAL,
+        calendarSourceConfirmed: false,
+        crmImported: false,
+      };
+      return {
+        ...interpretation,
+        assistantMessage:
+          'У вас есть YClients или Altegio? Сейчас запуск MAYA OS доступен только с CRM: она сама подтянет название, специалистов, услуги, расписание и логотип.',
+        blueprint,
+        missingFields: ['calendar_source'],
+        needsClarification: true,
+        quickReplies: [
+          {
+            label: 'Есть CRM',
+            message: 'У меня есть CRM',
+            action: 'connect_crm',
+          },
+          {
+            label: 'Работаю без CRM · Скоро',
+            message: '',
+            action: 'disabled',
+          },
+        ],
+      };
+    }
+
+    if (!blueprint.crmImported) {
+      return {
+        ...interpretation,
+        assistantMessage:
+          'Подключим CRM сейчас. Токен вводится в защищённом поле и не попадает в переписку.',
+        blueprint,
+        missingFields: ['crm_import'],
+        needsClarification: true,
+        quickReplies: [
+          {
+            label: 'Подключить CRM',
+            message: '',
+            action: 'connect_crm',
+          },
+        ],
+      };
+    }
+
+    const missingFields = this.getMissingFields(blueprint);
+    return {
+      ...interpretation,
+      blueprint,
+      missingFields,
+      needsClarification: missingFields.length > 0,
+      assistantMessage:
+        missingFields.length === 0
+          ? 'Данные CRM загружены. Проверьте карточку и укажите контакты владельца.'
+          : interpretation.assistantMessage,
+      quickReplies:
+        missingFields.length === 0
+          ? [
+              {
+                label: 'Проверить и продолжить',
+                message: '',
+                action: 'confirm',
+              },
+            ]
+          : interpretation.quickReplies,
+    };
+  }
+
+  private legacyHttpSmokeEnabled(): boolean {
+    return (
+      process.env.NODE_ENV === 'test' &&
+      process.env.HTTP_SMOKE_ENABLE_LEGACY_AI_ONBOARDING === 'true'
+    );
+  }
+
+  private assertCrmOnboardingReady(blueprint: AiOnboardingBlueprint): void {
+    if (
+      !blueprint.categoryId ||
+      !RELEASE_CATEGORY_IDS.has(blueprint.categoryId)
+    ) {
+      throw new BadRequestException({
+        message: 'Barbershop category must be selected before CRM connection',
+        error: {
+          code: 'ai_onboarding_category_required',
+          message: 'Сначала выберите «Барбер» или «Барбершоп».',
+        },
+      });
+    }
+  }
+
+  private assertReleaseCrmProvider(provider: CrmProvider): void {
+    if (provider === CrmProvider.YCLIENTS || provider === CrmProvider.ALTEGIO) {
+      return;
+    }
+
+    throw new BadRequestException({
+      message: 'CRM provider is not available in the barbershop release',
+      error: {
+        code: 'crm_provider_not_available',
+        provider,
+        message: 'Сейчас доступны только YClients и Altegio.',
+      },
+    });
+  }
+
+  private safeRemoteLogoUrl(value: string | null): string | null {
+    if (!value) {
+      return null;
+    }
+
+    try {
+      const url = new URL(value);
+      return url.protocol === 'https:' ? url.toString() : null;
+    } catch {
+      return null;
+    }
   }
 
   private async getAuthorizedDraft(draftId: string, token: string) {
@@ -441,19 +822,6 @@ export class AiOnboardingService {
     }
   }
 
-  private async createAvailableSlug(name: string): Promise<string> {
-    const base = this.slugify(name) || `maya-${randomBytes(4).toString('hex')}`;
-    for (let attempt = 0; attempt < 20; attempt += 1) {
-      const slug = attempt === 0 ? base : `${base}-${attempt + 1}`;
-      const existing = await this.prisma.tenant.findUnique({
-        where: { slug },
-        select: { id: true },
-      });
-      if (!existing) return slug;
-    }
-    return `${base}-${randomBytes(4).toString('hex')}`;
-  }
-
   private slugify(value: string): string {
     const transliterated = value
       .toLowerCase()
@@ -478,6 +846,7 @@ export class AiOnboardingService {
     draft: {
       id: string;
       status: string;
+      revision: number;
       blueprintJson: unknown;
       missingFieldsJson: unknown;
       expiresAt: Date;
@@ -495,6 +864,7 @@ export class AiOnboardingService {
   ) {
     return {
       draft_id: draft.id,
+      revision: draft.revision,
       draft_token: draftToken,
       status: draft.status,
       assistant_message:

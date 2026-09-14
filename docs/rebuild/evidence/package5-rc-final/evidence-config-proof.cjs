@@ -1,0 +1,10 @@
+const fs=require('node:fs'),path=require('node:path'),{createRequire}=require('node:module'),assert=require('node:assert/strict');
+const req=createRequire(path.join(process.cwd(),'package.json')),env=req('dotenv').parse(fs.readFileSync('/etc/maya-saas/live-widgets.env')),pyenv=req('dotenv').parse(fs.readFileSync('/home/botadmin/barbershop-bot/.env'));
+const plan=JSON.parse(fs.readFileSync('/tmp/maya-wave-rc-8bc03454-python/config-plan.json')),state=JSON.parse(fs.readFileSync('/opt/maya-saas/release-evidence/wave-rc-8bc03454/cutover-state.json'));
+for(const[k,v]of Object.entries(plan.nest))assert.equal(env[k],v==='@CUTOVER@'?state.canonicalCutoverAt:v);
+for(const[k,v]of Object.entries(plan.python))assert.equal(pyenv[k],v);
+req('reflect-metadata');const {ConfigService}=req('@nestjs/config');const {PublicCommunityGatewayService}=req(path.join(process.cwd(),'dist/src/public-community/public-community-gateway.service.js'));
+const expected=JSON.parse(plan.nest.PUBLIC_COMMUNITY_GATEWAYS)[0];const gateway=new PublicCommunityGatewayService(new ConfigService(env));assert.deepEqual(gateway.mapping(pyenv.PUBLIC_COMMUNITY_GATEWAY_ID),expected);assert(env[expected.secretEnv]?.length>=24);
+for(const k of ['OWNER_REPORT_PDF_PYTHON','OWNER_REPORT_PDF_RENDERER'])assert(fs.existsSync(env[k]));
+assert.equal(env.EXPENSE_REMINDERS_CANONICAL_ENABLED,'true');assert.equal(env.STAFF_AI_AVAILABLE_PROVIDERS,'claude,openai');
+console.log(JSON.stringify({status:'PASS',configuredNestKeys:Object.keys(plan.nest),configuredPythonKeys:Object.keys(plan.python),communityExactConfiguredScope:true,canonicalCutoverAt:state.canonicalCutoverAt,expenseUsersAutoOptedIn:false,newTenantConfigurationRevisions:0,productionBusinessWrites:0,messages:0}));

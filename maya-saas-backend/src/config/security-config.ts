@@ -13,7 +13,27 @@ const DEVELOPMENT_CORS_ORIGINS = [
 export function resolveNodeEnvironment(
   rawValue?: unknown,
 ): RuntimeNodeEnvironment {
-  const value = configString(rawValue, 'development').toLowerCase();
+  // 🔴 Отсутствующая переменная раньше молча давала development, а вместе с ней
+  // отключалась ВСЯ production-валидация: проверка шести секретов на длину и
+  // взаимную независимость, обязательный CORS-allowlist, запрет debug-доставки
+  // SMS и фиксированных кодов. В таком режиме публичный /api/auth/phone/start
+  // отдаёт одноразовый код входа прямо в теле ответа любому, кто знает номер.
+  //
+  // Незаметность и была главной опасностью: в деплое NODE_ENV не задавалась
+  // нигде — ни в юните, ни в скрипте выката, только в env-файле. Потеря строки
+  // при правке файла или переезде на новый сервер не уронила бы ничего:
+  // процесс поднялся бы, смоук по /api/health/ready прошёл бы, и салон работал
+  // бы с выключенной защитой.
+  //
+  // Окружение обязано быть ЗАЯВЛЕНО, а не угадано. Значение задают все три
+  // среды: боевой env-файл, .env для разработки (см. .env.example) и jest.
+  if (rawValue === undefined || rawValue === null) {
+    throw new Error(
+      'NODE_ENV is required: set it to development, test or production',
+    );
+  }
+
+  const value = configString(rawValue).toLowerCase();
 
   if (value === 'development' || value === 'production' || value === 'test') {
     return value;

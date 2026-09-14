@@ -1,0 +1,65 @@
+{
+  "scope": "mocine3388 account site/public_html discovery and ancestor configuration only",
+  "siteDirectories": [
+    {
+      "path": "/home/m/mocine3388/mayaos.ru",
+      "entries": [
+        "public_html"
+      ]
+    },
+    {
+      "path": "/home/m/mocine3388/mocine3388.beget.tech",
+      "entries": [
+        "public_html"
+      ]
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf",
+      "entries": [
+        "public_html",
+        "backups",
+        "logs",
+        "deploy-staging"
+      ]
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetik.rf",
+      "entries": []
+    }
+  ],
+  "ancestors": [
+    {
+      "path": "/home/m/mocine3388/.htaccess",
+      "exists": false
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/.htaccess",
+      "exists": false
+    },
+    {
+      "path": "/home/m/mocine3388/mocine3388.beget.tech/.htaccess",
+      "exists": false
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/.htaccess",
+      "exists": false
+    }
+  ],
+  "serverConfig": [
+    {
+      "path": "/etc/nginx",
+      "readable": false,
+      "error": "PermissionError"
+    },
+    {
+      "path": "/etc/apache2/virtdom",
+      "readable": false,
+      "error": "PermissionError"
+    },
+    {
+      "path": "/etc/apache2/conf-available",
+      "readable": false,
+      "error": "PermissionError"
+    }
+  ]
+}

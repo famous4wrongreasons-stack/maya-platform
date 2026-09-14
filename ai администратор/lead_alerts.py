@@ -24,8 +24,7 @@ from __future__ import annotations
 import logging
 import re
 
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Application, ContextTypes
+from telegram.ext import Application
 
 import database
 
@@ -143,63 +142,7 @@ def on_booking_confirmed(client_id: int):
 # ─── Главный scheduler-job ──────────────────────────────────────────────
 
 async def scan_and_alert(app: Application) -> dict:
-    """Тик scheduler'а. Ищет зависшие эпизоды и шлёт админам."""
-    candidates = database.find_pending_lead_alerts(
-        min_idle_minutes=IDLE_MINUTES_TO_ALERT,
-        max_idle_minutes=MAX_IDLE_MINUTES,
-    )
-    if not candidates:
-        return {"checked": 0, "alerted": 0}
-
-    admins = database.list_admins()
-    if not admins:
-        logger.warning("lead_alerts: нет админов для рассылки")
-        return {"checked": len(candidates), "alerted": 0}
-
-    alerted = 0
-    for state in candidates:
-        client_id = state["client_id"]
-        client = database.get_client_by_id(client_id)
-        if not client:
-            continue
-
-        # Только клиенты с привязанным Telegram считаются «заявкой» — иначе
-        # это случайный человек, не наша зона ответственности.
-        if not client.get("telegram_chat_id"):
-            continue
-
-        text = _build_alert_text(state, client)
-        # Кнопка «досье»: владелец одним тапом видит визиты + переписку клиента,
-        # чтобы понять — наш клиент завис или новенький.
-        kb = InlineKeyboardMarkup([[InlineKeyboardButton(
-            "📋 Кто это? (визиты + переписка)", callback_data="dossierc_" + str(client_id))]])
-        sent_any = False
-        for admin_id in admins:
-            try:
-                await app.bot.send_message(
-                    chat_id=admin_id,
-                    text=text,
-                    parse_mode="Markdown",
-                    disable_web_page_preview=True,
-                    reply_markup=kb,
-                )
-                sent_any = True
-            except Exception as e:
-                logger.error(
-                    f"lead_alerts: не отправил admin_id={admin_id} "
-                    f"client_id={client_id}: {e}"
-                )
-        if sent_any:
-            database.mark_lead_alerted(client_id)
-            alerted += 1
-            logger.info(
-                f"lead_alerts: ⚠️ пинг по client_id={client_id} "
-                f"({client.get('name', '?')})"
-            )
-
-    summary = {"checked": len(candidates), "alerted": alerted}
-    logger.info(f"lead_alerts: scheduler tick {summary}")
-    return summary
+    return {'checked':0,'alerted':0,'status':'retired_unverified_lead_occurrence'}
 
 
 def _build_alert_text(state: dict, client: dict) -> str:

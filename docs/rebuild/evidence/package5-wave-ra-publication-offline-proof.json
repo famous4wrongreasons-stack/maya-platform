@@ -1,0 +1,67 @@
+{
+  "publisherSourceHashes": {
+    "publish-edge.py": "6f61500d178d2a98ad03eaaf1a82c8115baac24a54c2b5e4e84df394d19419f8",
+    "publish-python.py": "28a78a256d1b4bb7bb5ea676d6a2819292a4e6e17b659499446ebac10f4887f3"
+  },
+  "cases": [
+    {
+      "publisher": "edge",
+      "phase": "php",
+      "failedCandidateCopy": 2,
+      "failedFirstRestart": false,
+      "result": "PASS",
+      "exactBeforeStateRestored": true,
+      "candidateAndRestoreTemporaryFiles": 0,
+      "externalCommandsExecuted": 0,
+      "guards": "synthetic source-reader stubs; production guards not imported"
+    },
+    {
+      "publisher": "edge",
+      "phase": "pwa",
+      "failedCandidateCopy": 3,
+      "failedFirstRestart": false,
+      "result": "PASS",
+      "exactBeforeStateRestored": true,
+      "candidateAndRestoreTemporaryFiles": 0,
+      "externalCommandsExecuted": 0,
+      "guards": "synthetic source-reader stubs; production guards not imported"
+    },
+    {
+      "publisher": "python",
+      "phase": "publish",
+      "failedCandidateCopy": 2,
+      "failedFirstRestart": false,
+      "result": "PASS",
+      "exactBeforeStateRestored": true,
+      "candidateAndRestoreTemporaryFiles": 0,
+      "externalCommandsExecuted": 0,
+      "guards": "synthetic source-reader stubs; production guards not imported"
+    },
+    {
+      "publisher": "python",
+      "phase": "publish",
+      "failedCandidateCopy": 6,
+      "failedFirstRestart": false,
+      "result": "PASS",
+      "exactBeforeStateRestored": true,
+      "candidateAndRestoreTemporaryFiles": 0,
+      "externalCommandsExecuted": 0,
+      "guards": "synthetic source-reader stubs; production guards not imported"
+    },
+    {
+      "publisher": "python",
+      "phase": "publish",
+      "failedCandidateCopy": null,
+      "failedFirstRestart": true,
+      "result": "PASS",
+      "exactBeforeStateRestored": true,
+      "candidateAndRestoreTemporaryFiles": 0,
+      "externalCommandsExecuted": 0,
+      "guards": "synthetic source-reader stubs; production guards not imported"
+    }
+  ],
+  "networkCalls": 0,
+  "productionFilesTouched": 0,
+  "applicationImports": 0,
+  "repositoryWrites": 0
+}

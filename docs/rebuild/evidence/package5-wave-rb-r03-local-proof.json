@@ -1,0 +1,80 @@
+{
+  "package": "R03",
+  "blockers": [
+    "B56"
+  ],
+  "acceptedBaseline": "cb4fb27c",
+  "capturedAt": "2026-09-07T19:47:53.673153+00:00",
+  "localAcceptance": "PASS",
+  "implementation": "Legacy Python schedule tool hands off to existing authenticated A15 approval; direct Python provider apply unconditionally retired before read/cache/write; canonical A15 runtime unchanged",
+  "canonicalAction": "update_external_staff_schedule_day",
+  "schema": {
+    "newModels": 0,
+    "newFields": 0,
+    "newActionClasses": 0,
+    "migration": false,
+    "backfill": false
+  },
+  "jest": {
+    "suites": 9,
+    "tests": 136,
+    "failed": 0,
+    "command": "node node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/auth/legacy-staff-principal.http.spec.ts src/ai-tools/ai-tool-canonical-receipt.spec.ts src/ai-tools/ai-tool-runtime.service.spec.ts src/ai-tools/ai-tool-handler.service.spec.ts src/ai-tools/staff-schedule-command.service.spec.ts src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts src/ai-tools/ai-tool-registry.service.spec.ts src/action-engine/package5-wave3-executable.contract.spec.ts"
+  },
+  "python": {
+    "actualSourceCases": 6,
+    "actualProductionCandidateCases": 6,
+    "existingSelectedScheduleRegressions": 9,
+    "negativeConcurrentRequests": 24,
+    "configDatabaseProviderDependencies": "Trapped or explicit synthetic test modules; no real app bootstrap/provider/DB",
+    "legacyReadOnlyPreview": "Preserved including split break and existing-reservation conflict cases"
+  },
+  "postgresql": {
+    "database": "maya_rb_r03",
+    "endpoint": "127.0.0.1:55508",
+    "provider": "Existing in-memory ProofProvider; dispatch loss and reconciliation simulated",
+    "result": {
+      "contract": "package5.wave3.all8-executable-proof/1",
+      "actionClasses": 8,
+      "shadows": 8,
+      "shadowDivergences": 0,
+      "mutationFacts": 9,
+      "providerDispatches": 1,
+      "providerReconciliation": true,
+      "duplicateBusinessMutationPossible": false,
+      "tenantIsolation": true,
+      "p02p03Hold": true,
+      "rawCredentialOrNotesInActionEvidence": false
+    },
+    "sourceProofSha256": "4bfff5f529553e5c8fcbf00ccc3bb7f988a66f9123ebcf848656694d0109a476",
+    "guardChanges": 1,
+    "a15Checks": [
+      "durable same-execution retry and rebuilt-command resume",
+      "independent duplicate initiator returns original execution",
+      "UNKNOWN after possible dispatch reconciles with one provider operation",
+      "exact successful attempt/reconciliation journal"
+    ],
+    "limits": "Existing PostgreSQL proof reuses executor and rebuilt command in one process; canonical wrapper restart/concurrency and immutable approval checks are additionally covered by the existing R10/runtime regression suites."
+  },
+  "overlayManifest": "package5-wave-rb-r03-overlay-manifest.json",
+  "overlayExistingFiles": 2,
+  "overlayNewFiles": 2,
+  "productionCandidateSha256": {
+    "claude_ai.py": "95b197e3fbb7e6875c99e3540c8832389a2660e4221d450fd2777ecaa564e53a",
+    "yclients.py": "5a2263a72029589acdac1d9347c42ccb1f05a3d4dcf678c0462a4012e606103b",
+    "canonical_staff_schedule_entry.py": "2c8cfbb4a5ff08fc53861e2b029afea23620ceb509f6485a545c1e599f0c7bca",
+    "package5_staff_schedule_guard.py": "46c2c940cbb5202e65d263bdf3e4ab31c46ac765afffeb224bc2ead39884eb7a"
+  },
+  "additionalChecks": {
+    "targetedEslint": "PASS",
+    "diffWhitespace": "PASS",
+    "candidatePythonSyntax": "PASS"
+  },
+  "productionOperations": 0,
+  "oldDatabasesAccessed": 0,
+  "b36Touched": false,
+  "ownedProcessesRemaining": 0,
+  "processHygiene": 0,
+  "package5Complete": false,
+  "chapter6Complete": false
+}

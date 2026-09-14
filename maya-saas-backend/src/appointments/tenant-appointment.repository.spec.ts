@@ -8,11 +8,19 @@ interface TestAppointment {
   clientId: string;
   branchId: string | null;
   crmExternalId: string | null;
+  crmProvider: string | null;
+  source: string;
+  staffId: string | null;
   staffExternalId: string;
   serviceIds: string[];
   startAt: Date;
+  endAt: Date;
+  blockedStartAt: Date;
+  blockedEndAt: Date;
   status: string;
   notes: string | null;
+  totalPriceKopecks: number | null;
+  currency: string;
   providerPayload: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
@@ -26,11 +34,19 @@ describe('TenantAppointmentRepository isolation', () => {
     clientId: 'client-a',
     branchId: null,
     crmExternalId: 'crm-a',
+    crmProvider: 'yclients',
+    source: 'external',
+    staffId: null,
     staffExternalId: 'staff-a',
     serviceIds: ['service-a'],
     startAt: new Date('2026-07-20T10:00:00.000Z'),
+    endAt: new Date('2026-07-20T11:00:00.000Z'),
+    blockedStartAt: new Date('2026-07-20T10:00:00.000Z'),
+    blockedEndAt: new Date('2026-07-20T11:00:00.000Z'),
     status: 'confirmed',
     notes: null,
+    totalPriceKopecks: 100_000,
+    currency: 'RUB',
     providerPayload: {},
     createdAt: new Date('2026-07-01T10:00:00.000Z'),
     updatedAt: new Date('2026-07-01T10:00:00.000Z'),
@@ -61,34 +77,51 @@ describe('TenantAppointmentRepository isolation', () => {
       ),
       findFirst: jest.fn(
         (args: {
-          where: { id: string; tenantId: string; clientId: string };
+          where: {
+            id?: string;
+            tenantId: string;
+            clientId?: string;
+            crmProvider?: string;
+            crmExternalId?: string;
+          };
         }): Promise<TestAppointment | null> =>
           Promise.resolve(
             records.find(
               (record) =>
-                record.id === args.where.id &&
                 record.tenantId === args.where.tenantId &&
-                record.clientId === args.where.clientId,
+                (args.where.id === undefined || record.id === args.where.id) &&
+                (args.where.clientId === undefined ||
+                  record.clientId === args.where.clientId) &&
+                (args.where.crmProvider === undefined ||
+                  record.crmProvider === args.where.crmProvider) &&
+                (args.where.crmExternalId === undefined ||
+                  record.crmExternalId === args.where.crmExternalId),
             ) ?? null,
           ),
       ),
       update: jest.fn(
         (args: {
-          where: {
-            id_tenantId_clientId: {
-              id: string;
-              tenantId: string;
-              clientId: string;
-            };
-          };
+          where:
+            | { id: string }
+            | {
+                id_tenantId_clientId: {
+                  id: string;
+                  tenantId: string;
+                  clientId: string;
+                };
+              };
           data: Partial<TestAppointment>;
         }): Promise<TestAppointment> => {
-          const key = args.where.id_tenantId_clientId;
+          const key =
+            'id_tenantId_clientId' in args.where
+              ? args.where.id_tenantId_clientId
+              : undefined;
           const record = records.find(
             (candidate) =>
-              candidate.id === key.id &&
-              candidate.tenantId === key.tenantId &&
-              candidate.clientId === key.clientId,
+              candidate.id === (key?.id ?? args.where.id) &&
+              (!key ||
+                (candidate.tenantId === key.tenantId &&
+                  candidate.clientId === key.clientId)),
           );
 
           if (!record) {
@@ -166,11 +199,19 @@ describe('TenantAppointmentRepository isolation', () => {
         clientId: 'client-a',
         branchId: null,
         crmExternalId: 'crm-new',
+        crmProvider: 'yclients',
+        source: 'external',
+        staffId: null,
         staffExternalId: 'staff-a',
         serviceIds: ['service-a'],
         startAt: new Date('2026-07-21T10:00:00.000Z'),
+        endAt: new Date('2026-07-21T11:00:00.000Z'),
+        blockedStartAt: new Date('2026-07-21T10:00:00.000Z'),
+        blockedEndAt: new Date('2026-07-21T11:00:00.000Z'),
         status: 'confirmed',
         notes: null,
+        totalPriceKopecks: 100_000,
+        currency: 'RUB',
       }),
     );
 

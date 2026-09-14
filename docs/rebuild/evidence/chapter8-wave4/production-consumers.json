@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "pwa": {
+    "status": "PASS",
+    "scriptsParsed": 27,
+    "sha256": "4751ebfd7f0f3a08f96b6867b50e375ddf2fe9310b6d3562e70dc0827dc1b9ae",
+    "c8": "PASS",
+    "numericPredictions": false,
+    "legacyGrowthScorers": 0
+  },
+  "python": {
+    "status": "PASS",
+    "retiredEntrypoints": [
+      "masters_ai.py::money_pitch",
+      "owner_ai.py::return_candidates",
+      "owner_ai.py::_stored_client_retention",
+      "owner_ai.py::client_retention",
+      "owner_ai.py::_fallback_client_retention",
+      "owner_ai.py::_money_at_stake",
+      "owner_ai.py::money_opportunities",
+      "owner_ai.py::risk_signals",
+      "owner_ai.py::plan_fact",
+      "owner_ai.py::_fallback_plan_fact",
+      "owner_ai.py::_financial_director",
+      "owner_ai.py::_business_goals",
+      "owner_ai.py::_owner_business_advisor",
+      "owner_ai.py::_growth_engine",
+      "owner_ai.py::_owner_briefing",
+      "owner_ai.py::_kpi_scorecard",
+      "owner_ai.py::business_snapshot",
+      "webhook_server.py::client_retention_refresh_loop"
+    ],
+    "growthOwner": "RETIRED",
+    "sourceImports": 0,
+    "productionEffects": 0
+  },
+  "businessEffects": 0
+}

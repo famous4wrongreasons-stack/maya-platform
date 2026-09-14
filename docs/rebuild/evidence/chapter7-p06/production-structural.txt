@@ -1,0 +1,31 @@
+Welcome to LTD BeGet SSH Server 'prime'
+{
+  "status": "PASS",
+  "release": "20260912-c7-p06-4058cd8c",
+  "columns": 37,
+  "checks": 16,
+  "restrictiveForeignKeys": 8,
+  "triggers": 4,
+  "guardBodiesMatch": true,
+  "measurementRows": "0",
+  "backfillPerformed": false,
+  "artifactsMatched": 680,
+  "businessProviderMessageProofEffects": 0
+}
+{
+  "ok": true,
+  "environment": "production",
+  "config": "safe",
+  "local_migrations": 94,
+  "database": {
+    "status": "ready",
+    "applied_migrations": 97,
+    "pending_migrations": 0
+  }
+}
+Loaded Prisma config from prisma.config.ts.
+
+No difference detected.
+
+{"status":"ok","service":"maya-saas-backend","release":"20260912-c7-p06-4058cd8c","started_at":"2026-09-12T20:09:10.635Z","timestamp":"2026-09-12T20:09:42.902Z"}{"status":"ready","service":"maya-saas-backend","checks":{"database":"ready"},"timestamp":"2026-09-12T20:09:42.925Z"}UNAUTHENTICATED READ analytics/measurements: 401
+UNAUTHENTICATED READ audit: 401

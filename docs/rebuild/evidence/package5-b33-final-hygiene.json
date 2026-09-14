@@ -1,0 +1,30 @@
+{
+  "ownedPostgresDatabasesDropped": [
+    "maya_c06_b33_proof",
+    "maya_c06_p5_wave1_b33_final_20260906",
+    "maya_c06_p5_wave2_b33_final_20260906",
+    "maya_c06_p5_wave3_b33_final_20260906",
+    "maya_c06_p5_wave4_b33_final_20260906",
+    "maya_c06_p5_wave5_b33_final_20260906",
+    "maya_c06_p5_wave6_b33_final_20260906"
+  ],
+  "ownedClusterStopped": true,
+  "ownedPort55503Closed": true,
+  "ownedDataSocketVenvRemoved": true,
+  "ownedSqliteFixturesRemoved": true,
+  "mainDirtyWorktreeTouched": false,
+  "mainStatusEntriesPreserved": 24,
+  "mainKnownDirtyFileHashesPreserved": true,
+  "preExistingDatabasesAccessed": 0,
+  "preExistingDatabasesPreserved": 17,
+  "ownedBrowsersOrWatchersStarted": 0,
+  "remainingOwnedProcesses": 0,
+  "remainingOwnedDatabases": 0,
+  "ownedVpsStagingRemoved": [
+    "/tmp/maya-b33-runtime-candidate",
+    "/tmp/maya-b33-schema-3e27bc9c"
+  ],
+  "ownedBegetStagingRemoved": "~/.maya-b33-owned",
+  "productionServices": "intentional active backend/PWA; excluded from temporary hygiene",
+  "processHygiene": 0
+}

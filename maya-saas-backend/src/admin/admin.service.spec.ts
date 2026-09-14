@@ -5,6 +5,9 @@ import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { BrandingService } from '../branding/branding.service';
 import { CrmService } from '../crm/crm.service';
+import { EncryptionService } from '../encryption/encryption.service';
+import { Package5Wave2CanonicalCutoverService } from '../package5-wave2/package5-wave2-canonical-cutover.service';
+import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { QuotaService } from '../quotas/quota.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -64,23 +67,73 @@ describe('AdminService tenant update boundaries', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+    const createStaffUserForInternalProviderMock = jest.fn().mockResolvedValue({
+      id: 'staff-user-1',
+      tenantId: 'tenant-1',
+      branchId: 'branch-1',
+      email: 'barber@example.test',
+      phone: '+79990000000',
+      encryptedName: null,
+      passwordHash: 'hash',
+      role: UserRole.STAFF,
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
     const serializeUserMock = jest.fn(
       (user: { id: string; role: UserRole }) => ({
         id: user.id,
         role: user.role,
       }),
     );
+    const canonicalExecuteMock = jest.fn().mockResolvedValue({});
+    const deterministicTargetIdMock = jest.fn((operation: string) =>
+      operation === 'create_provider_user' ? 'staff-user-1' : 'tenant-owner-1',
+    );
     const service = new AdminService(
       {
         updateTenant: updateTenantMock,
         getTenantByIdOrThrow: getTenantByIdOrThrowMock,
+        serializeTenant: (tenant: unknown) => tenant,
       } as unknown as TenantsService,
-      { upsertBranding: upsertBrandingMock } as unknown as BrandingService,
+      {
+        upsertBranding: upsertBrandingMock,
+        getTenantBrandingOrThrow: jest.fn().mockResolvedValue({
+          id: 'branding-1',
+          tenantId: 'tenant-1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+        assertValidTenantLogoFile: jest.fn(),
+      } as unknown as BrandingService,
       { connectAndActivateIntegration: upsertCrmMock } as unknown as CrmService,
       {
         ensureEmailIsAvailable: jest.fn().mockResolvedValue(undefined),
         ensurePhoneIsAvailable: jest.fn().mockResolvedValue(undefined),
         createUser: createUserMock,
+        createStaffUserForInternalProvider:
+          createStaffUserForInternalProviderMock,
+        getTenantUserOrThrow: jest.fn((userId: string) =>
+          Promise.resolve(
+            userId === 'staff-user-1'
+              ? {
+                  id: 'staff-user-1',
+                  tenantId: 'tenant-1',
+                  branchId: 'branch-1',
+                  email: 'barber@example.test',
+                  phone: '+79990000000',
+                  role: UserRole.STAFF,
+                }
+              : {
+                  id: 'tenant-owner-1',
+                  tenantId: 'tenant-1',
+                  branchId: null,
+                  email: 'owner@tenant.example',
+                  phone: null,
+                  role: UserRole.TENANT_OWNER,
+                },
+          ),
+        ),
         serializeUser: serializeUserMock,
       } as unknown as UsersService,
       {} as SubscriptionsService,
@@ -90,6 +143,24 @@ describe('AdminService tenant update boundaries', () => {
         assertCanCreate: assertCanCreateMock,
         assertCustomBrandingAllowed: assertCustomBrandingAllowedMock,
       } as unknown as QuotaService,
+      {
+        intentRef: jest.fn().mockReturnValue('request-admin-cutover'),
+        deterministicTargetId: deterministicTargetIdMock,
+        execute: canonicalExecuteMock,
+      } as unknown as Package5Wave2CanonicalCutoverService,
+      {
+        encrypt: jest.fn((value: string) => `enc:${value}`),
+        opaqueReference: jest.fn(
+          (purpose: string, value: string) => `opaque:${purpose}:${value}`,
+        ),
+      } as unknown as EncryptionService,
+      {
+        intentRef: jest.fn().mockReturnValue('request-admin-cutover'),
+        installCrmCredentials: upsertCrmMock,
+        activateCrmIntegration: jest.fn().mockResolvedValue({
+          connection: { id: 'crm-1', provider: CrmProvider.YCLIENTS },
+        }),
+      } as unknown as Package5Wave3CanonicalCutoverService,
     );
 
     return {
@@ -101,6 +172,8 @@ describe('AdminService tenant update boundaries', () => {
       assertCanCreateMock,
       assertCustomBrandingAllowedMock,
       createUserMock,
+      createStaffUserForInternalProviderMock,
+      canonicalExecuteMock,
     };
   };
 
@@ -118,7 +191,8 @@ describe('AdminService tenant update boundaries', () => {
   });
 
   it('allows a tenant admin to request preview/live UI mode', async () => {
-    const { service, updateTenantMock, auditLogMock } = createService();
+    const { service, updateTenantMock, auditLogMock, canonicalExecuteMock } =
+      createService();
 
     await service.updateTenant(
       'tenant-1',
@@ -126,9 +200,15 @@ describe('AdminService tenant update boundaries', () => {
       tenantAdmin,
     );
 
-    expect(updateTenantMock).toHaveBeenCalledWith('tenant-1', {
-      bookingMode: 'preview',
-    });
+    expect(canonicalExecuteMock).toHaveBeenCalledWith(
+      'tenant-1',
+      { userId: 'admin-1' },
+      {
+        operation: 'update_tenant_configuration',
+        changes: { bookingMode: 'preview' },
+      },
+    );
+    expect(updateTenantMock).not.toHaveBeenCalled();
     expect(auditLogMock).toHaveBeenCalled();
   });
 
@@ -160,7 +240,12 @@ describe('AdminService tenant update boundaries', () => {
 
     await service.upsertCrm('tenant-1', dto, tenantAdmin);
 
-    expect(upsertCrmMock).toHaveBeenCalledWith('tenant-1', dto);
+    expect(upsertCrmMock).toHaveBeenCalledWith(
+      'tenant-1',
+      tenantAdmin,
+      dto,
+      'request-admin-cutover:install',
+    );
   });
 
   it('checks staff quota before any tenant-user creation work', async () => {
@@ -195,7 +280,7 @@ describe('AdminService tenant update boundaries', () => {
   });
 
   it('allows only the platform owner to create a tenant owner', async () => {
-    const { service, createUserMock } = createService();
+    const { service, createUserMock, canonicalExecuteMock } = createService();
 
     const result = await service.createTenantUser(
       'tenant-1',
@@ -207,22 +292,83 @@ describe('AdminService tenant update boundaries', () => {
       platformOwner,
     );
 
-    expect(createUserMock).toHaveBeenCalledWith(
+    expect(canonicalExecuteMock).toHaveBeenCalledWith(
+      'tenant-1',
+      { userId: 'platform-owner-1' },
       expect.objectContaining({
-        tenantId: 'tenant-1',
+        operation: 'create_tenant_user',
         email: 'owner@tenant.example',
         role: UserRole.TENANT_OWNER,
       }),
+      'request-admin-cutover',
     );
+    expect(createUserMock).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       user: { id: 'tenant-owner-1', role: UserRole.TENANT_OWNER },
       temporary_password: null,
     });
   });
 
+  it('links a staff login to an existing provider without consuming quota twice', async () => {
+    const {
+      service,
+      assertCanCreateMock,
+      createStaffUserForInternalProviderMock,
+      auditLogMock,
+      canonicalExecuteMock,
+    } = createService();
+
+    const result = await service.createProviderUser(
+      'tenant-1',
+      'provider-2',
+      {
+        email: 'barber@example.test',
+        phone: '+79990000000',
+        password: 'StrongPass123',
+      },
+      tenantAdmin,
+    );
+
+    expect(assertCanCreateMock).not.toHaveBeenCalled();
+    expect(canonicalExecuteMock).toHaveBeenCalledWith(
+      'tenant-1',
+      { userId: 'admin-1' },
+      expect.objectContaining({
+        operation: 'create_provider_user',
+        providerId: 'provider-2',
+        email: 'barber@example.test',
+        phone: '+79990000000',
+      }),
+      'request-admin-cutover',
+    );
+    expect(createStaffUserForInternalProviderMock).not.toHaveBeenCalled();
+    expect(auditLogMock).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      userId: 'admin-1',
+      action: 'tenant.provider_user_created',
+      entityType: 'user',
+      entityId: 'staff-user-1',
+      metadata: {
+        role: UserRole.STAFF,
+        email: 'barber@example.test',
+        branch_id: 'branch-1',
+        provider_id: 'provider-2',
+      },
+    });
+    expect(result).toMatchObject({
+      user: { id: 'staff-user-1', role: UserRole.STAFF },
+      temporary_password: null,
+      provider_id: 'provider-2',
+    });
+  });
+
   it('checks plan-level white-label access before persisting custom branding', async () => {
-    const { service, assertCustomBrandingAllowedMock, upsertBrandingMock } =
-      createService();
+    const {
+      service,
+      assertCustomBrandingAllowedMock,
+      upsertBrandingMock,
+      canonicalExecuteMock,
+    } = createService();
     assertCustomBrandingAllowedMock.mockRejectedValue(
       new ForbiddenException({ error: { code: 'white_label_locked' } }),
     );
@@ -238,5 +384,6 @@ describe('AdminService tenant update boundaries', () => {
       'primaryColor',
     ]);
     expect(upsertBrandingMock).not.toHaveBeenCalled();
+    expect(canonicalExecuteMock).not.toHaveBeenCalled();
   });
 });

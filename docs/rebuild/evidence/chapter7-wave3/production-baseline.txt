@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "release": "20260908-c7-wave2-4b03a29c",
+  "columns": 37,
+  "checks": 16,
+  "restrictiveForeignKeys": 8,
+  "triggers": 4,
+  "guardBodiesMatch": true,
+  "measurementRows": 0,
+  "backfillRows": 0,
+  "artifactsMatched": 14,
+  "businessProviderMessageProofEffects": 0
+}
+{
+  "ok": true,
+  "environment": "production",
+  "config": "safe",
+  "local_migrations": 94,
+  "database": {
+    "status": "ready",
+    "applied_migrations": 97,
+    "pending_migrations": 0
+  }
+}
+Loaded Prisma config from prisma.config.ts.
+
+No difference detected.
+
+{"status":"ok","service":"maya-saas-backend","release":"20260908-c7-wave2-4b03a29c","started_at":"2026-09-08T17:34:19.828Z","timestamp":"2026-09-08T17:47:35.217Z"}{"status":"ready","service":"maya-saas-backend","checks":{"database":"ready"},"timestamp":"2026-09-08T17:47:35.224Z"}

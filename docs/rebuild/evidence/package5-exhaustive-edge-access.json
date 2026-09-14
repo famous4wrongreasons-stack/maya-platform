@@ -1,0 +1,59 @@
+{
+  "productionWrites": 0,
+  "httpCalls": 0,
+  "checks": [
+    {
+      "path": "app/api-proxy.php",
+      "exists": true,
+      "matchedFilesRules": [],
+      "blockedByInspectedFilesRules": false
+    },
+    {
+      "path": "app/api-proxy.codex-loyalty-20260721.php",
+      "exists": true,
+      "matchedFilesRules": [],
+      "blockedByInspectedFilesRules": false
+    },
+    {
+      "path": "app/index.codex-loyalty-20260721.html",
+      "exists": true,
+      "matchedFilesRules": [
+        {
+          "htaccess": ".htaccess",
+          "line": 54,
+          "deniesAll": false
+        }
+      ],
+      "blockedByInspectedFilesRules": false
+    },
+    {
+      "path": "app/index.backup-20260731-anton-analytics.html",
+      "exists": true,
+      "matchedFilesRules": [
+        {
+          "htaccess": ".htaccess",
+          "line": 54,
+          "deniesAll": false
+        }
+      ],
+      "blockedByInspectedFilesRules": false
+    },
+    {
+      "path": "new.bak/index.html",
+      "exists": false,
+      "matchedFilesRules": [
+        {
+          "htaccess": ".htaccess",
+          "line": 54,
+          "deniesAll": false
+        },
+        {
+          "htaccess": "new.bak/.htaccess",
+          "line": 5,
+          "deniesAll": false
+        }
+      ],
+      "blockedByInspectedFilesRules": false
+    }
+  ]
+}

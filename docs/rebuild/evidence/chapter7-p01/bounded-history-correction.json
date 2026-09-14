@@ -1,0 +1,10 @@
+{
+  "finding": "A copied per-visit evidence array could exceed the 256KiB bound for a long history.",
+  "correction": "One deterministic canonical Appointment aggregate-query receipt; exact counts and latest arrived date; coverage stays PARTIAL.",
+  "postgresFixtureVisits": 1101,
+  "checks": 41,
+  "schemaDelta": 0,
+  "productionChangeBeforeCorrection": 0,
+  "firstDeployAttempt": "Terminated in local mandatory gate before upload; owned process tree reaped.",
+  "runtimeScope": "P01 only"
+}

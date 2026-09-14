@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "shadowActionClasses": "6/6",
+  "shadowDivergences": 0,
+  "negativeAssertions": 53,
+  "durableRuns": 13,
+  "concurrentPrepare": "ONE RUN",
+  "sameRunLease": "ONE WINNER",
+  "crossRunDelete": "ONE EFFECT",
+  "crashRollback": "PASS",
+  "restartFence": "PASS",
+  "terminalAndBoundaryProtection": "PASS",
+  "cascadeBound": "PASS",
+  "tenantIsolation": "PASS",
+  "immutableAudit": "PASS",
+  "rawPiiInAudit": 0,
+  "fabricatedActionExecutions": 0,
+  "productionBusinessProviderMutations": 0
+}

@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "suites": 93,
+  "tests": 515,
+  "batches": 4,
+  "exactSuiteSetVerified": true,
+  "excludedSuites": 0,
+  "pendingSuites": 0,
+  "assertionsOrTimeoutsWeakened": false,
+  "node": "24.15.0",
+  "evidence": [
+    "final-ratchet-batch-plan.json",
+    "final-ratchet-batch-results.json",
+    "final-ratchets-batch1.json",
+    "final-ratchets-batch2.json",
+    "final-ratchets-batch3.json",
+    "final-ratchets-batch4.json"
+  ],
+  "earlierNativeCrash": "final-ratchet-node-crash.json"
+}

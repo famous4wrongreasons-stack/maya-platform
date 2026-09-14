@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "protectedScope": {
+    "mainWorktreeUnmodified": true,
+    "mainDirtyEntries": 24,
+    "mainFileHashesUnchanged": 22,
+    "mainStatusSha256": "c28307f97e02975799f0cd9fcbe854d97285a5c344e25af50c67f60fbfca2c25",
+    "inventoryAndSchemaHashesUnchanged": 86,
+    "oldDatabasesTouched": 0
+  },
+  "postgres": {
+    "ownedClusterStopped": true,
+    "ownedDatabasesDropped": [
+      "maya_ra_r01",
+      "maya_ra_r02",
+      "maya_ra_r10",
+      "maya_ra_release",
+      "maya_ra_replay"
+    ],
+    "oldDatabasesTouched": 0,
+    "port": 55507,
+    "ownedPostgresPidGone": true,
+    "ownedSocketRemoved": true,
+    "ownedDataDirectoryRemoved": true
+  },
+  "vpsStaging": {
+    "status": "PASS",
+    "hostScope": "vps",
+    "ownedStagingRemoved": [
+      "/tmp/maya-wave-ra-45688886-python",
+      "/tmp/maya-wave-ra-45688886-preflight"
+    ],
+    "activeRuntimeFilesChanged": 0,
+    "businessMutations": 0,
+    "messages": 0
+  },
+  "edgeStaging": {
+    "status": "PASS",
+    "hostScope": "edge",
+    "ownedStagingRemoved": [
+      "/tmp/maya-wave-ra-45688886-edge"
+    ],
+    "activeRuntimeFilesChanged": 0,
+    "businessMutations": 0,
+    "messages": 0
+  },
+  "smoke3199Listener": false,
+  "smokeProcessReaped": true,
+  "publicationTemporaryFiles": 0,
+  "productionProofMessages": 0,
+  "productionProofBusinessMutations": 0,
+  "oldDatabasesTouched": 0,
+  "processHygiene": 0,
+  "ownedProofProcessesRemaining": 0,
+  "ownedProofPortListening": false
+}

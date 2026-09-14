@@ -1,0 +1,26 @@
+{
+  "newModels": 1,
+  "newPhysicalFields": 37,
+  "alteredModels": [
+    "Tenant",
+    "ActionExecution",
+    "ActionAttempt",
+    "Branch",
+    "Membership",
+    "Client",
+    "Staff",
+    "Appointment"
+  ],
+  "relationOnly": true,
+  "newBusinessActions": 0,
+  "newAc6Classes": 1,
+  "newMigrations": 1,
+  "foreignKeys": 8,
+  "checks": 16,
+  "functions": 4,
+  "triggers": 4,
+  "newTables": 1,
+  "sourcePhysicalChanges": 0,
+  "backfill": 0,
+  "unapprovedFields": 0
+}

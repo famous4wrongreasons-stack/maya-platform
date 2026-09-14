@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Maya OS — AI-операционная система для вашего салона</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed-variant": "#474649",
+                        "on-secondary-fixed-variant": "#474746",
+                        "surface-dim": "#131313",
+                        "surface-variant": "#353534",
+                        "primary-fixed": "#e2e2e2",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "surface-tint": "#c6c6c7",
+                        "on-background": "#e5e2e1",
+                        "on-tertiary-container": "#656466",
+                        "on-tertiary-fixed": "#1b1b1d",
+                        "surface-container-high": "#2a2a2a",
+                        "inverse-primary": "#5d5f5f",
+                        "on-secondary": "#313030",
+                        "on-primary-fixed-variant": "#454747",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed-dim": "#c6c6c7",
+                        "on-secondary-container": "#b7b5b4",
+                        "error-container": "#93000a",
+                        "on-surface": "#e5e2e1",
+                        "on-primary": "#2f3131",
+                        "on-error": "#690005",
+                        "primary": "#ffffff",
+                        "error": "#ffb4ab",
+                        "surface-container-highest": "#353534",
+                        "outline-variant": "#444748",
+                        "on-surface-variant": "#c4c7c8",
+                        "on-primary-fixed": "#1a1c1c",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary": "#ffffff",
+                        "secondary-container": "#474746",
+                        "outline": "#8e9192",
+                        "on-tertiary": "#303032",
+                        "tertiary-fixed-dim": "#c8c6c8",
+                        "tertiary-fixed": "#e4e2e4",
+                        "surface-container-low": "#1c1b1b",
+                        "primary-container": "#e2e2e2",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "inverse-on-surface": "#313030",
+                        "secondary": "#c8c6c5",
+                        "on-primary-container": "#636565",
+                        "tertiary-container": "#e4e2e4",
+                        "surface-container": "#201f1f",
+                        "surface": "#131313",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed": "#e5e2e1",
+                        "background": "#131313",
+                        "surface-bright": "#3a3939"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        "section-margin": "80px",
+                        "gutter": "24px",
+                        "container-padding": "40px",
+                        "card-gap": "16px",
+                        "unit": "8px"
+                    },
+                    fontFamily: {
+                        "label-caps": ["JetBrains Mono"],
+                        "display-lg": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "data-lg": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "display-md": ["Manrope"]
+                    },
+                    fontSize: {
+                        "label-caps": ["12px", { lineHeight: "16px", letterSpacing: "0.15em", fontWeight: "500" }],
+                        "display-lg": ["72px", { lineHeight: "80px", letterSpacing: "-0.04em", fontWeight: "700" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "data-lg": ["40px", { lineHeight: "48px", fontWeight: "300" }],
+                        "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "display-md": ["48px", { lineHeight: "56px", letterSpacing: "-0.03em", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #010101;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: rgba(26, 26, 26, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gradient-text {
+            background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Subtle grid background for the hero */
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+
+        /* Float animation for devices */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-primary/30 selection:text-white">
+<!-- Top Navigation (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 bg-transparent backdrop-blur-xl border-b border-outline-variant/10">
+<div class="flex justify-between items-center px-gutter py-4 max-w-[1440px] mx-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl">all_inclusive</span>
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-primary">MayaOS</span>
+</div>
+<div class="hidden md:flex gap-8">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Platform</a>
+<a class="font-body-md text-body-md text-primary border-b-2 border-primary pb-1" href="#">AI Assistant</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Branded App</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Dashboard</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Benefits</a>
+</div>
+<button class="bg-primary text-black font-body-md text-body-md px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                Get Started
+            </button>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="relative min-h-screen flex items-center justify-center pt-24 pb-section-margin overflow-hidden bg-grid-pattern">
+<!-- Ambient Glow -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="max-w-[1440px] mx-auto px-gutter w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+<div class="flex flex-col gap-8 max-w-xl">
+<div class="space-y-4">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-outline-variant/30 bg-surface/50 backdrop-blur-md">
+<span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">MAYA OS 2.0 LIVE</span>
+</div>
+<h1 class="font-display-md md:font-display-lg text-display-md md:text-display-lg gradient-text">
+                        * AI-операционная система для вашего салона
+                    </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md">
+                        Единая экосистема: брендированное приложение, AI-администратор и аналитика под вашим брендом.
+                    </p>
+</div>
+<div class="flex flex-wrap items-center gap-4">
+<button class="bg-primary text-black font-body-md text-body-md px-8 py-4 rounded-lg hover:bg-primary/90 transition-colors font-medium">
+                        Попробовать бесплатно
+                    </button>
+<button class="w-14 h-14 rounded-lg border border-outline-variant/30 flex items-center justify-center hover:bg-surface-container-high transition-colors glass-panel">
+<span class="material-symbols-outlined text-primary">qr_code_scanner</span>
+</button>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant/60 font-body-md text-sm mt-4">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+<span>Интеграция с YClients за 5 минут</span>
+</div>
+</div>
+<div class="relative h-[600px] lg:h-[800px] flex items-center justify-center">
+<!-- Device Mockup Placeholder -->
+<div class="relative w-[320px] h-[650px] rounded-[3rem] border-[8px] border-surface-container-highest bg-black overflow-hidden shadow-2xl animate-float">
+<img alt="Maya OS App Interface showing AI chat and booking" class="w-full h-full object-cover" data-alt="A highly realistic 3D render of a modern smartphone displaying a sleek, dark-mode AI chat interface. The screen shows a sophisticated booking system for a salon. Minimalist design, deep blacks, thin white lines. Cinematic studio lighting with a subtle blue rim light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvkbnzy8lxoQDsjzZHHbg86F8gYtDfuBH9i9Xytys9t_pCQ3kUdN3GWOLM5dQ2dDnT2uCovuf0D3UgrKvbecdj8bSjLTGFfg81Tc39dr0-OFivM37zQ9p0NqB12hvYx11vMdlIi2kycVe37hUjcfmYCbcGHE0xfQKtA7Qnt3eUWD9La1DeGvIQL2i3MhOOXDUgBpq97_jFPxG8O01zLsVdEi5JABVxOkDlF-lGFq6d0DnGMHTnjSphvynO_BgUOnT-yshukO-HoVo"/>
+</div>
+<!-- Floating Element 1 -->
+<div class="absolute top-20 -left-10 glass-panel p-4 rounded-xl flex items-center gap-3 animate-float" style="animation-delay: 1s;">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+</div>
+<div>
+<div class="font-label-caps text-[10px] text-on-surface-variant">AI Assistant</div>
+<div class="font-body-md text-sm">Запись подтверждена</div>
+</div>
+</div>
+<!-- Floating Element 2 -->
+<div class="absolute bottom-32 -right-12 glass-panel p-4 rounded-xl flex flex-col gap-2 animate-float" style="animation-delay: 2s;">
+<div class="font-label-caps text-[10px] text-on-surface-variant uppercase">Выручка сегодня</div>
+<div class="font-headline-lg-mobile text-headline-lg-mobile">142 500 ₽</div>
+<div class="flex items-center gap-1 text-green-400 text-xs">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+12%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Scroll Hint -->
+<div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
+<span class="font-label-caps text-[10px] tracking-[0.2em] uppercase">Исследовать возможности</span>
+<span class="material-symbols-outlined animate-bounce">arrow_downward</span>
+</div>
+</section>
+<!-- Product Scenarios: Branded App -->
+<section class="py-section-margin relative border-t border-outline-variant/10">
+<div class="max-w-[1440px] mx-auto px-gutter">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-5 order-2 lg:order-1 space-y-6">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase">01 / Платформа</div>
+<h2 class="font-headline-lg text-headline-lg md:text-display-md">Собственное приложение для ваших клиентов</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                        Ваше приложение. Ваш бренд. Полный контроль удержания клиентов. Онлайн-запись, личный кабинет, покупки, бонусы и уведомления — все в едином стиле вашего бизнеса.
+                    </p>
+<ul class="space-y-4 pt-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary/50 mt-1">check</span>
+<span class="font-body-md text-on-surface">Пуш-уведомления без ограничений</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary/50 mt-1">check</span>
+<span class="font-body-md text-on-surface">Программа лояльности и кэшбэк</span>
+</li>
+</ul>
+</div>
+<div class="lg:col-span-7 order-1 lg:order-2">
+<div class="relative rounded-3xl overflow-hidden bg-surface-container-low p-8 border border-outline-variant/20 flex justify-center items-center h-[600px]">
+<img alt="White-label app interface on mobile device" class="w-[300px] h-auto object-contain rounded-[2.5rem] shadow-2xl relative z-10" data-alt="A minimalist, high-end presentation of a white-label mobile app interface for a beauty salon. Displayed on a modern smartphone screen against a dark grey background. The UI is clean, featuring sleek typography, subtle dark mode cards, and an elegant booking flow. Soft, diffused lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuArmYxbyv9ohvCOosuAEXDkJthIuNpLh57jju8NILNzNUWcAsXCoBbVjOrEartRYX-gNRS21RrphEiokoPkOBXGXWyoz--X1sEWSlYjN1m9TrdQjH-H3GKFp0UYDvAwudtzs7nb1zWKMhyrjZIPEKbl2Q7pzSNUhbt0xuztpo5df0I0O5RyuXauMbHk2m0OBFo-GTJmYBZ3TuR5vdP-sv-ZzfC3anBk1rzhKl_CLj9dlftGoCqB7jIjNvNvlJkdUW2QUZbNzpAKNZg"/>
+<!-- Decorative background element -->
+<div class="absolute inset-0 bg-gradient-to-tr from-surface-dim to-surface-container-highest opacity-50"></div>
+<div class="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/5 rounded-full blur-[80px]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Product Scenarios: AI Administrator -->
+<section class="py-section-margin relative bg-surface-container-lowest border-t border-outline-variant/10">
+<div class="max-w-[1440px] mx-auto px-gutter">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-7">
+<div class="relative rounded-3xl overflow-hidden bg-surface-container p-8 border border-outline-variant/20 h-[600px] flex items-center justify-center">
+<img alt="AI Chat Interface demonstrating automated booking" class="w-[80%] h-auto object-contain shadow-2xl rounded-2xl relative z-10 border border-outline-variant/30" data-alt="A sleek, dark-themed chat interface displayed on a tablet screen, illustrating an AI assistant interacting with a client. The UI features sophisticated message bubbles, subtle glowing elements indicating AI processing, and a high-end minimalist design aesthetic. The environment is dark and technological." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO0shsKYaJ7gYVbSP6J0BOAnM3mYfvAv6e84qRfMZZWwltJHbzhbMTDCTsXQJFiE7_e0rM6wC-L4fPg1tx_iROAkC2Epsl4coaWc4c2W9kwdFyQO5nNHIl8OXAsmPGWac-DfDoTf7KOZMqhnBVdFolqVgLMqGeIJJWkef61lQ7a5J3RmxU-_P_0w49xFplb1flj3zcvFCom_XVvmNnd0YOpbaf75s7GAinI1dwdxbhJYKQ8-L_rJwVDHkzU39CkV5EAXsZgWT1ftE"/>
+<div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-surface-container to-transparent z-20"></div>
+</div>
+</div>
+<div class="lg:col-span-5 space-y-6">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase">02 / Интеллект</div>
+<h2 class="font-headline-lg text-headline-lg md:text-display-md">Искусственный интеллект, который работает за вас</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                        AI-администратор Maya. Консультирует, записывает и продает 24/7. Получайте рекомендации, автоматизируйте рутину и принимайте решения быстрее с персональным AI-ассистентом.
+                    </p>
+<div class="grid grid-cols-2 gap-4 pt-4">
+<div class="glass-panel p-4 rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary mb-2">forum</span>
+<div class="font-body-md text-sm font-medium">Общение 24/7</div>
+<div class="text-xs text-on-surface-variant mt-1">Отвечает в WhatsApp и Telegram</div>
+</div>
+<div class="glass-panel p-4 rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary mb-2">bolt</span>
+<div class="font-body-md text-sm font-medium">Допродажи</div>
+<div class="text-xs text-on-surface-variant mt-1">Предлагает релевантные услуги</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Product Scenarios: Business Dashboard -->
+<section class="py-section-margin relative border-t border-outline-variant/10 overflow-hidden">
+<div class="max-w-[1440px] mx-auto px-gutter mb-12 text-center max-w-3xl mx-auto">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-4">03 / Управление</div>
+<h2 class="font-headline-lg text-headline-lg md:text-display-md mb-6">Все процессы в одном месте</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                Кабинет владельца. Вся выручка, загрузка и работа команды в одном интерфейсе. Календарь, аналитика, финансы без переключения между сервисами.
+            </p>
+</div>
+<div class="w-full overflow-hidden relative h-[500px]">
+<!-- Decorative gradient behind dashboard -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-surface-container-highest/20 to-surface-container-lowest z-0"></div>
+<div class="absolute left-1/2 -translate-x-1/2 w-[1200px] mt-8 z-10 perspective-1000">
+<div class="rounded-2xl border border-outline-variant/30 shadow-2xl bg-[#1A1A1A] p-2 transform rotate-x-12 scale-95 transition-transform hover:scale-100 duration-700">
+<img alt="Comprehensive analytics dashboard for salon owners" class="w-full h-auto rounded-xl border border-outline-variant/10" data-alt="A wide, panoramic view of a complex, data-rich dashboard UI on a dark background. The interface includes modern charts, detailed metrics cards, and a sleek sidebar. The design relies on high contrast, deep blacks (#1A1A1A), subtle white borders, and precise typography. Premium enterprise software aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-ydnRn_BiTSu3lc3o6G6UVvATp0kltB4fQtZ1zXI1-CarLg3_WhoncCPMXUEZZln1KaPfV7tfS87u64zz0dVHjEa0z2XBYOI2QZnmEocxBGQ7BLiH-qtKkxw_B5h_Sh6c9tjI8u2wX-ZsF9gEZvBzcNtZKK8cHddvOAdojJSS9BaS_Zg1l9Ajd9lS_oHsLt1OnxnNav5A10Oe6I4JPPW7H6rHcoAU5h62K6mLLj7mdcblTwK7YEP2vxj88a4GCtvi8Yvq76tfU4s"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-section-margin relative">
+<div class="max-w-[1000px] mx-auto px-gutter text-center">
+<div class="glass-panel rounded-3xl p-12 md:p-20 relative overflow-hidden">
+<!-- Abstract Animation Background Placeholder -->
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+
+</div>
+<div class="relative z-10 space-y-8">
+<h2 class="font-display-md text-display-md">Соберите цифровую экосистему своего салона</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
+                        Начните использовать технологии уровня enterprise для управления вашим бизнесом в beauty-сфере уже сегодня.
+                    </p>
+<button class="bg-primary text-black font-body-md text-body-md px-10 py-5 rounded-xl hover:bg-primary/90 transition-transform hover:scale-105 duration-300 font-semibold shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+                        Запустить MAYA
+                    </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer (Shared Component) -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant py-section-margin mt-12">
+<div class="max-w-[1440px] mx-auto px-gutter grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+<div class="flex flex-col gap-2">
+<span class="font-headline-md text-headline-md font-bold text-primary">Maya OS</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">© 2024 Maya OS. Technological Serenity for Beauty Leaders.</span>
+</div>
+<div class="flex flex-wrap md:justify-end gap-6">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Integrations</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Documentation</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+</body></html>

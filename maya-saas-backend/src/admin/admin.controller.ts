@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -26,10 +27,11 @@ import { CurrentUser } from '../decorators/current-user.decorator';
 import { AllowSubscriptionRequired } from '../decorators/allow-subscription-required.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { TenantScoped } from '../decorators/tenant-scoped.decorator';
-import { CreateTenantDto } from '../tenants/dto/create-tenant.dto';
+import { CreateTrialSignupDto } from '../onboarding/dto/create-trial-signup.dto';
 import { UpdateTenantDto } from '../tenants/dto/update-tenant.dto';
 import { QuotaResource } from '../quotas/quota-resource';
 import { RequiresQuota } from '../quotas/requires-quota.decorator';
+import { CreateProviderUserDto } from './dto/create-provider-user.dto';
 import { CreateTenantUserDto } from './dto/create-tenant-user.dto';
 import { AdminService } from './admin.service';
 
@@ -48,7 +50,7 @@ export class AdminController {
   @Roles(UserRole.PLATFORM_OWNER)
   @ApiOperation({ summary: 'Create a new service-business tenant' })
   createTenant(
-    @Body() dto: CreateTenantDto,
+    @Body() dto: CreateTrialSignupDto,
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     return this.adminService.createTenant(dto, actor);
@@ -129,8 +131,9 @@ export class AdminController {
     @Param('id') id: string,
     @Body() dto: CreateCrmIntegrationDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.adminService.upsertCrm(id, dto, actor);
+    return this.adminService.upsertCrm(id, dto, actor, idempotencyKey);
   }
 
   @Patch(':id/crm')
@@ -141,8 +144,9 @@ export class AdminController {
     @Param('id') id: string,
     @Body() dto: UpdateCrmIntegrationDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.adminService.upsertCrm(id, dto, actor);
+    return this.adminService.upsertCrm(id, dto, actor, idempotencyKey);
   }
 
   @Post(':id/test-crm')
@@ -166,8 +170,24 @@ export class AdminController {
     return this.adminService.createTenantUser(id, dto, actor);
   }
 
+  @Post(':id/providers/:providerId/user')
+  @Roles(UserRole.PLATFORM_OWNER, UserRole.TENANT_ADMIN)
+  @TenantScoped({ paramKey: 'id', requireTenant: false })
+  @ApiOperation({
+    summary: 'Create a staff login for an existing internal-calendar provider',
+  })
+  createProviderUser(
+    @Param('id') id: string,
+    @Param('providerId') providerId: string,
+    @Body() dto: CreateProviderUserDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.adminService.createProviderUser(id, providerId, dto, actor);
+  }
+
   @Post(':id/suspend')
   @Roles(UserRole.PLATFORM_OWNER)
+  @TenantScoped({ paramKey: 'id', requireTenant: false })
   @ApiOperation({ summary: 'Suspend a tenant' })
   suspendTenant(
     @Param('id') id: string,
@@ -178,6 +198,7 @@ export class AdminController {
 
   @Post(':id/activate')
   @Roles(UserRole.PLATFORM_OWNER)
+  @TenantScoped({ paramKey: 'id', requireTenant: false })
   @ApiOperation({ summary: 'Activate a tenant' })
   activateTenant(
     @Param('id') id: string,

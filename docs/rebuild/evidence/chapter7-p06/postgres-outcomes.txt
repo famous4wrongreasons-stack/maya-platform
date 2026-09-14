@@ -1,0 +1,29 @@
+PASS Q12 real B31 direct receipt credits exact internal Appointment and Client without User
+PASS Q04 later canonical cancellation advances current revision and preserves published history
+PASS UNKNOWN source execution is read-only and is not replayed or credited by funnel measurement
+PASS Q04 A29 frozen assignment and late source cancellation remain labelled and immutable as reported
+PASS Q12 pending exact Appointment A-to-B correction publishes UNAVAILABLE with P03 installed
+PASS exact tenant, timezone and unsupported scoped funnel authority fails closed
+PASS Q14 canonical delivery owner distinguishes ACCEPTED, DELIVERED, UNKNOWN and unsupported read receipt
+PASS Q15 canonical Opportunity assignment and admitted action cohorts retain independent denominators
+PASS Q13 unavailable capacity source never becomes true from A29 filledWindow flag
+PASS bounded source overflow publishes terminal UNAVAILABLE through shared publication
+{
+  "package": "C7-P03",
+  "checks": [
+    "Q12 real B31 direct receipt credits exact internal Appointment and Client without User",
+    "Q04 later canonical cancellation advances current revision and preserves published history",
+    "UNKNOWN source execution is read-only and is not replayed or credited by funnel measurement",
+    "Q04 A29 frozen assignment and late source cancellation remain labelled and immutable as reported",
+    "Q12 pending exact Appointment A-to-B correction publishes UNAVAILABLE with P03 installed",
+    "exact tenant, timezone and unsupported scoped funnel authority fails closed",
+    "Q14 canonical delivery owner distinguishes ACCEPTED, DELIVERED, UNKNOWN and unsupported read receipt",
+    "Q15 canonical Opportunity assignment and admitted action cohorts retain independent denominators",
+    "Q13 unavailable capacity source never becomes true from A29 filledWindow flag",
+    "bounded source overflow publishes terminal UNAVAILABLE through shared publication"
+  ],
+  "schemaChanges": 0,
+  "providerWrites": 0,
+  "productionEffects": 0,
+  "syntheticTenant": "cmtys9ghy0000zyc9j82b7mze"
+}

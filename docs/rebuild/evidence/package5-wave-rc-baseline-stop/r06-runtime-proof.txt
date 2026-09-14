@@ -1,0 +1,12 @@
+{
+  "package": "R06",
+  "scope": "B44 internal alert foundation",
+  "result": "PASS",
+  "checks": [
+    "actual internal schedule + exact Staff/User/Membership; four concurrent ticks one root/A11/CD/Inbox",
+    "frozen manifest exact replay; changed intent conflicts; external-channel plan rejected",
+    "changed schedule before pending effect terminates original slot; no replacement or direct effect",
+    "revoked canonical Staff membership cannot admit or authorize shifts"
+  ],
+  "productionEffects": 0
+}

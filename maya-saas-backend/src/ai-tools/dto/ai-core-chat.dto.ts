@@ -3,6 +3,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsIn,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -26,6 +27,15 @@ export class AiCoreChatMessageDto {
 export class AiCoreChatDto {
   @IsIn(['native', 'web', 'telegram', 'voice'])
   surface!: AiToolSurface;
+
+  /**
+   * UI zone in the app. Owner can open the client chat — audience must stay
+   * client so MAYA never answers with business analytics there. This is only
+   * a presentation hint; authorization comes from server-side membership.
+   */
+  @IsOptional()
+  @IsIn(['client', 'staff', 'owner'])
+  audience?: 'client' | 'staff' | 'owner';
 
   @IsString()
   @Matches(/^[A-Za-z0-9_-]{8,128}$/)

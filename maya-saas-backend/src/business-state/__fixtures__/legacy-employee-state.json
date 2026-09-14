@@ -1,0 +1,999 @@
+{
+  "мастер: полные данные": {
+    "verified": true,
+    "source": "crm",
+    "metrics": {
+      "booked_value_amount_kopecks": 3000000,
+      "appointments_total": 8,
+      "appointments_active": 8,
+      "appointments_scheduled": 2,
+      "appointments_completed": 6,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 6,
+      "repeat_clients_in_period": 2,
+      "repeat_client_rate_percent": 33.3,
+      "identified_client_visits": 8,
+      "clients_returning": 2,
+      "clients_new": 4,
+      "returning_share_percent": 33.3,
+      "cohort_lookback_days": 90,
+      "average_booked_value_amount_kopecks": 150000,
+      "booked_minutes": 480
+    },
+    "available_metrics": [
+      "booked_value_amount_kopecks",
+      "appointments_total",
+      "appointments_active",
+      "appointments_scheduled",
+      "appointments_completed",
+      "appointments_cancelled",
+      "appointments_no_show",
+      "cancellation_rate_percent",
+      "unique_clients",
+      "repeat_clients_in_period",
+      "repeat_client_rate_percent",
+      "identified_client_visits",
+      "clients_returning",
+      "clients_new",
+      "returning_share_percent",
+      "cohort_lookback_days",
+      "average_booked_value_amount_kopecks",
+      "booked_minutes"
+    ],
+    "limitations": [
+      {
+        "key": "cancellation_reason",
+        "reason": "the provider reports only that a record was removed; a business cancellation reason is not part of the contract and must not be inferred"
+      }
+    ],
+    "unavailable_metrics": [
+      {
+        "key": "staff_revenue",
+        "reason": "confirmed per-master revenue is unavailable for 1 master(s): YClients did not attribute their service financial transactions to a staff member. Do not estimate the missing cash from booked appointment prices"
+      },
+      {
+        "key": "personal_cash_revenue",
+        "reason": "confirmed personal cash is unavailable because no YClients service financial transaction was attributed to this master; booked service value and accrued payroll are different metrics"
+      },
+      {
+        "key": "other_employee_personal_data",
+        "reason": "role scope permits only the current employee data"
+      }
+    ],
+    "current": {
+      "data_source": "crm",
+      "period": {
+        "from": "2026-08-01T00:00:00.000Z",
+        "to": "2026-08-31T23:59:59.999Z",
+        "timezone": "Europe/Moscow"
+      },
+      "appointments": {
+        "total": 8,
+        "active": 8,
+        "scheduled": 2,
+        "completed": 6,
+        "cancelled": 0,
+        "no_show": 0,
+        "cancellation_rate_percent": 0,
+        "unique_clients": 6,
+        "repeat_clients_in_period": 2,
+        "repeat_client_rate_percent": 33.3,
+        "identified_client_visits": 8,
+        "clients_returning": 2,
+        "clients_new": 4,
+        "returning_share_percent": 33.3,
+        "cohort_lookback_days": 90,
+        "cohort_status": "available",
+        "cohort_unavailable_reason": null,
+        "booked_minutes": 480
+      },
+      "revenue": [
+        {
+          "currency": "RUB",
+          "amount_kopecks": 3000000,
+          "amount_major_units": 30000
+        }
+      ],
+      "expenses": [],
+      "net": [],
+      "average_ticket": [
+        {
+          "currency": "RUB",
+          "amount_kopecks": 150000,
+          "amount_major_units": 1500
+        }
+      ],
+      "daily": [],
+      "data_quality": {},
+      "completeness": {
+        "appointments": {
+          "source": "provider_journal",
+          "status": "complete",
+          "reason": null,
+          "observed_through": "2026-09-01T00:00:00.000Z",
+          "out_of_period_discarded": 0
+        },
+        "attendance": {
+          "source": "canonical_mirror",
+          "status": "complete",
+          "reason": null,
+          "observed_through": "2026-09-01T00:00:00.000Z"
+        }
+      },
+      "attendance": {
+        "state": "measured",
+        "arrived": 6,
+        "no_show": 0,
+        "awaiting": 0,
+        "not_observed": 0,
+        "records": 8,
+        "facts": []
+      },
+      "staff_summary": [
+        {
+          "name": "Илья",
+          "total": 8,
+          "appointments": 8,
+          "scheduled": 2,
+          "completed": 6,
+          "cancelled": 0,
+          "no_show": 0,
+          "cancellation_rate_percent": 0,
+          "unique_clients": 6,
+          "repeat_clients_in_period": 2,
+          "revenue": [
+            {
+              "currency": "RUB",
+              "amount_kopecks": 3000000,
+              "amount_major_units": 30000
+            }
+          ],
+          "confirmed_revenue": {
+            "status": "unavailable",
+            "basis": null,
+            "amount": null,
+            "unavailable_reason": "crm_financial_transactions_are_not_attributed_to_this_master"
+          },
+          "salary": {
+            "status": "available",
+            "basis": "crm_payroll_accrual",
+            "accrued": {
+              "currency": "RUB",
+              "amount_kopecks": 900000,
+              "amount_major_units": 9000
+            },
+            "paid": null,
+            "unavailable_reason": null
+          },
+          "booked_minutes": 480,
+          "services": [
+            {
+              "name": "Стрижка",
+              "appointments": 8
+            }
+          ]
+        }
+      ],
+      "service_summary": [
+        {
+          "name": "Стрижка",
+          "appointments": 8,
+          "booked_value": [
+            {
+              "currency": "RUB",
+              "amount_kopecks": 3000000,
+              "amount_major_units": 30000
+            }
+          ],
+          "confirmed_revenue": {
+            "status": "unavailable",
+            "basis": null,
+            "amount": null,
+            "unavailable_reason": "crm_confirmed_service_revenue_not_attributed"
+          }
+        }
+      ]
+    }
+  },
+  "мастер: неполное чтение": {
+    "verified": true,
+    "source": "crm",
+    "metrics": {
+      "booked_value_amount_kopecks": 3000000,
+      "appointments_total": 8,
+      "appointments_active": 8,
+      "appointments_scheduled": 2,
+      "appointments_completed": 6,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 6,
+      "repeat_clients_in_period": 2,
+      "repeat_client_rate_percent": 33.3,
+      "identified_client_visits": 8,
+      "clients_returning": 2,
+      "clients_new": 4,
+      "returning_share_percent": 33.3,
+      "cohort_lookback_days": 90,
+      "average_booked_value_amount_kopecks": 150000,
+      "booked_minutes": 480
+    },
+    "available_metrics": [
+      "booked_value_amount_kopecks",
+      "appointments_total",
+      "appointments_active",
+      "appointments_scheduled",
+      "appointments_completed",
+      "appointments_cancelled",
+      "appointments_no_show",
+      "cancellation_rate_percent",
+      "unique_clients",
+      "repeat_clients_in_period",
+      "repeat_client_rate_percent",
+      "identified_client_visits",
+      "clients_returning",
+      "clients_new",
+      "returning_share_percent",
+      "cohort_lookback_days",
+      "average_booked_value_amount_kopecks",
+      "booked_minutes"
+    ],
+    "limitations": [
+      {
+        "key": "cancellation_reason",
+        "reason": "the provider reports only that a record was removed; a business cancellation reason is not part of the contract and must not be inferred"
+      },
+      {
+        "key": "incomplete_read",
+        "reason": "the journal read for this period is incomplete (source_read_truncated), so every appointment counter — appointments_total, appointments_cancelled, appointments_no_show and the per-staff rows — is a lower bound and a zero in any of them means \"not measured\", not \"none\""
+      }
+    ],
+    "unavailable_metrics": [
+      {
+        "key": "staff_revenue",
+        "reason": "confirmed per-master revenue is unavailable for 1 master(s): YClients did not attribute their service financial transactions to a staff member. Do not estimate the missing cash from booked appointment prices"
+      },
+      {
+        "key": "personal_cash_revenue",
+        "reason": "confirmed personal cash is unavailable because no YClients service financial transaction was attributed to this master; booked service value and accrued payroll are different metrics"
+      },
+      {
+        "key": "other_employee_personal_data",
+        "reason": "role scope permits only the current employee data"
+      }
+    ],
+    "current": {
+      "data_source": "crm",
+      "period": {
+        "from": "2026-08-01T00:00:00.000Z",
+        "to": "2026-08-31T23:59:59.999Z",
+        "timezone": "Europe/Moscow"
+      },
+      "appointments": {
+        "total": 8,
+        "active": 8,
+        "scheduled": 2,
+        "completed": 6,
+        "cancelled": 0,
+        "no_show": 0,
+        "cancellation_rate_percent": 0,
+        "unique_clients": 6,
+        "repeat_clients_in_period": 2,
+        "repeat_client_rate_percent": 33.3,
+        "identified_client_visits": 8,
+        "clients_returning": 2,
+        "clients_new": 4,
+        "returning_share_percent": 33.3,
+        "cohort_lookback_days": 90,
+        "cohort_status": "available",
+        "cohort_unavailable_reason": null,
+        "booked_minutes": 480
+      },
+      "revenue": [
+        {
+          "currency": "RUB",
+          "amount_kopecks": 3000000,
+          "amount_major_units": 30000
+        }
+      ],
+      "expenses": [],
+      "net": [],
+      "average_ticket": [
+        {
+          "currency": "RUB",
+          "amount_kopecks": 150000,
+          "amount_major_units": 1500
+        }
+      ],
+      "daily": [],
+      "data_quality": {},
+      "completeness": {
+        "appointments": {
+          "source": "provider_journal",
+          "status": "incomplete",
+          "reason": "source_read_truncated",
+          "observed_through": "2026-09-01T00:00:00.000Z",
+          "out_of_period_discarded": 0
+        },
+        "attendance": {
+          "source": "canonical_mirror",
+          "status": "complete",
+          "reason": null,
+          "observed_through": "2026-09-01T00:00:00.000Z"
+        }
+      },
+      "attendance": {
+        "state": "measured",
+        "arrived": 6,
+        "no_show": 0,
+        "awaiting": 0,
+        "not_observed": 0,
+        "records": 8,
+        "facts": []
+      },
+      "staff_summary": [
+        {
+          "name": "Илья",
+          "total": 8,
+          "appointments": 8,
+          "scheduled": 2,
+          "completed": 6,
+          "cancelled": 0,
+          "no_show": 0,
+          "cancellation_rate_percent": 0,
+          "unique_clients": 6,
+          "repeat_clients_in_period": 2,
+          "revenue": [
+            {
+              "currency": "RUB",
+              "amount_kopecks": 3000000,
+              "amount_major_units": 30000
+            }
+          ],
+          "confirmed_revenue": {
+            "status": "unavailable",
+            "basis": null,
+            "amount": null,
+            "unavailable_reason": "crm_financial_transactions_are_not_attributed_to_this_master"
+          },
+          "salary": {
+            "status": "available",
+            "basis": "crm_payroll_accrual",
+            "accrued": {
+              "currency": "RUB",
+              "amount_kopecks": 900000,
+              "amount_major_units": 9000
+            },
+            "paid": null,
+            "unavailable_reason": null
+          },
+          "booked_minutes": 480,
+          "services": [
+            {
+              "name": "Стрижка",
+              "appointments": 8
+            }
+          ]
+        }
+      ],
+      "service_summary": [
+        {
+          "name": "Стрижка",
+          "appointments": 8,
+          "booked_value": [
+            {
+              "currency": "RUB",
+              "amount_kopecks": 3000000,
+              "amount_major_units": 30000
+            }
+          ],
+          "confirmed_revenue": {
+            "status": "unavailable",
+            "basis": null,
+            "amount": null,
+            "unavailable_reason": "crm_confirmed_service_revenue_not_attributed"
+          }
+        }
+      ]
+    }
+  },
+  "мастер: присутствие не наблюдалось": {
+    "verified": true,
+    "source": "crm",
+    "metrics": {
+      "booked_value_amount_kopecks": 3000000,
+      "appointments_total": 8,
+      "appointments_active": 8,
+      "appointments_scheduled": 2,
+      "appointments_completed": 6,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 6,
+      "repeat_clients_in_period": 2,
+      "repeat_client_rate_percent": 33.3,
+      "identified_client_visits": 8,
+      "clients_returning": 2,
+      "clients_new": 4,
+      "returning_share_percent": 33.3,
+      "cohort_lookback_days": 90,
+      "average_booked_value_amount_kopecks": 150000,
+      "booked_minutes": 480
+    },
+    "available_metrics": [
+      "booked_value_amount_kopecks",
+      "appointments_total",
+      "appointments_active",
+      "appointments_scheduled",
+      "appointments_completed",
+      "appointments_cancelled",
+      "appointments_no_show",
+      "cancellation_rate_percent",
+      "unique_clients",
+      "repeat_clients_in_period",
+      "repeat_client_rate_percent",
+      "identified_client_visits",
+      "clients_returning",
+      "clients_new",
+      "returning_share_percent",
+      "cohort_lookback_days",
+      "average_booked_value_amount_kopecks",
+      "booked_minutes"
+    ],
+    "limitations": [
+      {
+        "key": "cancellation_reason",
+        "reason": "the provider reports only that a record was removed; a business cancellation reason is not part of the contract and must not be inferred"
+      },
+      {
+        "key": "attendance_coverage",
+        "reason": "attendance was not observed for 3 record(s) of the period, so attended_appointments is not published for it and appointments_no_show is a lower bound: a record whose attendance was never observed cannot be counted as a no-show. appointments_completed is a provider status that means \"arrival marked OR bill paid\" and is not proof of attendance"
+      }
+    ],
+    "unavailable_metrics": [
+      {
+        "key": "attendance",
+        "reason": "attended_appointments and attendance_no_show are unavailable: attendance_was_not_observed_for_every_record_of_the_period. appointments_completed is a provider status that mixes arrival with payment and is not proof of attendance"
+      },
+      {
+        "key": "staff_revenue",
+        "reason": "confirmed per-master revenue is unavailable for 1 master(s): YClients did not attribute their service financial transactions to a staff member. Do not estimate the missing cash from booked appointment prices"
+      },
+      {
+        "key": "personal_cash_revenue",
+        "reason": "confirmed personal cash is unavailable because no YClients service financial transaction was attributed to this master; booked service value and accrued payroll are different metrics"
+      },
+      {
+        "key": "other_employee_personal_data",
+        "reason": "role scope permits only the current employee data"
+      }
+    ],
+    "current": {
+      "data_source": "crm",
+      "period": {
+        "from": "2026-08-01T00:00:00.000Z",
+        "to": "2026-08-31T23:59:59.999Z",
+        "timezone": "Europe/Moscow"
+      },
+      "appointments": {
+        "total": 8,
+        "active": 8,
+        "scheduled": 2,
+        "completed": 6,
+        "cancelled": 0,
+        "no_show": 0,
+        "cancellation_rate_percent": 0,
+        "unique_clients": 6,
+        "repeat_clients_in_period": 2,
+        "repeat_client_rate_percent": 33.3,
+        "identified_client_visits": 8,
+        "clients_returning": 2,
+        "clients_new": 4,
+        "returning_share_percent": 33.3,
+        "cohort_lookback_days": 90,
+        "cohort_status": "available",
+        "cohort_unavailable_reason": null,
+        "booked_minutes": 480
+      },
+      "revenue": [
+        {
+          "currency": "RUB",
+          "amount_kopecks": 3000000,
+          "amount_major_units": 30000
+        }
+      ],
+      "expenses": [],
+      "net": [],
+      "average_ticket": [
+        {
+          "currency": "RUB",
+          "amount_kopecks": 150000,
+          "amount_major_units": 1500
+        }
+      ],
+      "daily": [],
+      "data_quality": {},
+      "completeness": {
+        "appointments": {
+          "source": "provider_journal",
+          "status": "complete",
+          "reason": null,
+          "observed_through": "2026-09-01T00:00:00.000Z",
+          "out_of_period_discarded": 0
+        },
+        "attendance": {
+          "source": "canonical_mirror",
+          "status": "incomplete",
+          "reason": "attendance_was_not_observed_for_every_record_of_the_period",
+          "observed_through": "2026-09-01T00:00:00.000Z"
+        }
+      },
+      "attendance": {
+        "state": "measured_incomplete",
+        "arrived": 6,
+        "no_show": 0,
+        "awaiting": 0,
+        "not_observed": 3,
+        "records": 8,
+        "facts": []
+      },
+      "staff_summary": [
+        {
+          "name": "Илья",
+          "total": 8,
+          "appointments": 8,
+          "scheduled": 2,
+          "completed": 6,
+          "cancelled": 0,
+          "no_show": 0,
+          "cancellation_rate_percent": 0,
+          "unique_clients": 6,
+          "repeat_clients_in_period": 2,
+          "revenue": [
+            {
+              "currency": "RUB",
+              "amount_kopecks": 3000000,
+              "amount_major_units": 30000
+            }
+          ],
+          "confirmed_revenue": {
+            "status": "unavailable",
+            "basis": null,
+            "amount": null,
+            "unavailable_reason": "crm_financial_transactions_are_not_attributed_to_this_master"
+          },
+          "salary": {
+            "status": "available",
+            "basis": "crm_payroll_accrual",
+            "accrued": {
+              "currency": "RUB",
+              "amount_kopecks": 900000,
+              "amount_major_units": 9000
+            },
+            "paid": null,
+            "unavailable_reason": null
+          },
+          "booked_minutes": 480,
+          "services": [
+            {
+              "name": "Стрижка",
+              "appointments": 8
+            }
+          ]
+        }
+      ],
+      "service_summary": [
+        {
+          "name": "Стрижка",
+          "appointments": 8,
+          "booked_value": [
+            {
+              "currency": "RUB",
+              "amount_kopecks": 3000000,
+              "amount_major_units": 30000
+            }
+          ],
+          "confirmed_revenue": {
+            "status": "unavailable",
+            "basis": null,
+            "amount": null,
+            "unavailable_reason": "crm_confirmed_service_revenue_not_attributed"
+          }
+        }
+      ]
+    }
+  },
+  "мастер: расчёт зарплаты недоступен": {
+    "verified": true,
+    "source": "crm",
+    "metrics": {
+      "booked_value_amount_kopecks": 3000000,
+      "appointments_total": 8,
+      "appointments_active": 8,
+      "appointments_scheduled": 2,
+      "appointments_completed": 6,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 6,
+      "repeat_clients_in_period": 2,
+      "repeat_client_rate_percent": 33.3,
+      "identified_client_visits": 8,
+      "clients_returning": 2,
+      "clients_new": 4,
+      "returning_share_percent": 33.3,
+      "cohort_lookback_days": 90,
+      "average_booked_value_amount_kopecks": 150000,
+      "booked_minutes": 480
+    },
+    "available_metrics": [
+      "booked_value_amount_kopecks",
+      "appointments_total",
+      "appointments_active",
+      "appointments_scheduled",
+      "appointments_completed",
+      "appointments_cancelled",
+      "appointments_no_show",
+      "cancellation_rate_percent",
+      "unique_clients",
+      "repeat_clients_in_period",
+      "repeat_client_rate_percent",
+      "identified_client_visits",
+      "clients_returning",
+      "clients_new",
+      "returning_share_percent",
+      "cohort_lookback_days",
+      "average_booked_value_amount_kopecks",
+      "booked_minutes"
+    ],
+    "limitations": [
+      {
+        "key": "cancellation_reason",
+        "reason": "the provider reports only that a record was removed; a business cancellation reason is not part of the contract and must not be inferred"
+      }
+    ],
+    "unavailable_metrics": [
+      {
+        "key": "staff_revenue",
+        "reason": "confirmed per-master revenue is unavailable for 1 master(s): YClients did not attribute their service financial transactions to a staff member. Do not estimate the missing cash from booked appointment prices"
+      },
+      {
+        "key": "staff_accrued_salary",
+        "reason": "accrued salary is unavailable for at least one master: crm_finance_unavailable"
+      },
+      {
+        "key": "personal_cash_revenue",
+        "reason": "confirmed personal cash is unavailable because no YClients service financial transaction was attributed to this master; booked service value and accrued payroll are different metrics"
+      },
+      {
+        "key": "other_employee_personal_data",
+        "reason": "role scope permits only the current employee data"
+      }
+    ],
+    "current": {
+      "data_source": "crm",
+      "period": {
+        "from": "2026-08-01T00:00:00.000Z",
+        "to": "2026-08-31T23:59:59.999Z",
+        "timezone": "Europe/Moscow"
+      },
+      "appointments": {
+        "total": 8,
+        "active": 8,
+        "scheduled": 2,
+        "completed": 6,
+        "cancelled": 0,
+        "no_show": 0,
+        "cancellation_rate_percent": 0,
+        "unique_clients": 6,
+        "repeat_clients_in_period": 2,
+        "repeat_client_rate_percent": 33.3,
+        "identified_client_visits": 8,
+        "clients_returning": 2,
+        "clients_new": 4,
+        "returning_share_percent": 33.3,
+        "cohort_lookback_days": 90,
+        "cohort_status": "available",
+        "cohort_unavailable_reason": null,
+        "booked_minutes": 480
+      },
+      "revenue": [
+        {
+          "currency": "RUB",
+          "amount_kopecks": 3000000,
+          "amount_major_units": 30000
+        }
+      ],
+      "expenses": [],
+      "net": [],
+      "average_ticket": [
+        {
+          "currency": "RUB",
+          "amount_kopecks": 150000,
+          "amount_major_units": 1500
+        }
+      ],
+      "daily": [],
+      "data_quality": {},
+      "completeness": {
+        "appointments": {
+          "source": "provider_journal",
+          "status": "complete",
+          "reason": null,
+          "observed_through": "2026-09-01T00:00:00.000Z",
+          "out_of_period_discarded": 0
+        },
+        "attendance": {
+          "source": "canonical_mirror",
+          "status": "complete",
+          "reason": null,
+          "observed_through": "2026-09-01T00:00:00.000Z"
+        }
+      },
+      "attendance": {
+        "state": "measured",
+        "arrived": 6,
+        "no_show": 0,
+        "awaiting": 0,
+        "not_observed": 0,
+        "records": 8,
+        "facts": []
+      },
+      "staff_summary": [
+        {
+          "name": "Илья",
+          "total": 8,
+          "appointments": 8,
+          "scheduled": 2,
+          "completed": 6,
+          "cancelled": 0,
+          "no_show": 0,
+          "cancellation_rate_percent": 0,
+          "unique_clients": 6,
+          "repeat_clients_in_period": 2,
+          "revenue": [
+            {
+              "currency": "RUB",
+              "amount_kopecks": 3000000,
+              "amount_major_units": 30000
+            }
+          ],
+          "confirmed_revenue": {
+            "status": "unavailable",
+            "basis": null,
+            "amount": null,
+            "unavailable_reason": "crm_financial_transactions_are_not_attributed_to_this_master"
+          },
+          "salary": {
+            "status": "unavailable",
+            "basis": null,
+            "accrued": null,
+            "paid": null,
+            "unavailable_reason": "crm_finance_unavailable"
+          },
+          "booked_minutes": 480,
+          "services": [
+            {
+              "name": "Стрижка",
+              "appointments": 8
+            }
+          ]
+        }
+      ],
+      "service_summary": [
+        {
+          "name": "Стрижка",
+          "appointments": 8,
+          "booked_value": [
+            {
+              "currency": "RUB",
+              "amount_kopecks": 3000000,
+              "amount_major_units": 30000
+            }
+          ],
+          "confirmed_revenue": {
+            "status": "unavailable",
+            "basis": null,
+            "amount": null,
+            "unavailable_reason": "crm_confirmed_service_revenue_not_attributed"
+          }
+        }
+      ]
+    }
+  },
+  "мастер: внутренний календарь": {
+    "verified": true,
+    "source": "maya",
+    "metrics": {
+      "booked_value_amount_kopecks": 3000000,
+      "appointments_total": 8,
+      "appointments_active": 8,
+      "appointments_scheduled": 2,
+      "appointments_completed": 6,
+      "appointments_cancelled": 0,
+      "appointments_no_show": 0,
+      "cancellation_rate_percent": 0,
+      "unique_clients": 6,
+      "repeat_clients_in_period": 2,
+      "repeat_client_rate_percent": 33.3,
+      "identified_client_visits": 8,
+      "clients_returning": 2,
+      "clients_new": 4,
+      "returning_share_percent": 33.3,
+      "cohort_lookback_days": 90,
+      "average_booked_value_amount_kopecks": 150000,
+      "booked_minutes": 480
+    },
+    "available_metrics": [
+      "booked_value_amount_kopecks",
+      "appointments_total",
+      "appointments_active",
+      "appointments_scheduled",
+      "appointments_completed",
+      "appointments_cancelled",
+      "appointments_no_show",
+      "cancellation_rate_percent",
+      "unique_clients",
+      "repeat_clients_in_period",
+      "repeat_client_rate_percent",
+      "identified_client_visits",
+      "clients_returning",
+      "clients_new",
+      "returning_share_percent",
+      "cohort_lookback_days",
+      "average_booked_value_amount_kopecks",
+      "booked_minutes"
+    ],
+    "limitations": [],
+    "unavailable_metrics": [
+      {
+        "key": "staff_revenue",
+        "reason": "per-master revenue is unavailable as confirmed cash: the internal calendar stores the booked price of an appointment, which is planned value rather than a confirmed payment"
+      },
+      {
+        "key": "staff_accrued_salary",
+        "reason": "accrued salary is unavailable for at least one master: internal_calendar_has_no_payroll_calculation"
+      },
+      {
+        "key": "personal_cash_revenue",
+        "reason": "confirmed personal cash is unavailable because no YClients service financial transaction was attributed to this master; booked service value and accrued payroll are different metrics"
+      },
+      {
+        "key": "other_employee_personal_data",
+        "reason": "role scope permits only the current employee data"
+      }
+    ],
+    "current": {
+      "data_source": "maya",
+      "period": {
+        "from": "2026-08-01T00:00:00.000Z",
+        "to": "2026-08-31T23:59:59.999Z",
+        "timezone": "Europe/Moscow"
+      },
+      "appointments": {
+        "total": 8,
+        "active": 8,
+        "scheduled": 2,
+        "completed": 6,
+        "cancelled": 0,
+        "no_show": 0,
+        "cancellation_rate_percent": 0,
+        "unique_clients": 6,
+        "repeat_clients_in_period": 2,
+        "repeat_client_rate_percent": 33.3,
+        "identified_client_visits": 8,
+        "clients_returning": 2,
+        "clients_new": 4,
+        "returning_share_percent": 33.3,
+        "cohort_lookback_days": 90,
+        "cohort_status": "available",
+        "cohort_unavailable_reason": null,
+        "booked_minutes": 480
+      },
+      "revenue": [
+        {
+          "currency": "RUB",
+          "amount_kopecks": 3000000,
+          "amount_major_units": 30000
+        }
+      ],
+      "expenses": [],
+      "net": [],
+      "average_ticket": [
+        {
+          "currency": "RUB",
+          "amount_kopecks": 150000,
+          "amount_major_units": 1500
+        }
+      ],
+      "daily": [],
+      "data_quality": {},
+      "completeness": {
+        "appointments": {
+          "source": "provider_journal",
+          "status": "complete",
+          "reason": null,
+          "observed_through": "2026-09-01T00:00:00.000Z",
+          "out_of_period_discarded": 0
+        },
+        "attendance": {
+          "source": "canonical_mirror",
+          "status": "complete",
+          "reason": null,
+          "observed_through": "2026-09-01T00:00:00.000Z"
+        }
+      },
+      "attendance": {
+        "state": "measured",
+        "arrived": 6,
+        "no_show": 0,
+        "awaiting": 0,
+        "not_observed": 0,
+        "records": 8,
+        "facts": []
+      },
+      "staff_summary": [
+        {
+          "name": "Илья",
+          "total": 8,
+          "appointments": 8,
+          "scheduled": 2,
+          "completed": 6,
+          "cancelled": 0,
+          "no_show": 0,
+          "cancellation_rate_percent": 0,
+          "unique_clients": 6,
+          "repeat_clients_in_period": 2,
+          "revenue": [
+            {
+              "currency": "RUB",
+              "amount_kopecks": 3000000,
+              "amount_major_units": 30000
+            }
+          ],
+          "confirmed_revenue": {
+            "status": "unavailable",
+            "basis": null,
+            "amount": null,
+            "unavailable_reason": "internal_calendar_records_booked_appointment_value_which_is_not_till_confirmed_cash"
+          },
+          "salary": {
+            "status": "unavailable",
+            "basis": null,
+            "accrued": null,
+            "paid": null,
+            "unavailable_reason": "internal_calendar_has_no_payroll_calculation"
+          },
+          "booked_minutes": 480,
+          "services": [
+            {
+              "name": "Стрижка",
+              "appointments": 8
+            }
+          ]
+        }
+      ],
+      "service_summary": [
+        {
+          "name": "Стрижка",
+          "appointments": 8,
+          "booked_value": [
+            {
+              "currency": "RUB",
+              "amount_kopecks": 3000000,
+              "amount_major_units": 30000
+            }
+          ],
+          "confirmed_revenue": {
+            "status": "unavailable",
+            "basis": null,
+            "amount": null,
+            "unavailable_reason": "internal_calendar_has_no_confirmed_service_cash"
+          }
+        }
+      ]
+    }
+  }
+}

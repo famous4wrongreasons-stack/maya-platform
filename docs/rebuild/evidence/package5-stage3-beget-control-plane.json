@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-09-07T16:37:06.086909+00:00",
+  "accountScope": "mocine3388",
+  "existingAuthenticatedBrowserSessionFound": true,
+  "observedMainUrl": "https://cp.beget.com/main",
+  "observedWindowTitle": "Главная | Панель управления хостингом",
+  "readResult": "Native UI automation returned the window title only; no accessible page elements. Screenshot unavailable. Scheduler list, task count, enabled/disabled entries and commands were never observed.",
+  "userAssistanceRequested": "Open Cron/Планировщик заданий in existing authorized panel and leave visible; no reply/evidence received at this checkpoint",
+  "permissionBypass": false,
+  "serverConfigurationMutation": false,
+  "jobTriggers": 0,
+  "ownedBrowserTabsCreated": 1,
+  "ownedBrowserTabsClosed": 1,
+  "ownedBrowserTabsRemaining": 0,
+  "exactManualEvidenceRequired": [
+    "Full account Cron/Планировщик заданий list including disabled entries, pagination/total count and capture date; explicitly show zero tasks if empty.",
+    "For every entry: command or target URL, interpreter/working directory where shown, environment-variable names only, enabled state, schedule/timezone.",
+    "Any referenced wrapper/script body or hash plus its resolved target; redact credentials and personal recipient data while preserving action/path identity.",
+    "Review referenced targets, deduplicate existing blockers and complete a fresh closure pass before upgrading S13/inventory status."
+  ],
+  "unknowns": [
+    "possible existence of an unlisted scheduled command",
+    "exact targets",
+    "cadence/timezone",
+    "enablement"
+  ]
+}

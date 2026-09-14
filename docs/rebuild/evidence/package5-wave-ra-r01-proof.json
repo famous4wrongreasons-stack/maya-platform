@@ -1,0 +1,335 @@
+{
+  "package": "R01",
+  "stage": "Wave R-A Stage 1 contract/schema assessment and existing-foundation executable proof",
+  "acceptedCheckpoint": "4a253449",
+  "blockersIncluded": [
+    "B38",
+    "B39",
+    "B54"
+  ],
+  "runtimeImplementationPerformed": false,
+  "remediationComplete": false,
+  "readyForProduction": false,
+  "status": "PASS",
+  "testSuites": 5,
+  "passedSuites": 5,
+  "failedSuites": 0,
+  "tests": 52,
+  "passedTests": 52,
+  "failedTests": 0,
+  "pendingTests": 0,
+  "command": [
+    "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--runTestsByPath",
+    "src/appointments/client-appointment-create.service.spec.ts",
+    "src/crm/client-channel-appointment-create.service.spec.ts",
+    "src/crm/client-channel-appointment-authority.service.spec.ts",
+    "src/action-engine/client-booking-idempotency.architecture.spec.ts",
+    "src/action-engine/client-booking-confirmation.architecture.spec.ts",
+    "--json",
+    "--outputFile=/tmp/maya-wave-ra-r01-jest.json"
+  ],
+  "workingDirectory": "/tmp/maya-b29-contour/maya-saas-backend",
+  "suites": [
+    {
+      "path": "src/crm/client-channel-appointment-create.service.spec.ts",
+      "status": "passed",
+      "testCount": 7,
+      "assertions": [
+        {
+          "name": "B19 verified Client chat appointment creation uses the verified Client and existing canonical Action Engine executor",
+          "status": "passed"
+        },
+        {
+          "name": "B19 verified Client chat appointment creation passes a verified Client without a Maya User to the common contact/intent resolver",
+          "status": "passed"
+        },
+        {
+          "name": "B19 verified Client chat appointment creation fails closed for missing link",
+          "status": "passed"
+        },
+        {
+          "name": "B19 verified Client chat appointment creation fails closed for ambiguous link",
+          "status": "passed"
+        },
+        {
+          "name": "B19 verified Client chat appointment creation rejects caller Client, phone, tenant, and legacy chat authority fields",
+          "status": "passed"
+        },
+        {
+          "name": "B19 verified Client chat appointment creation preserves UNKNOWN and stable retry identity without a second owner",
+          "status": "passed"
+        },
+        {
+          "name": "B19 verified Client chat appointment creation fails before the shared creator when canonical privacy consent is unavailable",
+          "status": "passed"
+        }
+      ],
+      "sourceSha256": "007d24879438887f97390b889d0038e08e15557b71e387461dd59a0deeea861f"
+    },
+    {
+      "path": "src/appointments/client-appointment-create.service.spec.ts",
+      "status": "passed",
+      "testCount": 22,
+      "assertions": [
+        {
+          "name": "B31 verified Client create initiator and canonical executor uses the common creator for an authenticated channel without an account actor",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects a new external intent without canonical contact instead of inventing a User",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor creates an owned internal Appointment through the existing action without a Maya User",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor resolves Client-without-User contact through one exact active CRM link",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects missing before any Action Engine ingress or write",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects revoked before any Action Engine ingress or write",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects ambiguous before any Action Engine ingress or write",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects merged before any Action Engine ingress or write",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects wrong_tenant before any Action Engine ingress or write",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects wrong_user before any Action Engine ingress or write",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects inactive before any Action Engine ingress or write",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects unsupported_version before any Action Engine ingress or write",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects an unavailable slot or invalid services before ingress",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rechecks exact Client and binding before dispatch",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor restores the execution-owned internal row on repeat without another write",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor preserves branch/tenant wall time (Asia/Novosibirsk, null)",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor preserves branch/tenant wall time (Asia/Novosibirsk, Europe/Moscow)",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor keeps unresolved staff identity null rather than substituting the external id",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor persists the exact canonical owner inside CRM dispatch and reconciliation",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor keeps provider timeout and post-provider mirror failure UNKNOWN without blind retry",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor rejects an external phone override before ingress or provider dispatch",
+          "status": "passed"
+        },
+        {
+          "name": "B31 verified Client create initiator and canonical executor maps a durable UNKNOWN to unavailable without claiming accepted ownership",
+          "status": "passed"
+        }
+      ],
+      "sourceSha256": "757ca525ab30e1644a5f5a8de743915a9cbafacd4a92f69e1f5b2eaec4052e26"
+    },
+    {
+      "path": "src/crm/client-channel-appointment-authority.service.spec.ts",
+      "status": "passed",
+      "testCount": 16,
+      "assertions": [
+        {
+          "name": "B17 verified Client appointment authority routes an owned cancel through the existing canonical executor",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority routes reschedule with only the server-authorized record and new instant",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority routes an AI service change through the existing residual canonical executor",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority rejects forged identity and malformed service replacement fields",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority uses one durable identity for concurrent duplicate service changes",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority preserves UNKNOWN for a service change without authorizing blind retry",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority fails closed for a missing link without invoking CRM",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority fails closed for a ambiguous link without invoking CRM",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority fails closed for missing Client",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority fails closed for merged Client",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority fails closed for foreign Client appointment",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority fails closed for missing appointment",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority fails closed for inactive integration",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority rejects caller identity, staff, service and tenant authority fields",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority uses one durable identity for retry and concurrent duplicate commands",
+          "status": "passed"
+        },
+        {
+          "name": "B17 verified Client appointment authority preserves canonical UNKNOWN without authorizing blind retry",
+          "status": "passed"
+        }
+      ],
+      "sourceSha256": "c9754e51dcc976c3acde1f192693f2387933efa3feadca81610cff418b8aabd2"
+    },
+    {
+      "path": "src/action-engine/client-booking-idempotency.architecture.spec.ts",
+      "status": "passed",
+      "testCount": 3,
+      "assertions": [
+        {
+          "name": "B31 immutable booking ingress permanent ratchet allows binding writes only in the canonical Action Engine kernel",
+          "status": "passed"
+        },
+        {
+          "name": "B31 immutable booking ingress permanent ratchet requires the shared booking context/authorization before either calendar can execute a Client create",
+          "status": "passed"
+        },
+        {
+          "name": "B31 immutable booking ingress permanent ratchet hashes the normalized versioned descriptor and preserves the existing UNKNOWN path",
+          "status": "passed"
+        }
+      ],
+      "sourceSha256": "17bc92e892e6e0b658de96743e0e0affd35dc751c085dbae01d4c652e0361860"
+    },
+    {
+      "path": "src/action-engine/client-booking-confirmation.architecture.spec.ts",
+      "status": "passed",
+      "testCount": 4,
+      "assertions": [
+        {
+          "name": "B33 durable source receipt architecture has exactly approved eight scalar fields and no identity generator",
+          "status": "passed"
+        },
+        {
+          "name": "B33 durable source receipt architecture derives a stable namespaced key independent of model output",
+          "status": "passed"
+        },
+        {
+          "name": "B33 chat initiator ratchets requires receipt before interpretation and derives no model key in Python",
+          "status": "passed"
+        },
+        {
+          "name": "B33 chat initiator ratchets sender persists once per gesture, replays after restart and fails closed on storage failure",
+          "status": "passed"
+        }
+      ],
+      "sourceSha256": "18e6b2870d7aad8f0604505986ac91d0e315aa2eccba7e5a2c7dc478bd4edd73"
+    }
+  ],
+  "isolation": {
+    "prisma": "in-memory jest fixtures; no Prisma client instance or DB connection",
+    "provider": "jest fixtures; no real CRM/provider mutation",
+    "actionExecution": "service/registry handler fixtures and source guards; not a fresh real PostgreSQL kernel proof",
+    "architecture": "read-only source/schema/migration reads; no SQL execution",
+    "applicationBootstrap": false,
+    "networkOrProductionAccess": false,
+    "databaseConnections": 0,
+    "oldDatabasesTouched": 0,
+    "productionMutationsMessages": 0,
+    "ownedBackgroundProcessesAfterCompletion": 0
+  },
+  "limitations": [
+    "Existing foundation proof only; all B38/B39/B54 remediation paths remain open.",
+    "Does not prove browser/PHP/native Telegram end-to-end cutover or changed relay behavior.",
+    "Mock concurrency/retry checks do not replace required future isolated PostgreSQL/Action Engine concurrency proof.",
+    "B31/B33 existing architectural guards pass; package-wide R01 overlay/authority/transport ratchet remains implementation acceptance work."
+  ],
+  "residualPaths": {
+    "B38": [
+      "salon app/api-proxy.php?action=create_record",
+      "salon app/api-proxy.codex-loyalty-20260721.php?action=create_record",
+      "salon and VPS PWA BookingFlow / repeat-booking fallback",
+      "public Next booking bundles",
+      "mayaos/app/index.html",
+      "salon/app/index.codex-loyalty-20260721.html",
+      "salon/app/index.backup-20260731-anton-analytics.html",
+      "salon/app/tenant-test.html"
+    ],
+    "B39": [
+      "bot.handle_contact",
+      "bot._start_contact_flow/_finalize_booking",
+      "bot._handle_cancel_record_confirm",
+      "bot.process_message → claude_ai/memory",
+      "native Telegram own-history/dossier/contact flows",
+      "bot._handle_freed_slot_accept",
+      "bot._handle_freed_slot_decline"
+    ],
+    "B54": [
+      "maya-native-api.php/*",
+      "maya-platform-api.php/*",
+      "SaaS/native PWA requests through those relays"
+    ]
+  },
+  "newModels": 0,
+  "newFields": 0,
+  "newActionClasses": 0,
+  "migrationRequired": false,
+  "businessDecisionRequired": false,
+  "schemaRequired": false
+}

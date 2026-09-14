@@ -1,0 +1,32 @@
+[
+  {
+    "gate": "mandatory-backend",
+    "exitCode": 0,
+    "seconds": 350.9
+  },
+  {
+    "gate": "lint",
+    "exitCode": 0,
+    "seconds": 35.4
+  },
+  {
+    "gate": "application-typecheck",
+    "exitCode": 0,
+    "seconds": 5.7
+  },
+  {
+    "gate": "scripts-typecheck",
+    "exitCode": 0,
+    "seconds": 13.2
+  },
+  {
+    "gate": "build",
+    "exitCode": 0,
+    "seconds": 16.6
+  },
+  {
+    "gate": "prisma-validate",
+    "exitCode": 0,
+    "seconds": 0.6
+  }
+]

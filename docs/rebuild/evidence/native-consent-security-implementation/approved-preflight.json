@@ -1,0 +1,42 @@
+{
+  "auditedAt": "2026-09-08T09:10:36.177Z",
+  "release": "20260908-native-consent-compat-b6c53ff9",
+  "resolver": "a18.maya-user-client-association.v1",
+  "affectedLinks": 1,
+  "links": [
+    {
+      "active": true,
+      "challengeEvidenceMatchesLink": true,
+      "targetFingerprint": "2f5ead7db7dc3844f52a3294f1f80e4432321eb4ca548b391b9f24bfd9f5e0cd",
+      "consentReceipts": [
+        {
+          "kind": "marketing",
+          "decision": "grant",
+          "sourceType": "client_command",
+          "actionClass": "record_client_consent",
+          "state": "SUCCEEDED",
+          "trustedInputHashValid": true,
+          "usesAffectedLink": true,
+          "currentBindingPredicateAccepts": true,
+          "receiptFingerprint": "8987b79ea5544cac0610cb5e68f28c887602bf363a407b6a3680dbcadc4d3db6"
+        },
+        {
+          "kind": "privacy",
+          "decision": "grant",
+          "sourceType": "client_command",
+          "actionClass": "record_client_consent",
+          "state": "SUCCEEDED",
+          "trustedInputHashValid": true,
+          "usesAffectedLink": true,
+          "currentBindingPredicateAccepts": true,
+          "receiptFingerprint": "3dbc11747b322094cd02e8c76157c6093811c16a0406331d18bc282137d40af1"
+        }
+      ]
+    }
+  ],
+  "transaction": "REPEATABLE READ READ ONLY",
+  "productionWrites": 0,
+  "messages": 0,
+  "providerEffects": 0,
+  "rawIdsOrPayloadsEmitted": false
+}

@@ -1,0 +1,33 @@
+{
+  "observedAt": "2026-09-12T17:36:13.827932+00:00",
+  "nginxTestExit": 0,
+  "activePhpFastCgiLines": [],
+  "rootRows": [
+    {
+      "path": "/var/www/html",
+      "exists": true,
+      "symlink": false,
+      "resolved": "/var/www/html",
+      "phpArtifacts": [],
+      "symlinks": []
+    },
+    {
+      "path": "/var/www/maya-platform",
+      "exists": true,
+      "symlink": false,
+      "resolved": "/var/www/maya-platform",
+      "phpArtifacts": [],
+      "symlinks": []
+    },
+    {
+      "path": "/var/www/maya-saas-acme",
+      "exists": true,
+      "symlink": false,
+      "resolved": "/var/www/maya-saas-acme",
+      "phpArtifacts": [],
+      "symlinks": []
+    }
+  ],
+  "errors": [],
+  "configurationSha256": "16b1b351019d97fb64312f77cab136ce28fc4c989cce63f4104dbe1524afffba"
+}

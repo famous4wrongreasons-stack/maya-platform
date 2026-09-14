@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "rawObservations": {
+    "production-metadata.txt": {
+      "sha256": "e59db16776d31b08e5e9ec8202506f4ec2525de8b8554c1980471bc2e86ec8aa",
+      "bytes": 2842706,
+      "retainedPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter6-final-acceptance-20260908/production-metadata.txt"
+    },
+    "runtime-launchers.txt": {
+      "sha256": "046c967ab2ba9212a105fc3a49483fd53452db33df23cd14499ff160c06e7051",
+      "bytes": 98596,
+      "retainedPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter6-final-acceptance-20260908/runtime-launchers.txt"
+    },
+    "extra-surfaces.txt": {
+      "sha256": "2ea0d3d1bdb5438cd46cc8a8ea36bd4063255bbd204231bbad10d36d96c71a8e",
+      "bytes": 9802,
+      "retainedPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter6-final-acceptance-20260908/extra-surfaces.txt"
+    },
+    "edge-metadata.txt": {
+      "sha256": "0aa9b9f54d3af14c622d14c2a6bc6829786472e5f1f4573a0ab26fa3d52b7075",
+      "bytes": 163366,
+      "retainedPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter6-final-acceptance-20260908/edge-metadata.txt"
+    },
+    "schema-structure.txt": {
+      "sha256": "b7a99ab71e2252056cd4529e6b1dc1245d6043e5f2f7596b5f53b6f2d11a71e3",
+      "bytes": 201433,
+      "retainedPath": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter6-final-acceptance-20260908/schema-structure.txt"
+    }
+  },
+  "canonicalComparisonTargets": "../package5-rc-final/final-* metadata and production-exact-schema-structure.json",
+  "comparison": "baseline-certification.json",
+  "collectionMethod": "Existing repository metadata probes through SSH stdin; read-only SQL/catalog or file hashes; no app/job execution for proof",
+  "remoteFilesCreated": 0,
+  "productionBusinessWrites": 0,
+  "messages": 0,
+  "providerWrites": 0
+}

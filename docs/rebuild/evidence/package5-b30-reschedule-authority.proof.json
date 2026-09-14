@@ -1,0 +1,21 @@
+{
+  "b30RescheduleNowRejectsUnauthorizedTarget": true,
+  "denied": [
+    {"mode": "missing", "rescheduleAccepted": false, "statusAfter": "confirmed", "startUnchanged": true, "error": "client_link_required", "newActionExecutions": 0, "actionEngineRescheduleCalls": 0},
+    {"mode": "revoked", "rescheduleAccepted": false, "statusAfter": "confirmed", "startUnchanged": true, "error": "client_link_required", "newActionExecutions": 0, "actionEngineRescheduleCalls": 0},
+    {"mode": "verified_to_other_client", "rescheduleAccepted": false, "statusAfter": "confirmed", "startUnchanged": true, "error": "not_found", "newActionExecutions": 0, "actionEngineRescheduleCalls": 0}
+  ],
+  "owned": {"mode": "owned", "rescheduleAccepted": true, "clientWithoutMayaUser": false, "actionEngineRescheduleCalls": 1, "newActionExecutionsFromRoute": 0, "localAppointmentMutatedByExecutorMock": true},
+  "withoutUser": {"mode": "owned_without_user", "rescheduleAccepted": true, "clientWithoutMayaUser": true, "actionEngineRescheduleCalls": 1, "newActionExecutionsFromRoute": 0, "localAppointmentMutatedByExecutorMock": true},
+  "route": "POST /api/appointments/:id/reschedule",
+  "testedCalendarSource": "internal",
+  "compiledControllerServiceRescheduler": true,
+  "realPostgresql": true,
+  "syntheticFixturesOnly": true,
+  "schemaDiff": "NONE",
+  "migrationsApplied": 79,
+  "mandatoryBackendRegression": "367 suites / 2990 tests",
+  "actionEngineRescheduleCalls": 2,
+  "providerCalls": 0,
+  "realProductionMutations": 0
+}

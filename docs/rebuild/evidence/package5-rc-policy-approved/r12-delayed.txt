@@ -1,0 +1,16 @@
+{"delayedPolicyProof":"waiting","executionId":"53d5aaca-37eb-4d4a-b624-a49a52fdeb08","capability":"team.attachment.finalize.execute.v1","originalExpiry":"2026-09-08T11:41:03.873Z","delayMs":65000}
+{"delayedPolicyProof":"PASS","executionId":"53d5aaca-37eb-4d4a-b624-a49a52fdeb08","capability":"team.attachment.finalize.execute.v1","sameAdmission":true,"claimAudit":1}
+{
+  "package": "R12",
+  "proof": "PostgreSQL and actual private local storage",
+  "result": "PASS",
+  "checks": [
+    "User without Telegram; exact active membership; invalid input/auth creates no AE; four same-key sends one message/AE; changed key intent conflicts",
+    "concurrent reserve one owner; exact current reservation/chunk bytes; two chunks >6MiB verified; final publish lost receipt UNKNOWN; changed retry conflicts; no attach or unlink",
+    "message acceptance independent of notification; exact frozen Inbox plan; one UNKNOWN recipient does not block another; no external effect",
+    "same finalize reconciles without republish; one attachment consume winner; private member download; own-only withdrawal; reads hide without unlink; new recipient not added; revoked principal denied"
+  ],
+  "publishes": 1,
+  "externalCalls": 0,
+  "productionEffects": 0
+}

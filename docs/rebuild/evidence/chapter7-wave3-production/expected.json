@@ -1,0 +1,234 @@
+{
+  "columns": [
+    "id",
+    "tenantId",
+    "kind",
+    "identityHash",
+    "revision",
+    "requestKeyHash",
+    "intentHash",
+    "ruleKey",
+    "ruleVersion",
+    "clientId",
+    "appointmentId",
+    "staffId",
+    "branchId",
+    "configurationUserId",
+    "periodFrom",
+    "periodTo",
+    "timezone",
+    "scopeJson",
+    "asOf",
+    "admittedAt",
+    "expiresAt",
+    "state",
+    "leaseGeneration",
+    "leaseTokenHash",
+    "leaseExpiresAt",
+    "publishedAt",
+    "contractVersion",
+    "evidenceHash",
+    "snapshotHash",
+    "completeness",
+    "qualification",
+    "evidenceRefsJson",
+    "valuesJson",
+    "limitationsJson",
+    "attributionStatus",
+    "creditedExecutionId",
+    "creditedAttemptId"
+  ],
+  "functions": {
+    "C7_measurement_admission_guard": "d0cb9e9ecc43afe118f6846b906c636623020b92826cc4e2c7ae496700cbaecd",
+    "C7_measurement_publication_guard": "9d4bbc89b812ce777555a1816efbba9bf81626340f078816f6987ecce387b148",
+    "C7_measurement_delete_guard": "db7ebe6e9e2cbac71f15394c23cfb4a07bb08d083e36c3b641240b3c2445c4c0",
+    "C7_measurement_truncate_guard": "2018402def99ff2dd40a1cbaa032f6fa0835cbb3654a67b6c1f57a9cc2d69cf1"
+  },
+  "artifacts": {
+    "dist/src/app.module.js": "fc18b346080d9638bfc0fb384e3ee10351b955d0cce5bf9cea37c1daa4a7d364",
+    "dist/src/measurement/measurement.contract.js": "2cd52524f21eb4d3bb6b3433d221bce8a38d1b39dad1d4a8ce94c8a784111d1b",
+    "dist/src/measurement/measurement.finance.facts.js": "c79d0a165a1c19ba65c9065f994e6293b18e79386686b7f2022b0ebe8ee75981",
+    "dist/src/measurement/measurement.finance.js": "f3bbe15b5507c109c07748907bf0ec968c980c55655b1f7d7bb290de09a10659",
+    "dist/src/measurement/measurement.module.js": "ccab46e9bfb129255fed5d4dcf721079b80e5f5136d75686204ba67715746f44",
+    "dist/src/measurement/measurement.outcomes.facts.js": "4e343c7ee5571b8f35e75637b4c6d44dabd9dbebbf059dcdc1085ade80a482f2",
+    "dist/src/measurement/measurement.outcomes.funnel.js": "02a74971d5ad768b6619839d209c88eb909ea155389877a48da6355ad70239d3",
+    "dist/src/measurement/measurement.outcomes.js": "621ffb34777c10611d1aae1a9afa653d528c4a85238a2028462dcb3caafdd816",
+    "dist/src/measurement/measurement.period.js": "68194749a9abc37a2b30d2baf1984a7cefb420d9d9cfc3953c2de38b0da74f7e",
+    "dist/src/measurement/measurement.reputation.js": "be7119b3e8c6226e136bee3ceaf76e9fe827c50d552ecf0754718abc3deadaef",
+    "dist/src/measurement/measurement.service.js": "2b3b13745f92412c3c181315e338613ceec7f02733428a2c0a4ddfff1730b412",
+    "dist/src/measurement/measurement.sources.js": "798bcbe3d569eafbb12e609939315483c36a5e3e18c70a2e5afc0deb69311ffd",
+    "dist/src/measurement/measurement.staff-goal.facts.js": "27d301f5952bb245e3c50a0e0c3300e615cdba30de993e9a22dd31ce04a3a878",
+    "dist/src/measurement/measurement.staff-goal.js": "0a4742660085cd2e54aacaa237bb702e0e2a1536e4fced0258dbec5a5b0839f3",
+    "dist/src/measurement/measurement.value.js": "2ccce47a58f30c36dd5b771d4b5bf583cd85ced15656b456797026a61902d590",
+    "dist/src/package5-wave6/chapter7-measurement-retention.js": "7c634549d2aebf597609230586e0b708d95455929ab3555250701a235f0907ae",
+    "dist/src/package5-wave6/package5-wave-rc-retention.service.js": "6a769aa4e4cc3e63e373c5350788f726b718dfa444aec8e79e26d531162ef3c1",
+    "dist/src/package5-wave6/package5-wave6.policy.js": "4687fb24e74b7af9845129c1ffe31ef24b8249962d478bb0c91bccf9be0656b0",
+    "dist/src/package5-wave6/package5-wave6.service.js": "87f2aa0d546678c6b0f78e7df8df48551acf9c63a0b983af716f30a9ccc5b021"
+  },
+  "constraintDefinitions": [
+    {
+      "name": "C7_measurement_appointment_fk",
+      "definition": "FOREIGN KEY (\"appointmentId\", \"tenantId\") REFERENCES \"Appointment\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+    },
+    {
+      "name": "C7_measurement_attempt_fk",
+      "definition": "FOREIGN KEY (\"creditedAttemptId\", \"tenantId\") REFERENCES \"ActionAttempt\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+    },
+    {
+      "name": "C7_measurement_attribution_ck",
+      "definition": "CHECK ((((\"attributionStatus\" IS NULL) OR (\"attributionStatus\" = ANY (ARRAY['NOT_APPLICABLE'::text, 'UNATTRIBUTED'::text, 'AMBIGUOUS'::text, 'ATTRIBUTED'::text]))) AND (((\"creditedExecutionId\" IS NULL) AND (\"creditedAttemptId\" IS NULL) AND (COALESCE(\"attributionStatus\", ''::text) <> 'ATTRIBUTED'::text)) OR ((\"creditedExecutionId\" IS NOT NULL) AND (\"creditedAttemptId\" IS NOT NULL) AND (\"attributionStatus\" = 'ATTRIBUTED'::text) AND (kind = 'appointment_outcome'::text) AND (qualification = 'VERIFIED'::text)))))"
+    },
+    {
+      "name": "C7_measurement_bounds_ck",
+      "definition": "CHECK ((((length(\"tenantId\") >= 1) AND (length(\"tenantId\") <= 240)) AND (octet_length((\"scopeJson\")::text) <= 16384) AND ((length(COALESCE((\"scopeJson\" ->> 'capabilityKey'::text), ''::text)) >= 1) AND (length(COALESCE((\"scopeJson\" ->> 'capabilityKey'::text), ''::text)) <= 100)) AND ((state = 'PENDING'::text) OR COALESCE(((((octet_length((\"evidenceRefsJson\")::text) + octet_length((\"valuesJson\")::text)) + octet_length((\"limitationsJson\")::text)) <= 262144) AND ((jsonb_array_length((\"evidenceRefsJson\" -> 'sources'::text)) + jsonb_array_length((\"evidenceRefsJson\" -> 'dependencies'::text))) <= 1000) AND (jsonb_array_length((\"valuesJson\" -> 'metrics'::text)) <= 256)), false))))"
+    },
+    {
+      "name": "C7_measurement_branch_fk",
+      "definition": "FOREIGN KEY (\"branchId\", \"tenantId\") REFERENCES \"Branch\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+    },
+    {
+      "name": "C7_measurement_client_fk",
+      "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+    },
+    {
+      "name": "C7_measurement_completeness_ck",
+      "definition": "CHECK (((completeness IS NULL) OR (completeness = ANY (ARRAY['COMPLETE'::text, 'PARTIAL'::text, 'UNAVAILABLE'::text, 'NOT_MEASURED'::text]))))"
+    },
+    {
+      "name": "C7_measurement_config_owner_fk",
+      "definition": "FOREIGN KEY (\"configurationUserId\", \"tenantId\") REFERENCES \"Membership\"(\"userId\", \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+    },
+    {
+      "name": "C7_measurement_execution_fk",
+      "definition": "FOREIGN KEY (\"creditedExecutionId\", \"tenantId\") REFERENCES \"ActionExecution\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+    },
+    {
+      "name": "C7_measurement_hashes_ck",
+      "definition": "CHECK (((\"identityHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"requestKeyHash\" ~ '^[0-9a-f]{64}$'::text) AND (\"intentHash\" ~ '^[0-9a-f]{64}$'::text) AND ((\"leaseTokenHash\" IS NULL) OR (\"leaseTokenHash\" ~ '^[0-9a-f]{64}$'::text)) AND ((\"evidenceHash\" IS NULL) OR (\"evidenceHash\" ~ '^[0-9a-f]{64}$'::text)) AND ((\"snapshotHash\" IS NULL) OR (\"snapshotHash\" ~ '^[0-9a-f]{64}$'::text))))"
+    },
+    {
+      "name": "C7_measurement_json_ck",
+      "definition": "CHECK (COALESCE(((jsonb_typeof(\"scopeJson\") = 'object'::text) AND ((\"scopeJson\" ->> 'version'::text) = '1'::text) AND ((\"scopeJson\" - ARRAY['version'::text, 'capabilityKey'::text, 'branchIds'::text, 'dimensions'::text, 'sourceQuery'::text]) = '{}'::jsonb) AND (jsonb_typeof((\"scopeJson\" -> 'branchIds'::text)) = 'array'::text) AND (jsonb_typeof((\"scopeJson\" -> 'dimensions'::text)) = 'object'::text) AND (jsonb_typeof((\"scopeJson\" -> 'sourceQuery'::text)) = 'object'::text) AND ((state = 'PENDING'::text) OR ((jsonb_typeof(\"evidenceRefsJson\") = 'object'::text) AND ((\"evidenceRefsJson\" ->> 'version'::text) = '1'::text) AND ((\"evidenceRefsJson\" - ARRAY['version'::text, 'sources'::text, 'dependencies'::text]) = '{}'::jsonb) AND (jsonb_typeof((\"evidenceRefsJson\" -> 'sources'::text)) = 'array'::text) AND (jsonb_typeof((\"evidenceRefsJson\" -> 'dependencies'::text)) = 'array'::text) AND (jsonb_typeof(\"valuesJson\") = 'object'::text) AND ((\"valuesJson\" ->> 'version'::text) = '1'::text) AND ((\"valuesJson\" - ARRAY['version'::text, 'metrics'::text]) = '{}'::jsonb) AND (jsonb_typeof((\"valuesJson\" -> 'metrics'::text)) = 'array'::text) AND (jsonb_typeof(\"limitationsJson\") = 'object'::text) AND ((\"limitationsJson\" ->> 'version'::text) = '1'::text) AND ((\"limitationsJson\" - ARRAY['version'::text, 'reasons'::text]) = '{}'::jsonb) AND (jsonb_typeof((\"limitationsJson\" -> 'reasons'::text)) = 'array'::text)))), false))"
+    },
+    {
+      "name": "C7_measurement_kind_ck",
+      "definition": "CHECK ((kind = ANY (ARRAY['appointment_outcome'::text, 'client_history'::text, 'business_period'::text, 'staff_goal'::text, 'reputation_period'::text, 'execution_funnel'::text, 'value_discrepancy'::text])))"
+    },
+    {
+      "name": "C7_measurement_lease_ck",
+      "definition": "CHECK (((((\"leaseTokenHash\" IS NULL) AND (\"leaseExpiresAt\" IS NULL)) OR ((\"leaseTokenHash\" IS NOT NULL) AND (\"leaseExpiresAt\" IS NOT NULL) AND (\"leaseExpiresAt\" <= \"expiresAt\"))) AND ((state <> 'PUBLISHED'::text) OR ((\"leaseTokenHash\" IS NULL) AND (\"leaseExpiresAt\" IS NULL)))))"
+    },
+    {
+      "name": "C7_measurement_period_ck",
+      "definition": "CHECK (((\"periodFrom\" < \"periodTo\") AND (\"asOf\" <= \"admittedAt\")))"
+    },
+    {
+      "name": "C7_measurement_publication_ck",
+      "definition": "CHECK ((((state = 'PENDING'::text) AND (\"publishedAt\" IS NULL) AND (\"evidenceHash\" IS NULL) AND (\"snapshotHash\" IS NULL) AND (completeness IS NULL) AND (qualification IS NULL) AND (\"evidenceRefsJson\" IS NULL) AND (\"valuesJson\" IS NULL) AND (\"limitationsJson\" IS NULL) AND (\"attributionStatus\" IS NULL) AND (\"creditedExecutionId\" IS NULL) AND (\"creditedAttemptId\" IS NULL)) OR ((state = 'PUBLISHED'::text) AND (\"publishedAt\" IS NOT NULL) AND (\"publishedAt\" >= \"admittedAt\") AND (\"publishedAt\" < \"expiresAt\") AND (\"evidenceHash\" IS NOT NULL) AND (\"snapshotHash\" IS NOT NULL) AND (completeness IS NOT NULL) AND (qualification IS NOT NULL) AND (\"evidenceRefsJson\" IS NOT NULL) AND (\"valuesJson\" IS NOT NULL) AND (\"limitationsJson\" IS NOT NULL) AND (\"attributionStatus\" IS NOT NULL))))"
+    },
+    {
+      "name": "C7_measurement_qualification_ck",
+      "definition": "CHECK (((qualification IS NULL) OR (qualification = ANY (ARRAY['VERIFIED'::text, 'SOURCE_LABELLED'::text, 'UNQUALIFIED'::text]))))"
+    },
+    {
+      "name": "C7_measurement_retention_ck",
+      "definition": "CHECK ((\"expiresAt\" = (\"admittedAt\" + '8760:00:00'::interval)))"
+    },
+    {
+      "name": "C7_measurement_rule_ck",
+      "definition": "CHECK ((\"ruleKey\" = ('c7.'::text || replace(kind, '_'::text, '-'::text))))"
+    },
+    {
+      "name": "C7_measurement_staff_fk",
+      "definition": "FOREIGN KEY (\"staffId\", \"tenantId\") REFERENCES \"Staff\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+    },
+    {
+      "name": "C7_measurement_state_ck",
+      "definition": "CHECK ((state = ANY (ARRAY['PENDING'::text, 'PUBLISHED'::text])))"
+    },
+    {
+      "name": "C7_measurement_subject_ck",
+      "definition": "CHECK ((((\"appointmentId\" IS NULL) OR (\"clientId\" IS NOT NULL)) AND ((kind <> 'appointment_outcome'::text) OR ((\"appointmentId\" IS NOT NULL) AND (\"clientId\" IS NOT NULL))) AND ((kind <> 'client_history'::text) OR (\"clientId\" IS NOT NULL)) AND ((kind <> 'staff_goal'::text) OR ((\"staffId\" IS NOT NULL) AND (\"configurationUserId\" IS NOT NULL)))))"
+    },
+    {
+      "name": "C7_measurement_tenant_fk",
+      "definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
+    },
+    {
+      "name": "C7_measurement_timezone_ck",
+      "definition": "CHECK (((length(timezone) >= 1) AND (length(timezone) <= 100)))"
+    },
+    {
+      "name": "C7_measurement_versions_ck",
+      "definition": "CHECK (((revision > 0) AND (\"ruleVersion\" > 0) AND (\"contractVersion\" > 0) AND (\"leaseGeneration\" >= 0)))"
+    },
+    {
+      "name": "MeasurementRevision_pkey",
+      "definition": "PRIMARY KEY (id)"
+    }
+  ],
+  "indexDefinitions": [
+    {
+      "name": "C7_measurement_attempt_idx",
+      "definition": "CREATE INDEX \"C7_measurement_attempt_idx\" ON public.\"MeasurementRevision\" USING btree (\"tenantId\", \"creditedAttemptId\")"
+    },
+    {
+      "name": "C7_measurement_client_idx",
+      "definition": "CREATE INDEX \"C7_measurement_client_idx\" ON public.\"MeasurementRevision\" USING btree (\"tenantId\", \"clientId\", kind, \"asOf\")"
+    },
+    {
+      "name": "C7_measurement_execution_idx",
+      "definition": "CREATE INDEX \"C7_measurement_execution_idx\" ON public.\"MeasurementRevision\" USING btree (\"tenantId\", \"creditedExecutionId\")"
+    },
+    {
+      "name": "C7_measurement_expiry_idx",
+      "definition": "CREATE INDEX \"C7_measurement_expiry_idx\" ON public.\"MeasurementRevision\" USING btree (\"expiresAt\", id)"
+    },
+    {
+      "name": "C7_measurement_generation_uq",
+      "definition": "CREATE UNIQUE INDEX \"C7_measurement_generation_uq\" ON public.\"MeasurementRevision\" USING btree (\"tenantId\", \"identityHash\", revision)"
+    },
+    {
+      "name": "C7_measurement_id_tenant_uq",
+      "definition": "CREATE UNIQUE INDEX \"C7_measurement_id_tenant_uq\" ON public.\"MeasurementRevision\" USING btree (id, \"tenantId\")"
+    },
+    {
+      "name": "C7_measurement_pending_uq",
+      "definition": "CREATE UNIQUE INDEX \"C7_measurement_pending_uq\" ON public.\"MeasurementRevision\" USING btree (\"tenantId\", \"identityHash\") WHERE (state = 'PENDING'::text)"
+    },
+    {
+      "name": "C7_measurement_period_idx",
+      "definition": "CREATE INDEX \"C7_measurement_period_idx\" ON public.\"MeasurementRevision\" USING btree (\"tenantId\", kind, \"periodFrom\", \"periodTo\")"
+    },
+    {
+      "name": "C7_measurement_request_uq",
+      "definition": "CREATE UNIQUE INDEX \"C7_measurement_request_uq\" ON public.\"MeasurementRevision\" USING btree (\"tenantId\", \"requestKeyHash\")"
+    },
+    {
+      "name": "C7_measurement_staff_idx",
+      "definition": "CREATE INDEX \"C7_measurement_staff_idx\" ON public.\"MeasurementRevision\" USING btree (\"tenantId\", \"staffId\", kind, \"asOf\")"
+    },
+    {
+      "name": "MeasurementRevision_pkey",
+      "definition": "CREATE UNIQUE INDEX \"MeasurementRevision_pkey\" ON public.\"MeasurementRevision\" USING btree (id)"
+    }
+  ],
+  "triggerDefinitions": [
+    {
+      "name": "C7_measurement_admission_guard_trg",
+      "definition": "CREATE TRIGGER \"C7_measurement_admission_guard_trg\" BEFORE INSERT ON public.\"MeasurementRevision\" FOR EACH ROW EXECUTE FUNCTION \"C7_measurement_admission_guard\"()"
+    },
+    {
+      "name": "C7_measurement_delete_guard_trg",
+      "definition": "CREATE TRIGGER \"C7_measurement_delete_guard_trg\" BEFORE DELETE ON public.\"MeasurementRevision\" FOR EACH ROW EXECUTE FUNCTION \"C7_measurement_delete_guard\"()"
+    },
+    {
+      "name": "C7_measurement_publication_guard_trg",
+      "definition": "CREATE TRIGGER \"C7_measurement_publication_guard_trg\" BEFORE UPDATE ON public.\"MeasurementRevision\" FOR EACH ROW EXECUTE FUNCTION \"C7_measurement_publication_guard\"()"
+    },
+    {
+      "name": "C7_measurement_truncate_guard_trg",
+      "definition": "CREATE TRIGGER \"C7_measurement_truncate_guard_trg\" BEFORE TRUNCATE ON public.\"MeasurementRevision\" FOR EACH STATEMENT EXECUTE FUNCTION \"C7_measurement_truncate_guard\"()"
+    }
+  ]
+}

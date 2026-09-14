@@ -1,0 +1,56 @@
+{
+  "baseCheckpoint": "7b5b74d639404fcfa24b6df69d9c2176f46b54cf",
+  "scope": "B31 local candidate; no deployment",
+  "foundationSufficient": false,
+  "overallVerdict": "FAIL_STOP_B31_G1",
+  "gates": {
+    "appointmentBooking": {
+      "suites": 31,
+      "tests": 316,
+      "verdict": "PASS"
+    },
+    "architecture": {
+      "suites": 83,
+      "tests": 480,
+      "verdict": "PASS"
+    },
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "typecheckScripts": "PASS",
+    "build": "PASS",
+    "schemaCleanReplay": {
+      "migrations": 79,
+      "pending": 0,
+      "drift": "NONE"
+    },
+    "ordinaryMandatoryBackend": {
+      "suites": 369,
+      "tests": 3015,
+      "verdict": "PASS"
+    },
+    "compiledHttpAiCanonicalCreate": "PASS",
+    "secondaryCallerKeyChangedPayload": "FAIL"
+  },
+  "sourceSha256": {
+    "src/appointments/appointments.service.ts": "446bb861f26b3a5c5ba6ae0aa43ca62b184b4979e0835d9effbf9d09092fc6c0",
+    "src/appointments/client-appointment-create.service.ts": "41cb2f4d010a09e52e4f53276cb5e19c85b2d36b7847819c7e31aa6b412c73ba",
+    "src/crm/crm.service.ts": "fdb20378175e6ae7d7caf6ca29e89840558604c73e13f0434e4206d274c5009f",
+    "src/action-engine/action-engine.runtime.ts": "5d2373b76d1c1fef1f9a4d91322b31169be5964d8a60c26eafc9395009f84bae",
+    "src/action-engine/action-engine.kernel.ts": "b3d0cfdec47171846544a8aab3f3877c3b73ec304c85a99de26768d57d805831",
+    "prisma/schema.prisma": "4f623067f7a54d8a7c10db6d4cf21d80b278e57536c739bdcd9e49f787341c97"
+  },
+  "newSchemaModelsActionClasses": 0,
+  "productionDeploymentPerformed": false,
+  "productionMutations": 0,
+  "postB31ProductionFinalGate": "NOT_RUN",
+  "package5Complete": false,
+  "chapter6Complete": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "mainDirtyPaths": 24,
+  "mainDirtyWorktreeTouched": false,
+  "preExistingTestDatabasesTouched": 0,
+  "preExistingTestDatabases": 17,
+  "ownedPostgresqlStopped": true,
+  "ownedSyntheticDatabaseRetained": true
+}

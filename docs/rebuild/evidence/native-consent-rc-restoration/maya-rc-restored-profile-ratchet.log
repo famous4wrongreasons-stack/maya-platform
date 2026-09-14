@@ -1,0 +1,9 @@
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent --runTestsByPath src/crm/client-profile-read.architecture.spec.ts src/action-engine/consent-security-invalidation.architecture.spec.ts
+
+
+Test Suites: 2 passed, 2 total
+Tests:       22 passed, 22 total
+Snapshots:   0 total
+Time:        1.151 s

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CustomersService } from '../customers/customers.service';
+import { unavailableAuthorityView } from '../domain';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { UsersService } from '../users/users.service';
@@ -50,10 +51,15 @@ export class CustomerPortalService {
               account_id: null,
               balance: null,
               currency: 'RUB',
-              source: 'external_crm',
-              authoritative: 'crm',
-              sync_status: 'temporarily_unavailable',
-              stale: true,
+              source: null,
+              /**
+               * 🔴 Здесь синтезировался владелец `crm`. Это была выдумка:
+               * при внутреннем календаре владелец — `maya`, при включённом
+               * внешнем журнале — `legacy_bot`, а когда граница не ответила,
+               * не известно вообще ничего. Незнание называется незнанием.
+               */
+              ...unavailableAuthorityView(),
+              authoritative: null,
               synced_at: null,
               error: { code: 'loyalty_temporarily_unavailable' },
             },

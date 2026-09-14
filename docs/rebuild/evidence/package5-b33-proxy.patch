@@ -1,0 +1,18 @@
+--- proxy-before.php
++++ proxy-before.php
+@@ -2552,6 +2552,7 @@
+         $init_data = $_SERVER['HTTP_X_TELEGRAM_INITDATA'] ?? '';
+         $payload = json_encode([
+             'message'   => (string)($input['message'] ?? ''),
++            'booking_confirmation' => $input['booking_confirmation'] ?? null,
+             'mode'      => (string)($input['mode'] ?? ''),
+             'audio'     => $input['audio'] ?? null,
+             'auth_data' => $input['auth_data'] ?? null, 'session_token' => $input['session_token'] ?? null,
+@@ -2593,6 +2594,7 @@
+         $init_data = $_SERVER['HTTP_X_TELEGRAM_INITDATA'] ?? '';
+         $payload = json_encode([
+             'message'   => (string)($input['message'] ?? ''),
++            'booking_confirmation' => $input['booking_confirmation'] ?? null,
+             'mode'      => (string)($input['mode'] ?? ''),
+             'audio'     => $input['audio'] ?? null,
+             'voice'     => $input['voice'] ?? null,   // голосовой режим → озвучка по предложениям

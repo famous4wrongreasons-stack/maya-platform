@@ -1,5 +1,34 @@
 # MAYA conversational onboarding and verified trial
 
+## Permanent architectural boundary
+
+The canonical [service-business principles](../architecture/README.md#service-business-principles)
+and [target onboarding flow](../architecture/README.md#business-onboarding-target)
+apply to this existing product surface (owner decision, 2026-09-12). Conversation
+is the primary interface; forms remain fallback/admin/advanced editors. LLM output
+is a proposed structured draft, never policy authority. Deterministic validation,
+explicit owner confirmation and the existing canonical configuration action are
+required before persisting a Tenant Policy; personal preferences retain their
+separate scope. Chat history is not configuration storage.
+
+Business type/profile, branches, timezone and provider are candidates until
+verified/confirmed by the appropriate flow. Ask only missing relevant questions;
+a business without staff does not need payroll questions. Profile defaults are
+recommendations, not universal rules or permission/consent grants. The first
+barbershop and YClients integration do not define every tenant's business model.
+
+Credentials use the [separate secure connector flow](../architecture/README.md#conversational-policy-and-secrets).
+Raw secrets must never enter LLM prompts, conversation history, ordinary logs,
+business configuration or analytics. Existing draft/activation tokens below are
+protocol credentials, not chat messages; Maya receives only permitted status/ref.
+
+Website/map/public links follow [user-bound external-source rules](../architecture/README.md#external-source-capabilities):
+candidate entity → owner confirmation → canonical binding → actual connector
+capability check. A link is not verified access or automatic monitoring. Target
+report policies and external-source bindings are architectural requirements;
+this note does not claim new APIs/connectors exist or extend Chapter 7 scope.
+The API sections below describe their own existing slice, not the whole target.
+
 ## Product flow
 
 Owner onboarding runs inside the existing MAYA conversation. It is not a

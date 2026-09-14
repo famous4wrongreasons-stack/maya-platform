@@ -1,0 +1,245 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { runInNewContext } from 'node:vm';
+
+const pwa = readFileSync(
+  resolve(__dirname, '../../../сайт и приложение/app.html'),
+  'utf8',
+);
+const accessCode = pwa.slice(
+  pwa.indexOf("var ME_APP_MODES = ['platform', 'owner', 'staff', 'client'];"),
+  pwa.indexOf('function meAppAccessOpenMode('),
+);
+
+function browser(savedMode?: string) {
+  const storage = new Map<string, string>();
+  const key = 'me_app_mode_v1:tenant-1:user-1';
+  if (savedMode) storage.set(key, savedMode);
+  const localStorage = {
+    getItem: jest.fn((name: string) => storage.get(name) ?? null),
+    setItem: jest.fn((name: string, value: string) => storage.set(name, value)),
+    removeItem: jest.fn((name: string) => storage.delete(name)),
+  };
+  const window = {} as Record<string, unknown>;
+  const api = runInNewContext(
+    `${accessCode}; ({
+      normalize: meAppAccessNormalize,
+      resolve: meAppAccessResolveFromMe,
+      selectable: meAppAccessSelectableModes
+    })`,
+    { window, localStorage },
+  ) as {
+    normalize: (raw: unknown) => {
+      available_modes: Array<{
+        mode: string;
+        access: string;
+        profile_linked: boolean;
+      }>;
+    };
+    resolve: (
+      user: Record<string, unknown>,
+      opts?: Record<string, unknown>,
+    ) => { mode: string; descriptor: { access: string }; saved: boolean };
+    selectable: (access: unknown) => Array<{ mode: string; access: string }>;
+  };
+  return { ...api, storage, localStorage, key };
+}
+
+const ownerWithUnlinkedClient = {
+  id: 'user-1',
+  tenant: { id: 'tenant-1' },
+  app_access: {
+    schema_version: 1,
+    default_mode: 'owner',
+    can_switch_mode: true,
+    chooser_required: true,
+    available_modes: [
+      {
+        mode: 'owner',
+        access: 'granted',
+        tenant_id: 'tenant-1',
+        role: 'tenant_owner',
+        profile_linked: true,
+      },
+      {
+        mode: 'client',
+        access: 'granted',
+        tenant_id: 'tenant-1',
+        role: 'tenant_owner',
+        profile_linked: false,
+      },
+    ],
+  },
+};
+
+describe('PWA app-access recovery for an unlinked Client surface', () => {
+  it('downgrades an unlinked Client descriptor to read-only preview', () => {
+    const { normalize } = browser();
+    const access = normalize(ownerWithUnlinkedClient.app_access);
+
+    expect(access.available_modes[1]).toEqual(
+      expect.objectContaining({
+        mode: 'client',
+        access: 'preview',
+        profile_linked: false,
+      }),
+    );
+  });
+
+  it('clears a stale Client choice and restores the granted owner mode', () => {
+    const b = browser('client');
+
+    expect(b.resolve(ownerWithUnlinkedClient, { skipChooser: true })).toEqual(
+      expect.objectContaining({ mode: 'owner', saved: false }),
+    );
+    expect(b.storage.has(b.key)).toBe(false);
+    expect(b.localStorage.removeItem).toHaveBeenCalledWith(b.key);
+  });
+
+  it.each(['owner', 'staff'])(
+    'keeps Client preview selectable after %s login, without granting private access',
+    (businessMode) => {
+      const b = browser();
+      const user = {
+        ...ownerWithUnlinkedClient,
+        app_access: {
+          ...ownerWithUnlinkedClient.app_access,
+          default_mode: businessMode,
+          available_modes:
+            ownerWithUnlinkedClient.app_access.available_modes.map((m) =>
+              m.mode === 'owner' ? { ...m, mode: businessMode } : m,
+            ),
+        },
+      };
+      expect(b.selectable(b.normalize(user.app_access))).toEqual([
+        expect.objectContaining({ mode: businessMode, access: 'granted' }),
+        expect.objectContaining({ mode: 'client', access: 'preview' }),
+      ]);
+      expect(b.resolve(user)).toEqual(
+        expect.objectContaining({ chooser: true }),
+      );
+      const clientChoice = b.resolve(user, {
+        forceMode: 'client',
+        skipChooser: true,
+      });
+      expect(clientChoice.mode).toBe('client');
+      expect(clientChoice.descriptor.access).toBe('preview');
+      expect(
+        b.resolve(user, { forceMode: businessMode, skipChooser: true }).mode,
+      ).toBe(businessMode);
+    },
+  );
+
+  it('does not invent Client access when the server did not return that mode', () => {
+    const b = browser();
+    const user = {
+      ...ownerWithUnlinkedClient,
+      app_access: {
+        ...ownerWithUnlinkedClient.app_access,
+        available_modes: [
+          ownerWithUnlinkedClient.app_access.available_modes[0],
+        ],
+      },
+    };
+    expect(b.selectable(b.normalize(user.app_access))).toHaveLength(1);
+    expect(
+      b.resolve(user, { forceMode: 'client', skipChooser: true }).mode,
+    ).toBe('owner');
+  });
+
+  it('keeps a Client-only account in safe preview without granting private access', () => {
+    const b = browser();
+    const client = {
+      id: 'user-1',
+      tenant: { id: 'tenant-1' },
+      app_access: {
+        schema_version: 1,
+        default_mode: 'client',
+        can_switch_mode: false,
+        chooser_required: false,
+        available_modes: [
+          {
+            mode: 'client',
+            access: 'granted',
+            tenant_id: 'tenant-1',
+            role: 'client',
+            profile_linked: false,
+          },
+        ],
+      },
+    };
+
+    const resolved = b.resolve(client, { skipChooser: true });
+    expect(resolved.mode).toBe('client');
+    expect(resolved.descriptor.access).toBe('preview');
+  });
+
+  it('preserves a verified Client mode', () => {
+    const b = browser('client');
+    const verified = {
+      ...ownerWithUnlinkedClient,
+      app_access: {
+        ...ownerWithUnlinkedClient.app_access,
+        available_modes: ownerWithUnlinkedClient.app_access.available_modes.map(
+          (mode) =>
+            mode.mode === 'client' ? { ...mode, profile_linked: true } : mode,
+        ),
+      },
+    };
+
+    const resolved = b.resolve(verified, { skipChooser: true });
+    expect(resolved.mode).toBe('client');
+    expect(resolved.descriptor.access).toBe('granted');
+    expect(resolved.saved).toBe(true);
+  });
+
+  it.each([false, true])(
+    'opens consent only for canonical verified channel linked=%s, never from preview/profile metadata',
+    async (linked) => {
+      const code = pwa.slice(
+        pwa.indexOf('function AMayaConsent()'),
+        pwa.indexOf('window.AMayaConsent = AMayaConsent;'),
+      );
+      const effects: Array<() => unknown> = [];
+      const setters: Array<jest.Mock> = [];
+      const readStatus = jest.fn().mockResolvedValue({
+        linked,
+        privacy: false,
+        marketing_decided: false,
+      });
+      const sandbox = {
+        React: {
+          createElement: jest.fn(),
+          useState: (v: unknown) => {
+            const set = jest.fn();
+            setters.push(set);
+            return [v, set];
+          },
+          useRef: () => ({ current: null }),
+          useEffect: (f: () => unknown) => effects.push(f),
+        },
+        window: {
+          __meSaasAuthedFetch: readStatus,
+          __meAppAccess: {
+            available_modes: [
+              { mode: 'client', access: 'preview', profile_linked: false },
+            ],
+          },
+        },
+        meAppAccessCurrentMode: () => 'client',
+        meMayaConsentPendingKey: () => 'synthetic-scope',
+        meSaasCurrentBundle: () => ({ token: 'synthetic-token' }),
+        meMayaConsentPending: () => null,
+        setInterval: jest.fn(),
+        clearInterval: jest.fn(),
+      };
+      runInNewContext(code + ';AMayaConsent();', sandbox);
+      for (const effect of effects) effect();
+      await new Promise<void>((done) => setImmediate(done));
+      expect(readStatus.mock.calls).toEqual([['/client-channel/status']]);
+      expect(setters[0]).toHaveBeenLastCalledWith(linked);
+      // No challenge, consume, consent or hidden Client creation during this read.
+      expect(readStatus).toHaveBeenCalledTimes(1);
+    },
+  );
+});

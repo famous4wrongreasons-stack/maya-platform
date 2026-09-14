@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
@@ -24,6 +24,7 @@ type PublicTenantRecord = {
   brandingSettings: {
     appName: string | null;
     logoUrl: string | null;
+    updatedAt: Date;
     primaryColor: string | null;
     secondaryColor: string | null;
     backgroundImageUrl: string | null;
@@ -32,6 +33,7 @@ type PublicTenantRecord = {
     themeJson: Record<string, unknown> | null;
   } | null;
   branches: Array<{
+    name?: string;
     address: string | null;
     phone: string | null;
   }>;
@@ -69,6 +71,7 @@ describe('TenantsService', () => {
     brandingSettings: {
       appName: 'Грива',
       logoUrl: null,
+      updatedAt: new Date('2026-07-13T12:05:00.000Z'),
       primaryColor: '#111111',
       secondaryColor: '#C6A86A',
       backgroundImageUrl: null,
@@ -103,6 +106,7 @@ describe('TenantsService', () => {
     },
     branches: [
       {
+        name: 'Основной филиал',
         address: 'Moscow, Tverskaya 1',
         phone: '+79990000000',
       },
@@ -124,9 +128,26 @@ describe('TenantsService', () => {
     > = jest.fn().mockResolvedValue(baseTenant());
 
     const tenantUpdateManyMock = jest.fn().mockResolvedValue({ count: 1 });
+    const tenantFindManyMock = jest.fn().mockResolvedValue([
+      {
+        slug: 'demo-salon',
+        name: 'Demo Salon',
+        brandingSettings: {
+          appName: 'Грива',
+          themeJson: { city: 'Moscow' },
+        },
+        branches: [
+          {
+            name: 'Основной филиал',
+            address: 'Moscow, Tverskaya 1',
+          },
+        ],
+      },
+    ]);
     const prisma: Pick<PrismaService, 'tenant'> = {
       tenant: {
         findUnique: tenantFindUniqueMock,
+        findMany: tenantFindManyMock,
         updateMany: tenantUpdateManyMock,
       } as PrismaService['tenant'],
     };
@@ -145,10 +166,32 @@ describe('TenantsService', () => {
       ),
       mocks: {
         tenantFindUniqueMock,
+        tenantFindManyMock,
         tenantUpdateManyMock,
       },
     };
   };
+
+  it('finds only client-ready businesses by name and city', async () => {
+    const { service, mocks } = createService();
+
+    const result = await service.searchPublicMobileConfigs('Грива', 'Moscow');
+
+    expect(mocks.tenantFindManyMock).toHaveBeenCalledTimes(1);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      slug: 'demo-salon',
+      guest_access_ready: true,
+    });
+  });
+
+  it('rejects empty public business searches', async () => {
+    const { service } = createService();
+
+    await expect(service.searchPublicMobileConfigs(' ')).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+  });
 
   it('promotes normalized tenant content into top-level mobile config', async () => {
     const { service } = createService();
@@ -159,6 +202,7 @@ describe('TenantsService', () => {
       slug: 'demo-salon',
       brand: {
         name: 'Грива',
+        logo_updated_at: '2026-07-13T12:05:00.000Z',
         address: 'Moscow, Tverskaya 1',
         phone: '+79990000000',
       },
@@ -192,6 +236,7 @@ describe('TenantsService', () => {
         socials: ['Telegram', 'TikTok'],
       },
       branding: {
+        logo_updated_at: '2026-07-13T12:05:00.000Z',
         theme_json: {
           content: {
             hero_tag: 'Добро пожаловать в «Гриву»',
@@ -353,6 +398,65 @@ describe('TenantsService', () => {
     expect(result.booking_live_enabled).toBe(false);
   });
 
+  it('marks the neutral MAYA OS tenant as a platform bootstrap', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      slug: 'maya-os',
+      allowSelfRegistration: false,
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          platform_bootstrap: true,
+        },
+      },
+    });
+
+    const result = await service.getPublicMobileConfig('maya-os');
+
+    expect(result.platform_bootstrap).toBe(true);
+    expect(result.client_registration_enabled).toBe(false);
+    expect(result.guest_access_ready).toBe(false);
+    expect(result.guest_access_blockers).toContain('platform_bootstrap');
+  });
+
+  it('rejects live booking against the platform bootstrap tenant', async () => {
+    const {
+      service,
+      mocks: { tenantFindUniqueMock },
+    } = createService();
+    const tenant = baseTenant();
+
+    tenantFindUniqueMock.mockResolvedValue({
+      ...tenant,
+      slug: 'maya-os',
+      brandingSettings: {
+        ...tenant.brandingSettings,
+        themeJson: {
+          ...(tenant.brandingSettings?.themeJson ?? {}),
+          platform_bootstrap: true,
+          booking: { mode: 'live' },
+        },
+      },
+    });
+
+    await expect(
+      service.assertLiveBookingEnabled('tenant-1'),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: 'platform_tenant_not_bookable',
+        },
+      },
+    });
+  });
+
   it('opens client registration and internal live booking for a verified trial', async () => {
     const {
       service,
@@ -390,7 +494,7 @@ describe('TenantsService', () => {
     expect(result.trial_full_access).toBe(true);
   });
 
-  it('keeps public features available during the three-day grace period', async () => {
+  it('projects the three-day grace period without becoming a billing writer', async () => {
     const {
       service,
       mocks: { tenantFindUniqueMock, tenantUpdateManyMock },
@@ -416,19 +520,7 @@ describe('TenantsService', () => {
       booking_mode: 'preview',
       subscription_cta: null,
     });
-    expect(tenantUpdateManyMock).toHaveBeenCalledWith({
-      where: {
-        id: tenant.id,
-        status: 'trial',
-        updatedAt: tenant.updatedAt,
-      },
-      data: {
-        status: 'past_due',
-        trialFullAccess: false,
-        pastDueAt: expect.any(Date) as Date,
-        graceEndsAt: expect.any(Date) as Date,
-      },
-    });
+    expect(tenantUpdateManyMock).not.toHaveBeenCalled();
   });
 
   it('returns a subscription CTA after the persisted grace period', async () => {

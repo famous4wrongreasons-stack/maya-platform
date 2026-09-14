@@ -1,0 +1,17 @@
+{
+  "health": {
+    "status": "ok",
+    "service": "maya-saas-backend",
+    "release": "20260908-a18-security-consent-0867ecea",
+    "started_at": "2026-09-08T10:11:27.588Z",
+    "timestamp": "2026-09-08T10:11:28.514Z"
+  },
+  "readiness": {
+    "status": "ready",
+    "service": "maya-saas-backend",
+    "checks": {
+      "database": "ready"
+    },
+    "timestamp": "2026-09-08T10:11:28.524Z"
+  }
+}

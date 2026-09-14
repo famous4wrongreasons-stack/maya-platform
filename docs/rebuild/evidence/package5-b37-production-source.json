@@ -1,0 +1,101 @@
+{
+  "checkedAt": "2026-09-07T14:33:47.548580+00:00",
+  "productionMessages": 0,
+  "productionBusinessMutations": 0,
+  "inspection": "read-only source/launcher metadata",
+  "release": "/opt/maya-saas/releases/20260907-p5-b35-c8c7a8eb",
+  "functions": {
+    "bot.py:handle_message": {
+      "line": 2845,
+      "sha256": "3a09374d2dd5feb60f9aefeccc051114b3dbd428fa30b885b037dfa900982301",
+      "source": "async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):\n    # Антон присылает расходы по салону (после /rashod или еженедельного напоминания)\n    uid = update.effective_user.id if update.effective_user else 0\n    if uid == ANTON_CHAT_ID and uid in _anton_expense_awaiting:\n        _anton_expense_awaiting.discard(uid)\n        await _save_anton_expenses(update, update.message.text or \"\")\n        return\n    await process_message(update, context, update.message.text)",
+      "calls": [
+        "_anton_expense_awaiting.discard",
+        "_save_anton_expenses",
+        "process_message"
+      ]
+    },
+    "bot.py:_save_anton_expenses": {
+      "line": 6412,
+      "sha256": "12a5764ba85d60e969462e660ec3d5b59360fbfaf13af480caa158c843d00d4b",
+      "source": "async def _save_anton_expenses(update: Update, text: str) -> bool:\n    \"\"\"Парсит и сохраняет расходы Антона за СЕГОДНЯ. True, если что-то сохранили.\"\"\"\n    items = await asyncio.to_thread(_parse_anton_expenses, text)\n    if not items:\n        await update.message.reply_text(\n            \"Не разобрала суммы 🤔 Напишите списком, например:\\n\"\n            \"• кофе — 500\\n• уборщица — 2000\\n• касс. лента и средства — 800\"\n        )\n        return False\n    today = date.today().isoformat()\n    total = 0\n    for it in items:\n        try:\n            database.add_salon_expense(today, it[\"item\"], it[\"amount\"], source=\"anton\")\n            total += it[\"amount\"]\n        except Exception as e:\n            logger.error(f\"add_salon_expense: {e}\")\n    lines = \"\\n\".join(f\"• {it['item']} — {_fmt_rub_spaces(it['amount'])} ₽\" for it in items)\n    await update.message.reply_text(\n        f\"Записала расходы за сегодня ✓\\n{lines}\\nИтого: {_fmt_rub_spaces(total)} ₽\"\n        \"\\n\\nОни уже в отчёте владельца. Если ошибся — пришли /rashod и список заново (перезапишу день).\"\n    )\n    return True",
+      "calls": [
+        "'\\n'.join",
+        "_fmt_rub_spaces",
+        "asyncio.to_thread",
+        "database.add_salon_expense",
+        "date.today",
+        "date.today().isoformat",
+        "logger.error",
+        "update.message.reply_text"
+      ]
+    },
+    "bot.py:cmd_rashod": {
+      "line": 6437,
+      "sha256": "97fa24c91263984b673a031b773906017d35b5952b14eb178f9b8980d50a8a8e",
+      "source": "async def cmd_rashod(update: Update, context: ContextTypes.DEFAULT_TYPE):\n    \"\"\"Антон вносит расходы по салону. /rashod [список] — или команда, затем список.\"\"\"\n    uid = update.effective_user.id if update.effective_user else 0\n    if uid != ANTON_CHAT_ID:\n        return  # команда только для Антона\n    try:\n        database.clear_salon_expenses(date.today().isoformat())  # команда перезаписывает день\n    except Exception:\n        pass\n    parts = (update.message.text or \"\").split(maxsplit=1)\n    if len(parts) > 1 and parts[1].strip():\n        _anton_expense_awaiting.discard(uid)\n        await _save_anton_expenses(update, parts[1])\n        return\n    _anton_expense_awaiting.add(uid)\n    await update.message.reply_text(\n        \"Пришли расходы по салону за сегодня списком (кофе, уборщица, касс. лента и т.п.) \"\n        \"с суммами — добавлю их в отчёт владельцу. Например:\\n\"\n        \"• кофе — 500\\n• уборщица — 2000\\n• касс. лента и средства — 800\"\n    )",
+      "calls": [
+        "(update.message.text or '').split",
+        "_anton_expense_awaiting.add",
+        "_anton_expense_awaiting.discard",
+        "_save_anton_expenses",
+        "database.clear_salon_expenses",
+        "date.today",
+        "date.today().isoformat",
+        "len",
+        "parts[1].strip",
+        "update.message.reply_text"
+      ]
+    },
+    "bot.py:_anton_expense_reminder_job": {
+      "line": 6496,
+      "sha256": "7a4835f123d48a273232106b82d0d26f58fe490a069bc9fcdfb2d6429024b6ed",
+      "source": "async def _anton_expense_reminder_job(app: Application):\n    \"\"\"Раз в неделю (вс вечером) — напоминаем Антону прислать расходы по салону.\"\"\"\n    try:\n        await app.bot.send_message(\n            chat_id=ANTON_CHAT_ID,\n            text=(\"Привет! 👋 Напиши, какие расходы по салону были на этой неделе — кофе, \"\n                  \"уборщица, касс. лента, средства и т.п. Просто списком с суммами, я добавлю \"\n                  \"их в отчёт владельцу.\\n\\nМожно прямо ответить на это сообщение.\"),\n        )\n        _anton_expense_awaiting.add(ANTON_CHAT_ID)\n    except Exception as e:\n        logger.error(f\"anton expense reminder: {e}\")",
+      "calls": [
+        "_anton_expense_awaiting.add",
+        "app.bot.send_message",
+        "logger.error"
+      ]
+    },
+    "database.py:add_salon_expense": {
+      "line": 2184,
+      "sha256": "e59c70041f2457a2f3dcfafd17516129125466b58303312b0db2dc25dedae967",
+      "source": "def add_salon_expense(date: str, item: str, amount: int, source: str = \"anton\") -> int:\n    \"\"\"Добавляет один расход по салону за дату. amount — рубли (int).\"\"\"\n    with _db() as conn:\n        cur = conn.execute(\n            \"INSERT INTO salon_expenses (date, item, amount, source, created_at) \"\n            \"VALUES (?, ?, ?, ?, ?)\",\n            (date, (item or \"\").strip()[:120], int(round(amount or 0)), source, _now()),\n        )\n        return cur.lastrowid",
+      "calls": [
+        "(item or '').strip",
+        "_db",
+        "_now",
+        "conn.execute",
+        "int",
+        "round"
+      ]
+    },
+    "database.py:clear_salon_expenses": {
+      "line": 2215,
+      "sha256": "f0cad5de4d5d8b53c20a11849c705d974d86add55eab01d7b82e858572c548a5",
+      "source": "def clear_salon_expenses(date: str) -> int:\n    \"\"\"Удаляет все расходы за дату (для повторного ввода). Возвращает кол-во удалённых.\"\"\"\n    with _db() as conn:\n        cur = conn.execute(\"DELETE FROM salon_expenses WHERE date = ?\", (date,))\n        return cur.rowcount or 0",
+      "calls": [
+        "_db",
+        "conn.execute"
+      ]
+    }
+  },
+  "sourceHashes": {
+    "bot.py": "425c886e4a832641951998a08e9979445afdc7f15100fbe9cd26271fffa6099d",
+    "database.py": "eb1658fee4dadec041e4efe91ee367340782ded5bbb0e6e742ae519e156ec352"
+  },
+  "registeredInSource": true,
+  "recipientResolver": {
+    "line": 6336,
+    "sha256": "2d41b4dad32b2d959c9122dfd36a82fa35dec0bf22a692f22398884582fb984e",
+    "readsLegacySetting": true,
+    "hasNumericFallback": true
+  },
+  "service": {
+    "MainPID": "1585542",
+    "ActiveState": "active",
+    "ActiveEnterTimestamp": "Mon 2026-09-07 15:22:14 MSK",
+    "expenseJobRegisteredAtCurrentStart": true,
+    "schedulerStarted": true
+  }
+}

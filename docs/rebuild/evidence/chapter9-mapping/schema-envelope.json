@@ -1,0 +1,1289 @@
+{
+  "contract": "maya.c9-combined-mapping/1",
+  "status": "PROPOSED ENVELOPE; NOT IMPLEMENTED",
+  "baseline": "b9402e39d6aaab63104bfce868a636c60beb8cc5",
+  "ownerDecisionsApproved": 16,
+  "models": {
+    "C9Run": {
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID",
+          "mutable": "NO",
+          "meaning": "Server-generated primary key"
+        },
+        {
+          "name": "tenantId",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Exact authenticated tenant"
+        },
+        {
+          "name": "contractVersion",
+          "type": "INT",
+          "mutable": "NO",
+          "meaning": "1"
+        },
+        {
+          "name": "principalJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Typed exact User/Membership or Client/channel provenance refs; no contacts"
+        },
+        {
+          "name": "authorityHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Canonical initial principal/scope fingerprint; not permanent authority"
+        },
+        {
+          "name": "requestKeyHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Hash of caller durable request event identity"
+        },
+        {
+          "name": "requestHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Normalized immutable initial request hash"
+        },
+        {
+          "name": "requestIntentJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Bounded minimized normalized initial question/objective/constraints and refs; no raw chat history/contacts"
+        },
+        {
+          "name": "entryKind",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "EXPLICIT_REQUEST or SELECTED_OPPORTUNITY"
+        },
+        {
+          "name": "entryRefJson",
+          "type": "JSONB?",
+          "mutable": "NO",
+          "meaning": "Qualified Opportunity/AgentTask refs for selected entry, otherwise null"
+        },
+        {
+          "name": "admittedAt",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "First accepted request time"
+        },
+        {
+          "name": "validUntil",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "Nonrenewing maximum 24h/source bound for new orchestration work"
+        },
+        {
+          "name": "retentionUntil",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "First admission +365d for minimal request identity/budget; expired child payloads purge sooner"
+        },
+        {
+          "name": "state",
+          "type": "TEXT",
+          "mutable": "CAS",
+          "meaning": "Coordination root state; never external outcome authority"
+        },
+        {
+          "name": "currentRevision",
+          "type": "INT",
+          "mutable": "CAS",
+          "meaning": "0 before first proposed revision; monotone current revision number"
+        },
+        {
+          "name": "counterVersion",
+          "type": "INT",
+          "mutable": "CAS",
+          "meaning": "Optimistic budget/state revision, starts 0"
+        },
+        {
+          "name": "budgetManifestHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Hash of released ceilings, price evidence and confirmed tenant caps"
+        },
+        {
+          "name": "budgetManifestJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Typed fixed request ceiling/configuration; no credentials"
+        },
+        {
+          "name": "budgetStateJson",
+          "type": "JSONB",
+          "mutable": "CAS",
+          "meaning": "Exact reserved/settled/held call/token/cost vectors, reconciled with work receipts"
+        },
+        {
+          "name": "reasoningUsedMs",
+          "type": "INT",
+          "mutable": "CAS",
+          "meaning": "Charged active reasoning wall time, never decremented"
+        },
+        {
+          "name": "reasoningWindowStartedAt",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "LEASE",
+          "meaning": "Current reasoning window; null outside a window"
+        },
+        {
+          "name": "reasoningWindowDeadlineAt",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "LEASE",
+          "meaning": "Persisted deadline bounded by remaining 120s"
+        },
+        {
+          "name": "leaseTokenHash",
+          "type": "CHAR(64)?",
+          "mutable": "LEASE",
+          "meaning": "Fencing token hash, never raw token"
+        },
+        {
+          "name": "leaseUntil",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "LEASE",
+          "meaning": "Coordination lease bound"
+        },
+        {
+          "name": "leaseGeneration",
+          "type": "INT",
+          "mutable": "CAS",
+          "meaning": "Monotone fencing generation"
+        },
+        {
+          "name": "cancelKeyHash",
+          "type": "CHAR(64)?",
+          "mutable": "ONCE",
+          "meaning": "Exact first accepted coordination cancellation identity"
+        },
+        {
+          "name": "cancelledAt",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "ONCE",
+          "meaning": "Stops unstarted work, no source rollback"
+        },
+        {
+          "name": "updatedAt",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "CAS",
+          "meaning": "Audit of coordination writes"
+        }
+      ],
+      "checks": [
+        "C9Run_contract_ck",
+        "C9Run_principal_ck",
+        "C9Run_identity_ck",
+        "C9Run_entry_ck",
+        "C9Run_time_ck",
+        "C9Run_state_ck",
+        "C9Run_budget_ck",
+        "C9Run_window_ck",
+        "C9Run_lease_ck",
+        "C9Run_cancellation_ck"
+      ],
+      "uniques": [
+        {
+          "name": "C9Run_1_key",
+          "fields": [
+            "id",
+            "tenantId"
+          ]
+        },
+        {
+          "name": "C9Run_2_key",
+          "fields": [
+            "tenantId",
+            "requestKeyHash"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "C9Run_1_idx",
+          "fields": [
+            "tenantId",
+            "state",
+            "validUntil",
+            "id"
+          ]
+        },
+        {
+          "name": "C9Run_2_idx",
+          "fields": [
+            "tenantId",
+            "retentionUntil",
+            "id"
+          ]
+        }
+      ],
+      "fks": [
+        {
+          "fields": [
+            "tenantId"
+          ],
+          "target": "Tenant",
+          "refs": [
+            "id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9Run_1_fkey"
+        }
+      ],
+      "primaryKey": {
+        "name": "C9Run_pkey",
+        "fields": [
+          "id"
+        ]
+      },
+      "triggerFunctions": [
+        "C9Run_guard"
+      ],
+      "triggers": [
+        "C9Run_write_trg",
+        "C9Run_truncate_trg"
+      ]
+    },
+    "C9StrategyRevision": {
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID",
+          "mutable": "NO",
+          "meaning": "Revision identity"
+        },
+        {
+          "name": "tenantId",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Exact tenant"
+        },
+        {
+          "name": "runId",
+          "type": "UUID",
+          "mutable": "NO",
+          "meaning": "Shared request/budget owner"
+        },
+        {
+          "name": "revision",
+          "type": "INT",
+          "mutable": "NO",
+          "meaning": "1-based monotone run sequence"
+        },
+        {
+          "name": "parentRevisionId",
+          "type": "UUID?",
+          "mutable": "NO",
+          "meaning": "Previous revision of the same run, null for first"
+        },
+        {
+          "name": "editKeyHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Initial-proposal or explicit edit event; same event cannot produce different proposal"
+        },
+        {
+          "name": "inputHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Material edit/input/evidence/registry identity"
+        },
+        {
+          "name": "snapshotHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Canonical immutable strategy plus full ordered step graph digest"
+        },
+        {
+          "name": "state",
+          "type": "TEXT",
+          "mutable": "CAS",
+          "meaning": "Proposal/review/execution coordination lifecycle"
+        },
+        {
+          "name": "proposalContract",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "maya.c9-strategy/1"
+        },
+        {
+          "name": "registryHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Released code capability registry digest"
+        },
+        {
+          "name": "skillVersionsJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Exact task/skill/prompt/model configuration manifests used"
+        },
+        {
+          "name": "objectiveJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Typed objective, permitted subject scope and success criteria refs"
+        },
+        {
+          "name": "constraintsJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "One-off limits, source policy refs and budget/approval requirements"
+        },
+        {
+          "name": "alternativesJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "1..3 typed strategy summaries with keys, not embedded Plan/Action blobs"
+        },
+        {
+          "name": "evidenceRefsJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Bounded qualified evidence refs/status/asOf, no source row copies"
+        },
+        {
+          "name": "selectedOptionKey",
+          "type": "TEXT?",
+          "mutable": "ONCE",
+          "meaning": "Exact selected alternative on explicit strategy review"
+        },
+        {
+          "name": "reviewKeyHash",
+          "type": "CHAR(64)?",
+          "mutable": "ONCE",
+          "meaning": "Idempotent review event, not source effect permission"
+        },
+        {
+          "name": "reviewHash",
+          "type": "CHAR(64)?",
+          "mutable": "ONCE",
+          "meaning": "Hash of actor, snapshot, selected option, limits, validity"
+        },
+        {
+          "name": "reviewActorJson",
+          "type": "JSONB?",
+          "mutable": "ONCE",
+          "meaning": "Exact authenticated reviewing principal/scope; same initiator in v1"
+        },
+        {
+          "name": "reviewedAt",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "ONCE",
+          "meaning": "Review timestamp"
+        },
+        {
+          "name": "reviewDecision",
+          "type": "TEXT?",
+          "mutable": "ONCE",
+          "meaning": "ACCEPTED or DECLINED; effect owners still require own receipts"
+        },
+        {
+          "name": "admittedAt",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "Revision admission; cannot reset run deadlines"
+        },
+        {
+          "name": "validUntil",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "Min of run validity and current source/quote/policy deadlines"
+        },
+        {
+          "name": "retentionUntil",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "Same or shorter root retention cap"
+        },
+        {
+          "name": "terminalReason",
+          "type": "TEXT?",
+          "mutable": "ONCE",
+          "meaning": "Safe bounded coordination reason code"
+        },
+        {
+          "name": "terminalAt",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "ONCE",
+          "meaning": "Terminal coordination timestamp"
+        }
+      ],
+      "checks": [
+        "C9StrategyRevision_contract_ck",
+        "C9StrategyRevision_identity_ck",
+        "C9StrategyRevision_revision_ck",
+        "C9StrategyRevision_state_ck",
+        "C9StrategyRevision_strategy_ck",
+        "C9StrategyRevision_evidence_ck",
+        "C9StrategyRevision_review_ck",
+        "C9StrategyRevision_time_ck",
+        "C9StrategyRevision_terminal_ck",
+        "C9StrategyRevision_bounds_ck"
+      ],
+      "uniques": [
+        {
+          "name": "C9StrategyRevision_1_key",
+          "fields": [
+            "id",
+            "tenantId"
+          ]
+        },
+        {
+          "name": "C9StrategyRevision_2_key",
+          "fields": [
+            "tenantId",
+            "runId",
+            "revision"
+          ]
+        },
+        {
+          "name": "C9StrategyRevision_3_key",
+          "fields": [
+            "tenantId",
+            "runId",
+            "editKeyHash"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "C9StrategyRevision_1_idx",
+          "fields": [
+            "tenantId",
+            "state",
+            "validUntil",
+            "id"
+          ]
+        }
+      ],
+      "fks": [
+        {
+          "fields": [
+            "tenantId"
+          ],
+          "target": "Tenant",
+          "refs": [
+            "id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9StrategyRevision_1_fkey"
+        },
+        {
+          "fields": [
+            "runId",
+            "tenantId"
+          ],
+          "target": "C9Run",
+          "refs": [
+            "id",
+            "tenantId"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9StrategyRevision_2_fkey"
+        },
+        {
+          "fields": [
+            "parentRevisionId",
+            "tenantId"
+          ],
+          "target": "C9StrategyRevision",
+          "refs": [
+            "id",
+            "tenantId"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9StrategyRevision_3_fkey"
+        }
+      ],
+      "primaryKey": {
+        "name": "C9StrategyRevision_pkey",
+        "fields": [
+          "id"
+        ]
+      },
+      "triggerFunctions": [
+        "C9StrategyRevision_guard"
+      ],
+      "triggers": [
+        "C9StrategyRevision_write_trg",
+        "C9StrategyRevision_truncate_trg"
+      ]
+    },
+    "C9PlanStep": {
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID",
+          "mutable": "NO",
+          "meaning": "Node identity"
+        },
+        {
+          "name": "tenantId",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Exact tenant"
+        },
+        {
+          "name": "revisionId",
+          "type": "UUID",
+          "mutable": "NO",
+          "meaning": "Exact immutable proposal graph"
+        },
+        {
+          "name": "optionKey",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "One of the revision alternatives"
+        },
+        {
+          "name": "stepKey",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Stable key within option, not random per retry"
+        },
+        {
+          "name": "ordinal",
+          "type": "INT",
+          "mutable": "NO",
+          "meaning": "Deterministic tie order"
+        },
+        {
+          "name": "domain",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "ADMIN, CLIENT_LIFECYCLE, OCCUPANCY or BUSINESS_INTELLIGENCE"
+        },
+        {
+          "name": "kind",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "READ, PROPOSE, OWNER_HANDOFF or NO_ACTION"
+        },
+        {
+          "name": "capability",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Registered capability; BI cannot OWNER_HANDOFF"
+        },
+        {
+          "name": "registryHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Same released registry as revision"
+        },
+        {
+          "name": "intentContract",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Registered bounded input contract version"
+        },
+        {
+          "name": "intentHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Canonical material intent and dependency hash"
+        },
+        {
+          "name": "intentEncrypted",
+          "type": "TEXT?",
+          "mutable": "MINIMIZE",
+          "meaning": "Only necessary typed draft owner command; no credentials/customer database"
+        },
+        {
+          "name": "dependenciesJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Same-option earlier step keys and required resolved outcomes"
+        },
+        {
+          "name": "evidenceRefsJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Typed source/policy/previous result refs"
+        },
+        {
+          "name": "budgetSliceJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Bounded resource/exposure reservation references, not payment ledger"
+        },
+        {
+          "name": "state",
+          "type": "TEXT",
+          "mutable": "CAS",
+          "meaning": "WAITING, ELIGIBLE, CLAIMED, BOUND, RESOLVED or STOPPED"
+        },
+        {
+          "name": "leaseGeneration",
+          "type": "INT",
+          "mutable": "CAS",
+          "meaning": "Monotone claim generation"
+        },
+        {
+          "name": "leaseTokenHash",
+          "type": "CHAR(64)?",
+          "mutable": "LEASE",
+          "meaning": "Fenced dispatch identity"
+        },
+        {
+          "name": "leaseUntil",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "LEASE",
+          "meaning": "Claim deadline; expiry alone never authorizes duplicate effect"
+        },
+        {
+          "name": "admittedAt",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "Same transaction as revision publication"
+        },
+        {
+          "name": "validUntil",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "No later than revision/source intent validity"
+        },
+        {
+          "name": "retentionUntil",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "No later than revision/root retention"
+        },
+        {
+          "name": "terminalAt",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "ONCE",
+          "meaning": "Coordination closure, source outcome is read separately"
+        },
+        {
+          "name": "stopReason",
+          "type": "TEXT?",
+          "mutable": "ONCE",
+          "meaning": "Safe deterministic reason"
+        },
+        {
+          "name": "updatedAt",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "CAS",
+          "meaning": "Coordination update time"
+        }
+      ],
+      "checks": [
+        "C9PlanStep_identity_ck",
+        "C9PlanStep_domain_ck",
+        "C9PlanStep_kind_ck",
+        "C9PlanStep_contract_ck",
+        "C9PlanStep_graph_ck",
+        "C9PlanStep_payload_ck",
+        "C9PlanStep_budget_ck",
+        "C9PlanStep_state_ck",
+        "C9PlanStep_time_ck"
+      ],
+      "uniques": [
+        {
+          "name": "C9PlanStep_1_key",
+          "fields": [
+            "id",
+            "tenantId"
+          ]
+        },
+        {
+          "name": "C9PlanStep_2_key",
+          "fields": [
+            "tenantId",
+            "revisionId",
+            "optionKey",
+            "stepKey"
+          ]
+        },
+        {
+          "name": "C9PlanStep_3_key",
+          "fields": [
+            "tenantId",
+            "revisionId",
+            "optionKey",
+            "ordinal"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "C9PlanStep_1_idx",
+          "fields": [
+            "tenantId",
+            "state",
+            "validUntil",
+            "id"
+          ]
+        }
+      ],
+      "fks": [
+        {
+          "fields": [
+            "tenantId"
+          ],
+          "target": "Tenant",
+          "refs": [
+            "id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9PlanStep_1_fkey"
+        },
+        {
+          "fields": [
+            "revisionId",
+            "tenantId"
+          ],
+          "target": "C9StrategyRevision",
+          "refs": [
+            "id",
+            "tenantId"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9PlanStep_2_fkey"
+        }
+      ],
+      "primaryKey": {
+        "name": "C9PlanStep_pkey",
+        "fields": [
+          "id"
+        ]
+      },
+      "triggerFunctions": [
+        "C9PlanStep_guard"
+      ],
+      "triggers": [
+        "C9PlanStep_write_trg",
+        "C9PlanStep_truncate_trg"
+      ]
+    },
+    "C9StepBinding": {
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID",
+          "mutable": "NO",
+          "meaning": "Non-authoritative linkage identity"
+        },
+        {
+          "name": "tenantId",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Exact tenant"
+        },
+        {
+          "name": "stepId",
+          "type": "UUID",
+          "mutable": "NO",
+          "meaning": "Reviewed graph node"
+        },
+        {
+          "name": "slotKey",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Fixed owner receipt role/slot within step"
+        },
+        {
+          "name": "ownerKey",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Registered existing canonical owner"
+        },
+        {
+          "name": "bindingKind",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "APPROVAL, EXECUTION, OUTCOME or ASSIGNMENT"
+        },
+        {
+          "name": "sourceType",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Closed registered source model/receipt contract"
+        },
+        {
+          "name": "sourceId",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Exact source identity; never contact/phone/raw channel id"
+        },
+        {
+          "name": "sourceIdentityHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Source canonical identity fingerprint"
+        },
+        {
+          "name": "sourceIntentHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Exact source input/plan hash"
+        },
+        {
+          "name": "sourceApprovalHash",
+          "type": "CHAR(64)?",
+          "mutable": "NO",
+          "meaning": "Verified source approval material binding, when required"
+        },
+        {
+          "name": "lineageJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Bounded typed tenant/subject/receipt lineage and authority proof refs"
+        },
+        {
+          "name": "bindingHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Canonical complete binding digest"
+        },
+        {
+          "name": "boundAt",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "Attachment admission time"
+        },
+        {
+          "name": "validUntil",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "NO",
+          "meaning": "Observed source use deadline; not a source extension"
+        },
+        {
+          "name": "retentionUntil",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "Run/dependency retention cap"
+        }
+      ],
+      "checks": [
+        "C9StepBinding_identity_ck",
+        "C9StepBinding_contract_ck",
+        "C9StepBinding_kind_ck",
+        "C9StepBinding_source_ck",
+        "C9StepBinding_hashes_ck",
+        "C9StepBinding_lineage_ck",
+        "C9StepBinding_time_ck"
+      ],
+      "uniques": [
+        {
+          "name": "C9StepBinding_1_key",
+          "fields": [
+            "id",
+            "tenantId"
+          ]
+        },
+        {
+          "name": "C9StepBinding_2_key",
+          "fields": [
+            "tenantId",
+            "stepId",
+            "bindingKind",
+            "slotKey"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "C9StepBinding_1_idx",
+          "fields": [
+            "tenantId",
+            "sourceType",
+            "sourceId"
+          ]
+        }
+      ],
+      "fks": [
+        {
+          "fields": [
+            "tenantId"
+          ],
+          "target": "Tenant",
+          "refs": [
+            "id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9StepBinding_1_fkey"
+        },
+        {
+          "fields": [
+            "stepId",
+            "tenantId"
+          ],
+          "target": "C9PlanStep",
+          "refs": [
+            "id",
+            "tenantId"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9StepBinding_2_fkey"
+        }
+      ],
+      "primaryKey": {
+        "name": "C9StepBinding_pkey",
+        "fields": [
+          "id"
+        ]
+      },
+      "triggerFunctions": [
+        "C9StepBinding_guard"
+      ],
+      "triggers": [
+        "C9StepBinding_write_trg",
+        "C9StepBinding_truncate_trg"
+      ]
+    },
+    "C9WorkReceipt": {
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID",
+          "mutable": "NO",
+          "meaning": "A bounded reasoning/read invocation, not business ActionExecution"
+        },
+        {
+          "name": "tenantId",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Exact tenant"
+        },
+        {
+          "name": "runId",
+          "type": "UUID",
+          "mutable": "NO",
+          "meaning": "Shared unchanged budget owner"
+        },
+        {
+          "name": "revisionId",
+          "type": "UUID?",
+          "mutable": "NO",
+          "meaning": "Associated admitted revision when available, null for initial reasoning"
+        },
+        {
+          "name": "callKeyHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Stable logical invocation identity"
+        },
+        {
+          "name": "domain",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Four domains or ORCHESTRATOR coordinator (not fifth agent)"
+        },
+        {
+          "name": "kind",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "MODEL, TOOL_READ or OWNER_HANDOFF; last is dispatch-budget evidence, never the business executor"
+        },
+        {
+          "name": "taskKey",
+          "type": "TEXT",
+          "mutable": "NO",
+          "meaning": "Closed versioned registry task/capability"
+        },
+        {
+          "name": "registryHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Released manifest digest"
+        },
+        {
+          "name": "skillHash",
+          "type": "CHAR(64)?",
+          "mutable": "NO",
+          "meaning": "Model task skill/prompt bundle digest"
+        },
+        {
+          "name": "inputHash",
+          "type": "CHAR(64)",
+          "mutable": "NO",
+          "meaning": "Normalized safe bounded inputs, no raw prompt persisted"
+        },
+        {
+          "name": "inputEvidenceRefsJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Qualified refs used at call admission"
+        },
+        {
+          "name": "providerModelKey",
+          "type": "TEXT?",
+          "mutable": "NO",
+          "meaning": "Exact existing provider/model for MODEL or priced tool, no secret"
+        },
+        {
+          "name": "priceBasisJson",
+          "type": "JSONB?",
+          "mutable": "NO",
+          "meaning": "Immutable verified quote/version/currency/unit/expiry; null only proved zero-cost work"
+        },
+        {
+          "name": "reservationJson",
+          "type": "JSONB",
+          "mutable": "NO",
+          "meaning": "Worst-case exact counters/tokens/cost reserved before dispatch"
+        },
+        {
+          "name": "usageJson",
+          "type": "JSONB?",
+          "mutable": "ONCE",
+          "meaning": "Verified provider usage/settlement, write once; null while HELD_UNKNOWN retains reservation"
+        },
+        {
+          "name": "state",
+          "type": "TEXT",
+          "mutable": "CAS",
+          "meaning": "RESERVED, DISPATCHED, SETTLED, HELD_UNKNOWN or ABORTED_BEFORE_DISPATCH"
+        },
+        {
+          "name": "resultJson",
+          "type": "JSONB?",
+          "mutable": "ONCE",
+          "meaning": "Validated minimized AgentResult@1/read envelope; no hidden reasoning"
+        },
+        {
+          "name": "resultHash",
+          "type": "CHAR(64)?",
+          "mutable": "ONCE",
+          "meaning": "Digest of validated safe result"
+        },
+        {
+          "name": "startedAt",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "ONCE",
+          "meaning": "Persisted dispatch marker before call"
+        },
+        {
+          "name": "settledAt",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "ONCE",
+          "meaning": "Verified settlement or proven pre-dispatch abort; null while uncertain"
+        },
+        {
+          "name": "admittedAt",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "Reservation admission time"
+        },
+        {
+          "name": "retentionUntil",
+          "type": "TIMESTAMPTZ(3)",
+          "mutable": "NO",
+          "meaning": "Root and identifiable evidence expiry cap"
+        },
+        {
+          "name": "leaseGeneration",
+          "type": "INT",
+          "mutable": "CAS",
+          "meaning": "Monotone fence"
+        },
+        {
+          "name": "leaseTokenHash",
+          "type": "CHAR(64)?",
+          "mutable": "LEASE",
+          "meaning": "Owned dispatch token hash"
+        },
+        {
+          "name": "leaseUntil",
+          "type": "TIMESTAMPTZ(3)?",
+          "mutable": "LEASE",
+          "meaning": "Cannot turn dispatched timeout into retry authorization"
+        }
+      ],
+      "checks": [
+        "C9WorkReceipt_identity_ck",
+        "C9WorkReceipt_domain_ck",
+        "C9WorkReceipt_kind_ck",
+        "C9WorkReceipt_contract_ck",
+        "C9WorkReceipt_evidence_ck",
+        "C9WorkReceipt_price_ck",
+        "C9WorkReceipt_reservation_ck",
+        "C9WorkReceipt_usage_ck",
+        "C9WorkReceipt_state_ck",
+        "C9WorkReceipt_time_ck"
+      ],
+      "uniques": [
+        {
+          "name": "C9WorkReceipt_1_key",
+          "fields": [
+            "id",
+            "tenantId"
+          ]
+        },
+        {
+          "name": "C9WorkReceipt_2_key",
+          "fields": [
+            "tenantId",
+            "runId",
+            "callKeyHash"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "C9WorkReceipt_1_idx",
+          "fields": [
+            "tenantId",
+            "state",
+            "leaseUntil",
+            "id"
+          ]
+        },
+        {
+          "name": "C9WorkReceipt_2_idx",
+          "fields": [
+            "tenantId",
+            "runId",
+            "domain",
+            "kind"
+          ]
+        }
+      ],
+      "fks": [
+        {
+          "fields": [
+            "tenantId"
+          ],
+          "target": "Tenant",
+          "refs": [
+            "id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9WorkReceipt_1_fkey"
+        },
+        {
+          "fields": [
+            "runId",
+            "tenantId"
+          ],
+          "target": "C9Run",
+          "refs": [
+            "id",
+            "tenantId"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9WorkReceipt_2_fkey"
+        },
+        {
+          "fields": [
+            "revisionId",
+            "tenantId"
+          ],
+          "target": "C9StrategyRevision",
+          "refs": [
+            "id",
+            "tenantId"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "RESTRICT",
+          "name": "C9WorkReceipt_3_fkey"
+        }
+      ],
+      "primaryKey": {
+        "name": "C9WorkReceipt_pkey",
+        "fields": [
+          "id"
+        ]
+      },
+      "triggerFunctions": [
+        "C9WorkReceipt_guard"
+      ],
+      "triggers": [
+        "C9WorkReceipt_write_trg",
+        "C9WorkReceipt_truncate_trg"
+      ]
+    }
+  },
+  "alteredModels": [
+    {
+      "name": "Tenant",
+      "physicalFields": 0,
+      "change": "5 reverse Prisma relations only"
+    },
+    {
+      "name": "TenantBusinessConfigurationRevision",
+      "physicalFields": 0,
+      "change": "R11_config_contract_check admits c9_orchestration; existing namespace semantics unchanged"
+    }
+  ],
+  "partialUniqueIndexes": [
+    {
+      "name": "C9StepBinding_one_execution_idx",
+      "model": "C9StepBinding",
+      "fields": [
+        "tenantId",
+        "sourceType",
+        "sourceId"
+      ],
+      "where": "bindingKind = 'EXECUTION'"
+    }
+  ],
+  "newActionClasses": [],
+  "newAc6Classes": [
+    "expire_c9_orchestration_runs"
+  ],
+  "migrationNames": [
+    "chapter9_orchestration_foundation"
+  ],
+  "nativeEnums": [],
+  "sourceForeignKeys": [],
+  "backfills": 0,
+  "waves": [
+    [
+      "P01"
+    ],
+    [
+      "P02",
+      "P03"
+    ],
+    [
+      "P04",
+      "P05"
+    ],
+    [
+      "P06"
+    ]
+  ],
+  "counts": {
+    "newModels": 5,
+    "alteredModels": 2,
+    "newPhysicalFields": 123,
+    "primaryKeys": 5,
+    "uniqueConstraints": 12,
+    "partialUniqueIndexes": 1,
+    "checkConstraints": 46,
+    "alteredChecks": 1,
+    "foreignKeys": 11,
+    "nonUniqueIndexes": 7,
+    "nativeEnums": 0,
+    "newActionClasses": 0,
+    "newAc6Classes": 1,
+    "migrations": 1,
+    "backfills": 0,
+    "functions": 8,
+    "triggers": 10
+  },
+  "sharedFunctions": [
+    "C9_validate_graph",
+    "C9_validate_budget",
+    "C9_retention_claim"
+  ]
+}

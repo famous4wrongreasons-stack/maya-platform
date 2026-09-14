@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "mainDirtyEntries": 24,
+  "mainFileHashesPreserved": 22,
+  "protectedInventorySchemaHashesPreserved": 86,
+  "oldDatabasesTouched": 0,
+  "oldDatabasesProtected": 17,
+  "ownedPostgresCleanup": {
+    "ownedClusterStopped": true,
+    "ownedDatabasesDropped": [
+      "maya_rb_r03",
+      "maya_rb_r04",
+      "maya_rb_r07",
+      "maya_rb_release",
+      "maya_rb_replay"
+    ],
+    "oldDatabasesTouched": 0,
+    "port": 55508,
+    "ownedPostgresPidGone": true,
+    "ownedSocketRemoved": true,
+    "ownedDataDirectoryRemoved": true
+  },
+  "vpsStagingCleanup": {
+    "status": "PASS",
+    "hostScope": "vps",
+    "ownedStagingRemoved": [
+      "/tmp/maya-wave-rb-cb4fb27c-python"
+    ],
+    "activeRuntimeFilesChanged": 0,
+    "businessMutations": 0,
+    "messages": 0
+  },
+  "edgeStagingCleanup": {
+    "status": "PASS",
+    "hostScope": "edge",
+    "ownedStagingRemoved": [
+      "/tmp/maya-wave-rb-cb4fb27c-edge"
+    ],
+    "activeRuntimeFilesChanged": 0,
+    "businessMutations": 0,
+    "messages": 0
+  },
+  "productionProcessHygiene": {
+    "status": "PASS",
+    "ownedStagingRemaining": 0,
+    "smokeListenerRemaining": 0,
+    "smokeLogRemaining": 0,
+    "candidateRestoreFilesRemaining": 0,
+    "productionWrites": 0
+  },
+  "postGateChanges": "Owned changes docs/rebuild only; independent upstream7ee1e670 preserved by Git merge, not deployed or retested by this wave",
+  "newMigrations": 0,
+  "productionBusinessProviderMessagesForProof": 0,
+  "package5FinalGateRun": false,
+  "processHygiene": 0,
+  "laterBaselineHold": {
+    "status": "STOP",
+    "evidence": "package5-wave-rb-late-baseline-stop.json",
+    "reason": "Independent upstream PHP relay commit now matches a changed known production alias",
+    "priorProofAndAssessmentPreserved": true
+  }
+}

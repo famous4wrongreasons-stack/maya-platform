@@ -1,0 +1,48 @@
+{
+  "contract": "maya.c9-mapping-validation/1",
+  "checkedAt": "2026-09-13T15:33:02.074589+00:00",
+  "sourceBaseline": "b9402e39d6aaab63104bfce868a636c60beb8cc5",
+  "baselineEqualsOriginBeforeDocsCommit": true,
+  "checks": {
+    "requirements": "30/30",
+    "packages": "6/6",
+    "foundations": "28/28",
+    "catalog": "47/47",
+    "fieldCount": 123,
+    "fieldUniqueness": "PASS",
+    "pkUniqueFkTargets": "PASS",
+    "constraintCounts": "PASS",
+    "relativeDocumentLinks": "PASS",
+    "biNoMutatingCatalogTools": "PASS",
+    "secretPatternScan": "PASS",
+    "runtimeSchemaMigrationFilesChanged": 0
+  },
+  "execution": {
+    "schemaImplemented": false,
+    "postgresProofRun": false,
+    "mandatoryRuntimeRegressionRun": false,
+    "reason": "Documentation/schema proposal only; executable proofs are required after owner envelope approval",
+    "productionMutations": 0,
+    "productionReadsThisCycle": 0
+  },
+  "preservation": {
+    "mainStatusEqualAcceptedSnapshot": true,
+    "acceptedMainStatusEntries": 25,
+    "currentMainStatusEntries": 25,
+    "protectedMainFileHashesMatched": 23,
+    "mainWrites": 0,
+    "preExistingDatabasesTouched": 0,
+    "ownedTemporaryDatabases": 0,
+    "ownedProcessesRemaining": 0,
+    "ownedWatchers": 0,
+    "ownedBrowsers": 0,
+    "processHygiene": 0
+  },
+  "documents": {
+    "docs/rebuild/CYCLE-09-COMBINED-SCHEMA-ACTION-ORCHESTRATION-MAPPING.md": "9e14dc480c96c518b2203bf81d82f97d0aaa44cc6606ff1c0e0f60eb20d066a1",
+    "docs/rebuild/evidence/chapter9-mapping/registry-mapping.json": "05dfd98bf8f836f709c0766854ed4101cb6f98f018aec95eddbd4c0ba8eade46",
+    "docs/rebuild/evidence/chapter9-mapping/requirement-mapping.json": "add23b80f99092062aa504ae23560469ed706e54dbab4d845bcf3e31e5fb26fc",
+    "docs/rebuild/evidence/chapter9-mapping/schema-envelope.json": "d766e4ffcf6cd92b8e508f636e385702f29d63161561b475e66dec97d63f26c7",
+    "docs/rebuild/evidence/chapter9-mapping/source-evidence.json": "59cac46c34226c5867b664a0625394284926eb471978c9070ceb459a5896761f"
+  }
+}

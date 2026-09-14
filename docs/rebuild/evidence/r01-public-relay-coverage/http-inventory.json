@@ -1,0 +1,212 @@
+{
+  "observedAt": "2026-09-12T16:33:35.287425+00:00",
+  "requests": [
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php.pre-php56-hotfix-20260908",
+      "url": "https://mayaos.ru/maya-platform-api.php.pre-php56-hotfix-20260908",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php",
+      "url": "https://mayaos.ru/maya-platform-api.php",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/mocine3388.beget.tech/public_html/api-proxy.php",
+      "url": "https://mocine3388.beget.tech/api-proxy.php",
+      "error": "URLError"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/yclients-webhook.php",
+      "url": "https://malesthetic.pro/yclients-webhook.php",
+      "status": 403,
+      "contentType": "application/json; charset=utf-8",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tg-config.php",
+      "url": "https://malesthetic.pro/app/tg-config.php",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/site-publications-proxy.php",
+      "url": "https://malesthetic.pro/app/site-publications-proxy.php",
+      "status": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-config.php",
+      "url": "https://malesthetic.pro/app/tenant-config.php",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php",
+      "url": "https://malesthetic.pro/app/maya-native-api.php",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260704_230004",
+      "url": "https://malesthetic.pro/app/api-proxy.php.bak-20260704_230004",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/site-community-proxy.php",
+      "url": "https://malesthetic.pro/app/site-community-proxy.php",
+      "status": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.codex-loyalty-20260721.php",
+      "url": "https://malesthetic.pro/app/api-proxy.codex-loyalty-20260721.php",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/package5-client-consent-proxy.php",
+      "url": "https://malesthetic.pro/app/package5-client-consent-proxy.php",
+      "status": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.pre-b13-031977e4",
+      "url": "https://malesthetic.pro/app/api-proxy.php.pre-b13-031977e4",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak.staff_tasks_retry_20260709230808",
+      "url": "https://malesthetic.pro/app/api-proxy.php.bak.staff_tasks_retry_20260709230808",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260705_235508",
+      "url": "https://malesthetic.pro/app/api-proxy.php.bak-20260705_235508",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260704_223539",
+      "url": "https://malesthetic.pro/app/api-proxy.php.bak-20260704_223539",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tg-config.php.bak.20260703030847",
+      "url": "https://malesthetic.pro/app/tg-config.php.bak.20260703030847",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/package5-b35-bulk-proxy.php",
+      "url": "https://malesthetic.pro/app/package5-b35-bulk-proxy.php",
+      "status": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.20260708211912.bak",
+      "url": "https://malesthetic.pro/app/api-proxy.php.20260708211912.bak",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-221742",
+      "url": "https://malesthetic.pro/app/api-proxy.php.bak-20260703-221742",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260702-1305",
+      "url": "https://malesthetic.pro/app/api-proxy.php.bak-20260702-1305",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak.staff_tasks_20260709230559",
+      "url": "https://malesthetic.pro/app/api-proxy.php.bak.staff_tasks_20260709230559",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
+      "url": "https://malesthetic.pro/app/api-proxy.php",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-221534",
+      "url": "https://malesthetic.pro/app/api-proxy.php.bak-20260703-221534",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260703-213132",
+      "url": "https://malesthetic.pro/app/api-proxy.php.bak-20260703-213132",
+      "status": 403,
+      "contentType": "text/html; charset=iso-8859-1",
+      "location": null,
+      "method": "HEAD"
+    },
+    {
+      "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "url": "https://malesthetic.pro/app/backups/api-proxy-before-loyalty-20260721-2035.php",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "location": null,
+      "method": "HEAD"
+    }
+  ],
+  "requestsWithAction": 0,
+  "requestBodies": 0
+}

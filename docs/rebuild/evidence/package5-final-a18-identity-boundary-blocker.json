@@ -1,0 +1,317 @@
+{
+  "contract": "package5.final.a18.identity-boundary-blocker.v1",
+  "capturedAt": "2026-09-04T06:22:47.345771+00:00",
+  "sourceCheckpoint": "ba9e923490d8dd901868c5973d7b9a5a303ac980",
+  "productionRelease": "/opt/maya-saas/releases/20260904-c06-p5-wave6-cutover-3b545671",
+  "productionPwa": [
+    "MainPID=1435620",
+    "ActiveState=active",
+    "ActiveEnterTimestamp=Thu 2026-09-03 01:17:18 MSK"
+  ],
+  "productionSource": {
+    "webhook_server.py": {
+      "fileSha256": "b5dd66307b0dce5f6fdba7be24f1833224f48a521f9c23e0606fd8ca16771cea",
+      "functions": [
+        {
+          "name": "_authed_chat_id",
+          "line": 6631,
+          "end": 6650,
+          "sha256": "fc54d0a7e3abad4564cd842e3ce3a59bf3bbcb0a604a690547e96aa2218892e8"
+        },
+        {
+          "name": "consent_submit_handler",
+          "line": 7155,
+          "end": 7197,
+          "sha256": "60fcdb0bf1cfb0a39548eaec7aba54abf423337a7134fd6df2aa8e27d28f6149"
+        }
+      ]
+    },
+    "web_auth.py": {
+      "fileSha256": "94b891dc9ce1447491f49ca0f8edd625177dc803aeefeccd1744ae9f115e940e",
+      "functions": [
+        {
+          "name": "resolve_session",
+          "line": 435,
+          "end": 438,
+          "sha256": "7270803f83394f439825545dbb6061e78dd39d555aaa0d56fb6466c23eb660cd"
+        }
+      ]
+    },
+    "database.py": {
+      "fileSha256": "3c1ddfb8948e2cbf582ee91b7f78ea1dfa00fa557f1ad2a5c4ae4a763e2491c5",
+      "functions": [
+        {
+          "name": "get_or_create_client",
+          "line": 745,
+          "end": 759,
+          "sha256": "e470450037d08b85e87ea6def92e7623baa5570cc28c39eb200e74086b290dcf"
+        },
+        {
+          "name": "get_client",
+          "line": 794,
+          "end": 801,
+          "sha256": "d56c58fef512b0b54385df0b230f9a8f70a7f915dc207db59760644b4bb3cfc3"
+        },
+        {
+          "name": "get_web_session",
+          "line": 1053,
+          "end": 1071,
+          "sha256": "793ef487b054c2e94e36f46341c363b57016b50892560dc42879192defdebe42"
+        }
+      ]
+    }
+  },
+  "productionSqliteColumns": {
+    "clients": [
+      {
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "pk": 1
+      },
+      {
+        "name": "telegram_chat_id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "phone",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "name_enc",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "phone_enc",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "phone_hash",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "whats_new_seen_version",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "marketing_consent_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "marketing_consent_revoked_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "first_source",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "first_source_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "default_visit_mood",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      }
+    ],
+    "web_sessions": [
+      {
+        "name": "token",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 1
+      },
+      {
+        "name": "subject_kind",
+        "type": "TEXT",
+        "notnull": 1,
+        "pk": 0
+      },
+      {
+        "name": "chat_id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "phone_hash",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "vk_user_id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "display_name",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "pk": 0
+      },
+      {
+        "name": "expires_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "pk": 0
+      },
+      {
+        "name": "last_seen_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "revoked",
+        "type": "INTEGER",
+        "notnull": 1,
+        "pk": 0
+      },
+      {
+        "name": "tg_first_name",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "tg_last_name",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "tg_username",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "tg_photo_url",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      },
+      {
+        "name": "yandex_user_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "pk": 0
+      }
+    ]
+  },
+  "canonicalSchema": {
+    "Client": {
+      "line": 2033,
+      "sha256": "29774919df85c493d111b89675726b94c176cd7b903f7fff5e9580d246a1bbff",
+      "definition": "model Client {\n  id                 String   @id @default(cuid())\n  tenantId           String\n  /// Аккаунт Maya, если человек им обзавёлся.\n  userId             String?\n  /// HMAC от последних десяти цифр номера — того же ключа, по которому идёт всё\n  /// сопоставление сегодня. Сам номер здесь не хранится.\n  ///\n  /// НЕ идентичность и НЕ уникален: семья на один номер — обычное дело, и\n  /// склеивать таких людей нельзя. Это индекс кандидатов, не более.\n  phoneHash          String?\n  /// Терминальное состояние погашенного дубля, как UserStatus.merged.\n  mergedIntoClientId String?\n  createdAt          DateTime @default(now())\n  updatedAt          DateTime @updatedAt\n\n  tenant       Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)\n  user         User?           @relation(fields: [userId], references: [id], onDelete: SetNull)\n  /// 🔴 Ссылка СОСТАВНАЯ. Одноколоночная позволяла погасить клиента в пользу\n  /// клиента ЧУЖОГО арендатора — межарендное слияние на уровне базы.\n  mergedInto   Client?         @relation(\"ClientMerge\", fields: [mergedIntoClientId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction)\n  mergedFrom   Client[]        @relation(\"ClientMerge\")\n  crmLinks     CrmClientLink[]\n  appointments Appointment[]\n  loyaltyAccounts LoyaltyAccount[]\n  loyaltyRedemptionGrants LoyaltyRedemptionGrant[]\n  referralsAsReferrer CustomerReferral[] @relation(\"ReferralReferrer\")\n  referralsAsReferred CustomerReferral[] @relation(\"ReferralReferredClient\")\n  referralRewards ReferralReward[] @relation(\"ReferralRewardRecipient\")\n  customerSubscriptions CustomerSubscription[]\n  customerProfiles CustomerProfile[]\n  consentFacts ClientConsentFact[]\n\n  @@unique([id, tenantId])\n  @@index([tenantId, phoneHash])\n  @@index([tenantId, userId])\n}"
+    },
+    "CrmClientLink": {
+      "line": 2075,
+      "sha256": "5d2a0f39d98b0f05d255dc0a1963dfd31f9f11ab93aca410bd259a1bb7acfeea",
+      "definition": "model CrmClientLink {\n  id         String    @id @default(cuid())\n  tenantId   String\n  clientId   String\n  provider   String\n  externalId String\n  /// Когда карточку в последний раз видели живой в CRM.\n  syncedAt   DateTime  @default(now())\n  /// Карточка исчезла или заархивирована во внешней системе. Строка ОСТАЁТСЯ:\n  /// история Maya не должна пропадать вместе с записью провайдера.\n  unlinkedAt DateTime?\n  createdAt  DateTime  @default(now())\n  updatedAt  DateTime  @updatedAt\n\n  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)\n  /// Составной ключ: строка связи не может указывать на клиента другого\n  /// арендатора. То самое правило миграции strict_tenant_relations.\n  client Client @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Cascade)\n\n  @@unique([tenantId, provider, externalId])\n  @@index([tenantId, clientId])\n  @@index([tenantId, provider, syncedAt])\n}"
+    },
+    "AuthIdentity": {
+      "line": 777,
+      "sha256": "5bf1bdea37f7e45990c4ca668eb95e030d33c8c77e10003aa2854cd93ae1d8e9",
+      "definition": "model AuthIdentity {\n  id             String     @id @default(cuid())\n  tenantId       String\n  userId         String\n  provider       String\n  providerUserId String\n  email          String?\n  phone          String?\n  profileJson    Json?\n  createdAt      DateTime   @default(now())\n  updatedAt      DateTime   @updatedAt\n  tenant         Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)\n  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)\n  membership     Membership @relation(\"AuthIdentityMembership\", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)\n\n  @@unique([id, tenantId])\n  @@unique([tenantId, provider, providerUserId])\n  @@index([userId])\n  @@index([tenantId, provider])\n}"
+    },
+    "AuthSession": {
+      "line": 855,
+      "sha256": "2827b66ab2adb1dad02438aa550d9a37cd218a2f7ed089aaa33c83d817ea51d3",
+      "definition": "model AuthSession {\n  id            String             @id @default(cuid())\n  tenantId      String?\n  userId        String\n  deviceLabel   String\n  ipHash        String?\n  expiresAt     DateTime\n  lastUsedAt    DateTime           @default(now())\n  revokedAt     DateTime?\n  revokeReason  String?\n  createdAt     DateTime           @default(now())\n  updatedAt     DateTime           @updatedAt\n  tenant        Tenant?            @relation(fields: [tenantId], references: [id], onDelete: Cascade)\n  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)\n  membership    Membership?        @relation(\"AuthSessionMembership\", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)\n  refreshTokens AuthRefreshToken[]\n\n  @@index([tenantId, userId, revokedAt])\n  @@index([userId, revokedAt])\n  @@index([expiresAt])\n  @@index([revokedAt])\n}"
+    },
+    "ClientConsentFact": {
+      "line": 1469,
+      "sha256": "fbcbd49cf3e75602b38b6b4fde544bcc3cfe4f18609a5e8720ea99a9e251b795",
+      "definition": "model ClientConsentFact {\n  id                   String   @id @default(uuid())\n  tenantId             String\n  clientId             String\n  kind                 String\n  decision             String\n  occurredAt           DateTime\n  effectiveAt          DateTime\n  sourceType           String\n  sourceIdentityHash   String\n  actorUserId          String?\n  actionExecutionId    String?\n  createdAt            DateTime @default(now())\n\n  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)\n  client      Client           @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)\n  actor       Membership?      @relation(\"ClientConsentActor\", fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)\n  execution   ActionExecution? @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)\n\n  @@unique([id, tenantId])\n  @@unique([tenantId, sourceType, sourceIdentityHash])\n  @@index([tenantId, clientId, kind, effectiveAt])\n  @@index([tenantId, actionExecutionId])\n}"
+    },
+    "CustomerProfile": {
+      "line": 1445,
+      "sha256": "6bf4d9a45a7b70dbd8a27997e338024e5199d4667572541fe204cd24142e83a1",
+      "definition": "model CustomerProfile {\n  id                 String     @id @default(cuid())\n  tenantId           String\n  clientId           String?\n  userId             String?\n  preferredLocale    String?\n  privacyConsentAt   DateTime?\n  marketingConsentAt DateTime?\n  encryptedNotes     String?\n  createdAt          DateTime   @default(now())\n  updatedAt          DateTime   @updatedAt\n  tenant             Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)\n  client             Client?    @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)\n  user               User?      @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)\n  membership         Membership? @relation(\"CustomerProfileMembership\", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)\n\n  @@unique([userId, tenantId])\n  @@unique([tenantId, clientId])\n  @@index([tenantId, updatedAt])\n}"
+    }
+  },
+  "diagnostic": {
+    "diagnostic": "A18 guest authority precondition",
+    "reproduced": true,
+    "result": "REJECTED BEFORE CONSENT TARGET RESOLUTION",
+    "failure": "Active tenant membership required",
+    "databaseConnections": 0,
+    "domainWrites": 0,
+    "actionExecutions": 0,
+    "productionRequests": 0,
+    "shadowGateOrExecutableProofRun": false
+  },
+  "remainingAcceptedBlockerPaths": [
+    "A18 POST /api/consent/submit",
+    "A26 POST /api/onboarding/trial",
+    "A26 POST /api/admin/tenants"
+  ],
+  "newBlocker": "No approved durable binding / establishment authority from an authenticated legacy channel subject to canonical tenant-qualified Client; existing consent execution requires a Maya User membership.",
+  "schemaMutation": false,
+  "runtimeMutation": false,
+  "deployment": false,
+  "productionBusinessMutations": 0,
+  "providerWrites": 0,
+  "ownedTemporaryDatabasesCreated": 0,
+  "preExistingDatabasesObserved": 17,
+  "preExistingDatabasesDeleted": 0,
+  "hygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "taskWatchersOrBrowsersStarted": 0,
+    "historicalDatabasesObserved": 17,
+    "historicalDatabasesDeleted": 0,
+    "trackedOneShotSessionsExited": true
+  }
+}

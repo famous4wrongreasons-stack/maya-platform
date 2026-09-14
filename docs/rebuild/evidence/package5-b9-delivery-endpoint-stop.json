@@ -1,0 +1,42 @@
+{
+  "acceptedCheckpoint": "57196b09",
+  "schemaCheckpoint": "8a316f4c907ad092f2ccc7133bf6daf08a34a5e6",
+  "schemaFoundation": "APPLIED",
+  "productionMigration": {
+    "migration": "20260904230000_client_wanted_slot_v1",
+    "expectedOnlyPendingBefore": true,
+    "pendingAfter": 0,
+    "postApplyDrift": "NONE",
+    "healthReadiness": "PASS",
+    "rowsBackfilled": 0,
+    "businessProviderMutations": 0
+  },
+  "runtimeBlocker": {
+    "code": "VERIFIED_CLIENT_DELIVERY_ENDPOINT_NOT_DURABLE",
+    "clientChannelLinkStoresRecoverableAddress": false,
+    "wantedSlotStoresDeliveryAddress": false,
+    "clientWithoutMayaUserRequired": true,
+    "userOnlyFoundationsSufficient": false,
+    "communicationDeliveryRequiresRawAddressBeforeHashing": true,
+    "legacySqliteFallbackAllowed": false,
+    "runtimeWorkaroundImplemented": false,
+    "recommendedOption": "A — encrypted address on verified ClientChannelLink"
+  },
+  "package5FinalGateRerun": false,
+  "package5Complete": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "logs": {
+    "production-migration-gate.log": "sha256:95bff3514dc1aaf135214234aa0038577d12b545fcd663908d084208d0f861e0",
+    "production-migration-apply.log": "sha256:16a698ed3e9f529c3576b6f56ccfa69b0d3f8697a9ff60586771412ad2d7e738",
+    "closure-hygiene.json": "sha256:079dc355d50b21104f2ced23bb35e42c110a48b9b8397f41a09405503e648181"
+  },
+  "hygiene": {
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "preExistingLocalTempTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0
+  }
+}

@@ -1,0 +1,725 @@
+
+### 1/10 шлюз: чистое дерево, линт, типизация, тесты, схема
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+The schema at prisma/schema.prisma is valid 🚀
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+> maya-saas-backend@0.0.1 typecheck
+> tsc --noEmit --project tsconfig.build.json --incremental false
+
+
+> maya-saas-backend@0.0.1 typecheck:scripts
+> tsc --noEmit --project tsconfig.scripts.json --incremental false
+
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent
+
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 18.783s
+
+OK
+FAIL src/action-engine/package5-b34-remediation.architecture.spec.ts (17.627 s)
+  ● B34 sole immutable AC4 review owner › scans all backend modules, including background and future entrants
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "Nested review write or delegate alias is forbidden",
+    + ]
+
+      19 |       expect(
+      20 |         scanReviewAuthority(relative(src, file), readFileSync(file, 'utf8')),
+    > 21 |       ).toEqual([]);
+         |         ^
+      22 |   });
+      23 |
+      24 |   it.each([
+
+      at Object.<anonymous> (action-engine/package5-b34-remediation.architecture.spec.ts:21:9)
+
+......................
+----------------------------------------------------------------------
+Ran 22 tests in 2.102s
+
+OK
+FAIL src/action-engine/package-4-final-value-ownership-ratchet.spec.ts
+  ● Package 4 final value execution ownership ratchet › has no production value mutation owner outside canonical executors
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 90
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "code": "db.loyaltyAccount.create({
+    +     data: {
+    +       tenantId: tenant.id,
+    +       clientId: client.id,
+    +       source: 'internal',
+    +       balance: 300,
+    +     },
+    +   })",
+    +     "method": "main",
+    +     "model": "loyaltyAccount",
+    +     "operation": "create",
+    +     "path": "scripts/chapter7-finance-proof.ts",
+    +   },
+    +   Object {
+    +     "code": "db.loyaltyAccount.create({
+    +     data: {
+    +       tenantId: tenant.id,
+    +       clientId: unlinked.id,
+    +       source: 'internal',
+    +       balance: 900,
+    +     },
+    +   })",
+    +     "method": "main",
+    +     "model": "loyaltyAccount",
+    +     "operation": "create",
+    +     "path": "scripts/chapter7-finance-proof.ts",
+    +   },
+    +   Object {
+    +     "code": "db.loyaltyTransaction.create({
+    +     data: {
+    +       tenantId: tenant.id,
+    +       accountId: account.id,
+    +       kind: 'credit',
+    +       delta: 300,
+    +       balanceAfter: 300,
+    +       encryptedReason: 'synthetic-only',
+    +       idempotencyKey: randomUUID(),
+    +     },
+    +   })",
+    +     "method": "main",
+    +     "model": "loyaltyTransaction",
+    +     "operation": "create",
+    +     "path": "scripts/chapter7-finance-proof.ts",
+    +   },
+    +   Object {
+    +     "code": "tx.expense.createMany({
+    +       data: [
+    +         {
+    +           tenantId: tenant.id,
+    +           category: 'rent',
+    +           currency: 'RUB',
+    +           amountKopecks: 100,
+    +           source: 'manual',
+    +           occurredAt: from,
+    +         },
+    +         {
+    +           tenantId: tenant.id,
+    +           category: 'Принятая импортная категория',
+    +           currency: 'RUB',
+    +           amountKopecks: 100,
+    +           source: 'crm',
+    +           externalId: randomUUID(),
+    +           occurredAt: from,
+    +         },
+    +         {
+    +           tenantId: tenant.id,
+    +           category: 'supplies',
+    +           currency: 'EUR',
+    +           amountKopecks: 40,
+    +           source: 'manual',
+    +           occurredAt: from,
+    +         },
+    +         {
+    +           tenantId: tenant.id,
+    +           category: 'other',
+    +           currency: 'RUB',
+    +           amountKopecks: 999,
+    +           source: 'manual',
+    +           occurredAt: to,
+    +         },
+    +       ],
+    +     })",
+    +     "method": "main",
+    +     "model": "expense",
+    +     "operation": "createMany",
+    +     "path": "scripts/chapter7-finance-proof.ts",
+    +   },
+    + ]
+
+      207 |
+      208 |   it('has no production value mutation owner outside canonical executors', () => {
+    > 209 |     expect(productionViolations(files)).toEqual([]);
+          |                                         ^
+      210 |
+      211 |     const productionOwnerFiles = [
+      212 |       ...new Set(
+
+      at Object.<anonymous> (action-engine/package-4-final-value-ownership-ratchet.spec.ts:209:41)
+
+[Nest] 96693  - 09/08/2026, 8:17:15 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:15 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:15 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:15 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:16 PM    WARN [SocialAuthService] Telegram OAuth provider request failed (TypeError).
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 2)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:conversation_plan_missing
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:deepseek_output_missing (попытка 1)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 2)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:deepseek_output_missing
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_required_tool_missing
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 1)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 2)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_unexpected_tool_call
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:deepseek_api_key_missing (попытка 1)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:deepseek_api_key_missing
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:deepseek_base_url_invalid (попытка 1)
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:deepseek_base_url_invalid
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-09T21:00:00.000Z..2026-08-10T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-09T21:00:00.000Z..2026-08-10T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:17 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:19 PM    WARN [CrmService] CRM preview failed provider=yclients operation=connection_check status=unknown
+[Nest] 96693  - 09/08/2026, 8:17:19 PM    WARN [CrmService] CRM connection failed provider=yclients code=crm_credentials_rejected detail=401 token
+[Nest] 96693  - 09/08/2026, 8:17:19 PM    WARN [CrmService] CRM connection failed provider=yclients code=crm_platform_configuration_error detail=YCLIENTS_PARTNER_TOKEN is not configured
+[Nest] 96693  - 09/08/2026, 8:17:19 PM    WARN [CrmService] CRM team access synchronization deferred tenant=tenant-1: unavailable
+[Nest] 96693  - 09/08/2026, 8:17:19 PM    WARN [ClientIdentityService] shadow client identity registration blocked provider=yclients reason=client_identity_guard_unavailable
+[Nest] 96693  - 09/08/2026, 8:17:20 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:20 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:20 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-20T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:20 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-17T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:20 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-19T00:00:00.000Z..2026-08-16T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:20 PM     LOG [LegacyAppointmentBridgeService] MAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION {"event":"legacy_appointment_shadow_observation","contract":"maya.legacy-appointment-shadow-observation/1","mode":"shadow","tenant_ref":"0a96abb33b07ff0e8f48bcc4893e0e7346bff899dd316979517fa06509a49aff","tenant_resolution":"integration","origin":"webhook.chat","authorization_context":{"transport_authentication":"bridge_secret","integration_binding":"verified","origin_action_policy":"allowed","tenant_scope":"system_tenant"},"legacy_action_class":"create_appointment","preview_action_class":"create_appointment","capability":"crm.appointment.create.v1","capability_version":1,"target_kind":"appointment","target_ref_hash":"125ab104f37948fc4f6bf8869fe2f6fe7872df3fb6c5acc535ba33fc97fea14f","normalized_input_hash":"67c4987a0ddd095dcd76e249f2f34fe76d9b4b67b7dbb2c4f393f96228a1535b","identity_fingerprint":"d006dba7a3a61c6e056a66a04259a09e09ce9bffb27032c42fce8e70f9d195bf","request_idempotency_key_hash":"159afc7cab128b7cbe710ba097c1fd55f16db92b7ff69559f39cd44d0ba5c4f1","policy_key":"production.create_appointment.confirmed-request","policy_version":1,"policy_decision":"ALLOW","autonomy_level":"L2_CONFIRMED_REQUEST","approval_requirement":"NONE","executor_key":"crm.appointment.create","executor_version":1,"preview_external_side_effects":0,"bridge_external_side_effects":0,"shadow_side_effects":{"crm_writes":0,"messages":0,"campaigns":0}}
+[Nest] 96693  - 09/08/2026, 8:17:20 PM     LOG [LegacyAppointmentBridgeService] MAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION {"event":"legacy_appointment_shadow_observation","contract":"maya.legacy-appointment-shadow-observation/1","mode":"shadow","tenant_ref":"0a96abb33b07ff0e8f48bcc4893e0e7346bff899dd316979517fa06509a49aff","tenant_resolution":"integration","origin":"webhook.chat","authorization_context":{"transport_authentication":"bridge_secret","integration_binding":"verified","origin_action_policy":"allowed","tenant_scope":"system_tenant"},"legacy_action_class":"create_appointment","preview_action_class":"create_appointment","capability":"crm.appointment.create.v1","capability_version":1,"target_kind":"appointment","target_ref_hash":"125ab104f37948fc4f6bf8869fe2f6fe7872df3fb6c5acc535ba33fc97fea14f","normalized_input_hash":"67c4987a0ddd095dcd76e249f2f34fe76d9b4b67b7dbb2c4f393f96228a1535b","identity_fingerprint":"d006dba7a3a61c6e056a66a04259a09e09ce9bffb27032c42fce8e70f9d195bf","request_idempotency_key_hash":"159afc7cab128b7cbe710ba097c1fd55f16db92b7ff69559f39cd44d0ba5c4f1","policy_key":"production.create_appointment.confirmed-request","policy_version":1,"policy_decision":"ALLOW","autonomy_level":"L2_CONFIRMED_REQUEST","approval_requirement":"NONE","executor_key":"crm.appointment.create","executor_version":1,"preview_external_side_effects":0,"bridge_external_side_effects":0,"shadow_side_effects":{"crm_writes":0,"messages":0,"campaigns":0}}
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:22 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 3 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 5 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:22 PM   ERROR [ExpensePeriodReader] expense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T20:59:59.000Z branch=all: expense ledger unavailable
+Error: expense ledger unavailable
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/src/analytics/operations-analytics.service.spec.ts:1137:28)
+    at /private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:102:19)
+    at readExpensePeriod (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at OperationsAnalyticsService.loadCategorisedExpenses (/private/tmp/maya-b29-contour/maya-saas-backend/src/analytics/operations-analytics.service.ts:1678:29)
+    at OperationsAnalyticsService.getBusinessProfitability (/private/tmp/maya-b29-contour/maya-saas-backend/src/analytics/operations-analytics.service.ts:483:14)
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/src/analytics/operations-analytics.service.spec.ts:1699:22)
+[Nest] 96693  - 09/08/2026, 8:17:22 PM   ERROR [ExpensePeriodReader] expense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.000Z branch=all: expense ledger unavailable
+Error: expense ledger unavailable
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/src/analytics/operations-analytics.service.spec.ts:1889:28)
+    at /private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:102:19)
+    at readExpensePeriod (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at OperationsAnalyticsService.buildOverview (/private/tmp/maya-b29-contour/maya-saas-backend/src/analytics/operations-analytics.service.ts:694:30)
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM    WARN [AppointmentPeriodReader] journal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:23 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:26 PM   ERROR [ExpensePeriodReader] expense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.999Z branch=all: expense ledger unavailable
+Error: expense ledger unavailable
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-canon.spec.ts:88:29)
+    at /private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:57:19)
+    at readExpensePeriod (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at ExpensesService.list (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expenses.service.ts:166:24)
+    at AiToolHandlerService.readExpenses (/private/tmp/maya-b29-contour/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts:2055:47)
+[Nest] 96693  - 09/08/2026, 8:17:26 PM   ERROR [ExpensePeriodReader] expense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.999Z branch=all: expense ledger unavailable
+Error: expense ledger unavailable
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-canon.spec.ts:88:29)
+    at /private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:57:19)
+    at readExpensePeriod (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-canon.spec.ts:429:43)
+    at Promise.finally.completed (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:1561:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:1501:10)
+    at _callCircusTest (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:1011:40)
+    at _runTest (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:951:3)
+    at /private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:853:7
+    at _runTestsForDescribeBlock (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:866:11)
+    at _runTestsForDescribeBlock (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:861:11)
+    at run (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:765:3)
+    at runAndTransformResultsToJestFormat (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:1993:21)
+    at jestAdapter (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-circus/build/runner.js:111:19)
+    at runTestInternal (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-runner/build/index.js:276:16)
+    at runTest (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-runner/build/index.js:344:7)
+[Nest] 96693  - 09/08/2026, 8:17:26 PM   ERROR [ExpensePeriodReader] expense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.999Z branch=all: expense ledger unavailable
+Error: expense ledger unavailable
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-canon.spec.ts:88:29)
+    at /private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:57:19)
+    at readExpensePeriod (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at ExpensesService.list (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expenses.service.ts:166:24)
+    at /private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-canon.spec.ts:438:21
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at TenantContextService.runAsSystemTenant (/private/tmp/maya-b29-contour/maya-saas-backend/src/tenancy/tenant-context.service.ts:46:25)
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-canon.spec.ts:437:44)
+[Nest] 96693  - 09/08/2026, 8:17:26 PM   ERROR [ExpensePeriodReader] expense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.999Z branch=all: expense ledger unavailable
+Error: expense ledger unavailable
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-canon.spec.ts:88:29)
+    at /private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/private/tmp/maya-b29-contour/maya-saas-backend/node_modules/jest-mock/build/index.js:57:19)
+    at readExpensePeriod (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at ExpensesService.list (/private/tmp/maya-b29-contour/maya-saas-backend/src/expenses/expenses.service.ts:166:24)
+    at AiToolHandlerService.readExpenses (/private/tmp/maya-b29-contour/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts:2055:47)
+[Nest] 96693  - 09/08/2026, 8:17:30 PM    WARN [OwnerReportsService] daily_report slot unresolved run=run slot=first-1
+[Nest] 96693  - 09/08/2026, 8:17:30 PM    WARN [OwnerReportsService] daily_report slot unresolved run=run slot=first-1
+[Nest] 96693  - 09/08/2026, 8:17:31 PM     LOG [AppointmentPeriodReader] provider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:31 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:31 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] reconciliation near complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] opportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM   DEBUG [AppointmentReconciliationScheduler] reconciliation near: no active CRM integrations
+[Nest] 96693  - 09/08/2026, 8:17:32 PM   ERROR [AppointmentReconciliationScheduler] reconciliation near failed for yclients: провайдер первого молчит
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] reconciliation near complete for yclients: fetched=0 created=0 updated=0 unchanged=0 events=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] opportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] reconciliation near skipped for yclients: lease held by manual:host:1
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] reconciliation near complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] opportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] reconciliation near truncated for yclients: fetched=100 created=0 updated=0 unchanged=100 events=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] opportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] reconciliation near complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM   ERROR [AppointmentReconciliationScheduler] opportunity lifecycle near failed for yclients: shadow lifecycle unavailable
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] reconciliation near complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] opportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] reconciliation near complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] opportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] reconciliation medium complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] opportunity lifecycle medium complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0
+[Nest] 96693  - 09/08/2026, 8:17:32 PM     LOG [AppointmentReconciliationScheduler] Appointment reconciliation scheduler is disabled.
+[Nest] 96693  - 09/08/2026, 8:17:32 PM    WARN [BridgeSourceService] bridge tenant resolved by slug compatibility: muzhskaya-estetika-3. Source should send provider + external company id.
+[Nest] 96693  - 09/08/2026, 8:17:32 PM   ERROR [BridgeSourceService] bridge company yclients:503759 maps to 2 tenants
+[Nest] 96693  - 09/08/2026, 8:17:33 PM   ERROR [EventStoreService] domain event event-1 is dead after 5 attempts: boom
+[Nest] 96693  - 09/08/2026, 8:17:33 PM    WARN [AppointmentMirrorService] mirror window 2026-08-01T00:00:00.000Z..2026-08-25T00:00:00.000Z is truncated (page_limit_reached); nothing is declared missing from it
+[Nest] 96693  - 09/08/2026, 8:17:34 PM     LOG [QuarantineCatchupService] quarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0
+[Nest] 96693  - 09/08/2026, 8:17:34 PM     LOG [QuarantineCatchupService] quarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0
+[Nest] 96693  - 09/08/2026, 8:17:34 PM     LOG [QuarantineCatchupService] quarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0
+[Nest] 96693  - 09/08/2026, 8:17:34 PM     LOG [QuarantineCatchupService] quarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0
+[Nest] 96693  - 09/08/2026, 8:17:34 PM     LOG [QuarantineCatchupService] quarantine catch-up for yclients: considered=1 explained=0 still_unresolved=1 events=0
+[Nest] 96693  - 09/08/2026, 8:17:34 PM     LOG [QuarantineCatchupService] quarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0
+[Nest] 96693  - 09/08/2026, 8:17:34 PM     LOG [QuarantineCatchupService] quarantine catch-up for yclients: considered=1 explained=0 still_unresolved=1 events=0
+[Nest] 96693  - 09/08/2026, 8:17:34 PM     LOG [QuarantineCatchupService] quarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0
+[Nest] 96693  - 09/08/2026, 8:17:37 PM    WARN [AppointmentReconciliationService] reconciliation window 2026-08-18T00:00:00.000Z..2026-08-25T00:00:00.000Z is truncated (page_limit_reached); nothing is declared missing from it
+[Nest] 96693  - 09/08/2026, 8:17:37 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:37 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:38 PM     LOG [AppointmentPeriodReader] provider returned 8 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:38 PM     LOG [AppointmentPeriodReader] provider returned 8 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+[Nest] 96693  - 09/08/2026, 8:17:38 PM    WARN [BillingSchedulerService] Previous billing run is still in progress, skipping.
+[Nest] 96693  - 09/08/2026, 8:17:38 PM   ERROR [BillingSchedulerService] Billing run failed: YooKassa недоступна
+[Nest] 96693  - 09/08/2026, 8:17:38 PM     LOG [BillingSchedulerService] Billing scheduler is disabled by configuration.
+FAIL src/measurement/measurement.reputation.architecture.spec.ts
+  ● C7 P05 permanent reputation owner boundaries › retains the existing shared closed evidence contract
+
+    expect(received).toContain(expected) // indexOf
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      10 | describe('C7 P05 permanent reputation owner boundaries', () => {
+      11 |   it('retains the existing shared closed evidence contract', () => {
+    > 12 |     expect(MEASUREMENT_SOURCE_KINDS.BusinessReview).toContain(
+         |                                                     ^
+      13 |       'reputation_review_query',
+      14 |     );
+      15 |     expect(MEASUREMENT_SOURCE_KINDS.NativeFeedbackRequest).toContain(
+
+      at Object.<anonymous> (measurement/measurement.reputation.architecture.spec.ts:12:53)
+
+FAIL src/crm/client-identity-registration-guard.architecture.spec.ts
+  ● P4-03 unresolved client identity runtime registration guard › keeps one production identity-registration owner
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 1
+
+    @@ -8,6 +8,7 @@
+        "scripts/p4-09-offer-replacement-lineage-schema-proof.ts",
+        "scripts/package5-a18-client-link-challenge-proof.ts",
+        "scripts/package5-common-authority-foundation-proof.ts",
+        "scripts/package5-wave3-all8-executable-proof.ts",
+        "src/crm/client-identity.service.ts",
+    +   "src/measurement/measurement.finance.ts",
+      ]
+
+      125 |   it('keeps one production identity-registration owner', () => {
+      126 |     const owners = registrationOwners(files);
+    > 127 |     expect(owners).toEqual([
+          |                    ^
+      128 |       'scripts/p4-03-all8-executable-proof.ts',
+      129 |       'scripts/p4-04-all4-executable-proof.ts',
+      130 |       'scripts/p4-05-all8-executable-proof.ts',
+
+      at Object.<anonymous> (crm/client-identity-registration-guard.architecture.spec.ts:127:20)
+
+[Nest] 96693  - 09/08/2026, 8:17:42 PM    WARN [AuditLogService] audit write failed action=entity.updated entity=entity: Error
+[Nest] 96693  - 09/08/2026, 8:17:42 PM    WARN [AuditLogService] audit write failed action=blocked entity=entity: ForbiddenException
+[Nest] 96693  - 09/08/2026, 8:17:43 PM     LOG [IngestionRetentionScheduler] Ingestion quarantine retention started: every 24 h, keeping 14 days.
+[Nest] 96693  - 09/08/2026, 8:17:43 PM   ERROR [IngestionRetentionScheduler] quarantine retention failed: база недоступна
+[Nest] 96693  - 09/08/2026, 8:17:43 PM     LOG [IngestionRetentionScheduler] Ingestion quarantine retention is disabled.
+FAIL src/domain/boundary.spec.ts
+  ● граница канонического домена › число импортёров границы CRM только сокращается
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 9
+    Received:    11
+
+      94 |     // Сообщение важнее числа: если тест упал вверх — кто-то завёл новую
+      95 |     // зависимость от контракта адаптера вместо канонического домена.
+    > 96 |     expect(importers.length).toBeLessThanOrEqual(REMAINING_BOUNDARY_IMPORTERS);
+         |                              ^
+      97 |   });
+      98 |
+      99 |   it('решения о доступе не читают внешний id провайдера', () => {
+
+      at Object.<anonymous> (domain/boundary.spec.ts:96:30)
+
+[Nest] 96693  - 09/08/2026, 8:17:48 PM     LOG [AiSpeechService] Speech transcription completed in 8 ms (4 audio bytes)
+[Nest] 96693  - 09/08/2026, 8:17:48 PM     LOG [AiSpeechService] Speech transcription completed in 0 ms (4 audio bytes)
+[Nest] 96693  - 09/08/2026, 8:17:48 PM     LOG [AiSpeechService] Speech transcription completed in 1 ms (4 audio bytes)
+[Nest] 96693  - 09/08/2026, 8:17:48 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted
+
+Summary of all failing tests
+FAIL action-engine/package5-b34-remediation.architecture.spec.ts (17.627 s)
+  ● B34 sole immutable AC4 review owner › scans all backend modules, including background and future entrants
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "Nested review write or delegate alias is forbidden",
+    + ]
+
+      19 |       expect(
+      20 |         scanReviewAuthority(relative(src, file), readFileSync(file, 'utf8')),
+    > 21 |       ).toEqual([]);
+         |         ^
+      22 |   });
+      23 |
+      24 |   it.each([
+
+      at Object.<anonymous> (action-engine/package5-b34-remediation.architecture.spec.ts:21:9)
+
+FAIL action-engine/package-4-final-value-ownership-ratchet.spec.ts
+  ● Package 4 final value execution ownership ratchet › has no production value mutation owner outside canonical executors
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 90
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "code": "db.loyaltyAccount.create({
+    +     data: {
+    +       tenantId: tenant.id,
+    +       clientId: client.id,
+    +       source: 'internal',
+    +       balance: 300,
+    +     },
+    +   })",
+    +     "method": "main",
+    +     "model": "loyaltyAccount",
+    +     "operation": "create",
+    +     "path": "scripts/chapter7-finance-proof.ts",
+    +   },
+    +   Object {
+    +     "code": "db.loyaltyAccount.create({
+    +     data: {
+    +       tenantId: tenant.id,
+    +       clientId: unlinked.id,
+    +       source: 'internal',
+    +       balance: 900,
+    +     },
+    +   })",
+    +     "method": "main",
+    +     "model": "loyaltyAccount",
+    +     "operation": "create",
+    +     "path": "scripts/chapter7-finance-proof.ts",
+    +   },
+    +   Object {
+    +     "code": "db.loyaltyTransaction.create({
+    +     data: {
+    +       tenantId: tenant.id,
+    +       accountId: account.id,
+    +       kind: 'credit',
+    +       delta: 300,
+    +       balanceAfter: 300,
+    +       encryptedReason: 'synthetic-only',
+    +       idempotencyKey: randomUUID(),
+    +     },
+    +   })",
+    +     "method": "main",
+    +     "model": "loyaltyTransaction",
+    +     "operation": "create",
+    +     "path": "scripts/chapter7-finance-proof.ts",
+    +   },
+    +   Object {
+    +     "code": "tx.expense.createMany({
+    +       data: [
+    +         {
+    +           tenantId: tenant.id,
+    +           category: 'rent',
+    +           currency: 'RUB',
+    +           amountKopecks: 100,
+    +           source: 'manual',
+    +           occurredAt: from,
+    +         },
+    +         {
+    +           tenantId: tenant.id,
+    +           category: 'Принятая импортная категория',
+    +           currency: 'RUB',
+    +           amountKopecks: 100,
+    +           source: 'crm',
+    +           externalId: randomUUID(),
+    +           occurredAt: from,
+    +         },
+    +         {
+    +           tenantId: tenant.id,
+    +           category: 'supplies',
+    +           currency: 'EUR',
+    +           amountKopecks: 40,
+    +           source: 'manual',
+    +           occurredAt: from,
+    +         },
+    +         {
+    +           tenantId: tenant.id,
+    +           category: 'other',
+    +           currency: 'RUB',
+    +           amountKopecks: 999,
+    +           source: 'manual',
+    +           occurredAt: to,
+    +         },
+    +       ],
+    +     })",
+    +     "method": "main",
+    +     "model": "expense",
+    +     "operation": "createMany",
+    +     "path": "scripts/chapter7-finance-proof.ts",
+    +   },
+    + ]
+
+      207 |
+      208 |   it('has no production value mutation owner outside canonical executors', () => {
+    > 209 |     expect(productionViolations(files)).toEqual([]);
+          |                                         ^
+      210 |
+      211 |     const productionOwnerFiles = [
+      212 |       ...new Set(
+
+      at Object.<anonymous> (action-engine/package-4-final-value-ownership-ratchet.spec.ts:209:41)
+
+FAIL measurement/measurement.reputation.architecture.spec.ts
+  ● C7 P05 permanent reputation owner boundaries › retains the existing shared closed evidence contract
+
+    expect(received).toContain(expected) // indexOf
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      10 | describe('C7 P05 permanent reputation owner boundaries', () => {
+      11 |   it('retains the existing shared closed evidence contract', () => {
+    > 12 |     expect(MEASUREMENT_SOURCE_KINDS.BusinessReview).toContain(
+         |                                                     ^
+      13 |       'reputation_review_query',
+      14 |     );
+      15 |     expect(MEASUREMENT_SOURCE_KINDS.NativeFeedbackRequest).toContain(
+
+      at Object.<anonymous> (measurement/measurement.reputation.architecture.spec.ts:12:53)
+
+FAIL crm/client-identity-registration-guard.architecture.spec.ts
+  ● P4-03 unresolved client identity runtime registration guard › keeps one production identity-registration owner
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 1
+
+    @@ -8,6 +8,7 @@
+        "scripts/p4-09-offer-replacement-lineage-schema-proof.ts",
+        "scripts/package5-a18-client-link-challenge-proof.ts",
+        "scripts/package5-common-authority-foundation-proof.ts",
+        "scripts/package5-wave3-all8-executable-proof.ts",
+        "src/crm/client-identity.service.ts",
+    +   "src/measurement/measurement.finance.ts",
+      ]
+
+      125 |   it('keeps one production identity-registration owner', () => {
+      126 |     const owners = registrationOwners(files);
+    > 127 |     expect(owners).toEqual([
+          |                    ^
+      128 |       'scripts/p4-03-all8-executable-proof.ts',
+      129 |       'scripts/p4-04-all4-executable-proof.ts',
+      130 |       'scripts/p4-05-all8-executable-proof.ts',
+
+      at Object.<anonymous> (crm/client-identity-registration-guard.architecture.spec.ts:127:20)
+
+FAIL domain/boundary.spec.ts
+  ● граница канонического домена › число импортёров границы CRM только сокращается
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 9
+    Received:    11
+
+      94 |     // Сообщение важнее числа: если тест упал вверх — кто-то завёл новую
+      95 |     // зависимость от контракта адаптера вместо канонического домена.
+    > 96 |     expect(importers.length).toBeLessThanOrEqual(REMAINING_BOUNDARY_IMPORTERS);
+         |                              ^
+      97 |   });
+      98 |
+      99 |   it('решения о доступе не читают внешний id провайдера', () => {
+
+      at Object.<anonymous> (domain/boundary.spec.ts:96:30)
+
+
+Test Suites: 5 failed, 416 passed, 421 total
+Tests:       5 failed, 3493 passed, 3498 total
+Snapshots:   0 total
+Time:        374.533 s
+ПРОВАЛ: шлюз не пройден — на сервер ничего не заливалось — боевой релиз не тронут

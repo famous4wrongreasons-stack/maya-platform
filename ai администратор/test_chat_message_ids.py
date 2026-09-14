@@ -67,7 +67,7 @@ class ChatMessageIdTests(unittest.TestCase):
         self.assertEqual(payload["message_id"], history[1]["id"])
         self.assertEqual(payload["id"], history[1]["id"])
 
-    def test_history_handler_persists_migrated_ids(self):
+    def test_history_handler_projects_stable_ids_without_writeback(self):
         ws = self._load()
         memory = sys.modules["memory"]
         key = ws._chat_history_key(12345, "client")
@@ -75,6 +75,7 @@ class ChatMessageIdTests(unittest.TestCase):
             {"role": "user", "content": "Привет"},
             {"role": "assistant", "content": "Здравствуйте"},
         ]
+        before = [dict(item) for item in memory._store[key]]
 
         first = asyncio.run(ws.chat_history_handler(_Request({})))
         first_ids = [item["id"] for item in first["data"]["messages"]]
@@ -83,8 +84,8 @@ class ChatMessageIdTests(unittest.TestCase):
 
         self.assertEqual(first["status"], 200)
         self.assertEqual(first_ids, second_ids)
-        self.assertEqual(first_ids, [item["id"] for item in memory._store[key]])
-        self.assertTrue(all(ws._is_chat_message_id(value) for value in first_ids))
+        self.assertEqual(first_ids, [0, 1])
+        self.assertEqual(memory._store[key], before)
 
     def test_history_handler_does_not_prune_messages(self):
         ws = self._load()
@@ -140,73 +141,22 @@ class ChatMessageIdTests(unittest.TestCase):
             "MAYA · план на сегодня",
         )
 
-    def test_delete_uses_exact_server_id_even_when_text_is_duplicated(self):
+    def test_retired_delete_preserves_exact_id_text_and_index_targets(self):
         ws = self._load()
         memory = sys.modules["memory"]
         key = ws._chat_history_key(12345, "client")
-        first = ws._user_history_item("Да")
-        answer = ws._assistant_history_item("Продолжаем")
-        latest = ws._user_history_item("Да")
-        memory._store[key] = [first, answer, latest]
-
-        response = asyncio.run(ws.chat_delete_handler(_Request({
-            "delete_mode": "one",
-            "message_id": first["id"],
-            "role": "user",
-            "text": "Да",
-        })))
-
-        remaining_ids = [item["id"] for item in memory._store[key]]
-        self.assertTrue(response["data"]["deleted"])
-        self.assertEqual(response["data"]["deleted_id"], first["id"])
-        self.assertNotIn(first["id"], remaining_ids)
-        self.assertIn(latest["id"], remaining_ids)
-
-    def test_delete_falls_back_to_latest_role_and_text_match(self):
-        ws = self._load()
-        memory = sys.modules["memory"]
-        key = ws._chat_history_key(12345, "client")
-        oldest = ws._user_history_item("Удалить это")
-        answer = ws._assistant_history_item("Хорошо")
-        latest = ws._user_history_item("Удалить это")
-        memory._store[key] = [oldest, answer, latest]
-
-        response = asyncio.run(ws.chat_delete_handler(_Request({
-            "delete_mode": "one",
-            "message_id": "client-only-id",
-            "role": "user",
-            "text": "Удалить это",
-        })))
-
-        remaining_ids = [item["id"] for item in memory._store[key]]
-        self.assertTrue(response["data"]["deleted"])
-        self.assertEqual(response["data"]["deleted_id"], latest["id"])
-        self.assertIn(oldest["id"], remaining_ids)
-        self.assertNotIn(latest["id"], remaining_ids)
-        self.assertTrue(all(
-            ws._is_chat_message_id(item["id"])
-            for item in response["data"]["messages"]
-        ))
-
-    def test_shifted_legacy_index_does_not_delete_the_wrong_message(self):
-        ws = self._load()
-        memory = sys.modules["memory"]
-        key = ws._chat_history_key(12345, "client")
-        unrelated = ws._assistant_history_item("Другое сообщение")
-        target = ws._user_history_item("Нужное сообщение")
-        memory._store[key] = [unrelated, target]
-
-        response = asyncio.run(ws.chat_delete_handler(_Request({
-            "delete_mode": "one",
-            "message_id": 0,
-            "role": "user",
-            "text": "Нужное сообщение",
-        })))
-
-        remaining_ids = [item["id"] for item in memory._store[key]]
-        self.assertEqual(response["data"]["deleted_id"], target["id"])
-        self.assertIn(unrelated["id"], remaining_ids)
-        self.assertNotIn(target["id"], remaining_ids)
+        first = ws._user_history_item("Synthetic repeated message")
+        last = ws._user_history_item("Synthetic repeated message")
+        memory._store[key] = [first, last]
+        for target in [first["id"], "forged-history-id", 0, None]:
+            for mode in ["one", "all", "clear", "reset"]:
+                response = asyncio.run(ws.chat_delete_handler(_Request({
+                    "delete_mode": mode, "message_id": target,
+                    "role": "user", "text": "Synthetic repeated message",
+                })))
+                self.assertEqual(response, {"status": 410, "data": {
+                    "ok": False, "error": "FEATURE_NOT_AVAILABLE"}})
+                self.assertEqual(memory._store[key], [first, last])
 
 
 if __name__ == "__main__":

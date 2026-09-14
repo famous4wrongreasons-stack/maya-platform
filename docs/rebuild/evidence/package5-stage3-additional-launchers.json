@@ -1,0 +1,3373 @@
+{
+  "checkedAt": "2026-09-07T16:28:28.462077+00:00",
+  "productionWrites": 0,
+  "jobTriggers": 0,
+  "databaseConnections": 0,
+  "units": [
+    [
+      "apparmor.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "apport-autoreport.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "apport.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "apt-daily-upgrade.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "apt-daily.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "auditd.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "barbershop-bot.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "blk-availability.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "certbot.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "cloud-config.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "cloud-final.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "cloud-init-hotplugd.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "cloud-init-local.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "cloud-init.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "connman.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "console-screen.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "console-setup.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "cron.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "dbus.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "display-manager.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "dm-event.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "dmesg.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "dpkg-db-backup.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "e2scrub_all.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "e2scrub_reap.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "emergency.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "fail2ban.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "fcoe.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "finalrd.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "firewalld.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "fstrim.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "getty-static.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "getty@tty1.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "google-guest-agent.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "grub-common.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "grub-initrd-fallback.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "hv_kvp_daemon.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "ip6tables.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "ipset.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "iptables.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "irqbalance.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "iscsi-shutdown.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "iscsid.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "kbd.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "keyboard-setup.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "kmod-static-nodes.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "logrotate.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "lvm2-activation-early.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "lvm2-activation.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "lvm2-lvmpolld.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "lvm2-monitor.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "lxd-agent.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "man-db.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "maya-organic-appointment-shadow-observer.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "maya-saas.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "maya-telegram-egress.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "modprobe@configfs.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "modprobe@drm.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "modprobe@efi_pstore.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "modprobe@fuse.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "motd-news.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "multipathd.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "netfilter-persistent.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "netplan-ovs-cleanup.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "network.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "networkd-dispatcher.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "networking.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "NetworkManager.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "nftables.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "nginx.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "open-iscsi.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "open-vm-tools.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "ovsdb-server.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "packagekit.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "plymouth-quit-wait.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "plymouth-quit.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "plymouth-read-write.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "plymouth-start.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "polkit.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "pollinate.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "postgresql.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "postgresql@14-main.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "rbdmap.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "rc-local.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "rescue.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "rsyslog.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "run-u8519.service",
+      "loaded",
+      "failed",
+      "failed"
+    ],
+    [
+      "run-u8546.service",
+      "loaded",
+      "failed",
+      "failed"
+    ],
+    [
+      "secureboot-db.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "serial-getty@ttyS0.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "setvtrgb.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "snapd.seeded.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "ssh.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "sshd-keygen.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-ask-password-console.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-ask-password-plymouth.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-ask-password-wall.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-binfmt.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-boot-system-token.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-fsck-root.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-fsck@dev-disk-by\\x2dlabel-UEFI.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-fsckd.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-hwdb-update.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-initctl.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-journal-flush.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-journald.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "systemd-logind.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "systemd-machine-id-commit.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-modules-load.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-networkd-wait-online.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-networkd.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "systemd-pstore.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-quotacheck.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-random-seed.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-remount-fs.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-resolved.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "systemd-rfkill.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-sysctl.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-sysusers.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-timesyncd.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "systemd-tmpfiles-clean.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-tmpfiles-setup-dev.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-tmpfiles-setup.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-udev-trigger.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-udevd.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "systemd-update-done.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-update-utmp-runlevel.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "systemd-update-utmp.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-user-sessions.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "systemd-vconsole-setup.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "ua-auto-attach.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "ua-reboot-cmds.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "ua-timer.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "ubuntu-advantage-cloud-id-shim.service",
+      "not-found",
+      "inactive",
+      "dead"
+    ],
+    [
+      "ubuntu-advantage.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "ufw.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "unattended-upgrades.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "unscd.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "update-notifier-download.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "update-notifier-motd.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "user-runtime-dir@1000.service",
+      "loaded",
+      "active",
+      "exited"
+    ],
+    [
+      "user@1000.service",
+      "loaded",
+      "active",
+      "running"
+    ],
+    [
+      "uuidd.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "vgauth.service",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "apport-autoreport.timer",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "apt-daily-upgrade.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "apt-daily.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "certbot.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "dpkg-db-backup.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "e2scrub_all.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "fstrim.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "logrotate.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "man-db.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "motd-news.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "systemd-tmpfiles-clean.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "ua-timer.timer",
+      "loaded",
+      "inactive",
+      "dead"
+    ],
+    [
+      "update-notifier-download.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ],
+    [
+      "update-notifier-motd.timer",
+      "loaded",
+      "active",
+      "waiting"
+    ]
+  ],
+  "unitFiles": [
+    [
+      "apparmor.service",
+      "enabled"
+    ],
+    [
+      "apport-autoreport.service",
+      "static"
+    ],
+    [
+      "apport-forward@.service",
+      "static"
+    ],
+    [
+      "apport.service",
+      "generated"
+    ],
+    [
+      "apt-daily-upgrade.service",
+      "static"
+    ],
+    [
+      "apt-daily.service",
+      "static"
+    ],
+    [
+      "apt-news.service",
+      "static"
+    ],
+    [
+      "autovt@.service",
+      "alias"
+    ],
+    [
+      "barbershop-bot.service",
+      "enabled"
+    ],
+    [
+      "barbershop-pwa.service",
+      "disabled"
+    ],
+    [
+      "blk-availability.service",
+      "enabled"
+    ],
+    [
+      "bolt.service",
+      "static"
+    ],
+    [
+      "certbot.service",
+      "static"
+    ],
+    [
+      "cloud-config.service",
+      "enabled"
+    ],
+    [
+      "cloud-final.service",
+      "enabled"
+    ],
+    [
+      "cloud-init-hotplugd.service",
+      "static"
+    ],
+    [
+      "cloud-init-local.service",
+      "enabled"
+    ],
+    [
+      "cloud-init.service",
+      "enabled"
+    ],
+    [
+      "console-getty.service",
+      "disabled"
+    ],
+    [
+      "console-setup.service",
+      "enabled"
+    ],
+    [
+      "container-getty@.service",
+      "static"
+    ],
+    [
+      "cron.service",
+      "enabled"
+    ],
+    [
+      "crond.service",
+      "alias"
+    ],
+    [
+      "cryptdisks-early.service",
+      "masked"
+    ],
+    [
+      "cryptdisks.service",
+      "masked"
+    ],
+    [
+      "dbus-org.freedesktop.hostname1.service",
+      "alias"
+    ],
+    [
+      "dbus-org.freedesktop.locale1.service",
+      "alias"
+    ],
+    [
+      "dbus-org.freedesktop.login1.service",
+      "alias"
+    ],
+    [
+      "dbus-org.freedesktop.resolve1.service",
+      "alias"
+    ],
+    [
+      "dbus-org.freedesktop.timedate1.service",
+      "alias"
+    ],
+    [
+      "dbus-org.freedesktop.timesync1.service",
+      "alias"
+    ],
+    [
+      "dbus.service",
+      "static"
+    ],
+    [
+      "debug-shell.service",
+      "disabled"
+    ],
+    [
+      "dm-event.service",
+      "static"
+    ],
+    [
+      "dmesg.service",
+      "enabled"
+    ],
+    [
+      "dpkg-db-backup.service",
+      "static"
+    ],
+    [
+      "e2scrub@.service",
+      "static"
+    ],
+    [
+      "e2scrub_all.service",
+      "static"
+    ],
+    [
+      "e2scrub_fail@.service",
+      "static"
+    ],
+    [
+      "e2scrub_reap.service",
+      "enabled"
+    ],
+    [
+      "emergency.service",
+      "static"
+    ],
+    [
+      "esm-cache.service",
+      "static"
+    ],
+    [
+      "fail2ban.service",
+      "enabled"
+    ],
+    [
+      "finalrd.service",
+      "enabled"
+    ],
+    [
+      "friendly-recovery.service",
+      "static"
+    ],
+    [
+      "fstrim.service",
+      "static"
+    ],
+    [
+      "getty-static.service",
+      "static"
+    ],
+    [
+      "getty@.service",
+      "enabled"
+    ],
+    [
+      "google-guest-agent.service",
+      "enabled"
+    ],
+    [
+      "google-oslogin-cache.service",
+      "static"
+    ],
+    [
+      "grub-common.service",
+      "enabled"
+    ],
+    [
+      "grub-initrd-fallback.service",
+      "enabled"
+    ],
+    [
+      "hwclock.service",
+      "masked"
+    ],
+    [
+      "initrd-cleanup.service",
+      "static"
+    ],
+    [
+      "initrd-parse-etc.service",
+      "static"
+    ],
+    [
+      "initrd-switch-root.service",
+      "static"
+    ],
+    [
+      "initrd-udevadm-cleanup-db.service",
+      "static"
+    ],
+    [
+      "ip6tables.service",
+      "alias"
+    ],
+    [
+      "iptables.service",
+      "alias"
+    ],
+    [
+      "irqbalance.service",
+      "enabled"
+    ],
+    [
+      "iscsi.service",
+      "alias"
+    ],
+    [
+      "iscsid.service",
+      "disabled"
+    ],
+    [
+      "keyboard-setup.service",
+      "enabled"
+    ],
+    [
+      "kmod-static-nodes.service",
+      "static"
+    ],
+    [
+      "kmod.service",
+      "alias"
+    ],
+    [
+      "logrotate.service",
+      "static"
+    ],
+    [
+      "lvm2-lvmpolld.service",
+      "static"
+    ],
+    [
+      "lvm2-monitor.service",
+      "enabled"
+    ],
+    [
+      "lvm2-pvscan@.service",
+      "static"
+    ],
+    [
+      "lvm2.service",
+      "masked"
+    ],
+    [
+      "lxd-agent.service",
+      "enabled"
+    ],
+    [
+      "man-db.service",
+      "static"
+    ],
+    [
+      "maya-organic-appointment-shadow-observer.service",
+      "enabled"
+    ],
+    [
+      "maya-saas.service",
+      "enabled"
+    ],
+    [
+      "maya-telegram-egress.service",
+      "enabled"
+    ],
+    [
+      "mdadm-grow-continue@.service",
+      "static"
+    ],
+    [
+      "mdadm-last-resort@.service",
+      "static"
+    ],
+    [
+      "mdcheck_continue.service",
+      "static"
+    ],
+    [
+      "mdcheck_start.service",
+      "static"
+    ],
+    [
+      "mdmon@.service",
+      "static"
+    ],
+    [
+      "mdmonitor-oneshot.service",
+      "static"
+    ],
+    [
+      "mdmonitor.service",
+      "static"
+    ],
+    [
+      "modprobe@.service",
+      "static"
+    ],
+    [
+      "motd-news.service",
+      "static"
+    ],
+    [
+      "multipath-tools-boot.service",
+      "masked"
+    ],
+    [
+      "multipath-tools.service",
+      "alias"
+    ],
+    [
+      "multipathd.service",
+      "enabled"
+    ],
+    [
+      "netfilter-persistent.service",
+      "enabled"
+    ],
+    [
+      "netplan-ovs-cleanup.service",
+      "enabled-runtime"
+    ],
+    [
+      "networkd-dispatcher.service",
+      "enabled"
+    ],
+    [
+      "nftables.service",
+      "disabled"
+    ],
+    [
+      "nginx.service",
+      "enabled"
+    ],
+    [
+      "nscd.service",
+      "alias"
+    ],
+    [
+      "open-iscsi.service",
+      "enabled"
+    ],
+    [
+      "open-vm-tools.service",
+      "enabled"
+    ],
+    [
+      "packagekit-offline-update.service",
+      "static"
+    ],
+    [
+      "packagekit.service",
+      "static"
+    ],
+    [
+      "pg_basebackup@.service",
+      "static"
+    ],
+    [
+      "pg_compresswal@.service",
+      "static"
+    ],
+    [
+      "pg_dump@.service",
+      "static"
+    ],
+    [
+      "pg_receivewal@.service",
+      "disabled"
+    ],
+    [
+      "plymouth-halt.service",
+      "static"
+    ],
+    [
+      "plymouth-kexec.service",
+      "static"
+    ],
+    [
+      "plymouth-log.service",
+      "alias"
+    ],
+    [
+      "plymouth-poweroff.service",
+      "static"
+    ],
+    [
+      "plymouth-quit-wait.service",
+      "static"
+    ],
+    [
+      "plymouth-quit.service",
+      "static"
+    ],
+    [
+      "plymouth-read-write.service",
+      "static"
+    ],
+    [
+      "plymouth-reboot.service",
+      "static"
+    ],
+    [
+      "plymouth-start.service",
+      "static"
+    ],
+    [
+      "plymouth-switch-root-initramfs.service",
+      "static"
+    ],
+    [
+      "plymouth-switch-root.service",
+      "static"
+    ],
+    [
+      "plymouth.service",
+      "alias"
+    ],
+    [
+      "polkit.service",
+      "static"
+    ],
+    [
+      "pollinate.service",
+      "enabled"
+    ],
+    [
+      "postgresql.service",
+      "enabled"
+    ],
+    [
+      "postgresql@.service",
+      "indirect"
+    ],
+    [
+      "procps.service",
+      "alias"
+    ],
+    [
+      "quotaon.service",
+      "static"
+    ],
+    [
+      "rc-local.service",
+      "static"
+    ],
+    [
+      "rc.service",
+      "masked"
+    ],
+    [
+      "rcS.service",
+      "masked"
+    ],
+    [
+      "rescue.service",
+      "static"
+    ],
+    [
+      "rsync.service",
+      "disabled"
+    ],
+    [
+      "rsyslog.service",
+      "enabled"
+    ],
+    [
+      "run-u8519.service",
+      "transient"
+    ],
+    [
+      "run-u8546.service",
+      "transient"
+    ],
+    [
+      "screen-cleanup.service",
+      "masked"
+    ],
+    [
+      "secureboot-db.service",
+      "enabled"
+    ],
+    [
+      "serial-getty@.service",
+      "indirect"
+    ],
+    [
+      "setvtrgb.service",
+      "enabled"
+    ],
+    [
+      "ssh.service",
+      "enabled"
+    ],
+    [
+      "ssh@.service",
+      "static"
+    ],
+    [
+      "sshd.service",
+      "alias"
+    ],
+    [
+      "sudo.service",
+      "masked"
+    ],
+    [
+      "syslog.service",
+      "alias"
+    ],
+    [
+      "sysstat-collect.service",
+      "static"
+    ],
+    [
+      "sysstat-summary.service",
+      "static"
+    ],
+    [
+      "sysstat.service",
+      "disabled"
+    ],
+    [
+      "system-update-cleanup.service",
+      "static"
+    ],
+    [
+      "systemd-ask-password-console.service",
+      "static"
+    ],
+    [
+      "systemd-ask-password-plymouth.service",
+      "static"
+    ],
+    [
+      "systemd-ask-password-wall.service",
+      "static"
+    ],
+    [
+      "systemd-backlight@.service",
+      "static"
+    ],
+    [
+      "systemd-binfmt.service",
+      "static"
+    ],
+    [
+      "systemd-bless-boot.service",
+      "static"
+    ],
+    [
+      "systemd-boot-check-no-failures.service",
+      "disabled"
+    ],
+    [
+      "systemd-boot-system-token.service",
+      "static"
+    ],
+    [
+      "systemd-exit.service",
+      "static"
+    ],
+    [
+      "systemd-fsck-root.service",
+      "enabled-runtime"
+    ],
+    [
+      "systemd-fsck@.service",
+      "static"
+    ],
+    [
+      "systemd-fsckd.service",
+      "static"
+    ],
+    [
+      "systemd-halt.service",
+      "static"
+    ],
+    [
+      "systemd-hibernate-resume@.service",
+      "static"
+    ],
+    [
+      "systemd-hibernate.service",
+      "static"
+    ],
+    [
+      "systemd-hostnamed.service",
+      "static"
+    ],
+    [
+      "systemd-hybrid-sleep.service",
+      "static"
+    ],
+    [
+      "systemd-initctl.service",
+      "static"
+    ],
+    [
+      "systemd-journal-flush.service",
+      "static"
+    ],
+    [
+      "systemd-journald.service",
+      "static"
+    ],
+    [
+      "systemd-journald@.service",
+      "static"
+    ],
+    [
+      "systemd-kexec.service",
+      "static"
+    ],
+    [
+      "systemd-localed.service",
+      "static"
+    ],
+    [
+      "systemd-logind.service",
+      "static"
+    ],
+    [
+      "systemd-machine-id-commit.service",
+      "static"
+    ],
+    [
+      "systemd-modules-load.service",
+      "static"
+    ],
+    [
+      "systemd-network-generator.service",
+      "disabled"
+    ],
+    [
+      "systemd-networkd-wait-online.service",
+      "enabled"
+    ],
+    [
+      "systemd-networkd.service",
+      "enabled"
+    ],
+    [
+      "systemd-poweroff.service",
+      "static"
+    ],
+    [
+      "systemd-pstore.service",
+      "enabled"
+    ],
+    [
+      "systemd-quotacheck.service",
+      "static"
+    ],
+    [
+      "systemd-random-seed.service",
+      "static"
+    ],
+    [
+      "systemd-reboot.service",
+      "static"
+    ],
+    [
+      "systemd-remount-fs.service",
+      "enabled-runtime"
+    ],
+    [
+      "systemd-resolved.service",
+      "enabled"
+    ],
+    [
+      "systemd-rfkill.service",
+      "static"
+    ],
+    [
+      "systemd-suspend-then-hibernate.service",
+      "static"
+    ],
+    [
+      "systemd-suspend.service",
+      "static"
+    ],
+    [
+      "systemd-sysctl.service",
+      "static"
+    ],
+    [
+      "systemd-sysext.service",
+      "disabled"
+    ],
+    [
+      "systemd-sysusers.service",
+      "static"
+    ],
+    [
+      "systemd-time-wait-sync.service",
+      "disabled"
+    ],
+    [
+      "systemd-timedated.service",
+      "static"
+    ],
+    [
+      "systemd-timesyncd.service",
+      "enabled"
+    ],
+    [
+      "systemd-tmpfiles-clean.service",
+      "static"
+    ],
+    [
+      "systemd-tmpfiles-setup-dev.service",
+      "static"
+    ],
+    [
+      "systemd-tmpfiles-setup.service",
+      "static"
+    ],
+    [
+      "systemd-udev-settle.service",
+      "static"
+    ],
+    [
+      "systemd-udev-trigger.service",
+      "static"
+    ],
+    [
+      "systemd-udevd.service",
+      "static"
+    ],
+    [
+      "systemd-update-utmp-runlevel.service",
+      "static"
+    ],
+    [
+      "systemd-update-utmp.service",
+      "static"
+    ],
+    [
+      "systemd-user-sessions.service",
+      "static"
+    ],
+    [
+      "systemd-volatile-root.service",
+      "static"
+    ],
+    [
+      "ua-reboot-cmds.service",
+      "enabled"
+    ],
+    [
+      "ua-timer.service",
+      "static"
+    ],
+    [
+      "ubuntu-advantage.service",
+      "enabled"
+    ],
+    [
+      "udev.service",
+      "alias"
+    ],
+    [
+      "ufw.service",
+      "enabled"
+    ],
+    [
+      "unattended-upgrades.service",
+      "enabled"
+    ],
+    [
+      "unscd.service",
+      "enabled"
+    ],
+    [
+      "update-notifier-download.service",
+      "static"
+    ],
+    [
+      "update-notifier-motd.service",
+      "static"
+    ],
+    [
+      "usb_modeswitch@.service",
+      "static"
+    ],
+    [
+      "user-runtime-dir@.service",
+      "static"
+    ],
+    [
+      "user@.service",
+      "static"
+    ],
+    [
+      "uuidd.service",
+      "indirect"
+    ],
+    [
+      "vgauth.service",
+      "enabled"
+    ],
+    [
+      "vmtoolsd.service",
+      "alias"
+    ],
+    [
+      "x11-common.service",
+      "masked"
+    ],
+    [
+      "xfs_scrub@.service",
+      "static"
+    ],
+    [
+      "xfs_scrub_all.service",
+      "static"
+    ],
+    [
+      "xfs_scrub_fail@.service",
+      "static"
+    ],
+    [
+      "apport-autoreport.timer",
+      "enabled"
+    ],
+    [
+      "apt-daily-upgrade.timer",
+      "enabled"
+    ],
+    [
+      "apt-daily.timer",
+      "enabled"
+    ],
+    [
+      "certbot.timer",
+      "enabled"
+    ],
+    [
+      "dpkg-db-backup.timer",
+      "enabled"
+    ],
+    [
+      "e2scrub_all.timer",
+      "enabled"
+    ],
+    [
+      "fstrim.timer",
+      "enabled"
+    ],
+    [
+      "google-oslogin-cache.timer",
+      "disabled"
+    ],
+    [
+      "logrotate.timer",
+      "enabled"
+    ],
+    [
+      "man-db.timer",
+      "enabled"
+    ],
+    [
+      "mdadm-last-resort@.timer",
+      "static"
+    ],
+    [
+      "mdcheck_continue.timer",
+      "enabled"
+    ],
+    [
+      "mdcheck_start.timer",
+      "enabled"
+    ],
+    [
+      "mdmonitor-oneshot.timer",
+      "enabled"
+    ],
+    [
+      "motd-news.timer",
+      "enabled"
+    ],
+    [
+      "pg_basebackup@.timer",
+      "disabled"
+    ],
+    [
+      "pg_compresswal@.timer",
+      "disabled"
+    ],
+    [
+      "pg_dump@.timer",
+      "disabled"
+    ],
+    [
+      "sysstat-collect.timer",
+      "disabled"
+    ],
+    [
+      "sysstat-summary.timer",
+      "disabled"
+    ],
+    [
+      "systemd-tmpfiles-clean.timer",
+      "static"
+    ],
+    [
+      "ua-timer.timer",
+      "enabled"
+    ],
+    [
+      "update-notifier-download.timer",
+      "enabled"
+    ],
+    [
+      "update-notifier-motd.timer",
+      "enabled"
+    ],
+    [
+      "xfs_scrub_all.timer",
+      "disabled"
+    ]
+  ],
+  "definitions": [
+    {
+      "path": "/etc/systemd/system/NetworkManager.service.wants/google-guest-agent.service",
+      "sha256": "b36105ea6b0362ba55aafd9af57bde1db899f459559a887831f5ec3089529991",
+      "refs": [
+        {
+          "line": 17,
+          "key": "ExecStart",
+          "execSha256": "d98410eb297483d0d9e294e463d93907db6502969e8e5d617e762ba322278c03",
+          "firstExecutable": "/usr/bin/google_guest_agent",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/barbershop-bot.service",
+      "sha256": "186c9aa1b01408f4c9fcfe50de35eea157d7b15029bbd540e2a5777de8460fdc",
+      "refs": [
+        {
+          "line": 9,
+          "key": "WorkingDirectory",
+          "value": "/home/botadmin/barbershop-bot"
+        },
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "91c8e6733471f0992ae131bb5902a9f6f9921a9b4f8f14dc1ff914d1f06e621e",
+          "firstExecutable": "/home/botadmin/barbershop-bot/venv/bin/python",
+          "scriptRefs": [
+            "bot.py"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/barbershop-bot.service.d/30-a08-payment-proof.conf",
+      "sha256": "dba8bb96780a54efa6be73edcdcf35cad45d078676c33fa081555bd2642ecfcf",
+      "refs": []
+    },
+    {
+      "path": "/etc/systemd/system/barbershop-bot.service.d/environment.conf",
+      "sha256": "5e0e1f60e9553ac116a11b4f62f3c0c422e8f8477409f6e71cfa27f26d776729",
+      "refs": []
+    },
+    {
+      "path": "/etc/systemd/system/barbershop-bot.service.d/override.conf",
+      "sha256": "c185a03caa981212ea64a28c908ab0c51cd0cd94ff813d66c0f48396334d9655",
+      "refs": []
+    },
+    {
+      "path": "/etc/systemd/system/barbershop-pwa.service",
+      "sha256": "d04f3d6efb6a52bf061495f014d79658aa50048213a5cae4cf017c3d6066c049",
+      "refs": [
+        {
+          "line": 9,
+          "key": "WorkingDirectory",
+          "value": "/home/botadmin/barbershop-bot"
+        },
+        {
+          "line": 11,
+          "key": "ExecStart",
+          "execSha256": "53ddc1a194acf175980cd3e585555463b2feb0c81b999f634b721b16d4028469",
+          "firstExecutable": "/home/botadmin/barbershop-bot/venv/bin/python",
+          "scriptRefs": [
+            "/home/botadmin/barbershop-bot/pwa_api.py"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/cloud-init.target.wants/cloud-config.service",
+      "sha256": "7f10886b59e42ce7ac138f3a2c670fd9efd201e5c4e238eb7e9e02edf7cfe183",
+      "refs": [
+        {
+          "line": 12,
+          "key": "ExecStart",
+          "execSha256": "d76dc5447000fb508d6694557a4edd22db8ceaff5d3c47dc9e418356feed84ea",
+          "firstExecutable": "/usr/bin/cloud-init",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/cloud-init.target.wants/cloud-final.service",
+      "sha256": "96b9a7b8a74af189954aa04dc589b0e4fbf9e0d725f3f0fa7ca5ab05e6204a24",
+      "refs": [
+        {
+          "line": 15,
+          "key": "ExecStart",
+          "execSha256": "8d7c1a7393ea60793fc2b683e6b806f1c4bb2f6fe5ccf93d406c0c426dbc9311",
+          "firstExecutable": "/usr/bin/cloud-init",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/cloud-init.target.wants/cloud-init-local.service",
+      "sha256": "1103d3c110ac4ea3d03bb7dc8c7eb11eae6239c995c61fd5cfc40f0a9c24a16b",
+      "refs": [
+        {
+          "line": 19,
+          "key": "ExecStart",
+          "execSha256": "2d8b81066dd07c1043f24bae5e49fd2d9fd46241ffe7dc746af3cb7824c5560b",
+          "firstExecutable": "cloud-init",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/cloud-init.target.wants/cloud-init.service",
+      "sha256": "e13dd95a7bfac6407ea1ce45ed6683c0f4e84c791840d305c937d38ae77d9456",
+      "refs": [
+        {
+          "line": 24,
+          "key": "ExecStart",
+          "execSha256": "24d9e9ed101662f8b9460ea4a6d74b36679eb103b75f0ae68f748a6353ff8a82",
+          "firstExecutable": "/usr/bin/cloud-init",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/cron.service.d/crond.conf",
+      "sha256": "14f2968ea4297dd7af53c10189d4e2dbd582e59ca21081d287243dc8ab7e648f",
+      "refs": []
+    },
+    {
+      "path": "/etc/systemd/system/crond.service",
+      "sha256": "cb16493193f2340eb19705251c90de3b6574b18b77c90a63b0f6326353bbc416",
+      "refs": [
+        {
+          "line": 8,
+          "key": "ExecStart",
+          "execSha256": "b8b4b59ca445fbd7e879af5d0737381f5e14e570cf955eb03e4d0f501c1fdd07",
+          "firstExecutable": "/usr/sbin/cron",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/dbus-org.freedesktop.resolve1.service",
+      "sha256": "b14431545835ed3d90754d487cbfe7a93a845648065662234aa7541ddb8e933d",
+      "refs": [
+        {
+          "line": 27,
+          "key": "ExecStart",
+          "execSha256": "ba369a64665e309484d8f432a3a8e325ef7cbb104a4af14b4f7f0a9b4f0afb0d",
+          "firstExecutable": "!!/lib/systemd/systemd-resolved",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/dbus-org.freedesktop.timesync1.service",
+      "sha256": "0e2cc5ea697a01cf8eef93cbadaaa029d23fb9759af459315ee0b3a349214303",
+      "refs": [
+        {
+          "line": 29,
+          "key": "ExecStart",
+          "execSha256": "926c4ba14b492d1c3d36be8ba7452f908d8a224d557c01b4e5e99f98e5fcf53d",
+          "firstExecutable": "!!/lib/systemd/systemd-timesyncd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/emergency.target.wants/grub-initrd-fallback.service",
+      "sha256": "1d01ee1b57f8301b01b1aa9cb10a0116608827a3e0c27a817b46024e8395d807",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "b29d113fef9b88bb416ef4a098c11321b8831d71af79c22bb3ed91c3ff57007b",
+          "firstExecutable": "/usr/bin/grub-editenv",
+          "scriptRefs": []
+        },
+        {
+          "line": 11,
+          "key": "ExecStart",
+          "execSha256": "b3cdbe6520083cfba0880198066d28a25e94183eb81284723deb3dd20e490f61",
+          "firstExecutable": "/usr/bin/grub-editenv",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/getty.target.wants/getty@tty1.service",
+      "sha256": "f3586f44edc3c02631b50967ed8bd1c05ca63913a24f1c35a44b895027515cb1",
+      "refs": [
+        {
+          "line": 39,
+          "key": "ExecStart",
+          "execSha256": "2b05315208c210d979149f5a6894d54c8000b951cb7017fb020539450196fa29",
+          "firstExecutable": "-/sbin/agetty",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/iscsi.service",
+      "sha256": "2764e9ef31f9509b99d8b69c1abf56e8ceddcc405fbcc8284850fd57f67087ac",
+      "refs": [
+        {
+          "line": 23,
+          "key": "ExecStart",
+          "execSha256": "7c3fc3914c6f13af6afaefcb70076487b2432cb5373819c43f896dbf08e38af3",
+          "firstExecutable": "/sbin/iscsiadm",
+          "scriptRefs": []
+        },
+        {
+          "line": 24,
+          "key": "ExecStart",
+          "execSha256": "413814c46f6eeb97a53c4fbff5942634ddc1c4178da87d876af509d50318c2f9",
+          "firstExecutable": "/lib/open-iscsi/activate-storage.sh",
+          "scriptRefs": [
+            "/lib/open-iscsi/activate-storage.sh"
+          ]
+        },
+        {
+          "line": 25,
+          "key": "ExecStop",
+          "execSha256": "17e2d869d55e8e0f60945ec145a793d6e1c3667d6dbaa5a576aebabbc3744f57",
+          "firstExecutable": "/lib/open-iscsi/umountiscsi.sh",
+          "scriptRefs": [
+            "/lib/open-iscsi/umountiscsi.sh"
+          ]
+        },
+        {
+          "line": 26,
+          "key": "ExecStop",
+          "execSha256": "bddd5c3c8968a22e8e1b6666b5604f4f2719e050055e6475bc5d93308f6834f2",
+          "firstExecutable": "/bin/sync",
+          "scriptRefs": []
+        },
+        {
+          "line": 27,
+          "key": "ExecStop",
+          "execSha256": "d2eea3630ca5190b7668955f4bbd165efbd25967ae66272261965812a3c2679b",
+          "firstExecutable": "/lib/open-iscsi/logout-all.sh",
+          "scriptRefs": [
+            "/lib/open-iscsi/logout-all.sh"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/maya-organic-appointment-shadow-observer.service",
+      "sha256": "1bcf3766053bcc7ce3861fe8e18c61284f0872e21ba0b60e8be6db72725ec474",
+      "refs": [
+        {
+          "line": 11,
+          "key": "ExecStart",
+          "execSha256": "238da9599d8155dfddf6b16ac243908480133a1405effd05d2d868d9e7b1f09a",
+          "firstExecutable": "/usr/bin/python3",
+          "scriptRefs": [
+            "/opt/maya-shadow-observer/legacy_appointment_shadow_observer.py"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/maya-saas.service",
+      "sha256": "77194ab8ae06c6af82ff34b97fb243ead188b03c35655aeb43367b038bbdcd0b",
+      "refs": [
+        {
+          "line": 11,
+          "key": "WorkingDirectory",
+          "value": "/opt/maya-saas/current"
+        },
+        {
+          "line": 13,
+          "key": "ExecStart",
+          "execSha256": "4cd358d8630b83c7c09df717e700b8536f5554ee106177585107da5bdafa6d8a",
+          "firstExecutable": "/opt/node-v24/bin/node",
+          "scriptRefs": [
+            "dist/src/main.js"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/maya-telegram-egress.service",
+      "sha256": "eba95edb7abdb7c0629c82619a7456726d6f6a7f07009cc09c6628985c1aa61a",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "323d50291f3f34a96dfcf63cafa5b4504bed9322df81ef693a0c90b1409eae0e",
+          "firstExecutable": "/usr/bin/ssh",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/mdmonitor.service.wants/mdcheck_continue.timer",
+      "sha256": "ac74139084b5dad3c222bed6d5845397a3e11763a2788a39211fc61da0dfd6be",
+      "refs": [
+        {
+          "line": 12,
+          "key": "OnCalendar",
+          "value": "daily"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/mdmonitor.service.wants/mdcheck_start.timer",
+      "sha256": "c73715ad2139bfe39919db7fc55f118f606a00a74ff8d2984c58baf0a27e63e9",
+      "refs": [
+        {
+          "line": 12,
+          "key": "OnCalendar",
+          "value": "Sun *-*-1..7 1:00:00"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/mdmonitor.service.wants/mdmonitor-oneshot.timer",
+      "sha256": "f5826525ccab035198e0c266a588ded548a70b05ca10a983bc51279228faa9e2",
+      "refs": [
+        {
+          "line": 12,
+          "key": "OnCalendar",
+          "value": "daily"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/barbershop-bot.service",
+      "sha256": "186c9aa1b01408f4c9fcfe50de35eea157d7b15029bbd540e2a5777de8460fdc",
+      "refs": [
+        {
+          "line": 9,
+          "key": "WorkingDirectory",
+          "value": "/home/botadmin/barbershop-bot"
+        },
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "91c8e6733471f0992ae131bb5902a9f6f9921a9b4f8f14dc1ff914d1f06e621e",
+          "firstExecutable": "/home/botadmin/barbershop-bot/venv/bin/python",
+          "scriptRefs": [
+            "bot.py"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/console-setup.service",
+      "sha256": "50a0af31bcdcd939ad7e3f2ddfcee04e82313c5d6a8d2ed47f23dfdc1f9f2bfd",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "22695fdb69ab164f8cf9e582fc41ad86b4108edcbd137723ce0decc32858dd61",
+          "firstExecutable": "/lib/console-setup/console-setup.sh",
+          "scriptRefs": [
+            "/lib/console-setup/console-setup.sh"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/cron.service",
+      "sha256": "cb16493193f2340eb19705251c90de3b6574b18b77c90a63b0f6326353bbc416",
+      "refs": [
+        {
+          "line": 8,
+          "key": "ExecStart",
+          "execSha256": "b8b4b59ca445fbd7e879af5d0737381f5e14e570cf955eb03e4d0f501c1fdd07",
+          "firstExecutable": "/usr/sbin/cron",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/dmesg.service",
+      "sha256": "9a9364d95eef682c52aa385851924ef5695625d7e93c7ee97f377e62e8133673",
+      "refs": [
+        {
+          "line": 7,
+          "key": "ExecStartPre",
+          "execSha256": "9ebcdbd1ed040450aaa6150402ad8bd8f729f42f13584153b386bca78be970bf",
+          "firstExecutable": "-/usr/bin/savelog",
+          "scriptRefs": []
+        },
+        {
+          "line": 8,
+          "key": "ExecStart",
+          "execSha256": "844079c655dfe1cb8226518f88b1b05cbd7cdbf89177bba2768d39ef19b3872a",
+          "firstExecutable": "/bin/journalctl",
+          "scriptRefs": []
+        },
+        {
+          "line": 9,
+          "key": "ExecStartPost",
+          "execSha256": "2181eb00cbf70af2938a21419fc23501ad1a6757d5335fd6a7943d56643eb779",
+          "firstExecutable": "/bin/chgrp",
+          "scriptRefs": []
+        },
+        {
+          "line": 10,
+          "key": "ExecStartPost",
+          "execSha256": "91986de3a029a927296b0d8393951e7eaf47172d87ea59473d87e6803381580a",
+          "firstExecutable": "/bin/chmod",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/e2scrub_reap.service",
+      "sha256": "35405e2a877fe17ccf05c96db2e037a29605f8719ba3e4b2f1670c721aa7b5aa",
+      "refs": [
+        {
+          "line": 9,
+          "key": "WorkingDirectory",
+          "value": "/"
+        },
+        {
+          "line": 20,
+          "key": "ExecStart",
+          "execSha256": "669a53148228d4ca1ac3d33d7a9963e106eaadf52f13c3f5e4626ed125dca304",
+          "firstExecutable": "/sbin/e2scrub_all",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/fail2ban.service",
+      "sha256": "1ce60983492b5059aea6ae74ac24b118ce00a18b40c3677d56ce3eba02551119",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "ae52be11a7ed60c54893ae759fc1ac60792a4cfd163f2672debf65e6143c78a6",
+          "firstExecutable": "/usr/bin/fail2ban-server",
+          "scriptRefs": []
+        },
+        {
+          "line": 13,
+          "key": "ExecStop",
+          "execSha256": "0d84e60bf18122629d5dc51529d4660fd188c11bf802b726bbbf5aa8e528b796",
+          "firstExecutable": "/usr/bin/fail2ban-client",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/google-guest-agent.service",
+      "sha256": "b36105ea6b0362ba55aafd9af57bde1db899f459559a887831f5ec3089529991",
+      "refs": [
+        {
+          "line": 17,
+          "key": "ExecStart",
+          "execSha256": "d98410eb297483d0d9e294e463d93907db6502969e8e5d617e762ba322278c03",
+          "firstExecutable": "/usr/bin/google_guest_agent",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/grub-common.service",
+      "sha256": "e8af26cfbfa39d7da332596bec66e48d88cdfb1e956a51c1f592175d0f69d2e0",
+      "refs": [
+        {
+          "line": 9,
+          "key": "ExecStartPre",
+          "execSha256": "669cc04dc560170662b8b2bab78fb83365a8b68a53738c9866a6594ec8129d97",
+          "firstExecutable": "/bin/sh",
+          "scriptRefs": []
+        },
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "a33473751c97270dc13d426c3f9b1df3822dae816edf3a7aa67bad087e0c9391",
+          "firstExecutable": "grub-editenv",
+          "scriptRefs": []
+        },
+        {
+          "line": 11,
+          "key": "ExecStartPost",
+          "execSha256": "5de6fb8b8b4a2c98a26461263212c1e0f57511da1bb3384d0f91664d5c43d2e8",
+          "firstExecutable": "/bin/sh",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/grub-initrd-fallback.service",
+      "sha256": "1d01ee1b57f8301b01b1aa9cb10a0116608827a3e0c27a817b46024e8395d807",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "b29d113fef9b88bb416ef4a098c11321b8831d71af79c22bb3ed91c3ff57007b",
+          "firstExecutable": "/usr/bin/grub-editenv",
+          "scriptRefs": []
+        },
+        {
+          "line": 11,
+          "key": "ExecStart",
+          "execSha256": "b3cdbe6520083cfba0880198066d28a25e94183eb81284723deb3dd20e490f61",
+          "firstExecutable": "/usr/bin/grub-editenv",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/irqbalance.service",
+      "sha256": "bd0dd993b3b1bbc451aaad06540db206b9fbbbf7e507f1b37e9227608397189d",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "7f7aa43f114c93928afcd22941ac14abfcb297997cdf769dce0e495fa03b3a95",
+          "firstExecutable": "/usr/sbin/irqbalance",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/lxd-agent.service",
+      "sha256": "b6436fce96d5297280c728d27880d20bae594f54e0f3dacdc21b3320282531e3",
+      "refs": [
+        {
+          "line": 10,
+          "key": "WorkingDirectory",
+          "value": "-/run/lxd_agent"
+        },
+        {
+          "line": 11,
+          "key": "ExecStartPre",
+          "execSha256": "903a8505c40918987c6c079ea2942652e4bc473fd7324b51ffe82b6f408354f5",
+          "firstExecutable": "/lib/systemd/lxd-agent-setup",
+          "scriptRefs": []
+        },
+        {
+          "line": 12,
+          "key": "ExecStart",
+          "execSha256": "de006f339a8d77b2999b4513814797ef5d55b02ed7576d480ae1848fd7baef43",
+          "firstExecutable": "/run/lxd_agent/lxd-agent",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/maya-organic-appointment-shadow-observer.service",
+      "sha256": "1bcf3766053bcc7ce3861fe8e18c61284f0872e21ba0b60e8be6db72725ec474",
+      "refs": [
+        {
+          "line": 11,
+          "key": "ExecStart",
+          "execSha256": "238da9599d8155dfddf6b16ac243908480133a1405effd05d2d868d9e7b1f09a",
+          "firstExecutable": "/usr/bin/python3",
+          "scriptRefs": [
+            "/opt/maya-shadow-observer/legacy_appointment_shadow_observer.py"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/maya-saas.service",
+      "sha256": "77194ab8ae06c6af82ff34b97fb243ead188b03c35655aeb43367b038bbdcd0b",
+      "refs": [
+        {
+          "line": 11,
+          "key": "WorkingDirectory",
+          "value": "/opt/maya-saas/current"
+        },
+        {
+          "line": 13,
+          "key": "ExecStart",
+          "execSha256": "4cd358d8630b83c7c09df717e700b8536f5554ee106177585107da5bdafa6d8a",
+          "firstExecutable": "/opt/node-v24/bin/node",
+          "scriptRefs": [
+            "dist/src/main.js"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/maya-telegram-egress.service",
+      "sha256": "eba95edb7abdb7c0629c82619a7456726d6f6a7f07009cc09c6628985c1aa61a",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "323d50291f3f34a96dfcf63cafa5b4504bed9322df81ef693a0c90b1409eae0e",
+          "firstExecutable": "/usr/bin/ssh",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/netfilter-persistent.service",
+      "sha256": "660707538b332813f5b2b9754f81603b2d0014f87868f3ecb8e09174c6d773e6",
+      "refs": [
+        {
+          "line": 13,
+          "key": "ExecStart",
+          "execSha256": "61661eba2899e30310ace234ad8d35cf6165c58470b8f2ffd545598fec8f1502",
+          "firstExecutable": "/usr/sbin/netfilter-persistent",
+          "scriptRefs": []
+        },
+        {
+          "line": 14,
+          "key": "ExecStop",
+          "execSha256": "ff797fe51b801bb92f017fd519fd7815f2e0d442ed2dfb2b4a95504a59701fd1",
+          "firstExecutable": "/usr/sbin/netfilter-persistent",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/networkd-dispatcher.service",
+      "sha256": "bf1d13d1ea39069d0d0b87fd4254283b2c3443737d1eeec4f6a908ad2883bd5a",
+      "refs": [
+        {
+          "line": 6,
+          "key": "ExecStart",
+          "execSha256": "b9d80d9c80aa4ca9983a29dab330a55650bde627ab6b07d0954e48b0bbd3d0c3",
+          "firstExecutable": "/usr/bin/networkd-dispatcher",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/nginx.service",
+      "sha256": "a0178bda135048ad3071c49cedc680e52354e2e672f158ffc0cea298bb620e7e",
+      "refs": [
+        {
+          "line": 21,
+          "key": "ExecStartPre",
+          "execSha256": "1e8991494eef8192927a3fca8bce231be0ad3454b39bf70c028e8ba4f32857de",
+          "firstExecutable": "/usr/sbin/nginx",
+          "scriptRefs": []
+        },
+        {
+          "line": 22,
+          "key": "ExecStart",
+          "execSha256": "194accfe6338b6d086f3a40863037b36897def07c22a7caf8e34f391f6f522cd",
+          "firstExecutable": "/usr/sbin/nginx",
+          "scriptRefs": []
+        },
+        {
+          "line": 24,
+          "key": "ExecStop",
+          "execSha256": "3fcb07d87b9f85ade0ed590a65c4521a206ae4631f5980e2acc66208c8fdb89f",
+          "firstExecutable": "-/sbin/start-stop-daemon",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/open-vm-tools.service",
+      "sha256": "8eeef9026c706c3ccca5a0f28bfcdad6fe1fc3fb787cdda17648360743a1b599",
+      "refs": [
+        {
+          "line": 13,
+          "key": "ExecStart",
+          "execSha256": "a922b12daac9ee0e8f1c7bc039c9012de192bd75f51af41ed832e31a6b697135",
+          "firstExecutable": "/usr/bin/vmtoolsd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/pollinate.service",
+      "sha256": "36c1ad948ae318c4f4dc67c1325259d45374547d60adfd109fc894006b625020",
+      "refs": [
+        {
+          "line": 11,
+          "key": "ExecStart",
+          "execSha256": "56f9876881ff850b6c38bdfe03573af4363ee10ce3b11984c5ab5cdc75899175",
+          "firstExecutable": "/usr/bin/pollinate",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/postgresql.service",
+      "sha256": "78feb4ef840fe09159429c7855985738319263a3a486a102ad187e2554a5c809",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "0676cf497e98ae3e21c710bb830b2c78f6acc361363b7d6c1c29bfff505cf95c",
+          "firstExecutable": "/bin/true",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/rsyslog.service",
+      "sha256": "726b9641b81ede267adc4180b3e25b85122a4e798e0f748cac0e9e3a414e1622",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "f94d58b95d560c28f992c94ea350939dc2ea8188e6afbfc3f622b862cda0f797",
+          "firstExecutable": "/usr/sbin/rsyslogd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/secureboot-db.service",
+      "sha256": "40df52764374d46a3c084a6b161918dbfe82ef6cf4da401fd4f20ea7e45d7379",
+      "refs": [
+        {
+          "line": 7,
+          "key": "ExecStartPre",
+          "execSha256": "08c23fd67867847bdafc5ad940b5960ba075eb0fd77929005a93197db815da92",
+          "firstExecutable": "-/usr/bin/chattr",
+          "scriptRefs": []
+        },
+        {
+          "line": 8,
+          "key": "ExecStartPre",
+          "execSha256": "c1ebc82945048217e5d73edd7034e4ad5fcab800877f9b007b359eb499d52323",
+          "firstExecutable": "-/usr/bin/chattr",
+          "scriptRefs": []
+        },
+        {
+          "line": 9,
+          "key": "ExecStartPre",
+          "execSha256": "1f0d823eace72b08b5a048e90a50eca9867532df7d1aad2a839c021a39732c17",
+          "firstExecutable": "-/usr/bin/chattr",
+          "scriptRefs": []
+        },
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "fb20c67b1e375d3a9a5299fd87550018881603f2975678eb79582c8fc63bc290",
+          "firstExecutable": "/usr/bin/sbkeysync",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/ssh.service",
+      "sha256": "35b2858970feb78e985900b33ba8cb84249dfadbf296155e5639cafcf1dd40a3",
+      "refs": [
+        {
+          "line": 9,
+          "key": "ExecStartPre",
+          "execSha256": "b8a43af940d03439ad9c2a18c175a297df167e6874581809a9f0f7ca8359c706",
+          "firstExecutable": "/usr/sbin/sshd",
+          "scriptRefs": []
+        },
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "3272659a2754794602d97163b71bddefd5148f37c05ecfdf9966225743382876",
+          "firstExecutable": "/usr/sbin/sshd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/systemd-networkd.service",
+      "sha256": "d8ebad59090b3fb40599cde2c13852ba4e467827490e2816779ea566b15c1be5",
+      "refs": [
+        {
+          "line": 26,
+          "key": "ExecStart",
+          "execSha256": "686600516b99df6d85940f5a961bcb596f5d99c02866e57d22baa76986086909",
+          "firstExecutable": "!!/lib/systemd/systemd-networkd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/systemd-resolved.service",
+      "sha256": "b14431545835ed3d90754d487cbfe7a93a845648065662234aa7541ddb8e933d",
+      "refs": [
+        {
+          "line": 27,
+          "key": "ExecStart",
+          "execSha256": "ba369a64665e309484d8f432a3a8e325ef7cbb104a4af14b4f7f0a9b4f0afb0d",
+          "firstExecutable": "!!/lib/systemd/systemd-resolved",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/ua-reboot-cmds.service",
+      "sha256": "2a45a02c40999e98f57e84ebf001b355c083e2d5e41faa3a2efbce512aad6af4",
+      "refs": [
+        {
+          "line": 17,
+          "key": "ExecStart",
+          "execSha256": "cd75429fe6dc62f618fdec5470df3c9dc8969af8f49e564df5e435f5cacc6bb9",
+          "firstExecutable": "/usr/bin/python3",
+          "scriptRefs": [
+            "/usr/lib/ubuntu-advantage/reboot_cmds.py"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/ubuntu-advantage.service",
+      "sha256": "30708eea0adfbd42d9122218e59318552ba7392077bc1763df0207be595bdd20",
+      "refs": [
+        {
+          "line": 32,
+          "key": "ExecStart",
+          "execSha256": "22d4cb4aeec49f955b7fdd838a7329c734a1f03b455168727b6ca6e7974a1ecf",
+          "firstExecutable": "/usr/bin/python3",
+          "scriptRefs": [
+            "/usr/lib/ubuntu-advantage/daemon.py"
+          ]
+        },
+        {
+          "line": 33,
+          "key": "WorkingDirectory",
+          "value": "/var/lib/ubuntu-advantage/"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/ufw.service",
+      "sha256": "7b8042cb70b1acd9bbc3a4cf8a08c41700c986d62499b8852113c551cab1082a",
+      "refs": [
+        {
+          "line": 12,
+          "key": "ExecStart",
+          "execSha256": "e6a7fd9dc3e415afc67b03c4b374a976593076b87f88bc3d7b0395d20087c6d9",
+          "firstExecutable": "/lib/ufw/ufw-init",
+          "scriptRefs": []
+        },
+        {
+          "line": 13,
+          "key": "ExecStop",
+          "execSha256": "7f1d33389a99a7f6587446847dffad18cf74591028e88c6cef3d3b2511009d26",
+          "firstExecutable": "/lib/ufw/ufw-init",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/unattended-upgrades.service",
+      "sha256": "642331d3861bcc5e41342b9b93ad96b1852447d5b10533b9b2988531cfd2860a",
+      "refs": [
+        {
+          "line": 8,
+          "key": "ExecStart",
+          "execSha256": "d01024d9c68fc028b626a027dc1e44f012a8554aeb92a8bbf2b0a59ebffdeb63",
+          "firstExecutable": "/usr/share/unattended-upgrades/unattended-upgrade-shutdown",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multi-user.target.wants/unscd.service",
+      "sha256": "b6266e03da12caf1a71352746a0aa6aa10d868e8bee1003349ba0b2838f57eeb",
+      "refs": [
+        {
+          "line": 7,
+          "key": "ExecStart",
+          "execSha256": "8b88b65dcffb7ef85e06abe6ce72ad055ff366ee2b9a55b63104f9dccf152592",
+          "firstExecutable": "/usr/sbin/nscd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/multipath-tools.service",
+      "sha256": "9ca1139d2898316d870d22647e84fc476fe677a8d1dd8f27a0e126a394838bac",
+      "refs": [
+        {
+          "line": 18,
+          "key": "ExecStartPre",
+          "execSha256": "53ecdf028e450cf007203450b1a803ff805f508cc9b06eb32c2560d827514a42",
+          "firstExecutable": "-/sbin/modprobe",
+          "scriptRefs": []
+        },
+        {
+          "line": 19,
+          "key": "ExecStart",
+          "execSha256": "0df161911fde68c1653a7d73662e76ccdaf21aebd7acde028e27bd63db0d5867",
+          "firstExecutable": "/sbin/multipathd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/netfilter-persistent.service.d/iptables.conf",
+      "sha256": "e9727b0f53ded458b44a7e5ea5a8f166ae5c23ee4903d480f27be0e0e46db8ad",
+      "refs": []
+    },
+    {
+      "path": "/etc/systemd/system/network-online.target.wants/systemd-networkd-wait-online.service",
+      "sha256": "4a0380e4b15bf29b579c82f86db5bf5a1daa50886efbddce91886e84530ea54f",
+      "refs": [
+        {
+          "line": 21,
+          "key": "ExecStart",
+          "execSha256": "f532d8236ab6fb5b172ecd165df91b09ebecf156c2362559f08c889ae952285d",
+          "firstExecutable": "/lib/systemd/systemd-networkd-wait-online",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/network.service.wants/google-guest-agent.service",
+      "sha256": "b36105ea6b0362ba55aafd9af57bde1db899f459559a887831f5ec3089529991",
+      "refs": [
+        {
+          "line": 17,
+          "key": "ExecStart",
+          "execSha256": "d98410eb297483d0d9e294e463d93907db6502969e8e5d617e762ba322278c03",
+          "firstExecutable": "/usr/bin/google_guest_agent",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/networking.service.wants/google-guest-agent.service",
+      "sha256": "b36105ea6b0362ba55aafd9af57bde1db899f459559a887831f5ec3089529991",
+      "refs": [
+        {
+          "line": 17,
+          "key": "ExecStart",
+          "execSha256": "d98410eb297483d0d9e294e463d93907db6502969e8e5d617e762ba322278c03",
+          "firstExecutable": "/usr/bin/google_guest_agent",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/nscd.service",
+      "sha256": "b6266e03da12caf1a71352746a0aa6aa10d868e8bee1003349ba0b2838f57eeb",
+      "refs": [
+        {
+          "line": 7,
+          "key": "ExecStart",
+          "execSha256": "8b88b65dcffb7ef85e06abe6ce72ad055ff366ee2b9a55b63104f9dccf152592",
+          "firstExecutable": "/usr/sbin/nscd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/open-vm-tools.service.requires/vgauth.service",
+      "sha256": "7b7e67025ffa1422406e6284263dc4cfee7336b5c01ef24db23f487bfa4dc9b0",
+      "refs": [
+        {
+          "line": 11,
+          "key": "ExecStart",
+          "execSha256": "59cf39fca0a97e6ab62ffdb4a6a67fb7562a59126fdde17a19d4a19de547ae01",
+          "firstExecutable": "/usr/bin/VGAuthService",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/rescue.target.wants/grub-initrd-fallback.service",
+      "sha256": "1d01ee1b57f8301b01b1aa9cb10a0116608827a3e0c27a817b46024e8395d807",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "b29d113fef9b88bb416ef4a098c11321b8831d71af79c22bb3ed91c3ff57007b",
+          "firstExecutable": "/usr/bin/grub-editenv",
+          "scriptRefs": []
+        },
+        {
+          "line": 11,
+          "key": "ExecStart",
+          "execSha256": "b3cdbe6520083cfba0880198066d28a25e94183eb81284723deb3dd20e490f61",
+          "firstExecutable": "/usr/bin/grub-editenv",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sleep.target.wants/grub-common.service",
+      "sha256": "e8af26cfbfa39d7da332596bec66e48d88cdfb1e956a51c1f592175d0f69d2e0",
+      "refs": [
+        {
+          "line": 9,
+          "key": "ExecStartPre",
+          "execSha256": "669cc04dc560170662b8b2bab78fb83365a8b68a53738c9866a6594ec8129d97",
+          "firstExecutable": "/bin/sh",
+          "scriptRefs": []
+        },
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "a33473751c97270dc13d426c3f9b1df3822dae816edf3a7aa67bad087e0c9391",
+          "firstExecutable": "grub-editenv",
+          "scriptRefs": []
+        },
+        {
+          "line": 11,
+          "key": "ExecStartPost",
+          "execSha256": "5de6fb8b8b4a2c98a26461263212c1e0f57511da1bb3384d0f91664d5c43d2e8",
+          "firstExecutable": "/bin/sh",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sleep.target.wants/grub-initrd-fallback.service",
+      "sha256": "1d01ee1b57f8301b01b1aa9cb10a0116608827a3e0c27a817b46024e8395d807",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "b29d113fef9b88bb416ef4a098c11321b8831d71af79c22bb3ed91c3ff57007b",
+          "firstExecutable": "/usr/bin/grub-editenv",
+          "scriptRefs": []
+        },
+        {
+          "line": 11,
+          "key": "ExecStart",
+          "execSha256": "b3cdbe6520083cfba0880198066d28a25e94183eb81284723deb3dd20e490f61",
+          "firstExecutable": "/usr/bin/grub-editenv",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sshd.service",
+      "sha256": "35b2858970feb78e985900b33ba8cb84249dfadbf296155e5639cafcf1dd40a3",
+      "refs": [
+        {
+          "line": 9,
+          "key": "ExecStartPre",
+          "execSha256": "b8a43af940d03439ad9c2a18c175a297df167e6874581809a9f0f7ca8359c706",
+          "firstExecutable": "/usr/sbin/sshd",
+          "scriptRefs": []
+        },
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "3272659a2754794602d97163b71bddefd5148f37c05ecfdf9966225743382876",
+          "firstExecutable": "/usr/sbin/sshd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sshd.service.wants/google-guest-agent.service",
+      "sha256": "b36105ea6b0362ba55aafd9af57bde1db899f459559a887831f5ec3089529991",
+      "refs": [
+        {
+          "line": 17,
+          "key": "ExecStart",
+          "execSha256": "d98410eb297483d0d9e294e463d93907db6502969e8e5d617e762ba322278c03",
+          "firstExecutable": "/usr/bin/google_guest_agent",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sysinit.target.wants/apparmor.service",
+      "sha256": "02c4d752e9f13dde845cab6c067a790c7af61b3c414b82781d29881a37ec5e19",
+      "refs": [
+        {
+          "line": 21,
+          "key": "ExecStart",
+          "execSha256": "173165482ae0e4c885bd7ef3e72b257377f88a76a9feef595694b4f65c2045df",
+          "firstExecutable": "/lib/apparmor/apparmor.systemd",
+          "scriptRefs": []
+        },
+        {
+          "line": 31,
+          "key": "ExecStop",
+          "execSha256": "e9d64bc45db022e677f7bca1ecb8f952a08dea4f5c8a3f8e0621615f76254be9",
+          "firstExecutable": "/bin/true",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sysinit.target.wants/blk-availability.service",
+      "sha256": "f6c677f7cc33301220bba6b7000d7258d253debde62222fae3521b2d0b5223e9",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStop",
+          "execSha256": "9ec2d143bc759388da1033921620d8fadd3b1deab1e62dfd01b29557a0dbff68",
+          "firstExecutable": "/sbin/blkdeactivate",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sysinit.target.wants/finalrd.service",
+      "sha256": "0074df722fd46bb47143f47e0ce4151465cd197040afcdf5153b8531ff3678a8",
+      "refs": [
+        {
+          "line": 15,
+          "key": "ExecStart",
+          "execSha256": "0676cf497e98ae3e21c710bb830b2c78f6acc361363b7d6c1c29bfff505cf95c",
+          "firstExecutable": "/bin/true",
+          "scriptRefs": []
+        },
+        {
+          "line": 16,
+          "key": "ExecStop",
+          "execSha256": "8770df8913334e135578678ff43875d59f2f30cc29f697979c433a60a88e5bf9",
+          "firstExecutable": "/usr/bin/finalrd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sysinit.target.wants/keyboard-setup.service",
+      "sha256": "7bfae47456a8ccfd36c05494a6ec80256b4b2454fd737892c09e6c3c83b87e73",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "57c5293f28a0d240b0874cd2b8ca64c0a4a9c1f2b8f5b52fb242c02461e475f3",
+          "firstExecutable": "/lib/console-setup/keyboard-setup.sh",
+          "scriptRefs": [
+            "/lib/console-setup/keyboard-setup.sh"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sysinit.target.wants/lvm2-monitor.service",
+      "sha256": "e0d575fb203194b3946c9d8394a7fa0f2abea3eedbc5ae631401c63ed9bdf572",
+      "refs": [
+        {
+          "line": 14,
+          "key": "ExecStart",
+          "execSha256": "95e5e89fbbb318f8eda61ea2d13a8be8e8b105f28d292eb2b0d7335cab5c120f",
+          "firstExecutable": "/sbin/lvm",
+          "scriptRefs": []
+        },
+        {
+          "line": 15,
+          "key": "ExecStop",
+          "execSha256": "114ee3806d4eef8abb56a1233c5ffd4afc79f645ea22552341b84f3d8c894052",
+          "firstExecutable": "/sbin/lvm",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sysinit.target.wants/multipathd.service",
+      "sha256": "9ca1139d2898316d870d22647e84fc476fe677a8d1dd8f27a0e126a394838bac",
+      "refs": [
+        {
+          "line": 18,
+          "key": "ExecStartPre",
+          "execSha256": "53ecdf028e450cf007203450b1a803ff805f508cc9b06eb32c2560d827514a42",
+          "firstExecutable": "-/sbin/modprobe",
+          "scriptRefs": []
+        },
+        {
+          "line": 19,
+          "key": "ExecStart",
+          "execSha256": "0df161911fde68c1653a7d73662e76ccdaf21aebd7acde028e27bd63db0d5867",
+          "firstExecutable": "/sbin/multipathd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sysinit.target.wants/open-iscsi.service",
+      "sha256": "2764e9ef31f9509b99d8b69c1abf56e8ceddcc405fbcc8284850fd57f67087ac",
+      "refs": [
+        {
+          "line": 23,
+          "key": "ExecStart",
+          "execSha256": "7c3fc3914c6f13af6afaefcb70076487b2432cb5373819c43f896dbf08e38af3",
+          "firstExecutable": "/sbin/iscsiadm",
+          "scriptRefs": []
+        },
+        {
+          "line": 24,
+          "key": "ExecStart",
+          "execSha256": "413814c46f6eeb97a53c4fbff5942634ddc1c4178da87d876af509d50318c2f9",
+          "firstExecutable": "/lib/open-iscsi/activate-storage.sh",
+          "scriptRefs": [
+            "/lib/open-iscsi/activate-storage.sh"
+          ]
+        },
+        {
+          "line": 25,
+          "key": "ExecStop",
+          "execSha256": "17e2d869d55e8e0f60945ec145a793d6e1c3667d6dbaa5a576aebabbc3744f57",
+          "firstExecutable": "/lib/open-iscsi/umountiscsi.sh",
+          "scriptRefs": [
+            "/lib/open-iscsi/umountiscsi.sh"
+          ]
+        },
+        {
+          "line": 26,
+          "key": "ExecStop",
+          "execSha256": "bddd5c3c8968a22e8e1b6666b5604f4f2719e050055e6475bc5d93308f6834f2",
+          "firstExecutable": "/bin/sync",
+          "scriptRefs": []
+        },
+        {
+          "line": 27,
+          "key": "ExecStop",
+          "execSha256": "d2eea3630ca5190b7668955f4bbd165efbd25967ae66272261965812a3c2679b",
+          "firstExecutable": "/lib/open-iscsi/logout-all.sh",
+          "scriptRefs": [
+            "/lib/open-iscsi/logout-all.sh"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sysinit.target.wants/setvtrgb.service",
+      "sha256": "32e83e016d68d15c28f1d55f4c25ab742abe11851fbad32ae615d74c82fa63cc",
+      "refs": [
+        {
+          "line": 11,
+          "key": "ExecStart",
+          "execSha256": "8b7890f26d76e42b1a6175a71d7903e95cfb49ec62a6016019c9bb9263bd043c",
+          "firstExecutable": "/sbin/setvtrgb",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sysinit.target.wants/systemd-pstore.service",
+      "sha256": "f39fa5c39ffdb894a3fb3736c63e3ee3f69608b41aee4c1fbaa3fb6d58d081ff",
+      "refs": [
+        {
+          "line": 23,
+          "key": "ExecStart",
+          "execSha256": "cef7bd63395f027a02ef07b9af0ee5eed47e80ce95db1b8b77749b113e5b952d",
+          "firstExecutable": "/lib/systemd/systemd-pstore",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service",
+      "sha256": "0e2cc5ea697a01cf8eef93cbadaaa029d23fb9759af459315ee0b3a349214303",
+      "refs": [
+        {
+          "line": 29,
+          "key": "ExecStart",
+          "execSha256": "926c4ba14b492d1c3d36be8ba7452f908d8a224d557c01b4e5e99f98e5fcf53d",
+          "firstExecutable": "!!/lib/systemd/systemd-timesyncd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/syslog.service",
+      "sha256": "726b9641b81ede267adc4180b3e25b85122a4e798e0f748cac0e9e3a414e1622",
+      "refs": [
+        {
+          "line": 10,
+          "key": "ExecStart",
+          "execSha256": "f94d58b95d560c28f992c94ea350939dc2ea8188e6afbfc3f622b862cda0f797",
+          "firstExecutable": "/usr/sbin/rsyslogd",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/systemd-networkd.service.wants/google-guest-agent.service",
+      "sha256": "b36105ea6b0362ba55aafd9af57bde1db899f459559a887831f5ec3089529991",
+      "refs": [
+        {
+          "line": 17,
+          "key": "ExecStart",
+          "execSha256": "d98410eb297483d0d9e294e463d93907db6502969e8e5d617e762ba322278c03",
+          "firstExecutable": "/usr/bin/google_guest_agent",
+          "scriptRefs": []
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/apport-autoreport.timer",
+      "sha256": "72e4700854d2c3babee612f6dda7c1c61caf37878b7adf9663ddbcbbc3e4c9c5",
+      "refs": [
+        {
+          "line": 7,
+          "key": "OnUnitActiveSec",
+          "value": "3h"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/apt-daily-upgrade.timer",
+      "sha256": "b804d7bab8eb41202384f9270e25d5383346ace8b3d7c4f5029c150638d77bcd",
+      "refs": [
+        {
+          "line": 6,
+          "key": "OnCalendar",
+          "value": "*-*-* 6:00"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/apt-daily.timer",
+      "sha256": "0075e974af4e3a94757e219ba50ccb8348d4d1a8834d938f6cc9b1f4fd1db4e5",
+      "refs": [
+        {
+          "line": 5,
+          "key": "OnCalendar",
+          "value": "*-*-* 6,18:00"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/certbot.timer",
+      "sha256": "c93a2347a3d8a526daf8fda2dd59297fac3f96030872c2fee246a80a0445a40d",
+      "refs": [
+        {
+          "line": 5,
+          "key": "OnCalendar",
+          "value": "*-*-* 00,12:00:00"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/dpkg-db-backup.timer",
+      "sha256": "53f7ed8aadfaf61d9decda9565b65f68d5b5a66be4ee8f87741e47163839b4a6",
+      "refs": [
+        {
+          "line": 6,
+          "key": "OnCalendar",
+          "value": "daily"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/e2scrub_all.timer",
+      "sha256": "23f20fb6edc9fd54bf4754ef4311f88cba45ba65c6aecfa1885e8fb99531c211",
+      "refs": [
+        {
+          "line": 6,
+          "key": "OnCalendar",
+          "value": "Sun *-*-* 03:10:00"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/fstrim.timer",
+      "sha256": "b15bcc0d8fc3698701087264a834bc6c495780ed27b68e0a8e3eb10d02bef74a",
+      "refs": [
+        {
+          "line": 8,
+          "key": "OnCalendar",
+          "value": "weekly"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/logrotate.timer",
+      "sha256": "42f723dc5d90247a5fda11a3358d1a67eccceed856192b2264aa222d6aa240f4",
+      "refs": [
+        {
+          "line": 6,
+          "key": "OnCalendar",
+          "value": "daily"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/man-db.timer",
+      "sha256": "3a3a1ca2ab2c92fe74bae1257e4c666e5dd0a31f441221dfa809bc0cf6540774",
+      "refs": [
+        {
+          "line": 6,
+          "key": "OnCalendar",
+          "value": "daily"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/motd-news.timer",
+      "sha256": "f18dbd0f64344440d7d6e8f1ff302d26fe383921be2a3f13948a8e2e2545ee58",
+      "refs": [
+        {
+          "line": 5,
+          "key": "OnCalendar",
+          "value": "00,12:00:00"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/ua-timer.timer",
+      "sha256": "298cb263192451d1db12687202a5db3d849f2335db8bec0fc8d99a89f5897175",
+      "refs": [
+        {
+          "line": 9,
+          "key": "OnUnitActiveSec",
+          "value": "6h"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/update-notifier-download.timer",
+      "sha256": "78f01ff5be8b01eee4c438d6a7971dcb9f34687cb75bd0d61f754eb5eb42ad22",
+      "refs": [
+        {
+          "line": 7,
+          "key": "OnUnitActiveSec",
+          "value": "24h"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/timers.target.wants/update-notifier-motd.timer",
+      "sha256": "7e5fa1f167ad72cf1bd0421d72ca3017ccb5a62f98d91ec3f9e25efd46c2a9ef",
+      "refs": [
+        {
+          "line": 6,
+          "key": "OnCalendar",
+          "value": "Sun *-*-* 06:00:00"
+        }
+      ]
+    },
+    {
+      "path": "/etc/systemd/system/unscd.service.d/nscd.conf",
+      "sha256": "c0ba38d206dcc751e7527a0bc6668ab572252b75d6798cd506f8942374067403",
+      "refs": []
+    },
+    {
+      "path": "/etc/systemd/system/vmtoolsd.service",
+      "sha256": "8eeef9026c706c3ccca5a0f28bfcdad6fe1fc3fb787cdda17648360743a1b599",
+      "refs": [
+        {
+          "line": 13,
+          "key": "ExecStart",
+          "execSha256": "a922b12daac9ee0e8f1c7bc039c9012de192bd75f51af41ed832e31a6b697135",
+          "firstExecutable": "/usr/bin/vmtoolsd",
+          "scriptRefs": []
+        }
+      ]
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "/home/botadmin/barbershop-bot/test_schedule_regressions.py",
+      "sha256": "502c96f96918d01f5b89f23889943022e91167825cec7ef8e96ae143627ffb3b"
+    },
+    {
+      "path": "/home/botadmin/barbershop-bot/schedule.json",
+      "sha256": "228c070c5ab6b543d5c9ffe0315512ba3902abb1ac8520e31f02a0288a96eb93"
+    },
+    {
+      "path": "/home/botadmin/maya-deploy-candidates/staff-schedule-2cfc4e25/test_schedule_regressions.py",
+      "sha256": "b950b07ccfff43ecac893a5737e812cb825c49f81b9217057624730cc7103e03"
+    },
+    {
+      "path": "/home/botadmin/barbershop-bot-backups/staff-schedule-2cfc4e25/test_schedule_regressions.py",
+      "sha256": "e842020ac95c40d9a8f12bddeb1abdfc3af797d757dd1512699f0499f9206fbf"
+    }
+  ],
+  "readLimitations": [],
+  "unitsReadExit": 0,
+  "unitFilesReadExit": 0,
+  "scanBoundary": "Live unit names, all readable /etc/systemd/system service/timer/drop-in definitions, application launcher candidates depth <= 3 in /home/botadmin and /opt; excluded virtualenv/package/old-release/archive directories are not absence proof for an unknown Beget command."
+}

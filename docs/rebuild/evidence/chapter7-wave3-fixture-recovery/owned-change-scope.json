@@ -1,0 +1,14 @@
+{
+  "trackedChangedPaths": [
+    "docs/rebuild/CYCLE-07-WAVE-3-RECOVERY-RELEASE-GATE-STOP.md",
+    "maya-saas-backend/src/action-engine/package5-b13-remediation.architecture.spec.ts",
+    "maya-saas-backend/src/action-engine/package5-b14-remediation.architecture.spec.ts",
+    "maya-saas-backend/src/action-engine/package5-b16-remediation.architecture.spec.ts",
+    "maya-saas-backend/src/action-engine/package5-b17-remediation.architecture.spec.ts"
+  ],
+  "historicalMigrationsInventoryUnchanged": 85,
+  "runtimeChanges": 0,
+  "schemaChanges": 0,
+  "migrationChanges": 0,
+  "productionMutations": 0
+}

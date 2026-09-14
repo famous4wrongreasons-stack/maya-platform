@@ -87,6 +87,28 @@ def _load_claude_ai():
         def get_masters(self, *args, **kwargs):
             return [{"id": 7, "name": "Стас Мосин"}]
 
+        def get_master_schedule_for_date(self, staff_id, date_str):
+            return {
+                "success": True,
+                "status": "working",
+                "schedule_unknown": False,
+                "staff_id": staff_id,
+                "date": date_str,
+                "is_working": True,
+                "slots": [{"from": "10:00", "to": "20:00"}],
+                "hours": "10:00–20:00",
+            }
+
+        def who_works_on(self, date_str):
+            return {
+                "date": date_str,
+                "working": [{"name": "Стас Мосин", "hours": "10:00–20:00"}],
+                "off": [],
+                "unknown": [],
+                "schedule_unknown": False,
+                "working_count": 1,
+            }
+
         def change_staff_day_schedule(self, **kwargs):
             return {
                 "success": True,
@@ -152,11 +174,38 @@ def _load_claude_ai():
             "status": "done" if kwargs.get("action") == "complete" else "pending",
         },
     }
-    fake_owner_ai.master_performance = lambda: {
+    fake_owner_ai.master_performance = lambda **kwargs: {
         "top_profit_master": {"name": "Мастер 1", "profit_after_salary_rub": 26000},
         "top_gross_master": {"name": "Мастер 1", "gross_rub": 40000},
         "note": "Вклад после процента.",
     }
+    fake_owner_ai.client_registry_analysis = lambda **kwargs: {
+        "success": True,
+        "complete": True,
+        "total_cards": 4000,
+        "loyal_clients": 1800,
+    }
+    fake_owner_ai.return_candidates = lambda **kwargs: {
+        "success": True,
+        "candidates": [],
+    }
+    fake_owner_ai.empty_windows = lambda **kwargs: {
+        "success": True,
+        "windows": [],
+    }
+    fake_owner_ai.expiring_assets = lambda **kwargs: {
+        "success": True,
+        "items": [],
+    }
+    fake_owner_ai.service_insights = lambda **kwargs: {
+        "success": True,
+        "services": [],
+    }
+    fake_owner_ai.risk_signals = lambda **kwargs: {
+        "success": True,
+        "risks": [],
+    }
+    fake_owner_ai.money_opportunities = lambda **kwargs: []
     fake_owner_ai.owner_action_payload = lambda task, **kwargs: {
         "kind": "run_job",
         "job": task,
@@ -358,121 +407,65 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(logs[-1][2], "get_owner_command_center")
         self.assertTrue(logs[-1][4])
 
-    def test_founder_can_create_owner_control_task(self):
+    def test_founder_cannot_create_owner_control_task(self):
         claude_ai, logs = _load_claude_ai()
+        self.assertNotIn('create_owner_control_task', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('create_owner_control_task', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
-        result = json.loads(
-            claude_ai._execute_tool(
-                "create_owner_control_task",
-                {"title": "Проверить план-факт", "priority": "high", "due_in_days": 1},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["task_id"], 7)
-        self.assertEqual(result["control_item"]["title"], "Проверить план-факт")
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "create_owner_control_task")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
-
-    def test_founder_can_update_owner_control_task(self):
+    def test_founder_cannot_update_owner_control_task(self):
         claude_ai, logs = _load_claude_ai()
+        self.assertNotIn('update_owner_control_task', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('update_owner_control_task', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
-        result = json.loads(
-            claude_ai._execute_tool(
-                "update_owner_control_task",
-                {"task_id": 7, "action": "complete", "note": "Проверено"},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["task"]["id"], 7)
-        self.assertEqual(result["task"]["status"], "done")
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "update_owner_control_task")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
-
-    def test_founder_can_run_autonomous_director_tick(self):
+    def test_founder_cannot_run_autonomous_director_tick(self):
         claude_ai, logs = _load_claude_ai()
+        self.assertNotIn('run_autonomous_director_tick', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('run_autonomous_director_tick', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
-        result = json.loads(
-            claude_ai._execute_tool(
-                "run_autonomous_director_tick",
-                {"limit": 2},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "supervised_autopilot")
-        self.assertEqual(result["created_count"], 2)
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "run_autonomous_director_tick")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
-
-    def test_founder_can_run_autopilot_supervision_tick(self):
+    def test_founder_cannot_run_autopilot_supervision_tick(self):
         claude_ai, logs = _load_claude_ai()
+        self.assertNotIn('run_autopilot_supervision_tick', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('run_autopilot_supervision_tick', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
-        result = json.loads(
-            claude_ai._execute_tool(
-                "run_autopilot_supervision_tick",
-                {"limit": 3},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "internal_supervision")
-        self.assertEqual(result["applied_count"], 3)
-        self.assertEqual(result["created_count"], 1)
-        self.assertEqual(result["updated_count"], 2)
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "run_autopilot_supervision_tick")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
-
-    def test_founder_can_run_execution_loop_tick(self):
+    def test_founder_cannot_run_execution_loop_tick(self):
         claude_ai, logs = _load_claude_ai()
+        self.assertNotIn('run_execution_loop_tick', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('run_execution_loop_tick', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
-        result = json.loads(
-            claude_ai._execute_tool(
-                "run_execution_loop_tick",
-                {"limit": 2},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "closed_loop_control")
-        self.assertEqual(result["created_count"], 2)
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "run_execution_loop_tick")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
-
-    def test_founder_can_run_operating_rhythm_tick(self):
+    def test_founder_cannot_run_operating_rhythm_tick(self):
         claude_ai, logs = _load_claude_ai()
-
-        result = json.loads(
-            claude_ai._execute_tool(
-                "run_operating_rhythm_tick",
-                {"force": True},
-                user_id=948205934,
-            )
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["mode"], "safe_scheduler")
-        self.assertFalse(result["skipped"])
-        self.assertEqual(logs[-1][1], "founder")
-        self.assertEqual(logs[-1][2], "run_operating_rhythm_tick")
-        self.assertEqual(logs[-1][3], "write")
-        self.assertTrue(logs[-1][4])
+        self.assertNotIn('run_operating_rhythm_tick', {item["name"] for item in claude_ai.TOOLS})
+        from unittest.mock import patch
+        with patch.object(claude_ai.canonical_staff_access, 'ai_role', return_value='founder'):
+            result = json.loads(claude_ai._execute_tool('run_operating_rhythm_tick', {}, user_id=948205934, mode='staff'))
+        self.assertFalse(result.get("ok", False))
+        self.assertEqual(result["error"], "Этот инструмент недоступен в этом разделе приложения.")
+        self.assertFalse(logs[-1][4])
 
     def test_pro_model_uses_responses_api_route(self):
         claude_ai, _logs = _load_claude_ai()
@@ -835,6 +828,232 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIsNotNone(contact_request)
         self.assertIsNone(action)
 
+    def test_explicit_booking_confirmation_recovers_observed_telegram_request(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 23)
+        claude_ai.yclients.get_services = lambda staff_id=None: [{
+            "id": 101,
+            "title": "Мужская стрижка",
+        }]
+        messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Записываю тебя к Стасу Мосину на «Мужскую стрижку» "
+                    "сегодня в 11:00 — оформляем?"
+                ),
+            },
+            {"role": "user", "content": "Да"},
+        ]
+
+        tool_use = claude_ai._booking_confirmation_tool_use(
+            messages,
+            "client",
+            set(),
+            None,
+        )
+
+        self.assertIsNotNone(tool_use)
+        self.assertEqual(tool_use.name, "request_booking")
+        self.assertEqual(tool_use.input, {
+            "staff_name": "Стас Мосин",
+            "service_names": ["Мужская стрижка"],
+            "datetime_str": "2026-08-23T11:00:00",
+        })
+
+    def test_booking_confirmation_does_not_guess_from_unrelated_yes(self):
+        claude_ai, _logs = _load_claude_ai()
+        messages = [
+            {"role": "assistant", "content": "Показать цены на услуги?"},
+            {"role": "user", "content": "Да"},
+        ]
+
+        tool_use = claude_ai._booking_confirmation_tool_use(
+            messages,
+            "client",
+            set(),
+            None,
+        )
+
+        self.assertIsNone(tool_use)
+
+    def test_booking_confirmation_is_disabled_on_staff_surface(self):
+        claude_ai, _logs = _load_claude_ai()
+        messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Записываю тебя к Стасу Мосину на «Мужскую стрижку» "
+                    "сегодня в 11:00 — оформляем?"
+                ),
+            },
+            {"role": "user", "content": "Да"},
+        ]
+
+        tool_use = claude_ai._booking_confirmation_tool_use(
+            messages,
+            "founder",
+            set(),
+            "staff",
+        )
+
+        self.assertIsNone(tool_use)
+
+    def test_booking_confirmation_bypasses_model_and_emits_contact_request(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 23)
+        claude_ai.yclients.get_services = lambda staff_id=None: [{
+            "id": 101,
+            "title": "Мужская стрижка",
+        }]
+        contact = {
+            "staff_id": 7,
+            "staff_name": "Стас Мосин",
+            "service_ids": [101],
+            "service_names": ["Мужская стрижка"],
+            "datetime_str": "2026-08-23T11:00:00",
+        }
+        claude_ai._brain_turn = lambda *args, **kwargs: self.fail(
+            "model must not run after an explicit server-verifiable confirmation"
+        )
+        claude_ai._run_tool_uses = lambda *args, **kwargs: (
+            [{
+                "type": "tool_result",
+                "tool_use_id": "server_confirmed_booking",
+                "content": json.dumps({"status": "ready"}),
+            }],
+            contact,
+            None,
+        )
+        messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Записываю тебя к Стасу Мосину на «Мужскую стрижку» "
+                    "сегодня в 11:00 — оформляем?"
+                ),
+            },
+            {"role": "user", "content": "Да"},
+        ]
+
+        text, contact_request, action = claude_ai.get_ai_response(
+            messages,
+            user_id=123,
+            mode=None,
+        )
+
+        self.assertEqual(text, "Передаю запись на оформление.")
+        self.assertEqual(contact_request, contact)
+        self.assertIsNone(action)
+
+    def test_booking_confirmation_reports_slot_rejection_without_model_claim(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 23)
+        claude_ai.yclients.get_services = lambda staff_id=None: [{
+            "id": 101,
+            "title": "Мужская стрижка",
+        }]
+        claude_ai._brain_turn = lambda *args, **kwargs: self.fail(
+            "model must not replace an authoritative slot rejection"
+        )
+        claude_ai._run_tool_uses = lambda *args, **kwargs: (
+            [{
+                "type": "tool_result",
+                "tool_use_id": "server_confirmed_booking",
+                "content": json.dumps({
+                    "status": "error",
+                    "error": "slot_taken",
+                    "message": "11:00 уже занято. Ничего не создано.",
+                }, ensure_ascii=False),
+            }],
+            None,
+            None,
+        )
+        messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Записываю тебя к Стасу Мосину на «Мужскую стрижку» "
+                    "сегодня в 11:00 — оформляем?"
+                ),
+            },
+            {"role": "user", "content": "Да"},
+        ]
+
+        text, contact_request, action = claude_ai.get_ai_response(
+            messages,
+            user_id=123,
+            mode=None,
+        )
+
+        self.assertEqual(text, "11:00 уже занято. Ничего не создано.")
+        self.assertIsNone(contact_request)
+        self.assertIsNone(action)
+
+    def test_stream_booking_confirmation_has_same_contact_request(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 23)
+        claude_ai.yclients.get_services = lambda staff_id=None: [{
+            "id": 101,
+            "title": "Мужская стрижка",
+        }]
+        contact = {
+            "staff_id": 7,
+            "staff_name": "Стас Мосин",
+            "service_ids": [101],
+            "service_names": ["Мужская стрижка"],
+            "datetime_str": "2026-08-23T11:00:00",
+        }
+        claude_ai._run_tool_uses = lambda *args, **kwargs: (
+            [{
+                "type": "tool_result",
+                "tool_use_id": "server_confirmed_booking",
+                "content": json.dumps({"status": "ready"}),
+            }],
+            contact,
+            None,
+        )
+        messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Записываю тебя к Стасу Мосину на «Мужскую стрижку» "
+                    "сегодня в 11:00 — оформляем?"
+                ),
+            },
+            {"role": "user", "content": "Да"},
+        ]
+
+        events = list(claude_ai.get_ai_response_stream(
+            messages,
+            user_id=123,
+            mode="client",
+        ))
+
+        self.assertEqual(events, [{
+            "type": "meta",
+            "contact_request": contact,
+            "gift_cert_action": None,
+            "text": "Передаю запись на оформление.",
+        }])
+
+    def test_model_cannot_claim_booking_handoff_without_server_signal(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._brain_turn = lambda *args, **kwargs: (
+            "Передаю запись на оформление: сегодня в 11:00.",
+            [],
+        )
+
+        text, contact_request, action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Оформляй"}],
+            user_id=123,
+            mode=None,
+        )
+
+        self.assertIn("Ничего не создано", text)
+        self.assertIsNone(contact_request)
+        self.assertIsNone(action)
+
     def test_client_surface_limits_founder_to_client_tools(self):
         claude_ai, _logs = _load_claude_ai()
 
@@ -961,8 +1180,9 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertFalse(logs[-1][4])
         self.assertEqual(logs[-1][5], "surface")
 
-    def test_founder_can_preview_staff_schedule_change(self):
+    def test_founder_schedule_request_hands_off_to_canonical_approval(self):
         claude_ai, logs = _load_claude_ai()
+        claude_ai._resolve_role = lambda _user_id: "founder"
 
         result = json.loads(claude_ai._execute_tool(
             "manage_staff_schedule",
@@ -976,14 +1196,15 @@ class ClaudeAIRBACTests(unittest.TestCase):
             mode="staff",
         ))
 
-        self.assertEqual(result["status"], "preview")
-        self.assertEqual(result["staff_id"], 7)
-        self.assertEqual(result["staff_name"], "Стас")
+        self.assertEqual(result["status"], "canonical_entry_required")
+        self.assertFalse(result["accepted"])
+        self.assertEqual(result["error"], "canonical_staff_schedule_required")
         self.assertEqual(logs[-1][3], "write")
         self.assertTrue(logs[-1][4])
 
-    def test_schedule_apply_is_ignored_without_new_user_confirmation(self):
+    def test_schedule_apply_does_not_replace_canonical_approval(self):
         claude_ai, _logs = _load_claude_ai()
+        claude_ai._resolve_role = lambda _user_id: "founder"
 
         result = json.loads(claude_ai._execute_tool(
             "manage_staff_schedule",
@@ -997,29 +1218,21 @@ class ClaudeAIRBACTests(unittest.TestCase):
             mode="staff",
         ))
 
-        self.assertEqual(result["status"], "preview")
-        self.assertTrue(result["apply_ignored"])
+        self.assertEqual(result["status"], "canonical_entry_required")
+        self.assertFalse(result["retry_allowed"])
 
-    def test_schedule_confirmation_requires_prior_preview_and_new_yes(self):
+    def test_schedule_history_confirmation_is_not_an_authority(self):
         claude_ai, _logs = _load_claude_ai()
-        tool_use = claude_ai._ToolUse(
-            id="schedule",
-            name="manage_staff_schedule",
-            input={"apply": True},
-        )
-        messages = [
-            {"role": "assistant", "content": "Стас, 2099-07-20: график был 10:00–20:00; станет день закрыт. Применить?"},
-            {"role": "user", "content": "Да, применяй"},
-            {"role": "assistant", "content": claude_ai._assistant_blocks("", [tool_use])},
-        ]
-
-        self.assertTrue(claude_ai._schedule_confirmation_verified(messages))
-
-        messages[1]["content"] = "Закрой Стасу завтра"
-        self.assertFalse(claude_ai._schedule_confirmation_verified(messages))
+        claude_ai._resolve_role = lambda _user_id: "founder"
+        self.assertFalse(hasattr(claude_ai, "_schedule_confirmation_verified"))
+        result = json.loads(claude_ai._execute_tool(
+            "manage_staff_schedule", {"apply": True, "_schedule_confirmation_verified": True},
+            user_id=948205934, mode="staff"))
+        self.assertFalse(result["accepted"])
 
     def test_manager_cannot_change_staff_schedule(self):
         claude_ai, logs = _load_claude_ai()
+        claude_ai._resolve_role = lambda _user_id: "manager"
 
         result = json.loads(claude_ai._execute_tool(
             "manage_staff_schedule",
@@ -1051,15 +1264,141 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("manage_staff_schedule", staff_names)
         self.assertNotIn("manage_staff_schedule", client_names)
 
-    def test_director_prompt_requires_preview_then_confirmation(self):
+    def test_director_prompt_requires_existing_canonical_schedule_entry(self):
         claude_ai, _logs = _load_claude_ai()
 
         prompt = claude_ai._build_system_prompt(948205934, "founder", "staff")[0]["text"]
 
         self.assertIn("manage_staff_schedule", prompt)
-        self.assertIn("apply=false", prompt)
-        self.assertIn("apply=true", prompt)
-        self.assertIn("Применить?", prompt)
+        self.assertNotIn("apply=false", prompt)
+        self.assertNotIn("apply=true", prompt)
+        self.assertIn("подтверждение выполняются после входа в приложение", prompt)
+
+    def test_schedule_question_is_grounded_and_resolves_inflected_name(self):
+        claude_ai, _logs = _load_claude_ai()
+        messages = [{
+            "role": "user",
+            "content": "Какое расписание у Стаса Мосина 14.08.2026?",
+        }]
+
+        requirement = claude_ai._grounding_requirement(
+            messages, "founder", "staff", user_id=948205934,
+        )
+        tool_use = claude_ai._schedule_preflight_tool_use(messages, requirement)
+
+        self.assertIsNotNone(requirement)
+        self.assertEqual(requirement.domain, "staff_schedule")
+        self.assertEqual(tool_use.name, "get_master_schedule")
+        self.assertEqual(tool_use.input["staff_name"], "Стас Мосин")
+        self.assertEqual(tool_use.input["date"], "2026-08-14")
+
+    def test_tomorrow_schedule_date_is_resolved_deterministically(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        resolved = claude_ai._schedule_query_date(
+            "Какое расписание у Стаса завтра?",
+            claude_ai.date(2026, 8, 13),
+        )
+
+        self.assertEqual(resolved, claude_ai.date(2026, 8, 14))
+
+    def test_exact_schedule_answer_bypasses_model(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._brain_turn = lambda *args, **kwargs: self.fail("model must not run")
+
+        text, contact, action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Какое расписание у Стаса Мосина 14.08.2026?"}],
+            user_id=948205934,
+            mode="staff",
+        )
+
+        self.assertIn("Стас Мосин работает 10:00–20:00", text)
+        self.assertIsNone(contact)
+        self.assertIsNone(action)
+
+    def test_tomorrow_schedule_answer_bypasses_model(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 13)
+        claude_ai._brain_turn = lambda *args, **kwargs: self.fail("model must not run")
+
+        text, contact, action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Какое расписание у Стаса Мосина завтра?"}],
+            user_id=948205934,
+            mode="staff",
+        )
+
+        self.assertIn("Завтра, 14 августа", text)
+        self.assertIn("Стас Мосин работает 10:00–20:00", text)
+        self.assertIsNone(contact)
+        self.assertIsNone(action)
+
+    def test_short_schedule_followup_keeps_master_context(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 13)
+        messages = [
+            {"role": "user", "content": "Какое расписание у Стаса Мосина?"},
+            {"role": "assistant", "content": "Уточните дату."},
+            {"role": "user", "content": "А завтра?"},
+        ]
+
+        requirement = claude_ai._grounding_requirement(
+            messages, "founder", "staff", user_id=948205934,
+        )
+        tool_use = claude_ai._schedule_preflight_tool_use(messages, requirement)
+
+        self.assertEqual(requirement.domain, "staff_schedule")
+        self.assertEqual(tool_use.name, "get_master_schedule")
+        self.assertEqual(tool_use.input["staff_name"], "Стас Мосин")
+        self.assertEqual(tool_use.input["date"], "2026-08-14")
+
+    def test_roster_question_does_not_turn_into_today_schedule(self):
+        claude_ai, _logs = _load_claude_ai()
+
+        requirement = claude_ai._grounding_requirement(
+            [{"role": "user", "content": "Кто у нас работает в салоне?"}],
+            "founder",
+            "staff",
+            user_id=948205934,
+        )
+
+        self.assertEqual(requirement.domain, "staff_catalog")
+        self.assertEqual(requirement.tools, frozenset({"get_masters"}))
+
+    def test_all_appointments_question_uses_business_report(self):
+        claude_ai, _logs = _load_claude_ai()
+        claude_ai._moscow_today = lambda: claude_ai.date(2026, 8, 13)
+        messages = [{
+            "role": "user",
+            "content": "Сколько всего записей сегодня, включая будущие и ожидающие?",
+        }]
+
+        requirement = claude_ai._grounding_requirement(
+            messages, "founder", "staff", user_id=948205934,
+        )
+        tool_use = claude_ai._business_preflight_tool_use(messages, requirement)
+
+        self.assertEqual(requirement.domain, "business_analytics")
+        self.assertEqual(tool_use.name, "get_business_report")
+        self.assertEqual(tool_use.input, {
+            "date_from": "2026-08-13",
+            "date_to": "2026-08-13",
+        })
+
+    def test_successful_business_tool_blocks_false_data_denial(self):
+        claude_ai, _logs = _load_claude_ai()
+        replies = iter([
+            ("Я не вижу список услуг в YClients.", []),
+            ("В YClients сейчас нет активных услуг.", []),
+        ])
+        claude_ai._brain_turn = lambda *args, **kwargs: next(replies)
+
+        text, _contact, _action = claude_ai.get_ai_response(
+            [{"role": "user", "content": "Какие услуги есть?"}],
+            user_id=948205934,
+            mode="staff",
+        )
+
+        self.assertEqual(text, "В YClients сейчас нет активных услуг.")
 
 
 if __name__ == "__main__":

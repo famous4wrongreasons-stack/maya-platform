@@ -1,3 +1,4 @@
+import { canonicalReceiptFixture } from '../../test/fixtures/ai-tool-receipt.fixture';
 import { ConflictException, ForbiddenException } from '@nestjs/common';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -27,7 +28,7 @@ describe('AiToolRuntimeService', () => {
 
   it('executes read-only tools directly and stores only encrypted results', async () => {
     const harness = createHarness();
-    harness.handlerExecute.mockResolvedValue({ customer_count: 7 });
+    harness.handlerExecute.mockResolvedValue({ services: [] });
     harness.executionFindUnique.mockResolvedValue(null);
     harness.executionCreate.mockResolvedValue({ id: 'execution-a' });
 
@@ -36,7 +37,7 @@ describe('AiToolRuntimeService', () => {
       () =>
         harness.runtime.execute(
           { ...customer, role: UserRole.TENANT_OWNER },
-          'customers.count',
+          'catalog.services.read',
           { arguments: {}, surface: 'web' },
         ),
     );
@@ -44,7 +45,7 @@ describe('AiToolRuntimeService', () => {
     expect(result).toMatchObject({
       status: 'completed',
       execution_id: 'execution-a',
-      result: { customer_count: 7 },
+      result: { services: [] },
       replayed: false,
     });
     expect(harness.approvalCreate).not.toHaveBeenCalled();
@@ -55,6 +56,60 @@ describe('AiToolRuntimeService', () => {
       expect.stringMatching(/^encrypted:/),
     );
     expect(JSON.stringify(executionUpdateData)).not.toContain('customer_count');
+  });
+
+  it('returns the latest verified analytics snapshot when the CRM read fails', async () => {
+    const harness = createHarness();
+    harness.executionFindUnique.mockResolvedValue(null);
+    harness.executionCreate.mockResolvedValue({ id: 'execution-failed' });
+    harness.handlerExecute.mockRejectedValue(new Error('crm timeout'));
+    harness.executionFindFirst.mockResolvedValue({
+      id: 'execution-snapshot',
+      encryptedResult: encryptFixture({
+        verified: true,
+        period: { timezone: 'Europe/Moscow' },
+        metrics: { unique_clients: 41 },
+      }),
+      completedAt: new Date('2026-08-06T12:00:00.000Z'),
+    });
+
+    const result = await harness.tenantContext.runAsSystemTenant(
+      'tenant-a',
+      () =>
+        harness.runtime.execute(
+          { ...customer, role: UserRole.TENANT_OWNER },
+          'analytics.business.query',
+          {
+            arguments: {
+              period: 'month_to_date',
+              comparison: 'previous_period',
+            },
+            surface: 'native',
+          },
+        ),
+    );
+
+    expect(result).toMatchObject({
+      status: 'completed',
+      execution_id: 'execution-snapshot',
+      replayed: true,
+      stale: true,
+      result: {
+        verified: true,
+        metrics: { unique_clients: 41 },
+        freshness: {
+          status: 'stale',
+          snapshot_at: '2026-08-06T12:00:00.000Z',
+          reason: 'ai_tool_execution_failed',
+        },
+      },
+    });
+    expect(harness.getLastAuditLogInput()).toEqual(
+      expect.objectContaining({
+        action: 'ai.tool_execution_stale_replayed',
+        entityId: 'execution-failed',
+      }),
+    );
   });
 
   it('creates an approval without executing a write tool', async () => {
@@ -273,6 +328,7 @@ function createHarness() {
     return Promise.resolve({});
   });
   const executionFindUnique = jest.fn();
+  const executionFindFirst = jest.fn();
   const executionCreate = jest.fn();
   let executionUpdateInput: unknown;
   const executionUpdate = jest.fn<
@@ -293,6 +349,7 @@ function createHarness() {
     },
     aiToolExecution: {
       findUnique: executionFindUnique,
+      findFirst: executionFindFirst,
       create: executionCreate,
       update: executionUpdate,
     },
@@ -322,6 +379,21 @@ function createHarness() {
   const handlerExecute = jest.fn();
   const handler = {
     execute: handlerExecute,
+    // Доводка аргументов и обогащение карточки — тождественные для всего,
+    // кроме записи расхода; настоящее поведение проверяется в её собственных
+    // прогонах, здесь важно только что рантайм их зовёт.
+    normalizeArguments: jest.fn(
+      (_toolName: string, _principal: unknown, args: unknown) =>
+        Promise.resolve(args),
+    ),
+    enrichApprovalPreview: jest.fn(
+      (
+        _toolName: string,
+        _principal: unknown,
+        _args: unknown,
+        payload: unknown,
+      ) => Promise.resolve(payload),
+    ),
   } as unknown as AiToolHandlerService;
   const encryption = {
     encrypt: jest.fn(
@@ -334,9 +406,12 @@ function createHarness() {
       ),
     ),
   } as unknown as EncryptionService;
-  const auditLog = {
-    log: jest.fn().mockResolvedValue({ id: 'audit-a' }),
-  } as unknown as AuditLogService;
+  let lastAuditLogInput: unknown;
+  const auditLogLog = jest.fn((input: unknown): Promise<{ id: string }> => {
+    lastAuditLogInput = input;
+    return Promise.resolve({ id: 'audit-a' });
+  });
+  const auditLog = { log: auditLogLog } as unknown as AuditLogService;
 
   return {
     runtime: new AiToolRuntimeService(
@@ -347,6 +422,7 @@ function createHarness() {
       handler,
       encryption,
       auditLog,
+      canonicalReceiptFixture(prisma, encryption),
     ),
     tenantContext,
     approvalFindUnique,
@@ -355,12 +431,14 @@ function createHarness() {
     approvalFindUniqueOrThrow,
     approvalUpdate,
     executionFindUnique,
+    executionFindFirst,
     executionCreate,
     executionUpdate,
     membershipFindUnique,
     handlerExecute,
     policyAssertCanExecute,
     policyAssertCanDecide,
+    getLastAuditLogInput: () => lastAuditLogInput,
     getApprovalUpdateInput: () => approvalUpdateInput,
     getExecutionUpdateInput: () => executionUpdateInput,
   };

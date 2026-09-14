@@ -1,0 +1,18 @@
+{
+  "dropped": [
+    "maya_b35_release_schema",
+    "maya_b35_runtime",
+    "maya_c06_p5_wave1_b35_final_20260907",
+    "maya_c06_p5_wave2_b35_final_20260907",
+    "maya_c06_p5_wave3_b35_final_20260907",
+    "maya_c06_p5_wave4_b35_final_20260907",
+    "maya_c06_p5_wave5_b35_final_20260907",
+    "maya_c06_p5_wave6_b35_final_20260907"
+  ],
+  "ownedDatabasesRemaining": 0,
+  "ownedClusterStopped": true,
+  "ownedDirectoriesRemoved": true,
+  "ownedCluster55505Listening": false,
+  "preExistingDatabasesTouched": 0,
+  "protectedOldDatabaseCount": 17
+}

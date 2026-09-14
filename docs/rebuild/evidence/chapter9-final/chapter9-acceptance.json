@@ -1,0 +1,68 @@
+{
+  "contract": "maya.c9-chapter-acceptance/1",
+  "chapter": 9,
+  "complete": true,
+  "canonicalBranch": "codex/maya-brain-systemic-release-20260815",
+  "approvedBaseline": "cf05547b",
+  "ownerDecisions": "16/16",
+  "requirements": "30/30",
+  "packages": "6/6",
+  "waves": "4/4",
+  "productionSurfaces": "32/32 frozen",
+  "releases": [
+    { "wave": 1, "packages": ["P01"], "release": "20260914-c9-p01-336d270d" },
+    { "wave": 2, "packages": ["P02", "P03"], "release": "20260914-c9-wave2-b7ae4ddc" },
+    { "wave": 3, "packages": ["P04", "P05"], "release": "20260914-c9-wave3-78ad0247" },
+    { "wave": 4, "packages": ["P06"], "release": "20260914-c9-wave4-7c9da983" }
+  ],
+  "envelope": {
+    "newModels": 5,
+    "newPhysicalFields": 123,
+    "alteredModels": 2,
+    "migrations": 1,
+    "backfills": 0,
+    "newActionClasses": 0,
+    "newAc6Classes": 1,
+    "canonicalOrchestrators": 1,
+    "canonicalAgents": 4,
+    "capabilityRegistry": "HYBRID"
+  },
+  "proofs": {
+    "p01Postgresql": "27/27",
+    "p02Postgresql": "13/13",
+    "wave3Scenarios": "15/15",
+    "finalGate": "10/10",
+    "evaluationCorpus": "110/110",
+    "mandatorySuites": 461,
+    "mandatoryTests": 3878,
+    "permanentC9Ratchets": 12
+  },
+  "production": {
+    "localMigrations": 96,
+    "appliedMigrations": 99,
+    "pendingMigrations": 0,
+    "drift": "NONE",
+    "health": "PASS",
+    "readiness": "PASS",
+    "productionFieldTotal": 123,
+    "schemaIdenticalAcrossAllFourWaves": true,
+    "c9Rows": 0,
+    "productionProofEffects": 0,
+    "coordinationRoutesUnauthenticated": 401
+  },
+  "boundaries": {
+    "paidReasoning": "DISABLED",
+    "onlinePeerTraining": "NO",
+    "selfModifyingProductionAgent": "NO",
+    "autonomousSelfInitiation": "NO",
+    "businessProviderMessageMutationsForProof": 0,
+    "numericTargetsActive": 0
+  },
+  "statedLimitations": [
+    "C7/C8 reader boundary unwired in the executable proofs; covered deterministically by permanent specs",
+    "Model-graded scoring unavailable because paid reasoning is closed",
+    "Evaluation corpus is 110 cells following the mapping's enumerated factorization (80 named + 30 adversarial), not the stated 120 named",
+    "Chat-first UX direction intentionally not implemented and not foreclosed"
+  ],
+  "c10": "NOT STARTED"
+}

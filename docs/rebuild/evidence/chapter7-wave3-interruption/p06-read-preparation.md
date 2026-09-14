@@ -1,0 +1,29 @@
+# P06 bounded read preparation (no implementation yet)
+
+Approved scope: Q16/Q17/Q19/Q20/Q21; D1–D13 A; one MeasurementRevision, no schema/action growth. Wave3 must be production PASS before P06 runtime edits.
+
+## Read facade and authority
+
+Root to own shared MeasurementService live/revision access, common safe presenter/facade, current TenantContext/User/Membership/role/Staff/branch/feature authorization, AI integration. No public measurement admission/writer; read consumers may use shared typed live facts without persistence. System producer namespace only after trusted server authority. AI outputs omit raw Client/provider/contact/source IDs and payloads; exact canonical scopes before system context. Snapshot access must recheck current authorization. Finance roles exclude Manager/branch_manager. Source reader roles are not public authorization by themselves. Staff own queries use current Staff/StaffProviderLink/CrmStaffAccess; finance owner may view canonical Staff without User. Tenant-wide source cannot be used to satisfy missing branch scope. Existing bound calendar month goal cannot silently widen daily/weekly salary request. P04 salary normalizer may serve exact-window source facts without inventing another durable model.
+
+## Exact consumer locations
+
+BusinessState: readBusinessComposition, employeeSalaryScope, staffSalaryScope; businessMetricSnapshot; businessMetricChanges/percentageDelta plus staff/service changes. Warnings currently do not suppress incomparable trends. Reuse P02 comparator, not warning-only claims.
+OperationsAnalytics.getBusinessProfitability: positive provider revenue minus expense ledger, salary-category fuzzy overlap; replace C7 measured output with P02 financial completeness/expense rules. Existing getBusinessFinance/getStaffFinance/appointment/source readers remain source primitives.
+AI handler readTeamKpi at2449 private staff_targets_rub arithmetic; employeeMoneyMotivation forced earnedRub null; master-money-motivation helper default0.5/forecast/upside must not enter measured output. forecastBusinessRevenue and Python director projections must remain explicitly outside C7 facts; no C8 truth claim.
+PWA app.html ASaasOwnerPanel dateRange/load/content at34698, progressRow35142; journal fallback for revenue, missing staff revenue zero, company payroll status suppresses verified individual row. Home hydration29351 month revenue assigned salary_week. Preserve settings editor, render exact server facts/unknown/currency/bounds without local ratios/substitutions.
+Python analytics.py business_summary/_previous_window/business_pulse: duplicate money/salary and artificial100% fromzero. webhook_server active panel_salary, panel_my_earnings, panel_master_clients, panel_daily_report plus _today_earn_from_records/_master_month_behind/_master_clients_month/_daily_report/_period_report. Use canonical backend read result; no new raw-ID authority. canonical_staff_access.current_credential() is available only within current request, synchronous_request_callback explicitly transfers to awaited thread. Native Telegram has no Maya session => no staff authority; no keyless legacy fallback. Existing canonical internal bridge auth can forward credential to permitted GET route. Never log credential.
+
+## Owner reports (agent read-only evidence)
+
+OwnerReportsService.runDailyReport333 / runMorningKind204 currently check existing run + eligible recipients before state/composition/admit. Existing content.payload accepts bounded metadata; fingerprint includes payload and Store encrypts whole plan. DailyV1 content shared by recipients, MorningV2 content per recipient. Shared read report pin must use existing legitimate scope common to recipients; current finance feature/membership required, owner role alone insufficient. Snapshot Store539 checks admitted recipient/current membership/staff, but does not require daily_brief preference (intentional); supplement current C7 scope authority, no preference-retention rewrite.
+Measurement occurrence namespace owner_report requires existing OwnerReportRun, so pre-report admission uses deterministic measurement_request (tenant/reportType/localDate/version/kind/exactscope). Retry must restore original receipt/asOf then resume; random-on-retry/new now yields idempotency conflict. No new row after original expiry. Race loser rereads original accepted occurrence (verify immutable scope) rather than creates new snapshot.
+Daily dayIsoRange.to+1ms gives exclusive upper bound. Do not change report period/cadence. Existing report replay bypasses composition. content.payload must remain <=8000 JSON chars (Action Engine boundedJsonObject); keep only small metric/value/state/basis/currency whitelist and revision ID/hash/asOf/expiry. PDF download renders only title/bodyText; body and pin must use same snapshot. Existing report7day expiry not extended by C7 365day derivative. Active/trial/past_due report eligibility vs measurement active-only: use intersection; no silent extension of measurement authority.
+
+## Audit
+
+New bounded tenant audit GET already Q21 and S01/S20 scope. Existing AuditLog sole writer untouched. Current TENANT_OWNER/BUSINESS_OWNER only, tenantId exact + scope tenant; fixed safe event categories; <=31days window; default50/max100; newest(createdAt,id) cursor. Only safe id/createdAt/action/entityType/authorized opaque ref, safe per-event reason/outcome/rule/count allowlist. Never serialize metadataJson, platform rows, raw Client/User/provider payloads.
+
+## Final acceptance
+
+P06 consumer parity HTTP/PWA/proxy/AI/chat/realtime/Python/reports/authorizedPDF plus safe audit and retention access. Closed32surface manifest; no unrestricted discovery. All old retired effects preserved. Full mandatory gate then P06 production structural/read-only PASS; final C7 22/22Q6/6packages32/32surface gate once. No production proof business/provider/messages. Main24entries17oldDBuntouched.

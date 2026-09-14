@@ -1,0 +1,41 @@
+{
+  "verdict": "PASS",
+  "actualCompiledBridge": true,
+  "actualSignedAuthenticator": true,
+  "realPostgreSQL": true,
+  "clientWithoutUser": true,
+  "results": {
+    "internal_success": {
+      "sameReceipt": true,
+      "sameKey": true,
+      "oneExecution": true,
+      "changedTimeServiceStaff": "CONFLICT",
+      "restartBeforeModel": true,
+      "crashBeforeBinding": true
+    },
+    "external_success": {
+      "sameReceipt": true,
+      "sameKey": true,
+      "oneExecution": true,
+      "changedTimeServiceStaff": "CONFLICT",
+      "restartBeforeModel": true,
+      "crashBeforeBinding": true
+    },
+    "external_unresolved": {
+      "sameExecution": true,
+      "changedModelIntent": "CONFLICT",
+      "providerCreates": 1,
+      "unknownEscape": 0
+    },
+    "crashAfterBinding": {
+      "realChildSIGKILL": true,
+      "durableState": "EXECUTING",
+      "sameExecution": true,
+      "changedIntent": "CONFLICT",
+      "newExecutions": 0
+    }
+  },
+  "concurrentDivergent": "one accepted intent and conflict",
+  "newExplicitConfirmation": "new receipt/key",
+  "productionMutations": 0
+}

@@ -1,0 +1,22 @@
+{
+  "status": "PASS — STATIC DOCUMENTATION/SCHEMA MAPPING ONLY",
+  "checkedAt": "2026-09-08T14:39:38.579621+00:00",
+  "sourceFilesHashed": 34,
+  "existingModelsInspected": 35,
+  "existingFKTargetsValidated": 8,
+  "requirementsMapped": 22,
+  "packagesCovered": 6,
+  "ownerDecisionsApproved": 13,
+  "schemaDecisionApproved": false,
+  "newModelFieldsCounted": 37,
+  "namedChecksCounted": 16,
+  "localLinksChecked": 7,
+  "foundationCount": 20,
+  "packageDAG": "unchanged, acyclic, 4 waves",
+  "inheritedSurfaceGroups": 32,
+  "runtimeSchemaMigrationChanges": 0,
+  "productionMutations": 0,
+  "postgresProofRun": false,
+  "mandatoryRuntimeRegressionRun": false,
+  "reason": "Only proposal and evidence changed; no executable schema/runtime was created. Required future PostgreSQL/runtime proofs are listed, not claimed passed."
+}

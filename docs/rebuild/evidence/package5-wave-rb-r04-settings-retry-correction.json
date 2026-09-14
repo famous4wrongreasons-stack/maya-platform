@@ -1,0 +1,100 @@
+{
+  "package": "R04",
+  "baselineCommit": "330a7a25",
+  "correction": "Resolve persisted configJson inside the existing appointment_notifications retry branch. Preserve A23 null-config lazy parsing. No Python/PWA/schema/owner changes.",
+  "supersededFailure": "Aggregate diagnostics caught two undeclared config references at appointment_notifications. A first new-test lint run then caught two unbound mock-method references; explicit fixture mocks corrected the test without an exemption.",
+  "status": "PASS",
+  "sourceHashes": {
+    "maya-saas-backend/src/package5-wave1/package5-wave1-canonical-cutover.service.ts": "3754b8465a542bea50786bb326c93ae8b5193c9f1ff000a65b2ff7fefd2ee102",
+    "maya-saas-backend/src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts": "a2ab357162ef09dd73b5e6153111181efb62ab67ca49486796bde217e6d1935a"
+  },
+  "checks": [
+    {
+      "name": "settings-fix-typecheck",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.177,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "settings-fix-typecheck-scripts",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.scripts.json",
+        "--incremental",
+        "false"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 11.36,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "settings-fix-build",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/@nestjs/cli/bin/nest.js",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 7.721,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "settings-fix-build-preflight",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "tsconfig.preflight.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 7.03,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "settings-fix-regression-final",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts",
+        "src/package5-wave1/operational-work.http.spec.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.845,
+      "logSha256": "146344dcc9c3bc6a3b33d4ef478e90f37de6bec2fba15de3374e40828db06400"
+    },
+    {
+      "name": "settings-fix-lint-final",
+      "command": [
+        "/Users/stanislavmosin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "node_modules/eslint/bin/eslint.js",
+        "{src,apps,libs,test,scripts}/**/*.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 30.522,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "targetedSuites": 2,
+  "targetedTests": 15,
+  "regression": "Same canonical normalized appointment notification intent resumes original execution; changed enabled flag or lead times under original identity throws conflict without a second resume, build, execute or read. Existing A23 null-config retry remains tested.",
+  "fullWaveAggregate": "Parent reruns after independent correction commit; not predeclared by this report.",
+  "productionEffects": 0,
+  "schemaChanges": 0,
+  "processHygiene": 0,
+  "runtimeFrozen": true,
+  "testsFrozen": true
+}

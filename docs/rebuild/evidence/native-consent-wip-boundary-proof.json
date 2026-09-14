@@ -1,0 +1,11 @@
+{
+  "scope": "actual WIP adapter with synthetic effect sink, no database",
+  "keylessRejectedBeforeEffects": 4,
+  "keylessEffects": 0,
+  "keyedAdapterPreservesThreeEventIdentities": true,
+  "adapterRetriesPreserveEachIdentity": true,
+  "retiredHeuristicIssuerDeniesWithoutDatabaseReads": true,
+  "fullProvenanceOrConsentLifecycleAcceptance": false,
+  "databaseConnections": 0,
+  "productionEffects": 0
+}

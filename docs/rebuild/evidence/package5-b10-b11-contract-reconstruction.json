@@ -1,0 +1,55 @@
+{
+  "contract": "maya.package5-b10-b11-contract-reconstruction/1",
+  "sourceCheckpoint": "573c3e7b",
+  "observedAt": "2026-09-05",
+  "productionRelease": "/opt/maya-saas/releases/20260904-p5-b9-9b483768",
+  "productionLegacyRuntime": "/home/botadmin/barbershop-bot",
+  "productionMutationCount": 0,
+  "b9Reopened": false,
+  "b10": {
+    "subscription": {
+      "surface": "/api/sub/create",
+      "operation": "initiate_customer_subscription_purchase",
+      "canonicalOwner": "P405CustomerSubscriptionExecutableService via Action Engine",
+      "existingSchemaSufficient": true,
+      "legacyIdentityShortcut": "database.get_or_create_client",
+      "decisionRequired": false
+    },
+    "promoGift": {
+      "surface": "/api/promo_gift",
+      "operation": "issue_client_first_visit_percentage_discount_entitlement",
+      "legacyStore": "birthday_promo",
+      "percent": 20,
+      "validDays": 14,
+      "canonicalOwnerFound": false,
+      "notOwnedBy": [
+        "P4-04 qualified referral reward issuance",
+        "P4-09 tenant offer configuration",
+        "Package 2 Communication Delivery"
+      ],
+      "ownerDecisionRequired": true
+    }
+  },
+  "b11": {
+    "trigger": "YClients record-delete",
+    "providerEvidenceOwner": "provider event/evidence boundary",
+    "releasedCapacityOwner": "appointment_cancellation_recovery Opportunity",
+    "analysisOwner": "prepare_recovery_options",
+    "analysisMayContactClient": false,
+    "deliveryOwner": "Communication Delivery",
+    "legacyFact": "freed_slot_offers",
+    "legacyFactClassification": "recipient delivery outcome and cooldown",
+    "newOfferModelRequired": false,
+    "automaticOutreachAuthorityApproved": false,
+    "ownerDecisionRequired": true,
+    "directTelegramSendPresent": true,
+    "legacyChatIdLookupPresent": true
+  },
+  "implementation": {
+    "runtimeChanged": false,
+    "schemaChanged": false,
+    "migrationCreated": false,
+    "productionDeployed": false
+  },
+  "stopReason": "B10 promo value lifecycle and B11 proactive outreach authority require owner decisions"
+}

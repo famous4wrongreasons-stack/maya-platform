@@ -1,0 +1,197 @@
+{
+  "afterProductionPass": true,
+  "familyInventoryCoverage": "13/13",
+  "waves": [
+    {
+      "wave": 1,
+      "database": "maya_c06_p5_wave1_b35_final_20260907",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 2.06
+    },
+    {
+      "wave": 2,
+      "database": "maya_c06_p5_wave2_b35_final_20260907",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 2.33
+    },
+    {
+      "wave": 3,
+      "database": "maya_c06_p5_wave3_b35_final_20260907",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 2.07
+    },
+    {
+      "wave": 4,
+      "database": "maya_c06_p5_wave4_b35_final_20260907",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 2.2
+    },
+    {
+      "wave": 5,
+      "database": "maya_c06_p5_wave5_b35_final_20260907",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 1.89
+    },
+    {
+      "wave": 6,
+      "database": "maya_c06_p5_wave6_b35_final_20260907",
+      "stage": "proof",
+      "exitCode": 0,
+      "seconds": 1.7
+    }
+  ],
+  "waveProofs": [
+    {
+      "wave": 1,
+      "cleanMigrations": 82,
+      "proof": {
+        "package5Wave1ShadowActionClasses": "6/6",
+        "shadowDivergences": 0,
+        "executableActionClasses": "6/6",
+        "settingMutationOneTime": true,
+        "taskCreateCompleteOneTime": true,
+        "concurrentDuplicateWorkItemPossible": false,
+        "tenantIsolation": true,
+        "serverDerivedAuthority": true,
+        "package2ProjectionPreserved": true,
+        "unknownRequired": false,
+        "providerWrites": 0,
+        "productionMutations": 0,
+        "counts": {
+          "actionClasses": 6,
+          "targetMutations": 7,
+          "workItems": 3,
+          "inboxItems": 0,
+          "unknownExecutions": 0
+        }
+      }
+    },
+    {
+      "wave": 2,
+      "cleanMigrations": 82,
+      "proof": {
+        "shadowActionClasses": "13/13",
+        "shadowDivergences": 0,
+        "executableActionClasses": "13/13",
+        "actionTargetMutations": 14,
+        "duplicateBusinessMutationPossible": false,
+        "restartRebuildConverges": true,
+        "tenantAuthorityIsolation": true,
+        "serverDerivedPolicyAuthority": true,
+        "trialActivationAtomic": true,
+        "currentLogoutProtocolPreserved": true,
+        "crmProjectionBoundaryPreserved": true,
+        "objectDispatches": 1,
+        "providerUnknownReconciled": true,
+        "blindRetryAfterUnknown": false,
+        "productionBusinessMutations": 0,
+        "productionProviderWrites": 0
+      }
+    },
+    {
+      "wave": 3,
+      "cleanMigrations": 82,
+      "proof": {
+        "contract": "package5.wave3.all8-executable-proof/1",
+        "actionClasses": 8,
+        "shadows": 8,
+        "shadowDivergences": 0,
+        "mutationFacts": 9,
+        "providerDispatches": 1,
+        "providerReconciliation": true,
+        "duplicateBusinessMutationPossible": false,
+        "tenantIsolation": true,
+        "p02p03Hold": true,
+        "rawCredentialOrNotesInActionEvidence": false
+      }
+    },
+    {
+      "wave": 4,
+      "cleanMigrations": 82,
+      "proof": {
+        "contract": "package5.wave4.all12-executable-proof/1",
+        "families": [
+          "A27",
+          "A28"
+        ],
+        "actionClasses": 12,
+        "shadows": 12,
+        "shadowDivergences": 0,
+        "mutationFacts": 13,
+        "providerDispatches": 1,
+        "providerReconciliation": true,
+        "pendingIsNotUnknown": true,
+        "duplicateBusinessMutationPossible": false,
+        "tenantAuthorityIsolation": true,
+        "frozenAppointmentsPreserved": true,
+        "p409OfferAuthorityPreserved": true,
+        "reviewFactReplaySafe": true,
+        "realProductionBusinessMutations": 0
+      }
+    },
+    {
+      "wave": 5,
+      "cleanMigrations": 82,
+      "proof": {
+        "contract": "package5.wave5.all1-executable-proof/1",
+        "families": [
+          "A29",
+          "A31"
+        ],
+        "actionClasses": [
+          "correct_recovery_attribution"
+        ],
+        "shadows": 1,
+        "shadowDivergences": 0,
+        "factPlaneActionExecutions": 0,
+        "touchpointDeduplication": true,
+        "bookingDeduplication": true,
+        "immutableSourceFacts": true,
+        "correctionOwnerApproval": true,
+        "correctionConcurrencyWinnerCount": 1,
+        "a31EventDeduplication": true,
+        "a31SingleLiveLease": true,
+        "providerOperation": "READ_ONLY",
+        "unknownRequired": false,
+        "duplicateBusinessMutationPossible": false,
+        "tenantAuthorityIsolation": true,
+        "realProductionBusinessMutations": 0,
+        "providerWrites": 0
+      }
+    },
+    {
+      "wave": 6,
+      "cleanMigrations": 82,
+      "proof": {
+        "status": "PASS",
+        "shadowActionClasses": "6/6",
+        "shadowDivergences": 0,
+        "negativeAssertions": 53,
+        "durableRuns": 13,
+        "concurrentPrepare": "ONE RUN",
+        "sameRunLease": "ONE WINNER",
+        "crossRunDelete": "ONE EFFECT",
+        "crashRollback": "PASS",
+        "restartFence": "PASS",
+        "terminalAndBoundaryProtection": "PASS",
+        "cascadeBound": "PASS",
+        "tenantIsolation": "PASS",
+        "immutableAudit": "PASS",
+        "rawPiiInAudit": 0,
+        "fabricatedActionExecutions": 0,
+        "productionBusinessProviderMutations": 0
+      }
+    }
+  ],
+  "aggregateVerdict": "FAIL \u2014 B36",
+  "stop": {
+    "reason": "active A12 daily-report producer reaches Telegram before canonical admission; exact-source synthetic reproduction and existing ratchet failure",
+    "freshCrossBoundaryJest": "NOT RUN \u2014 STOP at first confirmed blocker",
+    "remainingLintTypechecksBuildSchemaMandatory": "NOT RUN \u2014 STOP; successful B35 deployment/local gates are not relabelled as a fresh Final Gate PASS"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "mainStatusUnchangedSincePreflight": true,
+  "original24EntriesPreserved": true,
+  "knownAdditionalExternalEntry": "\u0441\u0430\u0439\u0442 \u0438 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435/app.html",
+  "originalProtectedFileHashesUnchanged": 22,
+  "closedInventoryAndMigrationHashesUnchanged": 85,
+  "schemaUnchanged": true,
+  "preExistingDatabasesTouched": 0,
+  "productionMutationsMessagesProviderEffects": 0,
+  "ownedTempProcesses": 0,
+  "ownedWatchers": 0,
+  "ownedBrowsers": 0,
+  "ownedTempDatabases": 0,
+  "processHygiene": 0
+}

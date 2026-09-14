@@ -1,0 +1,41 @@
+{
+  "contacts": {
+    "phone": "+7 (962) 447-67-47",
+    "phone_raw": "+79624476747"
+  },
+  "stats": {
+    "years": "6+",
+    "masters": "5",
+    "rating": "5.0",
+    "return": "98%"
+  },
+  "ratings": {
+    "yandex": {
+      "score": "5.0",
+      "url": "https://yandex.ru/maps/org/muzhskaya_estetika/503759/"
+    },
+    "twogis": {
+      "score": "5.0",
+      "url": "https://2gis.ru/stavropol/firm/503759"
+    }
+  },
+  "social": {
+    "instagram": "https://www.instagram.com/malesthetic.pro/",
+    "telegram": "https://t.me/malesthetic",
+    "max": "#"
+  },
+  "booking": {
+    "main_url": "https://n532637.yclients.com/company/503759/personal/menu?o="
+  },
+  "promo": {
+    "enabled": true,
+    "photo_url": "/app/promo-photo.jpg",
+    "title": "Дни открытых дверей · каждый",
+    "days": ["Понедельник", "Вторник"],
+    "number": "−20",
+    "unit": "%",
+    "description": "на все услуги · для новых клиентов",
+    "note": "Каждый пн и вт · По записи",
+    "booking_url": "https://n532637.yclients.com/company/503759/personal/menu?o="
+  }
+}

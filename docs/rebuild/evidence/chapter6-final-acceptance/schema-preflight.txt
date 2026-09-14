@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "environment": "production",
+  "config": "safe",
+  "local_migrations": 93,
+  "database": {
+    "status": "ready",
+    "applied_migrations": 96,
+    "pending_migrations": 0
+  }
+}
+No difference detected.

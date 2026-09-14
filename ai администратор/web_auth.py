@@ -137,6 +137,23 @@ async def verify_phone_login(phone: str, code: str) -> dict:
     return _issue_session(phone=norm, vk_user_id=None, yandex_user_id=None, name=name)
 
 
+async def verify_phone_evidence(phone: str, code: str) -> dict:
+    """B8 possession evidence only: no session, Client lookup or contact write."""
+    norm = normalize_phone(phone)
+    if not norm or not isinstance(code, str) or not code.isascii() or not code.isdigit() or not 4 <= len(code) <= 8:
+        return {"ok": False, "error": "bad_input"}
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as cli:
+            response = await cli.post(f"{_YC_BASE}/user/auth", headers=_yc_headers(),
+                                      json={"phone": norm, "code": code})
+        data = response.json()
+        if response.status_code >= 400 or not isinstance(data, dict) or not data.get("success"):
+            return {"ok": False, "error": "wrong_code"}
+        return {"ok": True, "phone_evidence_only": True}
+    except Exception:
+        return {"ok": False, "error": "verify_failed"}
+
+
 # ─── VK ID ──────────────────────────────────────────────────────────────
 async def exchange_vk_code(code: str, redirect_uri: str | None = None,
                            code_verifier: str = "", device_id: str = "") -> dict:
@@ -364,72 +381,18 @@ def issue_yandex_session(yandex_user_id: str, name: str = "",
 def _issue_session(*, phone: str | None, vk_user_id: int | None,
                    yandex_user_id: str | None,
                    name: str, email: str = "", avatar_url: str = "") -> dict:
-    """Общая выдача сессии. Если телефон сматчился с Telegram-клиентом —
-    подставляем его chat_id, и кабинет работает как в Telegram."""
-    phone_hash = pii_crypto.hash_phone(phone) if phone else None
-    chat_id = None
-    display = name or ""
-    if phone:
-        client = database.find_client_by_phone(phone)
-        if client:
-            chat_id = client.get("telegram_chat_id") or client.get("chat_id")
-            display = display or client.get("name", "")
-
-    # Известные сотрудники по VK-id (вход через ВК телефон не отдаёт) → их Telegram
-    # chat_id. Тогда владелец/мастер видит панель и кабинет, заходя через ВК без VPN.
-    #
-    # БЕЗОПАСНОСТЬ: vk_user_id, попадающий сюда, ОБЯЗАН быть уже сверен с VK на стороне
-    # сервера — token-endpoint в exchange_vk_code либо user_info в vk_session_from_token.
-    # Иначе знание чужого числового id давало бы staff-сессию. Дополнительно эскалацию
-    # до staff включаем только при VK_LOGIN_ENABLED: пока VK-вход выключен, карта может
-    # быть заполнена «на будущее», а путь /api/auth/vk-sdk уже задеплоен и открыт.
-    if (not chat_id and vk_user_id
-            and _enabled_bool("VK_LOGIN_ENABLED")):
-        staff_map = getattr(config, "VK_STAFF_CHAT_MAP", {}) or {}
-        mapped = staff_map.get(int(vk_user_id)) or staff_map.get(str(vk_user_id))
-        if mapped:
-            chat_id = int(mapped)
-
-    if (not chat_id and yandex_user_id
-            and _enabled_bool("YANDEX_LOGIN_ENABLED")):
-        staff_map = getattr(config, "YANDEX_STAFF_CHAT_MAP", {}) or {}
-        mapped = (staff_map.get(str(yandex_user_id))
-                  or staff_map.get((email or "").strip().lower()))
-        if mapped:
-            chat_id = int(mapped)
-
-    subject_kind = "client"
-    if chat_id:
-        try:
-            if database.is_admin(int(chat_id)) or database.get_master_by_chat_id(int(chat_id)):
-                subject_kind = "staff"
-        except Exception:
-            subject_kind = "client"
-
+    """Legacy sessions are compatibility-only; never staff or Client authority."""
     token = _new_token()
     database.create_web_session(
-        token,
-        phone_hash=phone_hash,
-        chat_id=int(chat_id) if chat_id else None,
-        vk_user_id=int(vk_user_id) if vk_user_id else None,
-        yandex_user_id=str(yandex_user_id) if yandex_user_id else None,
-        display_name=display,
-        tg_photo_url=avatar_url or "",
-        subject_kind=subject_kind,
-        ttl_days=SESSION_TTL_DAYS,
+        token, phone_hash=pii_crypto.hash_phone(phone) if phone else None,
+        chat_id=None, vk_user_id=vk_user_id, yandex_user_id=yandex_user_id,
+        display_name=name or "", tg_photo_url=avatar_url or "",
+        subject_kind="client", ttl_days=SESSION_TTL_DAYS,
     )
-    return {
-        "ok": True,
-        "token": token,
-        "identity": {
-            "has_phone": bool(phone),
-            "known_client": bool(chat_id),
-            "subject_kind": subject_kind,
-            "is_staff": subject_kind == "staff",
-            "name": display,
-            "email": email or "",
-        },
-    }
+    return {"ok": True, "token": token, "identity": {"has_phone": bool(phone),
+        "known_client": False, "subject_kind": "client", "is_staff": False,
+        "name": name or "", "email": email or ""}}
+
 
 
 def resolve_session(token: str) -> dict | None:

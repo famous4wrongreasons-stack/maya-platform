@@ -1,0 +1,22 @@
+[
+  {
+    "file": "maya-saas-backend/src/action-engine/package5-b13-remediation.architecture.spec.ts",
+    "onlySemanticChange": "versioned fixture path",
+    "allAssertionsPreserved": true
+  },
+  {
+    "file": "maya-saas-backend/src/action-engine/package5-b14-remediation.architecture.spec.ts",
+    "onlySemanticChange": "versioned fixture path",
+    "allAssertionsPreserved": true
+  },
+  {
+    "file": "maya-saas-backend/src/action-engine/package5-b16-remediation.architecture.spec.ts",
+    "onlySemanticChange": "versioned fixture path",
+    "allAssertionsPreserved": true
+  },
+  {
+    "file": "maya-saas-backend/src/action-engine/package5-b17-remediation.architecture.spec.ts",
+    "onlySemanticChange": "versioned fixture path",
+    "allAssertionsPreserved": true
+  }
+]

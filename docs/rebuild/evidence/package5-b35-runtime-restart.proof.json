@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checks": [
+    "actual restart resumes original pending sibling",
+    "original UNKNOWN never resent",
+    "same approved graph and exact terminal outcomes"
+  ],
+  "productionMessages": 0
+}

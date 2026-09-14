@@ -1,0 +1,540 @@
+[
+  {
+    "id": "Q01",
+    "requirement": "Единый измеримый факт: basis/unit/currency/asOf/window/completeness/version",
+    "package": "P01",
+    "canonicalOwner": "Measurement + existing source owners",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.contract.ts",
+      "maya-saas-backend/src/measurement/measurement.sources.ts",
+      "maya-saas-backend/src/measurement/measurement.service.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.contract.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-measurement.txt",
+      "chapter7-p06/postgres-source-owner-compatibility.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q02",
+    "requirement": "Exact Client/tenant lineage от Opportunity до outcome",
+    "package": "P01",
+    "canonicalOwner": "Measurement; source identities remain A18/CRM",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.contract.ts",
+      "maya-saas-backend/src/measurement/measurement.sources.ts",
+      "maya-saas-backend/src/measurement/measurement.service.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.contract.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-measurement.txt",
+      "chapter7-p06/postgres-source-owner-compatibility.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q03",
+    "requirement": "Booked / arrived / paid / no-show / cancelled / deleted раздельны",
+    "package": "P01",
+    "canonicalOwner": "Attendance facts -> Measurement",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.contract.ts",
+      "maya-saas-backend/src/measurement/measurement.sources.ts",
+      "maya-saas-backend/src/measurement/measurement.service.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.contract.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-measurement.txt",
+      "chapter7-p06/postgres-source-owner-compatibility.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q04",
+    "requirement": "Поздние отмены/возвраты меняют current outcome, сохраняя as-reported",
+    "package": "P03",
+    "canonicalOwner": "A29 attribution + Measurement outcome",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.outcomes.ts",
+      "maya-saas-backend/src/measurement/measurement.outcomes.facts.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.outcomes.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.outcomes.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-outcomes.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q05",
+    "requirement": "Cash/refund/fiscal event interpretation с доказанным source meaning",
+    "package": "P02",
+    "canonicalOwner": "CRM financial facts / BusinessState",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.finance.ts",
+      "maya-saas-backend/src/measurement/measurement.finance.facts.ts",
+      "maya-saas-backend/src/measurement/measurement.period.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.finance.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.period.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.value.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.finance.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-wave2/p02-finance-proof.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q06",
+    "requirement": "Расходы: provenance overlap, raw category и currency",
+    "package": "P02",
+    "canonicalOwner": "P407 expense owner -> financial fact reader",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.finance.ts",
+      "maya-saas-backend/src/measurement/measurement.finance.facts.ts",
+      "maya-saas-backend/src/measurement/measurement.period.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.finance.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.period.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.value.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.finance.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-wave2/p02-finance-proof.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q07",
+    "requirement": "Периоды/полнота/финансовые подписи и compatibility disclosure",
+    "package": "P02",
+    "canonicalOwner": "BusinessState / measurement presenters",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.finance.ts",
+      "maya-saas-backend/src/measurement/measurement.finance.facts.ts",
+      "maya-saas-backend/src/measurement/measurement.period.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.finance.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.period.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.value.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.finance.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-wave2/p02-finance-proof.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q08",
+    "requirement": "Фактическое начисление мастера без default 0.5",
+    "package": "P04",
+    "canonicalOwner": "Financial/staff fact owner",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.staff-goal.ts",
+      "maya-saas-backend/src/measurement/measurement.staff-goal.facts.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.staff-goal.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.staff-goal.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-staff-goal.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q09",
+    "requirement": "Цель и plan/fact exact Staff/tenant/period",
+    "package": "P04",
+    "canonicalOwner": "A22 config owner -> goals measurement",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.staff-goal.ts",
+      "maya-saas-backend/src/measurement/measurement.staff-goal.facts.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.staff-goal.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.staff-goal.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-staff-goal.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q10",
+    "requirement": "Отзывы: provenance, denominator, local month, observed delta",
+    "package": "P05",
+    "canonicalOwner": "Review/NativeFeedback facts -> reputation measurement",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.reputation.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.reputation.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.reputation.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-wave2/p05-reputation-proof.final.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q11",
+    "requirement": "Ledger/card discrepancy is measured, not silently repaired",
+    "package": "P02",
+    "canonicalOwner": "P4 value owners -> Measurement",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.finance.ts",
+      "maya-saas-backend/src/measurement/measurement.finance.facts.ts",
+      "maya-saas-backend/src/measurement/measurement.period.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.finance.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.period.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.value.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.finance.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-wave2/p02-finance-proof.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q12",
+    "requirement": "Attributed result only with explicit evidence; no causal uplift by coincidence",
+    "package": "P03",
+    "canonicalOwner": "A29 + Measurement",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.outcomes.ts",
+      "maya-saas-backend/src/measurement/measurement.outcomes.facts.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.outcomes.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.outcomes.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-outcomes.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q13",
+    "requirement": "Заполненное окно доказано capacity/appointment lineage",
+    "package": "P03",
+    "canonicalOwner": "Occupancy facts -> Measurement",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.outcomes.ts",
+      "maya-saas-backend/src/measurement/measurement.outcomes.facts.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.outcomes.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.outcomes.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-outcomes.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q14",
+    "requirement": "Communication funnel separates admitted/attempted/accepted/delivered/read/outcome",
+    "package": "P03",
+    "canonicalOwner": "CD owner -> Measurement",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.outcomes.ts",
+      "maya-saas-backend/src/measurement/measurement.outcomes.facts.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.outcomes.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.outcomes.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-outcomes.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q15",
+    "requirement": "Proposal/approval/execution/reconciliation measured independently",
+    "package": "P03",
+    "canonicalOwner": "Opportunity/AE -> Measurement",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.outcomes.ts",
+      "maya-saas-backend/src/measurement/measurement.outcomes.facts.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.outcomes.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.outcomes.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-outcomes.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q16",
+    "requirement": "One result through existing HTTP/PWA/AI/report consumers",
+    "package": "P06",
+    "canonicalOwner": "Measurement read boundary; OwnerReportRun for existing reports",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.read.service.ts",
+      "maya-saas-backend/src/measurement/measurement.presentation.ts",
+      "maya-saas-backend/src/measurement/measurement.report.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.read.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.pwa.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.consumers.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-consumers.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q17",
+    "requirement": "Permissions, prompts, retention, export and tenant isolation",
+    "package": "P06",
+    "canonicalOwner": "Existing auth/A18/A22/AC6 owners; measurement read gate",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.read.service.ts",
+      "maya-saas-backend/src/measurement/measurement.presentation.ts",
+      "maya-saas-backend/src/measurement/measurement.report.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.read.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.pwa.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.consumers.architecture.spec.ts",
+      "maya-saas-backend/src/audit-log/tenant-audit-read.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-consumers.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q18",
+    "requirement": "Durable measurement is restart/retry/concurrency safe",
+    "package": "P01",
+    "canonicalOwner": "Measurement; no parallel AE executor",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.contract.ts",
+      "maya-saas-backend/src/measurement/measurement.sources.ts",
+      "maya-saas-backend/src/measurement/measurement.service.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.contract.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-measurement.txt",
+      "chapter7-p06/postgres-source-owner-compatibility.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q19",
+    "requirement": "Permanent guards preserve all C6 owners and 32 surface groups",
+    "package": "P06",
+    "canonicalOwner": "Existing owner guards + Measurement",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.read.service.ts",
+      "maya-saas-backend/src/measurement/measurement.presentation.ts",
+      "maya-saas-backend/src/measurement/measurement.report.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.read.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.pwa.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.consumers.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-consumers.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q20",
+    "requirement": "Finite acceptance/cutover manifest; no proof mutations",
+    "package": "P06",
+    "canonicalOwner": "Existing release owner/process",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.read.service.ts",
+      "maya-saas-backend/src/measurement/measurement.presentation.ts",
+      "maya-saas-backend/src/measurement/measurement.report.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.read.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.pwa.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.consumers.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-consumers.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q21",
+    "requirement": "Tenant-scoped читающее API аудита из Chapter1 handoff",
+    "package": "P06",
+    "canonicalOwner": "Existing AuditLog owner + authorization read boundary",
+    "implementation": [
+      "maya-saas-backend/src/audit-log/tenant-audit-read.controller.ts",
+      "maya-saas-backend/src/audit-log/tenant-audit-read.service.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.read.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.pwa.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.consumers.architecture.spec.ts",
+      "maya-saas-backend/src/audit-log/tenant-audit-read.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-consumers.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  },
+  {
+    "id": "Q22",
+    "requirement": "Доказанный source admission для C7 measurement из legacy bridge",
+    "package": "P01",
+    "canonicalOwner": "Existing BridgeSource/CRM/auth owners -> Measurement",
+    "implementation": [
+      "maya-saas-backend/src/measurement/measurement.contract.ts",
+      "maya-saas-backend/src/measurement/measurement.sources.ts",
+      "maya-saas-backend/src/measurement/measurement.service.ts"
+    ],
+    "executableProof": [
+      "maya-saas-backend/src/measurement/measurement.contract.spec.ts",
+      "maya-saas-backend/src/measurement/measurement.architecture.spec.ts"
+    ],
+    "postgresProof": [
+      "chapter7-p06/postgres-measurement.txt",
+      "chapter7-p06/postgres-source-owner-compatibility.txt"
+    ],
+    "productionEvidence": [
+      "chapter7-p06/production-structural.txt",
+      "chapter7-p06/expected.json",
+      "chapter7-final/surfaces.json"
+    ],
+    "status": "IMPLEMENTED / TESTED / PRODUCTION VERIFIED"
+  }
+]

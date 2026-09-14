@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "publisherSha256": "acb9caea6f7029857cc3de9074b715f2c396eb23add1ceed3b956ed567a2cee6",
+  "cases": [
+    {
+      "copyFailureAt": 2,
+      "restartFailure": false,
+      "successCase": false,
+      "status": "PASS",
+      "metadataPreserved": true,
+      "temporaryFilesRemaining": 0,
+      "baselineRaceRejected": true,
+      "externalCommandsExecuted": 0
+    },
+    {
+      "copyFailureAt": 4,
+      "restartFailure": false,
+      "successCase": false,
+      "status": "PASS",
+      "metadataPreserved": true,
+      "temporaryFilesRemaining": 0,
+      "baselineRaceRejected": true,
+      "externalCommandsExecuted": 0
+    },
+    {
+      "copyFailureAt": null,
+      "restartFailure": true,
+      "successCase": false,
+      "status": "PASS",
+      "metadataPreserved": true,
+      "temporaryFilesRemaining": 0,
+      "baselineRaceRejected": true,
+      "externalCommandsExecuted": 0
+    },
+    {
+      "copyFailureAt": null,
+      "restartFailure": false,
+      "successCase": true,
+      "status": "PASS",
+      "metadataPreserved": true,
+      "temporaryFilesRemaining": 0,
+      "baselineRaceRejected": true,
+      "externalCommandsExecuted": 0
+    }
+  ],
+  "rootOwnedPwaMetadata": "PASS",
+  "actualGuardChecks": "separate composed-source proof, not substituted by this filesystem harness",
+  "productionOperations": 0,
+  "processHygiene": 0
+}

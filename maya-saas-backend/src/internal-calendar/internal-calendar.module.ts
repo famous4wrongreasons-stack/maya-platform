@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 
-import { BrandingModule } from '../branding/branding.module';
+import { Package5Wave4Module } from '../package5-wave4/package5-wave4.module';
 import { QuotasModule } from '../quotas/quotas.module';
 import { UsersModule } from '../users/users.module';
 import { InternalCalendarController } from './internal-calendar.controller';
 import { InternalCalendarService } from './internal-calendar.service';
 
 @Module({
-  imports: [BrandingModule, UsersModule, QuotasModule],
+  imports: [UsersModule, QuotasModule, Package5Wave4Module],
   controllers: [InternalCalendarController],
   providers: [InternalCalendarService],
   exports: [InternalCalendarService],

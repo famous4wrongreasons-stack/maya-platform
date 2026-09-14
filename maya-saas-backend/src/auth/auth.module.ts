@@ -4,11 +4,16 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 
+import { AuditLogModule } from '../audit-log/audit-log.module';
+import { CommunicationShadowModule } from '../communication-shadow';
+import { CrmModule } from '../crm/crm.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
+import { Package5Wave2Module } from '../package5-wave2/package5-wave2.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
 import { AuthController } from './auth.controller';
+import { LegacyStaffPrincipalController } from './legacy-staff-principal.controller';
 import { AuthFlowSystemGateway } from './auth-flow-system.gateway';
 import { AuthRateLimitExceptionFilter } from './auth-rate-limit.filter';
 import { AuthRateLimitRepository } from './auth-rate-limit.repository';
@@ -26,10 +31,14 @@ import { TenantAuthRepository } from './tenant-auth.repository';
 
 @Module({
   imports: [
+    AuditLogModule,
+    CommunicationShadowModule,
     ConfigModule,
+    CrmModule,
     PassportModule,
     PrismaModule,
     UsersModule,
+    Package5Wave2Module,
     TenantsModule,
     TenancyModule,
     JwtModule.registerAsync({
@@ -51,7 +60,7 @@ import { TenantAuthRepository } from './tenant-auth.repository';
       },
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, LegacyStaffPrincipalController],
   providers: [
     {
       provide: APP_FILTER,

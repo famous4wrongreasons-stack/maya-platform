@@ -1,0 +1,85 @@
+{
+  "protocol": {
+    "transaction": "REPEATABLE READ READ ONLY",
+    "connectionDefaultReadOnly": true,
+    "statementTimeoutMs": 15000,
+    "lockTimeoutMs": 1000,
+    "completion": "ROLLBACK",
+    "aggregateOnly": true
+  },
+  "queries": [
+    {
+      "name": "protocol",
+      "sql": "SELECT current_setting('transaction_read_only') AS read_only, current_setting('transaction_isolation') AS isolation, transaction_timestamp() AS assessed_at, current_setting('statement_timeout') AS statement_timeout"
+    },
+    {
+      "name": "tenants",
+      "sql": "WITH t AS (SELECT id, 'tenant_'||dense_rank() OVER(ORDER BY \"createdAt\",id) AS alias,status,\"industryPresetId\",\"calendarSource\",\"createdAt\" FROM \"Tenant\") SELECT t.alias,t.status,t.\"calendarSource\", CASE WHEN lower(coalesce(t.\"industryPresetId\",'')) IN ('barbershop','beauty','dental','auto_service') THEN lower(t.\"industryPresetId\") ELSE 'unqualified_or_unspecified' END AS explicit_vertical, coalesce(c.provider,'none') AS provider, c.status AS integration_status,c.\"watchStartedAt\",c.\"verifiedAt\", t.\"createdAt\" FROM t LEFT JOIN \"CrmIntegration\" c ON c.\"tenantId\"=t.id ORDER BY t.alias"
+    },
+    {
+      "name": "core_counts",
+      "sql": "SELECT (SELECT count(*) FROM \"Client\") clients,(SELECT count(*) FROM \"Client\" WHERE \"mergedIntoClientId\" IS NULL) unmerged_clients,(SELECT count(*) FROM \"Client\" WHERE \"userId\" IS NULL) clients_without_user,(SELECT count(*) FROM \"CrmClientLink\") crm_client_links,(SELECT count(*) FROM \"Appointment\") appointments,(SELECT count(*) FROM \"MeasurementRevision\") measurements,(SELECT count(*) FROM \"DomainEvent\") domain_events,(SELECT count(*) FROM \"ReconciliationRun\") reconciliation_runs,(SELECT count(*) FROM \"InternalAvailabilityRule\") internal_capacity_rules,(SELECT count(*) FROM \"InternalAvailabilityException\") internal_capacity_exceptions,(SELECT count(*) FROM \"Expense\") expenses,(SELECT count(*) FROM \"ExpensePeriodDeclaration\") expense_declarations,(SELECT count(*) FROM \"RecoveryConversion\") recovery_conversions,(SELECT count(*) FROM \"TenantBusinessConfigurationRevision\" WHERE namespace='c8_valuation') c8_policies, to_regclass('\"C8ModelVersion\"') IS NOT NULL c8_model_table_present"
+    },
+    {
+      "name": "appointments_by_tenant",
+      "sql": "WITH t AS (SELECT id,'tenant_'||dense_rank() OVER(ORDER BY \"createdAt\",id) alias FROM \"Tenant\") SELECT t.alias,coalesce(a.\"crmProvider\",a.source) provider,count(*) rows,count(*) FILTER(WHERE a.\"mayaClientId\" IS NOT NULL AND c.id IS NOT NULL AND c.\"mergedIntoClientId\" IS NULL) exact_current_client_rows,count(DISTINCT a.\"mayaClientId\") clients,count(*) FILTER(WHERE a.\"mayaClientId\" IS NULL) missing_client,count(*) FILTER(WHERE a.\"staffId\" IS NULL) missing_staff,count(*) FILTER(WHERE a.\"branchId\" IS NULL) missing_branch,count(*) FILTER(WHERE a.attendance IS NULL) unknown_attendance,count(*) FILTER(WHERE a.\"totalPriceKopecks\" IS NULL) missing_booked_price,count(*) FILTER(WHERE a.\"updatedAt\">a.\"createdAt\") changed_since_first_stored,min(a.\"startAt\") earliest_visit,max(a.\"startAt\") latest_visit,min(a.\"createdAt\") earliest_mirror_admission,max(a.\"updatedAt\") latest_mirror_update FROM \"Appointment\" a JOIN t ON t.id=a.\"tenantId\" LEFT JOIN \"Client\" c ON c.id=a.\"mayaClientId\" AND c.\"tenantId\"=a.\"tenantId\" GROUP BY t.alias,coalesce(a.\"crmProvider\",a.source) ORDER BY 1,2"
+    },
+    {
+      "name": "appointment_outcome_inventory",
+      "sql": "SELECT coalesce(attendance,'UNKNOWN') attendance,status, CASE WHEN \"endAt\"<=transaction_timestamp() THEN 'past' ELSE 'future' END AS time_window,count(*) rows,count(*) FILTER(WHERE \"mayaClientId\" IS NOT NULL) client_linked FROM \"Appointment\" GROUP BY 1,2,3 ORDER BY 3,1,2"
+    },
+    {
+      "name": "temporal_appointment_inventory",
+      "sql": "SELECT to_char(date_trunc('month',\"startAt\"),'YYYY-MM') AS period_month,count(*) rows,count(*) FILTER(WHERE \"mayaClientId\" IS NOT NULL) client_linked,count(*) FILTER(WHERE attendance='arrived') arrived,count(*) FILTER(WHERE attendance='no_show') no_show,count(*) FILTER(WHERE attendance IS NULL) unknown_attendance,count(*) FILTER(WHERE \"createdAt\"<\"startAt\") stored_before_start FROM \"Appointment\" GROUP BY 1 ORDER BY 1 LIMIT 120"
+    },
+    {
+      "name": "visit_subject_history",
+      "sql": "WITH h AS (SELECT \"tenantId\",\"mayaClientId\",count(*) FILTER(WHERE attendance='arrived' AND \"endAt\"<=transaction_timestamp() AND status<>'cancelled') arrived,count(*) FILTER(WHERE attendance='no_show' AND \"endAt\"<=transaction_timestamp()) no_show FROM \"Appointment\" WHERE \"mayaClientId\" IS NOT NULL GROUP BY 1,2) SELECT count(*) observed_subjects,count(*) FILTER(WHERE arrived>0) subjects_with_arrival,count(*) FILTER(WHERE arrived>1) subjects_with_multiple_observed_arrivals,count(*) FILTER(WHERE no_show>0) subjects_with_observed_no_show FROM h"
+    },
+    {
+      "name": "measurements",
+      "sql": "SELECT kind,state,coalesce(completeness,'NULL') completeness,coalesce(qualification,'NULL') qualification,count(*) rows,count(DISTINCT \"clientId\") exact_client_subjects,min(\"admittedAt\") earliest_admission,max(\"admittedAt\") latest_admission,min(\"periodFrom\") earliest_source_period,max(\"periodTo\") latest_source_period FROM \"MeasurementRevision\" GROUP BY 1,2,3,4 ORDER BY 1,2,3,4"
+    },
+    {
+      "name": "events",
+      "sql": "SELECT type,source,\"ingestionMethod\",observation,status,count(*) rows,count(DISTINCT \"entityId\") entities,min(\"occurredAt\") first_occurred,max(\"occurredAt\") last_occurred,min(\"receivedAt\") first_received,max(\"receivedAt\") last_received,count(*) FILTER(WHERE \"receivedAt\">\"occurredAt\") received_later FROM \"DomainEvent\" GROUP BY 1,2,3,4,5 ORDER BY 1,2,3,4,5 LIMIT 200"
+    },
+    {
+      "name": "event_payload_shape_only",
+      "sql": "SELECT type,k.key,count(*) rows FROM \"DomainEvent\" e CROSS JOIN LATERAL jsonb_object_keys(e.payload) k(key) WHERE e.type IN ('appointment.created','appointment.attendance_changed','appointment.rescheduled') GROUP BY 1,2 ORDER BY 1,2 LIMIT 100"
+    },
+    {
+      "name": "reconciliation",
+      "sql": "SELECT provider,coalesce(completeness,'unfinished_or_failed') completeness,count(*) runs,count(*) FILTER(WHERE \"failureCode\" IS NOT NULL) with_failure,min(\"startedAt\") first_started,max(\"finishedAt\") last_finished,min(\"windowFrom\") earliest_queried,max(\"windowTo\") latest_queried,sum(fetched) fetched_observations,sum(created) created_observations,sum(updated) updated_observations FROM \"ReconciliationRun\" GROUP BY 1,2 ORDER BY 1,2"
+    },
+    {
+      "name": "known_data_tables",
+      "sql": "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND (table_name ILIKE '%payment%' OR table_name ILIKE '%refund%' OR table_name ILIKE '%salary%' OR table_name ILIKE '%cash%' OR table_name ILIKE '%forecast%' OR table_name ILIKE '%measurement%' OR table_name ILIKE '%evaluation%' OR table_name ILIKE '%capacity%') ORDER BY table_name"
+    },
+    {
+      "name": "safe_financial_source_inventory",
+      "sql": "SELECT currency,count(*) rows,count(*) FILTER(WHERE \"totalPriceKopecks\" IS NOT NULL) booked_price_known,count(*) FILTER(WHERE \"totalPriceKopecks\" IS NULL) booked_price_unknown,min(\"startAt\") first_source_at,max(\"startAt\") last_source_at FROM \"Appointment\" GROUP BY currency ORDER BY currency"
+    },
+    {
+      "name": "expense_inventory",
+      "sql": "SELECT source,currency,count(*) rows,count(*) FILTER(WHERE \"externalId\" IS NOT NULL) durable_external_source_refs,count(*) FILTER(WHERE \"actionExecutionId\" IS NOT NULL) execution_refs,min(\"occurredAt\") earliest_fact,max(\"occurredAt\") latest_fact FROM \"Expense\" GROUP BY 1,2 ORDER BY 1,2"
+    },
+    {
+      "name": "pipeline_label_state",
+      "sql": "SELECT count(*) quarantined_deliveries,count(*) FILTER(WHERE resolution='open') unresolved_deliveries,min(\"receivedAt\") earliest_received,max(\"receivedAt\") latest_received FROM \"IngestionQuarantine\""
+    },
+    {
+      "name": "linked_outcome_correction",
+      "sql": "SELECT count(*) FILTER (WHERE a.\"mayaClientId\" IS NOT NULL AND c.id IS NOT NULL) linked, count(*) FILTER (WHERE c.id IS NOT NULL AND a.attendance='arrived' AND a.status='completed' AND a.\"endAt\"<=transaction_timestamp()) consistent_arrived, count(*) FILTER (WHERE c.id IS NOT NULL AND a.attendance='no_show' AND a.status='no_show' AND a.\"endAt\"<=transaction_timestamp()) consistent_no_show, count(*) FILTER (WHERE c.id IS NOT NULL AND a.attendance='arrived' AND a.status='canceled') conflicting_arrived_canceled FROM \"Appointment\" a LEFT JOIN \"Client\" c ON c.id=a.\"mayaClientId\" AND c.\"tenantId\"=a.\"tenantId\" AND c.\"mergedIntoClientId\" IS NULL"
+    },
+    {
+      "name": "linked_subject_history_corrected",
+      "sql": "WITH h AS (SELECT a.\"mayaClientId\", count(*) FILTER (WHERE a.attendance='arrived' AND a.status='completed' AND a.\"endAt\"<=transaction_timestamp()) arrivals FROM \"Appointment\" a JOIN \"Client\" c ON c.id=a.\"mayaClientId\" AND c.\"tenantId\"=a.\"tenantId\" AND c.\"mergedIntoClientId\" IS NULL GROUP BY a.\"mayaClientId\") SELECT count(*) linked_subjects,count(*) FILTER (WHERE arrivals>0) subjects_with_arrival,count(*) FILTER (WHERE arrivals>1) subjects_with_multiple_arrivals FROM h"
+    },
+    {
+      "name": "other_durable_fact_snapshots",
+      "sql": "SELECT (SELECT count(*) FROM \"OwnerReportRun\") owner_report_runs,(SELECT count(*) FROM \"OwnerReportRun\" WHERE \"admittedAt\" <= transaction_timestamp()) admitted_report_runs,(SELECT count(*) FROM \"CashDeclaration\") cash_declarations"
+    }
+  ],
+  "caveat": "Original visit_subject_history predicate used status != cancelled; canonical spelling is canceled. Corrected exact completed + joined Client results in followup, unchanged counts; followup is authority for subject totals. No raw rows exported."
+}

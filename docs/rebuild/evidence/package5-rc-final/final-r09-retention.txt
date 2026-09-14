@@ -1,0 +1,1 @@
+{"package":"R09","proof":"actual AC6 scoped payload retention","result":"PASS","erasedPayloads":3,"recentPayloadHeld":true,"immutableTombstonesRetained":true,"readSideErasure":0,"productionEffects":0}

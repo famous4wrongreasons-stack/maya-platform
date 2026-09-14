@@ -1,0 +1,206 @@
+{
+  "assessedAt": "2026-09-08T09:06:02.787164+00:00",
+  "baseCheckpoint": "e9d3d3a27d63ed41f7f83040fd0e064d4280e32a",
+  "canonicalOrigin": "b6c53ff9ee31bb43d0419f5ce32aa6b0e4999ae0",
+  "rcCheckpoint": "ed13d57f46bc3bc49f91b59b57f040c85589c4c8",
+  "method": "source/schema/closed-contract inspection plus pinned READ ONLY production audit; not executable remediation acceptance",
+  "existingLinkRevocationReusable": true,
+  "existingSecurityConsentInvalidationOwnerSufficient": false,
+  "proposedNewModels": 1,
+  "proposedNewPhysicalFields": 12,
+  "proposedNewActionClasses": 1,
+  "proposedMigrationRequired": true,
+  "backfillRequired": false,
+  "implementationPerformed": false,
+  "syntheticPostgresRemediationProofRun": false,
+  "sources": {
+    "link_owner": {
+      "path": "maya-saas-backend/src/crm/client-channel-link.service.ts",
+      "sha256": "742ec211e8186c0d7e6f0c6abc4232db6a20a5c1a10ae53627075b23f0293309",
+      "anchors": [
+        {
+          "text": "async revoke(request: unknown)",
+          "lines": [
+            276
+          ]
+        },
+        {
+          "text": "private async revokeVerified",
+          "lines": [
+            283
+          ]
+        }
+      ]
+    },
+    "closed_revocation_verifier": {
+      "path": "maya-saas-backend/src/crm/client-channel-runtime.service.ts",
+      "sha256": "4c8427b7ab12b04b36717e809f442c8b8fbbd5633cac658c8316e5860eaae5e1",
+      "anchors": [
+        {
+          "text": "verifyRevocation:",
+          "lines": [
+            59
+          ]
+        }
+      ]
+    },
+    "consent_model": {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "5d45ab78ebb3edb349c50bd93d2b5e0e3449dea2956773232b9e36b8b2ea2fc8",
+      "anchors": [
+        {
+          "text": "model ClientConsentFact {",
+          "lines": [
+            1515
+          ]
+        },
+        {
+          "text": "model AuditLog {",
+          "lines": [
+            2554
+          ]
+        },
+        {
+          "text": "model MaintenanceRun {",
+          "lines": [
+            2868
+          ]
+        },
+        {
+          "text": "model ExpensePeriodDeclarationInvalidation {",
+          "lines": [
+            1740
+          ]
+        }
+      ]
+    },
+    "consent_guards": {
+      "path": "maya-saas-backend/prisma/migrations/20260903120000_package5_common_authority_foundation/migration.sql",
+      "sha256": "4166dcdaa50d88b715617c6a4018cb22db7e6713c09c76107d1130d60cfb0244",
+      "anchors": [
+        {
+          "text": "CHECK (\"decision\" IN ('grant', 'revoke'))",
+          "lines": [
+            226
+          ]
+        },
+        {
+          "text": "ClientConsentFact is append-only",
+          "lines": [
+            286
+          ]
+        }
+      ]
+    },
+    "consent_owner": {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "sha256": "c6885ee3deb147d13a8d3396cf8f42f7f39323fb2925d7109cf0acec306e16c1",
+      "anchors": [
+        {
+          "text": "if (!actor.consentChannel)",
+          "lines": [
+            488
+          ]
+        },
+        {
+          "text": "case 'record_client_consent':",
+          "lines": [
+            1341
+          ]
+        },
+        {
+          "text": "sourceType: 'client_command'",
+          "lines": [
+            811,
+            1350
+          ]
+        }
+      ]
+    },
+    "closed_action_contract": {
+      "path": "maya-saas-backend/src/action-engine/package5-wave3-executable.contract.ts",
+      "sha256": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513",
+      "anchors": [
+        {
+          "text": "export type Package5Wave3Operation =",
+          "lines": [
+            8
+          ]
+        },
+        {
+          "text": "if (operation === 'record_client_consent' && !consentChannel)",
+          "lines": [
+            278
+          ]
+        }
+      ]
+    },
+    "bulk_current_policy": {
+      "path": "maya-saas-backend/src/communication-delivery/communication-bulk-policy.service.ts",
+      "sha256": "47396f297e5f07a2f4100098df1d1e86bd9e70ee7192b813888267805863e8ed",
+      "anchors": [
+        {
+          "text": "for (const kind of ['privacy', 'marketing'])",
+          "lines": [
+            204
+          ]
+        },
+        {
+          "text": "const latest = facts[0];",
+          "lines": [
+            214
+          ]
+        }
+      ]
+    },
+    "auth_retention": {
+      "path": "maya-saas-backend/src/auth/auth-retention.repository.ts",
+      "sha256": "70c6bc2fda201b21b74b5687231dc484eec0c00b63f433718575935e5ea78675",
+      "anchors": [
+        {
+          "text": "const AUTH_CLASSES:",
+          "lines": [
+            7
+          ]
+        }
+      ]
+    },
+    "platform_authority": {
+      "path": "maya-saas-backend/src/auth/legacy-staff-principal.controller.ts",
+      "sha256": "ab39b9fe1c7ac954991f47cc53b71663a4f9c03d7330a8845d899441a181c113",
+      "anchors": [
+        {
+          "text": "user.role !== 'platform_owner'",
+          "lines": [
+            95
+          ]
+        },
+        {
+          "text": "session.revokedAt",
+          "lines": [
+            111
+          ]
+        }
+      ]
+    },
+    "platform_action_mapping": {
+      "path": "maya-saas-backend/src/package5-wave2/package5-wave2.service.ts",
+      "sha256": "7cadb06f74361d9a09053be7d9f2de3e3869da00f94bd21ddcbbbb8fc1b634fa",
+      "anchors": [
+        {
+          "text": "private async resolveActor(",
+          "lines": [
+            537
+          ]
+        },
+        {
+          "text": "...(authority.membershipId ? { actorUserId: actor.userId } : {})",
+          "lines": [
+            405,
+            464
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,221 @@
+{
+  "acceptedOwnerCheckpoint": "e86e1cfc",
+  "runtimeCommit": "dc26682009951c1afea5bdd07b766433deb6dc44",
+  "productionRelease": "/opt/maya-saas/releases/20260905-p5-b21-dc266820",
+  "b21ProductionRemediation": "PASS",
+  "schemaChanged": false,
+  "migrationAddedOrApplied": false,
+  "b21": {
+    "verifiedClientChannelLinkBeforeClientReady": true,
+    "canonicalStaffAuthority": "Maya JWT + AuthIdentity + active Membership + matching A16 CrmStaffAccess",
+    "legacySessionOrRawChatIdAuthorityPaths": 0,
+    "consentAsIdentityAuthorityPaths": 0,
+    "unverifiedPrivateClientProjectionPaths": 0,
+    "legacyOrDurableVoiceHistoryWriters": 0,
+    "realtimeContext": "EPHEMERAL PER WEBSOCKET",
+    "directBusinessProviderValueOwner": false,
+    "productionRealtimeEndpointInvoked": false
+  },
+  "deploymentSafety": {
+    "backendDeployGate": "PASS — 351 suites / 2875 tests",
+    "backendReleasePreflight": "PASS",
+    "requestOnlyPwaRuntimeGuard": "PASS — B13-B21",
+    "package4CrossPackageGuard": "PASS",
+    "publishedPwaInlineScriptParse": "PASS — 26 blocks",
+    "productionBusinessMutationBoundaryCrossed": false
+  },
+  "productionStructuralReadOnlyVerification": {
+    "backendHealth": "PASS",
+    "backendReadiness": "PASS",
+    "requestOnlyPwaService": "active",
+    "legacyFullBotService": "inactive",
+    "pendingMigrations": 0,
+    "schemaDrift": "NONE",
+    "postActivationErrorLogs": 0,
+    "publicPwaHttpStatus": 200,
+    "realProductionClientProviderValueMutations": 0
+  },
+  "artifactHashes": {
+    "backendClientChannelRuntimeJs": "aee177932be490054593480e9053d666c189d7b0f93adc8a2ab50c097dc9ebab",
+    "backendClientChannelControllerJs": "c711e980717379a4e037662b5bcf103f563bae8320512cd96b99b4392c80c4db",
+    "activeWebhookServer": "3aedf0f73b3b3a4c81d972599613c100bd31f0b0698859e009959dc583d685dd",
+    "activeRealtimeBridge": "21f8a97a43f6b5102ae0b74dcec2b7a653bc7e0ebbdbef9ce269980746446437",
+    "activeClientCommandBridge": "bf102f2db07203ed7297caa674dec7ce710e75a16442c749705de321b3d82b52",
+    "activePackage5Guard": "4c33acb0170ffac1463ba4c72da29b615be68ca7f77f293210ae974ec9fce338",
+    "publishedProxy": "37d14444c195a7bfa5b035669a9add067795050bef945212a609a4b60cdb5fc6",
+    "publishedApplication": "8b65bbd8de257c60a2927355c616cad550df5ae49850f05785e36b7fa86f254e"
+  },
+  "proofs": {
+    "targetedB21Typescript": "PASS — 2 suites / 15 tests",
+    "targetedB21Python": "PASS — 4 tests",
+    "combinedB21PythonAndGuard": "PASS — 35 tests",
+    "prismaValidate": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "scriptTypecheck": "PASS",
+    "build": "PASS",
+    "mandatoryDeploymentRegression": "PASS — 351 suites / 2875 tests",
+    "finalAggregateRegression": "NOT RUN — STOP AT NEW B22 INVENTORY BLOCKER"
+  },
+  "repositoryMigrations": 78,
+  "productionMigrationRecords": 81,
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "freshFinalGateStartedFromScratch": true,
+  "sourceInventory": {
+    "productionTypescriptFiles": 537,
+    "typescriptHttpRouteDecorators": 218,
+    "typescriptMutationLikeCalls": 502,
+    "deployedBackendJavascriptFiles": 537,
+    "activeRootPythonFiles": 89,
+    "activeProductionRootPythonFiles": 69,
+    "activePythonHttpRoutes": 94,
+    "activePythonHttpRouteHandlers": 93
+  },
+  "familyInventory": [
+    {
+      "family": "A15",
+      "canonicalFoundation": "Wave 3 AC2 staff-day executor",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A16",
+      "canonicalFoundation": "Wave 2 AC1 access commands and AC5 reducer",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A17",
+      "canonicalFoundation": "Wave 3 CRM connection/import and AC3/AC4/AC5 facts",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A18",
+      "canonicalFoundation": "Client-owned profile, consent, verified channel and appointment authority foundations",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A22",
+      "canonicalFoundation": "Wave 1 governed settings/preferences",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A23",
+      "canonicalFoundation": "Wave 1 OperationalWorkItem and approved protocol state",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A25",
+      "canonicalFoundation": "Wave 2 security commands and AC3 auth protocol",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A26",
+      "canonicalFoundation": "Canonical TrialActivation and Wave 2 lifecycle commands",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "reduced A27",
+      "canonicalFoundation": "Wave 4 inventory and AC4 review ingestion",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A28",
+      "canonicalFoundation": "Wave 4 prospective calendar actions and immutable AI receipt children",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A29",
+      "canonicalFoundation": "Wave 5 recovery correction and immutable evidence",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A30",
+      "canonicalFoundation": "AC6 coordinator, MaintenanceRun/ItemClaim and Policy V1",
+      "result": "registered; aggregate certification stopped at B22"
+    },
+    {
+      "family": "A31",
+      "canonicalFoundation": "AC4/AC5 event, ingestion and reconciliation facts",
+      "result": "registered; aggregate certification stopped at B22"
+    }
+  ],
+  "familySetCoverage": "13/13",
+  "newBlocker": {
+    "id": "B22",
+    "summary": "public tip_sent accepts caller master/amount/record without verified Client authority, writes a legacy SQLite tip fact and directly delivers Telegram/Web Push outside Communication Delivery",
+    "publishedApplicationLines": [
+      17687,
+      17717
+    ],
+    "publishedProxyCaseLine": 2831,
+    "routeRegistrationLine": 12583,
+    "handler": "webhook_server.py:tip_sent_handler",
+    "handlerLines": [
+      10299,
+      10368
+    ],
+    "handlerSha256": "3a73f136523b74da96139206c690507364dac77598619e148b4fb4e3abd25371",
+    "directSqliteWriter": "database.py:save_tip",
+    "directSqliteWriterLines": [
+      3940,
+      3953
+    ],
+    "directSqliteWriterSha256": "3f76e9c52da7fdb57d23f59b97acdbf70eb684ab6650c5eb016c76eb16e45f84",
+    "verifiedClientAuthorityRequired": false,
+    "proxyForwardsAuthProof": false,
+    "callerSuppliedAmountAuthoritative": true,
+    "idempotencyOrProviderEventIdentity": false,
+    "directTelegramDelivery": true,
+    "directWebPushDelivery": true,
+    "communicationDeliveryUsed": false,
+    "contractDecisionRequired": true,
+    "isolatedReproduction": {
+      "result": "B22 REPRODUCED",
+      "productionMutations": 0,
+      "providerCalls": 0,
+      "productionEndpointInvoked": false,
+      "route": "POST /api/tips/sent",
+      "handlerLines": [
+        10299,
+        10368
+      ],
+      "handlerSha256": "3a73f136523b74da96139206c690507364dac77598619e148b4fb4e3abd25371",
+      "activeWebhookSha256": "3aedf0f73b3b3a4c81d972599613c100bd31f0b0698859e009959dc583d685dd",
+      "publishedProxySha256": "37d14444c195a7bfa5b035669a9add067795050bef945212a609a4b60cdb5fc6",
+      "publishedAppSha256": "8b65bbd8de257c60a2927355c616cad550df5ae49850f05785e36b7fa86f254e",
+      "unauthenticatedSyntheticRequest": true,
+      "observed": {
+        "directSqliteTipWrites": 1,
+        "directTelegramSends": 1,
+        "directWebPushSends": 1,
+        "callerSuppliedAmountAccepted": 777777,
+        "proxyForwardsAuthProof": false
+      },
+      "mocks": [
+        "in-memory tip write recorder",
+        "synthetic master lookup",
+        "Telegram send recorder",
+        "Web Push recorder"
+      ],
+      "limitation": "Exact deployed handler AST executed with synthetic request and adapters; no HTTP, database, Telegram, push, provider or production call."
+    }
+  },
+  "finalAdversarialVerification": "FAIL",
+  "package5Complete": false,
+  "productionDirectBusinessProviderValueMutationBypasses": "PRESENT — B22",
+  "legacyMutatingOwnersActive": "PRESENT — B22",
+  "wavesAccepted": "6/6",
+  "realProductionMutationsForProof": 0,
+  "p4_11Created": false,
+  "wave7Created": false,
+  "chapter7Started": false,
+  "chapter6CompleteDeclared": false,
+  "hygiene": {
+    "preExistingLocalTestDatabases": 17,
+    "preExistingDatabasesDeleted": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0
+  }
+}

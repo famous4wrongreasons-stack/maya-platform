@@ -1,0 +1,12 @@
+{
+  "package": "R14",
+  "result": "PASS",
+  "checks": [
+    "bad confirmation/branch/tenant/amount/time/currency/feature/raw authority rejected before AE",
+    "same-key concurrent first count one canonical outcome; changed key intent conflicts; second first-declaration denied",
+    "one successor per predecessor; withdrawal null not zero; branch move denied; history retained; read writes zero; Expense writes zero",
+    "canonical accountant supported; generic admin and revoked membership denied",
+    "AC6 actual runtime claims erase only expired reason; cash/audit/identity/revision retained; same-run resume"
+  ],
+  "productionEffects": 0
+}

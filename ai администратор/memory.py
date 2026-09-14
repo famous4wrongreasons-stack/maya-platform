@@ -12,6 +12,7 @@ import json
 import os
 
 import database
+import canonical_staff_access
 from yclients import YClientsAPI
 
 CONVERSATIONS_FILE = os.path.join(os.path.dirname(__file__), "conversations.json")
@@ -437,8 +438,7 @@ def build_context(user_id: int) -> str:
     # а нейтральный фактологический контекст — чтобы MAYA знала его «как обычно»,
     # но не путала рабочий режим с записью на стрижку.
     try:
-        is_staff = bool(database.is_admin(int(user_id))
-                        or database.get_master_by_chat_id(int(user_id)))
+        is_staff = canonical_staff_access.is_staff(user_id)
     except Exception:
         is_staff = False
 

@@ -1,0 +1,318 @@
+{
+  "contract": "package5.final.a18.client-channel.schema-assessment.v1",
+  "recordedAt": "2026-09-04T06:31:06.967048+00:00",
+  "acceptedCheckpoint": "9ae29bedf8bebbd1b02a5a0bf7022d1085308e8e",
+  "userBindingV1Decision": "ACCEPTED; PHONE MATCH IS NOT CLIENT AUTHORITY",
+  "repositorySchemaSha256": "14f69709a31ec40524e1c34c4a0f96e8838ef72c6d9b90b3c09b68ff6012d933",
+  "repositoryModelCount": 88,
+  "repositoryMigrationCount": 70,
+  "production": {
+    "capturedAt": "2026-09-04T06:28:21.215Z",
+    "release": "/opt/maya-saas/releases/20260904-c06-p5-wave6-cutover-3b545671",
+    "mode": "READ ONLY; catalogs only; no application rows",
+    "tableCount": 89,
+    "allTableNames": [
+      "ActionAttempt",
+      "ActionExecution",
+      "ActionTargetMutation",
+      "AgentTask",
+      "AiApprovalRequest",
+      "AiBrainSession",
+      "AiKnowledgeChunk",
+      "AiKnowledgeSource",
+      "AiMemoryFact",
+      "AiOnboardingDraft",
+      "AiToolExecution",
+      "Appointment",
+      "AppointmentNotificationSetting",
+      "AuditLog",
+      "AuthFlowState",
+      "AuthIdentity",
+      "AuthRateLimitBucket",
+      "AuthRefreshToken",
+      "AuthSession",
+      "BillingPayment",
+      "Branch",
+      "BrandingSettings",
+      "BusinessReview",
+      "Client",
+      "ClientConsentFact",
+      "CommerceIntegration",
+      "CrmClientLink",
+      "CrmIntegration",
+      "CrmStaffAccess",
+      "CustomerProfile",
+      "CustomerReferral",
+      "CustomerSubscription",
+      "CustomerSubscriptionUsage",
+      "DashboardPreference",
+      "DevicePushToken",
+      "DomainEvent",
+      "EmailAuthCode",
+      "Expense",
+      "ExpensePeriodDeclaration",
+      "ExpensePeriodDeclarationInvalidation",
+      "Feature",
+      "GiftCertificate",
+      "GiftCertificateRedemption",
+      "InboxItem",
+      "IngestionQuarantine",
+      "InternalAvailabilityException",
+      "InternalAvailabilityRule",
+      "InternalProvider",
+      "InternalProviderService",
+      "InternalService",
+      "LoyaltyAccount",
+      "LoyaltyRedemption",
+      "LoyaltyRedemptionGrant",
+      "LoyaltyRedemptionGrantRevocation",
+      "LoyaltyTransaction",
+      "MaintenanceItemClaim",
+      "MaintenanceRun",
+      "MarketingAudience",
+      "MarketingAudienceRecipient",
+      "MarketingCampaign",
+      "MarketingCampaignRecipient",
+      "MarketingConsentEvidence",
+      "MarketingDeliveryAttempt",
+      "MarketingPolicy",
+      "Membership",
+      "OperationalWorkItem",
+      "Opportunity",
+      "PhoneAuthCode",
+      "PlanEntitlement",
+      "ReconciliationRun",
+      "RecoveryConversion",
+      "RecoveryTouchpoint",
+      "ReferralProgram",
+      "ReferralProgramValueVersion",
+      "ReferralReward",
+      "ReferralRewardFulfillment",
+      "ReferralRewardIssuance",
+      "Staff",
+      "StaffProviderLink",
+      "SubscriptionPlan",
+      "Tenant",
+      "TenantCatalogItem",
+      "TenantCatalogItemValueVersion",
+      "TenantEntitlement",
+      "TrialActivation",
+      "UnresolvedClientIdentityHold",
+      "User",
+      "UserMerge",
+      "_prisma_migrations"
+    ],
+    "unmodelledApplicationTables": [],
+    "clientForeignKeys": [
+      {
+        "table_name": "\"Appointment\"",
+        "conname": "Appointment_mayaClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"mayaClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"Client\"",
+        "conname": "Client_mergedIntoClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"mergedIntoClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\")"
+      },
+      {
+        "table_name": "\"ClientConsentFact\"",
+        "conname": "ClientConsentFact_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"CrmClientLink\"",
+        "conname": "CrmClientLink_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE CASCADE ON DELETE CASCADE"
+      },
+      {
+        "table_name": "\"CustomerProfile\"",
+        "conname": "CustomerProfile_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"CustomerReferral\"",
+        "conname": "CustomerReferral_referredClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"referredClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"CustomerReferral\"",
+        "conname": "CustomerReferral_referrerClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"referrerClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"CustomerSubscription\"",
+        "conname": "CustomerSubscription_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"LoyaltyAccount\"",
+        "conname": "LoyaltyAccount_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"LoyaltyRedemptionGrant\"",
+        "conname": "LoyaltyRedemptionGrant_clientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"clientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      },
+      {
+        "table_name": "\"ReferralReward\"",
+        "conname": "ReferralReward_recipientClientId_tenantId_fkey",
+        "definition": "FOREIGN KEY (\"recipientClientId\", \"tenantId\") REFERENCES \"Client\"(id, \"tenantId\") ON UPDATE RESTRICT ON DELETE RESTRICT"
+      }
+    ],
+    "inspectedColumnRows": 221,
+    "inspectedConstraints": 95,
+    "inspectedIndexes": 107
+  },
+  "evaluatedExistingModels": {
+    "AuthIdentity": {
+      "line": 777,
+      "sha256": "5bf1bdea37f7e45990c4ca668eb95e030d33c8c77e10003aa2854cd93ae1d8e9",
+      "sufficient": false,
+      "reason": "Required User/Membership, no Client FK or verified/revoked link history."
+    },
+    "AuthSession": {
+      "line": 855,
+      "sha256": "2827b66ab2adb1dad02438aa550d9a37cd218a2f7ed089aaa33c83d817ea51d3",
+      "sufficient": false,
+      "reason": "Required User, transient authentication, no Client binding/evidence."
+    },
+    "AuthFlowState": {
+      "line": 798,
+      "sha256": "18c62408cc3d90be2e35bc5ad1d71a7e42e54c93a590557eef3fe32b2b289333",
+      "sufficient": false,
+      "reason": "Expiring OAuth state, no subject-to-Client relation, purged under A30."
+    },
+    "PhoneAuthCode": {
+      "line": 817,
+      "sha256": "3d8a75be0252bf9b5b968e290583a3879628559173f0cdc8c93a8b2389c340db",
+      "sufficient": false,
+      "reason": "Phone challenge only; phone control is not canonical Client authority."
+    },
+    "EmailAuthCode": {
+      "line": 836,
+      "sha256": "aaf76acf4af8ce11b3c0df610c3fafbd1310d05d9943b9fd49a926b35c41a810",
+      "sufficient": false,
+      "reason": "Email challenge only; attribute control is not canonical Client authority."
+    },
+    "Client": {
+      "line": 2033,
+      "sha256": "29774919df85c493d111b89675726b94c176cd7b903f7fff5e9580d246a1bbff",
+      "sufficient": false,
+      "reason": "Optional mutable userId association; no channel key, verification evidence or active identity uniqueness."
+    },
+    "CrmClientLink": {
+      "line": 2075,
+      "sha256": "5d2a0f39d98b0f05d255dc0a1963dfd31f9f11ab93aca410bd259a1bb7acfeea",
+      "sufficient": false,
+      "reason": "CRM observation link; not authenticated channel control or client-link challenge evidence."
+    },
+    "CustomerProfile": {
+      "line": 1445,
+      "sha256": "6bf4d9a45a7b70dbd8a27997e338024e5199d4667572541fe204cd24142e83a1",
+      "sufficient": false,
+      "reason": "Client-owned projection, not proof of channel-to-Client authority."
+    },
+    "ClientConsentFact": {
+      "line": 1469,
+      "sha256": "fbcbd49cf3e75602b38b6b4fde544bcc3cfe4f18609a5e8720ea99a9e251b795",
+      "sufficient": false,
+      "reason": "Immutable consent decision, not identity registration authority."
+    },
+    "UnresolvedClientIdentityHold": {
+      "line": 1616,
+      "sha256": "df36b74f938496522f83238e77e2147a9878b7ee0900a030ff458a11b9931b23",
+      "sufficient": false,
+      "reason": "Collision hold/denial, not affirmative verified binding."
+    },
+    "UserMerge": {
+      "line": 674,
+      "sha256": "9ad56a078e182a10b6616eff0ae388d94075ba7d66e6bea31ffa00851bcd8de9",
+      "sufficient": false,
+      "reason": "Account merge history; no accountless channel-to-Client link."
+    },
+    "MarketingConsentEvidence": {
+      "line": 2282,
+      "sha256": "1afa9c810123ade56d4ce44be1cb3cf281052a9e446a3a0be6f1e4a2ac1ce481",
+      "sufficient": false,
+      "reason": "CRM recipient consent evidence, no canonical Client FK or authenticated subject."
+    },
+    "AuditLog": {
+      "line": 2343,
+      "sha256": "f82a98cf6ebe47132fadf822a3da8a1f7f01e0b02ce240c3f0e95794c89dfc8c",
+      "sufficient": false,
+      "reason": "Generic audit JSON; no typed subject/Client FK, active uniqueness or link lifecycle guards."
+    },
+    "DomainEvent": {
+      "line": 2477,
+      "sha256": "bdae5ff917999e2aa2fe351d843c23dc2fdb0ecebddd1c1c878093e0f735426e",
+      "sufficient": false,
+      "reason": "Generic source observations; no typed verified channel binding or active uniqueness."
+    }
+  },
+  "legacyPwaEvidence": {
+    "acceptedSourceCheckpoint": "9ae29bed",
+    "evidenceFile": "package5-final-a18-identity-boundary-blocker.json",
+    "clientsColumns": [
+      "id",
+      "telegram_chat_id",
+      "name",
+      "phone",
+      "created_at",
+      "updated_at",
+      "name_enc",
+      "phone_enc",
+      "phone_hash",
+      "whats_new_seen_version",
+      "marketing_consent_at",
+      "marketing_consent_revoked_at",
+      "first_source",
+      "first_source_at",
+      "default_visit_mood"
+    ],
+    "webSessionsColumns": [
+      "token",
+      "subject_kind",
+      "chat_id",
+      "phone_hash",
+      "vk_user_id",
+      "display_name",
+      "created_at",
+      "expires_at",
+      "last_seen_at",
+      "revoked",
+      "tg_first_name",
+      "tg_last_name",
+      "tg_username",
+      "tg_photo_url",
+      "yandex_user_id"
+    ]
+  },
+  "verdict": {
+    "bindingContract": "COMPLETE",
+    "existingSchemaSufficient": false,
+    "additionalSchemaRequired": true,
+    "proposedNewModels": [
+      "ClientChannelLink"
+    ],
+    "schemaImplemented": false,
+    "runtimeChanged": false,
+    "a18ConsentRemediationCanResume": false,
+    "a26Changed": false,
+    "productionBusinessMutations": 0,
+    "providerWrites": 0,
+    "wavesReopened": 0,
+    "wave7Created": false,
+    "chapter7Started": false
+  },
+  "hygiene": {
+    "preExistingLocalTempTestDatabases": 17,
+    "ownedByThisCycle": 0,
+    "ownedTempProcessesStillRunning": 0,
+    "backgroundWatchersLeft": 0,
+    "ownedPlaywrightChromeProcessesRemaining": 0,
+    "ownedTempDatabasesRemaining": 0,
+    "allTrackedSessionsExited": true,
+    "schemaAndRuntimeUnchangedFromAcceptedCheckpoint": true
+  }
+}

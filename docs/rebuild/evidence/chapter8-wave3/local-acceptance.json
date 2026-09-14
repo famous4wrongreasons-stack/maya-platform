@@ -1,0 +1,37 @@
+{
+  "wave": 3,
+  "packages": [
+    "P04",
+    "P05"
+  ],
+  "postgres": {
+    "wave3": 13,
+    "wave2Preservation": 13,
+    "p01Preservation": 24
+  },
+  "targeted": {
+    "suites": 13,
+    "tests": 145
+  },
+  "numericTargetsActive": 0,
+  "calibration": "UNAVAILABLE",
+  "productionEffects": 0,
+  "privateReceipts": [
+    {
+      "file": "wave3-postgres-final.txt",
+      "sha256": "ba61b15cbd19933cc001ec94ebb5caef309d896ff17c5858cf247b7b7058671f"
+    },
+    {
+      "file": "wave3-wave2-preservation.txt",
+      "sha256": "11bdde844c943b80dcc64b0d0949947345ab9ce67c8389149ac9ad05a910c39b"
+    },
+    {
+      "file": "wave3-p01-preservation.txt",
+      "sha256": "3ace6e8701d1866d2922eaf1bf60db50331c227c2db7f109aecbdc1c9a9ba669"
+    },
+    {
+      "file": "wave3-targeted-final.txt",
+      "sha256": "e94acd974e3165956259f691492698c2f738d90a5559bfed505b7333b0fccc34"
+    }
+  ]
+}

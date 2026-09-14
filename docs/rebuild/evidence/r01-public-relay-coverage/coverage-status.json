@@ -1,0 +1,23 @@
+{
+  "observedAt": "2026-09-12T16:42:18.941153+00:00",
+  "filesystemRootsFoundAndScanned": 3,
+  "effectivePublicRootsTotal": null,
+  "effectiveRootRewriteMappingCertified": false,
+  "phpArtifacts": 26,
+  "outsideRootRecoveryArtifacts": 67,
+  "symlinksObservedInRoots": 0,
+  "scanErrors": 0,
+  "http200Artifacts": 10,
+  "publicAuthenticatedWebhook403": 1,
+  "technicalDomainHttp500": 1,
+  "observedPublicApplicationUrls": 12,
+  "confirmedHttp200BookRecordArtifacts": 2,
+  "allObservedRootBookRecordArtifactsIncludingDeniedArchives": 13,
+  "additionalTechnicalDomainDirectRecordsWriter": 1,
+  "unaccountedPublicArtifacts": null,
+  "complete": false,
+  "productionMutations": 0,
+  "newC7Requirements": 0,
+  "newBusinessContracts": 0,
+  "blocker": "Effective virtual-host / document-root / Alias / server rewrite / PHP-handler mappings inaccessible by SSH; browser session expired and login not restored."
+}

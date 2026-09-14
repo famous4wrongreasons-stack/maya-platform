@@ -1,0 +1,960 @@
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
+import { createHash } from 'node:crypto';
+import type {
+  ActionExecutionPreviewV1,
+  ExecutionResultV1,
+} from '../action-engine';
+import { actionExecutionResultFromError } from '../action-engine';
+import { CrmProvider } from '../common/domain.enums';
+import { BridgeSourceService } from '../tenancy/bridge-source.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
+import type {
+  AppointmentActionInvocation,
+  CreateAppointmentRequest,
+  PayVisitRequest,
+  ResidualAppointmentAction,
+  ResidualAppointmentMutationInput,
+  ResidualAppointmentShadowCapability,
+  RescheduleAppointmentRequest,
+} from './crm.service';
+import { CrmService } from './crm.service';
+import {
+  type LegacyAppointmentAction,
+  type LegacyAppointmentBridgeDto,
+  type LegacyAppointmentOrigin,
+  type LegacyAppointmentOutcomeDto,
+} from './dto/legacy-appointment-bridge.dto';
+
+const LEGACY_APPOINTMENT_BRIDGE_RESULT_CONTRACT =
+  'maya.legacy-appointment-bridge-result/1' as const;
+const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_CONTRACT =
+  'maya.legacy-appointment-shadow-observation/1' as const;
+const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_PREFIX =
+  'MAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION ' as const;
+
+const EXECUTION_ENABLED_VALUES = new Set(['1', 'true', 'on', 'yes']);
+const SUPPORTED_PROVIDERS = new Set<string>([
+  CrmProvider.YCLIENTS,
+  CrmProvider.ALTEGIO,
+]);
+
+const ORIGIN_ACTIONS: Record<
+  LegacyAppointmentOrigin,
+  ReadonlySet<LegacyAppointmentAction>
+> = {
+  client_record_actions: new Set([
+    'reschedule_appointment',
+    'cancel_appointment',
+  ]),
+  'legacy.residual_appointment': new Set([
+    'set_appointment_attendance',
+    'set_appointment_duration',
+    'set_appointment_services',
+    'set_appointment_fields',
+  ]),
+  'webhook.loyalty': new Set(['create_appointment']),
+  'webhook.chat': new Set(['create_appointment']),
+  'webhook.panel': new Set([
+    'create_appointment',
+    'reschedule_appointment',
+    'cancel_appointment',
+    'pay_visit',
+  ]),
+  // R01: raw native Telegram is not a verified Client principal. Payment
+  // retains its separately deferred contract and is rejected before execution.
+  'telegram.bot': new Set(['pay_visit']),
+  claude_ai: new Set(['reschedule_appointment', 'cancel_appointment']),
+};
+
+type ParsedAction =
+  | { action: 'create_appointment'; params: CreateAppointmentRequest }
+  | { action: 'reschedule_appointment'; params: RescheduleAppointmentRequest }
+  | { action: 'cancel_appointment'; externalId: string }
+  | { action: 'pay_visit'; params: PayVisitRequest }
+  | {
+      action: 'set_appointment_attendance';
+      externalId: string;
+      input: { attendanceCode: number };
+    }
+  | {
+      action: 'set_appointment_duration';
+      externalId: string;
+      input: { durationSeconds: number };
+    }
+  | {
+      action: 'set_appointment_services';
+      externalId: string;
+      input: { serviceIds: string[]; durationSeconds?: number };
+    }
+  | {
+      action: 'set_appointment_fields';
+      externalId: string;
+      input:
+        | Extract<ResidualAppointmentMutationInput, { fieldKind: string }>
+        | { fieldKind: string; valueRef: string };
+    };
+
+type ExecutableParsedAction = Extract<
+  ParsedAction,
+  {
+    action:
+      | 'create_appointment'
+      | 'reschedule_appointment'
+      | 'cancel_appointment'
+      | 'pay_visit'
+      | ResidualAppointmentAction;
+  }
+>;
+
+type BridgeMode = 'shadow' | 'execute';
+
+export interface LegacyAppointmentBridgeShadowResult {
+  contract: typeof LEGACY_APPOINTMENT_BRIDGE_RESULT_CONTRACT;
+  accepted: true;
+  mode: 'shadow';
+  tenant_resolution: 'integration';
+  preview: ActionExecutionPreviewV1;
+  legacy_outcome?: LegacyAppointmentOutcomeDto;
+  bridge_external_side_effects: 0;
+}
+
+export interface LegacyAppointmentBridgeExecutionResult {
+  contract: typeof LEGACY_APPOINTMENT_BRIDGE_RESULT_CONTRACT;
+  accepted: true;
+  mode: 'execute' | 'status';
+  tenant_resolution: 'integration';
+  execution: ExecutionResultV1;
+  safe_explanation: string;
+  bridge_external_side_effects: 0;
+}
+
+function payloadError(message: string, code: string): never {
+  throw new BadRequestException({
+    message,
+    error: { code },
+  });
+}
+
+function opaqueObservationRef(value: string): string {
+  return createHash('sha256').update(value).digest('hex');
+}
+
+function assertExactKeys(
+  payload: Record<string, unknown>,
+  allowed: readonly string[],
+): void {
+  const allowedSet = new Set(allowed);
+  const unknown = Object.keys(payload).filter((key) => !allowedSet.has(key));
+  if (unknown.length > 0) {
+    payloadError(
+      `Unsupported appointment payload field: ${unknown[0]}`,
+      'legacy_appointment_payload_unknown_field',
+    );
+  }
+}
+
+function requiredString(
+  payload: Record<string, unknown>,
+  key: string,
+  maxLength = 160,
+): string {
+  const value = payload[key];
+  if (typeof value !== 'string') {
+    payloadError(
+      `Appointment payload field ${key} must be a string.`,
+      'legacy_appointment_payload_invalid',
+    );
+  }
+  const normalized = value.trim();
+  if (!normalized || normalized.length > maxLength) {
+    payloadError(
+      `Appointment payload field ${key} is invalid.`,
+      'legacy_appointment_payload_invalid',
+    );
+  }
+  return normalized;
+}
+
+function optionalString(
+  payload: Record<string, unknown>,
+  key: string,
+  maxLength: number,
+): string | undefined {
+  const value = payload[key];
+  if (value === undefined || value === null || value === '') return undefined;
+  if (typeof value !== 'string') {
+    payloadError(
+      `Appointment payload field ${key} must be a string.`,
+      'legacy_appointment_payload_invalid',
+    );
+  }
+  const normalized = value.trim();
+  if (!normalized || normalized.length > maxLength) {
+    payloadError(
+      `Appointment payload field ${key} is invalid.`,
+      'legacy_appointment_payload_invalid',
+    );
+  }
+  return normalized;
+}
+
+function requiredStringArray(
+  payload: Record<string, unknown>,
+  key: string,
+): string[] {
+  const value = payload[key];
+  if (
+    !Array.isArray(value) ||
+    value.length === 0 ||
+    value.length > 64 ||
+    value.some(
+      (item) =>
+        typeof item !== 'string' ||
+        item.trim().length === 0 ||
+        item.trim().length > 128,
+    )
+  ) {
+    payloadError(
+      `Appointment payload field ${key} must be a non-empty string array.`,
+      'legacy_appointment_payload_invalid',
+    );
+  }
+  return [...new Set(value.map((item) => String(item).trim()))];
+}
+
+function optionalStringArray(
+  payload: Record<string, unknown>,
+  key: string,
+): string[] | undefined {
+  if (payload[key] === undefined || payload[key] === null) return undefined;
+  return requiredStringArray(payload, key);
+}
+
+function optionalInteger(
+  payload: Record<string, unknown>,
+  key: string,
+  min: number,
+  max: number,
+): number | undefined {
+  const value = payload[key];
+  if (value === undefined || value === null) return undefined;
+  if (!Number.isInteger(value) || Number(value) < min || Number(value) > max) {
+    payloadError(
+      `Appointment payload field ${key} must be an integer from ${min} to ${max}.`,
+      'legacy_appointment_payload_invalid',
+    );
+  }
+  return Number(value);
+}
+
+function requiredInteger(
+  payload: Record<string, unknown>,
+  key: string,
+  min: number,
+  max: number,
+): number {
+  const value = optionalInteger(payload, key, min, max);
+  if (value === undefined) {
+    payloadError(
+      `Appointment payload field ${key} is required.`,
+      'legacy_appointment_payload_invalid',
+    );
+  }
+  return value;
+}
+
+function requiredIsoDate(
+  payload: Record<string, unknown>,
+  key: string,
+): string {
+  const value = requiredString(payload, key, 64);
+  if (!Number.isFinite(Date.parse(value))) {
+    payloadError(
+      `Appointment payload field ${key} must be an ISO date.`,
+      'legacy_appointment_payload_invalid',
+    );
+  }
+  return value;
+}
+
+@Injectable()
+export class LegacyAppointmentBridgeService {
+  private readonly logger = new Logger(LegacyAppointmentBridgeService.name);
+
+  constructor(
+    private readonly bridgeSource: BridgeSourceService,
+    private readonly tenantContext: TenantContextService,
+    private readonly crmService: CrmService,
+  ) {}
+
+  assertSecret(token: string | undefined): void {
+    this.bridgeSource.assertBridgeSecret(
+      token,
+      'MAYA_LEGACY_APPOINTMENT_BRIDGE_TOKEN',
+      {
+        disabled: 'legacy_appointment_bridge_disabled',
+        unauthorized: 'legacy_appointment_bridge_unauthorized',
+      },
+    );
+  }
+
+  executionEnabled(): boolean {
+    return EXECUTION_ENABLED_VALUES.has(
+      String(process.env.MAYA_LEGACY_APPOINTMENT_BRIDGE_EXECUTION_ENABLED || '')
+        .trim()
+        .toLowerCase(),
+    );
+  }
+
+  async shadow(
+    dto: LegacyAppointmentBridgeDto,
+  ): Promise<LegacyAppointmentBridgeShadowResult> {
+    const context = await this.resolve(dto, 'shadow');
+    const preview = await this.tenantContext.runAsSystemTenant(
+      context.tenantId,
+      () => this.preview(context.tenantId, context.parsed, context.invocation),
+    );
+
+    this.logShadowObservation({
+      tenantId: context.tenantId,
+      dto,
+      preview,
+    });
+
+    return {
+      contract: LEGACY_APPOINTMENT_BRIDGE_RESULT_CONTRACT,
+      accepted: true,
+      mode: 'shadow',
+      tenant_resolution: 'integration',
+      preview,
+      ...(dto.legacy_outcome
+        ? { legacy_outcome: { ...dto.legacy_outcome } }
+        : {}),
+      bridge_external_side_effects: 0,
+    };
+  }
+
+  async execute(
+    dto: LegacyAppointmentBridgeDto,
+  ): Promise<LegacyAppointmentBridgeExecutionResult> {
+    if (!this.executionEnabled()) {
+      throw new ServiceUnavailableException({
+        message: 'Legacy appointment bridge execution is disabled.',
+        error: { code: 'legacy_appointment_bridge_execution_disabled' },
+      });
+    }
+
+    if (dto.action_class === 'pay_visit') {
+      throw new ServiceUnavailableException({
+        message:
+          'Visit payment write is deferred. Complete the payment manually in YClients.',
+        error: { code: 'visit_payment_write_provider_contract_deferred' },
+      });
+    }
+
+    const context = await this.resolve(dto, 'execute');
+    let execution: ExecutionResultV1;
+    try {
+      execution = await this.tenantContext.runAsSystemTenant(
+        context.tenantId,
+        async () =>
+          (
+            await this.executeAction(
+              context.tenantId,
+              context.parsed,
+              context.invocation,
+            )
+          ).execution,
+      );
+    } catch (error) {
+      const canonical = actionExecutionResultFromError(error);
+      if (!canonical) throw error;
+      execution = canonical;
+    }
+
+    return this.executionResponse('execute', execution);
+  }
+
+  async status(input: {
+    provider: string;
+    externalCompanyId: string;
+    executionId: string;
+  }): Promise<LegacyAppointmentBridgeExecutionResult> {
+    const assertedProvider = this.normalizedProvider(input.provider);
+    const assertedCompanyId = this.externalCompanyId(input.externalCompanyId);
+    const { provider, externalCompanyId } = this.boundIntegrationSource(
+      assertedProvider,
+      assertedCompanyId,
+    );
+    const executionId = this.opaqueExecutionId(input.executionId);
+    const tenant = await this.bridgeSource.resolveTenantByIntegration(
+      { provider, externalCompanyId },
+      'legacy_appointment_tenant_not_found',
+    );
+    const execution = await this.tenantContext.runAsSystemTenant(
+      tenant.tenantId,
+      () =>
+        this.crmService.getAppointmentActionExecutionResult(
+          tenant.tenantId,
+          executionId,
+        ),
+    );
+    return this.executionResponse('status', execution);
+  }
+
+  private async resolve(dto: LegacyAppointmentBridgeDto, mode: BridgeMode) {
+    const assertedProvider = this.normalizedProvider(dto.provider);
+    const assertedCompanyId = this.externalCompanyId(dto.external_company_id);
+    this.assertOriginAction(dto.origin, dto.action_class);
+    const { provider, externalCompanyId } = this.boundIntegrationSource(
+      assertedProvider,
+      assertedCompanyId,
+    );
+    const parsed = this.parseAction(
+      dto.action_class,
+      dto.payload,
+      dto.origin,
+      externalCompanyId,
+      mode,
+    );
+    const tenant = await this.bridgeSource.resolveTenantByIntegration(
+      { provider, externalCompanyId },
+      'legacy_appointment_tenant_not_found',
+    );
+
+    const invocation: AppointmentActionInvocation = {
+      sourceType: 'legacy_bridge',
+      sourceRef: `legacy:${dto.origin}:${dto.requester_ref ?? dto.action_class}`,
+      callerIdempotency: {
+        scope: `legacy-appointment:${provider}:${externalCompanyId}:${dto.action_class}`,
+        key: dto.idempotency_key,
+      },
+    };
+
+    return { tenantId: tenant.tenantId, parsed, invocation };
+  }
+
+  private boundIntegrationSource(provider: string, externalCompanyId: string) {
+    return this.bridgeSource.assertBridgeIntegrationBinding(
+      { provider, externalCompanyId },
+      {
+        provider: 'MAYA_LEGACY_APPOINTMENT_BRIDGE_SOURCE_PROVIDER',
+        externalCompanyId: 'MAYA_LEGACY_APPOINTMENT_BRIDGE_SOURCE_COMPANY_ID',
+      },
+      {
+        disabled: 'legacy_appointment_bridge_source_binding_disabled',
+        mismatch: 'legacy_appointment_bridge_source_binding_mismatch',
+      },
+    );
+  }
+
+  private normalizedProvider(value: string): string {
+    const provider = String(value || '')
+      .trim()
+      .toLowerCase();
+    if (!SUPPORTED_PROVIDERS.has(provider)) {
+      payloadError(
+        'CRM provider is not supported by the legacy appointment bridge.',
+        'legacy_appointment_provider_unsupported',
+      );
+    }
+    return provider;
+  }
+
+  private externalCompanyId(value: string): string {
+    const companyId = String(value || '').trim();
+    if (!companyId || companyId.length > 64) {
+      payloadError(
+        'CRM external company id is invalid.',
+        'legacy_appointment_company_invalid',
+      );
+    }
+    return companyId;
+  }
+
+  private opaqueExecutionId(value: string): string {
+    const executionId = String(value || '').trim();
+    if (
+      !executionId ||
+      executionId.length > 96 ||
+      !/^[a-zA-Z0-9._:-]+$/.test(executionId)
+    ) {
+      payloadError(
+        'Action execution reference is invalid.',
+        'legacy_appointment_execution_reference_invalid',
+      );
+    }
+    return executionId;
+  }
+
+  private assertOriginAction(
+    origin: LegacyAppointmentOrigin,
+    action: LegacyAppointmentAction,
+  ): void {
+    if (!ORIGIN_ACTIONS[origin]?.has(action)) {
+      payloadError(
+        'Legacy origin is not allowed to request this appointment action.',
+        'legacy_appointment_origin_action_forbidden',
+      );
+    }
+  }
+
+  private parseAction(
+    action: LegacyAppointmentAction,
+    payload: Record<string, unknown>,
+    origin: LegacyAppointmentOrigin,
+    trustedCompanyId: string,
+    mode: BridgeMode,
+  ): ParsedAction {
+    if (!payload || Array.isArray(payload) || typeof payload !== 'object') {
+      payloadError(
+        'Appointment payload must be an object.',
+        'legacy_appointment_payload_invalid',
+      );
+    }
+
+    if (action === 'create_appointment') {
+      assertExactKeys(payload, [
+        'client_id',
+        'client_name',
+        'client_phone',
+        'branch_id',
+        'staff_id',
+        'service_ids',
+        'start',
+        'notes',
+        'duration_minutes',
+        'notify_by_sms_hours',
+      ]);
+      const assertedBranchId = optionalString(payload, 'branch_id', 128);
+      if (
+        assertedBranchId !== undefined &&
+        assertedBranchId !== trustedCompanyId
+      ) {
+        payloadError(
+          'Appointment branch does not match the authenticated integration.',
+          'legacy_appointment_cross_tenant_target',
+        );
+      }
+
+      return {
+        action,
+        params: {
+          clientId: requiredString(payload, 'client_id', 160),
+          clientName: requiredString(payload, 'client_name', 160),
+          clientPhone: optionalString(payload, 'client_phone', 40),
+          branchId: trustedCompanyId,
+          staffId: requiredString(payload, 'staff_id', 128),
+          serviceIds: requiredStringArray(payload, 'service_ids'),
+          start: requiredIsoDate(payload, 'start'),
+          notes: optionalString(payload, 'notes', 2_000),
+          durationMinutes: optionalInteger(payload, 'duration_minutes', 5, 720),
+          notifyBySmsHours: optionalInteger(
+            payload,
+            'notify_by_sms_hours',
+            0,
+            48,
+          ),
+          // The panel used the administrative provider route but explicitly
+          // rejected busy slots. Route selection and permission must remain
+          // separate; neither is accepted from the untrusted payload.
+          creationMode: origin === 'webhook.panel' ? 'admin' : 'client',
+          allowBusy: false,
+        },
+      };
+    }
+
+    if (action === 'reschedule_appointment') {
+      assertExactKeys(payload, [
+        'external_id',
+        'start',
+        'staff_id',
+        'service_ids',
+        'notes',
+      ]);
+      return {
+        action,
+        params: {
+          externalId: requiredString(payload, 'external_id', 128),
+          start: requiredIsoDate(payload, 'start'),
+          staffId: optionalString(payload, 'staff_id', 128),
+          serviceIds: optionalStringArray(payload, 'service_ids'),
+          notes: optionalString(payload, 'notes', 2_000),
+        },
+      };
+    }
+
+    if (action === 'pay_visit') {
+      assertExactKeys(payload, [
+        'external_id',
+        'amount_kopecks',
+        'payment_method',
+      ]);
+      const paymentMethod = requiredString(payload, 'payment_method', 16);
+      if (paymentMethod !== 'cash' && paymentMethod !== 'card') {
+        payloadError(
+          'Appointment payment method must be cash or card.',
+          'legacy_appointment_payload_invalid',
+        );
+      }
+      return {
+        action,
+        params: {
+          externalId: requiredString(payload, 'external_id', 128),
+          amountKopecks: requiredInteger(
+            payload,
+            'amount_kopecks',
+            1,
+            1_000_000_000,
+          ),
+          paymentMethod,
+        },
+      };
+    }
+
+    if (action === 'set_appointment_attendance') {
+      assertExactKeys(payload, ['external_id', 'attendance_code']);
+      const attendanceCode = requiredInteger(payload, 'attendance_code', -1, 2);
+      if (![-1, 0, 1, 2].includes(attendanceCode)) {
+        payloadError(
+          'Appointment attendance code is not writable.',
+          'legacy_appointment_payload_invalid',
+        );
+      }
+      return {
+        action,
+        externalId: requiredString(payload, 'external_id', 128),
+        input: { attendanceCode },
+      };
+    }
+
+    if (action === 'set_appointment_duration') {
+      assertExactKeys(payload, ['external_id', 'duration_seconds']);
+      return {
+        action,
+        externalId: requiredString(payload, 'external_id', 128),
+        input: {
+          durationSeconds: requiredInteger(
+            payload,
+            'duration_seconds',
+            60,
+            86_400,
+          ),
+        },
+      };
+    }
+
+    if (action === 'set_appointment_services') {
+      assertExactKeys(payload, [
+        'external_id',
+        'service_ids',
+        'duration_seconds',
+      ]);
+      return {
+        action,
+        externalId: requiredString(payload, 'external_id', 128),
+        input: {
+          serviceIds: requiredStringArray(payload, 'service_ids'),
+          ...(payload.duration_seconds === undefined
+            ? {}
+            : {
+                durationSeconds: requiredInteger(
+                  payload,
+                  'duration_seconds',
+                  60,
+                  86_400,
+                ),
+              }),
+        },
+      };
+    }
+
+    if (action === 'set_appointment_fields') {
+      if (mode === 'shadow') {
+        assertExactKeys(payload, ['external_id', 'field_kind', 'value_ref']);
+        return {
+          action,
+          externalId: requiredString(payload, 'external_id', 128),
+          input: {
+            fieldKind: requiredString(payload, 'field_kind', 64),
+            valueRef: requiredString(payload, 'value_ref', 128),
+          },
+        };
+      }
+
+      assertExactKeys(payload, ['external_id', 'field_kind', 'value']);
+      const externalId = requiredString(payload, 'external_id', 128);
+      const fieldKind = requiredString(payload, 'field_kind', 64);
+      if (fieldKind === 'comment') {
+        if (typeof payload.value !== 'string' || payload.value.length > 2_000) {
+          payloadError(
+            'Appointment comment is invalid.',
+            'legacy_appointment_payload_invalid',
+          );
+        }
+        return {
+          action,
+          externalId,
+          input: { fieldKind, value: payload.value },
+        };
+      }
+      if (fieldKind === 'sms_flag') {
+        return {
+          action,
+          externalId,
+          input: {
+            fieldKind,
+            value: requiredInteger(payload, 'value', 0, 48),
+          },
+        };
+      }
+      if (fieldKind !== 'client_name') {
+        payloadError(
+          'Appointment field kind is not supported.',
+          'legacy_appointment_payload_invalid',
+        );
+      }
+      const value = payload.value;
+      if (!value || Array.isArray(value) || typeof value !== 'object') {
+        payloadError(
+          'Appointment client value must be an object.',
+          'legacy_appointment_payload_invalid',
+        );
+      }
+      const client = value as Record<string, unknown>;
+      assertExactKeys(client, ['name', 'phone']);
+      return {
+        action,
+        externalId,
+        input: {
+          fieldKind,
+          value: {
+            name: requiredString(client, 'name', 160),
+            ...(client.phone === undefined
+              ? {}
+              : { phone: requiredString(client, 'phone', 40) }),
+          },
+        },
+      };
+    }
+
+    assertExactKeys(payload, ['external_id']);
+    return {
+      action: 'cancel_appointment',
+      externalId: requiredString(payload, 'external_id', 128),
+    };
+  }
+
+  private preview(
+    tenantId: string,
+    parsed: ParsedAction,
+    invocation: AppointmentActionInvocation,
+  ): Promise<ActionExecutionPreviewV1> {
+    if (parsed.action === 'create_appointment') {
+      return this.crmService.previewCreateAppointment(
+        tenantId,
+        parsed.params,
+        invocation,
+      );
+    }
+    if (parsed.action === 'reschedule_appointment') {
+      return this.crmService.previewRescheduleAppointment(
+        tenantId,
+        parsed.params,
+        invocation,
+      );
+    }
+    if (parsed.action === 'cancel_appointment') {
+      return this.crmService.previewCancelAppointment(
+        tenantId,
+        parsed.externalId,
+        invocation,
+      );
+    }
+    if (parsed.action === 'pay_visit') {
+      return this.crmService.previewPayVisit(
+        tenantId,
+        parsed.params,
+        invocation,
+      );
+    }
+    return this.crmService.planResidualAppointmentShadow(
+      tenantId,
+      this.shadowCapability(parsed.action),
+      `appointment/${parsed.externalId}`,
+      parsed.input,
+      invocation,
+    );
+  }
+
+  private executeAction(
+    tenantId: string,
+    parsed: ExecutableParsedAction,
+    invocation: AppointmentActionInvocation,
+  ) {
+    if (parsed.action === 'create_appointment') {
+      return this.crmService.executeCreateAppointmentWithReceipt(
+        tenantId,
+        parsed.params,
+        invocation,
+      );
+    }
+    if (parsed.action === 'reschedule_appointment') {
+      return this.crmService.executeRescheduleAppointmentWithReceipt(
+        tenantId,
+        parsed.params,
+        invocation,
+      );
+    }
+    if (parsed.action === 'pay_visit') {
+      return this.crmService.executePayVisitWithReceipt(
+        tenantId,
+        parsed.params,
+        invocation,
+      );
+    }
+    if (
+      parsed.action === 'set_appointment_attendance' ||
+      parsed.action === 'set_appointment_duration' ||
+      parsed.action === 'set_appointment_services' ||
+      parsed.action === 'set_appointment_fields'
+    ) {
+      return this.crmService.executeResidualAppointmentWithReceipt(
+        tenantId,
+        parsed.action,
+        parsed.externalId,
+        parsed.input as ResidualAppointmentMutationInput,
+        invocation,
+      );
+    }
+    return this.crmService.executeCancelAppointmentWithReceipt(
+      tenantId,
+      parsed.externalId,
+      invocation,
+    );
+  }
+
+  private isExecutableAction(action: LegacyAppointmentAction): boolean {
+    return (
+      action === 'create_appointment' ||
+      action === 'reschedule_appointment' ||
+      action === 'cancel_appointment' ||
+      action === 'pay_visit' ||
+      action === 'set_appointment_attendance' ||
+      action === 'set_appointment_duration' ||
+      action === 'set_appointment_services' ||
+      action === 'set_appointment_fields'
+    );
+  }
+
+  private shadowCapability(
+    action: ResidualAppointmentAction,
+  ): ResidualAppointmentShadowCapability {
+    const capabilities: Record<
+      ResidualAppointmentAction,
+      ResidualAppointmentShadowCapability
+    > = {
+      set_appointment_attendance: 'crm.appointment.attendance.shadow.v1',
+      set_appointment_duration: 'crm.appointment.duration.shadow.v1',
+      set_appointment_services: 'crm.appointment.services.shadow.v1',
+      set_appointment_fields: 'crm.appointment.fields.shadow.v1',
+    };
+    return capabilities[action];
+  }
+
+  private logShadowObservation(input: {
+    tenantId: string;
+    dto: LegacyAppointmentBridgeDto;
+    preview: ActionExecutionPreviewV1;
+  }): void {
+    const { tenantId, dto, preview } = input;
+    const observation = {
+      event: 'legacy_appointment_shadow_observation',
+      contract: LEGACY_APPOINTMENT_SHADOW_OBSERVATION_CONTRACT,
+      mode: 'shadow',
+      tenant_ref: opaqueObservationRef(tenantId),
+      tenant_resolution: 'integration',
+      origin: dto.origin,
+      authorization_context: {
+        transport_authentication: 'bridge_secret',
+        integration_binding: 'verified',
+        origin_action_policy: 'allowed',
+        tenant_scope: 'system_tenant',
+      },
+      legacy_action_class: dto.action_class,
+      preview_action_class: preview.actionClass,
+      capability: preview.capability,
+      capability_version: preview.capabilityVersion,
+      target_kind: preview.targetKind,
+      target_ref_hash: opaqueObservationRef(preview.targetRef),
+      normalized_input_hash: preview.normalizedInputHash,
+      identity_fingerprint: preview.identityFingerprint,
+      request_idempotency_key_hash: preview.requestIdempotencyKeyHash,
+      policy_key: preview.policyKey,
+      policy_version: preview.policyVersion,
+      policy_decision: preview.policyDecision,
+      autonomy_level: preview.autonomyLevel,
+      approval_requirement: preview.approvalRequirement,
+      executor_key: preview.executorKey,
+      executor_version: preview.executorVersion,
+      ...(dto.legacy_outcome
+        ? {
+            legacy_outcome: {
+              success: dto.legacy_outcome.success,
+              ...(dto.legacy_outcome.code
+                ? { code: dto.legacy_outcome.code }
+                : {}),
+              ...(dto.legacy_outcome.http_status
+                ? { http_status: dto.legacy_outcome.http_status }
+                : {}),
+              ...(dto.legacy_outcome.unknown === true ? { unknown: true } : {}),
+            },
+          }
+        : {}),
+      preview_external_side_effects: preview.externalSideEffects,
+      bridge_external_side_effects: 0,
+      shadow_side_effects: {
+        crm_writes: 0,
+        messages: 0,
+        campaigns: 0,
+      },
+    };
+
+    // A stable one-line prefix lets a separate read-only journal observer
+    // consume only this PII-free contract without importing application code.
+    this.logger.log(
+      `${LEGACY_APPOINTMENT_SHADOW_OBSERVATION_PREFIX}${JSON.stringify(observation)}`,
+    );
+  }
+
+  private executionResponse(
+    mode: 'execute' | 'status',
+    execution: ExecutionResultV1,
+  ): LegacyAppointmentBridgeExecutionResult {
+    return {
+      contract: LEGACY_APPOINTMENT_BRIDGE_RESULT_CONTRACT,
+      accepted: true,
+      mode,
+      tenant_resolution: 'integration',
+      execution,
+      safe_explanation: this.safeExplanation(execution),
+      bridge_external_side_effects: 0,
+    };
+  }
+
+  private safeExplanation(execution: ExecutionResultV1): string {
+    if (execution.state === 'UNKNOWN') {
+      return 'Результат операции уточняется. Не повторяйте действие.';
+    }
+    if (execution.state === 'SUCCEEDED') return 'Операция выполнена.';
+    if (execution.state === 'FAILED' || execution.state === 'NOT_EXECUTED') {
+      return 'Операция не выполнена.';
+    }
+    return 'Операция принята в обработку.';
+  }
+}

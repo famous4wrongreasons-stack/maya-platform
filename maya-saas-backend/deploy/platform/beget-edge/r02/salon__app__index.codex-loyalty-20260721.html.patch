@@ -1,0 +1,12 @@
+--- a/salon/app/index.codex-loyalty-20260721.html
++++ b/salon/app/index.codex-loyalty-20260721.html
+@@ -13466,0 +13467,6 @@
++          const canonical = typeof meSaasCurrentBundle === 'function' ? meSaasCurrentBundle() : null;
++          if (canonical && canonical.token) {
++            headers.Authorization = 'Bearer ' + canonical.token;
++            payload.maya_token = canonical.token;
++            return { headers: headers, payload: payload };
++          }
+@@ -31476,0 +31483,2 @@
++    var mayaTok = typeof canonicalMayaTok === 'function' ? canonicalMayaTok() : (typeof meSaasCurrentBundle === 'function' ? (meSaasCurrentBundle() || {}).token : '');
++    if (mayaTok) { headers.Authorization = 'Bearer ' + mayaTok; body.maya_token = mayaTok; return { headers: headers, body: JSON.stringify(body) }; }

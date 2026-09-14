@@ -1,0 +1,15 @@
+{
+  "scope": [
+    "P02",
+    "shared prepare/publication"
+  ],
+  "decisions": [
+    "D04",
+    "D05",
+    "D07",
+    "D11"
+  ],
+  "findings": 0,
+  "mode": "read-only code/contract review",
+  "mutationOrProcessEffects": 0
+}

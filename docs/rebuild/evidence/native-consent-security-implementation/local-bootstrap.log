@@ -1,0 +1,1 @@
+{"status":"PASS","canonicalApplicationContext":true,"realAuthOwnerAndJwtStrategy":true,"securityOwnerDependencyInjection":true,"schedulers":"DISABLED","businessWrites":0,"providerEffects":0,"messages":0,"productionWrites":0}

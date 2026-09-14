@@ -1,0 +1,1 @@
+{"package":"R09","publicFunctions":"PASS","checks":6,"proof":"lost response/reload/changed intent/normalized comment/anonymous scope/read-only","productionEffects":0}

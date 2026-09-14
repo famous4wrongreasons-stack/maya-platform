@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-09-07T17:36:15.132650+00:00",
+  "sourceType": "OWNER_SUPPLIED_SCREENSHOT",
+  "originalFilename": "Снимок экрана — 2026-09-07 в 8.29.14 PM.png",
+  "sourceImageSha256": "e283ffd1cd83e575b0d64bed4a6625ece80b72d290a4f23dc8e73ac1280d1793",
+  "sourceImageBytes": 1828587,
+  "sourceImageDimensions": [
+    3456,
+    2234
+  ],
+  "sourceImageLocalArchive": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/package5-s13-closure/owner-evidence-original.png",
+  "imageInGit": false,
+  "imageRetentionReason": "Unmodified original retained locally; repository stores relevant transcription/hash only. Unrelated background conversations, notifications and account financial details are not copied.",
+  "accountScope": "mocine3388",
+  "accountScopeEvidence": "Provided by owner in direct response to this account S13 evidence request; visible account label prefix mocine338 is consistent with existing authorized account evidence. Final label characters are partly obscured by a notification, not independently transcribed.",
+  "captureTimeFromFilenameLocal": "2026-09-07 20:29:14",
+  "serverClockVisible": "20:29:12",
+  "screenshotTimezoneExplicitlyDisplayed": false,
+  "directObservations": {
+    "browserUrl": "https://cp.beget.com/crontab/master",
+    "activeTab": "Мастер заданий",
+    "otherTabs": [
+      "Составить задание вручную",
+      "Запустить скрипт"
+    ],
+    "tableHeading": "Команды",
+    "filterText": "",
+    "filterPlaceholder": "Фильтр",
+    "emptyStateText": "Нет заданий для отображения",
+    "visibleJobRows": 0,
+    "paginationControlsVisible": false,
+    "statusFilterVisible": false,
+    "commandInput": "empty; placeholder Команда для выполнения",
+    "descriptionInput": "empty; placeholder Описание задания",
+    "addTaskButtonVisible": true,
+    "timeControlsAboveTable": "Unsaved new-task form: minute 1/hour 1; not an existing cron entry or active schedule"
+  },
+  "officialUiReference": {
+    "url": "https://beget.com/ru/kb/manual/crontab",
+    "accessedOn": "2026-09-07",
+    "supportedInterpretation": "Master tab lists configured tasks below the creation form; enable/disable is a per-row control in this table. Manual task composition is another input mode; Run script is on-demand execution/history, not a separate disabled-job list.",
+    "role": "Corroborates UI meaning only; the account-specific zero-job fact comes from owner screenshot, not public documentation"
+  },
+  "inference": {
+    "totalConfiguredJobs": 0,
+    "enabledJobs": 0,
+    "disabledJobs": 0,
+    "reason": "Explicit empty state in unfiltered configured-command table; no rows of either state, no pagination. No job exists whose hidden launch fields require a details view.",
+    "exactCommandOrUrl": "NOT APPLICABLE — zero jobs",
+    "nameScheduleWorkingDirectoryInterpreterEnvAndExtraParameters": "NOT APPLICABLE — zero jobs"
+  },
+  "scope": "Beget hosting Cron for the requested account at owner-evidence capture; VPS application/OS schedulers remain separately inventoried. No claim about future jobs or historical one-off operator commands.",
+  "permissionBypass": false,
+  "serverConfigurationMutation": false,
+  "jobTriggers": 0,
+  "productionMessages": 0,
+  "productionBusinessProviderMutations": 0
+}

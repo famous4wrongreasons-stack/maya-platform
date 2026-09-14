@@ -1,0 +1,289 @@
+commit b6c53ff9ee31bb43d0419f5ce32aa6b0e4999ae0
+Author:     Codex <codex@local>
+AuthorDate: Tue Sep 8 10:26:48 2026 +0300
+Commit:     Codex <codex@local>
+CommitDate: Tue Sep 8 10:26:48 2026 +0300
+
+    fix(client): support installed native consent flow
+
+diff --git a/maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts b/maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts
+new file mode 100644
+index 00000000..05e1b135
+--- /dev/null
++++ b/maya-saas-backend/src/action-engine/legacy-native-consent-compatibility.architecture.spec.ts
+@@ -0,0 +1,30 @@
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++
++const root = resolve(__dirname, '..');
++const read = (file: string) => readFileSync(resolve(root, file), 'utf8');
++
++describe('legacy installed native consent compatibility boundary', () => {
++  it('keeps the old route as a narrow initiator of canonical link and consent', () => {
++    const controller = read('customers/customers.controller.ts');
++    const runtime = read('crm/client-channel-runtime.service.ts');
++    const start = runtime.indexOf('async submitLegacyNativeConsent(');
++    const end = runtime.indexOf('\n  async status(', start);
++    const method = runtime.slice(start, end);
++
++    expect(controller).toContain(
++      'this.clientChannels.submitLegacyNativeConsent(',
++    );
++    expect(method).toContain('await this.issue(channelProof)');
++    expect(method).toContain(
++      'await this.consume(channelProof, challenge.token)',
++    );
++    expect(method).toContain('return this.submitConsent(channelProof');
++    expect(method).not.toMatch(
++      /customerProfile\.(create|update|upsert|delete)/,
++    );
++    expect(method).not.toMatch(
++      /phone|chat_id|providerSubject|clientId:\s*input/,
++    );
++  });
++});
+diff --git a/maya-saas-backend/src/crm/client-channel-runtime.service.ts b/maya-saas-backend/src/crm/client-channel-runtime.service.ts
+index 2274f974..7949a1e0 100644
+--- a/maya-saas-backend/src/crm/client-channel-runtime.service.ts
++++ b/maya-saas-backend/src/crm/client-channel-runtime.service.ts
+@@ -264,6 +264,60 @@ export class ClientChannelRuntimeService implements ClientChallengeIssuerAuthori
+     return { privacy, marketing };
+   }
+ 
++  /** Compatibility ingress for native bundles released before e5ec27fd.
++   * The legacy HTTP route remains an initiator only: it cannot select a Client
++   * or mutate a profile, and the canonical challenge/link/consent owners keep
++   * every durable effect.
++   */
++  async submitLegacyNativeConsent(channelProof: string, value: unknown) {
++    if (
++      !value ||
++      typeof value !== 'object' ||
++      Array.isArray(value) ||
++      Object.keys(value).sort().join(',') !== 'marketingConsent,privacyConsent'
++    )
++      throw new BadRequestException('Exact legacy consent decision required');
++    const input = value as {
++      privacyConsent: unknown;
++      marketingConsent: unknown;
++    };
++    if (
++      typeof input.privacyConsent !== 'boolean' ||
++      typeof input.marketingConsent !== 'boolean'
++    )
++      throw new BadRequestException('Exact legacy consent decision required');
++
++    if (!(await this.status(channelProof)).linked) {
++      const challenge = await this.issue(channelProof);
++      try {
++        await this.consume(channelProof, challenge.token);
++      } catch (error) {
++        // Concurrent requests for the same authenticated subject may race after
++        // issuing separate tokens. Continue only when the canonical active link
++        // now proves that another request completed the same identity step.
++        if (!(await this.status(channelProof)).linked) throw error;
++      }
++    }
++    const authority = await this.prisma.$transaction((tx) =>
++      this.resolve(channelProof, tx),
++    );
++    const decisionIdentity = createHash('sha256')
++      .update(
++        JSON.stringify([
++          authority.tenantId,
++          authority.linkId,
++          input.privacyConsent,
++          input.marketingConsent,
++        ]),
++      )
++      .digest('hex');
++    return this.submitConsent(channelProof, {
++      privacy: input.privacyConsent,
++      marketing: input.marketingConsent,
++      idempotencyKey: `legacy-native-consent:${decisionIdentity}`,
++    });
++  }
++
+   async status(channelProof: string) {
+     return this.prisma.$transaction(async (tx) => {
+       const channel = await this.channels.authenticate(channelProof, tx);
+diff --git a/maya-saas-backend/src/crm/legacy-native-consent.service.spec.ts b/maya-saas-backend/src/crm/legacy-native-consent.service.spec.ts
+new file mode 100644
+index 00000000..83a0efda
+--- /dev/null
++++ b/maya-saas-backend/src/crm/legacy-native-consent.service.spec.ts
+@@ -0,0 +1,104 @@
++import { BadRequestException } from '@nestjs/common';
++
++import { ClientChannelRuntimeService } from './client-channel-runtime.service';
++
++function fixture(linked = false) {
++  const status = jest
++    .fn()
++    .mockResolvedValueOnce({ linked })
++    .mockResolvedValue({ linked: true });
++  const issue = jest.fn().mockResolvedValue({ token: 'opaque-token' });
++  const consume = jest.fn().mockResolvedValue({ link: { id: 'link-1' } });
++  const resolve = jest.fn().mockResolvedValue({
++    tenantId: 'tenant-1',
++    clientId: 'client-1',
++    linkId: 'link-1',
++  });
++  const submitConsent = jest
++    .fn<Promise<{ accepted: boolean }>, [string, Record<string, unknown>]>()
++    .mockResolvedValue({ accepted: true });
++  const service = Object.assign(
++    Object.create(ClientChannelRuntimeService.prototype) as object,
++    {
++      prisma: {
++        $transaction: jest.fn((work: (tx: object) => unknown) => work({})),
++      },
++      status,
++      issue,
++      consume,
++      resolve,
++      submitConsent,
++    },
++  ) as ClientChannelRuntimeService;
++  return { service, status, issue, consume, resolve, submitConsent };
++}
++
++describe('legacy native consent compatibility ingress', () => {
++  it('creates the verified link before canonical consent for an unlinked session', async () => {
++    const { service, issue, consume, submitConsent } = fixture(false);
++
++    await service.submitLegacyNativeConsent('maya-session-proof', {
++      privacyConsent: true,
++      marketingConsent: false,
++    });
++
++    expect(issue).toHaveBeenCalledWith('maya-session-proof');
++    expect(consume).toHaveBeenCalledWith('maya-session-proof', 'opaque-token');
++    const call = submitConsent.mock.calls[0];
++    expect(call[0]).toBe('maya-session-proof');
++    expect(call[1].privacy).toBe(true);
++    expect(call[1].marketing).toBe(false);
++    expect(call[1].idempotencyKey).toMatch(
++      /^legacy-native-consent:[0-9a-f]{64}$/,
++    );
++  });
++
++  it('reuses an active verified link and a stable decision identity', async () => {
++    const first = fixture(true);
++    const second = fixture(true);
++    const input = { privacyConsent: true, marketingConsent: true };
++
++    await first.service.submitLegacyNativeConsent('maya-session-proof', input);
++    await second.service.submitLegacyNativeConsent('maya-session-proof', input);
++
++    expect(first.issue).not.toHaveBeenCalled();
++    expect(first.consume).not.toHaveBeenCalled();
++    expect(first.submitConsent.mock.calls[0][1]).toEqual(
++      second.submitConsent.mock.calls[0][1],
++    );
++  });
++
++  it('accepts a concurrent canonical link winner but no unresolved failure', async () => {
++    const winner = fixture(false);
++    winner.consume.mockRejectedValue(new Error('unique conflict'));
++    await expect(
++      winner.service.submitLegacyNativeConsent('maya-session-proof', {
++        privacyConsent: true,
++        marketingConsent: false,
++      }),
++    ).resolves.toEqual({ accepted: true });
++
++    const unresolved = fixture(false);
++    unresolved.consume.mockRejectedValue(new Error('unique conflict'));
++    unresolved.status.mockReset().mockResolvedValue({ linked: false });
++    await expect(
++      unresolved.service.submitLegacyNativeConsent('maya-session-proof', {
++        privacyConsent: true,
++        marketingConsent: false,
++      }),
++    ).rejects.toThrow('unique conflict');
++  });
++
++  it('rejects broader legacy profile payloads', async () => {
++    const { service, issue, submitConsent } = fixture(false);
++    await expect(
++      service.submitLegacyNativeConsent('maya-session-proof', {
++        privacyConsent: true,
++        marketingConsent: false,
++        preferredLocale: 'ru',
++      }),
++    ).rejects.toBeInstanceOf(BadRequestException);
++    expect(issue).not.toHaveBeenCalled();
++    expect(submitConsent).not.toHaveBeenCalled();
++  });
++});
+diff --git a/maya-saas-backend/src/customers/customers.controller.ts b/maya-saas-backend/src/customers/customers.controller.ts
+index 7b01ae8f..f184e704 100644
+--- a/maya-saas-backend/src/customers/customers.controller.ts
++++ b/maya-saas-backend/src/customers/customers.controller.ts
+@@ -1,4 +1,5 @@
+ import {
++  BadRequestException,
+   Body,
+   Controller,
+   Get,
+@@ -18,6 +19,16 @@ import { RequiresFeature } from '../entitlements/requires-feature.decorator';
+ import { CustomersService } from './customers.service';
+ import { UpdateCustomerNotesDto } from './dto/update-customer-notes.dto';
+ import { UpdateCustomerProfileDto } from './dto/update-customer-profile.dto';
++import { ClientChannelRuntimeService } from '../crm/client-channel-runtime.service';
++
++function mayaSessionProof(authorization: string | undefined) {
++  if (!authorization?.startsWith('Bearer '))
++    throw new BadRequestException('Maya session required');
++  return JSON.stringify({
++    type: 'maya_jwt',
++    credential: authorization.slice(7),
++  });
++}
+ 
+ const CUSTOMER_MANAGER_ROLES = [
+   UserRole.TENANT_OWNER,
+@@ -33,7 +44,10 @@ const CUSTOMER_MANAGER_ROLES = [
+ @RequiresFeature('customers.core')
+ @Controller('customers')
+ export class CustomersController {
+-  constructor(private readonly customersService: CustomersService) {}
++  constructor(
++    private readonly customersService: CustomersService,
++    private readonly clientChannels: ClientChannelRuntimeService,
++  ) {}
+ 
+   @Get('me/profile')
+   @ApiOperation({ summary: 'Get the current customer consent profile' })
+@@ -43,11 +57,29 @@ export class CustomersController {
+ 
+   @Patch('me/profile')
+   @ApiOperation({ summary: 'Update the current customer consent profile' })
+-  updateOwnProfile(
++  async updateOwnProfile(
+     @CurrentUser() user: AuthenticatedUser,
+     @Body() dto: UpdateCustomerProfileDto,
+     @Headers('idempotency-key') idempotencyKey?: string,
++    @Headers('authorization') authorization?: string,
+   ) {
++    // Installed native builds before e5ec27fd submit this exact consent-only
++    // shape. Preserve their explicit user decision while routing it through the
++    // same verified challenge/link and canonical Client consent boundary.
++    if (
++      dto.preferredLocale === undefined &&
++      typeof dto.privacyConsent === 'boolean' &&
++      typeof dto.marketingConsent === 'boolean'
++    ) {
++      await this.clientChannels.submitLegacyNativeConsent(
++        mayaSessionProof(authorization),
++        {
++          privacyConsent: dto.privacyConsent,
++          marketingConsent: dto.marketingConsent,
++        },
++      );
++      return this.customersService.getOwnProfile(user.tenantId!, user.userId);
++    }
+     return this.customersService.updateOwnProfile(
+       user.tenantId!,
+       user.userId,

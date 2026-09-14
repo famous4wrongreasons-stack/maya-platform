@@ -1,0 +1,46 @@
+{
+  "verdict": "BLOCKER_REPRODUCED",
+  "blocker": "B29 / A18",
+  "cases": [
+    {
+      "mode": "missing",
+      "verifiedReaderDisclosesTarget": false,
+      "cancelAccepted": true,
+      "targetClientIsOtherThanVerifiedOrAccountAssociatedClient": true,
+      "statusAfter": "canceled",
+      "newActionExecutions": 0,
+      "clientLinkProfileConsentStateUnchanged": true
+    },
+    {
+      "mode": "revoked",
+      "verifiedReaderDisclosesTarget": false,
+      "cancelAccepted": true,
+      "targetClientIsOtherThanVerifiedOrAccountAssociatedClient": true,
+      "statusAfter": "canceled",
+      "newActionExecutions": 0,
+      "clientLinkProfileConsentStateUnchanged": true
+    },
+    {
+      "mode": "verified_to_other_client",
+      "verifiedReaderDisclosesTarget": false,
+      "cancelAccepted": true,
+      "targetClientIsOtherThanVerifiedOrAccountAssociatedClient": true,
+      "statusAfter": "canceled",
+      "newActionExecutions": 0,
+      "clientLinkProfileConsentStateUnchanged": true
+    }
+  ],
+  "route": "POST /api/appointments/:id/cancel",
+  "testedCalendarSource": "internal",
+  "compiledControllerServiceRepository": true,
+  "realPostgresql": true,
+  "syntheticFixturesOnly": true,
+  "httpAuthenticationBypassClaimed": false,
+  "requiresAuthenticatedTenantMemberAndBookingFeature": true,
+  "actionEngineExecutionsCreated": 0,
+  "providerCalls": 0,
+  "inboxRequestsIntercepted": 3,
+  "realProductionMutations": 0,
+  "realProductionPrivateReads": 0,
+  "limitations": "Does not execute external CRM cancellation, rescheduling, creation, or production HTTP."
+}

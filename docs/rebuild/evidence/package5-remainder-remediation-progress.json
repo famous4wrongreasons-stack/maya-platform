@@ -1,0 +1,778 @@
+{
+  "inventorySource": "docs/rebuild/evidence/package5-remainder-inventory-final.json",
+  "inventorySha256": "f0d29c9f60c4699c1458b383b86decf0fb26aef5ee56e89a2d9a89b6b62df425",
+  "wave": "R-C",
+  "state": "PACKAGE 5 COMPLETE; CHAPTER 6 FINAL ACCEPTANCE PASS — CHAPTER 7 NOT STARTED",
+  "packages": [
+    {
+      "id": "R01",
+      "blockers": [
+        "B38",
+        "B39",
+        "B54"
+      ],
+      "owner": "Canonical Client/profile and Appointment owners; B31/B32/B33 identity/intent ingress",
+      "dependencies": [],
+      "status": "REMEDIATED"
+    },
+    {
+      "id": "R02",
+      "blockers": [
+        "B40",
+        "B41"
+      ],
+      "owner": "Canonical User/Membership/CrmStaffAccess/platform access owner",
+      "dependencies": [],
+      "status": "REMEDIATED"
+    },
+    {
+      "id": "R03",
+      "blockers": [
+        "B56"
+      ],
+      "owner": "A15 canonical StaffSchedule action owner",
+      "dependencies": [
+        "R02"
+      ],
+      "status": "REMEDIATED"
+    },
+    {
+      "id": "R04",
+      "blockers": [
+        "B42"
+      ],
+      "owner": "A23 OperationalWorkItem owner; A29/A31 projection boundary",
+      "dependencies": [
+        "R02"
+      ],
+      "status": "REMEDIATED"
+    },
+    {
+      "id": "R05",
+      "blockers": [
+        "B36",
+        "B43"
+      ],
+      "owner": "OwnerReportRun immutable recipient/slot plan → A12 → Communication Delivery",
+      "dependencies": [
+        "R02",
+        "B43 contract/schema approval",
+        "B36 proof PASS before any extension acceptance"
+      ],
+      "status": "REMEDIATED",
+      "assessmentStatus": "APPROVED OPTION A — IMPLEMENTED AND PRODUCTION PASS",
+      "assessmentEvidence": "package5-remainder-e3-r05-assessment.json",
+      "ownerDecisionRequired": false,
+      "schemaApprovalRequiredForRecommendedOption": false,
+      "wholePackageReadyForImplementation": true,
+      "historicalStage1": {
+        "owner": "Owner report immutable run/recipient-slot plan owner",
+        "status": "NOT REMEDIATED",
+        "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
+        "assessmentEvidence": "package5-remainder-e3-r05-assessment.json",
+        "ownerDecisionRequired": true,
+        "schemaApprovalRequiredForRecommendedOption": true,
+        "wholePackageReadyForImplementation": false
+      },
+      "dependenciesSatisfied": true,
+      "localAcceptance": "PASS",
+      "productionAcceptance": "PASS",
+      "evidence": "package5-rc-final/production-wave-acceptance.json"
+    },
+    {
+      "id": "R06",
+      "blockers": [
+        "B44",
+        "B45",
+        "B48",
+        "B49"
+      ],
+      "owner": "Existing producer owners + OperationalAlertRun for B44 occurrence/audience → Communication Delivery",
+      "dependencies": [
+        "R01",
+        "R02",
+        "B44 contract/schema decision"
+      ],
+      "status": "REMEDIATED",
+      "assessmentStatus": "APPROVED OPTION A — IMPLEMENTED AND PRODUCTION PASS",
+      "assessmentEvidence": "package5-remainder-e3-r06-assessment.json",
+      "ownerDecisionRequired": false,
+      "schemaApprovalRequiredForRecommendedOption": false,
+      "wholePackageReadyForImplementation": true,
+      "historicalStage1": {
+        "owner": "Communication Delivery admission/execution owner; producer occurrence authority remains explicit",
+        "status": "NOT REMEDIATED",
+        "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
+        "assessmentEvidence": "package5-remainder-e3-r06-assessment.json",
+        "ownerDecisionRequired": true,
+        "schemaApprovalRequiredForRecommendedOption": true,
+        "wholePackageReadyForImplementation": false
+      },
+      "dependenciesSatisfied": true,
+      "localAcceptance": "PASS",
+      "productionAcceptance": "PASS",
+      "evidence": "package5-rc-final/production-wave-acceptance.json"
+    },
+    {
+      "id": "R07",
+      "blockers": [
+        "B46",
+        "B57"
+      ],
+      "owner": "B35 canonical bulk marketing owner; P405 retains subscription eligibility",
+      "dependencies": [
+        "R02"
+      ],
+      "status": "REMEDIATED"
+    },
+    {
+      "id": "R08",
+      "blockers": [
+        "B47"
+      ],
+      "owner": "NativeFeedbackRequest/Revision + exact Client/Appointment → Action Engine/Communication Delivery",
+      "dependencies": [
+        "R01",
+        "R02",
+        "B47 owner/schema decision"
+      ],
+      "status": "REMEDIATED",
+      "assessmentStatus": "APPROVED OPTION A — IMPLEMENTED AND PRODUCTION PASS",
+      "assessmentEvidence": "package5-remainder-e3-r08-assessment.json",
+      "ownerDecisionRequired": false,
+      "schemaApprovalRequiredForRecommendedOption": false,
+      "wholePackageReadyForImplementation": true,
+      "historicalStage1": {
+        "owner": "Native feedback/request owner — exact mapping pending",
+        "status": "NOT REMEDIATED",
+        "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
+        "assessmentEvidence": "package5-remainder-e3-r08-assessment.json",
+        "ownerDecisionRequired": true,
+        "schemaApprovalRequiredForRecommendedOption": true,
+        "wholePackageReadyForImplementation": false
+      },
+      "dependenciesSatisfied": true,
+      "localAcceptance": "PASS",
+      "productionAcceptance": "PASS",
+      "evidence": "package5-rc-final/production-wave-acceptance.json"
+    },
+    {
+      "id": "R09",
+      "blockers": [
+        "B52"
+      ],
+      "owner": "Anonymous community source facts → human moderation → Action Engine",
+      "dependencies": [
+        "R02",
+        "B52 owner/schema decision"
+      ],
+      "status": "REMEDIATED",
+      "assessmentStatus": "APPROVED OPTION A — IMPLEMENTED AND PRODUCTION PASS",
+      "assessmentEvidence": "package5-remainder-e3-r09-assessment.json",
+      "ownerDecisionRequired": false,
+      "schemaApprovalRequiredForRecommendedOption": false,
+      "wholePackageReadyForImplementation": true,
+      "historicalStage1": {
+        "owner": "Anonymous community source facts and canonical moderation owner — mapping pending",
+        "status": "NOT REMEDIATED",
+        "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
+        "assessmentEvidence": "package5-remainder-e3-r09-assessment.json",
+        "ownerDecisionRequired": true,
+        "schemaApprovalRequiredForRecommendedOption": true,
+        "wholePackageReadyForImplementation": false
+      },
+      "dependenciesSatisfied": true,
+      "localAcceptance": "PASS",
+      "productionAcceptance": "PASS",
+      "evidence": "package5-rc-final/production-wave-acceptance.json"
+    },
+    {
+      "id": "R10",
+      "blockers": [
+        "B50"
+      ],
+      "owner": "AI invocation/approval receipt owner over existing ActionExecution",
+      "dependencies": [],
+      "status": "REMEDIATED"
+    },
+    {
+      "id": "R11",
+      "blockers": [
+        "B51",
+        "B59"
+      ],
+      "owner": "A22 tenant configuration revisions, separate personal Telegram preferences",
+      "dependencies": [
+        "R02",
+        "B51/B59 owner/schema decisions"
+      ],
+      "status": "REMEDIATED",
+      "assessmentStatus": "APPROVED OPTION A — IMPLEMENTED AND PRODUCTION PASS",
+      "assessmentEvidence": "package5-remainder-e3-r11-assessment.json",
+      "ownerDecisionRequired": false,
+      "schemaApprovalRequiredForRecommendedOption": false,
+      "wholePackageReadyForImplementation": true,
+      "historicalStage1": {
+        "owner": "A22 governed configuration owner with distinct tenant-rule and personal staff-preference scopes",
+        "status": "NOT REMEDIATED",
+        "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
+        "assessmentEvidence": "package5-remainder-e3-r11-assessment.json",
+        "ownerDecisionRequired": true,
+        "schemaApprovalRequiredForRecommendedOption": true,
+        "wholePackageReadyForImplementation": false
+      },
+      "dependenciesSatisfied": true,
+      "localAcceptance": "PASS",
+      "productionAcceptance": "PASS",
+      "evidence": "package5-rc-final/production-wave-acceptance.json"
+    },
+    {
+      "id": "R12",
+      "blockers": [
+        "B53",
+        "B58"
+      ],
+      "owner": "TeamMessage/TeamAttachment → Action Engine → Communication Delivery + scoped retention",
+      "dependencies": [
+        "R02",
+        "B58 owner/schema decision"
+      ],
+      "status": "REMEDIATED",
+      "assessmentStatus": "APPROVED OPTION A — IMPLEMENTED AND PRODUCTION PASS",
+      "assessmentEvidence": "package5-remainder-e3-r12-assessment.json",
+      "ownerDecisionRequired": false,
+      "schemaApprovalRequiredForRecommendedOption": false,
+      "wholePackageReadyForImplementation": true,
+      "historicalStage1": {
+        "owner": "Conversation/message and persistent attachment lifecycle owner",
+        "status": "NOT REMEDIATED",
+        "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
+        "assessmentEvidence": "package5-remainder-e3-r12-assessment.json",
+        "ownerDecisionRequired": true,
+        "schemaApprovalRequiredForRecommendedOption": true,
+        "wholePackageReadyForImplementation": false
+      },
+      "dependenciesSatisfied": true,
+      "localAcceptance": "PASS",
+      "productionAcceptance": "PASS",
+      "evidence": "package5-rc-final/production-wave-acceptance.json"
+    },
+    {
+      "id": "R13",
+      "blockers": [
+        "B37"
+      ],
+      "owner": "P407 + ExpenseReminderRun/ExpenseIntakeBinding + R10/Communication Delivery",
+      "dependencies": [
+        "R02",
+        "B37 owner/schema approval"
+      ],
+      "status": "REMEDIATED",
+      "assessmentStatus": "APPROVED OPTION A — IMPLEMENTED AND PRODUCTION PASS",
+      "assessmentEvidence": "package5-remainder-e3-r13-assessment.json",
+      "ownerDecisionRequired": false,
+      "schemaApprovalRequiredForRecommendedOption": false,
+      "wholePackageReadyForImplementation": true,
+      "historicalStage1": {
+        "owner": "P407 expense declaration owner plus durable reminder/reply intent owner",
+        "status": "NOT REMEDIATED",
+        "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
+        "assessmentEvidence": "package5-remainder-e3-r13-assessment.json",
+        "ownerDecisionRequired": true,
+        "schemaApprovalRequiredForRecommendedOption": true,
+        "wholePackageReadyForImplementation": false
+      },
+      "dependenciesSatisfied": true,
+      "localAcceptance": "PASS",
+      "productionAcceptance": "PASS",
+      "evidence": "package5-rc-final/production-wave-acceptance.json"
+    },
+    {
+      "id": "R14",
+      "blockers": [
+        "B55"
+      ],
+      "owner": "CashDeclaration observation/correction history → Action Engine; not an accounting ledger",
+      "dependencies": [
+        "R02",
+        "B55 owner/schema decision"
+      ],
+      "status": "REMEDIATED",
+      "assessmentStatus": "APPROVED OPTION A — IMPLEMENTED AND PRODUCTION PASS",
+      "assessmentEvidence": "package5-remainder-e3-r14-assessment.json",
+      "ownerDecisionRequired": false,
+      "schemaApprovalRequiredForRecommendedOption": false,
+      "wholePackageReadyForImplementation": true,
+      "historicalStage1": {
+        "owner": "Cash declaration/reconciliation owner — mapping pending",
+        "status": "NOT REMEDIATED",
+        "assessmentStatus": "COMPLETE — PROPOSAL NOT APPROVED",
+        "assessmentEvidence": "package5-remainder-e3-r14-assessment.json",
+        "ownerDecisionRequired": true,
+        "schemaApprovalRequiredForRecommendedOption": true,
+        "wholePackageReadyForImplementation": false
+      },
+      "dependenciesSatisfied": true,
+      "localAcceptance": "PASS",
+      "productionAcceptance": "PASS",
+      "evidence": "package5-rc-final/production-wave-acceptance.json"
+    }
+  ],
+  "package5Complete": true,
+  "chapter6Complete": true,
+  "finalGateRun": true,
+  "productionRelease": "20260908-p5-rc-8bc03454",
+  "completedPackageCount": 14,
+  "totalPackageCount": 14,
+  "remediatedBlockerCount": 24,
+  "totalBlockerCount": 24,
+  "remainingBlockerCount": 0,
+  "nextEligiblePackages": [],
+  "progressEvidence": "package5-rc-final/manifest.json",
+  "remediatedPackages": [
+    "R01",
+    "R02",
+    "R03",
+    "R04",
+    "R05",
+    "R06",
+    "R07",
+    "R08",
+    "R09",
+    "R10",
+    "R11",
+    "R12",
+    "R13",
+    "R14"
+  ],
+  "remediatedBlockers": [
+    "B36",
+    "B37",
+    "B38",
+    "B39",
+    "B40",
+    "B41",
+    "B42",
+    "B43",
+    "B44",
+    "B45",
+    "B46",
+    "B47",
+    "B48",
+    "B49",
+    "B50",
+    "B51",
+    "B52",
+    "B53",
+    "B54",
+    "B55",
+    "B56",
+    "B57",
+    "B58",
+    "B59"
+  ],
+  "blockers": [
+    {
+      "id": "B36",
+      "family": "A12",
+      "package": "R05",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": {
+        "schema": "APPLIED",
+        "runtime": "NOT DEPLOYED",
+        "knownProofDefects": [
+          "idempotency key",
+          "concurrent write conflict"
+        ],
+        "approvedOrder": "INBOX → TELEGRAM → APNS",
+        "newDecisionRequired": false
+      },
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B37",
+      "family": "P4-07 + A13",
+      "package": "R13",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B38",
+      "family": "A01 / appointment create",
+      "package": "R01",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null
+    },
+    {
+      "id": "B39",
+      "family": "A18 + appointment ownership",
+      "package": "R01",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null
+    },
+    {
+      "id": "B40",
+      "family": "A16",
+      "package": "R02",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null
+    },
+    {
+      "id": "B41",
+      "family": "A16/A25 + all legacy owner surfaces",
+      "package": "R02",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null
+    },
+    {
+      "id": "B42",
+      "family": "A23 + A29/A31 read boundaries",
+      "package": "R04",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null
+    },
+    {
+      "id": "B43",
+      "family": "A12",
+      "package": "R05",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B44",
+      "family": "A13",
+      "package": "R06",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B45",
+      "family": "A11",
+      "package": "R06",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B46",
+      "family": "A14/A18",
+      "package": "R07",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null
+    },
+    {
+      "id": "B47",
+      "family": "reduced A27 + A13/A14",
+      "package": "R08",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B48",
+      "family": "A13/A31 appointment events",
+      "package": "R06",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B49",
+      "family": "A11/A13/A23/A14 + Inbox/APNS",
+      "package": "R06",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B50",
+      "family": "cross-family AI execution",
+      "package": "R10",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null
+    },
+    {
+      "id": "B51",
+      "family": "A22/A25 business configuration",
+      "package": "R11",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B52",
+      "family": "public content/reviews + A25",
+      "package": "R09",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B53",
+      "family": "A23/A30 conversation lifecycle",
+      "package": "R12",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B54",
+      "family": "cross-family idempotency / proxy",
+      "package": "R01",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null
+    },
+    {
+      "id": "B55",
+      "family": "finance/P4-07-adjacent",
+      "package": "R14",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B56",
+      "family": "A15",
+      "package": "R03",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null
+    },
+    {
+      "id": "B57",
+      "family": "A14 / P4-05 projection",
+      "package": "R07",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null
+    },
+    {
+      "id": "B58",
+      "family": "A23/A30 + A13",
+      "package": "R12",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    },
+    {
+      "id": "B59",
+      "family": "A22/A16 staff notification preferences",
+      "package": "R11",
+      "status": "REMEDIATED",
+      "historicalPreservedStatus": null,
+      "historicalPreRCStatus": "NOT REMEDIATED",
+      "evidence": "package5-rc-final/coverage.json"
+    }
+  ],
+  "b36": {
+    "schema": "ALREADY APPLIED — PRESERVED",
+    "runtime": "DEPLOYED",
+    "repeatSchemaMigration": false,
+    "proofDefects": [],
+    "resolvedProofDefects": [
+      "IDEMPOTENCY KEY",
+      "CONCURRENT WRITE CONFLICT",
+      "DELAYED RESUME"
+    ],
+    "channelOrder": "INBOX → TELEGRAM → APNS",
+    "localAcceptance": "PASS",
+    "productionAcceptance": "PASS"
+  },
+  "remainingPackageCount": 0,
+  "waveHistory": [
+    {
+      "wave": "R-A",
+      "packages": [
+        "R01",
+        "R02",
+        "R10"
+      ],
+      "blockers": [
+        "B38",
+        "B39",
+        "B40",
+        "B41",
+        "B50",
+        "B54"
+      ],
+      "evidence": "package5-wave-ra-production-proof.json"
+    },
+    {
+      "wave": "R-B",
+      "packages": [
+        "R03",
+        "R04",
+        "R07"
+      ],
+      "blockers": [
+        "B42",
+        "B46",
+        "B56",
+        "B57"
+      ],
+      "evidence": "package5-wave-rb-production-proof.json"
+    },
+    {
+      "wave": "R-C",
+      "packages": [
+        "R05",
+        "R06",
+        "R08",
+        "R09",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "blockers": [
+        "B36",
+        "B37",
+        "B43",
+        "B44",
+        "B45",
+        "B47",
+        "B48",
+        "B49",
+        "B51",
+        "B52",
+        "B53",
+        "B55",
+        "B58",
+        "B59"
+      ],
+      "evidence": "package5-rc-final/production-wave-acceptance.json"
+    }
+  ],
+  "nextAssessmentEvidence": null,
+  "nextOwnerDecisionPackages": [],
+  "nextSchemaApprovalPackages": [],
+  "approvedRemainingRuntimeSubscopesReady": [],
+  "assessedPackageCount": 14,
+  "laterBaselineHold": {
+    "evidence": "package5-wave-rb-late-baseline-stop.json",
+    "upstreamCommit": "7ee1e670ed4fc503c632d2fc200c34dccd1561f8",
+    "currentExecutionHold": false,
+    "remediationCountsPreserveVerifiedCutover": true,
+    "reconciliationEvidence": "package5-late-baseline-reconciliation.json",
+    "runtimeCompatibility": "PASS",
+    "combinedBaselineCertified": true,
+    "reason": "Authorized metadata-only patch regeneration and exact-base replay proof PASS; upstream-compatible combined baseline certified. Remaining package approvals are pending separately.",
+    "status": "RESOLVED BY AUTHORIZED PATCH ARTIFACT REPAIR",
+    "resolutionEvidence": "package5-combined-baseline-certification.json",
+    "historicalReason": "Upstream modified two documented R01 replay patches without updating hunk sizes; current patches fail git apply parsing. No automatic fix authorized by reconciliation task."
+  },
+  "ownerDecisionPack": {
+    "evidence": "package5-owner-decision-pack.json",
+    "presented": 8,
+    "approved": 8,
+    "proposedRemediationWavesRemaining": 1,
+    "proposedWaveRC": [
+      "R05",
+      "R06",
+      "R08",
+      "R09",
+      "R11",
+      "R12",
+      "R13",
+      "R14"
+    ],
+    "implementationStarted": true,
+    "implementationCompleted": true,
+    "approvedOption": "A",
+    "remediationWavesRemaining": 0,
+    "approvalAcceptedAfterCheckpoint": "0ad0eef2"
+  },
+  "historicalPreRCProgress": {
+    "wave": "R-B",
+    "state": "COMBINED BASELINE CERTIFIED; EIGHT-PACKAGE OWNER DECISION PACK PRESENTED — AWAITING OWNER APPROVAL",
+    "completedPackageCount": 6,
+    "remediatedBlockerCount": 10,
+    "remainingBlockerCount": 14,
+    "remainingPackageCount": 8,
+    "productionRelease": "/opt/maya-saas/releases/20260907-p5-rb-cb4fb27c",
+    "nextEligiblePackages": [
+      "R05",
+      "R06",
+      "R08",
+      "R09",
+      "R11",
+      "R12",
+      "R13",
+      "R14"
+    ],
+    "nextAssessmentEvidence": "package5-remainder-e3-stage1-summary.json",
+    "nextOwnerDecisionPackages": [
+      "R05",
+      "R06",
+      "R08",
+      "R09",
+      "R11",
+      "R12",
+      "R13",
+      "R14"
+    ],
+    "nextSchemaApprovalPackages": [
+      "R05",
+      "R06",
+      "R08",
+      "R09",
+      "R11",
+      "R12",
+      "R13",
+      "R14"
+    ],
+    "approvedRemainingRuntimeSubscopesReady": [
+      "B36",
+      "B45",
+      "B48",
+      "B49",
+      "B53"
+    ],
+    "ownerDecisionPack": {
+      "evidence": "package5-owner-decision-pack.json",
+      "presented": 8,
+      "approved": 0,
+      "proposedRemediationWavesRemaining": 1,
+      "proposedWaveRC": [
+        "R05",
+        "R06",
+        "R08",
+        "R09",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "implementationStarted": false
+    },
+    "b36": {
+      "schema": "APPLIED",
+      "runtime": "NOT DEPLOYED",
+      "proofDefects": [
+        "IDEMPOTENCY KEY",
+        "CONCURRENT WRITE CONFLICT"
+      ]
+    }
+  },
+  "finalGateEvidence": "package5-rc-final/coverage.json",
+  "nextCycle": "CHAPTER 7 — separate user instruction; NOT STARTED",
+  "combinedBaselineCertified": true,
+  "securityRemediationPreserved": "package5-rc-final/production-final-security-preservation.json",
+  "chapter6AcceptanceEvidence": "chapter6-final-acceptance/manifest.json",
+  "chapter6AcceptanceReport": "../CYCLE-06-FINAL-COMPLETION-REPORT.md",
+  "chapter7Started": false
+}

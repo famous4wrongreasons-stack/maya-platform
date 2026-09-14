@@ -24,6 +24,7 @@ from telegram.error import Forbidden, BadRequest
 from telegram.ext import Application
 
 import database
+from maya_recovery_bridge import publish_recovery_touchpoint
 from yclients import YClientsAPI
 
 logger = logging.getLogger(__name__)
@@ -122,6 +123,7 @@ def find_dormant_clients() -> list[dict]:
         candidates.append({
             "client_id": client["id"],
             "chat_id": chat_id,
+            "phone": phone,
             "name": _first_name(client.get("name")),
             "last_master": staff.get("name") or "вашему мастеру",
             "last_staff_id": staff.get("id"),
@@ -169,65 +171,6 @@ def _build_message(candidate: dict) -> tuple[str, InlineKeyboardMarkup]:
 
 
 async def run_reactivation_job(app: Application) -> dict:
-    """Главный entry point — запускается scheduler'ом раз в день."""
-    candidates = find_dormant_clients()
-    sent, blocked, errors = 0, 0, 0
-
-    logger.info(f"🔄 Реактивация: найдено {len(candidates)} уснувших клиентов")
-    # AI-директор (owner_ai.return_candidates) читает это число мгновенно, без ре-скана
-    # базы, чтобы показать владельцу в брифинге «кого вернуть» с потенциалом в рублях.
-    try:
-        import json as _json
-        database.set_setting("reactivation_last", _json.dumps({
-            "count": len(candidates),
-            "at": date.today().isoformat(),
-        }))
-    except Exception as _e:
-        logger.error(f"reactivation persist count: {_e}")
-
-    for c in candidates:
-        # Персональные настройки: «давно не были» относится к семейству 'cycle' —
-        # пропускаем при явно выключенном 'cycle' (дефолт ON) + уважаем тихие часы.
-        try:
-            _prefs = database.get_notify_prefs(c["client_id"])
-            if _prefs.get("cycle") is False:
-                continue
-            import datetime as _dtm
-            if database.in_quiet_hours(_prefs, _dtm.datetime.now().hour):
-                continue
-        except Exception:
-            pass
-        text, keyboard = _build_message(c)
-        try:
-            await app.bot.send_message(
-                chat_id=c["chat_id"],
-                text=text,
-                reply_markup=keyboard,
-            )
-            database.log_reactivation(c["client_id"], "sent")
-            sent += 1
-            logger.info(
-                f"  ✅ {c['name']} (chat_id={c['chat_id']}, "
-                f"{c['weeks_since']} нед назад) — отправлено"
-            )
-        except Forbidden:
-            # Клиент заблокировал бот — фиксируем и больше не пробуем
-            database.log_reactivation(c["client_id"], "blocked")
-            blocked += 1
-            logger.info(f"  🚫 {c['name']} (chat_id={c['chat_id']}) — заблокировал бот")
-        except BadRequest as e:
-            database.log_reactivation(c["client_id"], "blocked")
-            blocked += 1
-            logger.info(f"  ⚠️ {c['name']}: {e}")
-        except Exception as e:
-            errors += 1
-            logger.error(f"  ❌ Ошибка для {c['name']}: {e}")
-
-    summary = {
-        "candidates": len(candidates),
-        "sent": sent,
-        "blocked": blocked,
-        "errors": errors,
-    }
-    logger.info(f"🔄 Реактивация завершена: {summary}")
-    return summary
+    """Legacy initiator is not a reviewed canonical campaign."""
+    from canonical_retention_entry import retention_owner_required
+    return retention_owner_required('reactivation')

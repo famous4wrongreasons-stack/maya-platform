@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "release": "20260913-c8-wave3-66e83891",
+  "commit": "66e83891",
+  "mandatory": {
+    "suites": 446,
+    "tests": 3745
+  },
+  "lint": "PASS",
+  "applicationTypecheck": "PASS",
+  "scriptsTypecheck": "PASS",
+  "build": "PASS",
+  "prisma": "PASS",
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "readiness": "PASS",
+  "finiteRelayAndPwaPreservation": "PASS at three release checkpoints",
+  "logSha256": "6bd2c51bf241e3163f6f550f629df832714ade2b13615fd74c7bfadc0d7edcd7",
+  "proofBusinessEffects": 0,
+  "numericTargetsActive": 0,
+  "calibration": "UNAVAILABLE"
+}

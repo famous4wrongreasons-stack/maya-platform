@@ -1,0 +1,27 @@
+[
+  {
+    "file": "src/action-engine/beget-relay-fixture.architecture.spec.ts",
+    "emittedProgramIdentical": true,
+    "programSha256": "8adeed7ac81f3237b5539244b9c83efb64461f302b0b01879bb6ddcef048b24a"
+  },
+  {
+    "file": "src/action-engine/package5-b13-remediation.architecture.spec.ts",
+    "emittedProgramIdentical": true,
+    "programSha256": "41ed86e5cb9e2bf59760d3aa3f5ee3c92ec9874d1b07bd097a610c20d472e675"
+  },
+  {
+    "file": "src/action-engine/package5-b14-remediation.architecture.spec.ts",
+    "emittedProgramIdentical": true,
+    "programSha256": "6afabe936ddb9a212fb07614cd5320a9232217c7acc8e4d547dab719563d24a2"
+  },
+  {
+    "file": "src/action-engine/package5-b16-remediation.architecture.spec.ts",
+    "emittedProgramIdentical": true,
+    "programSha256": "860bf6e2ad38d1f07af268bcae5f382d78883cf5ed888316a4f88fc34c644bbc"
+  },
+  {
+    "file": "src/action-engine/package5-b17-remediation.architecture.spec.ts",
+    "emittedProgramIdentical": true,
+    "programSha256": "67abeac2e117fc2f91a4f705471d72eb207e085488d4b89f995d4bc7329b6f3b"
+  }
+]

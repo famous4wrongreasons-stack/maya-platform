@@ -1,0 +1,43 @@
+{
+  "assessment": "B33 EXISTING DURABLE CONFIRMATION FOUNDATION SUFFICIENT: NO",
+  "existingHistoryIdRetainedWhenRereadingStoredItem": true,
+  "reprocessingSameUserTextAllocatesDifferentHistoryIds": true,
+  "historyItemHasTenantClientConfirmationBinding": false,
+  "requestContextFields": [
+    "proof",
+    "intent"
+  ],
+  "sameWordsAcrossDistinctEventsHaveSameContextIntent": true,
+  "confirmationPreflightToolId": "constant server_confirmed_booking; not an event identifier",
+  "b31BindingRequiresExistingActionExecution": true,
+  "aiBrainSessionRequiresActorUserId": true,
+  "onboardingReceiptStorageExistsButIsDifferentContract": true,
+  "sourceHashes": {
+    "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/webhook_server.py": "beef4e78c6cd5978d8bd7f7ba0e2a01ed5092c8114e824b37f9aa635e2118816",
+    "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/legacy_client_habits_bridge.py": "35d6ad3be94709e20e863ca7c50d27bccbbcebe2033161cf199ccc41cf5fbf86",
+    "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/legacy_client_command_bridge.py": "c539c3176bd26cda723a79d7ec7f0a5ef1032127809b6dac41d019009a87837e",
+    "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/claude_ai.py": "d70e49ddbbf6880d5f7ad931709c1b1c04cdd6d0908ea7fbd737f86a1e525a59",
+    "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/memory.py": "b286f39327adcc3e82c544ad4409d2e5c75a28e0b8367ceb9e16e320850c1b41",
+    "\u0441\u0430\u0439\u0442 \u0438 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435/app.html": "4ba336d42939eb6172f93b6f668ef88f9a47280f8bfa2dafe7001afd044af094",
+    "maya-saas-backend/prisma/schema.prisma": "c164788613e59a7afe78bb5fc3fe5e1d5e3a8134613083aaa272acd69f90194d",
+    "maya-saas-backend/src/onboarding/ai-confirmation-receipt.service.ts": "7626e45c8ffedf10d4ac609c87d38850598b3f34d231c2fcbed5529ee1fccc12",
+    "maya-saas-backend/src/ai-tools/dto/ai-core-chat.dto.ts": "2a20b4fc0071e013165fbbf69faff49669b8f53dde876150bef74cc79f255d12",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "7745b959c5e62b28c212889141ac5c10f6b5426a8d9940fc1ba7cb7d4cef8bd4"
+  },
+  "webhookSourceAnchors": {
+    "_new_chat_message_id": 8012,
+    "_is_chat_message_id": 8016,
+    "_user_history_item": 8041,
+    "_ensure_chat_history_ids": 8020,
+    "_with_chat_turn_ids": 8049,
+    "chat_handler": 8363,
+    "chat_stream_handler": 8935,
+    "_finalize_booking_for_chat": 6324
+  },
+  "applicationModulesImported": 0,
+  "databasesAccessed": 0,
+  "networkCalls": 0,
+  "runtimeChanges": 0,
+  "schemaChanges": 0,
+  "productionMutations": 0
+}

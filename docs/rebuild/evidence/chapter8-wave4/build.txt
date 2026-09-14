@@ -1,0 +1,8 @@
+
+> maya-saas-backend@0.0.1 build
+> nest build && npm run build:preflight
+
+
+> maya-saas-backend@0.0.1 build:preflight
+> tsc --project tsconfig.preflight.json
+

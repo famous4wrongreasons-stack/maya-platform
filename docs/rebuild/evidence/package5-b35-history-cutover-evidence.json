@@ -1,0 +1,38 @@
+{
+  "contract": "maya.bulk-history-cutover/1",
+  "release": "20260907-p5-b35-c8c7a8eb",
+  "structuralVerification": "PASS",
+  "legacySendersRetired": true,
+  "canonicalJournalActive": true,
+  "productionMessages": 0,
+  "files": [
+    {
+      "path": "/opt/maya-saas/releases/20260907-p5-b35-c8c7a8eb/dist/src/communication-delivery/communication-bulk-delivery.service.js",
+      "sha256": "6fd2d4d17308318ca3f0da147806de9d7c69010434fe9f75b9273b556de8746d"
+    },
+    {
+      "path": "/opt/maya-saas/releases/20260907-p5-b35-c8c7a8eb/dist/src/marketing/canonical-bulk.service.js",
+      "sha256": "855437a3d7c24570b750d6fcaddb1d250ff16cca5ce72ce067c6dc112feee6a5"
+    },
+    {
+      "path": "/home/botadmin/barbershop-bot/webhook_server.py",
+      "sha256": "5568115de0a39e0b99f50fa7b811eab086f446dc9f6071883717281841146ee3"
+    },
+    {
+      "path": "/home/botadmin/barbershop-bot/bot.py",
+      "sha256": "425c886e4a832641951998a08e9979445afdc7f15100fbe9cd26271fffa6099d"
+    },
+    {
+      "path": "/home/botadmin/barbershop-bot/legacy_marketing_bulk_bridge.py",
+      "sha256": "86f82322906451958ef5dc7a8f29c76f745c4ca53438ad9d65b2087f8e910aad"
+    },
+    {
+      "path": "/home/botadmin/barbershop-bot/package5_bulk_runtime_guard.py",
+      "sha256": "f52fb182dab9f975a67fc57962ae36477ee7ee7fee669ab154107034bb0a9d5b"
+    },
+    {
+      "path": "/home/botadmin/barbershop-bot/package5_control_plane_runtime_guard.py",
+      "sha256": "3f08cf3be6d91b471e65e0051c073f52039a3a916402d41dc4bcc2f385cbd648"
+    }
+  ]
+}

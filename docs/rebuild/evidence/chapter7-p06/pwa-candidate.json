@@ -1,0 +1,10 @@
+{
+  "target": "/var/www/maya-platform/app.html",
+  "base": "46e713c6cca82817b07697bdede877cd5e85ca940667299bab8db3a819360527",
+  "candidate": "204daaf2ce452ba5e1383750bded372683596cceade4c9f0f33dade3831b862a",
+  "sourceRecovery": "exact previously certified VPS artifact; private unmodified recovery file not versioned",
+  "patch": "maya-saas-backend/deploy/platform/chapter7-consumers/vps-cabinet-c7.patch",
+  "businessOrSecurityOwnerChanges": 0,
+  "maintenanceAndBegetBackupChanges": 0,
+  "inlineScriptsParsed": 25
+}

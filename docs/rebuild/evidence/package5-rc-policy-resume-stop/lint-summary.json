@@ -1,0 +1,9 @@
+{
+  "status": "FAIL",
+  "problems": 3810,
+  "errors": 3808,
+  "warnings": 2,
+  "autoFixableErrors": 3735,
+  "note": "Existing preserved R-C WIP plus owned additions; no wave acceptance/aggregate PASS. Formatting changes not pursued past security-contract STOP.",
+  "fullLogSha256": "f870058a7eadfbb8ad2865e6b734c48477784982f1bd735853e37859938b894a"
+}

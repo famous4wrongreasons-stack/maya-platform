@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "pythonPatches": [
+    {
+      "file": "owner_ai.py",
+      "exactBase": "9972e1c2a560cf99a03b8fbc88f542cee4050ccfca028fa14d9eedc5a0cb722a",
+      "intendedResult": "d78e46a18b4a4fa6bf51ca74c2550119215e6bb2647ee6417589a1b70e76a29e",
+      "parse": "PASS",
+      "applyCheck": "PASS",
+      "appliedEqualsExpected": true,
+      "unexpectedFiles": 0
+    },
+    {
+      "file": "masters_ai.py",
+      "exactBase": "f56ed09f92d126059d3f24a97cec132dc12640ef77ccc114e3201d290654ada2",
+      "intendedResult": "2106311b6ad54da691dd5ec61fa6842eac7a1d7f40b786548403d5c0f8e94905",
+      "parse": "PASS",
+      "applyCheck": "PASS",
+      "appliedEqualsExpected": true,
+      "unexpectedFiles": 0
+    },
+    {
+      "file": "growth_planner.py",
+      "exactBase": "529ecf522677c8e141615ba8469a4a358a2cbc78f1908c3219b32294862e1bda",
+      "intendedResult": "d7526a808c9ba7c06e53d83cbd9de669fa3ddedb54204bc47f36cb6039944471",
+      "parse": "PASS",
+      "applyCheck": "PASS",
+      "appliedEqualsExpected": true,
+      "unexpectedFiles": 0
+    },
+    {
+      "file": "webhook_server.py",
+      "exactBase": "5b01fdbc32ad3062010ed1312eba12931d8679c5a24e518c19fb8505dc37e9b8",
+      "intendedResult": "71953c8b9f12ebf9dd52211821d1759d7e53e695a9c92cc1297f4681fb3be128",
+      "parse": "PASS",
+      "applyCheck": "PASS",
+      "appliedEqualsExpected": true,
+      "unexpectedFiles": 0
+    }
+  ],
+  "pwaBefore": "dae6c0b057bf4fc05d26393da13dbd0dafb38a6ba38359244a7870ee495d8715",
+  "pwaAfter": "4751ebfd7f0f3a08f96b6867b50e375ddf2fe9310b6d3562e70dc0827dc1b9ae",
+  "secretsVersioned": 0
+}

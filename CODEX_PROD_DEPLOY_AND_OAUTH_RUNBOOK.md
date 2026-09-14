@@ -13,20 +13,22 @@
 
 ## Рекомендуемая схема
 
-- Backend API: отдельный поддомен, например `api.malesthetic.pro`.
-- Frontend PWA: остаётся на текущем домене до готовности cutover.
-- Tenant-ссылки: сначала можно оставить path/slug-режим, wildcard-поддомены включать вторым шагом.
-- Wildcard позже: `*.malesthetic.pro` или отдельная зона под SaaS-салоны.
+- MAYA APP получает собственный нейтральный production-домен, не связанный с доменом какого-либо tenant.
+- PWA и API публикуются на одном platform-origin:
+  - `https://<maya-platform-domain>/app.html`;
+  - `https://<maya-platform-domain>/api/...`.
+- `/api` проксируется с platform-origin на NestJS backend. Это сохраняет корректные PWA scope, manifest и tenant-иконки.
+- `malesthetic.pro` остаётся доменом tenant «Мужская Эстетика» и не используется как системный домен MAYA APP.
+- Tenant-ссылки сначала работают в path/slug-режиме. Tenant-домены и wildcard-зона подключаются отдельным этапом.
 
 ## Что нужно от Стаса
 
 1. Решить, где живёт backend:
    - новый VPS под SaaS backend, рекомендуется;
    - или текущий VPS, но только если не мешаем старому боту.
-2. Дать домен/API-поддомен:
-   - например `api.malesthetic.pro`.
+2. Выбрать и зарегистрировать отдельный домен MAYA APP.
 3. Настроить DNS:
-   - `A api.malesthetic.pro -> <server-ip>`.
+   - `A <maya-platform-domain> -> <server-ip>`.
 4. Создать production-секреты:
    - `DATABASE_URL`
    - `JWT_SECRET`
@@ -75,7 +77,7 @@ TELEGRAM_JWKS_URL="https://oauth.telegram.org/.well-known/jwks.json"
 
 YOOKASSA_SHOP_ID="..."
 YOOKASSA_SECRET_KEY="..."
-YOOKASSA_RETURN_URL="https://malesthetic.pro/app/maya-admin.html"
+YOOKASSA_RETURN_URL="https://<maya-platform-domain>/billing/return"
 YOOKASSA_API_BASE_URL="https://api.yookassa.ru/v3"
 
 UPLOAD_ROOT="./uploads"
@@ -87,7 +89,8 @@ UPLOAD_ROOT="./uploads"
 
 ```text
 http://127.0.0.1:8787/oauth-callback.html
-https://malesthetic.pro/app/oauth-callback.html
+https://<maya-platform-domain>/oauth-callback.html
+https://<maya-platform-domain>/api/auth/oauth/native/callback
 ```
 
 Если production callback будет жить не в `/app/`, добавить фактический URL callback-страницы.
@@ -97,7 +100,7 @@ https://malesthetic.pro/app/oauth-callback.html
 В кабинете YooKassa добавить:
 
 ```text
-https://api.malesthetic.pro/api/billing/yookassa/webhook
+https://<maya-platform-domain>/api/billing/yookassa/webhook
 ```
 
 События:
@@ -131,15 +134,16 @@ npm run start:prod
 docker compose up -d --build
 ```
 
-6. Поставить reverse proxy `api.malesthetic.pro -> localhost:3000`.
-7. Выпустить SSL.
-8. Проверить:
+6. Разместить PWA на platform-origin и поставить reverse proxy `<maya-platform-domain>/api -> localhost:3000`.
+7. Указать `OAUTH_NATIVE_REDIRECT_URI=https://<maya-platform-domain>/api/auth/oauth/native/callback`; этот URL должен дословно присутствовать и в `OAUTH_ALLOWED_REDIRECT_URIS`, и в настройках Яндекс ID/Telegram OIDC.
+8. Выпустить SSL.
+9. Проверить:
 
 ```bash
-curl -i https://api.malesthetic.pro/api/health
+curl -i https://<maya-platform-domain>/api/health
 ```
 
-9. Smoke-check без переключения реального приложения:
+10. Smoke-check без переключения реального приложения:
    - `GET /api/health`
    - `GET /api/admin/plans` с platform-owner JWT
    - `POST /api/onboarding/trial`

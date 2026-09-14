@@ -1,0 +1,130 @@
+{
+  "verdict": "CONFIRMED B33",
+  "productionMutations": 0,
+  "actualCompiledBridge": true,
+  "actualSignedAuthenticator": true,
+  "actualClientResolver": true,
+  "actualPolicyAndKernel": true,
+  "realOwnedPostgres": true,
+  "issue": "Same authenticated user statement/context plus changed model booking parameters generates a new key and second execution/provider operation",
+  "results": {
+    "SUCCEEDED": {
+      "upstream": {
+        "actualChatHandler": true,
+        "actualRequestContext": true,
+        "actualFinalizer": true,
+        "actualPythonWidgetVerifier": true,
+        "sameUserStatementAndContext": true,
+        "sameModelResultSameKey": true,
+        "changedModelResultChangesKey": true,
+        "payloads": [
+          {
+            "idempotencyKey": "chat-booking:6a5606a0a55b731bea0217fc9a8b5043a4e37d1b8b4b1382bd77bf237629e8cc",
+            "staffId": "synthetic-provider",
+            "serviceIds": [
+              "svc-1"
+            ],
+            "start": "2099-09-20T10:00:00.000Z"
+          },
+          {
+            "idempotencyKey": "chat-booking:6a5606a0a55b731bea0217fc9a8b5043a4e37d1b8b4b1382bd77bf237629e8cc",
+            "staffId": "synthetic-provider",
+            "serviceIds": [
+              "svc-1"
+            ],
+            "start": "2099-09-20T10:00:00.000Z"
+          },
+          {
+            "idempotencyKey": "chat-booking:3ebc6219fe62e35131670b2c0823168d8228a02acd7661e406a932b05919b546",
+            "staffId": "synthetic-provider",
+            "serviceIds": [
+              "svc-1"
+            ],
+            "start": "2099-09-20T12:00:00.000Z"
+          }
+        ],
+        "stubs": [
+          "LLM response",
+          "history memory",
+          "consent read (backend rechecked)",
+          "bridge HTTP transport/result projection",
+          "aiohttp response"
+        ],
+        "productionMutations": 0
+      },
+      "states": [
+        "SUCCEEDED",
+        "SUCCEEDED"
+      ],
+      "sameKeyChangedIntentControl": "IDEMPOTENCY_CONFLICT",
+      "canonicalClientWithoutMayaUser": true,
+      "executionIds": [
+        "b0e36758-0a71-4d48-88a6-0bd29e67b5c2",
+        "cdf0dbe1-6160-4030-972f-79ac4b238e60"
+      ],
+      "appointments": 2,
+      "executions": 2,
+      "providerCreates": 2,
+      "firstExecutionStillUnknown": false
+    },
+    "UNKNOWN": {
+      "upstream": {
+        "actualChatHandler": true,
+        "actualRequestContext": true,
+        "actualFinalizer": true,
+        "actualPythonWidgetVerifier": true,
+        "sameUserStatementAndContext": true,
+        "sameModelResultSameKey": true,
+        "changedModelResultChangesKey": true,
+        "payloads": [
+          {
+            "idempotencyKey": "chat-booking:6a5606a0a55b731bea0217fc9a8b5043a4e37d1b8b4b1382bd77bf237629e8cc",
+            "staffId": "synthetic-provider",
+            "serviceIds": [
+              "svc-1"
+            ],
+            "start": "2099-09-20T10:00:00.000Z"
+          },
+          {
+            "idempotencyKey": "chat-booking:6a5606a0a55b731bea0217fc9a8b5043a4e37d1b8b4b1382bd77bf237629e8cc",
+            "staffId": "synthetic-provider",
+            "serviceIds": [
+              "svc-1"
+            ],
+            "start": "2099-09-20T10:00:00.000Z"
+          },
+          {
+            "idempotencyKey": "chat-booking:3ebc6219fe62e35131670b2c0823168d8228a02acd7661e406a932b05919b546",
+            "staffId": "synthetic-provider",
+            "serviceIds": [
+              "svc-1"
+            ],
+            "start": "2099-09-20T12:00:00.000Z"
+          }
+        ],
+        "stubs": [
+          "LLM response",
+          "history memory",
+          "consent read (backend rechecked)",
+          "bridge HTTP transport/result projection",
+          "aiohttp response"
+        ],
+        "productionMutations": 0
+      },
+      "states": [
+        "UNKNOWN",
+        "SUCCEEDED"
+      ],
+      "sameKeyChangedIntentControl": "IDEMPOTENCY_CONFLICT",
+      "canonicalClientWithoutMayaUser": true,
+      "executionIds": [
+        "7048f220-b3fc-4826-9d73-b05da3523945",
+        "10096cf0-0d4d-40d1-a35d-ea3da444cdb5"
+      ],
+      "appointments": 1,
+      "executions": 2,
+      "providerCreates": 2,
+      "firstExecutionStillUnknown": true
+    }
+  }
+}

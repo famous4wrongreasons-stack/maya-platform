@@ -15,10 +15,7 @@ import {
   featureKeysFromFlags,
   normalizeFeatureFlags,
 } from '../common/feature-catalog';
-import {
-  DEFAULT_INDUSTRY_PRESET_ID,
-  getIndustryPreset,
-} from '../common/industry-presets';
+import { getIndustryPreset } from '../common/industry-presets';
 import { asJson } from '../common/json.util';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -26,11 +23,7 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { serializePublicCrmSettings } from '../crm/crm-provider-settings';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
-import {
-  addDays,
-  evaluateTenantAccessState,
-  PAST_DUE_GRACE_DAYS,
-} from './tenant-access-state';
+import { addDays, evaluateTenantAccessState } from './tenant-access-state';
 
 type PublicContentPair = [string, string];
 
@@ -61,6 +54,8 @@ type InternalCalendarCounts = {
 const DEFAULT_TRIAL_PERIOD_DAYS = 14;
 const TENANT_STATUS_TRIAL = 'trial';
 const TENANT_STATUS_PAST_DUE = 'past_due';
+const PUBLIC_TENANT_SEARCH_LIMIT = 12;
+const PUBLIC_TENANT_SEARCH_CANDIDATE_LIMIT = 100;
 
 function isInternalCalendarReady(
   counts: InternalCalendarCounts | null | undefined,
@@ -83,6 +78,22 @@ function asNonEmptyString(value: unknown): string | null {
 
   const normalized = value.trim();
   return normalized.length > 0 ? normalized : null;
+}
+
+function normalizePublicSearchText(value: unknown): string {
+  const text =
+    typeof value === 'string'
+      ? value
+      : typeof value === 'number' && Number.isFinite(value)
+        ? String(value)
+        : '';
+
+  return text
+    .normalize('NFKC')
+    .toLocaleLowerCase('ru-RU')
+    .replace(/[^\p{L}\p{N}\s-]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function asStringList(value: unknown, maxItems?: number): string[] {
@@ -155,6 +166,17 @@ function resolveRequestedBookingMode(
     asNonEmptyString(saas?.booking_mode);
 
   return rawMode === 'live' ? 'live' : 'preview';
+}
+
+/** Platform shell (maya-os): onboarding/trial UI only — not a bookable salon. */
+function isPlatformBootstrapTenant(params: {
+  slug?: string | null;
+  theme?: Record<string, unknown> | null;
+}): boolean {
+  if (String(params.slug || '').toLowerCase() === 'maya-os') {
+    return true;
+  }
+  return params.theme?.platform_bootstrap === true;
 }
 
 function withBookingModeTheme(
@@ -247,16 +269,6 @@ function normalizeOptionalDateString(value?: string): Date | null | undefined {
   return new Date(normalized);
 }
 
-function normalizeBillingMethodId(value?: string): string | null | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  const normalized = value.trim();
-
-  return normalized.length > 0 ? normalized : null;
-}
-
 @Injectable()
 export class TenantsService {
   constructor(
@@ -275,6 +287,30 @@ export class TenantsService {
     }
 
     return tenant;
+  }
+
+  /**
+   * Platform shell tenants (maya-os / platform_bootstrap) are for onboarding UI
+   * only — client signup and live booking must fail closed.
+   */
+  assertClientBookableBusiness(params: {
+    slug?: string | null;
+    theme?: Record<string, unknown> | null;
+    brandingSettings?: { themeJson?: unknown } | null;
+  }): void {
+    const theme = params.theme ?? asRecord(params.brandingSettings?.themeJson);
+    if (!isPlatformBootstrapTenant({ slug: params.slug, theme })) {
+      return;
+    }
+
+    throw new ForbiddenException({
+      message: 'This workspace is the MAYA OS platform shell, not a salon.',
+      error: {
+        code: 'platform_tenant_not_bookable',
+        message:
+          'Open a salon link to sign in as a client or create an appointment.',
+      },
+    });
   }
 
   async getTenantByIdOrThrow(id: string) {
@@ -375,104 +411,130 @@ export class TenantsService {
     return tenants.map((tenant) => this.serializeTenant(tenant));
   }
 
-  async createTenant(dto: CreateTenantDto) {
-    const existing = await this.prisma.tenant.findUnique({
-      where: { slug: dto.slug.toLowerCase() },
-      select: { id: true },
-    });
-
-    if (existing) {
-      throw new ConflictException('Tenant slug already exists');
-    }
-
-    if (dto.planId) {
-      await this.subscriptionsService.getPlanByIdOrThrow(dto.planId);
-    }
-
-    const billingDates = this.resolveBillingDates({
-      status: dto.status ?? TenantStatus.TRIAL,
-      trialEndsAt: normalizeOptionalDateString(dto.trialEndsAt),
-      currentPeriodStart: normalizeOptionalDateString(dto.currentPeriodStart),
-      currentPeriodEnd: normalizeOptionalDateString(dto.currentPeriodEnd),
-    });
-    const billingMethodId = normalizeBillingMethodId(dto.billingMethodId);
-    const status = dto.status ?? TenantStatus.TRIAL;
-    const pastDueAt = status === TenantStatus.PAST_DUE ? new Date() : null;
-    const graceEndsAt = addDays(pastDueAt, PAST_DUE_GRACE_DAYS);
-
-    const tenant = await this.prisma.$transaction(async (tx) => {
-      const normalizedBranchName = asNonEmptyString(dto.branchName) ?? dto.name;
-      const normalizedBranchTimezone =
-        asNonEmptyString(dto.branchTimezone) ?? 'Europe/Moscow';
-      const created = await tx.tenant.create({
-        data: {
-          name: dto.name,
-          slug: dto.slug.toLowerCase(),
-          status,
-          planId: dto.planId,
-          industryPresetId: dto.industryPresetId ?? DEFAULT_INDUSTRY_PRESET_ID,
-          calendarSource: dto.calendarSource ?? CalendarSource.EXTERNAL,
-          defaultCurrency: dto.defaultCurrency ?? 'RUB',
-          defaultTimezone: dto.defaultTimezone ?? normalizedBranchTimezone,
-          defaultLocale: dto.defaultLocale ?? 'ru-RU',
-          customDomain: dto.customDomain?.toLowerCase(),
-          subdomain: (dto.subdomain ?? dto.slug).toLowerCase(),
-          trialEndsAt: billingDates.trialEndsAt,
-          currentPeriodStart: billingDates.currentPeriodStart,
-          currentPeriodEnd: billingDates.currentPeriodEnd,
-          pastDueAt,
-          graceEndsAt,
-          billingMethodId,
-          trialFullAccess: dto.trialFullAccess ?? false,
-          allowSelfRegistration: dto.allowSelfRegistration ?? true,
-        },
-      });
-
-      await tx.brandingSettings.create({
-        data: {
-          tenantId: created.id,
-          appName: dto.name,
-          themeJson: asJson({}),
-        },
-      });
-
-      await tx.branch.create({
-        data: {
-          tenantId: created.id,
-          name: normalizedBranchName,
-          address: asNonEmptyString(dto.branchAddress),
-          phone: asNonEmptyString(dto.branchPhone),
-          timezone: normalizedBranchTimezone,
-        },
-      });
-
-      return created;
-    });
-
-    return this.serializeTenant(await this.getTenantByIdOrThrow(tenant.id));
+  createTenant(dto: CreateTenantDto): Promise<never> {
+    void dto;
+    return Promise.reject(
+      new ForbiddenException(
+        'Tenant creation requires the canonical TrialActivation flow',
+      ),
+    );
   }
 
-  async deleteFailedTrialTenant(id: string) {
-    return this.prisma.tenant.deleteMany({
-      where: {
-        id,
-        status: TenantStatus.TRIAL,
-        currentPeriodStart: null,
-      },
-    });
+  deleteFailedTrialTenant(id: string): Promise<never> {
+    void id;
+    return Promise.reject(
+      new ForbiddenException(
+        'Tenant hard delete is forbidden; preserve the canonical activation outcome',
+      ),
+    );
+  }
+
+  /**
+   * Имена, которые не может занять ни один салон.
+   *
+   * 🔴 Резолвер определяет тенанта по домену. Салон, забравший себе
+   * платформенное имя, увёл бы к себе адресацию всей платформы, а чужие
+   * салоны получили бы отказ. Проверка действует и для платформы тоже —
+   * от опечатки она защищает так же, как от умысла.
+   */
+  private static readonly RESERVED_HOST_NAMES = new Set<string>([
+    'www',
+    'api',
+    'app',
+    'admin',
+    'auth',
+    'login',
+    'billing',
+    'pay',
+    'static',
+    'assets',
+    'cdn',
+    'mail',
+    'smtp',
+    'ftp',
+    'ns',
+    'ns1',
+    'ns2',
+    'maya',
+    'maya-os',
+    'mayaos',
+    'platform',
+    'system',
+    'support',
+    'help',
+    'status',
+    'docs',
+    'blog',
+    'test',
+    'staging',
+    'dev',
+    'local',
+  ]);
+
+  assertHostNamesAllowed(dto: {
+    subdomain?: string | null;
+    customDomain?: string | null;
+    slug?: string | null;
+  }): void {
+    const candidates = [dto.subdomain, dto.slug]
+      .map((v) =>
+        String(v ?? '')
+          .trim()
+          .toLowerCase(),
+      )
+      .filter(Boolean);
+
+    for (const value of candidates) {
+      if (TenantsService.RESERVED_HOST_NAMES.has(value)) {
+        throw new BadRequestException({
+          message: `Имя «${value}» зарезервировано платформой. Выберите другое.`,
+          error: { code: 'tenant_host_name_reserved', value },
+        });
+      }
+    }
+
+    const domain = String(dto.customDomain ?? '')
+      .trim()
+      .toLowerCase();
+
+    if (!domain) {
+      return;
+    }
+
+    const platformDomain = String(process.env.PLATFORM_BASE_DOMAIN ?? '')
+      .trim()
+      .toLowerCase();
+
+    // Сам платформенный домен и всё, что под ним, салону не отдаём.
+    if (
+      platformDomain &&
+      (domain === platformDomain || domain.endsWith(`.${platformDomain}`))
+    ) {
+      throw new BadRequestException({
+        message: 'Этот домен принадлежит платформе и не может быть занят.',
+        error: { code: 'tenant_domain_reserved', value: domain },
+      });
+    }
   }
 
   async updateTenant(id: string, dto: UpdateTenantDto) {
+    this.assertHostNamesAllowed(dto);
+    if (
+      dto.planId !== undefined ||
+      dto.currentPeriodStart !== undefined ||
+      dto.currentPeriodEnd !== undefined ||
+      dto.billingMethodId !== undefined ||
+      dto.status === TenantStatus.ACTIVE ||
+      dto.status === TenantStatus.PAST_DUE
+    ) {
+      throw new BadRequestException('payment_derived_billing_fields_forbidden');
+    }
     const existingTenant = await this.getTenantByIdOrThrow(id);
     const existingThemeJson =
       (existingTenant.brandingSettings?.themeJson as Record<
         string,
         unknown
       > | null) ?? null;
-
-    if (dto.planId) {
-      await this.subscriptionsService.getPlanByIdOrThrow(dto.planId);
-    }
 
     if (dto.slug) {
       const existing = await this.prisma.tenant.findFirst({
@@ -491,30 +553,8 @@ export class TenantsService {
     const billingDates = this.resolveBillingDates({
       status: dto.status ?? existingTenant.status,
       trialEndsAt: normalizeOptionalDateString(dto.trialEndsAt),
-      currentPeriodStart: normalizeOptionalDateString(dto.currentPeriodStart),
-      currentPeriodEnd: normalizeOptionalDateString(dto.currentPeriodEnd),
       existingTrialEndsAt: existingTenant.trialEndsAt,
-      existingCurrentPeriodStart: existingTenant.currentPeriodStart,
-      existingCurrentPeriodEnd: existingTenant.currentPeriodEnd,
     });
-    const billingMethodId = normalizeBillingMethodId(dto.billingMethodId);
-    const nextStatus = dto.status ?? existingTenant.status;
-    const enteringPastDue =
-      nextStatus === TENANT_STATUS_PAST_DUE &&
-      existingTenant.status !== TENANT_STATUS_PAST_DUE;
-    const pastDueAt =
-      nextStatus === TENANT_STATUS_PAST_DUE
-        ? enteringPastDue
-          ? new Date()
-          : (existingTenant.pastDueAt ?? new Date())
-        : null;
-    const graceEndsAt =
-      nextStatus === TENANT_STATUS_PAST_DUE
-        ? enteringPastDue
-          ? addDays(pastDueAt, PAST_DUE_GRACE_DAYS)
-          : (existingTenant.graceEndsAt ??
-            addDays(pastDueAt, PAST_DUE_GRACE_DAYS))
-        : null;
 
     await this.prisma.$transaction(async (tx) => {
       await tx.tenant.update({
@@ -523,7 +563,6 @@ export class TenantsService {
           name: dto.name,
           slug: dto.slug?.toLowerCase(),
           status: dto.status,
-          planId: dto.planId,
           industryPresetId: dto.industryPresetId,
           calendarSource: dto.calendarSource,
           defaultCurrency: dto.defaultCurrency,
@@ -532,11 +571,6 @@ export class TenantsService {
           customDomain: dto.customDomain?.toLowerCase(),
           subdomain: dto.subdomain?.toLowerCase(),
           trialEndsAt: billingDates.trialEndsAt,
-          currentPeriodStart: billingDates.currentPeriodStart,
-          currentPeriodEnd: billingDates.currentPeriodEnd,
-          pastDueAt,
-          graceEndsAt,
-          billingMethodId,
           allowSelfRegistration: dto.allowSelfRegistration,
         },
       });
@@ -574,24 +608,18 @@ export class TenantsService {
 
   async setTenantStatus(id: string, status: TenantStatus) {
     const tenant = await this.getTenantByIdOrThrow(id);
-    const enteringPastDue =
-      status === TenantStatus.PAST_DUE &&
-      tenant.status !== TENANT_STATUS_PAST_DUE;
-    const pastDueAt =
-      status === TenantStatus.PAST_DUE
-        ? enteringPastDue
-          ? new Date()
-          : (tenant.pastDueAt ?? new Date())
-        : null;
-    const graceEndsAt =
-      status === TenantStatus.PAST_DUE
-        ? enteringPastDue
-          ? addDays(pastDueAt, PAST_DUE_GRACE_DAYS)
-          : (tenant.graceEndsAt ?? addDays(pastDueAt, PAST_DUE_GRACE_DAYS))
-        : null;
+    if (status === TenantStatus.PAST_DUE) {
+      throw new BadRequestException('canonical_billing_transition_required');
+    }
+    if (status === TenantStatus.ACTIVE) {
+      const activeUntil = tenant.currentPeriodEnd ?? tenant.trialEndsAt;
+      if (!activeUntil || activeUntil <= new Date()) {
+        throw new BadRequestException('billing_entitlement_evidence_required');
+      }
+    }
     await this.prisma.tenant.update({
       where: { id },
-      data: { status, pastDueAt, graceEndsAt },
+      data: { status },
     });
 
     return this.serializeTenant(await this.getTenantByIdOrThrow(id));
@@ -601,6 +629,7 @@ export class TenantsService {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id },
       select: {
+        slug: true,
         status: true,
         trialEndsAt: true,
         trialFullAccess: true,
@@ -650,6 +679,7 @@ export class TenantsService {
     const theme =
       (tenant.brandingSettings?.themeJson as Record<string, unknown> | null) ??
       {};
+    this.assertClientBookableBusiness({ slug: tenant.slug, theme });
     const resolvedEntitlements = this.entitlementsService
       ? await this.entitlementsService.getEffectiveEntitlements(id)
       : null;
@@ -701,6 +731,7 @@ export class TenantsService {
           select: {
             provider: true,
             status: true,
+            settingsJson: true,
           },
         },
         _count: {
@@ -726,29 +757,6 @@ export class TenantsService {
     }
 
     const access = evaluateTenantAccessState(tenant);
-    const shouldPersistWindow =
-      access.tenantStatus === TENANT_STATUS_PAST_DUE &&
-      Boolean(access.pastDueAt && access.graceEndsAt) &&
-      (!tenant.pastDueAt || !tenant.graceEndsAt);
-    if (
-      access.shouldMarkPastDue ||
-      shouldPersistWindow ||
-      (access.subscriptionRequired && tenant.trialFullAccess)
-    ) {
-      await this.prisma.tenant.updateMany({
-        where: {
-          id: tenant.id,
-          status: tenant.status,
-          updatedAt: tenant.updatedAt,
-        },
-        data: {
-          status: TenantStatus.PAST_DUE,
-          trialFullAccess: false,
-          pastDueAt: access.pastDueAt,
-          graceEndsAt: access.graceEndsAt,
-        },
-      });
-    }
 
     const firstBranch = tenant.branches[0] ?? null;
     const theme =
@@ -768,6 +776,7 @@ export class TenantsService {
     const bookingFeatureEnabled =
       availableFeatureKeys.length === 0 || availableFeatures.booking === true;
     const clientRegistrationEnabled =
+      !isPlatformBootstrapTenant({ slug: tenant.slug, theme }) &&
       tenant.allowSelfRegistration &&
       !access.subscriptionRequired &&
       (new Set<string>([TenantStatus.ACTIVE, TenantStatus.PAST_DUE]).has(
@@ -786,14 +795,21 @@ export class TenantsService {
       trialFullAccess: access.trialFullAccess,
     });
     const guestAccessReady =
-      clientRegistrationEnabled && bookingEvaluation.liveEligible;
+      !isPlatformBootstrapTenant({ slug: tenant.slug, theme }) &&
+      clientRegistrationEnabled &&
+      bookingEvaluation.liveEligible;
     const guestAccessBlockers = [
       ...bookingEvaluation.blockers,
       ...(clientRegistrationEnabled ? [] : ['client_registration_disabled']),
+      ...(isPlatformBootstrapTenant({ slug: tenant.slug, theme })
+        ? ['platform_bootstrap']
+        : []),
     ].filter((blocker, index, blockers) => blockers.indexOf(blocker) === index);
     const brand = {
       name: tenant.brandingSettings?.appName ?? tenant.name,
       logo_url: tenant.brandingSettings?.logoUrl ?? null,
+      logo_updated_at:
+        tenant.brandingSettings?.updatedAt?.toISOString() ?? null,
       icon_url: tenant.brandingSettings?.iconUrl ?? null,
       favicon_url: tenant.brandingSettings?.faviconUrl ?? null,
       accent_color:
@@ -818,6 +834,7 @@ export class TenantsService {
 
     return {
       slug: tenant.slug,
+      platform_bootstrap: theme.platform_bootstrap === true,
       active: !new Set(['subscription_required', 'disabled']).has(
         access.accessState,
       ),
@@ -860,6 +877,7 @@ export class TenantsService {
       branding: {
         app_name: brand.name,
         logo_url: brand.logo_url,
+        logo_updated_at: brand.logo_updated_at,
         icon_url: brand.icon_url,
         favicon_url: brand.favicon_url,
         primary_color: brand.primary_color,
@@ -894,11 +912,111 @@ export class TenantsService {
       },
       available_features: availableFeatures,
       available_feature_keys: availableFeatureKeys,
-      crm: {
-        provider: tenant.crmIntegration?.provider ?? null,
-        status: tenant.crmIntegration?.status ?? null,
-      },
+      crm: (function () {
+        const settings = serializePublicCrmSettings(
+          tenant.crmIntegration?.provider ?? '',
+          tenant.crmIntegration?.settingsJson,
+        );
+        const companyId =
+          typeof settings.companyId === 'number' ||
+          typeof settings.companyId === 'string'
+            ? settings.companyId
+            : null;
+        const tipsCompanyId =
+          typeof settings.tipsCompanyId === 'number' ||
+          typeof settings.tipsCompanyId === 'string'
+            ? settings.tipsCompanyId
+            : companyId;
+        return {
+          provider: tenant.crmIntegration?.provider ?? null,
+          status: tenant.crmIntegration?.status ?? null,
+          company_id: companyId,
+          tips_company_id: tipsCompanyId,
+        };
+      })(),
     };
+  }
+
+  async searchPublicMobileConfigs(rawQuery: string, rawCity?: string) {
+    const query = normalizePublicSearchText(rawQuery);
+    const city = normalizePublicSearchText(rawCity);
+
+    if (query.length < 2 || query.length > 80 || city.length > 80) {
+      throw new BadRequestException({
+        message: 'Enter at least two characters to find a business.',
+        error: {
+          code: 'public_business_search_invalid',
+          message: 'Enter at least two characters to find a business.',
+        },
+      });
+    }
+
+    const queryTokens = query.split(' ').filter(Boolean).slice(0, 8);
+    const cityTokens = city.split(' ').filter(Boolean).slice(0, 4);
+    const candidates = await this.prisma.tenant.findMany({
+      where: {
+        status: {
+          in: [TenantStatus.ACTIVE, TenantStatus.TRIAL, TenantStatus.PAST_DUE],
+        },
+      },
+      orderBy: [{ name: 'asc' }, { createdAt: 'asc' }],
+      take: PUBLIC_TENANT_SEARCH_CANDIDATE_LIMIT,
+      select: {
+        slug: true,
+        name: true,
+        brandingSettings: {
+          select: {
+            appName: true,
+            themeJson: true,
+          },
+        },
+        branches: {
+          orderBy: { createdAt: 'asc' },
+          take: 3,
+          select: {
+            name: true,
+            address: true,
+          },
+        },
+      },
+    });
+
+    const matchingSlugs = candidates
+      .filter((tenant) => {
+        const theme = asRecord(tenant.brandingSettings?.themeJson);
+        const cityValue = normalizePublicSearchText(theme?.city);
+        const addressValue = tenant.branches
+          .map((branch) => branch.address)
+          .filter(Boolean)
+          .join(' ');
+        const haystack = normalizePublicSearchText(
+          [
+            tenant.name,
+            tenant.slug,
+            tenant.brandingSettings?.appName,
+            cityValue,
+            addressValue,
+            tenant.branches.map((branch) => branch.name).join(' '),
+          ]
+            .filter(Boolean)
+            .join(' '),
+        );
+
+        return (
+          queryTokens.every((token) => haystack.includes(token)) &&
+          cityTokens.every((token) => haystack.includes(token))
+        );
+      })
+      .slice(0, PUBLIC_TENANT_SEARCH_LIMIT)
+      .map((tenant) => tenant.slug);
+
+    const configs = await Promise.all(
+      matchingSlugs.map((slug) => this.getPublicMobileConfig(slug)),
+    );
+
+    return configs.filter(
+      (config) => config.active && config.guest_access_ready === true,
+    );
   }
 
   async assertBranchBelongsToTenant(branchId: string, tenantId: string) {

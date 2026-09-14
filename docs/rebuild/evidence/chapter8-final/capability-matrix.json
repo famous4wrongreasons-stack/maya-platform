@@ -1,0 +1,82 @@
+[
+  {
+    "id": "T01",
+    "target": "attended_return",
+    "implementedContract": true,
+    "qualifiedData": "INSUFFICIENT",
+    "calibration": "UNAVAILABLE",
+    "activation": "DISABLED",
+    "userVisibleNumericPrediction": false,
+    "reason": "qualified_model_and_approved_activation_evidence_required"
+  },
+  {
+    "id": "T02",
+    "target": "appointment_no_show",
+    "implementedContract": true,
+    "qualifiedData": "INSUFFICIENT",
+    "calibration": "UNAVAILABLE",
+    "activation": "DISABLED",
+    "userVisibleNumericPrediction": false,
+    "reason": "qualified_model_and_approved_activation_evidence_required"
+  },
+  {
+    "id": "T03",
+    "target": "client_expected_value",
+    "implementedContract": true,
+    "qualifiedData": "INSUFFICIENT",
+    "calibration": "UNAVAILABLE",
+    "activation": "DISABLED",
+    "userVisibleNumericPrediction": false,
+    "reason": "qualified_model_and_approved_activation_evidence_required"
+  },
+  {
+    "id": "T04",
+    "target": "business_revenue",
+    "implementedContract": true,
+    "qualifiedData": "INSUFFICIENT",
+    "calibration": "UNAVAILABLE",
+    "activation": "DISABLED",
+    "userVisibleNumericPrediction": false,
+    "reason": "qualified_model_and_approved_activation_evidence_required"
+  },
+  {
+    "id": "T05",
+    "target": "staff_earnings_conditional",
+    "implementedContract": true,
+    "qualifiedData": "INSUFFICIENT",
+    "calibration": "UNAVAILABLE",
+    "activation": "DISABLED",
+    "userVisibleNumericPrediction": false,
+    "reason": "qualified_model_and_approved_activation_evidence_required"
+  },
+  {
+    "id": "T06",
+    "target": "observed_booking_demand",
+    "implementedContract": true,
+    "qualifiedData": "INSUFFICIENT",
+    "calibration": "UNAVAILABLE",
+    "activation": "DISABLED",
+    "userVisibleNumericPrediction": false,
+    "reason": "qualified_model_and_approved_activation_evidence_required"
+  },
+  {
+    "id": "T07",
+    "target": "scheduled_utilization",
+    "implementedContract": true,
+    "qualifiedData": "INSUFFICIENT",
+    "calibration": "UNAVAILABLE",
+    "activation": "DISABLED",
+    "userVisibleNumericPrediction": false,
+    "reason": "qualified_model_and_approved_activation_evidence_required"
+  },
+  {
+    "id": "T08",
+    "target": "statistical_deviation",
+    "implementedContract": true,
+    "qualifiedData": "INSUFFICIENT",
+    "calibration": "UNAVAILABLE",
+    "activation": "DISABLED",
+    "userVisibleNumericPrediction": false,
+    "reason": "qualified_model_and_approved_activation_evidence_required"
+  }
+]

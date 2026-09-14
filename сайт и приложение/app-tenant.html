@@ -9535,12 +9535,12 @@ function AChat() {
 }
 window.AChat = AChat;
 
-// Tips: send intent signal (tip_sent → master push + panel analytics) + open SBP tips page.
+// Tips: external payment only; no self-report or notification.
 (function () {
-  var TIPS_PROXY = 'https://malesthetic.pro/app/api-proxy.php';
   // order matches [...d.masters.top, ...d.masters.senior] used by ATips
   var TIPS_STAFF = [1461615, 1460233, 1461618, 1461621, 3278920];
   var TIPS_SLUG = ['stas', 'ilya', 'alexey', 'maxim', 'alexander'];
+  // p5_b22_external_payment_only: opening a page never confirms payment.
   window.__tipsSend = function (idx, amount) {
     var sid = TIPS_STAFF[idx],
       slug = TIPS_SLUG[idx];
@@ -9548,37 +9548,13 @@ window.AChat = AChat;
       alert('Мастер не найден.');
       return;
     }
-    // 1) intent signal — notifies the master + logs for the panel «Чаевые» analytics (auth optional)
-    try {
-      var headers = {
-        'Content-Type': 'application/json'
-      };
-      var body = {
-        master: slug,
-        master_id: sid,
-        amount: amount,
-        source: 'app'
-      };
-      try {
-        var tok = localStorage.getItem('web_session_token');
-        if (tok) body.session_token = tok;
-      } catch (e) {}
-      if (window.__tgAuthData) body.auth_data = window.__tgAuthData;
-      fetch(TIPS_PROXY + '?action=tip_sent', {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(body)
-      }).catch(function () {});
-    } catch (e) {}
-    // 2) open the master's SBP tips page for the actual transfer
     var url = 'https://yclients.com/companies/503759/staff/' + sid + '/tips/pay/?master_tips_source=payed_from_pos_qr';
     try {
       if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
-        window.Telegram.WebApp.openLink(url);
-        return;
+        window.Telegram.WebApp.openLink(url); return { opened: true };
       }
     } catch (e) {}
-    window.open(url, '_blank');
+    return { opened: !!window.open(url, '_blank') };
   };
   // ?tips= deep-link (post-visit push opens /app/?tips=<master>) → open the tips screen
   try {

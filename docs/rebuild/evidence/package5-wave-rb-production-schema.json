@@ -1,0 +1,23 @@
+{
+  "gate": "PASS",
+  "pending": 0,
+  "postApplyDrift": "NONE",
+  "migration": "20260907180000_b36_owner_report_run",
+  "migrationChecksum": "3572d6327a1f24f055370d44004c6ddfdebdfcc6746d3a2fbb33a14955a676f0",
+  "newColumns": 14,
+  "newForeignKeys": 2,
+  "newPhysicalIndexes": 7,
+  "guards": 2,
+  "checkConstraints": 2,
+  "ownerReportRuns": 0,
+  "populatedNewFields": 0,
+  "fakeHistoricalBackfill": 0,
+  "release": "/opt/maya-saas/releases/20260907-p5-rb-cb4fb27c",
+  "health": 200,
+  "readiness": 200,
+  "waveRuntimeSwitched": true,
+  "b36RuntimeSwitched": false,
+  "ownerReportRunDurableInProduction": true,
+  "productionMessages": 0,
+  "productionBusinessProofMutations": 0
+}

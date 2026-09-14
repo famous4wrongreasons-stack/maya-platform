@@ -307,4 +307,43 @@ export class TenantAuthRepository {
       data: params,
     });
   }
+
+  reassignIdentity(
+    id: string,
+    params: {
+      userId: string;
+      email: string | null;
+      phone: string | null;
+      profileJson: Prisma.InputJsonValue;
+    },
+  ) {
+    const tenantId = this.tenantContext.requireTenantId();
+
+    return this.prisma.authIdentity.update({
+      where: {
+        id_tenantId: {
+          id,
+          tenantId,
+        },
+      },
+      data: params,
+    });
+  }
+
+  listIdentityProvidersForUser(userId: string) {
+    const tenantId = this.tenantContext.requireTenantId();
+
+    return this.prisma.authIdentity.findMany({
+      where: {
+        tenantId,
+        userId,
+      },
+      select: {
+        provider: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { provider: 'asc' },
+    });
+  }
 }

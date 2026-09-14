@@ -41,6 +41,9 @@ enum UserStatus {
   active
   suspended
   invited
+  // Терминальный статус погашенного дубля. Обратно в active не переводится:
+  // suspended для этой роли не подходит — его воскрешает сверка с CRM.
+  merged
 }
 
 enum MembershipStatus {
@@ -49,64 +52,599 @@ enum MembershipStatus {
   invited
 }
 
+enum CrmStaffAccessStatus {
+  pending_contact
+  active
+  disabled
+}
+
 enum CalendarSource {
   internal
   external
 }
 
+enum OpportunityLifecycleStatus {
+  active
+  resolved
+  expired
+  superseded
+}
+
+enum OpportunityOutcome {
+  inform_only
+  investigation_required
+  action_candidate
+}
+
+enum OpportunityAgentDomain {
+  admin
+  client_lifecycle
+  occupancy
+  business_intelligence
+}
+
+enum AgentTaskLifecycleStatus {
+  current
+  invalidated
+}
+
+enum ActionExecutionState {
+  PENDING_APPROVAL
+  READY
+  EXECUTING
+  UNKNOWN
+  SUCCEEDED
+  FAILED
+  NOT_EXECUTED
+}
+
+enum ActionPolicyDecision {
+  ALLOW
+  DENY
+  SHADOW_ONLY
+}
+
+enum ActionApprovalDecision {
+  NOT_REQUIRED
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum ActionReconciliationState {
+  NOT_REQUIRED
+  REQUIRED
+  IN_PROGRESS
+  RESOLVED
+  MANUAL_REQUIRED
+}
+
+enum ActionAttemptKind {
+  EXECUTION
+  RECONCILIATION
+}
+
+enum ActionAttemptState {
+  STARTED
+  SUCCEEDED
+  FAILED
+  UNKNOWN
+}
+
+enum ExternalDispatchState {
+  NOT_APPLICABLE
+  NOT_CROSSED
+  MAY_HAVE_CROSSED
+  ACKNOWLEDGED
+}
+
+enum CommunicationScope {
+  SINGLE
+  BULK
+}
+
+enum CommunicationDeliveryState {
+  NOT_SENT
+  ACCEPTED
+  DELIVERED
+  FAILED
+  UNKNOWN
+  SKIPPED
+}
+
+enum CommunicationCampaignState {
+  DRAFT
+  READY
+  RUNNING
+  UNRESOLVED
+  COMPLETED
+  PARTIAL
+  FAILED
+  SKIPPED
+  CANCELLED
+  EXPIRED
+  LEGACY_UNRESOLVED
+}
+
 model Tenant {
-  id                     String                          @id @default(cuid())
-  name                   String
-  slug                   String                          @unique
-  status                 TenantStatus                    @default(trial)
-  planId                 String?
-  industryPresetId       String?
-  calendarSource         CalendarSource                  @default(external)
-  defaultCurrency        String                          @default("RUB")
-  defaultTimezone        String                          @default("Europe/Moscow")
-  defaultLocale          String                          @default("ru-RU")
-  customDomain           String?                         @unique
-  subdomain              String?                         @unique
-  trialEndsAt            DateTime?
-  currentPeriodStart     DateTime?
-  currentPeriodEnd       DateTime?
-  pastDueAt              DateTime?
-  graceEndsAt            DateTime?
-  billingMethodId        String?
-  trialFullAccess        Boolean                         @default(false)
-  allowSelfRegistration  Boolean                         @default(true)
-  createdAt              DateTime                        @default(now())
-  updatedAt              DateTime                        @updatedAt
-  plan                   SubscriptionPlan?               @relation(fields: [planId], references: [id])
-  brandingSettings       BrandingSettings?
-  branches               Branch[]
-  users                  User[]
-  crmIntegration         CrmIntegration?
-  auditLogs              AuditLog[]
-  appointments           Appointment[]
-  phoneAuthCodes         PhoneAuthCode[]
-  emailAuthCodes         EmailAuthCode[]
-  authIdentities         AuthIdentity[]
-  authFlowStates         AuthFlowState[]
-  authSessions           AuthSession[]
-  authRateLimitBuckets   AuthRateLimitBucket[]
-  billingPayments        BillingPayment[]
-  memberships            Membership[]
-  entitlements           TenantEntitlement[]
-  internalServices       InternalService[]
-  internalProviders      InternalProvider[]
-  availabilityRules      InternalAvailabilityRule[]
-  availabilityExceptions InternalAvailabilityException[]
-  aiOnboardingDrafts     AiOnboardingDraft[]             @relation("AiOnboardingConfirmedTenant")
-  trialActivation        TrialActivation?
-  customerProfiles       CustomerProfile[]
-  loyaltyAccounts        LoyaltyAccount[]
-  loyaltyTransactions    LoyaltyTransaction[]
-  expenses               Expense[]
-  aiApprovalRequests     AiApprovalRequest[]
-  aiToolExecutions       AiToolExecution[]
+  // Chapter 9: derived coordination only; source ownership is unchanged.
+  c9Runs C9Run[] @relation("C9Run_1_fkey")
+  c9StrategyRevisions C9StrategyRevision[] @relation("C9StrategyRevision_1_fkey")
+  c9PlanSteps C9PlanStep[] @relation("C9PlanStep_1_fkey")
+  c9StepBindings C9StepBinding[] @relation("C9StepBinding_1_fkey")
+  c9WorkReceipts C9WorkReceipt[] @relation("C9WorkReceipt_1_fkey")
+
+  c8ModelVersions C8ModelVersion[]
+  c8ResultRevisions C8ResultRevision[]
+  c8EvaluationRevisions C8EvaluationRevision[]
+  measurementRevisions MeasurementRevision[] @relation("C7TenantMeasurement")
+  consentInvalidations ClientConsentInvalidation[]
+  ownerReportRuns OwnerReportRun[]
+  bookingConfirmations ClientBookingConfirmation[]
+  id                             String                          @id @default(cuid())
+  name                           String
+  slug                           String                          @unique
+  status                         TenantStatus                    @default(trial)
+  planId                         String?
+  industryPresetId               String?
+  calendarSource                 CalendarSource                  @default(external)
+  defaultCurrency                String                          @default("RUB")
+  defaultTimezone                String                          @default("Europe/Moscow")
+  defaultLocale                  String                          @default("ru-RU")
+  customDomain                   String?                         @unique
+  subdomain                      String?                         @unique
+  trialEndsAt                    DateTime?
+  currentPeriodStart             DateTime?
+  currentPeriodEnd               DateTime?
+  pastDueAt                      DateTime?
+  graceEndsAt                    DateTime?
+  billingMethodId                String?
+  trialFullAccess                Boolean                         @default(false)
+  allowSelfRegistration          Boolean                         @default(true)
+  createdAt                      DateTime                        @default(now())
+  updatedAt                      DateTime                        @updatedAt
+  plan                           SubscriptionPlan?               @relation(fields: [planId], references: [id])
+  brandingSettings               BrandingSettings?
+  branches                       Branch[]
+  users                          User[]
+  crmIntegration                 CrmIntegration?
+  commerceIntegration            CommerceIntegration?
+  auditLogs                      AuditLog[]
+  appointments                   Appointment[]
+  phoneAuthCodes                 PhoneAuthCode[]
+  emailAuthCodes                 EmailAuthCode[]
+  authIdentities                 AuthIdentity[]
+  clientChannelLinks             ClientChannelLink[]
+  authFlowStates                 AuthFlowState[]
+  authSessions                   AuthSession[]
+  authRateLimitBuckets           AuthRateLimitBucket[]
+  billingPayments                BillingPayment[]
+  memberships                    Membership[]
+  entitlements                   TenantEntitlement[]
+  internalServices               InternalService[]
+  internalProviders              InternalProvider[]
+  availabilityRules              InternalAvailabilityRule[]
+  availabilityExceptions         InternalAvailabilityException[]
+  aiOnboardingDrafts             AiOnboardingDraft[]             @relation("AiOnboardingConfirmedTenant")
+  trialActivation                TrialActivation?
+  customerProfiles               CustomerProfile[]
+  loyaltyAccounts                LoyaltyAccount[]
+  loyaltyTransactions            LoyaltyTransaction[]
+  loyaltyRedemptionGrants        LoyaltyRedemptionGrant[]
+  loyaltyRedemptions             LoyaltyRedemption[]
+  loyaltyGrantRevocations        LoyaltyRedemptionGrantRevocation[]
+  unresolvedClientIdentityHolds  UnresolvedClientIdentityHold[]
+  expenses                       Expense[]
+  expensePeriodDeclarations      ExpensePeriodDeclaration[]
+  expensePeriodDeclarationInvalidations ExpensePeriodDeclarationInvalidation[]
+  aiApprovalRequests             AiApprovalRequest[]
+  aiToolExecutions               AiToolExecution[]
+  aiBrainSessions                AiBrainSession[]
+  aiMemoryFacts                  AiMemoryFact[]
+  aiKnowledgeSources             AiKnowledgeSource[]
+  aiKnowledgeChunks              AiKnowledgeChunk[]
+  crmStaffAccesses               CrmStaffAccess[]
+  dashboardPreferences           DashboardPreference[]
+  userMerges                     UserMerge[]
+  inboxItems                     InboxItem[]
+  domainEvents                   DomainEvent[]
+  ingestionQuarantine            IngestionQuarantine[]
+  reconciliationRuns             ReconciliationRun[]
+  devicePushTokens               DevicePushToken[]
+  recoveryTouchpoints            RecoveryTouchpoint[]
+  recoveryConversions            RecoveryConversion[]
+  marketingAudiences             MarketingAudience[]
+  marketingCampaigns             MarketingCampaign[]
+  appointmentNotificationSetting AppointmentNotificationSetting?
+  catalogItems                   TenantCatalogItem[]
+  catalogItemValueVersions       TenantCatalogItemValueVersion[]
+  referralProgram                ReferralProgram?
+  referralProgramValueVersions   ReferralProgramValueVersion[]
+  customerReferrals              CustomerReferral[]
+  referralRewardIssuances        ReferralRewardIssuance[]
+  referralRewards                ReferralReward[]
+  referralRewardFulfillments     ReferralRewardFulfillment[]
+  customerSubscriptions          CustomerSubscription[]
+  customerSubscriptionUsages     CustomerSubscriptionUsage[]
+  giftCertificates               GiftCertificate[]
+  giftCertificateRedemptions     GiftCertificateRedemption[]
+  businessReviews                BusinessReview[]
+  clients                        Client[]
+  crmClientLinks                 CrmClientLink[]
+  staff                          Staff[]
+  staffProviderLinks             StaffProviderLink[]
+  marketingPolicy                MarketingPolicy?
+  marketingAudienceRecipients    MarketingAudienceRecipient[]
+  marketingCampaignRecipients    MarketingCampaignRecipient[]
+  marketingConsentEvidence       MarketingConsentEvidence[]
+  marketingDeliveryAttempts      MarketingDeliveryAttempt[]
+  opportunities                  Opportunity[]
+  agentTasks                     AgentTask[]
+  actionExecutions               ActionExecution[]
+  actionIdempotencyBindings       ActionExecutionIdempotencyBinding[]
+  actionAttempts                 ActionAttempt[]
+  actionTargetMutations          ActionTargetMutation[]
+  operationalWorkItems           OperationalWorkItem[]
+  clientConsentFacts             ClientConsentFact[]
+  clientLinkChallenges           ClientLinkChallenge[]
+  clientWantedSlotInterests       ClientWantedSlotInterest[]
+  clientWebPushEndpoints          ClientWebPushEndpoint[]
+  maintenanceRuns                MaintenanceRun[]
 
   @@index([status, graceEndsAt])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  nativeFeedbackRequests NativeFeedbackRequest[] @relation("R08_NativeFeedbackRequest_tenant")
+  nativeFeedbackRevisions NativeFeedbackRevision[] @relation("R08_NativeFeedbackRevision_tenant")
+  publicCommunityComments PublicCommunityComment[] @relation("R09_PublicCommunityComment_tenant")
+  publicCommunityInteractions PublicCommunityInteraction[] @relation("R09_PublicCommunityInteraction_tenant")
+  teamMessages TeamMessage[] @relation("R12_TeamMessage_tenant")
+  teamAttachments TeamAttachment[] @relation("R12_TeamAttachment_tenant")
+  businessConfigurationRevisions TenantBusinessConfigurationRevision[] @relation("R11_TenantBusinessConfigurationRevision_tenant")
+  cashDeclarations CashDeclaration[] @relation("R14_CashDeclaration_tenant")
+  expenseReminderRuns ExpenseReminderRun[] @relation("R13_ExpenseReminderRun_tenant")
+  expenseIntakeBindings ExpenseIntakeBinding[] @relation("R13_ExpenseIntakeBinding_tenant")
+  operationalAlertRuns OperationalAlertRun[] @relation("R06_OperationalAlertRun_tenant")
+}
+
+/// Durable Chapter 5 interpretation of current canonical evidence. This row
+/// stores only opaque evidence references and deterministic policy metadata;
+/// it does not own business truth or execution state.
+model Opportunity {
+  id                          String                     @id @default(cuid())
+  tenantId                    String
+  type                        String
+  identityVersion             Int                        @default(1)
+  semanticKey                 String
+  identityFingerprint         String
+  revision                    Int
+  affectedEntityKind          String?
+  affectedEntityRef           String?
+  evidenceFingerprint         String
+  evidenceRefsJson            Json
+  evidenceObservedAt          DateTime
+  limitationsJson             Json
+  policyKey                   String
+  policyVersion               Int
+  recommendedAgentDomain      OpportunityAgentDomain
+  outcome                     OpportunityOutcome
+  status                      OpportunityLifecycleStatus @default(active)
+  firstDetectedAt             DateTime
+  lastValidatedAt             DateTime
+  expiresAt                   DateTime
+  terminalAt                  DateTime?
+  terminalReasonCode          String?
+  terminalEvidenceFingerprint String?
+  terminalEvidenceRefsJson    Json?
+  supersedesOpportunityId     String?
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  tenant                      Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  supersedes                  Opportunity?               @relation("OpportunitySupersession", fields: [supersedesOpportunityId, tenantId, semanticKey], references: [id, tenantId, semanticKey], onDelete: Restrict)
+  supersededBy                Opportunity[]              @relation("OpportunitySupersession")
+  agentTasks                  AgentTask[]
+
+  @@unique([id, tenantId])
+  @@unique([id, tenantId, semanticKey])
+  @@unique([tenantId, identityFingerprint])
+  @@unique([tenantId, semanticKey, revision])
+  @@unique([tenantId, supersedesOpportunityId])
+  @@index([tenantId, status, expiresAt])
+  @@index([tenantId, type, status])
+  @@index([tenantId, semanticKey, revision])
+}
+
+/// Durable Chapter 5 assignment record. It is deliberately not an execution
+/// job: retries, approvals, delivery and provider outcomes belong to Chapter 6.
+model AgentTask {
+  id                      String                   @id @default(cuid())
+  tenantId                String
+  opportunityId           String
+  semanticKey             String
+  taskFingerprint         String
+  agentDomain             OpportunityAgentDomain
+  objectiveKey            String
+  allowedReadCapabilities Json
+  allowedActionClasses    Json
+  autonomyLevel           String                   @default("L2_5_SHADOW")
+  status                  AgentTaskLifecycleStatus @default(current)
+  requestedAt             DateTime
+  expiresAt               DateTime
+  invalidatedAt           DateTime?
+  invalidationReasonCode  String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  tenant                  Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  opportunity             Opportunity              @relation(fields: [opportunityId, tenantId, semanticKey], references: [id, tenantId, semanticKey], onDelete: Restrict)
+  actionExecutions        ActionExecution[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, taskFingerprint])
+  @@unique([tenantId, opportunityId, agentDomain])
+  @@index([tenantId, status, expiresAt])
+  @@index([tenantId, semanticKey, agentDomain, status])
+}
+
+/// Canonical Chapter 6 lifecycle for one logical action. It stores a trusted,
+/// normalized contract and durable outcome state, never raw model output or
+/// unrestricted provider payloads.
+model ActionExecution {
+  measurementRevisions MeasurementRevision[] @relation("C7ActionExecutionMeasurement")
+  consentInvalidations ClientConsentInvalidation[]
+  ownerReportRunId String?
+  ownerReportSlotKey String?
+  ownerReportRun OwnerReportRun? @relation(fields: [ownerReportRunId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "B36_execution_run_fkey")
+  id                        String  @id @default(uuid())
+  tenantId                  String
+  identityVersion           Int
+  identityFingerprint       String
+  idempotencyScope          String?
+  requestIdempotencyKeyHash String?
+  bookingIntentContract    String?
+  bookingIntentHash        String?
+  bookingIntentEncrypted   String?
+
+  sourceType  String
+  sourceRef   String?
+  agentTaskId String?
+  actorUserId String?
+
+  actionClass              String
+  capability               String
+  capabilityVersion        Int
+  targetKind               String
+  targetRef                String
+  normalizedInputContract  String
+  normalizedInputHash      String
+  normalizedInputEncrypted String?
+  evidenceRefsJson         Json
+  intentExpiresAt          DateTime?
+  dryRun                   Boolean   @default(false)
+
+  riskProfileVersion    Int
+  riskFacetsJson        Json
+  policyKey             String
+  policyVersion         Int
+  policyDecision        ActionPolicyDecision
+  autonomyLevel         String
+  policyDecidedBy       String
+  policyContextContract String?
+  policyContextHash     String?
+  policyEvidenceJson    Json?
+  policyEvaluatedAt     DateTime?
+  policyValidUntil      DateTime?
+
+  approvalRequirement     String
+  approvalDecision        ActionApprovalDecision
+  approvalInputHash       String?
+  approvalBindingHash     String?
+  approvalRequestedAt     DateTime?
+  approvalExpiresAt       DateTime?
+  approvalDecidedAt       DateTime?
+  approvalDecidedByUserId String?
+
+  state                       ActionExecutionState
+  notExecutedReasonCode       String?
+  retryPolicyKey              String
+  retryPolicyVersion          Int
+  maxExecutionAttempts        Int
+  executionAttemptCount       Int                       @default(0)
+  nextExecutionAttemptAt      DateTime?
+  reconciliationPolicyKey     String
+  reconciliationPolicyVersion Int
+  reconciliationState         ActionReconciliationState
+
+  leaseOwner     String?
+  leaseTokenHash String?
+  leaseExpiresAt DateTime?
+  revision       Int       @default(0)
+
+  transportIdentityVersion  Int
+  transportIdempotencyKey   String
+  finalOutcomeCode          String?
+  safeResultSummaryJson     Json?
+  userExplanationCode       String?
+  userExplanationParamsJson Json?
+  firstAttemptedAt          DateTime?
+  finalizedAt               DateTime?
+  payloadRetentionUntil     DateTime?
+  auditRetentionUntil       DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  tenant                Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  agentTask             AgentTask?         @relation(fields: [agentTaskId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  actorMembership       Membership?        @relation("ActionActor", fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+  approverMembership    Membership?        @relation("ActionApprover", fields: [approvalDecidedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+  attempts              ActionAttempt[]
+  communicationCampaign MarketingCampaign?
+  billingPayment        BillingPayment?    @relation("BillingPaymentActionExecution")
+  loyaltyTransactions   LoyaltyTransaction[] @relation("LoyaltyTransactionActionExecution")
+  issuedLoyaltyRedemptionGrant LoyaltyRedemptionGrant? @relation("LoyaltyRedemptionGrantIssueExecution")
+  loyaltyRedemption     LoyaltyRedemption? @relation("LoyaltyRedemptionActionExecution")
+  loyaltyGrantRevocation LoyaltyRedemptionGrantRevocation? @relation("LoyaltyRedemptionGrantRevocationActionExecution")
+  resolvedClientIdentityHolds UnresolvedClientIdentityHold[] @relation("UnresolvedClientIdentityHoldResolutionExecution")
+  createdCustomerReferral CustomerReferral? @relation("CustomerReferralCreateExecution")
+  resolvedCustomerReferral CustomerReferral? @relation("CustomerReferralResolutionExecution")
+  referralRewardIssuance ReferralRewardIssuance? @relation("ReferralRewardIssuanceActionExecution")
+  referralRewardFulfillment ReferralRewardFulfillment? @relation("ReferralRewardFulfillmentActionExecution")
+  activatedCustomerSubscription CustomerSubscription? @relation("CustomerSubscriptionActivationExecution")
+  endedCustomerSubscription CustomerSubscription? @relation("CustomerSubscriptionEndExecution")
+  customerSubscriptionUsages CustomerSubscriptionUsage[] @relation("CustomerSubscriptionUsageActionExecution")
+  issuedGiftCertificate GiftCertificate? @relation("GiftCertificateIssueExecution")
+  giftCertificateRedemption GiftCertificateRedemption? @relation("GiftCertificateRedemptionActionExecution")
+  expense               Expense?           @relation("ExpenseActionExecution")
+  expensePeriodDeclaration ExpensePeriodDeclaration? @relation("ExpensePeriodDeclarationActionExecution")
+  invalidatedExpensePeriodDeclarations ExpensePeriodDeclarationInvalidation[] @relation("ExpensePeriodInvalidatedDeclarationExecution")
+  expensePeriodDeclarationInvalidations ExpensePeriodDeclarationInvalidation[] @relation("ExpensePeriodInvalidationExecution")
+  tenantCatalogItemValueVersion TenantCatalogItemValueVersion? @relation("TenantCatalogItemValueVersionActionExecution")
+  referralProgramValueVersion ReferralProgramValueVersion? @relation("ReferralProgramValueVersionActionExecution")
+  actionTargetMutations       ActionTargetMutation[]
+  operationalWorkItemsCreated OperationalWorkItem[] @relation("OperationalWorkItemCreateExecution")
+  operationalWorkItemsCompleted OperationalWorkItem[] @relation("OperationalWorkItemCompleteExecution")
+  clientConsentFacts          ClientConsentFact[]
+  wantedSlotInterestsCreated  ClientWantedSlotInterest[] @relation("ClientWantedSlotCreateExecution")
+  wantedSlotInterestsMutated  ClientWantedSlotInterest[] @relation("ClientWantedSlotMutationExecution")
+  maintenanceRuns             MaintenanceRun[]
+  idempotencyBindings          ActionExecutionIdempotencyBinding[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, identityFingerprint])
+  @@unique([tenantId, idempotencyScope, requestIdempotencyKeyHash], map: "ActionExecution_tenant_idempotency_key")
+  @@unique([tenantId, ownerReportRunId, ownerReportSlotKey], map: "B36_execution_slot_key")
+  @@index([tenantId, state, nextExecutionAttemptAt])
+  @@index([tenantId, reconciliationState, leaseExpiresAt])
+  @@index([tenantId, agentTaskId])
+  @@index([tenantId, createdAt])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  operationalAlertRunId String?
+  operationalAlertSlotKey String?
+  nativeFeedbackRequestId String?
+  nativeFeedbackRevisionId String?
+  nativeFeedbackSlotKey String?
+  teamMessageId String?
+  teamMessageSlotKey String?
+  expenseReminderRunId String?
+  expenseReminderSlotKey String?
+  @@unique([tenantId, operationalAlertRunId, operationalAlertSlotKey], map: "R06_execution_slot_uq")
+  operationalAlertRun OperationalAlertRun? @relation("R06_execution_run", fields: [operationalAlertRunId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R06_execution_run_fk")
+  ownedNativeFeedbackRequests NativeFeedbackRequest[] @relation("R08_request_execution")
+  ownedNativeFeedbackRevisions NativeFeedbackRevision[] @relation("R08_revision_execution")
+  @@unique([tenantId, nativeFeedbackRequestId, nativeFeedbackSlotKey], map: "R08_execution_slot_uq")
+  nativeFeedbackRequest NativeFeedbackRequest? @relation("R08_execution_request", fields: [nativeFeedbackRequestId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_execution_request_fk")
+  nativeFeedbackRevision NativeFeedbackRevision? @relation("R08_execution_revision", fields: [nativeFeedbackRevisionId, tenantId, nativeFeedbackRequestId], references: [id, tenantId, requestId], onDelete: Restrict, onUpdate: Restrict, map: "R08_execution_revision_fk")
+  communityReplies PublicCommunityComment[] @relation("R09_comment_creation")
+  moderatedCommunityComments PublicCommunityComment[] @relation("R09_comment_moderation")
+  businessConfigurationRevision TenantBusinessConfigurationRevision[] @relation("R11_config_execution")
+  reservedTeamAttachments TeamAttachment[] @relation("R12_attachment_reserve")
+  finalizedTeamAttachments TeamAttachment[] @relation("R12_attachment_finalize")
+  sentTeamMessage TeamMessage[] @relation("R12_message_send")
+  withdrawnTeamMessage TeamMessage[] @relation("R12_message_withdraw")
+  @@unique([tenantId, teamMessageId, teamMessageSlotKey], map: "R12_execution_slot_uq")
+  teamMessage TeamMessage? @relation("R12_execution_message", fields: [teamMessageId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_execution_message_fk")
+  @@unique([tenantId, expenseReminderRunId, expenseReminderSlotKey], map: "R13_execution_slot_uq")
+  expenseReminderRun ExpenseReminderRun? @relation("R13_execution_reminder", fields: [expenseReminderRunId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R13_execution_reminder_fk")
+  expenseIntakeBindings ExpenseIntakeBinding[] @relation("R13_intake_slot")
+  cashDeclaration CashDeclaration[] @relation("R14_cash_execution")
+}
+
+/// B31: every accepted caller alias is immutable and tenant/Client qualified.
+/// Intent and execution lifecycle remain owned by ActionExecution.
+model ActionExecutionIdempotencyBinding {
+  tenantId                  String
+  clientId                  String
+  idempotencyScope          String
+  requestIdempotencyKeyHash  String
+  actionExecutionId         String
+  createdAt                 DateTime @default(now())
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client    Client          @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  execution ActionExecution @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict)
+
+  @@id([tenantId, idempotencyScope, requestIdempotencyKeyHash])
+  @@index([actionExecutionId, tenantId])
+  @@index([clientId, tenantId])
+}
+
+/// Immutable-after-finish ledger entry for execution and reconciliation work.
+/// A retry remains an attempt under the same logical ActionExecution.
+model ActionAttempt {
+  measurementRevisions MeasurementRevision[] @relation("C7ActionAttemptMeasurement")
+  id                          String                @id @default(uuid())
+  tenantId                    String
+  actionExecutionId           String
+  attemptNumber               Int
+  kind                        ActionAttemptKind
+  state                       ActionAttemptState
+  executorKey                 String
+  executorVersion             Int
+  externalDispatchState       ExternalDispatchState
+  providerRequestIdentityHash String?
+  providerReferenceEncrypted  String?
+  providerReferenceHash       String?
+  transportCode               String?
+  httpStatus                  Int?
+  errorClass                  String?
+  outcomeCode                 String?
+  safeResultJson              Json?
+  retryDecisionCode           String?
+  reconciliationRequired      Boolean               @default(false)
+  startedAt                   DateTime              @default(now())
+  finishedAt                  DateTime?
+  createdAt                   DateTime              @default(now())
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  execution ActionExecution @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, actionExecutionId, attemptNumber])
+  @@index([tenantId, state, startedAt])
+  @@index([tenantId, providerReferenceHash])
+}
+
+/// Immutable proof of the exact domain-target generation committed by one
+/// governed Package 5 action. It stores only internal references and safe
+/// normalized hashes; raw PII, credentials, tokens and provider payloads are
+/// forbidden by contract.
+model ActionTargetMutation {
+  id                String   @id @default(uuid())
+  tenantId          String
+  actionExecutionId String
+  mutationKey       String
+  targetKind        String
+  targetRef         String
+  mutationKind      String
+  targetGeneration  Int
+  beforeStateHash   String?
+  afterStateHash    String?
+  createdAt         DateTime @default(now())
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  execution ActionExecution @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, actionExecutionId, mutationKey])
+  @@unique([tenantId, targetKind, targetRef, targetGeneration])
+  @@index([tenantId, targetKind, targetRef, createdAt])
+  @@index([tenantId, actionExecutionId])
+}
+
+/// Tenant-wide transactional appointment reminder policy. These notices are
+/// operational, not marketing: delivery is limited to the authenticated MAYA
+/// account whose phone exactly matches the CRM appointment.
+model AppointmentNotificationSetting {
+  id               String   @id @default(cuid())
+  tenantId         String   @unique
+  enabled          Boolean  @default(true)
+  leadTimesMinutes Json     @default("[1440,120]")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([enabled])
 }
 
 /// Persisted white-label BrandingConfig. The database model name is retained
@@ -148,6 +686,7 @@ model BrandingSettings {
 }
 
 model Branch {
+  measurementRevisions MeasurementRevision[] @relation("C7BranchMeasurement")
   id                String             @id @default(cuid())
   tenantId          String
   name              String
@@ -160,73 +699,191 @@ model Branch {
   users             User[]
   appointments      Appointment[]
   internalProviders InternalProvider[]
+  staff             Staff[]
   expenses          Expense[]
   memberships       Membership[]
+  wantedSlotInterests ClientWantedSlotInterest[]
 
   @@unique([id, tenantId])
   @@index([tenantId])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  cashDeclarations CashDeclaration[] @relation("R14_cash_branch")
 }
 
 model User {
-  id                   String               @id @default(cuid())
-  tenantId             String?
-  branchId             String?
-  email                String
-  phone                String?
-  encryptedName        String?
-  passwordHash         String
-  role                 UserRole
-  status               UserStatus           @default(active)
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-  tenant               Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch               Branch?              @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
-  auditLogs            AuditLog[]
-  appointments         Appointment[]        @relation("ClientAppointments")
-  authIdentities       AuthIdentity[]
-  authSessions         AuthSession[]
-  memberships          Membership[]
-  internalProviders    InternalProvider[]
-  customerProfiles     CustomerProfile[]
-  loyaltyAccounts      LoyaltyAccount[]
-  loyaltyTransactions  LoyaltyTransaction[] @relation("LoyaltyTransactionActor")
-  createdExpenses      Expense[]            @relation("ExpenseCreator")
-  requestedAiApprovals AiApprovalRequest[]  @relation("AiApprovalRequester")
-  decidedAiApprovals   AiApprovalRequest[]  @relation("AiApprovalDecider")
-  aiToolExecutions     AiToolExecution[]    @relation("AiToolExecutionActor")
+  authorizedConsentInvalidations ClientConsentInvalidation[]
+  id                        String                     @id @default(cuid())
+  tenantId                  String?
+  branchId                  String?
+  email                     String
+  phone                     String?
+  encryptedName             String?
+  passwordHash              String
+  role                      UserRole
+  status                    UserStatus                 @default(active)
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  tenant                    Tenant?                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch                    Branch?                    @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  auditLogs                 AuditLog[]
+  clients                   Client[]
+  appointments              Appointment[]              @relation("ClientAppointments")
+  authIdentities            AuthIdentity[]
+  authSessions              AuthSession[]
+  memberships               Membership[]
+  internalProviders         InternalProvider[]
+  customerProfiles          CustomerProfile[]
+  loyaltyAccounts           LoyaltyAccount[]
+  loyaltyTransactions       LoyaltyTransaction[]       @relation("LoyaltyTransactionActor")
+  createdExpenses           Expense[]                  @relation("ExpenseCreator")
+  expensePeriodDeclarations ExpensePeriodDeclaration[] @relation("ExpensePeriodDeclarer")
+  requestedAiApprovals      AiApprovalRequest[]        @relation("AiApprovalRequester")
+  decidedAiApprovals        AiApprovalRequest[]        @relation("AiApprovalDecider")
+  aiToolExecutions          AiToolExecution[]          @relation("AiToolExecutionActor")
+  createdAiKnowledgeSources AiKnowledgeSource[]        @relation("AiKnowledgeSourceCreator")
+  crmStaffAccesses          CrmStaffAccess[]
+  staff                     Staff[]
+  inboxItems                InboxItem[]
+  devicePushTokens          DevicePushToken[]
+  maintenanceRunsRequested  MaintenanceRun[] @relation("MaintenanceRunRequester")
+  maintenanceRunsApproved   MaintenanceRun[] @relation("MaintenanceRunApprover")
 
   @@unique([id, tenantId])
   @@unique([tenantId, email])
   @@unique([tenantId, phone])
   @@index([tenantId])
   @@index([branchId])
+  /// Вход по почте ищет пользователя ПО ВСЕМ арендаторам, поэтому составные
+  /// ключи с ведущим tenantId для него непригодны — без этих двух индексов
+  /// каждая попытка входа сканирует таблицу целиком.
+  @@index([email])
+  @@index([phone])
+}
+
+/// Карта слияния дублей аккаунта.
+///
+/// Дубли появлялись, когда соц-вход не находил рабочий аккаунт и заводил
+/// человеку второй, клиентский. Слияние переносит владение на рабочий аккаунт
+/// и гасит дубль статусом UserStatus.merged — БЕЗ физического удаления, иначе
+/// каскады по Membership унесли бы визиты, баллы и согласия.
+///
+/// @@unique([tenantId, duplicateUserId]) — замок идемпотентности: повторный
+/// commit не создаёт вторую запись, а возвращает исходный отчёт.
+/// Внешних ключей на User намеренно нет: карта обязана пережить любое будущее
+/// удаление пользователя, иначе обезличится ровно тогда, когда понадобится.
+model UserMerge {
+  id              String   @id @default(cuid())
+  tenantId        String
+  primaryUserId   String
+  duplicateUserId String
+  actorUserId     String?
+  /// Чем доказано, что это один человек: identity_email | identity_phone |
+  /// primary_login_email_digits | operator_bearer_primary
+  evidence        String
+  /// Счётчики перенесённого и id — без персональных данных.
+  reportJson      Json
+  createdAt       DateTime @default(now())
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, duplicateUserId])
+  @@index([tenantId, primaryUserId])
 }
 
 model Membership {
-  id                 String             @id @default(cuid())
-  tenantId           String
-  userId             String
-  branchId           String?
-  role               UserRole
-  status             MembershipStatus   @default(active)
-  invitedAt          DateTime?
-  joinedAt           DateTime?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  branch             Branch?            @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
-  authIdentities     AuthIdentity[]     @relation("AuthIdentityMembership")
-  authSessions       AuthSession[]      @relation("AuthSessionMembership")
-  internalProviders  InternalProvider[] @relation("InternalProviderMembership")
-  customerProfile    CustomerProfile?   @relation("CustomerProfileMembership")
-  loyaltyAccount     LoyaltyAccount?    @relation("LoyaltyAccountMembership")
-  clientAppointments Appointment[]      @relation("ClientMembershipAppointments")
+  measurementRevisions MeasurementRevision[] @relation("C7MembershipMeasurement")
+  id                             String                       @id @default(cuid())
+  tenantId                       String
+  userId                         String
+  branchId                       String?
+  role                           UserRole
+  status                         MembershipStatus             @default(active)
+  invitedAt                      DateTime?
+  joinedAt                       DateTime?
+  createdAt                      DateTime                     @default(now())
+  updatedAt                      DateTime                     @updatedAt
+  tenant                         Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                           User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch                         Branch?                      @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  authIdentities                 AuthIdentity[]               @relation("AuthIdentityMembership")
+  authSessions                   AuthSession[]                @relation("AuthSessionMembership")
+  internalProviders              InternalProvider[]           @relation("InternalProviderMembership")
+  customerProfile                CustomerProfile?             @relation("CustomerProfileMembership")
+  loyaltyAccount                 LoyaltyAccount?              @relation("LoyaltyAccountMembership")
+  dashboardPreferences           DashboardPreference[]
+  aiBrainSessions                AiBrainSession[]
+  aiMemoryFacts                  AiMemoryFact[]
+  actionExecutionsAsActor        ActionExecution[]            @relation("ActionActor")
+  actionExecutionsAsApprover     ActionExecution[]            @relation("ActionApprover")
+  communicationCampaignsCreated  MarketingCampaign[]          @relation("CommunicationCreator")
+  communicationCampaignsApproved MarketingCampaign[]          @relation("CommunicationApprover")
+  communicationRecipients        MarketingCampaignRecipient[] @relation("CommunicationRecipientMembership")
+  operationalWorkItemsAssigned   OperationalWorkItem[] @relation("OperationalWorkItemAssignee")
+  operationalWorkItemsCreated    OperationalWorkItem[] @relation("OperationalWorkItemCreator")
+  clientConsentFactsAsActor      ClientConsentFact[] @relation("ClientConsentActor")
 
   @@unique([userId, tenantId])
   @@index([tenantId, status])
   @@index([userId, status])
   @@index([tenantId, branchId])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  @@unique([id, tenantId], map: "Membership_id_tenantId_key")
+  nativeFeedbackRequests NativeFeedbackRequest[] @relation("R08_request_member")
+  businessConfigurationRevisions TenantBusinessConfigurationRevision[] @relation("R11_config_member")
+  teamAttachments TeamAttachment[] @relation("R12_attachment_member")
+  sentTeamMessages TeamMessage[] @relation("R12_message_sender")
+  withdrawnTeamMessages TeamMessage[] @relation("R12_message_withdrawer")
+  expenseIntakeBindings ExpenseIntakeBinding[] @relation("R13_intake_member")
+  cashDeclarations CashDeclaration[] @relation("R14_cash_member")
+}
+
+/// Personal dashboard layout and targets for one membership. Preferences are
+/// tenant-scoped so the same MAYA account can configure each business safely.
+model DashboardPreference {
+  id         String     @id @default(cuid())
+  tenantId   String
+  userId     String
+  section    String     @default("finance")
+  configJson Json       @default("{}")
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+
+  @@unique([userId, tenantId, section])
+  @@index([tenantId, section])
+}
+
+/// Tenant-scoped link between a CRM staff record and MAYA access. A role can
+/// be prepared before a login is created; userId is attached only when the
+/// owner supplies a verified login channel for that staff member.
+model CrmStaffAccess {
+  id                   String               @id @default(cuid())
+  tenantId             String
+  externalStaffId      String
+  userId               String?
+  encryptedDisplayName String
+  title                String?
+  role                 UserRole
+  status               CrmStaffAccessStatus @default(pending_contact)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  tenant               Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                 User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  /// 🔴 Phase A. Грант доступа переезжает на идентичность Maya. Пока nullable:
+  /// NOT NULL ставится только на CUTOVER, после доказанного backfill.
+  staffId String?
+  staff   Staff?  @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([staffId, tenantId])
+  /// НАСЛЕДИЕ: снимается на CUTOVER, не раньше.
+  @@unique([tenantId, externalStaffId])
+  @@unique([tenantId, userId])
+  @@index([tenantId, role, status])
+  @@index([userId])
+  @@index([staffId])
 }
 
 model AuthIdentity {
@@ -248,6 +905,9 @@ model AuthIdentity {
   @@unique([tenantId, provider, providerUserId])
   @@index([userId])
   @@index([tenantId, provider])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  expenseIntakeBindings ExpenseIntakeBinding[] @relation("R13_intake_identity")
 }
 
 model AuthFlowState {
@@ -374,11 +1034,436 @@ model CrmIntegration {
   verifiedAt        DateTime?
   lastCheckedAt     DateTime?
   lastSyncAt        DateTime?
+  /// 🔴 С какого момента Maya НАБЛЮДАЕТ за этой интеграцией.
+  ///
+  /// Нужен, чтобы первое сканирование не выдало существующий бизнес за
+  /// «создано сегодня»: всё, что старше этой отметки, — `observed_existing`.
+  watchStartedAt    DateTime?
   lastErrorCode     String?
   lastErrorAt       DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+/// Payment credentials belonging to one tenant's customer-facing commerce.
+/// These credentials are intentionally separate from MAYA subscription billing.
+model CommerceIntegration {
+  id                 String    @id @default(cuid())
+  tenantId           String    @unique
+  provider           String    @default("yookassa")
+  encryptedShopId    String
+  encryptedSecretKey String
+  status             String    @default("active")
+  verifiedAt         DateTime?
+  lastCheckedAt      DateTime?
+  lastErrorCode      String?
+  lastErrorAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+/// Tenant-owned products and sellable offers. CRM/store adapters may mirror
+/// their catalog here, while businesses without an adapter can manage it
+/// manually. `kind` is one of inventory, certificate or membership.
+model TenantCatalogItem {
+  id                    String                          @id @default(cuid())
+  tenantId              String
+  kind                  String
+  name                  String
+  description           String?
+  priceKopecks          Int?
+  currency              String                          @default("RUB")
+  quantity              Int?
+  lowStockThreshold     Int?
+  active                Boolean                         @default(true)
+  source                String                          @default("manual")
+  externalRef           String?
+  metadataJson          Json?
+  canonicalTemplateKey  String?
+  supersedesOfferId     String?
+  currentValueVersionId String?
+  createdAt             DateTime                        @default(now())
+  updatedAt             DateTime                        @updatedAt
+  tenant                Tenant                          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  valueVersions         TenantCatalogItemValueVersion[] @relation("TenantCatalogItemValueVersions")
+  currentValueVersion   TenantCatalogItemValueVersion?  @relation("TenantCatalogItemCurrentValueVersion", fields: [currentValueVersionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  supersededOffer       TenantCatalogItem?               @relation("TenantCatalogItemReplacementLineage", fields: [supersedesOfferId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  replacementOffer      TenantCatalogItem?               @relation("TenantCatalogItemReplacementLineage")
+
+  @@unique([id, tenantId])
+  @@unique([currentValueVersionId, tenantId])
+  @@unique([supersedesOfferId, tenantId])
+  @@unique([tenantId, kind, externalRef])
+  @@index([tenantId, kind, canonicalTemplateKey], map: "TenantCatalogItem_tenant_kind_template_idx")
+  @@index([tenantId, kind, active])
+}
+
+/// Append-only value-bearing configuration for one immutable internal offer.
+/// The mutable catalog row is only the current projection; checkout freezes
+/// this exact version identity and snapshot before any provider dispatch.
+model TenantCatalogItemValueVersion {
+  id                String                         @id @default(cuid())
+  tenantId          String
+  offerId           String
+  actionExecutionId String
+  previousVersionId String?
+  version           Int
+  templateKey       String
+  offerKind         String
+  priceKopecks      Int
+  currency          String
+  availabilityState String
+  valueSnapshotHash String
+  createdAt         DateTime                       @default(now())
+  tenant            Tenant                         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  offer             TenantCatalogItem              @relation("TenantCatalogItemValueVersions", fields: [offerId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution   ActionExecution                @relation("TenantCatalogItemValueVersionActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  previousVersion   TenantCatalogItemValueVersion? @relation("TenantCatalogItemValueVersionChain", fields: [previousVersionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  nextVersion       TenantCatalogItemValueVersion? @relation("TenantCatalogItemValueVersionChain")
+  currentForOffer   TenantCatalogItem?             @relation("TenantCatalogItemCurrentValueVersion")
+
+  @@unique([id, tenantId])
+  @@unique([offerId, tenantId, version])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([previousVersionId, tenantId])
+  @@index([tenantId, templateKey, availabilityState], map: "TenantCatalogItemValueVersion_lookup_idx")
+}
+
+/// One referral policy per tenant. Referral fulfillment remains a separately
+/// entitled add-on; this record is the source of truth for its public rules.
+model ReferralProgram {
+  id                                 String                        @id @default(cuid())
+  tenantId                           String                        @unique
+  enabled                            Boolean                       @default(false)
+  inviterRewardKopecks               Int?
+  inviteeRewardKopecks               Int?
+  inviterRewardPercentBasisPoints    Int?
+  inviteeRewardPercentBasisPoints    Int?
+  inviterRewardLiabilityCapKopecks   Int?
+  inviteeRewardLiabilityCapKopecks   Int?
+  currency                           String                        @default("RUB")
+  terms                              String?
+  codePrefix                         String?
+  currentValueVersionId              String?
+  createdAt                          DateTime                      @default(now())
+  updatedAt                          DateTime                      @updatedAt
+  tenant                             Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  valueVersions                      ReferralProgramValueVersion[] @relation("ReferralProgramValueVersions")
+  currentValueVersion                ReferralProgramValueVersion?  @relation("ReferralProgramCurrentValueVersion", fields: [currentValueVersionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([currentValueVersionId, tenantId])
+}
+
+/// Append-only future-issuance value policy for one tenant referral program.
+/// Existing referral rewards remain bound to the immutable values copied at
+/// issuance and are never recomputed from a later policy version.
+model ReferralProgramValueVersion {
+  id                               String                       @id @default(cuid())
+  tenantId                         String
+  programId                        String
+  actionExecutionId                String
+  previousVersionId                String?
+  version                          Int
+  enabled                          Boolean
+  inviterRewardKopecks             Int?
+  inviteeRewardKopecks             Int?
+  inviterRewardPercentBasisPoints  Int?
+  inviteeRewardPercentBasisPoints  Int?
+  inviterRewardLiabilityCapKopecks Int?
+  inviteeRewardLiabilityCapKopecks Int?
+  currency                         String
+  valueSnapshotHash                String
+  createdAt                        DateTime                     @default(now())
+  tenant                           Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  program                          ReferralProgram              @relation("ReferralProgramValueVersions", fields: [programId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution                  ActionExecution              @relation("ReferralProgramValueVersionActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  previousVersion                  ReferralProgramValueVersion? @relation("ReferralProgramValueVersionChain", fields: [previousVersionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  nextVersion                      ReferralProgramValueVersion? @relation("ReferralProgramValueVersionChain")
+  currentForProgram                ReferralProgram?             @relation("ReferralProgramCurrentValueVersion")
+
+  @@unique([id, tenantId])
+  @@unique([programId, tenantId, version])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([previousVersionId, tenantId])
+  @@index([tenantId, programId, version])
+}
+
+/// Tenant-scoped referral fact. Creation and terminal resolution remain
+/// separate logical actions; reward issuance is deliberately modeled outside
+/// this row so a relationship fact cannot itself grant value.
+model CustomerReferral {
+  id                    String           @id @default(cuid())
+  tenantId              String
+  createExecutionId     String?
+  resolutionExecutionId String?
+  referrerClientId      String
+  referredClientId      String?
+  identityHash          String
+  referredSubjectHash   String
+  referralCodeHash      String
+  status                String           @default("pending")
+  joinedAt              DateTime
+  resolvedAt            DateTime?
+  legacySourceRef       String?
+  createdAt             DateTime         @default(now())
+  tenant                Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  referrer              Client           @relation("ReferralReferrer", fields: [referrerClientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  referredClient        Client?          @relation("ReferralReferredClient", fields: [referredClientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  createExecution       ActionExecution? @relation("CustomerReferralCreateExecution", fields: [createExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  resolutionExecution   ActionExecution? @relation("CustomerReferralResolutionExecution", fields: [resolutionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  rewardIssuance        ReferralRewardIssuance?
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, identityHash])
+  @@unique([createExecutionId, tenantId])
+  @@unique([resolutionExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, referredSubjectHash, status])
+  @@index([tenantId, referrerClientId, joinedAt])
+}
+
+/// One reward-issuance batch for one qualified referral. The action binding is
+/// one-to-one; its immutable child rows carry the individual recipient values.
+model ReferralRewardIssuance {
+  id                 String           @id @default(cuid())
+  tenantId           String
+  referralId         String
+  actionExecutionId  String?
+  policySnapshotHash String
+  issuedAt           DateTime
+  legacySourceRef    String?
+  createdAt          DateTime         @default(now())
+  tenant             Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  referral           CustomerReferral @relation(fields: [referralId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution    ActionExecution? @relation("ReferralRewardIssuanceActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  rewards            ReferralReward[]
+
+  @@unique([id, tenantId])
+  @@unique([referralId, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, issuedAt])
+}
+
+/// One immutable value slot in a referral issuance batch. Money and percentage
+/// rewards keep their native domain facts rather than collapsing into a
+/// generic value amount.
+model ReferralReward {
+  id                 String                     @id @default(cuid())
+  tenantId           String
+  issuanceId         String
+  recipientClientId  String
+  rewardSlot         String
+  codeHash           String
+  amountKopecks      Int?
+  currency           String?
+  percentBasisPoints Int?
+  liabilityCapKopecks Int?
+  liabilityCurrency String?
+  presentationKeyVersion String?
+  issuedAt           DateTime
+  expiresAt          DateTime
+  createdAt          DateTime                   @default(now())
+  tenant             Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  issuance           ReferralRewardIssuance     @relation(fields: [issuanceId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  recipient          Client                     @relation("ReferralRewardRecipient", fields: [recipientClientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  fulfillment        ReferralRewardFulfillment?
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, codeHash])
+  @@unique([issuanceId, tenantId, rewardSlot])
+  @@index([tenantId, recipientClientId, expiresAt])
+}
+
+/// Append-only claim for applying one referral reward. The unique reward
+/// identity blocks a second fulfillment through another execution path.
+model ReferralRewardFulfillment {
+  id                String           @id @default(cuid())
+  tenantId          String
+  rewardId          String
+  actionExecutionId String?
+  targetAppointmentId String?
+  targetIdentityHash String?
+  eligibleAmountKopecks Int?
+  appliedAmountKopecks Int?
+  currency          String?
+  fulfilledAt       DateTime
+  legacySourceRef   String?
+  createdAt         DateTime         @default(now())
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reward            ReferralReward   @relation(fields: [rewardId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution   ActionExecution? @relation("ReferralRewardFulfillmentActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  targetAppointment Appointment?     @relation(fields: [targetAppointmentId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ReferralRewardFulfillment_target_appointment_tenant_fkey")
+
+  @@unique([id, tenantId])
+  @@unique([rewardId, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@unique([tenantId, targetIdentityHash], map: "ReferralRewardFulfillment_tenant_target_hash_key")
+  @@index([tenantId, fulfilledAt])
+  @@index([tenantId, targetAppointmentId], map: "ReferralRewardFulfillment_tenant_target_appointment_idx")
+}
+
+/// One actually activated customer subscription term. A renewal is a new row
+/// linked to its predecessor; it never rewrites the predecessor's immutable
+/// plan, price, allowance, or term facts.
+model CustomerSubscription {
+  id                       String                      @id @default(cuid())
+  tenantId                 String
+  activationExecutionId    String?
+  endExecutionId           String?
+  clientId                 String
+  previousSubscriptionId   String?
+  termIdentityHash         String
+  planCode                 String
+  planSnapshotHash         String
+  serviceScopeHash         String
+  priceKopecks             Int
+  currency                 String
+  visitsIncluded           Int
+  status                   String                      @default("active")
+  provider                 String?
+  providerPaymentRefHash   String?
+  activatedAt              DateTime
+  termStartsAt             DateTime
+  termEndsAt               DateTime
+  endedAt                  DateTime?
+  legacySourceRef          String?
+  createdAt                DateTime                    @default(now())
+  updatedAt                DateTime                    @updatedAt
+  tenant                   Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client                   Client                      @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  activationExecution      ActionExecution?            @relation("CustomerSubscriptionActivationExecution", fields: [activationExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  endExecution             ActionExecution?            @relation("CustomerSubscriptionEndExecution", fields: [endExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  previousSubscription     CustomerSubscription?        @relation("CustomerSubscriptionRenewal", fields: [previousSubscriptionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  renewal                  CustomerSubscription?        @relation("CustomerSubscriptionRenewal")
+  usages                   CustomerSubscriptionUsage[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, termIdentityHash])
+  @@unique([activationExecutionId, tenantId])
+  @@unique([endExecutionId, tenantId])
+  @@unique([previousSubscriptionId, tenantId])
+  @@unique([tenantId, provider, providerPaymentRefHash])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, clientId, status, termEndsAt])
+  @@index([tenantId, status, termEndsAt])
+}
+
+/// Append-only evidence that one or more units of a subscription term were
+/// consumed. A sync action may own multiple claims, while the subscription-
+/// qualified usage identity prevents another execution from claiming the same
+/// visit or source event twice.
+model CustomerSubscriptionUsage {
+  id                       String                @id @default(cuid())
+  tenantId                 String
+  subscriptionId           String
+  actionExecutionId        String?
+  usageIdentityHash        String
+  targetKind               String
+  targetRefHash            String
+  units                    Int                   @default(1)
+  usedAt                   DateTime
+  legacySourceRef          String?
+  createdAt                DateTime              @default(now())
+  tenant                   Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscription             CustomerSubscription  @relation(fields: [subscriptionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution          ActionExecution?      @relation("CustomerSubscriptionUsageActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([subscriptionId, tenantId, usageIdentityHash])
+  @@unique([tenantId, legacySourceRef])
+  @@index([actionExecutionId, tenantId])
+  @@index([subscriptionId, tenantId, usedAt])
+}
+
+/// One tenant-owned certificate issuance and its provider payment lifecycle.
+/// The bearer secret is represented only by a server-derived hash; the
+/// non-secret presentation key version makes re-presentation restart-safe.
+/// Recipient and offer facts are immutable snapshots, not mutable catalog data.
+model GiftCertificate {
+  id                       String                     @id @default(cuid())
+  tenantId                 String
+  issueExecutionId         String?
+  issuanceIdentityHash     String
+  codeHash                 String
+  presentationKeyVersion   String?
+  recipientSubjectHash     String
+  offerSnapshotHash        String
+  nominalAmountKopecks     Int
+  currency                 String
+  paymentStatus            String                     @default("pending_payment")
+  provider                 String?
+  providerPaymentRefHash   String?
+  issuedAt                 DateTime
+  expiresAt                DateTime
+  paidAt                   DateTime?
+  canceledAt               DateTime?
+  legacySourceRef          String?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  tenant                   Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  issueExecution           ActionExecution?           @relation("GiftCertificateIssueExecution", fields: [issueExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  redemption               GiftCertificateRedemption?
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, issuanceIdentityHash])
+  @@unique([tenantId, codeHash])
+  @@unique([issueExecutionId, tenantId])
+  @@unique([tenantId, provider, providerPaymentRefHash])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, paymentStatus, expiresAt])
+  @@index([tenantId, recipientSubjectHash, expiresAt])
+}
+
+/// Append-only claim that consumes one paid certificate in full. Partial
+/// balance semantics are intentionally absent because the approved and legacy
+/// contract is one certificate -> at most one full redemption.
+model GiftCertificateRedemption {
+  id                       String           @id @default(cuid())
+  tenantId                 String
+  certificateId            String
+  actionExecutionId        String?
+  targetKind               String
+  targetRefHash            String
+  redeemedAt               DateTime
+  legacySourceRef          String?
+  createdAt                DateTime         @default(now())
+  tenant                   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  certificate              GiftCertificate  @relation(fields: [certificateId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution          ActionExecution? @relation("GiftCertificateRedemptionActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([certificateId, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, redeemedAt])
+}
+
+/// Review text can contain names and other personal data, so it is encrypted
+/// at rest. AI tools receive only rating, source, date and deterministic topic
+/// tags, never the original text.
+model BusinessReview {
+  id              String   @id @default(cuid())
+  tenantId        String
+  externalRef     String?
+  source          String
+  rating          Int
+  occurredAt      DateTime
+  encryptedText   String?
+  topicTagsJson   Json?
+  branchId        String?
+  staffExternalId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, source, externalRef])
+  @@index([tenantId, occurredAt])
+  @@index([tenantId, rating, occurredAt])
 }
 
 model InternalService {
@@ -446,6 +1531,10 @@ model AiOnboardingDraft {
   expiresAt            DateTime
   confirmedTenantId    String?
   trialActivationId    String?          @unique
+  /// Approved Package 5 confirmation receipt V1; no historical approval backfill.
+  revision             Int              @default(0)
+  confirmationReceiptJson Json?
+  confirmationMaterialEncrypted String?
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
   confirmedTenant      Tenant?          @relation("AiOnboardingConfirmedTenant", fields: [confirmedTenantId], references: [id], onDelete: SetNull)
@@ -475,25 +1564,65 @@ model TrialActivation {
 model CustomerProfile {
   id                 String     @id @default(cuid())
   tenantId           String
-  userId             String
+  clientId           String?
+  userId             String?
   preferredLocale    String?
+  /// Explicit Client choices only; NULL inherits policy and is not consent.
+  defaultVisitMood   String?
+  notificationPreferencesJson Json?
   privacyConsentAt   DateTime?
   marketingConsentAt DateTime?
   encryptedNotes     String?
+  /// B7 Client-stated habits, encrypted under canonical limits V1; no backfill.
+  encryptedClientPreferences String?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   tenant             Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  membership         Membership @relation("CustomerProfileMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+  client             Client?    @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  user               User?      @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  membership         Membership? @relation("CustomerProfileMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([userId, tenantId])
+  @@unique([tenantId, clientId])
   @@index([tenantId, updatedAt])
+}
+
+/// Append-only proof of a canonical Client's consent decision. Current
+/// CustomerProfile timestamps remain compatibility projections and are not
+/// accepted as historical evidence by themselves.
+model ClientConsentFact {
+  id                   String   @id @default(uuid())
+  tenantId             String
+  clientId             String
+  kind                 String
+  decision             String
+  occurredAt           DateTime
+  effectiveAt          DateTime
+  sourceType           String
+  sourceIdentityHash   String
+  actorUserId          String?
+  actionExecutionId    String?
+  createdAt            DateTime @default(now())
+
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client      Client           @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actor       Membership?      @relation("ClientConsentActor", fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  execution   ActionExecution? @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  invalidation ClientConsentInvalidation?
+
+  @@unique([id, tenantId, clientId], map: "ConsentFact_client_reference_key")
+  @@unique([id, tenantId])
+  @@unique([tenantId, sourceType, sourceIdentityHash])
+  @@index([tenantId, clientId, kind, effectiveAt])
+  @@index([tenantId, actionExecutionId])
 }
 
 model LoyaltyAccount {
   id                String               @id @default(cuid())
   tenantId          String
-  userId            String
+  clientId          String?
+  userId            String?
   source            String               @default("internal")
   balance           Int                  @default(0)
   externalReference String?
@@ -501,58 +1630,216 @@ model LoyaltyAccount {
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   tenant            Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  membership        Membership           @relation("LoyaltyAccountMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+  client            Client?              @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  user              User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  membership        Membership?          @relation("LoyaltyAccountMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)
   transactions      LoyaltyTransaction[]
 
   @@unique([id, tenantId])
   @@unique([userId, tenantId])
+  @@unique([tenantId, clientId])
   @@index([tenantId, source, updatedAt])
 }
 
 model LoyaltyTransaction {
-  id              String         @id @default(cuid())
-  tenantId        String
-  accountId       String
-  actorUserId     String?
-  actorTenantId   String?
-  kind            String
-  delta           Int
-  balanceAfter    Int
-  encryptedReason String
-  idempotencyKey  String
-  externalRef     String?
-  createdAt       DateTime       @default(now())
-  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  account         LoyaltyAccount @relation(fields: [accountId, tenantId], references: [id, tenantId], onDelete: Cascade)
-  actor           User?          @relation("LoyaltyTransactionActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  id                String           @id @default(cuid())
+  tenantId          String
+  actionExecutionId String?
+  accountId         String
+  actorUserId       String?
+  actorTenantId     String?
+  kind              String
+  delta             Int
+  balanceAfter      Int
+  encryptedReason   String
+  idempotencyKey    String
+  externalRef       String?
+  createdAt         DateTime         @default(now())
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account           LoyaltyAccount   @relation(fields: [accountId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  actor             User?            @relation("LoyaltyTransactionActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actionExecution   ActionExecution? @relation("LoyaltyTransactionActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, actionExecutionId])
   @@index([tenantId, accountId, createdAt])
   @@index([tenantId, actorUserId, createdAt])
 }
 
-model Expense {
-  id                String   @id @default(cuid())
+/// One tenant-scoped, one-time loyalty right. The bearer code is stored only
+/// as a server-derived hash; the immutable target and point value remain
+/// domain facts rather than a generic value-ledger payload.
+model LoyaltyRedemptionGrant {
+  id               String           @id @default(cuid())
+  tenantId         String
+  issueExecutionId String?
+  clientId         String
+  codeHash         String
+  serviceRef       String
+  points           Int
+  issuedAt         DateTime
+  expiresAt        DateTime
+  legacySourceRef  String?
+  createdAt        DateTime         @default(now())
+  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client           Client           @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  issueExecution   ActionExecution? @relation("LoyaltyRedemptionGrantIssueExecution", fields: [issueExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  redemption       LoyaltyRedemption?
+  revocation       LoyaltyRedemptionGrantRevocation?
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, codeHash])
+  @@unique([issueExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, clientId, expiresAt])
+}
+
+/// Append-only one-time claim for a loyalty grant. A separate row makes issue
+/// and consume distinct logical actions and lets the database reject a second
+/// redemption even when it arrives through another execution path.
+model LoyaltyRedemption {
+  id                String           @id @default(cuid())
   tenantId          String
+  grantId           String
+  actionExecutionId String?
+  redeemedAt        DateTime
+  legacySourceRef   String?
+  createdAt         DateTime         @default(now())
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  grant             LoyaltyRedemptionGrant @relation(fields: [grantId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution   ActionExecution? @relation("LoyaltyRedemptionActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([grantId, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([tenantId, legacySourceRef])
+  @@index([tenantId, redeemedAt])
+}
+
+/// Append-only revocation of one still-active loyalty grant. Revocation is a
+/// distinct terminal fact from expiry or redemption and always belongs to one
+/// canonical ActionExecution; no nullable legacy escape hatch exists.
+model LoyaltyRedemptionGrantRevocation {
+  id                String                 @id @default(cuid())
+  tenantId          String
+  grantId           String
+  actionExecutionId String
+  reasonCode        String
+  revokedAt         DateTime
+  createdAt         DateTime               @default(now())
+  tenant            Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  grant             LoyaltyRedemptionGrant @relation(fields: [grantId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  actionExecution   ActionExecution        @relation("LoyaltyRedemptionGrantRevocationActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "LoyaltyGrantRevocation_execution_tenant_fkey")
+
+  @@unique([id, tenantId])
+  @@unique([grantId, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@index([tenantId, revokedAt])
+}
+
+/// Tenant-qualified, fail-closed record of one known provider-identity
+/// collision. The legacy principal manifest stays outside this table; only its
+/// immutable evidence digest and cardinality are persisted, never raw PII.
+model UnresolvedClientIdentityHold {
+  id                          String           @id @default(cuid())
+  tenantId                    String
+  provider                    String
+  externalId                  String
+  reasonCode                  String
+  sourceNamespace             String
+  sourceEvidenceHash          String
+  unresolvedPrincipalCount    Int
+  createdAt                   DateTime         @default(now())
+  resolvedAt                  DateTime?
+  resolutionActionExecutionId String?
+  tenant                      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  resolutionActionExecution   ActionExecution? @relation("UnresolvedClientIdentityHoldResolutionExecution", fields: [resolutionActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "UnresolvedIdentityHold_resolution_execution_tenant_fkey")
+
+  @@unique([tenantId, provider, externalId], map: "UnresolvedClientIdentityHold_tenant_provider_external_key")
+  @@index([tenantId, reasonCode, resolvedAt], map: "UnresolvedClientIdentityHold_tenant_reason_resolved_idx")
+}
+
+model Expense {
+  id                String           @id @default(cuid())
+  tenantId          String
+  actionExecutionId String?
   branchId          String?
   branchTenantId    String?
   createdById       String?
   createdByTenantId String?
   category          String
   amountKopecks     Int
-  currency          String   @default("RUB")
+  currency          String           @default("RUB")
   occurredAt        DateTime
   encryptedNote     String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branch            Branch?  @relation(fields: [branchId, branchTenantId], references: [id, tenantId], onDelete: SetNull)
-  createdBy         User?    @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  source            String           @default("manual")
+  externalId        String?
+  idempotencyKey    String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch            Branch?          @relation(fields: [branchId, branchTenantId], references: [id, tenantId], onDelete: SetNull)
+  createdBy         User?            @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  actionExecution   ActionExecution? @relation("ExpenseActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([id, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@unique([tenantId, externalId])
+  @@unique([tenantId, idempotencyKey])
   @@index([tenantId, occurredAt])
   @@index([tenantId, branchId, occurredAt])
+  @@index([tenantId, source, occurredAt])
+}
+
+/// Явное подтверждение владельца, что за конкретный период все расходы,
+/// кроме системной зарплаты из CRM, уже внесены. Нулевая аренда не создаётся:
+/// собственное помещение — нормальный сценарий, а не фиктивный расход.
+model ExpensePeriodDeclaration {
+  id                String           @id @default(cuid())
+  tenantId          String
+  actionExecutionId String?
+  declaredById      String?
+  periodFromDay     String
+  periodToDay       String
+  declarationEpoch  Int?
+  idempotencyKey    String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  declaredBy        User?            @relation("ExpensePeriodDeclarer", fields: [declaredById], references: [id], onDelete: SetNull)
+  actionExecution   ActionExecution? @relation("ExpensePeriodDeclarationActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([actionExecutionId, tenantId])
+  @@unique([tenantId, periodFromDay, periodToDay])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, periodFromDay, periodToDay])
+}
+
+/// Append-only boundary between two current expense-period declaration
+/// generations. The invalidated declaration row may be physically deleted,
+/// so its id and canonical ActionExecution remain as immutable evidence here.
+model ExpensePeriodDeclarationInvalidation {
+  id                                      String   @id @default(uuid())
+  tenantId                                String
+  periodFromDay                           String
+  periodToDay                             String
+  invalidatedDeclarationId                String
+  invalidatedDeclarationActionExecutionId String
+  invalidationActionExecutionId           String
+  previousDeclarationEpoch                Int
+  nextDeclarationEpoch                    Int
+  reasonCode                              String
+  createdAt                               DateTime @default(now())
+
+  tenant                                Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade, map: "ExpensePeriodInvalidation_tenant_fkey")
+  invalidatedDeclarationActionExecution ActionExecution @relation("ExpensePeriodInvalidatedDeclarationExecution", fields: [invalidatedDeclarationActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ExpensePeriodInvalidation_decl_exec_fkey")
+  invalidationActionExecution           ActionExecution @relation("ExpensePeriodInvalidationExecution", fields: [invalidationActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ExpensePeriodInvalidation_action_exec_fkey")
+
+  @@unique([id, tenantId], map: "ExpensePeriodInvalidation_id_tenant_key")
+  @@unique([tenantId, invalidatedDeclarationActionExecutionId], map: "ExpensePeriodInvalidation_decl_exec_key")
+  @@unique([tenantId, periodFromDay, periodToDay, nextDeclarationEpoch], map: "ExpensePeriodInvalidation_period_epoch_key")
+  @@unique([tenantId, invalidationActionExecutionId, invalidatedDeclarationId], map: "ExpensePeriodInvalidation_action_decl_key")
+  @@index([tenantId, periodFromDay, periodToDay, nextDeclarationEpoch], map: "ExpensePeriodInvalidation_period_epoch_idx")
 }
 
 model AiApprovalRequest {
@@ -587,6 +1874,9 @@ model AiApprovalRequest {
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, status, expiresAt])
   @@index([tenantId, requestedByUserId, createdAt])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  expenseIntakeBinding ExpenseIntakeBinding[] @relation("R13_intake_approval")
 }
 
 model AiToolExecution {
@@ -617,6 +1907,98 @@ model AiToolExecution {
   @@index([tenantId, toolName, createdAt])
   @@index([tenantId, actorUserId, createdAt])
   @@index([tenantId, status, startedAt])
+}
+
+/// Bounded, structured state for one Maya Brain conversation. Raw messages and
+/// chain-of-thought are deliberately never persisted.
+model AiBrainSession {
+  id             String     @id @default(cuid())
+  tenantId       String
+  actorUserId    String
+  sessionKeyHash String
+  surface        String
+  profile        String
+  intent         String
+  status         String     @default("active")
+  planJson       Json       @default("{}")
+  lastRequestId  String
+  turnCount      Int        @default(0)
+  expiresAt      DateTime
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  tenant         Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membership     Membership @relation(fields: [actorUserId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, actorUserId, sessionKeyHash])
+  @@index([tenantId, expiresAt])
+  @@index([tenantId, actorUserId, updatedAt])
+}
+
+/// Encrypted, bounded notes explicitly saved by an authenticated person with
+/// the "REMEMBER" command. Secrets and personal/contact data are rejected.
+model AiMemoryFact {
+  id             String     @id @default(cuid())
+  tenantId       String
+  subjectUserId  String
+  scope          String
+  key            String
+  encryptedValue String
+  valueHash      String
+  source         String
+  confidence     Int
+  retentionDays  Int
+  expiresAt      DateTime
+  deletedAt      DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  tenant         Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membership     Membership @relation(fields: [subjectUserId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, subjectUserId, scope, key])
+  @@index([tenantId, subjectUserId, expiresAt])
+  @@index([tenantId, expiresAt, deletedAt])
+}
+
+/// Tenant-owned knowledge source. Titles and body chunks are encrypted; only
+/// opaque identifiers and aggregate metadata cross audit boundaries.
+model AiKnowledgeSource {
+  id                String             @id @default(cuid())
+  tenantId          String
+  createdByUserId   String?
+  createdByTenantId String?
+  encryptedTitle    String
+  sourceType        String
+  locale            String             @default("ru-RU")
+  status            String             @default("active")
+  audienceRolesJson Json               @default("[]")
+  contentHash       String
+  effectiveAt       DateTime           @default(now())
+  expiresAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy         User?              @relation("AiKnowledgeSourceCreator", fields: [createdByUserId, createdByTenantId], references: [id, tenantId], onDelete: SetNull)
+  chunks            AiKnowledgeChunk[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, contentHash])
+  @@index([tenantId, status, effectiveAt])
+  @@index([tenantId, expiresAt])
+}
+
+model AiKnowledgeChunk {
+  id               String            @id @default(cuid())
+  tenantId         String
+  sourceId         String
+  ordinal          Int
+  encryptedContent String
+  contentHash      String
+  createdAt        DateTime          @default(now())
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source           AiKnowledgeSource @relation(fields: [sourceId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([sourceId, tenantId, ordinal])
+  @@index([tenantId, sourceId])
 }
 
 model InternalProviderService {
@@ -728,6 +2110,7 @@ model TenantEntitlement {
 model BillingPayment {
   id                String            @id @default(cuid())
   tenantId          String
+  actionExecutionId String?
   planId            String?
   provider          String            @default("yookassa")
   providerPaymentId String?           @unique
@@ -745,57 +2128,1921 @@ model BillingPayment {
   updatedAt         DateTime          @updatedAt
   tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   plan              SubscriptionPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  actionExecution   ActionExecution?  @relation("BillingPaymentActionExecution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([id, tenantId])
+  @@unique([actionExecutionId, tenantId])
   @@index([tenantId, createdAt])
   @@index([tenantId, status])
   @@index([provider, providerPaymentId])
 }
 
+/// Область действия записи аудита.
+///
+/// Различие ЗАЯВЛЯЕТСЯ, а не выводится из того, заполнена ли колонка
+/// арендатора. Платформенное действие (вход владельца платформы, создание или
+/// удаление арендатора) не принадлежит никакому арендатору, и подделывать ему
+/// принадлежность через служебного арендатора нельзя: тогда платформенные
+/// записи попали бы в историю чужого салона.
+enum AuditScope {
+  tenant
+  platform
+}
+
+/// Идентичность клиента внутри Maya.
+///
+/// 🔴 До этого её не существовало вовсе: внешний id клиента адаптер вычислял и
+/// ВЫБРАСЫВАЛ, а единственным ключом сопоставления был телефон. Отсюда три
+/// следствия — смена номера рвала историю атрибуции (subjectRef считается от
+/// телефона), дубли карточек в CRM были неразрешимы, а смена CRM обнуляла
+/// связь с прошлым.
+///
+/// Якорь намеренно почти пустой: имя, визиты, суммы и прайс остаются во внешней
+/// системе. Вторую CRM внутри Maya не строим. Личность существует и для гостя
+/// без аккаунта — таких в салоне большинство.
+model Client {
+  measurementRevisions MeasurementRevision[] @relation("C7ClientMeasurement")
+  consentInvalidations ClientConsentInvalidation[]
+  bulkAudienceMembers MarketingAudienceRecipient[]
+  bulkRecipients MarketingCampaignRecipient[]
+  bookingConfirmations ClientBookingConfirmation[]
+  actionIdempotencyBindings ActionExecutionIdempotencyBinding[]
+  id                 String   @id @default(cuid())
+  tenantId           String
+  /// Аккаунт Maya, если человек им обзавёлся.
+  userId             String?
+  /// HMAC от последних десяти цифр номера — того же ключа, по которому идёт всё
+  /// сопоставление сегодня. Сам номер здесь не хранится.
+  ///
+  /// НЕ идентичность и НЕ уникален: семья на один номер — обычное дело, и
+  /// склеивать таких людей нельзя. Это индекс кандидатов, не более.
+  phoneHash          String?
+  /// Терминальное состояние погашенного дубля, как UserStatus.merged.
+  mergedIntoClientId String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tenant       Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  /// 🔴 Ссылка СОСТАВНАЯ. Одноколоночная позволяла погасить клиента в пользу
+  /// клиента ЧУЖОГО арендатора — межарендное слияние на уровне базы.
+  mergedInto   Client?         @relation("ClientMerge", fields: [mergedIntoClientId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction)
+  mergedFrom   Client[]        @relation("ClientMerge")
+  crmLinks     CrmClientLink[]
+  appointments Appointment[]
+  loyaltyAccounts LoyaltyAccount[]
+  loyaltyRedemptionGrants LoyaltyRedemptionGrant[]
+  referralsAsReferrer CustomerReferral[] @relation("ReferralReferrer")
+  referralsAsReferred CustomerReferral[] @relation("ReferralReferredClient")
+  referralRewards ReferralReward[] @relation("ReferralRewardRecipient")
+  customerSubscriptions CustomerSubscription[]
+  customerProfiles CustomerProfile[]
+  consentFacts ClientConsentFact[]
+  channelLinks ClientChannelLink[]
+  linkChallenges ClientLinkChallenge[]
+  wantedSlotInterests ClientWantedSlotInterest[]
+  webPushEndpoints ClientWebPushEndpoint[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, phoneHash])
+  @@index([tenantId, userId])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  nativeFeedbackRequests NativeFeedbackRequest[] @relation("R08_request_client")
+  nativeFeedbackRevisions NativeFeedbackRevision[] @relation("R08_revision_client")
+}
+
+/// Привязка карточки внешней CRM к идентичности Maya.
+///
+/// Провайдер входит в ключ намеренно: без него смена CRM отдала бы историю
+/// чужой карточке с совпавшим номером.
+model CrmClientLink {
+  id         String    @id @default(cuid())
+  tenantId   String
+  clientId   String
+  provider   String
+  externalId String
+  /// Когда карточку в последний раз видели живой в CRM.
+  syncedAt   DateTime  @default(now())
+  /// Карточка исчезла или заархивирована во внешней системе. Строка ОСТАЁТСЯ:
+  /// история Maya не должна пропадать вместе с записью провайдера.
+  unlinkedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  /// Составной ключ: строка связи не может указывать на клиента другого
+  /// арендатора. То самое правило миграции strict_tenant_relations.
+  client Client @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, provider, externalId])
+  @@index([tenantId, clientId])
+  @@index([tenantId, provider, syncedAt])
+}
+
+/// Approved A18 V1: one verified binding episode, independent of Maya User.
+/// Active subject uniqueness and immutable verification history are enforced
+/// by the additive PostgreSQL migration, including a partial unique index.
+model ClientChannelLink {
+  consentInvalidations ClientConsentInvalidation[]
+  bookingConfirmations ClientBookingConfirmation[]
+  id                       String   @id @default(uuid())
+  tenantId                 String
+  clientId                 String
+  provider                 String
+  providerSubjectHash      String
+  deliveryAddressEncrypted String?
+  subjectHashVersion       Int      @default(1)
+  verificationMethod       String
+  verificationVersion      Int      @default(1)
+  verificationIdentityHash String
+  verificationEvidenceJson Json
+  verificationEvidenceHash String
+  verifiedAt               DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+  createdAt                DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+  supersedesLinkId          String?  @unique
+  revokedAt                DateTime?
+  revocationIdentityHash   String?
+  revocationEvidenceJson   Json?
+  revocationEvidenceHash   String?
+
+  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  client     Client             @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  predecessor ClientChannelLink? @relation("ClientChannelLinkHistory", fields: [supersedesLinkId, tenantId, provider, providerSubjectHash], references: [id, tenantId, provider, providerSubjectHash], onDelete: Restrict, onUpdate: Restrict, map: "ClientChannelLink_predecessor_fkey")
+  successors ClientChannelLink[] @relation("ClientChannelLinkHistory")
+  consumedChallenges ClientLinkChallenge[] @relation("ClientLinkChallengeOutcome")
+  wantedSlotInterests ClientWantedSlotInterest[]
+  webPushEndpoints ClientWebPushEndpoint[]
+
+  @@unique([id, tenantId])
+  @@unique([id, tenantId, clientId], map: "ClientChannelLink_client_reference_key")
+  @@unique([id, tenantId, provider, providerSubjectHash], map: "ClientChannelLink_identity_reference_key")
+  @@unique([tenantId, verificationIdentityHash], map: "ClientChannelLink_verification_identity_key")
+  @@unique([tenantId, revocationIdentityHash], map: "ClientChannelLink_revocation_identity_key")
+  @@index([tenantId, clientId])
+}
+
+/// B24 V1: immutable encrypted delivery episode, never Client identity.
+/// SQL guards enforce verified ownership, terminal lifecycle and the active cap.
+model ClientWebPushEndpoint {
+  id                       String    @id @default(uuid())
+  tenantId                 String
+  clientId                 String
+  clientChannelLinkId      String
+  endpointHash             String
+  hashVersion              Int       @default(1)
+  subscriptionEncrypted    String
+  materialHash             String
+  registrationIdentityHash String
+  policyVersion            Int       @default(1)
+  createdAt                DateTime  @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+  registrationEvidenceJson Json
+  registrationEvidenceHash String
+  supersedesEndpointId     String?   @unique
+  endedAt                  DateTime?
+  endReason                String?
+  terminationIdentityHash  String?   @unique
+  terminationEvidenceJson  Json?
+  terminationEvidenceHash  String?
+
+  tenant            Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  client            Client                  @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  clientChannelLink ClientChannelLink       @relation(fields: [clientChannelLinkId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict)
+  predecessor       ClientWebPushEndpoint?  @relation("WebPushEpisode", fields: [supersedesEndpointId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict)
+  successors        ClientWebPushEndpoint[] @relation("WebPushEpisode")
+
+  @@unique([id, tenantId, clientId])
+  @@unique([tenantId, registrationIdentityHash])
+  @@index([tenantId, clientId, endedAt, createdAt, id])
+  @@index([endpointHash])
+}
+
+/// Approved after 84696bc9: Client-bound, single-use challenge; TTL V1 = 600s.
+/// Immutable issuance and correlated atomic consumption are guarded in SQL.
+model ClientLinkChallenge {
+  id                   String   @id @default(uuid())
+  tenantId             String
+  clientId             String
+  tokenHash            String
+  tokenHashVersion     Int      @default(1)
+  policyVersion        Int      @default(1)
+  issuedAt             DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+  expiresAt            DateTime
+  issuanceEvidenceJson Json
+  issuanceEvidenceHash String
+  consumedAt           DateTime?
+  consumedLinkId       String?  @unique
+  consumedProvider     String?
+  consumedSubjectHash  String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  client Client @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  consumedLink ClientChannelLink? @relation("ClientLinkChallengeOutcome", fields: [consumedLinkId, tenantId, consumedProvider, consumedSubjectHash], references: [id, tenantId, provider, providerSubjectHash], onDelete: Restrict, onUpdate: Restrict, map: "ClientLinkChallenge_outcome_fkey")
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, tokenHash])
+  @@index([tenantId, clientId])
+  @@index([tenantId, expiresAt])
+}
+
+/// Мастер салона глазами Maya — идентичность, не зависящая ни от подключённой
+/// CRM, ни от наличия аккаунта.
+///
+/// 🔴 До этой модели идентичность мастера существовала ДВАЖДЫ: InternalProvider
+/// для внутреннего календаря и CrmStaffAccess.externalStaffId для CRM. Второе
+/// вдобавок было ключом выдачи роли и отзыва сессий, то есть правом входа
+/// распоряжался идентификатор из чужой системы.
+///
+/// Различитель источников — не поле, а структура: у внутреннего мастера НЕТ ни
+/// одной StaffProviderLink.
+model Staff {
+  measurementRevisions MeasurementRevision[] @relation("C7StaffMeasurement")
+  id                   String   @id @default(cuid())
+  tenantId             String
+  /// Аккаунт Maya, если человек им обзавёлся.
+  ///
+  /// 🔴 SetNull, а не Cascade (в отличие от InternalProvider): идентичность
+  /// мастера переживает удаление аккаунта, иначе вместе с ним уходит история.
+  ///
+  /// 🔴 Связи с Membership здесь СОЗНАТЕЛЬНО нет — как и у Client. Составной FK
+  /// на Membership(userId, tenantId) даёт ON DELETE CASCADE, то есть снятие
+  /// членства стирало бы саму идентичность мастера вместе с его историей.
+  /// Принадлежность арендатору держит tenantId и @@unique([tenantId, userId]);
+  /// членство проверяет приложение.
+  userId               String?
+  branchId             String?
+  /// Имя шифруется ВСЕГДА. InternalProvider хранил его открытым, CrmStaffAccess
+  /// зашифрованным; объединение поднимает планку до строгой из двух.
+  ///
+  /// Phase A: nullable, потому что шифровать средствами Postgres нечем — ключ у
+  /// приложения. Заполняется backfill-скриптом, NOT NULL ставится на CUTOVER.
+  encryptedDisplayName String?
+  title                String?
+  specialization       String?
+  avatarUrl            String?
+  active               Boolean  @default(true)
+  /// Шаг сетки записи — свойство внутреннего календаря.
+  slotIntervalMinutes  Int      @default(30)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  tenant        Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  branch        Branch?             @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  providerLinks StaffProviderLink[]
+  accessGrant   CrmStaffAccess?
+  appointments  Appointment[]
+  wantedSlotInterests ClientWantedSlotInterest[]
+
+  /// 🔴 Цель составных внешних ключей: ссылка не может указать на мастера
+  /// чужого арендатора.
+  @@unique([id, tenantId])
+  @@unique([tenantId, userId])
+  @@index([tenantId, active])
+  @@index([branchId])
+}
+
+/// Связь мастера Maya с его карточкой у провайдера. Зеркало CrmClientLink.
+model ClientWantedSlotInterest {
+  id                            String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  tenantId                      String
+  clientId                      String
+  branchId                      String
+  staffId                       String
+  desiredStartAt                DateTime
+  expiresAt                     DateTime  @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+  matchToleranceMinutes         Int       @default(0)
+  status                        String    @default("ACTIVE")
+  createdByActionExecutionId    String
+  lastMutationActionExecutionId String?
+  sourceChannelLinkId           String
+  matchedSourceEventId          String?
+  matchedAt                     DateTime?
+  notifiedAt                    DateTime?
+  terminalAt                    DateTime?
+  createdAt                     DateTime  @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+  updatedAt                     DateTime  @updatedAt
+
+  tenant                Tenant            @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "ClientWantedSlotInterest_tenant_fkey")
+  client                Client            @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ClientWantedSlotInterest_client_fkey")
+  branch                Branch            @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ClientWantedSlotInterest_branch_fkey")
+  staff                 Staff             @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ClientWantedSlotInterest_staff_fkey")
+  sourceChannelLink     ClientChannelLink @relation(fields: [sourceChannelLinkId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict, map: "ClientWantedSlotInterest_channel_fkey")
+  createdByExecution    ActionExecution   @relation("ClientWantedSlotCreateExecution", fields: [createdByActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ClientWantedSlotInterest_create_execution_fkey")
+  lastMutationExecution ActionExecution?  @relation("ClientWantedSlotMutationExecution", fields: [lastMutationActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "ClientWantedSlotInterest_mutation_execution_fkey")
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, createdByActionExecutionId], map: "ClientWantedSlotInterest_tenant_createExecution_key")
+  @@unique([tenantId, lastMutationActionExecutionId], map: "ClientWantedSlotInterest_tenant_mutationExecution_key")
+  @@index([tenantId, clientId, status, expiresAt], map: "ClientWantedSlotInterest_client_active_idx")
+  @@index([tenantId, branchId, staffId, desiredStartAt, status], map: "ClientWantedSlotInterest_match_idx")
+  @@index([tenantId, status, createdAt, id], map: "ClientWantedSlotInterest_order_idx")
+}
+
+/// Связь мастера Maya с его карточкой у провайдера. Зеркало CrmClientLink.
+
+model StaffProviderLink {
+  id         String    @id @default(cuid())
+  tenantId   String
+  staffId    String
+  /// 🔴 Провайдер входит в ключ намеренно. Без него смена CRM отдала бы права
+  /// нового человека старому при совпадении числового id — ровно та дыра,
+  /// которую нашёл анализ гейта.
+  provider   String
+  externalId String
+  /// Когда карточку в последний раз видели живой в составе команды.
+  syncedAt   DateTime  @default(now())
+  /// Карточка исчезла у провайдера или CRM отключили. Строка ОСТАЁТСЯ:
+  /// история Maya не должна пропадать вместе с записью чужой системы.
+  unlinkedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  staff  Staff  @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, provider, externalId])
+  @@index([tenantId, staffId])
+  @@index([tenantId, provider, syncedAt])
+  @@index([tenantId, provider, externalId, unlinkedAt])
+}
+
+/// Правило рассылок арендатора.
+///
+/// 🔴 Модель восстановлена по ФАКТИЧЕСКОЙ структуре боевой базы (цикл 02-R):
+/// три миграции 14.08 были применены к проду и утеряны, файлов не существует
+/// нигде. Поля, типы, значения по умолчанию и связи взяты из прода дословно.
+/// Прикладной смысл по именам НЕ додумывался: ни один сервис в эту таблицу не
+/// пишет, бизнес-логика маркетинга относится к главе 6.
+model MarketingPolicy {
+  canonicalHistoryStartedAt DateTime?
+  tenantId               String   @id
+  provider               String   @default("yclients_sms")
+  enabled                Boolean  @default(false)
+  dailyRecipientLimit    Int      @default(500)
+  monthlyRecipientLimit  Int      @default(5000)
+  maxCampaignRecipients  Int      @default(500)
+  maxCampaignCostKopecks Int?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime
+  tenant                 Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+/// Получатель в составе аудитории. Восстановлено по боевой структуре, 02-R.
+model MarketingAudienceRecipient {
+  clientId String?
+  client Client? @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "B35_audience_client_fkey")
+  id                String            @id
+  tenantId          String
+  audienceId        String
+  externalClientId  String
+  internalUserId    String?
+  eligibilityStatus String
+  exclusionReason   String?
+  consentSource     String?
+  consentRecordedAt DateTime?
+  metricsJson       Json?
+  createdAt         DateTime          @default(now())
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  audience          MarketingAudience @relation(fields: [audienceId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, audienceId, clientId], map: "B35_audience_client_key")
+  @@index([tenantId, clientId], map: "B35_audience_client_idx")
+  @@unique([tenantId, audienceId, externalClientId], map: "MarketingAudienceRecipient_tenantId_audienceId_externalClientId")
+  @@index([tenantId, audienceId, eligibilityStatus], map: "MarketingAudienceRecipient_tenantId_audienceId_eligibilityStatu")
+}
+
+/// Получатель в составе кампании. Восстановлено по боевой структуре, 02-R.
+model MarketingCampaignRecipient {
+  clientId String?
+  routePlanJson Json?
+  contentEncrypted String?
+  aggregateState CommunicationCampaignState?
+  client Client? @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "B35_recipient_client_fkey")
+  transportSlots MarketingCampaign[] @relation("B35TransportParent")
+  id                       String                      @id
+  tenantId                 String
+  campaignId               String
+  externalClientId         String
+  internalUserId           String?
+  idempotencyKey           String
+  status                   String                      @default("QUEUED")
+  attemptCount             Int                         @default(0)
+  nextAttemptAt            DateTime?
+  acceptedAt               DateTime?
+  deliveredAt              DateTime?
+  failedAt                 DateTime?
+  providerMessageId        String?
+  providerStatus           String?
+  lastErrorCode            String?
+  createdAt                DateTime                    @default(now())
+  updatedAt                DateTime
+  lifecycleVersion         Int                         @default(0)
+  identityVersion          Int?
+  recipientKind            String?
+  recipientRefHash         String?
+  contentIdentityHash      String?
+  deliveryState            CommunicationDeliveryState?
+  externalDispatchState    ExternalDispatchState?
+  reconciliationState      ActionReconciliationState?
+  eligibilityBasis         String?
+  eligibilityDecision      String?
+  eligibilityPolicyVersion Int?
+  eligibilityEvidenceRef   String?
+  eligibilityEvidenceHash  String?
+  eligibilityCheckedAt     DateTime?
+  consentEvidenceId        String?
+  leaseOwner               String?
+  leaseTokenHash           String?
+  leaseExpiresAt           DateTime?
+  revision                 Int                         @default(0)
+  dispatchedAt             DateTime?
+  responseReceivedAt       DateTime?
+  unknownAt                DateTime?
+  terminalAt               DateTime?
+  terminalReasonCode       String?
+  payloadRetentionUntil    DateTime?
+  auditRetentionUntil      DateTime?
+  tenant                   Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaign                 MarketingCampaign           @relation(fields: [campaignId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  internalMembership       Membership?                 @relation("CommunicationRecipientMembership", fields: [internalUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+  consentEvidence          MarketingConsentEvidence?   @relation(fields: [consentEvidenceId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  deliveryAttempts         MarketingDeliveryAttempt[]
+
+  @@unique([tenantId, campaignId, clientId], map: "B35_bulk_client_key")
+  @@index([tenantId, clientId, createdAt, id], map: "B35_recipient_client_history_idx")
+  @@unique([id, tenantId])
+  @@unique([id, tenantId, campaignId])
+  @@unique([tenantId, idempotencyKey])
+  @@unique([tenantId, campaignId, externalClientId], map: "MarketingCampaignRecipient_tenantId_campaignId_externalClientId")
+  @@index([tenantId, campaignId, status, nextAttemptAt], map: "MarketingCampaignRecipient_tenantId_campaignId_status_nextAttem")
+  @@index([tenantId, campaignId, deliveryState, nextAttemptAt])
+  @@index([tenantId, reconciliationState, leaseExpiresAt])
+}
+
+/// Свидетельство согласия. Восстановлено по боевой структуре, 02-R.
+model MarketingConsentEvidence {
+  id               String                       @id
+  tenantId         String
+  externalClientId String
+  channel          String
+  status           String
+  source           String
+  evidenceRef      String?
+  grantedAt        DateTime?
+  revokedAt        DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime                     @default(now())
+  updatedAt        DateTime
+  tenant           Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  recipients       MarketingCampaignRecipient[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, externalClientId, channel], map: "MarketingConsentEvidence_tenantId_externalClientId_channel_key")
+  @@index([tenantId, channel, status])
+}
+
+/// Попытка доставки. Восстановлено по боевой структуре, 02-R.
+model MarketingDeliveryAttempt {
+  dispatchEligibilityJson Json?
+  id                          String                      @id
+  tenantId                    String
+  campaignId                  String
+  recipientId                 String?
+  batchKey                    String
+  attemptNumber               Int
+  status                      String
+  httpStatus                  Int?
+  providerResponseCode        String?
+  errorCode                   String?
+  startedAt                   DateTime                    @default(now())
+  completedAt                 DateTime?
+  createdAt                   DateTime                    @default(now())
+  lifecycleVersion            Int                         @default(0)
+  kind                        ActionAttemptKind?
+  state                       ActionAttemptState?
+  externalDispatchState       ExternalDispatchState?
+  providerRequestIdentityHash String?
+  providerIdempotencyKeyHash  String?
+  providerReferenceEncrypted  String?
+  providerReferenceHash       String?
+  outcomeCode                 String?
+  retryDecisionCode           String?
+  reconciliationRequired      Boolean?
+  dispatchedAt                DateTime?
+  responseReceivedAt          DateTime?
+  payloadRetentionUntil       DateTime?
+  tenant                      Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaign                    MarketingCampaign           @relation(fields: [campaignId, tenantId], references: [id, tenantId], onDelete: Cascade)
+  recipient                   MarketingCampaignRecipient? @relation(fields: [recipientId, tenantId, campaignId], references: [id, tenantId, campaignId], onDelete: Cascade)
+
+  @@unique([tenantId, recipientId, attemptNumber])
+  @@index([tenantId, campaignId, createdAt])
+  @@index([tenantId, recipientId, attemptNumber])
+  @@index([tenantId, state, startedAt])
+  @@index([tenantId, providerReferenceHash])
+}
+
 model AuditLog {
-  id           String   @id @default(cuid())
-  tenantId     String
+  id           String     @id @default(cuid())
+  /// Инвариант, который держит CHECK в базе (AuditLog_scope_tenant_check):
+  ///   scope = tenant   ⟺ tenantId IS NOT NULL
+  ///   scope = platform ⟺ tenantId IS NULL
+  /// Состояния взаимоисключающие и исчерпывающие — третьего нет. Поэтому
+  /// арендаторной записи без арендатора не существует, а платформенная не
+  /// может нести tenantId и попасть в выборку салона.
+  scope        AuditScope @default(tenant)
+  tenantId     String?
   userId       String?
   action       String
   entityType   String
   entityId     String
   metadataJson Json?
-  createdAt    DateTime @default(now())
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+  /// Записи арендатора уходят вместе с ним. Платформенные переживают удаление:
+  /// «платформа удалила арендатора» обязано жить дольше самого арендатора.
+  tenant       Tenant?    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([tenantId])
   @@index([userId])
+  @@index([scope, createdAt])
+  /// Журнал арендатора читается по времени, а не целиком.
+  @@index([tenantId, createdAt])
 }
 
 model Appointment {
-  id                String     @id @default(cuid())
+  measurementRevisions MeasurementRevision[] @relation("C7AppointmentMeasurement")
+  id                String   @id @default(cuid())
   tenantId          String
-  clientId          String
+  /**
+   * 🔴 АККАУНТ, а не клиент бизнеса.
+   * Доказано данными в B3: у всех 18 боевых визитов здесь стоял ОДИН и тот же
+   * пользователь — владелец салона, потому что строка появляется, когда
+   * вошедший аккаунт открывает «Мои записи». Поле отвечает на вопрос «в чьём
+   * кабинете это видно», а не «кто пришёл стричься».
+   * Стало опциональным: у записи салона, сделанной по телефону или с виджета,
+   * аккаунта Maya нет и быть не должно. Бизнес-клиент живёт в `mayaClientId`.
+   */
+  clientId          String?
+  /**
+   * 🔴 КЛИЕНТ БИЗНЕСА — идентичность Maya из главы 2.
+   * Разрешается через `CrmClientLink` по внешнему идентификатору клиента у
+   * провайдера. По телефону НЕ склеивается: совпадение номера доказательством
+   * тождества не является.
+   * Переходное имя. Целевое состояние — переименовать аккаунтное поле в
+   * `accountUserId`, а это в `clientId`; массовое переименование сейчас стоило
+   * бы правок в 47 местах ради ясности, поэтому вынесено отдельным шагом.
+   */
+  mayaClientId      String?
+  /// Maya-local Client choice, independent of provider facts and later defaults.
+  clientVisitMood   String?
   branchId          String?
   crmExternalId     String?
-  source            String     @default("external")
+  /// 🔴 Cycle 03 B1. Провайдер, у которого живёт `crmExternalId`.
+  ///
+  /// Ключ визита обязан быть КВАЛИФИЦИРОВАН провайдером: голое равенство
+  /// внешних идентификаторов уже приводило к тому, что права одного человека
+  /// доставались другому (глава 2). Число `12345` у YCLIENTS и у Altegio —
+  /// разные записи.
+  ///
+  /// Заполнено ⟺ заполнен `crmExternalId`; это держит CHECK в базе, иначе
+  /// половина ключа с NULL молча отключила бы уникальность.
+  crmProvider       String?
+  source            String   @default("external")
   staffExternalId   String
   serviceIds        Json
   startAt           DateTime
   endAt             DateTime
   blockedStartAt    DateTime
   blockedEndAt      DateTime
-  status            String     @default("confirmed")
+  status            String   @default("confirmed")
+  /**
+   * 🔴 Cycle 03 B3.3. Присутствие клиента — канон главы 2
+   * (`awaiting | arrived | no_show | confirmed_by_client`).
+   * NULL означает «Maya НЕ получила доказанного значения»: либо не спрашивали,
+   * либо провайдер поля не прислал. Это НЕ `awaiting`.
+   * Различие не косметическое. `awaiting` — утверждение провайдера «отметки
+   * ещё нет»; NULL — отсутствие утверждения. Смешав их, зеркало заявляло бы
+   * знание, которого у него нет, а компаратор выпускал бы события о переходах,
+   * которых не было. Поэтому переход NULL → значение событием не является:
+   * это первое наблюдение, а не изменение.
+   * Существующие 1940 строк получают NULL и наполняются первым проходом
+   * сверки: значение берётся у провайдера, а миграция к сети не ходит.
+   */
+  attendance        String?
   notes             String?
   totalPriceKopecks Int?
-  currency          String     @default("RUB")
+  currency          String   @default("RUB")
   providerPayload   Json?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  tenant            Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  client            User       @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
-  clientMembership  Membership @relation("ClientMembershipAppointments", fields: [clientId, tenantId], references: [userId, tenantId], onDelete: Cascade)
-  branch            Branch?    @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  /// 🔴 Phase A. Однозначная идентичность мастера внутри Maya. Пока nullable.
+  staffId           String?
+  staff             Staff?   @relation(fields: [staffId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  /// Удаление аккаунта не стирает факт визита салона: остаётся история бизнеса.
+  client            User?    @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: SetNull)
+  /**
+   * 🔴 Клиент бизнеса. `Restrict`, а не `SetNull`: идентичность клиента,
+   * у которого есть визиты, не удаляется молча. Это сильнее сохраняет историю,
+   * чем обнуление ссылки, и совпадает с правилом для мастера.
+   */
+  mayaClient        Client?  @relation(fields: [mayaClientId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  branch            Branch?  @relation(fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  referralRewardFulfillments ReferralRewardFulfillment[]
 
+  @@unique([id, tenantId])
   @@unique([id, tenantId, clientId])
+  /// 🔴 Одна запись CRM — одна строка Maya. До Cycle 03 уникальности не было
+  /// вовсе, а поиск шёл в пределах КЛИЕНТА: два независимых пути приёма
+  /// создавали два визита на одну запись, и база этому не мешала.
+  @@unique([tenantId, crmProvider, crmExternalId])
+  @@index([tenantId, mayaClientId])
+  @@index([tenantId, staffId, startAt])
   @@index([tenantId])
   @@index([clientId])
   @@index([branchId])
   @@index([tenantId, staffExternalId, startAt])
+  /// Показ недели без фильтра по мастеру: составной выше неприменим
+  /// (staffExternalId — вторая колонка), а GiST построен по blockedStartAt.
+  /// Без этого читались все записи арендатора за всю историю.
+  @@index([tenantId, startAt])
+
+  // Wave R-C Option A: approved owner bindings and relations.
+  @@unique([id, tenantId, mayaClientId], map: "Appointment_id_tenantId_mayaClientId_key")
+  nativeFeedbackRequests NativeFeedbackRequest[] @relation("R08_request_appointment")
+}
+
+/// Канонический факт бизнеса, замеченный Maya.
+///
+/// 🔴 Что это НЕ такое. Не копия CRM, не сообщение получателю, не след
+/// действия пользователя. Все три уже есть (`Appointment`, `InboxItem`,
+/// `AuditLog`) и ни один не отвечает на вопрос «что изменилось и откуда мы это
+/// знаем»: у первых двух нет даже отличия «когда произошло» от «когда узнали».
+///
+/// 🔴 Событие означает: Maya получила ДОСТАТОЧНОЕ ДОКАЗАТЕЛЬСТВО изменения.
+/// Повторное чтение того же состояния событием не является — за это отвечает
+/// `dedupFingerprint`.
+model DomainEvent {
+  id       String @id @default(cuid())
+  tenantId String
+
+  /// Канонический тип Maya: `appointment.created`, не `record.create`.
+  type    String
+  /// Версия контракта. Единственный механизм версионирования: номер живёт в
+  /// колонке, а не внутри имени, иначе по нему нельзя фильтровать.
+  version Int    @default(1)
+
+  entityType     String
+  /// Идентичность MAYA (`Appointment.id`, `Staff.id`, `Client.id`).
+  /// Внешний идентификатор сюда не кладётся никогда.
+  entityId       String
+  /// Порядок в пределах одной сущности. Глобального порядка Maya не обещает.
+  entitySequence Int?
+
+  /// Когда изменилось в бизнесе. Приходит из данных источника.
+  occurredAt  DateTime
+  /// Когда Maya приняла доставку. Совпадающим с `occurredAt` не считается:
+  /// доставки приходят пачками, а между создание и изменением записи проходят
+  /// десятки минут.
+  receivedAt  DateTime  @default(now())
+  /// Когда обработала. Отделено от факта: провал обработки не стирает факт.
+  processedAt DateTime?
+
+  /// Откуда: `yclients`, `internal_calendar`, `legacy_bot`.
+  source          String
+  /// Как узнали: `webhook` | `reconciliation` | `bootstrap`.
+  ingestionMethod String  @default("webhook")
+  /// Ссылка на сущность у источника. ПРОВЕНАНС, а не идентичность.
+  sourceRef       String?
+  /// `observed_existing` — найдено при первом взгляде на уже работающий салон;
+  /// `after_watch_started` — изменение после начала наблюдения.
+  observation     String  @default("after_watch_started")
+
+  /// Детерминированный отпечаток канонического состояния.
+  /// 🔴 Идентификатора события провайдер не даёт (доказано в Phase A), а один
+  /// timestamp отпечатком не является: два одинаковых чтения обязаны дать один
+  /// ключ, иначе дедупликации нет.
+  dedupFingerprint String
+  /// Минимальный факт, независимый от провайдера. Сырое тело сюда не попадает.
+  payload          Json
+
+  /// `pending` | `processing` | `processed` | `failed` | `dead`.
+  /// Приём и обработка — разные вещи: строка существует уже как принятый факт.
+  status     String    @default("pending")
+  attempts   Int       @default(0)
+  leaseUntil DateTime?
+  lastError  String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  /// Дедупликация живёт в БАЗЕ и переживает перезапуск. Внутри арендатора, а не
+  /// глобально: два салона с одинаковым номером записи не должны подавлять
+  /// друг друга.
+  @@unique([tenantId, dedupFingerprint])
+  @@index([tenantId, entityType, entityId, occurredAt])
+  @@index([status, leaseUntil])
+  @@index([tenantId, type, occurredAt])
+  @@index([tenantId, receivedAt])
+}
+
+/// Доставка, которую Maya приняла, но НЕ ПОНЯЛА.
+///
+/// 🔴 Почему отдельная таблица, а не статус события. У карантина нет ни типа,
+/// ни сущности — значит прочитать его как факт невозможно ПО ПОСТРОЕНИЮ. Пока
+/// смысл доставки неизвестен, доменного события из неё не возникает.
+///
+/// Повод: за неделю 221 доставка (треть потока) не распознавалась вовсе и
+/// выбрасывалась молча.
+model IngestionQuarantine {
+  id            String   @id @default(cuid())
+  /// Может быть НЕ определён: «арендатор не разрешён» — законная причина
+  /// карантина, и запись об этом нужна.
+  tenantId      String?
+  source        String
+  /// Что удалось прочитать о типе доставки (`resource`/`status`), если удалось.
+  discriminator String?
+  /// Детерминированный отпечаток — чтобы повтор не плодил строки.
+  fingerprint   String
+  receivedAt    DateTime @default(now())
+  /// `unknown_discriminator` | `tenant_unresolved` | `malformed` | `unsupported`.
+  reason        String
+  /// МИНИМУМ для разбора: имена полей и типы, неперсональные идентификаторы.
+  /// Ни имени, ни телефона, ни email — контур 152-ФЗ не ослабляется.
+  diagnostic    Json?
+  /// `open` | `explained` | `discarded`.
+  resolution    String   @default("open")
+  /// Срок хранения. Это диагностика, а не история: она обязана истекать.
+  expiresAt     DateTime
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([source, fingerprint])
+  @@index([receivedAt])
+  @@index([expiresAt])
+  @@index([tenantId, receivedAt])
+  @@index([resolution, receivedAt])
+}
+
+/// Прогон сверки зеркала визитов с источником (Cycle 03 B3.3).
+///
+/// 🔴 Зачем отдельная таблица, если есть `CrmIntegration.lastSyncAt`. Та метка
+/// отвечает на один вопрос — «когда последний раз что-то происходило», — и не
+/// отвечает ни на один из нужных: за какое окно смотрели, дочитали ли до конца,
+/// сколько нашли, не упало ли. Сверка, чей результат нельзя отличить от
+/// усечённого или упавшего, права объявлять что-либо исчезнувшим не имеет.
+///
+/// 🔴 Курсора здесь нет намеренно. Окно считается от «сейчас», а последний
+/// ПОЛНЫЙ проход находится запросом по этой же таблице. Состояние, которое
+/// выводится из данных, но хранится отдельно, — лишний источник расхождения.
+///
+/// 🔴 Здесь же живёт аренда (B3.4). Инвариант «живой прогон у пары арендатор +
+/// провайдер только один» держит ЧАСТИЧНЫЙ уникальный индекс, объявленный в
+/// миграции `20260818120000_reconciliation_lease`:
+///
+///   CREATE UNIQUE INDEX "ReconciliationRun_live_run_unique"
+///     ON "ReconciliationRun" ("tenantId", "provider")
+///     WHERE "finishedAt" IS NULL AND "failureCode" IS NULL;
+///
+/// Prisma частичные индексы в схеме не выражает, поэтому он существует только
+/// в SQL. Дрейфа это не создаёт — проверено `migrate diff`.
+model ReconciliationRun {
+  id       String @id @default(cuid())
+  tenantId String
+  provider String
+
+  windowFrom DateTime
+  windowTo   DateTime
+  startedAt  DateTime  @default(now())
+  /// NULL ⟺ прогон не завершился. Незавершённый выводов не даёт вовсе.
+  finishedAt DateTime?
+
+  /**
+   * `complete` | `truncated` — контракт полноты B3.0.
+   * Только `complete` двигает базовую линию наблюдения и даёт право на выводы
+   * об ОТСУТСТВИИ. По усечённой выборке отсутствие записи не означает ничего:
+   * её могло просто не хватить страниц.
+   */
+  completeness     String?
+  truncationReason String?
+
+  fetched       Int @default(0)
+  created       Int @default(0)
+  updated       Int @default(0)
+  unchanged     Int @default(0)
+  eventsEmitted Int @default(0)
+
+  failureCode    String?
+  failureMessage String?
+
+  /**
+   * 🔴 Cycle 03 B3.4. Аренда: до какого момента этот прогон считается живым.
+   * Процессной переменной недостаточно, и не в будущем, а сегодня: ручной
+   * запуск сверки — ОТДЕЛЬНЫЙ процесс, а во время выката старый процесс
+   * дорабатывает проход, пока новый уже стартовал. Булево поле в памяти об
+   * этом не знает и знать не может.
+   * Аренда не снимается, а ИСТЕКАЕТ. Процесс, умерший посреди прохода, не
+   * оставляет замок, который нужно снимать руками: следующий претендент видит
+   * просроченную аренду, закрывает брошенный прогон как упавший и начинает
+   * свой. Ручного вмешательства не требуется ни в одном сценарии.
+   */
+  leaseUntil DateTime?
+  /// Кто держит аренду. Провенанс для разбора, не идентичность.
+  holderId   String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, startedAt])
+  /// Поиск последнего ПОЛНОГО завершённого прогона — его нельзя перепутать
+  /// с усечённым или упавшим: оба отбираются этим же индексом по значению.
+  @@index([tenantId, completeness, finishedAt])
+}
+
+/// Durable envelope for one bounded, centrally versioned Package 5 retention
+/// or cleanup run. Platform-scope automatic runs do not fabricate a tenant
+/// ActionExecution; an explicit tenant command may bind one.
+model MaintenanceRun {
+  id                     String    @id @default(uuid())
+  scope                  String
+  tenantId               String?
+  runIdentityVersion     Int
+  runIdentityFingerprint String    @unique
+  maintenanceKind        String
+  subjectClass           String
+  policyKey              String
+  policyVersion          Int
+  cutoffAt               DateTime
+  maxItems               Int
+  batchSize              Int
+  cursorHash             String?
+  state                  String    @default("PLANNED")
+  leaseOwner             String?
+  leaseTokenHash         String?
+  leaseExpiresAt         DateTime?
+  authorityType          String
+  requestedByUserId      String?
+  approvedByUserId       String?
+  approvalBindingHash    String?
+  actionExecutionId      String?
+  attemptedCount         Int       @default(0)
+  succeededCount         Int       @default(0)
+  failedCount            Int       @default(0)
+  startedAt              DateTime?
+  finishedAt             DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  tenant       Tenant?          @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  requestedBy  User?            @relation("MaintenanceRunRequester", fields: [requestedByUserId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  approvedBy   User?            @relation("MaintenanceRunApprover", fields: [approvedByUserId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  execution    ActionExecution? @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  itemClaims   MaintenanceItemClaim[]
+
+  @@unique([id, scope])
+  @@index([tenantId, maintenanceKind, state, createdAt])
+  @@index([scope, state, leaseExpiresAt])
+  @@index([tenantId, actionExecutionId])
+}
+
+/// Restart-safe ownership and terminal result for one non-PII maintenance
+/// target within a bounded MaintenanceRun.
+model MaintenanceItemClaim {
+  id                String    @id @default(uuid())
+  maintenanceRunId  String
+  itemKind          String
+  itemRefHash       String
+  claimGeneration   Int       @default(0)
+  state             String    @default("CLAIMED")
+  outcomeCode       String?
+  claimedAt         DateTime  @default(now())
+  finishedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  run MaintenanceRun @relation(fields: [maintenanceRunId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([maintenanceRunId, itemKind, itemRefHash])
+  @@index([maintenanceRunId, state, claimedAt])
+}
+
+/// Consent-safe outreach fact used by MAYA Recovered attribution.
+/// `subjectRef` is a tenant-independent HMAC of the normalized phone; raw
+/// client identity is never persisted in this subsystem.
+model RecoveryTouchpoint {
+  id                    String               @id @default(cuid())
+  tenantId              String
+  externalEventId       String
+  subjectRef            String
+  kind                  String
+  channel               String
+  status                String
+  occurredAt            DateTime
+  attributionWindowDays Int                  @default(30)
+  createdAt             DateTime             @default(now())
+  tenant                Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversions           RecoveryConversion[]
+
+  @@unique([tenantId, externalEventId])
+  @@index([tenantId, occurredAt])
+  @@index([tenantId, subjectRef, occurredAt])
+}
+
+/// Booking attributed to an earlier MAYA touchpoint. Booked value and CRM
+/// confirmed cash are deliberately separate so reports cannot claim forecast
+/// money as received revenue.
+model RecoveryConversion {
+  id                      String             @id @default(cuid())
+  tenantId                String
+  touchpointId            String
+  externalBookingRef      String
+  crmExternalId           String?
+  subjectRef              String
+  bookedAt                DateTime
+  visitAt                 DateTime?
+  status                  String             @default("booked")
+  filledWindow            Boolean            @default(false)
+  bookedValueKopecks      Int?
+  confirmedRevenueKopecks Int?
+  currency                String             @default("RUB")
+  confirmedAt             DateTime?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  tenant                  Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  touchpoint              RecoveryTouchpoint @relation(fields: [touchpointId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, externalBookingRef])
+  @@index([tenantId, bookedAt])
+  @@index([tenantId, crmExternalId])
+  @@index([tenantId, subjectRef, bookedAt])
+}
+
+/// Consent-scoped audience snapshot. Recipient ids stay server-side and are
+/// never exposed to the language model or written into an approval preview.
+model MarketingAudience {
+  snapshotContract String?
+  id                   String              @id @default(cuid())
+  tenantId             String
+  createdByUserId      String
+  ruleJson             Json
+  recipientUserIdsJson Json
+  candidateCount       Int
+  eligibleCount        Int
+  unavailableCount     Int                 @default(0)
+  expiresAt            DateTime
+  createdAt            DateTime            @default(now())
+  /// Восстановлено по фактической боевой структуре, цикл 02-R.
+  provider             String              @default("yclients_sms")
+  status               String              @default("AUDIENCE_CALCULATED")
+  snapshotHash         String              @default("")
+  exclusionReasonsJson Json                @default("{}")
+  tenant               Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaigns            MarketingCampaign[]
+
+  recipients MarketingAudienceRecipient[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, expiresAt])
+}
+
+/// Immutable campaign preview followed by one idempotent, owner-approved send.
+/// The message is stored as business content; recipient identity remains an
+/// internal user id list and is revalidated against consent before delivery.
+model MarketingCampaign {
+  bulkIntentContract String?
+  bulkIntentHash String?
+  parentRecipientId String?
+  bulkSlotKey String?
+  parentRecipient MarketingCampaignRecipient? @relation("B35TransportParent", fields: [parentRecipientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "B35_transport_parent_fkey")
+  id                          String                      @id @default(cuid())
+  tenantId                    String
+  createdByUserId             String?
+  audienceId                  String?
+  channel                     String?                     @default("app")
+  status                      String                      @default("draft")
+  message                     String
+  recipientUserIdsJson        Json
+  recipientCount              Int
+  sentCount                   Int                         @default(0)
+  idempotencyKey              String?
+  expiresAt                   DateTime
+  sentAt                      DateTime?
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+  /// Двадцать две колонки восстановлены по фактической боевой структуре,
+  /// цикл 02-R. Прикладной смысл по именам не додумывался.
+  provider                    String?                     @default("yclients_sms")
+  audienceSnapshotHash        String                      @default("")
+  messageSnapshotHash         String                      @default("")
+  confirmationHash            String?
+  confirmedAt                 DateTime?
+  confirmedByUserId           String?
+  costEstimateKopecks         Int?
+  costEstimateStatus          String                      @default("unavailable")
+  costCurrency                String                      @default("RUB")
+  scheduledFor                DateTime?
+  queuedAt                    DateTime?
+  startedAt                   DateTime?
+  completedAt                 DateTime?
+  cancelledAt                 DateTime?
+  leaseOwner                  String?
+  leaseExpiresAt              DateTime?
+  retryCount                  Int                         @default(0)
+  lastErrorCode               String?
+  acceptedCount               Int                         @default(0)
+  failedCount                 Int                         @default(0)
+  skippedCount                Int                         @default(0)
+  unknownCount                Int                         @default(0)
+  lifecycleVersion            Int                         @default(0)
+  scope                       CommunicationScope?
+  actionExecutionId           String?
+  aggregateState              CommunicationCampaignState?
+  contentRef                  String?
+  deliveryCapabilityKey       String?
+  deliveryCapabilityVersion   Int?
+  retryPolicyKey              String?
+  retryPolicyVersion          Int?
+  reconciliationPolicyKey     String?
+  reconciliationPolicyVersion Int?
+  leaseTokenHash              String?
+  revision                    Int                         @default(0)
+  payloadRetentionUntil       DateTime?
+  auditRetentionUntil         DateTime?
+  tenant                      Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actionExecution             ActionExecution?            @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  audience                    MarketingAudience?          @relation(fields: [audienceId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  creatorMembership           Membership?                 @relation("CommunicationCreator", fields: [createdByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+  approverMembership          Membership?                 @relation("CommunicationApprover", fields: [confirmedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict)
+
+  recipients MarketingCampaignRecipient[]
+
+  deliveryAttempts MarketingDeliveryAttempt[]
+
+  @@unique([tenantId, parentRecipientId, bulkSlotKey], map: "B35_recipient_slot_key")
+  @@unique([tenantId, idempotencyKey])
+  @@unique([id, tenantId])
+  @@unique([actionExecutionId, tenantId])
+  @@index([tenantId, status, createdAt])
+  @@index([tenantId, audienceId])
+  @@index([tenantId, aggregateState, scheduledFor, leaseExpiresAt])
+  @@index([status, leaseExpiresAt, queuedAt])
+  @@index([status, scheduledFor, leaseExpiresAt])
+}
+
+/// Persistent in-app MAYA inbox (message of record for reports / alerts).
+/// Telegram and push only announce; this row survives app restarts.
+model InboxItem {
+  id            String    @id @default(cuid())
+  tenantId      String
+  userId        String
+  operationalWorkItemId String?
+  /// daily_report | morning_brief | growth_plan | new_appointment |
+  /// shift_reminder | appointment_reassigned | hanging_lead | owner_alert
+  type          String
+  sourceEventId String
+  title         String
+  bodyText      String
+  payloadJson   Json?
+  deepLink      String?
+  createdAt     DateTime  @default(now())
+  readAt        DateTime?
+  archivedAt    DateTime?
+  deletedAt     DateTime?
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  operationalWorkItem OperationalWorkItem? @relation(fields: [operationalWorkItemId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, userId, type, sourceEventId])
+  @@index([tenantId, userId, createdAt])
+  @@index([tenantId, type, createdAt])
+  @@index([tenantId, operationalWorkItemId])
+}
+
+/// Canonical business aggregate for Package 5 operational tasks and support
+/// requests. InboxItem is only a presentation/delivery projection.
+model OperationalWorkItem {
+  id                        String   @id @default(uuid())
+  tenantId                  String
+  kind                      String
+  assigneeUserId            String
+  createdByUserId           String?
+  title                     String
+  bodyText                  String
+  dueAt                     DateTime?
+  status                    String   @default("OPEN")
+  createActionExecutionId   String
+  completeActionExecutionId String?
+  completedAt               DateTime?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignee          Membership       @relation("OperationalWorkItemAssignee", fields: [assigneeUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  creator           Membership?      @relation("OperationalWorkItemCreator", fields: [createdByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  createExecution   ActionExecution  @relation("OperationalWorkItemCreateExecution", fields: [createActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  completeExecution ActionExecution? @relation("OperationalWorkItemCompleteExecution", fields: [completeActionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  inboxItems         InboxItem[]
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, createActionExecutionId])
+  @@unique([tenantId, completeActionExecutionId])
+  @@index([tenantId, assigneeUserId, status, dueAt])
+  @@index([tenantId, kind, status, createdAt])
+}
+
+/// Native / web push device tokens for inbox announcements.
+model DevicePushToken {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  /// ios | android | web
+  platform  String
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, token])
+  @@index([tenantId, userId])
+}
+
+/// B33: immutable source receipt accepted before booking interpretation; no backfill.
+model ClientBookingConfirmation {
+  id                       String   @id
+  tenantId                 String
+  clientId                 String
+  clientChannelLinkId      String
+  actionNamespace          String
+  confirmationEvidenceJson Json
+  confirmationEvidenceHash String
+  acceptedAt               DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  client Client @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  clientChannelLink ClientChannelLink @relation(fields: [clientChannelLinkId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict, map: "ClientBookingConfirmation_link_fkey")
+
+  @@index([tenantId, clientId])
+}
+
+/// B36 immutable staff/business report. Delivery state belongs to existing A12 executions.
+model OwnerReportRun {
+  id String @id @default(uuid())
+  tenantId String
+  reportType String
+  periodLocalDate String
+  reportVersion Int
+  timezone String
+  intentHash String
+  intentEncrypted String?
+  admittedAt DateTime
+  expiresAt DateTime
+  payloadRetentionUntil DateTime
+  auditRetentionUntil DateTime
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "B36_report_tenant_fkey")
+  executions ActionExecution[]
+
+  @@unique([tenantId, reportType, periodLocalDate, reportVersion], map: "B36_report_identity_key")
+  @@unique([id, tenantId], map: "B36_report_tenant_key")
+  @@index([tenantId, expiresAt], map: "B36_report_resume_idx")
+  @@index([payloadRetentionUntil], map: "B36_report_payload_retention_idx")
+  @@index([auditRetentionUntil], map: "B36_report_audit_retention_idx")
+}
+
+/// R08 Option A. Prospective canonical owner; no historical backfill.
+model NativeFeedbackRequest {
+  id String @id @default(uuid())
+  tenantId String
+  clientId String
+  appointmentId String
+  requestedByUserId String
+  requestExecutionId String
+  requestIdentityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  contractVersion Int
+  eligibleAt DateTime @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  contentHash String @db.Char(64)
+  contentEncrypted String?
+  planHash String @db.Char(64)
+  planEncrypted String?
+  state String
+  revision Int
+  latestResponseVersion Int
+  createdAt DateTime @db.Timestamptz(3)
+  closedAt DateTime? @db.Timestamptz(3)
+  payloadErasedAt DateTime? @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R08_NativeFeedbackRequest_tenant_uq")
+  tenant Tenant @relation("R08_NativeFeedbackRequest_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R08_NativeFeedbackRequest_tenant_fk")
+  @@unique([tenantId, requestIdentityHash], map: "R08_request_identity_uq")
+  @@unique([tenantId, appointmentId, clientId], map: "R08_request_appointment_uq")
+  @@unique([id, tenantId, clientId], map: "R08_request_client_uq")
+  client Client @relation("R08_request_client", fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_request_client_fk")
+  appointment Appointment @relation("R08_request_appointment", fields: [appointmentId, tenantId, clientId], references: [id, tenantId, mayaClientId], onDelete: Restrict, onUpdate: Restrict, map: "R08_request_appointment_fk")
+  requesterMembership Membership @relation("R08_request_member", fields: [requestedByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_request_member_fk")
+  requestExecution ActionExecution @relation("R08_request_execution", fields: [requestExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_request_execution_fk")
+  @@index([tenantId, retentionUntil], map: "R08_request_retention_idx")
+  revisions NativeFeedbackRevision[] @relation("R08_revision_request")
+  deliveries ActionExecution[] @relation("R08_execution_request")
+}
+
+/// R08 Option A. Prospective canonical owner; no historical backfill.
+model NativeFeedbackRevision {
+  id String @id @default(uuid())
+  tenantId String
+  requestId String
+  clientId String
+  executionId String
+  identityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  version Int
+  kind String
+  rating Int?
+  commentEncrypted String?
+  contentHash String @db.Char(64)
+  planHash String @db.Char(64)
+  planEncrypted String?
+  createdAt DateTime @db.Timestamptz(3)
+  payloadErasedAt DateTime? @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R08_NativeFeedbackRevision_tenant_uq")
+  tenant Tenant @relation("R08_NativeFeedbackRevision_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R08_NativeFeedbackRevision_tenant_fk")
+  @@unique([tenantId, requestId, version], map: "R08_revision_version_uq")
+  @@unique([tenantId, requestId, identityHash], map: "R08_revision_identity_uq")
+  @@unique([id, tenantId, requestId], map: "R08_revision_request_uq")
+  request NativeFeedbackRequest @relation("R08_revision_request", fields: [requestId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict, map: "R08_revision_request_fk")
+  client Client @relation("R08_revision_client", fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_revision_client_fk")
+  execution ActionExecution @relation("R08_revision_execution", fields: [executionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R08_revision_execution_fk")
+  deliveries ActionExecution[] @relation("R08_execution_revision")
+}
+
+/// R09 Option A. Prospective canonical owner; no historical backfill.
+model PublicCommunityComment {
+  id String @id @default(uuid())
+  tenantId String
+  publicationKey String
+  parentCommentId String?
+  sourceKind String
+  visitorSubjectHash String? @db.Char(64)
+  identityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  authorEncrypted String?
+  textEncrypted String?
+  contentHash String @db.Char(64)
+  consentPolicyVersion String?
+  consentAcceptedAt DateTime? @db.Timestamptz(3)
+  status String
+  revision Int
+  createdAt DateTime @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  payloadErasedAt DateTime? @db.Timestamptz(3)
+  creationExecutionId String?
+  sourceGatewayId String
+  lastModerationExecutionId String?
+  @@unique([id, tenantId], map: "R09_PublicCommunityComment_tenant_uq")
+  tenant Tenant @relation("R09_PublicCommunityComment_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R09_PublicCommunityComment_tenant_fk")
+  @@unique([tenantId, sourceGatewayId, identityHash], map: "R09_comment_identity_uq")
+  parent PublicCommunityComment? @relation("R09_comment_parent", fields: [parentCommentId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R09_comment_parent_fk")
+  children PublicCommunityComment[] @relation("R09_comment_parent")
+  creationExecution ActionExecution? @relation("R09_comment_creation", fields: [creationExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R09_comment_creation_fk")
+  lastModerationExecution ActionExecution? @relation("R09_comment_moderation", fields: [lastModerationExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R09_comment_moderation_fk")
+  @@index([tenantId, publicationKey, status, createdAt], map: "R09_comment_feed_idx")
+  @@index([retentionUntil], map: "R09_comment_retention_idx")
+}
+
+/// R09 Option A. Prospective canonical owner; no historical backfill.
+model PublicCommunityInteraction {
+  id String @id @default(uuid())
+  tenantId String
+  publicationKey String
+  kind String
+  visitorSubjectHash String @db.Char(64)
+  identityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  expectedVersion Int
+  version Int
+  desiredValue Boolean?
+  viewDay DateTime? @db.Date
+  receivedAt DateTime @db.Timestamptz(3)
+  sourceGatewayId String
+  contractVersion Int
+  payloadHash String @db.Char(64)
+  @@unique([id, tenantId], map: "R09_PublicCommunityInteraction_tenant_uq")
+  tenant Tenant @relation("R09_PublicCommunityInteraction_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R09_PublicCommunityInteraction_tenant_fk")
+  @@unique([tenantId, sourceGatewayId, identityHash], map: "R09_interaction_identity_uq")
+  @@unique([tenantId, sourceGatewayId, publicationKey, visitorSubjectHash, kind, version], map: "R09_interaction_version_uq")
+}
+
+/// R12 Option A. Prospective canonical owner; no historical backfill.
+model TeamMessage {
+  id String @id @default(uuid())
+  tenantId String
+  conversationKey String
+  senderUserId String
+  sendExecutionId String
+  identityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  payloadEncrypted String?
+  payloadHash String @db.Char(64)
+  attachmentId String?
+  createdAt DateTime @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  withdrawnAt DateTime? @db.Timestamptz(3)
+  withdrawnByUserId String?
+  withdrawalExecutionId String?
+  withdrawalIdentityHash String? @db.Char(64)
+  withdrawalIntentHash String? @db.Char(64)
+  revision Int
+  planHash String @db.Char(64)
+  planEncrypted String?
+  payloadErasedAt DateTime? @db.Timestamptz(3)
+  status String
+  @@unique([id, tenantId], map: "R12_TeamMessage_tenant_uq")
+  tenant Tenant @relation("R12_TeamMessage_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R12_TeamMessage_tenant_fk")
+  @@unique([tenantId, conversationKey, senderUserId, identityHash], map: "R12_message_identity_uq")
+  @@unique([attachmentId, tenantId, senderUserId], map: "R12_message_attachment_uq")
+  @@unique([tenantId, sendExecutionId], map: "R12_message_send_uq")
+  @@unique([tenantId, withdrawalExecutionId], map: "R12_message_withdraw_uq")
+  senderMembership Membership @relation("R12_message_sender", fields: [senderUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_message_sender_fk")
+  withdrawerMembership Membership? @relation("R12_message_withdrawer", fields: [withdrawnByUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_message_withdrawer_fk")
+  sendExecution ActionExecution @relation("R12_message_send", fields: [sendExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_message_send_fk")
+  withdrawalExecution ActionExecution? @relation("R12_message_withdraw", fields: [withdrawalExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_message_withdraw_fk")
+  attachment TeamAttachment? @relation("R12_message_attachment", fields: [attachmentId, tenantId, senderUserId], references: [id, tenantId, ownerUserId], onDelete: Restrict, onUpdate: Restrict, map: "R12_message_attachment_fk")
+  @@index([tenantId, conversationKey, createdAt], map: "R12_message_feed_idx")
+  @@index([expiresAt], map: "R12_message_retention_idx")
+  deliveries ActionExecution[] @relation("R12_execution_message")
+}
+
+/// R12 Option A. Prospective canonical owner; no historical backfill.
+model TeamAttachment {
+  id String @id @default(uuid())
+  tenantId String
+  ownerUserId String
+  reserveExecutionId String
+  finalizeExecutionId String?
+  uploadIdentityHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  objectStoreKey String
+  contentSha256 String @db.Char(64)
+  declaredSize BigInt
+  actualSize BigInt?
+  mime String
+  kind String
+  filenameEncrypted String?
+  state String
+  revision Int
+  createdAt DateTime @db.Timestamptz(3)
+  uploadExpiresAt DateTime @db.Timestamptz(3)
+  mediaExpiresAt DateTime? @db.Timestamptz(3)
+  storageReceiptHash String? @db.Char(64)
+  payloadErasedAt DateTime? @db.Timestamptz(3)
+  lastObservedAt DateTime? @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R12_TeamAttachment_tenant_uq")
+  tenant Tenant @relation("R12_TeamAttachment_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R12_TeamAttachment_tenant_fk")
+  @@unique([tenantId, ownerUserId, uploadIdentityHash], map: "R12_attachment_identity_uq")
+  @@unique([objectStoreKey], map: "R12_attachment_object_uq")
+  @@unique([id, tenantId, ownerUserId], map: "R12_attachment_owner_uq")
+  ownerMembership Membership @relation("R12_attachment_member", fields: [ownerUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_attachment_member_fk")
+  reserveExecution ActionExecution @relation("R12_attachment_reserve", fields: [reserveExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_attachment_reserve_fk")
+  finalizeExecution ActionExecution? @relation("R12_attachment_finalize", fields: [finalizeExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R12_attachment_finalize_fk")
+  @@index([tenantId, uploadExpiresAt], map: "R12_attachment_upload_idx")
+  @@index([mediaExpiresAt], map: "R12_attachment_retention_idx")
+  message TeamMessage? @relation("R12_message_attachment")
+}
+
+/// R11 Option A. Prospective canonical owner; no historical backfill.
+model TenantBusinessConfigurationRevision {
+  id String @id @default(uuid())
+  tenantId String
+  namespace String
+  revision Int
+  previousRevisionId String?
+  actionExecutionId String
+  actorUserId String
+  actorMembershipId String
+  contractVersion Int
+  contentHash String @db.Char(64)
+  encryptedContent String?
+  createdAt DateTime @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R11_TenantBusinessConfigurationRevision_tenant_uq")
+  tenant Tenant @relation("R11_TenantBusinessConfigurationRevision_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R11_TenantBusinessConfigurationRevision_tenant_fk")
+  @@unique([tenantId, namespace, revision], map: "R11_config_version_uq")
+  @@unique([tenantId, actionExecutionId], map: "R11_config_execution_uq")
+  actorMembership Membership @relation("R11_config_member", fields: [actorMembershipId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R11_config_member_fk")
+  execution ActionExecution @relation("R11_config_execution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R11_config_execution_fk")
+  previousRevision TenantBusinessConfigurationRevision? @relation("R11_config_previous", fields: [previousRevisionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R11_config_previous_fk")
+  nextRevisions TenantBusinessConfigurationRevision[] @relation("R11_config_previous")
+}
+
+/// R14 Option A. Prospective canonical owner; no historical backfill.
+model CashDeclaration {
+  id String @id @default(uuid())
+  tenantId String
+  branchId String
+  businessDay String @db.Char(10)
+  timezone String
+  countedAt DateTime @db.Timestamptz(3)
+  currency String @db.Char(3)
+  countedCashKopecks Int?
+  declarationKind String
+  revision Int
+  previousDeclarationId String?
+  actionExecutionId String
+  declaredByUserId String
+  declaredByMembershipId String
+  contractVersion Int
+  intentHash String @db.Char(64)
+  encryptedReason String?
+  createdAt DateTime @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R14_CashDeclaration_tenant_uq")
+  tenant Tenant @relation("R14_CashDeclaration_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R14_CashDeclaration_tenant_fk")
+  @@unique([tenantId, branchId, businessDay, revision], map: "R14_cash_version_uq")
+  @@unique([tenantId, actionExecutionId], map: "R14_cash_execution_uq")
+  branch Branch @relation("R14_cash_branch", fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R14_cash_branch_fk")
+  declarerMembership Membership @relation("R14_cash_member", fields: [declaredByMembershipId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R14_cash_member_fk")
+  execution ActionExecution @relation("R14_cash_execution", fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R14_cash_execution_fk")
+  previousDeclaration CashDeclaration? @relation("R14_cash_previous", fields: [previousDeclarationId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R14_cash_previous_fk")
+  nextDeclarations CashDeclaration[] @relation("R14_cash_previous")
+}
+
+/// R13 Option A. Prospective canonical owner; no historical backfill.
+model ExpenseReminderRun {
+  id String @id @default(uuid())
+  tenantId String
+  reminderType String
+  periodStartLocalDate String @db.Char(10)
+  periodEndLocalDate String @db.Char(10)
+  contractVersion Int
+  timezone String
+  intentHash String @db.Char(64)
+  intentEncrypted String?
+  admittedAt DateTime @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  payloadRetentionUntil DateTime @db.Timestamptz(3)
+  auditRetentionUntil DateTime @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R13_ExpenseReminderRun_tenant_uq")
+  tenant Tenant @relation("R13_ExpenseReminderRun_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R13_ExpenseReminderRun_tenant_fk")
+  @@unique([tenantId, reminderType, periodStartLocalDate, periodEndLocalDate], map: "R13_reminder_identity_uq")
+  @@index([tenantId, expiresAt], map: "R13_reminder_resume_idx")
+  @@index([payloadRetentionUntil], map: "R13_reminder_retention_idx")
+  executions ActionExecution[] @relation("R13_execution_reminder")
+}
+
+/// R13 Option A. Prospective canonical owner; no historical backfill.
+model ExpenseIntakeBinding {
+  id String @id @default(uuid())
+  tenantId String
+  actorUserId String
+  actorMembershipId String
+  authIdentityId String
+  sourceNamespace String
+  sourceEventHash String @db.Char(64)
+  itemIndex Int
+  sourceItemCount Int
+  sourceContentHash String @db.Char(64)
+  reminderRunId String?
+  reminderSlotKey String?
+  approvalRequestId String
+  createdAt DateTime @db.Timestamptz(3)
+  auditRetentionUntil DateTime @db.Timestamptz(3)
+  @@unique([id, tenantId], map: "R13_ExpenseIntakeBinding_tenant_uq")
+  tenant Tenant @relation("R13_ExpenseIntakeBinding_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R13_ExpenseIntakeBinding_tenant_fk")
+  @@unique([tenantId, sourceNamespace, sourceEventHash, itemIndex], map: "R13_intake_source_uq")
+  @@unique([tenantId, approvalRequestId], map: "R13_intake_approval_uq")
+  actorMembership Membership @relation("R13_intake_member", fields: [actorMembershipId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R13_intake_member_fk")
+  authIdentity AuthIdentity @relation("R13_intake_identity", fields: [authIdentityId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R13_intake_identity_fk")
+  approval AiApprovalRequest @relation("R13_intake_approval", fields: [approvalRequestId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "R13_intake_approval_fk")
+  reminderExecution ActionExecution? @relation("R13_intake_slot", fields: [tenantId, reminderRunId, reminderSlotKey], references: [tenantId, expenseReminderRunId, expenseReminderSlotKey], onDelete: Restrict, onUpdate: Restrict, map: "R13_intake_slot_fk")
+}
+
+/// R06 Option A. Prospective canonical owner; no historical backfill.
+model OperationalAlertRun {
+  id String @id @default(uuid())
+  tenantId String
+  alertType String
+  occurrenceRef String
+  contractVersion Int
+  occurredAt DateTime
+  intentHash String
+  intentEncrypted String?
+  admittedAt DateTime
+  expiresAt DateTime
+  payloadRetentionUntil DateTime
+  auditRetentionUntil DateTime
+  @@unique([id, tenantId], map: "R06_OperationalAlertRun_tenant_uq")
+  tenant Tenant @relation("R06_OperationalAlertRun_tenant", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "R06_OperationalAlertRun_tenant_fk")
+  @@unique([tenantId, alertType, occurrenceRef, contractVersion], map: "R06_alert_identity_uq")
+  @@index([tenantId, expiresAt], map: "R06_alert_resume_idx")
+  @@index([payloadRetentionUntil], map: "R06_alert_payload_idx")
+  @@index([auditRetentionUntil], map: "R06_alert_audit_idx")
+  executions ActionExecution[] @relation("R06_execution_run")
+}
+
+/// A18 security fact. Client revoke != security invalidation. No historical backfill.
+model ClientConsentInvalidation {
+  id                    String   @id @default(uuid())
+  tenantId              String
+  clientId              String
+  consentFactId         String
+  invalidatedLinkId     String
+  actionExecutionId     String
+  authorizedByUserId    String
+  reasonCode            String
+  policyVersion         Int
+  evidenceSetHash       String
+  authorityEvidenceJson Json
+  invalidatedAt         DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  client Client @relation(fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  fact ClientConsentFact @relation(fields: [consentFactId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict)
+  link ClientChannelLink @relation(fields: [invalidatedLinkId, tenantId, clientId], references: [id, tenantId, clientId], onDelete: Restrict, onUpdate: Restrict)
+  execution ActionExecution @relation(fields: [actionExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict)
+  authorizedBy User @relation(fields: [authorizedByUserId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([tenantId, consentFactId])
+  @@unique([consentFactId, tenantId, clientId], map: "ConsentInvalidation_fact_reference_key")
+  @@index([tenantId, clientId, invalidatedAt])
+  @@index([tenantId, actionExecutionId])
+}
+
+/// C7 derived measurements. Source facts and business effects remain with their owners.
+model MeasurementRevision {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String
+  kind String
+  identityHash String @db.Char(64)
+  revision Int
+  requestKeyHash String @db.Char(64)
+  intentHash String @db.Char(64)
+  ruleKey String
+  ruleVersion Int
+  clientId String?
+  appointmentId String?
+  staffId String?
+  branchId String?
+  configurationUserId String?
+  periodFrom DateTime @db.Timestamptz(3)
+  periodTo DateTime @db.Timestamptz(3)
+  timezone String
+  scopeJson Json
+  asOf DateTime @db.Timestamptz(3)
+  admittedAt DateTime @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  state String @default("PENDING")
+  leaseGeneration Int @default(0)
+  leaseTokenHash String? @db.Char(64)
+  leaseExpiresAt DateTime? @db.Timestamptz(3)
+  publishedAt DateTime? @db.Timestamptz(3)
+  contractVersion Int @default(1)
+  evidenceHash String? @db.Char(64)
+  snapshotHash String? @db.Char(64)
+  completeness String?
+  qualification String?
+  evidenceRefsJson Json?
+  valuesJson Json?
+  limitationsJson Json?
+  attributionStatus String?
+  creditedExecutionId String?
+  creditedAttemptId String?
+
+  tenant Tenant @relation("C7TenantMeasurement", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_tenant_fk")
+  client Client? @relation("C7ClientMeasurement", fields: [clientId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_client_fk")
+  appointment Appointment? @relation("C7AppointmentMeasurement", fields: [appointmentId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_appointment_fk")
+  staff Staff? @relation("C7StaffMeasurement", fields: [staffId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_staff_fk")
+  branch Branch? @relation("C7BranchMeasurement", fields: [branchId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_branch_fk")
+  configurationOwner Membership? @relation("C7MembershipMeasurement", fields: [configurationUserId, tenantId], references: [userId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_config_owner_fk")
+  creditedExecution ActionExecution? @relation("C7ActionExecutionMeasurement", fields: [creditedExecutionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_execution_fk")
+  creditedAttempt ActionAttempt? @relation("C7ActionAttemptMeasurement", fields: [creditedAttemptId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C7_measurement_attempt_fk")
+
+  @@unique([id, tenantId], map: "C7_measurement_id_tenant_uq")
+  @@unique([tenantId, identityHash, revision], map: "C7_measurement_generation_uq")
+  @@unique([tenantId, requestKeyHash], map: "C7_measurement_request_uq")
+  @@index([tenantId, kind, periodFrom, periodTo], map: "C7_measurement_period_idx")
+  @@index([tenantId, clientId, kind, asOf], map: "C7_measurement_client_idx")
+  @@index([tenantId, staffId, kind, asOf], map: "C7_measurement_staff_idx")
+  @@index([expiresAt, id], map: "C7_measurement_expiry_idx")
+  @@index([tenantId, creditedExecutionId], map: "C7_measurement_execution_idx")
+  @@index([tenantId, creditedAttemptId], map: "C7_measurement_attempt_idx")
+}
+
+
+model C8ModelVersion {
+  id                     String   @id @db.Uuid
+  tenantId               String
+  modelKey               String
+  version                Int
+  contractVersion        Int
+  manifestHash           String   @db.Char(64)
+  artifactHash           String   @db.Char(64)
+  featureContractHash    String   @db.Char(64)
+  evaluationContractHash String   @db.Char(64)
+  targetKey              String
+  targetJson             Json     @db.JsonB
+  scopeJson              Json     @db.JsonB
+  methodJson             Json     @db.JsonB
+  parametersJson         Json     @db.JsonB
+  trainingEvidenceJson   Json     @db.JsonB
+  informationCutoffAt    DateTime @db.Timestamptz(3)
+  trainingMode           String
+  releaseDigest          String   @db.Char(64)
+  requestKeyHash         String   @db.Char(64)
+  intentHash             String   @db.Char(64)
+  admittedAt             DateTime @db.Timestamptz(3)
+  expiresAt              DateTime @db.Timestamptz(3)
+  tenant                 Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C8_model_tenant_fk")
+
+  @@unique([id, tenantId], map: "C8_model_id_tenant_uq")
+  @@unique([tenantId, modelKey, version], map: "C8_model_version_uq")
+  @@unique([tenantId, requestKeyHash], map: "C8_model_request_uq")
+  @@unique([tenantId, manifestHash], map: "C8_model_manifest_uq")
+  @@index([tenantId, targetKey, admittedAt], map: "C8_model_target_idx")
+  @@index([expiresAt, id], map: "C8_model_expiry_idx")
+}
+
+model C8ResultRevision {
+  id                String    @id @db.Uuid
+  tenantId          String
+  kind              String
+  subjectKind       String
+  subjectId         String
+  identityHash      String    @db.Char(64)
+  revision          Int
+  intentHash        String    @db.Char(64)
+  contractVersion   Int
+  ruleKey           String
+  ruleVersion       Int
+  modelVersionId    String?   @db.Uuid
+  modelManifestHash String?   @db.Char(64)
+  policyRevisionId  String
+  policyContentHash String    @db.Char(64)
+  t0                DateTime  @db.Timestamptz(3)
+  horizonEnd        DateTime? @db.Timestamptz(3)
+  periodFrom        DateTime  @db.Timestamptz(3)
+  periodTo          DateTime  @db.Timestamptz(3)
+  timezone          String
+  scopeJson         Json      @db.JsonB
+  basis             String
+  currency          String?
+  inputHash         String    @db.Char(64)
+  inputSnapshotJson Json      @db.JsonB
+  evidenceRefsJson  Json      @db.JsonB
+  completeness      String
+  qualification     String
+  eligibility       String
+  admittedAt        DateTime  @db.Timestamptz(3)
+  expiresAt         DateTime  @db.Timestamptz(3)
+  state             String
+  leaseGeneration   Int
+  leaseTokenHash    String?   @db.Char(64)
+  leaseExpiresAt    DateTime? @db.Timestamptz(3)
+  publishedAt       DateTime? @db.Timestamptz(3)
+  snapshotHash      String?   @db.Char(64)
+  valuesJson        Json?     @db.JsonB
+  uncertaintyJson   Json?     @db.JsonB
+  reasonsJson       Json?     @db.JsonB
+  rankingJson       Json?     @db.JsonB
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C8_result_tenant_fk")
+
+  @@unique([id, tenantId], map: "C8_result_id_tenant_uq")
+  @@unique([tenantId, identityHash, revision], map: "C8_result_revision_uq")
+  @@unique([tenantId, intentHash], map: "C8_result_intent_uq")
+  @@index([tenantId, subjectKind, subjectId, t0], map: "C8_result_subject_idx")
+  @@index([tenantId, kind, periodFrom, periodTo], map: "C8_result_period_idx")
+  @@index([tenantId, state, leaseExpiresAt], map: "C8_result_claim_idx")
+  @@index([expiresAt, id], map: "C8_result_expiry_idx")
+  @@index([tenantId, modelVersionId], map: "C8_result_model_idx")
+}
+
+model C8EvaluationRevision {
+  id                     String    @id @db.Uuid
+  tenantId               String
+  modelVersionId         String    @db.Uuid
+  modelManifestHash      String    @db.Char(64)
+  identityHash           String    @db.Char(64)
+  revision               Int
+  intentHash             String    @db.Char(64)
+  contractVersion        Int
+  evaluationContractHash String    @db.Char(64)
+  mode                   String
+  targetKey              String
+  scopeJson              Json      @db.JsonB
+  t0From                 DateTime  @db.Timestamptz(3)
+  t0To                   DateTime  @db.Timestamptz(3)
+  labelsAsOf             DateTime  @db.Timestamptz(3)
+  admittedAt             DateTime  @db.Timestamptz(3)
+  expiresAt              DateTime  @db.Timestamptz(3)
+  state                  String
+  leaseGeneration        Int
+  leaseTokenHash         String?   @db.Char(64)
+  leaseExpiresAt         DateTime? @db.Timestamptz(3)
+  publishedAt            DateTime? @db.Timestamptz(3)
+  snapshotHash           String?   @db.Char(64)
+  casesJson              Json      @db.JsonB
+  evidenceHash           String    @db.Char(64)
+  countsJson             Json      @db.JsonB
+  metricsJson            Json?     @db.JsonB
+  calibrationJson        Json?     @db.JsonB
+  driftJson              Json?     @db.JsonB
+  outcome                String?
+  reasonsJson            Json?     @db.JsonB
+  tenant                 Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C8_eval_tenant_fk")
+
+  @@unique([id, tenantId], map: "C8_eval_id_tenant_uq")
+  @@unique([tenantId, identityHash, revision], map: "C8_eval_revision_uq")
+  @@unique([tenantId, intentHash], map: "C8_eval_intent_uq")
+  @@index([tenantId, modelVersionId, t0From, t0To], map: "C8_eval_period_idx")
+  @@index([tenantId, state, leaseExpiresAt], map: "C8_eval_claim_idx")
+  @@index([expiresAt, id], map: "C8_eval_expiry_idx")
+}
+
+/// Chapter 9 approved shared derived foundation; never a source business owner.
+model C9Run {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String
+  contractVersion Int
+  principalJson Json @db.JsonB
+  authorityHash String @db.Char(64)
+  requestKeyHash String @db.Char(64)
+  requestHash String @db.Char(64)
+  requestIntentJson Json @db.JsonB
+  entryKind String
+  entryRefJson Json? @db.JsonB
+  admittedAt DateTime @db.Timestamptz(3)
+  validUntil DateTime @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  state String
+  currentRevision Int
+  counterVersion Int
+  budgetManifestHash String @db.Char(64)
+  budgetManifestJson Json @db.JsonB
+  budgetStateJson Json @db.JsonB
+  reasoningUsedMs Int
+  reasoningWindowStartedAt DateTime? @db.Timestamptz(3)
+  reasoningWindowDeadlineAt DateTime? @db.Timestamptz(3)
+  leaseTokenHash String? @db.Char(64)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  leaseGeneration Int
+  cancelKeyHash String? @db.Char(64)
+  cancelledAt DateTime? @db.Timestamptz(3)
+  updatedAt DateTime @db.Timestamptz(3)
+
+  tenant Tenant @relation("C9Run_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C9Run_1_fkey")
+  c9StrategyRevisions C9StrategyRevision[] @relation("C9StrategyRevision_2_fkey")
+  c9WorkReceipts C9WorkReceipt[] @relation("C9WorkReceipt_2_fkey")
+
+  @@unique([id, tenantId], map: "C9Run_1_key")
+  @@unique([tenantId, requestKeyHash], map: "C9Run_2_key")
+  @@index([tenantId, state, validUntil, id], map: "C9Run_1_idx")
+  @@index([tenantId, retentionUntil, id], map: "C9Run_2_idx")
+}
+
+/// Chapter 9 approved shared derived foundation; never a source business owner.
+model C9StrategyRevision {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String
+  runId String @db.Uuid
+  revision Int
+  parentRevisionId String? @db.Uuid
+  editKeyHash String @db.Char(64)
+  inputHash String @db.Char(64)
+  snapshotHash String @db.Char(64)
+  state String
+  proposalContract String
+  registryHash String @db.Char(64)
+  skillVersionsJson Json @db.JsonB
+  objectiveJson Json @db.JsonB
+  constraintsJson Json @db.JsonB
+  alternativesJson Json @db.JsonB
+  evidenceRefsJson Json @db.JsonB
+  selectedOptionKey String?
+  reviewKeyHash String? @db.Char(64)
+  reviewHash String? @db.Char(64)
+  reviewActorJson Json? @db.JsonB
+  reviewedAt DateTime? @db.Timestamptz(3)
+  reviewDecision String?
+  admittedAt DateTime @db.Timestamptz(3)
+  validUntil DateTime @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  terminalReason String?
+  terminalAt DateTime? @db.Timestamptz(3)
+
+  tenant Tenant @relation("C9StrategyRevision_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C9StrategyRevision_1_fkey")
+  run C9Run @relation("C9StrategyRevision_2_fkey", fields: [runId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9StrategyRevision_2_fkey")
+  parentRevision C9StrategyRevision? @relation("C9StrategyRevision_3_fkey", fields: [parentRevisionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9StrategyRevision_3_fkey")
+  c9StrategyRevisions C9StrategyRevision[] @relation("C9StrategyRevision_3_fkey")
+  c9PlanSteps C9PlanStep[] @relation("C9PlanStep_2_fkey")
+  c9WorkReceipts C9WorkReceipt[] @relation("C9WorkReceipt_3_fkey")
+
+  @@unique([id, tenantId], map: "C9StrategyRevision_1_key")
+  @@unique([tenantId, runId, revision], map: "C9StrategyRevision_2_key")
+  @@unique([tenantId, runId, editKeyHash], map: "C9StrategyRevision_3_key")
+  @@index([tenantId, state, validUntil, id], map: "C9StrategyRevision_1_idx")
+}
+
+/// Chapter 9 approved shared derived foundation; never a source business owner.
+model C9PlanStep {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String
+  revisionId String @db.Uuid
+  optionKey String
+  stepKey String
+  ordinal Int
+  domain String
+  kind String
+  capability String
+  registryHash String @db.Char(64)
+  intentContract String
+  intentHash String @db.Char(64)
+  intentEncrypted String?
+  dependenciesJson Json @db.JsonB
+  evidenceRefsJson Json @db.JsonB
+  budgetSliceJson Json @db.JsonB
+  state String
+  leaseGeneration Int
+  leaseTokenHash String? @db.Char(64)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  admittedAt DateTime @db.Timestamptz(3)
+  validUntil DateTime @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  terminalAt DateTime? @db.Timestamptz(3)
+  stopReason String?
+  updatedAt DateTime @db.Timestamptz(3)
+
+  tenant Tenant @relation("C9PlanStep_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C9PlanStep_1_fkey")
+  strategyRevision C9StrategyRevision @relation("C9PlanStep_2_fkey", fields: [revisionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9PlanStep_2_fkey")
+  c9StepBindings C9StepBinding[] @relation("C9StepBinding_2_fkey")
+
+  @@unique([id, tenantId], map: "C9PlanStep_1_key")
+  @@unique([tenantId, revisionId, optionKey, stepKey], map: "C9PlanStep_2_key")
+  @@unique([tenantId, revisionId, optionKey, ordinal], map: "C9PlanStep_3_key")
+  @@index([tenantId, state, validUntil, id], map: "C9PlanStep_1_idx")
+}
+
+/// Chapter 9 approved shared derived foundation; never a source business owner.
+model C9StepBinding {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String
+  stepId String @db.Uuid
+  slotKey String
+  ownerKey String
+  bindingKind String
+  sourceType String
+  sourceId String
+  sourceIdentityHash String @db.Char(64)
+  sourceIntentHash String @db.Char(64)
+  sourceApprovalHash String? @db.Char(64)
+  lineageJson Json @db.JsonB
+  bindingHash String @db.Char(64)
+  boundAt DateTime @db.Timestamptz(3)
+  validUntil DateTime? @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+
+  tenant Tenant @relation("C9StepBinding_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C9StepBinding_1_fkey")
+  step C9PlanStep @relation("C9StepBinding_2_fkey", fields: [stepId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9StepBinding_2_fkey")
+
+  @@unique([id, tenantId], map: "C9StepBinding_1_key")
+  @@unique([tenantId, stepId, bindingKind, slotKey], map: "C9StepBinding_2_key")
+  @@index([tenantId, sourceType, sourceId], map: "C9StepBinding_1_idx")
+}
+
+/// Chapter 9 approved shared derived foundation; never a source business owner.
+model C9WorkReceipt {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String
+  runId String @db.Uuid
+  revisionId String? @db.Uuid
+  callKeyHash String @db.Char(64)
+  domain String
+  kind String
+  taskKey String
+  registryHash String @db.Char(64)
+  skillHash String? @db.Char(64)
+  inputHash String @db.Char(64)
+  inputEvidenceRefsJson Json @db.JsonB
+  providerModelKey String?
+  priceBasisJson Json? @db.JsonB
+  reservationJson Json @db.JsonB
+  usageJson Json? @db.JsonB
+  state String
+  resultJson Json? @db.JsonB
+  resultHash String? @db.Char(64)
+  startedAt DateTime? @db.Timestamptz(3)
+  settledAt DateTime? @db.Timestamptz(3)
+  admittedAt DateTime @db.Timestamptz(3)
+  retentionUntil DateTime @db.Timestamptz(3)
+  leaseGeneration Int
+  leaseTokenHash String? @db.Char(64)
+  leaseUntil DateTime? @db.Timestamptz(3)
+
+  tenant Tenant @relation("C9WorkReceipt_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "C9WorkReceipt_1_fkey")
+  run C9Run @relation("C9WorkReceipt_2_fkey", fields: [runId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9WorkReceipt_2_fkey")
+  strategyRevision C9StrategyRevision? @relation("C9WorkReceipt_3_fkey", fields: [revisionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "C9WorkReceipt_3_fkey")
+
+  @@unique([id, tenantId], map: "C9WorkReceipt_1_key")
+  @@unique([tenantId, runId, callKeyHash], map: "C9WorkReceipt_2_key")
+  @@index([tenantId, state, leaseUntil, id], map: "C9WorkReceipt_1_idx")
+  @@index([tenantId, runId, domain, kind], map: "C9WorkReceipt_2_idx")
 }

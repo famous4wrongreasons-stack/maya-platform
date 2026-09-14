@@ -1,0 +1,26 @@
+[
+  {
+    "batch": 1,
+    "exitCode": 0,
+    "suites": 24,
+    "tests": 134
+  },
+  {
+    "batch": 2,
+    "exitCode": 0,
+    "suites": 23,
+    "tests": 128
+  },
+  {
+    "batch": 3,
+    "exitCode": 0,
+    "suites": 23,
+    "tests": 126
+  },
+  {
+    "batch": 4,
+    "exitCode": 0,
+    "suites": 23,
+    "tests": 127
+  }
+]

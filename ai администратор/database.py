@@ -426,22 +426,7 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_review_requests_client
                 ON review_requests (client_id);
 
-            -- Публичные отзывы с внешних площадок. Имена авторов не сохраняем;
-            -- текст перед записью обезличивает reputation.py.
-            CREATE TABLE IF NOT EXISTS external_reviews (
-                id              INTEGER PRIMARY KEY AUTOINCREMENT,
-                source          TEXT    NOT NULL,
-                external_id     TEXT    NOT NULL,
-                rating          REAL,
-                review_text     TEXT,
-                published_at    TEXT,
-                imported_at     TEXT    NOT NULL,
-                response_state  TEXT    NOT NULL DEFAULT '',
-                alerted_at      TEXT,
-                UNIQUE (source, external_id)
-            );
-            CREATE INDEX IF NOT EXISTS idx_external_reviews_source_date
-                ON external_reviews (source, published_at);
+            -- B34: legacy external review storage is no longer provisioned or mutated.
 
             -- Состояние «текущего открытого диалога» клиента с ботом.
             -- Нужно для алерта о зависшей заявке: если клиент писал,
@@ -510,18 +495,7 @@ def init_db():
                 PRIMARY KEY (user_id, day)
             );
 
-            -- Расходы по салону, которые присылает ассистент Антон (кофе, уборщица,
-            -- касс. лента и т.п.). Попадают в дневной отчёт владельцу за свою дату.
-            CREATE TABLE IF NOT EXISTS salon_expenses (
-                id         INTEGER PRIMARY KEY AUTOINCREMENT,
-                date       TEXT    NOT NULL,   -- YYYY-MM-DD (день, к которому относится расход)
-                item       TEXT    NOT NULL,   -- что куплено/оплачено
-                amount     INTEGER NOT NULL,   -- рубли
-                source     TEXT    NOT NULL DEFAULT 'anton',
-                created_at TEXT    NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_salon_expenses_date
-                ON salon_expenses (date);
+            -- R13: legacy expense DDL retired; historical rows are never migrated.
 
             -- Касса со слов Антона: сколько всего налички в кассе и сколько получено
             -- наличкой за конкретный день. Для сверки с расчётной наличкой YClients
@@ -611,31 +585,7 @@ def init_db():
         """)
         # Журнал действий AI-директора: что MAYA предложила владельцу и что было
         # запущено вручную. Без ПД: только тип задачи, заголовок, статус и агрегаты.
-        conn.executescript("""
-            CREATE TABLE IF NOT EXISTS owner_action_journal (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                source        TEXT    NOT NULL DEFAULT 'owner_os',
-                job           TEXT    NOT NULL,
-                title         TEXT,
-                status        TEXT    NOT NULL DEFAULT 'running',
-                created_by    INTEGER,
-                created_at    TEXT    NOT NULL,
-                started_at    TEXT,
-                completed_at  TEXT,
-                payload_json  TEXT,
-                summary_json  TEXT,
-                baseline_json TEXT,
-                result_due_at TEXT,
-                evaluated_at  TEXT,
-                impact_status TEXT,
-                impact_json   TEXT,
-                error         TEXT
-            );
-            CREATE INDEX IF NOT EXISTS idx_owner_action_journal_created
-                ON owner_action_journal (created_at);
-            CREATE INDEX IF NOT EXISTS idx_owner_action_journal_job
-                ON owner_action_journal (job, created_at);
-        """)
+        # R04: historical journal remains untouched; no parallel owner schema.
         # Миграция: добавляем зашифрованные колонки в clients и gift_certificates
         _migrate_add_encrypted_columns(conn)
         _backfill_encryption(conn)
@@ -922,58 +872,21 @@ _PREF_MAX_LINES = 12
 _PREF_MAX_LEN = 800
 
 
-def add_client_preference(telegram_chat_id: int, pref: str) -> bool:
-    """Добавляет одно предпочтение клиента (по chat_id). Дедуп без учёта
-    регистра, копит до _PREF_MAX_LINES строк. Возвращает True, если записано."""
-    pref = (pref or "").strip().strip("•- ").strip()
-    if not pref or len(pref) > 200:
-        return False
-    client_id = get_or_create_client(int(telegram_chat_id))
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT prefs FROM client_preferences WHERE client_id = ?",
-            (client_id,),
-        ).fetchone()
-        lines = [l for l in (row["prefs"].split("\n") if row else []) if l.strip()]
-        if any(pref.lower() == l.lower() for l in lines):
-            return False                       # уже есть
-        lines.append(pref)
-        lines = lines[-_PREF_MAX_LINES:]       # держим последние N
-        text = "\n".join(lines)[:_PREF_MAX_LEN]
-        conn.execute(
-            "INSERT INTO client_preferences (client_id, prefs, updated_at) "
-            "VALUES (?, ?, ?) ON CONFLICT(client_id) DO UPDATE SET "
-            "prefs = excluded.prefs, updated_at = excluded.updated_at",
-            (client_id, text, _now()),
-        )
-    return True
+def add_client_preference(*_args, **_kwargs):
+    """Removed B7 writer: numeric/phone legacy identity is never Client authority."""
+    raise RuntimeError("canonical_client_habit_command_required")
 
 
-def get_client_preferences(telegram_chat_id: int) -> str:
-    """Предпочтения клиента по telegram chat_id (или '' если нет)."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT p.prefs FROM client_preferences p "
-            "JOIN clients c ON c.id = p.client_id WHERE c.telegram_chat_id = ?",
-            (int(telegram_chat_id),),
-        ).fetchone()
-        return (row["prefs"] if row else "") or ""
+def get_client_preferences(_telegram_chat_id: int) -> str:
+    """Only current verified request context may read canonical Client habits."""
+    from legacy_client_habits_bridge import read_preferences
+    return read_preferences()
 
 
-def get_client_preferences_by_phone(phone: str) -> str:
-    """Предпочтения клиента по телефону (для досье мастеру). '' если нет."""
-    cl = find_client_by_phone(phone)
-    if not cl or not cl.get("id"):
-        return ""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT prefs FROM client_preferences WHERE client_id = ?",
-            (cl["id"],),
-        ).fetchone()
-        return (row["prefs"] if row else "") or ""
+def get_client_preferences_by_phone(_phone: str) -> str:
+    """Phone-only discovery is not authority to read another Client profile."""
+    return ""
 
-
-# ─── Веб-вход без Telegram (VK ID / телефон): коды и сессии ──────────────
 
 def save_web_login_code(phone_hash: str, code_hash: str, channel: str = "call",
                         ttl_minutes: int = 5):
@@ -1131,60 +1044,32 @@ def applogin_poll(nonce: str) -> dict:
 
 # ─── Согласия на обработку ПД ───────────────────────────────────────────
 
-def save_consent(client_id: int, consent_given: bool, source: str = "telegram",
-                  consent_version: str = CONSENT_VERSION):
-    """Логирует факт согласия (или отказа) на обработку персональных данных."""
-    with _db() as conn:
-        conn.execute(
-            "INSERT INTO consents (client_id, consent_given, consent_at, "
-            "consent_version, source) VALUES (?, ?, ?, ?, ?)",
-            (client_id, 1 if consent_given else 0, _now(), consent_version, source),
-        )
+def save_consent(client_id: int, consent_given: bool, source: str = "telegram", consent_version: str = CONSENT_VERSION):
+    """Historical entry point is fail closed; only canonical Client commands write."""
+    raise RuntimeError("canonical_client_consent_required")
 
 
 def set_marketing_consent(client_id: int, consent_given: bool):
-    """
-    Помечает согласие/отказ на маркетинговые рассылки.
-    consent_given=True  → пишем marketing_consent_at = сейчас, чистим _revoked_at.
-    consent_given=False → чистим marketing_consent_at, пишем _revoked_at = сейчас.
-    """
+    """No SQL fallback may replace a canonical consent fact."""
+    raise RuntimeError("canonical_client_consent_required")
+
+
+def _canonical_delivery_consent_for_client(client_id: int) -> dict:
+    # Local id selects only the outgoing Telegram recipient. Canonical Client
+    # authority is resolved exclusively by an existing verified backend link.
+    from legacy_client_command_bridge import delivery_consent
     with _db() as conn:
-        if consent_given:
-            conn.execute(
-                "UPDATE clients SET marketing_consent_at = ?, "
-                "marketing_consent_revoked_at = NULL WHERE id = ?",
-                (_now(), client_id),
-            )
-        else:
-            conn.execute(
-                "UPDATE clients SET marketing_consent_at = NULL, "
-                "marketing_consent_revoked_at = ? WHERE id = ?",
-                (_now(), client_id),
-            )
+        row = conn.execute("SELECT telegram_chat_id FROM clients WHERE id = ?", (client_id,)).fetchone()
+    return delivery_consent(row["telegram_chat_id"]) if row else {}
 
 
 def has_marketing_consent(client_id: int) -> bool:
-    """True, если клиент согласился на маркетинговые рассылки и не отозвал."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT marketing_consent_at FROM clients WHERE id = ?",
-            (client_id,),
-        ).fetchone()
-        if not row:
-            return False
-        return bool(row["marketing_consent_at"])
+    return bool(_canonical_delivery_consent_for_client(client_id).get("marketing"))
 
 
 def has_marketing_consent_by_chat_id(telegram_chat_id: int) -> bool:
-    """То же, но по chat_id (удобно для рассылок)."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT marketing_consent_at FROM clients WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        ).fetchone()
-        if not row:
-            return False
-        return bool(row["marketing_consent_at"])
+    from legacy_client_command_bridge import delivery_consent
+    return bool(delivery_consent(telegram_chat_id).get("marketing"))
 
 
 # ─── Персональные настройки уведомлений клиента ──────────────────────────
@@ -1194,94 +1079,35 @@ def has_marketing_consent_by_chat_id(telegram_chat_id: int) -> bool:
 # (юридическое согласие), эти настройки — тонкая регулировка ВНУТРИ согласия.
 import json as _json_np
 
-NOTIFY_PREFS_DEFAULTS = {
-    "record_changes": True,    # изменения по моей записи (создана/перенесена/отменена)
-    "reminder": True,          # напоминание перед визитом (наш Telegram + YClients SMS)
-    "reminder_hours": 3,       # за сколько часов до визита (0..48); рулит notify_by_sms YClients
-    "marketing": True,         # акции / промокоды
-    "marketing_freq": "week",  # week | 2weeks | month — минимальный интервал между акциями
-    "cycle": True,             # «давно не были» (возвращающие)
-    "birthday": True,          # промокод на день рождения
-    "freed_slot": True,        # «освободилось окно у мастера»
-    "quiet_from": None,        # тихие часы: час начала 0..23 или None
-    "quiet_to": None,          # тихие часы: час конца 0..23 или None
-}
+# No legacy default policy. Reads use canonical sparse Client overrides.
+NOTIFY_PREFS_DEFAULTS = {}
 # Минимальный интервал маркетинга в днях
 MARKETING_FREQ_DAYS = {"week": 7, "2weeks": 14, "month": 30}
 
 
-def _notify_prefs_ensure(conn):
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS notify_prefs ("
-        " client_id INTEGER PRIMARY KEY, prefs TEXT, updated_at TEXT)")
+def _preference_delivery_subject(client_id: int):
+    # Existing transport recipient selector, never Client authority or creation.
+    with _db() as conn:
+        row = conn.execute("SELECT telegram_chat_id FROM clients WHERE id = ?", (int(client_id),)).fetchone()
+    return row["telegram_chat_id"] if row else None
+
 
 
 def get_notify_prefs(client_id: int) -> dict:
-    """Настройки уведомлений клиента, слитые с дефолтами (всегда полный набор ключей)."""
-    prefs = dict(NOTIFY_PREFS_DEFAULTS)
-    try:
-        with _db() as conn:
-            _notify_prefs_ensure(conn)
-            row = conn.execute(
-                "SELECT prefs FROM notify_prefs WHERE client_id = ?",
-                (int(client_id),)).fetchone()
-        if row and row["prefs"]:
-            saved = _json_np.loads(row["prefs"])
-            if isinstance(saved, dict):
-                for k in NOTIFY_PREFS_DEFAULTS:
-                    if k in saved:
-                        prefs[k] = saved[k]
-    except Exception:
-        pass
-    return prefs
+    from legacy_client_preferences_bridge import delivery_preferences
+    return delivery_preferences(_preference_delivery_subject(client_id))
+
 
 
 def get_notify_prefs_by_chat_id(telegram_chat_id: int) -> dict:
-    """Настройки по Telegram chat_id (для отправщиков уведомлений)."""
-    try:
-        with _db() as conn:
-            row = conn.execute(
-                "SELECT id FROM clients WHERE telegram_chat_id = ?",
-                (int(telegram_chat_id),)).fetchone()
-        if row:
-            return get_notify_prefs(row["id"])
-    except Exception:
-        pass
-    return dict(NOTIFY_PREFS_DEFAULTS)
+    from legacy_client_preferences_bridge import delivery_preferences
+    return delivery_preferences(telegram_chat_id)
+
 
 
 def set_notify_prefs(client_id: int, partial: dict) -> dict:
-    """Частичное обновление настроек (мержим с текущими). Возвращает итог."""
-    cur = get_notify_prefs(client_id)
-    for k, v in (partial or {}).items():
-        if k not in NOTIFY_PREFS_DEFAULTS:
-            continue
-        if k in ("reminder_hours",):
-            try:
-                v = max(0, min(48, int(v)))
-            except (TypeError, ValueError):
-                continue
-        elif k in ("quiet_from", "quiet_to"):
-            if v is None or v == "":
-                v = None
-            else:
-                try:
-                    v = max(0, min(23, int(v)))
-                except (TypeError, ValueError):
-                    continue
-        elif k == "marketing_freq":
-            if v not in MARKETING_FREQ_DAYS:
-                continue
-        else:
-            v = bool(v)
-        cur[k] = v
-    with _db() as conn:
-        _notify_prefs_ensure(conn)
-        conn.execute(
-            "INSERT OR REPLACE INTO notify_prefs (client_id, prefs, updated_at) "
-            "VALUES (?, ?, ?)",
-            (int(client_id), _json_np.dumps(cur, ensure_ascii=False), _now()))
-    return cur
+    raise RuntimeError("canonical_verified_client_preference_command_required")
+
 
 
 def get_maya_audience_stats() -> dict:
@@ -1293,19 +1119,7 @@ def get_maya_audience_stats() -> dict:
     an actual send, so this function never labels the whole base as "active".
     """
     with _db() as conn:
-        _notify_prefs_ensure(conn)
-        rows = conn.execute(
-            "SELECT c.id, c.phone_enc, c.marketing_consent_at, np.prefs, "
-            "COALESCE(("
-            "  SELECT consent_given FROM consents "
-            "  WHERE client_id = c.id AND consent_version = ? "
-            "  ORDER BY id DESC LIMIT 1"
-            "), 0) AS pd_consent "
-            "FROM clients c "
-            "LEFT JOIN notify_prefs np ON np.client_id = c.id "
-            "WHERE c.telegram_chat_id IS NOT NULL",
-            (CONSENT_VERSION,),
-        ).fetchall()
+        rows = conn.execute("SELECT id, telegram_chat_id, phone_enc FROM clients WHERE telegram_chat_id IS NOT NULL").fetchall()
 
     stats = {
         "telegram_connected": 0,
@@ -1317,19 +1131,11 @@ def get_maya_audience_stats() -> dict:
         "reactivation_reachable": 0,
     }
     for row in rows:
-        prefs = dict(NOTIFY_PREFS_DEFAULTS)
-        try:
-            saved = _json_np.loads(row["prefs"] or "{}")
-            if isinstance(saved, dict):
-                for key in NOTIFY_PREFS_DEFAULTS:
-                    if key in saved:
-                        prefs[key] = saved[key]
-        except (TypeError, ValueError, _json_np.JSONDecodeError):
-            pass
-
+        prefs = get_notify_prefs(row["id"])
+        consent = _canonical_delivery_consent_for_client(row["id"])
         identified = bool(row["phone_enc"])
-        pd_consented = bool(row["pd_consent"])
-        marketing_consented = bool(row["marketing_consent_at"])
+        pd_consented = bool(consent.get("privacy"))
+        marketing_consented = bool(consent.get("marketing"))
         marketing_enabled = marketing_consented and bool(prefs.get("marketing", True))
         cycle_enabled = marketing_consented and bool(prefs.get("cycle", True))
         reachable = (
@@ -1367,8 +1173,11 @@ def get_maya_audience_stats() -> dict:
     }
 
 
+
 def in_quiet_hours(prefs: dict, now_hour: int) -> bool:
     """True, если текущий час попадает в тихие часы клиента (не маркетинг/не срочное)."""
+    if "_canonical_quiet_now" in prefs:
+        return bool(prefs["_canonical_quiet_now"])
     try:
         qf, qt = prefs.get("quiet_from"), prefs.get("quiet_to")
         if qf is None or qt is None:
@@ -1384,18 +1193,9 @@ def in_quiet_hours(prefs: dict, now_hour: int) -> bool:
 
 
 def has_saved_notify_prefs(client_id: int) -> bool:
-    """True, если клиент РЕАЛЬНО открывал «Настройки» и что-то сохранил (есть строка).
-    Нужно, чтобы частотный троттл маркетинга применялся ТОЛЬКО к тем, кто сам выбрал
-    частоту — иначе дефолтный 7-дневный кап молча резал бы рассылки всей базе."""
-    try:
-        with _db() as conn:
-            _notify_prefs_ensure(conn)
-            row = conn.execute(
-                "SELECT 1 FROM notify_prefs WHERE client_id = ? LIMIT 1",
-                (int(client_id),)).fetchone()
-        return bool(row)
-    except Exception:
-        return False
+    """Compatibility reader: explicit frequency restriction, never row/consent authority."""
+    return "marketing_freq" in get_notify_prefs(client_id)
+
 
 
 # Троттлинг частоты маркетинга: запоминаем момент последней отправки клиенту,
@@ -1431,62 +1231,22 @@ def marketing_sent_within(client_id: int, days: int) -> bool:
 
 
 def has_valid_consent(client_id: int, consent_version: str = CONSENT_VERSION) -> bool:
-    """True, если у клиента есть действующее согласие текущей версии."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT consent_given FROM consents "
-            "WHERE client_id = ? AND consent_version = ? "
-            "ORDER BY id DESC LIMIT 1",
-            (client_id, consent_version),
-        ).fetchone()
-        return bool(row and row["consent_given"])
+    return bool(_canonical_delivery_consent_for_client(client_id).get("privacy"))
 
 
 def has_valid_consent_by_chat_id(telegram_chat_id: int) -> bool:
-    """True, если по этому Telegram-аккаунту есть подписанное согласие на ПД.
-
-    Используется глобальным гейтом до того, как пользователь как-либо
-    взаимодействовал с ботом (записи у него ещё нет → можно только
-    проверить, есть ли запись в clients и было ли подписано согласие).
-    """
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT id FROM clients WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        ).fetchone()
-        if not row:
-            return False
-        return has_valid_consent(row["id"])
+    from legacy_client_command_bridge import delivery_consent
+    return bool(delivery_consent(telegram_chat_id).get("privacy"))
 
 
 def has_made_marketing_decision_by_chat_id(telegram_chat_id: int) -> bool:
-    """True, если пользователь явно сделал выбор по маркетинговому согласию
-    (либо принял, либо отказался — главное, что вопрос ему задавали и
-    он на него ответил)."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT marketing_consent_at, marketing_consent_revoked_at "
-            "FROM clients WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        ).fetchone()
-        if not row:
-            return False
-        return bool(row["marketing_consent_at"] or row["marketing_consent_revoked_at"])
+    from legacy_client_command_bridge import delivery_consent
+    return bool(delivery_consent(telegram_chat_id).get("marketing_decided"))
 
 
 def consent_gate_status(telegram_chat_id: int) -> str:
-    """Сводный статус «все ли документы подписаны» для глобального гейта.
-
-    Возвращает:
-      'pass'           — ПД и маркетинг (любой выбор) пройдены, бот доступен
-      'need_pdn'       — нужно подписать согласие на ПД
-      'need_marketing' — ПД подписано, но решение по рассылке ещё не сделано
-    """
-    if not has_valid_consent_by_chat_id(telegram_chat_id):
-        return "need_pdn"
-    if not has_made_marketing_decision_by_chat_id(telegram_chat_id):
-        return "need_marketing"
-    return "pass"
+    from legacy_client_command_bridge import delivery_consent, consent_status
+    return consent_status(delivery_consent(telegram_chat_id))
 
 
 def export_consents_csv() -> str:
@@ -1615,6 +1375,7 @@ def save_gift_certificate(
     payment_status: str = "paid",
 ):
     """Сохраняет выпущенный сертификат. Имя/телефон получателя шифрует."""
+    raise RuntimeError("p4_06_legacy_mutation_disabled:initiate_gift_certificate_purchase")
     with _db() as conn:
         # Legacy-столбец recipient_phone имеет NOT NULL — пишем пустую строку,
         # реальный (зашифрованный) телефон уходит в recipient_phone_enc.
@@ -1649,6 +1410,7 @@ def mark_cert_paid(code: str, yukassa_payment_id: str = None) -> bool:
     Помечает сертификат оплаченным (после успешного платежа в ЮKassa).
     Возвращает True, если переход был выполнен (был pending → стал paid).
     """
+    raise RuntimeError("p4_06_legacy_mutation_disabled:activate_gift_certificate")
     with _db() as conn:
         cur = conn.execute(
             "UPDATE gift_certificates SET payment_status = 'paid', "
@@ -1663,6 +1425,7 @@ def set_cert_payment_id(code: str, yukassa_payment_id: str) -> bool:
     Привязывает ID платежа ЮKassa к сертификату (сразу после create_payment).
     Нужно, чтобы при рестарте бота можно было возобновить опрос статуса.
     """
+    raise RuntimeError("p4_06_legacy_mutation_disabled:provider_payment_correlation")
     with _db() as conn:
         cur = conn.execute(
             "UPDATE gift_certificates SET yukassa_payment_id = ? WHERE code = ?",
@@ -1687,6 +1450,7 @@ def list_pending_certs() -> list[dict]:
 
 def mark_cert_canceled(code: str) -> bool:
     """Помечает сертификат отменённым (если ЮKassa вернул status=canceled)."""
+    raise RuntimeError("p4_06_legacy_mutation_disabled:provider_payment_reconciliation")
     with _db() as conn:
         cur = conn.execute(
             "UPDATE gift_certificates SET payment_status = 'canceled' "
@@ -1701,6 +1465,7 @@ def mark_cert_used(code: str, admin_user_id: int) -> bool:
     Помечает сертификат использованным. Возвращает True, если успешно
     (т.е. сертификат был активен), False если уже погашен / не найден.
     """
+    raise RuntimeError("p4_06_legacy_mutation_disabled:redeem_gift_certificate")
     with _db() as conn:
         cur = conn.execute(
             "UPDATE gift_certificates SET used_at = ?, used_by_admin_id = ? "
@@ -1727,14 +1492,9 @@ def list_certs_by_phone(phone: str) -> list[dict]:
 # ─── Админы (могут гасить сертификаты) ─────────────────────────────────
 
 def add_admin(telegram_user_id: int, added_by: int = None) -> bool:
-    """Добавляет админа (идемпотентно). True если добавлен сейчас, False если уже был."""
-    with _db() as conn:
-        cur = conn.execute(
-            "INSERT OR IGNORE INTO admins (telegram_user_id, added_at, added_by_user_id) "
-            "VALUES (?, ?, ?)",
-            (telegram_user_id, _now(), added_by),
-        )
-        return cur.rowcount > 0
+    """R02: retired raw staff authority; use canonical A16/A25."""
+    raise RuntimeError("canonical_crm_staff_access_required")
+
 
 
 def is_admin(telegram_user_id: int) -> bool:
@@ -1747,19 +1507,10 @@ def is_admin(telegram_user_id: int) -> bool:
 
 
 def can_redeem_codes(telegram_user_id: int) -> bool:
-    """
-    True если пользователь имеет право гасить коды (баллы лояльности,
-    сертификаты): он либо админ, либо привязанный мастер с can_redeem=1.
-    """
-    if is_admin(telegram_user_id):
-        return True
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT 1 FROM masters_telegram WHERE telegram_chat_id = ? "
-            "AND can_redeem = 1 LIMIT 1",
-            (telegram_user_id,),
-        ).fetchone()
-        return bool(row)
+    """Legacy cashier flags never grant Package 4 value authority."""
+    del telegram_user_id
+    # p5_b13_legacy_cashier_value_authority_disabled
+    return False
 
 
 def list_cashiers() -> list[dict]:
@@ -1773,14 +1524,9 @@ def list_cashiers() -> list[dict]:
 
 
 def set_cashier_role(yclients_staff_id: int, can_redeem: bool) -> bool:
-    """Включает/выключает роль кассира у мастера. True если строка нашлась."""
-    with _db() as conn:
-        cur = conn.execute(
-            "UPDATE masters_telegram SET can_redeem = ? "
-            "WHERE yclients_staff_id = ?",
-            (1 if can_redeem else 0, yclients_staff_id),
-        )
-        return cur.rowcount > 0
+    """Historical cashier flags are read-only compatibility data."""
+    del yclients_staff_id, can_redeem
+    raise RuntimeError("canonical_package4_value_authority_required")
 
 
 def find_master_by_partial_name(query: str) -> dict | None:
@@ -1821,116 +1567,27 @@ from datetime import timedelta
 
 
 def create_master_with_bind_code(yclients_staff_id: int, full_name: str) -> str:
-    """
-    Регистрирует мастера в системе и генерирует bind-код. Идемпотентно:
-    если мастер уже есть и ещё не привязан — возвращает существующий код.
-    Если уже привязан — возвращает None.
-    """
-    with _db() as conn:
-        existing = conn.execute(
-            "SELECT bind_code, telegram_chat_id FROM masters_telegram "
-            "WHERE yclients_staff_id = ?",
-            (yclients_staff_id,),
-        ).fetchone()
-        if existing:
-            if existing["telegram_chat_id"]:
-                return None  # уже привязан
-            return existing["bind_code"]
-
-        # Генерируем уникальный код вида ME-XXXXXX
-        alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        for _ in range(10):
-            code = "ME-" + "".join(secrets.choice(alphabet) for _ in range(6))
-            try:
-                conn.execute(
-                    "INSERT INTO masters_telegram "
-                    "(yclients_staff_id, full_name, bind_code, created_at) "
-                    "VALUES (?, ?, ?, ?)",
-                    (yclients_staff_id, full_name, code, _now()),
-                )
-                return code
-            except sqlite3.IntegrityError:
-                continue
-        raise RuntimeError("Не удалось сгенерировать уникальный bind-код")
+    """Telegram bind codes were retired in favor of canonical A16 access."""
+    del yclients_staff_id, full_name
+    raise RuntimeError("canonical_crm_staff_access_required")
 
 
 def reset_master_bind_code(yclients_staff_id: int, full_name: str) -> str:
-    """
-    Генерирует НОВЫЙ bind-код для мастера, сбрасывая текущую привязку.
-    Создаёт запись, если её ещё не было. Используется когда админ просит
-    «выдать новый код» (мастер сменил телефон, потерял доступ и т.п.).
-    Возвращает новый код.
-    """
-    alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-    with _db() as conn:
-        existing = conn.execute(
-            "SELECT id FROM masters_telegram WHERE yclients_staff_id = ?",
-            (yclients_staff_id,),
-        ).fetchone()
-        for _ in range(10):
-            code = "ME-" + "".join(secrets.choice(alphabet) for _ in range(6))
-            try:
-                if existing:
-                    conn.execute(
-                        "UPDATE masters_telegram SET bind_code = ?, "
-                        "telegram_chat_id = NULL, bound_at = NULL, "
-                        "full_name = ?, is_active = 1 "
-                        "WHERE yclients_staff_id = ?",
-                        (code, full_name, yclients_staff_id),
-                    )
-                else:
-                    conn.execute(
-                        "INSERT INTO masters_telegram "
-                        "(yclients_staff_id, full_name, bind_code, created_at) "
-                        "VALUES (?, ?, ?, ?)",
-                        (yclients_staff_id, full_name, code, _now()),
-                    )
-                return code
-            except sqlite3.IntegrityError:
-                continue
-        raise RuntimeError("Не удалось сгенерировать уникальный bind-код")
+    """Telegram bind-code reset cannot mutate staff authority."""
+    del yclients_staff_id, full_name
+    raise RuntimeError("canonical_crm_staff_access_required")
 
 
 def bind_master(bind_code: str, telegram_chat_id: int) -> dict | None:
-    """
-    Привязывает Telegram-аккаунт к мастеру по bind-коду.
-    Возвращает запись мастера при успехе, None — если код невалидный или уже использован.
-    """
-    code = (bind_code or "").strip().upper()
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT id, yclients_staff_id, full_name, telegram_chat_id "
-            "FROM masters_telegram WHERE bind_code = ?",
-            (code,),
-        ).fetchone()
-        if not row:
-            return None
-        # Уже привязан кем-то другим
-        if row["telegram_chat_id"] and row["telegram_chat_id"] != telegram_chat_id:
-            return None
-        # Этот же мастер уже привязан к этому же chat_id — успех (идемпотентно)
-        if row["telegram_chat_id"] == telegram_chat_id:
-            return dict(row)
-        # Свободный код — привязываем
-        conn.execute(
-            "UPDATE masters_telegram SET telegram_chat_id = ?, bound_at = ?, is_active = 1 "
-            "WHERE id = ?",
-            (telegram_chat_id, _now(), row["id"]),
-        )
-        result = dict(row)
-        result["telegram_chat_id"] = telegram_chat_id
-        return result
+    """Legacy Telegram bind codes no longer establish staff authority."""
+    del bind_code, telegram_chat_id
+    raise RuntimeError("canonical_crm_staff_access_required")
 
 
 def unbind_master(telegram_chat_id: int) -> bool:
-    """Отвязывает мастера от Telegram-аккаунта. True если был привязан."""
-    with _db() as conn:
-        cur = conn.execute(
-            "UPDATE masters_telegram SET telegram_chat_id = NULL, bound_at = NULL "
-            "WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        )
-        return cur.rowcount > 0
+    """R02: retired raw staff authority; use canonical A16/A25."""
+    raise RuntimeError("canonical_crm_staff_access_required")
+
 
 
 def get_master_by_chat_id(telegram_chat_id: int) -> dict | None:
@@ -1973,140 +1630,50 @@ _STAFF_MSG_SELECT = ("id, sender_chat_id, sender_name, text, created_at, "
                      "media_kind, media_url, media_name, media_mime, media_size, media_dur")
 
 
-def _staff_messages_ensure(conn) -> None:
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS staff_messages ("
-        "  id          INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "  sender_chat_id INTEGER NOT NULL,"
-        "  sender_name TEXT,"
-        "  text        TEXT NOT NULL,"
-        "  created_at  TEXT NOT NULL,"
-        "  media_kind  TEXT,"      # '' | 'image' | 'video' | 'voice' | 'file'
-        "  media_url   TEXT,"      # публичная ссылка на файл (на Beget)
-        "  media_name  TEXT,"      # исходное имя файла
-        "  media_mime  TEXT,"
-        "  media_size  INTEGER,"   # размер файла в байтах
-        "  media_dur   REAL"       # длительность (сек) для голоса/видео
-        ")"
-    )
-    # Идемпотентная миграция: в проде таблица уже создана (старая 5-колоночная),
-    # а CREATE IF NOT EXISTS колонок не добавляет — дописываем по одной.
-    for _col, _typ in (("media_kind", "TEXT"), ("media_url", "TEXT"),
-                       ("media_name", "TEXT"), ("media_mime", "TEXT"),
-                       ("media_size", "INTEGER"), ("media_dur", "REAL")):
-        try:
-            conn.execute(f"ALTER TABLE staff_messages ADD COLUMN {_col} {_typ}")
-        except Exception:
-            pass  # колонка уже есть
+def _staff_messages_ensure(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def add_staff_message(sender_chat_id: int, sender_name: str, text: str,
-                      media_kind: str = "", media_url: str = "", media_name: str = "",
-                      media_mime: str = "", media_size: int = 0,
-                      media_dur: float = 0) -> int:
-    """Сохраняет сообщение команды (текст и/или вложение), возвращает его id."""
-    with _db() as conn:
-        _staff_messages_ensure(conn)
-        cur = conn.execute(
-            "INSERT INTO staff_messages "
-            "(sender_chat_id, sender_name, text, created_at, "
-            " media_kind, media_url, media_name, media_mime, media_size, media_dur) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (int(sender_chat_id), str(sender_name or "")[:80], str(text or "")[:2000],
-             datetime.now().isoformat(timespec="seconds"),
-             str(media_kind or "")[:16], str(media_url or "")[:512],
-             str(media_name or "")[:200], str(media_mime or "")[:80],
-             int(media_size or 0), float(media_dur or 0)),
-        )
-        return int(cur.lastrowid)
+
+def add_staff_message(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def get_staff_messages_since(since_id: int = 0, limit: int = 100) -> list[dict]:
-    """Сообщения новее since_id (для поллинга открытого чата)."""
-    with _db() as conn:
-        _staff_messages_ensure(conn)
-        rows = conn.execute(
-            f"SELECT {_STAFF_MSG_SELECT} FROM staff_messages "
-            "WHERE id > ? ORDER BY id ASC LIMIT ?",
-            (int(since_id or 0), int(limit)),
-        ).fetchall()
-        return [dict(r) for r in rows]
+
+def get_staff_messages_since(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def get_staff_messages_recent(limit: int = 50) -> list[dict]:
-    """Последние N сообщений в хронологическом порядке (первая загрузка чата)."""
-    with _db() as conn:
-        _staff_messages_ensure(conn)
-        rows = conn.execute(
-            f"SELECT {_STAFF_MSG_SELECT} FROM staff_messages "
-            "ORDER BY id DESC LIMIT ?",
-            (int(limit),),
-        ).fetchall()
-        return list(reversed([dict(r) for r in rows]))
+
+def get_staff_messages_recent(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def get_staff_latest_message_id() -> int:
-    """Последний id сообщения команды. Нужен для новой пустой сессии чата."""
-    with _db() as conn:
-        _staff_messages_ensure(conn)
-        row = conn.execute("SELECT COALESCE(MAX(id), 0) AS id FROM staff_messages").fetchone()
-        return int((row or {}).get("id") or 0)
+
+def get_staff_latest_message_id(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def delete_staff_message(message_id: int, sender_chat_id: int) -> dict:
-    """Удаляет своё сообщение команды. Чужие сообщения не трогает."""
-    with _db() as conn:
-        _staff_messages_ensure(conn)
-        row = conn.execute(
-            f"SELECT {_STAFF_MSG_SELECT} FROM staff_messages WHERE id = ?",
-            (int(message_id or 0),),
-        ).fetchone()
-        if not row:
-            return {"ok": False, "reason": "not_found"}
-        msg = dict(row)
-        if int(msg.get("sender_chat_id") or 0) != int(sender_chat_id or 0):
-            return {"ok": False, "reason": "forbidden"}
-        conn.execute(
-            "DELETE FROM staff_messages WHERE id = ? AND sender_chat_id = ?",
-            (int(message_id), int(sender_chat_id)),
-        )
-        return {"ok": True, "message": msg}
+
+def delete_staff_message(*args, **kwargs):
+    raise PermissionError('canonical_TeamMessage_owner_required')
 
 
-def mute_master(telegram_chat_id: int, hours: float) -> bool:
-    """Заглушает уведомления для мастера на N часов. False если мастер не найден."""
-    until = (datetime.now() + timedelta(hours=hours)).isoformat(timespec="seconds")
-    with _db() as conn:
-        cur = conn.execute(
-            "UPDATE masters_telegram SET mute_until = ? WHERE telegram_chat_id = ?",
-            (until, telegram_chat_id),
-        )
-        return cur.rowcount > 0
+
+def mute_master(telegram_chat_id: int, hours: float):
+    raise PermissionError('canonical_A22_confirmed_configuration_required')
 
 
-def unmute_master(telegram_chat_id: int) -> bool:
-    """Снимает mute с мастера."""
-    with _db() as conn:
-        cur = conn.execute(
-            "UPDATE masters_telegram SET mute_until = NULL WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        )
-        return cur.rowcount > 0
+
+def unmute_master(telegram_chat_id: int):
+    raise PermissionError('canonical_A22_confirmed_configuration_required')
+
 
 
 def is_master_muted(telegram_chat_id: int) -> bool:
-    """True, если у мастера сейчас активен mute."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT mute_until FROM masters_telegram WHERE telegram_chat_id = ?",
-            (telegram_chat_id,),
-        ).fetchone()
-        if not row or not row["mute_until"]:
-            return False
-        try:
-            return datetime.fromisoformat(row["mute_until"]) > datetime.now()
-        except Exception:
-            return False
+    from canonical_governed_settings import telegram_muted
+    return telegram_muted(telegram_chat_id)
+
 
 
 # ─── Кто инициировал перенос записи (эфемерно, для webhook-уведомления мастеру) ──
@@ -2241,81 +1808,27 @@ def delete_record_state(record_id: int):
 _VALID_MOODS = ("red", "blue")
 
 
-def set_visit_mood(record_id: int, mood: str, source: str = "bot",
-                   client_id: int | None = None) -> bool:
-    """Сохраняет выбор настроения для конкретной записи (idempotent upsert).
-    Также запоминает выбор как default клиента для будущих записей.
-    Возвращает True, если mood валиден и сохранён."""
-    mood = (mood or "").strip().lower()
-    if mood not in _VALID_MOODS:
-        return False
-    _ts = _now()
-    with _db() as conn:
-        conn.execute(
-            "INSERT INTO visit_mood "
-            "(record_id, mood, source, client_id, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?) "
-            "ON CONFLICT(record_id) DO UPDATE SET "
-            "  mood = excluded.mood, "
-            "  source = excluded.source, "
-            "  client_id = COALESCE(excluded.client_id, visit_mood.client_id), "
-            "  updated_at = excluded.updated_at",
-            (record_id, mood, source, client_id, _ts, _ts),
-        )
-        if client_id:
-            try:
-                conn.execute(
-                    "UPDATE clients SET default_visit_mood = ? WHERE id = ?",
-                    (mood, client_id),
-                )
-            except sqlite3.OperationalError:
-                pass  # колонка ещё не мигрирована — не критично
-    return True
+def set_visit_mood(record_id: int, mood: str, source: str = "bot", client_id: int | None = None) -> bool:
+    raise RuntimeError("canonical_verified_client_preference_command_required")
+
 
 
 def get_visit_mood(record_id: int) -> str | None:
-    """'red' | 'blue' | None для конкретной записи."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT mood FROM visit_mood WHERE record_id = ?", (record_id,)
-        ).fetchone()
-        return row["mood"] if row else None
+    from legacy_client_preferences_bridge import visit_projection
+    return visit_projection([record_id]).get(int(record_id))
+
 
 
 def get_visit_moods(record_ids) -> dict:
-    """Батч-чтение настроений для списка record_id → {record_id: mood}.
-    Используется журналом, чтобы не делать N запросов на день расписания."""
-    ids = []
-    for r in record_ids:
-        if r is None:
-            continue
-        try:
-            ids.append(int(r))
-        except (TypeError, ValueError):
-            continue  # пропускаем один кривой id, не теряя настроения остальных
-    if not ids:
-        return {}
-    placeholders = ",".join("?" * len(ids))
-    with _db() as conn:
-        rows = conn.execute(
-            f"SELECT record_id, mood FROM visit_mood WHERE record_id IN ({placeholders})",
-            ids,
-        ).fetchall()
-        return {row["record_id"]: row["mood"] for row in rows}
+    from legacy_client_preferences_bridge import visit_projection
+    return visit_projection(record_ids)
+
 
 
 def get_default_visit_mood(client_id: int) -> str | None:
-    """Последний выбор клиента ('red'|'blue'|None) — для пред-выбора при записи."""
-    if not client_id:
-        return None
-    with _db() as conn:
-        try:
-            row = conn.execute(
-                "SELECT default_visit_mood FROM clients WHERE id = ?", (client_id,)
-            ).fetchone()
-        except sqlite3.OperationalError:
-            return None
-        return row["default_visit_mood"] if row and row["default_visit_mood"] else None
+    from legacy_client_preferences_bridge import delivery_read
+    return delivery_read(_preference_delivery_subject(client_id)).get("defaultVisitMood")
+
 
 
 def delete_visit_mood(record_id: int):
@@ -2495,6 +2008,8 @@ def get_ai_advice_for_record(record_id: int) -> dict | None:
 
 def get_setting(key: str, default: str | None = None) -> str | None:
     """Возвращает значение настройки или default, если не задана."""
+    from canonical_governed_settings import reject_legacy_setting_key
+    reject_legacy_setting_key(key)
     with _db() as conn:
         row = conn.execute(
             "SELECT value FROM settings WHERE key = ?", (key,)
@@ -2504,6 +2019,8 @@ def get_setting(key: str, default: str | None = None) -> str | None:
 
 def set_setting(key: str, value: str):
     """Сохраняет настройку (UPSERT)."""
+    from canonical_governed_settings import reject_legacy_setting_key
+    reject_legacy_setting_key(key)
     with _db() as conn:
         conn.execute(
             "INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?) "
@@ -2525,103 +2042,50 @@ def list_maya_tenants() -> list[dict]:
 
 def add_maya_tenant(name: str, city: str = "", plan: str = "", owner_name: str = "",
                     phone: str = "", mrr: int = 0, status: str = "pending") -> int:
-    """Заводит салон-подписчик. Возвращает id."""
-    with _db() as conn:
-        cur = conn.execute(
-            "INSERT INTO maya_tenants (name, city, plan, status, owner_name, phone, "
-            "mrr, created_at, activated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (name, city, plan, status, owner_name, phone, int(mrr or 0), _now(),
-             _now() if status == "active" else None),
-        )
-        return cur.lastrowid
+    """Legacy subscriber registry cannot create canonical tenants."""
+    del name, city, plan, owner_name, phone, mrr, status
+    raise RuntimeError("canonical_trial_activation_required")
 
 
 def set_maya_tenant_status(tenant_id: int, status: str) -> bool:
-    """Меняет статус салона (active|suspended|pending). Активация ставит activated_at."""
-    with _db() as conn:
-        if status == "active":
-            conn.execute(
-                "UPDATE maya_tenants SET status = ?, "
-                "activated_at = COALESCE(activated_at, ?) WHERE id = ?",
-                (status, _now(), int(tenant_id)),
-            )
-        else:
-            conn.execute(
-                "UPDATE maya_tenants SET status = ? WHERE id = ?",
-                (status, int(tenant_id)),
-            )
-        return True
+    """Legacy subscriber rows cannot activate or suspend canonical tenants."""
+    del tenant_id, status
+    raise RuntimeError("canonical_a26_tenant_lifecycle_required")
 
 
 # ─── Расходы по салону (от ассистента Антона) ─────────────────────────────
 
-def add_salon_expense(date: str, item: str, amount: int, source: str = "anton") -> int:
-    """Добавляет один расход по салону за дату. amount — рубли (int)."""
-    with _db() as conn:
-        cur = conn.execute(
-            "INSERT INTO salon_expenses (date, item, amount, source, created_at) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (date, (item or "").strip()[:120], int(round(amount or 0)), source, _now()),
-        )
-        return cur.lastrowid
+def add_salon_expense(*args, **kwargs):
+    raise PermissionError('canonical_P407_expense_owner_required')
 
 
-def get_salon_expenses(date: str) -> list[dict]:
-    """Список расходов по салону за дату: [{id, item, amount}]."""
-    with _db() as conn:
-        rows = conn.execute(
-            "SELECT id, item, amount FROM salon_expenses WHERE date = ? ORDER BY id",
-            (date,),
-        ).fetchall()
-        return [{"id": r["id"], "item": r["item"], "amount": r["amount"]} for r in rows]
+
+def get_salon_expenses(*args, **kwargs):
+    raise PermissionError('canonical_P407_expense_owner_required')
 
 
-def sum_salon_expenses(date: str) -> int:
-    """Сумма расходов по салону за дату."""
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT COALESCE(SUM(amount), 0) AS s FROM salon_expenses WHERE date = ?",
-            (date,),
-        ).fetchone()
-        return int(row["s"] or 0)
+
+def sum_salon_expenses(*args, **kwargs):
+    raise PermissionError('canonical_P407_expense_owner_required')
 
 
-def clear_salon_expenses(date: str) -> int:
-    """Удаляет все расходы за дату (для повторного ввода). Возвращает кол-во удалённых."""
-    with _db() as conn:
-        cur = conn.execute("DELETE FROM salon_expenses WHERE date = ?", (date,))
-        return cur.rowcount or 0
+
+def clear_salon_expenses(*args, **kwargs):
+    raise PermissionError('canonical_P407_expense_owner_required')
+
 
 
 # ─── Касса со слов Антона (для сверки в дневном отчёте) ──────────────────────
 
 def set_cash_log(date: str, total_till: int, day_cash: int, entered_by=None) -> None:
-    """Сохраняет/перезаписывает кассу за день: всего налички + наличка за день."""
-    try:
-        by = int(entered_by) if entered_by else None
-    except Exception:
-        by = None
-    with _db() as conn:
-        conn.execute(
-            "INSERT INTO cash_log (date, total_till, day_cash, entered_by, ts) "
-            "VALUES (?, ?, ?, ?, ?) "
-            "ON CONFLICT(date) DO UPDATE SET total_till=excluded.total_till, "
-            "day_cash=excluded.day_cash, entered_by=excluded.entered_by, ts=excluded.ts",
-            (date, int(total_till), int(day_cash), by, _now()),
-        )
+    raise PermissionError('canonical_cash_declaration_confirmation_required')
+
 
 
 def get_cash_log(date: str) -> dict | None:
-    """Касса со слов Антона за дату или None."""
-    try:
-        with _db() as conn:
-            row = conn.execute(
-                "SELECT date, total_till, day_cash, entered_by, ts FROM cash_log WHERE date = ?",
-                (date,),
-            ).fetchone()
-            return dict(row) if row else None
-    except Exception:
-        return None
+    # Legacy history remains an archive, never a current verified observation.
+    return None
+
 
 
 # ─── Лист ожидания на занятое время ───────────────────────────────────────
@@ -2884,56 +2348,19 @@ def schedule_review_request(
     staff_id: int | None,
     delay_hours: int = 3,
 ) -> bool:
-    """
-    Планирует запрос на отзыв через delay_hours после закрытия визита.
-    Возвращает True если запланировали, False если уже было запланировано
-    для этой пары (client_id, record_id) — защита от двойного запроса.
-    """
-    visit_closed_at = _now()
-    send_after = (datetime.now() + timedelta(hours=delay_hours)).isoformat(
-        timespec="seconds"
-    )
-    with _db() as conn:
-        try:
-            conn.execute(
-                "INSERT INTO review_requests "
-                "(client_id, record_id, staff_id, visit_closed_at, send_after, status) "
-                "VALUES (?, ?, ?, ?, ?, 'pending')",
-                (client_id, record_id, staff_id, visit_closed_at, send_after),
-            )
-            return True
-        except sqlite3.IntegrityError:
-            return False
+    raise PermissionError('canonical_native_feedback_executor_required')
 
 
 def pending_review_requests_to_send(now_iso: str | None = None) -> list[dict]:
-    """Запросы, у которых статус 'pending' и send_after уже наступил."""
-    now_iso = now_iso or _now()
-    with _db() as conn:
-        rows = conn.execute(
-            "SELECT * FROM review_requests "
-            "WHERE status = 'pending' AND send_after <= ? "
-            "ORDER BY send_after",
-            (now_iso,),
-        ).fetchall()
-        return [dict(r) for r in rows]
+    return []
 
 
 def mark_review_request_sent(review_id: int):
-    with _db() as conn:
-        conn.execute(
-            "UPDATE review_requests SET status = 'sent', sent_at = ? WHERE id = ?",
-            (_now(), review_id),
-        )
+    raise PermissionError('canonical_native_feedback_executor_required')
 
 
 def mark_review_request_failed(review_id: int, reason: str = "send_failed"):
-    """Когда клиент заблокировал бот или ошибка отправки."""
-    with _db() as conn:
-        conn.execute(
-            "UPDATE review_requests SET status = ? WHERE id = ?",
-            (reason, review_id),
-        )
+    raise PermissionError('canonical_native_feedback_executor_required')
 
 
 def record_review_response(
@@ -2941,103 +2368,28 @@ def record_review_response(
     rating: int,
     comment: str | None = None,
 ):
-    """Сохраняет ответ клиента на запрос отзыва."""
-    with _db() as conn:
-        conn.execute(
-            "UPDATE review_requests SET rating = ?, comment = ?, "
-            "responded_at = ?, status = 'responded' WHERE id = ?",
-            (rating, comment, _now(), review_id),
-        )
+    raise PermissionError('canonical_native_feedback_executor_required')
 
 
 def get_review_request_by_id(review_id: int) -> dict | None:
-    with _db() as conn:
-        row = conn.execute(
-            "SELECT * FROM review_requests WHERE id = ?", (review_id,)
-        ).fetchone()
-        return dict(row) if row else None
+    return None
 
 
 def expire_stale_review_requests(stale_days: int = 7) -> int:
-    """Помечает 'sent', на которые клиент не ответил за N дней, как expired."""
-    cutoff = (datetime.now() - timedelta(days=stale_days)).isoformat(timespec="seconds")
-    with _db() as conn:
-        cur = conn.execute(
-            "UPDATE review_requests SET status = 'expired' "
-            "WHERE status = 'sent' AND sent_at < ?",
-            (cutoff,),
-        )
-        return cur.rowcount
+    raise PermissionError('canonical_native_feedback_executor_required')
 
 
 def review_stats(days: int = 30) -> dict:
-    """Сводка по отзывам за N дней (для команды /reviews_stats)."""
-    cutoff = (datetime.now() - timedelta(days=days)).isoformat(timespec="seconds")
-    with _db() as conn:
-        rows = conn.execute(
-            "SELECT status, COUNT(*) AS n FROM review_requests "
-            "WHERE visit_closed_at >= ? GROUP BY status",
-            (cutoff,),
-        ).fetchall()
-        by_status = {r["status"]: r["n"] for r in rows}
-        # Средний рейтинг и распределение
-        rating_rows = conn.execute(
-            "SELECT rating, COUNT(*) AS n FROM review_requests "
-            "WHERE visit_closed_at >= ? AND rating IS NOT NULL GROUP BY rating",
-            (cutoff,),
-        ).fetchall()
-        by_rating = {r["rating"]: r["n"] for r in rating_rows}
-        total_rated = sum(by_rating.values())
-        avg = (
-            sum(r * n for r, n in by_rating.items()) / total_rated
-            if total_rated else None
-        )
-    return {
-        "by_status": by_status,
-        "by_rating": by_rating,
-        "total_requested": sum(by_status.values()),
-        "total_rated": total_rated,
-        "avg_rating": avg,
-    }
+    return {'available':False,'source':'quarantined_legacy_feedback','avg_rating':None,'total_rated':None,'requested':None,'responded':None}
 
 
 def list_recent_reviews(limit: int = 40, days: int = 180) -> list[dict]:
-    """Последние отзывы с оценкой (для модерации в панели управления)."""
-    cutoff = (datetime.now() - timedelta(days=days)).isoformat(timespec="seconds")
-    with _db() as conn:
-        rows = conn.execute(
-            "SELECT rating, comment, staff_id, visit_closed_at, responded_at "
-            "FROM review_requests WHERE rating IS NOT NULL AND visit_closed_at >= ? "
-            "ORDER BY COALESCE(responded_at, visit_closed_at) DESC LIMIT ?",
-            (cutoff, int(limit)),
-        ).fetchall()
-        return [dict(r) for r in rows]
+    return []
 
 
 def _external_reviews_ensure(conn):
-    """Ленивая миграция для production-БД, созданной до reputation v1."""
-    conn.executescript("""
-        CREATE TABLE IF NOT EXISTS external_reviews (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            source          TEXT    NOT NULL,
-            external_id     TEXT    NOT NULL,
-            rating          REAL,
-            review_text     TEXT,
-            published_at    TEXT,
-            imported_at     TEXT    NOT NULL,
-            response_state  TEXT    NOT NULL DEFAULT '',
-            alerted_at      TEXT,
-            UNIQUE (source, external_id)
-        );
-        CREATE INDEX IF NOT EXISTS idx_external_reviews_source_date
-            ON external_reviews (source, published_at);
-    """)
-    columns = {
-        str(row[1])
-        for row in conn.execute("PRAGMA table_info(external_reviews)").fetchall()
-    }
-    if "alerted_at" not in columns:
-        conn.execute("ALTER TABLE external_reviews ADD COLUMN alerted_at TEXT")
+    """B34: historical review storage is retained without schema writes."""
+    return None
 
 
 def upsert_external_review(
@@ -3049,102 +2401,28 @@ def upsert_external_review(
     published_at: str = "",
     response_state: str = "",
 ) -> dict:
-    """Идемпотентно сохраняет обезличенный публичный отзыв без автора."""
-    with _db() as conn:
-        _external_reviews_ensure(conn)
-        existing = conn.execute(
-            "SELECT id FROM external_reviews WHERE source = ? AND external_id = ?",
-            (str(source or "")[:24], str(external_id or "")[:160]),
-        ).fetchone()
-        conn.execute(
-            "INSERT INTO external_reviews "
-            "(source, external_id, rating, review_text, published_at, imported_at, response_state) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?) "
-            "ON CONFLICT(source, external_id) DO UPDATE SET "
-            "rating=excluded.rating, review_text=excluded.review_text, "
-            "published_at=excluded.published_at, imported_at=excluded.imported_at, "
-            "response_state=excluded.response_state",
-            (
-                str(source or "")[:24],
-                str(external_id or "")[:160],
-                rating,
-                str(review_text or "")[:4000],
-                str(published_at or "")[:32],
-                _now(),
-                str(response_state or "")[:32],
-            ),
-        )
-        row = conn.execute(
-            "SELECT * FROM external_reviews WHERE source = ? AND external_id = ?",
-            (str(source or "")[:24], str(external_id or "")[:160]),
-        ).fetchone()
-        result = dict(row) if row else {}
-        result["created"] = existing is None and bool(row)
-        return result
+    """B34: the legacy review writer is retired; historical evidence stays intact."""
+    return {"ok": False, "error": "LEGACY_REVIEW_SOURCE_RETIRED", "created": False, "business_mutations": 0}
 
 
 def list_external_reviews(days: int = 365, limit: int = 300) -> list[dict]:
-    cutoff = (datetime.now() - timedelta(days=max(1, int(days or 365)))).isoformat(
-        timespec="seconds"
-    )
-    with _db() as conn:
-        _external_reviews_ensure(conn)
-        rows = conn.execute(
-            "SELECT source, external_id, rating, review_text, published_at, imported_at, response_state "
-            "FROM external_reviews "
-            "WHERE COALESCE(NULLIF(published_at, ''), imported_at) >= ? "
-            "ORDER BY COALESCE(NULLIF(published_at, ''), imported_at) DESC LIMIT ?",
-            (cutoff, max(1, min(int(limit or 300), 1000))),
-        ).fetchall()
-        return [dict(row) for row in rows]
+    """B34: legacy review projections are unavailable, not canonical facts."""
+    return []
 
 
 def list_unalerted_external_reviews(limit: int = 20) -> list[dict]:
-    """Новые отзывы, которые ещё не были показаны владельцу."""
-    with _db() as conn:
-        _external_reviews_ensure(conn)
-        rows = conn.execute(
-            "SELECT id, source, external_id, rating, review_text, published_at, imported_at "
-            "FROM external_reviews WHERE alerted_at IS NULL "
-            "ORDER BY COALESCE(NULLIF(published_at, ''), imported_at) ASC LIMIT ?",
-            (max(1, min(int(limit or 20), 100)),),
-        ).fetchall()
-        return [dict(row) for row in rows]
+    """B34: legacy review projections are unavailable, not canonical facts."""
+    return []
 
 
 def mark_external_reviews_alerted(review_ids: list[int]) -> int:
-    ids = set()
-    for value in review_ids or []:
-        try:
-            parsed = int(value)
-        except (TypeError, ValueError):
-            continue
-        if parsed > 0:
-            ids.add(parsed)
-    ids = sorted(ids)
-    if not ids:
-        return 0
-    placeholders = ",".join("?" for _ in ids)
-    with _db() as conn:
-        _external_reviews_ensure(conn)
-        cur = conn.execute(
-            f"UPDATE external_reviews SET alerted_at = ? "
-            f"WHERE id IN ({placeholders}) AND alerted_at IS NULL",
-            (_now(), *ids),
-        )
-        return cur.rowcount
+    """B34: no legacy review metadata mutation is authorized."""
+    return 0
 
 
 def mark_external_reviews_alerted_for_source(source: str) -> int:
-    """Первичный снимок становится базой и не рассылается как новый."""
-    with _db() as conn:
-        _external_reviews_ensure(conn)
-        cur = conn.execute(
-            "UPDATE external_reviews SET alerted_at = ? "
-            "WHERE source = ? AND alerted_at IS NULL",
-            (_now(), str(source or "")[:24]),
-        )
-        return cur.rowcount
+    """B34: no legacy review metadata mutation is authorized."""
+    return 0
 
 
 # ─── Алерт админу о зависшей заявке ──────────────────────────────
@@ -3302,6 +2580,7 @@ def create_subscription(*, client_id: int, plan_code: str, tier: str,
                          price_rub: int, visits_included: int,
                          started_at: str, expires_at: str) -> int:
     """Создаёт подписку со статусом pending_payment. Возвращает id."""
+    raise RuntimeError("p4_05_legacy_mutation_disabled:initiate_customer_subscription_purchase")
     with _db() as conn:
         cur = conn.execute(
             "INSERT INTO subscriptions "
@@ -3315,6 +2594,7 @@ def create_subscription(*, client_id: int, plan_code: str, tier: str,
 
 
 def set_subscription_payment_id(subscription_id: int, payment_id: str):
+    raise RuntimeError("p4_05_legacy_mutation_disabled:provider_payment_correlation")
     with _db() as conn:
         conn.execute(
             "UPDATE subscriptions SET yukassa_payment_id = ? WHERE id = ?",
@@ -3341,6 +2621,7 @@ def get_subscription_by_payment_id(payment_id: str) -> dict | None:
 
 def activate_subscription(subscription_id: int):
     """pending_payment → active + проставляет payment_completed_at."""
+    raise RuntimeError("p4_05_legacy_mutation_disabled:activate_customer_subscription")
     with _db() as conn:
         conn.execute(
             "UPDATE subscriptions SET status = 'active', "
@@ -3351,6 +2632,7 @@ def activate_subscription(subscription_id: int):
 
 def update_subscription_status(subscription_id: int, status: str):
     """active / expired / refunded."""
+    raise RuntimeError("p4_05_legacy_mutation_disabled:terminal_subscription_lifecycle")
     with _db() as conn:
         conn.execute(
             "UPDATE subscriptions SET status = ? WHERE id = ?",
@@ -3359,6 +2641,7 @@ def update_subscription_status(subscription_id: int, status: str):
 
 
 def update_subscription_usage(subscription_id: int, visits_used: int):
+    raise RuntimeError("p4_05_legacy_mutation_disabled:sync_customer_subscription_usage")
     with _db() as conn:
         conn.execute(
             "UPDATE subscriptions SET visits_used = ? WHERE id = ?",
@@ -3367,11 +2650,7 @@ def update_subscription_usage(subscription_id: int, visits_used: int):
 
 
 def mark_subscription_renew_pushed(subscription_id: int):
-    with _db() as conn:
-        conn.execute(
-            "UPDATE subscriptions SET renew_reminder_sent_at = ? WHERE id = ?",
-            (_now(), subscription_id),
-        )
+    raise RuntimeError('B35_CANONICAL_OWNER_REQUIRED')
 
 
 def get_active_subscription_for_client(client_id: int) -> dict | None:
@@ -3997,15 +3276,7 @@ def dashboard_timeseries(days: int = 30, start: str = None, end: str = None) -> 
 
 
 def reviews_by_master(days: int = 90) -> dict:
-    """Средний рейтинг и число оценок по каждому мастеру (staff_id) за период."""
-    cutoff = (datetime.now() - timedelta(days=days)).isoformat(timespec="seconds")
-    out = {}
-    with _db() as conn:
-        for r in conn.execute(
-            "SELECT staff_id, AVG(rating) AS a, COUNT(*) AS n FROM review_requests "
-            "WHERE rating IS NOT NULL AND visit_closed_at >= ? GROUP BY staff_id", (cutoff,)):
-            out[r["staff_id"]] = {"avg": float(r["a"]) if r["a"] is not None else None, "n": int(r["n"])}
-    return out
+    return {}
 
 
 def loyalty_summary() -> dict:
@@ -4088,6 +3359,7 @@ def is_ref_code_free(code: str) -> bool:
 
 
 def create_ref_code(client_id: int, code: str):
+    raise RuntimeError("p4_04_legacy_mutation_disabled:issue_referral_link")
     with _db() as conn:
         conn.execute(
             "INSERT INTO referral_codes (client_id, code, created_at) "
@@ -4120,6 +3392,7 @@ def get_referral_for_referee(referee_chat_id: int) -> dict | None:
 
 
 def create_referral(referrer_client_id: int, referee_chat_id: int, code_used: str):
+    raise RuntimeError("p4_04_legacy_mutation_disabled:create_customer_referral")
     with _db() as conn:
         conn.execute(
             "INSERT INTO referrals "
@@ -4140,6 +3413,7 @@ def list_pending_referrals() -> list[dict]:
 
 
 def set_referral_referee_client(referral_id: int, referee_client_id: int):
+    raise RuntimeError("p4_04_legacy_mutation_disabled:resolve_customer_referral")
     with _db() as conn:
         conn.execute(
             "UPDATE referrals SET referee_client_id = ? WHERE id = ?",
@@ -4149,6 +3423,7 @@ def set_referral_referee_client(referral_id: int, referee_client_id: int):
 
 def update_referral_status(referral_id: int, status: str):
     """status: pending / granted / self_block / expired."""
+    raise RuntimeError("p4_04_legacy_mutation_disabled:resolve_customer_referral")
     with _db() as conn:
         conn.execute(
             "UPDATE referrals SET status = ? WHERE id = ?",
@@ -4159,6 +3434,7 @@ def update_referral_status(referral_id: int, status: str):
 def save_referral_promo(*, referral_id: int, client_id: int, code: str,
                          kind: str, percent: int, expires_at: str):
     """kind: referrer (тому, кто пригласил) / referee (приведённому)."""
+    raise RuntimeError("p4_04_legacy_mutation_disabled:issue_referral_rewards")
     with _db() as conn:
         conn.execute(
             "INSERT INTO referral_promos "
@@ -4216,6 +3492,17 @@ def already_sent_birthday_this_year(client_id: int, year: int) -> bool:
         return bool(row)
 
 
+def get_birthday_promo_for_year(client_id: int, year: int) -> dict | None:
+    """Возвращает уже созданный промокод, чтобы повторный job не создавал новый."""
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT * FROM birthday_promo WHERE client_id = ? AND year = ? "
+            "ORDER BY id DESC LIMIT 1",
+            (client_id, year),
+        ).fetchone()
+        return dict(row) if row else None
+
+
 def new_birthday_promo_code() -> str:
     """Уникальный код вида BDAY-XXXXXX (без 0/O/1/I/L)."""
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -4266,61 +3553,8 @@ def mark_birthday_promo_used(code: str) -> bool:
 # ─── Ротация ПД (152-ФЗ: не хранить дольше нужного) ──────────────────
 
 def rotate_old_pii(retention_months: int) -> dict:
-    """
-    Обезличивает клиентов без активности N месяцев и сертификаты, истёкшие
-    больше N месяцев назад. Фактически зануляет name_enc/phone_enc/phone_hash,
-    но саму строку оставляет — чтобы не сломались связи с bookings.
-
-    Возвращает счётчики {"clients": N, "gift_certs": M} для лога.
-    """
-    cutoff = (datetime.now() - timedelta(days=retention_months * 30)).isoformat(
-        timespec="seconds"
-    )
-    counts = {"clients": 0, "gift_certs": 0}
-
-    with _db() as conn:
-        # Клиенты: нет ни одной записи позже cutoff. Через GROUP BY + HAVING.
-        # Дополнительно условие на updated_at — чтобы только что зарегистрированных
-        # без записей не обезличивать (вдруг человек ввёл данные но не успел дойти
-        # до выбора времени).
-        rows = conn.execute(
-            """
-            SELECT c.id FROM clients c
-            LEFT JOIN bookings b ON b.client_id = c.id
-            WHERE (c.name_enc IS NOT NULL OR c.phone_enc IS NOT NULL)
-              AND (c.updated_at IS NULL OR c.updated_at < ?)
-            GROUP BY c.id
-            HAVING (MAX(b.datetime) IS NULL OR MAX(b.datetime) < ?)
-            """,
-            (cutoff, cutoff),
-        ).fetchall()
-        for r in rows:
-            conn.execute(
-                "UPDATE clients SET name_enc = NULL, phone_enc = NULL, "
-                "phone_hash = NULL, updated_at = ? WHERE id = ?",
-                (_now(), r["id"]),
-            )
-            counts["clients"] += 1
-
-        # Сертификаты: истекли давно. Хранить ПД получателя дальше нет смысла.
-        rows = conn.execute(
-            """
-            SELECT id FROM gift_certificates
-            WHERE expires_at < ?
-              AND (recipient_name_enc IS NOT NULL OR recipient_phone_enc IS NOT NULL)
-            """,
-            (cutoff,),
-        ).fetchall()
-        for r in rows:
-            conn.execute(
-                "UPDATE gift_certificates SET recipient_name_enc = NULL, "
-                "recipient_phone_enc = NULL, recipient_phone_hash = NULL "
-                "WHERE id = ?",
-                (r["id"],),
-            )
-            counts["gift_certs"] += 1
-
-    return counts
+    """D7-A: legacy Client/certificate anonymization is not allowlisted."""
+    raise RuntimeError("package5_a30_legacy_pii_cleanup_not_allowlisted")
 
 
 # Создаём таблицы при импорте модуля — БД всегда готова к работе.
@@ -4330,45 +3564,18 @@ init_db()
 # ─── Чаевые (аналитика по каждому мастеру) ──────────────────────────────
 def save_tip(master_id=None, master_slug: str = "", master_name: str = "",
              amount=0, record_id=None, note: str = "") -> None:
-    """Записать факт перевода чаевых (служебный сигнал клиента «Я перевёл»)."""
-    try:
-        amount_i = int(float(amount or 0))
-    except (TypeError, ValueError):
-        amount_i = 0
-    with _db() as conn:
-        conn.execute(
-            "INSERT INTO tips (master_id, master_slug, master_name, amount, record_id, note, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (int(master_id) if master_id else None, master_slug or "", master_name or "",
-             amount_i, int(record_id) if record_id else None, str(note or "").strip()[:240], _now()),
-        )
+    """B22: preserve history; self-reported tips are not payment evidence."""
+    raise RuntimeError("p5_b22_unverified_tip_signal_retired")
 
 
-def tips_totals_by_master(from_iso: str = None, to_iso: str = None) -> list:
-    """Сумма и количество чаевых по каждому мастеру за период (для владельца)."""
-    q = ("SELECT master_id, MAX(master_name) AS master_name, MAX(master_slug) AS master_slug, "
-         "COUNT(*) AS cnt, COALESCE(SUM(amount),0) AS total FROM tips WHERE 1=1")
-    params = []
-    if from_iso:
-        q += " AND created_at >= ?"; params.append(from_iso)
-    if to_iso:
-        q += " AND created_at <= ?"; params.append(to_iso)
-    q += " GROUP BY master_id ORDER BY total DESC"
-    with _db() as conn:
-        return [dict(r) for r in conn.execute(q, params).fetchall()]
+def tips_totals_by_master(from_iso: str = None, to_iso: str = None):
+    """B22: historical self-reports cannot project current financial totals."""
+    raise RuntimeError("p5_b22_legacy_tip_projection_retired")
 
 
-def tips_for_master(master_id, from_iso: str = None, to_iso: str = None) -> dict:
-    """Сумма и количество чаевых конкретного мастера (для его собственной панели)."""
-    q = "SELECT COUNT(*) AS cnt, COALESCE(SUM(amount),0) AS total FROM tips WHERE master_id = ?"
-    params = [int(master_id) if master_id else 0]
-    if from_iso:
-        q += " AND created_at >= ?"; params.append(from_iso)
-    if to_iso:
-        q += " AND created_at <= ?"; params.append(to_iso)
-    with _db() as conn:
-        r = conn.execute(q, params).fetchone()
-        return {"count": (r["cnt"] or 0), "total": (r["total"] or 0)}
+def tips_for_master(master_id, from_iso: str = None, to_iso: str = None):
+    """B22: historical self-reports cannot project current financial totals."""
+    raise RuntimeError("p5_b22_legacy_tip_projection_retired")
 
 
 # ── CutMatch: лимит ИИ-консультаций (2/день на пользователя) ─────────────────
@@ -4449,89 +3656,13 @@ def _json_loads_safe(value: str | None):
 
 
 def _ensure_owner_action_journal(conn) -> None:
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS owner_action_journal (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            source        TEXT    NOT NULL DEFAULT 'owner_os',
-            job           TEXT    NOT NULL,
-            title         TEXT,
-            status        TEXT    NOT NULL DEFAULT 'running',
-            created_by    INTEGER,
-            created_at    TEXT    NOT NULL,
-            started_at    TEXT,
-            completed_at  TEXT,
-            payload_json  TEXT,
-            summary_json  TEXT,
-            baseline_json TEXT,
-            result_due_at TEXT,
-            evaluated_at  TEXT,
-            impact_status TEXT,
-            impact_json   TEXT,
-            error         TEXT
-        );
-    """)
-    conn.execute("""
-        CREATE INDEX IF NOT EXISTS idx_owner_action_journal_created
-            ON owner_action_journal (created_at);
-    """)
-    conn.execute("""
-        CREATE INDEX IF NOT EXISTS idx_owner_action_journal_job
-            ON owner_action_journal (job, created_at);
-    """)
-    for col in (
-        ("baseline_json", "TEXT"),
-        ("result_due_at", "TEXT"),
-        ("evaluated_at", "TEXT"),
-        ("impact_status", "TEXT"),
-        ("impact_json", "TEXT"),
-    ):
-        try:
-            conn.execute(f"ALTER TABLE owner_action_journal ADD COLUMN {col[0]} {col[1]}")
-        except sqlite3.OperationalError:
-            pass
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def create_owner_action(job: str, title: str = "", *, source: str = "owner_os",
                         created_by=None, payload=None, status: str = "running",
                         baseline=None, result_due_at: str | None = None) -> int:
-    """Создаёт запись в журнале AI-директора. ПД не сохраняем."""
-    try:
-        uid = int(created_by) if created_by else None
-    except Exception:
-        uid = None
-    job = (job or "").strip().lower()[:80]
-    title = (title or job or "Действие")[:180]
-    status = (status or "running").strip().lower()[:40]
-    now = _now()
-    if baseline is None:
-        baseline = _owner_action_baseline(job)
-    if result_due_at is None:
-        result_due_at = _owner_action_due_at(job, now)
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        cur = conn.execute(
-            "INSERT INTO owner_action_journal "
-            "(source, job, title, status, created_by, created_at, started_at, "
-            "payload_json, summary_json, baseline_json, result_due_at, impact_status, "
-            "impact_json, error) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                (source or "owner_os")[:60],
-                job,
-                title,
-                status,
-                uid,
-                now,
-                now if status in ("running", "done", "failed") else None,
-                _json_dumps_safe(payload),
-                "{}",
-                _json_dumps_safe(baseline),
-                result_due_at,
-                "pending",
-                "{}",
-                "",
-            ),
-        )
-        return int(cur.lastrowid)
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def _compact_owner_action_summary(summary) -> dict:
@@ -4552,425 +3683,35 @@ def _compact_owner_action_summary(summary) -> dict:
 def link_owner_control_task_action(control_action_id, linked_action_id, linked_job: str = "",
                                    *, action_status: str = "running", note: str = "",
                                    summary=None, error: str = "") -> dict | None:
-    """Связывает контрольную задачу owner_control с запущенным действием.
-
-    Контроль не закрывается автоматически: MAYA фиксирует, что действие уже
-    запущено/выполнено, а владелец позже отмечает фактический результат.
-    """
-    try:
-        control_id = int(control_action_id)
-        action_id = int(linked_action_id)
-    except Exception:
-        return None
-    if not control_id or not action_id:
-        return None
-    action_status = (action_status or "running").strip().lower()[:40]
-    if action_status not in ("running", "done", "failed"):
-        action_status = "running"
-    now = _now()
-    linked_job = (linked_job or "").strip().lower()[:80]
-    note = (note or "")[:420]
-    error = (error or "")[:240]
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        control_row = conn.execute(
-            "SELECT * FROM owner_action_journal WHERE id = ?",
-            (control_id,),
-        ).fetchone()
-        if not control_row:
-            return None
-        control = dict(control_row)
-        if control.get("source") != "owner_control" or control.get("job") != "control_task":
-            return None
-        action_row = conn.execute(
-            "SELECT job, result_due_at FROM owner_action_journal WHERE id = ?",
-            (action_id,),
-        ).fetchone()
-        if action_row:
-            linked_job = linked_job or str(action_row["job"] or "")[:80]
-
-        payload = _json_loads_safe(control.get("payload_json"))
-        control_summary = _json_loads_safe(control.get("summary_json"))
-        if not payload.get("linked_action_started_at"):
-            payload["linked_action_started_at"] = now
-        payload.update({
-            "linked_action_id": action_id,
-            "linked_action_job": linked_job,
-            "linked_action_status": action_status,
-            "linked_action_updated_at": now,
-        })
-        if action_status in ("done", "failed"):
-            payload["linked_action_completed_at"] = now
-        if action_row and action_row["result_due_at"]:
-            payload["linked_action_due_at"] = action_row["result_due_at"]
-            if not payload.get("due_at") and not control.get("result_due_at"):
-                payload["due_at"] = action_row["result_due_at"]
-
-        control_summary.update({
-            "manual": False,
-            "last_action": "linked_action_" + action_status,
-            "linked_action_id": action_id,
-            "linked_action_job": linked_job,
-            "linked_action_status": action_status,
-            "updated_at": now,
-        })
-        compact_summary = _compact_owner_action_summary(summary)
-        if compact_summary:
-            control_summary["linked_action_summary"] = compact_summary
-        if note:
-            control_summary["note"] = note
-        if error:
-            control_summary["linked_action_error"] = error
-
-        current_status = str(control.get("status") or "").lower()
-        if current_status in ("done", "canceled"):
-            next_status = current_status
-            completed_at = control.get("completed_at")
-        elif action_status == "failed":
-            next_status = "pending"
-            completed_at = None
-        else:
-            next_status = "running"
-            completed_at = None
-        result_due_at = control.get("result_due_at") or payload.get("due_at")
-
-        conn.execute(
-            "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
-            "result_due_at = ?, payload_json = ?, summary_json = ?, error = ? "
-            "WHERE id = ?",
-            (
-                next_status,
-                completed_at,
-                result_due_at,
-                _json_dumps_safe(payload),
-                _json_dumps_safe(control_summary),
-                "",
-                control_id,
-            ),
-        )
-
-    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == control_id]
-    return actions[0] if actions else None
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def finish_owner_action(action_id, status: str, *, summary=None, error: str = "") -> bool:
-    """Завершает запись журнала AI-директора статусом done/failed/running."""
-    try:
-        aid = int(action_id)
-    except Exception:
-        return False
-    status = (status or "").strip().lower()[:40] or "done"
-    completed_at = _now() if status in ("done", "failed") else None
-    source_control_id = 0
-    linked_job = ""
-    try:
-        with _db() as conn:
-            _ensure_owner_action_journal(conn)
-            row = conn.execute(
-                "SELECT job, payload_json FROM owner_action_journal WHERE id = ?",
-                (aid,),
-            ).fetchone()
-            if row:
-                linked_job = str(row["job"] or "")[:80]
-                payload = _json_loads_safe(row["payload_json"])
-                try:
-                    source_control_id = int(payload.get("source_control_id") or 0)
-                except Exception:
-                    source_control_id = 0
-            conn.execute(
-                "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
-                "summary_json = ?, error = ? WHERE id = ?",
-                (status, completed_at, _json_dumps_safe(summary), (error or "")[:240], aid),
-            )
-    except Exception:
-        return False
-    if source_control_id:
-        try:
-            link_owner_control_task_action(
-                source_control_id,
-                aid,
-                linked_job,
-                action_status=status,
-                summary=summary,
-                error=error,
-            )
-        except Exception:
-            pass
-    return True
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def update_owner_control_task(action_id, action: str, *, note: str = "",
                               due_at: str | None = None,
                               assigned_to: str | None = None,
                               assignee_name: str = "") -> dict | None:
-    """Меняет состояние ручной контрольной задачи owner_control."""
-    try:
-        aid = int(action_id)
-    except Exception:
-        return None
-    action = (action or "").strip().lower()
-    if action in ("complete", "done", "finish"):
-        next_status = "done"
-    elif action in ("cancel", "canceled", "cancelled"):
-        next_status = "canceled"
-    elif action in ("postpone", "snooze", "delay"):
-        next_status = "pending"
-    elif action in ("reopen", "open"):
-        next_status = "pending"
-    elif action in ("revision", "return", "redo", "rework"):
-        next_status = "running"
-    elif action in ("assign", "reassign"):
-        next_status = None
-    else:
-        return None
-
-    now = _now()
-    note = (note or "")[:420]
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        row = conn.execute(
-            "SELECT * FROM owner_action_journal WHERE id = ?",
-            (aid,),
-        ).fetchone()
-        if not row:
-            return None
-        item = dict(row)
-        if item.get("source") != "owner_control" or item.get("job") != "control_task":
-            return None
-
-        payload = _json_loads_safe(item.get("payload_json"))
-        summary = _json_loads_safe(item.get("summary_json"))
-        if next_status is None:
-            next_status = str(item.get("status") or "pending")
-        summary.update({
-            "manual": True,
-            "last_action": action,
-            "note": note,
-            "updated_at": now,
-        })
-        completed_at = None
-        result_due_at = item.get("result_due_at")
-        if action in ("assign", "reassign"):
-            raw_assigned = (assigned_to or payload.get("assigned_to") or "owner")
-            assigned = str(raw_assigned or "owner").strip().lower()[:40]
-            if assigned not in ("owner", "maya", "admin", "master", "team"):
-                assigned = "owner"
-            name = (assignee_name or "")[:80]
-            payload["assigned_to"] = assigned
-            payload["assignee_name"] = name
-            if assigned in ("admin", "master", "team"):
-                delivery_channel = "team_chat"
-                delivery_state = "queued"
-            elif assigned == "maya":
-                delivery_channel = "maya_queue"
-                delivery_state = "internal"
-            else:
-                delivery_channel = "owner_control"
-                delivery_state = "owner_only"
-            payload["assignment_delivery_channel"] = delivery_channel
-            payload["assignment_delivery_state"] = delivery_state
-            payload["assignment_delivery_updated_at"] = now
-            payload["assignment_delivery_error"] = ""
-            payload["assignment_delivery_message_id"] = 0
-            payload["assignment_delivery_key"] = "%s:%s:%s:%s" % (aid, assigned, name, now)
-            summary["assigned_to"] = assigned
-            summary["assignee_name"] = name
-            summary["assigned_at"] = now
-            summary["assignment_delivery_channel"] = delivery_channel
-            summary["assignment_delivery_state"] = delivery_state
-        if next_status in ("done", "canceled"):
-            completed_at = now
-            summary["result"] = next_status
-        elif action in ("postpone", "snooze", "delay") and due_at:
-            result_due_at = str(due_at)[:19]
-            payload["due_at"] = result_due_at
-            summary["postponed_to"] = result_due_at
-        elif action in ("revision", "return", "redo", "rework"):
-            payload["assignment_work_state"] = "revision"
-            payload["assignment_work_updated_at"] = now
-            payload["assignment_work_actor_role"] = "owner"
-            payload["assignment_work_actor_name"] = "Владелец"
-            payload["assignment_work_note"] = note
-            summary["assignment_work_state"] = "revision"
-            summary["assignment_work_updated_at"] = now
-            summary["assignment_work_actor_role"] = "owner"
-            summary["assignment_work_actor_name"] = "Владелец"
-            summary["owner_revision_requested_at"] = now
-            if note:
-                summary["owner_revision_note"] = note
-
-        conn.execute(
-            "UPDATE owner_action_journal SET status = ?, completed_at = ?, "
-            "result_due_at = ?, payload_json = ?, summary_json = ?, error = ? "
-            "WHERE id = ?",
-            (
-                next_status,
-                completed_at,
-                result_due_at,
-                _json_dumps_safe(payload),
-                _json_dumps_safe(summary),
-                "",
-                aid,
-            ),
-        )
-
-    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
-    return actions[0] if actions else None
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def mark_owner_control_task_delivery(action_id, *, state: str = "delivered",
                                      channel: str = "team_chat", message_id: int = 0,
                                      error: str = "") -> dict | None:
-    """Фиксирует, что назначенная контрольная задача доставлена исполнителю."""
-    try:
-        aid = int(action_id)
-    except Exception:
-        return None
-    if not aid:
-        return None
-    state = (state or "delivered").strip().lower()[:40]
-    if state not in ("queued", "delivered", "failed", "internal", "owner_only"):
-        state = "delivered"
-    channel = (channel or "team_chat").strip().lower()[:40]
-    now = _now()
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        row = conn.execute(
-            "SELECT * FROM owner_action_journal WHERE id = ?",
-            (aid,),
-        ).fetchone()
-        if not row:
-            return None
-        item = dict(row)
-        if item.get("source") != "owner_control" or item.get("job") != "control_task":
-            return None
-        payload = _json_loads_safe(item.get("payload_json"))
-        summary = _json_loads_safe(item.get("summary_json"))
-        payload["assignment_delivery_state"] = state
-        payload["assignment_delivery_channel"] = channel
-        payload["assignment_delivery_updated_at"] = now
-        payload["assignment_delivery_error"] = (error or "")[:240]
-        if message_id:
-            payload["assignment_delivery_message_id"] = int(message_id)
-            payload["assignment_delivered_at"] = now
-        elif state != "delivered":
-            payload["assignment_delivery_message_id"] = int(payload.get("assignment_delivery_message_id") or 0)
-        summary["assignment_delivery_state"] = state
-        summary["assignment_delivery_channel"] = channel
-        summary["assignment_delivery_updated_at"] = now
-        if message_id:
-            summary["assignment_delivery_message_id"] = int(message_id)
-        if error:
-            summary["assignment_delivery_error"] = (error or "")[:180]
-        conn.execute(
-            "UPDATE owner_action_journal SET payload_json = ?, summary_json = ?, error = ? "
-            "WHERE id = ?",
-            (_json_dumps_safe(payload), _json_dumps_safe(summary), "", aid),
-        )
-    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
-    return actions[0] if actions else None
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def update_owner_assignment_work_state(action_id, state: str, *, actor_role: str = "",
                                        actor_name: str = "", actor_chat_id: int = 0,
                                        note: str = "") -> dict | None:
-    """Фиксирует работу исполнителя по назначенной owner_control задаче.
-
-    Это не закрывает контроль владельца: исполнитель может отметить «готово»,
-    а владелец всё равно проверяет результат и закрывает задачу вручную.
-    """
-    try:
-        aid = int(action_id)
-    except Exception:
-        return None
-    if not aid:
-        return None
-    state = (state or "").strip().lower()[:40]
-    aliases = {
-        "accept": "accepted",
-        "accepted": "accepted",
-        "start": "running",
-        "run": "running",
-        "running": "running",
-        "done": "done",
-        "complete": "done",
-        "finish": "done",
-        "blocked": "blocked",
-    }
-    state = aliases.get(state)
-    if not state:
-        return None
-    now = _now()
-    actor_role = (actor_role or "")[:40]
-    actor_name = (actor_name or "")[:80]
-    note = (note or "")[:300]
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        row = conn.execute(
-            "SELECT * FROM owner_action_journal WHERE id = ?",
-            (aid,),
-        ).fetchone()
-        if not row:
-            return None
-        item = dict(row)
-        if item.get("source") != "owner_control" or item.get("job") != "control_task":
-            return None
-        current_status = str(item.get("status") or "pending").lower()
-        if current_status in ("done", "canceled"):
-            return None
-        payload = _json_loads_safe(item.get("payload_json"))
-        summary = _json_loads_safe(item.get("summary_json"))
-        payload["assignment_work_state"] = state
-        payload["assignment_work_updated_at"] = now
-        payload["assignment_work_actor_role"] = actor_role
-        payload["assignment_work_actor_name"] = actor_name
-        payload["assignment_work_actor_chat_id"] = int(actor_chat_id or 0)
-        payload["assignment_work_note"] = note
-        summary["assignment_work_state"] = state
-        summary["assignment_work_updated_at"] = now
-        summary["assignment_work_actor_role"] = actor_role
-        summary["assignment_work_actor_name"] = actor_name
-        if note:
-            summary["assignment_work_note"] = note
-        next_status = "running" if current_status == "pending" else current_status
-        conn.execute(
-            "UPDATE owner_action_journal SET status = ?, payload_json = ?, summary_json = ?, error = ? "
-            "WHERE id = ?",
-            (
-                next_status,
-                _json_dumps_safe(payload),
-                _json_dumps_safe(summary),
-                "",
-                aid,
-            ),
-        )
-    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
-    return actions[0] if actions else None
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def list_owner_actions(limit: int = 12) -> list[dict]:
-    """Последние действия AI-директора, новые первыми."""
-    try:
-        with _db() as conn:
-            _ensure_owner_action_journal(conn)
-            rows = conn.execute(
-                "SELECT id, source, job, title, status, created_by, created_at, "
-                "started_at, completed_at, payload_json, summary_json, baseline_json, "
-                "result_due_at, evaluated_at, impact_status, impact_json, error "
-                "FROM owner_action_journal ORDER BY id DESC LIMIT ?",
-                (max(1, min(int(limit or 12), 50)),),
-            ).fetchall()
-    except Exception:
-        return []
-    out = []
-    for row in rows:
-        item = dict(row)
-        item["payload"] = _json_loads_safe(item.pop("payload_json", None))
-        item["summary"] = _json_loads_safe(item.pop("summary_json", None))
-        item["baseline"] = _json_loads_safe(item.pop("baseline_json", None))
-        item["impact"] = _json_loads_safe(item.pop("impact_json", None))
-        out.append(item)
-    return out
+    # Retired history is not a canonical work projection; do not open/migrate SQLite.
+    return []
 
 
 def _owner_action_due_at(job: str, created_at: str | None = None) -> str:
@@ -5069,68 +3810,12 @@ def _owner_action_impact(job: str, summary: dict, baseline: dict) -> dict:
 
 
 def evaluate_owner_action(action_id, *, force: bool = False) -> dict | None:
-    """Оценивает результат owner action. Возвращает обновлённую запись."""
-    try:
-        aid = int(action_id)
-    except Exception:
-        return None
-    now_iso = _now()
-    with _db() as conn:
-        _ensure_owner_action_journal(conn)
-        row = conn.execute(
-            "SELECT * FROM owner_action_journal WHERE id = ?",
-            (aid,),
-        ).fetchone()
-        if not row:
-            return None
-        item = dict(row)
-        due_at = item.get("result_due_at") or ""
-        if not force and due_at and due_at > now_iso:
-            return {
-                **item,
-                "payload": _json_loads_safe(item.get("payload_json")),
-                "summary": _json_loads_safe(item.get("summary_json")),
-                "baseline": _json_loads_safe(item.get("baseline_json")),
-                "impact": _json_loads_safe(item.get("impact_json")),
-                "not_due": True,
-            }
-        summary = _json_loads_safe(item.get("summary_json"))
-        baseline = _json_loads_safe(item.get("baseline_json"))
-        impact = _owner_action_impact(item.get("job") or "", summary, baseline)
-        conn.execute(
-            "UPDATE owner_action_journal SET evaluated_at = ?, impact_status = ?, "
-            "impact_json = ? WHERE id = ?",
-            (
-                impact.get("evaluated_at") or now_iso,
-                impact.get("status") or "unknown",
-                _json_dumps_safe(impact),
-                aid,
-            ),
-        )
-    actions = [x for x in list_owner_actions(limit=50) if int(x.get("id") or 0) == aid]
-    return actions[0] if actions else None
+    raise RuntimeError('CANONICAL_OPERATIONAL_WORK_REQUIRED')
 
 
 def evaluate_due_owner_actions(limit: int = 5) -> int:
-    """Автоматически оценивает просроченные проверки. Возвращает число оценок."""
-    now_iso = _now()
-    try:
-        with _db() as conn:
-            _ensure_owner_action_journal(conn)
-            rows = conn.execute(
-                "SELECT id FROM owner_action_journal "
-                "WHERE status = 'done' AND evaluated_at IS NULL "
-                "AND result_due_at IS NOT NULL AND result_due_at <= ? "
-                "ORDER BY result_due_at ASC LIMIT ?",
-                (now_iso, max(1, min(int(limit or 5), 20))),
-            ).fetchall()
-    except Exception:
-        return 0
-    done = 0
-    for row in rows:
-        if evaluate_owner_action(row["id"], force=True):
-            done += 1
-    return done
+    # Reads and scheduled evaluation never manufacture mutable impact facts.
+    return 0
 
 
 # ─── Durable-идемпотентность оплаты визита ───────────────────────────────────
@@ -5167,41 +3852,17 @@ def mark_payment_done(record_id, method: str, amount=None) -> None:
 
 # ─── Procedural-память: операционные правила салона ──────────────────────────
 
-def add_salon_rule(rule_text: str, created_by=None) -> int:
-    """Сохраняет правило салона (заданное владельцем). Возвращает id."""
-    try:
-        uid = int(created_by) if created_by else None
-    except Exception:
-        uid = None
-    with _db() as conn:
-        cur = conn.execute(
-            "INSERT INTO salon_rules (rule_text, created_by, created_at, active) "
-            "VALUES (?, ?, ?, 1)",
-            ((rule_text or "").strip()[:500], uid, _now()),
-        )
-        return int(cur.lastrowid)
+def add_salon_rule(rule_text: str, created_by=None):
+    raise PermissionError('canonical_A22_confirmed_configuration_required')
+
 
 
 def list_salon_rules(active_only: bool = True, limit: int = 40) -> list:
-    """Активные правила салона (для системного промпта MAYA / показа владельцу)."""
-    try:
-        with _db() as conn:
-            sql = ("SELECT id, rule_text, created_at FROM salon_rules "
-                   + ("WHERE active = 1 " if active_only else "")
-                   + "ORDER BY id ASC LIMIT ?")
-            return [dict(r) for r in conn.execute(sql, (int(limit),)).fetchall()]
-    except Exception:
-        return []
+    from canonical_governed_settings import rules
+    return rules(limit)
 
 
-def deactivate_salon_rule(rule_id) -> bool:
-    """Деактивирует (мягко удаляет) правило по id. True — если что-то изменилось."""
-    try:
-        with _db() as conn:
-            cur = conn.execute(
-                "UPDATE salon_rules SET active = 0 WHERE id = ? AND active = 1",
-                (int(rule_id),),
-            )
-            return cur.rowcount > 0
-    except Exception:
-        return False
+
+def deactivate_salon_rule(rule_id: int):
+    raise PermissionError('canonical_A22_confirmed_configuration_required')
+

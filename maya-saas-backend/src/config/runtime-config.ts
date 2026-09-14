@@ -1,4 +1,5 @@
 import {
+  resolveAllowedOauthRedirectUri,
   resolveCorsAllowlist,
   resolveNodeEnvironment,
   resolveOauthRedirectAllowlist,
@@ -12,6 +13,20 @@ const PRODUCTION_SECRET_NAMES = [
   'AUTH_RATE_LIMIT_SECRET',
   'PHONE_AUTH_SECRET',
   'CRM_ENCRYPTION_KEY',
+  // One-time loyalty bearer lookup is a separate security domain. The raw
+  // bearer is never persisted, so this key must remain stable and independent.
+  'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER',
+  // Referral rewards use a deterministic presentation PRF and a separate
+  // lookup HMAC. Neither secret may share another security domain.
+  'MAYA_REFERRAL_REWARD_PRESENTATION_KEY',
+  'MAYA_REFERRAL_REWARD_CLAIM_SECRET',
+  // Gift certificates are transferable bearer value. Their deterministic
+  // presentation PRF and lookup HMAC are independent security domains.
+  'MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY',
+  'MAYA_GIFT_CERTIFICATE_CLAIM_SECRET',
+  // Отдельный от прочих намеренно: хеш личности клиента — свой домен
+  // безопасности, и ротироваться он должен независимо от сессий и токенов.
+  'CLIENT_IDENTITY_HASH_SECRET',
 ] as const;
 
 const BOOLEAN_NAMES = [
@@ -51,6 +66,8 @@ const INTEGER_RULES = [
   ['AI_TOOL_STALE_EXECUTION_MINUTES', 5, 120],
   ['AI_CORE_TIMEOUT_MS', 1_000, 60_000],
   ['AI_CORE_MAX_TOOL_STEPS', 1, 3],
+  ['AI_CORE_MAX_OUTPUT_TOKENS', 500, 8_000],
+  ['AI_SPEECH_TIMEOUT_MS', 1_000, 60_000],
 ] as const;
 
 export function validateRuntimeConfig(
@@ -116,6 +133,20 @@ function validateConfiguredPolicies(
   } catch (error) {
     issues.push(errorMessage(error));
   }
+
+  if (stringValue(config.OAUTH_NATIVE_REDIRECT_URI)) {
+    try {
+      resolveAllowedOauthRedirectUri(
+        config.OAUTH_NATIVE_REDIRECT_URI,
+        config.OAUTH_ALLOWED_REDIRECT_URIS,
+        environment,
+      );
+    } catch {
+      issues.push(
+        'OAUTH_NATIVE_REDIRECT_URI must be an exact entry in OAUTH_ALLOWED_REDIRECT_URIS',
+      );
+    }
+  }
 }
 
 function validateProductionConfig(
@@ -129,9 +160,23 @@ function validateProductionConfig(
     true,
   );
   validateProductionSecrets(config, issues, emailLoginEnabled);
+  validateReferralRewardPresentationVersion(config, issues);
+  validateGiftCertificatePresentationVersion(config, issues);
 
   if (!stringValue(config.CORS_ALLOWED_ORIGINS)) {
     issues.push('CORS_ALLOWED_ORIGINS is required in production');
+  }
+
+  // 🔴 Пустое значение отбраковки не проходило, а вредило: приложение живёт за
+  // nginx (proxy_pass на 127.0.0.1:3107), и без списка доверенных прокси
+  // request.ip у ВСЕХ запросов равен 127.0.0.1. Лимиты со scope 'ip' тогда
+  // считают одного субъекта на всю платформу: двадцати запросов к
+  // /api/auth/phone/start хватает, чтобы закрыть вход по телефону всем
+  // арендаторам на десять минут. Заодно теряется настоящий клиентский адрес в
+  // сессиях и аудите. Дефолт в .env.example пустой, то есть оператор,
+  // копирующий пример, получал сломанные лимиты по умолчанию.
+  if (!stringValue(config.AUTH_TRUST_PROXY)) {
+    issues.push('AUTH_TRUST_PROXY is required in production');
   }
 
   validateTrustedProxy(config.AUTH_TRUST_PROXY, issues);
@@ -202,6 +247,7 @@ function validateProductionConfig(
     requireSetting(config, 'TELEGRAM_CLIENT_ID', issues);
     requireSetting(config, 'TELEGRAM_CLIENT_SECRET', issues);
     validateHttpsUrl(config.TELEGRAM_JWKS_URL, 'TELEGRAM_JWKS_URL', issues);
+    validateTelegramOauthProxyUrl(config.TELEGRAM_OAUTH_PROXY_URL, issues);
   }
 
   if (
@@ -210,6 +256,38 @@ function validateProductionConfig(
   ) {
     issues.push(
       'OAUTH_ALLOWED_REDIRECT_URIS is required when social login is enabled',
+    );
+  }
+
+  if (yandexEnabled || telegramEnabled) {
+    requireSetting(config, 'OAUTH_NATIVE_REDIRECT_URI', issues);
+  }
+}
+
+function validateReferralRewardPresentationVersion(
+  config: Record<string, unknown>,
+  issues: string[],
+): void {
+  const value = stringValue(
+    config.MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION,
+  );
+  if (!/^[A-Za-z0-9._:-]{1,64}$/.test(value)) {
+    issues.push(
+      'MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION must be a stable version identifier',
+    );
+  }
+}
+
+function validateGiftCertificatePresentationVersion(
+  config: Record<string, unknown>,
+  issues: string[],
+): void {
+  const value = stringValue(
+    config.MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION,
+  );
+  if (!/^[A-Za-z0-9._:-]{1,64}$/.test(value)) {
+    issues.push(
+      'MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION must be a stable version identifier',
     );
   }
 }
@@ -417,6 +495,39 @@ function validateHttpsUrl(
     }
   } catch {
     issues.push(`${name} must be an HTTPS URL`);
+  }
+}
+
+function validateTelegramOauthProxyUrl(value: unknown, issues: string[]): void {
+  const raw = stringValue(value);
+
+  if (!raw) {
+    return;
+  }
+
+  try {
+    const parsed = new URL(raw);
+    const localHosts = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
+    const isRootPath = parsed.pathname === '' || parsed.pathname === '/';
+
+    if (
+      parsed.protocol !== 'socks5h:' ||
+      !localHosts.has(parsed.hostname) ||
+      !parsed.port ||
+      parsed.username ||
+      parsed.password ||
+      !isRootPath ||
+      parsed.search ||
+      parsed.hash
+    ) {
+      issues.push(
+        'TELEGRAM_OAUTH_PROXY_URL must be a credential-free local socks5h URL with an explicit port',
+      );
+    }
+  } catch {
+    issues.push(
+      'TELEGRAM_OAUTH_PROXY_URL must be a credential-free local socks5h URL with an explicit port',
+    );
   }
 }
 

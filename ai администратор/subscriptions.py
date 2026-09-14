@@ -241,6 +241,9 @@ async def sync_subscription_usage(sub: dict) -> tuple[int, int]:
     Синхронизирует visits_used для одной подписки. Возвращает
     (previous_used, new_used). Если изменилось — обновляет БД.
     """
+    logger.warning("p4_05_legacy_mutation_disabled:sync_customer_subscription_usage")
+    current = sub.get("visits_used", 0)
+    return current, current
     client = database.get_client_by_id(sub["client_id"])
     if not client or not client.get("phone"):
         return sub.get("visits_used", 0), sub.get("visits_used", 0)
@@ -267,106 +270,15 @@ async def sync_subscription_usage(sub: dict) -> tuple[int, int]:
 # ─── Daily job: sync + expire + renew-push ───────────────────────────────
 
 async def _send_renew_push(app: Application, sub: dict, client: dict, plan: dict):
-    name = (client.get("name") or "").split()[0] if client.get("name") else "друг"
-    chat_id = client.get("telegram_chat_id")
-    if not chat_id:
-        return
-    visits_left = max(0, sub["visits_included"] - sub.get("visits_used", 0))
-    expires_h = datetime.fromisoformat(sub["expires_at"]).strftime("%d.%m")
-    tier = (sub.get("tier") or "top").lower()
-    price = get_plan_price(plan, tier)
-    tier_label = TIER_LABELS.get(tier, "")
-    used_part = (
-        f"Из {sub['visits_included']} визитов ты использовал {sub.get('visits_used', 0)} "
-        f"(осталось {visits_left})."
-        if visits_left > 0 else
-        f"Все {sub['visits_included']} визитов уже использованы — отличный месяц 👏"
-    )
-    text = (
-        f"{name}, абонемент *{plan['title']} ({tier_label})* истекает *{expires_h}* "
-        f"(через {RENEW_PUSH_DAYS_BEFORE} дня).\n\n"
-        f"{used_part}\n\n"
-        f"Продлим ещё на месяц за {price} ₽?"
-    )
-    kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton(
-            f"💳 Продлить — {price} ₽",
-            callback_data=f"sub_pay_{plan['code']}_{tier}",
-        )],
-        [InlineKeyboardButton("Не сейчас", callback_data="sub_renew_skip")],
-    ])
-    try:
-        await app.bot.send_message(chat_id, text, parse_mode="Markdown", reply_markup=kb)
-        database.mark_subscription_renew_pushed(sub["id"])
-    except (Forbidden, BadRequest) as e:
-        logger.info(f"sub renew push → {chat_id}: {e}")
-    except Exception as e:
-        logger.error(f"sub renew push → {chat_id}: {e}")
-    try:
-        import webhook_server
-        await webhook_server._send_client_push(
-            int(chat_id),
-            title="Абонемент скоро закончится 🎟",
-            body=f"{plan['title']} ({tier_label}) до {expires_h}. Продлим ещё на месяц?",
-            url="/app/?shop=subs",
-            tag=f"sub-renew-{sub['id']}",
-            data={"event": "subscription.renew_offer", "subscription_id": sub["id"]},
-            persist_in_chat=True,
-            chat_text=(
-                f"{name}, абонемент «{plan['title']}» ({tier_label}) заканчивается {expires_h}.\n\n"
-                f"{used_part}\n\n"
-                f"Если хотите, можем продлить ещё на месяц за {price} ₽."
-            ),
-            chat_action={
-                "type": "open_subs",
-                "label": f"Продлить — {price} ₽",
-            },
-            chat_dedupe_key=f"subscription-renew:{sub['id']}",
-        )
-    except Exception as e:
-        logger.error(f"sub renew app push → {chat_id}: {e}")
+    """Legacy initiator is not a reviewed canonical campaign."""
+    from canonical_retention_entry import retention_owner_required
+    return retention_owner_required('subscriptions')
 
 
 async def run_subscriptions_job(app: Application) -> dict:
-    """
-    Ежедневный таск:
-      1. Sync visits_used для всех active.
-      2. Push «продлить» для тех, у кого до конца ≤ RENEW_PUSH_DAYS_BEFORE
-         и push ещё не отправляли.
-      3. Mark expired для тех, у кого срок прошёл.
-    """
-    today = date.today()
-    summary = {"synced": 0, "expired": 0, "renew_pushed": 0, "errors": 0}
-
-    for sub in database.list_active_subscriptions():
-        try:
-            # Sync использований
-            prev, new = await sync_subscription_usage(sub)
-            if new != prev:
-                summary["synced"] += 1
-
-            expires = datetime.fromisoformat(sub["expires_at"]).date()
-
-            # Истекла?
-            if expires < today:
-                database.update_subscription_status(sub["id"], "expired")
-                summary["expired"] += 1
-                continue
-
-            # До конца ≤ 3 дня и push ещё не слали — пнуть
-            days_left = (expires - today).days
-            if days_left <= RENEW_PUSH_DAYS_BEFORE and not sub.get("renew_reminder_sent_at"):
-                plan = get_plan(sub["plan_code"])
-                client = database.get_client_by_id(sub["client_id"])
-                if plan and client:
-                    await _send_renew_push(app, sub, client, plan)
-                    summary["renew_pushed"] += 1
-        except Exception as e:
-            summary["errors"] += 1
-            logger.error(f"subscriptions job: sub#{sub.get('id')} err: {e}")
-
-    logger.info(f"🎟 Subscriptions job: {summary}")
-    return summary
+    """Legacy initiator is not a reviewed canonical campaign."""
+    from canonical_retention_entry import retention_owner_required
+    return retention_owner_required('subscriptions')
 
 
 # ─── UI: карточки и кнопки ──────────────────────────────────────────────

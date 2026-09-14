@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "exactStructuralMatch": true,
+  "sha256": "d1e9f5206045ed52d4bf377826d388dea5cf4bd4f8bd1049443bad4b0468a047",
+  "newModels": 11,
+  "newPhysicalFields": 197,
+  "newModelRows": {
+    "OperationalAlertRun": 0,
+    "NativeFeedbackRequest": 0,
+    "NativeFeedbackRevision": 0,
+    "PublicCommunityComment": 0,
+    "PublicCommunityInteraction": 0,
+    "TenantBusinessConfigurationRevision": 0,
+    "TeamMessage": 0,
+    "TeamAttachment": 0,
+    "ExpenseReminderRun": 0,
+    "ExpenseIntakeBinding": 0,
+    "CashDeclaration": 0
+  },
+  "fakeHistoricalBackfill": 0,
+  "businessWrites": 0
+}

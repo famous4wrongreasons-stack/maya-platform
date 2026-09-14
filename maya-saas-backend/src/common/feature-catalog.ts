@@ -31,6 +31,7 @@ export const MAYA_FEATURE_KEYS = [
   'commerce.memberships',
   'commerce.redemption',
   'referrals',
+  'reviews.core',
   'team.chat',
   'notifications.core',
   'customer.portal',
@@ -224,6 +225,11 @@ export const MAYA_FEATURE_REGISTRY: Record<
     'commerce',
     'Tenant referral programs.',
   ),
+  'reviews.core': defineFeature(
+    'Business reviews',
+    'reviews',
+    'Privacy-safe review registry and rating analytics.',
+  ),
   'team.chat': defineFeature(
     'Team chat',
     'messaging',
@@ -293,6 +299,7 @@ const CURRENT_AND_PLATFORM_BACKEND = [
   'current_maya',
   'platform_backend',
 ] as const;
+const PLATFORM_BACKEND = ['platform_backend'] as const;
 const CURRENT_AND_PLATFORM = [
   'current_maya',
   'platform_backend',
@@ -388,14 +395,22 @@ export const MAYA_FEATURE_READINESS: Record<
       'YClients and Altegio are implemented; DIKIDI, Whitelines and Salon Online are planned.',
     ],
   ),
-  'commerce.store': defineReadiness('current_runtime_only', CURRENT_MAYA),
-  'commerce.certificates': defineReadiness(
-    'current_runtime_only',
-    CURRENT_MAYA,
-  ),
-  'commerce.memberships': defineReadiness('current_runtime_only', CURRENT_MAYA),
+  'commerce.store': defineReadiness('partial', PLATFORM_BACKEND, [
+    'Tenant-scoped catalog and stock signals are ready; checkout remains a separately entitled frontend and payment flow.',
+  ]),
+  'commerce.certificates': defineReadiness('partial', PLATFORM_BACKEND, [
+    'Tenant-scoped certificate catalog is ready; purchase, issuance and redemption remain separate commerce work.',
+  ]),
+  'commerce.memberships': defineReadiness('partial', PLATFORM_BACKEND, [
+    'Tenant-scoped membership catalog is ready; purchase, entitlement issuance and redemption remain separate commerce work.',
+  ]),
   'commerce.redemption': defineReadiness('current_runtime_only', CURRENT_MAYA),
-  referrals: defineReadiness('current_runtime_only', CURRENT_MAYA),
+  referrals: defineReadiness('partial', PLATFORM_BACKEND, [
+    'Tenant referral rules are configurable and readable; invitation attribution and reward settlement are not yet implemented.',
+  ]),
+  'reviews.core': defineReadiness('partial', PLATFORM_BACKEND, [
+    'Encrypted review ingestion and aggregate analytics are ready; external review-provider synchronization must be configured separately.',
+  ]),
   'team.chat': defineReadiness('current_runtime_only', CURRENT_MAYA),
   'notifications.core': defineReadiness('current_runtime_only', CURRENT_MAYA),
   'customer.portal': defineReadiness('partial', CURRENT_AND_PLATFORM_BACKEND, [
@@ -458,13 +473,45 @@ const START_PLAN_FEATURES: MayaFeatureKey[] = [
 
 const PRO_PLAN_FEATURES: MayaFeatureKey[] = [
   ...START_PLAN_FEATURES,
-  'shop',
   'tg_marketing',
   'journal',
   'staff_cabinet',
   'analytics',
+  'reviews.core',
   'priority_support',
 ];
+
+export const MAYA_ADD_ON_FEATURES = {
+  commerce: [
+    'shop',
+    'commerce.store',
+    'commerce.certificates',
+    'commerce.memberships',
+    'commerce.redemption',
+  ],
+  referrals: ['referrals'],
+} as const satisfies Record<string, readonly MayaFeatureKey[]>;
+
+export const MAYA_ADD_ON_CATALOG = [
+  {
+    key: 'commerce',
+    name: 'Магазин, сертификаты и абонементы',
+    description:
+      'Отдельный модуль продаж бизнеса с собственным подключением YooKassa.',
+    billing_mode: 'separate_subscription',
+    feature_keys: MAYA_ADD_ON_FEATURES.commerce,
+    implementation_status: 'configuration_ready',
+  },
+  {
+    key: 'referrals',
+    name: 'Реферальная программа',
+    description:
+      'Отдельный модуль приглашений и вознаграждений клиентов конкретного бизнеса.',
+    billing_mode: 'separate_subscription',
+    feature_keys: MAYA_ADD_ON_FEATURES.referrals,
+    implementation_status: 'configuration_ready',
+  },
+] as const;
 
 export const MAYA_PLAN_FEATURES: Record<string, MayaFeatureKey[]> = {
   solo: START_PLAN_FEATURES,

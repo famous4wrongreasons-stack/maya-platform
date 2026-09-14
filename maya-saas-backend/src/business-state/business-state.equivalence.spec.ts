@@ -1,0 +1,1225 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { UserRole } from '../common/domain.enums';
+import LEGACY_GOLDEN from './__fixtures__/legacy-business-state.json';
+import LEGACY_EMPLOYEE_MARKER from './__fixtures__/legacy-employee-state.json';
+import {
+  BusinessStateService,
+  type StaffDisclosure,
+  type StaffIdentityRow,
+} from './business-state.service';
+
+/**
+ * 🔴 Cycle 04 P1 — доказательство эквивалентности с БОЕВОЙ реализацией.
+ *
+ * Эталон в `__fixtures__/legacy-business-state.json` снят с коммита, который в
+ * этот момент работал в проде (`9ce6ef6f`), прогоном ТОЙ САМОЙ реализации на
+ * тех же входах. Это не «ожидания, записанные с текущего поведения»: файл
+ * получен из другого дерева, до переноса, и переписать его вместе с правкой
+ * нельзя случайно.
+ *
+ * Сравниваются БИЗНЕС-поля, а не презентация. `resolved_period`, человеческие
+ * подписи периода и форма полезной нагрузки инструмента — работа слоя, который
+ * разговаривает; их совпадения никто не обещал и обещать не должен.
+ *
+ * Файл остаётся храповиком навсегда: любое расхождение канонического владельца
+ * с тем, что отвечал бой, становится упавшим тестом, а не сюрпризом владельца.
+ */
+
+const PERIOD = {
+  from: '2026-08-01T00:00:00.000Z',
+  to: '2026-08-31T23:59:59.999Z',
+};
+const PREVIOUS = {
+  from: '2026-07-01T00:00:00.000Z',
+  to: '2026-07-31T23:59:59.999Z',
+};
+
+type Overview = Record<string, unknown>;
+
+const overview = (over: {
+  source?: 'crm' | 'maya';
+  total?: number;
+  cancelled?: number;
+  completed?: number;
+  revenueKopecks?: number | null;
+  bookedKopecks?: number;
+  completeness?: 'complete' | 'incomplete';
+  notObserved?: number;
+  cohorts?: 'available' | 'unavailable';
+  staff?: Array<{ id: string; name: string | null; appointments: number }>;
+}): Overview => {
+  const source = over.source ?? 'crm';
+  const total = over.total ?? 10;
+  const cancelled = over.cancelled ?? 2;
+  const completed = over.completed ?? 6;
+  const cohortsAvailable = (over.cohorts ?? 'available') === 'available';
+  return {
+    data_source: source,
+    period: { from: PERIOD.from, to: PERIOD.to, timezone: 'Europe/Moscow' },
+    appointments: {
+      total,
+      active: total - cancelled,
+      scheduled: Math.max(0, total - cancelled - completed),
+      completed,
+      cancelled,
+      no_show: 0,
+      cancellation_rate_percent: total === 0 ? 0 : (cancelled / total) * 100,
+      unique_clients: 5,
+      repeat_clients_in_period: 1,
+      repeat_client_rate_percent: 20,
+      identified_client_visits: 9,
+      clients_returning: cohortsAvailable ? 2 : null,
+      clients_new: cohortsAvailable ? 3 : null,
+      returning_share_percent: cohortsAvailable ? 40 : null,
+      cohort_lookback_days: 90,
+      cohort_status: cohortsAvailable ? 'available' : 'unavailable',
+      cohort_unavailable_reason: cohortsAvailable
+        ? null
+        : 'period_window_read_was_truncated',
+      booked_minutes: 600,
+    },
+    revenue: [
+      { currency: 'RUB', amount_kopecks: over.bookedKopecks ?? 250_000 },
+    ],
+    expenses: [],
+    net: [],
+    revenue_basis: 'booked_prices',
+    net_status: 'unavailable',
+    net_unavailable_reason: 'not_in_operational_overview',
+    average_ticket: [{ currency: 'RUB', amount_kopecks: 25_000 }],
+    daily: [],
+    staff: (over.staff ?? [{ id: 'st-1', name: 'Илья', appointments: 4 }]).map(
+      (row) => ({
+        staff_external_id: row.id,
+        staff_id: null,
+        name: row.name,
+        total: row.appointments,
+        appointments: row.appointments,
+        scheduled: 1,
+        completed: row.appointments - 1,
+        cancelled: 0,
+        no_show: 0,
+        cancellation_rate_percent: 0,
+        unique_clients: 2,
+        repeat_clients_in_period: 0,
+        revenue: [{ currency: 'RUB', amount_kopecks: 100_000 }],
+        booked_minutes: 240,
+        services: [{ name: 'Стрижка', appointments: row.appointments }],
+      }),
+    ),
+    services: [
+      {
+        service_external_id: 'svc-1',
+        name: 'Стрижка',
+        appointments: 7,
+        booked_value: [{ currency: 'RUB', amount_kopecks: 175_000 }],
+      },
+    ],
+    completeness: {
+      appointments: {
+        source: 'provider_journal',
+        status: over.completeness ?? 'complete',
+        reason:
+          (over.completeness ?? 'complete') === 'incomplete'
+            ? 'source_read_truncated'
+            : null,
+        observed_through: '2026-09-01T00:00:00.000Z',
+        out_of_period_discarded: 0,
+      },
+      attendance: {
+        source: 'canonical_mirror',
+        status: (over.notObserved ?? 0) > 0 ? 'incomplete' : 'complete',
+        reason:
+          (over.notObserved ?? 0) > 0
+            ? 'attendance_was_not_observed_for_every_record_of_the_period'
+            : null,
+        observed_through: '2026-09-01T00:00:00.000Z',
+      },
+    },
+    attendance: {
+      state: (over.notObserved ?? 0) > 0 ? 'measured_incomplete' : 'measured',
+      arrived: completed,
+      no_show: 0,
+      awaiting: 0,
+      not_observed: over.notObserved ?? 0,
+      records: total,
+      facts: [],
+    },
+    data_quality: {
+      priced_appointments: total,
+      active_appointments: total - cancelled,
+      unidentified_client_appointments: 0,
+      revenue_coverage: 1,
+      note: null,
+    },
+  };
+};
+
+const finance = (revenueKopecks: number | null) =>
+  revenueKopecks === null
+    ? null
+    : {
+        source: 'external_crm',
+        provider: 'yclients',
+        verified: true,
+        period: { from: PERIOD.from, to: PERIOD.to, timezone: 'Europe/Moscow' },
+        revenue: {
+          status: 'available',
+          verified: true,
+          basis: 'provider_transactions',
+          total: { currency: 'RUB', amount_kopecks: revenueKopecks },
+          transaction_count: 12,
+          discarded: { negative_count: 0, zero_count: 0, untyped_count: 0 },
+          by_staff: [
+            {
+              staff_external_id: 'st-1',
+              amount: { currency: 'RUB', amount_kopecks: 90_000 },
+              transaction_count: 5,
+            },
+          ],
+          by_service: [],
+          staff_attribution_status: 'available',
+          staff_attribution_coverage_percent: 100,
+          service_attribution_status: 'unavailable',
+        },
+        payroll: {
+          status: 'available',
+          verified: true,
+          accrued_total: { currency: 'RUB', amount_kopecks: 60_000 },
+          paid_total: null,
+          balance_total: null,
+          staff: [
+            {
+              staff_id: 'st-1',
+              status: 'available',
+              verified: true,
+              accrued: { currency: 'RUB', amount_kopecks: 60_000 },
+              paid: null,
+            },
+          ],
+        },
+        warnings: [],
+      };
+
+interface Scenario {
+  name: string;
+  role: UserRole;
+  current: Overview;
+  previous?: Overview | null;
+  finance: number | null | 'throws';
+  calendarSource: 'external' | 'internal';
+}
+
+const SCENARIOS: Scenario[] = [
+  {
+    name: 'полные данные CRM, текущий период',
+    role: UserRole.TENANT_OWNER,
+    current: overview({}),
+    finance: 500_000,
+    calendarSource: 'external',
+  },
+  {
+    name: 'полные данные CRM со сравнением прошлого периода',
+    role: UserRole.TENANT_OWNER,
+    current: overview({}),
+    previous: overview({ total: 8, cancelled: 1, completed: 5 }),
+    finance: 500_000,
+    calendarSource: 'external',
+  },
+  {
+    name: 'неполное чтение журнала',
+    role: UserRole.TENANT_OWNER,
+    current: overview({ completeness: 'incomplete', cohorts: 'unavailable' }),
+    finance: 500_000,
+    calendarSource: 'external',
+  },
+  {
+    name: 'прошлый период прочитан неполно, текущий полностью',
+    role: UserRole.TENANT_OWNER,
+    current: overview({}),
+    previous: overview({ completeness: 'incomplete', cohorts: 'unavailable' }),
+    finance: 500_000,
+    calendarSource: 'external',
+  },
+  {
+    name: 'деньги недоступны: источник не ответил',
+    role: UserRole.TENANT_OWNER,
+    current: overview({}),
+    finance: 'throws',
+    calendarSource: 'external',
+  },
+  {
+    name: 'измеренный ноль: записей за период не было',
+    role: UserRole.TENANT_OWNER,
+    current: overview({ total: 0, cancelled: 0, completed: 0 }),
+    finance: 0,
+    calendarSource: 'external',
+  },
+  {
+    name: 'присутствие не наблюдалось — метрика не публикуется',
+    role: UserRole.TENANT_OWNER,
+    current: overview({ notObserved: 4 }),
+    finance: 500_000,
+    calendarSource: 'external',
+  },
+  {
+    name: 'внутренний календарь',
+    role: UserRole.TENANT_OWNER,
+    current: overview({ source: 'maya' }),
+    finance: null,
+    calendarSource: 'internal',
+  },
+  {
+    // 🔴 Роль выбрана та, у которой права на имена ДЕЙСТВИТЕЛЬНО нет.
+    // Первая версия сценария называлась так же, но брала MANAGER — а он в
+    // списке допущенных к именам. Тест носил правильное имя и проверял не то;
+    // нашла это состязательная проверка, а не я.
+    name: 'роль без права на имена мастеров',
+    role: UserRole.PROVIDER,
+    current: overview({}),
+    finance: 500_000,
+    calendarSource: 'external',
+  },
+  {
+    name: 'роль без права на деньги',
+    role: UserRole.MANAGER,
+    current: overview({}),
+    finance: 500_000,
+    calendarSource: 'external',
+  },
+];
+
+/** Роли, которым видны имена мастеров. Копия правила вызывающего слоя. */
+const NAMED_STAFF_ROLES = new Set<UserRole>([
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.MANAGER,
+  UserRole.BRANCH_MANAGER,
+  UserRole.ACCOUNTANT,
+]);
+const FINANCE_ROLES = new Set<UserRole>([
+  UserRole.TENANT_OWNER,
+  UserRole.BUSINESS_OWNER,
+  UserRole.TENANT_ADMIN,
+  UserRole.ADMINISTRATOR,
+  UserRole.ACCOUNTANT,
+]);
+
+/** Та же нумерация тёзок, что и в слое, который отвечает владельцу. */
+const discloseFor =
+  (role: UserRole) =>
+  (rows: StaffIdentityRow[]): StaffDisclosure => {
+    if (!NAMED_STAFF_ROLES.has(role)) {
+      return { names: new Map(), allowedExternalIds: new Set<string>() };
+    }
+    const names = new Map<string, string | null>();
+    for (const row of rows) {
+      if (!names.get(row.externalId)) names.set(row.externalId, row.name);
+    }
+    const ordered = [...names.keys()].sort((left, right) =>
+      left < right ? -1 : left > right ? 1 : 0,
+    );
+    const seen = new Map<string, number>();
+    const resolved = new Map<string, string>();
+    let unnamed = 0;
+    for (const externalId of ordered) {
+      const raw = names.get(externalId);
+      if (typeof raw === 'string' && raw.trim() !== '') {
+        const base = raw.trim();
+        const count = (seen.get(base) ?? 0) + 1;
+        seen.set(base, count);
+        resolved.set(externalId, count === 1 ? base : `${base} (${count})`);
+      } else {
+        unnamed += 1;
+        resolved.set(externalId, `Мастер ${unnamed}`);
+      }
+    }
+    return { names: resolved, allowedExternalIds: null };
+  };
+
+/**
+ * 🔴 Что Cycle 04 P2 изменил НАМЕРЕННО.
+ *
+ * Эталон снят с боевой реализации, в которой стоимость записанного и касса
+ * жили в одном поле: у CRM-арендатора `booked_value_amount_kopecks` содержал
+ * кассу. P2 это исправляет, поэтому по трём позициям канонический слой обязан
+ * от эталона ОТЛИЧАТЬСЯ — и отличие проверяется отдельно, а не прощается
+ * молчанием. Всё остальное обязано совпадать по-прежнему.
+ */
+const P2_CHANGED_METRICS = [
+  'booked_value_amount_kopecks',
+  'booked_value_basis',
+] as const;
+
+/** Позиция, которой в эталоне не было: раньше пустота молчала. */
+const P2_ADDED_UNAVAILABLE = 'booked_value';
+
+/**
+ * 🔴 Что Cycle 04 P4 ДОБАВИЛ намеренно.
+ *
+ * Утренний бриф показывал владельцу среднюю цену записи из журнала под именем
+ * «средний чек» — то есть выдавал стоимость записанного за полученные деньги.
+ * Считать её в тексте отчёта нельзя (это арифметика над деньгами), поэтому
+ * величина получила собственное имя и собственное основание рядом с суммой
+ * записанного. Ни одно старое поле при этом не изменилось: позиция НОВАЯ, и
+ * проверяется она отдельно — эталон о ней знать не может.
+ *
+ * Там же — разбивка кассы на наличные и безналичные: вечерний отчёт складывал
+ * строки счетов сам.
+ */
+const P4_ADDED_METRICS = ['average_booked_value_amount_kopecks'] as const;
+
+const P4_ADDED_PUBLISHED = [
+  'average_booked_value',
+  /**
+   * 🔴 Финальная сверка главы 4. Пустые расходы денежной ветки получили
+   * основание — ровно как у `net`, у которого оно было с самого начала.
+   * Числа не изменились: добавлены два поля, объясняющие пустоту.
+   */
+  'expenses_status',
+  'expenses_unavailable_reason',
+] as const;
+
+const P4_ADDED_FINANCE_REVENUE = [
+  'cash_total',
+  'cashless_total',
+  'unclassified_total',
+] as const;
+
+/**
+ * Поимённые начисления смены. Раньше вечерний отчёт брал их прямо из ответа
+ * CRM — вместе с именем оттуда же, мимо решения о раскрытии, — и молча терял
+ * строки со статусом «недоступно». Теперь это позиция канонического слоя, имя
+ * в ней выдаёт раскрытие.
+ */
+const P4_ADDED_FINANCE_PAYROLL = ['staff'] as const;
+
+const withoutP4Added = (metrics: unknown) => {
+  const rest = { ...(metrics as Record<string, unknown>) };
+  for (const key of P4_ADDED_METRICS) delete rest[key];
+  return rest;
+};
+
+/** Снять новые позиции с опубликованного среза, включая денежный блок. */
+const withoutP4Published = (published: unknown) => {
+  if (published === null || published === undefined) return published;
+  const rest = { ...(published as Record<string, unknown>) };
+  for (const key of P4_ADDED_PUBLISHED) delete rest[key];
+  const finance = rest.finance as Record<string, unknown> | undefined;
+  if (finance && typeof finance === 'object') {
+    const revenue = { ...((finance.revenue as Record<string, unknown>) ?? {}) };
+    for (const key of P4_ADDED_FINANCE_REVENUE) delete revenue[key];
+    const payroll = { ...((finance.payroll as Record<string, unknown>) ?? {}) };
+    for (const key of P4_ADDED_FINANCE_PAYROLL) delete payroll[key];
+    rest.finance = {
+      ...finance,
+      revenue,
+      ...(finance.payroll !== undefined ? { payroll } : {}),
+    };
+  }
+  return rest;
+};
+
+const CLOSURE_ADDED_LIMITATIONS = new Set([
+  'comparison_period_not_finished',
+  'period_has_not_started',
+]);
+
+const withoutClosureAdded = (entries: unknown) =>
+  (entries as Array<{ key: string }>).filter(
+    (entry) => !CLOSURE_ADDED_LIMITATIONS.has(entry.key),
+  );
+
+const withoutP2Added = (entries: unknown) =>
+  (entries as Array<{ key: string }>).filter(
+    (entry) => entry.key !== P2_ADDED_UNAVAILABLE,
+  );
+
+const withoutP2Changes = (metrics: unknown) => {
+  const rest = { ...(metrics as Record<string, unknown>) };
+  for (const key of P2_CHANGED_METRICS) delete rest[key];
+  return rest;
+};
+
+/** Опубликованный срез без нового поля стоимости записанного. */
+const withoutBookedValue = (published: unknown) => {
+  if (published === null || published === undefined) return published;
+  const rest = { ...(published as Record<string, unknown>) };
+  delete rest.booked_value;
+  return rest;
+};
+
+const buildFixture = (scenario: Scenario) => {
+  const getBusinessOperationalOverview = jest
+    .fn()
+    .mockImplementation((_tenantId: string, query: { from: string }) =>
+      Promise.resolve(
+        query.from === PREVIOUS.from
+          ? (scenario.previous ?? scenario.current)
+          : scenario.current,
+      ),
+    );
+  const getBusinessFinance = jest
+    .fn()
+    .mockImplementation(() =>
+      scenario.finance === 'throws'
+        ? Promise.reject(new Error('crm finance unavailable'))
+        : Promise.resolve(finance(scenario.finance)),
+    );
+  const analytics = {
+    getBusinessOperationalOverview,
+    getBusinessFinance,
+    getStaffFinance: jest.fn().mockResolvedValue(null),
+  } as unknown as OperationsAnalyticsService;
+  const prisma = {
+    tenant: {
+      findUnique: jest.fn().mockResolvedValue({
+        calendarSource: scenario.calendarSource,
+        defaultTimezone: 'Europe/Moscow',
+      }),
+    },
+    branch: { findFirst: jest.fn() },
+  } as unknown as PrismaService;
+  return { analytics, prisma };
+};
+
+/** Что отвечала боевая реализация до переноса. Снято с коммита `9ce6ef6f`. */
+const legacyResult = (scenario: Scenario): Record<string, unknown> => {
+  const golden = (LEGACY_GOLDEN as Record<string, Record<string, unknown>>)[
+    scenario.name
+  ];
+  if (!golden) {
+    throw new Error(`нет эталона для сценария: ${scenario.name}`);
+  }
+  return golden;
+};
+
+const canonicalResult = async (scenario: Scenario, withPrevious: boolean) => {
+  const { analytics, prisma } = buildFixture(scenario);
+  const service = new BusinessStateService(analytics, prisma);
+  return service.business({
+    tenantId: `tenant-${scenario.name}`,
+    period: { from: PERIOD.from, to: PERIOD.to },
+    comparisonMode: withPrevious ? 'previous_period' : 'none',
+    comparisonPeriod: withPrevious
+      ? { from: PREVIOUS.from, to: PREVIOUS.to }
+      : null,
+    financeAllowed: FINANCE_ROLES.has(scenario.role),
+    // Право на операционный факт шире права на кассу: тот же список, что
+    // допущен к бизнес-разрезу.
+    bookedValueAllowed: NAMED_STAFF_ROLES.has(scenario.role),
+    disclose: discloseFor(scenario.role),
+  });
+};
+
+describe('🔴 P1 §9 — legacy против канонического владельца', () => {
+  for (const scenario of SCENARIOS) {
+    const withPrevious = Boolean(scenario.previous);
+
+    it(`${scenario.name}: бизнес-поля совпадают`, async () => {
+      const legacy = legacyResult(scenario);
+      const canonical = await canonicalResult(scenario, withPrevious);
+
+      expect(canonical.verified).toEqual(legacy.verified);
+      expect(canonical.financeVerified).toEqual(legacy.finance_verified);
+      expect(canonical.source).toEqual(legacy.source);
+      expect(withoutP4Added(withoutP2Changes(canonical.metrics))).toEqual(
+        withoutP4Added(withoutP2Changes(legacy.metrics)),
+      );
+      // Изменения между периодами считаются по тем же метрикам, поэтому
+      // исправленная стоимость записанного меняет и свою дельту.
+      // C7 D7 deliberately retires legacy comparisons without complete coverage.
+      // Golden source facts above remain unchanged; currency-free money deltas move to the typed owner.
+      const incomplete = scenario.name.includes('неполно');
+      if (incomplete && withPrevious) {
+        expect(canonical.changes).toEqual({});
+        expect(canonical.serviceChanges).toEqual([]);
+        expect(canonical.staffChanges).toEqual([]);
+      } else {
+        const countChanges = (value: unknown) =>
+          Object.fromEntries(
+            Object.entries(
+              withoutP4Added(withoutP2Changes(value)) as Record<
+                string,
+                unknown
+              >,
+            ).filter(([key]) => !key.includes('amount_kopecks')),
+          );
+        expect(countChanges(canonical.changes)).toEqual(
+          countChanges(legacy.changes),
+        );
+        expect(
+          Object.keys(canonical.changes).some((key) =>
+            key.includes('amount_kopecks'),
+          ),
+        ).toBe(false);
+        expect(canonical.serviceChanges).toEqual(legacy.service_changes);
+        expect(canonical.staffChanges).toEqual(legacy.staff_changes);
+      }
+      const withoutChangedAndAdded = (keys: string[]) =>
+        keys.filter(
+          (key) =>
+            !(P2_CHANGED_METRICS as readonly string[]).includes(key) &&
+            !(P4_ADDED_METRICS as readonly string[]).includes(key),
+        );
+
+      expect(withoutChangedAndAdded(canonical.availableMetrics)).toEqual(
+        withoutChangedAndAdded(legacy.available_metrics as string[]),
+      );
+      // 🔴 Cycle 04 closure C. Оговорка про незакончившийся период — добавка
+      // этой сверки: legacy её не знал, потому что молча сравнивал прожитую
+      // часть суток с полными прошлыми сутками. Числа не изменились.
+      expect(withoutClosureAdded(canonical.limitations)).toEqual(
+        legacy.limitations,
+      );
+      expect(withoutP2Added(canonical.unavailableMetrics)).toEqual(
+        legacy.unavailable_metrics,
+      );
+      expect(canonical.comparison.completeness).toEqual(
+        legacy.comparison_completeness,
+      );
+    });
+
+    it(`${scenario.name}: опубликованный срез совпадает`, async () => {
+      const legacy = legacyResult(scenario);
+      const canonical = await canonicalResult(scenario, withPrevious);
+
+      // Именно здесь живут имена мастеров, деньги по мастерам и гашение по
+      // роли: если раскрытие разъедется, разъедется и приватность.
+      expect(withoutP4Published(withoutBookedValue(canonical.current))).toEqual(
+        legacy.current,
+      );
+      expect(
+        withoutP4Published(withoutBookedValue(canonical.previous)),
+      ).toEqual(legacy.previous);
+    });
+  }
+
+  it('🔴 роль без права на деньги не получает их ни в одной реализации', async () => {
+    const scenario = SCENARIOS[SCENARIOS.length - 1];
+    const legacy = legacyResult(scenario);
+    const canonical = await canonicalResult(scenario, false);
+
+    expect(legacy.finance_verified).toBe(false);
+    expect(canonical.financeVerified).toBe(false);
+    expect(withoutP4Added(withoutP2Changes(canonical.metrics))).toEqual(
+      withoutP4Added(withoutP2Changes(legacy.metrics)),
+    );
+    // 🔴 Отсутствие права на ДЕНЬГИ и право на операционный факт — разные
+    // решения (P2.1). Средняя стоимость записанного стоит на ценах журнала и
+    // приезжает по `bookedValueAllowed`; подтверждённой кассы у этой роли нет
+    // ни здесь, ни в эталоне.
+    expect(canonical.metrics.revenue_amount_kopecks).toBeNull();
+    expect(canonical.metrics.revenue_basis).toBe('unavailable');
+  });
+
+  it('🔴 роль без права на имена не получает их ни в одной реализации', async () => {
+    const scenario = SCENARIOS.find(
+      (item) => item.name === 'роль без права на имена мастеров',
+    );
+    if (!scenario) throw new Error('сценарий не найден');
+    const withNames = { ...scenario, role: UserRole.TENANT_OWNER };
+
+    const [restricted, allowed] = await Promise.all([
+      canonicalResult({ ...scenario, role: UserRole.PROVIDER }, false),
+      canonicalResult(withNames, false),
+    ]);
+
+    const rows = (state: { current: Record<string, unknown> }) =>
+      (state.current.staff_summary as unknown[]) ?? [];
+    expect(rows(restricted)).toHaveLength(0);
+    expect(rows(allowed).length).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * 🔴 Эквивалентность ЛИЧНОГО среза.
+ *
+ * Этот файл появился потому, что первая версия переноса потеряла личную
+ * метрику `average_booked_value_amount_kopecks`: у мастера свой срез метрик, и
+ * я убрал его как «осиротевший». Поймал это не мой сравнительный тест, а
+ * существующая спека — то есть моя проверка эквивалентности покрывала бизнес и
+ * не покрывала человека. Здесь этот пробел закрыт эталоном, снятым с того же
+ * боевого коммита.
+ */
+
+const EMP_PERIOD = {
+  from: '2026-08-01T00:00:00.000Z',
+  to: '2026-08-31T23:59:59.999Z',
+};
+
+const employeeOverview = (over: {
+  source?: 'crm' | 'maya';
+  total?: number;
+  notObserved?: number;
+  completeness?: 'complete' | 'incomplete';
+}) => {
+  const total = over.total ?? 8;
+  return {
+    data_source: over.source ?? 'crm',
+    period: {
+      from: EMP_PERIOD.from,
+      to: EMP_PERIOD.to,
+      timezone: 'Europe/Moscow',
+    },
+    employee: { provider_id: 'st-1', name: 'Илья' },
+    appointments: {
+      total,
+      active: total,
+      scheduled: 2,
+      completed: total - 2,
+      cancelled: 0,
+      no_show: 0,
+      cancellation_rate_percent: 0,
+      unique_clients: 6,
+      repeat_clients_in_period: 2,
+      repeat_client_rate_percent: 33.3,
+      identified_client_visits: 8,
+      clients_returning: 2,
+      clients_new: 4,
+      returning_share_percent: 33.3,
+      cohort_lookback_days: 90,
+      cohort_status: 'available',
+      cohort_unavailable_reason: null,
+      booked_minutes: 480,
+    },
+    revenue: [{ currency: 'RUB', amount_kopecks: 3_000_000 }],
+    expenses: [],
+    net: [],
+    revenue_basis: 'booked_prices',
+    net_status: 'unavailable',
+    net_unavailable_reason: 'not_in_operational_overview',
+    average_ticket: [{ currency: 'RUB', amount_kopecks: 150_000 }],
+    daily: [],
+    staff: [
+      {
+        staff_external_id: 'st-1',
+        staff_id: null,
+        name: 'Илья',
+        total,
+        appointments: total,
+        scheduled: 2,
+        completed: total - 2,
+        cancelled: 0,
+        no_show: 0,
+        cancellation_rate_percent: 0,
+        unique_clients: 6,
+        repeat_clients_in_period: 2,
+        revenue: [{ currency: 'RUB', amount_kopecks: 3_000_000 }],
+        booked_minutes: 480,
+        services: [{ name: 'Стрижка', appointments: total }],
+      },
+    ],
+    services: [
+      {
+        service_external_id: 'svc-1',
+        name: 'Стрижка',
+        appointments: total,
+        booked_value: [{ currency: 'RUB', amount_kopecks: 3_000_000 }],
+      },
+    ],
+    completeness: {
+      appointments: {
+        source: 'provider_journal',
+        status: over.completeness ?? 'complete',
+        reason:
+          (over.completeness ?? 'complete') === 'incomplete'
+            ? 'source_read_truncated'
+            : null,
+        observed_through: '2026-09-01T00:00:00.000Z',
+        out_of_period_discarded: 0,
+      },
+      attendance: {
+        source: 'canonical_mirror',
+        status: (over.notObserved ?? 0) > 0 ? 'incomplete' : 'complete',
+        reason:
+          (over.notObserved ?? 0) > 0
+            ? 'attendance_was_not_observed_for_every_record_of_the_period'
+            : null,
+        observed_through: '2026-09-01T00:00:00.000Z',
+      },
+    },
+    attendance: {
+      state: (over.notObserved ?? 0) > 0 ? 'measured_incomplete' : 'measured',
+      arrived: total - 2,
+      no_show: 0,
+      awaiting: 0,
+      not_observed: over.notObserved ?? 0,
+      records: total,
+      facts: [],
+    },
+    data_quality: {},
+  };
+};
+
+const STAFF_FINANCE = {
+  payroll: {
+    status: 'available',
+    staff: [
+      {
+        staff_id: 'st-1',
+        status: 'available',
+        verified: true,
+        accrued: { currency: 'RUB', amount_kopecks: 900_000 },
+        paid: null,
+      },
+    ],
+  },
+  warnings: [],
+};
+
+const EMPLOYEE_SCENARIOS: Array<{
+  name: string;
+  over: {
+    source?: 'crm' | 'maya';
+    total?: number;
+    notObserved?: number;
+    completeness?: 'complete' | 'incomplete';
+  };
+  finance: unknown;
+}> = [
+  { name: 'мастер: полные данные', over: {}, finance: STAFF_FINANCE },
+  {
+    name: 'мастер: неполное чтение',
+    over: { completeness: 'incomplete' },
+    finance: STAFF_FINANCE,
+  },
+  {
+    name: 'мастер: присутствие не наблюдалось',
+    over: { notObserved: 3 },
+    finance: STAFF_FINANCE,
+  },
+  { name: 'мастер: расчёт зарплаты недоступен', over: {}, finance: null },
+  {
+    name: 'мастер: внутренний календарь',
+    over: { source: 'maya' },
+    finance: null,
+  },
+];
+
+describe('🔴 P1 §9 — личный срез против боевой реализации', () => {
+  for (const scenario of EMPLOYEE_SCENARIOS) {
+    it(`${scenario.name}: бизнес-поля совпадают`, async () => {
+      const analytics = {
+        getEmployeeOperationalOverview: jest
+          .fn()
+          .mockResolvedValue(employeeOverview(scenario.over)),
+        getStaffFinance: jest.fn().mockResolvedValue(scenario.finance),
+      } as unknown as OperationsAnalyticsService;
+      const prisma = {
+        tenant: {
+          findUnique: jest.fn().mockResolvedValue({
+            calendarSource:
+              scenario.over.source === 'maya' ? 'internal' : 'external',
+            defaultTimezone: 'Europe/Moscow',
+          }),
+        },
+      } as unknown as PrismaService;
+      const service = new BusinessStateService(analytics, prisma);
+
+      const canonical = await service.employee({
+        tenantId: `tenant-${scenario.name}`,
+        userId: 'master-1',
+        period: { from: EMP_PERIOD.from, to: EMP_PERIOD.to },
+        comparisonMode: 'none',
+        comparisonPeriod: null,
+        nameRows: (rows) =>
+          new Map(rows.map((row) => [row.externalId, row.name ?? 'Мастер'])),
+      });
+
+      const legacy = (
+        LEGACY_EMPLOYEE_MARKER as Record<string, Record<string, unknown>>
+      )[scenario.name];
+      expect(legacy).toBeDefined();
+      expect(canonical.verified).toEqual(legacy.verified);
+      expect(canonical.source).toEqual(legacy.source);
+      expect(withoutP4Added(withoutP2Changes(canonical.metrics))).toEqual(
+        withoutP4Added(withoutP2Changes(legacy.metrics)),
+      );
+      const withoutChangedAndAdded = (keys: string[]) =>
+        keys.filter(
+          (key) =>
+            !(P2_CHANGED_METRICS as readonly string[]).includes(key) &&
+            !(P4_ADDED_METRICS as readonly string[]).includes(key),
+        );
+
+      expect(withoutChangedAndAdded(canonical.availableMetrics)).toEqual(
+        withoutChangedAndAdded(legacy.available_metrics as string[]),
+      );
+      expect(withoutClosureAdded(canonical.limitations)).toEqual(
+        legacy.limitations,
+      );
+      expect(withoutP2Added(canonical.unavailableMetrics)).toEqual(
+        legacy.unavailable_metrics,
+      );
+      expect(withoutP4Published(withoutBookedValue(canonical.current))).toEqual(
+        legacy.current,
+      );
+      // 🔴 В конверте личного среза `finance_verified` не было и не появится:
+      // касса конкретного мастера провайдером не подтверждается.
+      expect(legacy.finance_verified).toBeUndefined();
+    });
+  }
+});
+
+describe('🔴 P1 — то, что нашли скептики: боевое поведение сохранено', () => {
+  it('🔴 личный срез читается БЕЗ повторной попытки, как и в бою', async () => {
+    let calls = 0;
+    const analytics = {
+      getEmployeeOperationalOverview: jest.fn().mockImplementation(() => {
+        calls += 1;
+        return Promise.reject(new Error('источник молчит'));
+      }),
+      getStaffFinance: jest.fn().mockResolvedValue(null),
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: { findUnique: jest.fn().mockResolvedValue({}) },
+    } as unknown as PrismaService;
+    const service = new BusinessStateService(analytics, prisma);
+
+    await expect(
+      service.employee({
+        tenantId: 'tenant-retry',
+        userId: 'master-1',
+        period: { from: PERIOD.from, to: PERIOD.to },
+        comparisonMode: 'none',
+        comparisonPeriod: null,
+        nameRows: () => new Map(),
+      }),
+    ).rejects.toThrow('источник молчит');
+    // Бизнес-срез повторяет один раз, личный — нет. Перенос не имеет права
+    // менять число обращений к провайдеру.
+    expect(calls).toBe(1);
+  });
+
+  it('🔴 бизнес-срез повторяет чтение один раз, как и в бою', async () => {
+    let calls = 0;
+    const analytics = {
+      getBusinessOperationalOverview: jest.fn().mockImplementation(() => {
+        calls += 1;
+        return calls === 1
+          ? Promise.reject(new Error('первая попытка'))
+          : Promise.resolve(overview({}));
+      }),
+      getBusinessFinance: jest.fn().mockRejectedValue(new Error('нет денег')),
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({
+          calendarSource: 'external',
+          defaultTimezone: 'Europe/Moscow',
+        }),
+      },
+    } as unknown as PrismaService;
+    const service = new BusinessStateService(analytics, prisma);
+
+    const state = await service.business({
+      tenantId: 'tenant-retry-business',
+      period: { from: PERIOD.from, to: PERIOD.to },
+      comparisonMode: 'none',
+      comparisonPeriod: null,
+      financeAllowed: true,
+      bookedValueAllowed: true,
+      disclose: () => ({ names: new Map(), allowedExternalIds: null }),
+    });
+
+    expect(calls).toBe(2);
+    expect(state.verified).toBe(true);
+  });
+
+  it('🔴 составляющие «недоступного» отдаются по отдельности', async () => {
+    const canonical = await canonicalResult(SCENARIOS[0], false);
+
+    // Конверты потребителей разные: KPI команды складывает свой порядок и без
+    // утверждений уровня салона. Один готовый список сделал бы это невозможным.
+    expect(canonical.unavailableParts.neverAvailable.map((e) => e.key)).toEqual(
+      ['accounting_net_profit', 'gross_margin', 'marketing_roi'],
+    );
+    expect(canonical.unavailableMetrics).toEqual([
+      ...canonical.unavailableParts.bookedValue,
+      ...canonical.unavailableParts.cohorts,
+      ...canonical.unavailableParts.attendance,
+      ...canonical.unavailableParts.staffMoney,
+      ...canonical.unavailableParts.neverAvailable,
+    ]);
+  });
+
+  it('🔴 в личном срезе утверждений уровня салона нет', async () => {
+    const analytics = {
+      getEmployeeOperationalOverview: jest.fn().mockResolvedValue({
+        ...overview({}),
+        employee: { provider_id: 'st-1' },
+      }),
+      getStaffFinance: jest.fn().mockResolvedValue(null),
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: { findUnique: jest.fn().mockResolvedValue({}) },
+    } as unknown as PrismaService;
+    const service = new BusinessStateService(analytics, prisma);
+
+    const state = await service.employee({
+      tenantId: 'tenant-personal',
+      userId: 'master-1',
+      period: { from: PERIOD.from, to: PERIOD.to },
+      comparisonMode: 'none',
+      comparisonPeriod: null,
+      nameRows: (rows) =>
+        new Map(rows.map((r) => [r.externalId, r.name ?? 'М'])),
+    });
+
+    expect(state.unavailableParts.neverAvailable).toEqual([]);
+    expect(state.unavailableMetrics.map((e) => e.key)).not.toContain(
+      'marketing_roi',
+    );
+  });
+});
+
+describe('🔴 P2 §9 — выручка и стоимость записанного как ДВА факта', () => {
+  /**
+   * Боевой случай, ради которого пакет и написан.
+   *
+   * Измерено на проде 2026-08-18 (период 1 августа … текущий момент): касса
+   * 60 105 000 копеек, стоимость записанного 61 250 000. До P2 AI отдавал ОДНО
+   * число — кассу — под обоими именами.
+   *
+   * Числа здесь не вечная бизнес-истина: салон живёт дальше. Они доказывают
+   * другое — что две величины законно расходятся, и что касса больше никогда
+   * не окажется в поле стоимости записанного.
+   */
+  const PRODUCTION_CASE = {
+    tillKopecks: 60_105_000,
+    bookedKopecks: 61_250_000,
+  };
+
+  const build = (options: {
+    source?: 'crm' | 'maya';
+    bookedKopecks?: number | null;
+    financeKopecks?: number | null | 'throws';
+    financeAllowed?: boolean;
+    bookedValueAllowed?: boolean;
+    completeness?: 'complete' | 'incomplete';
+    outOfPeriodDiscarded?: number;
+  }) => {
+    const base = overview({
+      source: options.source ?? 'crm',
+      bookedKopecks: options.bookedKopecks ?? 250_000,
+      completeness: options.completeness ?? 'complete',
+    });
+    if (options.bookedKopecks === null) {
+      (base as Record<string, unknown>).revenue = [];
+    }
+    if (options.outOfPeriodDiscarded) {
+      const completeness = (base as Record<string, unknown>)
+        .completeness as Record<string, Record<string, unknown>>;
+      completeness.appointments.out_of_period_discarded =
+        options.outOfPeriodDiscarded;
+    }
+    const analytics = {
+      getBusinessOperationalOverview: jest.fn().mockResolvedValue(base),
+      getBusinessFinance: jest
+        .fn()
+        .mockImplementation(() =>
+          options.financeKopecks === 'throws'
+            ? Promise.reject(new Error('источник не ответил'))
+            : Promise.resolve(
+                options.financeKopecks === null ||
+                  options.financeKopecks === undefined
+                  ? null
+                  : finance(options.financeKopecks),
+              ),
+        ),
+      getStaffFinance: jest.fn().mockResolvedValue(null),
+    } as unknown as OperationsAnalyticsService;
+    const prisma = {
+      tenant: {
+        findUnique: jest.fn().mockResolvedValue({
+          calendarSource: options.source === 'maya' ? 'internal' : 'external',
+          defaultTimezone: 'Europe/Moscow',
+        }),
+      },
+    } as unknown as PrismaService;
+    const service = new BusinessStateService(analytics, prisma);
+    return () =>
+      service.business({
+        tenantId: 'tenant-p2',
+        period: { from: PERIOD.from, to: PERIOD.to },
+        comparisonMode: 'none',
+        comparisonPeriod: null,
+        financeAllowed: options.financeAllowed ?? true,
+        bookedValueAllowed: options.bookedValueAllowed ?? true,
+        disclose: () => ({ names: new Map(), allowedExternalIds: null }),
+      });
+  };
+
+  it('🔴 боевой случай: два факта, две величины, два основания', async () => {
+    const state = await build({
+      bookedKopecks: PRODUCTION_CASE.bookedKopecks,
+      financeKopecks: PRODUCTION_CASE.tillKopecks,
+    })();
+
+    expect(state.metrics.revenue_amount_kopecks).toBe(
+      PRODUCTION_CASE.tillKopecks,
+    );
+    expect(state.metrics.revenue_basis).toBe('provider_transactions');
+    expect(state.metrics.booked_value_amount_kopecks).toBe(
+      PRODUCTION_CASE.bookedKopecks,
+    );
+    expect(state.metrics.booked_value_basis).toBe('booked_prices');
+    // Главное утверждение пакета: величины разные, и ни одна не выдаёт себя
+    // за другую.
+    expect(state.metrics.booked_value_amount_kopecks).not.toBe(
+      state.metrics.revenue_amount_kopecks,
+    );
+  });
+
+  it('🔴 равные величины — всё равно два разных факта', async () => {
+    const state = await build({
+      source: 'maya',
+      bookedKopecks: 777_000,
+      financeKopecks: null,
+    })();
+
+    // У внутреннего календаря другого понятия денег нет: выручка стоит на
+    // ценах журнала, и обе величины совпадают. Фактов при этом два, и
+    // основание у каждого своё.
+    expect(state.metrics.booked_value_amount_kopecks).toBe(777_000);
+    expect(state.metrics.booked_value_basis).toBe('booked_prices');
+    expect(state.metrics.revenue_basis).toBe('booked_prices');
+  });
+
+  it('🔴 записанное есть, а кассы нет вовсе: внутренний календарь', async () => {
+    const state = await build({
+      source: 'maya',
+      bookedKopecks: 61_250_000,
+      financeKopecks: null,
+    })();
+
+    expect(state.metrics.booked_value_amount_kopecks).toBe(61_250_000);
+    expect(state.metrics.revenue_amount_kopecks).toBeNull();
+    // Касса не выдумывается из цен журнала.
+    expect(state.financeVerified).toBe(false);
+  });
+
+  it('🔴 кассы нет, записанное есть: одно не подменяет другое', async () => {
+    const state = await build({
+      bookedKopecks: 61_250_000,
+      financeKopecks: 'throws',
+    })();
+
+    // Отсутствие выручки не удаляет стоимость записанного…
+    expect(state.metrics.booked_value_amount_kopecks).toBe(61_250_000);
+    expect(state.metrics.booked_value_basis).toBe('booked_prices');
+    // …а наличие записанного не делает выручку доступной.
+    expect(state.metrics.revenue_amount_kopecks).toBeNull();
+    expect(state.metrics.revenue_basis).toBe('unavailable');
+  });
+
+  it('🔴 деньги есть, а источник записей прочитан неполно', async () => {
+    const state = await build({
+      bookedKopecks: 61_250_000,
+      financeKopecks: 60_105_000,
+      completeness: 'incomplete',
+    })();
+
+    expect(state.metrics.revenue_amount_kopecks).toBe(60_105_000);
+    expect(state.comparison.completeness.current).toBe('incomplete');
+    expect(state.limitations.map((entry) => entry.key)).toContain(
+      'incomplete_read',
+    );
+  });
+
+  it('🔴 измеренный ноль кассы остаётся нулём кассы', async () => {
+    const state = await build({
+      bookedKopecks: 61_250_000,
+      financeKopecks: 0,
+    })();
+
+    expect(state.metrics.revenue_amount_kopecks).toBe(0);
+    expect(state.metrics.revenue_basis).toBe('provider_transactions');
+  });
+
+  it('🔴 измеренный ноль записанного отличим от его отсутствия', async () => {
+    const zero = await build({
+      source: 'maya',
+      bookedKopecks: 0,
+      financeKopecks: null,
+    })();
+    const absent = await build({
+      source: 'maya',
+      bookedKopecks: null,
+      financeKopecks: null,
+    })();
+
+    expect(zero.metrics.booked_value_amount_kopecks).toBe(0);
+    expect(zero.metrics.booked_value_basis).toBe('booked_prices');
+    expect(absent.metrics.booked_value_amount_kopecks).toBeNull();
+    expect(absent.metrics.booked_value_basis).toBe('unavailable');
+  });
+
+  it('🔴 записи вне окна провайдера названы вслух', async () => {
+    const state = await build({
+      bookedKopecks: 61_250_000,
+      financeKopecks: 60_105_000,
+      outOfPeriodDiscarded: 17,
+    })();
+
+    expect(
+      state.limitations.find((entry) => entry.key === 'provider_window')
+        ?.reason,
+    ).toMatch(/17 record/);
+  });
+
+  it('🔴 ни один путь не выводит записанное из перезаписанного поля', () => {
+    const source = readFileSync(
+      join(__dirname, 'business-state.service.ts'),
+      'utf8',
+    );
+
+    // Оба снимка обязаны читать своё поле. Возврат к `data.revenue[0]` — это
+    // возврат к одному полю с двумя смыслами.
+    const bookedFromRevenue =
+      /bookedValue\s*=\s*Array\.isArray\(data\.revenue\)/;
+    expect(source).not.toMatch(bookedFromRevenue);
+    // Оба снимка метрик плюс объяснение недоступности читают одно и то же
+    // поле: другого источника «записанного» в файле нет.
+    expect(
+      source.match(/Array\.isArray\(data\.booked_value\)/g)?.length ?? 0,
+    ).toBe(3);
+  });
+
+  it('🔴 роль без разрешения не получает факт, и это сказано', async () => {
+    const state = await build({
+      bookedKopecks: 61_250_000,
+      financeKopecks: 60_105_000,
+      bookedValueAllowed: false,
+    })();
+
+    expect(state.metrics.booked_value_amount_kopecks).toBeNull();
+    expect(state.metrics.booked_value_basis).toBe('unavailable');
+    const reason = state.unavailableMetrics.find(
+      (entry) => entry.key === 'booked_value',
+    )?.reason;
+    // Причина называет РЕШЕНИЕ вызывающего, а не изображает отсутствие данных.
+    expect(reason).toMatch(/not permitted/);
+  });
+
+  it('🔴 роль с разрешением получает факт под своим именем', async () => {
+    const state = await build({
+      bookedKopecks: 61_250_000,
+      financeKopecks: 60_105_000,
+      bookedValueAllowed: true,
+    })();
+
+    expect(state.metrics.booked_value_amount_kopecks).toBe(61_250_000);
+    expect(state.metrics.booked_value_basis).toBe('booked_prices');
+    expect(state.unavailableMetrics.map((entry) => entry.key)).not.toContain(
+      'booked_value',
+    );
+  });
+});

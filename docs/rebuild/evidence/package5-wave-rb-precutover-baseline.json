@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "release": "/opt/maya-saas/releases/20260907-p5-ra-d8049d47",
+  "exactBaselineFields": [
+    "release",
+    "pythonHashes",
+    "compiledHashes",
+    "flags",
+    "environmentFileFlags",
+    "processManagers",
+    "services"
+  ],
+  "pythonHashes": 95,
+  "compiledHashes": 593,
+  "edgeAliases": 9,
+  "vpsPwaOwner": [
+    0,
+    0
+  ],
+  "pendingMigrations": 0,
+  "schemaDrift": "NONE",
+  "health": 200,
+  "readiness": 200,
+  "B36Runtime": "NOT_DEPLOYED",
+  "productionMutationsMessages": 0
+}

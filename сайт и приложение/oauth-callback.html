@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Вход · MAYA</title>
-<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/app/fonts.css">
 <style>
 :root{
   --bg:#070810; --ink:#f2f0ec; --dim:rgba(242,240,236,.6); --faint:rgba(242,240,236,.36);
@@ -51,18 +51,20 @@ p{color:var(--dim);font-size:13.5px;line-height:1.6}
 
   function codeText(code, fallback) {
     var m = {
-      social_provider_unavailable: 'Вход через этот сервис сейчас недоступен — войдите по номеру.',
+      social_provider_unavailable: 'Вход через этот сервис сейчас недоступен — попробуйте войти через Яндекс.',
       social_state_invalid: 'Сессия входа устарела — начните заново.',
       social_exchange_failed: 'Не удалось завершить вход. Попробуйте ещё раз.',
       social_token_invalid: 'Не удалось завершить вход. Попробуйте ещё раз.',
       social_identity_conflict: 'Этот аккаунт уже привязан к другому профилю.',
+      social_phone_required: 'Разрешите Яндексу или Telegram передать подтверждённый номер телефона, чтобы открыть кабинет клиента.',
+      social_native_callback_unavailable: 'Вход на iPhone ещё не подключён к защищённому адресу MAYA OS.',
       trial_client_registration_disabled: 'Салон ещё готовится к запуску — запись откроется скоро.',
       self_registration_disabled: 'Регистрация в этом салоне сейчас закрыта.'
     };
     return m[code] || fallback || 'Не удалось войти.';
   }
 
-  var RET_URL = '/app.html'; // выставляется из pending соответствующего state
+  var RET_URL = '/app/'; // без явного салона не уводим в платформенный maya-os // выставляется из pending соответствующего state
   function fail(text) {
     $('spin').style.display = 'none';
     $('card').classList.add('err');
@@ -96,7 +98,7 @@ p{color:var(--dim);font-size:13.5px;line-height:1.6}
       var x = new URL(String(u || ''), location.origin);
       if (x.origin === location.origin) return x.pathname + x.search + x.hash;
     } catch (e) {}
-    return '/app.html';
+    return '/app/';
   }
   var q = new URLSearchParams(location.search);
   var err = q.get('error');
@@ -162,6 +164,7 @@ p{color:var(--dim);font-size:13.5px;line-height:1.6}
         access_expires_at: data.expires_in ? Date.now() + Number(data.expires_in) * 1000 : null,
         refresh_expires_at: data.refresh_expires_at || null,
         session: data.session || null,
+        auth_provider: data.provider || provider,
         user: data.user || null,
         tenant_slug: tenantSlug, // контекст пары — проверяется при каждом чтении в app.html
         api_base: apiBase
