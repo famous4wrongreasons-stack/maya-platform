@@ -1,0 +1,437 @@
+
+### 1/10 шлюз: чистое дерево, линт, типизация, тесты, схема
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+The schema at prisma/schema.prisma is valid 🚀
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+> maya-saas-backend@0.0.1 typecheck
+> tsc --noEmit --project tsconfig.build.json --incremental false
+
+
+> maya-saas-backend@0.0.1 typecheck:scripts
+> tsc --noEmit --project tsconfig.scripts.json --incremental false
+
+
+> maya-saas-backend@0.0.1 test
+> jest --runInBand --silent
+
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 16.831s
+
+OK
+......................
+----------------------------------------------------------------------
+Ran 22 tests in 1.860s
+
+OK
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:16 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:17 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:17 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:17 PM [33m   WARN[39m [38;5;3m[SocialAuthService] [39m[33mTelegram OAuth provider request failed (TypeError).[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 3 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 5 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [31m  ERROR[39m [38;5;3m[ExpensePeriodReader] [39m[31mexpense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T20:59:59.000Z branch=all: expense ledger unavailable[39m
+Error: expense ledger unavailable
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/analytics/operations-analytics.service.spec.ts:1137:28)
+    at /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:102:19)
+    at readExpensePeriod (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at OperationsAnalyticsService.loadCategorisedExpenses (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/analytics/operations-analytics.service.ts:1678:29)
+    at OperationsAnalyticsService.getBusinessProfitability (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/analytics/operations-analytics.service.ts:483:14)
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/analytics/operations-analytics.service.spec.ts:1699:22)
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [31m  ERROR[39m [38;5;3m[ExpensePeriodReader] [39m[31mexpense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.000Z branch=all: expense ledger unavailable[39m
+Error: expense ledger unavailable
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/analytics/operations-analytics.service.spec.ts:1889:28)
+    at /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:102:19)
+    at readExpensePeriod (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at OperationsAnalyticsService.buildOverview (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/analytics/operations-analytics.service.ts:694:30)
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[LegacyAppointmentBridgeService] [39m[32mMAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION {"event":"legacy_appointment_shadow_observation","contract":"maya.legacy-appointment-shadow-observation/1","mode":"shadow","tenant_ref":"0a96abb33b07ff0e8f48bcc4893e0e7346bff899dd316979517fa06509a49aff","tenant_resolution":"integration","origin":"webhook.chat","authorization_context":{"transport_authentication":"bridge_secret","integration_binding":"verified","origin_action_policy":"allowed","tenant_scope":"system_tenant"},"legacy_action_class":"create_appointment","preview_action_class":"create_appointment","capability":"crm.appointment.create.v1","capability_version":1,"target_kind":"appointment","target_ref_hash":"125ab104f37948fc4f6bf8869fe2f6fe7872df3fb6c5acc535ba33fc97fea14f","normalized_input_hash":"67c4987a0ddd095dcd76e249f2f34fe76d9b4b67b7dbb2c4f393f96228a1535b","identity_fingerprint":"d006dba7a3a61c6e056a66a04259a09e09ce9bffb27032c42fce8e70f9d195bf","request_idempotency_key_hash":"159afc7cab128b7cbe710ba097c1fd55f16db92b7ff69559f39cd44d0ba5c4f1","policy_key":"production.create_appointment.confirmed-request","policy_version":1,"policy_decision":"ALLOW","autonomy_level":"L2_CONFIRMED_REQUEST","approval_requirement":"NONE","executor_key":"crm.appointment.create","executor_version":1,"preview_external_side_effects":0,"bridge_external_side_effects":0,"shadow_side_effects":{"crm_writes":0,"messages":0,"campaigns":0}}[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:19 PM [32m    LOG[39m [38;5;3m[LegacyAppointmentBridgeService] [39m[32mMAYA_LEGACY_APPOINTMENT_SHADOW_OBSERVATION {"event":"legacy_appointment_shadow_observation","contract":"maya.legacy-appointment-shadow-observation/1","mode":"shadow","tenant_ref":"0a96abb33b07ff0e8f48bcc4893e0e7346bff899dd316979517fa06509a49aff","tenant_resolution":"integration","origin":"webhook.chat","authorization_context":{"transport_authentication":"bridge_secret","integration_binding":"verified","origin_action_policy":"allowed","tenant_scope":"system_tenant"},"legacy_action_class":"create_appointment","preview_action_class":"create_appointment","capability":"crm.appointment.create.v1","capability_version":1,"target_kind":"appointment","target_ref_hash":"125ab104f37948fc4f6bf8869fe2f6fe7872df3fb6c5acc535ba33fc97fea14f","normalized_input_hash":"67c4987a0ddd095dcd76e249f2f34fe76d9b4b67b7dbb2c4f393f96228a1535b","identity_fingerprint":"d006dba7a3a61c6e056a66a04259a09e09ce9bffb27032c42fce8e70f9d195bf","request_idempotency_key_hash":"159afc7cab128b7cbe710ba097c1fd55f16db92b7ff69559f39cd44d0ba5c4f1","policy_key":"production.create_appointment.confirmed-request","policy_version":1,"policy_decision":"ALLOW","autonomy_level":"L2_CONFIRMED_REQUEST","approval_requirement":"NONE","executor_key":"crm.appointment.create","executor_version":1,"preview_external_side_effects":0,"bridge_external_side_effects":0,"shadow_side_effects":{"crm_writes":0,"messages":0,"campaigns":0}}[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:20 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:20 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:20 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:20 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:20 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:20 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:20 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-09T21:00:00.000Z..2026-08-10T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:20 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-09T21:00:00.000Z..2026-08-10T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:20 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:20 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-01T00:00:00.000Z..2026-08-31T23:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:21 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:21 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:21 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-20T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:21 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-17T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:21 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-19T00:00:00.000Z..2026-08-16T23:59:59.999Z); they are not counted[39m
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [31m  ERROR[39m [38;5;3m[ExpensePeriodReader] [39m[31mexpense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.999Z branch=all: expense ledger unavailable[39m
+Error: expense ledger unavailable
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-canon.spec.ts:89:29)
+    at /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:57:19)
+    at readExpensePeriod (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at ExpensesService.list (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expenses.service.ts:166:24)
+    at AiToolHandlerService.readExpenses (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts:1997:47)
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [31m  ERROR[39m [38;5;3m[ExpensePeriodReader] [39m[31mexpense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.999Z branch=all: expense ledger unavailable[39m
+Error: expense ledger unavailable
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-canon.spec.ts:89:29)
+    at /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:57:19)
+    at readExpensePeriod (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-canon.spec.ts:440:43)
+    at Promise.finally.completed (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:1561:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:1501:10)
+    at _callCircusTest (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:1011:40)
+    at _runTest (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:951:3)
+    at /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:853:7
+    at _runTestsForDescribeBlock (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:866:11)
+    at _runTestsForDescribeBlock (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:861:11)
+    at run (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:765:3)
+    at runAndTransformResultsToJestFormat (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-circus/build/jestAdapterInit.js:1993:21)
+    at jestAdapter (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-circus/build/runner.js:111:19)
+    at runTestInternal (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-runner/build/index.js:276:16)
+    at runTest (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-runner/build/index.js:344:7)
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [31m  ERROR[39m [38;5;3m[ExpensePeriodReader] [39m[31mexpense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.999Z branch=all: expense ledger unavailable[39m
+Error: expense ledger unavailable
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-canon.spec.ts:89:29)
+    at /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:57:19)
+    at readExpensePeriod (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at ExpensesService.list (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expenses.service.ts:166:24)
+    at /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-canon.spec.ts:449:21
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at TenantContextService.runAsSystemTenant (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/tenancy/tenant-context.service.ts:46:25)
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-canon.spec.ts:448:44)
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [31m  ERROR[39m [38;5;3m[ExpensePeriodReader] [39m[31mexpense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.999Z branch=all: expense ledger unavailable[39m
+Error: expense ledger unavailable
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-canon.spec.ts:89:29)
+    at /Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/node_modules/jest-mock/build/index.js:57:19)
+    at readExpensePeriod (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at ExpensesService.list (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/expenses/expenses.service.ts:166:24)
+    at AiToolHandlerService.readExpenses (/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts:1997:47)
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-12T21:00:00.000Z..2026-08-13T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 4 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:23 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:27 PM [33m   WARN[39m [38;5;3m[OwnerReportsService] [39m[33mdaily_report slot unresolved run=run slot=first-1[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:27 PM [33m   WARN[39m [38;5;3m[OwnerReportsService] [39m[33mdaily_report slot unresolved run=run slot=first-1[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:28 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:28 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 8 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:28 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 8 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:30 PM [33m   WARN[39m [38;5;3m[AppointmentReconciliationService] [39m[33mreconciliation window 2026-08-18T00:00:00.000Z..2026-08-25T00:00:00.000Z is truncated (page_limit_reached); nothing is declared missing from it[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:30 PM [32m    LOG[39m [38;5;3m[QuarantineCatchupService] [39m[32mquarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:30 PM [32m    LOG[39m [38;5;3m[QuarantineCatchupService] [39m[32mquarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:30 PM [32m    LOG[39m [38;5;3m[QuarantineCatchupService] [39m[32mquarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:30 PM [32m    LOG[39m [38;5;3m[QuarantineCatchupService] [39m[32mquarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:30 PM [32m    LOG[39m [38;5;3m[QuarantineCatchupService] [39m[32mquarantine catch-up for yclients: considered=1 explained=0 still_unresolved=1 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:30 PM [32m    LOG[39m [38;5;3m[QuarantineCatchupService] [39m[32mquarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:30 PM [32m    LOG[39m [38;5;3m[QuarantineCatchupService] [39m[32mquarantine catch-up for yclients: considered=1 explained=0 still_unresolved=1 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:30 PM [32m    LOG[39m [38;5;3m[QuarantineCatchupService] [39m[32mquarantine catch-up for yclients: considered=1 explained=1 still_unresolved=0 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:32 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:32 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:32 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mreconciliation near complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mopportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0[39m
+[95m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [95m  DEBUG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[95mreconciliation near: no active CRM integrations[39m
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [31m  ERROR[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[31mreconciliation near failed for yclients: провайдер первого молчит[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mreconciliation near complete for yclients: fetched=0 created=0 updated=0 unchanged=0 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mopportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mreconciliation near skipped for yclients: lease held by manual:host:1[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mreconciliation near complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mopportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mreconciliation near truncated for yclients: fetched=100 created=0 updated=0 unchanged=100 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mopportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mreconciliation near complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0[39m
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [31m  ERROR[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[31mopportunity lifecycle near failed for yclients: shadow lifecycle unavailable[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mreconciliation near complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mopportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mreconciliation near complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mopportunity lifecycle near complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mreconciliation medium complete for yclients: fetched=1 created=0 updated=0 unchanged=1 events=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mopportunity lifecycle medium complete: detected=0 active=0 resolved=0 expired=0 superseded=0 tasks=0 duplicates=0 executed=0[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [32m    LOG[39m [38;5;3m[AppointmentReconciliationScheduler] [39m[32mAppointment reconciliation scheduler is disabled.[39m
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [31m  ERROR[39m [38;5;3m[EventStoreService] [39m[31mdomain event event-1 is dead after 5 attempts: boom[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:33 PM [33m   WARN[39m [38;5;3m[AppointmentMirrorService] [39m[33mmirror window 2026-08-01T00:00:00.000Z..2026-08-25T00:00:00.000Z is truncated (page_limit_reached); nothing is declared missing from it[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:35 PM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM preview failed provider=yclients operation=connection_check status=unknown[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:35 PM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM connection failed provider=yclients code=crm_credentials_rejected detail=401 token[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:35 PM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM connection failed provider=yclients code=crm_platform_configuration_error detail=YCLIENTS_PARTNER_TOKEN is not configured[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:35 PM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM team access synchronization deferred tenant=tenant-1: unavailable[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:36 PM [33m   WARN[39m [38;5;3m[BridgeSourceService] [39m[33mbridge tenant resolved by slug compatibility: muzhskaya-estetika-3. Source should send provider + external company id.[39m
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:36 PM [31m  ERROR[39m [38;5;3m[BridgeSourceService] [39m[31mbridge company yclients:503759 maps to 2 tenants[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:37 PM [32m    LOG[39m [38;5;3m[IngestionRetentionScheduler] [39m[32mIngestion quarantine retention started: every 24 h, keeping 14 days.[39m
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:37 PM [31m  ERROR[39m [38;5;3m[IngestionRetentionScheduler] [39m[31mquarantine retention failed: база недоступна[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:37 PM [32m    LOG[39m [38;5;3m[IngestionRetentionScheduler] [39m[32mIngestion quarantine retention is disabled.[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:40 PM [33m   WARN[39m [38;5;3m[BillingSchedulerService] [39m[33mPrevious billing run is still in progress, skipping.[39m
+[31m[Nest] 57899  - [39m09/14/2026, 1:31:40 PM [31m  ERROR[39m [38;5;3m[BillingSchedulerService] [39m[31mBilling run failed: YooKassa недоступна[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:40 PM [32m    LOG[39m [38;5;3m[BillingSchedulerService] [39m[32mBilling scheduler is disabled by configuration.[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:46 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-03T00:00:00.000Z..2026-07-31T23:59:59.999Z); they are not counted[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:47 PM [33m   WARN[39m [38;5;3m[AuditLogService] [39m[33maudit write failed action=entity.updated entity=entity: Error[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:47 PM [33m   WARN[39m [38;5;3m[AuditLogService] [39m[33maudit write failed action=blocked entity=entity: ForbiddenException[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:49 PM [33m   WARN[39m [38;5;3m[ClientIdentityService] [39m[33mshadow client identity registration blocked provider=yclients reason=client_identity_guard_unavailable[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:53 PM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-14T21:00:00.000Z..2026-08-12T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [32m    LOG[39m [38;5;3m[AiSpeechService] [39m[32mSpeech transcription completed in 1 ms (4 audio bytes)[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [32m    LOG[39m [38;5;3m[AiSpeechService] [39m[32mSpeech transcription completed in 2 ms (4 audio bytes)[39m
+[32m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [32m    LOG[39m [38;5;3m[AiSpeechService] [39m[32mSpeech transcription completed in 0 ms (4 audio bytes)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 2)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:conversation_plan_missing[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 2)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_output_missing[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 1)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 2)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_unexpected_tool_call[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_api_key_missing (попытка 1)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_api_key_missing[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_base_url_invalid (попытка 1)[39m
+[33m[Nest] 57899  - [39m09/14/2026, 1:31:55 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_base_url_invalid[39m
+
+Test Suites: 461 passed, 461 total
+Tests:       3878 passed, 3878 total
+Snapshots:   0 total
+Time:        343.812 s
+
+### 2/10 локальная сборка dist
+
+> maya-saas-backend@0.0.1 build
+> nest build && npm run build:preflight
+
+
+> maya-saas-backend@0.0.1 build:preflight
+> tsc --project tsconfig.preflight.json
+
+Welcome to LTD BeGet SSH Server 'prime'
+{"artifact":"/var/www/maya-platform/app.html","status":"PASS","scriptsParsed":27,"sha256":"4751ebfd7f0f3a08f96b6867b50e375ddf2fe9310b6d3562e70dc0827dc1b9ae","businessEffects":0}
+Welcome to LTD BeGet SSH Server 'prime'
+Welcome to LTD BeGet SSH Server 'prime'
+{"status":"PASS","pwa":{"status":"PASS","scriptsParsed":27,"sha256":"4751ebfd7f0f3a08f96b6867b50e375ddf2fe9310b6d3562e70dc0827dc1b9ae","c8":"PASS","numericPredictions":false,"legacyGrowthScorers":0},"python":{"status":"PASS","retiredEntrypoints":["masters_ai.py::money_pitch","owner_ai.py::return_candidates","owner_ai.py::_stored_client_retention","owner_ai.py::client_retention","owner_ai.py::_fallback_client_retention","owner_ai.py::_money_at_stake","owner_ai.py::money_opportunities","owner_ai.py::risk_signals","owner_ai.py::plan_fact","owner_ai.py::_fallback_plan_fact","owner_ai.py::_financial_director","owner_ai.py::_business_goals","owner_ai.py::_owner_business_advisor","owner_ai.py::_growth_engine","owner_ai.py::_owner_briefing","owner_ai.py::_kpi_scorecard","owner_ai.py::business_snapshot","webhook_server.py::client_retention_refresh_loop"],"growthOwner":"RETIRED","sourceImports":0,"productionEffects":0},"businessEffects":0}
+
+### 3/10 каталог релиза
+Welcome to LTD BeGet SSH Server 'prime'
+
+### 4/10 заливка сборки
+Welcome to LTD BeGet SSH Server 'prime'
+
+### 5/10 установка зависимостей (npm ci, без dev)
+Welcome to LTD BeGet SSH Server 'prime'
+npm warn allow-scripts   bcrypt@6.0.0 (install: node-gyp-build)
+npm warn allow-scripts   prisma@7.9.1 (preinstall: node scripts/preinstall-entry.js)
+npm warn allow-scripts
+npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.
+bcrypt собран и работает
+
+
+
+### 6/10 release:preflight (блокирующий, до базы)
+Welcome to LTD BeGet SSH Server 'prime'
+Package 4 active PWA runtime guard: PASS
+Welcome to LTD BeGet SSH Server 'prime'
+Package 5 active PWA control-plane / B34 review guard: PASS
+Welcome to LTD BeGet SSH Server 'prime'
+{
+  "ok": true,
+  "environment": "production",
+  "config": "safe",
+  "local_migrations": 96,
+  "database": {
+    "status": "ready",
+    "applied_migrations": 99,
+    "pending_migrations": 0
+  }
+}
+
+### 7/10 миграция базы (до переключения)
+Welcome to LTD BeGet SSH Server 'prime'
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+No pending migrations to apply.
+{
+  "ok": true,
+  "environment": "production",
+  "config": "safe",
+  "local_migrations": 96,
+  "database": {
+    "status": "ready",
+    "applied_migrations": 99,
+    "pending_migrations": 0
+  }
+}
+Loaded Prisma config from prisma.config.ts.
+
+No difference detected.
+
+
+### 8/10 клиент базы под свежую схему
+Welcome to LTD BeGet SSH Server 'prime'
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+клиент базы сгенерирован и загружается
+
+### 9/10 смоук на запасном порту 3199
+Welcome to LTD BeGet SSH Server 'prime'
+смоук пройден; процесс завершён и reap выполнен
+
+### 10/10 переключение, проверка, уборка
+Welcome to LTD BeGet SSH Server 'prime'
+{"artifact":"/var/www/maya-platform/app.html","status":"PASS","scriptsParsed":27,"sha256":"4751ebfd7f0f3a08f96b6867b50e375ddf2fe9310b6d3562e70dc0827dc1b9ae","businessEffects":0}
+Welcome to LTD BeGet SSH Server 'prime'
+Welcome to LTD BeGet SSH Server 'prime'
+{"status":"PASS","pwa":{"status":"PASS","scriptsParsed":27,"sha256":"4751ebfd7f0f3a08f96b6867b50e375ddf2fe9310b6d3562e70dc0827dc1b9ae","c8":"PASS","numericPredictions":false,"legacyGrowthScorers":0},"python":{"status":"PASS","retiredEntrypoints":["masters_ai.py::money_pitch","owner_ai.py::return_candidates","owner_ai.py::_stored_client_retention","owner_ai.py::client_retention","owner_ai.py::_fallback_client_retention","owner_ai.py::_money_at_stake","owner_ai.py::money_opportunities","owner_ai.py::risk_signals","owner_ai.py::plan_fact","owner_ai.py::_fallback_plan_fact","owner_ai.py::_financial_director","owner_ai.py::_business_goals","owner_ai.py::_owner_business_advisor","owner_ai.py::_growth_engine","owner_ai.py::_owner_briefing","owner_ai.py::_kpi_scorecard","owner_ai.py::business_snapshot","webhook_server.py::client_retention_refresh_loop"],"growthOwner":"RETIRED","sourceImports":0,"productionEffects":0},"businessEffects":0}
+Welcome to LTD BeGet SSH Server 'prime'
+здоровье: {"status":"ok","service":"maya-saas-backend","release":"20260914-c9-wave4-7c9da983","started_at":"2026-09-14T10:40:47.224Z","timestamp":"2026-09-14T10:40:49.887Z"}
+{"status":"ready","service":"maya-saas-backend","checks":{"database":"ready"},"timestamp":"2026-09-14T10:40:50.014Z"}
+--- ошибки за 2 минуты ---
+-- No entries --
+--- уборка (оставляю 3 + current + previous) ---
+/dev/vda1        19G   12G  6.9G  64% /
+Welcome to LTD BeGet SSH Server 'prime'
+{"artifact":"/var/www/maya-platform/app.html","status":"PASS","scriptsParsed":27,"sha256":"4751ebfd7f0f3a08f96b6867b50e375ddf2fe9310b6d3562e70dc0827dc1b9ae","businessEffects":0}
+Welcome to LTD BeGet SSH Server 'prime'
+Welcome to LTD BeGet SSH Server 'prime'
+{"status":"PASS","pwa":{"status":"PASS","scriptsParsed":27,"sha256":"4751ebfd7f0f3a08f96b6867b50e375ddf2fe9310b6d3562e70dc0827dc1b9ae","c8":"PASS","numericPredictions":false,"legacyGrowthScorers":0},"python":{"status":"PASS","retiredEntrypoints":["masters_ai.py::money_pitch","owner_ai.py::return_candidates","owner_ai.py::_stored_client_retention","owner_ai.py::client_retention","owner_ai.py::_fallback_client_retention","owner_ai.py::_money_at_stake","owner_ai.py::money_opportunities","owner_ai.py::risk_signals","owner_ai.py::plan_fact","owner_ai.py::_fallback_plan_fact","owner_ai.py::_financial_director","owner_ai.py::_business_goals","owner_ai.py::_owner_business_advisor","owner_ai.py::_growth_engine","owner_ai.py::_owner_briefing","owner_ai.py::_kpi_scorecard","owner_ai.py::business_snapshot","webhook_server.py::client_retention_refresh_loop"],"growthOwner":"RETIRED","sourceImports":0,"productionEffects":0},"businessEffects":0}
+
+### ГОТОВО: 20260914-c9-wave4-7c9da983
+
+[exited with code 0]

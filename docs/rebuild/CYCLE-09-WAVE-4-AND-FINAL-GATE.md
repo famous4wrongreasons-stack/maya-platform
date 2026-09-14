@@ -98,3 +98,35 @@ database admits only `EXPLICIT_REQUEST` or an explicitly selected `SELECTED_OPPO
 | P02 PostgreSQL proof | **13/13** |
 | Wave 3 three-scenario proof | **15/15**, 0 business/provider/message mutations |
 | Chapter 9 final gate | **10/10** |
+
+## 5. Production deployment and read-only verification
+
+Release **`20260914-c9-wave4-7c9da983`**, all ten steps, exit 0.
+[Transcript](evidence/chapter9-final/deployment.txt) ·
+[verification](evidence/chapter9-final/production-verification.txt) ·
+[chapter acceptance](evidence/chapter9-final/chapter9-acceptance.json).
+
+| Production gate | Result |
+|---|---|
+| `migrate deploy` | `No pending migrations to apply.` |
+| Applied / pending migrations | 99 / **0** |
+| Drift | **NONE** |
+| Health / readiness after cutover | `ok` / `ready` |
+| Structural probe vs Wave 1 | **byte-for-byte identical**, 123 fields |
+| Rows in the five C9 tables | **0** → production proof effects **0** |
+| Coordination routes, unauthenticated | 401 |
+
+```text
+C9 WAVE 4 ENVELOPE CONFORMANCE: EXACT (0 models / 0 fields / 0 migrations / 0 actions / 0 AC6)
+FINAL GATE: 10/10
+EVALUATION CORPUS: 110/110
+PRODUCTION RELEASE: 20260914-c9-wave4-7c9da983
+PENDING MIGRATIONS: 0
+DRIFT: NONE
+HEALTH: PASS
+READINESS: PASS
+PAID REASONING: DISABLED
+PRODUCTION EFFECTS: 0
+WAVE 4: COMPLETE
+CHAPTER 9: COMPLETE
+```
