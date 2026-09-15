@@ -73,7 +73,7 @@ predicate-restatement-check.mjs       0 restatements
 ```
 
 Four rounds: **48 findings (3 security-contract) → 38 (0) → 12 (0, 0 unproven, rules hold) → 4
-(0, 0, rules hold, one lens passing).** 6,201 → 6,209 lines.
+(0, 0, rules hold, one lens passing).** 6,201 → 6,208 lines.
 
 **The contract is not certified.** It has not been re-read since these six repairs, and the last
 pass that did read it was split. What can be said with evidence is narrower and worth saying

@@ -1,0 +1,162 @@
+{
+ "pass": "narrow-final (last 6 repairs + R3.11.5) — NOT a certification round",
+ "lenses": 2,
+ "scope": [
+  "the six repairs made after the final split pass",
+  "their immediate dependency closures",
+  "§3.11 R3.11.5",
+  "communication.bulk-campaign.admit.v2",
+  "C9 propose-key resolution",
+  "MARKETING_FANOUT",
+  "the REQUEST_APPROVAL / COMMIT refusal path",
+  "the authority and type invariants those touch"
+ ],
+ "decisiveQuestion": "Does the repaired R3.11.5 ACTUALLY EXECUTE the refusal, or merely read correctly?",
+ "answer": "IT ACTUALLY EXECUTES — 2/2 lenses, each tracing the chain independently by execution.",
+ "R3115_CONSTRUCTIBLE": true,
+ "R3115_ACTUALLY_REFUSES": true,
+ "sixRepairsCorrect": true,
+ "independentLoadBearingDefects": 0,
+ "repairErrorsFiled": 4,
+ "securityViolations": 0,
+ "unprovenClaimsInScope": 0,
+ "fundamentalRulesHold": true,
+ "invariants": {
+  "floorReductionCount": [
+   2,
+   2
+  ],
+  "client2FenceIntact": true,
+  "artifact3FenceIntact": true,
+  "gate5Recomputable": true,
+  "gate6Executable": true,
+  "gate7RereadsAllowlist": true,
+  "registries": [
+   "226 / 221 / 47 / 56 — ALL FOUR CONFIRMED",
+   "226 / 221 / 47 / 56 — all four re-derive"
+  ]
+ },
+ "certifiableAsReturnedByLens": {
+  "constructibility": false,
+  "closure": false
+ },
+ "certifiableConditionNamedByBothLenses": "Both set certifiable=false SOLELY on the filed repair-errors and said so in terms: \"Delete those six words and the closure is complete. That does not warrant another full round; it warrants the edit, and then certification.\" / \"Fix P-10 one line (and, if the owner wants the premise as tight as the fence it now carries, F31 as well), and this certifies.\" Those edits are Z1, Z2, Z3 and are applied.",
+ "byLens": {
+  "constructibility": {
+   "certifiable": false,
+   "r3115ChainTrace": "EXECUTED, link by link. (1) Intent carries an AE ref — §0.12 F69's table: REQUEST_APPROVAL and COMMIT \"may carry an AE ref\", \"must not carry C9/TOOL/CONTROL\". (2) That AE key has an AE_WIDGET_COMMIT_ALLOWLIST row — §0.7 F31's (row XOR gap) start-up assertion classifies all 226 rows; Gate 7 re-reads the live allowlist for a COMMIT; an un-allowlisted key resolves to no confirmation kind (F72, no default branch) and refuseMint('capability_not_allowlisted') fires. Live case executed: ActionCapabilityRegistry.list() contains communication.bulk-campaign.admit.v2 {policyDecision ALLOW, approvalRequirement REQUIRED, actionClass deliver_bulk_campaign, targetKind marketing_campaign, allowedSourceTypes ['authenticated_request']}, so F31's ALLOW / authenticated_request / requires_ae_approval conjuncts all hold. (3) Allowlisted AE key -> exactly one AE_PROPOSE_PAIRING row — F31 line 465: \"row => cap.capability is the `ae` side of exactly one AE_PROPOSE_PAIRING row else fail\". F38's traced table: 13 rows, each AE key distinct; communication.bulk-campaign.admit.v2 occurs exactly once (row 13, via CanonicalBulkService.request()); b35.confirm occurs exactly once on the C9 side. Uniqueness CONFIRMED by extracting both columns of the table, not by grepping the literal. (4) That pairing row's propose side resolves in C9_CAPABILITIES — F31's second block: \"every AE_PROPOSE_PAIRING row: propose.key resolves in C9_CAPABILITIES ... else fail\". Executed: C9_CAPABILITIES.length === 56 and contains b35.confirm {mode OWNER_HANDOFF, resourceClass SOURCE_HANDOFF}. (5) A WIDGET_CAPABILITY_POLICY row exists for it — F28: total over C9-CAP's 56 rows and over those only; a C9 key with no row fails the build. b35.confirm is one of the 56, so the row exists by construction. (6) dispatch_is_synchronous is readable on that row — F28 declares it a column of that table. (7) mintIntent() refuses when it is false — R3.11.5, *Evaluated at:* EP-MINT, *Mechanism:* the mint function's refusal, fail-closed. NO LINK RETURNS UNDEFINED. Crucially, the owner's stated route via AeCommitRow.propose is NOT what makes this total, and I checked that specifically: F30 types propose as CapabilityRef with the comment \"never null\", but a CapabilityRef is space-qualified and NOTHING in F31 asserts AeCommitRow.propose's space is C9, that it resolves in C9_CAPABILITIES, or that it equals the pairing row's propose side. Non-nullness alone is therefore NOT enough to make the lookup total. What makes it total is the pairing route — F31's line 465 plus F31's \"propose.key resolves in C9_CAPABILITIES\" — and the repaired R3.11.5 cites exactly that route (\"F31 makes the propose-key lookup total: every allowlisted AE key is the `ae` side of exactly one AE_PROPOSE_PAIRING row\"), as does F28's repaired gloss (\"whose pairing row names that key as `propose`\"). The repair took the route that is total; the route the proof script argues from is not.",
+   "perRepair": [
+    {
+     "repair": "Y1 — R3.11.5 reads the C9 propose key's WIDGET_CAPABILITY_POLICY row",
+     "correct": true,
+     "closed": false,
+     "note": "Correct and self-defending: it names the propose-key route, states in place why the AE-keyed form is undefined for every capability it governs and so fails open, and cites F31 for totality rather than asserting it. Constructibility verified above. ALSO VERIFIED AS A LIVE CASE, not merely a schematic one: I read the owner. src/marketing/canonical-bulk.service.ts confirm() calls engine.decideApproval({decision:'APPROVED'}) and then continue() -> CommunicationBulkDeliveryService.resume(), which is a leased, 25-second-deadline, resumable per-recipient loop with its own separate resume() re-entry point. That IS 'the owner queues dispatch after APPROVED', so dispatch_is_synchronous: false is the factually correct value for b35.confirm and the refusal is the one this rule exists to make. Marked not-closed ONLY because of §A1.1 P-10 (see repairErrors); R3.11.5 itself is complete."
+    },
+    {
+     "repair": "Y1b — F28's column gloss",
+     "correct": true,
+     "closed": false,
+     "note": "Gloss now reads 'a REQUEST_APPROVAL or COMMIT whose pairing row names that key as propose refuses ... the flag is read through the propose key, never through the AE key, because this table has no AE rows'. Agrees with R3.11.5 and with §0.14 F80's idiom ('its C9 propose key's WIDGET_CAPABILITY_POLICY row'). The antecedent of 'until the owner declares it' is loose read in isolation, but R3.11.5 owns the lifting condition ('until the owner performs its own execute-time re-resolution') and the two do not diverge. Same P-10 residual as Y1."
+    },
+    {
+     "repair": "Y2 — §A2.3 states K20 over REGISTERED_KEYS",
+     "correct": true,
+     "closed": true,
+     "note": "Line 5946 now reads 'emittable(kind) = ∃ k ∈ ownerClassKeys(kind) : k ∈ REGISTERED_KEYS', identical in form to §2.4 K20's declaration at line 2622. capabilityRegistry now has 0 occurrences in the whole contract (counted, not inherited)."
+    },
+    {
+     "repair": "Y2b — §A1.1 P-09 the same",
+     "correct": true,
+     "closed": true,
+     "note": "P-09 now reads 'ownerClassKeys(CONSENT_STATE) ∩ REGISTERED_KEYS = ∅'. Its factual premise re-verified by execution: MAYA_AI_TOOL_CATALOG has exactly 47 names and zero contain consent/identity/privacy."
+    },
+    {
+     "repair": "Y3 — §A1.6.2 cites CONSENT(cap) instead of restating one disjunct",
+     "correct": true,
+     "closed": true,
+     "note": "Now: \"§0.7 F32's CONSENT(cap) — a two-disjunct predicate, restated nowhere — holds for this key on its targetKind disjunct\". Cites without restating and names the satisfied disjunct. The citation's truth verified by execution, not by reading F32: package5.wave3.record-client-consent.execute.v1 has targetKind 'client_consent' (and independently actionClass 'record_client_consent'), and F32's CONSENT predicate resolves to exactly the 3 of 226 rows F32 claims. predicate-restatement-check.mjs re-run: 6 predicates declared with :=, 0 restatements outside the declaration. Line 881's 'return CONSENT(cap) || IDENTITY(cap)' is a use, and §3.4's 'are declared in §0.7 F32 ... and are not restated here' is a citation — neither is a restatement."
+    },
+    {
+     "repair": "Y4 — §2.4 K20 names the TOOL/C9 collision F24 proves",
+     "correct": true,
+     "closed": true,
+     "note": "K20 now says an unqualified intersection 'would match a TOOL-space key against a C9 spelling ... all 47 catalogue names are also C9-CAP keys'. F24's three claims re-verified by enumerating the live registries rather than by reading F24: TOOL ⊂ C9 by spelling (47/47, zero catalogue names absent from C9_CAPABILITIES); AE ∩ C9 = ∅ (zero of 226 AE keys resolve in C9); the 9 C9-only extras are exactly the nine F24 lists. So the old wording (C9-against-AE) named a collision that provably cannot occur, and the new wording names the one that does."
+    }
+   ],
+   "repairErrors": [
+    {
+     "repair": "Y1 / Y1b (closure)",
+     "clause": "§A1.1 P-10 (line 5846)",
+     "whyWrong": "P-10 still describes the repaired table as '`WIDGET_CAPABILITY_POLICY` (`min_verification`, `consent_class` per key, total over `C9_CAPABILITIES` ∪ the reachable Action Engine keys)'. That is the exact domain claim whose falsity is the entire premise of the Y1/Y1b repair: if the table really were total over the reachable AE keys, the AE-keyed lookup R3.11.5 used to make would have resolved and the fence would never have failed open. Four clauses now contradict P-10 — F28 ('total over C9-CAP's 56 rows, and over those only'), R3.4.3 ('total over C9_CAPABILITIES (56 rows) ... Totality over AE-CAP is carried instead by AE_WIDGET_COMMIT_ALLOWLIST ∪ AE_CAPABILITY_GAP_LEDGER'), §A1.6.2 ('No WIDGET_CAPABILITY_POLICY row is required or permitted for it ... and over those only'), and Annex B EB-2, which declares this precise formulation 'VOID as to the AE half'. P-10 is also the build-spec row that tells package K2 which table to build, and it sits one row below Y2b's own repair site in the same table. Provenance checked with git log -L: the wording is original to the contract's first commit and appears in no round-1..4 finding, so it was never adjudicated and deliberately retained — it is simply the surviving half of the claim the repair corrected elsewhere. WEIGHT, STATED HONESTLY: this does NOT make R3.11.5 fail open today. R3.11.5 and F28 are unambiguous on their own terms, and A1.6.2 and R3.4.3 agree with them, so the constructibility chain above is unaffected. Its force is (a) it falsifies §A0.1's own self-description that 'where this annex and the body appeared to differ, the body has been corrected and the annex now agrees with it', and (b) §A0.1 scopes A1's normativity to existence-and-status only, so this parenthetical is not normative about the domain — which is why I classify it a closure error rather than an independent load-bearing defect. It is a six-word deletion.",
+     "fix": "In §A1.1 P-10, delete '∪ the reachable Action Engine keys' so it reads 'total over `C9_CAPABILITIES` (56 rows)'; optionally append ', AE-CAP totality carried by `AE_WIDGET_COMMIT_ALLOWLIST` ∪ `AE_CAPABILITY_GAP_LEDGER`' to match R3.4.3."
+    },
+    {
+     "repair": "the evidence script, not the contract",
+     "clause": "r3115-constructibility-proof.mjs step 6",
+     "whyWrong": "Step 6 asserts 'F30 types AeCommitRow.propose as CapabilityRef and NEVER NULL, so the lookup is total over the allowlist', and establishes it by regex-matching F30's own comment string. The inference is invalid: CapabilityRef is space-qualified, and no clause asserts AeCommitRow.propose's space is C9, that it resolves in C9_CAPABILITIES, or that it agrees with the pairing row's propose side. Non-nullness gives you a ref, not a resolvable C9 ref, so it cannot by itself make the WIDGET_CAPABILITY_POLICY lookup total — F28's table has no AE rows. The script's CONCLUSION nevertheless survives, because step 13 independently establishes the pairing route (F31), which is the route the repaired R3.11.5 actually cites. Separately: 9 of the script's 13 steps are regex matches against the prose rather than executions, and step 2 checks only the actionClass half of F32's two-disjunct MARKETING_FANOUT. I re-derived all of those against the executed registries instead and they hold, but the script should not be read as an execution proof of links 5–13.",
+     "fix": "Reword step 6 to 'F31 makes the lookup total over the allowlist: every allowlisted AE key is the ae side of exactly one AE_PROPOSE_PAIRING row, and every pairing row's propose.key resolves in C9_CAPABILITIES' — i.e. fold step 6 into step 13 and drop the non-nullness inference."
+    }
+   ],
+   "independentLoadBearingDefects": [],
+   "verdict": "THE DECISIVE QUESTION, ANSWERED PLAINLY: the repaired R3.11.5 ACTUALLY EXECUTES. It does not merely read correctly. Every lookup in the chain resolves — allowlist row -> exactly one F38 pairing row (uniqueness confirmed by extracting the table's columns) -> b35.confirm, one of the executed 56 C9_CAPABILITIES -> a WIDGET_CAPABILITY_POLICY row that exists by F28's totality -> dispatch_is_synchronous readable -> mintIntent() refuses. Nothing returns undefined. The fence fires, and it fires on the live case: I read the owner, and dispatch after APPROVED in CanonicalBulkService/CommunicationBulkDeliveryService really is a leased, deadline-bounded, resumable loop, so false is the correct flag value for b35.confirm and communication.bulk-campaign.admit.v2 is exactly the REQUEST_APPROVAL from CLIENT_LIST that R3.11.5 exists to refuse. One correction to the owner's own framing, because it matters: AeCommitRow.propose being non-null is NOT what makes the lookup total — nothing constrains that ref's space or asserts it resolves in C9_CAPABILITIES. F31's pairing assertions are what make it total, and the repair cites precisely those. The supplied proof script reaches the right answer partly through a wrong step (step 6), which I have named and which its own step 13 rescues. ALL SIX REPAIRS ARE CORRECT. I re-derived each one's factual premise by executing the registries rather than trusting the prose: Y4's collision claim, Y3's disjunct, Y2b's 47-names-zero-consent, and the counts behind Y1. Four of the six are also fully closed. THE RE-CONFIRMATIONS ALL HOLD, each checked in place: exactly two floor reductions, both in §0.17, with R3.4.8 explicitly declining to enumerate them a second time and no third clause creating one; CLIENT.2 intact at §2.6.7, unrenumbered, with CLIENT.3 governing intent roles and superseding nothing; ARTIFACT.3 intact at §2.6.22 on the same terms against ARTIFACT.5; Gate 5 recomputes verificationFloor from the IntentRecord and refuses on ANY difference, raised or lowered; Gate 6 dispatches on subjectCapability(record) with HANDOFF resolving destination fences only and never assertCanExecute, c9Capability's admission, or the AE allowlist; Gate 7 re-reads the live allowlist for a COMMIT. Zero security-contract violations, zero unproven normative claims in scope, fundamental rules hold. I FOUND NO INDEPENDENT LOAD-BEARING DEFECT, and I am saying that plainly rather than manufacturing one — the owner should not stop. The single finding is a closure error, and I set certifiable false only because the owner's bar is zero indicators, not because anything is broken: §A1.1 P-10 still calls WIDGET_CAPABILITY_POLICY 'total over C9_CAPABILITIES ∪ the reachable Action Engine keys', which is the exact AE-inclusive domain whose falsity is the premise of the Y1/Y1b repair, and which the contract's own Annex B EB-2 already declares VOID as to the AE half. It changes no authority, breaks no link in the chain above, and sits in a parenthetical that §A0.1 scopes out of A1's normativity — a six-word deletion, in the same table as Y2b's repair, one row below it. Delete those six words and the closure is complete. That does not warrant another full round; it warrants the edit, and then certification. (Two incidental accuracies for the record, neither a contract defect: the round-4 memo says 6,201 -> 6,209 lines; the file is 6,208, and the repair commit's diff is exactly the six repairs with no collateral edits, which is how I bounded the closure.)"
+  },
+  "closure": {
+   "certifiable": false,
+   "r3115ChainTrace": "Walked independently, not inherited from the script. (1) AE key: executed ActionCapabilityRegistry().list() — communication.bulk-campaign.admit.v2 present; actionClass deliver_bulk_campaign, targetKind marketing_campaign, policyDecision ALLOW, allowedSourceTypes ['authenticated_request'], approvalRequirement REQUIRED. (2) MARKETING_FANOUT(cap) holds on F32's actionClass disjunct; executed enumeration returns exactly 4 MARKETING_FANOUT rows (admit.v2, bulk-slot.admit.v2, bulk-campaign.execute.v1, bulk-campaign.shadow.v1), the other three ledgered GAP-BULK-SEND-DIRECT (F37). (3) Allowlist row: F34 (lines 548-555) declares it the single MARKETING_FANOUT row, confirmation_kind APPROVAL, requires_ae_approval true, min_verification SESSION_VERIFIED; F31's cardinality assertion |{MF ∧ allowlisted}| === 1 backs it. (4) Pairing existence AND uniqueness: F31 line 465 asserts row ⟹ cap.capability is the `ae` side of EXACTLY ONE AE_PROPOSE_PAIRING row — uniqueness is ASSERTED at EP-REGISTRY-LOAD, not merely observed. Independently, that AE key occurs 5 times in the whole document and only once inside F38 (line 631: `b35.confirm` | CanonicalBulkService.request()), so F38's pairing row is the only one for it. (5) Propose side is a C9 key: F31 line 474 asserts every AE_PROPOSE_PAIRING row's propose.key resolves in C9_CAPABILITIES; executed — b35.confirm IS in C9_CAPABILITIES (56 rows), mode OWNER_HANDOFF, resourceClass SOURCE_HANDOFF, ownerKey CanonicalBulkService. (6) Policy row: F28 makes WIDGET_CAPABILITY_POLICY total over C9-CAP's 56 rows, keyed capKey(ref) = 'C9:b35.confirm'; a C9 key with no row fails the build. (7) dispatch_is_synchronous has exactly two mentions contract-wide — F28's declaration (419) and R3.11.5's read (4446) — so there is no third caller left on the old terms. (8) R3.11.5 reads the flag through the propose key and cites F31 for totality, so mintIntent() has a defined boolean to refuse on. ANSWER TO THE OWNER'S SPECIFIC QUESTION: AeCommitRow.propose being non-null is NOT what makes the lookup total — the proof script's step 6 overclaims. Non-nullness yields a value, not a C9-resolving value. Totality comes from F31's two pairing assertions (exactly-one pairing per allowlisted `ae` key, and propose.key resolves in C9_CAPABILITIES), which is the route F28's gloss (\"whose pairing row names that key as `propose`\") and R3.11.5's own F31 citation actually name. The chain resolves end to end; the fence can fire.",
+   "perRepair": [
+    {
+     "repair": "Y1 — R3.11.5 reads the C9 propose key's WIDGET_CAPABILITY_POLICY row",
+     "correct": true,
+     "closed": false,
+     "note": "Correct at its site (§3.11, lines 4443-4454): names the propose key, states in place why the AE-keyed form fails open, grounds totality in F31 rather than in F30's field comment. Chain verified constructible. Closure NOT clean: §A1.1 P-10 still commissions that table over 'C9_CAPABILITIES ∪ the reachable Action Engine keys', contradicting the exact fact this repair turns on; and F31's pairing assertion constrains propose.key without constraining propose.space. Note also that R3.11.5 relies on totality alone where the contract's only two other readers of that table (F46 c9Floor line 764, F48 SENSITIVE_DEST line 884) each carry an explicit 'if (row === undefined) FAIL CLOSED' default."
+    },
+    {
+     "repair": "Y1b — F28's column gloss",
+     "correct": true,
+     "closed": false,
+     "note": "Correct at its site (§0.7 line 419): the gloss reads the flag through the pairing row's propose side and says in the same sentence that the table has no AE rows. Only one consumer exists (R3.11.5), verified by grep. Closure gap: §A1.1 P-10 still lists the table's columns as only min_verification and consent_class, so the prerequisite row that commissions the table omits the column the repaired fence reads."
+    },
+    {
+     "repair": "Y2 — §A2.3 states K20 over REGISTERED_KEYS",
+     "correct": true,
+     "closed": true,
+     "note": "§A2.3's K20 row (line 5946) reads 'emittable(kind) = ∃ k ∈ ownerClassKeys(kind) : k ∈ REGISTERED_KEYS', matching §2.4 K20's declaration (line 2622). 'capabilityRegistry' has 0 occurrences document-wide (verified). It cites the derivation rather than restating a fence predicate; predicate-restatement-check.mjs re-run reports 0."
+    },
+    {
+     "repair": "Y2b — §A1.1 P-09 the same",
+     "correct": true,
+     "closed": true,
+     "note": "P-09 (line 5845) reasons 'ownerClassKeys(CONSENT_STATE) ∩ REGISTERED_KEYS = ∅ and K20 derives emittable = false'. Supporting fact executed-true: MAYA_AI_TOOL_CATALOG has 47 names, none containing consent/identity/privacy."
+    },
+    {
+     "repair": "Y3 — §A1.6.2 cites CONSENT(cap) instead of restating one disjunct",
+     "correct": true,
+     "closed": true,
+     "note": "Line 5905 cites \"F32's CONSENT(cap) — a two-disjunct predicate, restated nowhere — holds for this key on its targetKind disjunct\". Executed: package5.wave3.record-client-consent.execute.v1 carries targetKind client_consent AND actionClass record_client_consent, so both disjuncts hold and naming the targetKind one is accurate rather than selective; CONSENT enumerates to 3 of 226 as F32 states. The clause also derives correctly that no WIDGET_CAPABILITY_POLICY row is required or permitted for an AE key — the same F28 fact Y1 uses, stated right."
+    },
+    {
+     "repair": "Y4 — §2.4 K20 names the TOOL/C9 collision F24 proves",
+     "correct": true,
+     "closed": true,
+     "note": "Line 2622 now says an unqualified intersection 'would match a TOOL-space key against a C9 spelling ... all 47 catalogue names are also C9-CAP keys'. Verified by execution: TOOL ⊂ C9 by spelling with 0 exceptions (47/47), the 9 C9-only extras match F24 exactly, and AE ∩ (C9 ∪ TOOL) = ∅ — so the AE-against-C9 collision the old wording claimed is provably empty and the TOOL-against-C9 one is real."
+    }
+   ],
+   "repairErrors": [
+    {
+     "repair": "Y1 / Y1b (F28's domain and column set)",
+     "clause": "§A1.1 P-10 (line 5846)",
+     "whyWrong": "The repair landed at F28 and R3.11.5 but not at the prerequisite row that commissions the table. P-10 still reads: WIDGET_CAPABILITY_POLICY (`min_verification`, `consent_class` per key, total over `C9_CAPABILITIES` ∪ the reachable Action Engine keys). That is (a) the exact claim Annex B EB-2 (line 6164) declares VOID as to the AE half, (b) a direct contradiction of F28's 'and over those only', the single premise Y1's rationale rests on ('a lookup keyed on the AE key would be undefined for every capability this rule governs'), and (c) an omission of dispatch_is_synchronous from the column list, so the row commissioning the table does not carry the column the repaired fence reads. §A0.2 rules that a body/annex divergence 'is a defect in one of them, to be repaired, not adjudicated', so the contract's own standard classifies this as a defect. It is load-bearing because package K2 builds the table from this row and the build plan already inherited the wrong domain: evidence/maya-chat-first-ux/K1-K16-IMPLEMENTATION-MAPPING.draft.md:248 repeats 'total over C9_CAPABILITIES ∪ the reachable Action Engine keys'. Every other restatement in the body is correct (R3.4.3 line 3725, F46 line 757, §3.9's non-normative note line 4257, §A1.6.2 line 5905) — P-10 is the lone outlier, and no prior round adjudicated it.",
+     "fix": "One line: replace P-10's parenthetical with '(`min_verification`, `consent_class`, `dispatch_is_synchronous` per key, total over `C9_CAPABILITIES`'s 56 keys and over those only — §0.7 F28; the 226 AE keys are covered by F31's totality assertion)'."
+    },
+    {
+     "repair": "Y1 (the totality premise R3.11.5 now depends on)",
+     "clause": "§0.7 F31 pairing assertion (line 474), with §0.7 F30 (line 447)",
+     "whyWrong": "F31 reads 'every AE_PROPOSE_PAIRING row: propose.key resolves in C9_CAPABILITIES' — it constrains the key, not the space tag. Because TOOL-DEF ⊂ C9-CAP by spelling (F24, re-verified by execution: all 47 catalogue names are C9 keys), a ref written {space:'TOOL', key:<a C9 spelling>} satisfies the assertion literally while capKey(ref) yields 'TOOL:…', for which WIDGET_CAPABILITY_POLICY has no row — the same undefined-lookup shape Y1 removed, and exactly the collision Y4 just added to K20 to warn against. Separately, F30 declares AeCommitRow.propose as a second carrier of 'the C9 propose key', and nothing ties it to that capability's pairing row or requires it to resolve in C9_CAPABILITIES; grep shows no rule reads it (the COMMIT guard at §0.13 line 1287 and §3.10.2 line 4342 both read AE_PROPOSE_PAIRING), so it is an unconstrained duplicate a builder implementing R3.11.5's phrase 'its C9 propose key' could read instead. Neither breaks the live case — b35.confirm is a C9-only extra, not a catalogue name — so this is hardening of the premise, not a present fail-open.",
+     "fix": "One line in F31: 'every AE_PROPOSE_PAIRING row: propose.space === \"C9\" ∧ propose.key resolves in C9_CAPABILITIES … and row ⟹ row.propose equals that pairing row's propose side else fail.'"
+    }
+   ],
+   "independentLoadBearingDefects": [],
+   "verdict": "THE DECISIVE QUESTION ANSWERS YES, AND I SAY IT PLAINLY: the repaired R3.11.5 is CONSTRUCTIBLE and actually executes — it does not merely read correctly. Every link resolves: allowlist row (F34/F31) → exactly one AE_PROPOSE_PAIRING row with that key on the `ae` side, asserted at start-up and independently the only such row in F38 → propose side b35.confirm, which F31 requires to resolve in C9_CAPABILITIES and which executes as present among the 56 → F28's totality gives that key a WIDGET_CAPABILITY_POLICY row → dispatch_is_synchronous is readable, can be false, and mintIntent() then refuses. The flag has exactly one reader, so no caller was left on the old terms. All six repairs are correct at their sites; Y2, Y2b, Y3 and Y4 are correct AND closed, each checked against the executed registries rather than against the document's own prose. I re-confirm each unchanged item explicitly: floor reductions EXACTLY 2 (§0.17 F91; R3.4.8, FR-1's line and §4's item 8 all defer to it rather than creating a third); CLIENT.2 intact and unrenumbered at §2.6.7, CLIENT.3 governing intent roles only; ARTIFACT.3 intact and unrenumbered at §2.6.22, ARTIFACT.5 governing intent roles only; Gate 5 recomputable from an IntentRecord; Gate 6 executable, dispatching on subjectCapability with HANDOFF resolving destination fences only; Gate 7 re-reading the live allowlist for a COMMIT; registries 226/221/47/56; security violations 0; unproven normative claims in scope 0; FR-1…FR-16 hold. All five committed checkers re-run clean (29/29, 0 citation problems, 22/22 on both per-kind tables, 1 admitted F6a exception, 0 predicate restatements). WHY NOT CERTIFIABLE, AND IT IS NARROW: one clause in the repair's own dependency closure was not updated. §A1.1 P-10 — the prerequisite row that commissions WIDGET_CAPABILITY_POLICY for package K2 — still says the table is total over 'C9_CAPABILITIES ∪ the reachable Action Engine keys' and still lists only two of its three columns. That is the claim Annex B EB-2 already voided as to the AE half, and it contradicts the single premise Y1's rationale rests on. §A0.2 says a body/annex divergence is a defect to repair, not to adjudicate, and the K1-K16 build-mapping draft has already copied the wrong domain forward, so it is not inert prose. This is the round-2/round-4 pattern precisely — the repair applied at the declaration site and not at the restatement — which is why I am not calling it cosmetic. It is one line. I ALSO FOUND NO INDEPENDENT LOAD-BEARING DEFECT, and I state that as plainly as the rest: nothing in §3.11, the bulk-campaign path, MARKETING_FANOUT, the C9 propose-key resolution, the REQUEST_APPROVAL/COMMIT refusal path, or the authority and type invariants they touch bears weight incorrectly. No STOP condition. The second repair-error I filed (F31 constrains propose.key but not propose.space; F30's AeCommitRow.propose is an unconstrained duplicate no rule reads) is hardening of the premise Y1 leans on, not a present fail-open: the live propose key b35.confirm is a C9-only extra, so no TOOL spelling can collide with it today. One correction the owner should not inherit from the existing proof script: its step 6 claims AeCommitRow.propose being non-null is what makes the lookup total over the allowlist. It is not. Non-nullness yields a value, not a C9-resolving one; totality comes from F31's exactly-one-pairing and propose-resolves-in-C9 assertions — the route F28's gloss and R3.11.5's own citation name. The script's conclusion survives on steps 7, 9 and 13; its stated reason at step 6 does not. Fix P-10's one line (and, if the owner wants the premise as tight as the fence it now carries, F31's), and this certifies."
+  }
+ }
+}

@@ -471,8 +471,14 @@ row ⟹ CONSENT(cap) ∨ IDENTITY(cap) ⟹ fail                                 
 row ⟹ TENANT_AUTHORITY(cap)        ⟹ fail                                                // veto
 |{ cap : MARKETING_FANOUT(cap) ∧ cap.capability ∈ AE_WIDGET_COMMIT_ALLOWLIST }| === 1     else fail
 
-every AE_PROPOSE_PAIRING row: propose.key resolves in C9_CAPABILITIES
-                          and ae.key resolves in ActionCapabilityRegistry                else fail
+every AE_PROPOSE_PAIRING row: propose.space === 'C9'                                    else fail
+                          and propose.key resolves in C9_CAPABILITIES                     else fail
+                          and ae.space === 'AE'                                           else fail
+                          and ae.key resolves in ActionCapabilityRegistry                 else fail
+       // the SPACE tags are asserted, not only the spellings. TOOL-DEF ⊂ C9-CAP by
+       // spelling (F24: all 47 catalogue names are C9-CAP keys), so a ref written
+       // { space: 'TOOL', key: <a C9 spelling> } would satisfy a key-only assertion and
+       // then resolve against the wrong table's independently-set fields.
 SETTINGS_DRAFT's resolved key set ∩ { cap : MONEY(cap) } === ∅                           else fail
 ```
 
@@ -4451,7 +4457,14 @@ never be `false`, and **the refusal would never fire** — a fence that fails op
 closed. F31 makes the propose-key lookup total: every allowlisted AE key is the `ae` side of
 exactly one `AE_PROPOSE_PAIRING` row. For such a
 capability `mintIntent()` refuses to mint a `REQUEST_APPROVAL` or `COMMIT` intent until the
-owner performs its own execute-time re-resolution. *Mechanism:* the mint function's
+owner performs its own execute-time re-resolution. **A missing row refuses too:** the lookup is
+total by F31 — every allowlisted AE key is the `ae` side of exactly one `AE_PROPOSE_PAIRING`
+row, and every pairing row's `propose` is a `C9`-space ref resolving in `C9_CAPABILITIES`, which
+F28 gives a row — and the reader nonetheless carries an explicit
+`if (row === undefined) refuseMint('policy_row_missing')`, on the same discipline as the
+contract's only two other readers of this table (§0.8 F46's `c9Floor`, §0.8 F48's
+`SENSITIVE_DEST`). A fence that depends on a totality proof to avoid failing open is a fence one
+edit away from failing open. *Mechanism:* the mint function's
 refusal; fail-closed. *Evaluated at:* `EP-MINT`. *Status:* [TO BUILD].
 
 [NON-NORMATIVE] "The price shown 90 seconds ago is never the price charged" is true for a
@@ -5843,7 +5856,7 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 | **P-07** | **Capability-gap ledger** — the 8 gap keys as first-class entries with `owner: NONE`, plus the gaps §0.7 F37 and §4.3 DR4 add | §1.6.7 P2; §1.3 C5; §2 K20; §2.6.14 LIMIT.1; §2.6.18 CONSENT.5; §2.6.20 PAY.4; §2.6.22 ARTIFACT.4; **§A2's entire mechanism** | `[ABSENT]` — `capability_gap_ref` 0 hits | **K1** (wave 1 — the only wave executable under this cycle's fence) |
 | **P-08** | **Server-owned draft store** — the canonical draft owner's draft, named by `confirmation_of_ref.kind === 'draft'` | §0.12 F69's key-space rule (the draft owner names the Action Engine key); §0.13 F74; §3.2's effect table ("draft store only"); FR-6b, FR-7 | `[ABSENT]` — 0 hits | **K3** (store) + **K7** (booking draft owner, wave 3) |
 | **P-09** | **Consent-register read projection** — the `CONSENT_REGISTER` owner class resolving to a registered `consent.*` **read** capability, and `register_ref` as an append-only handle | `CONSENT_STATE` emittability (§2.7, §2 K23); §2.6.18 CONSENT.1–6; the `scope_text` / `change_effect_text` body | `[PARTIAL]` — the canonical facts **do** exist: `prisma/schema.prisma:1593 model ClientConsentFact`, `:1573-1574 privacyConsentAt/marketingConsentAt`, `:2584 MarketingConsentEvidence`, and a reader `effectiveClientConsents` (`src/crm/client-effective-consent.ts:53`, used at `client-profile-read.service.ts:177`). What is absent is a **registered read key**: `MAYA_AI_TOOL_CATALOG` has 47 names, **zero** containing `consent`, `identity` or `privacy`, so `ownerClassKeys(CONSENT_STATE) ∩ REGISTERED_KEYS = ∅` and K20 derives `emittable = false` | **K12** (wave 5) |
-| **P-10** | **`WIDGET_CAPABILITY_POLICY`** (`min_verification`, `consent_class` per key, total over `C9_CAPABILITIES` ∪ the reachable Action Engine keys) and **`CONTROL_REGISTRY`** (closed at three keys) | §0.8 F45 `subjectFloor`; §0.8 F45's totality and monotonicity; §0.8 F50's fail-closed default; §0.8 F54 Gate 6 for `CONTROL`; §0.14 F80's `consent_class` fence; FR-4, FR-6d | `[ABSENT]` — both 0 hits | **K2** (the tables, wave 1) over **K1**'s canon |
+| **P-10** | **`WIDGET_CAPABILITY_POLICY`** (`min_verification`, `consent_class` and `dispatch_is_synchronous` per key, total over `C9_CAPABILITIES`'s 56 keys **and over those only** — §0.7 F28; AE-CAP totality is carried instead by `AE_WIDGET_COMMIT_ALLOWLIST` ∪ `AE_CAPABILITY_GAP_LEDGER` under F31) and **`CONTROL_REGISTRY`** (closed at three keys) | §0.8 F45 `subjectFloor`; §0.8 F45's totality and monotonicity; §0.8 F50's fail-closed default; §0.8 F54 Gate 6 for `CONTROL`; §0.14 F80's `consent_class` fence; FR-4, FR-6d | `[ABSENT]` — both 0 hits | **K2** (the tables, wave 1) over **K1**'s canon |
 
 ### A1.2 The derivations, and the floor that cannot be reached
 
